@@ -57,7 +57,7 @@ import javax.swing.*;
  */
 public class History implements OptionConstants {
 
-  public static final String INTERACTION_SEPARATOR = "//EOI//";
+  public static final String INTERACTION_SEPARATOR = "//End of Interaction//";
   
   // Not final because it may be updated by config
   private int MAX_SIZE;

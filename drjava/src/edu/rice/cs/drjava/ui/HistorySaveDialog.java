@@ -57,23 +57,40 @@ import java.io.*;
  */
 public class HistorySaveDialog extends ScrollableDialog {
 
-  // a history pointer
+  /**
+   * Reference to the history text being edited.
+   */
   private String _history;
+  
+  /**
+   * Lock to ensure this history is only edited by one user at a time.
+   * TODO: Is this necessary?
+   */
   private Object _historyLock = new Object();
   
-  public HistorySaveDialog (JFrame frame) {
-    super(frame, "Save Interactions History",
+  /**
+   * Creates a new HistorySaveDialog.
+   * @param parent Parent frame for this dialog
+   */
+  public HistorySaveDialog (JFrame parent) {
+    super(parent, "Save Interactions History",
           "Make any changes to the history, and then click \"Save\".", "");
   }
 
+  /**
+   * Creates a custom set of buttons for this panel, including
+   * Save and Cancel.
+   */
   protected void _addButtons() {
+    // Updates the _history field with the new contents and closes the dialog
     Action saveAction = new AbstractAction("Save") {
       public void actionPerformed (ActionEvent ae) {
         _history = _textArea.getText(); 
         _dialog.dispose();
       }
     };
-  
+    
+    // Closes the dialog
     Action cancelAction = new AbstractAction("Cancel") {
       public void actionPerformed (ActionEvent ae) {
         _dialog.dispose();
@@ -87,12 +104,21 @@ public class HistorySaveDialog extends ScrollableDialog {
     _dialog.getRootPane().setDefaultButton(saveButton);
   }
 
+  /**
+   * Shows the dialog for editing the given history.
+   * @param history History to edit
+   * @return Edited history, if it is saved.  Null, if not.
+   */
   public String editHistory(String history) {
     synchronized(_historyLock) {
       _history = null; // make it null by default
       _textArea.setText(history);
       _textArea.setEditable(true);
+      
+      // Block until the dialog is closed
       show();
+      
+      // The save action will set the history field
       return _history;
     }
   }

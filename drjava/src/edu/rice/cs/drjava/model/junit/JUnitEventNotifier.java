@@ -46,6 +46,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 /**
  * Keeps track of all listeners to a JUnitModel, and has the ability
  * to notify them of some event.
+ * <p>
  *
  * This class has a specific role of managing JUnitListeners.  Other
  * classes with similar names use similar code to perform the same function for
@@ -53,27 +54,29 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
  * These classes implement the appropriate interface definition so that they
  * can be used transparently as composite packaging for a particular listener
  * interface.
+ * <p>
  *
  * Components which might otherwise manage their own list of listeners use
  * EventNotifiers instead to simplify their internal implementation.  Notifiers
  * should therefore be considered a private implementation detail of the
  * components, and should not be used directly outside of the "host" component.
+ * <p>
  *
  * All methods in this class must use the synchronization methods
  * provided by ReaderWriterLock.  This ensures that multiple notifications
  * (reads) can occur simultaneously, but only one thread can be adding
  * or removing listeners (writing) at a time, and no reads can occur
  * during a write.
+ * <p>
  *
  * <i>No</i> methods on this class should be synchronized using traditional
  * Java synchronization!
+ * <p>
  *
  * @version $Id$
  */
 class JUnitEventNotifier extends EventNotifier<JUnitListener>
     implements JUnitListener {
-
-  // -------------------- READER METHODS --------------------
 
   /**
    * Called when trying to test a non-TestCase class.

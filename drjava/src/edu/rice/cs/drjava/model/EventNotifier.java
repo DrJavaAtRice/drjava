@@ -46,6 +46,7 @@ import edu.rice.cs.util.ReaderWriterLock;
  * Base class for all component-specific EventNotifiers.  This class provides
  * common methods to manage listeners of a specific type.
  * @type T the type of the listener class to be managed
+ * @version $Id$
  */
 public abstract class EventNotifier<T> {
 
@@ -67,10 +68,8 @@ public abstract class EventNotifier<T> {
    */
   protected final ReaderWriterLock _lock = new ReaderWriterLock();
 
-  // -------------------- WRITER METHODS --------------------
-
   /**
-   * Add a listener to the model.
+   * Adds a listener to the notifier.
    * @param listener a listener that reacts on events
    */
   public void addListener(T listener) {
@@ -84,7 +83,7 @@ public abstract class EventNotifier<T> {
   }
 
   /**
-   * Remove a listener from the model.
+   * Removes a listener from the notifier.
    * @param listener a listener that reacts on events
    */
   public void removeListener(T listener) {

@@ -61,6 +61,13 @@ import javax.swing.text.StyledDocument;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.BadLocationException;
 
+/**
+ * Manages unit testing via JUnit.
+ * 
+ * TODO: Remove dependence on GlobalModel
+ * 
+ * @version $Id$
+ */
 public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 
   /**

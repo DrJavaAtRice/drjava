@@ -273,6 +273,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    */
   protected abstract void _notifySyntaxErrorOccurred(int offset, int length);
 
+  /**
+   * Opens the files chosen in the given file selector, and returns an ArrayList
+   * with one history string for each selected file.
+   * @param selector A file selector supporting multiple file selection
+   * @return a list of histories (one for each selected file)
+   */
   protected ArrayList<String> _getHistoryText(FileOpenSelector selector)
     throws IOException, OperationCanceledException
   {
@@ -306,6 +312,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         }
       }
       
+      // Create a single string with all formatted lines from this history
       String text = "";
       String currString;
       boolean firstLine = true;
@@ -323,15 +330,15 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
               // When reading this format, we need to make sure each line ends in a semicolon.
               // This behavior can be buggy; that's why the format was changed.
               if (currString.charAt(currString.length() - 1) == ';') {
-              text += currString + _newLine;
+                text += currString + _newLine;
               }
               else {
                 text += currString + ";" + _newLine;
               }
               break;
-            case(2):
+            case (2):
               if (!firstLine) { // don't include format version string in output
-              text += currString + _newLine;
+                text += currString + _newLine;
               }
               break;
           }
@@ -339,15 +346,28 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         }
       }
 
+      // Add the entire formatted text to the list of histories
       histories.add(text);
     }
     return histories;
   }
 
+  /**
+   * Removes the interaction-separator comments from a history, so that they
+   * will not appear when executing the history.
+   * @param text The full, formatted text of an interactions history (obtained
+   * from _getHistoryText)
+   * @return A list of strings representing each interaction in the history.
+   * If no separators are present, the entire history is treated as one
+   * interaction.
+   */
   protected ArrayList<String> _removeSeparators(String text) {
     String sep = History.INTERACTION_SEPARATOR;
     int len = sep.length();
     ArrayList<String> interactions = new ArrayList<String>();
+
+    // Loop while there are still separators, adding the text between separators
+    //  as separate elements to the interactions list
     int index = text.indexOf(sep);
     int lastIndex = 0;
     while (index != -1) {
@@ -355,6 +375,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       lastIndex = index + len;
       index = text.indexOf(sep, lastIndex);
     }
+
     // get last interaction
     String last = text.substring(lastIndex, text.length()).trim();
     if (!"".equals(last)) {

@@ -45,6 +45,7 @@ import java.io.File;
 /**
  * Keeps track of all listeners to the model, and has the ability
  * to notify them of some event.
+ * <p>
  *
  * This class has a specific role of managing GlobalModelListeners.  Other
  * classes with similar names use similar code to perform the same function for
@@ -52,11 +53,13 @@ import java.io.File;
  * These classes implement the appropriate interface definition so that they
  * can be used transparently as composite packaging for a particular listener
  * interface.
+ * <p>
  *
  * Components which might otherwise manage their own list of listeners use
  * EventNotifiers instead to simplify their internal implementation.  Notifiers
  * should therefore be considered a private implementation detail of the
  * components, and should not be used directly outside of the "host" component.
+ * <p>
  *
  * TODO: remove direct references to GlobalEventNotifier outside of DefaultGlobalModel
  * TODO: remove public modifier from this class when above has happened
@@ -66,21 +69,24 @@ import java.io.File;
  * (reads) can occur simultaneously, but only one thread can be adding
  * or removing listeners (writing) at a time, and no reads can occur
  * during a write.
+ * <p>
  *
  * <i>No</i> methods on this class should be synchronized using traditional
  * Java synchronization!
+ * <p>
  *
  * @version $Id$
  */
 public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     implements GlobalModelListener {
 
-  // -------------------- READER METHODS --------------------
 
+  // ---------- Deprecated Methods ----------
+  
   /**
    * Lets the listeners know some event has taken place.
    * @param EventNotifier n tells the listener what happened
-   * @deprecated
+   * @deprecated Use listener methods directly instead.
    */
   public void notifyListeners(Notifier n) {
     _lock.startRead();
@@ -101,7 +107,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
    * @param EventPoller p the question being asked of the listeners
    * @return the listeners' responses ANDed together, true if they all
    * agree, false if some disagree
-   * @deprecated
+   * @deprecated Use listener methods directly instead.
    */
   public boolean pollListeners(Poller p) {
     _lock.startRead();
@@ -121,7 +127,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
 
   /**
    * Class model for notifying listeners of an event.
-   * @deprecated
+   * @deprecated Use listener methods directly instead.
    */
   public abstract static class Notifier {
     public abstract void notifyListener(GlobalModelListener l);
@@ -129,15 +135,19 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
 
   /**
    * Class model for asking listeners a yes/no question.
-   * @deprecated
+   * @deprecated Use listener methods directly instead.
    */
   public abstract static class Poller {
     public abstract boolean poll(GlobalModelListener l);
   }
 
 
+  // ---------- End of Deprecated Methods ----------
+  
 
-
+  
+  //------------------------------ GlobalModel -------------------------------//
+  
   /**
    * Called when a file's main method is about to be run.
    */
@@ -516,7 +526,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     }
   }
 
-  //--------------------------------- JUnit ---------------------------------//
+  //---------------------------------- JUnit ---------------------------------//
 
   /**
    * Called when trying to test a non-TestCase class.

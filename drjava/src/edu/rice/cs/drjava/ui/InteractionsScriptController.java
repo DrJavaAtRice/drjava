@@ -68,11 +68,18 @@ public class InteractionsScriptController {
     _closeScriptAction = closeAction;
     _interactionsPane = interactionsPane;
     _pane = new InteractionsScriptPane(4, 1);
+    
+    // Previous
+    _setupAction(_prevInteractionAction, "Previous", "Insert Previous Interaction from Script");
     _pane.addButton(_prevInteractionAction);
-    // We've decided not to have a "Current" button for now. (It also crowds out the other buttons)
-    //_pane.addButton(_currentInteractionAction);
+    // Next
+    _setupAction(_nextInteractionAction, "Next", "Insert Next Interaction from Script");
     _pane.addButton(_nextInteractionAction);
+    // Execute
+    _setupAction(_executeInteractionAction, "Execute", "Execute Current Interaction");
     _pane.addButton(_executeInteractionAction, _interactionsPane);
+    // Close
+    _setupAction(_closeScriptAction, "Close", "Close Interactions Script");
     _pane.addButton(_closeScriptAction);
     setActionsEnabled();
   }
@@ -82,7 +89,6 @@ public class InteractionsScriptController {
    */
   public void setActionsEnabled() {
     _nextInteractionAction.setEnabled(_model.hasNextInteraction());
-    _currentInteractionAction.setEnabled(_model.hasCurrentInteraction());
     _prevInteractionAction.setEnabled(_model.hasPrevInteraction());
     _executeInteractionAction.setEnabled(true);
   }
@@ -92,7 +98,6 @@ public class InteractionsScriptController {
    */
   public void setActionsDisabled() {
     _nextInteractionAction.setEnabled(false);
-    _currentInteractionAction.setEnabled(false);
     _prevInteractionAction.setEnabled(false);
     _executeInteractionAction.setEnabled(false);
   }
@@ -112,13 +117,6 @@ public class InteractionsScriptController {
       _interactionsPane.requestFocus();
     }
   };
-  /** Action to execute the current interaction. */
-  private Action _currentInteractionAction = new AbstractAction("Current") {
-    public void actionPerformed(ActionEvent e) {
-      _model.currentInteraction();
-      _interactionsPane.requestFocus();
-    }
-  };
   /** Action to go forward in the script. */
   private Action _nextInteractionAction = new AbstractAction("Next") {
     public void actionPerformed(ActionEvent e) {
@@ -134,11 +132,22 @@ public class InteractionsScriptController {
       _interactionsPane.requestFocus();
     }
   };
-  /** Action to end the script. */
+  /** Action to end the script.  (Defined in constructor.) */
   private Action _closeScriptAction; /* = new AbstractAction("<=Close=>") {
     public void actionPerformed(ActionEvent e) {
       _model.closeScript();
       _pane.setMaximumSize(new Dimension(0,0));
     }
   };*/
+  
+  /**
+   * Sets up fields on the given Action, such as the name and tooltip.
+   * @param a Action to modify
+   * @param name Default name for the Action (for buttons)
+   * @param desc Short description of the Action (for tooltips)
+   */
+  protected void _setupAction(Action a, String name, String desc) {
+    a.putValue(Action.DEFAULT, name);
+    a.putValue(Action.SHORT_DESCRIPTION, desc);
+  }
 }

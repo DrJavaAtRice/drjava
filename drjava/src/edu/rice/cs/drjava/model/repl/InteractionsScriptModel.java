@@ -44,7 +44,9 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.DocumentAdapterException;
 
 /**
- * An interactions script model.
+ * Manages the execution of a Interactions History as a script of
+ * individual commands.  Useful for presentations.
+ * @version $Id$
  */
 public class InteractionsScriptModel {
   /** The interactions model associated with the script. */
@@ -55,6 +57,14 @@ public class InteractionsScriptModel {
   private List<String> _interactions;
   /** The index into the list of the current interaction. */
   private int _currentInteraction;
+  /**
+   * Indicates whether the iterator has "passed" the current interaction,
+   * which is the case after an execution.
+   * In this state, "next" will show the interaction after our index,
+   * and "prev" will show the interaction at our index (which was most
+   * recently executed).
+   */
+  private boolean _passedCurrent;
 
   /**
    * Constructs a new interactions script using the given model and interactions.
@@ -66,6 +76,7 @@ public class InteractionsScriptModel {
     _doc = model.getDocument();
     _interactions = interactions;
     _currentInteraction = -1;
+    _passedCurrent = false;
   }
 
   /**
@@ -75,30 +86,27 @@ public class InteractionsScriptModel {
     if (!hasNextInteraction()) {
       throw new IllegalStateException("There is no next interaction!");
     }
-    try {
-      _doc.clearCurrentInteraction();
-      _doc.insertText(_doc.getDocLength(), _interactions.get(++_currentInteraction), _doc.DEFAULT_STYLE);
-    }
-    catch (DocumentAdapterException dae) {
-      throw new UnexpectedException(dae);
-    }
+    _currentInteraction++;
+    _showCurrentInteraction();
+    _passedCurrent = false;
   }
 
   /**
    * Enters the current interaction into the interactions pane.
-   */
+   *
   public void currentInteraction() {
     if (!hasCurrentInteraction()) {
       throw new IllegalStateException("There is no current interaction!");
     }
     try {
       _doc.clearCurrentInteraction();
-      _doc.insertText(_doc.getDocLength(), _interactions.get(_currentInteraction), _doc.DEFAULT_STYLE);
+      String text = _interactions.get(_currentInteraction);
+      _doc.insertText(_doc.getDocLength(), text, _doc.DEFAULT_STYLE);
     }
     catch (DocumentAdapterException dae) {
       throw new UnexpectedException(dae);
     }
-  }
+  }*/
 
   /**
    * Enters the previous interaction into the interactions pane.
@@ -107,9 +115,23 @@ public class InteractionsScriptModel {
     if (!hasPrevInteraction()) {
       throw new IllegalStateException("There is no previous interaction!");
     }
+    // Only move back if we haven't passed the current interaction
+    if (!_passedCurrent) {
+      _currentInteraction--;
+    }
+    _showCurrentInteraction();
+    _passedCurrent = false;
+  }
+
+  /**
+   * Clears the current text at the prompt and shows the current
+   * interaction from the script.
+   */
+  protected void _showCurrentInteraction() {
     try {
       _doc.clearCurrentInteraction();
-      _doc.insertText(_doc.getDocLength(), _interactions.get(--_currentInteraction), _doc.DEFAULT_STYLE);
+      String text = _interactions.get(_currentInteraction);
+      _doc.insertText(_doc.getDocLength(), text, _doc.DEFAULT_STYLE);
     }
     catch (DocumentAdapterException dae) {
       throw new UnexpectedException(dae);
@@ -118,17 +140,21 @@ public class InteractionsScriptModel {
 
   /**
    * Executes the current interaction.
+   * After this call, we have passed the current interaction.
    */
   public void executeInteraction() {
     _model.interpretCurrentInteraction();
+    _passedCurrent = true;
   }
 
   /**
    * Ends the script.
+   * TODO: Is this method necessary at all?
    */
   public void closeScript() {
-    _interactions = null;
+    //_interactions = null;  // Why do this?  It can only cause problems...
     _currentInteraction = -1;
+    _passedCurrent = false;
   }
 
   /**
@@ -140,15 +166,20 @@ public class InteractionsScriptModel {
 
   /**
    * @return true iff this script has a current interaction to perform.
-   */
+   *
   public boolean hasCurrentInteraction() {
     return _currentInteraction >= 0;
-  }
+  }*/
 
   /**
    * @return true iff this script has a previous interaction to perform.
    */
   public boolean hasPrevInteraction() {
-    return _currentInteraction > 0;
+    int index = _currentInteraction;
+    if (_passedCurrent) {
+      // We're passed the current, so the previous interaction is the current.
+      index++;
+    }
+    return index > 0;
   }
 }

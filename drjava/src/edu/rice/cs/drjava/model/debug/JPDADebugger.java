@@ -124,7 +124,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   /**
    * Provides a way for the JPDADebugger to communicate with the view.
    */
-  private DebugEventNotifier _notifier = new DebugEventNotifier();
+  private final DebugEventNotifier _notifier = new DebugEventNotifier();
 
   /**
    * The running ThreadReference that we are debugging.

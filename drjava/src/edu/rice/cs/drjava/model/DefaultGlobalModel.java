@@ -185,6 +185,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
   // ---- Javadoc Fields ----
 
+  /**
+   * Manages all Javadoc functionality.
+   */
   protected JavadocModel _javadocModel = new DefaultJavadocModel(this);
 
   // ---- Debugger Fields ----
@@ -269,7 +272,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
     _registerOptionListeners();
 
-    // Chain notifiers so that all events also go to GlobalModelListers.
+    // Chain notifiers so that all events also go to GlobalModelListeners.
     _interactionsModel.addListener(_notifier);
     _compilerModel.addListener(_notifier);
     _junitModel.addListener(_notifier);
