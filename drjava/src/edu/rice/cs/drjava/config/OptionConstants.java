@@ -1021,12 +1021,18 @@ public interface OptionConstants {
     new BooleanOption("files.backup", Boolean.TRUE);
   
   /**
+   * Whether to allow users to access to all members in the Interactions Pane.
+   */
+  public static final BooleanOption ALLOW_PRIVATE_ACCESS =
+    new BooleanOption("allow.private.access", Boolean.FALSE);
+  
+  /* ---------- Undisplayed Options ---------- */
+  
+  /**
    * A vector containing the most recently used files.
    */
   public static final VectorOption<File> RECENT_FILES =
     new VectorOption<File>("recent.files",new FileOption("",null),new Vector<File>());
-  
-  /* ---------- Undisplayed Options ---------- */
   
   /**
    * Whether to enabled the Show Debug Console menu item in the Tools menu.

@@ -225,16 +225,17 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
   }
 
   public Object visit(ObjectFieldAccess node) {
-    _checkInterrupted(node);
+    _checkInterrupted(node);    
     return super.visit(node);
   }
 
   public Object visit(ObjectMethodCall node) {
     _checkInterrupted(node);
+    Method m = (Method) node.getProperty(NodeProperties.METHOD);
+//    m.setAccessible(true);
     Object ret = super.visit(node);
 
     // workaround to not return null for void returns
-    Method m = (Method) node.getProperty(NodeProperties.METHOD);
     if (m.getReturnType().equals(Void.TYPE)) {
       return Interpreter.NO_RESULT;
     }
@@ -567,7 +568,33 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     return Interpreter.NO_RESULT;
   }
 
+    /**
+     * Performs a dynamic cast. This method acts on primitive wrappers.
+     * @param tc the target class
+     * @param o  the object to cast
+     */
   protected static Object performCast(Class tc, Object o) {
-    return EvaluationVisitor.performCast(tc, o);
+    Class ec = (o != null) ? o.getClass() : null;
+    
+    if (tc != ec && tc.isPrimitive() && ec != null) {
+      if (tc != char.class && ec == Character.class) {
+        o = new Integer(((Character)o).charValue());
+      } else if (tc == byte.class) {
+        o = new Byte(((Number)o).byteValue());
+      } else if (tc == short.class) {
+        o = new Short(((Number)o).shortValue());
+      } else if (tc == int.class) {
+        o = new Integer(((Number)o).intValue());
+      } else if (tc == long.class) {
+        o = new Long(((Number)o).longValue());
+      } else if (tc == float.class) {
+        o = new Float(((Number)o).floatValue());
+      } else if (tc == double.class) {
+        o = new Double(((Number)o).doubleValue());
+      } else if (tc == char.class && ec != Character.class) {
+        o = new Character((char)((Number)o).shortValue());
+      }
+    }
+    return o;
   }
 }

@@ -164,7 +164,6 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     if (printMessages) System.out.println("before compile");
-    // Doesn't reset interactions because interpreter is not used
     doc.startCompile();
     if (printMessages) System.out.println("after compile");
     listener.checkCompileOccurred();
@@ -193,7 +192,6 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     if (printMessages) System.out.println("before compile");
-    // Doesn't reset interactions because interpreter is not used
     doc.startCompile();
     if (printMessages) System.out.println("after compile");
     synchronized(listener) {
@@ -221,8 +219,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     doc.saveFile(new FileSelector(file));
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
-    if (printMessages) System.out.println("before compile");
-    // Doesn't reset interactions because interpreter is not used
+    if (printMessages) System.out.println("before compile");   
     doc.startCompile();
     if (printMessages) System.out.println("after compile");
     synchronized(listener) {
@@ -254,7 +251,6 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 
     _model.addListener(listener);
     if (printMessages) System.out.println("before compile");
-    // Doesn't reset interactions because interpreter is not used
     doc.startCompile();
     if (printMessages) System.out.println("after compile");
     synchronized(listener) {
@@ -290,7 +286,6 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _model.addListener(listener);
 
     if (printMessages) System.out.println("before compile");
-    // Doesn't reset interactions because interpreter is not used
     doc.startCompile();
     if (printMessages) System.out.println("after compile");
 
@@ -412,11 +407,11 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     };
     _model.addListener(listener);
     if (printMessages) System.out.println("before compile");
-    // Doesn't reset interactions because interpreter is not used
-    doc.startCompile();
+      doc.startCompile();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
+    listener.checkCompileOccurred();
     if (printMessages) System.out.println("after compile");
     _model.removeListener(listener);
     _model.addListener(listener2);
@@ -444,7 +439,6 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     JUnitTestListener listener = new JUnitTestListener(true);
     _model.addListener(listener);
     if (printMessages) System.out.println("before compile");
-    // Doesn't reset interactions because interpreter is not used
     doc.startCompile();
     if (printMessages) System.out.println("after compile");
     changeDocumentText(MONKEYTEST_FAIL_TEXT, doc);

@@ -67,6 +67,7 @@ import edu.rice.cs.drjava.model.FileMovedException;
  * @version $Id$
  */
 public class CompilerErrorModel<T extends CompilerError> {
+  private static final String newLine = System.getProperty("line.separator");
   /**
    * An array of errors to be displayed in the CompilerErrorPanel associated
    * with this model.  After the constructor, this should be sorted in this order:
@@ -432,7 +433,7 @@ public class CompilerErrorModel<T extends CompilerError> {
             while ((curLine != curErrorLine) 
                      && (nextNewline != -1)
                      && (file.equals(_errors[curError].file()))) {
-              nextNewline = defsText.indexOf('\n', offset);
+              nextNewline = defsText.indexOf(newLine, offset);
               if (nextNewline != -1) {
                 curLine++;
                 offset = nextNewline + 1;

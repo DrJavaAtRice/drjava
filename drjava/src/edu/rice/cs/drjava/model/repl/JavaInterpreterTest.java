@@ -45,6 +45,9 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
+
 import  junit.framework.*;
 import  java.util.Vector;
 import  junit.extensions.*;
@@ -495,6 +498,40 @@ public final class JavaInterpreterTest extends TestCase {
     catch (ExceptionReturnedException e) {
       // correct, it should fail
     }
+  }
+  
+  /** 
+   * Tests that arrays initializers are accepted.
+   */
+  public void testInitializeArrays() throws ExceptionReturnedException {    
+    try {
+      _interpreter.interpret("int i[] = new int[]{1,2,3};");
+      _interpreter.interpret("int j[][] = new int[][]{{1}, {2,3}};");
+      _interpreter.interpret("int k[][][][] = new int[][][][]{{{{1},{2,3}}}};");
+    }
+    catch(IllegalArgumentException iae) {
+      fail("Legal array initializations were not accepted.");
+    }
+  }
+  
+  /**
+   * Tests that the Interactions Pane will or won't allow access to private members
+   * given the value of the ALLOW_PRIVATE_ACCESS configuration option.
+   */
+  public void testAllowPrivateAccess() throws ExceptionReturnedException {
+    DrJava.getConfig().setSetting(OptionConstants.ALLOW_PRIVATE_ACCESS, new Boolean(false));
+    try {
+      _interpreter.interpret("class A { private int i = 0; }");
+      _interpreter.interpret("new A().i");
+      fail("Should not have access to the private field i inside class A.");
+    }
+    catch (ExceptionReturnedException ere) {
+      assertTrue(ere.getContainedException() instanceof IllegalAccessException);
+    }
+    DrJava.getConfig().setSetting(OptionConstants.ALLOW_PRIVATE_ACCESS, new Boolean(true));
+    assertEquals("Should be able to access private field i whose value should be 0", 
+                 new Integer(0), 
+                 _interpreter.interpret("new A().i"));
   }
 
   /**

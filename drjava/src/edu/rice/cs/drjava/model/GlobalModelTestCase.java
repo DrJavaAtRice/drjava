@@ -129,6 +129,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   public void setUp() throws IOException {
     DrJava.getConfig().resetToDefaults();
     createModel();
+    _model.setResetAfterCompile(false);
     String user = System.getProperty("user.name");
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
     super.setUp();
@@ -291,6 +292,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
 
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
+    _model.setResetAfterCompile(true);
     _model.addListener(listener);
     synchronized(listener) {
       doc.startCompile();
@@ -990,7 +992,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     /**
      * @param expectReset Whether to listen for interactions being
-     * reset after a compiliation
+     * reset after a compilation.
      */
     public CompileShouldSucceedListener(boolean expectReset) {
       _expectReset = expectReset;
@@ -1046,7 +1048,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void checkCompileOccurred() {
       assertCompileEndCount(1);
       assertCompileStartCount(1);
-      if (_expectReset) {
+      if (_expectReset) { 
         assertInterpreterResettingCount(1);
         assertInterpreterReadyCount(1);
       }

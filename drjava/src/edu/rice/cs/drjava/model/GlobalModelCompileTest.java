@@ -112,9 +112,11 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     doc.saveFile(new FileSelector(file));
 
     // Interpret something to force a reset
-    interpret("Object o = new Object();");
+    // Note: the interpreter should reset now without any interactions.
+//    interpret("Object o = new Object();");
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
+    _model.setResetAfterCompile(true);
     _model.addListener(listener);
     synchronized(listener) {
       _model.getCompilerModel().compileAll();

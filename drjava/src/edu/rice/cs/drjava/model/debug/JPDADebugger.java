@@ -634,7 +634,14 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   synchronized Vector<ReferenceType> getReferenceTypes(String className,
                                                        int lineNumber) {
     // Get all classes that match this name
-    List classes = _vm.classesByName(className);
+    List classes;
+    try {
+      classes = _vm.classesByName(className);
+    }
+    catch (VMDisconnectedException vmde) {
+      // We're quitting, return empty Vector.
+      return new Vector<ReferenceType>();
+    }
 
     // Return each valid reference type
     Vector<ReferenceType> refTypes = new Vector<ReferenceType>();

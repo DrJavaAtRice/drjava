@@ -117,7 +117,6 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
-    // Interactions are not reset because interpreter wasn't used
     doc.startCompile();
     listener.checkCompileOccurred();
     synchronized(listener) {
@@ -169,27 +168,31 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     doc2.saveFile(new FileSelector(file2));
 
     // Compile the correct ABC and the test
-    //  (won't reset because the interactions pane has not been used)
+    JUnitTestListener listener = new JUnitTestListener(false);
+//      System.out.println("compiling all");
     _model.getCompilerModel().compileAll();
 
     OpenDefinitionsDocument doc3 = setupDocument(ABC_CLASS_TWO);
     final File file3 = new File(_tempDir, "ABC2.java");
     doc3.saveFile(new FileSelector(file3));
 
+    listener = new JUnitTestListener();
     // Compile the incorrect ABC
+//      System.out.println("compiling doc3");
     doc3.startCompile();
-
-    // Run the test: a VerifyError will be thrown.
-    JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
-    synchronized(listener) {
+    // Run the test: a VerifyError will be thrown.
+    JUnitTestListener listener2 = new JUnitTestListener();
+    _model.addListener(listener2);
+    synchronized(listener2) {
+//      System.out.println("starting junit");
       doc2.startJUnit();
-      listener.wait();
+      listener2.wait();
     }
 
     assertEquals("test case has one error reported", 1,
                  _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
-    _model.removeListener(listener);
+    _model.removeListener(listener2);
   }
 }
 

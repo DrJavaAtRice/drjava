@@ -1265,10 +1265,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     _debugStepTimer.setRepeats(false);
 
 
-    // Working directory is default place to start
+    // Working directory is default place to start, else
+    // use user.home, not user.dir like we were before.
     File workDir = config.getSetting(WORKING_DIRECTORY);
     if (workDir == FileOption.NULL_FILE) {
-      workDir = new File(System.getProperty("user.dir"));
+      workDir = new File(System.getProperty("user.home"));
     }
     if (workDir.isFile() && workDir.getParent() != null) {
       workDir = workDir.getParentFile();

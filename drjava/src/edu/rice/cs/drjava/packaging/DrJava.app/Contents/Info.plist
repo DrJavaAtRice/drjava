@@ -32,8 +32,8 @@
 		<string>$JAVAROOT/DrJava.jar</string>
 		<key>Properties</key>
 		<dict>
-			<key>com.apple.mrj.application.apple.menu.about.name</key>
-			<string>DrJava</string>
+			<!--key>com.apple.mrj.application.apple.menu.about.name</key>
+			<string>DrJava</string-->
 			<key>com.apple.mrj.application.live-resize</key>
 			<string>true</string>
 			<key>com.apple.macos.useScreenMenuBar</key>

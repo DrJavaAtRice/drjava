@@ -69,10 +69,73 @@
 
     <section id="gs-license">
       <title>License</title>
-      <para>DrJava is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.</para>
-      <para>DrJava is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</para>
-      <para>The full text of the license is available from <ulink url="http://www.gnu.org">www.gnu.org</ulink>.</para>
-      <para>DrJava incorporates DynamicJava (available at <ulink url="http://koala.ilog.fr/djava">http://koala.ilog.fr/djava</ulink>), which is licensed under these terms:</para>
+<para>
+DrJava Open Source License
+</para>
+
+<para>
+Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
+All rights reserved.
+</para>
+
+<para>
+<literallayout>
+Developed by:   Java Programming Languages Team
+                Rice University
+                http://www.cs.rice.edu/~javaplt/
+</literallayout>
+</para>
+
+<para>
+Permission is hereby granted, free of charge, to any person obtaining a 
+copy of this software and associated documentation files (the "Software"),
+to deal with the Software without restriction, including without 
+limitation the rights to use, copy, modify, merge, publish, distribute, 
+sublicense, and/or sell copies of the Software, and to permit persons to 
+whom the Software is furnished to do so, subject to the following 
+conditions:
+</para>
+
+<itemizedlist mark=opencircle>
+<listitem>
+<para>
+    Redistributions of source code must retain the above copyright 
+    notice, this list of conditions and the following disclaimers.
+</para>
+</listitem>
+<listitem>
+<para>
+    Redistributions in binary form must reproduce the above copyright 
+    notice, this list of conditions and the following disclaimers in the
+    documentation and/or other materials provided with the distribution.
+</para>
+</listitem>
+<listitem>
+<para>
+    Neither the names of DrJava, the JavaPLT, Rice University, nor the
+    names of its contributors may be used to endorse or promote products
+    derived from this Software without specific prior written permission.
+</para>
+</listitem>
+<listitem>
+<para>
+    Products derived from this software may not be called "DrJava" nor
+    use the term "DrJava" as part of their names without prior written
+    permission from the JavaPLT group.  For permission, write to
+    javaplt@rice.edu.
+</para>
+</listitem>
+</itemizedlist>
+
+<para>
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+OTHER DEALINGS WITH THE SOFTWARE.
+</para>
       <para>DynamicJava - Copyright (c) 1999 Dyade</para>
       <para>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</para>
       <para>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</para>

@@ -155,8 +155,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       public void compileEnded() {
         // Only clear interactions if there were no errors
         if ((_compilerModel.getNumErrors() == 0)
-              && _interactionsModel.interpreterUsed()
-              /* && _resetAfterCompile */) {
+              // reset even when the interpreter is not used.
+              //&& _interactionsModel.interpreterUsed()
+              && _resetAfterCompile) {
           resetInteractions();
         }
       }
@@ -176,7 +177,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * Whether or not to reset the interactions JVM after compiling.
    * Should only be false in test cases.
    */
-//  private boolean _resetAfterCompile = true;
+  private boolean _resetAfterCompile = true;
 
 
   // ---- JUnit Fields ----
@@ -1151,10 +1152,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * Sets whether or not the Interactions JVM will be reset after
    * a compilation succeeds.  This should ONLY be used in tests!
    * @param shouldReset Whether to reset after compiling
-   *
+   */
   void setResetAfterCompile(boolean shouldReset) {
     _resetAfterCompile = shouldReset;
-  }*/
+  }
 
   /**
    * Gets the Debugger used by DrJava.

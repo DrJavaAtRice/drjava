@@ -639,10 +639,6 @@ public class InterpreterJVM extends AbstractSlaveJVM
    * @param s Entry to add to the accumulated classpath
    */
   public void addClassPath(String s) {
-    if (_classpath.contains(s)) {
-      return;
-    }
-
     //_dialog("add classpath: " + s);
     if (_classpath.contains(s)) {
       // Don't add it again

@@ -237,12 +237,12 @@ public class ConfigFrame extends JFrame {
 
   /**
    * Returns the current working directory, or the user's current directory
-   * if none is set.
+   * if none is set. 20031027 Changed default value to user's home directory.
    */
   private File _getWorkDir() {
     File workDir = DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY);
     if (workDir == FileOption.NULL_FILE) {
-      workDir = new File(System.getProperty("user.dir"));
+      workDir = new File(System.getProperty("user.home"));
     }
     if (workDir.isFile() && workDir.getParent() != null) {
       workDir = workDir.getParentFile();
@@ -779,6 +779,8 @@ public class ConfigFrame extends JFrame {
                                                   "the user modifies, saved with a '~' at the end of the filename.</html>"));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.RESET_CLEAR_CONSOLE, "Clear Console After Interactions Reset", this,
                                                   "Whether to clear the Console output after resetting the Interactions Pane."));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALLOW_PRIVATE_ACCESS, "Allow Access of Private Members in Interactions Pane", this,
+                                                  "Whether to allow users to access private (and protected) fields and methods."));
 
     panel.displayComponents();
   }

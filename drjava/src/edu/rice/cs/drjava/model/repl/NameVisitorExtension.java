@@ -80,7 +80,7 @@ public class NameVisitorExtension extends NameVisitor {
     _tc = new TypeChecker(typeContext);
   }
   
-  // An attempt at fixing the redefinition issue in DynamicJava
+  // Fixes the redefinition issue in DynamicJava
   public Object visit(VariableDeclaration node) {  
     // NameVisitor
     Node n = node.getInitializer();

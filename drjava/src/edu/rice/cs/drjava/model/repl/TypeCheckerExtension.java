@@ -50,6 +50,9 @@ import koala.dynamicjava.tree.*;
 import koala.dynamicjava.interpreter.context.Context;
 import koala.dynamicjava.interpreter.error.ExecutionError;
 
+import java.util.List;
+import java.util.Iterator;
+
 /**
  * Overrides divide and mod so that they won't evaluate any expressions in 
  * the type checker since this may cause divide by zero exceptions even when
@@ -66,6 +69,82 @@ public class TypeCheckerExtension extends TypeChecker {
   public TypeCheckerExtension(Context c) {
     super(c);
   }
+  
+  /**
+   * Overrides TypeChecker's default behavior on an InstanceOfExpression,
+   * since it caused a NullPointerException on "null instanceof Object"
+   * @param node the node to visit
+   */
+  public Object visit(InstanceOfExpression node) {
+    node.getReferenceType().acceptVisitor(this);
+    
+    // The expression must not have a primitive type
+    Class c = (Class) node.getExpression().acceptVisitor(this);
+    if ((c != null) && c.isPrimitive()) {
+      throw new ExecutionError("left.expression", node);
+    }
+    
+    // Set the type property
+    node.setProperty(NodeProperties.TYPE, boolean.class);
+    return boolean.class;
+  }
+  
+  public Object visit(MethodDeclaration node) {
+    super.visit(node);
+    Class c = (Class)node.getProperty(NodeProperties.TYPE);
+    BlockStatement bs = node.getBody();
+    List l = bs.getStatements();
+    Iterator iter = l.iterator();
+    boolean foundCorrectType = false;
+    while(iter.hasNext()) {
+      Statement s = (Statement)iter.next();
+      if (s instanceof ReturnStatement) {
+        Class returnExpClass;
+        Expression expression = ((ReturnStatement)s).getExpression();
+        if (expression == null) {
+          returnExpClass = null;
+        }
+        else {
+          returnExpClass = (Class)expression.acceptVisitor(this);
+        }
+        // will void return type mean c is null?
+        if (c == null) {
+          if (returnExpClass != null) {
+            // returning a value in a void method
+            throw new ExecutionError("assignment.types", node);
+          }
+        }
+        else if (returnExpClass == null) {
+          // returning nothing in a non-void method
+          throw new ExecutionError("assignment.types", node);    
+        }
+        else if (!c.isAssignableFrom(returnExpClass)) {
+          // returning an unassignable type
+          throw new ExecutionError("assignment.types", node);
+        }
+        else {
+          // returning an assignable type
+          foundCorrectType = true;
+        }
+      }
+    }
+    if (c != null) {
+      if (!foundCorrectType) {
+        // we were supposed to return a type, but did not
+        throw new ExecutionError("assignment.types", node);
+      }
+    }
+    return null;
+  }
+  
+  public Object visit(ReturnStatement node) {
+    Expression e = node.getExpression();
+    if (e != null) {
+      return e.acceptVisitor(this);
+    }
+    return null;
+  }     
+    
   
   /**
    * Visits a DivideExpression
