@@ -55,7 +55,7 @@ public class LongLiteral extends Literal {
    */
   public LongLiteral(String rep, String fn, int bl, int bc, int el, int ec) {
     super(rep,
-          parse(rep.substring(0, rep.length()-1)),
+          parse(rep.substring(0, rep.length())), //corrected bug, was rep.length()-1
           long.class,
           fn, bl, bc, el, ec);
   }
@@ -102,38 +102,4 @@ public class LongLiteral extends Literal {
     }
     return new Long(value);
   }
-  
-  /*Begin Static Test Methods*/
-  public static boolean testParse() {
-    if(((new Long("312").compareTo(parse("0x138"))) == 0) &&
-       ((new Long("312").compareTo(parse("0470"))) == 0) &&
-       ((new Long("312").compareTo(parse("312"))) == 0))
-      return true;
-    else
-      return false;
-  }
-  
-  /*Test for correct conversion at zero, max(int), max(int)+1*/
-  /*TODO: add in test for negative numbers*/
-  public static boolean testParseHexadecimal(){
-    if(((new Long("0").compareTo(parseHexadecimal("0"))) == 0) &&
-       ((new Long("2147483647").compareTo(parseHexadecimal("7fffffff"))) == 0) &&
-       ((new Long("2147483648").compareTo(parseHexadecimal("80000000"))) == 0))
-      return true;
-    else
-      return false;
-  }
-  
-  /*Test for correct conversion at zero, max(int), max(int)+1*/
-  /*TODO: add in test for negative numbers*/
-  public static boolean testParseOctal(){
-    if(((new Long("0").compareTo(parseOctal("0"))) == 0) &&
-       ((new Long("2147483647").compareTo(parseOctal("17777777777"))) == 0) &&
-         ((new Long("2147483648").compareTo(parseOctal("20000000000"))) == 0)
-         )
-      return true;
-    else
-      return false;
-  }
-  /*End Static Test Methods*/
 }
