@@ -219,18 +219,115 @@ public class FindReplaceMachineTest extends TestCase
                  doc.getText(0, doc.getLength()));     
   }
 
+  public void testReplaceAllBackwards() throws BadLocationException {
+    doc.insertString(0, "hElo helO", null);
+    _initFrm(3);
+    frm.setFindWord("heLo");
+    frm.setReplaceWord("cool");
+    frm.setMatchCase(false);
+    frm.setSearchBackwards(true);
+    frm.replaceAll();
+    assertEquals("backwards replace", "cool cool", doc.getText(0, doc.getLength()));
+  }
+
+  public void testFindMatchWithCaretInMiddle() throws BadLocationException {
+    doc.insertString(0, "hello hello", null);
+    _initFrm(3);
+    frm.setFindWord("hello");
+    frm.setMatchCase(false);
+    frm.setSearchBackwards(false);
+    _testFindNextSucceeds(frm, CONTINUE, 3, 11);
+    _testFindNextSucceeds(frm, CONTINUE, 3, 5);
+  }
+
+  public void testFindMatchWithCaretInMiddleBackwards() throws BadLocationException {
+    doc.insertString(0, "hello hello", null);
+    _initFrm(8);
+    frm.setFindWord("helLo");
+    frm.setMatchCase(false);
+    frm.setSearchBackwards(true);
+    _testFindNextSucceeds(frm, CONTINUE, 8, 0);
+    _testFindNextSucceeds(frm, CONTINUE, 8, 6);
+  }
+
+  /**
+   * This tests that a replace all where the replacement action creates a new match
+   * does not replace this new match
+   */
+  public void testReplaceCreatesMatch() throws BadLocationException {
+    doc.insertString(0, "hhelloello", null);
+    _initFrm(1);
+    frm.setFindWord("hello");
+    frm.setMatchCase(false);
+    frm.setSearchBackwards(false);
+    frm.setReplaceWord("");
+    frm.replaceAll();
+    assertEquals("replace creates new match", "hello", doc.getText(0, doc.getLength()));
+  }
+
+  /**
+   * This tests that a replace all where the replacement action creates a new match
+   * does not replace this new match
+   */
+  public void testReplaceCreatesMatchBackwards() throws BadLocationException {
+    doc.insertString(0, "hhelloello", null);
+    _initFrm(1);
+    frm.setFindWord("hello");
+    frm.setMatchCase(false);
+    frm.setSearchBackwards(true);
+    frm.setReplaceWord("");
+    frm.replaceAll();
+    assertEquals("replace creates new match", "hello", doc.getText(0, doc.getLength()));
+  }
+
+  /**
+   * This test checks that replacing a word with itself will halt on replace all
+   */
+  public void testReplaceAllSameWord() throws BadLocationException {
+    doc.insertString(0, "cool cool", null);
+    _initFrm(3);
+    frm.setFindWord("cool");
+    frm.setMatchCase(false);
+    frm.setSearchBackwards(false);
+    frm.setReplaceWord("cool");
+    frm.replaceAll();
+    frm.setSearchBackwards(true);
+    frm.replaceAll();
+    assertEquals("replace all with the same word", "cool cool", doc.getText(0, doc.getLength()));
+  }
+
+  /**
+   * This test checks that a findNext won't find two matches that partially overlap.
+   * This is the current behavior of the FindReplaceMachine, though at some time
+   * in the future someone may want to change it
+   */
+  public void testFindPartialSubstrings() throws BadLocationException {
+    doc.insertString(0, "ooAooAoo", null);
+    _initFrm(0);
+    frm.setFindWord("ooAo");
+    frm.setMatchCase(false);
+    frm.setSearchBackwards(false);
+    _testFindNextSucceeds(frm, CONTINUE, 0, 4);
+    _testFindNextSucceeds(frm, CONTINUE, 0, 4);
+
+    _initFrm(8);
+    frm.setSearchBackwards(true);
+    _testFindNextSucceeds(frm, CONTINUE, 8, 3);
+    _testFindNextSucceeds(frm, CONTINUE, 8, 3);
+  }
+
   /**
    test case no longer applies -- we always wrap
-   public void testReplaceAllHalt() throws BadLocationException { 
+   public void testReplaceAllHalt() throws BadLocationException {
    doc.insertString(0, EVIL_TEXT, null);
    _initFrm(15);
-   _assertOffsets(frm, 15, 15); 
-   frm.setFindWord("evil"); 
-   frm.setReplaceWord("monkey"); 
-   frm.replaceAll(HALT); 
-   assertEquals("revised text", 
-   "Hear no evil, see no monkey, speak no monkey.", 
-   doc.getText(0, doc.getLength()));     
+   _assertOffsets(frm, 15, 15);
+   frm.setFindWord("evil");
+   frm.setReplaceWord("monkey");
+   frm.replaceAll(HALT);
+   assertEquals("revised text",
+   "Hear no evil, see no monkey, speak no monkey.",
+   doc.getText(0, doc.getLength()));
    }
   **/
 

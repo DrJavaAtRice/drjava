@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -45,6 +45,8 @@ import javax.swing.text.Position;
 
 import edu.rice.cs.util.UnexpectedException;
 
+import java.util.Date;
+
 /**
  * Implementation of logic of find/replace over a document.
  *
@@ -64,7 +66,8 @@ public class FindReplaceMachine {
   private boolean _found;
   private boolean _wrapped;
   private boolean _matchCase;
-  
+  private boolean _searchBackwards;
+
   /**
    * Constructor.
    * Creates a new machine to perform find/replace operations
@@ -82,7 +85,15 @@ public class FindReplaceMachine {
     _replaceWord = "";
     _matchCase = true;
   }
- 
+
+  public boolean getSearchBackwards() {
+    return _searchBackwards;
+  }
+
+  public void setSearchBackwards(boolean searchBackwards) {
+    this._searchBackwards = searchBackwards;
+  }
+
   public void setMatchCase(boolean matchCase) {
     _matchCase = matchCase;
   }
@@ -94,7 +105,7 @@ public class FindReplaceMachine {
   public void setPosition(int pos)
   {
     try {
-      _current = _doc.createPosition(pos);      
+      _current = _doc.createPosition(pos);
     } catch (BadLocationException ble) {
       throw new UnexpectedException(ble);
     }
@@ -111,7 +122,7 @@ public class FindReplaceMachine {
       throw new UnexpectedException(ble);
     }
   }
-  
+
   /**
    * Gets the character offset at which this machine started
    * operations.
@@ -119,7 +130,7 @@ public class FindReplaceMachine {
   public int getStartOffset() {
     return _start.getOffset();
   }
-  
+
   /**
    * Gets the character offset to which this machine is currently pointing.
    */
@@ -135,15 +146,15 @@ public class FindReplaceMachine {
       throw new UnexpectedException(e);
     }
   }
-  
+
   public String getFindWord() {
     return _findWord;
   }
-  
+
   public String getReplaceWord() {
     return _replaceWord;
   }
-  
+
   /**
    * Change the word being sought.
    * @param word the new word to seek
@@ -151,7 +162,7 @@ public class FindReplaceMachine {
   public void setFindWord(String word) {
     _findWord = word;
   }
-    
+
   /**
    * Change the replacing word.
    * @param word the new replacing word
@@ -159,22 +170,35 @@ public class FindReplaceMachine {
   public void setReplaceWord(String word) {
     _replaceWord = word;
   }
-  
+
   /**
    * Determine if the machine is on an instance of the find word.
    * @return true if the current position is right after an instance
    *         of the find word.
    */
   public boolean isOnMatch() {
-    int len = _findWord.length();
-    int off = _current.getOffset();
-    if(off < len) return false;
+    String findWord = this._findWord;
+    int len, off;
+    len = findWord.length();
+    if(!_searchBackwards) {
+      off = _current.getOffset() - len;
+    } else {
+      off = _current.getOffset();
+    }
+
+    if(off < 0){
+      return false;
+    } else if (off + len > _doc.getLength()){
+      return false;
+    }
+
     try {
-      String matchSpace = _doc.getText(off-len, len);
-      if (_matchCase)
-        return matchSpace.equals(_findWord);
-      else
-        return matchSpace.toLowerCase().equals(_findWord.toLowerCase());
+      String matchSpace = _doc.getText(off, len);
+      if (!_matchCase){
+        matchSpace = matchSpace.toLowerCase();
+        findWord = findWord.toLowerCase();
+      }
+      return matchSpace.equals(findWord);
     }
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
@@ -188,51 +212,89 @@ public class FindReplaceMachine {
    * the find word from the find offset.  This position is stored
    * in the current offset of the machine, and that is why it is
    * after: in subsequent searches, the same instance won't be found
-   * twice. Also returns a flag indicating whether the end of the
-   * document was reached and wrapped around. This is done using 
-   * the FindResult class which just contains an integer and a
-   * flag. 
-   * @return a FindResult object containing foundOffset and aflag 
+   * twice.  In a backward search, the position returned is at the
+   * beginning of the word.  Also returns a flag indicating whether the
+   * end of the document was reached and wrapped around. This is done
+   * using  the FindResult class which just contains an integer and a
+   * flag.
+   * @return a FindResult object containing foundOffset and aflag
    * indicating wrapping to the beginning during a search
    */
   public FindResult findNext() {
     try {
+      int start, len;
+      String findWord = this._findWord;
       // get the search space in the document
-      String findSpace = _doc.getText(_current.getOffset(), 
-                                      _doc.getLength()-_current.getOffset());
-      // find the first occurrence of _findWord
+      String findSpace;
+      if(!_searchBackwards){
+        start = _current.getOffset();
+        len = _doc.getLength() - start;
+      } else {
+        start = 0;
+        len = _current.getOffset();
+      }
+      findSpace = _doc.getText(start, len);
+      if (!_matchCase){
+        findSpace = findSpace.toLowerCase();
+        findWord = findWord.toLowerCase();
+      }
+
+      // find the first occurrence of findWord
       int foundOffset;
-      if (_matchCase) 
-        foundOffset = findSpace.indexOf(_findWord);
-      else
-        foundOffset = findSpace.toLowerCase().indexOf(_findWord.toLowerCase());
+      foundOffset = !_searchBackwards ? findSpace.indexOf(findWord)
+                                      : findSpace.lastIndexOf(findWord);
       // if we've found it
       if (foundOffset >= 0) {
         _found = true;
-        foundOffset += _current.getOffset() + _findWord.length();
+        foundOffset += start;
+        if (!_searchBackwards){
+           foundOffset += findWord.length();
+        }
         _current = _doc.createPosition(foundOffset);
-      }
-      else {
+      } else {
         // if we haven't found it
         _wrapped = true;
-        findSpace = _doc.getText(0, _start.getOffset());
-        if (_matchCase) 
-          foundOffset = findSpace.indexOf(_findWord);
-        else
-          foundOffset = findSpace.toLowerCase().indexOf(_findWord.toLowerCase());
+        //When we wrap, we need to include some text that was already searched before wrapping.
+        //Otherwise, we won't find an only match that has the caret in it already.
+        if(!_searchBackwards){
+          start = 0;
+          len = _start.getOffset() + (_findWord.length() - 1);
+          if(len > _doc.getLength()){
+            len = _doc.getLength();
+          }
+        } else {
+          start = _start.getOffset() - (_findWord.length() - 1);
+          if (start < 0){
+            start = 0;
+          }
+          len = _doc.getLength() - start;
+        }
+        findSpace = _doc.getText(start, len);
+
+        if (!_matchCase) {
+          findSpace = findSpace.toLowerCase();
+        }
+
+        foundOffset = !_searchBackwards ? findSpace.indexOf(findWord)
+                                        : findSpace.lastIndexOf(findWord);
+
         if (foundOffset >= 0) {
-          foundOffset += _findWord.length();
+          foundOffset += start;
+          if (!_searchBackwards) {
+            foundOffset += findWord.length();
+          }
           _current = _doc.createPosition(foundOffset);
         }
       }
-      // flag the return value so that they can tell that we had to wrap 
+      // flag the return value so that they can tell that we had to wrap
       // the file to determine the info.
-    
+
+      //This means we have found the word before, just not in this call
       if(foundOffset == -1 && _found) {
         _current = _start;
         _found = false;
         return findNext();
-      } 
+      }
       else {
         FindResult fr = new FindResult(foundOffset, _wrapped);
         _wrapped = false;
@@ -243,7 +305,7 @@ public class FindReplaceMachine {
       throw new UnexpectedException(e);
     }
   }
-  
+
   /**
    * If we're on a match for the find word, replace
    * it with the replace word.
@@ -251,11 +313,31 @@ public class FindReplaceMachine {
   public boolean replaceCurrent() {
     try {
       if (isOnMatch()) {
-        _doc.remove(getCurrentOffset() - _findWord.length(),
-                    _findWord.length());
-        // the current offset will be correct since we keep track
-        // of it as a Position.
+        boolean atStart = false;
+        int position = getCurrentOffset();
+        if(!_searchBackwards) {
+          position -= _findWord.length();
+        }
+        _doc.remove(position, _findWord.length());
+        if (position == 0){
+          atStart = true;
+        }
         _doc.insertString(getCurrentOffset(), _replaceWord, null);
+
+        // the current offset will be the end of the inserted word
+        //since we keep track of current as a Position.
+        //The exception is if we are at the beginning of the document,
+        //in which case the text is inserted AFTER the current position
+        //So, current offset is correct for forwards searching unless
+        //we were at the start of the document, in which case it is
+        //correct for backwards searching.
+        if(atStart && !_searchBackwards) {
+          setPosition(_replaceWord.length());
+        }
+        if(!atStart && _searchBackwards){
+          setPosition(getCurrentOffset() - _replaceWord.length());
+        }
+
         return true;
       }
       else {
@@ -266,24 +348,49 @@ public class FindReplaceMachine {
       throw new UnexpectedException(e);
     }
   }
-  
+
   /**
    * Replaces all occurences of the find word with the replace
    * word. Checks to see if the entire document is searched in case
    * the find word is equivalent to the replace word in which case
-   * an infinite loop would otherwise occur.
-   */ 
+   * an infinite loop would otherwise occur.  Starts at the beginning
+   * or the end of the document (depending on find direction).  This
+   * is so that matches created by string replacement will not be
+   * replaced as in the following example:
+   * findString:    "hello"
+   * replaceString: "e"
+   * document text: "hhellollo"
+   * Depending on the cursor position, clicking replace all could either
+   * make the document text read "hello" (which is correct) or "".  This
+   * is because of the behavior of findNext(), and it would be incorrect
+   * to change that behavior
+   */
   public int replaceAll() {
+    try {
+      if (!_searchBackwards){
+        _start = _doc.createPosition(0);
+        setPosition(0);
+      } else {
+        _start = _doc.createPosition(_doc.getLength());
+        setPosition(_doc.getLength());
+      }
+    } catch (BadLocationException e) {
+      throw new UnexpectedException(e);
+    }
     int count = 0;
     FindResult fr = findNext();
     int found = fr.getFoundOffset();
-    int wrapped = 0; 
+    int wrapped = 0;
     if (fr.getWrapped())
       wrapped++;
-    // Checks that the findNext method has found something and has not 
-    // wrapped once and gone beyond start. 
-    while (found >= 0 && (wrapped == 0 || found <= _start.getOffset()) && 
-    wrapped < 2) {
+    // Checks that the findNext method has found something and has not
+    // wrapped once and gone beyond start.
+//    while (found >= 0 && (wrapped == 0 ||
+//                         ((found < _start.getOffset() + _findWord.length() && !_searchBackwards)  ||
+//                          (found > _start.getOffset() - _findWord.length() && _searchBackwards))) && wrapped < 2) {
+
+    //new while condition, since I started replacing from the beginning/end of the document only
+    while(wrapped == 0) {
       replaceCurrent();
       count++;
       fr = findNext();
