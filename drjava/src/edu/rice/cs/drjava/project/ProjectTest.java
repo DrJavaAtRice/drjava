@@ -47,6 +47,8 @@ package edu.rice.cs.drjava.project;
 
 import junit.framework.TestCase;
 import java.io.*;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
 import edu.rice.cs.util.sexp.*;
 import edu.rice.cs.util.*;
@@ -92,20 +94,20 @@ public class ProjectTest extends TestCase {
   /**
    * Test to make sure all elements of the project are read correctly into the IR
    */
-  public void testParseProject() throws IOException, MalformedProjectFileException {
+  public void testParseProject() throws IOException, MalformedProjectFileException, java.text.ParseException {
     String proj1 =
       ";; DrJava project file.  Written with build: 20040623-1933\n" +
       "(source ;; comment\n" +
-      "   (file (name \"sexp/Atom.java\")(select 32 32))\n" +
-      "   (file (name \"sexp/BoolAtom.java\")(select 0 0))\n" +
-      "   (file (name \"sexp/Cons.java\")(select 0 0))\n" +
-      "   (file (name \"sexp/Empty.java\")(select 24 28)(active))\n" +
-      "   (file (name \"sexp/Lexer.java\")(select 0 0))\n" +
-      "   (file (name \"sexp/NumberAtom.java\")(select 12 12))\n" +
-      "   (file (name \"sexp/SEList.java\")(select 0 0)))\n" +
+      "   (file (name \"sexp/Atom.java\")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"sexp/BoolAtom.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"sexp/Cons.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"sexp/Empty.java\")(select 24 28)(mod-date \"16-Jul-2004 03:45:23\")(active))\n" +
+      "   (file (name \"sexp/Lexer.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"sexp/NumberAtom.java\")(select 12 12)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"sexp/SEList.java\")(select 0 0)))\n" + // doesn't have mod date
       "(auxiliary ;; absolute file names\n" +
-      "   (file (name "+ProjectFileBuilder.convertToLiteral(new File(absp,"junk/sexp/Tokens.java").getCanonicalPath()) +")(select 32 32))\n" +
-      "   (file (name "+ProjectFileBuilder.convertToLiteral(new File(absp,"jdk1.5.0/JScrollPane.java").getCanonicalPath()) +")(select 9086 8516)))\n" +
+      "   (file (name "+ProjectFileBuilder.convertToLiteral(new File(absp,"junk/sexp/Tokens.java").getCanonicalPath()) +")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name "+ProjectFileBuilder.convertToLiteral(new File(absp,"jdk1.5.0/JScrollPane.java").getCanonicalPath()) +")(select 9086 8516)(mod-date \"16-Jul-2004 03:45:23\")))\n" +
       "(collapsed ;; relative paths\n" +
       "   (file (name \"sexp\"))\n" +
       "   (file (name \"[External]\")))\n" +
@@ -124,6 +126,9 @@ public class ProjectTest extends TestCase {
     assertEquals("number of classpaths", 1, pfir.getClasspaths().length);
     String base = f.getParent();
     assertEquals("first source filename", new File(base,"/sexp/Atom.java").getPath(), pfir.getSourceFiles()[0].getPath());
+    assertEquals("mod-date value", 
+                 new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").parse("16-Jul-2004 03:45:23").getTime(),
+                 pfir.getSourceFiles()[0].getSavedModDate());
     assertEquals("last source filename", new File(base,"/sexp/SEList.java").getPath(), pfir.getSourceFiles()[6].getPath());
     assertEquals("first aux filename", new File(absp,"junk/sexp/Tokens.java").getPath(), pfir.getAuxiliaryFiles()[0].getCanonicalPath());
     assertEquals("last collapsed path", "[External]", pfir.getCollapsedPaths()[1].getPath());

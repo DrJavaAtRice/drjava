@@ -56,6 +56,7 @@ public class DocFile extends File {
   private Pair<Integer,Integer> _scroll;
   private boolean _active;
   private String _package;
+  private long _mod;
   
   /**
    * Creates a docfile that has the same path as the given
@@ -178,5 +179,20 @@ public class DocFile extends File {
    */
   public void setPackage(String pack) {
     _package = pack;
+  }
+  /**
+   * Sets the lastModified value of this file at the time the including project file
+   * was saved. The <code>lastModified</code> date any documents saved after the 
+   * project file was written will not match the date recorded in the project file.
+   * @param the last known modification date when the project was saved. 
+   */
+  public void setSavedModDate(long mod) {
+    _mod = mod;
+  }
+  /**
+   * @return the modification date of this file at the time the project file was generated
+   */
+  public long getSavedModDate() {
+    return _mod;
   }
 }

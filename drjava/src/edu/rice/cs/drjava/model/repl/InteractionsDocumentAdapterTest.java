@@ -97,15 +97,18 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
     assertEquals("The third element of StylesList before reset should be", 
                  "((21, 22), number.return.style)", _adapter.getStylesList().get(2).toString());
     
-    // Reset should clear
-    _model.setWaitingForFirstInterpreter(false);
-    //this adds the "Resetting Interactions" 
-    _model.resetInterpreter();
-    _model.interpreterResetting();
-    
-    assertEquals("StylesList after reset should contain 1 pair",1, _adapter.getStylesList().size());
-    //Resetting Interactions piece
-    assertEquals("The only element of the StylesList after reset should be",
-                 "((48, 74), error)", _adapter.getStylesList().get(0).toString());
+    synchronized(_model){
+      // Reset should clear
+      _model.setWaitingForFirstInterpreter(false);
+      //this adds the "Resetting Interactions" 
+      _model.resetInterpreter();
+      _model.interpreterResetting();
+    }
+    synchronized(_model){
+      assertEquals("StylesList after reset should contain 1 pair",1, _adapter.getStylesList().size());
+      //Resetting Interactions piece
+      assertEquals("The only element of the StylesList after reset should be",
+                   "((48, 74), error)", _adapter.getStylesList().get(0).toString());
+    }
   }
 }

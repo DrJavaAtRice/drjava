@@ -47,6 +47,8 @@ package edu.rice.cs.drjava.project;
 
 import java.util.List;
 import java.util.Vector;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.io.*;
 
 import edu.rice.cs.drjava.Version;
@@ -253,9 +255,10 @@ public class ProjectFileBuilder {
    * @param df the doc file to encode
    * @param prefix the indent level to place the s-expression at
    * @param relative whether this file should be made relative to the project path
+   * @param hasDate whether to include the modification date
    * @return the s-expression syntax to describe the given docfile.
    */
-  private String encodeDocFile(DocFile df, String prefix, boolean relative) throws IOException {
+  private String encodeDocFile(DocFile df, String prefix, boolean relative, boolean hasDate) throws IOException {
     String ret = "";
     String path;
     if (relative) {
@@ -269,7 +272,7 @@ public class ProjectFileBuilder {
     Pair<Integer,Integer> p1 = df.getSelection();
     Pair<Integer,Integer> p2 = df.getScroll();
     boolean active = df.isActive();
-    
+    long modDate = df.lastModified();
     // Add prefix to the next line if any tags exist
     if (p1 != null || p2 != null || active) {
       ret += "\n" + prefix + "      ";
@@ -280,6 +283,10 @@ public class ProjectFileBuilder {
     }
     if (p2 != null) {
       ret += "(scroll " + p2.getFirst() + " " + p2.getSecond() + ")";
+    }
+    if (hasDate && modDate > 0) {
+      String s = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").format(new Date(modDate));
+      ret += "(mod-date " + convertToLiteral(s) + ")";
     }
     if (active) {
       ret += "(active)";
@@ -301,7 +308,10 @@ public class ProjectFileBuilder {
    * @param prefix the indent level
    */
   private String encodeDocFile(DocFile df, String prefix) throws IOException {
-    return encodeDocFile(df, prefix, true);
+    return encodeDocFile(df, prefix, true,true);
+  }
+  private String encodeDocFile(DocFile df, String prefix, boolean relative) throws IOException {
+    return encodeDocFile(df,prefix,relative,true);
   }
   
   /**

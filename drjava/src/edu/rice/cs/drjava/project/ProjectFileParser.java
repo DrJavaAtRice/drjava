@@ -50,7 +50,8 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.ArrayList;
-
+import java.util.Date;
+import java.text.SimpleDateFormat;
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.sexp.*;
 
@@ -293,6 +294,7 @@ public class ProjectFileParser {
     private Pair<Integer,Integer> scroll = new Pair<Integer,Integer>(0,0);
     private boolean active = false;
     private String pack = "";
+    private Date modDate = null;
     
     private String _parentDir;
     public FilePropertyVisitor(String parentDir){ _parentDir = parentDir; }
@@ -314,6 +316,16 @@ public class ProjectFileParser {
       else if (name.compareToIgnoreCase("package") == 0) {
         pack = ProjectFileParser.ONLY.parseStringNode(c.getFirst());
       }
+      else if (name.compareToIgnoreCase("mod-date") == 0) {
+        String tmp = ProjectFileParser.ONLY.parseStringNode(c.getFirst());
+        try {
+          modDate = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").parse(tmp);
+        }
+        catch (java.text.ParseException e) {
+          throw new PrivateProjectException("Bad mod-date: " + e.getMessage());
+        }
+      }
+        
       return c.getRest().accept(this);
     }
     
@@ -322,7 +334,9 @@ public class ProjectFileParser {
         return new DocFile(fname, select, scroll, active, pack);
       }
       else {
-        return new DocFile(_parentDir, fname, select, scroll, active, pack);
+        DocFile f = new DocFile(_parentDir, fname, select, scroll, active, pack);
+        if (modDate != null) f.setSavedModDate(modDate.getTime());
+        return f;
       }
     }
   }
