@@ -37,48 +37,39 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
+package edu.rice.cs.util.classloader;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 /**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20030216-0001;
+ * A class loader that only loads resources from the given URLs,
+ * and never from the system class loader or bootclasspath.
+ * Designed to be used in conjunction with a StickyClassLoader
+ * to ensure that classes are loaded from the URLs before anywhere
+ * else.
+ * 
+ * A regular URLClassLoader first looks at its parent, then looks
+ * at the bootclasspath, and only looks at the given URLs if the
+ * class or resource couldn't be found in the other two.
  *
  * @version $Id$
  */
-public abstract class Version {
+public class StrictURLClassLoader extends URLClassLoader {
+
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Creates a StrictURLClassLoader
+   * @param urls List of URLs to use to load classes.
    */
-  private static final String BUILD_TIME_STRING = "20030216-0001";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public StrictURLClassLoader(URL[] urls) {
+    // Make sure this class loader has no parent
+    super(urls, null);
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  /**
+   * Override getResource to not look at bootclasspath.
+   */
+  public URL getResource(String name) {
+    return findResource(name);
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+}

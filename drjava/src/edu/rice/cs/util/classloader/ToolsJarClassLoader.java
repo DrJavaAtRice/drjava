@@ -64,17 +64,29 @@ public class ToolsJarClassLoader extends URLClassLoader {
    */
   public static File[] getToolsJarFiles() {
     String javaHome = System.getProperty("java.home");
-    File home = new File(javaHome);
-    File libDir = new File(home, "lib");
-    File libDir2 = new File(home.getParentFile(), "lib");
-    
+    File home = new File(javaHome);    
     Vector<File> files = new Vector<File>();
-    files.addElement(new File(libDir, "tools.jar"));
-    files.addElement(new File(libDir2, "tools.jar"));
+    
+    // Check $JAVA_HOME/lib/tools.jar
+    File libDir = new File(home, "lib");
+    File jar = new File(libDir, "tools.jar");
+    if (jar.exists()) {
+      files.addElement(jar);
+    }
+    
+    // Check $JAVA_HOME/../lib/tools.jar
+    File libDir2 = new File(home.getParentFile(), "lib");
+    File jar2 = new File(libDir2, "tools.jar");
+    if (jar2.exists()) {
+      files.addElement(jar2);
+    }
     
     if (javaHome.indexOf("Program Files") != -1) {
       // Windows: JavaHome is JRE; guess where SDK is
-      files.addElement(new File(getWindowsToolsJar(javaHome)));
+      File jar3 = new File(getWindowsToolsJar(javaHome));
+      if (jar3.exists()) {
+        files.addElement(jar3);
+      }
     }
 
     File[] fileArray = new File[files.size()];
