@@ -750,7 +750,9 @@ public class MainFrame extends JFrame implements OptionConstants {
         showTab(_findReplace);
         _findReplace.beginListeningTo(_currentDefPane);
       }
+      _findReplace.setVisible(true);
       _tabbedPane.setSelectedComponent(_findReplace);
+      try { Thread.sleep(100); } catch(Exception e) { e.printStackTrace(); }
       _findReplace.requestFocus();
       //_setDividerLocation();
     }
@@ -3950,7 +3952,23 @@ public class MainFrame extends JFrame implements OptionConstants {
       public void stateChanged(ChangeEvent e) {
         clearStatusMessage();
         if (_tabbedPane.getSelectedComponent() == _interactionsContainer) {
-          _interactionsPane.requestFocus();
+          /**
+           * This was probably a bad design decision but I couldn't think
+           * of any other way around it.  When the intaractions tab gains
+           * focus we want the interactions pane (editor pane) to receive
+           * the focus.  But focus is given to the tab itself *AFTER* this
+           * listener is called on.  This code waits for a bit for Swing
+           * to give the tab focus, then steals the focus back to the
+           * interactions pane.
+           */
+          Thread t = new Thread() {
+            public void run() { 
+              try { Thread.sleep(100); } 
+              catch(Exception e) { throw new UnexpectedException(e); }
+              _interactionsPane.requestFocus();
+            }
+          };
+          t.start();
         }
         else if (_tabbedPane.getSelectedComponent() == _consoleScroll) {
           _consolePane.requestFocus();

@@ -127,7 +127,8 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
    */
   public void beginListeningTo(DefinitionsPane defPane) {
     if(_defPane==null) {
-      requestFocus();
+      // removed so it doesn't give the pane focus when switching documents
+//      requestFocus(); 
       _displayed = true;
       _defPane = defPane;
       _defPane.addCaretListener(_caretListener);

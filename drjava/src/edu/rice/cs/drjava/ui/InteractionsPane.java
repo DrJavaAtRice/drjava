@@ -160,4 +160,9 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
     }
     _highlightManager.addHighlight(offset, offset+length, ERROR_PAINTER);
   }
+  
+//  public void requestFocus() {
+//    super.requestFocus();
+//    System.out.println("InteractionsPane.setFocus() was called");
+//  }
 }
