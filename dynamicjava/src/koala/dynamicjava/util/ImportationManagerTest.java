@@ -366,14 +366,15 @@ public class ImportationManagerTest extends TestCase {
     assertEquals("List of staticly imported fields should not have changed",1,fields.size());
     assertEquals("List of staticly imported methods should contain both parseint methods",2,methods.size());
     assertEquals("List of staticly imported fields should contain java.lang.Integer.MAX_VALUE","public static final int java.lang.Integer.MAX_VALUE",fields.get(0).toString());
-    if(TigerUtilities.isTigerEnabled()) {      
+    try {      
       assertEquals("List of staticly imported fields should contain both parseInt methods",
                    "public static int java.lang.Integer.parseInt(java.lang.String) throws java.lang.NumberFormatException",methods.get(0).toString());
       assertEquals("List of staticly imported fields should contain both parseInt methods",
                    "public static int java.lang.Integer.parseInt(java.lang.String,int) throws java.lang.NumberFormatException",methods.get(1).toString());
     }
-    else {
-      //When running 1.4, the methods returned by java.lang.reflect.Class.getMethods() are in the array in reverse order from the way they are returned in 1.5.
+    catch(AssertionFailedError e){
+      //When running 1.4 or running in Windows, the methods returned by java.lang.reflect.Class.getMethods() 
+      //are in the array in reverse order from the way they are returned in 1.5 in Linux. 
       //This will not affect the program but does affect these assertions
       assertEquals("List of staticly imported fields should contain both parseInt methods",
                    "public static int java.lang.Integer.parseInt(java.lang.String,int) throws java.lang.NumberFormatException",methods.get(0).toString());
@@ -426,14 +427,15 @@ public class ImportationManagerTest extends TestCase {
     assertEquals("List of staticly imported fields should not have changed",1,fields.size());
     assertEquals("List of staticly imported inner classes should not have changed",4,classes.size());
     assertEquals("List of staticly imported methods should contain the two static toString methods in the Integer class",4,methods.size());
-    if(TigerUtilities.isTigerEnabled()) {
+    try{
       assertEquals("List of staticly imported methods should contain the two static toString methods in the Integer class as its first two entries",
                    "public static java.lang.String java.lang.Integer.toString(int)",methods.get(0).toString());
       assertEquals("List of staticly imported methods should contain the two static toString methods in the Integer class as its first two entries",
                    "public static java.lang.String java.lang.Integer.toString(int,int)",methods.get(1).toString());
     }
-    else {
-      //When running 1.4, the methods returned by java.lang.reflect.Class.getMethods() are in the array in reverse order from the way they are returned in 1.5.
+    catch(AssertionFailedError e){
+      //When running 1.4 or running in Windows, the methods returned by java.lang.reflect.Class.getMethods() 
+      //are in the array in reverse order from the way they are returned in 1.5 in Linux. 
       //This will not affect the program but does affect these assertions
       assertEquals("List of staticly imported methods should contain the two static toString methods in the Integer class as its first two entries",
                    "public static java.lang.String java.lang.Integer.toString(int,int)",methods.get(0).toString());

@@ -122,12 +122,12 @@ public class Parser {
      }
      _throwParseException(message);
    }
-  
-  /**
-   * Creates a primary expression from a refix and a list of suffixes
-   * @param prefix   the prefix expression
-   * @param suffixes the suffix list built in reverse order
-   */
+        
+   /**
+    * Creates a primary expression from a refix and a list of suffixes
+    * @param prefix   the prefix expression
+    * @param suffixes the suffix list built in reverse order
+    */
   private static Expression createPrimaryExpression(Expression prefix, List/*<ExpressionSuffix>*/ suffixes) {
     Iterator/*<ExpressionSuffix>*/ it = suffixes.iterator();
     if (it.hasNext()) {
@@ -1066,6 +1066,11 @@ PARSER_END(Parser)
        | < RSIGNEDSHIFTASSIGN: ">>=" >
        | < RUNSIGNEDSHIFTASSIGN: ">>>=" >*/
   }
+  
+  JAVACODE
+    void _errorChar(char c) {
+     _throwParseException("'" + c + "' expected.");
+   }
   
   /*
    * The syntactic grammar
@@ -2564,7 +2569,9 @@ PARSER_END(Parser)
   }
   {
     try { 
-      t="if" "(" exp=expression() ")"  stat1=statement()
+      t="if" ( "(" | _errorChar('('))
+        exp=expression() ")"
+        stat1=statement()
         [ LOOKAHEAD(1) "else" stat2=statement() ]
       {   
         if (stat2 == null) {
@@ -2597,7 +2604,9 @@ PARSER_END(Parser)
   }
   {
     try{
-      t="while" "(" exp=expression() ")" stat=statement()
+      t="while" ( "(" | _errorChar('(')) 
+        exp=expression() ")" 
+        stat=statement()
       {
         return new WhileStatement(exp, stat,
                                   filename,
@@ -2622,7 +2631,9 @@ PARSER_END(Parser)
   }
   {
     try {
-      t1="do" stat=statement() "while" "(" exp=expression() ")" t2=";"
+      t1="do" stat=statement() "while" 
+        ( "(" | _errorChar('('))
+        exp=expression() ")" t2=";"
       {
         return new DoStatement(exp, stat,
                                filename,
@@ -2652,8 +2663,11 @@ PARSER_END(Parser)
   }
   {
     try {
-      b="switch" "(" sel=expression() ")" "{"
-        ( ( "case" val=expression() | t="default" ) ":"
+      b="switch" ( "(" | _errorChar('('))
+        sel=expression() ")" 
+        ( "{" | _errorChar('{'))
+        ( ( "case" val=expression() | t="default" ) 
+           (":" | _errorChar(':'))
            ( stat=blockStatement()
               {
         list.addAll(stat);
@@ -2722,7 +2736,7 @@ ForSlashEachStatement forStatement() :
 }
 {
   try {
-    t="for" "("  
+    t="for" ( "(" | _errorChar('(')) 
       (
        LOOKAHEAD(formalParameterLookahead() ":")
          forEachInit=formalParameter() colon=":" exp=expression()
@@ -2902,7 +2916,8 @@ ForSlashEachStatement forStatement() :
   }
   {
     try {
-      t="synchronized" "(" exp=expression() ")" stmt=block()
+      t="synchronized" ( "(" | _errorChar('('))
+        exp=expression() ")" stmt=block()
       {
         return new SynchronizedStatement(exp, stmt,
                                          filename,
@@ -2932,7 +2947,8 @@ ForSlashEachStatement forStatement() :
   {
     try{
       t="try" tryBlock=block()
-        ( u="catch" "(" formal=formalParameter() ")" catchBlock=block()
+        ( u="catch" ( "(" | _errorChar('('))
+           formal=formalParameter() ")" catchBlock=block()
            {
         el = catchBlock.getEndLine();
         ec = catchBlock.getEndColumn();
