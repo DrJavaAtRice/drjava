@@ -221,10 +221,10 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called after the current document is saved.
-   */
+  /** Called after the current document is saved. */
   public void fileSaved(OpenDefinitionsDocument doc) {
+//    ScrollableDialog sd = new ScrollableDialog(null, "fileSaved(" + doc + ") called in GlobalEventNotifier.java", "", "");
+//    sd.show();
     _lock.startRead();
     try { for(GlobalModelListener l : _listeners) { l.fileSaved(doc); } }
     finally { _lock.endRead(); }
@@ -455,7 +455,9 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
    * It is up to the caller of this method to check if the documents have been
    * saved, using IGetDocuments.hasModifiedDocuments().
    */
-  public void saveBeforeCompile() {;
+  public void saveBeforeCompile() {
+//    ScrollableDialog sd = new ScrollableDialog(null, "saveBeforeCompile called in GlobalEventNotifier", "", "");
+//    sd.show();
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.saveBeforeCompile(); } }
     finally { _lock.endRead(); }

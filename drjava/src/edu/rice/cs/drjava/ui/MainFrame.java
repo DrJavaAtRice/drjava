@@ -5747,6 +5747,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     public void fileSaved(OpenDefinitionsDocument doc) {
+//      ScrollableDialog sd = new ScrollableDialog(null, "fileSaved called in ModelListener", "", "");
+//      sd.show();
       _saveAction.setEnabled(false);
       _revertAction.setEnabled(true);
       updateFileTitle();
@@ -5755,10 +5757,9 @@ public class MainFrame extends JFrame implements OptionConstants {
         File f = doc.getFile();
         if(! _model.isProjectFile(f)) _recentFileManager.updateOpenFiles(f);
       }
-      catch (IllegalStateException ise) {
-        // Impossible: saved => has a file
-        throw new UnexpectedException(ise);
-      }
+      catch (IllegalStateException ise) { throw new UnexpectedException(ise); }
+        // Impossible because saved => has a file
+        
       catch (FileMovedException fme) {
         File f = fme.getFile();
         // Recover, show it in the list anyway
@@ -6300,6 +6301,8 @@ public class MainFrame extends JFrame implements OptionConstants {
      * @param checkMsg the description of the checkbox ("Always save before X")
      */
     private void _saveAllBeforeProceeding(String message, BooleanOption option, String checkMsg) {
+//      ScrollableDialog sd = new ScrollableDialog(null, "saveBeforeProceeding called in MainFrame", "", "");
+//      sd.show();
       if (_model.hasModifiedDocuments()) {
         if (!DrJava.getConfig().getSetting(option).booleanValue()) {
           ConfirmCheckBoxDialog dialog =
@@ -6546,15 +6549,15 @@ public class MainFrame extends JFrame implements OptionConstants {
           return;
         }
       }
-      else{
-        //Close the file that wasn't found
+//      else {
+//        //Close the file that wasn't found
 //        LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
 //        l.add(d);
 //        _model.closeFiles(l);
 //        _model.closeFile(d);
 //        d.setFile(null);
 //        throw new DocumentClosedException(d,"Document in " + f + "closed unexpectedly");
-      }
+//      }
     }
   }
 

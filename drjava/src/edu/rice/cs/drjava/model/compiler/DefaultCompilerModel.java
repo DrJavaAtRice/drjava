@@ -259,10 +259,7 @@ public class DefaultCompilerModel implements CompilerModel {
       CompilerError[] errors = new CompilerError[] { err };
       _distributeErrors(errors);
     }
-    finally {
-      // Fire a compileEnded event
-      _notifier.compileEnded();
-    }
+    finally { _notifier.compileEnded(); }
   }
   
   /**
@@ -415,29 +412,12 @@ public class DefaultCompilerModel implements CompilerModel {
       CompilerError[] compilerErrorsArray = (CompilerError[]) compilerErrors.toArray(new CompilerError[0]);
       
       /** Compile the files in specified sourceRoots and files */
-      if (compilerErrorsArray.length == 0) {
+      if (compilerErrorsArray.length == 0)
         compilerErrorsArray = compiler.compile(sourceRoots, files);
-      }
-//      Iterator<File> iter = filesToRestore.iterator();
-//      while (iter.hasNext()) {
-//        _getter.getDocumentForFile(iter.next()).revertFile();
-//      }
+
       _distributeErrors(compilerErrorsArray);
-      // Restore the files that were moved.
-//      Iterator<File> iter = filesToRestore.iterator();
-//      while (iter.hasNext()) {
-//        File f = iter.next();
-//        File sourceFile = new File(f.getAbsolutePath() + ".beginner");
-//        // Windows needs this since otherwise rename won't work.
-//        if (f.exists()) {
-//          f.delete();
-//        }
-//        sourceFile.renameTo(f);
-//      }
     }
-    else {
-      _distributeErrors(new CompilerError[0]);
-    }
+    else _distributeErrors(new CompilerError[0]);
   }
   
   /** Determines if file f ends with one of the extensions in exts. */

@@ -455,6 +455,20 @@ public class DocumentCacheTest extends TestCase {
    * rather than a single display model.
    */
   private class TestGlobalModel extends DefaultGlobalModel {
+    public void addListener(GlobalModelListener listener) { addListenerHelper(listener); }
+    public void aboutToSaveFromSaveAll(OpenDefinitionsDocument doc) { /* dummy method */ }
+    public void saveAllFiles(FileSaveSelector fs) throws IOException { saveAllFilesHelper(fs); }
+    
+    public OpenDefinitionsDocument newFile() { return newFile(null); }
+    public OpenDefinitionsDocument openFile(FileOpenSelector fs) 
+      throws IOException, OperationCanceledException, AlreadyOpenException { 
+      return openFileHelper(fs); 
+    }
+    public boolean closeFile(OpenDefinitionsDocument doc) { return closeFileHelper(doc); }
+    public OpenDefinitionsDocument openFiles(FileOpenSelector com)
+      throws IOException, OperationCanceledException, AlreadyOpenException {
+      return openFilesHelper(com); 
+    }
     
   }
 }

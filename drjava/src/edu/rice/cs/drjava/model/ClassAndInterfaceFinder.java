@@ -62,16 +62,12 @@ public class ClassAndInterfaceFinder {
   /* normal constructor */
   public ClassAndInterfaceFinder(File f) {
     Reader r;
-    try {
-      r = new FileReader(f);
-    }
+    try { r = new FileReader(f); }
     catch(FileNotFoundException e) { /* create a Reader for an "empty" file */
       r = new StringReader("");
     }
     initialize(r);
   }
-  
-  
   
   private void initialize(Reader r) {
     

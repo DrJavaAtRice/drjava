@@ -95,35 +95,30 @@ import edu.rice.cs.util.docnavigation.*;
  */
 public class DefaultSingleDisplayModel extends DefaultGlobalModel implements SingleDisplayModel {
 
-  /**
-   * The active document pointer, which will never be null once the constructor is done.
-   * Maintained by the _gainVisitor with a navigation listener.
+  /** The active document pointer, which will never be null once the constructor is done.
+   *  Maintained by the _gainVisitor with a navigation listener.
    */
   private OpenDefinitionsDocument _activeDocument;
-  /**
-   * A pointer to the active directory, which is not necessarily the parent of the active document
-   * The user may click on a folder component in the navigation pane and that will set this field without
-   * setting the active document.  It is used by the newFile method to place new files into the active directory.
+  
+  /** A pointer to the active directory, which is not necessarily the parent of the active document
+   *  The user may click on a folder component in the navigation pane and that will set this field without
+   *  setting the active document.  It is used by the newFile method to place new files into the active directory.
    */
   private File _activeDirectory;
 
-  /**
-   * Creates a SingleDisplayModel.
+  /** Creates a SingleDisplayModel.
    *
-   * <ol>
-   *   <li>A new document is created to satisfy the invariant.
-   *   <li>The first document in the list is set as the active document.
-   * </ol>
+   *  <ol>
+   *    <li>A new document is created to satisfy the invariant.
+   *    <li>The first document in the list is set as the active document.
+   *  </ol>
    */
   public DefaultSingleDisplayModel() {
     super();
     _init();
   }
 
-  /**
-   * Initiates this SingleDisplayModel.  Should only be called
-   * from the constructor.
-   */
+  /** Initiates this SingleDisplayModel.  Should only be called from the constructor. */
   private void _init() {
     
     final NodeDataVisitor<Boolean> _gainVisitor = new NodeDataVisitor<Boolean>() {
@@ -171,7 +166,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     if (! (listener instanceof SingleDisplayModelListener))
       throw new IllegalArgumentException("Must use SingleDisplayModelListener");
 
-    super.addListener(listener);
+    addListenerHelper(listener);
   }
 
   //----------------------- New SingleDisplay Methods -----------------------//
@@ -234,7 +229,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
    * @return The new open document
    */
   public OpenDefinitionsDocument newFile() {
-    OpenDefinitionsDocument doc = super.newFile(_activeDirectory);
+    OpenDefinitionsDocument doc = newFile(_activeDirectory);
     
     setActiveDocument(doc);
     return doc;
@@ -263,8 +258,8 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     boolean closeUntitled = _hasOneEmptyDocument();
     OpenDefinitionsDocument oldDoc = _activeDocument;
 
-    OpenDefinitionsDocument openedDoc = super.openFile(com);
-    if (closeUntitled) super.closeFile(oldDoc);
+    OpenDefinitionsDocument openedDoc = openFileHelper(com);
+    if (closeUntitled) closeFileHelper(oldDoc);
 
     setActiveDocument(openedDoc);
     return openedDoc;
@@ -291,41 +286,38 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     boolean closeUntitled = _hasOneEmptyDocument();
     OpenDefinitionsDocument oldDoc = _activeDocument;
 
-    OpenDefinitionsDocument openedDoc = super.openFiles(com);
-    if (closeUntitled) super.closeFile(oldDoc);
+    OpenDefinitionsDocument openedDoc = openFilesHelper(com);
+    if (closeUntitled) closeFileHelper(oldDoc);
     setActiveDocument(openedDoc);
     return openedDoc;
   }
 
   //----------------------- End ILoadDocuments Methods -----------------------//
 
-  /**
-   * Saves all open files, prompting for names if necessary.
-   * When prompting (ie, untitled document), set that document as active.
-   * @param com a FileSaveSelector
-   * @exception IOException
+  /** Saves all open files, prompting for names if necessary.
+   *  When prompting (ie, untitled document), set that document as active.
+   *  @param com a FileSaveSelector
+   *  @exception IOException
    */
    public void saveAllFiles(FileSaveSelector com) throws IOException {
      OpenDefinitionsDocument curdoc = getActiveDocument();
-     super.saveAllFiles(com);
+     saveAllFilesHelper(com);
      setActiveDocument(curdoc); // Return focus to previously active doc
    }
 
-  /**
-   * If the document is untitled, brings it to the top so that the
-   * user will know which file she is saving
+  /** If the document is untitled, brings it to the top so that the
+   *  user will know which is being saved.
    */
    public void aboutToSaveFromSaveAll(OpenDefinitionsDocument doc) {
      if (doc.isUntitled()) setActiveDocument(doc);
    }
 
-  /**
-   * Closes an open definitions document, prompting to save if
-   * the document has been changed.  Returns whether the file
-   * was successfully closed.
-   * Also ensures the invariant that there is always at least
-   * one open document holds by creating a new file if necessary.
-   * @return true if the document was closed
+  /** Closes an open definitions document, prompting to save if
+   *  the document has been changed.  Returns whether the file
+   *  was successfully closed.
+   *  Also ensures the invariant that there is always at least
+   *  one open document holds by creating a new file if necessary.
+   *  @return true if the document was closed
    */
    public boolean closeFile(OpenDefinitionsDocument doc) {
      List<OpenDefinitionsDocument> list = new LinkedList<OpenDefinitionsDocument>();
@@ -382,10 +374,10 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     // Close all files. If together, then don't let it prompt a 2nd time;
     // but, if not together, then call closeFile which may prompt the user.
     for (OpenDefinitionsDocument doc : docList) {
-      if (together) super.closeFileWithoutPrompt(doc);
-      else if (!super.closeFile(doc)) {
+      if (together) closeFileWithoutPrompt(doc);
+      else if (! closeFileHelper(doc)) {
         setActiveDocument(doc);
-        if (newDoc != null) super.closeFile(newDoc); // undo previous newFile() 
+        if (newDoc != null) closeFileHelper(newDoc); // undo previous newFile() 
         return false;
       }
     }  
@@ -405,7 +397,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
    * Creates a new document if there are currently no documents open.
    */
   private void _ensureNotEmpty() {
-    if ((!_isClosingAllDocs) && (getDefinitionsDocumentsSize() == 0)) super.newFile();
+    if ((!_isClosingAllDocs) && (getDefinitionsDocumentsSize() == 0)) newFile(null);
   }
   
   /**
@@ -450,7 +442,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
   private void _setActiveDoc(INavigatorItem idoc) {
     //Hashtable<INavigatorItem, OpenDefinitionsDocument> docs = getDefinitionsDocumentsTable();
     
-    _activeDocument = super.getODDGivenIDoc(idoc);
+    _activeDocument = getODDGivenIDoc(idoc);
     try {
       _activeDocument.checkIfClassFileInSync();
      

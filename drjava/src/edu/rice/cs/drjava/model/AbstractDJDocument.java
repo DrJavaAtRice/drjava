@@ -155,10 +155,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * Get the indent level.
    * @return the indent level
    */
-  public int getIndent() {
-    // throwErrorHuh();
-    return _indent;
-  }
+  public int getIndent() { return _indent; }
   
   /**
    * Set the indent to a particular number of spaces.
@@ -169,7 +166,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     DrJava.getConfig().setSetting(INDENT_LEVEL,new Integer(indent));
     this._indent = indent;
   }
-  
   
   protected void _removeIndenter(){
     DrJava.getConfig().removeOptionListener(INDENT_LEVEL,

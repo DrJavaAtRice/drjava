@@ -102,9 +102,13 @@ class CompilerEventNotifier extends EventNotifier<CompilerListener> implements C
    * saved, using IGetDocuments.hasModifiedDocuments().
    */
   public void saveBeforeCompile() {
+//    ScrollableDialog sd = new ScrollableDialog(null, "CompilerEventNotifier.saveBeforeCompile called", "", _listeners.toString());
+//    sd.show();
     _lock.startRead();
     try { for (CompilerListener cl : _listeners) { cl.saveBeforeCompile(); } }
     finally { _lock.endRead();
+//      ScrollableDialog sd1 = new ScrollableDialog(null, "CompilerEventNotifier.saveBeforeCompile completed", "", _listeners.toString());
+//      sd1.show();
     }
   }
 }
