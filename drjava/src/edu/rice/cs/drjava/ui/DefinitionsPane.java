@@ -427,8 +427,38 @@ public class DefinitionsPane extends JEditorPane {
     _doc.syncCurrentLocationWithDefinitions(getCaretPosition());
     int selStart = getSelectionStart();
     int selEnd = getSelectionEnd();
-    _doc.indentLinesInDefinitions(selStart, selEnd);
-    setCaretPosition(_doc.getCurrentDefinitionsLocation());
+    
+    // Show a wait cursor for reasonable sized blocks
+    boolean showWaitCursor = selEnd > (selStart + 100);
+
+    // Temporary hack because of slow indent...
+    //  Prompt if more than 2000 characters to be indented
+    boolean doIndent = true;
+    if (selEnd > (selStart + 2000)) {
+      Object[] options = {"Yes","No"};
+      int n = JOptionPane.showOptionDialog
+        (_mainFrame,
+         "Re-indenting this block may take a very long time.  Are you sure?",
+         "Confirm Re-indent",
+         JOptionPane.YES_NO_OPTION,
+         JOptionPane.QUESTION_MESSAGE,
+         null,
+         options,
+         options[1]);
+      if (n==JOptionPane.NO_OPTION) { doIndent = false; }
+    }
+    
+    // Do the indent
+    if (doIndent) {
+      if (showWaitCursor) {
+        _mainFrame.hourglassOn();
+      }
+      _doc.indentLinesInDefinitions(selStart, selEnd);
+      setCaretPosition(_doc.getCurrentDefinitionsLocation());
+      if (showWaitCursor) {
+        _mainFrame.hourglassOff();
+      }
+    }
   }
 
 
