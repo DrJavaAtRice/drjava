@@ -516,6 +516,11 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     //TestListener listener = new TestListener();
     TestListener listener = new TestListener() {
+      
+      public void fileNotFound(File f){
+        fileNotFoundCount++;
+      }
+      
       public void fileOpened(OpenDefinitionsDocument doc) {
         File file = null;
         try {
@@ -532,7 +537,6 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
         try {
           assertEquals("file to open", tempFile1.getCanonicalFile(),
                        file.getCanonicalFile());
-
           openCount++;
         }
         catch (IOException ioe) {
@@ -546,10 +550,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     try {
       doc = _model.openFiles(new FileSelector(tempFile1,
                                               new File("fake-file")));
-      fail("IO exception was not thrown!");
     }
     catch (FileNotFoundException fnf) {
-      // As we hoped, the file was not found
+      fail("FileNotFound exception was not thrown!");
     }
     catch (AlreadyOpenException aoe) {
       // Should not be open
@@ -559,8 +562,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       // Should not be canceled
       fail("Open was unexpectedly canceled!");
     }
-    assertEquals("non-existant file", doc, null);
+    assertTrue("one file was opened", doc instanceof OpenDefinitionsDocument);
     listener.assertOpenCount(1);
+    listener.assertFileNotFoundCount(1);
   }
 
   /**

@@ -860,6 +860,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     AlreadyOpenException storedAOE = null;
     OpenDefinitionsDocument retDoc = null;
     
+    LinkedList<File> lof = new LinkedList<File>();
+    
     for (int i=0; i < files.length; i++) {
       if (files[i] == null) {
         throw new IOException("File name returned from FileSelector is null");
@@ -874,8 +876,17 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         if (storedAOE == null) {
           storedAOE = aoe;
         }
+      }catch(FileNotFoundException e){
+        lof.add(files[i]);
       }
     }
+    
+    for(File f: lof){
+      _notifier.fileNotFound(f);
+    }
+    
+    
+    
     if (storedAOE != null) {
       throw storedAOE;
     }

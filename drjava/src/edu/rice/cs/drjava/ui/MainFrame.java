@@ -4911,6 +4911,11 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Inner class to listen to all events in the model.
    */
   private class ModelListener implements SingleDisplayModelListener {
+    
+    public void fileNotFound(File f){
+      _showFileNotFoundError(new FileNotFoundException("File " + f + " cannot be found"));
+    }
+    
     public void newFileCreated(OpenDefinitionsDocument doc) {
       _createDefScrollPane(doc);
     }

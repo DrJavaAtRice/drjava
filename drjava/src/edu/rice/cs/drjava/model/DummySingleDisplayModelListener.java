@@ -56,6 +56,11 @@ import java.util.List;
 public class DummySingleDisplayModelListener implements SingleDisplayModelListener {
   
   /**
+   * called when trying to open a file that does not exist
+   */
+  public void fileNotFound(File f){   }
+  
+  /**
    * called when the project's build directory has changed
    */
   public void projectBuildDirChanged(){  }

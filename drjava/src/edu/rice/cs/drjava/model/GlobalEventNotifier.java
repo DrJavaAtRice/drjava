@@ -86,6 +86,20 @@ import java.io.File;
 public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     implements GlobalModelListener {
 
+  public void fileNotFound(File f){
+    _lock.startRead();
+    try {
+      int size = _listeners.size();
+      for(int i = 0; i < size; i++) {
+        _listeners.get(i).fileNotFound(f);
+      }
+    }
+    finally {
+      _lock.endRead();
+    }
+  }
+  
+  
   /* -------------- project state ------------------*/
   
   public void projectModified(){

@@ -573,6 +573,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   public static class TestListener implements GlobalModelListener {
     /** Remembers when this listener was created. */
     protected Exception _startupTrace;
+    protected int fileNotFoundCount;
     protected int newCount;
     protected int openCount;
     protected int closeCount;
@@ -615,6 +616,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
 
     public void resetCounts() {
+      fileNotFoundCount = 0;
       newCount = 0;
       openCount = 0;
       closeCount = 0;
@@ -665,6 +667,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       String header = "\nTestListener creation stack trace:\n" +
         StringOps.getStackTrace(_startupTrace);
       GlobalModelTestCase.listenerFail(header + message);
+    }
+
+    public void assertFileNotFoundCount(int i) {
+      assertEquals("number of times fileNotFound fired", i, fileNotFoundCount);
     }
 
     public void assertAbandonCount(int i) {
@@ -846,6 +852,11 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("newFileCreated fired unexpectedly");
     }
 
+    
+    public void fileNotFound(File f){
+      listenerFail("fileNotFound fired unexpectedly");
+    }
+    
     public void fileOpened(OpenDefinitionsDocument doc) {
       listenerFail("fileOpened fired unexpectedly");
     }

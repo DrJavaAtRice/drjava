@@ -45,6 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
+import java.io.File;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.junit.JUnitListener;
@@ -58,6 +59,12 @@ import edu.rice.cs.drjava.model.junit.JUnitListener;
 public interface GlobalModelListener extends InteractionsListener,
   JavadocListener, CompilerListener, JUnitListener {
 
+  
+  /**
+   * called when trying to open a file that does not exist
+   */
+  public void fileNotFound(File f);
+  
   /**
    * Called after a new document is created.
    */
