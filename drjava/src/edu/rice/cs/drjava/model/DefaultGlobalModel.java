@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -40,16 +40,28 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Font;
+import java.awt.print.*;
 import javax.swing.text.*;
 import javax.swing.ListModel;
 import javax.swing.DefaultListModel;
 import java.io.*;
 import java.util.*;
 
+import java.text.AttributedString;
+import java.text.AttributedCharacterIterator;
+import java.awt.font.TextLayout;
+import java.awt.font.LineBreakMeasurer;
+import java.awt.font.TextAttribute;
+import java.awt.geom.*;
+
 import edu.rice.cs.util.swing.FindReplaceMachine;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.*;
+import edu.rice.cs.drjava.model.print.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.newjvm.*;
@@ -72,6 +84,7 @@ public class DefaultGlobalModel implements GlobalModel {
     = new InteractionsDocument();
   private final StyledDocument _consoleDoc = new DefaultStyledDocument();
   private final LinkedList _listeners = new LinkedList();
+  private PageFormat _pageFormat = new PageFormat();
 
   // blank final, set differently in the two constructors
   private final MainJVM _interpreterControl;
@@ -94,7 +107,7 @@ public class DefaultGlobalModel implements GlobalModel {
 
   public static final AttributeSet SYSTEM_OUT_INTERACTIONS_STYLE
     = _getOutInsideInteractionsStyle();
-  
+
   private static AttributeSet _getOutInsideInteractionsStyle() {
     SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_STYLE);
     s.addAttribute(StyleConstants.Foreground, Color.green.darker().darker());
@@ -172,6 +185,14 @@ public class DefaultGlobalModel implements GlobalModel {
 
   public StyledDocument getConsoleDocument() {
     return _consoleDoc;
+  }
+
+  public PageFormat getPageFormat() {
+    return _pageFormat;
+  }
+
+  public void setPageFormat(PageFormat format) {
+    _pageFormat = format;
   }
 
   /** Errors without associated files */
@@ -548,7 +569,7 @@ public class DefaultGlobalModel implements GlobalModel {
   }
 
   /**
-   * Signifies that the most recent interpretation was ended 
+   * Signifies that the most recent interpretation was ended
    * due to an exception being thrown.
    *
    * @param exceptionClass The name of the class of the thrown exception
@@ -671,6 +692,7 @@ public class DefaultGlobalModel implements GlobalModel {
   private class DefinitionsDocumentHandler implements OpenDefinitionsDocument {
     private final DefinitionsDocument _doc;
     private CompilerErrorModel _errorModel;
+    private DrJavaBook _book;
 
     /**
      * Constructor.  Initializes this handler's document.
@@ -792,6 +814,45 @@ public class DefaultGlobalModel implements GlobalModel {
       }
     }
 
+    /**
+     * This method tells the document to prepare all the DrJavaBook
+     * and PagePrinter objects.
+     */
+    public void preparePrintJob() throws BadLocationException {
+      String filename = "(untitled)";
+      try {
+        filename = _doc.getFile().getAbsolutePath();
+      } catch (IllegalStateException e) {
+      }
+
+      _book = new DrJavaBook(_doc.getText(0, _doc.getLength()), filename, _pageFormat);
+    }
+
+    /**
+     * Prints the given document by bringing up a
+     * "Print" window.
+     */
+    public void print() throws PrinterException, BadLocationException {
+      preparePrintJob();
+      PrinterJob printJob = PrinterJob.getPrinterJob();
+      printJob.setPageable(_book);
+      if (printJob.printDialog()) {
+        printJob.print();
+      }
+      cleanUpPrintJob();
+    }
+
+    /**
+     * Returns the Pageable object for printing.
+     * @return A Pageable representing this document.
+     */
+    public Pageable getPageable() throws IllegalStateException {
+      return _book;
+    }
+
+    public void cleanUpPrintJob() {
+      _book = null;
+    }
 
     /**
      * Starts compiling the source.  Demands that the definitions be

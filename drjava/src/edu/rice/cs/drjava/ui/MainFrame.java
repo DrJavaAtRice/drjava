@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -44,6 +44,7 @@ import javax.swing.text.*;
 import javax.swing.event.*;
 import java.awt.event.*;
 import java.awt.*;
+import java.awt.print.*;
 import java.beans.*;
 
 import java.io.File;
@@ -70,7 +71,7 @@ public class MainFrame extends JFrame {
   private static final int GUI_WIDTH = 800;
   private static final int GUI_HEIGHT = 700;
   private static final int DOC_LIST_WIDTH = 150;
-  
+
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
 
   private final SingleDisplayModel _model;
@@ -83,7 +84,6 @@ public class MainFrame extends JFrame {
   private CompilerErrorPanel _errorPanel;
   private OutputPane _outputPane;
   private InteractionsPane _interactionsPane;
-  
   private JLabel _fileNameField;
   private JTabbedPane _tabbedPane;
   private JSplitPane _docSplitPane;
@@ -168,6 +168,27 @@ public class MainFrame extends JFrame {
     }
   };
 
+  /** Prints the current document. */
+  private Action _printAction = new AbstractAction("Print") {
+    public void actionPerformed(ActionEvent ae) {
+      _print();
+    }
+  };
+
+  /** Opens the print preview window */
+  private Action _printPreviewAction = new AbstractAction("Print Preview") {
+    public void actionPerformed(ActionEvent ae) {
+      _printPreview();
+    }
+  };
+
+  /** Opens the page setup window. */
+  private Action _pageSetupAction = new AbstractAction("Page Setup") {
+    public void actionPerformed(ActionEvent ae) {
+      _pageSetup();
+    }
+  };
+
   /**
    * Asks the user for a file name and saves the document
    * currently in the definitions pane to that file.
@@ -193,10 +214,10 @@ public class MainFrame extends JFrame {
       _compile();
     }
   };
-  
+
   /** Default cut action. */
   private Action _cutAction = new DefaultEditorKit.CutAction();
-  
+
   /** Default copy action. */
   private Action _copyAction = new DefaultEditorKit.CopyAction();
 
@@ -478,6 +499,35 @@ public class MainFrame extends JFrame {
     _model.closeFile(_model.getActiveDocument());
   }
 
+  private void _print() {
+    try {
+      _model.getActiveDocument().print();
+    } catch (PrinterException e) {
+      _showError(e, "Print Error", "An error occured while printing.");
+    } catch (BadLocationException e) {
+      _showError(e, "Print Error", "An error occured while printing.");
+    }
+  }
+
+  /**
+   * Opens a new PrintPreview frame.
+   */
+  private void _printPreview() {
+    try {
+      _model.getActiveDocument().preparePrintJob();
+      new PreviewFrame(_model, this);
+    } catch (BadLocationException e) {
+      _showError(e, "Print Error", "An error occured while preparing the print preview.");
+    } catch (IllegalStateException e) {
+      _showError(e, "Print Error", "An error occured while preparing the print preview.");
+    }
+  }
+
+  private void _pageSetup() {
+    PrinterJob job = PrinterJob.getPrinterJob();
+    _model.setPageFormat(job.pageDialog(_model.getPageFormat()));
+  }
+
   private void _closeAll() {
     _model.closeAllFiles();
   }
@@ -510,7 +560,7 @@ public class MainFrame extends JFrame {
       _showIOError(ioe);
     }
   }
-    
+
   private void _compile() {
     try {
       _model.getActiveDocument().startCompile();
@@ -521,9 +571,14 @@ public class MainFrame extends JFrame {
   }
 
   private void _showIOError(IOException ioe) {
+    _showError(ioe, "Input/output error",
+               "An I/O exception occurred during the last operation.");
+  }
+
+  private void _showError(Exception e, String title, String message) {
     JOptionPane.showMessageDialog(this,
-                                  "An I/O exception occurred during the last operation.\n" + ioe,
-                                  "Input/output error",
+                                  message + "\n" + e,
+                                  title,
                                   JOptionPane.ERROR_MESSAGE);
   }
 
@@ -606,7 +661,7 @@ public class MainFrame extends JFrame {
       pane.removeCaretListener(pane.getErrorCaretListener());
     }
   }
-  
+
   /**
    * Initializes all action objects.
    * Adds icons and descriptions to several of the actions.
@@ -618,9 +673,15 @@ public class MainFrame extends JFrame {
     _setUpAction(_openAction, "Open", "Open");
     _setUpAction(_saveAction, "Save", "Save the current document");
     _setUpAction(_saveAsAction, "SaveAs", "Save the current document with a new name");
+    _setUpAction(_closeAction, "Close", "Close");
+    _setUpAction(_closeAllAction, "CloseAll", "Close all");
     _setUpAction(_saveAllAction, "SaveAll", "Save all open documents");
+
     _setUpAction(_compileAction, "Play", "Compile the current document");
-    
+    _setUpAction(_printAction, "Print", "Print");
+    _setUpAction(_pageSetupAction, "PageSetup", "Page Setup");
+    _setUpAction(_printPreviewAction, "PrintPreview", "Print Preview");
+
     _setUpAction(_cutAction, "Cut", "Cut selected text to the clipboard");
     _setUpAction(_copyAction, "Copy", "Copy selected text to the clipboard");
     _setUpAction(_pasteAction, "Paste", "Paste text from the clipboard");
@@ -628,10 +689,10 @@ public class MainFrame extends JFrame {
     _cutAction.putValue(Action.NAME, "Cut");
     _copyAction.putValue(Action.NAME, "Copy");
     _pasteAction.putValue(Action.NAME, "Paste");
-    
+
     _setUpAction(_switchToPrevAction, "Back", "Previous Document");
     _setUpAction(_switchToNextAction, "Forward", "Next Document");
-    
+
     _setUpAction(_findReplaceAction, "Find", "Find/Replace");
     _setUpAction(_aboutAction, "About", "About");
 
@@ -722,6 +783,14 @@ public class MainFrame extends JFrame {
     _abortInteractionMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
 
     fileMenu.addSeparator();
+
+    fileMenu.add(_pageSetupAction);
+    fileMenu.add(_printPreviewAction);
+    tmpItem = fileMenu.add(_printAction);
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
+                                                  ActionEvent.CTRL_MASK));
+    fileMenu.addSeparator();
+
     tmpItem = fileMenu.add(_quitAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,
                                                   ActionEvent.CTRL_MASK));
@@ -815,18 +884,24 @@ public class MainFrame extends JFrame {
    */
   private void _setUpToolBar() {
     _toolBar = new JToolBar();
+
     _toolBar.setFloatable(false);
-    
+
     _toolBar.addSeparator();
-    
+
     // New, open, save (disabled)
     _toolBar.add(_newAction);
     _toolBar.add(_openAction);
     _saveButton = _toolBar.add(_saveAction);
     _toolBar.add(_saveAllAction);
+    _toolBar.add(_closeAction);
     _toolBar.addSeparator();
-    
-    // Undo, redo
+
+    _toolBar.add(_printPreviewAction);
+    _toolBar.add(_printAction);
+    _toolBar.addSeparator();
+
+
     // Simple workaround, for now, for bug # 520742:
     // Undo/Redo button text in JDK 1.3
     // We just manually create the JButtons, and we *don't* set up
@@ -836,36 +911,36 @@ public class MainFrame extends JFrame {
 
     _toolBar.add(_createManualToolbarButton(_undoAction));
     _toolBar.add(_createManualToolbarButton(_redoAction));
-    
     _toolBar.addSeparator();
-    
+
     // Cut, copy, paste
     _toolBar.add(_cutAction);
     _toolBar.add(_copyAction);
     _toolBar.add(_pasteAction);
-    
+
     _toolBar.addSeparator();
-    
+
     // Find
     _toolBar.add(_findReplaceAction);
-    
+
     _toolBar.addSeparator();
-    
+
+
     // Prev, next
     _toolBar.add(_switchToPrevAction);
     _toolBar.add(_switchToNextAction);
-    
+
     _toolBar.addSeparator();
-    
+
     // Compile (disabled)
     _compileButton = _toolBar.add(_compileAction);
-    
+
     _toolBar.add(_resetInteractionsAction);
     _toolBar.add(_abortInteractionAction);
 
     getContentPane().add(_toolBar, BorderLayout.NORTH);
   }
-  
+
   /**
    * Sets up the status bar with the filename field.
    */
@@ -883,8 +958,8 @@ public class MainFrame extends JFrame {
     _tabbedPane = new JTabbedPane();
     _tabbedPane.add("Interactions", new BorderlessScrollPane(_interactionsPane));
     _tabbedPane.add("Compiler output", _errorPanel);
-    _tabbedPane.add("Console", new BorderlessScrollPane(_outputPane));
-    
+    _tabbedPane.add("Console", new JScrollPane(_outputPane));
+
     // Select interactions pane when interactions tab is selected
     _tabbedPane.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
@@ -926,7 +1001,7 @@ public class MainFrame extends JFrame {
    */
   private JScrollPane _createDefScrollPane(OpenDefinitionsDocument doc) {
     DefinitionsPane pane = new DefinitionsPane(this, _model, doc);
-    
+
     // Add listeners
     _installNewDocumentListener(doc.getDocument());
     CompilerErrorCaretListener caretListener =
@@ -949,7 +1024,7 @@ public class MainFrame extends JFrame {
       new BorderlessScrollPane(_docList,
           JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
           JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    
+
     // DefinitionsPane
     JScrollPane defScroll = (JScrollPane)
       _defScrollPanes.get(_model.getActiveDocument());
@@ -1107,7 +1182,7 @@ public class MainFrame extends JFrame {
 
     public void interactionsExited(int status) {
       String msg = "The interactions window was terminated by a call " +
-                   "to System.exit(" + status + ").\n" + 
+                   "to System.exit(" + status + ").\n" +
                    "The interactions window will now be restarted.";
 
       String title = "Interactions terminated by System.exit(" + status + ")";

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -40,6 +40,8 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import java.io.*;
+import java.awt.print.*;
+import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.util.swing.FindReplaceMachine;
 import edu.rice.cs.drjava.model.definitions.*;
@@ -197,5 +199,16 @@ public interface OpenDefinitionsDocument {
    *                                 location of the source file.
    */
   public File getSourceRoot() throws InvalidPackageException;
+
+  /**
+   *
+   */
+  public void preparePrintJob() throws BadLocationException;
+
+  public void print() throws PrinterException, BadLocationException;
+
+  public Pageable getPageable() throws IllegalStateException;
+
+  public void cleanUpPrintJob();
 
 }
