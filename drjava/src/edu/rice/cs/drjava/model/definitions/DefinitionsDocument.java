@@ -217,7 +217,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //      _undoManager = undoManager;
 //  }
 
-  
+  /**
+   * Returns a new indenter.
+   */
+  protected Indenter makeNewIndenter(int indentLevel) {
+    return new Indenter(indentLevel);
+  }
   
   /**
    * Private common helper for constructors.

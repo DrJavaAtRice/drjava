@@ -149,7 +149,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   
   protected AbstractDJDocument() {
     int ind = DrJava.getConfig().getSetting(INDENT_LEVEL).intValue();
-    _indenter = new Indenter(ind);
+    _indenter = makeNewIndenter(ind); //new Indenter(ind);
     _initNewIndenter();
   }
   
@@ -165,6 +165,10 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   
   //-------- METHODS ---------
   
+  /**
+   * Returns a new indenter.
+   */
+  protected abstract Indenter makeNewIndenter(int indentLevel);
   
   /**
    * Get the indent level.

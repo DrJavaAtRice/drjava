@@ -198,13 +198,12 @@ public class InteractionsController extends AbstractConsoleController {
       _pane.resetPrompts();
     }
     
-    public void interpreterReady() {}  
+    public void interpreterReady() {
+    }  
     public void interpreterResetFailed(Throwable t) {}  
     public void interpreterExited(int status) {}  
     public void interpreterChanged(boolean inProgress) {}
     public void interactionIncomplete() {
-//      moveToEnd();
-//      _pane.indent();
     }
   };
 
@@ -417,7 +416,13 @@ public class InteractionsController extends AbstractConsoleController {
     public void actionPerformed(ActionEvent e) {
       SwingWorker worker = new SwingWorker() {
         public Object construct() {
-          _model.interpretCurrentInteraction();
+          if(! _adapter.isInCommentBlock()) { //Eventually check if it's in a block statement as well?
+            _model.interpretCurrentInteraction(); 
+          }
+          else {
+            _model.addNewLine();
+            _model.interactionContinues();
+          }
           return null;
         }
       };

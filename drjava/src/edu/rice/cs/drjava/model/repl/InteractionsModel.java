@@ -180,6 +180,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     return _document;
   }
 
+  public void interactionContinues() {
+    _document.setInProgress(false);
+    _notifyInteractionEnded();
+    _notifyInteractionIncomplete();
+  }
+  
   /**
    * Sets this model's notion of whether it is waiting for the first
    * interpreter to connect.  The interactionsReady event is not fired
@@ -215,10 +221,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * notifies the view.
    */
   private void _prepareToInterpret(String text) {
-    _docAppend(_newLine, InteractionsDocument.DEFAULT_STYLE);
+    addNewLine();
     _notifyInteractionStarted();
     _document.setInProgress(true);
     _document.addToHistory(text);
+  }
+  
+  public void addNewLine() {
+    _docAppend(_newLine, InteractionsDocument.DEFAULT_STYLE);
   }
 
   /**
@@ -661,9 +671,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
                                  String shortMessage) {
     if (shortMessage!=null) {
       if (shortMessage.endsWith("<EOF>\"")) {
-        _document.setInProgress(false);
-        _notifyInteractionEnded();
-        _notifyInteractionIncomplete();
+        interactionContinues();
         return;
       }
     }
@@ -693,9 +701,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
                                       int endCol ) {
     if (errorMessage!=null) {
       if (errorMessage.endsWith("<EOF>\"")) {
-        _document.setInProgress(false);
-        _notifyInteractionEnded();
-        _notifyInteractionIncomplete();
+        interactionContinues();
         return;
       }
     }

@@ -86,6 +86,9 @@ public abstract class IndentRulesTestCase extends TestCase {
       protected void _styleChanged() {
        //Do nothing 
       }
+      protected Indenter makeNewIndenter(int indentLevel) {
+        return new Indenter(indentLevel);
+      }
     };
   }
   

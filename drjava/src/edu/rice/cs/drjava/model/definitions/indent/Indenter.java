@@ -81,7 +81,7 @@ public class Indenter {
   /**
    * Root of decision tree.
    */
-  private IndentRule _topRule;
+  protected IndentRule _topRule;
 
   /**
    * Builds the decision tree for indentation.

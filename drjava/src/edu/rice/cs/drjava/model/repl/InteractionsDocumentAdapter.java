@@ -48,6 +48,8 @@ package edu.rice.cs.drjava.model.repl;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
+import edu.rice.cs.drjava.model.definitions.indent.Indenter;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.Pair;
 
 import java.awt.*;
@@ -100,6 +102,14 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
   }
   protected void _styleChanged() {
     //Do nothing 
+  }
+  
+  /**
+   * Returns a new indenter.
+   * Eventually to be used to return an interactions indenter
+   */
+  protected Indenter makeNewIndenter(int indentLevel) {
+    return new Indenter(indentLevel);
   }
   
   //A list of styles and their locations
@@ -210,6 +220,19 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
     //_stylesList.clear();
     _toClear = true;
   }
+  
+  
+  /**
+   * Returns true iff the end of the current interaction is an open comment block
+   * @return true iff the end of the current interaction is an open comment block
+   */
+  public boolean isInCommentBlock() {
+    resetReducedModelLocation();
+    ReducedModelState state = stateAtRelLocation(getLength()-_currentLocation);
+    boolean toReturn = (state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT));
+    return toReturn;
+  }
+  
   
   public InteractionsDocumentAdapter() {
     synchronized(_lock) {

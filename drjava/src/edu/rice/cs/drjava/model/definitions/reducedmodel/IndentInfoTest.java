@@ -48,6 +48,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 import  junit.framework.*;
 import  javax.swing.text.*;
 import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 //import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
@@ -83,6 +84,9 @@ public final class IndentInfoTest extends TestCase {
       }
       protected void _styleChanged() {
        //Do nothing 
+      }
+      protected Indenter makeNewIndenter(int indentLevel) {
+        return new Indenter(indentLevel);
       }
     };
   }
