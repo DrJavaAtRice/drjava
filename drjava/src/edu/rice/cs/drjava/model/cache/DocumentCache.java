@@ -60,13 +60,13 @@ import edu.rice.cs.util.UnexpectedException;
 
 public class DocumentCache{
   
-  Hashtable<OpenDefinitionsDocument,Pair<DefinitionsDocument,DDReconstructor>> table;
+  private final Hashtable<OpenDefinitionsDocument,Pair<DefinitionsDocument,DDReconstructor>> table;
   
   /**
    * most recent are first
    * least recent are last
    */
-  LinkedList<OpenDefinitionsDocument> lru;
+  private final LinkedList<OpenDefinitionsDocument> lru;
   
   private int CACHE_SIZE = 24;
   
@@ -114,7 +114,7 @@ public class DocumentCache{
         pair = new Pair<DefinitionsDocument,DDReconstructor>(retdoc, pair.getSecond());
         table.remove(odd);
         table.put(odd, pair);
-      }catch(BadLocationException e){
+      } catch(BadLocationException e){
         throw new UnexpectedException(e);
       }
     }
@@ -157,33 +157,34 @@ public class DocumentCache{
    */
   private void updatelru(OpenDefinitionsDocument odd, Pair<DefinitionsDocument,DDReconstructor> pair){
     synchronized(lru) {
-      if(!lru.isEmpty() && lru.getFirst() == odd){
+      if (!lru.isEmpty() && lru.getFirst() == odd) {
         //System.out.println("updatelru: " + odd + " is first in list");
         return;
       }
       lru.remove(odd);
     }
-    
-    if(!(isDDocInCache(odd) && pair.getFirst().isModifiedSinceSave())){
-//      System.out.println("adding " + odd + " to lru");
+     
+
+    if (!(isDDocInCache(odd) && pair.getFirst().isModifiedSinceSave())) {
+      //      System.out.println("adding " + odd + " to lru");
       synchronized(lru) {
         lru.addFirst(odd);
       }
     }
-
+    
     //System.out.println("Cache size is : " + lru.size());
-    if(lru.size() > CACHE_SIZE){
-      synchronized(lru) {
+    synchronized(lru) {
+      if (lru.size() > CACHE_SIZE) {
         odd = lru.removeLast();
-      }
-      Pair<DefinitionsDocument,DDReconstructor> removedPair = table.get(odd);
-//      System.out.println("should i dispose of " + odd + "?");
-     
-      if(isDDocInCache(odd) && removedPair.getFirst().isModifiedSinceSave()){
-//        System.out.println("no");
-      } else {
-//        System.out.println("disposing of " + odd);
+        Pair<DefinitionsDocument,DDReconstructor> removedPair = table.get(odd);
+        //      System.out.println("should i dispose of " + odd + "?");
+        
+        if(isDDocInCache(odd) && removedPair.getFirst().isModifiedSinceSave()){
+          //        System.out.println("no");
+        } else {
+          //        System.out.println("disposing of " + odd);
           update(odd, removedPair.getSecond());
+        }
       }
     }
   }
