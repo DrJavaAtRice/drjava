@@ -229,6 +229,12 @@ public interface OptionConstants {
     new KeyStrokeOption("key.new.file",
                         KeyStroke.getKeyStroke(KeyEvent.VK_N, mask));
   /**
+   * The key binding for creating a new JUnit test case
+   */
+  public static final KeyStrokeOption KEY_NEW_TEST =
+    new KeyStrokeOption("key.new.test",
+                        KeyStrokeOption.NULL_KEYSTROKE);
+  /**
    * The key binding for opening a file
    */
   public static final KeyStrokeOption KEY_OPEN_FILE =
@@ -248,11 +254,37 @@ public interface OptionConstants {
                         KeyStroke.getKeyStroke(KeyEvent.VK_S, mask |
                                                InputEvent.SHIFT_MASK));
   /**
+   * The key binding for saving all files
+   */
+  public static final KeyStrokeOption KEY_SAVE_ALL_FILES =
+    new KeyStrokeOption("key.save.all.files",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_S, mask |
+                                               InputEvent.ALT_MASK));
+  /**
+   * The key binding for reverting a file
+   */
+  public static final KeyStrokeOption KEY_REVERT_FILE =
+    new KeyStrokeOption("key.revert.file",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_R, mask));
+  /**
    * The key binding for closing a file
    */
   public static final KeyStrokeOption KEY_CLOSE_FILE =
     new KeyStrokeOption("key.close.file",
                         KeyStroke.getKeyStroke(KeyEvent.VK_W, mask));
+  /**
+   * The key binding for closing all files
+   */
+  public static final KeyStrokeOption KEY_CLOSE_ALL_FILES =
+    new KeyStrokeOption("key.close.all.files",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_W, mask |
+                                               InputEvent.ALT_MASK));
+  /**
+   * The key binding for showing the print preview
+   */
+  public static final KeyStrokeOption KEY_PAGE_SETUP =
+    new KeyStrokeOption("key.page.setup",
+                        KeyStrokeOption.NULL_KEYSTROKE);
   /**
    * The key binding for showing the print preview
    */
@@ -399,13 +431,6 @@ public interface OptionConstants {
                         KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
   
   /**
-   * The key binding for testing the current document
-   */
-  public static final KeyStrokeOption KEY_TEST =
-    new KeyStrokeOption("key.test",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_T, mask));
-  
-  /**
    * The key binding for openning the preferences dialog
    */
   public static final KeyStrokeOption KEY_RUN =
@@ -413,13 +438,76 @@ public interface OptionConstants {
                         KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0));
   
   /**
-   * The key binding for aborting the current interaction.
-   * (replaced by Reset Interactions, with no shortcut.)
-   *
-  public static final KeyStrokeOption KEY_ABORT_INTERACTION =
-    new KeyStrokeOption("key.abort.interaction",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
-                        */
+   * The key binding for testing the current document
+   */
+  public static final KeyStrokeOption KEY_TEST =
+    new KeyStrokeOption("key.test",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_T, mask));
+  
+  /**
+   * The key binding for generating javadoc for all documents
+   */
+  public static final KeyStrokeOption KEY_JAVADOC_ALL =
+    new KeyStrokeOption("key.javadoc.all",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_J, mask));
+  
+  /**
+   * The key binding for generating javadoc for the current document
+   */
+  public static final KeyStrokeOption KEY_JAVADOC_CURRENT =
+    new KeyStrokeOption("key.javadoc.current",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_J,
+                                               mask | InputEvent.SHIFT_MASK));
+  
+  /**
+   * The key binding for loading an interactions history.
+   */
+  public static final KeyStrokeOption KEY_LOAD_HISTORY =
+    new KeyStrokeOption("key.load.history",
+                        KeyStrokeOption.NULL_KEYSTROKE);
+  
+  /**
+   * The key binding for saving an interactions history.
+   */
+  public static final KeyStrokeOption KEY_SAVE_HISTORY =
+    new KeyStrokeOption("key.save.history",
+                        KeyStrokeOption.NULL_KEYSTROKE);
+  
+  /**
+   * The key binding for clearing the interactions history.
+   */
+  public static final KeyStrokeOption KEY_CLEAR_HISTORY =
+    new KeyStrokeOption("key.clear.history",
+                        KeyStrokeOption.NULL_KEYSTROKE);
+  
+  /**
+   * The key binding for resetting the interactions pane.
+   */
+  public static final KeyStrokeOption KEY_RESET_INTERACTIONS =
+    new KeyStrokeOption("key.reset.interactions",
+                        KeyStrokeOption.NULL_KEYSTROKE);
+  
+  /**
+   * The key binding for viewing the interactions classpath.
+   */
+  public static final KeyStrokeOption KEY_VIEW_INTERACTIONS_CLASSPATH =
+    new KeyStrokeOption("key.view.interactions.classpath",
+                        KeyStrokeOption.NULL_KEYSTROKE);
+  
+  /**
+   * The key binding for lifting the current interaction to definitions.
+   */
+  public static final KeyStrokeOption KEY_LIFT_CURRENT_INTERACTION =
+    new KeyStrokeOption("key.lift.current.interaction",
+                        KeyStrokeOption.NULL_KEYSTROKE);
+  
+  /**
+   * The key binding for clearing the console.
+   */
+  public static final KeyStrokeOption KEY_CLEAR_CONSOLE =
+    new KeyStrokeOption("key.clear.console",
+                        KeyStrokeOption.NULL_KEYSTROKE);
+                        
   /**
    * The key binding for moving the cursor backwards
    */
@@ -584,6 +672,27 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_DEBUG_BREAKPOINT_TOGGLE =
     new KeyStrokeOption("key.debug.breakpoint.toggle",
                         KeyStroke.getKeyStroke(KeyEvent.VK_B, mask));
+  
+  /**
+   * The key binding for clearing all breakpoints
+   */
+  public static final KeyStrokeOption KEY_DEBUG_CLEAR_ALL_BREAKPOINTS =
+    new KeyStrokeOption("key.debug.clear.all.breakpoints",
+                        KeyStrokeOption.NULL_KEYSTROKE);
+  
+  /**
+   * The key binding for help
+   */
+  public static final KeyStrokeOption KEY_HELP =
+    new KeyStrokeOption("key.help",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
+  
+  /**
+   * The key binding for the about dialog
+   */
+  public static final KeyStrokeOption KEY_ABOUT =
+    new KeyStrokeOption("key.about",
+                        KeyStrokeOption.NULL_KEYSTROKE);
     
     
   /* ---------- Debugger Options ---------- */

@@ -45,6 +45,7 @@ import java.io.File;
 import java.util.List;
 
 import edu.rice.cs.util.ArgumentTokenizer;
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -133,23 +134,37 @@ class DefaultPlatform implements PlatformSupport {
     // Get the two config options.
     Configuration config = DrJava.getConfig();
     File exe = config.getSetting(OptionConstants.BROWSER_FILE);
-    String args = config.getSetting(OptionConstants.BROWSER_STRING);
+    String command = config.getSetting(OptionConstants.BROWSER_STRING);
     
     // Check for empty settings.
-    if ((exe == FileOption.NULL_FILE) && (args.equals(""))) {
+    if ((exe == FileOption.NULL_FILE) && (command.equals(""))) {
       // If the user hasn't specified anything, don't try to run it.
       return false;
     }
     else {
+      String addr = address.toString();
+      if (command.equals("")) {
+        // If there is no command, simply use the URL.
+        command = addr;
+      }
+      else {
+        // Otherwise, replace any <URL> tags in the command with the address.
+        String tag = "<URL>";
+        command = StringOps.replace(command, tag, addr);
+      }
+      
       // Build a string array of command and arguments.
-      List<String> command = ArgumentTokenizer.tokenize(args);
-      command.add(0, exe.getAbsolutePath());
-      command.add(address.toString());
+      List<String> args = ArgumentTokenizer.tokenize(command);
+      
+      // Prepend the file only if it exists.
+      if (exe != FileOption.NULL_FILE) {
+        args.add(0, exe.getAbsolutePath());
+      }
       
       // Call the command.
       try {
         // Process proc = 
-        Runtime.getRuntime().exec(command.toArray(new String[command.size()]));
+        Runtime.getRuntime().exec(args.toArray(new String[args.size()]));
         
         // TODO: This may cause a memory leak on Windows, if we don't check the exit code.
       }

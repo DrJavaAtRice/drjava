@@ -197,7 +197,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenuItem _suspendDebugMenuItem;
   private JMenuItem _toggleBreakpointMenuItem;
   private JMenuItem _printBreakpointsMenuItem;
-  private JMenuItem _clearAllBreakpointsMenuItem;
+  //private JMenuItem _clearAllBreakpointsMenuItem;
 
   // Popup menus
   private JPopupMenu _docPanePopupMenu;
@@ -2406,7 +2406,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // New, open
     _addMenuItem(fileMenu, _newAction, KEY_NEW_FILE);
     if (CodeStatus.DEVELOPMENT) {
-      fileMenu.add(_newJUnitTestAction);
+      _addMenuItem(fileMenu, _newJUnitTestAction, KEY_NEW_TEST);
     }
     _addMenuItem(fileMenu, _openAction, KEY_OPEN_FILE);
     fileMenu.addSeparator();
@@ -2414,20 +2414,20 @@ public class MainFrame extends JFrame implements OptionConstants {
     _addMenuItem(fileMenu, _saveAction, KEY_SAVE_FILE);
     _saveAction.setEnabled(false);
     _addMenuItem(fileMenu, _saveAsAction, KEY_SAVE_FILE_AS);
-    fileMenu.add(_saveAllAction);
+    _addMenuItem(fileMenu, _saveAllAction, KEY_SAVE_ALL_FILES);
 
-    fileMenu.add(_revertAction);
+    _addMenuItem(fileMenu, _revertAction, KEY_REVERT_FILE);
     _revertAction.setEnabled(false);
     //tmpItem = fileMenu.add(_revertAllAction);
 
     // Close, Close all
     fileMenu.addSeparator();
     _addMenuItem(fileMenu, _closeAction, KEY_CLOSE_FILE);
-    fileMenu.add(_closeAllAction);
+    _addMenuItem(fileMenu, _closeAllAction, KEY_CLOSE_ALL_FILES);
 
     // Page setup, print preview, print
     fileMenu.addSeparator();
-    fileMenu.add(_pageSetupAction);
+    _addMenuItem(fileMenu, _pageSetupAction, KEY_PAGE_SETUP);
     _addMenuItem(fileMenu, _printPreviewAction, KEY_PRINT_PREVIEW);
     _addMenuItem(fileMenu, _printAction, KEY_PRINT);
     
@@ -2497,13 +2497,13 @@ public class MainFrame extends JFrame implements OptionConstants {
       _addMenuItem(toolsMenu, _runAction, KEY_RUN);
     }
     _addMenuItem(toolsMenu, _junitAction, KEY_TEST);
-    toolsMenu.add(_javadocAllAction);
-    toolsMenu.add(_javadocCurrentAction);
+    _addMenuItem(toolsMenu, _javadocAllAction, KEY_JAVADOC_ALL);
+    _addMenuItem(toolsMenu, _javadocCurrentAction, KEY_JAVADOC_CURRENT);
     toolsMenu.addSeparator();
     
-    toolsMenu.add(_loadHistoryAction);
-    toolsMenu.add(_saveHistoryAction);
-    toolsMenu.add(_clearHistoryAction);
+    _addMenuItem(toolsMenu, _loadHistoryAction, KEY_LOAD_HISTORY);
+    _addMenuItem(toolsMenu, _saveHistoryAction, KEY_SAVE_HISTORY);
+    _addMenuItem(toolsMenu, _clearHistoryAction, KEY_CLEAR_HISTORY);
     toolsMenu.addSeparator();
 
     // Abort/reset interactions, clear console
@@ -2511,12 +2511,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     _abortInteractionAction.setEnabled(false);
     _addMenuItem(toolsMenu, _abortInteractionAction, KEY_ABORT_INTERACTION);
     */
-    toolsMenu.add(_resetInteractionsAction);
-    toolsMenu.add(_viewInteractionsClasspathAction);
-    toolsMenu.add(_copyInteractionToDefinitionsAction);
+    _addMenuItem(toolsMenu, _resetInteractionsAction, KEY_RESET_INTERACTIONS);
+    _addMenuItem(toolsMenu, _viewInteractionsClasspathAction, KEY_VIEW_INTERACTIONS_CLASSPATH);
+    _addMenuItem(toolsMenu, _copyInteractionToDefinitionsAction, KEY_LIFT_CURRENT_INTERACTION);
     toolsMenu.addSeparator();
 
-    toolsMenu.add(_clearConsoleAction);
+    _addMenuItem(toolsMenu, _clearConsoleAction, KEY_CLEAR_CONSOLE);
 
     // Add the menus to the menu bar
     return toolsMenu;
@@ -2538,7 +2538,8 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     _addMenuItem(debugMenu, _toggleBreakpointAction, KEY_DEBUG_BREAKPOINT_TOGGLE);
     //_printBreakpointsMenuItem = debugMenu.add(_printBreakpointsAction);
-    _clearAllBreakpointsMenuItem = debugMenu.add(_clearAllBreakpointsAction);
+    //_clearAllBreakpointsMenuItem = 
+    _addMenuItem(debugMenu, _clearAllBreakpointsAction, KEY_DEBUG_CLEAR_ALL_BREAKPOINTS);
     debugMenu.addSeparator();
     
     //_addMenuItem(debugMenu, _suspendDebugAction, KEY_DEBUG_SUSPEND);
@@ -2593,8 +2594,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenu _setUpHelpMenu(int mask) {
     JMenu helpMenu = new JMenu("Help");
     helpMenu.setMnemonic(KeyEvent.VK_H);
-    helpMenu.add(_helpAction);
-    helpMenu.add(_aboutAction);
+    _addMenuItem(helpMenu, _helpAction, KEY_HELP);
+    _addMenuItem(helpMenu, _aboutAction, KEY_ABOUT);
     return helpMenu;
   }
 
@@ -3918,8 +3919,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          // Now done in _javadocAll
-//          MainFrame.this.hourglassOn();
+          // if we don't lock edits, our error highlighting might break
+          MainFrame.this.hourglassOn();
+          
           showTab(_javadocErrorPanel);
           _javadocErrorPanel.setJavadocInProgress();
           _javadocAllAction.setEnabled(false);
@@ -3933,8 +3935,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          // Now done in _javadocAll
-//          MainFrame.this.hourglassOff();
+          MainFrame.this.hourglassOff();
+
           showTab(_javadocErrorPanel);
           _javadocAllAction.setEnabled(true);
           _javadocCurrentAction.setEnabled(true);
@@ -3969,10 +3971,8 @@ public class MainFrame extends JFrame implements OptionConstants {
               // JavadocFrame couldn't find any output files!
               // Display a message.
               String msg = 
-                "Javadoc completed successfully, but\n" +
-                "did not produce any HTML files.\n" +
-                "Please ensure that your access level\n" +
-                "in Preferences is appropriate.\n";
+                "Javadoc completed successfully, but did not produce any HTML files.\n" +
+                "Please ensure that your access level in Preferences is appropriate.";
               JOptionPane.showMessageDialog(MainFrame.this, msg,
                                             "No output to display.",
                                             JOptionPane.INFORMATION_MESSAGE);

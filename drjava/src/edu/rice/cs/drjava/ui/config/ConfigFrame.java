@@ -82,6 +82,7 @@ public class ConfigFrame extends JFrame {
   private JButton _saveSettingsButton;
   private JPanel _mainPanel;
   private JFileChooser _fileOptionChooser;
+  private JFileChooser _browserChooser;
   
   /**
    * Sets up the frame and displays it.
@@ -97,6 +98,11 @@ public class ConfigFrame extends JFrame {
     _fileOptionChooser.setApproveButtonText("Select");
     _fileOptionChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     _fileOptionChooser.setFileFilter(ClasspathFilter.ONLY);
+    
+    _browserChooser = new JFileChooser(workDir);
+    _browserChooser.setDialogTitle("Select Web Browser");
+    _browserChooser.setApproveButtonText("Select");
+    _browserChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     
     _createTree();
     _createPanels();
@@ -429,6 +435,25 @@ public class ConfigFrame extends JFrame {
                                                  "Extra Classpath", this,
                                                  "<html>Any directories or jar files to add to the classpath<br>"+
                                                  "of the Compiler and Interactions Pane.</html>"));
+    
+    
+    FileOptionComponent browserLoc =
+      new FileOptionComponent(OptionConstants.BROWSER_FILE,
+                              "Web Browser Location", this,
+                              "<html>Location of a web browser to use for Javadoc and Help links.<br>" +
+                              "If left blank, only the Web Browser Command will be used.<br>" +
+                              "This is not necessary if a default is available on your system.",
+                              _browserChooser);
+    panel.addComponent(browserLoc);
+    
+    StringOptionComponent browserCommand =
+      new StringOptionComponent(OptionConstants.BROWSER_STRING,
+                              "Web Browser Command", this,
+                              "<html>Command to send to the web browser to view a web location.<br>" +
+                              "The string &lt;URL&gt; will be replaced with the URL address.<br>" +
+                              "This is not necessary if a default is available on your system.");
+    panel.addComponent(browserCommand);
+    
     panel.displayComponents();
   }
   
