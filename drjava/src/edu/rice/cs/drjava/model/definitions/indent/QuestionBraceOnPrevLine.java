@@ -40,32 +40,72 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
- * A node in the decision tree used for the indentation system.
+ * Determines whether or not the last opened block or expression 
+ * list containing the start of the current line (opened by one of 
+ * the characters '{', '(', or '[') was opened on the previous line 
+ * (relative to the current position in the document). 
+ * This question corresponds to rule 16 in our decision tree.
  * @version $Id$
  */
-public interface IndentRule {
-
+public class QuestionBraceOnPrevLine extends IndentRuleQuestion 
+{
   /**
-   * Properly indents the line that the given position is on.
-   * Replaces all whitespace characters at the beginning of the
-   * line with the appropriate spacing or characters.
-   * @param doc DefinitionsDocument containing the line to be indented.
-   * @param reducedModel reduced model used by the document.
-   * @param pos Position in the document within line to indent.
-   */
-  public void indentLine(DefinitionsDocument doc, 
-                         BraceReduction reducedModel, 
-                         int pos);
+  * @param yesRule The decision subtree for the case that this rule applies 
+  * in the current context.
+  * @param noRule The decision subtree for the case that this rule does not
+  * apply in the current context.
+  */
+  public QuestionBraceOnPrevLine(IndentRule yesRule, IndentRule noRule)
+  {
+    super(yesRule, noRule);
+  }
   
   /**
-   * Properly indents the line that the current position is on.
-   * Replaces all whitespace characters at the beginning of the
-   * line with the appropriate spacing or characters.
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param doc The DefinitionsDocument containing the current line.
    * @param reducedModel reduced model used by the document.
+   * @param pos The position in the document to set the caret to.
+   * @return True iff the last opened block or expression list containing 
+   * the start of the current line (opened by one of the characters '{', 
+   * '(', or '[') was opened on the previous line.
    */
-  public void indentLine(DefinitionsDocument doc, BraceReduction reducedModel);
+  boolean applyRule(DefinitionsDocument doc, BraceReduction reducedModel, int pos)
+  {
+    doc.setCurrentLocation(pos);
+    return applyRule(doc, reducedModel);
+  }
+  
+  /**
+   * @param doc The DefinitionsDocument containing the current line.
+   * @param reducedModel reduced model used by the document.
+   * @return True iff the last opened block or expression list containing 
+   * the start of the current line (opened by one of the characters '{', 
+   * '(', or '[') was opened on the previous line.
+   */
+  boolean applyRule(DefinitionsDocument doc, BraceReduction reducedModel)
+  {
+    // PRE: We are not inside a multiline comment.
+    // PRE: The most recently opened expression list or block
+    //      was opened by a '{'.
+    
+    throw new RuntimeException("Not yet implemented!");
+    
+    /*
+    * pos := START
+    * counter := 0
+    *
+    * while (pos > DOCSTART)   
+    *    if char[pos] = '{' 
+    *       return (counter = 1)     [if pos is not in // comment!!]
+    *  
+    *    else if char[pos] = '\n'
+    *       counter := counter + 1
+    *       pos := pos - 1
+    *
+    * return false
+    *
+    */
+  }
 }

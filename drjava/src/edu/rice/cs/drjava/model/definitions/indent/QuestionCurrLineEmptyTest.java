@@ -47,6 +47,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import junit.framework.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 // Rule #3: Is the current line empty?
 public class QuestionCurrLineEmptyTest extends IndentRulesTestCase {
@@ -57,7 +58,7 @@ public class QuestionCurrLineEmptyTest extends IndentRulesTestCase {
   // to use until we get the actual implementation
   static IndentRuleQuestion rule3 = new 
     IndentRuleQuestion(new ActionDoNothing(), new ActionDoNothing()) {
-    public boolean applyRule(DefinitionsDocument doc, int pos) {
+    public boolean applyRule(DefinitionsDocument doc, BraceReduction rm, int pos) {
       return false;
     }
   };

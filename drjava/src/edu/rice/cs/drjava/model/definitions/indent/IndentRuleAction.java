@@ -40,6 +40,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
 
 /**
  * A leaf node in the decision tree for the indentation system.
@@ -54,17 +55,21 @@ public abstract class IndentRuleAction implements IndentRule {
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
    * @param doc DefinitionsDocument containing the line to be indented.
+   * @param reducedModel reduced model used by the document.
    * @param pos Position within line to be indented.
    */
-  public abstract void indentLine(DefinitionsDocument doc, int pos);
+  public abstract void indentLine(DefinitionsDocument doc, 
+                                  BraceReduction reducedModel,
+                                  int pos);
   
    /**
    * Properly indents the line that the current position is on.
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
    * @param doc DefinitionsDocument containing the line to be indented.
+   * @param reducedModel reduced model used by the document.
    */
-  public void indentLine(DefinitionsDocument doc) {
-    indentLine(doc, doc.getCurrentLocation());
+  public void indentLine(DefinitionsDocument doc, BraceReduction reducedModel) {
+    indentLine(doc, reducedModel, doc.getCurrentLocation());
   }
 }

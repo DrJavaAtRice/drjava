@@ -146,4 +146,10 @@ public interface BraceReduction {
    *@param relLocation distance from walker to get state at.
    */
   public ReducedModelState stateAtRelLocation(int relLocation);
+  
+  /**
+   * Resets the location of the walker in the comment list to where the 
+   * current cursor is.
+   */  
+  public void resetLocation();
 }

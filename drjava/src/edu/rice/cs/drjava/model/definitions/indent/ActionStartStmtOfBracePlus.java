@@ -40,6 +40,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
  * Indents the current line in the document to the indent level of the
@@ -64,9 +65,13 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
    * @param doc DefinitionsDocument containing the line to be indented.
+   * @param reducedModel reduced model used by the document.
    * @param pos Position within line to be indented.
    */
-  public void indentLine(DefinitionsDocument doc, int pos) {
+  public void indentLine(DefinitionsDocument doc, 
+                         BraceReduction reducedModel, 
+                         int pos)
+  {
     throw new RuntimeException("Not yet implemented.");
     
     /**

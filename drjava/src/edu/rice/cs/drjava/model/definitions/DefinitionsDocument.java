@@ -51,6 +51,8 @@ import java.io.File;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
 
+import edu.rice.cs.drjava.model.definitions.indent.Indenter;
+
 /**
  * The model for the definitions pane.
  *
@@ -73,7 +75,7 @@ public class DefinitionsDocument extends PlainDocument {
   /** A set of Java keywords. */
   private static HashSet _keywords = _makeKeywords();
   /** The default indent setting. */
-  private static int _indent = 2;
+  private int _indent = 2;
   /** Determines if tabs are removed on open and converted to spaces. */
   private static boolean _tabsRemoved = true;
   /** Determines if the document has been modified since the last save. */
@@ -85,8 +87,13 @@ public class DefinitionsDocument extends PlainDocument {
   BraceReduction _reduced = new ReducedModelControl();
   /** The absolute character offset in the document. */
   int _currentLocation = 0;
-
+  
   private File _file;
+  
+  /**
+   * Constant for starting position of document.
+   */
+  private static final int DOCSTART = 0;
 
   /**
    * Constructor.
@@ -410,16 +417,77 @@ public class DefinitionsDocument extends PlainDocument {
     return count;
   }
   
-   
+  /**
+   * Get the indent level.
+   * @return the indent level
+   */
+  public int getIndent() {
+    return _indent;
+  }
 
   /**
    * Set the indent to a particular number of spaces.
    * @param indent the size of indent that you want for the document
    */
-  public void setIndent(int indent) {
+  public void setIndent(final int indent) {
     this._indent = indent;
   }
 
+  /**
+   * For new indent system, not yet implemented
+   *
+  public int findPrevDelimiter(int pos, char[] delims) {
+    // Not implemented...
+    return 0;
+  }*/
+  
+  /**
+   * Returns the absolute position of the beginning of the
+   * current line.  (Just after most recent newline.)
+   * @param pos Any position on the current line
+   */
+  public int getLineStartPos(int pos) {
+    int dist = _reduced.getDistToPreviousNewline(0);
+    return _currentLocation - dist;
+  }
+  
+  /**
+   * Returns the absolute position of the end of the current
+   * line.  (Just before the next newline.)
+   * @param pos Any position on the current line
+   */
+  public int getLineEndPos(int pos) throws BadLocationException {
+    int dist = _reduced.getDistToNextNewline();
+    return _currentLocation + dist;
+  }
+
+  /**
+   * Returns the absolute position of the first non-whitespace character
+   * on the current line.
+   * @param pos Any position on the current line
+   * @return position at the end of the line if no non-whitespace character is found.
+   */
+  public int getLineFirstCharPos(int pos) throws BadLocationException {
+    int startLinePos = getLineStartPos(pos);
+    int endLinePos = getLineEndPos(pos);
+    
+    // Get all text on this line
+    String text = this.getText(startLinePos, endLinePos - startLinePos);
+    int walker = 0;
+    while (walker < text.length()) {
+      if (text.charAt(walker) == ' ' || 
+          text.charAt(walker) == '\t') {
+            walker++;
+      }
+      else {
+        return startLinePos + walker;
+      }
+    }
+    // No non-WS char found, so return last position on line
+    return endLinePos;
+  }
+  
+  
   /**
    * Returns true iff tabs are to removed on text insertion.
    */
@@ -494,6 +562,13 @@ public class DefinitionsDocument extends PlainDocument {
     }
   }
 
+  /**
+   * Indents a line using the Indenter decision tree.
+   */
+  private void _indentLineNew() {
+    Indenter.ONLY.indent(this, _reduced);
+  }
+  
   /**
    * Indents a line in accordance with the rules that DrJava has set up.
    */
@@ -660,6 +735,30 @@ public class DefinitionsDocument extends PlainDocument {
     }
     else {
       remove(_currentLocation - distToPrevNewline, currentTab - tab);
+    }
+  }
+  
+  /**
+   * Sets the text between the previous newline and the first non-whitespace
+   * character of the line containing pos to tab.
+   * @param tab String to be placed between previous newline and first
+   * non-whitespace character
+   * @param pos Position on line to be indented
+   */
+  public void setTab(String tab, int pos) {
+    try {
+      int startPos = getLineStartPos(pos);
+      int firstNonWSPos = getLineFirstCharPos(pos);
+      
+      // Removes old prefix, then adds new one
+      // FIXME: If tab only contains spaces, then just adjust as necessary
+      //   for efficiency, rather than replacing the whole thing
+      remove(startPos, firstNonWSPos - startPos);
+      insertString(startPos, tab, null);
+    }
+    catch (BadLocationException e) {
+      // Should never see a bad location
+      throw new UnexpectedException(e);
     }
   }
 

@@ -1,3 +1,5 @@
+
+
 /*BEGIN_COPYRIGHT_BLOCK
  *
  * This file is a part of DrJava. Current versions of this project are available
@@ -43,29 +45,37 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
 
 /**
- * A node in the decision tree used for the indentation system.
+ * Aligns the indentation of the current line to the character
+ * that opened the most recent block or expression list that contains
+ * the beginning of the current line. Optional additional whitespaces 
+ * can be passed through the constructor.
  * @version $Id$
  */
-public interface IndentRule {
-
+public class ActionBracePlus extends IndentRuleAction 
+{
+  /** String holding the additional whitespaces to be inserted. */
+  private String _suffix;
+  
+  /** @param plus The additional whitespaces to be inserted. */
+  public ActionBracePlus(String suffix)
+  {
+    _suffix = suffix;
+  }
+  
   /**
-   * Properly indents the line that the given position is on.
-   * Replaces all whitespace characters at the beginning of the
+   * Properly indents the line that the caret is currently on. 
+   * Replaces all whitespace characters at the beginning of the 
    * line with the appropriate spacing or characters.
    * @param doc DefinitionsDocument containing the line to be indented.
    * @param reducedModel reduced model used by the document.
-   * @param pos Position in the document within line to indent.
+   * @param pos Position within line to be indented.
    */
   public void indentLine(DefinitionsDocument doc, 
                          BraceReduction reducedModel, 
-                         int pos);
-  
-  /**
-   * Properly indents the line that the current position is on.
-   * Replaces all whitespace characters at the beginning of the
-   * line with the appropriate spacing or characters.
-   * @param doc DefinitionsDocument containing the line to be indented.
-   * @param reducedModel reduced model used by the document.
-   */
-  public void indentLine(DefinitionsDocument doc, BraceReduction reducedModel);
+                         int pos)
+  {
+    // For testing only
+    doc.setTab("---", pos);
+  }
+
 }

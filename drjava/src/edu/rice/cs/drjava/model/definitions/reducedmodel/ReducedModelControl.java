@@ -139,7 +139,7 @@ public class ReducedModelControl implements BraceReduction {
   *using relative distance instead of having to rewalk the same distance
   *every call to stateAtRelLocation. It is an optimization.
   */
-  void resetLocation() {
+  public void resetLocation() {
     rmc.resetLocation();
   }
 

@@ -45,6 +45,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
  * Test the action rules for code in the indentation decision tree.

@@ -40,32 +40,71 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
- * A node in the decision tree used for the indentation system.
+ * Determines whether or not the last block or expression list 
+ * opened previous to the start of the current line was opened 
+ * by the character '{'. 
+ * This questions corresponds to rule 15 in our decision tree.
  * @version $Id$
  */
-public interface IndentRule {
-
+public class QuestionBraceIsCurly extends IndentRuleQuestion 
+{
   /**
-   * Properly indents the line that the given position is on.
-   * Replaces all whitespace characters at the beginning of the
-   * line with the appropriate spacing or characters.
-   * @param doc DefinitionsDocument containing the line to be indented.
-   * @param reducedModel reduced model used by the document.
-   * @param pos Position in the document within line to indent.
+   * @param yesRule The decision subtree for the case that this rule applies 
+   * in the current context.
+   * @param noRule The decision subtree for the case that this rule does not
+   * apply in the current context.
    */
-  public void indentLine(DefinitionsDocument doc, 
-                         BraceReduction reducedModel, 
-                         int pos);
+  public QuestionBraceIsCurly(IndentRule yesRule, IndentRule noRule)
+  {
+    super(yesRule, noRule);
+  }
   
   /**
-   * Properly indents the line that the current position is on.
-   * Replaces all whitespace characters at the beginning of the
-   * line with the appropriate spacing or characters.
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param doc The DefinitionsDocument containing the current line.
    * @param reducedModel reduced model used by the document.
+   * @param pos The position in the document to set the caret to.
+   * @return True iff the last block or expression list  opened previous 
+   * to the start of the current line was opened by the character '{'. 
    */
-  public void indentLine(DefinitionsDocument doc, BraceReduction reducedModel);
+  boolean applyRule(DefinitionsDocument doc, BraceReduction reducedModel, int pos)
+  {
+    doc.setCurrentLocation(pos);
+    return applyRule(doc, reducedModel);
+  } 
+  
+  /**
+   * @param doc The DefinitionsDocument containing the current line.
+   * @param reducedModel reduced model used by the document.
+   * @return True iff the last block or expression list  opened previous 
+   * to the start of the current line was opened by the character '{'. 
+   */
+  boolean applyRule(DefinitionsDocument doc, BraceReduction reducedModel)
+  {
+    // PRE: we are not inside a multiline comment
+    // PRE: the current block or expression list was *not* 
+    //      opened by '[' or '('.
+    
+    throw new RuntimeException("Not yet implemented!");
+    
+    /*
+    * pos := START
+    * 
+    * while (pos < DOCSTART)
+    *    if char[pos] = '{'
+    *       return TRUE
+    *  
+    *    else if char[pos] = '[' or char[pos] = '('
+    *       return false
+    *
+    *    else 
+    *       pos := pos - 1
+    *
+    * return FALSE
+    *
+    * [Note: ensure return char is not in // comment!!]
+    */ 
+  }
 }

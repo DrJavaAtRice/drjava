@@ -37,22 +37,30 @@
  *
 END_COPYRIGHT_BLOCK*/
 
+package edu.rice.cs.drjava.model.definitions.indent;
+
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+
 /**
  * @version $Id$
  * 
  * Asks whether the current line is empty (contains only whitespace).
  */
-package edu.rice.cs.drjava.model.definitions.indent;
-
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-
 class QuestionCurrLineEmpty extends IndentRuleQuestion {
+  
   QuestionCurrLineEmpty(IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
   }
-  //private IndentRule _yesRule = new ActionStartPrevLinePlus(" ");
-  //private IndentRule _noRule = new ActionDoNothing();
-  boolean applyRule(DefinitionsDocument doc, int pos) {
+
+  /**
+   * Determines if the current line in the document is empty.
+   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param reducedModel reduced model used by the document.
+   * @param pos Position within line to be indented.
+   * @return true if this node's rule holds.
+   */
+  boolean applyRule(DefinitionsDocument doc, BraceReduction reducedModel, int pos) {
     // one solution: if startOfLine somehow tells you when 
     //   there's no first WS char on this line
     //   (i.e. the line is empty), just use that.
@@ -61,6 +69,6 @@ class QuestionCurrLineEmpty extends IndentRuleQuestion {
     // END = go forward to find first \n or EOF
     // return true if there's only WS between START and END    
 
-    return true;
+    throw new RuntimeException("Not yet implemented!");
   }
 }

@@ -41,7 +41,13 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import junit.framework.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
+/**
+ * Indents the current line in the document to the indent level of the
+ * start of the previous line, plus the given suffix.
+ * @version $Id$
+ */
 class ActionStartPrevLinePlus extends IndentRuleAction {
   private String _suffix;
   
@@ -55,8 +61,14 @@ class ActionStartPrevLinePlus extends IndentRuleAction {
   
   /**
    * Indents the line according to the previous line, with the suffix string added.
+   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param reducedModel reduced model used by the document.
+   * @param pos Position within line to be indented.
    */
-  public void indentLine(DefinitionsDocument doc, int pos) {
+  public void indentLine(DefinitionsDocument doc, 
+                         BraceReduction reducedModel, 
+                         int pos)
+  {
     // START = findPrevDelimiter
     // START' = scoot behind the delimiter we just found
     // PREVSTART = findPrevDelimiter(START')              -- prev line's START

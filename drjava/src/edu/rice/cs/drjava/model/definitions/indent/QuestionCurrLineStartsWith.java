@@ -40,6 +40,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
  * Question rule in the indentation decision tree.  Determines if the 
@@ -77,13 +78,14 @@ public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
   }
   
   /**
-   * Determines if the current line in the document stars with the
+   * Determines if the current line in the document starts with the
    * specified character.
    * @param doc DefinitionsDocument containing the line to be indented.
+   * @param reducedModel reduced model used by the document.
    * @param pos Position within line to be indented.
    * @return true if this node's rule holds.
    */
-  boolean applyRule(DefinitionsDocument doc, int pos) {
+  boolean applyRule(DefinitionsDocument doc, BraceReduction reducedModel, int pos) {
     throw new RuntimeException("Not yet implemented.");
     
     /*  FIXME: don't look in comments if _searchComments == false

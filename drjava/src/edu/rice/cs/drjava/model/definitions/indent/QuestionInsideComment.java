@@ -37,40 +37,39 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-/**
- * @version $Id$
- * 
- * Asks whether the beginning of the current line is inside a C-style comment.
- */
-
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import javax.swing.text.*;
 
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+
+import edu.rice.cs.util.UnexpectedException;
+
+/**
+ * Asks whether the beginning of the current line is inside a C-style comment.
+ *
+ * @version $Id$
+ */
 class QuestionInsideComment extends IndentRuleQuestion {
-  QuestionInsideComment(IndentRule yesRule, IndentRule noRule) {
+  
+  QuestionInsideComment(final IndentRule yesRule, final IndentRule noRule) {
     super(yesRule, noRule);
   }
-  //private IndentRule _yesRule = new QuestionPrevLineStartsComment();
-  //private IndentRule _noRule = new QuestionBraceIsParenOrBracket();
-  boolean applyRule(DefinitionsDocument doc, int pos) {
-    // Reduced model makes it easy!
-    // return (stateAtRelLocation(dist. to START) == INSIDE_BLOCK_COMMENT)
-    // [see classes in reducedmodel package:
-    //  ReducedModelStates, AbstractReducedModel, InsideBlockComment]
-    // I only wish we had stateAtAbsLocation.
-    return true;
+
+  /**
+   * Determines if the current line in the document is in a block comment.
+   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param reducedModel reduced model used by the document.
+   * @param pos Position within line to be indented.
+   * @return true if this node's rule holds.
+   */
+  boolean applyRule(DefinitionsDocument doc, BraceReduction reducedModel, int pos) {
+    int here = doc.getCurrentLocation();
+    ReducedModelState state = null;
+    int distToStart = here - doc.getLineStartPos(here);
+    reducedModel.resetLocation();  // Gaaah!
+    state = reducedModel.stateAtRelLocation(-distToStart);
+    return (state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT));
   }
 }
-
-// previous, incorrect version:
-
-// Search backwards...
-// point = findPrevDelimiter(start of statement)
-// while point != DOCSTART {
-//    if this line starts with "//", keep looking
-//    if this line contains a non-quoted "/*", return true
-//    point = previous START
-// }
-// return false
-

@@ -40,6 +40,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
 
 /**
  * A question node in the decision tree for the indentation system.
@@ -53,19 +54,19 @@ public abstract class IndentRuleQuestion implements IndentRule {
   /**
    * Node in decision tree to use if the rule holds in this context.
    */
-  private IndentRule _yesRule;
+  private final IndentRule _yesRule;
 
   /**
    * Node in decision tree to use if the rule does not hold in this context.
    */
-  private IndentRule _noRule;
+  private final IndentRule _noRule;
   
   /**
    * Constructs a new Question indent rule using the two given children.
    * @param yesRule Rule to use if this rule holds
    * @param noRule Rule to use if this rule does not hold
    */
-  public IndentRuleQuestion(IndentRule yesRule, IndentRule noRule) {
+  public IndentRuleQuestion(final IndentRule yesRule, final IndentRule noRule) {
     _yesRule = yesRule;
     _noRule = noRule;
   }
@@ -73,23 +74,30 @@ public abstract class IndentRuleQuestion implements IndentRule {
   /**
    * Determines if the given rule holds in this context.
    * @param doc DefinitionsDocument containing the line to be indented.
+   * @param reducedModel reduced model used by the document.
    * @param pos Position within line to be indented.
    * @return true if this node's rule holds.
    */
-  abstract boolean applyRule(DefinitionsDocument doc, int pos);
+  abstract boolean applyRule(DefinitionsDocument doc, 
+                             BraceReduction reducedModel, 
+                             int pos);
 
   /**
    * Determines if the given rule holds in this context and calls
    * the same method on one of its child nodes.
    * @param doc DefinitionsDocument containing the line to be indented.
+   * @param reducedModel reduced model used by the document.
    * @param pos Position within line to be indented.
    */
-  public void indentLine(DefinitionsDocument doc, int pos) {
-    if (applyRule(doc, pos)) {
-      _yesRule.indentLine(doc, pos);
+  public void indentLine(DefinitionsDocument doc, 
+                         BraceReduction reducedModel,
+                         int pos)
+  {
+    if (applyRule(doc, reducedModel, pos)) {
+      _yesRule.indentLine(doc, reducedModel, pos);
     }
     else {
-      _noRule.indentLine(doc, pos);
+      _noRule.indentLine(doc, reducedModel, pos);
     }
   }
   
@@ -98,9 +106,10 @@ public abstract class IndentRuleQuestion implements IndentRule {
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
    * @param doc DefinitionsDocument containing the line to be indented.
+   * @param reducedModel reduced model used by the document.
    */
-  public void indentLine(DefinitionsDocument doc) {
-    indentLine(doc, doc.getCurrentLocation());
+  public void indentLine(DefinitionsDocument doc, BraceReduction reducedModel) {
+    indentLine(doc, reducedModel, doc.getCurrentLocation());
   }
 
 }

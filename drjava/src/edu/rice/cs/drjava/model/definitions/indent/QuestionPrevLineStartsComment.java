@@ -37,21 +37,31 @@
  *
 END_COPYRIGHT_BLOCK*/
 
+package edu.rice.cs.drjava.model.definitions.indent;
+
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+
 /**
  * @version $Id$
  * 
  * Given the start of the current line is inside a C-style comment, asks
  * whether the comment begins on the "previous line," ignoring white space.
  */
-
-package edu.rice.cs.drjava.model.definitions.indent;
-
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 class QuestionPrevLineStartsComment extends IndentRuleQuestion {
+  
   QuestionPrevLineStartsComment(IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
   }
-  boolean applyRule(DefinitionsDocument doc, int pos) {
+  
+  /**
+   * Determines if the previous line in the document starts the block comment.
+   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param reducedModel reduced model used by the document.
+   * @param pos Position within line to be indented.
+   * @return true if this node's rule holds.
+   */
+  boolean applyRule(DefinitionsDocument doc, BraceReduction reducedModel, int pos) {
     // return 
     //   (stateAtRelLocation(dist. to PREVSTART) != INSIDE_BLOCK_COMMENT)
     // NB: not always accurate.  No false positives, but may give false
@@ -61,7 +71,7 @@ class QuestionPrevLineStartsComment extends IndentRuleQuestion {
     // Indenting at "bar" will not notice that its comment begins on the
     // "foo" line.  But it will be treated as a continuation of the comment
     // before "foo", so I think this is acceptable.
-    return true;
+    throw new RuntimeException("Not yet implemented!");
   }
 }
 // previous pseudocode:
