@@ -1678,7 +1678,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_switchToNextAction, "Forward", "Next Document");
 
     _setUpAction(_findReplaceAction, "Find", "Find/Replace");
-    
+    _setUpAction(_editPreferencesAction, "Preferences", "Edit DrJava Preferences");
     _setUpAction(_helpAction, "Help", "Show the User Documentation");
     _setUpAction(_aboutAction, "About", "About DrJava");
 

@@ -33,6 +33,8 @@
   <!-- put documentation html in this directory -->
   <property name="doc_dir" value="${built}/edu/rice/cs/drjava/docs" />
 
+  <property name="osxtag" value="drjava-osx" />
+  <property name="osxdir" value="${srcroot}/../" />
   <property name="jarfile" value="${srcroot}/../drjava.jar" />
   <property name="manifest" value="manifest" />
 
@@ -115,6 +117,11 @@
 
     <antcall target="docs" />
 
+    <antcall target="osxapp">
+      <param name="osxdir" value="${dist}" />
+      <param name="osxtag" value="${version-tag}-osx" />
+    </antcall>
+
     <antcall target="jar">
       <param name="jarfile" value="${dist}/${version-tag}.jar" />
     </antcall>
@@ -138,6 +145,26 @@
       </fileset>
     </copy>
 
+  </target>
+
+  <target name="osxapp" depends="jar">
+    <mkdir dir="${osxdir}/${osxtag}/DrJava.app" />
+    <copy todir="${osxdir}/${osxtag}/DrJava.app/">
+      <fileset dir="${basedir}/packaging/DrJava.app" 
+        excludes="Contents/Resources/Java/DrJava.jar-goes-here" />
+    </copy>
+
+    <copy file="${jarfile}" tofile="${osxdir}/${osxtag}/DrJava.app/Contents/Resources/Java/DrJava.jar" />
+    
+    <tar tarfile="${osxdir}/${osxtag}.tar" 
+      basedir="${osxdir}/" 
+      includes="${osxtag}/**/*"/>
+
+    <gzip src="${osxdir}/${osxtag}.tar"
+      zipfile="${osxdir}/${osxtag}.tar.gz" />
+
+    <delete dir="${osxdir}/${osxtag}" />
+    <delete file="${osxdir}/${osxtag}.tar" />
   </target>
 
   <!-- Makes a jar with dependencies. No tests are included. -->

@@ -93,7 +93,19 @@ public class HelpFrame extends JFrame {
     }
   }
   
-  private Action _forwardAction = new AbstractAction("Forward") {
+  public static abstract class ResourceAction extends AbstractAction {
+    public ResourceAction(String name, String iconName) {
+      super(name,MainFrame.getIcon(iconName));
+    }
+  }
+  
+  private static abstract class ConsolidatedAction extends ResourceAction {
+    private ConsolidatedAction(String name) {
+      super(name,name+"16.gif");
+    }
+  }
+  
+  private Action _forwardAction = new ConsolidatedAction("Forward") {
     public void actionPerformed(ActionEvent e) {
       _history = _history.next;
 
@@ -108,7 +120,7 @@ public class HelpFrame extends JFrame {
     }
   };
   
-  private Action _backAction = new AbstractAction("Back") {
+  private Action _backAction = new ConsolidatedAction("Back") {
     public void actionPerformed(ActionEvent e) {
       _history = _history.prev;
       
@@ -129,7 +141,16 @@ public class HelpFrame extends JFrame {
     }
   };
  
-  
+  private static JButton makeButton(Action a, int horTextPos,
+                                    int left, int right) {
+    JButton j = new JButton(a);
+    j.setHorizontalTextPosition(horTextPos);
+    j.setVerticalTextPosition(JButton.CENTER);
+    //Insets i = j.getMargin();
+    //j.setMargin(new Insets(i.top,left,i.bottom,right));
+    j.setMargin(new Insets(3,left+3,3,right+3));
+    return j;
+  }
   
   /**
    * Sets up the frame and displays it.
@@ -157,21 +178,33 @@ public class HelpFrame extends JFrame {
     tempPanel.add(_splitPane);
     // _splitPane.setBorder(new CompoundBorder(new EmptyBorder(0,5,0,5),_splitPane.getBorder()));
     _closeButton = new JButton(_closeAction);
-    _backButton = new JButton(_backAction);
-    _forwardButton = new JButton(_forwardAction);
+    _backButton = makeButton(_backAction,JButton.RIGHT,0,3);
+    _forwardButton = makeButton(_forwardAction,JButton.LEFT,3,0);
     _backAction.setEnabled(false);
     _forwardAction.setEnabled(false);
     _closePanel = new JPanel(new BorderLayout());
     _closePanel.add(_closeButton, BorderLayout.EAST);
     _closePanel.setBorder(new EmptyBorder(5,5,5,5)); // padding
     _navPane = new JPanel();
+    _navPane.setBackground(new Color(0xCCCCFF));
     _navPane.setLayout(new BoxLayout(_navPane,BoxLayout.X_AXIS));
+    JLabel icon = new JLabel(MainFrame.getIcon("DrJavaHelp.gif"));
+    _navPane.add(icon);
+    _navPane.add(Box.createHorizontalStrut(8));
+    _navPane.add(Box.createHorizontalGlue());
     _navPane.add(_backButton);
+    _navPane.add(Box.createHorizontalStrut(8));
     _navPane.add(_forwardButton);
+    _navPane.add(Box.createHorizontalStrut(3));
     _navPane.setBorder(new EmptyBorder(5,5,5,5));
+    JPanel navContainer = new JPanel(new GridLayout(1,1));
+    navContainer.setBorder(new CompoundBorder(new EmptyBorder(5,5,5,5),
+                                              new EtchedBorder()));
+                                              //new BevelBorder(BevelBorder.LOWERED)));
+    navContainer.add(_navPane);
     Container cp = getContentPane();
     cp.setLayout(new BorderLayout());
-    cp.add(_navPane, BorderLayout.NORTH);
+    cp.add(navContainer, BorderLayout.NORTH);
     cp.add(tempPanel, BorderLayout.CENTER);
     cp.add(_closePanel, BorderLayout.SOUTH);
     

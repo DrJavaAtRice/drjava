@@ -60,7 +60,6 @@ public class DrJava implements ConfigurationTool, OptionConstants {
   public static final File PROPERTIES_FILE = ConfigurationTool.PROPERTIES_FILE;
   public static final FileConfiguration CONFIG = ConfigurationTool.CONFIG;
 
-    
   public static void main(final String[] args) {
     
     /*
