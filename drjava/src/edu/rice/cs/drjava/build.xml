@@ -22,6 +22,12 @@
   <!-- put a jar in this directory after each commit -->
   <property name="jars_dir" value="/home/javaplt/public_html/drjava/builds" />
 
+  <!-- put new javadoc in this directory after each commit -->
+  <property name="public_javadoc_dir" value="/home/javaplt/public_html/drjava/javadoc" />
+
+  <!-- put javadoc in this directory if generating private javadoc -->
+  <property name="private_javadoc_dir" value="${srcroot}/../javadoc" />
+
   <property name="jarfile" value="${srcroot}/../drjava2.jar" />
   <property name="manifest" value="manifest" />
   <property name="cvsroot" value="/home/javaplt/.cvsroot" />
@@ -88,7 +94,11 @@
     <cvs command="update -A ${file_with_build_name}"
          cvsRoot="${cvsroot}" quiet="true" />
 
-    <echo message="New version ${version-tag} committed to CVS." />
+    <!-- generate javadoc for the committed version! -->
+    <antcall target="generate_javadoc">
+      <param name="javadoc_dir" value="${public_javadoc_dir}" />
+      <param name="javadoc_title" value="${version-tag}" />
+    </antcall>
 
     <!-- Create distribution jar.
          We modify property jarfile for this call to put the jar in
@@ -100,7 +110,7 @@
       <param name="jarfile" value="${distjar}" />
     </antcall>
 
-    <echo message="Created jar: ${distjar}" />
+    <echo message="New version ${version-tag} committed to CVS." />
   </target>
 
   <!-- Compile. We have to start at srcroot and then selectively include
@@ -218,8 +228,60 @@
           classname="edu.rice.cs.drjava.DrJava" />
   </target>
 
+  <!-- generate private javadoc for current uncommitted version -->
+  <target name="javadoc" depends="init">
+    <tstamp />
+    <antcall target="generate_javadoc">
+      <param name="javadoc_dir" value="${private_javadoc_dir}" />
+      <param name="javadoc_title" value="${user.name}-uncommitted-${DSTAMP}-${TSTAMP}" />
+    </antcall>
+  </target>
+
+  <!-- Generate javadoc, removing generics references first.
+       The property javadoc_dir must be set when calling this.
+       The property javadoc_title must be set when calling this.
+  -->
+  <target name="generate_javadoc" if="javadoc_dir">
+    <delete dir="${javadoc_dir}" />
+    <mkdir dir="${javadoc_dir}" />
+
+    <mkdir dir="${javadoc_dir}/src" />
+    <execon executable="javac" failonerror="yes" parallel="yes" type="file">
+      <arg value="-sourcepath" />
+      <arg value="${srcroot}" />
+
+      <!-- Generate Java source without generics -->
+      <arg value="-s" />
+
+      <arg value="-d" />
+      <arg value="${javadoc_dir}/src" />
+      <arg value="-J-Xbootclasspath/p:${jsr14_path}/javac.jar" />
+      <arg value="-bootclasspath" />
+      <arg path="${jsr14_path}/collect.jar:${java.home}/lib/rt.jar" />
+      <fileset dir="${srcroot}">
+        <include name="${projpath}/**/*.java" />
+      </fileset>
+    </execon>
+
+    <javadoc sourcepath="${javadoc_dir}/src"
+             destdir="${javadoc_dir}"
+             packagenames="edu.rice.cs.drjava.*"
+             Private="yes"
+             Use="yes"
+             Version="yes"
+             Windowtitle="${javadoc_title}">
+      <link href="http://java.sun.com/j2se/1.3/docs/api" />
+      <link href="http://junit.org/junit/javadoc/3.7" />
+      <link href="http://www-sop.inria.fr/koala/djava/javadoc" />
+    </javadoc>
+
+    <!-- delete source we generated without generics -->
+    <delete dir="${javadoc_dir}/src" />
+  </target>
+
   <!-- Delete all generated files (only for this project!) -->
   <target name="clean">
+    <delete dir="${private_javadoc_dir}" />
     <delete dir="${built}/${projpath}" />
     <delete file="${jarfile}" />
   </target>
