@@ -111,7 +111,24 @@ public class EventHandler extends Thread {
   }
   
   private void _handleClassPrepareEvent(ClassPrepareEvent e) {
-    System.out.println("ClassPrepareEvent occured");
+    DrJava.consoleOut().println("ClassPrepareEvent occured");
+    DrJava.consoleOut().println("In " + e.referenceType().name());
+    try {
+      DrJava.consoleOut().println("sourcename " + e.referenceType().sourceName());
+    }
+    catch(AbsentInformationException aie) {
+      DrJava.consoleOut().println("no info");
+    }
+    try {
+      _debugManager.getPendingRequestManager().classPrepared(e);
+    }
+    catch(DebugException de) {
+      System.err.println("Error preparing action: " + de);
+    }
+    // resumes this thread which was suspended because its 
+    // suspend policy was SUSPEND_EVENT_THREAD
+    e.thread().resume();
+    DrJava.consoleOut().println("resumed thread");
   }
   
   private void _handleVMDeathEvent(VMDeathEvent e) {

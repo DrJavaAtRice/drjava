@@ -39,6 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.debug;
 
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
@@ -52,37 +53,35 @@ import com.sun.jdi.request.*;
  * The breakpoint object which has references to its OpenDefinitionsDocument and its 
  * BreakpointRequest
  */
-public class Breakpoint { 
+public class Breakpoint extends DebugAction<BreakpointRequest> { 
   
-  private OpenDefinitionsDocument _doc;
-  private String _className;
-  private int _lineNumber;
-  private ReferenceType _ref;
-  private BreakpointRequest _breakpointReq;
-  
-  public Breakpoint( OpenDefinitionsDocument doc, int lineNumber, VirtualMachine vm) 
-    throws DebugException {
+  //private String _className;
+  //private int _lineNumber;
+  //private ReferenceType _ref;
+  //private BreakpointRequest _breakpointReq;
+   
+  /**
+   * @throws IllegalStateException if the document does not have a file
+   */
+  public Breakpoint( OpenDefinitionsDocument doc, int lineNumber, DebugManager manager) 
+    throws DebugException, IllegalStateException {    
     
-    _doc = doc;
+    super (manager, doc);
+    _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;
     _lineNumber = lineNumber;
-    
-    _createBreakpointRequest(vm);
+    _initializeRequest();
+    //_doc = doc;
+    //_createBreakpointRequest();
+    DrJava.consoleOut().println("Breakpoint lineNumber is " + lineNumber);
   }
  
-  private void _createBreakpointRequest(VirtualMachine vm) throws DebugException {
+  /*private void _createBreakpointRequest() throws DebugException {
 
-    String packageName = "";
-    try {
-      packageName = _doc.getDocument().getPackageName();
-    }
-    catch (InvalidPackageException e) {
-      // Couldn't find package, pretend there's none
-    }
-    _className = packageName + _doc.getClassName();
+    
     //System.out.println("Setting breakpoint in class: " + className + 
     //                   ", line: " + lineNumber);
     
-    _ref = _getReferenceType(_className, vm);
+    _ref = manager.getReferenceType(_className, vm);
     
     
     // Get locations for the line number, use the first
@@ -103,47 +102,51 @@ public class Breakpoint {
       throw new DebugException("Could not find line number: " + aie);
     }
     
-  }
+  }*/
   
-  private ReferenceType _getReferenceType(String className, VirtualMachine vm) throws DebugException {
-    // Get all classes that match this name
-    List classes = vm.classesByName(className);
-    //System.out.println("Num of classes found: " + classes.size());
-    ReferenceType ref = null; //Reference type is null
-    // Assume first one is correct, for now
-    
-    if (classes.size() == 0) {
-      //_tryLoadingClass(className, vm);
-      classes = vm.classesByName(className);
+  /**
+   * Creates an appropriate EventRequest from the EventRequestManager, using
+   * the provided ReferenceType, and stores it in the _request field.
+   * @throws DebugException if the request could not be created.
+   */
+  protected void _createRequest(ReferenceType rt) throws DebugException {
+    DrJava.consoleOut().println("Breakpoint._createRequest starting...");
+    /*
+    DrJava.consoleOut().println("rt.isVerified: " + rt.isVerified() +
+                                " rt.isInitialized: " + rt.isInitialized() +
+                                " rt.isPrepared: " + rt.isPrepared());
+                                */
+    // Get locations for the line number, use the first
+    try {
+      List lines = rt.locationsOfLine(_lineNumber);
+      if (lines.size() == 0) {
+        // Can't find a location on this line
+        //System.out.println("No locations found.");
+        throw new DebugException("Could not find line number: " + _lineNumber);
+      }
+      Location loc = (Location) lines.get(0);
+      _request = _manager.getEventRequestManager().createBreakpointRequest(loc);
+      DrJava.consoleOut().println("Created a breakpoint request: " + _request);
+      //DrJava.consoleOut().println("new Breakpoint: " + toString());
+      //_breakpointReq.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+      //_breakpointReq.enable();
+      //System.out.println("Breakpoint: " + req);
+      _manager.addBreakpointToMap(this);
     }
-    if (classes.size() >0) {
-      ref = (ReferenceType) classes.get(0);
-      return ref;
+    catch (AbsentInformationException aie) {
+      throw new DebugException("Could not find line number: " + aie);
     }
-    else throw new DebugException ("Couldn't find the class corresponding to '" + className +"'.");
-  }
-   
-  public OpenDefinitionsDocument getDocument() {
-    return _doc;
-  }
-  
-  public BreakpointRequest getRequest() {
-    return _breakpointReq;
-  }
-  
-  public ReferenceType getReference() {
-    return _ref;
-  }
-  
-  public String getClassName() {
-    return _className;
-  }
- 
-  public int getLineNumber() {
-    return _breakpointReq.location().lineNumber();
   }
   
   public String toString() {
-    return "Breakpoint @ "+getLineNumber()+" in "+getClassName();
+    if (_request != null) {
+      return "Breakpoint[class: " + getClassName() + 
+        ", lineNumber: " + getLineNumber() + 
+        ", method: " + _request.location().method() +
+        ", codeIndex: " + _request.location().codeIndex() + "]";
+    }
+    else
+      return "Breakpoint[class: " + getClassName() + 
+        ", lineNumber: " + getLineNumber() + "]";
   }
 }

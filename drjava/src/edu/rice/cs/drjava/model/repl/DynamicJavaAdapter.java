@@ -155,7 +155,22 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      */
     public InterpreterExtension() {
       super(new JavaCCParserFactory());
-      classLoader = new ClassLoaderExtension(this);
+      
+      /** 
+       * The following block was commented out because we are no longer using
+       * the StickyClassLoader because 1) since we restart the InteractionsJVM
+       * every time we reset or compile, the StickyClassLoader is unnecessary
+       * and 2) the DebugManager will not work in its present form with the 
+       * StickyClassLoader. In the future, an optimization can be made by
+       * reenabling the StickyClassLoader and changing the DebugManager to 
+       * use it (changes will have to be made in many places starting in 
+       * getReferenceType since it just grabs the first class that 
+       * classesByName returns right now) such that if no threads are still
+       * running, only the StickyClassLoader has to be replaced.
+       */
+      
+      /*
+       classLoader = new ClassLoaderExtension(this);
       // We have to reinitialize these variables because they automatically
       // fetch pointers to classLoader in their constructors.
       nameVisitorContext = new GlobalContext(this);
@@ -165,6 +180,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       evalVisitorContext = new GlobalContext(this);
       evalVisitorContext.setAdditionalClassLoaderContainer(classLoader);
       //System.err.println("set loader: " + classLoader);
+      */
     }
 
     /**

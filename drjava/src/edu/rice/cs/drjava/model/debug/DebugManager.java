@@ -41,6 +41,7 @@ package edu.rice.cs.drjava.model.debug;
 
 import java.io.*;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
 import javax.swing.ListModel;
 //import java.util.Iterator;
@@ -110,6 +111,11 @@ public class DebugManager {
   private Hashtable<BreakpointRequest,Breakpoint> _breakpoints;
   
   /**
+   * Maps class names to vector's of pending DebugAction
+   */
+  private PendingRequestManager _pendingRequestManager;
+  
+  /**
    * Writer to use for output messages.
    */
   //private Writer _logwriter;
@@ -127,6 +133,11 @@ public class DebugManager {
     _eventManager = null;
     _breakpoints = new Hashtable<BreakpointRequest, Breakpoint>();
     //_logwriter = new PrintWriter(DrJava.consoleOut());
+    _pendingRequestManager = new PendingRequestManager(this);
+  }
+  
+  public EventRequestManager getEventRequestManager() {
+    return _eventManager;
   }
   
   private void _attachToVM() throws DebugException {
@@ -211,6 +222,76 @@ public class DebugManager {
    */
   public boolean isReady() {
     return _vm != null;
+  }
+  
+  /**
+   * Returns the loaded ReferenceType for the given class name, or null
+   * if the class could not be found.  Makes no attempt to load the class
+   * if it is not already loaded.
+   */
+  ReferenceType getReferenceType(String className) {
+    return getReferenceType(className, -1);
+  }
+  
+  /**
+   * Returns the loaded ReferenceType for the given class name, or null
+   * if the class could not be found.  Makes no attempt to load the class
+   * if it is not already loaded. If the lineNumber is greater than -1, we're 
+   * trying to get the ReferenceType for a Breakpoint so we have to check 
+   * if the lineNumber falls in one of the inner classes of the given
+   * class. In that case, the ReferenceType of that inner class must be 
+   * returned, not that of the outer class.
+   */
+  ReferenceType getReferenceType(String className, int lineNumber) {
+    System.out.println("Looking for RefType for class: " + className);
+    System.out.println("on line number: " + lineNumber);
+    
+    // Get all classes that match this name
+    List classes = _vm.classesByName(className);
+    System.out.println("Num of classes found: " + classes.size());
+    ReferenceType ref = null; //Reference type is null
+    
+    // Assume first one is correct, for now
+    if (classes.size() > 0) {
+      ref = (ReferenceType) classes.get(0);
+      
+      if (lineNumber > -1) {
+        List lines = new LinkedList();
+        try {
+          lines = ref.locationsOfLine(lineNumber);
+        }
+        catch (AbsentInformationException aie) {
+          // try looking in inner classes
+        }
+        if (lines.size() == 0) {
+          // The ReferenceType might be in an inner class
+          List innerRefs = ref.nestedTypes();
+          ref = null;
+          for (int i = 0; i < innerRefs.size(); i++) {
+            try {
+              ReferenceType currRef = (ReferenceType) innerRefs.get(i);
+              lines = currRef.locationsOfLine(lineNumber);
+              if (lines.size() > 0) {
+                ref =currRef;
+                break;                
+              }
+            }
+            catch (AbsentInformationException aie) {
+              // skipping this inner class
+            }
+          }
+        }
+      }
+      if (ref != null && !ref.isPrepared()) {
+         return null;
+      }
+    }
+    return ref;
+    //else throw new DebugException ("Couldn't find the class corresponding to '" + className +"'.");
+  }
+  
+  PendingRequestManager getPendingRequestManager() {
+    return _pendingRequestManager;
   }
   
   /**
@@ -359,12 +440,13 @@ public class DebugManager {
    * @param doc Document in which to set or remove the breakpoint
    * @param lineNumber Line on which to set or remove the breakpoint
    */
-  public void toggleBreakpoint(OpenDefinitionsDocument doc, int lineNumber)
+  public synchronized void toggleBreakpoint(OpenDefinitionsDocument doc, 
+                                            int lineNumber)
     throws DebugException {  
     
     Breakpoint breakpoint = doc.getBreakpointAt(lineNumber);
     if (breakpoint == null) {
-      setBreakpoint(new Breakpoint (doc, lineNumber, _vm));
+      setBreakpoint(new Breakpoint (doc, lineNumber, this));
     }
     else {
       removeBreakpoint(breakpoint);
@@ -377,14 +459,18 @@ public class DebugManager {
    * @param className the name of the class in which to break
    * @param lineNumber the line number at which to break
    */
-  public void setBreakpoint(Breakpoint breakpoint)
-    throws DebugException
+  public synchronized void setBreakpoint(Breakpoint breakpoint)
   {
 
     System.out.println("setting: " + breakpoint);
-    
-    _breakpoints.put(breakpoint.getRequest(), breakpoint);
+    /*
+    if (breakpoint.getRequest() != null)
+      _breakpoints.put(breakpoint.getRequest(), breakpoint);*/
     breakpoint.getDocument().addBreakpoint(breakpoint);
+  }
+  
+  void addBreakpointToMap(Breakpoint breakpoint) {
+    _breakpoints.put(breakpoint.getRequest(), breakpoint);
   }
 
  /**
@@ -396,11 +482,16 @@ public class DebugManager {
   * @param breakpoint The breakpoint to remove.
   * @param className the name of the class the BP is being removed from.
   */
-  public void removeBreakpoint(Breakpoint breakpoint) {
+  public synchronized void removeBreakpoint(Breakpoint breakpoint) {
     System.out.println("unsetting: " + breakpoint);
-    _breakpoints.remove(breakpoint.getRequest());
+    if (breakpoint.getRequest() != null) {
+      _breakpoints.remove(breakpoint.getRequest());
+      _eventManager.deleteEventRequest(breakpoint.getRequest());
+    }
+    else {
+      _pendingRequestManager.removePendingRequest(breakpoint);
+    }
     breakpoint.getDocument().removeBreakpoint(breakpoint);
-    _eventManager.deleteEventRequest(breakpoint.getRequest());
   }
 
   /**
