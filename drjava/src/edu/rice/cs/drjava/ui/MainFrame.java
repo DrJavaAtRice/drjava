@@ -1661,6 +1661,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Show compiler output pane by default
     showTab(_errorPanel);
     
+    _tabbedPane.setSelectedIndex(0);
+    
     // Select interactions pane when interactions tab is selected
     _tabbedPane.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
