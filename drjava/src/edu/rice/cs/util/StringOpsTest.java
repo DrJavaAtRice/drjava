@@ -150,4 +150,39 @@ public class StringOpsTest extends TestCase {
     };
     assertEquals("Should have returned the correct stack trace!", trace, StringOps.getStackTrace(t));
   }
+
+  /**
+   * Tests converting a string to a literal
+   */
+  public void testConvertToLiteral() {
+    String toConvert = " a  b  c  d";
+    String expResult = "\" a  b  c  d\"";
+    String actResult = StringOps.convertToLiteral(toConvert);
+    assertEquals("converting "+toConvert+" should yield "+ expResult, expResult, actResult);
+
+    toConvert = "\\ hello world \\";
+    expResult = "\"\\\\ hello world \\\\\"";
+    actResult = StringOps.convertToLiteral(toConvert);
+    assertEquals("converting "+toConvert+" should yield "+ expResult, expResult, actResult);
+
+    toConvert = "\\\n\\n";
+    expResult = "\"\\\\\\n\\\\n\"";
+    actResult = StringOps.convertToLiteral(toConvert);
+    assertEquals("converting "+toConvert+" should yield "+ expResult, expResult, actResult);
+
+    toConvert = "\\\"\t\\t";
+    expResult = "\"\\\\\\\"\\t\\\\t\"";
+    actResult = StringOps.convertToLiteral(toConvert);
+    assertEquals("converting "+toConvert+" should yield "+ expResult, expResult, actResult);
+
+    toConvert = "\"\\\"\t\\n\n\\\n\"";
+    expResult = "\"\\\"\\\\\\\"\\t\\\\n\\n\\\\\\n\\\"\"";
+    actResult = StringOps.convertToLiteral(toConvert);
+    assertEquals("converting "+toConvert+" should yield "+ expResult, expResult, actResult);
+
+    toConvert = "    ";
+    expResult = "\"    \"";
+    actResult = StringOps.convertToLiteral(toConvert);
+    assertEquals("converting "+toConvert+" should yield "+ expResult, expResult, actResult);
+  }
 }
