@@ -17,6 +17,7 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.JMenuItem;
 import javax.swing.JComponent;
+import javax.swing.JTabbedPane;
 
 import javax.swing.text.DefaultEditorKit;
 
@@ -47,16 +48,15 @@ public class MainFrame extends JFrame
   private OutputView _outputView;
   private InteractionsView _interactionsView;
   private JTextField _fileNameField;
+  private JTabbedPane _tabbedPane;
 
   private JMenuBar _menuBar;
   private JMenu _fileMenu;
   private JMenu _editMenu;
-    // status bar at bottom of window
-    public static Label _status = new Label("");
 	
-    JButton _saveButton;
-    JButton _compileButton;
-    
+  JButton _saveButton;
+  JButton _compileButton;
+
   // Make some actions for menus
   private Action _quitAction = new AbstractAction("Quit")
   {
@@ -79,8 +79,9 @@ public class MainFrame extends JFrame
       boolean opened = _definitionsView.open();
       if (opened) {
         _resetInteractions();
-				_saveButton.setEnabled(false);
-				_compileButton.setEnabled(true);
+        _errorPanel.resetErrors(new CompilerError[0]);
+        _saveButton.setEnabled(false);
+        _compileButton.setEnabled(true);
       }
     }
   };
@@ -92,6 +93,7 @@ public class MainFrame extends JFrame
       boolean createdNew = _definitionsView.newFile();
       if (createdNew) {
         _resetInteractions();
+        _errorPanel.resetErrors(new CompilerError[0]);
 				_saveButton.setEnabled(false);
 				_compileButton.setEnabled(true);
       }
@@ -160,7 +162,6 @@ public class MainFrame extends JFrame
 	void compile() 
     {
 			_compileButton.setEnabled(false);
-			
 
       String filename = _definitionsView.getCurrentFileName();
 			
@@ -177,12 +178,8 @@ public class MainFrame extends JFrame
       CompilerError[] errors = DrJava.compiler.compile(new File[] { file });
       _errorPanel.resetErrors(errors);
 
-      if (errors.length == 0) {
-        // Success doesn't print anything, so we should print something
-        // to let them know it worked.
-        System.out.println(file.getName() + " compiled successfully.");
-        _resetInteractions();
-      }
+      _resetInteractions();
+      _selectCompileTab();
     }
 
   private Action _compileAction = new AbstractAction("Compile")
@@ -240,6 +237,9 @@ public class MainFrame extends JFrame
 		};
 
   private void _resetInteractions() {
+    // Also reset the compiler error panel
+    //_errorPanel.resetErrors(new CompilerError[0]);
+
     // Reset the interactions window, and add the source directory
     // of the file we just compiled to the class path.
     _interactionsView.reset();
@@ -305,20 +305,20 @@ public class MainFrame extends JFrame
 	}
 
 	public void hourglassOn ()
-		{
-			getGlassPane().setVisible(true);
-		}
+  {
+    getGlassPane().setVisible(true);
+  }
 
 	public void hourglassOff ()
-		{
-			getGlassPane().setVisible(false);
-		}
+  {
+    getGlassPane().setVisible(false);
+  }
 	
   /** Creates the main window, and shows it. */
   public MainFrame()
   {
 		//set up the hourglass cursor
-		setGlassPane(new GlassPane());
+    setGlassPane(new GlassPane());
 
 		_fileNameField = new JTextField();
     _fileNameField.setEditable(false);
@@ -409,38 +409,20 @@ public class MainFrame extends JFrame
     //_outputView.makeActive();
     
     _interactionsView = new InteractionsView();
-    // Split2 has output view and the interactions view
-		/*
-			OLD WAY OF SPLITTING SCREEN!!!!!!!!!
-			
-    JSplitPane split2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                                       true,
-                                       new JScrollPane(_outputView),
-                                        new JScrollPane(_interactionsView));
-		
-    // Create split pane with defs and split2
-    JSplitPane split1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                                       true,
-                                       new JScrollPane(_definitionsView),
-                                       split2);
-		*/
+    
+    _tabbedPane = new JTabbedPane();
+    _tabbedPane.add("Interactions", new JScrollPane(_interactionsView));
+    _tabbedPane.add("Compiler output", _errorPanel);
+
 		JSplitPane split1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                                        true,
                                        new JScrollPane(_definitionsView),
-																			 new JScrollPane(_interactionsView));
+																			 _tabbedPane);
 		
-    /*
-		JSplitPane split3 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-																			 true,
-																			 _errorPanel,
-																			 _status);
-    */
-
 
     setBounds(25, 25, 300, 500);
 
 
-    getContentPane().add(_errorPanel, BorderLayout.SOUTH);
     getContentPane().add(split1, BorderLayout.CENTER);
     setSize(640, 480);
 
@@ -453,6 +435,14 @@ public class MainFrame extends JFrame
     //split2.setDividerLocation(50);
 
     updateFileTitle("Untitled");
+  }
+
+  private void _selectCompileTab() {
+    _tabbedPane.setSelectedIndex(1);
+  }
+
+  private void _selectInteractionsTab() {
+    _tabbedPane.setSelectedIndex(0);
   }
 
   public void updateFileTitle(String filename)

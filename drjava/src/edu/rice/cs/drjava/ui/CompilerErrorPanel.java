@@ -19,6 +19,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.ListSelectionModel;
 import javax.swing.BoxLayout;
 import javax.swing.JScrollPane;
+import javax.swing.JEditorPane;
 
 import javax.swing.text.Document;
 import javax.swing.text.Position;
@@ -33,14 +34,23 @@ import javax.swing.event.ListSelectionEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import java.awt.Rectangle;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.BorderLayout;
+
 public class CompilerErrorPanel extends JPanel {
   private static final String NEWLINE = System.getProperty("line.separator");
 
-  private static DefaultHighlighter.DefaultHighlightPainter _highlightPainter
-  = new DefaultHighlighter.DefaultHighlightPainter(Color.red);
+  /** Highlight painter for selected errors in the defs doc. */
+  private static final DefaultHighlighter.DefaultHighlightPainter
+    _documentHighlightPainter
+      = new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
+
+  /** Highlight painter for selected list items. */
+  private static final DefaultHighlighter.DefaultHighlightPainter
+    _listHighlightPainter
+      = new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
 
   // when we create a highlight we get back a tag we can use to remove it
   private Object _previousHighlightTag = null;
@@ -49,32 +59,16 @@ public class CompilerErrorPanel extends JPanel {
   private Position[] _errorPositions;
 
   private DefinitionsView _definitionsView;
-  private int _selectedError;
 
-  private CompilerErrorListModel _listModel;
-  private JList _errorList;
   private JButton _showAllButton;
   private JButton _nextButton;
   private JButton _previousButton;
+  private ErrorListPane _errorListPane;
 
   /**
-   * We want the selected error in the combo box to change when the caret
-   * reaches a line with an error. But when the combo box is changed by a click,
-   * we want to move the caret to the location of the error. To keep from moving
-   * the caret when all we wanted to do was select the error in the combo box,
-   * we set this flag.
+   * A caret listener to watch the Defs Doc and highlight the error on the
+   * current line.
    */
-  private boolean _caretGuard = false;
-
-  private ListSelectionListener _listListener = new ListSelectionListener() {
-    public void valueChanged(ListSelectionEvent e) {
-      if (! _caretGuard) {
-        // subtract 1 to deal with the (none) line in the list
-        _gotoError(_errorList.getSelectedIndex() - 1);
-      }
-    }
-  };
-
   private CaretListener _listener = new CaretListener() {
     public void caretUpdate(CaretEvent evt) {
       if (_errorPositions.length == 0) {
@@ -97,7 +91,7 @@ public class CompilerErrorPanel extends JPanel {
       // index of the first error before the dot
       int errorBefore = errorAfter - 1;
 
-      // this will be set to what we want to select
+      // this will be set to what we want to select, or -1 if nothing
       int shouldSelect = -1;
 
       if (errorBefore >= 0) { // there's an error before the dot
@@ -131,16 +125,11 @@ public class CompilerErrorPanel extends JPanel {
 
       // if no error is on this line, select the (none) item
       if (shouldSelect == -1) {
+        _errorListPane.selectNothing();
         _removePreviousHighlight();
-        _caretGuard = true;
-        _errorList.setSelectedIndex(0);
-        _selectedError = -1;
-        _caretGuard = false;
       }
-      else if (shouldSelect != _selectedError) {
-        _caretGuard = true;
+      else {
         _selectError(shouldSelect);
-        _caretGuard = false;
       }
     }
   };
@@ -149,7 +138,7 @@ public class CompilerErrorPanel extends JPanel {
     _previousHighlightTag =
       _definitionsView.getHighlighter().addHighlight(from,
                                                      to,
-                                                     _highlightPainter);
+                                                     _documentHighlightPainter);
   }
 
   private void _removePreviousHighlight() {
@@ -160,22 +149,11 @@ public class CompilerErrorPanel extends JPanel {
   }
 
   public CompilerErrorPanel(DefinitionsView view) {
-		setLayout(new BorderLayout());
-				
-		_listModel = new CompilerErrorListModel();
+    setLayout(new BorderLayout());
+        
     _definitionsView = view;
     _definitionsView.addCaretListener(_listener);
 
-    // Make errors initially zero-length array so it's never null
-    _errors = new CompilerError[0];
-    _errorPositions = new Position[0];
-    _selectedError = 0;
-
-    _errorList = new JList(_listModel);
-		_errorList.setCellRenderer(new myCellRenderer());
-		_errorList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    _errorList.addListSelectionListener(_listListener);
-    
     _showAllButton = new JButton("Show all");
     _showAllButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -186,31 +164,42 @@ public class CompilerErrorPanel extends JPanel {
     _nextButton = new JButton("Next");
     _nextButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          _gotoError(_selectedError + 1);
+          _gotoError(_errorListPane.getSelectedIndex() + 1);
         }
     });
 
     _previousButton = new JButton("Previous");
     _previousButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          _gotoError(_selectedError - 1);
+          _gotoError(_errorListPane.getSelectedIndex() - 1);
         }
     });
-		
-    _resetEnabledStatus();
-		//size stuff
-		_errorList.setVisibleRowCount(4);
-		JScrollPane scrollPane = new JScrollPane(_errorList);
-		//scrollPane.setPreferredSize(
-		//	_errorList.getPreferredScrollableViewportSize());
-    add(scrollPane, BorderLayout.CENTER);
-    // Show all not yet implemented.
-    // add(_showAllButton);
-		JPanel buttonPanel = new JPanel();
-		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-		buttonPanel.add(_previousButton);
+    
+    _errorListPane = new ErrorListPane();
+    _errorListPane.setEditable(false);
+
+    // We make the vertical scrollbar always there.
+    // If we don't, when it pops up it cuts away the right edge of the 
+    // text. Very bad.
+    JScrollPane scroller =
+      new JScrollPane(_errorListPane,
+                      JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                      JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+    resetErrors(new CompilerError[0]);
+
+    // Disable buttons. They don't totally work and who needs em.
+    /*
+    JPanel buttonPanel = new JPanel();
+    buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+    buttonPanel.add(_previousButton);
     buttonPanel.add(_nextButton);
-		add(buttonPanel, BorderLayout.EAST);
+    // Show all not yet implemented.
+    // buttonPanel.add(_showAllButton);
+    add(buttonPanel, BorderLayout.EAST);
+    */
+
+    add(scroller, BorderLayout.CENTER);
   }
 
   private void _gotoError(int newIndex) {
@@ -230,10 +219,8 @@ public class CompilerErrorPanel extends JPanel {
   }
 
   private void _selectError(int newIndex) {
-    if (newIndex != _selectedError) {
-      _selectedError = newIndex;
-      // add one to account for the (none) item
-      _errorList.setSelectedIndex(_selectedError + 1);
+    if (newIndex != _errorListPane.getSelectedIndex()) {
+      _errorListPane.selectItem(newIndex);
     }
 
     int errPos = _errorPositions[newIndex].getOffset();
@@ -257,7 +244,6 @@ public class CompilerErrorPanel extends JPanel {
     catch (BadLocationException stupidMachineItWontHappen) {}
 
     // now display that line with highlight
-    //System.err.println("Selected error: " + newIndex);
     _resetEnabledStatus();
   }
 
@@ -265,34 +251,34 @@ public class CompilerErrorPanel extends JPanel {
   }
 
   private void _resetEnabledStatus() {
-    _nextButton.setEnabled(_selectedError < (_errors.length - 1));
-    _previousButton.setEnabled(_selectedError > 0);
+    _nextButton.setEnabled(_errorListPane.getSelectedIndex() < _errors.length);
+    _previousButton.setEnabled(_errorListPane.getSelectedIndex() > 0);
     _showAllButton.setEnabled(_errors.length != 0);
   }
 
   public void resetErrors(CompilerError[] errors) {
-    int oldSize = _errors.length;
+    // Get rid of any old highlights
+    _removePreviousHighlight();
+
     _errors = errors;
 
     // sort the errors by location
     Arrays.sort(_errors);
 
     _createPositionsArray();
-
-    _listModel.notifyChanged(oldSize);
-
-    if (_errors.length > 0) {
-      // dummy value so it knows we did really change selection
-      _selectedError = -1;
-      _gotoError(0);
-    }
-
     _resetEnabledStatus();
+
+    _errorListPane.updateListPane();
   }
 
   private void _createPositionsArray() {
     // Create array of positions where each error occurred
     _errorPositions = new Position[_errors.length];
+
+    // don't bother with anything else if there are no errors
+    if (_errorPositions.length == 0) 
+      return;
+
     Document defsDoc = _definitionsView.getDocument();
     try {
       String defsText = defsDoc.getText(0, defsDoc.getLength());
@@ -327,78 +313,134 @@ public class CompilerErrorPanel extends JPanel {
     catch (BadLocationException willNeverEverEverHappen) {}
   }
 
-  class CompilerErrorListModel extends DefaultComboBoxModel {
-    // we put in fake element #0
-    // thus we need to subtract one to get the index into the real list of errs
-    public Object getElementAt(int i) {
-      if (i == 0) {
-        return "(no error on this line)";
-      } else {
-        CompilerError curErr = _errors[i - 1];
+  /**
+   * A pane to show compiler errors. It acts a bit like a listbox (clicking
+   * selects an item) but items can each wrap, etc.
+   */
+  private class ErrorListPane extends JEditorPane {
+    private int _selectedIndex;
 
-        // We need to make each message unique due to a documented bug in
-        // JComboBox. Otherwise navigation in the list gets messed.
-        // So we put the error # in the message to make it unique.
-        return i + ": " + curErr.message();
+    /**
+     * The start position of each error in the list. This position is the place
+     * where the error starts in the error list, as opposed to the place where
+     * the error exists in the source.
+     */
+    private Position[] _errorListPositions;
+
+    private Document _doc;
+
+    // when we create a highlight we get back a tag we can use to remove it
+    private Object _listHighlightTag = null;
+
+    public ErrorListPane() {
+      // If we set this pane to be of type text/rtf, it wraps based on words
+      // as opposed to based on characters.
+      super("text/rtf", "");
+      _doc = getDocument();
+    }
+
+    public void updateListPane() {
+      try {
+        // First clear the editor pane.
+        _doc.remove(0, getDocument().getLength());
+
+        _errorListPositions = new Position[_errors.length];
+
+        if (_errors.length == 0) {
+          _updateNoErrors();
+        }
+        else {
+          _updateWithErrors();
+        }
+      }
+      catch (BadLocationException impossible) {}
+      
+      selectNothing();
+    }
+
+    private void _updateNoErrors() throws BadLocationException {
+      _doc.insertString(0, "Last compilation completed successfully.", null);
+    }
+
+    private void _updateWithErrors() throws BadLocationException {
+      _doc.insertString(0,
+                        "Last compilation returned the following errors:",
+                        null);
+
+      for (int i = 0; i < _errors.length; i++) {
+        int startPos = _doc.getLength();
+        _doc.insertString(startPos, _errorText(i), null);
+        _errorListPositions[i] = _doc.createPosition(startPos);
       }
     }
 
-    public int getSize() {
-      return _errors.length + 1;
+    private String _errorText(int i) {
+      CompilerError error = _errors[i];
+
+      StringBuffer buf = new StringBuffer();
+      buf.append("\n");
+
+      if (error.isWarning()) {
+        buf.append("Warning: ");
+      }
+      else {
+        buf.append("Error: ");
+      }
+
+      buf.append(error.message());
+
+      return buf.toString();
     }
 
-    void notifyChanged(int oldSize) {
-      int sizeDelta = _errors.length - oldSize;
-
-      if (sizeDelta > 0) {
-        fireIntervalAdded(this, oldSize + 1, _errors.length - 1);
+    private void _removeListHighlight() {
+      if (_listHighlightTag != null) {
+        getHighlighter().removeHighlight(_listHighlightTag);
+        _listHighlightTag = null;
       }
-      else if (sizeDelta < 0) {
-        fireIntervalRemoved(this, _errors.length + 1, oldSize - 1);
-      }
-
-      // We use min of the two sizes since remove/add dealt with the ones
-      // beyond the minimum of the sizes.
-      fireContentsChanged(this, 0, Math.min(oldSize, _errors.length) + 1);
     }
+
+    public void selectNothing() {
+      _selectedIndex = -1;
+      _removeListHighlight();
+    }
+
+    public void selectItem(int i) {
+      _selectedIndex = i;
+      _removeListHighlight();
+
+      // We don't highlight the first char of this error message
+      // because it's the original \n
+      int startPos = _errorListPositions[i].getOffset() + 1;
+
+      // end pos is either the end of the document (if this is the last error)
+      // or the char where the next error starts
+      int endPos;
+      if (i + 1 == _errors.length) {
+        endPos = _doc.getLength();
+      }
+      else {
+        endPos = _errorListPositions[i + 1].getOffset();
+      }
+
+      try {
+        _listHighlightTag =
+          getHighlighter().addHighlight(startPos,
+                                        endPos,
+                                        _listHighlightPainter);
+
+        // Scroll to make sure this item is visible
+        Rectangle startRect = modelToView(startPos);
+        Rectangle endRect = modelToView(endPos - 1);
+
+        // Add the end rect onto the start rect to make a rectangle
+        // that encompasses the entire errorp
+        startRect.add(endRect);
+
+        scrollRectToVisible(startRect);
+      } 
+      catch (BadLocationException badBadLocation) {}
+    }
+
+    public int getSelectedIndex() { return _selectedIndex; }
   }
-
-	private class myCellRenderer extends JTextArea implements ListCellRenderer {
-		public myCellRenderer()
-			{
-				setLineWrap(true);
-				setEditable(false);
-			}
-		
-		public myCellRenderer (String text, boolean isSelected)
-			{
-				if(isSelected) {
-					setBackground(Color.yellow);
-					setForeground(Color.black);
-				}
-				setLineWrap(true);
-				setEditable(false);
-				append(text);
-			}
-
-		public Component getListCellRendererComponent (JList list,
-																									 Object value,
-																									 int index,
-																									 boolean isSelected,
-																									 boolean cellHasFocus)
-			{
-				return new myCellRenderer(value.toString(),isSelected);
-			}
-	}
 }
-
-
-
-
-
-
-
-
-
-
-
