@@ -745,6 +745,74 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   public ListModel getDefinitionsDocs() {
     return _definitionsDocs;
   }
+  
+  /**
+   * Returns the OpenDefinitionsDocument corresponding to the document
+   * passed in.
+   * @param doc the searched for Document
+   * @return its corresponding OpenDefinitionsDocument
+   */
+  public OpenDefinitionsDocument getODDForDocument(Document doc) {
+    int index = _getIndexOfDocument(doc);
+    if (index == -1) {
+      throw new UnexpectedException(new IllegalStateException("Could not get the OpenDefinitionsDocument for Document: " + doc));
+    }
+    else {
+      return (OpenDefinitionsDocument) _definitionsDocs.elementAt(index);
+    }
+  }
+  
+  /**
+   * Given a Document, returns the Document corresponding to the next 
+   * OpenDefinitionsDocument in the document list.
+   * @param doc the current Document
+   * @return the next Document
+   */
+  public Document getNextDocument(Document doc) {
+    int index = _getIndexOfDocument(doc);
+    if (index == -1) {
+      throw new UnexpectedException(new IllegalStateException("Could not get the next Document for Document: " + doc));
+    }
+    else if (index == _definitionsDocs.size() - 1) {
+      return ((OpenDefinitionsDocument)_definitionsDocs.elementAt(0)).getDocument();
+    }
+    else {
+      return ((OpenDefinitionsDocument)_definitionsDocs.elementAt(index+1)).getDocument();
+    }
+  }
+  
+  /**
+   * Given a Document, returns the Document corresponding to the previous 
+   * OpenDefinitionsDocument in the document list.
+   * @param doc the current Document
+   * @return the previous Document
+   */
+  public Document getPrevDocument(Document doc) {
+    int index = _getIndexOfDocument(doc);
+    if (index == -1) {
+      throw new UnexpectedException(new IllegalStateException("Could not get the previous Document for Document: " + doc));
+    }
+    else if (index == 0) {
+      return ((OpenDefinitionsDocument)_definitionsDocs.elementAt(_definitionsDocs.size()-1)).getDocument();
+    }
+    else {
+      return ((OpenDefinitionsDocument)_definitionsDocs.elementAt(index-1)).getDocument();
+    }
+  }
+  
+  private int _getIndexOfDocument(Document doc) {
+    int index = 0;
+    Enumeration en = _definitionsDocs.elements();
+    while (en.hasMoreElements()) {
+      if (doc == ((OpenDefinitionsDocument)en.nextElement()).getDocument()) {
+        return index;
+      }
+      else {
+        index++;
+      }
+    }
+    return -1;
+  }
 
   /**
    * Returns a collection of all documents currently open for editing.
@@ -755,7 +823,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   public List<OpenDefinitionsDocument> getDefinitionsDocuments() {
     ArrayList<OpenDefinitionsDocument> docs =
       new ArrayList<OpenDefinitionsDocument>(_definitionsDocs.size());
-    java.util.Enumeration en = _definitionsDocs.elements();
+    Enumeration en = _definitionsDocs.elements();
 
     while (en.hasMoreElements()) {
       docs.add((OpenDefinitionsDocument) en.nextElement());
@@ -1788,17 +1856,18 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
     /**
      * Create a find and replace mechanism starting at the current
-     * character offset in the definitions.
+     * character offset in the definitions. 
+     * NOT USED.
      */
-    public FindReplaceMachine createFindReplaceMachine() {
+//    public FindReplaceMachine createFindReplaceMachine() {
       //try {
       //return new FindReplaceMachine(_doc, _doc.getCurrentLocation());
-      return new FindReplaceMachine();
+//      return new FindReplaceMachine();
       //}
       //catch (BadLocationException e) {
       //throw new UnexpectedException(e);
       //}
-    }
+//    }
 
     /**
      * Returns the first Breakpoint in this OpenDefinitionsDocument whose region

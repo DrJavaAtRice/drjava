@@ -115,12 +115,14 @@ public class CompoundUndoManager extends UndoManager {
       _compoundEdits.remove(0);
       compoundEdit.end();
 
-      if (!_compoundEditInProgress()) {
-        super.addEdit(compoundEdit);
-        _notifyUndoHappened();
-      }
-      else {
-        _compoundEdits.get(0).addEdit(compoundEdit);
+      if (compoundEdit.canUndo()) {
+        if (!_compoundEditInProgress()) {
+          super.addEdit(compoundEdit);
+          _notifyUndoHappened();
+        }
+        else {
+          _compoundEdits.get(0).addEdit(compoundEdit);
+        }
       }
       _keys.remove(0);
 

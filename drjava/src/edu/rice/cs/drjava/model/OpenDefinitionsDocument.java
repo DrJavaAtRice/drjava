@@ -251,8 +251,9 @@ public interface OpenDefinitionsDocument {
   /**
    * Create a find and replace mechanism starting at the current
    * character offset in the definitions.
+   * NOT USED.
    */
-  public FindReplaceMachine createFindReplaceMachine();
+//  public FindReplaceMachine createFindReplaceMachine();
 
   /**
    * Finds the root directory of the source files.

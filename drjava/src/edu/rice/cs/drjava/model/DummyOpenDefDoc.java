@@ -258,10 +258,11 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   /**
    * Create a find and replace mechanism starting at the current
    * character offset in the definitions.
+   * NOT USED.
    */
-  public FindReplaceMachine createFindReplaceMachine() {
-    throw new UnsupportedOperationException("Dummy method");
-  }
+//  public FindReplaceMachine createFindReplaceMachine() {
+//    throw new UnsupportedOperationException("Dummy method");
+//  }
   
   /**
    * Finds the root directory of the source files.

@@ -119,7 +119,7 @@ public class InteractionsScriptModel {
    * @return true iff this script has another interaction to perform.
    */
   public boolean hasNextInteraction() {
-    return _nextInteraction < _interactions.size() - 1;
+    return _nextInteraction < _interactions.size();
   }
 
   /**

@@ -156,7 +156,7 @@ public class CompilerRegistry {
       }
       catch (Throwable t) {
         // This compiler didn't load. Keep on going.
-        //DrJava.consoleOut().println("failed to load:");
+//        DrJava.consoleOut().println("failed to load:");
         //t.printStackTrace(DrJava.consoleOut());
         //System.err.println();
       }

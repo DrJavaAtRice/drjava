@@ -147,7 +147,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JScrollPane _consoleScroll;
   private ConsoleController _consoleController;  // move to controller
   private InteractionsPane _interactionsPane;
-  private JScrollPane _interactionsScroll;
   private JPanel _interactionsContainer;
   private InteractionsController _interactionsController;  // move to controller
   private InteractionsScriptController _interactionsScriptController;
@@ -158,6 +157,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JavadocErrorPanel _javadocErrorPanel;
   private FindReplaceDialog _findReplace;
   private LinkedList<TabbedPanel> _tabs;
+  
+  private Component _lastFocusOwner;
 
   /**
    * Panel to hold both InteractionsPane and its sync message.
@@ -807,14 +808,16 @@ public class MainFrame extends JFrame implements OptionConstants {
    * @param c the pane to switch focus to
    */
   private void _switchToPane(Component c) {
-    if (c == _interactionsScroll) {
-      c = _interactionsPane;
+    Component newC = c;
+    if (c == _interactionsContainer) {
+      newC = _interactionsPane;
     }
     if (c == _consoleScroll) {
-      c = _consolePane;
+      newC = _consolePane;
     }
-    showTab(c);
-    c.requestFocus();
+    showTab(newC);
+    // need this when defPane is switched to
+    newC.requestFocus();  
   }
 
   /**
@@ -824,9 +827,11 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private synchronized void _switchPaneFocus(boolean next) {
     int numTabs = _tabbedPane.getTabCount();
-    int selectedIndex = _tabbedPane.getSelectedIndex();
+    int selectedIndex = _tabbedPane.indexOfComponent(_lastFocusOwner);
     if (next) {
-      if (_currentDefPane.hasFocus()) {
+      // if the DefinitionsPane has focus or nothing has focus,
+      // switch to the first pane
+      if (_currentDefPane == _lastFocusOwner) {
         // switch to the first tab if there is one
         if (numTabs > 0) {
           _switchToPane(_tabbedPane.getComponentAt(0));
@@ -842,7 +847,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
     else {
-      if (_currentDefPane.hasFocus()) {
+      // if the DefinitionsPane has focus or nothing has focus,
+      // switch to the last pane
+      if (_currentDefPane == _lastFocusOwner) {
         // switch to the last tab if there is one
         if (numTabs > 0) {
           _switchToPane(_tabbedPane.getComponentAt(numTabs - 1));
@@ -1042,7 +1049,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Closes the currently executing interactions script, if there is one.
    */
   private void _closeInteractionsScript() {
-    if (_interactionsController != null) {
+    if (_interactionsScriptController != null) {
       _interactionsContainer.remove(_interactionsScriptPane);
       _interactionsScriptController = null;
       _interactionsScriptPane = null;
@@ -1456,6 +1463,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _configFrame = null;
     _helpFrame = null;
     _aboutDialog = null;
+    _interactionsScriptController = null;
 
     // If any errors occurred while parsing config file, show them
     _showConfigException();
@@ -3150,9 +3158,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     _findReplace = new FindReplaceDialog(this, _model);
 
     _consoleScroll = new BorderlessScrollPane(_consolePane);
-    _interactionsScroll = new BorderlessScrollPane(_interactionsPane);
+    JScrollPane interactionsScroll = new BorderlessScrollPane(_interactionsPane);
     _interactionsContainer = new JPanel(new BorderLayout());
-    _interactionsContainer.add(_interactionsScroll, BorderLayout.CENTER);
+    _interactionsContainer.add(interactionsScroll, BorderLayout.CENTER);
 
     _junitErrorPanel = new JUnitPanel(_model, this);
     _javadocErrorPanel = new JavadocErrorPanel(_model, this);
@@ -3160,7 +3168,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _tabbedPane = new JTabbedPane();
     _tabbedPane.addChangeListener(new ChangeListener () {
       public void stateChanged(ChangeEvent e) {
-        if (_tabbedPane.getSelectedComponent() == _interactionsScroll) {
+        if (_tabbedPane.getSelectedComponent() == _interactionsContainer) {
           _interactionsPane.requestFocus();
         }
         else if (_tabbedPane.getSelectedComponent() == _consoleScroll) {
@@ -3190,6 +3198,41 @@ public class MainFrame extends JFrame implements OptionConstants {
     _tabs.addLast(_junitErrorPanel);
     _tabs.addLast(_javadocErrorPanel);
     _tabs.addLast(_findReplace);
+    
+    _interactionsPane.addFocusListener(new FocusAdapter() {
+      public void focusGained(FocusEvent e) {
+        _lastFocusOwner = _interactionsContainer;
+      }
+    });
+    _consolePane.addFocusListener(new FocusAdapter() {
+      public void focusGained(FocusEvent e) {
+        _lastFocusOwner = _consoleScroll;
+      }
+    });
+//    _compilerErrorPanel.addFocusListener(new LastFocusListener());
+//    _junitErrorPanel.addFocusListener(new LastFocusListener());
+//    _javadocErrorPanel.addFocusListener(new LastFocusListener());
+//    _findReplace.addFocusListener(new LastFocusListener());
+    _compilerErrorPanel.getMainPanel().addFocusListener(new FocusAdapter() {
+      public void focusGained(FocusEvent e) {
+        _lastFocusOwner = _compilerErrorPanel;
+      }
+    });
+    _junitErrorPanel.getMainPanel().addFocusListener(new FocusAdapter() {
+      public void focusGained(FocusEvent e) {
+        _lastFocusOwner = _junitErrorPanel;
+      }
+    });
+    _javadocErrorPanel.getMainPanel().addFocusListener(new FocusAdapter() {
+      public void focusGained(FocusEvent e) {
+        _lastFocusOwner = _javadocErrorPanel;
+      }
+    });
+    _findReplace.getFindField().addFocusListener(new FocusAdapter() {
+      public void focusGained(FocusEvent e) {
+        _lastFocusOwner = _findReplace;
+      }
+    });
 
     // Show compiler output pane by default
     showTab(_compilerErrorPanel);
@@ -3285,7 +3328,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     pane.addErrorCaretListener(caretListener);
 
     // add a listener to update line and column.
-    pane.addCaretListener( _posListener );
+    pane.addCaretListener(_posListener);
+    
+    // add a focus listener to the pane.
+    pane.addFocusListener(new LastFocusListener());
 
     // Add to a scroll pane
     JScrollPane scroll = new BorderlessScrollPane(pane,
@@ -3301,7 +3347,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     });*/
 
     if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
-      scroll.setRowHeaderView( new LineEnumRule(pane));
+      scroll.setRowHeaderView(new LineEnumRule(pane));
     }
 
     _defScrollPanes.put(doc, scroll);
@@ -3406,9 +3452,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     int oldLocation = _docSplitPane.getDividerLocation();
-
-    // Following line should fix "Dancing UI" bug
-    // scroll.setPreferredSize(_docSplitPane.getRightComponent().getPreferredSize());
 
     _docSplitPane.setRightComponent(scroll);
     _docSplitPane.setDividerLocation(oldLocation);
@@ -3774,6 +3817,14 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Listens to events from the debugger.
    */
   private class UIDebugListener implements DebugListener {
+    
+    // This field is used by threadLocationUpdated. We want to
+    // call centerViewOnLine the second time setSize is called
+    // on _currentDefPane if it is a new definitions pane. This
+    // actually centers the correct line instead of having it
+    // appear at the top of the screen. There ought to be a
+    // cleaner way to do this...
+    private boolean _firstCallFromSetSize;
 
     public void debuggerStarted() {
       // Only change GUI from event-dispatching thread
@@ -3818,17 +3869,23 @@ public class MainFrame extends JFrame implements OptionConstants {
           // is called, the document won't yet have positive size and we
           // don't want to scroll to a line until it does, so we wait
           // for a call to setSize.
+          //_firstCallFromSetSize = true;
           ActionListener setSizeListener = new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-              _currentDefPane.centerViewOnLine(lineNumber);
+            public void actionPerformed(ActionEvent ae) { 
+//              if (_firstCallFromSetSize) {
+//                _firstCallFromSetSize = false;
+//              }
+//              else {
+                _currentDefPane.centerViewOnLine(lineNumber);
+//              }
             }
           };
           _currentDefPane.addSetSizeListener(setSizeListener);
-
+          
           if (!_model.getActiveDocument().equals(doc)) {
             _model.setActiveDocument(doc);
           }
-
+          
           // this block occurs if the documents is already open and as such
           // has a positive size
           if (_currentDefPane.getSize().getWidth() > 0 &&
@@ -4099,7 +4156,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _currentDefPane.getUndoAction().updateUndoState();
       _currentDefPane.getRedoAction().updateRedoState();
     }
-
+    
     // NOTE: Not necessarily called from event-dispatching thread...
     //  Should figure out how to deal with invokeLater here.
     public void activeDocumentChanged(final OpenDefinitionsDocument active) {
@@ -4107,51 +4164,73 @@ public class MainFrame extends JFrame implements OptionConstants {
       // (This can be called from other threads...)
       //Runnable doCommand = new Runnable() {
       // public void run() {
-
-      _switchDefScrollPane();
-
-      boolean isModified = active.isModifiedSinceSave();
-      boolean canCompile = (!isModified && !active.isUntitled());
-      _saveAction.setEnabled(!canCompile);
-      _revertAction.setEnabled(!active.isUntitled());
-
-      // Update error highlights
-      int pos = _currentDefPane.getCaretPosition();
-      _currentDefPane.getErrorCaretListener().updateHighlight(pos);
-
-      // Update FileChoosers' directory
-      _setCurrentDirectory(active);
-
-      // Update title and position
-      updateFileTitle();
-      _currentDefPane.requestFocus();
-      _posListener.updateLocation();
-
-      // Check if modified (but only if we're not closing all files)
-      if (!_model.isClosingAllFiles()) {
+      Runnable command = new Runnable() {
+        public void run(){
+          
+          _switchDefScrollPane();
+          
+          boolean isModified = active.isModifiedSinceSave();
+          boolean canCompile = (!isModified && !active.isUntitled());
+          _saveAction.setEnabled(!canCompile);
+          _revertAction.setEnabled(!active.isUntitled());
+          
+          // Update error highlights
+          int pos = _currentDefPane.getCaretPosition();
+          _currentDefPane.getErrorCaretListener().updateHighlight(pos);
+          
+          // Update FileChoosers' directory
+          _setCurrentDirectory(active);
+          
+          // Update title and position
+          updateFileTitle();
+          _currentDefPane.requestFocus();
+          _posListener.updateLocation();
+          
+          // Check if modified (but only if we're not closing all files)
+          if (!_model.isClosingAllFiles()) {
+            try {
+              active.revertIfModifiedOnDisk();
+            }
+            catch (FileMovedException fme) {
+              _showFileMovedError(fme);
+            }
+            catch (IOException e) {
+              _showIOError(e);
+            }
+          }
+          
+          // Change Find/Replace to the new defpane
+          if (_findReplace.isDisplayed()) {
+            _findReplace.stopListening();
+            _findReplace.beginListeningTo(_currentDefPane);
+            //uninstallFindReplaceDialog(_findReplace);
+            //installFindReplaceDialog(_findReplace);
+          }
+          //  }
+          //};
+          //SwingUtilities.invokeLater(doCommand);
+        }
+      };
+      if ( !SwingUtilities.isEventDispatchThread() && !inDebugMode() ) {
+        // Can't invokeAndWait while in debug mode:
+        //  UI thread might not respond, so DrJava locks up) {
         try {
-          active.revertIfModifiedOnDisk();
+          SwingUtilities.invokeAndWait(command);
         }
-        catch (FileMovedException fme) {
-          _showFileMovedError(fme);
+        catch(InterruptedException e) {
+          /** we don't expect to be interrupted */
+          throw new UnexpectedException(e);
         }
-        catch (IOException e) {
-          _showIOError(e);
+        catch(InvocationTargetException e2) {
+          /** we don't expect _fileOpened() to throw any exceptions */
+          throw new UnexpectedException(e2);
         }
       }
-
-      // Change Find/Replace to the new defpane
-      if (_findReplace.isDisplayed()) {
-        _findReplace.stopListening();
-        _findReplace.beginListeningTo(_currentDefPane);
-        //uninstallFindReplaceDialog(_findReplace);
-        //installFindReplaceDialog(_findReplace);
+      else {
+        command.run();
       }
-      //  }
-      //};
-      //SwingUtilities.invokeLater(doCommand);
     }
-
+    
     public void interactionStarted() {
       _disableInteractionsPane();
       _runAction.setEnabled(false);
@@ -4699,6 +4778,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             tp.setDisplayed(true);
           }
           _tabbedPane.setSelectedIndex(numVisible + 2);
+          c.requestFocus();
           return;
         }
         if (tp.isDisplayed())
@@ -4956,4 +5036,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       _recentFileManager.numberItems();
     }
   }
+  
+  private class LastFocusListener extends FocusAdapter {
+    public void focusGained(FocusEvent e) {
+      _lastFocusOwner = e.getComponent();
+    }
+  };
 }

@@ -1126,7 +1126,14 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     throws DebugException
   {
     _ensureReady();
-    List listThreads = _vm.allThreads();
+    List listThreads;
+    try {
+      listThreads = _vm.allThreads();
+    }
+    catch (VMDisconnectedException vmde) {
+      // We're quitting, just pass back an empty Vector
+      return new Vector<DebugThreadData>();
+    }
 
     // get an iterator from the list returned by _vm.allThreads()
     Iterator<ThreadReference> iter = listThreads.iterator();

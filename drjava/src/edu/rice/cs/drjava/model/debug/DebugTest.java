@@ -440,14 +440,13 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
 
     // Shut down
     _shutdownWithoutSuspendedInteraction();
-    _model.removeListener(interpretListener);
     _debugger.removeListener(debugListener);
   }
 
   /**
    * Tests that the debugger will stop at a breakpoint in one class
    * when the invoking method resides in a class with the same
-   * prefix in its name.  (bug 769764)
+   * prefix in its name.  (bug #769764)
    * (ie. Class DrJavaDebugTest2 has a method which calls something
    * in class DrJavaDebugTest, which has a breakpoint.)
    */
@@ -504,7 +503,6 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
 
     // Shut down
     _shutdownWithoutSuspendedInteraction();
-    _model.removeListener(interpretListener);
     _debugger.removeListener(debugListener);
   }
 
@@ -775,7 +773,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
       _asyncResume();
-      _waitForNotifies(3);  // interactionEnded, interpreterChanged
+      _waitForNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
                             // here, we get a currThreadDied since it's the last thread
       _notifierLock.wait();
     }
