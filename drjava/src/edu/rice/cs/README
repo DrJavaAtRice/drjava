@@ -36,10 +36,35 @@ That should be it! Make sure all the environment variables are exported if
 you're using UNIX. Of course you'll probably want to set them from within
 a script or your .bashrc or .cshrc or whatever.
 
-One other possible thing: If you ever get an OutOfMemoryError when compiling
-or testing from within Ant, the way to up the maximum JVM memory size is
-to set environment variable ANT_OPTS to "-XmxSIZE", where SIZE is the 
-size you'd like. ANT_OPTS is put on the command line when invoking the JVM.
+Some potential problems and their solutions
+-------------------------------------------
+Problem: You get an OutOfMemoryError when compiling or testing
+Solution: Increase the maximum JVM memory size for the JVM Ant uses.
+To do this, add to ANT_OPTS "-XmxSIZE", where SIZE is the size you'd like.
+(See "Setting ANT_OPTS" below.)
+
+Problem: Compiling DrJava gives errors at definitions involving parametric types
+Solution: Put jsr14.jar in the bootclasspath.
+The DrJava build script automatically puts JSR14 into the classpath when compiling,
+and usually this works just fine. Sometimes (I've seen it only on MacOS X so far),
+this doesn't work. (On MacOS, it's because the standard bootclasspath already
+contains a copy of javac.) To get around this, we must put jsr14.jar in the
+bootclasspath of Ant's JVM. To do this, add to ANT_OPTS "-Xbootclasspath/p:PATH",
+where PATH is the full path to jsr14.jar (which should be
+$HOME/sf/src/edu/rice/cs/lib/jsr14.jar). 
+(See "Setting ANT_OPTS" below.)
+
+Setting ANT_OPTS
+----------------
+The contents of the environment variable ANT_OPTS are automatically put on the
+command line when invoking the JVM by Ant. There are three ways to set this variable:
+You can set it manually from the shell, you can set it automatically in your
+shell's startup file (.profile or .cshrc), or you can set it from within .antrc.
+.antrc is loaded by the ant shell script before invoking the JVM. Since ant
+is an sh shell script, .antrc must also be of that form. Here you can put in a line
+like this, for example, to set the maximum heap size to 256MB:
+
+  ANT_OPTS="$ANT_OPTS -Xmx256M"
 
 -------------------------------------------------------------------------------
 To view the most current version of this document in your Web browser, go to:
