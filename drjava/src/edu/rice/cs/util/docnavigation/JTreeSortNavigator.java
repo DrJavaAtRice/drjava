@@ -685,42 +685,6 @@ public class JTreeSortNavigator extends JTree
    * the cell renderer for this tree
    */
   private class CustomTreeCellRenderer extends DefaultTreeCellRenderer{
-//    private String    _filename;
-//    private ImageIcon _javaIcon;
-//    private ImageIcon _advancedMIcon;
-//    private ImageIcon _advancedIcon;
-//    private ImageIcon _intermediateMIcon;
-//    private ImageIcon _intermediateIcon;
-//    private ImageIcon _elementaryMIcon;
-//    private ImageIcon _elementaryIcon;
-//    private ImageIcon _otherIcon;
-//    private ImageIcon _javaMIcon;
-//    private ImageIcon _otherMIcon;
-//    private ImageIcon _projectIcon;
-    
-    /**
-     * simple constructor
-     */
-    public CustomTreeCellRenderer(){
-//      _javaIcon   = _getIconResource("JavaIcon.gif");
-//      _javaMIcon  = _getIconResource("JavaMIcon.gif");
-//      _elementaryIcon   = _getIconResource("ElementaryIcon.gif");
-//      _elementaryMIcon  = _getIconResource("ElementaryMIcon.gif");
-//      _intermediateIcon   = _getIconResource("IntermediateIcon.gif");
-//      _intermediateMIcon  = _getIconResource("IntermediateMIcon.gif");
-//      _advancedIcon   = _getIconResource("AdvancedIcon.gif");
-//      _advancedMIcon  = _getIconResource("AdvancedMIcon.gif");
-//      _otherIcon  = _getIconResource("OtherIcon.gif");
-//      _otherMIcon = _getIconResource("OtherMIcon.gif");
-    }
-    
-    private ImageIcon _getIconResource(String name) {
-      URL url = JTreeSortNavigator.class.getResource("icons/" + name);
-      if (url != null) {
-        return new ImageIcon(url);
-      }
-      return null;
-    }
     
     /**
      * returns the component for a cell
