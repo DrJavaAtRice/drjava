@@ -160,7 +160,7 @@ public final class SourceInfo {
     _endColumn = -1;
   }
 
-  public final File getFile() { return _file; }
+  final public File getFile() { return _file; }
   final public String getFilename() { return _file.getName(); }
   final public int getStartLine() { return _startLine; }
   final public int getStartColumn() { return _startColumn; }
