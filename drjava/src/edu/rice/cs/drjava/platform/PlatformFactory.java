@@ -37,48 +37,62 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
+package edu.rice.cs.drjava.platform;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030201-2036;
- *
- * @version $Id$
+ * Factory class for accessing the appropriate platform-specific implementation
+ * of the PlatformSupport interface.
+ * @see PlatformSupport
  */
-public abstract class Version {
+public class PlatformFactory {
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * A platform-appropriate implementation of the PlatformSupport interface
+   * Singleton field populated by the static factory method.
    */
-  private static final String BUILD_TIME_STRING = "20030201-2036";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+  public static final PlatformSupport ONLY = getPlatformSupport();
+  
+  /**
+   * Static factory method.
+   * @return a platform-appropriate implementation of PlatformSupport
+   */
+  private static PlatformSupport getPlatformSupport() {
+    // Check for Mac OS X.
+    String mrjVer = System.getProperty("mrj.version");
+    
+    // Check for other OS types.
+    String os = System.getProperty("os.name");
+    
+    if (mrjVer != null) {
+      // This must be a Mac, but what JDK version?
+      String jdkVer = System.getProperty("java.specification.version");
+      
+      if (jdkVer.equals("1.4")) {
+        // This is a 1.4 compliant JDK.
+        // System.out.println("Mac14Platform");
+        return Mac14Platform.ONLY;
+      }
+      else if (jdkVer.equals("1.3")) {
+        // This is a 1.3 compliant JDK.
+        // System.out.println("Mac13Platform");
+        return Mac13Platform.ONLY;
+      }
+      else {
+        // We don't know what version of the JDK this is, so use a default for OS X.
+        // System.out.println("MacPlatform");
+        return MacPlatform.ONLY;
+      }
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
+    // Check for Windows platform.
+    else if ((os != null) && (os.toLowerCase().indexOf("windows") == 0)) {
+      // This must be a Windows OS.
+      // System.out.println("WindowsPlatform");
+      return WindowsPlatform.ONLY;
+    }
+    else {
+      // This isn't one of our specifically-supported platforms, so use the default.
+      // System.out.println("DefaultPlatform");
+      return DefaultPlatform.ONLY;
     }
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

@@ -87,8 +87,6 @@ public class ConfigPanel extends JPanel {
   public void displayComponents() {
     this.setLayout(new BorderLayout());
     //this.add(_title, BorderLayout.NORTH);
-    setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
-                                               _title));
 
     JPanel panel = new JPanel();  // sits in scrollpane and compresses layout
     panel.setLayout(new BorderLayout());
@@ -97,6 +95,8 @@ public class ConfigPanel extends JPanel {
     JScrollPane scroll = new JScrollPane(panel,
                                          JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                                          JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    scroll.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+                                               _title));
     // Fix increment on scrollbar
     JScrollBar bar = scroll.getVerticalScrollBar();
     bar.setUnitIncrement(25);

@@ -202,8 +202,6 @@ public class DrJava implements OptionConstants {
    */
   public static void beginProgram(final String[] args) {
     try {
-      System.setProperty("com.apple.macos.useScreenMenuBar","true");
-
       // handleCommandLineArgs will return true if the program should load
       if (handleCommandLineArgs(args)) {
         

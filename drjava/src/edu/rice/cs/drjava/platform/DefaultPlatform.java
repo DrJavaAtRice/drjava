@@ -37,48 +37,48 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.platform;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import javax.swing.*;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030201-2036;
- *
- * @version $Id$
+ * Default platform-neutral implementation of PlatformSupport.  Most implementations
+ * will extend this class to inherit default behaviors.
  */
-public abstract class Version {
+class DefaultPlatform implements PlatformSupport {
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Singleton instance.
    */
-  private static final String BUILD_TIME_STRING = "20030201-2036";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public static DefaultPlatform ONLY = new DefaultPlatform();
+  
+  /**
+   * Private constructor for singleton pattern.
+   */
+  protected DefaultPlatform() {};
+  
+  /**
+   * Utility method to determine if the current Swing look and feel is the
+   * platform-specific look and feel for the client platform.
+   * @return true if current Swing look and feel is the system look and feel
+   */
+  public boolean isUsingSystemLAF() {
+    String sysLAF = UIManager.getSystemLookAndFeelClassName();
+    String curLAF = UIManager.getLookAndFeel().getClass().getName();
+    return (sysLAF.equals(curLAF));
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+  
+  /**
+   * Hook for performing general UI setup.  Called before all other UI setup is done.
+   * The default implementation does nothing.
+   */
+  public void beforeUISetup() {}
+  
+  /**
+   * Hook for performing general UI setup.  Called after all other UI setup is done.
+   * The default implementation does nothing.
+   * @param about the Action associated with openning the About dialog
+   * @param prefs the Action associated with openning the Preferences dialog
+   * @param quit the Action associated with quitting the DrJava application
+   */
+  public void afterUISetup(Action about, Action prefs, Action quit) {}
+}

@@ -61,6 +61,7 @@ import gj.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
+import edu.rice.cs.drjava.platform.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
@@ -867,6 +868,9 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** Creates the main window, and shows it. */
   public MainFrame() {
+    // Platform-specific UI setup.
+    PlatformFactory.ONLY.beforeUISetup();
+    
     // create position listener for line numbers in status bar
     _posListener = new PositionListener();
     _setUpStatusBar();
@@ -1003,6 +1007,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     _showConfigException();
     
     KeyBindingManager.Singleton.setShouldCheckConflict(false);
+    
+    // Platform-specific UI setup.
+    PlatformFactory.ONLY.afterUISetup(_aboutAction, _editPreferencesAction, _quitAction);
   }
   
   

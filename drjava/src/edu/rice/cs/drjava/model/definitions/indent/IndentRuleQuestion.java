@@ -99,7 +99,6 @@ public abstract class IndentRuleQuestion implements IndentRule {
    * Determines if the given rule holds in this context and calls
    * the same method on one of its child nodes.
    * @param doc DefinitionsDocument containing the line to be indented.
-   * @param reducedModel reduced model used by the document.
    */
   public void indentLine(DefinitionsDocument doc)
   {

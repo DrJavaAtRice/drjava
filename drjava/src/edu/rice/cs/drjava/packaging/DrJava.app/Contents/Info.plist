@@ -62,8 +62,6 @@
 			<string>false</string>
 			<key>com.apple.mrj.application.verify</key>
 			<string>remote</string>
-			<key>com.apple.usedebugkeys</key>
-			<string>true</string>
 		</dict>
 	</dict>
 	<key>NSJavaNeeded</key>

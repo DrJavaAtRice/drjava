@@ -10,7 +10,7 @@ The compilers-jsr14v1_0.jar and compilers-jsr14v1_2.jar files in the lib
 directory *must* be on your classpath when compiling, because classes in 
 this directory extend classes defined in these jar files.
 
-The source for these classes is stored in the following directorys:
+The source for these classes is stored in the following directories:
 src/src-jsr14v1_0/edu/rice/cs/drjava/model/compiler/
 src/src-jsr14v1_2/edu/rice/cs/drjava/model/compiler/
 

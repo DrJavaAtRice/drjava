@@ -111,7 +111,7 @@ public class ConfigFrame extends JFrame {
     JScrollPane treeScroll = new JScrollPane(_tree);
     JPanel treePanel = new JPanel();
     treePanel.setLayout(new BorderLayout());
-    treePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+    treeScroll.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
                                                          "Categories"));
     treePanel.add(treeScroll, BorderLayout.CENTER);
     cp.add(treePanel, BorderLayout.WEST);
