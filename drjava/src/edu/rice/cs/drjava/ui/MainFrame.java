@@ -646,9 +646,9 @@ public class MainFrame extends JFrame {
     // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
     File selection = _openChooser.getSelectedFile();
     if (selection != null) {
-        _openChooser.setSelectedFile(selection.getParentFile());
- _openChooser.setSelectedFile(selection);
- _openChooser.setSelectedFile(null);
+      _openChooser.setSelectedFile(selection.getParentFile());
+      _openChooser.setSelectedFile(selection);
+      _openChooser.setSelectedFile(null);
     }
     int rc = _openChooser.showOpenDialog(this);
     return getChosenFile(_openChooser, rc);
@@ -661,9 +661,9 @@ public class MainFrame extends JFrame {
     // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
     File selection = _saveChooser.getSelectedFile();
     if (selection != null) {
-        _saveChooser.setSelectedFile(selection.getParentFile());
- _saveChooser.setSelectedFile(selection);
- _saveChooser.setSelectedFile(null);
+      _saveChooser.setSelectedFile(selection.getParentFile());
+      _saveChooser.setSelectedFile(selection);
+      _saveChooser.setSelectedFile(null);
     }
     int rc = _saveChooser.showSaveDialog(this);
     return getChosenFile(_saveChooser, rc);
@@ -722,18 +722,19 @@ public class MainFrame extends JFrame {
         // Can't happen: this open document must have a file
         throw new UnexpectedException(ise);
       }
-      String title = "File already open";
-      String message = filename + " is already open.\n" +
-        "Click OK to switch to the open copy\n" +
-        "or Cancel to return to the previous file.";
-      int choice = JOptionPane.showConfirmDialog(this,
-                                                 message,
-                                                 title,
-                                                 JOptionPane.OK_CANCEL_OPTION);
-      if (choice == JOptionPane.OK_OPTION) {
+      /* This prompt is removed until it can provide a useful revert option. */
+//       String title = "File already open";
+//       String message = filename + " is already open.\n" +
+//         "Click OK to switch to the open copy\n" +
+//         "or Cancel to return to the previous file.";
+//       int choice = JOptionPane.showConfirmDialog(this,
+//                                                  message,
+//                                                  title,
+//                                                  JOptionPane.OK_CANCEL_OPTION);
+//       if (choice == JOptionPane.OK_OPTION) {
 
-        _model.setActiveDocument(openDoc);
-      }
+         _model.setActiveDocument(openDoc);
+//       }
     }
     catch (OperationCanceledException oce) {
       // Ok, don't open a file
