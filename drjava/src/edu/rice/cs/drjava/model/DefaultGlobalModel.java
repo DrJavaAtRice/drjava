@@ -100,7 +100,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     "Current document is out of sync with the Interactions Pane and should be recompiled!\n";
 
   static final String CLASSPATH_OUT_OF_SYNC_MSG =
-    "Current classpath is out of sync with the Interactions Pane and should be reset!\n";
+    "Interactions Pane is out of sync with the current classpath and should be reset!\n";
 
   // ----- FIELDS -----
 

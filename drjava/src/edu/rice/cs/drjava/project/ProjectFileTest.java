@@ -170,11 +170,16 @@ public class ProjectFileTest extends TestCase {
     /* munch the builddir tag */
     TagFactory.makeBuildDirTag(testFile, reader);
     
+    
+    File classpath_1 = new File(CLASSPATH_1);
+    File classpath_2 = new File(CLASSPATH_2);
+    File classpath_3 = new File(CLASSPATH_3);
+    
     ClasspathTag tag = TagFactory.makeClasspathTag(testFile, reader);
     assertTrue( tag.entries().length == 3 );
-    assertTrue(tag.entries()[0].getAbsolutePath().equals(CLASSPATH_1));
-    assertTrue(tag.entries()[1].getAbsolutePath().equals(CLASSPATH_2));
-    assertTrue(tag.entries()[2].getAbsolutePath().equals(CLASSPATH_3));
+    assertTrue(tag.entries()[0].getAbsolutePath().equals(classpath_1.getAbsolutePath()));
+    assertTrue(tag.entries()[1].getAbsolutePath().equals(classpath_2.getAbsolutePath()));
+    assertTrue(tag.entries()[2].getAbsolutePath().equals(classpath_3.getAbsolutePath()));
   }
   
   public void testJarTag() throws Exception {
@@ -189,8 +194,10 @@ public class ProjectFileTest extends TestCase {
     
     JarTag tag = TagFactory.makeJarTag(testFile, reader);
     
+    File entry_0 = new File(JAR_MAIN_CLASS);
+    
     assertTrue( tag.entries().length == 1 );
-    assertTrue(tag.entries()[0].getPath().equals(JAR_MAIN_CLASS));
+    assertTrue(tag.entries()[0].getPath().equals(entry_0.getPath()));
   }
   
   public void testParser() throws Exception {

@@ -710,6 +710,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     // Invoke the Interpreter JVM
     try {
       //_startupClasspath is sent in as the interactions classpath
+//      System.out.println("startup: " + _startupClasspath);
       invokeSlave(jvmArgsArray, _startupClasspath);
     }
     catch (RemoteException re) {
