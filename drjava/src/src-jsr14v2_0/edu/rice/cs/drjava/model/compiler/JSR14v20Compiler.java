@@ -223,7 +223,9 @@ public class JSR14v20Compiler implements CompilerInterface {
     }
 
     CompilerError[] errors = compilerLog.getErrors();
-
+//    System.out.println("Errors: " + compiler.errorCount());
+//    System.out.println("Warnings: " + compiler.warningCount());
+    
     // null out things to not keep pointers to dead data
     compiler = null;
     compilerLog = null;
@@ -293,7 +295,8 @@ public class JSR14v20Compiler implements CompilerInterface {
     Context context = new Context();
     Options options = Options.instance(context);
     
-    options.put("-warnunchecked", "");
+    //options.put("-warnunchecked", ""); <<< DOES NOT WORK
+    options.put("-Xlint:unchecked","");
 
     // Turn on debug -- maybe this should be setable some day?
     options.put("-g", "");
