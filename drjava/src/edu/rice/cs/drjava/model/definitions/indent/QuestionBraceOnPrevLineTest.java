@@ -47,6 +47,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
+import edu.rice.cs.util.UnexpectedException;
 
 /**
  * Test class according to the JUnit protocol. Tests the question
@@ -72,23 +74,24 @@ public class QuestionBraceOnPrevLineTest extends IndentRulesTestCase
      */
     public QuestionBraceOnPrevLineTest(String name) { super(name); }
     
-    public void setUp() { super.setUp(); }
-
+    public void setUp() { super.setUp(); }    
+    
     public void testWithParen() throws BadLocationException 
     {
-	/*
 	int i;
 
-	/* (1)* /
+	/* (1) */
 	
-	_text = "boolean method(int[] a, String b) {}";
+	_text = "method(\nint[] a, String b) {}";
 	_setDocText(_text);
 
-	assertTrue("There is no previous line.", !_rule.applyRule(_doc, 0));
-	assertTrue("There is no previous line.", !_rule.applyRule(_doc, 12));
-	assertTrue("There is no previous line.", !_rule.applyRule(_doc, _text.length() - 1));
+	try { _rule.applyRule(_doc, 0); fail("There is no brace."); }
+	catch (UnexpectedException e) {}
 
-	/* (2)* /
+	assertTrue("START's brace ('(') is on the previous line.", _rule.applyRule(_doc, 8));
+	assertTrue("START's brace ('(') is on the previous line.", _rule.applyRule(_doc, _text.length() - 1));
+
+	/* (2) */
 
 	_text = 
 	    "boolean method() {\n" +
@@ -96,10 +99,12 @@ public class QuestionBraceOnPrevLineTest extends IndentRulesTestCase
 
 	_setDocText(_text);
 
-	assertTrue("There is no previous line.", !_rule.applyRule(_doc, 18));	
+        try { _rule.applyRule(_doc, 18); fail("START has no brace."); }
+	catch (UnexpectedException e) {}
+
 	assertTrue("START's brace ('{') is on previous line.", _rule.applyRule(_doc, 19));
 
-	/* (3)* /
+	/* (3) */
 
 	_text = 
 	    "boolean method(\n" +
@@ -108,11 +113,15 @@ public class QuestionBraceOnPrevLineTest extends IndentRulesTestCase
 
 	_setDocText(_text);
 	
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 10));
-	assertTrue("START's brace ('(') is on previous line.", _rule.applyRule(_doc, 16));
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, _text.length() - 1));
+        try { _rule.applyRule(_doc, 10); fail("START has no brace."); }
+	catch (UnexpectedException e) {}
 
-	/* (4)* /
+	assertTrue("START's brace ('(') is on previous line.", _rule.applyRule(_doc, 16));
+
+        try { _rule.applyRule(_doc, _text.length()-1); fail("START has no brace."); }
+	catch (UnexpectedException e) {}
+
+	/* (4) */
 
 	_text = 
 	    "boolean method(\n" +
@@ -122,12 +131,16 @@ public class QuestionBraceOnPrevLineTest extends IndentRulesTestCase
 
 	_setDocText(_text);
 	
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 10));
+        try { _rule.applyRule(_doc, 10); fail("START has no brace."); }
+	catch (UnexpectedException e) {}
+
 	assertTrue("START's brace ('(') is on previous line.", _rule.applyRule(_doc, 16));
 	assertTrue("START's brace ('(') is two lines above.", !_rule.applyRule(_doc, 30));
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, _text.length() - 1));
 
-	/* (5)* /
+        try { _rule.applyRule(_doc, _text.length()-1); fail("START has no brace."); }
+	catch (UnexpectedException e) {}
+
+	/* (5) */
 
 	_text = 
 	    "if (<cond>) {\n" +
@@ -136,11 +149,13 @@ public class QuestionBraceOnPrevLineTest extends IndentRulesTestCase
 
 	_setDocText(_text);
 
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 10));	    
+        try { _rule.applyRule(_doc, 10); fail("START has no brace."); }
+	catch (UnexpectedException e) {}
+
 	assertTrue("START's brace ('{') is on previous line.", _rule.applyRule(_doc, 17));	    
 	assertTrue("START's brace ('(') is on previous line.", _rule.applyRule(_doc, 23));	    
 	
-	/* (6)* /
+	/* (6) */
 
 	_text = 
 	    "array[\n" +
@@ -151,32 +166,37 @@ public class QuestionBraceOnPrevLineTest extends IndentRulesTestCase
 
 	_setDocText(_text);
 
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));	    
+        try { _rule.applyRule(_doc, 0); fail("START has no brace."); }
+	catch (UnexpectedException e) {}
+
 	assertTrue("START's brace ('[') is on previous line.", _rule.applyRule(_doc, 7));	    
 	assertTrue("START's brace ('{') is on previous line.", _rule.applyRule(_doc, 28));	    
 	assertTrue("START's brace ('{') is on previous line.", _rule.applyRule(_doc, 50));	    
 	assertTrue("START's brace ('{') is three lines above.", !_rule.applyRule(_doc, _text.length() - 1));	    
-	*/
     }
 
     public void testOnlyCurly() throws BadLocationException
     {
-	/*
-	/* (1)* /
+	/* (1) */
 
 	_text =
-	    "{ /* block1* / }\n" +
-	    "{ /* block2* / }\n" +
-	    "{ /* block3* / }";
+	    "{ /* block1 */ }\n" +
+	    "{ /* block2 */ }\n" +
+	    "{ /* block3 */ }";
 	
 	_setDocText(_text);
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));	    
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 7));	    
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 28));	    
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 30));	    
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, _text.length() - 1));	    
+        try { _rule.applyRule(_doc, 0); fail("START has no brace."); }
+	catch (UnexpectedException e) {}
+        try { _rule.applyRule(_doc, 7); fail("START has no brace."); }
+	catch (UnexpectedException e) {}
+        try { _rule.applyRule(_doc, 28); fail("START has no brace."); }
+	catch (UnexpectedException e) {}
+        try { _rule.applyRule(_doc, 30); fail("START has no brace."); }
+	catch (UnexpectedException e) {}
+        try { _rule.applyRule(_doc, _text.length()-1); fail("START has no brace."); }
+	catch (UnexpectedException e) {}
 
-	/* (2)* /
+	/* (2) */
 
 	_text =
 	    "{\n" +
@@ -187,12 +207,10 @@ public class QuestionBraceOnPrevLineTest extends IndentRulesTestCase
 	
 	_setDocText(_text);
 
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));	    
 	assertTrue("START's brace ('{') is on previous line.", _rule.applyRule(_doc, 7));	    
 	assertTrue("START's brace ('{') is on previous line.", _rule.applyRule(_doc, 8));	    
 	assertTrue("START's brace ('{') is two lines above.", !_rule.applyRule(_doc, 19));	    
 	assertTrue("START's brace ('{') is four lines above.", !_rule.applyRule(_doc, _text.length() - 1));	    
-	*/
     }
 }
   

@@ -1,3 +1,5 @@
+
+
 /*BEGIN_COPYRIGHT_BLOCK
  *
  * This file is a part of DrJava. Current versions of this project are available
@@ -39,8 +41,10 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
+import javax.swing.text.BadLocationException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
+import edu.rice.cs.util.UnexpectedException;
 
 /**
  * Determines whether or not the last opened block or expression 
@@ -74,29 +78,44 @@ public class QuestionBraceOnPrevLine extends IndentRuleQuestion
     // PRE: We are not inside a multiline comment.
     // PRE: The most recently opened expression list or block
     //      was opened by a '{'.
-    
+      
     IndentInfo info = doc.getReduced().getIndentInformation();
+      
+    int distToBrace = info.distToBrace;
+      
+    // If there is no brace, s.th. went wrong!
+      
+    if (distToBrace == -1) 
+      throw new UnexpectedException(new RuntimeException("Precondition for QuestionBraceOnPrevLine " +
+							 "not met: there is no brace."));
     
-    //info.distToPrevNewline;    //______|\n_____x___
-    //info.distToNewline;        //______\n|____{_____x___
-    //info.distToBrace;          //______|{_____x___
+    int distToNewline = info.distToPrevNewline;
     
-    return true;
+    // If we are on the first line of the document,
+    // then there is no previous line. If the brace
+    // is on the same line, we return false.
+    
+    if (distToNewline == -1 || distToNewline > distToBrace) return false;
+    
+    int location = doc.getCurrentLocation();
+    String text;
 
-    /*
-     * pos := START
-     * counter := 0
-     *
-     * while (pos > DOCSTART)   
-     *    if char[pos] = '{' 
-     *       return (counter = 1)     [if pos is not in // comment!!]
-     *  
-     *    else if char[pos] = '\n'
-     *       counter := counter + 1
-     *       pos := pos - 1
-     *
-     * return false
-     *
-     */
+    try
+    {
+      text = doc.getText(location-distToBrace+1, distToBrace-distToNewline-2);
+    }
+    catch (BadLocationException e)
+    {
+      throw new UnexpectedException(new RuntimeException("doc.getText() failed."));
+    }
+
+    // There should be no further '\n' between our newline and 
+    // our brace for this rule to apply.
+ 
+    for(int i = distToBrace-distToNewline-3; i >= 0; i--)
+    {
+      if (text.charAt(i) == '\n') return false;
+    }
+    return true;
   }
 }
