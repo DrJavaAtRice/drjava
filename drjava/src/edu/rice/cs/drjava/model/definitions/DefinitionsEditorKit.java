@@ -44,7 +44,7 @@ import java.awt.*;
 import javax.swing.event.DocumentEvent;
 
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
-import edu.rice.cs.drjava.model.EventNotifier;
+import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
 /**
  * This is an editor kit for editing Java source files.
@@ -55,13 +55,13 @@ import edu.rice.cs.drjava.model.EventNotifier;
  */
 public class DefinitionsEditorKit extends DefaultEditorKit {
   
-  private EventNotifier _notifier;
+  private GlobalEventNotifier _notifier;
   
   /**
    * Creates a new editor kit with the given listeners.
    * @param notifier Keeps track of the listeners to the model
    */
-  public DefinitionsEditorKit(EventNotifier notifier) {
+  public DefinitionsEditorKit(GlobalEventNotifier notifier) {
     _notifier = notifier;
   }
   

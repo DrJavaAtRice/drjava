@@ -50,7 +50,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.indent.*;
-import edu.rice.cs.drjava.model.EventNotifier;
+import edu.rice.cs.drjava.model.GlobalEventNotifier;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.util.*;
 
@@ -67,7 +67,7 @@ public final class IndentTest extends TestCase {
   static String openBracket = IndentInfo.openBracket;
   private Integer indentLevel = new Integer(2);
   private Integer configIndent;
-  private EventNotifier _notifier;
+  private GlobalEventNotifier _notifier;
 
   /**
    * put your documentation comment here
@@ -82,7 +82,7 @@ public final class IndentTest extends TestCase {
    */
   public void setUp() {
     DrJava.getConfig().resetToDefaults();
-    _notifier = new EventNotifier();
+    _notifier = new GlobalEventNotifier();
     doc = new DefinitionsDocument(_notifier);
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,indentLevel);
   }

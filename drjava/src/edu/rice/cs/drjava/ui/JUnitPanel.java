@@ -127,16 +127,16 @@ public class JUnitPanel extends ErrorPanel{
 
 
     _mainPanel.add(scroller, BorderLayout.CENTER);
-    
+
     JPanel sidePanel = new JPanel(new BorderLayout());
     sidePanel.setBorder(new EmptyBorder(0,5,0,5)); // 5 pix padding on sides
     JPanel innerPanel = new JPanel(new BorderLayout());  // bar and checkbox
     innerPanel.setBorder(new EmptyBorder(5,0,0,0)); // 5 pix padding on top
     sidePanel.add(new JLabel("Test Progress", SwingConstants.LEFT),
                       BorderLayout.NORTH);
-       
+
     sidePanel.add(innerPanel,BorderLayout.CENTER);
-    
+
     _progressBar = new JUnitProgressBar();
     innerPanel.add(_progressBar, BorderLayout.NORTH);
     innerPanel.add(new JPanel(),BorderLayout.CENTER);
@@ -144,7 +144,7 @@ public class JUnitPanel extends ErrorPanel{
     innerPanel.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
     _mainPanel.add(sidePanel, BorderLayout.EAST);
   }
-  
+
   /**
    * Returns the JUnitErrorListPane that this panel manages.
    */
@@ -153,9 +153,9 @@ public class JUnitPanel extends ErrorPanel{
   }
 
   protected JUnitErrorModel getErrorModel(){
-    return getModel().getJUnitErrorModel();
+    return getModel().getJUnitModel().getJUnitErrorModel();
   }
-  
+
   /**
    * Updates all document styles with the attributes contained in newSet.
    * @param newSet Style containing new attributes to use.
@@ -179,7 +179,7 @@ public class JUnitPanel extends ErrorPanel{
    */
   protected void _close() {
     super._close();
-    getModel().resetJUnitErrors();
+    getModel().getJUnitModel().resetJUnitErrors();
     reset();
   }
 
@@ -187,7 +187,7 @@ public class JUnitPanel extends ErrorPanel{
    * Reset the errors to the current error information.
    */
   public void reset() {
-    JUnitErrorModel juem = _model.getJUnitErrorModel();
+    JUnitErrorModel juem = getModel().getJUnitModel().getJUnitErrorModel();
     boolean testsHaveRun = false;
     if (juem != null) {
       _numErrors = juem.getNumErrors();
@@ -207,7 +207,7 @@ public class JUnitPanel extends ErrorPanel{
     _testsSuccessful = true;
     _testCount = 0;
   }
-  
+
   /**
    * Steps the progress bar forward by one test.
    * @param successful Whether the last test was successful or not.
@@ -274,7 +274,7 @@ public class JUnitPanel extends ErrorPanel{
         throw new IllegalArgumentException("Name does not contain any parens: " + name);
       }
     }
-    
+
     private String _getClassFromName(String name) {
       int paren = name.indexOf('(');
       if ((paren > -1) && (paren < name.length())) {
@@ -284,7 +284,7 @@ public class JUnitPanel extends ErrorPanel{
         throw new IllegalArgumentException("Name does not contain any parens: " + name);
       }
     }
-    
+
     /**
      * Provides the ability to display the name of the test being run.
      */
@@ -297,7 +297,7 @@ public class JUnitPanel extends ErrorPanel{
       }
       Document doc = getDocument();
       int index = doc.getLength();
-      
+
       try {
         // Insert the classname if it has changed
         if (!className.equals(_runningTestName)) {
@@ -305,7 +305,7 @@ public class JUnitPanel extends ErrorPanel{
           doc.insertString(index, "  " + className + "\n", NORMAL_ATTRIBUTES);
           index = doc.getLength();
         }
-        
+
         // Insert the test name, remembering its position
         doc.insertString(index, "    ", NORMAL_ATTRIBUTES);
         index = doc.getLength();
@@ -458,7 +458,7 @@ public class JUnitPanel extends ErrorPanel{
     protected String _getWarningText() {
       return "Error: ";
     }
-    
+
     /**
      * Returns the string to identify an error.
      * In JUnit, errors (the normal case) indicate TestFailures.
@@ -557,7 +557,7 @@ public class JUnitPanel extends ErrorPanel{
     /**
      * Updates the UI to a new look and feel.
      * Need to update the contained popup menu as well.
-     * 
+     *
      * Currently, we don't support changing the look and feel
      * on the fly, so this is disabled.
      *
@@ -629,12 +629,12 @@ public class JUnitPanel extends ErrorPanel{
    */
   static class JUnitProgressBar extends JProgressBar {
     private boolean _hasError = false;
-    
+
     public JUnitProgressBar() {
       super();
       setForeground(getStatusColor());
     }
-    
+
     private Color getStatusColor() {
       if (_hasError) {
         return Color.red;
@@ -643,18 +643,18 @@ public class JUnitPanel extends ErrorPanel{
         return Color.green;
       }
     }
-    
+
     public void reset() {
       _hasError = false;
       setForeground(getStatusColor());
       setValue(0);
     }
-    
+
     public void start(int total) {
       setMaximum(total);
       reset();
     }
-    
+
     public void step(int value, boolean successful) {
       setValue(value);
       if (!_hasError && !successful) {

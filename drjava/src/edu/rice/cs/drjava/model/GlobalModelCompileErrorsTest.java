@@ -106,7 +106,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     for (int i = 0; i < compilers.length; i++) {
       //System.out.println("Run " + i + ": " + compilers[i]);
       setUp();
-      _model.setActiveCompiler(compilers[i]);
+      _model.getCompilerModel().setActiveCompiler(compilers[i]);
 
       try {
         runTest();
@@ -118,7 +118,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   }
 
   private String _name() {
-    return "compiler=" + _model.getActiveCompiler().getName() + ": ";
+    return "compiler=" + _model.getCompilerModel().getActiveCompiler().getName() + ": ";
   }
   
   
@@ -142,9 +142,10 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
-    _model.compileAll();
+    _model.getCompilerModel().compileAll();
     assertCompileErrorsPresent(_name(), true);
-    assertEquals("Should have 2 compiler errors", 2, _model.getNumErrors());
+    assertEquals("Should have 2 compiler errors", 2,
+                 _model.getCompilerModel().getNumErrors());
     listener.checkCompileOccurred();
 
     // Make sure .class does not exist for both files
@@ -266,8 +267,8 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
                !compiled.exists());
     
     // check that model.resetCompilerErrors works
-    _model.resetCompilerErrors();
-    CompilerErrorModel cem = _model.getCompilerErrorModel();
+    _model.getCompilerModel().resetCompilerErrors();
+    CompilerErrorModel cem = _model.getCompilerModel().getCompilerErrorModel();
     assertEquals("CompilerErrorModel has errors after reset",
                  0,
                  cem.getNumErrors());
@@ -294,7 +295,8 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     _model.addListener(listener);
     _model.compileAll();
     assertCompileErrorsPresent(_name(), true);
-    //    assertEquals("Should have 2 compiler errors", 2, _model.getNumErrors());
+    //    assertEquals("Should have 2 compiler errors", 2, 
+    //                 _model.getCompilerModel().getNumErrors());
     listener.checkCompileOccurred();
     _model.removeListener(listener);
 

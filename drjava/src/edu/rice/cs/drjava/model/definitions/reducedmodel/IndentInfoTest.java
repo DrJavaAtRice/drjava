@@ -44,7 +44,7 @@ import  junit.extensions.*;
 import  javax.swing.text.BadLocationException;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.drjava.model.EventNotifier;
+import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
 /**
  
@@ -56,14 +56,14 @@ public final class IndentInfoTest extends TestCase {
   private DefinitionsDocument _document;
   //private BraceReduction _reduced;
   private IndentInfo _info;
-  private EventNotifier _notifier;
+  private GlobalEventNotifier _notifier;
 
   public IndentInfoTest(String name) {
     super(name);
   }
 
   public void setUp() {
-    _notifier = new EventNotifier();
+    _notifier = new GlobalEventNotifier();
     _document = new DefinitionsDocument(_notifier);
   }
 

@@ -44,7 +44,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.DefaultGlobalModel;
-import edu.rice.cs.drjava.model.EventNotifier;
+import edu.rice.cs.drjava.model.GlobalEventNotifier;
 import edu.rice.cs.drjava.model.GlobalModelListener;
 import edu.rice.cs.drjava.model.repl.History.HistorySizeOptionListener;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
@@ -69,11 +69,6 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected final DefaultGlobalModel _model;
 
   /**
-   * Keeps track of any listeners to the model.
-   */
-  protected final EventNotifier _notifier;
-
-  /**
    * Creates a new InteractionsModel.
    * @param model DefaultGlobalModel to do the interpretation
    * @param control RMI interface to the Interpreter JVM
@@ -85,7 +80,6 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
           DrJava.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue(),
           DefaultGlobalModel.WRITE_DELAY);
     _model = model;
-    _notifier = model.getNotifier();
 
     // Set whether to allow "assert" statements to be run in the remote JVM.
     Boolean allow =
@@ -121,7 +115,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
    */
   public void replSystemErrPrint(String s) {
     super.replSystemErrPrint(s);
-    // TO DO: How can we print to the console without having a model field?
+    // TODO: How can we print to the console without having a model field?
     _model.systemErrPrint(s);
   }
 

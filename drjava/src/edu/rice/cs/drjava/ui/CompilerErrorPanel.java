@@ -98,20 +98,23 @@ public class CompilerErrorPanel extends ErrorPanel {
     // Also: The UI will go out of sync with reality if the active compiler
     // is later changed somewhere else. This is because there is no way
     // to listen on the active compiler.
-    _compilerChoiceBox = new JComboBox(getModel().getAvailableCompilers());
+    _compilerChoiceBox = 
+      new JComboBox(getModel().getCompilerModel().getAvailableCompilers());
     _compilerChoiceBox.setEditable(false);
-    _compilerChoiceBox.setSelectedItem(getModel().getActiveCompiler());
+    _compilerChoiceBox.setSelectedItem
+      (getModel().getCompilerModel().getActiveCompiler());
     _compilerChoiceBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         CompilerInterface compiler = (CompilerInterface)
           _compilerChoiceBox.getSelectedItem();
         if (compiler != null) {
-          getModel().setActiveCompiler(compiler);
+          getModel().getCompilerModel().setActiveCompiler(compiler);
         }
         else {
-          getModel().setActiveCompiler(NoCompilerAvailable.ONLY);
+          getModel().getCompilerModel()
+            .setActiveCompiler(NoCompilerAvailable.ONLY);
         }
-        getModel().resetCompilerErrors();
+        getModel().getCompilerModel().resetCompilerErrors();
         _compileHasOccurred = false;
         reset();
       }
@@ -154,7 +157,8 @@ public class CompilerErrorPanel extends ErrorPanel {
     
     public void optionChanged(OptionEvent<T> oce) {
       _compilerChoiceBox.removeAllItems();
-      CompilerInterface[] availCompilers = getModel().getAvailableCompilers();
+      CompilerInterface[] availCompilers = 
+        getModel().getCompilerModel().getAvailableCompilers();
       for (int i=0; i<availCompilers.length; i++) {
         _compilerChoiceBox.addItem(availCompilers[i]);
       }
@@ -174,7 +178,7 @@ public class CompilerErrorPanel extends ErrorPanel {
   }
 
   protected CompilerErrorModel<CompilerError> getErrorModel(){
-    return getModel().getCompilerErrorModel();
+    return getModel().getCompilerModel().getCompilerErrorModel();
   }
 
   /**
@@ -182,7 +186,7 @@ public class CompilerErrorPanel extends ErrorPanel {
    */
   protected void _close() {
     super._close();
-    getModel().resetCompilerErrors();
+    getModel().getCompilerModel().resetCompilerErrors();
     reset();
   }
 
@@ -190,7 +194,7 @@ public class CompilerErrorPanel extends ErrorPanel {
    * Reset the errors to the current error information.
    */
   public void reset() {
-    _numErrors = getModel().getNumErrors();
+    _numErrors = getModel().getCompilerModel().getNumErrors();
 
     _errorListPane.updateListPane(true);
   }
@@ -239,16 +243,16 @@ public class CompilerErrorPanel extends ErrorPanel {
         message = "Last compilation completed successfully.";
       }
       else {
-        if (getModel().getAvailableCompilers().length == 0) {
+        if (getModel().getCompilerModel().getAvailableCompilers().length == 0) {
           message = "No compiler is available.  Please specify one in\n" +
                     "the Preferences dialog in the Edit menu.";
         }
         else {
-          if (getModel().getActiveCompiler() == NoCompilerAvailable.ONLY) {
+          if (getModel().getCompilerModel().getActiveCompiler() == NoCompilerAvailable.ONLY) {
             message = "No compiler available.";
           }
           else {
-            message = getModel().getActiveCompiler().getName() + " compiler ready.";
+            message = getModel().getCompilerModel().getActiveCompiler().getName() + " compiler ready.";
           }
         }
       }

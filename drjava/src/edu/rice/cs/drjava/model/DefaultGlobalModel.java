@@ -97,8 +97,7 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
  *
  * @version $Id$
  */
-public class DefaultGlobalModel implements GlobalModel, OptionConstants,
-  JUnitModelCallback {
+public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
   static final String DOCUMENT_OUT_OF_SYNC_MSG =
     "Current document is out of sync with the Interactions Pane and should be recompiled!\n";
@@ -111,7 +110,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * but this has been replaced by having EN directly implement all listener
    * interfaces it supports.
    */
-  protected final EventNotifier _notifier = new EventNotifier();
+  protected final GlobalEventNotifier _notifier = new GlobalEventNotifier();
 
   // ---- Definitions fields ----
 
@@ -152,10 +151,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
   /**
    * RMI interface to the Interactions JVM.
-   * Final, but set differently in the two constructors.
    * Package private so we can access it from test cases.
    */
-  final MainJVM _interpreterControl;
+  final MainJVM _interpreterControl = new MainJVM();
 
   /**
    * Interface between the InteractionsDocument and the JavaInterpreter,
@@ -163,45 +161,56 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   protected DefaultInteractionsModel _interactionsModel;
 
+  private CompilerListener _clearInteractionsListener =
+    new CompilerListener() {
+      public void compileStarted() {}
+
+      public void compileEnded() {
+        // Only clear interactions if there were no errors
+        if ((_compilerModel.getNumErrors() == 0)
+              && _interactionsModel.interpreterUsed()
+              /* && _resetAfterCompile */) {
+          resetInteractions();
+        }
+      }
+
+      public void saveBeforeCompile() {}
+    };
+
 
   // ---- Compiler Fields ----
 
   /**
-   * Lock to prevent multiple threads from accessing the compiler at the
-   * same time.
+   * CompilerModel manages all compiler functionality.
    */
-  private Object _compilerLock = new Object();
-
-  private CompilerErrorModel _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], this);
-
-  /**
-   * The total number of current compiler errors, including both errors
-   * with and without files.
-   */
-  private int _numErrors = 0;
+  private final CompilerModel _compilerModel = new DefaultCompilerModel(this);
 
   /**
    * Whether or not to reset the interactions JVM after compiling.
    * Should only be false in test cases.
    */
-  //private boolean _resetAfterCompile = true;
+//  private boolean _resetAfterCompile = true;
 
 
   // ---- JUnit Fields ----
 
-  private JUnitErrorModel _junitErrorModel = new JUnitErrorModel(new JUnitError[0], this, false);
+  /**
+   * JUnitModel manages all JUnit functionality.
+   * TODO: remove dependence on GlobalModel
+   */
+  private final DefaultJUnitModel _junitModel =
+    new DefaultJUnitModel(this, _interpreterControl, _compilerModel, this);
 
   /**
    * If a JUnit test is currently running, this is the OpenDefinitionsDocument
    * being tested.  Otherwise this is null.
    */
 //  private OpenDefinitionsDocument _docBeingTested = null;
-  private boolean _isTestInProgress = false;
 
 
   // ---- Javadoc Fields ----
 
-  private JavadocModel _javadocModel = new DefaultJavadocModel(this);
+  protected JavadocModel _javadocModel = new DefaultJavadocModel(this);
 
   // ---- Debugger Fields ----
 
@@ -237,11 +246,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   private final SwingDocumentAdapter _consoleDocAdapter;
 
   /**
-   * The document used to display JUnit test results.
-   */
-  private final StyledDocument _junitDoc = new DefaultStyledDocument();
-
-  /**
    * A lock object to prevent print calls to System.out or System.err
    * from flooding the JVM, ensuring the UI remains responsive.
    */
@@ -271,15 +275,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * Creates a new MainJVM and starts its Interpreter JVM.
    */
   public DefaultGlobalModel() {
-    //this(new MainJVM());
 
-    _interpreterControl = new MainJVM();
     _interactionsDocAdapter = new SwingDocumentAdapter();
     _interactionsModel =
       new DefaultInteractionsModel(this, _interpreterControl,
                                    _interactionsDocAdapter);
+
     _interpreterControl.setInteractionsModel(_interactionsModel);
-    _interpreterControl.setJUnitModel(this);  // to be replaced by JUnitModel
+    _interpreterControl.setJUnitModel(_junitModel);
 
     _consoleDocAdapter = new SwingDocumentAdapter();
     _consoleDoc = new ConsoleDocument(_consoleDocAdapter);
@@ -290,6 +293,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
     _registerOptionListeners();
 
+    // Chain notifiers so that all events also go to GlobalModelListers.
+    _interactionsModel.addListener(_notifier);
+    _compilerModel.addListener(_notifier);
+    _junitModel.addListener(_notifier);
+    _javadocModel.addListener(_notifier);
+
+    // Listen to compiler to clear interactions appropriately.
+    // XXX: The tests need this to be registered after _notifier, sadly.
+    //      This is obnoxiously order-dependent, but it works for now.
+    _compilerModel.addListener(_clearInteractionsListener);
 
     // Perhaps do this in another thread to allow startup to continue...
     _interpreterControl.startInterpreterJVM();
@@ -302,47 +315,49 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * since there is substantial overhead to initializing the interpreter.
    *
    * Reset the interpreter for good measure since it's an old one.
-   * (NOTE: I'm not sure this is still correct or effective any more,
+   * (TODO: I'm not sure this is still correct or effective any more,
    *   now that we're always restarting the JVM.  Needs to be looked at...)
-   *
-  public DefaultGlobalModel(DefaultGlobalModel other) {
-    this(other._interpreterControl);
-
-    _interpreterControl.reset();
-    try {
-      _interactionsModel.setDebugPort(other.getDebugPort());
-      _interactionsModel.setWaitingForFirstInterpreter(false);
-    }
-    catch (IOException ioe) {
-      // Other model should already have a port, or it should be -1.
-      //  We shouldn't ever get an IOException here.
-      throw new UnexpectedException(ioe);
-    }
-  }*/
+   * This has been commented out because it is never used and has bitrot.
+   */
+//  public DefaultGlobalModel(DefaultGlobalModel other) {
+//    this(other._interpreterControl);
+//
+//    _interpreterControl.reset();
+//    try {
+//      _interactionsModel.setDebugPort(other.getDebugPort());
+//      _interactionsModel.setWaitingForFirstInterpreter(false);
+//    }
+//    catch (IOException ioe) {
+//      // Other model should already have a port, or it should be -1.
+//      //  We shouldn't ever get an IOException here.
+//      throw new UnexpectedException(ioe);
+//    }
+//  }
 
   /**
    * Constructs a new GlobalModel with the given MainJVM to act as an
    * RMI interface to the Interpreter JVM.  Does not attempt to start
    * the InterpreterJVM.
+   * TODO: This has been commented out because it is never used and has bitrot.
    * @param control RMI interface to the Interpreter JVM
-   *
-  public DefaultGlobalModel(MainJVM control) {
-    _interpreterControl = control;
-    _interactionsDocAdapter = new SwingDocumentAdapter();
-    _interactionsModel =
-      new DefaultInteractionsModel(this, control, _interactionsDocAdapter);
-    _interpreterControl.setInteractionsModel(_interactionsModel);
-    _interpreterControl.setJUnitModel(this);  // to be replaced by JUnitModel
-
-    _consoleDocAdapter = new SwingDocumentAdapter();
-    _consoleDoc = new ConsoleDocument(_consoleDocAdapter);
-
-    _inputListener = NoInputListener.ONLY;
-
-    _createDebugger();
-
-    _registerOptionListeners();
-  }*/
+   */
+//  public DefaultGlobalModel(MainJVM control) {
+//    _interpreterControl = control;
+//    _interactionsDocAdapter = new SwingDocumentAdapter();
+//    _interactionsModel =
+//      new DefaultInteractionsModel(this, control, _interactionsDocAdapter);
+//    _interpreterControl.setInteractionsModel(_interactionsModel);
+//    _interpreterControl.setJUnitModel(this);  // to be replaced by JUnitModel
+//
+//    _consoleDocAdapter = new SwingDocumentAdapter();
+//    _consoleDoc = new ConsoleDocument(_consoleDocAdapter);
+//
+//    _inputListener = NoInputListener.ONLY;
+//
+//    _createDebugger();
+//
+//    _registerOptionListeners();
+//  }
 
 
 
@@ -366,7 +381,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
   // getter methods for the private fields
 
-  public EventNotifier getNotifier() {
+  // TODO: remove this!
+  public GlobalEventNotifier getNotifier() {
     return _notifier;
   }
 
@@ -392,28 +408,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return _interactionsModel.getDocument();
   }
 
-  public JUnitErrorModel getJUnitErrorModel() {
-    return _junitErrorModel;
-  }
-
-  public CompilerErrorModel getJavadocErrorModel() {
-    return _javadocModel.getJavadocErrorModel();
-  }
-
   public ConsoleDocument getConsoleDocument() {
     return _consoleDoc;
   }
 
   public SwingDocumentAdapter getSwingConsoleDocument() {
     return _consoleDocAdapter;
-  }
-
-  public CompilerErrorModel getCompilerErrorModel() {
-    return _compilerErrorModel;
-  }
-
-  public StyledDocument getJUnitDocument() {
-    return _junitDoc;
   }
 
   public PageFormat getPageFormat() {
@@ -425,10 +425,24 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
 
   /**
-   * @return the current total number of errors, both with and without files.
+   * Gets the CompilerModel, which provides all methods relating to compilers.
    */
-  public int getNumErrors() {
-    return _numErrors;
+  public CompilerModel getCompilerModel() {
+    return _compilerModel;
+  }
+
+  /**
+   * Gets the JUnitModel, which provides all methods relating to JUnit testing.
+   */
+  public JUnitModel getJUnitModel() {
+    return _junitModel;
+  }
+
+  /**
+   * Gets the JavadocModel, which provides all methods relating to Javadoc.
+   */
+  public JavadocModel getJavadocModel() {
+    return _javadocModel;
   }
 
   /**
@@ -954,40 +968,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
 
   /**
-   * Returns all registered compilers that are actually available.
-   * That is, for all elements in the returned array, .isAvailable()
-   * is true.
-   * This method will never return null or a zero-length array.
-   *
-   * @see CompilerRegistry#getAvailableCompilers
-   */
-  public CompilerInterface[] getAvailableCompilers() {
-    return CompilerRegistry.ONLY.getAvailableCompilers();
-  }
-
-  /**
-   * Sets which compiler is the "active" compiler.
-   *
-   * @param compiler Compiler to set active.
-   *
-   * @see #getActiveCompiler
-   * @see CompilerRegistry#setActiveCompiler
-   */
-  public void setActiveCompiler(CompilerInterface compiler) {
-    CompilerRegistry.ONLY.setActiveCompiler(compiler);
-  }
-
-  /**
-   * Gets the compiler is the "active" compiler.
-   *
-   * @see #setActiveCompiler
-   * @see CompilerRegistry#getActiveCompiler
-   */
-  public CompilerInterface getActiveCompiler() {
-    return CompilerRegistry.ONLY.getActiveCompiler();
-  }
-
-  /**
    * Returns the current classpath in use by the Interpreter JVM.
    */
   public String getClasspathString() {
@@ -1010,6 +990,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * of the currently open documents in order that whatever version the user
    * is looking at corresponds to the class file the interactions window
    * uses.
+   * TODO: Fix out of date comment, possibly remove this here?
    */
   public File[] getSourceRootSet() {
     LinkedList<File> roots = new LinkedList<File>();
@@ -1031,16 +1012,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         // can't add it to roots
       }
     }
-    /*
-    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
 
-    if (workDir == FileOption.NULL_FILE) {
-      workDir = new File( System.getProperty("user.dir"));
-    }
-    if (workDir.isFile() && workDir.getParent() != null) {
-      workDir = workDir.getParentFile();
-    }
-    roots.add(workDir);*/
+//    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
+//
+//    if (workDir == FileOption.NULL_FILE) {
+//      workDir = new File( System.getProperty("user.dir"));
+//    }
+//    if (workDir.isFile() && workDir.getParent() != null) {
+//      workDir = workDir.getParentFile();
+//    }
+//    roots.add(workDir);
 
     return roots.toArray(new File[0]);
   }
@@ -1053,144 +1034,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   void setResetAfterCompile(boolean shouldReset) {
     _resetAfterCompile = shouldReset;
   }*/
-
-  /**
-   * Compiles all open documents, after ensuring that all are saved.
-   *
-   * This method used to only compile documents which were out of sync
-   * with their class file, as a performance optimization.  However,
-   * bug #634386 pointed out that unmodified files could depend on
-   * modified files, in which case this would not recompile a file in
-   * some situations when it should.  Since we value correctness over
-   * performance, we now always compile all open documents.
-   */
-  public void compileAll() throws IOException {
-    synchronized(_compilerLock) {
-      // Only compile if all are saved
-      if (hasModifiedDocuments()) {
-        _notifier.saveBeforeCompile();
-      }
-
-      if (hasModifiedDocuments()) {
-        // if any files haven't been saved after we told our
-        // listeners to do so, don't proceed with the rest
-        // of the compile.
-      }
-      else {
-        // Get sourceroots and all files
-        File[] sourceRoots = getSourceRootSet();
-        ArrayList<File> filesToCompile = new ArrayList<File>();
-        for (int i = 0; i < _definitionsDocs.getSize(); i++) {
-          OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
-            _definitionsDocs.getElementAt(i);
-          try {
-            filesToCompile.add(doc.getFile());
-          }
-          catch (IllegalStateException ise) {
-            // No file for this document; skip it
-          }
-        }
-        File[] files = filesToCompile.toArray(new File[0]);
-
-        _notifier.compileStarted();
-
-        try {
-          // Compile the files
-          _compileFiles(sourceRoots, files);
-        }
-        catch (Throwable t) {
-          CompilerError err = new CompilerError(t.toString(), false);
-          CompilerError[] errors = new CompilerError[] { err };
-          _distributeErrors(errors);
-        }
-        finally {
-          // Fire a compileEnded event
-          _notifier.compileEnded();
-
-          // Only clear interactions if there were no errors
-          if (_numErrors == 0) {
-            if (/*_resetAfterCompile && */
-                _interactionsModel.interpreterUsed()) {
-              resetInteractions();
-            }
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * Compile the given files (with the given sourceroots), and update
-   * the model with any errors that result.  Does not notify listeners;
-   * use compileAll or doc.startCompile instead.
-   * @param sourceRoots An array of all sourceroots for the files to be compiled
-   * @param files An array of all files to be compiled
-   */
-  protected void _compileFiles(File[] sourceRoots, File[] files) throws IOException {
-
-    CompilerError[] errors = new CompilerError[0];
-
-    CompilerInterface compiler
-      = CompilerRegistry.ONLY.getActiveCompiler();
-
-    if (files.length > 0) {
-      errors = compiler.compile(sourceRoots, files);
-    }
-    _distributeErrors(errors);
-  }
-
-  /**
-   * Creates a JUnit test suite over all currently open documents and runs it.
-   * If the class file associated with a file is not a test case, it will be ignored.
-   */
-  public void junitAll() {
-    synchronized (_compilerLock) {
-      Enumeration en = _definitionsDocs.elements();
-      HashMap<String,OpenDefinitionsDocument> classNamesToODDs =
-        new HashMap<String,OpenDefinitionsDocument>();
-      ArrayList<String> classNames = new ArrayList<String>();
-      ArrayList<File> files = new ArrayList<File>();
-      while (en.hasMoreElements()) {
-        try {
-          OpenDefinitionsDocument doc = (OpenDefinitionsDocument)en.nextElement();
-          DefinitionsDocument dd = doc.getDocument();
-          if (!doc.isUntitled()) {
-            String cn = dd.getQualifiedClassName();
-            classNames.add(cn);
-            File f;
-            try {
-              f = dd.getFile();
-            }
-            catch (FileMovedException fme) {
-              f = fme.getFile();
-            }
-            files.add(f);
-            classNamesToODDs.put(cn, doc);
-          }
-        }
-        catch (ClassNameNotFoundException cnnfe) {
-          // don't add it to the test suite
-        }
-      }
-      List<String> tests = _interpreterControl.runTestSuite(classNames, files, true);
-      ArrayList<OpenDefinitionsDocument> odds = new ArrayList<OpenDefinitionsDocument>();
-      Iterator<String> it = tests.iterator();
-      while (it.hasNext()) {
-        odds.add(classNamesToODDs.get(it.next()));
-      }
-      _notifier.junitStarted(odds);
-      _isTestInProgress = true;
-    }
-  }
-
-  /**
-   * Called when the JUnitTestManager wants to open a file that is not currently open.
-   * @param className the name of the class for which we want to find the file
-   * @return the file associated with the given class
-   */
-  public File getFileForClassName(String className) {
-    return getSourceFile(className + ".java");
-  }
 
   /**
    * Gets the Debugger used by DrJava.
@@ -1272,71 +1115,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     String root = path.getAbsolutePath();
     File f = new File(root + System.getProperty("file.separator") + filename);
     return f.exists() ? f : null;
-  }
-
-  /**
-   * Called from the JUnitTestManager if its given className is not a test case.
-   * @param isTestAll whether or not it was a use of the test all button
-   */
-  public void nonTestCase(final boolean isTestAll) {
-    synchronized(_compilerLock) {
-//      _docBeingTested = null;
-      _isTestInProgress = false;
-      _notifier.nonTestCase(isTestAll);
-      _notifier.junitEnded();
-    }
-  }
-
-  /**
-   * Called to indicate that a suite of tests has started running.
-   * @param numTests The number of tests in the suite to be run.
-   */
-  public void testSuiteStarted(final int numTests) {
-    synchronized(_compilerLock) {
-      _notifier.junitSuiteStarted(numTests);
-    }
-  }
-
-  /**
-   * Called when a particular test is started.
-   * @param testName The name of the test being started.
-   */
-  public void testStarted(final String testName) {
-    synchronized(_compilerLock) {
-      _notifier.junitTestStarted(testName);
-    }
-  }
-
-  /**
-   * Called when a particular test has ended.
-   * @param testName The name of the test that has ended.
-   * @param wasSuccessful Whether the test passed or not.
-   * @param causedError If not successful, whether the test caused an error
-   *  or simply failed.
-   */
-  public void testEnded(final String testName, final boolean wasSuccessful,
-                        final boolean causedError)
-  {
-    synchronized(_compilerLock) {
-      _notifier.junitTestEnded(testName, wasSuccessful, causedError);
-    }
-  }
-
-  /**
-   * Called when a full suite of tests has finished running.
-   * @param errors The array of errors from all failed tests in the suite.
-   */
-  public void testSuiteEnded(JUnitError[] errors) {
-    synchronized(_compilerLock) {
-//      if (_docBeingTested == null) {
-      if (_isTestInProgress) {
-        _junitErrorModel = new JUnitErrorModel(errors, this, true);
-
-//      _docBeingTested = null;
-        _isTestInProgress = false;
-        _notifier.junitEnded();
-      }
-    }
   }
 
   /**
@@ -1608,66 +1386,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       _book = null;
     }
 
-    /**
-     * Starts compiling the source.  Demands that the definitions be
-     * saved before proceeding with the compile. If the compile can
-     * proceed, a compileStarted event is fired which guarantees that
-     * a compileEnded event will be fired when the compile finishes or
-     * fails.  If the compilation succeeds, then a call is
-     * made to resetInteractions(), which fires an
-     * event of its own, contingent on the conditions.  If the current
-     * package as determined by getSourceRoot(String) and getPackageName()
-     * is invalid, compileStarted and compileEnded will fire, and
-     * an error will be put in compileErrors.
-     *
-     * (Interactions are not reset if the _resetAfterCompile field is
-     * set to false, which allows some test cases to run faster.)
-     */
     public void startCompile() throws IOException {
-      synchronized(_compilerLock) {
-        // Only compile if all are saved
-        if (hasModifiedDocuments()) {
-          _notifier.saveBeforeCompile();
-        }
-
-        if (hasModifiedDocuments()) {
-          // if any files haven't been saved after we told our
-          // listeners to do so, don't proceed with the rest
-          // of the compile.
-        }
-        else {
-          try {
-            File file = _doc.getFile();
-            File[] files = new File[] { file };
-
-            try {
-              _notifier.compileStarted();
-
-              File[] sourceRoots = new File[] { getSourceRoot() };
-
-              _compileFiles(sourceRoots, files);
-            }
-            catch (Throwable e) {
-              CompilerError err = new CompilerError(file, -1, -1, e.getMessage(), false);
-              CompilerError[] errors = new CompilerError[] { err };
-              _distributeErrors(errors);
-            }
-            finally {
-              // Fire a compileEnded event
-              _notifier.compileEnded();
-
-              // Only clear interactions if there were no errors
-              if (_numErrors == 0 && _interactionsModel.interpreterUsed()) {
-//                  && _resetAfterCompile) {
-                resetInteractions();
-              }
-            }
-          }
-          catch (IllegalStateException ise) {
-            // No file exists, don't try to compile
-          }
-        }
-      }
+      _compilerModel.compile(DefinitionsDocumentHandler.this);
     }
 
     /**
@@ -1699,7 +1419,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         }
 
         // Make sure that the compiler is done before continuing.
-        synchronized(_compilerLock) {
+        synchronized(_compilerModel) {
           // If the compile had errors, abort the run.
           if (!_compilerErrorModel.hasOnlyWarnings()) {
             return;
@@ -1750,107 +1470,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * before testing but have removed that requirement in order to allow the
      * debugging of test cases. If the classes being tested are out of
      * sync, a message is displayed.
-     *
-     * @return The results of running the tests specified in the
-     * given definitions document.
-     *
      */
     public void startJUnit() throws ClassNotFoundException, IOException {
-      synchronized(_compilerLock) {
-        //JUnit started, so throw out all JUnitErrorModels now, regardless of whether
-        //  the tests succeed, etc.
-
-        // if a test is running, don't start another one
-//        if (_docBeingTested != null) {
-        if (_isTestInProgress) {
-          return;
-        }
-
-        //reset the JUnitErrorModel
-        // TODO: does this need to be done here?
-        _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
-
-        // Compile and save before proceeding.
-        /*saveAllBeforeProceeding(GlobalModelListener.JUNIT_REASON);
-        if (areAnyModifiedSinceSave()) {
-          return;
-        }*/
-        try {
-          File testFile = getFile();
-          /*
-          compileAll();
-          if(getNumErrors() > 0) {
-            _notifier.notifyListeners(new EventNotifier.Notifier() {
-              public void notifyListener(GlobalModelListener l) {
-                l.compileErrorDuringJUnit();
-              }
-            });
-            return;
-          }
-          */
-          ArrayList<OpenDefinitionsDocument> thisList = new ArrayList<OpenDefinitionsDocument>();
-          thisList.add(this);
-          _notifier.junitStarted(thisList);
-
-          try {
-            getJUnitDocument().remove(0, getJUnitDocument().getLength() - 1);
-          }
-          catch (BadLocationException e) {
-            nonTestCase(false);
-            return;
-          }
-
-          String testFilename = testFile.getName();
-          if (testFilename.toLowerCase().endsWith(".java")) {
-            testFilename = testFilename.substring(0, testFilename.length() - 5);
-          }
-          else {
-            nonTestCase(false);
-            return;
-          }
-          String packageName;
-          try {
-            packageName = _doc.getPackageName();
-          }
-          catch (InvalidPackageException e) {
-            nonTestCase(false);
-            return;
-          }
-          if(!packageName.equals("")) {
-            testFilename = packageName + "." + testFilename;
-          }
-          ArrayList<String> classNames = new ArrayList<String>();
-          classNames.add(testFilename);
-          ArrayList<File> files = new ArrayList<File>();
-          files.add(testFile);
-          _interpreterControl.runTestSuite(classNames, files, false);
-          // Assign _docBeingTested after calling runTest because we know at
-          // this point that the interpreterJVM has registered itself. We also
-          // know that the testFinished cannot be entered before this because
-          // it has to acquire the same lock as this method.
-//          _docBeingTested = this;
-          _isTestInProgress = true;
-        }
-        catch (IllegalStateException e) {
-          // No file exists, don't try to compile and test
-          nonTestCase(false);
-          return;
-        }
-        catch (NoClassDefFoundError e) {
-          // Method getTest in junit.framework.BaseTestRunner can throw a
-          // NoClassDefFoundError (via reflection).
-//          _docBeingTested = null;
-          _isTestInProgress = false;
-          _notifier.junitEnded();
-          throw e;
-        }
-        catch (ExitingNotAllowedException enae) {
-//          _docBeingTested = null;
-          _isTestInProgress = false;
-          _notifier.junitEnded();
-          throw enae;
-        }
-      }
+      _junitModel.junit(DefinitionsDocumentHandler.this);
     }
 
     /**
@@ -1861,7 +1483,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      */
     public void generateJavadoc(FileSaveSelector saver) throws IOException {
       // Use the model's classpath, and use the EventNotifier as the listener
-      javadocDocument(this, saver, getClasspath(), getNotifier());
+      _javadocModel.javadocDocument(this, saver, getClasspath());
     }
 
     /**
@@ -2386,83 +2008,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
 
   /**
-   * Resets the compiler error state to have no errors.
-   * Also resets the JUnit error state.  Since we went to
-   * a single CompilerErrorModel and a single JUnitErrorModel,
-   * this <b>should</b> no longer be necessary
-   */
-  public void resetCompilerErrors() {
-    // Reset CompilerErrorModel (and JUnitErrorModel)
-    // TODO: see if we can get by without this function
-    _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], this);
-    _numErrors = 0;
-  }
-
-  /**
-   * Resets the junit error state to have no errors.
-   */
-  public void resetJUnitErrors() {
-    _junitErrorModel = new JUnitErrorModel(new JUnitError[0], this, false);
-  }
-
-  /**
-   * Resets the javadoc error state to have no errors.
-   */
-  public void resetJavadocErrors() {
-    _javadocModel.resetJavadocErrors();
-  }
-
-  /**
-   * Suggests a default location for generating Javadoc, based on the given
-   * document's source root.  (Appends JavadocModel.SUGGESTED_DIR_NAME to
-   * the sourceroot.)
-   * @param doc Document with the source root to use as the default.
-   * @return Suggested destination directory, or null if none could be
-   * determined.
-   */
-  public File suggestJavadocDestination(OpenDefinitionsDocument doc) {
-    return _javadocModel.suggestJavadocDestination(doc);
-  }
-
-  /**
-   * Javadocs all open documents, after ensuring that all are saved.
-   */
-  public void javadocAll(DirectorySelector select, FileSaveSelector saver,
-                         List<String> classpath,
-                         JavadocListener listener)
-    throws IOException
-  {
-    _javadocModel.javadocAll(select, saver, classpath, listener);
-  }
-
-  /**
-   * Generates Javadoc for the given document only, after ensuring it is saved.
-   */
-  public void javadocDocument(final OpenDefinitionsDocument doc,
-                              final FileSaveSelector saver,
-                              final List<String> classpath,
-                              final JavadocListener listener)
-    throws IOException
-  {
-    _javadocModel.javadocDocument(doc, saver, classpath, listener);
-  }
-
-  /**
-   * Sorts the given array of CompilerErrors and divides it into groups
-   * based on the file, giving each group to the appropriate
-   * OpenDefinitionsDocument, opening files if necessary.
-   */
-  private void _distributeErrors(CompilerError[] errors)
-    throws IOException {
-    resetCompilerErrors();
-
-    // Store number of errors
-    _numErrors = errors.length;
-
-    _compilerErrorModel = new CompilerErrorModel(errors, this);
-  }
-
-  /**
    * Creates a DefinitionsDocumentHandler for a new DefinitionsDocument,
    * using the DefinitionsEditorKit.
    * @return OpenDefinitionsDocument object for a new document
@@ -2627,33 +2172,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     File[] sourceRoots = getSourceRootSet();
     for (int i = 0; i < sourceRoots.length; i++) {
       _interactionsModel.addToClassPath(sourceRoots[i].getAbsolutePath());
-    }
-  }
-
-  /**
-   * Called when the JVM used for unit tests has registered.
-   */
-  public void junitJVMReady() {
-//    if (_docBeingTested != null) {
-    if (_isTestInProgress) {
-      JUnitError[] errors = new JUnitError[1];
-//      String fileName = null;
-//      try {
-//        fileName = _docBeingTested.getDocument().getFile().getAbsolutePath();
-//      }
-//      catch (IllegalStateException ise) {
-//      }
-//      catch (FileMovedException fme) {
-//        fileName = fme.getFile().getAbsolutePath();
-//      }
-//      errors[0] = new JUnitError(new File(fileName), -1, -1, "Previous test was interrupted", true,
-//                                 "", "No associated stack trace");
-      errors[0] = new JUnitError("Previous test was interrupted", true, "");
-      // TODO: Should this happen here?  The modified field is on the outer class.
-      _junitErrorModel = new JUnitErrorModel(errors, this, true);
-//      _docBeingTested = null;
-      _isTestInProgress = false;
-      _notifier.junitEnded();
     }
   }
 

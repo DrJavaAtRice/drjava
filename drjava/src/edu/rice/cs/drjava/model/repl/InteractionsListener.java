@@ -74,16 +74,16 @@ public interface InteractionsListener {
   public void interpreterReady();
   
   /**
-   * Called when the interpreter exits unexpectedly.
-   * @param status the exit code
-   */
-  public void interpreterExited(int status);
-  
-  /**
    * Called if the interpreter could not be reset.
    * @param t Throwable explaining why the reset failed.
    */
   public void interpreterResetFailed(Throwable t);
+  
+  /**
+   * Called when the interpreter exits unexpectedly.
+   * @param status the exit code
+   */
+  public void interpreterExited(int status);
   
   /**
    * Called when the active interpreter is changed.

@@ -55,7 +55,7 @@ import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 
 /**
  * A simple implementation of an InteractionsModel, which uses a
- * DynamicJavaAdatper directly (in the same JVM) to interpret code.
+ * DynamicJavaAdapter directly (in the same JVM) to interpret code.
  * This can be used in a standalone interface, such as
  * edu.rice.cs.drjava.ui.SimpleInteractionsWindow.
  * @version $Id$
@@ -71,11 +71,6 @@ public class SimpleInteractionsModel extends InteractionsModel {
   protected JavaInterpreter _interpreter;
 
   /**
-   * List of listeners to this document.
-   */
-  protected final Vector<InteractionsListener> _listeners;
-
-  /**
    * Creates a new InteractionsModel using a SwingDocumentAdapter.
    */
   public SimpleInteractionsModel() {
@@ -89,7 +84,6 @@ public class SimpleInteractionsModel extends InteractionsModel {
   public SimpleInteractionsModel(DocumentAdapter document) {
     super(document, 1000, WRITE_DELAY);
     _interpreter = new DynamicJavaAdapter();
-    _listeners = new Vector<InteractionsListener>();
     
     _interpreter.defineVariable("INTERPRETER", _interpreter);
   }
@@ -196,44 +190,19 @@ public class SimpleInteractionsModel extends InteractionsModel {
     interpreterReady();
   }
 
-  /**
-   * Adds a listener to this model.
-   */
-  public void addInteractionsListener(InteractionsListener l) {
-    _listeners.add(l);
-  }
-
-  /**
-   * Removes the given listener from this model.
-   */
-  public void removeInteractionsListener(InteractionsListener l) {
-    _listeners.remove(l);
-  }
-
-  /**
-   * Removes all listeners from this model.
-   */
-  public void removeAllInteractionListeners() {
-    _listeners.clear();
-  }
-
   
   /**
    * Notifies listeners that an interaction has started.
    */
   protected void _notifyInteractionStarted() {
-    for (int i=0; i < _listeners.size(); i++) {
-      _listeners.get(i).interactionStarted();
-    }
+    _notifier.interactionStarted();
   }
   
   /**
    * Notifies listeners that an interaction has ended.
    */
   protected void _notifyInteractionEnded() {
-    for (int i=0; i < _listeners.size(); i++) {
-      _listeners.get(i).interactionEnded();
-    }
+    _notifier.interactionEnded();
   }
   
   /**
@@ -241,9 +210,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
    * a syntax error.
    */
   protected void _notifySyntaxErrorOccurred(final int offset, final int length) {
-    for (int i=0; i < _listeners.size(); i++) {
-      _listeners.get(i).interactionErrorOccurred(offset, length);
-    }
+    _notifier.interactionErrorOccurred(offset, length);
   }
   
   /**

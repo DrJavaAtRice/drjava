@@ -49,7 +49,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.indent.*;
 import edu.rice.cs.drjava.CodeStatus;
-import edu.rice.cs.drjava.model.EventNotifier;
+import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
 /**
  * Test the comment lines / uncomment lines functionality.
@@ -59,7 +59,7 @@ public final class CommentTest extends TestCase {
   protected DefinitionsDocument doc;
   private Integer indentLevel = new Integer(2);
   private Integer configIndent;
-  private EventNotifier _notifier;
+  private GlobalEventNotifier _notifier;
 
   /**
    * put your documentation comment here
@@ -75,7 +75,7 @@ public final class CommentTest extends TestCase {
    */
   public void setUp() {
     DrJava.getConfig().resetToDefaults();
-    _notifier = new EventNotifier();
+    _notifier = new GlobalEventNotifier();
     doc = new DefinitionsDocument(_notifier);
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,indentLevel);
   }

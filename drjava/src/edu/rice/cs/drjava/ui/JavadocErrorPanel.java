@@ -62,7 +62,7 @@ import java.util.Arrays;
  *
  * @version $Id$
  */
-public class JavadocErrorPanel extends ErrorPanel{
+public class JavadocErrorPanel extends ErrorPanel {
 
   protected JavadocErrorListPane _errorListPane;
   private boolean _successful;
@@ -114,7 +114,7 @@ public class JavadocErrorPanel extends ErrorPanel{
   }
 
   protected CompilerErrorModel getErrorModel(){
-    return getModel().getJavadocErrorModel();
+    return getModel().getJavadocModel().getJavadocErrorModel();
   }
 
   /** Called when work begins. */
@@ -127,7 +127,7 @@ public class JavadocErrorPanel extends ErrorPanel{
    */
   protected void _close() {
     super._close();
-    getModel().resetJavadocErrors();
+    getModel().getJavadocModel().resetJavadocErrors();
     reset();
   }
 
@@ -135,7 +135,7 @@ public class JavadocErrorPanel extends ErrorPanel{
    * Reset the errors to the current error information.
    */
   public void reset() {
-    CompilerErrorModel em = _model.getJavadocErrorModel();
+    CompilerErrorModel em = getModel().getJavadocModel().getJavadocErrorModel();
     if (em != null) {
       _numErrors = em.getNumErrors();
     } else {

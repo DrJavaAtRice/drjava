@@ -45,7 +45,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.drjava.model.EventNotifier;
+import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
 /**
  * Superclass for all test classes for the indentation decision tree.
@@ -55,13 +55,13 @@ public abstract class IndentRulesTestCase extends TestCase {
 
   protected DefinitionsDocument _doc;
   private String _indent;
-  private EventNotifier _notifier;
+  private GlobalEventNotifier _notifier;
 
   /**
    * Sets up the test environment.
    */
   public void setUp() {
-    _notifier = new EventNotifier();
+    _notifier = new GlobalEventNotifier();
     _doc = new DefinitionsDocument(_notifier);
   }
   

@@ -42,7 +42,7 @@ package edu.rice.cs.drjava.model.definitions;
 import javax.swing.undo.*;
 import java.util.LinkedList;
 
-import edu.rice.cs.drjava.model.EventNotifier;
+import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
 /**
  * Extended UndoManager with increased functionality.  Can handle aggregating 
@@ -75,12 +75,12 @@ public class CompoundUndoManager extends UndoManager {
   /**
    * keeps track of the listeners to this undo manager
    */
-  private final EventNotifier _notifier;
+  private final GlobalEventNotifier _notifier;
   
   /**
    * Default constructor.
    */
-  public CompoundUndoManager(EventNotifier notifier) {
+  public CompoundUndoManager(GlobalEventNotifier notifier) {
     super();
     _compoundEdits = new LinkedList<CompoundEdit>();
     _keys = new LinkedList<Integer>();

@@ -75,7 +75,7 @@ public class TestDocGetter extends DummyGetDocuments {
 
     docs = new HashMap<File, OpenDefinitionsDocument>(texts.length * 2);
 
-    EventNotifier en = new EventNotifier();
+    GlobalEventNotifier en = new GlobalEventNotifier();
     for (int i = 0; i < texts.length; i++) {
       DefinitionsDocument doc = new DefinitionsDocument(en);
       doc.setFile(files[i]);

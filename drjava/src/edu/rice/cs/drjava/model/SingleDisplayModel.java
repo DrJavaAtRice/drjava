@@ -493,7 +493,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
     _activeDocument.checkIfClassFileInSync();
 
     // notify single display model listeners
-    getNotifier().notifyListeners(new EventNotifier.Notifier() {
+    getNotifier().notifyListeners(new GlobalEventNotifier.Notifier() {
       public void notifyListener(GlobalModelListener l) {
         // If it is a SingleDisplayModelListener, let it know that the
         //  active doc changed

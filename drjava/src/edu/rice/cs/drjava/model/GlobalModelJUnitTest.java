@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -60,66 +60,66 @@ import edu.rice.cs.util.UnexpectedException;
  */
 public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   static final boolean printMessages = false;
-  
+
   private static final String MONKEYTEST_PASS_TEXT =
-    "import junit.framework.*; " + 
+    "import junit.framework.*; " +
     "public class MonkeyTestPass extends TestCase { " +
     "  public MonkeyTestPass(String name) { super(name); } " +
     "  public void testShouldPass() { " +
     "    assertEquals(\"monkey\", \"monkey\"); " +
     "  } " +
     "}";
-  
+
   private static final String MONKEYTEST_FAIL_TEXT =
-    "import junit.framework.*; " + 
+    "import junit.framework.*; " +
     "public class MonkeyTestFail extends TestCase { " +
     "  public MonkeyTestFail(String name) { super(name); } " +
     "  public void testShouldFail() { " +
     "    assertEquals(\"monkey\", \"baboon\"); " +
     "  } " +
     "}";
-  
+
   private static final String MONKEYTEST_ERROR_TEXT =
-    "import junit.framework.*; " + 
+    "import junit.framework.*; " +
     "public class MonkeyTestError extends TestCase { " +
     "  public MonkeyTestError(String name) { super(name); } " +
     "  public void testThrowsError() { " +
     "    throw new Error(\"This is an error.\"); " +
     "  } " +
     "}";
-  
+
   private static final String MONKEYTEST_COMPILEERROR_TEXT =
-    "import junit.framework.*; " + 
+    "import junit.framework.*; " +
     "public class MonkeyTestCompileError extends TestCase { " +
     "  Object MonkeyTestFail(String name) { super(name); } " +
     "  public void testShouldFail() { " +
     "    assertEquals(\"monkey\", \"baboon\"); " +
     "  } " +
     "}";
-  
+
   private static final String NONPUBLIC_TEXT =
-    "import junit.framework.*; " + 
+    "import junit.framework.*; " +
     "public class NonPublic extends TestCase { " +
     "  public NonPublic(String name) { super(name); } " +
     "  void testShouldFail() { " +
     "    assertEquals(\"monkey\", \"baboon\"); " +
     "  } " +
     "}";
-  
+
   private static final String NON_TESTCASE_TEXT =
     "public class NonTestCase {}";
-  
+
   private static final String MONKEYTEST_INFINITE_TEXT =
-    "import junit.framework.*; " + 
+    "import junit.framework.*; " +
     "public class MonkeyTestInfinite extends TestCase { " +
     "  public MonkeyTestInfinite(String name) { super(name); } " +
     "  public void testInfinite() { " +
     "    while(true){}" +
     "  } " +
     "}";
-  
+
   private static final String HAS_MULTIPLE_TESTS_PASS_TEXT =
-    "import junit.framework.*; " + 
+    "import junit.framework.*; " +
     "public class HasMultipleTestsPass extends TestCase { " +
     "  public HasMultipleTestsPass(String name) { super(name); } " +
     "  public void testShouldPass() { " +
@@ -129,7 +129,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "    assertTrue(true); " +
     "  } " +
     "}";
-  
+
   /**
    * Constructor.
    * @param  String name
@@ -137,21 +137,21 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   public GlobalModelJUnitTest(String name) {
     super(name);
   }
-  
+
   /**
    * Creates a test suite for JUnit to run.
    * @return a test suite based on the methods in this class
    */
   public static Test suite() {
     return  new TestSuite(GlobalModelJUnitTest.class);
-  }  
-  
+  }
+
   /**
    * Tests that a JUnit file with no errors is reported to have no errors.
    */
   public void testNoJUnitErrors() throws Exception {
     if (printMessages) System.out.println("----testNoJUnitErrors-----");
-    
+
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     doc.saveFile(new FileSelector(file));
@@ -171,16 +171,16 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     if (printMessages) System.out.println("after test");
     assertEquals("test case should have no errors reported",
                  0,
-                 _model.getJUnitErrorModel().getNumErrors());
+                 _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     _model.removeListener(listener);
   }
-  
+
   /**
    * Tests that a JUnit file with an error is reported to have an error.
    */
   public void testOneJUnitError() throws Exception {
     if (printMessages) System.out.println("----testOneJUnitError-----");
-    
+
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
     final File file = new File(_tempDir, "MonkeyTestFail.java");
     doc.saveFile(new FileSelector(file));
@@ -196,20 +196,20 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
       listener.wait();
     }
     if (printMessages) System.out.println("after test");
-    
+
     assertEquals("test case has one error reported",
                  1,
-                 _model.getJUnitErrorModel().getNumErrors());
+                 _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     _model.removeListener(listener);
   }
-  
+
   /**
    * Tests that a test class which throws a *real* Error (not an Exception)
    * is handled correctly.
    */
   public void testRealError() throws Exception {
     if (printMessages) System.out.println("----testRealError-----");
-    
+
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_ERROR_TEXT);
     final File file = new File(_tempDir, "MonkeyTestError.java");
     doc.saveFile(new FileSelector(file));
@@ -225,27 +225,27 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
       listener.wait();
     }
     if (printMessages) System.out.println("after test");
-    
+
     assertEquals("test case has one error reported",
                  1,
-                 _model.getJUnitErrorModel().getNumErrors());
+                 _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     listener.assertJUnitEndCount(1);
     _model.removeListener(listener);
   }
- 
+
   /**
    * Tests that the ui is notified to put up an error dialog if JUnit
    * is run on a non-TestCase.
    */
   public void testNonTestCaseError() throws Exception {
     if (printMessages) System.out.println("----testNonTestCaseError-----");
-    
+
     final OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
     final File file = new File(_tempDir, "NonTestCase.java");
     doc.saveFile(new FileSelector(file));
-    
+
     JUnitTestListener listener = new JUnitNonTestListener();
-    
+
     _model.addListener(listener);
     if (printMessages) System.out.println("before compile");
     // Doesn't reset interactions because interpreter is not used
@@ -258,7 +258,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
       listener.wait();
     }
     if (printMessages) System.out.println("after test");
-    
+
     // Check events fired
     listener.assertJUnitEndCount(1);
     listener.assertNonTestCaseCount(1);
@@ -267,27 +267,27 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitTestEndedCount(0);
     _model.removeListener(listener);
   }
-  
+
   /**
    * Tests that the ui is notified to put up an error dialog if JUnit
    * is run on a non-public TestCase.
    */
   public void testResultOfNonPublicTestCase() throws Exception {
     if (printMessages) System.out.println("----testResultOfNonPublicTestCase-----");
-    
+
     final OpenDefinitionsDocument doc = setupDocument(NONPUBLIC_TEXT);
     final File file = new File(_tempDir, "NonPublic.java");
     doc.saveFile(new FileSelector(file));
-    
+
     JUnitTestListener listener = new JUnitTestListener();
-    
+
     _model.addListener(listener);
-    
+
     if (printMessages) System.out.println("before compile");
     // Doesn't reset interactions because interpreter is not used
     doc.startCompile();
     if (printMessages) System.out.println("after compile");
-    
+
     synchronized(listener) {
       doc.startJUnit();
       listener.assertJUnitStartCount(1);
@@ -295,27 +295,27 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
       listener.wait();
     }
     if (printMessages) System.out.println("after test");
-    
+
     //System.err.println(testResults.toString());
-    
+
     // Check events fired
     listener.assertJUnitEndCount(1);
-   
+
     assertEquals("test case has one error reported",
                  1,
-                 _model.getJUnitErrorModel().getNumErrors());
+                 _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     _model.removeListener(listener);
   }
-  
+
   public void testDoNotRunJUnitIfFileHasBeenMoved() throws Exception {
     if (printMessages) System.out.println("----testDoNotRunJUnitIfFileHasBeenMoved-----");
-    
+
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     doc.saveFile(new FileSelector(file));
-    
+
     TestListener listener = new TestListener();
-    
+
     _model.addListener(listener);
     file.delete();
     try {
@@ -328,7 +328,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     }
     _model.removeListener(listener);
   }
-  
+
   /**
    * Tests a document that has no corresponding class file.
    */
@@ -355,18 +355,18 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitTestEndedCount(0);
     _model.removeListener(listener);
   }
-  
+
   /**
    * Tests that an infinite loop in a test case can be aborted by clicking
    * the Reset button.
    */
   public void testInfiniteLoop() throws Exception {
     if (printMessages) System.out.println("----testInfiniteLoop-----");
-    
+
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_INFINITE_TEXT);
     final File file = new File(_tempDir, "MonkeyTestInfinite.java");
     doc.saveFile(new FileSelector(file));
-    
+
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     TestListener listener2 = new TestListener() {
       public void junitStarted(List<OpenDefinitionsDocument> odds) {
@@ -408,7 +408,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     if (printMessages) System.out.println("before compile");
     // Doesn't reset interactions because interpreter is not used
     doc.startCompile();
-    if (_model.getNumErrors() > 0) {
+    if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
     if (printMessages) System.out.println("after compile");
@@ -423,15 +423,15 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     if (printMessages) System.out.println("after test");
     _model.removeListener(listener2);
     listener2.assertJUnitEndCount(1);
-  }  
-  
+  }
+
   /**
    * Tests that when a JUnit file with no errors, after being saved and compiled,
    * has it's contents replaced by a test that should fail, will pass all tests.
    */
   public void testUnsavedAndUnCompiledChanges() throws Exception {
     if (printMessages) System.out.println("----testUnsavedAndUnCompiledChanges-----");
-    
+
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     doc.saveFile(new FileSelector(file));
@@ -449,22 +449,22 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     }
     if (printMessages) System.out.println("after test");
     _model.removeListener(listener);
-    
+
     assertEquals("test case should have no errors reported after modifying",
                  0,
-                 _model.getJUnitErrorModel().getNumErrors());
+                 _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     doc.saveFile(new FileSelector(file));
-    
+
     listener = new JUnitTestListener();
     _model.addListener(listener);
     synchronized(listener) {
       doc.startJUnit();
       listener.wait();
     }
-    
+
     assertEquals("test case should have no errors reported after saving",
                  0,
-                 _model.getJUnitErrorModel().getNumErrors());
+                 _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     _model.removeListener(listener);
   }
 
@@ -475,7 +475,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     JUnitNonTestListener listener = new JUnitNonTestListener(true);
     _model.addListener(listener);
     synchronized (listener) {
-      _model.junitAll();
+      _model.getJUnitModel().junitAll();
       listener.wait();
     }
     listener.assertNonTestCaseCount(1);
@@ -494,7 +494,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     doc.saveFile(new FileSelector(file));
     _model.addListener(listener);
     synchronized (listener) {
-      _model.junitAll();
+      _model.getJUnitModel().junitAll();
       listener.wait();
     }
     listener.assertNonTestCaseCount(1);
@@ -519,7 +519,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     doc.startCompile();
     _model.addListener(listener);
     synchronized (listener) {
-      _model.junitAll();
+      _model.getJUnitModel().junitAll();
       listener.wait();
     }
     listener.assertNonTestCaseCount(0);
@@ -535,7 +535,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     doc.startCompile();
     _model.addListener(listener);
     synchronized (listener) {
-      _model.junitAll();
+      _model.getJUnitModel().junitAll();
       listener.wait();
     }
     listener.assertNonTestCaseCount(0);
@@ -560,7 +560,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     doc.startCompile();
     _model.addListener(listener);
     synchronized (listener) {
-      _model.junitAll();
+      _model.getJUnitModel().junitAll();
       listener.wait();
     }
     listener.assertNonTestCaseCount(0);
@@ -568,8 +568,8 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitTestStartedCount(2);
     listener.assertJUnitTestEndedCount(2);
     _model.removeListener(listener);
-    
-    JUnitErrorModel jem = _model.getJUnitErrorModel();
+
+    JUnitErrorModel jem = _model.getJUnitModel().getJUnitErrorModel();
     assertEquals("test case has one error reported", 2, jem.getNumErrors());
     assertTrue("first error should be an error", jem.getError(0).isWarning());
     assertFalse("second error should be a failure", jem.getError(1).isWarning());

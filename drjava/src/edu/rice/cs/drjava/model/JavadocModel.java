@@ -59,6 +59,24 @@ public interface JavadocModel {
   public static final String SUGGESTED_DIR_NAME = "doc";
   
   /**
+   * Add a JavadocListener to the model.
+   * @param listener a listener that reacts to Javadoc events
+   */
+  public void addListener(JavadocListener listener);
+
+  /**
+   * Remove a JavadocListener from the model.  If the listener is not currently
+   * listening to this model, this method has no effect.
+   * @param listener a listener that reacts to Javadoc events
+   */
+  public void removeListener(JavadocListener listener);
+
+  /**
+   * Removes all JavadocListeners from this model.
+   */
+  public void removeAllListeners();
+  
+  /**
    * Accessor for the Javadoc error model.
    */
   public CompilerErrorModel getJavadocErrorModel();
@@ -91,8 +109,7 @@ public interface JavadocModel {
    * @throws IOException if there is a problem manipulating files
    */
   public void javadocAll(DirectorySelector select, FileSaveSelector saver,
-                         List<String> classpath,
-                         JavadocListener listener)
+                         List<String> classpath)
     throws IOException;
   
   /**
@@ -109,7 +126,6 @@ public interface JavadocModel {
    */
   public void javadocDocument(final OpenDefinitionsDocument doc,
                               final FileSaveSelector saver,
-                              final List<String> classpath,
-                              final JavadocListener listener)
+                              final List<String> classpath)
     throws IOException;
 }

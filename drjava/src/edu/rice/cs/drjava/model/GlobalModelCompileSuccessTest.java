@@ -102,7 +102,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
     for (int i = 0; i < compilers.length; i++) {
       //System.out.println("Run " + i + ": " + compilers[i]);
       setUp();
-      _model.setActiveCompiler(compilers[i]);
+      _model.getCompilerModel().setActiveCompiler(compilers[i]);
 
       try {
         runTest();
@@ -114,7 +114,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
   }
 
   private String _name() {
-    return "compiler=" + _model.getActiveCompiler().getName() + ": ";
+    return "compiler=" + _model.getCompilerModel().getActiveCompiler().getName() + ": ";
   }
   
 
@@ -137,8 +137,8 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
-    _model.compileAll();
-    if (_model.getNumErrors() > 0) {
+    _model.getCompilerModel().compileAll();
+    if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
     assertCompileErrorsPresent(_name(), false);
@@ -174,7 +174,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
     doc1.startCompile();
-    if (_model.getNumErrors() > 0) {
+    if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
     _model.removeListener(listener);
@@ -186,7 +186,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
     CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
     _model.addListener(listener2);
     doc2.startCompile();
-    if (_model.getNumErrors() > 0) {
+    if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
     assertCompileErrorsPresent(_name(), false);
@@ -223,7 +223,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
     doc1.startCompile();
-    if (_model.getNumErrors() > 0) {
+    if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
     _model.removeListener(listener);
@@ -236,7 +236,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
     CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
     _model.addListener(listener2);
     doc2.startCompile();
-    if (_model.getNumErrors() > 0) {
+    if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
     assertCompileErrorsPresent(_name(), false);
@@ -267,14 +267,14 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
     doc.startCompile();
-    if (_model.getNumErrors() > 0) {
+    if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
     _model.removeListener(listener);
     CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
     _model.addListener(listener2);
     doc2.startCompile();
-    if (_model.getNumErrors() > 0) {
+    if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
     
@@ -324,7 +324,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
       CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
       _model.addListener(listener2);
       doc.startCompile();
-      if (_model.getNumErrors() > 0) {
+      if (_model.getCompilerModel().getNumErrors() > 0) {
         fail("compile failed: " + getCompilerErrorString());
       }
       _model.removeListener(listener2);
@@ -358,8 +358,8 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
       
       CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
       _model.addListener(listener);
-      _model.compileAll();
-      if (_model.getNumErrors() > 0) {
+      _model.getCompilerModel().compileAll();
+      if (_model.getCompilerModel().getNumErrors() > 0) {
         fail("compile failed: " + getCompilerErrorString());
       }
       assertCompileErrorsPresent(_name(), false);
@@ -376,7 +376,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
    * Returns whether the currently active compiler supports generics.
    */
   protected boolean _isGenericCompiler() {
-    String name = _model.getActiveCompiler().getClass().getName();
+    String name = _model.getCompilerModel().getActiveCompiler().getClass().getName();
     for (int i=0; i < CompilerRegistry.GENERIC_JAVA_COMPILERS.length; i++) {
       if (name.equals(CompilerRegistry.GENERIC_JAVA_COMPILERS[i])) {
         //System.out.println(name + " supports generics");

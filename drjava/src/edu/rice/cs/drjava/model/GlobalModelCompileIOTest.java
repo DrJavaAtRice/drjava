@@ -91,7 +91,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     assertTrue("should not be in sync before compile",
                !doc.checkIfClassFileInSync());
     doc.startCompile();
-    if (_model.getNumErrors() > 0) {
+    if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
     _model.removeListener(listener);
@@ -135,7 +135,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     assertTrue("should not be in sync before compile",
                !doc.checkIfClassFileInSync());
     doc.startCompile();
-    if (_model.getNumErrors() > 0) {
+    if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
     _model.removeListener(listener);

@@ -57,7 +57,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.DefaultGlobalModel;
 import edu.rice.cs.drjava.model.FileMovedException;
-import edu.rice.cs.drjava.model.EventNotifier;
+import edu.rice.cs.drjava.model.GlobalEventNotifier;
 import edu.rice.cs.drjava.model.OperationCanceledException;
 
 
@@ -169,16 +169,16 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   /**
    * keeps track of the listeners to this model
    */
-  private final EventNotifier _notifier;
+  private final GlobalEventNotifier _notifier;
 
   /**
    * Constructor.
    */
-  public DefinitionsDocument(EventNotifier notifier) {
+  public DefinitionsDocument(GlobalEventNotifier notifier) {
     this(DefaultGlobalModel.INDENTER, notifier);
   }
 
-  public DefinitionsDocument(Indenter i, EventNotifier notifier) {
+  public DefinitionsDocument(Indenter i, GlobalEventNotifier notifier) {
     super();
     _indenter = i;
     _file = null;

@@ -475,7 +475,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent e) {
       new Thread("Running JUnit Tests") {
         public void run() {
-          _model.junitAll();
+          _model.getJUnitModel().junitAll();
         }
       }.start();
     }
@@ -485,9 +485,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _javadocAllAction = new AbstractAction("Javadoc All Documents") {
       public void actionPerformed(ActionEvent ae) {
         try {
-          File suggestedDir = _model.suggestJavadocDestination(_model.getActiveDocument());
+          JavadocModel jm = _model.getJavadocModel();
+          File suggestedDir =
+            jm.suggestJavadocDestination(_model.getActiveDocument());
           _javadocSelector.setSuggestedDir(suggestedDir);
-          _model.javadocAll(_javadocSelector, _saveSelector, _model.getClasspath(), _model.getNotifier());
+          jm.javadocAll(_javadocSelector, _saveSelector, _model.getClasspath());
         }
         catch (IOException ioe) {
           _showIOError(ioe);
@@ -1291,11 +1293,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     int y = config.getSetting(WINDOW_Y).intValue();
     int width = config.getSetting(WINDOW_WIDTH).intValue();
     int height = config.getSetting(WINDOW_HEIGHT).intValue();
-    
+
     // Bounds checking.
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    
+
     final int menubarHeight = 24;
     if (height > screenSize.height - menubarHeight) {
       // Too tall, so resize
@@ -1305,12 +1307,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Too wide, so resize
       width = screenSize.width;
     }
-    
+
     // I assume that we want to be contained on the default screen.
     // TODO: support spanning screens in multi-screen setups.
     Rectangle bounds = GraphicsEnvironment.getLocalGraphicsEnvironment()
       .getDefaultScreenDevice().getDefaultConfiguration().getBounds();
-    
+
     if (x == Integer.MAX_VALUE) {
       // magic value for "not set" - center.
       x = (bounds.width - width + bounds.x) / 2;
@@ -1319,7 +1321,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // magic value for "not set" - center.
       y = (bounds.height - height + bounds.y) / 2;
     }
-    
+
     if (x < bounds.x) {
       // Too far left, move to left edge.
       x = bounds.x;
@@ -1336,7 +1338,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Too far down, move to bottom edge.
       y = bounds.height - height + bounds.y;
     }
-    
+
     // Set to the new correct size and location
     setBounds(x, y, width, height);
 
@@ -1431,7 +1433,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 //          _showError(ex, "Could Not Set Look and Feel",
 //                     "An error occurred while trying to set the look and feel.");
 //        }
-        
+
         String title = "Apply Look and Feel";
         String msg = "Look and feel changes will take effect when you restart DrJava.";
         if (config.getSetting(WARN_CHANGE_LAF).booleanValue()) {
@@ -1955,7 +1957,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       config.setSetting(WINDOW_X, WINDOW_X.getDefault());
       config.setSetting(WINDOW_Y, WINDOW_Y.getDefault());
     }
-      
+
     // Panel heights.
     if (_debugPanel != null) {
       config.setSetting(DEBUG_PANEL_HEIGHT, new Integer(_debugPanel.getHeight()));
@@ -1991,7 +1993,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
         try {
-          _model.compileAll();
+          _model.getCompilerModel().compileAll();
         }
         catch (FileMovedException fme) {
           _showFileMovedError(fme);

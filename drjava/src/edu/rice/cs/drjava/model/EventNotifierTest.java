@@ -50,10 +50,10 @@ import edu.rice.cs.drjava.model.GlobalModelTestCase.TestListener;
  */
 public final class EventNotifierTest extends TestCase {
   
-  protected EventNotifier _notifier;
+  protected GlobalEventNotifier _notifier;
   
   public void setUp() {
-    _notifier = new EventNotifier();
+    _notifier = new GlobalEventNotifier();
   }
   
   public void tearDown() {
@@ -81,7 +81,7 @@ public final class EventNotifierTest extends TestCase {
     
     _notifier.addListener(listener1);
     _notifier.addListener(listener2);
-    _notifier.notifyListeners(new EventNotifier.Notifier() {
+    _notifier.notifyListeners(new GlobalEventNotifier.Notifier() {
       public void notifyListener(GlobalModelListener l) {
         l.junitSuiteStarted(1);
       }
@@ -91,7 +91,7 @@ public final class EventNotifierTest extends TestCase {
 
     //remove one listener and fire another event
     _notifier.removeListener(listener2);
-    _notifier.notifyListeners(new EventNotifier.Notifier() {
+    _notifier.notifyListeners(new GlobalEventNotifier.Notifier() {
       public void notifyListener(GlobalModelListener l) {
         l.interpreterExited(1);
       }
@@ -116,7 +116,7 @@ public final class EventNotifierTest extends TestCase {
 
     // Make sure trueListener says yes
     _notifier.addListener(trueListener);
-    boolean result = _notifier.pollListeners(new EventNotifier.Poller() {
+    boolean result = _notifier.pollListeners(new GlobalEventNotifier.Poller() {
       public boolean poll(GlobalModelListener l) {
         return l.canAbandonFile(null);
       }
@@ -125,7 +125,7 @@ public final class EventNotifierTest extends TestCase {
     
     // Make sure falseListener says no
     _notifier.addListener(falseListener);
-    result = _notifier.pollListeners(new EventNotifier.Poller() {
+    result = _notifier.pollListeners(new GlobalEventNotifier.Poller() {
       public boolean poll(GlobalModelListener l) {
         return l.canAbandonFile(null);
       }

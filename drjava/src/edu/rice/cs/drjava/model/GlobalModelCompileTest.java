@@ -83,8 +83,8 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
-    _model.compileAll();
-    if (_model.getNumErrors() > 0) {
+    _model.getCompilerModel().compileAll();
+    if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
     assertCompileErrorsPresent("compile should succeed", false);
@@ -111,8 +111,8 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
     _model.addListener(listener);
     synchronized(listener) {
-      _model.compileAll();
-      if (_model.getNumErrors() > 0) {
+      _model.getCompilerModel().compileAll();
+      if (_model.getCompilerModel().getNumErrors() > 0) {
         fail("compile failed: " + getCompilerErrorString());
       }
       listener.wait();
@@ -242,7 +242,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     
     _model.addListener(listener);
     doc.startCompile();
-    if (_model.getNumErrors() > 0) {
+    if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
 
@@ -326,7 +326,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     assertModified(true, doc2);
     _model.addListener(listener);
     doc.startCompile();
-    if (_model.getNumErrors() > 0) {
+    if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
     assertTrue(!_model.hasModifiedDocuments());

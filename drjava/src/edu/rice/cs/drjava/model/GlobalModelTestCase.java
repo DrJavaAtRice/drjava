@@ -285,7 +285,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _model.addListener(listener);
     synchronized(listener) {
       doc.startCompile();
-      if (_model.getNumErrors() > 0) {
+      if (_model.getCompilerModel().getNumErrors() > 0) {
         fail("compile failed: " + getCompilerErrorString());
       }
       listener.wait();
@@ -301,7 +301,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   protected String getCompilerErrorString() {
     StringBuffer buf = new StringBuffer();
     buf.append(" compiler error(s):\n");
-    buf.append(_model.getCompilerErrorModel().toString());
+    buf.append(_model.getCompilerModel().getCompilerErrorModel().toString());
     return buf.toString();
   }
 
@@ -452,7 +452,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
   protected void assertCompileErrorsPresent(String name, boolean b) {
     //CompilerError[] errors = _model.getCompileErrors();
-    int numErrors = _model.getNumErrors();
+    int numErrors = _model.getCompilerModel().getNumErrors();
 
     if (name.length() > 0) {
       name += ": ";

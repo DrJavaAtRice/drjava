@@ -64,6 +64,12 @@ import edu.rice.cs.util.text.DocumentAdapterException;
  * @version $Id$
  */
 public abstract class InteractionsModel implements InteractionsModelCallback {
+
+  /**
+   * Keeps track of any listeners to the model.
+   */
+  protected final InteractionsEventNotifier _notifier =
+    new InteractionsEventNotifier();
   
   protected static final String _newLine = System.getProperty("line.separator");
   
@@ -117,7 +123,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * @param historySize Number of lines to store in the history
    * @param writeDelay Number of milliseconds to wait after each println
    */
-  public InteractionsModel(DocumentAdapter adapter, int historySize, int writeDelay) {
+  public InteractionsModel(DocumentAdapter adapter, int historySize,
+                           int writeDelay) {
     _writeDelay = writeDelay;
     _document = new InteractionsDocument(adapter, historySize);
     _waitingForFirstInterpreter = true;
@@ -126,6 +133,30 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _writerLock = new Object();
     _debugPort = -1;
     _debugPortSet = false;
+  }
+  
+  /**
+   * Add a JavadocListener to the model.
+   * @param listener a listener that reacts to Interactions events
+   */
+  public void addListener(InteractionsListener listener) {
+    _notifier.addListener(listener);
+  }
+
+  /**
+   * Remove an InteractionsListener from the model.  If the listener is not
+   * currently listening to this model, this method has no effect.
+   * @param listener a listener that reacts to Interactions events
+   */
+  public void removeListener(InteractionsListener listener) {
+    _notifier.removeListener(listener);
+  }
+
+  /**
+   * Removes all InteractionsListeners from this model.
+   */
+  public void removeAllInteractionListeners() {
+    _notifier.removeAllListeners();
   }
   
   /**

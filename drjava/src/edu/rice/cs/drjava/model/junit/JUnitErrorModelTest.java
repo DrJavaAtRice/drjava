@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -78,20 +78,20 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "}";
 
   private static final String NONPUBLIC_TEXT =
-    "import junit.framework.*; " + 
+    "import junit.framework.*; " +
     "public class NonPublic extends TestCase { " +
     "  public NonPublic(String name) { super(name); } " +
     "  void testShouldFail() { " +
     "    assertEquals(\"monkey\", \"baboon\"); " +
     "  } " +
     "}";
-    
+
   private static final String ABC_CLASS_ONE =
     "class ABC extends java.util.Vector {}\n";
-  
+
   private static final String ABC_CLASS_TWO =
     "class ABC extends java.util.ArrayList {}\n";
-  
+
   private static final String ABC_TEST =
     "public class ABCTest extends junit.framework.TestCase {\n" +
     "  public void testABC() {\n" +
@@ -103,12 +103,12 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
    * Tests that the errors array contains all encountered failures and errors
    * in the right order.
    */
-  public void testErrorsArrayInOrder() throws Exception { 
+  public void testErrorsArrayInOrder() throws Exception {
     _m = new JUnitErrorModel(new JUnitError[0], _model, false);
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
     final File file = new File(_tempDir, "MonkeyTestFail.java");
     doc.saveFile(new FileSelector(file));
-    
+
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     // Interactions are not reset because interpreter wasn't used
@@ -120,12 +120,13 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
       listener.wait();
     }
     // Clear document so we can make sure it's written to after startJUnit
-    _model.getJUnitDocument().remove(0, _model.getJUnitDocument().getLength() - 1);
+    _model.getJUnitModel().getJUnitDocument().remove
+      (0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);
     //final TestResult testResults = doc.startJUnit();
-    
+
     //_m = new JUnitErrorModel(doc.getDocument(), "MonkeyTestFail", testResults);
-    _m = _model.getJUnitErrorModel();
-    
+    _m = _model.getJUnitModel().getJUnitErrorModel();
+
     //JUnitError[] errorsWithPositions = _m.getErrorsWithPositions();
     //JUnitError[] errorsWithoutPositions = _m.getErrorsWithoutPositions();
     //assertTrue("testResults should not be null", testResults != null);
@@ -133,7 +134,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     assertEquals("the test results should have one error and one failure "+_m.getNumErrors(),
                  2,
                   _m.getNumErrors());
-    
+
     assertEquals("test case has one error reported" + _m.getError(0).message(),
                  _m.getError(0).isWarning(),
                  false
@@ -156,19 +157,19 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc = setupDocument(ABC_CLASS_ONE);
     final File file = new File(_tempDir, "ABC1.java");
     doc.saveFile(new FileSelector(file));
-    
+
     OpenDefinitionsDocument doc2 = setupDocument(ABC_TEST);
     final File file2 = new File(_tempDir, "ABCTest.java");
     doc2.saveFile(new FileSelector(file2));
-    
+
     // Compile the correct ABC and the test
     //  (won't reset because the interactions pane has not been used)
-    _model.compileAll();
-    
+    _model.getCompilerModel().compileAll();
+
     OpenDefinitionsDocument doc3 = setupDocument(ABC_CLASS_TWO);
     final File file3 = new File(_tempDir, "ABC2.java");
     doc3.saveFile(new FileSelector(file3));
-    
+
     // Compile the incorrect ABC
     doc3.startCompile();
 
@@ -181,7 +182,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     }
 
     assertEquals("test case has one error reported", 1,
-                 _model.getJUnitErrorModel().getNumErrors());
+                 _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     _model.removeListener(listener);
   }
 }

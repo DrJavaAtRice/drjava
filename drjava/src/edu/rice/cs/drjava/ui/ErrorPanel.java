@@ -77,6 +77,9 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   /** The total number of errors in the list */
   protected int _numErrors;
   protected JCheckBox _showHighlightsCheckBox;
+  
+  // TODO: is this necessary, or can we get by with installing a domain-specific
+  //       model in the constructor - e.g. JavadocModel
   protected SingleDisplayModel _model;
 
   /** Highlight painter for selected list items. */
