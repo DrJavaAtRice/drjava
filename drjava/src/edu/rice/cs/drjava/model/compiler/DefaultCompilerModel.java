@@ -383,14 +383,14 @@ public class DefaultCompilerModel implements CompilerModel {
   /**
    * Converts errors thrown by the language level visitors to CompilerErrors.
    */
-  private LinkedList<CompilerError> _visitorErrors2CompilerErrors(LinkedList<Pair<String, JExpression>> visitorErrors) {
+  private LinkedList<CompilerError> _visitorErrors2CompilerErrors(LinkedList<Pair<String, JExpressionIF>> visitorErrors) {
     LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
-    Iterator<Pair<String, JExpression>> iter = visitorErrors.iterator();
+    Iterator<Pair<String, JExpressionIF>> iter = visitorErrors.iterator();
     while (iter.hasNext()) {
-      Pair<String, JExpression> pair = iter.next();
+      Pair<String, JExpressionIF> pair = iter.next();
       String message = pair.getFirst();      
 //      System.out.println("Got error message: " + message);
-      JExpression jexpr = pair.getSecond();
+      JExpressionIF jexpr = pair.getSecond();
       SourceInfo si;
       if (jexpr == null) {
         si = JExprParser.NO_SOURCE_INFO;
@@ -414,9 +414,9 @@ public class DefaultCompilerModel implements CompilerModel {
   protected void _compileFiles(File[] sourceRoots, File[] files, File buildDir) throws IOException {
 
 //    CompilerError[] errors = new CompilerError[0];
-    Pair<LinkedList<ParseException>, LinkedList<Pair<String, JExpression>>> errors;
+    Pair<LinkedList<ParseException>, LinkedList<Pair<String, JExpressionIF>>> errors;
     LinkedList<ParseException> parseExceptions;
-    LinkedList<Pair<String, JExpression>> visitorErrors;
+    LinkedList<Pair<String, JExpressionIF>> visitorErrors;
       LinkedList<CompilerError> compilerErrors = new LinkedList<CompilerError>();
     CompilerInterface compiler
       = CompilerRegistry.ONLY.getActiveCompiler();
