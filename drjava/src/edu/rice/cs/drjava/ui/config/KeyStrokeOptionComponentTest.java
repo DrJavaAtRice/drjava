@@ -41,6 +41,7 @@ package edu.rice.cs.drjava.ui.config;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 
@@ -78,7 +79,7 @@ public final class KeyStrokeOptionComponentTest extends TestCase {
   }
   
   public void testApplyDoesChangeConfig() {
-    KeyStroke testKeyStroke = KeyStrokeOption.NULL_KEYSTROKE;
+    KeyStroke testKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0);
        
     _option.setValue(testKeyStroke); 
     _option.updateConfig();

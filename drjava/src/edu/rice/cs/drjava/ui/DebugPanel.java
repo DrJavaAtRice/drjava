@@ -327,7 +327,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
           // Add value
           _debugger.addWatch(String.valueOf(value));
         }
-        fireTableCellUpdated(row, col);
+        //fireTableCellUpdated(row, col);
+        fireTableRowsUpdated(row, _watches.size()-1);
       }
       catch (DebugException de) {
         _frame._showDebugError(de);

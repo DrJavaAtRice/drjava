@@ -141,7 +141,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
   public boolean updateConfig() {
     if (!_key.equals(getConfigKeyStroke())) {
       DrJava.getConfig().setSetting(_option, _key);
-      _setKeyStroke(_key);
+      setValue(_key);
     }
     return true;
   }
@@ -184,14 +184,6 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
    * Return's this OptionComponent's configurable component.
    */
   public JComponent getComponent() { return _panel; }
-  
-  /**
-   * Sets the currently selected KeyStroke.
-   */
-  private void _setKeyStroke(KeyStroke ks) {
-    _key = ks;
-    _keyField.setText(_option.format(_key));
-  }
   
   /**
    * A dialog that allows the user to type in a keystroke to be bound
@@ -240,15 +232,14 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
           if (!_ksoc.getKeyStroke().equals(_currentKeyStroke)) {
             _keyToKSOC.remove(_ksoc.getKeyStroke());
             
-            KeyStrokeOptionComponent conflict =
-              (KeyStrokeOptionComponent)_keyToKSOC.get(_currentKeyStroke);
+            KeyStrokeOptionComponent conflict = _keyToKSOC.get(_currentKeyStroke);
             
             if (conflict != null) {
               _keyToKSOC.remove(_currentKeyStroke);
-              conflict._setKeyStroke(KeyStrokeOption.NULL_KEYSTROKE);
+              conflict.setValue(KeyStrokeOption.NULL_KEYSTROKE);
             }
             _keyToKSOC.put(_currentKeyStroke, _ksoc);
-            _ksoc._setKeyStroke(_currentKeyStroke);
+            _ksoc.setValue(_currentKeyStroke);
           }
           _inputField.requestFocus();
           GetKeyDialog.this.dispose();
@@ -322,11 +313,11 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
         KeyStroke ks = KeyStroke.getKeyStrokeForEvent(e);
         if (e.getID() == KeyEvent.KEY_PRESSED) {
           this.setText(_option.format(ks));
-          KeyStrokeOptionComponent configKs = (KeyStrokeOptionComponent)_keyToKSOC.get(ks);
+          KeyStrokeOptionComponent configKs = _keyToKSOC.get(ks);
           if (configKs == null)
             _actionLabel.setText("<none>");
           else {
-            String name = KeyBindingManager.Singleton.getName(configKs.getConfigKeyStroke());
+            String name = configKs.getLabelText();//KeyBindingManager.Singleton.getName(configKs.getConfigKeyStroke());
             _actionLabel.setText(name);
           }
           _currentKeyStroke = ks;

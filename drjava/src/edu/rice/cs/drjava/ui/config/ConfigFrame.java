@@ -338,12 +338,12 @@ public class ConfigFrame extends JFrame {
    * @param parent the parent tree node
    * @return this tree node
    */
-  private PanelTreeNode _createPanel(ConfigPanel c, PanelTreeNode parent) {
-    PanelTreeNode ptNode = new PanelTreeNode(c);
-    parent.add(ptNode);
-    
-    return ptNode;
-  }
+//  private PanelTreeNode _createPanel(ConfigPanel c, PanelTreeNode parent) {
+//    PanelTreeNode ptNode = new PanelTreeNode(c);
+//    parent.add(ptNode);
+//    
+//    return ptNode;
+//  }
   /**
    * Creates an individual panel, adds it to the JTree and the list of panels, and
    *  returns the tree node. Adds to the root node.
@@ -372,8 +372,7 @@ public class ConfigFrame extends JFrame {
     PanelTreeNode colorNode = _createPanel("Colors", displayNode);
     _setupColorPanel(colorNode.getPanel());
     
-    PanelTreeNode keystrokesNode = _createPanel(new KeyStrokeConfigPanel("Key Bindings"),
-                                                _rootNode);
+    PanelTreeNode keystrokesNode = _createPanel("Key Bindings");
     _setupKeyBindingsPanel(keystrokesNode.getPanel());
     
     PanelTreeNode debugNode = _createPanel("Debugger");
@@ -522,8 +521,6 @@ public class ConfigFrame extends JFrame {
         }
       }
     }
-    // gives the KeyStrokeConfigPanel a collection of the KeyStrokeOptionComponents
-    ((KeyStrokeConfigPanel)panel).setKeyStrokeComponents(_comps);
 
     Iterator<KeyStrokeOptionComponent> iter = _comps.iterator();
     while (iter.hasNext()) {
