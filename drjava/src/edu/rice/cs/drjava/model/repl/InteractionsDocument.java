@@ -260,7 +260,7 @@ public class InteractionsDocument extends DefaultStyledDocument {
     //writeLock();
     try {
 
-      if (null != message || "null".equals(message)) {
+      if (null == message || "null".equals(message)) {
         message = "";
       }
 
