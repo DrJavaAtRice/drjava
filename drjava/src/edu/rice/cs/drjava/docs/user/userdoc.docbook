@@ -68,7 +68,7 @@
 
     <section id="gs-requirements">
       <title>System Requirements</title>
-      <para>As of the June 18th release, DrJava requires Java 2, version 1.4 or later. Note that you will need to have the JDK (not the JRE) installed if you wish to use the compiler or debugger within DrJava.</para>
+      <para>DrJava requires Java 2, version 1.4 or later. Note that you will need to have the JDK (not the JRE) installed if you wish to use the compiler or debugger within DrJava.</para>
       <para>We recommend downloading and using Sun's JDK 1.5.0, currently in beta releases, (from <ulink url="http://java.sun.com">http://java.sun.com</ulink>) for Solaris, Linux, and Windows.  Other users should use the Java virtual machine that comes with their operating system (including Mac OS X).</para>
       <para>DrJava uses two Java Virtual Machines (one for the main program, and one for the Interactions Pane) that use Java's Remote Method Invocation (RMI) to communicate with each other. RMI uses TCP/IP as the default transport mechanism, so you must have those drivers installed. Without TCP/IP, DrJava will not start properly.</para>
     </section>
@@ -324,7 +324,7 @@ Welcome to DrJava.
      
       <formalpara>
   <title>Tiger Features</title>
-  <para>New to the development release on June 18th is support for Tiger (JDK 1.5) features in the interactions pane. These include enum types, static import, for each statements, methods with variable arguments, generics, and autoboxing. Note that you must be running Java 2, version 1.5.0 or later to use 1.5 features in the Interactions Pane. Also, as of the June 18th release, we do not type check generics, so while they may be used in the interactions pane without a syntax error, we do not yet provide full support for type checking of generics.</para>
+  <para>DrJava provides support for Tiger (JDK 1.5) features in the interactions pane. These include enum types, static import, for each statements, methods with variable arguments, generics, and autoboxing. Note that you must be running Java 2, version 1.5.0 or later to use 1.5 features in the Interactions Pane. Also, DrJava does not currently type check generics, so while they may be used in the interactions pane without a syntax error, we do not yet provide full support for type checking of generics.</para>
       </formalpara>
   </chapter>
 
