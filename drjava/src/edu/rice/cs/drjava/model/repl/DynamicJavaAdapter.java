@@ -42,6 +42,7 @@ package edu.rice.cs.drjava.model.repl;
 import java.util.*;
 import java.io.*;
 import java.net.URL;
+import java.net.URLClassLoader;
 
 import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.interpreter.context.*;
@@ -264,6 +265,37 @@ public class DynamicJavaAdapter implements JavaInterpreter {
                                             getClass().getClassLoader(),
                                             excludes);
     }
+
+    /**
+     * Adds an URL to the class path.  DynamicJava's version of this creates a
+     * new URLClassLoader with the given URL, using the old loader as a parent.
+     * This seems to cause problems for us in certain cases, such as accessing
+     * static fields or methods in a class that extends a superclass which is
+     * loaded by "child" classloader...
+     * 
+     * Instead, we'll replace the old URLClassLoader with a new one containing
+     * all the known URLs.
+     *
+     * (I don't know if this really works yet, so I'm not including it in 
+     * the current release.  CSR, 3-13-2003)
+     *
+    public void addURL(URL url) {
+      if (classLoader == null) {
+        classLoader = new URLClassLoader(new URL[] { url });
+      }
+      else if (classLoader instanceof URLClassLoader) {
+        URL[] oldURLs = ((URLClassLoader)classLoader).getURLs();
+        URL[] newURLs = new URL[oldURLs.length + 1];
+        System.arraycopy(oldURLs, 0, newURLs, 0, oldURLs.length);
+        newURLs[oldURLs.length] = url;
+        
+        // Create a new class loader with all the URLs
+        classLoader = new URLClassLoader(newURLs);
+      }
+      else {
+        classLoader = new URLClassLoader(new URL[] { url }, classLoader);
+      }
+    }*/
 
     /*
     public Class defineClass(String name, byte[] code)  {

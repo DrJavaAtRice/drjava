@@ -50,7 +50,7 @@
 
       <formalpara>
         <title>Running DrJava on Mac OS X</title>
-        <para>If you are using Mac OS X, you can download DrJava as an Application from our website.  Download the <filename>drjava-DATE-TIME-osx.tar.gz</filename> and decompress it.  You can then copy the DrJava icon into your Applications folder or keep it on your Dock.</para>
+        <para>If you are using Mac OS X, you can download DrJava as an Application from our website.  Download the <filename>drjava-DATE-TIME-osx.tar.gz</filename> file and decompress it.  You can then copy the DrJava icon into your Applications folder or keep it on your Dock.</para>
       </formalpara>
     </section>
 
@@ -79,7 +79,7 @@
   <!-- Chapter: Editing Programs -->
   <chapter id="editing">
     <title>Editing Programs</title>
-    <para>While DrJava contains many useful tools for Java development, its most fundamental one is an editor for Java source code.  Like most text editors, it supports a full range of editing features such as "Find/Replace" and "Goto Line", while also providing more advanced features like syntax coloring, automatic indentation, and brace matching.</para>
+    <para>While DrJava contains many useful tools for Java development, its fundamental tool is an editor for Java source code.  Like most text editors, it supports a full range of editing features such as "Find/Replace" and "Goto Line", while also providing more advanced features like syntax coloring, automatic indentation, and brace matching.</para>
 
     <section id="edit-defpane">
       <title>Definitions Pane</title>

@@ -507,9 +507,13 @@ public class MainFrame extends JFrame implements OptionConstants {
   {
     public void actionPerformed(ActionEvent ae) {
       // Delegate everything to the DefinitionsDocument.
+      OpenDefinitionsDocument openDoc = _model.getActiveDocument();
+      DefinitionsDocument doc = openDoc.getDocument();
+      int caretPos = _currentDefPane.getCaretPosition();
+      openDoc.syncCurrentLocationWithDefinitions(caretPos);
       int start = _currentDefPane.getSelectionStart();
       int end = _currentDefPane.getSelectionEnd();
-      _model.getActiveDocument().getDocument().commentLines(start, end);
+      doc.commentLines(start, end);
     }
   };
   
@@ -520,9 +524,13 @@ public class MainFrame extends JFrame implements OptionConstants {
   {
     public void actionPerformed(ActionEvent ae) {
       // Delegate everything to the DefinitionsDocument.
+      OpenDefinitionsDocument openDoc = _model.getActiveDocument();
+      DefinitionsDocument doc = openDoc.getDocument();
+      int caretPos = _currentDefPane.getCaretPosition();
+      openDoc.syncCurrentLocationWithDefinitions(caretPos);
       int start = _currentDefPane.getSelectionStart();
       int end = _currentDefPane.getSelectionEnd();
-      _model.getActiveDocument().getDocument().uncommentLines(start, end);
+      doc.uncommentLines(start, end);
     }
   };
   
@@ -2145,7 +2153,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Indent lines, comment lines
     editMenu.addSeparator();
     //_addMenuItem(editMenu, _indentLinesAction, KEY_INDENT);
-    editMenu.add(_indentLinesAction);
+    JMenuItem editItem = editMenu.add(_indentLinesAction);
+    editItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0));
     _addMenuItem(editMenu, _commentLinesAction, KEY_COMMENT_LINES);
     _addMenuItem(editMenu, _uncommentLinesAction, KEY_UNCOMMENT_LINES);
     

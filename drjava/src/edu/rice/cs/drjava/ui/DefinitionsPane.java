@@ -586,7 +586,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     JMenuItem indentItem = new JMenuItem("Indent Line(s)");
     indentItem.addActionListener(new AbstractAction() {
       public void actionPerformed(ActionEvent ae) {
-        _indentLines();
+        indent();
       }
     });
     _popMenu.add(indentItem);
@@ -594,6 +594,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     JMenuItem commentLinesItem = new JMenuItem("Comment Line(s)");
     commentLinesItem.addActionListener ( new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
+        _doc.syncCurrentLocationWithDefinitions(getCaretPosition());
         _commentLines();
       }
     });
@@ -602,6 +603,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     JMenuItem uncommentLinesItem = new JMenuItem("Uncomment Line(s)");
     uncommentLinesItem.addActionListener ( new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
+        _doc.syncCurrentLocationWithDefinitions(getCaretPosition());
         _uncommentLines();
       }
     });
