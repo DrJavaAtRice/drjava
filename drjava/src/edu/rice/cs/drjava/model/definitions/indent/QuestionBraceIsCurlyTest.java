@@ -171,7 +171,28 @@ public class QuestionBraceIsCurlyTest extends IndentRulesTestCase
 	assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 7));	    
 	assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 18));	    
 	assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 19));	    
-	assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, _text.length() - 1));	    
+	assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, _text.length() - 1));
+
+	/* (3) */
+
+	_text =
+	    "class Foo {\n" +
+	    "}";
+	_setDocText(_text);
+
+	assertTrue("Close brace immediately after open brace.", _rule.applyRule(_doc, 12));
+
+	/* (4) */
+	
+	_text =
+	    "class Foo {\n" +
+	    "  method m()\n" +
+	    "  {\n" +
+	    "  }\n" +
+	    "}";
+	_setDocText(_text);
+
+	assertTrue("Close brace immediately after open brace.", _rule.applyRule(_doc, 29));
     }
 }
   

@@ -69,6 +69,8 @@ public class QuestionBraceIsCurly extends IndentRuleQuestion
    */
   boolean applyRule(DefinitionsDocument doc)
   {
+    System.err.println("QuestionBraceIsCurly");
+
     // PRE: We are not inside a multiline comment.
     // PRE: The closest brace is not a '(' or a '['.
 

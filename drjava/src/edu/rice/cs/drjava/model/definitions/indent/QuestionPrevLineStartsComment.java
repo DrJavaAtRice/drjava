@@ -73,7 +73,8 @@ class QuestionPrevLineStartsComment extends IndentRuleQuestion {
    * @return true if this node's rule holds.
    */
   boolean applyRule(DefinitionsDocument doc) {
-    int cursor;
+      System.err.println("QuestionPrevLineStartsComment");
+      int cursor;
 
     // Move back to start of current line
     cursor = doc.getLineStartPos(doc.getCurrentLocation());

@@ -126,6 +126,21 @@ public class QuestionStartingNewStmtTest extends IndentRulesTestCase {
     assertTrue("starting new stmt, ignore multi-line comment on same " +
 	       "line as new stmt",
 	       rule.applyRule(_doc));
+
+    _setDocText("method foo() {\n" +
+		"}\n" +
+		"     ");
+    _doc.setCurrentLocation(17);
+    assertTrue("Blank line with no non-WS after",
+	       rule.applyRule(_doc));
+
+    _setDocText("method foo() {\n" +
+		"}\n" +
+		"     \n" +
+		"// comment");
+    _doc.setCurrentLocation(17);
+    assertTrue("Blank line with comments after, but no non-WS",
+	       rule.applyRule(_doc));
   }
 
   /**

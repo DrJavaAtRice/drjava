@@ -43,18 +43,17 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
 
 /**
- * Determines whether or not the last opened block or expression 
- * list containing the start of the current line (opened by one of 
- * the characters '{', '(', or '[') was opened on the previous line 
- * (relative to the current position in the document). 
- * This question corresponds to rule 16 in our decision tree.
+ * Determines whether or not the closest non-whitespace character
+ * previous to the start of the current line (excluding any characters
+ * inside comments or strings) is an open brace.
+ *
  * @version $Id$
  */
-public class QuestionBraceOnPrevLine extends IndentRuleQuestion 
+public class QuestionStartAfterOpenBrace extends IndentRuleQuestion 
 {
   /**
   * @param yesRule The decision subtree for the case that this rule applies 
@@ -62,60 +61,52 @@ public class QuestionBraceOnPrevLine extends IndentRuleQuestion
   * @param noRule The decision subtree for the case that this rule does not
   * apply in the current context.
   */
-  public QuestionBraceOnPrevLine(IndentRule yesRule, IndentRule noRule)
+  public QuestionStartAfterOpenBrace(IndentRule yesRule, IndentRule noRule)
   {
     super(yesRule, noRule);
   }
   
   /**
    * @param doc The DefinitionsDocument containing the current line.
-   * @return True iff the last opened block or expression list containing 
-   * the start of the current line (opened by one of the characters '{', 
-   * '(', or '[') was opened on the previous line.
+   * @return True the closest non-whitespace character
+   * previous to the start of the current line (excluding any characters
+   * inside comments or strings) is an open brace.
    */
   boolean applyRule(DefinitionsDocument doc)
   {
-    // PRE: We are not inside a multiline comment.
-    // PRE: The most recently opened expression list or block
-    //      was opened by a '{'.
-      
-    IndentInfo info = doc.getReduced().getIndentInformation();
-      
-    int distToBrace = info.distToBrace;
-      
-    // If there is no brace, s.th. went wrong!
-      
-    if (distToBrace == -1) 
-      throw new UnexpectedException(new RuntimeException("Precondition for QuestionBraceOnPrevLine " +
-							 "not met: there is no brace."));
-    
-    int distToNewline = info.distToPrevNewline;
-    
-    // If we are on the first line of the document,
-    // then there is no previous line. If the brace
-    // is on the same line, we return false.
-    
-    if (distToNewline == -1 || distToNewline > distToBrace) return false;
-    
-    int location = doc.getCurrentLocation();
+    System.err.println("QuestionStartAfterOpenBrace");
+
+    int start = doc.getLineStartPos(doc.getCurrentLocation());
+    BraceReduction reduced = doc.getReduced();
+    int origin = reduced.absOffset();
     String text;
+    char c;
 
     try
     {
-      text = doc.getText(location-distToBrace+1, distToBrace-distToNewline-2);
+	text = doc.getText(DefinitionsDocument.DOCSTART, start);
     }
     catch (BadLocationException e)
     {
-      throw new UnexpectedException(new RuntimeException("doc.getText() failed."));
+	// Control flow should never reach this point.
+	throw new UnexpectedException(new RuntimeException(e.getMessage()));
     }
-
-    // There should be no further '\n' between our newline and 
-    // our brace for this rule to apply.
- 
-    for(int i = distToBrace-distToNewline-3; i >= 0; i--)
+    for (int i = start-1; i >= DefinitionsDocument.DOCSTART; i--)
     {
-      if (text.charAt(i) == '\n') return false;
+      c = text.charAt(i);
+
+      if (c == '{')
+      {
+          reduced.move(i - origin);
+          ReducedModelState state = reduced.getStateAtCurrent();
+          reduced.move(origin - i);
+
+          if (state.equals(ReducedModelState.FREE))
+	  {
+	      return true;
+	  }
+      }
     }
-    return true;
+    return false;
   }
 }

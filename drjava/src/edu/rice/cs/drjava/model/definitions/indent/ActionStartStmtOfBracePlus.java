@@ -48,8 +48,8 @@ import javax.swing.text.BadLocationException;
 
 /**
  * Indents the current line in the document to the indent level of the
- * start of the contract or statement of the brace enclosing the current
- * position, plus the given suffix.
+ * start of the contract or statement of the brace enclosing the start of the
+ * current line, plus the given suffix.
  * @version $Id$
  */
 public class ActionStartStmtOfBracePlus extends IndentRuleAction {
@@ -72,6 +72,8 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
    */
   public void indentLine(DefinitionsDocument doc)
   {
+    System.err.println("ActionStartStmtOfBracePlus");
+
     int pos = doc.getCurrentLocation();
 
     // Get distance to brace

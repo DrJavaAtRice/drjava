@@ -76,6 +76,8 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
    * @return true if this node's rule holds.
    */
   boolean applyRule(DefinitionsDocument doc) {
+    System.err.println("QuestionStartingNewStmt");
+
     char[] delims = {';', '{', '}'};
     int lineStart = doc.getLineStartPos(doc.getCurrentLocation());
     int prevDelimiterPos;
@@ -95,12 +97,16 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
     // Delimiter must be at the end of its line (ignoring whitespace & comments)
     int firstNonWSAfterDelimiter;
     try {
-      firstNonWSAfterDelimiter = doc.getFirstNonWSCharPos(prevDelimiterPos+1);
+	firstNonWSAfterDelimiter = doc.getFirstNonWSCharPos(prevDelimiterPos+1);
+	// will return ERROR_INDEX if we hit the end of the document
     } catch (BadLocationException e) {
       throw new UnexpectedException(e);
     }
 
-    return (firstNonWSAfterDelimiter >= lineStart);
+    // If the first non-WS character is after the beginning of the line
+    // or we reached the end of the document, then we are starting a new statement.
+    return (firstNonWSAfterDelimiter >= lineStart
+	    || firstNonWSAfterDelimiter == DefinitionsDocument.ERROR_INDEX);
   }
 }
 

@@ -51,32 +51,27 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
 import edu.rice.cs.util.UnexpectedException;
 
 /**
- * Test class according to the JUnit protocol. Tests the question
- * that determines whether or not the last opened block or expression 
- * list containing the start of the current line (opened by one of 
- * the characters '{', '(', or '[') was opened on the previous line 
- * (relative to the current position in the document). 
- * This question corresponds to rule 16 in our decision tree.
+ * Test class according to the JUnit protocol.
+ * Tests the question determining whether or not the closest non-whitespace character
+ * previous to the start of the current line (excluding any characters
+ * inside comments or strings) is an open brace.
+ *
  * @version $Id$
  */
-public class QuestionBraceOnPrevLineTest extends IndentRulesTestCase 
+public class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase 
 {
-    // PRE: We are not inside a multiline comment.
-    // PRE: The most recently opened expression list or block
-    //      was opened by a '{'.                           
-
     private String _text;
     
-    private IndentRuleQuestion _rule = new QuestionBraceOnPrevLine(null, null);
+    private IndentRuleQuestion _rule = new QuestionStartAfterOpenBrace(null, null);
 
     /**
      * @param name The name of this test case.
      */
-    public QuestionBraceOnPrevLineTest(String name) { super(name); }
+    public QuestionStartAfterOpenBraceTest(String name) { super(name); }
     
     public void setUp() { super.setUp(); }    
     
-    public void testWithParen() throws BadLocationException 
+    public void testWithFree() throws BadLocationException 
     {
 	int i;
 
@@ -84,12 +79,9 @@ public class QuestionBraceOnPrevLineTest extends IndentRulesTestCase
 	
 	_text = "method(\nint[] a, String b) {}";
 	_setDocText(_text);
-
-	try { _rule.applyRule(_doc, 0); fail("There is no brace."); }
-	catch (UnexpectedException e) {}
-
-	assertTrue("START's brace ('(') is on the previous line.", _rule.applyRule(_doc, 8));
-	assertTrue("START's brace ('(') is on the previous line.", _rule.applyRule(_doc, _text.length() - 1));
+	assertTrue("START has no preceding brace.", !_rule.applyRule(_doc, 0));
+	assertTrue("START immediately follows an open paren, not a brace.", !_rule.applyRule(_doc, 8));
+	assertTrue("START immediately follows an open paren, not a brace.", !_rule.applyRule(_doc, _text.length()-1));
 
 	/* (2) */
 
@@ -98,64 +90,36 @@ public class QuestionBraceOnPrevLineTest extends IndentRulesTestCase
 	    "}";
 
 	_setDocText(_text);
-
-        try { _rule.applyRule(_doc, 18); fail("START has no brace."); }
-	catch (UnexpectedException e) {}
-
-	assertTrue("START's brace ('{') is on previous line.", _rule.applyRule(_doc, 19));
+	assertTrue("START immediately follows an open brace.", _rule.applyRule(_doc, 19));
 
 	/* (3) */
 
 	_text = 
 	    "boolean method(\n" +
 	    "    int[] a, String b)\n" +
-	    "{}";
+	    "{\n" +
+	    "}";
 
-	_setDocText(_text);
-	
-        try { _rule.applyRule(_doc, 10); fail("START has no brace."); }
-	catch (UnexpectedException e) {}
-
-	assertTrue("START's brace ('(') is on previous line.", _rule.applyRule(_doc, 16));
-
-        try { _rule.applyRule(_doc, _text.length()-1); fail("START has no brace."); }
-	catch (UnexpectedException e) {}
-
-	/* (4) */
-
-	_text = 
-	    "boolean method(\n" +
-	    "    int[] a,\n" +
-	    "    String b)\n" +
-	    "{}";
-
-	_setDocText(_text);
-	
-        try { _rule.applyRule(_doc, 10); fail("START has no brace."); }
-	catch (UnexpectedException e) {}
-
-	assertTrue("START's brace ('(') is on previous line.", _rule.applyRule(_doc, 16));
-	assertTrue("START's brace ('(') is two lines above.", !_rule.applyRule(_doc, 30));
-
-        try { _rule.applyRule(_doc, _text.length()-1); fail("START has no brace."); }
-	catch (UnexpectedException e) {}
+	_setDocText(_text);	
+	assertTrue("START immediately follows an open paren.", !_rule.applyRule(_doc, 40));
+	assertTrue("START immediately follows an open brace.", _rule.applyRule(_doc, 41));
 
 	/* (5) */
 
 	_text = 
 	    "if (<cond>) {\n" +
+	    "\n" +
 	    "    if (\n" +
 	    "        <cond>) { ... }}";
 
 	_setDocText(_text);
 
-        try { _rule.applyRule(_doc, 10); fail("START has no brace."); }
-	catch (UnexpectedException e) {}
-
-	assertTrue("START's brace ('{') is on previous line.", _rule.applyRule(_doc, 17));	    
-	assertTrue("START's brace ('(') is on previous line.", _rule.applyRule(_doc, 23));	    
+	assertTrue("START immediatly follows an open brace.", _rule.applyRule(_doc, 14));	    
+	assertTrue("Only WS between open brace and START.", _rule.applyRule(_doc, 15));	    
+	assertTrue("Only WS between open brace and START.", _rule.applyRule(_doc, 24));	    
+	assertTrue("START immediatly follows an open paren.", _rule.applyRule(_doc, 25));	    
 	
-	/* (6) */
+	/* (6) 
 
 	_text = 
 	    "array[\n" +
@@ -173,32 +137,13 @@ public class QuestionBraceOnPrevLineTest extends IndentRulesTestCase
 	assertTrue("START's brace ('{') is on previous line.", _rule.applyRule(_doc, 28));	    
 	assertTrue("START's brace ('{') is on previous line.", _rule.applyRule(_doc, 50));	    
 	assertTrue("START's brace ('{') is three lines above.", !_rule.applyRule(_doc, _text.length() - 1));	    
-    }
 
-    public void testOnlyCurly() throws BadLocationException
-    {
-	/* (1) */
+		_text =
+	    "{ /* block1* / }\n" +
+	    "{ /* block2* / }\n" +
+	    "{ /* block3* / }";
 
-	_text =
-	    "{ /* block1 */ }\n" +
-	    "{ /* block2 */ }\n" +
-	    "{ /* block3 */ }";
-	
-	_setDocText(_text);
-        try { _rule.applyRule(_doc, 0); fail("START has no brace."); }
-	catch (UnexpectedException e) {}
-        try { _rule.applyRule(_doc, 7); fail("START has no brace."); }
-	catch (UnexpectedException e) {}
-        try { _rule.applyRule(_doc, 28); fail("START has no brace."); }
-	catch (UnexpectedException e) {}
-        try { _rule.applyRule(_doc, 30); fail("START has no brace."); }
-	catch (UnexpectedException e) {}
-        try { _rule.applyRule(_doc, _text.length()-1); fail("START has no brace."); }
-	catch (UnexpectedException e) {}
-
-	/* (2) */
-
-	_text =
+			_text =
 	    "{\n" +
 	    "    {\n" +
 	    "        {}\n" +
@@ -211,6 +156,11 @@ public class QuestionBraceOnPrevLineTest extends IndentRulesTestCase
 	assertTrue("START's brace ('{') is on previous line.", _rule.applyRule(_doc, 8));	    
 	assertTrue("START's brace ('{') is two lines above.", !_rule.applyRule(_doc, 19));	    
 	assertTrue("START's brace ('{') is four lines above.", !_rule.applyRule(_doc, _text.length() - 1));	    
+	*/
+    }
+
+    public void testShadowed() throws BadLocationException
+    {
     }
 }
   
