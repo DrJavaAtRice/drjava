@@ -52,16 +52,10 @@ import java.io.*;
 public class ArgumentTokenizerTest extends TestCase {
   
   /**
-   * Tokenizer to re-use in each test.
-   */
-  protected ArgumentTokenizer _tokenizer;
-  
-  /**
    * Creates a new ArgumentTokenizer to be used in every test.
    */
   public ArgumentTokenizerTest(String name) {
     super(name);
-    _tokenizer = new ArgumentTokenizer();
   }
   
   /**
@@ -84,7 +78,7 @@ public class ArgumentTokenizerTest extends TestCase {
    */
   protected void _assertTokenized(String typed, String[] expected,
                                   boolean stringify) {
-    ArrayList<String> actual = _tokenizer.tokenize(typed, stringify);
+    List<String> actual = ArgumentTokenizer.tokenize(typed, stringify);
     List expectedList = Arrays.asList(expected);
     assertEquals("tokenized argument list should match expected",
                  expectedList, actual);

@@ -39,7 +39,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.LinkedList;
 import java.io.*;
 
 /**
@@ -47,19 +48,15 @@ import java.io.*;
  * with behavior similar to parsing command line arguments to a program.
  * Quoted Strings are treated as single arguments, and escaped characters
  * are translated so that the tokenized arguments have the same meaning.
+ * Since all methods are static, the class is declared abstract to prevent
+ * instantiation.
  * @version $Id$
  */
-public class ArgumentTokenizer {
+public abstract class ArgumentTokenizer {
   private static final int NO_TOKEN_STATE = 0;
   private static final int NORMAL_TOKEN_STATE = 1;
   private static final int SINGLE_QUOTE_STATE = 2;
   private static final int DOUBLE_QUOTE_STATE = 3;
-    
-  /**
-   * Creates an ArgumentTokenizer that can be used to tokenize many strings.
-   */
-  public ArgumentTokenizer() {
-  }
 
   /**
    * Convenience method redirects to tokenize(arguments, false).
@@ -68,7 +65,7 @@ public class ArgumentTokenizer {
    * arguments to be tokenized.
    * @return A list of parsed and properly escaped arguments.
    */
-  public ArrayList<String> tokenize(String arguments) {
+  public static List<String> tokenize(String arguments) {
     return tokenize(arguments, false);
   }
 
@@ -79,9 +76,9 @@ public class ArgumentTokenizer {
    * @param stringify whether or not to include escape special characters
    * @return A list of parsed and properly escaped arguments.
    */
-  public ArrayList<String> tokenize(String arguments, boolean stringify) {
+  public static List<String> tokenize(String arguments, boolean stringify) {
 
-    ArrayList<String> argList = new ArrayList<String>();
+    LinkedList<String> argList = new LinkedList<String>();
     StringBuffer currArg = new StringBuffer();
     boolean escaped = false;
     int state = NO_TOKEN_STATE;  // start in the NO_TOKEN_STATE
