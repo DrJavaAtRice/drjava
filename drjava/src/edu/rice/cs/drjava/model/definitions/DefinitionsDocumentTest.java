@@ -476,7 +476,10 @@ public class DefinitionsDocumentTest extends TestCase
     defModel.setCurrentLocation(19);
     assertEquals("#0.2", 4, defModel.getCurrentLine());
   }
-  
+
+  /**
+   * Tests line numbering output after deletion of a block
+   */
   public void testGetLineDeleteText() throws BadLocationException{
     final String s = "123456789\n123456789\n123456789\n123456789\n";
     defModel.insertString(0,s,null);
@@ -485,6 +488,18 @@ public class DefinitionsDocumentTest extends TestCase
     defModel.remove(0,30);
     defModel.setCurrentLocation(5);
     assertEquals("After delete", 1, defModel.getCurrentLine() );
+  }
+  
+  /**
+   * Tests line numbering output after deletion of a block
+   */
+  public void testGetLineDeleteText2() throws BadLocationException {
+    final String s = "123456789\n123456789\n123456789\n123456789\n";
+    defModel.insertString(0,s,null);
+    defModel.setCurrentLocation(35);
+    assertEquals("Before delete", 4, defModel.getCurrentLine());
+    defModel.remove(18,7);
+    assertEquals("After delete", 2, defModel.getCurrentLine());
   }
   
   /**
@@ -756,12 +771,30 @@ public class DefinitionsDocumentTest extends TestCase
     String result = "MyClass";
     defModel.insertString(0, weird, null);
 
-    assertEquals("class name for interface: '" + weird + "'",
+    assertEquals("class name for user interface: '" + weird + "'",
                  result,
                  defModel.getFirstTopLevelClassName());
   }
   
-    /**
+  /**
+   * Test class name-finding on document 
+   */
+  public void testTopLevelInterfaceNameMisleading2()
+    throws BadLocationException, ClassNameNotFoundException
+  {
+    String weird = "package edu . rice\n./*interface comment!*/cs.drjava; \n" +
+      " {interface X<T>} " + 
+      " \"class interface Foo\"" +
+      " class MyClass extends Foo<T> {";
+    String result = "MyClass";
+    defModel.insertString(0, weird, null);
+
+    assertEquals("class name for user interface: '" + weird + "'",
+                 result,
+                 defModel.getFirstTopLevelClassName());
+  }
+
+  /**
    * Test class name-finding on document 
    */
   public void testTopLevelInterfaceNameBeforeClassName() 
@@ -841,6 +874,14 @@ public class DefinitionsDocumentTest extends TestCase
     try {
       String result = defModel.getEnclosingTopLevelClassName(15);
       fail("no enclosing class should be found before open brace");
+    }
+    catch (ClassNameNotFoundException cnnfe) {
+      // Correct: no class name found
+    }
+    
+    try {
+      String result = defModel.getEnclosingTopLevelClassName(186);
+      fail("no enclosing class should be found at end of file");
     }
     catch (ClassNameNotFoundException cnnfe) {
       // Correct: no class name found

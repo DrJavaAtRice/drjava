@@ -1054,7 +1054,7 @@ public class IndentTest extends TestCase {
       "    4,\n" +
       "    5}\n" +
       "};\n";
-    
+
     String indentedAfter =
       "int[2][] a ={\n" + 
       "        {\n" + 
@@ -1075,6 +1075,74 @@ public class IndentTest extends TestCase {
     _assertContents(indentedAfter, doc);   
   }
   
+  /**
+   * tests that an if statment nested in a switch will be indented properly
+   * @throws BadLocationException
+   */
+  public void testNestedIfInSwitch() throws BadLocationException {
+    String text =
+      "switch(cond) {\n" +
+      "case 1:\n" +
+      "object.doStuff();\n" +
+      "if(object.hasDoneStuff()) {\n" +
+      "thingy.doOtherStuff();\n" +
+      "lion.roar(\"raaargh\");\n" +
+      "}\n" +
+      "break;\n" +
+      "}\n";
+
+    String indented =
+      "switch(cond) {\n" +
+      "  case 1:\n" +
+      "    object.doStuff();\n" +
+      "    if(object.hasDoneStuff()) {\n" +
+      "      thingy.doOtherStuff();\n" +
+      "      lion.roar(\"raaargh\");\n" +
+      "    }\n" +
+      "    break;\n" +
+      "}\n";
+    
+    doc.insertString(0, text, null);
+    _assertContents(text, doc);
+    doc.indentLines(0, doc.getLength());
+    _assertContents(indented, doc);
+  }
+
+  /**
+   * tests that an if statment nested in a switch will be indented properly
+   * this, as opposed to the previous test, does not have any code in that case
+   * except the if statement
+   * @throws BadLocationException
+   */
+/*  public void testNestedIfInSwitch2() throws BadLocationException {
+    String text =
+      "switch(c) {\n" +
+      "case 2:\n" +
+      "break;\n" +
+      "case 3:\n" +
+      "if(owner.command() == ROLL_OVER) {\n" +
+      "dog.rollOver();\n" +
+      "}\n" +
+      "break;\n" +
+      "}\n";
+
+    String indented =
+      "switch(c) {\n" +
+      "  case 2:\n" +
+      "    break;\n" +
+      "  case 3:\n" +
+      "    if(owner.command() == ROLL_OVER) {\n" +
+      "      dog.rollOver();\n" +
+      "    }\n" +
+      "    break;\n" +
+      "}\n";
+
+    doc.insertString(0, text, null);
+    _assertContents(text, doc);
+    doc.indentLines(0, doc.getLength());
+    _assertContents(indented, doc);
+  }
+*/
   private void _assertContents(String expected, Document document) 
     throws BadLocationException
   {
@@ -1097,6 +1165,7 @@ public class IndentTest extends TestCase {
     assertEquals("indent info: dist to prev new line", 
                  distToPrevNewline, ii.distToPrevNewline);
   }
+
 /*
   public void testNoParameters() throws BadLocationException
   {
@@ -1209,7 +1278,7 @@ public class IndentTest extends TestCase {
     String _aligned = 
       "int[] blah = new int[]\n"+
       "  {4, 5, 6};";
-    
+
     doc.insertString(0, _text, null);
     _action.indentLine(doc, 0); // Does nothing.
     assertEquals("START has no brace.", _text.length(), doc.getLength());
@@ -1221,5 +1290,5 @@ public class IndentTest extends TestCase {
     _assertContents(_aligned, doc);
     assertEquals("Line aligned to open paren.", _aligned.length(), doc.getLength());
   }
-*/  
+*/
 }
