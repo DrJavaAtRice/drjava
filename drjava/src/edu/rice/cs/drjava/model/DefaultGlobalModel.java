@@ -839,10 +839,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       return modified;
     }
     
-
-  // ---------- DefinitionsDocumentHandler inner class ----------
-
-  /**
+    
+    // ---------- DefinitionsDocumentHandler inner class ----------
+    
+    /**
    * Inner class to handle operations on each of the open
    * DefinitionsDocuments by the GlobalModel.
    */
@@ -1267,13 +1267,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     public boolean isModifiedOnDisk() {
       return _doc.isModifiedOnDisk();
     }
+    // <<<<<<< DefaultGlobalModel.java
     
-    /**
-     * Determines if the defintions document has been changed
-     * by an outside program. If the document has changed,
-     * then asks the listeners if the GlobalModel should 
-     * revert the document to the most recent version saved.
-     * @return true if document has been reverted
+    /** Determines if the defintions document has been changed
+     *  by an outside program. If the document has changed,
+     *  then asks the listeners if the GlobalModel should 
+     *  revert the document to the most recent version saved.
+     *  @return true if document has been reverted
      */
     public boolean revertIfModifiedOnDisk() throws IOException{
       final OpenDefinitionsDocument doc = this;
@@ -1401,12 +1401,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * character offset in the definitions.
      */
     public FindReplaceMachine createFindReplaceMachine() {
-      try {
-        return new FindReplaceMachine(_doc, _doc.getCurrentLocation());
-      }
-      catch (BadLocationException e) {
-        throw new UnexpectedException(e);
-      }
+      //try {
+        //return new FindReplaceMachine(_doc, _doc.getCurrentLocation());
+        return new FindReplaceMachine();
+        //}
+        //catch (BadLocationException e) {
+        //throw new UnexpectedException(e);
+        //}
     }
 
     /**

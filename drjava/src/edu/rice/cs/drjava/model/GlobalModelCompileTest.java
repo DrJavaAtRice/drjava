@@ -433,17 +433,17 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
   {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
-
+    
     TestListener listener = new TestListener() {
       public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
         assertModified(true, doc);
- assertModified(true, doc2);
+        assertModified(true, doc2);
         assertEquals(_name() + "save reason", COMPILE_REASON, reason);
         saveAllBeforeProceedingCount++;
         // since we don't actually save the compile should abort
       }
     };
-
+    
     _model.addListener(listener);
     doc.startCompile();
     listener.assertSaveAllBeforeProceedingCount(1);
@@ -465,29 +465,29 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     final File file = tempFile();
     final File file2 = tempFile(2);
-
+    
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
       public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
         assertEquals(_name() + "save reason", COMPILE_REASON, reason);
         assertModified(true, doc);
- assertModified(true, doc2);
+        assertModified(true, doc2);
         assertSaveCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
         assertInteractionsResetCount(0);
         assertConsoleResetCount(0);
-
+        
         try {
           doc.saveFile(new FileSelector(file));
-   doc2.saveFile(new FileSelector(file2));
+          doc2.saveFile(new FileSelector(file2));
         }
         catch (IOException ioe) {
           fail("Save produced exception: " + ioe);
         }
-
+        
         saveAllBeforeProceedingCount++;
       }
-
+      
       public void fileSaved(OpenDefinitionsDocument doc) {
         assertModified(false, doc);
         assertSaveAllBeforeProceedingCount(0);
@@ -495,7 +495,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
         assertCompileEndCount(0);
         assertInteractionsResetCount(0);
         assertConsoleResetCount(0);
-
+        
         File f = null;
         try {
           f = doc.getFile();
@@ -508,7 +508,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
         saveCount++;
       }
     };
-
+    
     _model.addListener(listener);
     doc.startCompile();
 
@@ -517,7 +517,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     listener.assertSaveCount(2);
     assertCompileErrorsPresent(_name(), false);
     listener.checkCompileOccurred();
-
+    
     // Make sure .class exists
     File compiled = classForJava(file, "Foo");
     assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
@@ -535,31 +535,31 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     final File file = tempFile();
     final File file2 = tempFile(1);
-
+    
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
       public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
         assertEquals(_name() + "save reason", COMPILE_REASON, reason);
         assertModified(false, doc);
- assertModified(true, doc2);
+        assertModified(true, doc2);
         assertSaveCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
         assertInteractionsResetCount(0);
         assertConsoleResetCount(0);
-
+        
         try {
-   doc2.saveFile(new FileSelector(file2));
+          doc2.saveFile(new FileSelector(file2));
         }
         catch (IOException ioe) {
           fail("Save produced exception: " + ioe);
         }
-
+        
         saveAllBeforeProceedingCount++;
- assertModified(false, doc);
- assertModified(false, doc2);
- assertTrue(!_model.areAnyModifiedSinceSave());
+        assertModified(false, doc);
+        assertModified(false, doc2);
+        assertTrue(!_model.areAnyModifiedSinceSave());
       }
-
+      
       public void fileSaved(OpenDefinitionsDocument doc) {
         assertModified(false, doc);
         assertSaveAllBeforeProceedingCount(0);
@@ -567,7 +567,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
         assertCompileEndCount(0);
         assertInteractionsResetCount(0);
         assertConsoleResetCount(0);
-
+        
         File f = null;
         try {
           f = doc.getFile();
@@ -580,7 +580,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
         saveCount++;
       }
     };
-
+    
     assertModified(true, doc);
     doc.saveFile(new FileSelector(file));
     assertModified(false, doc);
@@ -588,14 +588,14 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     _model.addListener(listener);
     doc.startCompile();
     assertTrue(!_model.areAnyModifiedSinceSave());
-
+    
     // Check events fired
     listener.assertCompileStartCount(1);
     listener.assertSaveAllBeforeProceedingCount(1);
     listener.assertSaveCount(1);
     assertCompileErrorsPresent(_name(), false);
     listener.checkCompileOccurred();
-
+    
     // Make sure .class exists
     File compiled = classForJava(file, "Foo");
     assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());

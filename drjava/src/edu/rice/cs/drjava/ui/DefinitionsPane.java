@@ -167,6 +167,7 @@ public class DefinitionsPane extends JEditorPane
       _matchHighlight = null;
     }
   }
+
   private UndoableEditListener _undoListener = new UndoableEditListener() {
 
     /**

@@ -226,6 +226,7 @@ public class JUnitPanel extends JPanel {
       _errorListPositions = new Position[0];
       _errorTable = new Hashtable();
       _lastDefPane = _frame.getCurrentDefPane();
+      //System.out.println("lastDefPane = " + _lastDefPane);
 
       JUnitErrorListPane.this.setFont(new Font("Courier", 0, 20));
 

@@ -109,7 +109,7 @@ public class MainFrame extends JFrame {
   private JMenu _toolsMenu;
   private JMenu _debugMenu;
   private JMenu _helpMenu;
-  private FindReplaceDialog _findReplace;
+  private final FindReplaceDialog _findReplace;
   private JButton _saveButton;
   private JButton _compileButton;
   private JButton _junitButton;
@@ -351,8 +351,10 @@ public class MainFrame extends JFrame {
   /** Opens the find/replace dialog. */
   private Action _findReplaceAction = new AbstractAction("Find/Replace") {
     public void actionPerformed(ActionEvent ae) {
-      _findReplace.setMachine(_currentDefPane);
-      _findReplace.show();
+      if(!_findReplace.isVisible()) {
+        _findReplace.show();
+      }
+      
     }
   };
 
@@ -487,15 +489,18 @@ public class MainFrame extends JFrame {
   };
 
   /** How DrJava responds to window events. */
-  private WindowListener _windowCloseListener = new WindowListener() {
+  private WindowListener _windowCloseListener = new WindowAdapter() {
     public void windowActivated(WindowEvent ev) {}
     public void windowClosed(WindowEvent ev) {}
     public void windowClosing(WindowEvent ev) {
       _model.quit();
     }
     public void windowDeactivated(WindowEvent ev) {}
-    public void windowDeiconified(WindowEvent ev) {}
-    public void windowIconified(WindowEvent ev) {}
+    public void windowDeiconified(WindowEvent ev) {
+      
+    }
+    public void windowIconified(WindowEvent ev) {
+    }
     public void windowOpened(WindowEvent ev) {
       _currentDefPane.requestFocus();
     }
@@ -579,7 +584,7 @@ public class MainFrame extends JFrame {
     updateFileTitle();
     _setAllFonts(new Font("Monospaced", 0, 12));
     _docList.setFont(new Font("Monospaced", 0, 10));
-    _findReplace = new FindReplaceDialog(this, _currentDefPane);
+    _findReplace = new FindReplaceDialog(this, _model);
 
     //     frameSize = this.getSize();
     //     System.out.println("Actual Frame Height: " + frameSize.height);
@@ -1143,10 +1148,8 @@ public class MainFrame extends JFrame {
 
     _setUpAction(_abortInteractionAction, "Break", "Abort the current interaction");
     _setUpAction(_resetInteractionsAction, "Reset", "Reset interactions");
-
-    // Commented out because testing is breaking on some files. We shouldn't
-    // put the button up until it works. eallen 5/31/2002
-    //_setUpAction(_junitAction, "Test", "Run JUnit over the current document");
+    
+    _setUpAction(_junitAction, "Test", "Run JUnit over the current document");
   }
 
   private void _setUpAction(Action a, String _default, String shortDesc) {
@@ -1327,8 +1330,7 @@ public class MainFrame extends JFrame {
     // keep track of the compile menu item
     _compileMenuItem = tmpItem;
 
-    // Commented out until test functionality is fixed. eallen 5/31/2002
-    // toolsMenu.add(_junitAction);
+    toolsMenu.add(_junitAction);
 
     // Abort/reset interactions, clear console
     toolsMenu.addSeparator();
@@ -1498,9 +1500,8 @@ public class MainFrame extends JFrame {
     // Junit
     _toolBar.addSeparator();
     
-    // Commented out until test button functionality is fixed. eallen 5/31/2002
-    // _junitButton = _createToolbarButton(_junitAction);
-    // _toolBar.add(_junitButton);
+    _junitButton = _createToolbarButton(_junitAction);
+    _toolBar.add(_junitButton);
 
     getContentPane().add(_toolBar, BorderLayout.NORTH);
   }
@@ -1570,7 +1571,7 @@ public class MainFrame extends JFrame {
     _tabbedPane.add("Interactions", new BorderlessScrollPane(_interactionsPane));
     _tabbedPane.add("Compiler output", _errorPanel);
     _tabbedPane.add("Console", new JScrollPane(_outputPane));
-    //_tabbedPane.add("Test output", _junitPanel);
+    _tabbedPane.add("Test output", _junitPanel);
 
     // Select interactions pane when interactions tab is selected
     _tabbedPane.addChangeListener(new ChangeListener() {
@@ -1738,7 +1739,7 @@ public class MainFrame extends JFrame {
     }
   }
 
-  private class ModelListener implements SingleDisplayModelListener {
+  private class ModelListener implements SingleDisplayModelListener{
     public void newFileCreated(OpenDefinitionsDocument doc) {
       _createDefScrollPane(doc);
     }
@@ -1783,11 +1784,15 @@ public class MainFrame extends JFrame {
       updateFileTitle();
       _posListener.updateLocation();
       _currentDefPane.requestFocus();
-   try {
-     active.revertIfModifiedOnDisk();
-   } catch (IOException e) {
-     _showIOError(e);
-   }
+      try {
+        active.revertIfModifiedOnDisk();
+      } catch (IOException e) {
+        _showIOError(e);
+      }
+      if(_findReplace.isVisible()) {
+        uninstallFindReplaceDialog(_findReplace);
+        installFindReplaceDialog(_findReplace);
+      }
     }
 
     public void interactionStarted() {
@@ -1819,7 +1824,7 @@ public class MainFrame extends JFrame {
     }
 
     public void junitStarted() {
- //_tabbedPane.setSelectedIndex(JUNIT_TAB);
+      //_tabbedPane.setSelectedIndex(JUNIT_TAB);
       _saveAction.setEnabled(false);
       hourglassOn();
     }
@@ -1973,12 +1978,13 @@ public class MainFrame extends JFrame {
       }
       
       String text = fname + " has changed on disk. Would you like to " +
-        "reload it?\nThis will discard any changes you have made.";
+      "reload it?\nThis will discard any changes you have made.";
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
                                              text,
                                              fname + " Modified on Disk",
+      
                                              JOptionPane.YES_NO_OPTION);
-
+      
      switch (rc) {
      case JOptionPane.YES_OPTION:
        return true;
@@ -2017,6 +2023,15 @@ public class MainFrame extends JFrame {
 
       return this;
     }
+  }
+
+  public void installFindReplaceDialog(FindReplaceDialog frd) {
+    frd.beginListeningTo(_currentDefPane);
+  }
+  
+  public void uninstallFindReplaceDialog(FindReplaceDialog frd) {
+    //remove listeners
+    frd.stopListening();
   }
 
 }

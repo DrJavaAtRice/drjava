@@ -192,15 +192,15 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   public void setFile(File file) {
     _file = file;
 
-		//jim: maybe need lock
-		if (_file != null) {
-				_timestamp = _file.lastModified();
-		}
+    //jim: maybe need lock
+    if (_file != null) {
+      _timestamp = _file.lastModified();
+    }
   }
-		
-		public long getTimestamp() {
-				return _timestamp;
-		}
+  
+  public long getTimestamp() {
+    return _timestamp;
+  }
   /**
    * Inserts a string of text into the document.
    * It turns out that this is not where we should do custom processing
@@ -248,7 +248,6 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
 
       // add the undo/redo
       chng.addEdit(new CommandUndoableEdit(undoCommand, doCommand));
-
       // actually do the insert
       doCommand.run();
     }
@@ -279,11 +278,12 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @see CommandUndoableEdit
    */
   protected void removeUpdate(AbstractDocument.DefaultDocumentEvent chng) {
+    
     try {
       final int offset = chng.getOffset();
       final int length = chng.getLength();
       final String removedText = getText(offset, length);
-      super.removeUpdate(chng);
+            super.removeUpdate(chng);
 
       Runnable doCommand = new RemoveCommand(offset, length);
       Runnable undoCommand = new InsertCommand(offset, removedText);
@@ -297,6 +297,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     catch (BadLocationException ble) {
       throw new UnexpectedException(ble);
     }
+    
   }
 
   /**
@@ -403,12 +404,12 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   public boolean isModifiedOnDisk() {
     try {
       readLock();
-			boolean ret = false;
-			if (_file == null) {
-			} else {
-					ret = (_file.lastModified() > _timestamp);
-			}
-			return ret;
+      boolean ret = false;
+      if (_file == null) {
+      } else {
+        ret = (_file.lastModified() > _timestamp);
+      }
+      return ret;
     }
     finally {
       readUnlock();
@@ -438,13 +439,12 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @param dist the distance from the current location to the new location.
    */
   public void move(int dist) {
-    int oldLoc = _currentLocation;
-    _currentLocation += dist;
-    
-    if (_currentLocation < 0) {
-      throw  new RuntimeException("location < 0?! oldLoc=" + oldLoc + " dist=" +
-          dist);
+    int newLoc = _currentLocation + dist;
+    if (newLoc < 0) {
+      throw  new RuntimeException("location < 0?! oldLoc=" + _currentLocation + " dist=" +
+                                  dist);
     }
+    _currentLocation = newLoc;
     _reduced.move(dist);
   }
   
@@ -1491,7 +1491,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     }
 
     public void run() {
-      setCurrentLocation(_offset);
+      setCurrentLocation(_offset); 
+      
+      // (don't move the cursor... I hope this doesn't break too much)
       _reduced.delete(_length);
       _styleChanged();
     }
