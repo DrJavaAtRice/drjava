@@ -1,9 +1,10 @@
 <!--
-  $Id$
+  $Header$
 -->
 <project name="drjava" default="test">
   <!-- This makes the javac task use the GJ compiler. -->
-  <property name="build.compiler" value="edu.rice.cs.misc.GJv6CompilerAdapter" />
+  <property name="build.compiler"
+            value="edu.rice.cs.anttools.GJv6CompilerAdapter" />
 
   <!-- srcroot is the base directory of the source, 4 packages back -->
   <property name="srcroot" value="../../../../" />
@@ -47,7 +48,7 @@
 
   <!-- Compile -->
   <target name="compile" depends="init">
-    <javac srcdir="${srcroot}"
+    <javac srcdir="."
            destdir="${built}" 
            debug="on"
            optimize="off" />
