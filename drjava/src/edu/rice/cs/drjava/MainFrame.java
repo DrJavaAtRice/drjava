@@ -514,8 +514,9 @@ public class MainFrame extends JFrame {
         }
       }
     });
-    JScrollPane defScroll = new JScrollPane(_definitionsPane, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, 
-        JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    JScrollPane defScroll = new JScrollPane(_definitionsPane,
+                                            JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, 
+                                            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     JSplitPane split1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, defScroll, 
         _tabbedPane);
     setBounds(0, 0, 700, 700);

@@ -457,19 +457,28 @@ public class DefinitionsDocument extends PlainDocument {
     // First move the reduced model to the start
     int oldLocation = _currentLocation;
     setCurrentLocation(start);
+
     // Now ask reduced model for highlight status for chars till end
     Vector<HighlightStatus> v = 
       _reduced.getHighlightStatus(start, end - start);
+    
     // Go through and find any NORMAL blocks
     // Within them check for keywords
     for (int i = 0; i < v.size(); i++) {
       HighlightStatus stat = v.elementAt(i);
+
       if (stat.getState() == HighlightStatus.NORMAL) {
         i = _highlightKeywords(v, i);
       }
     }
-    // Return to previous location
-    setCurrentLocation(oldLocation);
+
+    // bstoler: Previously we moved back to the old location. This was
+    // very bad and severly slowed down rendering when scrolling.
+    // This is because parts are rendered in order. Thus, if old location is
+    // 0, but now we've scrolled to display 100000-100100, if we keep
+    // jumping back to 0 after getting every bit of highlight, it slows
+    // stuff down incredibly.
+    //setCurrentLocation(oldLocation);
     return v;
   }
 
