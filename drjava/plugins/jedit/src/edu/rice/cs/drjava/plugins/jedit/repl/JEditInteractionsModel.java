@@ -53,8 +53,8 @@ import org.gjt.sp.jedit.*;
 import edu.rice.cs.drjava.plugins.jedit.JEditPlugin;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.config.OptionListener;
-import edu.rice.cs.drjava.config.OptionEvent;
+//import edu.rice.cs.drjava.config.OptionListener;
+//import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.repl.RMIInteractionsModel;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
@@ -74,14 +74,15 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
    */
   protected static int HISTORY_SIZE =
     DrJava.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue();
-  static {
-    DrJava.getConfig().addOptionListener(OptionConstants.HISTORY_MAX_SIZE,
-                                         new OptionListener<Integer>() {
-      public void optionChanged(OptionEvent<Integer> oe) {
-        HISTORY_SIZE = oe.value.intValue();
-      }
-    });
-  }
+//  static {
+//    DrJava.getConfig().addOptionListener(OptionConstants.HISTORY_MAX_SIZE,
+//                                         new OptionListener<Integer>() {
+//      public void optionChanged(OptionEvent<Integer> oe) {
+//        HISTORY_SIZE = oe.value.intValue();
+//      }
+//    });
+//  }
+  // TODO:  Add preferences.  For now, it seems silly to listen to an unchangeable set of options.
 
   /**
    * Milliseconds to wait after each println.
@@ -126,11 +127,11 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
   public JEditInteractionsModel(MainJVM control, SwingDocumentAdapter adapter) {
     super(control, adapter, HISTORY_SIZE, WRITE_DELAY);
     _listeners = new ArrayList<InteractionsListener>();
-//    if (DEBUG) {
-//      _debugSystemOutAndErr();
-//    }
+    if (DEBUG) {
+      _debugSystemOutAndErr();
+    }
     _log = new Log("JEditInteractionsModelLog", DEBUG);
-    
+
     _interpreterControl.setInteractionsModel(this);
     String classpath = System.getProperty("java.class.path");
     String pathSep = System.getProperty("path.separator");
@@ -193,7 +194,7 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
   public void removeAllInteractionsListeners() {
     _listeners.clear();
   }
-  
+
   /**
    * Called when input is requested from System.in.
    * @return the input
@@ -210,7 +211,7 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
     _resetInteractionsClasspath();
     super.interpreterReady();
   }
-  
+
   /**
    * Notifies listeners that an interaction has started.
    */
@@ -255,7 +256,7 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
       _listeners.get(i).interpreterReady();
     }
   }
-  
+
   /**
    * Notifies listeners that the interpreter has exited unexpectedly.
    * @param status Status code of the dead process
@@ -265,7 +266,7 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
       _listeners.get(i).interpreterExited(status);
     }
   }
-  
+
   /**
    * Notifies listeners that the interpreter has changed.
    * @param inProgress Whether the new interpreter is currently in progress.
@@ -410,9 +411,9 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
     st.slashSlashComments(true);
     st.slashStarComments(true);
     try {
-      if (st.nextToken() == st.TT_WORD && st.sval.equals("package")) {
+      if (st.nextToken() == StreamTokenizer.TT_WORD && st.sval.equals("package")) {
         // ...package...
-        if (st.nextToken() == st.TT_WORD) {
+        if (st.nextToken() == StreamTokenizer.TT_WORD) {
           // ...package packageName...
           String packageName = st.sval;
           if (st.nextToken() == ';') {
@@ -438,15 +439,11 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
    */
   protected void _warnUserToReset() {
     if (interpreterUsed()) {
-      String warning = 
+      String warning =
         "Warning: Interactions are out of sync with the current class files.\n" +
         "You should reset interactions before contuing.\n";
       _document.insertBeforeLastPrompt(warning, InteractionsDocument.ERROR_STYLE);
     }
-  }
-
-  public Vector<String> getClasspath() {
-    return _interpreterControl.getClasspath();
   }
 
   /**

@@ -40,7 +40,6 @@
 package edu.rice.cs.drjava.plugins.jedit;
 
 import java.util.*;
-import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -227,7 +226,7 @@ public class JEditPlugin extends EBPlugin {
       }
     });
   }
-  
+
   /**
    * Ensures that the interactions pane is editable after an interaction completes.
    */
@@ -283,7 +282,7 @@ public class JEditPlugin extends EBPlugin {
         }
       });
     }
-    
+
     public void interpreterChanged(boolean inProgress) {
       if (inProgress) {
         _disableInteractionsPane();

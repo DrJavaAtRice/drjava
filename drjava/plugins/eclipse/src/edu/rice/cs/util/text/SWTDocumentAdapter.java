@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -39,7 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.text;
 
-import gj.util.Hashtable;
+import java.util.Hashtable;
 
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.StyledTextContent;
@@ -51,38 +51,38 @@ import org.eclipse.swt.events.*;
 /**
  * Provides a toolkit-independent way to interact with an
  * SWT StyledText widget (from Eclipse).
- * 
+ *
  * A StyledText serves as both model and view, so this class
  * must interface to the model parts of the widget.
- * 
+ *
  * @version $Id$
  */
 public class SWTDocumentAdapter implements DocumentAdapter {
-  
+
   // TO DO:
   //  - Test multithreaded support
-  
+
   /** StyledText widget containing the view. */
   protected StyledText _pane;
-  
+
   /** Underlying document used by the view. */
   protected StyledTextContent _text;
-  
+
   /** Maps names to attribute sets */
   protected Hashtable<String, SWTStyle> _styles;
-  
+
   /** Determines which edits are legal on this document. */
   protected DocumentEditCondition _condition;
-  
+
   /** Whether the adapter is in a state of forcing an insertion. */
   protected boolean _forceInsert;
-  
+
   /** Whether the adapter is in a state of forcing a removal. */
   protected boolean _forceRemove;
-  
+
   /** Any exception that occurred in the most recent (asynchronous) edit. */
   protected DocumentAdapterException _editException;
-  
+
   /**
    * Creates a new document adapter for an SWT StyledText.
    */
@@ -94,11 +94,11 @@ public class SWTDocumentAdapter implements DocumentAdapter {
     _forceInsert = false;
     _forceRemove = false;
     _editException = null;
-    
+
     // Add a listener that enforces the condition
     addVerifyListener(new ConditionListener());
   }
-  
+
   /**
    * Adds a VerifyListener to the internal SWTStyledText.
    * @param l VerifyListener to add to the pane
@@ -106,7 +106,7 @@ public class SWTDocumentAdapter implements DocumentAdapter {
   public void addVerifyListener(VerifyListener l) {
     _pane.addVerifyListener(l);
   }
-    
+
   /**
    * Removes a VerifyListener from the internal SWTStyledText.
    * @param l VerifyListener to remove from the pane
@@ -114,7 +114,7 @@ public class SWTDocumentAdapter implements DocumentAdapter {
   public void removeVerifyListener(VerifyListener l) {
     _pane.removeVerifyListener(l);
   }
-  
+
   /**
    * Adds a ModifyListener to the internal SWTStyledText.
    * @param l ModifyListener to add to the pane
@@ -122,7 +122,7 @@ public class SWTDocumentAdapter implements DocumentAdapter {
   public void addModifyListener(ModifyListener l) {
     _pane.addModifyListener(l);
   }
-    
+
   /**
    * Removes a ModifyListener from the internal SWTStyledText.
    * @param l ModifyListener to remove from the pane
@@ -130,7 +130,7 @@ public class SWTDocumentAdapter implements DocumentAdapter {
   public void removeModifyListener(ModifyListener l) {
     _pane.removeModifyListener(l);
   }
-  
+
   /**
    * Adds the given SWTStyle as a style with the given name.
    * It can then be used in insertText.
@@ -140,16 +140,16 @@ public class SWTDocumentAdapter implements DocumentAdapter {
   public void addDocStyle(String name, SWTStyle s) {
     _styles.put(name, s);
   }
-  
+
   /**
    * Gets the object which can determine whether an insert
    * or remove edit should be applied, based on the inputs.
-   * @param condition Object to determine legality of inputs
+   * @return an Object to determine legality of inputs
    */
   public DocumentEditCondition getEditCondition() {
     return _condition;
   }
-  
+
   /**
    * Provides an object which can determine whether an insert
    * or remove edit should be applied, based on the inputs.
@@ -158,7 +158,7 @@ public class SWTDocumentAdapter implements DocumentAdapter {
   public void setEditCondition(DocumentEditCondition condition) {
     _condition = condition;
   }
-  
+
   /**
    * Inserts a string into the document at the given offset
    * and the given named style, if the edit condition allows it.
@@ -169,13 +169,13 @@ public class SWTDocumentAdapter implements DocumentAdapter {
    * @throws DocumentAdapterException if the offset is illegal
    */
   public void insertText(int offs, String str, String style)
-    throws DocumentAdapterException 
+    throws DocumentAdapterException
   {
     if (_condition.canInsertText(offs, str, style)) {
       forceInsertText(offs, str, style);
     }
   }
-  
+
   /**
    * Inserts a string into the document at the given offset
    * and the given named style, regardless of the edit condition.
@@ -185,16 +185,16 @@ public class SWTDocumentAdapter implements DocumentAdapter {
    * added using addStyle.
    * @throws DocumentAdapterException if the offset is illegal
    */
-  public synchronized void forceInsertText(final int offs, final String str, 
+  public synchronized void forceInsertText(final int offs, final String str,
                                            final String style)
-    throws DocumentAdapterException 
+    throws DocumentAdapterException
   {
     SWTStyle s = null;
     if (style != null) {
       s = _styles.get(style);
     }
     final SWTStyle chosenStyle = s;
-    
+
     _editException = null;
     _forceInsert = true;
 
@@ -203,7 +203,7 @@ public class SWTDocumentAdapter implements DocumentAdapter {
       public void run() {
         try {
           _pane.replaceTextRange(offs, 0, str);
-          
+
           // Add the style
           if (chosenStyle != null) {
             StyleRange range = new StyleRange();
@@ -224,7 +224,7 @@ public class SWTDocumentAdapter implements DocumentAdapter {
       throw _editException;
     }
   }
-  
+
   /**
    * Removes a portion of the document, if the edit condition allows it.
    * @param offs Offset to start deleting from
@@ -236,14 +236,14 @@ public class SWTDocumentAdapter implements DocumentAdapter {
       forceRemoveText(offs, len);
     }
   }
-  
+
   /**
    * Removes a portion of the document, regardless of the edit condition.
    * @param offs Offset to start deleting from
    * @param len Number of characters to remove
    * @throws DocumentAdapterException if the offset or length are illegal
    */
-  public synchronized void forceRemoveText(final int offs, final int len) 
+  public synchronized void forceRemoveText(final int offs, final int len)
     throws DocumentAdapterException
   {
     _editException = null;
@@ -265,14 +265,14 @@ public class SWTDocumentAdapter implements DocumentAdapter {
       throw _editException;
     }
   }
-  
+
   /**
    * Returns the length of the document.
    */
   public int getDocLength() {
     return _text.getCharCount();
   }
-  
+
   /**
    * Returns a portion of the document.
    * @param offs First offset of the desired text
@@ -287,7 +287,7 @@ public class SWTDocumentAdapter implements DocumentAdapter {
       throw new DocumentAdapterException(e);
     }
   }
-  
+
   /**
    * Highlights the given range in the given color.
    * @param offset Offset of first character to highlight
@@ -301,7 +301,7 @@ public class SWTDocumentAdapter implements DocumentAdapter {
     range.background = color;
     _pane.setStyleRange(range);
   }
-  
+
   /**
    * A VerifyListener that enforces the current edit condition.
    */
@@ -327,11 +327,11 @@ public class SWTDocumentAdapter implements DocumentAdapter {
     }
     /** Returns whether the event should be allowed to remove. */
     protected boolean _canRemove(VerifyEvent e) {
-      return _forceRemove || 
+      return _forceRemove ||
         _condition.canRemoveText(e.start, e.end - e.start);
     }
   }
-  
+
   /**
    * Bookkeeping for a particular style in an SWTDocumentAdapter.
    */
@@ -339,7 +339,7 @@ public class SWTDocumentAdapter implements DocumentAdapter {
     /** Color for this style. */
     protected Color _color;
     protected int _fontStyle;
-    
+
     /**
      * Creates a new style to be used in an SWTDocumentAdapter.
      * @param color Color of the style
@@ -349,7 +349,7 @@ public class SWTDocumentAdapter implements DocumentAdapter {
       _color = color;
       _fontStyle = fontStyle;
     }
-    
+
     public Color getColor() { return _color; }
     public int getFontStyle() { return _fontStyle; }
   }

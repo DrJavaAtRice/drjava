@@ -64,6 +64,7 @@ import edu.rice.cs.util.text.SWTDocumentAdapter.SWTStyle;
 import edu.rice.cs.util.text.DocumentAdapter;
 
 import java.io.File;
+import java.util.Vector;
 
 /**
  * This class installs listeners and actions between an InteractionsDocument
@@ -420,8 +421,26 @@ public class InteractionsController {
       }
     };
     resetInteractionsAction.setText("Reset Interactions");
-    resetInteractionsAction.setToolTipText("Reset Interactions Pane");
+    resetInteractionsAction.setToolTipText("Resets the Interactions Pane");
     _view.addMenuItem(resetInteractionsAction);
+
+    Action showClasspathAction = new Action() {
+      public void run() {
+        String title = "Interpreter Classpath";
+        StringBuffer cpBuf = new StringBuffer();
+        Vector<String> classpathElements = _model.getClasspath();
+        for(int i = 0; i < classpathElements.size(); i++) {
+          cpBuf.append(classpathElements.get(i));
+          if (i + 1 < classpathElements.size()) {
+            cpBuf.append("\n");
+          }
+        }
+        _view.showInfoDialog(title, cpBuf.toString());
+      }
+    };
+    showClasspathAction.setText("Show Interpreter Classpath");
+    showClasspathAction.setToolTipText("Shows the classpath used in the interactions pane.");
+    _view.addMenuItem(showClasspathAction);
   }
 
   /**
