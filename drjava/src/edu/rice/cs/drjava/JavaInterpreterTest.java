@@ -241,7 +241,7 @@ public class JavaInterpreterTest extends TestCase {
    
    catch (Exception ex) {
    ex.printStackTrace();
-   throw new RuntimeException(ex.toString());				
+   throw new RuntimeException(ex.toString());
    }
    finally{
    new File("C.java").delete();

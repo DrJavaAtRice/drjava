@@ -458,10 +458,10 @@ public class MainFrame extends JFrame {
     /*The undo/redo menus and key action
      //tmpItem = _editMenu.add(_definitionsPane.getUndoAction());
      //tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
-     //																							ActionEvent.CTRL_MASK));		
+     //                                             ActionEvent.CTRL_MASK));    
      //tmpItem = _editMenu.add(_definitionsPane.getRedoAction());
      //tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
-     //																							ActionEvent.CTRL_MASK));
+     //                                             ActionEvent.CTRL_MASK));
      _editMenu.addSeparator();
      */
     tmpItem = _editMenu.add(cutAction);

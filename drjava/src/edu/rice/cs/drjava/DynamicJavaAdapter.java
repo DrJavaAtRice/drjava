@@ -195,8 +195,16 @@ class ClassLoadChecker {
    * @return 
    */
   public boolean mustUseSystemLoader(String name) {
-    if (name.startsWith("java.") || name.startsWith("javax.")) {
-      return  true;
+    // If name begins with java., must use System loader. This
+    // is regardless of the security manager.
+    // javax too, though this is not documented
+    // And com.sun.tools.javac.* doesn't seem to work unless
+    // I use the system loader! Also never documented!
+    if (name.startsWith("java.") ||
+        name.startsWith("javax.") ||
+        name.startsWith("com.sun."))
+    {
+      return true;
     }
     // No security manager? We can do whatever we want!
     if (_security == null) {

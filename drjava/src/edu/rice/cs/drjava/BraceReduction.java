@@ -22,7 +22,7 @@ public interface BraceReduction
    * @return the current token
    */
   ReducedToken currentToken();
-		
+
   /**
    * Get the state of the token at the current cursor position.
    * @return the current state

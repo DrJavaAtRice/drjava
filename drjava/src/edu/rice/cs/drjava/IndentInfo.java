@@ -4,7 +4,7 @@ package  edu.rice.cs.drjava;
  * @version $Id$
  */
 public class IndentInfo {
-  public String braceType;      //the type of brace.	
+  public String braceType;      //the type of brace.
   //the distance to infront of the newline directly preceding the brace.
   //____\n|_____
   public int distToNewline;
