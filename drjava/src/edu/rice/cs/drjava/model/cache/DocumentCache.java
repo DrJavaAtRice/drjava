@@ -57,171 +57,82 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.util.UnexpectedException;
 
-
+/**
+ * The document cache is a structure that organizes the instances
+ * of the DefinitionsDocument.  It ensures that there no more than a 
+ * set number of DefinitionsDocuments loaded in memory at one time 
+ * since the information stored within them is large.  
+ * <p>
+ * It manages the documents with DocManagers.  There is exactly one 
+ * manager for each OpenDefinitionsDocument that is registered with this 
+ * cache. The managers are the only objects that keep a link to the 
+ * document. Since the Managers themselves implement the DCacheAdapter 
+ * interface, the rest of the model goes directly to the manager to get 
+ * the instance of the DefinitionsDocument (which saves time).
+ * <p>
+ * When a manager is at the end of the most recently used list, the
+ * cache notifies the manager and the manager discards the instance
+ * of the DefinitionsDocument.  When the document is retrieved from
+ * the manager by the rest of the model, the manager (if it isn't already
+ * at the front of the LRU) notifies the cache of this event and the 
+ * cache modifies the LRU accordingly dealing with any other document
+ * managers that this event affects.
+ * <p>
+ * The LRU only applies to documents that have not been modified since
+ * their last save.  If a document is modified, the cache does not
+ * put it in the LRU nor does it tell the manager to ever discard the
+ * instance of the DefinitionsDocument. Whenever that modified document 
+ * is saved again, the manager is placed again in the LRU and is treated
+ * as the others.
+ */
 public class DocumentCache{
   
-  private final Hashtable<OpenDefinitionsDocument,Pair<DefinitionsDocument,DDReconstructor>> table;
+  private int CACHE_SIZE;
   
-  /**
-   * most recent are first
-   * least recent are last
-   */
-  private final LinkedList<OpenDefinitionsDocument> lru;
-  
-  private int CACHE_SIZE = 24;
-  
-  public DocumentCache(){
-    lru = new LinkedList<OpenDefinitionsDocument>();
-    table = new Hashtable<OpenDefinitionsDocument,Pair<DefinitionsDocument,DDReconstructor>>();
-  }
-
-  /**
-   * adds the ODD to the cache with the given document and reconstructor as its value (a pair Open)
-   * @param odd the ODD to use as the key to the cache
-   * @param reconstructor a Open which can make another DefinitionsDocument for this odd if needed
-   */
-  public void put(OpenDefinitionsDocument odd, DDReconstructor reconstructor){
-    //System.out.println("put: " + odd);
-    Pair<DefinitionsDocument,DDReconstructor> pair = new Pair<DefinitionsDocument,DDReconstructor>(null, reconstructor);
-    table.remove(odd);
-    table.put(odd, pair);
-    synchronized(lru) {
-      lru.remove(odd);
-    }
-//    System.out.println(this);
-  }
-
-  /**
-   * retrieves the definitions document for the ODD.  If the dd is not available, it is reconstructed
-   * then returned.  When the dd is retrieved, it is placed at the top of the most recently used list
-   * so that it will stay in the cache longer
-   * @param odd the ODD to use as the key to the cache
-   * @return a DefinitionsDocument for this odd 
-   */
-  public DefinitionsDocument get(OpenDefinitionsDocument odd) throws IOException, FileMovedException{
-    DefinitionsDocument retdoc;
-    Pair<DefinitionsDocument,DDReconstructor> pair = table.get(odd);
-    if(pair == null){
-      throw new NoSuchDocumentException("Cannot obtain the definitions document for: " + odd);
-    }
-    retdoc = pair.getFirst();
-    updatelru(odd, pair);
-//    System.out.println(this);
-    if(retdoc == null){
-      try{
-//        System.out.println("DocumentCache.java: 114: creating document from reconstructor for " + odd);
-        retdoc = pair.getSecond().make();
-        pair = new Pair<DefinitionsDocument,DDReconstructor>(retdoc, pair.getSecond());
-        table.remove(odd);
-        table.put(odd, pair);
-      } catch(BadLocationException e){
-        throw new UnexpectedException(e);
-      }
-    }
-    return retdoc;
-  }
-  
-  /**
-   * @param odd the open definitions document who registered the reconstructor
-   * @return the reconstructor associated with the given odd
-   */
-  public DDReconstructor getReconstructor(OpenDefinitionsDocument odd) {
-    Pair<DefinitionsDocument,DDReconstructor> pair = table.get(odd);
-    if(pair == null){
-      throw new NoSuchDocumentException("Cannot obtain the reconstructor for: " + odd);
-    }
-    return pair.getSecond();
-  }
-  
-  /**
-   * updates the ODD to the cache with the given document and reconstructor as its value (a pair Open)
-   * @param odd the ODD to use as the key to the cache
-   * @param reconstructor a new reconstructor for this odd
-   */
-  public void update(OpenDefinitionsDocument odd, DDReconstructor reconstructor){
-    //System.out.println("update " + odd);
-    Pair<DefinitionsDocument,DDReconstructor> oldpair = table.get(odd);
-    Pair<DefinitionsDocument,DDReconstructor> newpair = new Pair<DefinitionsDocument,DDReconstructor>(null, reconstructor);
-    if(isDDocInCache(odd)){
-      reconstructor.saveDocInfo(oldpair.getFirst());
-      oldpair.getFirst().close();
-    }
-    oldpair = table.remove(odd);
-    table.put(odd, newpair);
-  }
-  
-  
-  /**
-   * updates the lru cache to have the input document as most recently used
-   * @param odd the document that has been used most recently
-   */
-  private void updatelru(OpenDefinitionsDocument odd, Pair<DefinitionsDocument,DDReconstructor> pair){
-    synchronized(lru) {
-      if (!lru.isEmpty() && lru.getFirst() == odd) {
-        //System.out.println("updatelru: " + odd + " is first in list");
-        return;
-      }
-      lru.remove(odd);
-    }
-     
-
-    if (!(isDDocInCache(odd) && pair.getFirst().isModifiedSinceSave())) {
-      //      System.out.println("adding " + odd + " to lru");
-      synchronized(lru) {
-        lru.addFirst(odd);
-      }
-    }
+  private LinkedList<DocManager> _lru;
     
-    //System.out.println("Cache size is : " + lru.size());
-    synchronized(lru) {
-      if (lru.size() > CACHE_SIZE) {
-        odd = lru.removeLast();
-        Pair<DefinitionsDocument,DDReconstructor> removedPair = table.get(odd);
-        //      System.out.println("should i dispose of " + odd + "?");
-        
-        if(isDDocInCache(odd) && removedPair.getFirst().isModifiedSinceSave()){
-          //        System.out.println("no");
-        } else {
-          //        System.out.println("disposing of " + odd);
-          update(odd, removedPair.getSecond());
-        }
-      }
-    }
+  public DocumentCache(int size){
+    CACHE_SIZE = size;
+    _lru = new LinkedList<DocManager>();
   }
-  
-  
+  public DocumentCache() {
+    this(24);
+  }
+
+  /**
+   * Returns a cache adapter corresponding to the owner of the
+   * given reconstructor.
+   * @param odd The open definitions document that is registering.
+   * (This is there for unit testing purposes).
+   * @param rec A reconstructor from which to create the document
+   * that is to be managed in this cache
+   * @return an adapter that allows its owner to access its 
+   * definitions document
+   */
+  public DCacheAdapter register(OpenDefinitionsDocument odd, DDReconstructor rec) {
+    DocManager man = new DocManager(rec);
+    notifyRegistrationListeners(odd,man);
+    return man;
+  }
   
   /**
-   * @return true if the DefinitionsDocument for this OpenDefinitionsDocument is in the cache
-   * @param oddoc the key to this hash
+   * Changes the number of allowed <b>unmodified</b> documents 
+   * in the cache at one time.  <br>
+   * Note: modified documents are not managed in the cache.
    */
-  public boolean isDDocInCache(OpenDefinitionsDocument oddoc){
-//    System.out.print("checking doc in cache: " + oddoc);
-    Pair<DefinitionsDocument,DDReconstructor> pair = table.get(oddoc);
-    if(pair == null){
-      throw new NoSuchDocumentException("Cannot obtain the needed definitions document for " + oddoc);
-    }
-    DefinitionsDocument retdoc = pair.getFirst();
-    return retdoc != null;
-  }
-  
-  
-  public void removeDoc(OpenDefinitionsDocument odd){
-    Pair<DefinitionsDocument,DDReconstructor> pair = table.remove(odd);
-    if(pair.getFirst() != null){
-//      pair.getSecond().saveDocInfo(pair.getFirst());
-      pair.getFirst().close();
-    }
-    synchronized(lru) {
-      lru.remove(odd);
-    }
-  }
-  
-  public void setCacheSize(int size) {
-    if (size < 0) {
-      throw new IllegalArgumentException("Cannot set the cache size less than 0");
-    }
+  public synchronized void setCacheSize(int size) {
     CACHE_SIZE = size;
+    if (_lru.size() >= CACHE_SIZE) {
+      ListIterator<DocManager> it = _lru.listIterator();
+      int i = 0;
+      while (it.hasNext()) {
+        it.next();
+        if (i >= CACHE_SIZE) {
+          it.remove();
+        }
+        i++;
+      }
+    }
   }
   
   public int getCacheSize() {
@@ -229,10 +140,209 @@ public class DocumentCache{
   }
   
   public int getNumInCache(){
-    return lru.size();
+    return _lru.size();
+  }
+    
+  /**
+   * Called by a manager when it is used by the model.
+   * This causes the given document manager to be put at
+   * the top of the LRU.
+   * @param dm The document manager that was just used.
+   */
+  private synchronized void newFirst(DocManager dm) {
+    if (_lru.size() > 0) _lru.getFirst().setNotFirst();
+    _lru.remove(dm); // Make sure dm isn't in the LRU
+    _lru.addFirst(dm);
+    dm.setFirst();
+    if (_lru.size() > CACHE_SIZE) {
+      DocManager last = _lru.getLast();
+      _lru.removeLast();
+      last.kickOut();
+    }
   }
   
-  public synchronized String toString() {
-    return "Document Cache: LRU: " + lru;
+  /**
+   * Removes the given DocManager from the top LRU list
+   * if in it at all.
+   */
+  private synchronized void remove(DocManager toRemove) {
+    _lru.remove(toRemove);
+    if (toRemove.isFirst()) {
+      toRemove.setOut();
+    }
+    if (_lru.size() > 0 )
+      _lru.getFirst().setFirst(); // just in case the one removed was first
   }
+  
+  
+  
+  
+  ///////////////////////////// DocManager //////////////////////////
+  
+  private static final int FIRST_IN_LRU = 0;
+  private static final int OTHER_IN_LRU = 1;
+  private static final int NOT_IN_LRU = 2;
+  private static final int UNMANAGED = 3;
+  
+  /**
+   * Manages the retrieval of a document for a corresponding
+   * open definitions document.  This manager only maintains
+   * its document data if it is among the top CACHE_SIZE most
+   * recently used managers in the set.
+   */
+  private class DocManager implements DCacheAdapter {
+    
+    private int _stat; // I know, this is not very OO
+    private DDReconstructor _rec;
+    private DefinitionsDocument _doc;
+    
+    /**
+     * Instantiates a manager for the documents that are produced by
+     * the given document reconstructor
+     * @param rec The reconstructor used to create the document
+     */
+    public DocManager(DDReconstructor rec) {
+      _stat = NOT_IN_LRU;
+      _rec = rec;
+      _doc = null;
+    }
+    
+    public synchronized void setReconstructor(DDReconstructor rec) {
+      _rec = rec;
+      close();
+    }
+    
+    public synchronized DDReconstructor getReconstructor() {
+      return _rec;
+    }
+  
+    /**
+     * Retrieves the document for the corresponding ODD.  If the document
+     * is not in memory, it loads it into memory and then returns it.
+     * @return the document that is managed by this adapter
+     */
+    public synchronized DefinitionsDocument getDocument() 
+      throws IOException, FileMovedException {
+        
+      if (_stat != FIRST_IN_LRU && 
+          _stat != UNMANAGED) {
+        makeMeFirst();
+      }
+      else if (_stat == UNMANAGED && _doc !=null && 
+               !_doc.isModifiedSinceSave()) {
+        _stat = NOT_IN_LRU;
+      }
+
+      if (_doc != null) {
+        return _doc;
+      }
+      else {
+        try {
+          _doc = _rec.make();
+          if (_doc == null) 
+            throw new IllegalStateException("the reconstructor made a null document");
+        }
+        catch(BadLocationException e) {
+          throw new UnexpectedException(e);
+        }
+        return _doc;
+      }
+    }
+    
+    /**
+     * Checks whether the document is ready to be returned.  If false, then
+     * the document would have to be loaded from disk.
+     * @return if the document is already loaded
+     */
+    public boolean isReady() {
+      return _doc != null;
+    }
+  
+    /**
+     * Closes the corresponding document for this adapter
+     */
+    public void close() {
+      kickOut(false); // should not save the doc info
+      DocumentCache.this.remove(this);
+    }
+        
+    /**
+     * Should be called by the cache
+     */
+    void kickOut() {
+      kickOut(true);
+    }
+    
+    private void kickOut(boolean save) {
+      if (_doc != null) {
+        if (save) _rec.saveDocInfo(_doc);
+        _doc.close();
+        _doc = null;
+      }
+      _stat = NOT_IN_LRU;
+    }
+    
+    /**
+     * Tells the cache that this document should be first
+     * document in the LRU.
+     */
+    private void makeMeFirst() {
+      DocumentCache.this.newFirst(this);
+    }
+    
+    // The following methods used by the cache to speed up algos
+    // These enable the managers to decide when to bypass the 
+    // cache and just give the user the document.
+    
+    void setStatus(int stat) { _stat = stat; }
+    int getStatus() { return _stat; }
+    
+    void setFirst() { _stat = FIRST_IN_LRU; }
+    void setOut()   { _stat = NOT_IN_LRU; }
+    void setNotFirst() {
+      if (_doc != null && _doc.isModifiedSinceSave()) {
+        _stat = UNMANAGED;
+        DocumentCache.this.remove(this);
+      }
+      _stat = OTHER_IN_LRU;
+    }
+    
+    boolean isFirst()    { return _stat == FIRST_IN_LRU; }
+    boolean isNotFirst() { return _stat == OTHER_IN_LRU; }
+    boolean isOut()      { return _stat == NOT_IN_LRU; }
+    
+    public String toString() {
+      return "Manager for: " + _doc;
+    } 
+  }
+  
+  ////////////////////////////////////////
+  
+  /**
+   * This interface allows the unit tests to get a handle
+   * on what's going on since the work is spread between the
+   * ODD, the cache, and the Adapters.
+   */
+  public interface RegistrationListener {
+    public void registered(OpenDefinitionsDocument odd, DCacheAdapter man);
+  }
+  
+  private LinkedList<RegistrationListener> _regListeners = 
+    new LinkedList<RegistrationListener>();
+  
+  public void addRegistrationListener(RegistrationListener list) {
+    _regListeners.add(list);
+  }
+  public void removeRegistrationListener(RegistrationListener list) {
+    _regListeners.remove(list);
+  }
+  public void clearRegistrationListeners() {
+    _regListeners.clear();
+  }
+  private void notifyRegistrationListeners(OpenDefinitionsDocument odd, DocManager man) {
+    for(RegistrationListener list : _regListeners) {
+      list.registered(odd,man);
+    }
+  }
+  
 }

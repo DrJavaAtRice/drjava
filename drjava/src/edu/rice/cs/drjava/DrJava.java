@@ -155,7 +155,9 @@ public class DrJava implements OptionConstants {
         if (!configLAFName.equals(currLAFName)) {
           UIManager.setLookAndFeel(configLAFName);
         }
-        // Initializes the Windows XP L&F fixes included in the winlaf jar
+        
+        // This line uses the winlaf-0.4.1.jar in the lib directory to
+        // install L&F upgrades for windows XP.
         // For more information see: https://winlaf.dev.java.net/release_0.4.html
         net.java.plaf.LookAndFeelPatchManager.initialize();
         

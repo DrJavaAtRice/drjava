@@ -1393,8 +1393,6 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     srcFiles = ir.getSourceFiles();
     auxFiles = ir.getAuxiliaryFiles();
     String projfilepath = projectFile.getCanonicalPath();
-
-    
     
     List<Pair<String, INavigatorItemFilter>> l = new LinkedList<Pair<String, INavigatorItemFilter>>();
     l.add(new Pair<String, INavigatorItemFilter>("[ Source Files ]", new INavigatorItemFilter(){
@@ -2300,6 +2298,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     private int _initSelStart;
     private int _initSelEnd;
     
+    private DCacheAdapter _cacheAdapter;
+    
 //    boolean _shouldRun;
 //    private GlobalModelListener _notifyListener = new DummySingleDisplayModelListener() {
 //      public synchronized void interpreterReady() {
@@ -2350,7 +2350,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         //System.out.println("about to make reconstructor " + this);
         DDReconstructor ddr = makeReconstructor();
         //System.out.println("finished making reconstructor " + this);
-        _cache.put(this, ddr);
+        _cacheAdapter = _cache.register(this,ddr);
       }catch(IllegalStateException e){
         throw new UnexpectedException(e);
       }
@@ -2418,8 +2418,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         
         public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException{
           DefinitionsDocument tempDoc;
-            tempDoc = new DefinitionsDocument(_notifier);
-            tempDoc.setOpenDefDoc(ConcreteOpenDefDoc.this);
+          tempDoc = new DefinitionsDocument(_notifier);
+          tempDoc.setOpenDefDoc(ConcreteOpenDefDoc.this);
             
           
           if(_file != null){
@@ -2512,7 +2512,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
 //        System.out.println("  " + e.getStackTrace()[4]);
 //      }
       try{
-        return _cache.get(this);
+        return _cacheAdapter.getDocument();
       }catch(FileMovedException e){
 //        System.out.println("DefaultGlobalModel: 1430: FileMovedException should be handled by box that fixes everything.");
       }catch(IOException e){
@@ -2527,15 +2527,6 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       
       return getDocument();
 
-//      try{
-//        File tempFile = _file;
-//        setFile(null);
-//        _cache.update(this, makeReconstructor());
-//        _cache.get(this).insertString(0, "\"Error loading document from file: " + tempFile + "\"", null);
-//        return _cache.get(this);
-//      }catch(Exception e){
-//        throw new UnexpectedException(e);
-//      }
     }
 
     /** 
@@ -2988,7 +2979,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     public boolean isModifiedSinceSave() {
       /* if the document is not in the cache, then we know that it's not modified, so
        * only check if the DDoc is in the cache */
-      if(_cache.isDDocInCache(this)){
+      if(_cacheAdapter.isReady()){
         return getDocument().isModifiedSinceSave();
       }else{
         return false;
@@ -3174,7 +3165,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
 //      new RuntimeException().printStackTrace(System.err);
 //      System.err.println("---------------------------");
       removeFromDebugger();
-      _cache.removeDoc(this);      
+      _cacheAdapter.close();
     }
 
     public void revertFile() throws IOException {
@@ -3546,11 +3537,11 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
      * Implementation of the javax.swing.text.Document interface
      */
     public void addDocumentListener(DocumentListener listener){
-      if(_cache.isDDocInCache(this)){
+      if(_cacheAdapter.isReady()){
         getDocument().addDocumentListener(listener);
       }
       else {
-        _cache.getReconstructor(this).addDocumentListener(listener);
+        _cacheAdapter.getReconstructor().addDocumentListener(listener);
       }
     }
     
@@ -3641,14 +3632,14 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
      * @return whether the undo manager can perform any undo's
      */
     public boolean undoManagerCanUndo() {
-      return _cache.isDDocInCache(this) && getUndoManager().canUndo();
+      return _cacheAdapter.isReady() && getUndoManager().canUndo();
     }
     /**
      * If the undo manager is unavailable, no redos are available
      * @return whether the undo manager can perform any redo's
      */
     public boolean undoManagerCanRedo() {
-      return _cache.isDDocInCache(this) && getUndoManager().canRedo();
+      return _cacheAdapter.isReady() && getUndoManager().canRedo();
     }
     
     /**
@@ -3709,7 +3700,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     public void resetUndoManager() {
       // if it's not in the cache, the undo manager will be 
       // reset when it's reconstructed
-      if(_cache.isDDocInCache(this)){
+      if(_cacheAdapter.isReady()){
         getDocument().resetUndoManager();
       }
     }

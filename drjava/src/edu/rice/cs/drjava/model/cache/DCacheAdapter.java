@@ -1,4 +1,4 @@
-  /*BEGIN_COPYRIGHT_BLOCK
+/*BEGIN_COPYRIGHT_BLOCK
  *
  * This file is part of DrJava.  Download the current version of this project:
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
@@ -45,36 +45,43 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.cache;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import java.io.IOException;
 import javax.swing.text.BadLocationException;
-import javax.swing.event.DocumentListener;
+
 import edu.rice.cs.drjava.model.FileMovedException;
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
 /**
- * The Reconstructor is basically a mix between a factory and
- * a lambda.  This class is used by the DocumentCache in order
- * to be able to load DefinitionsDocuments lazily from disk.
+ * Objects of this type are responsible for getting
+ * the definitions documents to their own respective
+ * OpenDefinitionsDocuments.  This in effect decouples
+ * the OpenDefinitionsDocument from the DocumentCache
+ * and allows for some optimizations on document retrieval
  */
-public interface DDReconstructor{
+public interface DCacheAdapter {
   
   /**
-   * @return a new DefinitionsDocument
+   * Retrieves the document for its corresponding ODD
+   * @return the definitions document for the corresponding ODD
    */
-  public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException;
+  public DefinitionsDocument getDocument() throws IOException, FileMovedException;
   
   /**
-   * Saves information (like cursor location, highlight, etc.) from the 
-   * definitions document before the cache deletes the definitions 
-   * document so that those pieces of info can be reinstated when 
-   * reconstructing the DefinitionsDocument again.
-   * @param doc the DefinitionsDocument whose data needs saving
+   * Checks whether the document is ready to be returned.  If false, then
+   * the document would have to be loaded from disk when getDocument() is 
+   * called.  
+   * @return if the document is already loaded
    */
-  public void saveDocInfo(DefinitionsDocument doc);
+  public boolean isReady();
   
   /**
-   * Sets a document listener to be added to the definitions document when it is created
-   * @param dl the listener to add to the document
+   * Closes the corresponding document for this adapter
    */
-  public void addDocumentListener(DocumentListener dl);
+  public void close();
+  
+  
+  public void setReconstructor(DDReconstructor rec);
+  
+  public DDReconstructor getReconstructor();
+  
 }

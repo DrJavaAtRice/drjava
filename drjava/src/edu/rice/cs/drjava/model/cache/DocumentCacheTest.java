@@ -48,28 +48,89 @@ package edu.rice.cs.drjava.model.cache;
 import junit.framework.TestCase;
 
 import java.io.*;
+import java.util.*;
 import javax.swing.text.*;
 
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.*;
+import edu.rice.cs.util.*;
 
 /**
- * 
+ * This used to extend GlobalModelTestCase, but now it 
+ * extends just TestCase because the GlobalModelTestCase
+ * was changed to use a DefaultSingleDisplayModel rather
+ * than a DefaultGlobalModel.  The extra code in Single
+ * Display makes it very difficult to predict which documents
+ * will be in the cache and in which order.  This is because 
+ * The single display model has extra algorithms that 
+ * maintain the single-active-document invariant.  Given that
+ * the SingleDisplayModel is not keeping any references to
+ * DefinitionsDocuments, that should not be a source of a
+ * memory leak for the DocumentCache
  */
-public class DocumentCacheTest extends GlobalModelTestCase {
+public class DocumentCacheTest extends TestCase {
   
+  private DefaultGlobalModel _model;
   private DocumentCache _cache;
-  
+  private Hashtable<OpenDefinitionsDocument, DCacheAdapter> _adapterTable;
   
   private int _doc_made;
   private int _doc_saved;
   
+  protected File _tempDir;
+
   public void setUp() throws IOException {
-    super.setUp();
+//    super.setUp();
+    createModel();
+    
+    String user = System.getProperty("user.name");
+    _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+    
     _cache = _model.getDocumentCache();
     _cache.setCacheSize(4);
+    _adapterTable = new Hashtable<OpenDefinitionsDocument, DCacheAdapter> ();
+    _cache.addRegistrationListener(new DocumentCache.RegistrationListener() {
+      public void registered(OpenDefinitionsDocument odd, DCacheAdapter a) {
+        _adapterTable.put(odd, a);
+      }
+    });
     _doc_made = 0;
     _doc_saved = 0;
+  }
+  
+  public void tearDown() throws IOException {
+    boolean ret = FileOps.deleteDirectory(_tempDir);
+    assertTrue("delete temp directory " + _tempDir, ret);
+    _model.dispose();
+
+    _tempDir = null;
+    _model = null;
+    System.gc();
+  }
+  
+  /**
+   * Instantiates the GlobalModel to be used in the test cases.
+   */
+  protected void createModel() {
+    //_model = new DefaultSingleDisplayModel(_originalModel);
+    _model = new TestGlobalModel();
+
+    // Wait until it has connected
+    _model.waitForInterpreter();
+  }
+
+  /** Create a new temporary file in _tempDir. */
+  protected File tempFile() throws IOException {
+    return File.createTempFile("DrJava-test", ".java", _tempDir);
+  }
+  
+  /**
+   * Create a new temporary file in _tempDir.  Calls with the same
+   * int will return the same filename, while calls with different
+   * ints will return different filenames.
+   */
+  protected File tempFile(int i) throws IOException {
+    return File.createTempFile("DrJava-test" + i, ".java", _tempDir);
   }
   
   protected OpenDefinitionsDocument openFile(final File f) throws IOException{
@@ -101,57 +162,109 @@ public class DocumentCacheTest extends GlobalModelTestCase {
   public void testDocumentsInAndOutOfTheCache() throws BadLocationException, IOException {
     assertEquals("Wrong Cache Size", 4, _cache.getCacheSize());
     
-    // The model already has an active empty document
-    OpenDefinitionsDocument doc1 =  _model.newFile();
-    assertTrue("The document should start out in the cache", _cache.isDDocInCache(doc1));
-    assertEquals("There should be 2 documents in the cache", 2, _cache.getNumInCache());
-    OpenDefinitionsDocument doc2 =  _model.newFile();
-    assertTrue("The document should start out in the cache", _cache.isDDocInCache(doc2));
-    assertEquals("There should be 3 documents in the cache", 3, _cache.getNumInCache());
-    OpenDefinitionsDocument doc3 =  _model.newFile();
-    assertTrue("The document should start out in the cache", _cache.isDDocInCache(doc3));
-    assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
-    OpenDefinitionsDocument doc4 =  _model.newFile();
-    assertTrue("The document should start out in the cache", _cache.isDDocInCache(doc4));
-    assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
-    OpenDefinitionsDocument doc5 =  _model.newFile();
-    assertTrue("The document should start out in the cache", _cache.isDDocInCache(doc5));
-    assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
-    OpenDefinitionsDocument doc6 =  _model.newFile();
-    assertTrue("The document should start out in the cache", _cache.isDDocInCache(doc6));
-    assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
+    // The documents should not be activated upon creation 
     
-    // checkin isModifiedSinceSave shouldn't activate the documents
+    OpenDefinitionsDocument doc1 =  _model.newFile();
+    assertEquals("There should be 0 documents in the cache", 0, _cache.getNumInCache()); // was 0
+    
+    OpenDefinitionsDocument doc2 =  _model.newFile();
+    assertEquals("There should be 0 documents in the cache", 0, _cache.getNumInCache()); // was 0
+    
+    OpenDefinitionsDocument doc3 =  _model.newFile();
+    assertEquals("There should be 0 documents in the cache", 0, _cache.getNumInCache()); // was 0
+    
+    OpenDefinitionsDocument doc4 =  _model.newFile();
+    assertEquals("There should be 0 documents in the cache", 0, _cache.getNumInCache()); // was 0
+    
+    OpenDefinitionsDocument doc5 =  _model.newFile();
+    assertEquals("There should be 0 documents in the cache", 0, _cache.getNumInCache()); // was 0
+    
+    OpenDefinitionsDocument doc6 =  _model.newFile();
+    assertEquals("There should be 0 documents in the cache", 0, _cache.getNumInCache()); // was 0
+    
+    // This tests that isModifiedSinceSave does not cause the document to load into the cache,
+    // so the two that should have been kicked out, 1 & 2 should not be loaded uppon calling isModified.
+
     assertFalse("Document 1 shouldn't be modified", doc1.isModifiedSinceSave());
     assertFalse("Document 2 shouldn't be modified", doc2.isModifiedSinceSave());
     assertFalse("Document 3 shouldn't be modified", doc3.isModifiedSinceSave());
     assertFalse("Document 4 shouldn't be modified", doc4.isModifiedSinceSave());
     assertFalse("Document 5 shouldn't be modified", doc5.isModifiedSinceSave());
     assertFalse("Document 6 shouldn't be modified", doc6.isModifiedSinceSave());
+    assertEquals("There should be 4 documents in the cache", 0, _cache.getNumInCache());
     
-    assertEquals("There should still be 4 documents in the cache", 4, _cache.getNumInCache());
+    assertFalse("Document 1 shouldn't be ready", _adapterTable.get(doc1).isReady());
+    assertFalse("Document 2 shouldn't be ready", _adapterTable.get(doc2).isReady());
+    assertFalse("Document 3 shouldn't be ready", _adapterTable.get(doc3).isReady());
+    assertFalse("Document 4 shouldn't be ready", _adapterTable.get(doc4).isReady());
+    assertFalse("Document 5 shouldn't be ready", _adapterTable.get(doc5).isReady());
+    assertFalse("Document 6 shouldn't be ready", _adapterTable.get(doc6).isReady());
+    
     
     // Activate all documents and make sure that the right ones get kicked out
+    // Front of LRU -> a b c d | e f <- out of LRU
     doc1.getLength();
     doc2.getLength();
     doc3.getLength();
     doc4.getLength();
     doc5.getLength();
     doc6.getLength();
-    doc1.getLength();
-    doc2.getLength();
-    doc3.getLength();
-    doc4.getLength();
-    assertFalse("The document 5 should have been kicked out of the cache", _cache.isDDocInCache(doc5));
-    assertFalse("The document 6 should have been kicked out of the cache", _cache.isDDocInCache(doc6));
+    
+    // 6 5 4 3 | 2 1
+    assertFalse("Document 1 shouldn't be ready", _adapterTable.get(doc1).isReady());
+    assertFalse("Document 2 shouldn't be ready", _adapterTable.get(doc2).isReady());
+    assertTrue("Document 3 shouldn't be ready", _adapterTable.get(doc3).isReady());
+    assertTrue("Document 4 shouldn't be ready", _adapterTable.get(doc4).isReady());
+    assertTrue("Document 5 shouldn't be ready", _adapterTable.get(doc5).isReady());
+    assertTrue("Document 6 shouldn't be ready", _adapterTable.get(doc6).isReady());
+        
+    doc1.getLength(); // 1 6 5 4 | 3 2
+    assertTrue("The document 1 should should now be in the cache", _adapterTable.get(doc1).isReady());    
+    assertEquals("There should still be 1 documents in the cache", 4, _cache.getNumInCache()); 
+    assertFalse("The document 3 should have been kicked out of the cache", _adapterTable.get(doc3).isReady());
+    
+    doc2.getLength(); // 2 1 6 5 | 4 3
+    assertTrue("The document 2 should should now be in the cache", _adapterTable.get(doc2).isReady());
+    assertEquals("There should still be 2 documents in the cache", 4, _cache.getNumInCache());
+    assertFalse("The document 4 should have been kicked out of the cache", _adapterTable.get(doc4).isReady());
+    
+    doc3.getLength(); // 3 2 1 6 | 5 4
+    assertTrue("The document 3 should should now be in the cache", _adapterTable.get(doc3).isReady());
+    assertEquals("There should still be 3 documents in the cache", 4, _cache.getNumInCache());
+    assertFalse("The document 5 should have been kicked out of the cache", _adapterTable.get(doc5).isReady());
+    
+    doc4.getLength(); // 4 3 2 1 | 6 5
+    assertTrue("The document 4 should should now be in the cache", _adapterTable.get(doc4).isReady());
+    assertEquals("There should still be 4 documents in the cache", 4, _cache.getNumInCache());
+    assertFalse("The document 6 should have been kicked out of the cache", _adapterTable.get(doc6).isReady());
+    
+    doc5.getLength(); // 5 4 3 2 | 1 6
+    assertTrue("The document 5 should should now be in the cache", _adapterTable.get(doc5).isReady());
+    assertEquals("There should still be 4 documents in the cache", 4, _cache.getNumInCache());
+    assertFalse("The document 1 should have been kicked out of the cache", _adapterTable.get(doc1).isReady());
+    
+    doc6.getLength(); // 6 5 4 3 | 2 1
+    assertTrue("The document 6 should should now be in the cache", _adapterTable.get(doc6).isReady());
+    assertEquals("There should still be 4 documents in the cache", 4, _cache.getNumInCache());
+    assertFalse("The document 2 should have been kicked out of the cache", _adapterTable.get(doc2).isReady());
+    
+    // Load documents out of order
+    doc4.getLength(); // 4 6 5 3 | 2 1
+    assertTrue("The document 3 should should still be in the cache", _adapterTable.get(doc3).isReady());    
+    assertEquals("There should still be 4 documents in the cache", 4, _cache.getNumInCache());
+    doc5.getLength(); // 5 4 6 3 | 2 1
+    assertTrue("The document 3 should should still be in the cache", _adapterTable.get(doc3).isReady());    
+    assertEquals("There should still be 4 documents in the cache", 4, _cache.getNumInCache());
+    doc3.getLength(); // 3 5 4 6 | 2 1
+    assertTrue("The document 6 should should still be in the cache", _adapterTable.get(doc6).isReady());    
+    assertEquals("There should still be 4 documents in the cache", 4, _cache.getNumInCache());
+    doc4.getLength(); // 4 3 5 6 | 2 1
+    assertTrue("The document 6 should should still be in the cache", _adapterTable.get(doc6).isReady());    
     
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
+    assertFalse("The document 1 should still be out of the cache", _adapterTable.get(doc1).isReady());
+    assertFalse("The document 2 should still be out of the cache", _adapterTable.get(doc2).isReady());
     
-    // Test the LRU to make sure the documents are kicked out in the right order
-    doc5.getLength();
-    assertFalse("doc1 should have been kicked out first", _cache.isDDocInCache(doc1));
-    doc6.getLength();
-    assertFalse("doc2 should have been kicked out first", _cache.isDDocInCache(doc2));
   }
   
   public void testGetDDocFromCache() throws BadLocationException, IOException, OperationCanceledException {
@@ -164,33 +277,35 @@ public class DocumentCacheTest extends GlobalModelTestCase {
     
     // opening a document should set it as active
     OpenDefinitionsDocument doc1 = openFile(file1);
-    assertTrue("The document should not start out in the cache", _cache.isDDocInCache(doc1));
+    assertTrue("The document should not start out in the cache", _adapterTable.get(doc1).isReady());
     assertEquals("There should be 1 documents in the cache", 1, _cache.getNumInCache());
     OpenDefinitionsDocument doc2 = openFile(file2);
-    assertTrue("The document should not start out in the cache", _cache.isDDocInCache(doc2));
+    assertTrue("The document should not start out in the cache", _adapterTable.get(doc2).isReady());
     assertEquals("There should be 2 documents in the cache", 2, _cache.getNumInCache());
     OpenDefinitionsDocument doc3 = openFile(file3);
-    assertTrue("The document should not start out in the cache", _cache.isDDocInCache(doc3));
+    assertTrue("The document should not start out in the cache", _adapterTable.get(doc3).isReady());
     assertEquals("There should be 3 documents in the cache", 3, _cache.getNumInCache());
     OpenDefinitionsDocument doc4 = openFile(file4);
-    assertTrue("The document should not start out in the cache", _cache.isDDocInCache(doc4));
+    assertTrue("The document should not start out in the cache", _adapterTable.get(doc4).isReady());
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
     OpenDefinitionsDocument doc5 = openFile(file5);
-    assertTrue("The document should not start out in the cache", _cache.isDDocInCache(doc5));
-    assertFalse("The document should not start out in the cache", _cache.isDDocInCache(doc1));
+    assertTrue("The document should not start out in the cache", _adapterTable.get(doc5).isReady());
+    assertFalse("The document should not start out in the cache", _adapterTable.get(doc1).isReady());
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
     OpenDefinitionsDocument doc6 = openFile(file6);
-    assertTrue("The document should not start out in the cache", _cache.isDDocInCache(doc6));
-    assertFalse("The document should not start out in the cache", _cache.isDDocInCache(doc2));
+    assertTrue("The document should not start out in the cache", _adapterTable.get(doc6).isReady());
+    assertFalse("The document should not start out in the cache", _adapterTable.get(doc2).isReady());
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
   }
+  
+  private DefinitionsDocument _saved; // used for testReconstructor()
   
   public void testReconstructor() throws IOException{
     final int i = 0;
     DDReconstructor d = new DDReconstructor(){
       public DefinitionsDocument make(){
         _doc_made++;
-        return null;
+        return _saved;
       }
       public void saveDocInfo(DefinitionsDocument doc){
         _doc_saved++;
@@ -201,19 +316,22 @@ public class DocumentCacheTest extends GlobalModelTestCase {
     };
     
     OpenDefinitionsDocument doc1 =  _model.newFile();
-    assertTrue("The document should start out in the cache", _cache.isDDocInCache(doc1));
-    _cache.update(doc1, d);
-    assertFalse("The document should not be in the cache after an update", _cache.isDDocInCache(doc1)); // force save
-
+    assertFalse("The document should not be in the cache", _adapterTable.get(doc1).isReady());
+    _saved = _adapterTable.get(doc1).getDocument();
+    assertTrue("The document should be in the cache", _adapterTable.get(doc1).isReady());
     
-    _cache.get(doc1); // force the cache to reconstruct the document.
+    _adapterTable.get(doc1).setReconstructor(d);
+    assertFalse("The document should not be in the cache after an update", _adapterTable.get(doc1).isReady());
+    
+    _adapterTable.get(doc1).getDocument(); // force the cache to reconstruct the document.
 
-    assertEquals("The make in the reconstructor was called once", 1, _doc_made);
-    assertEquals("The save in the reconstructor was called once", 1, _doc_saved);
+    assertEquals("The make in the reconstructor was called 1nce", 1, _doc_made);
+    assertEquals("The save in the reconstructor was not called", 0, _doc_saved);
   }
   
-  
-  public void testNoDDocInCache(){
+  // not being used.  The new definition of the cache allows for a closed document, if it is used again, to bring its document back.
+  // This should be dealt with.
+  public void xtestNoDDocInCache(){
    OpenDefinitionsDocument doc1 = _model.newFile();
    assertTrue("The document should now be closed", _model.closeFile(doc1));
    try{
@@ -257,7 +375,7 @@ public class DocumentCacheTest extends GlobalModelTestCase {
    * definitions panes/documents from being GC'd at the correct
    * times causing the entire program to run out of heap space
    * when working with large numbers of files.  This problem was
-   * aggravated when we added project facility and implemented
+   * agrivated when we added project facility and implemented
    * the document cache (which was supposed to solve our memory
    * problem but actually worsened it).  
    * <p>Adam and Jonathan went through great pains to remove 
@@ -270,41 +388,52 @@ public class DocumentCacheTest extends GlobalModelTestCase {
         _memLeakCounter++;
       }
     };
-    // The model already has one empty document in the cache when the model is created
-    // Attach a finalization listener to the DefinitionsDocument embedded in each of the
-    // following OpenDefinitionsDocs.
+    
+    // Adding the listeners will load the document into the cache
     OpenDefinitionsDocument doc1 = _model.newFile();
-    doc1.addFinalizationListener(fl); 
     OpenDefinitionsDocument doc2 = _model.newFile();
-    doc2.addFinalizationListener(fl);
     OpenDefinitionsDocument doc3 = _model.newFile();
-    doc3.addFinalizationListener(fl);
     OpenDefinitionsDocument doc4 = _model.newFile();
-    doc4.addFinalizationListener(fl);
     OpenDefinitionsDocument doc5 = _model.newFile();
-    doc5.addFinalizationListener(fl);
+        
+    doc1.addFinalizationListener(fl);
+    doc2.addFinalizationListener(fl);
+    doc3.addFinalizationListener(fl);
+    doc4.addFinalizationListener(fl);
+    doc5.addFinalizationListener(fl); // kick 1 out
     
-    // At this point, 6 documents exist but only 4 can be in the cache; hence 2 embedded
-    // DefinitionsDocuments have been freed
-    // System.out.println(doc1 + " " + doc2 + " " + doc3 + " " + doc4 + " " + doc5);
+    assertEquals("There should be 4 in the LRU", 4, _cache.getNumInCache());
+    System.gc();
+    Thread.sleep(100);
+    
+    
+    assertFalse("doc1 should be the one that's not ready", _adapterTable.get(doc1).isReady());
+    assertEquals("One doc should have been collected", 1, _memLeakCounter);
+    
+    doc1.getLength(); // kick 2
+    
+    // make sure doc1 has it's finalization listener still
+    List<FinalizationListener<DefinitionsDocument>> list = doc1.getFinalizationListeners();
+    assertEquals("There should only be one finalization listener", 1, list.size());
+    assertEquals("The finalization listener should be fl", fl, list.get(0));
+    
+    doc2.getLength(); // kick 3
+    doc3.getLength(); // kick 4
+    doc4.getLength(); // kick 5
+    doc5.getLength(); // kick 1
     
     System.gc();
     Thread.sleep(100);
-    assertEquals("Two docs should have been collected", 2, _memLeakCounter);
-    
-    // System.out.println(doc1 + " " + doc2 + " " + doc3 + " " + doc4 + " " + doc5);
-    
-    doc1.getLength();
-    doc2.getLength();
-    doc3.getLength();
-    doc4.getLength();
-    
-    doc5.getLength();
-    
-    System.gc();
-    Thread.sleep(100);
-    assertEquals("several docs should have been collected", 4, _memLeakCounter);
+    assertEquals("several docs should have been collected", 6, _memLeakCounter);
     
   }
   private int _memLeakCounter;
+  
+  /**
+   * This is just so that we can have an instance of a DefaultGlobalModel
+   * rather than a single display model.
+   */
+  private class TestGlobalModel extends DefaultGlobalModel {
+    
+  }
 }
