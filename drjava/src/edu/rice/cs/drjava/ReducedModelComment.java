@@ -1048,26 +1048,33 @@ public class ReducedModelComment
 				return;
 
 			int curState = _getStateAtCurrentHelper(copyCursor);
-			// Free if at the beginning  
-   
-		
-			switch (curState)
+			// Free if at the beginning     
+			while (!copyCursor.atEnd())
 				{
-				case Brace.FREE:
-					_updateFree(copyCursor);
-					break;
-				case Brace.INSIDE_QUOTE:
-					_updateInsideQuote(copyCursor);
-					break;
-				case Brace.INSIDE_BLOCK_COMMENT:
-					_updateInsideBlockComment(copyCursor);
-					break;
-				case Brace.INSIDE_LINE_COMMENT:
-					_updateInsideLineComment(copyCursor);
-					break;
+					switch (curState)
+						{
+						case Brace.FREE:
+							curState = _updateFree(copyCursor);
+							break;
+						case Brace.INSIDE_QUOTE:
+							curState = _updateInsideQuote(copyCursor);
+							break;
+						case Brace.INSIDE_BLOCK_COMMENT:
+							curState = _updateInsideBlockComment(copyCursor);
+							break;
+						case Brace.INSIDE_LINE_COMMENT:
+							curState = _updateInsideLineComment(copyCursor);
+							break;
+						default:
+							if (copyCursor.atStart())
+								copyCursor.next();
+							if (copyCursor.atEnd())
+								return;
+							curState = _getStateAtCurrentHelper(copyCursor);
+							break;
+						}
 				}
 		}
-
   /**
 	 *	Walk function for when we're not inside a string or comment.
 	 *  Self-recursive and mutually recursive with other walk functions.
@@ -1081,10 +1088,10 @@ public class ReducedModelComment
    *        Else, mark current brace as FREE, go to the next brace, and recur.
 	 * </ol>
    */
-  private void _updateFree(ModelList<ReducedToken>.Iterator copyCursor)
+  private int _updateFree(ModelList<ReducedToken>.Iterator copyCursor)
 		{
 			if (copyCursor.atEnd())
-				return;
+				return -1;
 
 			_combineCurrentAndNextIfFind("/", "*", copyCursor);
 			//_combineCurrentAndNextIfFind("*", "/", copyCursor);
@@ -1105,21 +1112,24 @@ public class ReducedModelComment
 				{
 					_splitCurrentIfCommentBlock(true,false,copyCursor);
 					copyCursor.prev();
-					_updateBasedOnCurrentStateHelper(copyCursor);
+					return -1;
+					//_updateBasedOnCurrentStateHelper(copyCursor);
 				}
 			else if (type.equals("//"))
 				{
 					// open comment blocks are not set commented, they're set free
 					copyCursor.current().setState(Brace.FREE);
 					copyCursor.next();
-					_updateInsideLineComment(copyCursor);
+					return Brace.INSIDE_LINE_COMMENT;
+					//_updateInsideLineComment(copyCursor);
 				}
 			else if (type.equals("/*"))
 				{
 					// open comment blocks are not set commented, they're set free
 					copyCursor.current().setState(Brace.FREE);
 					copyCursor.next();
-					_updateInsideBlockComment(copyCursor);
+					return Brace.INSIDE_BLOCK_COMMENT;
+					//_updateInsideBlockComment(copyCursor);
 				}
 			else if (type.equals("\""))
 				{
@@ -1129,13 +1139,15 @@ public class ReducedModelComment
 
 					copyCursor.current().setState(Brace.FREE);
 					copyCursor.next();
-					_updateInsideQuote(copyCursor);
+					return Brace.INSIDE_QUOTE;
+					//_updateInsideQuote(copyCursor);
 				}
 			else
 				{
 					copyCursor.current().setState(Brace.FREE);
 					copyCursor.next();
-					_updateFree(copyCursor);
+					return Brace.FREE;
+					//_updateFree(copyCursor);
 				}
 		}
 
@@ -1151,10 +1163,10 @@ public class ReducedModelComment
    *       Else, mark current brace as INSIDE_QUOTE, go to next brace, recur.
 	 * </ol>	 
    */
-  private void _updateInsideQuote(ModelList<ReducedToken>.Iterator copyCursor)
+  private int _updateInsideQuote(ModelList<ReducedToken>.Iterator copyCursor)
 		{
 			if (copyCursor.atEnd())
-				return;
+				return -1;
 
 			_splitCurrentIfCommentBlock(true,false, copyCursor);
 			_combineCurrentAndNextIfFind("","", copyCursor);
@@ -1168,7 +1180,8 @@ public class ReducedModelComment
 				{
 					copyCursor.current().setState(Brace.FREE);
 					copyCursor.next();
-					_updateFree(copyCursor);
+					return Brace.FREE;
+					//_updateFree(copyCursor);
 				}
 			else if (type.equals("\""))
 				{
@@ -1178,13 +1191,15 @@ public class ReducedModelComment
 
 					copyCursor.current().setState(Brace.FREE);
 					copyCursor.next();
-					_updateFree(copyCursor);
+					return Brace.FREE;
+					//_updateFree(copyCursor);
 				}
 			else
 				{
 					copyCursor.current().setState(Brace.INSIDE_QUOTE);
 					copyCursor.next();
-					_updateInsideQuote(copyCursor);
+					return Brace.INSIDE_QUOTE;
+					//_updateInsideQuote(copyCursor);
 				}
 		}
 
@@ -1200,11 +1215,11 @@ public class ReducedModelComment
    *        Else, mark current brace as LINE_COMMENT, goto next, and recur.
 	 *  </ol>
    */
-  private void _updateInsideLineComment(
+  private int _updateInsideLineComment(
 		ModelList<ReducedToken>.Iterator copyCursor)
 		{
 			if (copyCursor.atEnd())
-				return;
+				return -1;
 
 			_splitCurrentIfCommentBlock(true, false,copyCursor);
 			_combineCurrentAndNextIfFind("","", copyCursor);
@@ -1219,13 +1234,15 @@ public class ReducedModelComment
 				{
 					copyCursor.current().setState(Brace.FREE);
 					copyCursor.next();
-					_updateFree(copyCursor);
+					return Brace.FREE;
+					//_updateFree(copyCursor);
 				}
 			else
 				{
 					copyCursor.current().setState(Brace.INSIDE_LINE_COMMENT);
 					copyCursor.next();
-					_updateInsideLineComment(copyCursor);
+					return Brace.INSIDE_LINE_COMMENT;
+          //_updateInsideLineComment(copyCursor);
 				}
 		}
 
@@ -1244,11 +1261,11 @@ public class ReducedModelComment
    *        and go to next brace and recur.
 	 *  </ol>
    */
-  private void _updateInsideBlockComment(
+  private int _updateInsideBlockComment(
 		ModelList<ReducedToken>.Iterator copyCursor)
 		{
 			if (copyCursor.atEnd())
-				return;
+				return -1;
 
 			_combineCurrentAndNextIfFind("*", "/", copyCursor);
 			_combineCurrentAndNextIfFind("*","//", copyCursor);
@@ -1266,14 +1283,16 @@ public class ReducedModelComment
 				{
 					copyCursor.current().setState(Brace.FREE);
 					copyCursor.next();
-					_updateFree(copyCursor);
+					return Brace.FREE;
+          //_updateFree(copyCursor);
 				}
 		
 			else
 				{
 					copyCursor.current().setState(Brace.INSIDE_BLOCK_COMMENT);
 					copyCursor.next();
-					_updateInsideBlockComment(copyCursor);
+					return Brace.INSIDE_BLOCK_COMMENT;
+					//_updateInsideBlockComment(copyCursor);
 				}
 		}
 
