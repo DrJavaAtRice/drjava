@@ -10,7 +10,8 @@ options {
 PARSER_BEGIN(Parser)
 package koala.dynamicjava.parser;
 
-import java.lang.reflect.*;
+//import java.lang.reflect.*;  
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 import koala.dynamicjava.parser.wrapper.*;
@@ -35,14 +36,14 @@ public class Parser {
      * The message reader
      */
     private LocalizedMessageReader reader =
-	new LocalizedMessageReader("koala.dynamicjava.parser.resources.messages");
+ new LocalizedMessageReader("koala.dynamicjava.parser.resources.messages");
 
     /**
      * Sets the current filename
      * @param fname the name of the input file
      */
     public void setFilename(String fname) {
-	filename = fname;
+ filename = fname;
     }
 
     /**
@@ -51,107 +52,107 @@ public class Parser {
      * @param suffixes the suffix list built in reverse order
      */
     private static Expression createPrimaryExpression(Expression prefix,
-						      List       suffixes) {
+            List       suffixes) {
         Iterator it = suffixes.iterator();
-	if (it.hasNext()) {
-	    return ((ExpressionSuffix)it.next()).createExpression(prefix, it);
-	} else {
-	    if (prefix instanceof CompileTimeQualifiedName) {
-		return ((CompileTimeQualifiedName)prefix).createFieldAccess();
-	    } else if (prefix instanceof CompileTimeExpression) {
-		return ((CompileTimeExpression)prefix).createRuntimeExpression();
-	    } else {
-		return prefix;
-	    }
-	}
+ if (it.hasNext()) {
+     return ((ExpressionSuffix)it.next()).createExpression(prefix, it);
+ } else {
+     if (prefix instanceof CompileTimeQualifiedName) {
+  return ((CompileTimeQualifiedName)prefix).createFieldAccess();
+     } else if (prefix instanceof CompileTimeExpression) {
+  return ((CompileTimeExpression)prefix).createRuntimeExpression();
+     } else {
+  return prefix;
+     }
+ }
     }
     
     /**
      * Creates a field declaration
      */
     private FieldDeclaration createFieldDeclaration(ModifierFlags  mf,
-						    Type           typ,
-						    Token          name,
-						    Expression     exp,
-						    int            dim) {
-	int bl;
-	int bc;
-	int el;
-	int ec;
-	int flags = 0;
+          Type           typ,
+          Token          name,
+          Expression     exp,
+          int            dim) {
+ int bl;
+ int bc;
+ int el;
+ int ec;
+ int flags = 0;
 
-	// Compute the position of the declaration in the source code
-	if (mf != null) {
-	    bl    = mf.beginLine;
-	    bc    = mf.beginColumn;
-	    flags = mf.accessFlags;
-	} else {
-	    bl = typ.getBeginLine();
-	    bc = typ.getBeginColumn();
-	}
+ // Compute the position of the declaration in the source code
+ if (mf != null) {
+     bl    = mf.beginLine;
+     bc    = mf.beginColumn;
+     flags = mf.accessFlags;
+ } else {
+     bl = typ.getBeginLine();
+     bc = typ.getBeginColumn();
+ }
 
-	if (exp != null) {
-	    el = exp.getEndLine();
-	    ec = exp.getEndColumn();
-	} else {
-	    el = name.endLine;
-	    ec = name.endColumn;
-	}
+ if (exp != null) {
+     el = exp.getEndLine();
+     ec = exp.getEndColumn();
+ } else {
+     el = name.endLine;
+     ec = name.endColumn;
+ }
 
-	// If the field is an array, create an array type node
-	if (dim > 0) {
-	    typ = new ArrayType(typ, dim,
-				filename,
-				typ.getBeginLine(), typ.getBeginColumn(),
-				typ.getEndLine(),   typ.getEndColumn());
-	}
+ // If the field is an array, create an array type node
+ if (dim > 0) {
+     typ = new ArrayType(typ, dim,
+    filename,
+    typ.getBeginLine(), typ.getBeginColumn(),
+    typ.getEndLine(),   typ.getEndColumn());
+ }
 
-	return new FieldDeclaration(flags, typ, name.image, exp,
-				    filename, bl, bc, el, ec);
+ return new FieldDeclaration(flags, typ, name.image, exp,
+        filename, bl, bc, el, ec);
     }
 
     /**
      * Creates a variable declaration
      */
     private VariableDeclaration createVariableDeclaration(Token          mf,
-							  Type           typ,
-							  Token          name,
-							  Expression     exp,
-							  int            dim) {
-	int     bl;
-	int     bc;
-	int     el;
-	int     ec;
-	boolean isFinal = false;
+         Type           typ,
+         Token          name,
+         Expression     exp,
+         int            dim) {
+ int     bl;
+ int     bc;
+ int     el;
+ int     ec;
+ boolean isFinal = false;
 
-	// Compute the position of the declaration in the source code
-	if (mf != null) {
-	    bl      = mf.beginLine;
-	    bc      = mf.beginColumn;
-	    isFinal = true;
-	} else {
-	    bl = typ.getBeginLine();
-	    bc = typ.getBeginColumn();
-	}
+ // Compute the position of the declaration in the source code
+ if (mf != null) {
+     bl      = mf.beginLine;
+     bc      = mf.beginColumn;
+     isFinal = true;
+ } else {
+     bl = typ.getBeginLine();
+     bc = typ.getBeginColumn();
+ }
 
-	if (exp != null) {
-	    el = exp.getEndLine();
-	    ec = exp.getEndColumn();
-	} else {
-	    el = name.endLine;
-	    ec = name.endColumn;
-	}
+ if (exp != null) {
+     el = exp.getEndLine();
+     ec = exp.getEndColumn();
+ } else {
+     el = name.endLine;
+     ec = name.endColumn;
+ }
 
-	// If the variable contains an array, create an array type node
-	if (dim > 0) {
-	    typ = new ArrayType(typ, dim,
-				filename,
-				typ.getBeginLine(), typ.getBeginColumn(),
-				typ.getEndLine(),   typ.getEndColumn());
-	}
+ // If the variable contains an array, create an array type node
+ if (dim > 0) {
+     typ = new ArrayType(typ, dim,
+    filename,
+    typ.getBeginLine(), typ.getBeginColumn(),
+    typ.getEndLine(),   typ.getEndColumn());
+ }
 
-	return new VariableDeclaration(isFinal, typ, name.image, exp,
-				       filename, bl, bc, el, ec);
+ return new VariableDeclaration(isFinal, typ, name.image, exp,
+           filename, bl, bc, el, ec);
     }
 
     /*
@@ -159,421 +160,421 @@ public class Parser {
      */
 
     abstract class ExpressionSuffix {
-	/**
-	 * Creates an expression node
-	 * @param prefix the prefix expression
-	 * @param it     an iterator over the suffixes
-	 */
-	public abstract Expression createExpression(Expression prefix, Iterator it);
+ /**
+  * Creates an expression node
+  * @param prefix the prefix expression
+  * @param it     an iterator over the suffixes
+  */
+ public abstract Expression createExpression(Expression prefix, Iterator it);
     }
 
     class DotAllocationSuffix extends ExpressionSuffix {
-	/**
-	 * The allocation expression
-	 */
-	public Allocation expression;
+ /**
+  * The allocation expression
+  */
+ public Allocation expression;
 
-	/**
-	 * Creates a new suffix
-	 * @param exp the expression
-	 */
-	public DotAllocationSuffix(Allocation exp) {
-	    expression = exp;
-	}
+ /**
+  * Creates a new suffix
+  * @param exp the expression
+  */
+ public DotAllocationSuffix(Allocation exp) {
+     expression = exp;
+ }
 
-	/**
-	 * Creates an expression node
-	 * @param prefix the prefix expression
-	 * @param it     an iterator over the suffixes
-	 */
-	public Expression createExpression(Expression prefix, Iterator it) {
-	    Expression exp = prefix;
-	    if (it.hasNext()) {
-		exp = ((ExpressionSuffix)it.next()).createExpression(prefix, it);
-	    } else {
-		if (prefix instanceof CompileTimeExpression) {
-		    exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
-		}
-	    }
-	    if (expression instanceof SimpleAllocation) {
-		SimpleAllocation sa = (SimpleAllocation)expression;
-		return new InnerAllocation
-		    (exp, sa.getCreationType(), sa.getArguments(),
-		     filename,
-		     exp.getBeginLine(), exp.getBeginColumn(),
-		     sa.getEndLine(),    sa.getEndColumn());
-	    } else {
-		ClassAllocation ca = (ClassAllocation)expression;
-		return new InnerClassAllocation
-		    (exp, ca.getCreationType(), ca.getArguments(), ca.getMembers(),
-		     filename,
-		     exp.getBeginLine(), exp.getBeginColumn(),
-		     ca.getEndLine(),    ca.getEndColumn());		
-	    }
-	}
+ /**
+  * Creates an expression node
+  * @param prefix the prefix expression
+  * @param it     an iterator over the suffixes
+  */
+ public Expression createExpression(Expression prefix, Iterator it) {
+     Expression exp = prefix;
+     if (it.hasNext()) {
+  exp = ((ExpressionSuffix)it.next()).createExpression(prefix, it);
+     } else {
+  if (prefix instanceof CompileTimeExpression) {
+      exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
+  }
+     }
+     if (expression instanceof SimpleAllocation) {
+  SimpleAllocation sa = (SimpleAllocation)expression;
+  return new InnerAllocation
+      (exp, sa.getCreationType(), sa.getArguments(),
+       filename,
+       exp.getBeginLine(), exp.getBeginColumn(),
+       sa.getEndLine(),    sa.getEndColumn());
+     } else {
+  ClassAllocation ca = (ClassAllocation)expression;
+  return new InnerClassAllocation
+      (exp, ca.getCreationType(), ca.getArguments(), ca.getMembers(),
+       filename,
+       exp.getBeginLine(), exp.getBeginColumn(),
+       ca.getEndLine(),    ca.getEndColumn());  
+     }
+ }
     }
 
     class DotIdentifierSuffix extends ExpressionSuffix {
-	/**
-	 * The identifier
-	 */
-	public Token identifier;
+ /**
+  * The identifier
+  */
+ public Token identifier;
 
-	/**
-	 * Creates a new suffix
-	 * @param ident the identifier
-	 */
-	public DotIdentifierSuffix(Token ident) {
-	    identifier = ident;
-	}
+ /**
+  * Creates a new suffix
+  * @param ident the identifier
+  */
+ public DotIdentifierSuffix(Token ident) {
+     identifier = ident;
+ }
 
-	/**
-	 * Creates an expression node
-	 * @param prefix the prefix expression
-	 * @param it     an iterator over the suffixes
-	 */
-	public Expression createExpression(Expression prefix, Iterator it) {
-	    Expression exp = prefix;
-	    if (it.hasNext()) {
-		exp = ((ExpressionSuffix)it.next()).createExpression(prefix, it);
-	    } else {
-		if (prefix instanceof CompileTimeExpression) {
-		    exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
-		}
-	    }
-	    return new ObjectFieldAccess
-		(exp, identifier.image,
-		 filename,
-		 exp.getBeginLine(), exp.getBeginColumn(),
-		 identifier.endLine, identifier.endColumn);
-	}
+ /**
+  * Creates an expression node
+  * @param prefix the prefix expression
+  * @param it     an iterator over the suffixes
+  */
+ public Expression createExpression(Expression prefix, Iterator it) {
+     Expression exp = prefix;
+     if (it.hasNext()) {
+  exp = ((ExpressionSuffix)it.next()).createExpression(prefix, it);
+     } else {
+  if (prefix instanceof CompileTimeExpression) {
+      exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
+  }
+     }
+     return new ObjectFieldAccess
+  (exp, identifier.image,
+   filename,
+   exp.getBeginLine(), exp.getBeginColumn(),
+   identifier.endLine, identifier.endColumn);
+ }
     }
 
     class ArrayReferenceSuffix extends ExpressionSuffix {
-	/**
-	 * The expression
-	 */
-	public Expression expression;
+ /**
+  * The expression
+  */
+ public Expression expression;
 
-	/**
-	 * The end line
-	 */
-	public int endLine;
+ /**
+  * The end line
+  */
+ public int endLine;
 
-	/**
-	 * The end column
-	 */
-	public int endColumn;
+ /**
+  * The end column
+  */
+ public int endColumn;
 
-	/**
-	 * Creates a new suffix
-	 * @param exp the expression
-	 * @param el  the end line
-	 * @param ec  the end column
-	 */
-	public ArrayReferenceSuffix(Expression exp, int el, int ec) {
-	    expression = exp;
-	    endLine    = el;
-	    endColumn  = ec;
-	}
+ /**
+  * Creates a new suffix
+  * @param exp the expression
+  * @param el  the end line
+  * @param ec  the end column
+  */
+ public ArrayReferenceSuffix(Expression exp, int el, int ec) {
+     expression = exp;
+     endLine    = el;
+     endColumn  = ec;
+ }
 
-	/**
-	 * Creates an expression node
-	 * @param prefix the prefix expression
-	 * @param it     an iterator over the suffixes
-	 */
-	public Expression createExpression(Expression prefix, Iterator it) {
-	    Expression exp = prefix;
-	    if (it.hasNext()) {
-		exp = ((ExpressionSuffix)it.next()).createExpression(prefix, it);
-	    } else {
-		if (prefix instanceof CompileTimeExpression) {
-		    exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
-		}
-	    }
-	    return new ArrayAccess
-		(exp, expression,
-		 filename,
-		 exp.getBeginLine(), exp.getBeginColumn(),
-		 endLine, endColumn);
-	}
+ /**
+  * Creates an expression node
+  * @param prefix the prefix expression
+  * @param it     an iterator over the suffixes
+  */
+ public Expression createExpression(Expression prefix, Iterator it) {
+     Expression exp = prefix;
+     if (it.hasNext()) {
+  exp = ((ExpressionSuffix)it.next()).createExpression(prefix, it);
+     } else {
+  if (prefix instanceof CompileTimeExpression) {
+      exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
+  }
+     }
+     return new ArrayAccess
+  (exp, expression,
+   filename,
+   exp.getBeginLine(), exp.getBeginColumn(),
+   endLine, endColumn);
+ }
     }
     
     class DotThisSuffix extends ExpressionSuffix {
-	/**
-	 * The end line
-	 */
-	public int endLine;
-	
-	/**
-	 * The end column
-	 */
-	public int endColumn;
+ /**
+  * The end line
+  */
+ public int endLine;
+ 
+ /**
+  * The end column
+  */
+ public int endColumn;
 
-	/**
-	 * Creates a new suffix
-	 * @param el  the end line
-	 * @param ec  the end column
-	 * @param fn  the file name
-	 */
-	public DotThisSuffix(int el, int ec) {
-	    endLine    = el;
-	    endColumn  = ec;
-	}
+ /**
+  * Creates a new suffix
+  * @param el  the end line
+  * @param ec  the end column
+  * @param fn  the file name
+  */
+ public DotThisSuffix(int el, int ec) {
+     endLine    = el;
+     endColumn  = ec;
+ }
 
-	/**
-	 * Creates an expression node
-	 * @param prefix the prefix expression
-	 * @param it     an iterator over the suffixes
-	 */
-	public Expression createExpression(Expression prefix, Iterator it) {
-	    Expression exp = prefix;
-	    if (it.hasNext()) {
-		exp = ((ExpressionSuffix)it.next()).createExpression(prefix, it);
-	    } else {
-		if (prefix instanceof CompileTimeExpression) {
-		    exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
-		}
-	    }
-	    if (exp instanceof QualifiedName) {
-		return new ThisExpression
-		    (((QualifiedName)exp).getIdentifiers(),
-		     filename,
-		     exp.getBeginLine(), exp.getBeginColumn(),
-		     endLine, endColumn);
-	    } else {
-		throw new ParseError(reader.getMessage("this.prefix", null),
-				     filename,
-				     exp.getBeginLine(), exp.getBeginColumn());
-	    }
-	}
+ /**
+  * Creates an expression node
+  * @param prefix the prefix expression
+  * @param it     an iterator over the suffixes
+  */
+ public Expression createExpression(Expression prefix, Iterator it) {
+     Expression exp = prefix;
+     if (it.hasNext()) {
+  exp = ((ExpressionSuffix)it.next()).createExpression(prefix, it);
+     } else {
+  if (prefix instanceof CompileTimeExpression) {
+      exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
+  }
+     }
+     if (exp instanceof QualifiedName) {
+  return new ThisExpression
+      (((QualifiedName)exp).getIdentifiers(),
+       filename,
+       exp.getBeginLine(), exp.getBeginColumn(),
+       endLine, endColumn);
+     } else {
+  throw new ParseError(reader.getMessage("this.prefix", null),
+         filename,
+         exp.getBeginLine(), exp.getBeginColumn());
+     }
+ }
     }
 
     class ArgumentsSuffix extends ExpressionSuffix {
-	/**
-	 * The arguments
-	 */
-	public List arguments;
-	
-	/**
-	 * The end line
-	 */
-	public int endLine;
+ /**
+  * The arguments
+  */
+ public List arguments;
+ 
+ /**
+  * The end line
+  */
+ public int endLine;
 
-	/**
-	 * The end column
-	 */
-	public int endColumn;
+ /**
+  * The end column
+  */
+ public int endColumn;
 
-	/**
-	 * Creates a new argument suffix
-	 * @param args  the list of argument
-	 * @param el    the end line
-	 * @param ec    the end column
-	 */
-	public ArgumentsSuffix(List args, int el, int ec) {
-	    arguments = args;
-	    endLine   = el;
-	    endColumn = ec;
-	}
+ /**
+  * Creates a new argument suffix
+  * @param args  the list of argument
+  * @param el    the end line
+  * @param ec    the end column
+  */
+ public ArgumentsSuffix(List args, int el, int ec) {
+     arguments = args;
+     endLine   = el;
+     endColumn = ec;
+ }
 
-	/**
-	 * Creates an expression node
-	 * @param prefix the prefix expression
-	 * @param it     an iterator over the suffixes
-	 */
-	public Expression createExpression(Expression prefix, Iterator it) {
-	    if (it.hasNext()) {
-		ExpressionSuffix es = (ExpressionSuffix)it.next();
-		if (es instanceof DotIdentifierSuffix) {
-		    DotIdentifierSuffix dis = (DotIdentifierSuffix)es;
-		    Expression exp = prefix;
-		    if (it.hasNext()) {
-			exp = ((ExpressionSuffix)it.next()).createExpression(prefix, it);
-		    } else if (prefix instanceof CompileTimeExpression) {
-			exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
-		    }
-		    return new ObjectMethodCall
-			(exp, dis.identifier.image, arguments,
-			 filename,
-			 exp.getBeginLine(), exp.getBeginColumn(),
-			 endLine,            endColumn);
-		} else {
-		    throw new ParseError(reader.getMessage("parameter.list", null),
-					 filename,
-					 endLine, endColumn);
-		}
-	    } else {
-		if (prefix instanceof CompileTimeQualifiedName) {
-		    // Remove the last identifier from the qualified name
-		    List  l = ((CompileTimeQualifiedName)prefix).identifiers;
-		    Token f = ((TreeToken)l.get(0)).getToken();
-		    Token t = ((TreeToken)l.remove(l.size()-1)).getToken();
-		    Expression exp = null;
-		    if (l.size() >= 1) {
-			exp = ((CompileTimeQualifiedName)prefix).
-			    createRuntimeExpression();
-		    }
-		    return new ObjectMethodCall(exp, t.image, arguments,
-						filename,
-						f.beginLine, f.beginColumn,
-						endLine,   endColumn);
-		} else if (prefix instanceof CompileTimeSuperExpression) {
-		    // Transform the super expression into a super method call
-		    CompileTimeSuperExpression se = (CompileTimeSuperExpression)prefix;
-		    return new SuperMethodCall(se.identifier, arguments,
-					       filename,
-					       se.getBeginLine(), se.getBeginColumn(),
-					       endLine,           endColumn);
-		} else {
-		    throw new ParseError(reader.getMessage("parameter.list", null),
-					 filename,
-					 endLine, endColumn);
-		}
-	    }
-	}
+ /**
+  * Creates an expression node
+  * @param prefix the prefix expression
+  * @param it     an iterator over the suffixes
+  */
+ public Expression createExpression(Expression prefix, Iterator it) {
+     if (it.hasNext()) {
+  ExpressionSuffix es = (ExpressionSuffix)it.next();
+  if (es instanceof DotIdentifierSuffix) {
+      DotIdentifierSuffix dis = (DotIdentifierSuffix)es;
+      Expression exp = prefix;
+      if (it.hasNext()) {
+   exp = ((ExpressionSuffix)it.next()).createExpression(prefix, it);
+      } else if (prefix instanceof CompileTimeExpression) {
+   exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
+      }
+      return new ObjectMethodCall
+   (exp, dis.identifier.image, arguments,
+    filename,
+    exp.getBeginLine(), exp.getBeginColumn(),
+    endLine,            endColumn);
+  } else {
+      throw new ParseError(reader.getMessage("parameter.list", null),
+      filename,
+      endLine, endColumn);
+  }
+     } else {
+  if (prefix instanceof CompileTimeQualifiedName) {
+      // Remove the last identifier from the qualified name
+      List  l = ((CompileTimeQualifiedName)prefix).identifiers;
+      Token f = ((TreeToken)l.get(0)).getToken();
+      Token t = ((TreeToken)l.remove(l.size()-1)).getToken();
+      Expression exp = null;
+      if (l.size() >= 1) {
+   exp = ((CompileTimeQualifiedName)prefix).
+       createRuntimeExpression();
+      }
+      return new ObjectMethodCall(exp, t.image, arguments,
+      filename,
+      f.beginLine, f.beginColumn,
+      endLine,   endColumn);
+  } else if (prefix instanceof CompileTimeSuperExpression) {
+      // Transform the super expression into a super method call
+      CompileTimeSuperExpression se = (CompileTimeSuperExpression)prefix;
+      return new SuperMethodCall(se.identifier, arguments,
+            filename,
+            se.getBeginLine(), se.getBeginColumn(),
+            endLine,           endColumn);
+  } else {
+      throw new ParseError(reader.getMessage("parameter.list", null),
+      filename,
+      endLine, endColumn);
+  }
+     }
+ }
     }
 
     interface CompileTimeExpression {
-	/**
-	 * Builds a runtime expression from this compile-time one.
-	 * This method must only be called when the expression has no suffix.
-	 */
-	Expression createRuntimeExpression();
+ /**
+  * Builds a runtime expression from this compile-time one.
+  * This method must only be called when the expression has no suffix.
+  */
+ Expression createRuntimeExpression();
 
     }
 
     class CompileTimeSuperExpression
-	extends Expression implements CompileTimeExpression {
-	/**
-	 * The identifier from the superclass
-	 */
-	public String identifier;
+ extends Expression implements CompileTimeExpression {
+ /**
+  * The identifier from the superclass
+  */
+ public String identifier;
     
-	/**
-	 * Initializes the expression
-	 * @param ident the identifier from the super class
-	 * @param bl    the begin line
-	 * @param bc    the begin column
-	 * @param el    the end line
-	 * @param ec    the end column
-	 */
-	public CompileTimeSuperExpression(String ident, int bl, int bc, int el, int ec) {
-	    super("", bl, bc, el, ec);
-	    identifier = ident;
-	}
+ /**
+  * Initializes the expression
+  * @param ident the identifier from the super class
+  * @param bl    the begin line
+  * @param bc    the begin column
+  * @param el    the end line
+  * @param ec    the end column
+  */
+ public CompileTimeSuperExpression(String ident, int bl, int bc, int el, int ec) {
+     super("", bl, bc, el, ec);
+     identifier = ident;
+ }
 
-	/**
-	 * Builds a runtime expression from this compile-time one.
-	 * This method must be called when the expression has no suffix
-	 */
-	public Expression createRuntimeExpression() {
-	    return new SuperFieldAccess(identifier,
-					filename,
-					getBeginLine(), getBeginColumn(),
-					getEndLine(),   getEndColumn());
-	}
+ /**
+  * Builds a runtime expression from this compile-time one.
+  * This method must be called when the expression has no suffix
+  */
+ public Expression createRuntimeExpression() {
+     return new SuperFieldAccess(identifier,
+     filename,
+     getBeginLine(), getBeginColumn(),
+     getEndLine(),   getEndColumn());
+ }
 
-	/**
-	 * Not used
-	 */
-	public Object acceptVisitor(Visitor visitor) {
-	    return null;
-	}
+ /**
+  * Not used
+  */
+ public Object acceptVisitor(Visitor visitor) {
+     return null;
+ }
     }
 
     class CompileTimeQualifiedName extends Expression implements CompileTimeExpression {
-	/**
-	 * The identifiers (tokens)
-	 */
-	public List identifiers;
+ /**
+  * The identifiers (tokens)
+  */
+ public List identifiers;
     
-	/**
-	 * Initializes the expression
-	 * @param ids a list of token
-	 */
-	public CompileTimeQualifiedName(List ids) {
-	    super("", 0, 0, 0, 0);
-	    identifiers = ids;
-	}
+ /**
+  * Initializes the expression
+  * @param ids a list of token
+  */
+ public CompileTimeQualifiedName(List ids) {
+     super("", 0, 0, 0, 0);
+     identifiers = ids;
+ }
 
-	/**
-	 * Creates a runtime qualified name
-	 */
-	public Expression createFieldAccess() {
-	    if (identifiers.size() == 1) {
-		Token t = ((TreeToken)identifiers.get(0)).getToken();
-		return new QualifiedName(identifiers,
-					 filename,
-					 t.beginLine, t.beginColumn,
-					 t.endLine,   t.endColumn);
-	    } else {
-		Token f = ((TreeToken)identifiers.get(0)).getToken();
-		Token t = ((TreeToken)identifiers.remove
-			      (identifiers.size()-1)).getToken();;
-		Token l = ((TreeToken)identifiers.get
-			      (identifiers.size()-1)).getToken();
-		return new ObjectFieldAccess
-		    (new QualifiedName(identifiers,
-				       filename,
-				       f.beginLine, f.beginColumn,
-				       l.endLine,   l.endColumn),
-		     t.image,
-		     filename,
-		     f.beginLine, f.beginColumn,
-		     t.endLine,   t.endColumn);
-	    }
-	}
+ /**
+  * Creates a runtime qualified name
+  */
+ public Expression createFieldAccess() {
+     if (identifiers.size() == 1) {
+  Token t = ((TreeToken)identifiers.get(0)).getToken();
+  return new QualifiedName(identifiers,
+      filename,
+      t.beginLine, t.beginColumn,
+      t.endLine,   t.endColumn);
+     } else {
+  Token f = ((TreeToken)identifiers.get(0)).getToken();
+  Token t = ((TreeToken)identifiers.remove
+         (identifiers.size()-1)).getToken();;
+  Token l = ((TreeToken)identifiers.get
+         (identifiers.size()-1)).getToken();
+  return new ObjectFieldAccess
+      (new QualifiedName(identifiers,
+           filename,
+           f.beginLine, f.beginColumn,
+           l.endLine,   l.endColumn),
+       t.image,
+       filename,
+       f.beginLine, f.beginColumn,
+       t.endLine,   t.endColumn);
+     }
+ }
 
-	/**
-	 * Builds a runtime expression from this compile-time one.
-	 * This method must be called when the expression has no suffix
-	 */
-	public Expression createRuntimeExpression() {
-	    Token first = ((TreeToken)identifiers.get(0)).getToken();
-	    Token last  = ((TreeToken)identifiers.get(identifiers.size()-1)).getToken();
-	    return new QualifiedName(identifiers,
-				     filename,
-				     first.beginLine, first.beginColumn,
-				     last.endLine,    last.endColumn);
-	}
+ /**
+  * Builds a runtime expression from this compile-time one.
+  * This method must be called when the expression has no suffix
+  */
+ public Expression createRuntimeExpression() {
+     Token first = ((TreeToken)identifiers.get(0)).getToken();
+     Token last  = ((TreeToken)identifiers.get(identifiers.size()-1)).getToken();
+     return new QualifiedName(identifiers,
+         filename,
+         first.beginLine, first.beginColumn,
+         last.endLine,    last.endColumn);
+ }
 
-	/**
-	 * Not used
-	 */
-	public Object acceptVisitor(Visitor visitor) {
-	    return null;
-	}
+ /**
+  * Not used
+  */
+ public Object acceptVisitor(Visitor visitor) {
+     return null;
+ }
     }
 
     /**
      * To store modifier flags
      */
     static class ModifierFlags {
-	int accessFlags;
-	int beginLine;
-	int beginColumn;
+ int accessFlags;
+ int beginLine;
+ int beginColumn;
 
-	ModifierFlags(int flags, int bl, int bc) {
-	    accessFlags = flags;
-	    beginLine   = bl;
-	    beginColumn = bc;
-	}
+ ModifierFlags(int flags, int bl, int bc) {
+     accessFlags = flags;
+     beginLine   = bl;
+     beginColumn = bc;
+ }
     }
 
     /**
      * To store a class body
      */
     static class ClassBody {
-	List list;
-	int  endLine;
-	int  endColumn;
+ List list;
+ int  endLine;
+ int  endColumn;
 
-	ClassBody(List l, int el, int ec) {
-	    list      = l;
-	    endLine   = el;
-	    endColumn = ec;
-	}
+ ClassBody(List l, int el, int ec) {
+     list      = l;
+     endLine   = el;
+     endColumn = ec;
+ }
     }
 }
 PARSER_END(Parser)
@@ -877,25 +878,25 @@ List parseStream() :
       | root=importDeclaration()
       | LOOKAHEAD( methodDeclarationLookahead() )
         root=methodDeclaration()
-      |	LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
-	l=localVariableDeclaration() ";"
-	{
-	    list.addAll(l);
-	}
+      | LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
+ l=localVariableDeclaration() ";"
+ {
+     list.addAll(l);
+ }
       | LOOKAHEAD(2)
         root=topLevelStatement()
       | root=typeDeclaration()
-	)
+ )
       {
-	  if (root != null) {
-	      list.add(root);
-	      root = null;
-	  }
+   if (root != null) {
+       list.add(root);
+       root = null;
+   }
       }
       )*
     <EOF>
     {
-	return list;
+ return list;
     }
 }
 
@@ -929,7 +930,7 @@ Node topLevelStatement() :
     | node=tryStatement()
       )
     {
-	return node;
+ return node;
     }
 }
 
@@ -948,23 +949,23 @@ List parseCompilationUnit() :
 {
     [ node=packageDeclaration()
       {
-	  list.add(node);
+   list.add(node);
       }
       ]
     ( node=importDeclaration()
       {
-	  list.add(node);
+   list.add(node);
       }
       )*
     ( ( node=typeDeclaration() 
         {
-	    list.add(node);
-	}
+     list.add(node);
+ }
       | ";" )
       )*
   <EOF>
   {
-	return list;
+ return list;
   }
 }
 
@@ -980,10 +981,10 @@ PackageDeclaration packageDeclaration() :
 {
     t1="package" [ list=name() ] t2=";"
     {
-	return new PackageDeclaration(list,
-				      filename,
-				      t1.beginLine, t1.beginColumn,
-				      t2.endLine,   t2.endColumn);
+ return new PackageDeclaration(list,
+          filename,
+          t1.beginLine, t1.beginColumn,
+          t2.endLine,   t2.endColumn);
     }
 }
 
@@ -1000,10 +1001,10 @@ ImportDeclaration importDeclaration() :
 {
     t1="import" list=name() [ "." star="*" ] t2=";"
     {
-	return new ImportDeclaration(list, star != null,
-				     filename,
-				     t1.beginLine, t1.beginColumn,
-				     t2.endLine,   t2.endColumn);
+ return new ImportDeclaration(list, star != null,
+         filename,
+         t1.beginLine, t1.beginColumn,
+         t2.endLine,   t2.endColumn);
     }
 }
 
@@ -1022,7 +1023,7 @@ TypeDeclaration typeDeclaration() :
       node=interfaceDeclaration()
     )
     {
-	return node;
+ return node;
     }
 }
 
@@ -1041,16 +1042,16 @@ List name() :
 {
     id=<IDENTIFIER>
     {
-	list.add(new TreeToken(id));
+ list.add(new TreeToken(id));
     }
     ( LOOKAHEAD(2)
       "." id=<IDENTIFIER>
       {
-	  list.add(new TreeToken(id));
+   list.add(new TreeToken(id));
       }
       )*
     {
-	return list;
+ return list;
     }
 }
 
@@ -1067,15 +1068,15 @@ List nameList() :
 {
     obj=name()
     {
-	list.add(obj);
+ list.add(obj);
     }
     ( "," obj=name() 
       {
-	  list.add(obj);
+   list.add(obj);
       }
       )*
     {
-	return list;
+ return list;
     }
 }
 
@@ -1095,7 +1096,7 @@ ClassDeclaration classDeclaration() :
 {
     md=modifiers() cd=unmodifiedClassDeclaration(md)
     {
-	return cd;
+ return cd;
     }
 }
 
@@ -1111,156 +1112,156 @@ ModifierFlags modifiers() :
 {
     ( t="abstract"
       {
-	  if (ft == null) {
-	      ft = t;
-	  } else if ((flags & Modifier.ABSTRACT) != 0) {
-	      throw new ParseError(reader.getMessage("abstract.abstract", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  } else if ((flags & Modifier.FINAL) != 0) {
-	      throw new ParseError(reader.getMessage("abstract.final", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  }
-	  flags |= Modifier.ABSTRACT;
+   if (ft == null) {
+       ft = t;
+   } else if ((flags & Modifier.ABSTRACT) != 0) {
+       throw new ParseError(reader.getMessage("abstract.abstract", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   } else if ((flags & Modifier.FINAL) != 0) {
+       throw new ParseError(reader.getMessage("abstract.final", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   }
+   flags |= Modifier.ABSTRACT;
       }
     | t="final" 
       {
-	  if (ft == null) {
-	      ft = t;
-	  } else if ((flags & Modifier.FINAL) != 0) {
-	      throw new ParseError(reader.getMessage("final.final", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  } else if ((flags & Modifier.ABSTRACT) != 0) {
-	      throw new ParseError(reader.getMessage("abstract.final", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  }
-	  flags |= Modifier.FINAL;
+   if (ft == null) {
+       ft = t;
+   } else if ((flags & Modifier.FINAL) != 0) {
+       throw new ParseError(reader.getMessage("final.final", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   } else if ((flags & Modifier.ABSTRACT) != 0) {
+       throw new ParseError(reader.getMessage("abstract.final", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   }
+   flags |= Modifier.FINAL;
       }
     | t="public"
       {
-	  if (ft == null) {
-	      ft = t;
-	  } else if ((flags & Modifier.PUBLIC) != 0) {
-	      throw new ParseError(reader.getMessage("public.public", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  } else if ((flags & Modifier.PROTECTED) != 0) {
-	      throw new ParseError(reader.getMessage("public.protected", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  } else if ((flags & Modifier.PRIVATE) != 0) {
-	      throw new ParseError(reader.getMessage("public.private", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  }
+   if (ft == null) {
+       ft = t;
+   } else if ((flags & Modifier.PUBLIC) != 0) {
+       throw new ParseError(reader.getMessage("public.public", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   } else if ((flags & Modifier.PROTECTED) != 0) {
+       throw new ParseError(reader.getMessage("public.protected", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   } else if ((flags & Modifier.PRIVATE) != 0) {
+       throw new ParseError(reader.getMessage("public.private", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   }
 
-	  flags |= Modifier.PUBLIC;
+   flags |= Modifier.PUBLIC;
       }
     | t="protected" 
       {
-	  if (ft == null) {
-	      ft = t;
-	  } else if ((flags & Modifier.PROTECTED) != 0) {
-	      throw new ParseError(reader.getMessage("protected.protected", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  } else if ((flags & Modifier.PUBLIC) != 0) {
-	      throw new ParseError(reader.getMessage("public.protected", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  } else if ((flags & Modifier.PRIVATE) != 0) {
-	      throw new ParseError(reader.getMessage("protected.private", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  }
-	  flags |= Modifier.PROTECTED;
+   if (ft == null) {
+       ft = t;
+   } else if ((flags & Modifier.PROTECTED) != 0) {
+       throw new ParseError(reader.getMessage("protected.protected", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   } else if ((flags & Modifier.PUBLIC) != 0) {
+       throw new ParseError(reader.getMessage("public.protected", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   } else if ((flags & Modifier.PRIVATE) != 0) {
+       throw new ParseError(reader.getMessage("protected.private", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   }
+   flags |= Modifier.PROTECTED;
       }
     | t="private"
       {
-	  if (ft == null) {
-	      ft = t;
-	  }  else if ((flags & Modifier.PRIVATE) != 0) {
-	      throw new ParseError(reader.getMessage("private.private", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  } else if ((flags & Modifier.PUBLIC) != 0) {
-	      throw new ParseError(reader.getMessage("public.private", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  } else if ((flags & Modifier.PROTECTED) != 0) {
-	      throw new ParseError(reader.getMessage("protected.private", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  }
-	  flags |= Modifier.PRIVATE;
+   if (ft == null) {
+       ft = t;
+   }  else if ((flags & Modifier.PRIVATE) != 0) {
+       throw new ParseError(reader.getMessage("private.private", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   } else if ((flags & Modifier.PUBLIC) != 0) {
+       throw new ParseError(reader.getMessage("public.private", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   } else if ((flags & Modifier.PROTECTED) != 0) {
+       throw new ParseError(reader.getMessage("protected.private", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   }
+   flags |= Modifier.PRIVATE;
       }
      | t="transient"
       {
-	  if (ft == null) {
-	      ft = t;
-	  } else if ((flags & Modifier.TRANSIENT) != 0) {
-	      throw new ParseError(reader.getMessage("transient.transient", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  }
-	  flags |= Modifier.TRANSIENT;
+   if (ft == null) {
+       ft = t;
+   } else if ((flags & Modifier.TRANSIENT) != 0) {
+       throw new ParseError(reader.getMessage("transient.transient", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   }
+   flags |= Modifier.TRANSIENT;
       }
     | t="volatile"
       {
-	  if (ft == null) {
-	      ft = t;
-	  } else if ((flags & Modifier.VOLATILE) != 0) {
-	      throw new ParseError(reader.getMessage("volatile.volatile", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  }
-	  flags |= Modifier.VOLATILE;
+   if (ft == null) {
+       ft = t;
+   } else if ((flags & Modifier.VOLATILE) != 0) {
+       throw new ParseError(reader.getMessage("volatile.volatile", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   }
+   flags |= Modifier.VOLATILE;
       }
     | t="native"
       {
-	  if (ft == null) {
-	      ft = t;
-	  } else if ((flags & Modifier.NATIVE) != 0) {
-	      throw new ParseError(reader.getMessage("native.native", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  }  else if ((flags & Modifier.ABSTRACT) != 0) {
-	      throw new ParseError(reader.getMessage("abstract.native", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  }
-	  flags |= Modifier.NATIVE;
+   if (ft == null) {
+       ft = t;
+   } else if ((flags & Modifier.NATIVE) != 0) {
+       throw new ParseError(reader.getMessage("native.native", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   }  else if ((flags & Modifier.ABSTRACT) != 0) {
+       throw new ParseError(reader.getMessage("abstract.native", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   }
+   flags |= Modifier.NATIVE;
       }
     | t="static"
       {
-	  if (ft == null) {
-	      ft = t;
-	  } else if ((flags & Modifier.STATIC) != 0) {
-	      throw new ParseError(reader.getMessage("static.static", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  }
-	  flags |= Modifier.STATIC;
+   if (ft == null) {
+       ft = t;
+   } else if ((flags & Modifier.STATIC) != 0) {
+       throw new ParseError(reader.getMessage("static.static", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   }
+   flags |= Modifier.STATIC;
       }
     | t="synchronized"
       {
-	  if (ft == null) {
-	      ft = t;
-	  } else if ((flags & Modifier.SYNCHRONIZED) != 0) {
-	      throw new ParseError(reader.getMessage("synchronized.synchronized", null),
-				   filename,
-				   t.beginLine, t.beginColumn);
-	  }
-	  flags |= Modifier.SYNCHRONIZED;
+   if (ft == null) {
+       ft = t;
+   } else if ((flags & Modifier.SYNCHRONIZED) != 0) {
+       throw new ParseError(reader.getMessage("synchronized.synchronized", null),
+       filename,
+       t.beginLine, t.beginColumn);
+   }
+   flags |= Modifier.SYNCHRONIZED;
       }
      )*
     {
-	return (ft == null)
-	    ? null
-	    : new ModifierFlags(flags, ft.beginLine, ft.beginColumn);
+ return (ft == null)
+     ? null
+     : new ModifierFlags(flags, ft.beginLine, ft.beginColumn);
     }
 }
 
@@ -1280,17 +1281,17 @@ ClassDeclaration unmodifiedClassDeclaration(ModifierFlags mf) :
     t="class" id=<IDENTIFIER> [ "extends" ext=name() ] [ "implements" impl=nameList() ]
     body=classBody()
     {
-	if (mf == null) {
-	    return new ClassDeclaration(0, id.image, ext, impl, body.list,
-					filename,
-					t.beginLine,  t.beginColumn,
-					body.endLine, body.endColumn);
-	} else {
-	    return new ClassDeclaration(mf.accessFlags, id.image, ext, impl, body.list,
-					filename,
-					mf.beginLine, mf.beginColumn,
-					body.endLine, body.endColumn);
-	}
+ if (mf == null) {
+     return new ClassDeclaration(0, id.image, ext, impl, body.list,
+     filename,
+     t.beginLine,  t.beginColumn,
+     body.endLine, body.endColumn);
+ } else {
+     return new ClassDeclaration(mf.accessFlags, id.image, ext, impl, body.list,
+     filename,
+     mf.beginLine, mf.beginColumn,
+     body.endLine, body.endColumn);
+ }
     }
 }
 
@@ -1308,12 +1309,12 @@ ClassBody classBody() :
     ( 
      decl=classBodyDeclaration()
      {
-	 list.addAll(decl);
+  list.addAll(decl);
      }
       )*
     t="}"
     {
-	return new ClassBody(list, t.endLine, t.endColumn);
+ return new ClassBody(list, t.endLine, t.endColumn);
     }
 }
 
@@ -1349,10 +1350,10 @@ List classBodyDeclaration() :
       ";"
       )
     {
-	if (node != null) {
-	    list.add(node);
-	}
-	return list;
+ if (node != null) {
+     list.add(node);
+ }
+ return list;
     }
 }
 
@@ -1378,19 +1379,19 @@ List fieldDeclaration() :
     typ=type() id=<IDENTIFIER>
     ( "[" "]" { dim++; } )*
     [ "=" exp=variableInitializer() ]
-	{
-	    list.add(createFieldDeclaration(mf, typ, id, exp, dim));
-	}
+ {
+     list.add(createFieldDeclaration(mf, typ, id, exp, dim));
+ }
     ( "," { dim = 0; exp = null; }
       id=<IDENTIFIER>
       ( "[" "]" { dim++; } )*
       [ "=" exp=variableInitializer() ]
           {
-	    list.add(createFieldDeclaration(mf, typ, id, exp, dim));
+     list.add(createFieldDeclaration(mf, typ, id, exp, dim));
           }
       )* ";"
     {
-	return list;
+ return list;
     }
 }
 
@@ -1423,28 +1424,28 @@ MethodDeclaration methodDeclaration() :
     [ "throws" exceptions=nameList() ]
     ( body=block() | body=emptyStatement() )
     {
-	if (mf != null) {
-	    bl    = mf.beginLine;
-	    bc    = mf.beginColumn;
-	    flags = mf.accessFlags;
-	} else {
-	    bl = typ.getBeginLine();
-	    bc = typ.getBeginColumn();
-	}
+ if (mf != null) {
+     bl    = mf.beginLine;
+     bc    = mf.beginColumn;
+     flags = mf.accessFlags;
+ } else {
+     bl = typ.getBeginLine();
+     bc = typ.getBeginColumn();
+ }
 
-	if (dim > 0) {
-	    typ = new ArrayType(typ, dim,
-				filename,
-				typ.getBeginLine(), typ.getBeginColumn(),
-				typ.getEndLine(),   typ.getEndColumn());
-	}
+ if (dim > 0) {
+     typ = new ArrayType(typ, dim,
+    filename,
+    typ.getBeginLine(), typ.getBeginColumn(),
+    typ.getEndLine(),   typ.getEndColumn());
+ }
 
-	return new MethodDeclaration(flags, typ, id.image, params,
-				     exceptions,
-				     (body instanceof BlockStatement) ?
-				     (BlockStatement)body : null,
-				     filename,
-				     bl, bc, body.getEndLine(), body.getEndColumn());
+ return new MethodDeclaration(flags, typ, id.image, params,
+         exceptions,
+         (body instanceof BlockStatement) ?
+         (BlockStatement)body : null,
+         filename,
+         bl, bc, body.getEndLine(), body.getEndColumn());
     }
 }
 
@@ -1459,16 +1460,16 @@ List formalParameters() :
 }
 {
     "(" [ node=formalParameter()
-	  {
-	      list.add(node);
-	  }
+   {
+       list.add(node);
+   }
     ( "," node=formalParameter() 
           {
-	      list.add(node);
-	  }
+       list.add(node);
+   }
       )* ] ")"
     {
-	return list;
+ return list;
     }
 }
 
@@ -1486,17 +1487,17 @@ FormalParameter formalParameter() :
 {
     [ f="final" ] typ=type() id=<IDENTIFIER> ( "[" "]" { dim++; } )*
     {
-	if (dim > 0) {
-	    typ = new ArrayType(typ, dim,
-				filename,
-				typ.getBeginLine(), typ.getBeginColumn(),
-				typ.getEndLine(),   typ.getEndColumn());
-	}
-	return new FormalParameter(f != null, typ, id.image,
-				   filename,
-				   (f != null) ? f.beginLine   : typ.getBeginLine(),
-				   (f != null) ? f.beginColumn : typ.getBeginColumn(),
-				   id.endLine, id.endColumn);
+ if (dim > 0) {
+     typ = new ArrayType(typ, dim,
+    filename,
+    typ.getBeginLine(), typ.getBeginColumn(),
+    typ.getEndLine(),   typ.getEndColumn());
+ }
+ return new FormalParameter(f != null, typ, id.image,
+       filename,
+       (f != null) ? f.beginLine   : typ.getBeginLine(),
+       (f != null) ? f.beginColumn : typ.getBeginColumn(),
+       id.endLine, id.endColumn);
     }
 }
 
@@ -1514,17 +1515,17 @@ Initializer initializer() :
 {
     [ t="static" ] node=block()
     {
-	if (t == null) {
-	    return new InstanceInitializer(node,
-					   filename,
-					   node.getBeginLine(), node.getEndColumn(),
-					   node.getEndLine(), node.getEndColumn());
-	} else {
-	    return new ClassInitializer(node,
-					filename,
-					t.beginLine, t.beginColumn,
-					node.getEndLine(), node.getEndColumn());
-	}
+ if (t == null) {
+     return new InstanceInitializer(node,
+        filename,
+        node.getBeginLine(), node.getEndColumn(),
+        node.getEndLine(), node.getEndColumn());
+ } else {
+     return new ClassInitializer(node,
+     filename,
+     t.beginLine, t.beginColumn,
+     node.getEndLine(), node.getEndColumn());
+ }
     }
 }
 
@@ -1550,41 +1551,41 @@ ConstructorDeclaration constructorDeclaration() :
 {
     [ t="public"
       {
-	  flag = Modifier.PUBLIC;
+   flag = Modifier.PUBLIC;
       }
     | t="protected"
       {
-	  flag = Modifier.PROTECTED;
+   flag = Modifier.PROTECTED;
       }
     | t="private"
       {
-	  flag = Modifier.PRIVATE;
+   flag = Modifier.PRIVATE;
       }
     ]
     id=<IDENTIFIER> 
     params=formalParameters()
     [ "throws" exceptions=nameList() ]
     "{"
-	[ LOOKAHEAD( explicitConstructorInvocationLookahead() )
-	  ci=explicitConstructorInvocation() ]
-	( stmt=blockStatement()
-	  {
-	      stmts.addAll(stmt);
-	  }
-	  )*
+ [ LOOKAHEAD( explicitConstructorInvocationLookahead() )
+   ci=explicitConstructorInvocation() ]
+ ( stmt=blockStatement()
+   {
+       stmts.addAll(stmt);
+   }
+   )*
     e="}"
     {
-	if (t == null) {
-	    bl = id.beginLine;
-	    bc = id.beginColumn;
-	} else {
-	    bl = t.beginLine;
-	    bc = t.beginColumn;
-	}
-	return new ConstructorDeclaration(flag, id.image, params, exceptions, ci, stmts,
-					  filename,
-					  bl, bc,
-					  e.endLine, e.endColumn);
+ if (t == null) {
+     bl = id.beginLine;
+     bc = id.beginColumn;
+ } else {
+     bl = t.beginLine;
+     bc = t.beginColumn;
+ }
+ return new ConstructorDeclaration(flag, id.image, params, exceptions, ci, stmts,
+       filename,
+       bl, bc,
+       e.endLine, e.endColumn);
     }
 }
 
@@ -1606,10 +1607,10 @@ ConstructorInvocation explicitConstructorInvocation() :
       b="super" args=arguments() e=";"
       )
     {
-	return new ConstructorInvocation(exp, args.arguments, b.image.equals("super"),
-					 filename,
-					 b.beginLine, b.beginColumn,
-					 e.endLine,   e.endColumn);
+ return new ConstructorInvocation(exp, args.arguments, b.image.equals("super"),
+      filename,
+      b.beginLine, b.beginColumn,
+      e.endLine,   e.endColumn);
     }
 }
 
@@ -1627,7 +1628,7 @@ InterfaceDeclaration interfaceDeclaration() :
 {
     md=modifiers() id=unmodifiedInterfaceDeclaration(md)
     {
-	return id;
+ return id;
     }
 }
 
@@ -1650,19 +1651,19 @@ InterfaceDeclaration unmodifiedInterfaceDeclaration(ModifierFlags mf) :
     "{"
     ( 
         decl=interfaceMemberDeclaration()
-	{
-	    list.addAll(decl);
-	}
+ {
+     list.addAll(decl);
+ }
     )*
     e="}"
     {
-	if (mf != null) {
-	    m = mf.accessFlags;
-	}
-	return new InterfaceDeclaration(m, id.image, impl, list,
-					filename,
-					t.beginLine, t.beginColumn,
-					e.endLine,   e.endColumn);
+ if (mf != null) {
+     m = mf.accessFlags;
+ }
+ return new InterfaceDeclaration(m, id.image, impl, list,
+     filename,
+     t.beginLine, t.beginColumn,
+     e.endLine,   e.endColumn);
     }
 }
 
@@ -1690,10 +1691,10 @@ List interfaceMemberDeclaration() :
       list=fieldDeclaration()
       )
     {
-	if (node != null) {
-	    list.add(node);
-	}
-	return list;
+ if (node != null) {
+     list.add(node);
+ }
+ return list;
     }
 }
 
@@ -1711,21 +1712,21 @@ ArrayInitializer arrayInitializer() :
 }
 {
     b="{" [ init=variableInitializer()
-	    {
-	        list.add(init);
-	    }
-	    ( LOOKAHEAD(2)
-	      "," init=variableInitializer()
-	      {
-		  list.add(init);
-	      }
-	      )* ]
+     {
+         list.add(init);
+     }
+     ( LOOKAHEAD(2)
+       "," init=variableInitializer()
+       {
+    list.add(init);
+       }
+       )* ]
       [ t="," ] e="}"
     {
-	return new ArrayInitializer(list,
-				    filename,
-				    b.beginLine, b.beginColumn,
-				    e.endLine,   e.endColumn);
+ return new ArrayInitializer(list,
+        filename,
+        b.beginLine, b.beginColumn,
+        e.endLine,   e.endColumn);
     }
 }
 
@@ -1741,7 +1742,7 @@ Expression variableInitializer() :
     ( exp=arrayInitializer()
     | exp=expression() )
     {
-	return exp;
+ return exp;
     }
 }
 
@@ -1760,18 +1761,18 @@ BlockStatement block() :
 }
 {
     p1="{"
-	(
-	 nodes=blockStatement()
-	 {
-	     list.addAll(nodes);
-	 }
-	 )* 
+ (
+  nodes=blockStatement()
+  {
+      list.addAll(nodes);
+  }
+  )* 
     p2="}"
     {
-	return new BlockStatement(list,
-				  filename,
-				  p1.beginLine, p1.beginColumn,
-				  p2.endLine,   p2.endColumn);
+ return new BlockStatement(list,
+      filename,
+      p1.beginLine, p1.beginColumn,
+      p2.endLine,   p2.endColumn);
     }
 }
 
@@ -1792,17 +1793,17 @@ List blockStatement() :
   |
     node=statement()
     {
-	list.add(node);
+ list.add(node);
     }
   |
     node=unmodifiedClassDeclaration(null)
     {
-	list.add(node);
+ list.add(node);
     }
   |
     node=unmodifiedInterfaceDeclaration(null)
     {
-	list.add(node);
+ list.add(node);
     }
     )
   {
@@ -1830,17 +1831,17 @@ List localVariableDeclaration() :
     typ=type() id=<IDENTIFIER> ( "[" "]" { dim++; } )*
     [ "=" init=variableInitializer() ]
     {
-	list.add(createVariableDeclaration(t, typ, id, init, dim));
+ list.add(createVariableDeclaration(t, typ, id, init, dim));
     }
     ( { init = null; dim = 0; } 
       ","  id=<IDENTIFIER> ( "[" "]" { dim++; } )* 
       [ "=" init=variableInitializer() ]
       {
-	  list.add(createVariableDeclaration(t, typ, id, init, dim));
+   list.add(createVariableDeclaration(t, typ, id, init, dim));
       }
       )*
     {
-	return list;
+ return list;
     }
 }
 
@@ -1871,7 +1872,7 @@ Node statement() :
     | node=tryStatement()
       )
     {
-	return node;
+ return node;
     }
 }
 
@@ -1888,15 +1889,15 @@ Statement labeledStatement() :
 {
     id=<IDENTIFIER> ":" node=statement()
     {
-	if (node instanceof ContinueTarget) {
-	    ((ContinueTarget)node).addLabel(id.image);
-	    return (Statement)node;
-	} else {
-	    return new LabeledStatement(id.image, node,
-					filename,
-					id.beginLine,      id.beginColumn,
-					node.getEndLine(), node.getEndColumn());
-	}
+ if (node instanceof ContinueTarget) {
+     ((ContinueTarget)node).addLabel(id.image);
+     return (Statement)node;
+ } else {
+     return new LabeledStatement(id.image, node,
+     filename,
+     id.beginLine,      id.beginColumn,
+     node.getEndLine(), node.getEndColumn());
+ }
     }
 }
 
@@ -1911,7 +1912,7 @@ EmptyStatement emptyStatement() :
 {
     t=";"
     {
-	return new EmptyStatement(filename, t.beginLine, t.beginColumn);
+ return new EmptyStatement(filename, t.beginLine, t.beginColumn);
     }
 }
 
@@ -1932,17 +1933,17 @@ Statement ifStatement() :
       stat1=statement()
       [ LOOKAHEAD(1) "else" stat2=statement() ]
     {
-	if (stat2 == null) {
-	    return new IfThenStatement(exp, stat1,
-				       filename,
-				       t.beginLine,       t.beginColumn,
-				       stat1.getEndLine(), stat1.getEndColumn());
-	} else {
-	    return new IfThenElseStatement(exp, stat1, stat2,
-					   filename,
-					   t.beginLine,       t.beginColumn,
-					   stat2.getEndLine(), stat2.getEndColumn());
-	}
+ if (stat2 == null) {
+     return new IfThenStatement(exp, stat1,
+           filename,
+           t.beginLine,       t.beginColumn,
+           stat1.getEndLine(), stat1.getEndColumn());
+ } else {
+     return new IfThenElseStatement(exp, stat1, stat2,
+        filename,
+        t.beginLine,       t.beginColumn,
+        stat2.getEndLine(), stat2.getEndColumn());
+ }
     }
 }
 
@@ -1959,10 +1960,10 @@ WhileStatement whileStatement() :
 {
     t="while" "(" exp=expression() ")" stat=statement()
     {
-	return new WhileStatement(exp, stat,
-				  filename,
-				  t.beginLine,       t.beginColumn,
-				  stat.getEndLine(), stat.getEndColumn());
+ return new WhileStatement(exp, stat,
+      filename,
+      t.beginLine,       t.beginColumn,
+      stat.getEndLine(), stat.getEndColumn());
     }
 }
 
@@ -1979,10 +1980,10 @@ DoStatement doStatement() :
 {
     t1="do" stat=statement() "while" "(" exp=expression() ")" t2=";"
     {
-	return new DoStatement(exp, stat,
-			       filename,
-			       t1.beginLine, t1.beginColumn,
-			       t2.endLine,   t2.endColumn);
+ return new DoStatement(exp, stat,
+          filename,
+          t1.beginLine, t1.beginColumn,
+          t2.endLine,   t2.endColumn);
     }
 }
 
@@ -2004,46 +2005,46 @@ SwitchStatement switchStatement() :
   b="switch" "(" sel=expression() ")" "{"
     ( ( "case" val=expression() | t="default" ) ":"
       ( stat=blockStatement()
-	{
-	    list.addAll(stat);
-	}
-	)*
+ {
+     list.addAll(stat);
+ }
+ )*
         {
-	    int bl, bc, el, ec;
-	    if (t != null) {
-		bl = t.beginLine;
-		bc = t.beginColumn;
-		el = t.endLine;
-		ec = t.endColumn;
-	    } else {
-		bl = val.getBeginLine();
-		bc = val.getBeginColumn();
-		el = val.getEndLine();
-		ec = val.getEndColumn();
-	    }
+     int bl, bc, el, ec;
+     if (t != null) {
+  bl = t.beginLine;
+  bc = t.beginColumn;
+  el = t.endLine;
+  ec = t.endColumn;
+     } else {
+  bl = val.getBeginLine();
+  bc = val.getBeginColumn();
+  el = val.getEndLine();
+  ec = val.getEndColumn();
+     }
 
-	    if (list.size() != 0) {
-		Node n = (Node)list.get(list.size() - 1);
-		el = n.getEndLine();
-		ec = n.getEndColumn();
-	    }
+     if (list.size() != 0) {
+  Node n = (Node)list.get(list.size() - 1);
+  el = n.getEndLine();
+  ec = n.getEndColumn();
+     }
 
-	    cases.add(new SwitchBlock(val, (list.size() != 0) ? list : null,
-				      filename,
-				      bl, bc, el, ec));
-	    val = null;
-	    t   = null;
-	    if (list.size() != 0) {
-		list = new LinkedList();
-	    }
-	}
+     cases.add(new SwitchBlock(val, (list.size() != 0) ? list : null,
+          filename,
+          bl, bc, el, ec));
+     val = null;
+     t   = null;
+     if (list.size() != 0) {
+  list = new LinkedList();
+     }
+ }
       )*
   e="}"
     {
-	return new SwitchStatement(sel, cases,
-				   filename,
-				   b.beginLine, b.beginColumn,
-				   e.endLine,   e.endColumn);
+ return new SwitchStatement(sel, cases,
+       filename,
+       b.beginLine, b.beginColumn,
+       e.endLine,   e.endColumn);
     }
 }
 
@@ -2065,10 +2066,10 @@ ForStatement forStatement() :
                 [ update=statementExpressionList() ] ")"
       stmt=statement()
     {
-	return new ForStatement(init, exp, update, stmt,
-				filename,
-				t.beginLine, t.beginColumn,
-				stmt.getEndLine(), stmt.getEndColumn());
+ return new ForStatement(init, exp, update, stmt,
+    filename,
+    t.beginLine, t.beginColumn,
+    stmt.getEndLine(), stmt.getEndColumn());
     }
 }
 
@@ -2086,7 +2087,7 @@ List forInit() :
       list=statementExpressionList()
       )
     {
-	return list;
+ return list;
     }
 }
 
@@ -2101,15 +2102,15 @@ List statementExpressionList() :
 {
     node=statementExpression()
     {
-	list.add(node);
+ list.add(node);
     }
     ( "," node=statementExpression()
       {
-	  list.add(node);
+   list.add(node);
       }
       )*
     {
-	return list;
+ return list;
     }
 }
 
@@ -2125,10 +2126,10 @@ BreakStatement breakStatement() :
 {
     b="break" [ id=<IDENTIFIER> ] e=";"
     {
-	return new BreakStatement((id != null) ? id.image : null,
-				  filename,
-				  b.beginLine, b.beginColumn,
-				  e.endLine,   e.endColumn);
+ return new BreakStatement((id != null) ? id.image : null,
+      filename,
+      b.beginLine, b.beginColumn,
+      e.endLine,   e.endColumn);
     }
 }
 
@@ -2144,10 +2145,10 @@ ContinueStatement continueStatement() :
 {
     b="continue" [ id=<IDENTIFIER> ] e=";"
     {
-	return new ContinueStatement((id != null) ? id.image : null,
-				     filename,
-				     b.beginLine, b.beginColumn,
-				     e.endLine,   e.endColumn);
+ return new ContinueStatement((id != null) ? id.image : null,
+         filename,
+         b.beginLine, b.beginColumn,
+         e.endLine,   e.endColumn);
     }
 }
 
@@ -2163,10 +2164,10 @@ ReturnStatement returnStatement() :
 {
     b="return" [ exp=expression() ] e=";"
     {
-	return new ReturnStatement(exp,
-				   filename,
-				   b.beginLine, b.beginColumn,
-				   e.endLine,   e.endColumn);
+ return new ReturnStatement(exp,
+       filename,
+       b.beginLine, b.beginColumn,
+       e.endLine,   e.endColumn);
     }
 }
 
@@ -2182,10 +2183,10 @@ ThrowStatement throwStatement() :
 {
     b="throw" exp=expression() e=";"
     {
-	return new ThrowStatement(exp,
-				  filename,
-				  b.beginLine, b.beginColumn,
-				  e.endLine,   e.endColumn);
+ return new ThrowStatement(exp,
+      filename,
+      b.beginLine, b.beginColumn,
+      e.endLine,   e.endColumn);
     }
 }
 
@@ -2202,10 +2203,10 @@ SynchronizedStatement synchronizedStatement() :
 {
     t="synchronized" "(" exp=expression() ")" stmt=block()
     {
-	return new SynchronizedStatement(exp, stmt,
-					 filename,
-					 t.beginLine, t.beginColumn,
-					 stmt.getEndLine(), stmt.getEndColumn());
+ return new SynchronizedStatement(exp, stmt,
+      filename,
+      t.beginLine, t.beginColumn,
+      stmt.getEndLine(), stmt.getEndColumn());
     }
 }
 
@@ -2227,30 +2228,30 @@ TryStatement tryStatement() :
     t="try" tryBlock=block()
     ( u="catch" "(" formal=formalParameter() ")" catchBlock=block()
       {
-	  el = catchBlock.getEndLine();
-	  ec = catchBlock.getEndColumn();
-	  catches.add(new CatchStatement(formal, catchBlock,
-					 filename,
-					 u.beginLine, u.beginColumn,
-					 el, ec));
+   el = catchBlock.getEndLine();
+   ec = catchBlock.getEndColumn();
+   catches.add(new CatchStatement(formal, catchBlock,
+      filename,
+      u.beginLine, u.beginColumn,
+      el, ec));
       }
       )*
     [ "finally" finallyBlock=block()
       {
-	  el = finallyBlock.getEndLine();
-	  ec = finallyBlock.getEndColumn();
+   el = finallyBlock.getEndLine();
+   ec = finallyBlock.getEndColumn();
       }
     ]
     {
-	if (finallyBlock == null && catches.size() == 0) {
-	    throw new ParseError(reader.getMessage("try.without.catch", null),
-				 filename,
-				 t.beginLine, t.beginColumn);
-	}
-	return new TryStatement(tryBlock, catches, finallyBlock,
-				filename,
-				t.beginLine, t.beginColumn,
-				el, ec);
+ if (finallyBlock == null && catches.size() == 0) {
+     throw new ParseError(reader.getMessage("try.without.catch", null),
+     filename,
+     t.beginLine, t.beginColumn);
+ }
+ return new TryStatement(tryBlock, catches, finallyBlock,
+    filename,
+    t.beginLine, t.beginColumn,
+    el, ec);
     }
 }
 
@@ -2271,29 +2272,29 @@ Node statementExpression() :
     | exp=primaryExpression() 
       [ t="++"
         {
-	    exp = new PostIncrement(exp,
-				    filename,
-				    exp.getBeginLine(), exp.getBeginColumn(),
-				    t.endLine,          t.endColumn);
+     exp = new PostIncrement(exp,
+        filename,
+        exp.getBeginLine(), exp.getBeginColumn(),
+        t.endLine,          t.endColumn);
         }
       | t="--" 
         {
-	    exp = new PostDecrement(exp,
-				    filename,
-				    exp.getBeginLine(), exp.getBeginColumn(),
-				    t.endLine,          t.endColumn);
+     exp = new PostDecrement(exp,
+        filename,
+        exp.getBeginLine(), exp.getBeginColumn(),
+        t.endLine,          t.endColumn);
         }
       | exp=expressionSuffix(exp)
       ]
     )
     {
-	if (exp instanceof ExpressionStatement) {
-	    return exp;
-	} else {
-	    throw new ParseError(reader.getMessage("expression.statement", null),
-				 filename,
-				 exp.getBeginLine(), exp.getBeginColumn());
-	}
+ if (exp instanceof ExpressionStatement) {
+     return exp;
+ } else {
+     throw new ParseError(reader.getMessage("expression.statement", null),
+     filename,
+     exp.getBeginLine(), exp.getBeginColumn());
+ }
     }
 }
 
@@ -2310,7 +2311,7 @@ Expression expression() :
 {
     exp=conditionalExpression() [ exp=expressionSuffix(exp) ]
     {
-	return exp;
+ return exp;
     }
 }
 
@@ -2325,99 +2326,99 @@ Expression expressionSuffix(Expression pre) :
 {
     ( "="    exp2=expression()
       {
-	  exp = new SimpleAssignExpression(pre, exp2,
-					   filename,
-					   pre.getBeginLine(), pre.getBeginColumn(),
-					   exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new SimpleAssignExpression(pre, exp2,
+        filename,
+        pre.getBeginLine(), pre.getBeginColumn(),
+        exp2.getEndLine(),  exp2.getEndColumn());
       }
     | "*="   exp2=expression()
       {
-	  exp = new MultiplyAssignExpression(pre, exp2,
-					     filename,
-					     pre.getBeginLine(), pre.getBeginColumn(),
-					     exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new MultiplyAssignExpression(pre, exp2,
+          filename,
+          pre.getBeginLine(), pre.getBeginColumn(),
+          exp2.getEndLine(),  exp2.getEndColumn());
       }
     | "/="   exp2=expression()
       {
-	  exp = new DivideAssignExpression(pre, exp2,
-					   filename,
-					   pre.getBeginLine(), pre.getBeginColumn(),
-					   exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new DivideAssignExpression(pre, exp2,
+        filename,
+        pre.getBeginLine(), pre.getBeginColumn(),
+        exp2.getEndLine(),  exp2.getEndColumn());
       }
     | "%="   exp2=expression()
       {
-	  exp = new RemainderAssignExpression(pre, exp2,
-					      filename,
-					      pre.getBeginLine(), pre.getBeginColumn(),
-					      exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new RemainderAssignExpression(pre, exp2,
+           filename,
+           pre.getBeginLine(), pre.getBeginColumn(),
+           exp2.getEndLine(),  exp2.getEndColumn());
       }
     | "+="   exp2=expression()
       {
-	  exp = new AddAssignExpression(pre, exp2,
-					filename,
-					pre.getBeginLine(), pre.getBeginColumn(),
-					exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new AddAssignExpression(pre, exp2,
+     filename,
+     pre.getBeginLine(), pre.getBeginColumn(),
+     exp2.getEndLine(),  exp2.getEndColumn());
       }
     | "-="   exp2=expression()
       {
-	  exp = new SubtractAssignExpression(pre, exp2,
-					     filename,
-					     pre.getBeginLine(), pre.getBeginColumn(),
-					     exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new SubtractAssignExpression(pre, exp2,
+          filename,
+          pre.getBeginLine(), pre.getBeginColumn(),
+          exp2.getEndLine(),  exp2.getEndColumn());
       }
     | "<<="  exp2=expression()
       {
-	  exp = new ShiftLeftAssignExpression(pre, exp2,
-					      filename,
-					      pre.getBeginLine(), pre.getBeginColumn(),
-					      exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new ShiftLeftAssignExpression(pre, exp2,
+           filename,
+           pre.getBeginLine(), pre.getBeginColumn(),
+           exp2.getEndLine(),  exp2.getEndColumn());
       }
     | ">>="  exp2=expression()
       {
-	  exp = new ShiftRightAssignExpression
-	      (pre, exp2,
-	       filename,
-	       pre.getBeginLine(), pre.getBeginColumn(),
-	       exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new ShiftRightAssignExpression
+       (pre, exp2,
+        filename,
+        pre.getBeginLine(), pre.getBeginColumn(),
+        exp2.getEndLine(),  exp2.getEndColumn());
       }
     | ">>>=" exp2=expression()
       {
-	  exp = new UnsignedShiftRightAssignExpression
-	      (pre, exp2,
-	       filename,
-	       pre.getBeginLine(), pre.getBeginColumn(),
-	       exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new UnsignedShiftRightAssignExpression
+       (pre, exp2,
+        filename,
+        pre.getBeginLine(), pre.getBeginColumn(),
+        exp2.getEndLine(),  exp2.getEndColumn());
       }
     | "&="   exp2=expression()
       {
-	  exp = new BitAndAssignExpression(pre, exp2,
-					   filename,
-					   pre.getBeginLine(), pre.getBeginColumn(),
-					   exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new BitAndAssignExpression(pre, exp2,
+        filename,
+        pre.getBeginLine(), pre.getBeginColumn(),
+        exp2.getEndLine(),  exp2.getEndColumn());
       }
     | "^="   exp2=expression()
       {
-	  exp = new ExclusiveOrAssignExpression(pre, exp2,
-						filename,
-						pre.getBeginLine(), pre.getBeginColumn(),
-						exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new ExclusiveOrAssignExpression(pre, exp2,
+      filename,
+      pre.getBeginLine(), pre.getBeginColumn(),
+      exp2.getEndLine(),  exp2.getEndColumn());
       }
     | "|="   exp2=expression()
       {
-	  exp = new BitOrAssignExpression(pre, exp2,
-					  filename,
-					  pre.getBeginLine(), pre.getBeginColumn(),
-					  exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new BitOrAssignExpression(pre, exp2,
+       filename,
+       pre.getBeginLine(), pre.getBeginColumn(),
+       exp2.getEndLine(),  exp2.getEndColumn());
       }
     )
     {
-	if (!(pre instanceof LeftHandSide)) {
-	    throw new ParseError(reader.getMessage("left.expression.in.assignment",
-						   null),
-				 filename,
-				 pre.getBeginLine(), pre.getBeginColumn());
-	}
-	return exp;
+ if (!(pre instanceof LeftHandSide)) {
+     throw new ParseError(reader.getMessage("left.expression.in.assignment",
+         null),
+     filename,
+     pre.getBeginLine(), pre.getBeginColumn());
+ }
+ return exp;
     }
 }
 
@@ -2434,14 +2435,14 @@ Expression conditionalExpression() :
     exp=conditionalOrExpression()
     [ "?" exp2=expression() ":" exp3=conditionalExpression()
       {
-	  exp = new ConditionalExpression(exp, exp2, exp3,
-					  filename,
-					  exp.getBeginLine(), exp.getBeginColumn(),
-					  exp3.getEndLine(),  exp3.getEndColumn());
+   exp = new ConditionalExpression(exp, exp2, exp3,
+       filename,
+       exp.getBeginLine(), exp.getBeginColumn(),
+       exp3.getEndLine(),  exp3.getEndColumn());
       }
     ]
     {
-	return exp;
+ return exp;
     }
 }
 
@@ -2457,14 +2458,14 @@ Expression conditionalOrExpression() :
     exp=conditionalAndExpression()
     ( "||" exp2=conditionalAndExpression()
       {
-	  exp = new OrExpression(exp, exp2,
-				 filename,
-				 exp.getBeginLine(), exp.getBeginColumn(),
-				 exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new OrExpression(exp, exp2,
+     filename,
+     exp.getBeginLine(), exp.getBeginColumn(),
+     exp2.getEndLine(),  exp2.getEndColumn());
       }
       )*
     {
-	return exp;
+ return exp;
     }
 }
 
@@ -2480,14 +2481,14 @@ Expression conditionalAndExpression() :
     exp=inclusiveOrExpression()
     ( "&&" exp2=inclusiveOrExpression()
       {
-	  exp = new AndExpression(exp, exp2,
-				  filename,
-				  exp.getBeginLine(), exp.getBeginColumn(),
-				  exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new AndExpression(exp, exp2,
+      filename,
+      exp.getBeginLine(), exp.getBeginColumn(),
+      exp2.getEndLine(),  exp2.getEndColumn());
       }
       )*
     {
-	return exp;
+ return exp;
     }
 }
 
@@ -2503,14 +2504,14 @@ Expression inclusiveOrExpression() :
     exp=exclusiveOrExpression()
     ( "|" exp2=exclusiveOrExpression()
       {
-	  exp = new BitOrExpression(exp, exp2,
-				    filename,
-				    exp.getBeginLine(), exp.getBeginColumn(),
-				    exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new BitOrExpression(exp, exp2,
+        filename,
+        exp.getBeginLine(), exp.getBeginColumn(),
+        exp2.getEndLine(),  exp2.getEndColumn());
       }
       )*
     {
-	return exp;
+ return exp;
     }
 }
 
@@ -2526,14 +2527,14 @@ Expression exclusiveOrExpression() :
     exp=andExpression() 
     ( "^" exp2=andExpression()
       {
-	  exp = new ExclusiveOrExpression(exp, exp2,
-					  filename,
-					  exp.getBeginLine(), exp.getBeginColumn(),
-					  exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new ExclusiveOrExpression(exp, exp2,
+       filename,
+       exp.getBeginLine(), exp.getBeginColumn(),
+       exp2.getEndLine(),  exp2.getEndColumn());
       }
       )*
     {
-	return exp;
+ return exp;
     }
 }
 
@@ -2549,14 +2550,14 @@ Expression andExpression() :
     exp=equalityExpression() 
     ( "&" exp2=equalityExpression()
       {
-	  exp = new BitAndExpression(exp, exp2,
-				     filename,
-				     exp.getBeginLine(), exp.getBeginColumn(),
-				     exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new BitAndExpression(exp, exp2,
+         filename,
+         exp.getBeginLine(), exp.getBeginColumn(),
+         exp2.getEndLine(),  exp2.getEndColumn());
       }
       )*
     {
-	return exp;
+ return exp;
     }
 }
 
@@ -2572,21 +2573,21 @@ Expression equalityExpression() :
     exp=instanceOfExpression() 
     ( "==" exp2=instanceOfExpression()
       {
-	  exp = new EqualExpression(exp, exp2,
-				    filename,
-				    exp.getBeginLine(), exp.getBeginColumn(),
-				    exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new EqualExpression(exp, exp2,
+        filename,
+        exp.getBeginLine(), exp.getBeginColumn(),
+        exp2.getEndLine(),  exp2.getEndColumn());
       }
     | "!=" exp2=instanceOfExpression()
       {
-	  exp = new NotEqualExpression(exp, exp2,
-				       filename,
-				       exp.getBeginLine(), exp.getBeginColumn(),
-				       exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new NotEqualExpression(exp, exp2,
+           filename,
+           exp.getBeginLine(), exp.getBeginColumn(),
+           exp2.getEndLine(),  exp2.getEndColumn());
       }
       )*
     {
-	return exp;
+ return exp;
     }
 }
 
@@ -2601,14 +2602,14 @@ Expression instanceOfExpression() :
 {
     exp=relationalExpression() [ "instanceof" typ=type() ]
     {
-	if (typ != null) {
-	    return new InstanceOfExpression(exp, typ,
-					    filename,
-					    exp.getBeginLine(), exp.getBeginColumn(),
-					    typ.getEndLine(),   typ.getEndColumn());
-	} else {
-	    return exp;
-	}
+ if (typ != null) {
+     return new InstanceOfExpression(exp, typ,
+         filename,
+         exp.getBeginLine(), exp.getBeginColumn(),
+         typ.getEndLine(),   typ.getEndColumn());
+ } else {
+     return exp;
+ }
     }
 }
 
@@ -2624,35 +2625,35 @@ Expression relationalExpression() :
     exp=shiftExpression() 
     ( "<"  exp2=shiftExpression()
       {
-	  exp = new LessExpression(exp, exp2,
-				   filename,
-				   exp.getBeginLine(), exp.getBeginColumn(),
-				   exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new LessExpression(exp, exp2,
+       filename,
+       exp.getBeginLine(), exp.getBeginColumn(),
+       exp2.getEndLine(),  exp2.getEndColumn());
       }
     | ">"  exp2=shiftExpression()
       {
-	  exp = new GreaterExpression(exp, exp2,
-				      filename,
-				      exp.getBeginLine(), exp.getBeginColumn(),
-				      exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new GreaterExpression(exp, exp2,
+          filename,
+          exp.getBeginLine(), exp.getBeginColumn(),
+          exp2.getEndLine(),  exp2.getEndColumn());
       }
     | "<=" exp2=shiftExpression()
       {
-	  exp = new LessOrEqualExpression(exp, exp2,
-					  filename,
-					  exp.getBeginLine(), exp.getBeginColumn(),
-					  exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new LessOrEqualExpression(exp, exp2,
+       filename,
+       exp.getBeginLine(), exp.getBeginColumn(),
+       exp2.getEndLine(),  exp2.getEndColumn());
       }
     | ">=" exp2=shiftExpression()
       {
-	  exp = new GreaterOrEqualExpression(exp, exp2,
-					     filename,
-					     exp.getBeginLine(), exp.getBeginColumn(),
-					     exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new GreaterOrEqualExpression(exp, exp2,
+          filename,
+          exp.getBeginLine(), exp.getBeginColumn(),
+          exp2.getEndLine(),  exp2.getEndColumn());
       }
       )*
     {
-	return exp;
+ return exp;
     }
 }
 
@@ -2668,29 +2669,29 @@ Expression shiftExpression() :
     exp=additiveExpression()
     ( "<<"  exp2=additiveExpression()
       {
-	  exp = new ShiftLeftExpression(exp, exp2,
-					filename,
-					exp.getBeginLine(), exp.getBeginColumn(),
-					exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new ShiftLeftExpression(exp, exp2,
+     filename,
+     exp.getBeginLine(), exp.getBeginColumn(),
+     exp2.getEndLine(),  exp2.getEndColumn());
       }
     | ">>"  exp2=additiveExpression()
       {
-	  exp = new ShiftRightExpression(exp, exp2,
-					 filename,
-					 exp.getBeginLine(), exp.getBeginColumn(),
-					 exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new ShiftRightExpression(exp, exp2,
+      filename,
+      exp.getBeginLine(), exp.getBeginColumn(),
+      exp2.getEndLine(),  exp2.getEndColumn());
       }
     | ">>>" exp2=additiveExpression()
       {
-	  exp = new UnsignedShiftRightExpression
-	      (exp, exp2,
-	       filename,
-	       exp.getBeginLine(), exp.getBeginColumn(),
-	       exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new UnsignedShiftRightExpression
+       (exp, exp2,
+        filename,
+        exp.getBeginLine(), exp.getBeginColumn(),
+        exp2.getEndLine(),  exp2.getEndColumn());
       }
       )*
     {
-	return exp;
+ return exp;
     }
 }
 
@@ -2706,21 +2707,21 @@ Expression additiveExpression() :
     exp=multiplicativeExpression() 
     ( "+" exp2=multiplicativeExpression() 
       {
-	  exp = new AddExpression(exp, exp2,
-				  filename,
-				  exp.getBeginLine(), exp.getBeginColumn(),
-				  exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new AddExpression(exp, exp2,
+      filename,
+      exp.getBeginLine(), exp.getBeginColumn(),
+      exp2.getEndLine(),  exp2.getEndColumn());
       }
     | "-" exp2=multiplicativeExpression()
       {
-	  exp = new SubtractExpression(exp, exp2,
-				       filename,
-				       exp.getBeginLine(), exp.getBeginColumn(),
-				       exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new SubtractExpression(exp, exp2,
+           filename,
+           exp.getBeginLine(), exp.getBeginColumn(),
+           exp2.getEndLine(),  exp2.getEndColumn());
       }
       )*
     {
-	return exp;
+ return exp;
     }
 }
 
@@ -2736,28 +2737,28 @@ Expression multiplicativeExpression() :
     exp=unaryExpression() 
     ( "*" exp2=unaryExpression()
       {
-	  exp = new MultiplyExpression(exp, exp2,
-				       filename,
-				       exp.getBeginLine(), exp.getBeginColumn(),
-				       exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new MultiplyExpression(exp, exp2,
+           filename,
+           exp.getBeginLine(), exp.getBeginColumn(),
+           exp2.getEndLine(),  exp2.getEndColumn());
       }
     | "/" exp2=unaryExpression()
       {
-	  exp = new DivideExpression(exp, exp2,
-				     filename,
-				     exp.getBeginLine(), exp.getBeginColumn(),
-				     exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new DivideExpression(exp, exp2,
+         filename,
+         exp.getBeginLine(), exp.getBeginColumn(),
+         exp2.getEndLine(),  exp2.getEndColumn());
       }
     | "%" exp2=unaryExpression()
       {
-	  exp = new RemainderExpression(exp, exp2,
-					filename,
-					exp.getBeginLine(), exp.getBeginColumn(),
-					exp2.getEndLine(),  exp2.getEndColumn());
+   exp = new RemainderExpression(exp, exp2,
+     filename,
+     exp.getBeginLine(), exp.getBeginColumn(),
+     exp2.getEndLine(),  exp2.getEndColumn());
       }
       )*
     {
-	return exp;
+ return exp;
     }
 }
 
@@ -2772,18 +2773,18 @@ Expression unaryExpression() :
 {
     ( t="+" exp=unaryExpression()
       {
-	  return new PlusExpression(exp,
-				    filename,
-				    t.beginLine,      t.beginColumn,
-				    exp.getEndLine(), exp.getEndColumn());
+   return new PlusExpression(exp,
+        filename,
+        t.beginLine,      t.beginColumn,
+        exp.getEndLine(), exp.getEndColumn());
       }
     |
       t="-" exp=unaryExpression()
       {
-	  return new MinusExpression(exp,
-				     filename,
-				     t.beginLine,      t.beginColumn,
-				     exp.getEndLine(), exp.getEndColumn());
+   return new MinusExpression(exp,
+         filename,
+         t.beginLine,      t.beginColumn,
+         exp.getEndLine(), exp.getEndColumn());
       }
     |
       exp=preIncrementExpression()
@@ -2792,7 +2793,7 @@ Expression unaryExpression() :
     |
       exp=unaryExpressionNotPlusMinus() )
     {
-	return exp;
+ return exp;
     }
 }
 
@@ -2807,18 +2808,18 @@ Expression unaryExpressionNotPlusMinus() :
 {
     ( t="~" exp=unaryExpression()
       {
-	  return new ComplementExpression(exp,
-					  filename,
-					  t.beginLine,      t.beginColumn,
-					  exp.getEndLine(), exp.getEndColumn());
+   return new ComplementExpression(exp,
+       filename,
+       t.beginLine,      t.beginColumn,
+       exp.getEndLine(), exp.getEndColumn());
       }
     |
       t="!" exp=unaryExpression()
       {
-	  return new NotExpression(exp,
-				   filename,
-				   t.beginLine,      t.beginColumn,
-				   exp.getEndLine(), exp.getEndColumn());
+   return new NotExpression(exp,
+       filename,
+       t.beginLine,      t.beginColumn,
+       exp.getEndLine(), exp.getEndColumn());
       }
     |
       LOOKAHEAD( castLookahead() )
@@ -2826,7 +2827,7 @@ Expression unaryExpressionNotPlusMinus() :
     |
       exp=postfixExpression() )
     {
-	return exp;
+ return exp;
     }
 }
 
@@ -2845,10 +2846,10 @@ Expression castExpression() :
     |
       t="(" typ=type() ")" exp=unaryExpressionNotPlusMinus() )
     {
-	return new CastExpression(typ, exp,
-				  filename,
-				  t.beginLine, t.beginColumn,
-				  exp.getEndLine(), exp.getEndColumn());
+ return new CastExpression(typ, exp,
+      filename,
+      t.beginLine, t.beginColumn,
+      exp.getEndLine(), exp.getEndColumn());
     }
 }
 
@@ -2863,10 +2864,10 @@ Expression preIncrementExpression() :
 {
     t="++" pe=primaryExpression()
     {
-	return new PreIncrement(pe,
-				filename,
-				pe.getBeginLine(), pe.getBeginColumn(),
-				t.endLine,         t.endColumn);
+ return new PreIncrement(pe,
+    filename,
+    pe.getBeginLine(), pe.getBeginColumn(),
+    t.endLine,         t.endColumn);
     }
 }
 
@@ -2881,10 +2882,10 @@ Expression preDecrementExpression() :
 {
     t="--" pe=primaryExpression()
     {
-	return new PreDecrement(pe,
-				filename,
-				pe.getBeginLine(), pe.getBeginColumn(),
-				t.endLine,         t.endColumn);
+ return new PreDecrement(pe,
+    filename,
+    pe.getBeginLine(), pe.getBeginColumn(),
+    t.endLine,         t.endColumn);
     }
 }
 
@@ -2898,23 +2899,23 @@ Expression postfixExpression() :
 }
 {
     pe=primaryExpression() 
-	[ t="++"
-	  {
-	      return new PostIncrement(pe,
-				       filename,
-				       pe.getBeginLine(), pe.getBeginColumn(),
-				       t.endLine,         t.endColumn);
-	  }
-	| t="--"
-	  {
-	      return new PostDecrement(pe,
-				       filename,
-				       pe.getBeginLine(), pe.getBeginColumn(),
-				       t.endLine,         t.endColumn);
-	  }
-	]
+ [ t="++"
+   {
+       return new PostIncrement(pe,
+           filename,
+           pe.getBeginLine(), pe.getBeginColumn(),
+           t.endLine,         t.endColumn);
+   }
+ | t="--"
+   {
+       return new PostDecrement(pe,
+           filename,
+           pe.getBeginLine(), pe.getBeginColumn(),
+           t.endLine,         t.endColumn);
+   }
+ ]
     {
-	return pe;
+ return pe;
     }
 }
 
@@ -2931,12 +2932,12 @@ Expression primaryExpression() :
     pp=primaryPrefix() 
     ( LOOKAHEAD(2) es=primarySuffix()
       {
-	  // Build the list of suffixes in reverse order
-	  list.add(0, es);
+   // Build the list of suffixes in reverse order
+   list.add(0, es);
       }
       )*
     {
-	return createPrimaryExpression(pp, list);
+ return createPrimaryExpression(pp, list);
     }
 }
 
@@ -2957,7 +2958,7 @@ Expression primaryPrefix() :
     | exp=qualifiedName()
       )
     {
-	return exp;
+ return exp;
     }
 }
 
@@ -2976,7 +2977,7 @@ ExpressionSuffix primarySuffix() :
     | es=arguments()
       )
     {
-	return es;
+ return es;
     }
 }
 
@@ -2990,7 +2991,7 @@ ExpressionSuffix dotThis() :
 {
     "." t="this"
     {
-	return new DotThisSuffix(t.endLine, t.endColumn);
+ return new DotThisSuffix(t.endLine, t.endColumn);
     }
 }
 
@@ -3004,7 +3005,7 @@ ExpressionSuffix dotAllocationExpression() :
 {
     "." a=simpleAllocationExpression()
     {
-	return new DotAllocationSuffix(a);
+ return new DotAllocationSuffix(a);
     }
 }
 
@@ -3022,28 +3023,28 @@ Allocation simpleAllocationExpression() :
     
     t="new" ls=name() as=arguments() [ cb=classBody() ]
     {
-	IdentifierToken f  = (IdentifierToken)ls.get(0);
-	IdentifierToken l  = (IdentifierToken)ls.get(ls.size()-1);
-	if (cb == null) {
-	    return new SimpleAllocation(new ReferenceType(ls,
-							  filename,
-							  f.beginLine(), f.beginColumn(),
-							  l.endLine(),   l.endColumn()),
-					as.arguments,
-					filename,
-					t.beginLine, t.beginColumn,
-					as.endLine,  as.endColumn);
-	} else {
-	    return new ClassAllocation(new ReferenceType(ls,
-							 filename,
-							 f.beginLine(), f.beginColumn(),
-							 l.endLine(),   l.endColumn()),
-				       as.arguments,
-				       cb.list,
-				       filename,
-				       t.beginLine, t.beginColumn,
-				       cb.endLine,  cb.endColumn);
-	}
+ IdentifierToken f  = (IdentifierToken)ls.get(0);
+ IdentifierToken l  = (IdentifierToken)ls.get(ls.size()-1);
+ if (cb == null) {
+     return new SimpleAllocation(new ReferenceType(ls,
+         filename,
+         f.beginLine(), f.beginColumn(),
+         l.endLine(),   l.endColumn()),
+     as.arguments,
+     filename,
+     t.beginLine, t.beginColumn,
+     as.endLine,  as.endColumn);
+ } else {
+     return new ClassAllocation(new ReferenceType(ls,
+        filename,
+        f.beginLine(), f.beginColumn(),
+        l.endLine(),   l.endColumn()),
+           as.arguments,
+           cb.list,
+           filename,
+           t.beginLine, t.beginColumn,
+           cb.endLine,  cb.endColumn);
+ }
     }
 }
 
@@ -3057,7 +3058,7 @@ ExpressionSuffix dotIdentifier() :
 {
     "." id=<IDENTIFIER>
     {
-	return new DotIdentifierSuffix(id);
+ return new DotIdentifierSuffix(id);
     }
 }
 
@@ -3072,7 +3073,7 @@ ExpressionSuffix arrayReference() :
 {
     "[" exp=expression() t="]"
     {
-	return new ArrayReferenceSuffix(exp, t.endLine, t.endColumn);
+ return new ArrayReferenceSuffix(exp, t.endLine, t.endColumn);
     }
 }
 
@@ -3087,7 +3088,7 @@ ArgumentsSuffix arguments() :
 {
     "(" [ list=argumentList() ] t=")"
     {
-	return new ArgumentsSuffix(list, t.endLine, t.endColumn);
+ return new ArgumentsSuffix(list, t.endLine, t.endColumn);
     }
 }
 
@@ -3102,15 +3103,15 @@ List argumentList() :
 {
     exp=expression()
     {
-	list.add(exp);
+ list.add(exp);
     }
     ( "," exp=expression()
       {
-	  list.add(exp);
+   list.add(exp);
       }
       )*
     {
-	return list;
+ return list;
     }
 }
 
@@ -3124,73 +3125,73 @@ Expression literal() :
 {
     t=<INTEGER_LITERAL>
     {
-	return new IntegerLiteral(t.image,
-				  filename,
-				  t.beginLine, t.beginColumn,
-				  t.endLine,   t.endColumn);
+ return new IntegerLiteral(t.image,
+      filename,
+      t.beginLine, t.beginColumn,
+      t.endLine,   t.endColumn);
     }
   |
     t=<LONG_LITERAL>
     {
-	return new LongLiteral(t.image,
-			       filename,
-			       t.beginLine, t.beginColumn,
-			       t.endLine,   t.endColumn);
+ return new LongLiteral(t.image,
+          filename,
+          t.beginLine, t.beginColumn,
+          t.endLine,   t.endColumn);
     }
   |
     t=<FLOAT_LITERAL>
     {
-	return new FloatLiteral(t.image,
-				filename,
-				t.beginLine, t.beginColumn,
-				t.endLine,   t.endColumn);
+ return new FloatLiteral(t.image,
+    filename,
+    t.beginLine, t.beginColumn,
+    t.endLine,   t.endColumn);
     }
   |
     t=<DOUBLE_LITERAL>
     {
-	return new DoubleLiteral(t.image,
-				 filename,
-				 t.beginLine, t.beginColumn,
-				 t.endLine,   t.endColumn);
+ return new DoubleLiteral(t.image,
+     filename,
+     t.beginLine, t.beginColumn,
+     t.endLine,   t.endColumn);
     }
   |
     t=<CHARACTER_LITERAL>
     {
-	return new CharacterLiteral(t.image,
-				    filename,
-				    t.beginLine, t.beginColumn,
-				    t.endLine,   t.endColumn);
+ return new CharacterLiteral(t.image,
+        filename,
+        t.beginLine, t.beginColumn,
+        t.endLine,   t.endColumn);
     }
   |
     t=<STRING_LITERAL>
     {
-	return new StringLiteral(t.image,
-				 filename,
-				 t.beginLine, t.beginColumn,
-				 t.endLine,   t.endColumn);
+ return new StringLiteral(t.image,
+     filename,
+     t.beginLine, t.beginColumn,
+     t.endLine,   t.endColumn);
     }
   |
     t="true"
     {
-	return new BooleanLiteral(true,
-				  filename,
-				  t.beginLine, t.beginColumn,
-				  t.endLine,   t.endColumn);
+ return new BooleanLiteral(true,
+      filename,
+      t.beginLine, t.beginColumn,
+      t.endLine,   t.endColumn);
     }
   |
     t="false"
     {
-	return new BooleanLiteral(false,
-				  filename,
-				  t.beginLine, t.beginColumn,
-				  t.endLine,   t.endColumn);
+ return new BooleanLiteral(false,
+      filename,
+      t.beginLine, t.beginColumn,
+      t.endLine,   t.endColumn);
     }
   |
     t="null"
     {
-	return new NullLiteral(filename, 
-			       t.beginLine, t.beginColumn,
-			       t.endLine,   t.endColumn);
+ return new NullLiteral(filename, 
+          t.beginLine, t.beginColumn,
+          t.endLine,   t.endColumn);
     }
 }
 
@@ -3204,10 +3205,10 @@ Expression thisExpression() :
 {
     t="this"
     {
-	return new ThisExpression(new LinkedList(),
-				  filename,
-				  t.beginLine, t.beginColumn,
-				  t.endLine,   t.endColumn);
+ return new ThisExpression(new LinkedList(),
+      filename,
+      t.beginLine, t.beginColumn,
+      t.endLine,   t.endColumn);
     }
 }
 
@@ -3222,9 +3223,9 @@ Expression superExpression() :
 {
     t="super" "." id=<IDENTIFIER>
     {
-	return new CompileTimeSuperExpression(id.image,
-					      t.beginLine,  t.beginColumn,
-					      id.endLine,   id.endColumn);
+ return new CompileTimeSuperExpression(id.image,
+           t.beginLine,  t.beginColumn,
+           id.endLine,   id.endColumn);
     }
 }
 
@@ -3238,7 +3239,7 @@ Expression qualifiedName() :
 {
     list=name()
     {
-	return new CompileTimeQualifiedName(list);
+ return new CompileTimeQualifiedName(list);
     }
 }
 
@@ -3253,10 +3254,10 @@ Expression classExpression() :
 {
     typ=resultType() "." t="class"
     {
-	return new TypeExpression(typ,
-				  filename,
-				  typ.getBeginLine(), typ.getBeginColumn(),
-				  t.endLine,   t.endColumn);
+ return new TypeExpression(typ,
+      filename,
+      typ.getBeginLine(), typ.getBeginColumn(),
+      t.endLine,   t.endColumn);
     }
 }
 
@@ -3276,43 +3277,43 @@ Expression allocationExpression() :
     ( LOOKAHEAD(2)
       t="new" pt=primitiveType() td=arrayDimsAndInits()
       {
-	  return new ArrayAllocation(pt, td, 
-				     filename,
-				     t.beginLine, t.beginColumn,
-				     td.endLine,  td.endColumn);
+   return new ArrayAllocation(pt, td, 
+         filename,
+         t.beginLine, t.beginColumn,
+         td.endLine,  td.endColumn);
       }
     |
       t="new" ls=name()
       {
-	  IdentifierToken f  = (IdentifierToken)ls.get(0);
-	  IdentifierToken l  = (IdentifierToken)ls.get(ls.size()-1);
-	  pt = new ReferenceType(ls,
-				 filename,
-				 f.beginLine(), f.beginColumn(),
-				 l.endLine(),   l.endColumn());
+   IdentifierToken f  = (IdentifierToken)ls.get(0);
+   IdentifierToken l  = (IdentifierToken)ls.get(ls.size()-1);
+   pt = new ReferenceType(ls,
+     filename,
+     f.beginLine(), f.beginColumn(),
+     l.endLine(),   l.endColumn());
       }
       ( td=arrayDimsAndInits()
         {
-	    return new ArrayAllocation(pt, td,
-				       filename,
-				       t.beginLine, t.beginColumn,
-				       td.endLine, td.endColumn);
+     return new ArrayAllocation(pt, td,
+           filename,
+           t.beginLine, t.beginColumn,
+           td.endLine, td.endColumn);
         }
       | as=arguments() [ cb=classBody() ]
         {
-	    if (cb == null) {
-		return new SimpleAllocation(pt, as.arguments,
-					    filename,
-					    t.beginLine, t.beginColumn,
-					    as.endLine,  as.endColumn);
-	    } else {
-		return new ClassAllocation(pt, as.arguments, cb.list,
-					   filename,
-					   t.beginLine, t.beginColumn,
-					   cb.endLine,  cb.endColumn);
-	    }
+     if (cb == null) {
+  return new SimpleAllocation(pt, as.arguments,
+         filename,
+         t.beginLine, t.beginColumn,
+         as.endLine,  as.endColumn);
+     } else {
+  return new ClassAllocation(pt, as.arguments, cb.list,
+        filename,
+        t.beginLine, t.beginColumn,
+        cb.endLine,  cb.endColumn);
+     }
         }
-	)
+ )
       )
 }
 
@@ -3332,29 +3333,29 @@ ArrayAllocation.TypeDescriptor arrayDimsAndInits() :
      ( LOOKAHEAD(2)
        "[" exp=expression() t="]"
        {
-	   dims.add(exp);
+    dims.add(exp);
        }
        )+
        ( LOOKAHEAD(2) "[" t="]"
-	 {
-	     dim++;
-	 }
-	 )*
+  {
+      dim++;
+  }
+  )*
        {
-	   return new ArrayAllocation.TypeDescriptor(dims, dim+dims.size(), null,
-						     t.endLine, t.endColumn);
+    return new ArrayAllocation.TypeDescriptor(dims, dim+dims.size(), null,
+           t.endLine, t.endColumn);
        }
      |
      ( "[" "]"
-	 {
-	     dim++;
-	 }
+  {
+      dim++;
+  }
        )+
        ai=arrayInitializer()
        {
-	   return new ArrayAllocation.TypeDescriptor
-	       (dims, dim, ai,
-		ai.getEndLine(), ai.getEndColumn());
+    return new ArrayAllocation.TypeDescriptor
+        (dims, dim, ai,
+  ai.getEndLine(), ai.getEndColumn());
        }     
       )
 }
@@ -3376,29 +3377,29 @@ Type type() :
     | ls=name() ) 
     ( "[" t="]"
       {
-	  dim++;
+   dim++;
       }
       )*
     {
-	Type rt;
-	if (pt != null) {
-	    rt = pt;
-	} else {
-	    IdentifierToken f  = (IdentifierToken)ls.get(0);
-	    IdentifierToken l  = (IdentifierToken)ls.get(ls.size()-1);
-	    rt = new ReferenceType(ls,
-				   filename,
-				   f.beginLine(), f.beginColumn(),
-				   l.endLine(),   l.endColumn());
-	}
-	if (dim == 0) {
-	    return rt;
-	} else {
-	    return new ArrayType(rt, dim,
-				 filename,
-				 rt.getBeginLine(), rt.getBeginColumn(),
-				 t.endLine,         t.endColumn);
-	}
+ Type rt;
+ if (pt != null) {
+     rt = pt;
+ } else {
+     IdentifierToken f  = (IdentifierToken)ls.get(0);
+     IdentifierToken l  = (IdentifierToken)ls.get(ls.size()-1);
+     rt = new ReferenceType(ls,
+       filename,
+       f.beginLine(), f.beginColumn(),
+       l.endLine(),   l.endColumn());
+ }
+ if (dim == 0) {
+     return rt;
+ } else {
+     return new ArrayType(rt, dim,
+     filename,
+     rt.getBeginLine(), rt.getBeginColumn(),
+     t.endLine,         t.endColumn);
+ }
     }
 }
 
@@ -3413,13 +3414,13 @@ Type resultType() :
 {
     t="void"
     {
-	return new VoidType(filename,
-			    t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+ return new VoidType(filename,
+       t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
   |
     typ=type()
     {
-	return typ;
+ return typ;
     }
 }
 
@@ -3433,50 +3434,50 @@ Type primitiveType() :
 {
     t="boolean"
     {
-	return new BooleanType(filename, 
-			       t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+ return new BooleanType(filename, 
+          t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
   |
     t="char"
     {
-	return new CharType(filename,
-			    t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+ return new CharType(filename,
+       t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
   |
     t="byte"
     {
-	return new ByteType(filename,
-			    t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+ return new ByteType(filename,
+       t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
   |
     t="short"
     {
-	return new ShortType(filename,
-			     t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+ return new ShortType(filename,
+        t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
   |
     t="int"
     {
-	return new IntType(filename,
-			   t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+ return new IntType(filename,
+      t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
   |
     t="long"
     {
-	return new LongType(filename,
-			    t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+ return new LongType(filename,
+       t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
   |
     t="float"
     {
-	return new FloatType(filename,
-			     t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+ return new FloatType(filename,
+        t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
   |
     t="double"
     {
-	return new DoubleType(filename,
-			      t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+ return new DoubleType(filename,
+         t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
 }
 
@@ -3607,7 +3608,7 @@ void conditionalExpressionLookahead() :
 {}
 {
     conditionalOrExpressionLookahead()
-	[ "?" expressionLookahead() ":" conditionalExpressionLookahead() ]
+ [ "?" expressionLookahead() ":" conditionalExpressionLookahead() ]
 }
 
 /**
@@ -3680,7 +3681,7 @@ void relationalExpressionLookahead() :
 {}
 {
     shiftExpressionLookahead()
-	( ( "<" | ">" | "<=" | ">=" ) shiftExpressionLookahead() )*
+ ( ( "<" | ">" | "<=" | ">=" ) shiftExpressionLookahead() )*
 }
 
 /**
@@ -3690,7 +3691,7 @@ void shiftExpressionLookahead() :
 {}
 {
     additiveExpressionLookahead()
-	( ( "<<" | ">>" | ">>>" ) additiveExpressionLookahead() )*
+ ( ( "<<" | ">>" | ">>>" ) additiveExpressionLookahead() )*
 }
 
 /**
@@ -3700,7 +3701,7 @@ void additiveExpressionLookahead() :
 {}
 {
     multiplicativeExpressionLookahead()
-	( ( "+" | "-" ) multiplicativeExpressionLookahead() )*
+ ( ( "+" | "-" ) multiplicativeExpressionLookahead() )*
 }
 
 /**
@@ -4097,7 +4098,7 @@ void switchStatementLookahead() :
 {
     "switch" "(" expressionLookahead() ")" "{"
       ( ( "case" expressionLookahead() | "default" ) ":"
-	( blockStatementLookahead() )* )*
+ ( blockStatementLookahead() )* )*
     "}"
 }
 
@@ -4108,7 +4109,7 @@ void ifStatementLookahead() :
 {}
 {
     "if" "(" expressionLookahead() ")"
-	statementLookahead() [ LOOKAHEAD(1) "else" statementLookahead() ]
+ statementLookahead() [ LOOKAHEAD(1) "else" statementLookahead() ]
 }
 
 /**
@@ -4136,9 +4137,9 @@ void forStatementLookahead() :
 {}
 {
     "for" "(" [ forInitLookahead() ] ";"
-	      [ expressionLookahead() ] ";"
+       [ expressionLookahead() ] ";"
               [ statementExpressionListLookahead() ] ")"
-	statementLookahead()
+ statementLookahead()
 }
 
 /**
@@ -4214,7 +4215,7 @@ void localVariableDeclarationLookahead() :
 {}
 {
     [ "final" ] typeLookahead() variableDeclaratorLookahead()
-	( "," variableDeclaratorLookahead() )*
+ ( "," variableDeclaratorLookahead() )*
 }
 
 /**
@@ -4224,8 +4225,8 @@ void tryStatementLookahead() :
 {}
 {
     "try" blockLookahead()
-	( "catch" "(" formalParameterLookahead() ")" blockLookahead() )*
-	[ "finally" blockLookahead() ]
+ ( "catch" "(" formalParameterLookahead() ")" blockLookahead() )*
+ [ "finally" blockLookahead() ]
 }
 
 /**
@@ -4235,9 +4236,9 @@ void arrayDimsAndInitsLookahead() :
 {}
 {
     LOOKAHEAD(2)
-	( LOOKAHEAD(2) "[" expressionLookahead() "]" )+ ( LOOKAHEAD(2) "[" "]" )*
+ ( LOOKAHEAD(2) "[" expressionLookahead() "]" )+ ( LOOKAHEAD(2) "[" "]" )*
   |
-	( "[" "]" )+ arrayInitializerLookahead()
+ ( "[" "]" )+ arrayInitializerLookahead()
 }
 
 /**
@@ -4247,7 +4248,7 @@ void arrayInitializerLookahead() :
 {}
 {
     "{" [ variableInitializerLookahead()
-	( LOOKAHEAD(2) "," variableInitializerLookahead() )* ] [ "," ] "}"
+ ( LOOKAHEAD(2) "," variableInitializerLookahead() )* ] [ "," ] "}"
 }
 
 /**

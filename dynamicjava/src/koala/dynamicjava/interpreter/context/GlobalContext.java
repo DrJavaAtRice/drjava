@@ -29,7 +29,15 @@
 package koala.dynamicjava.interpreter.context;
 
 import java.io.*;
-import java.lang.reflect.*;
+//import java.lang.reflect.*; //  Broken into All classes imported, to avoid importing the class Type
+import java.lang.reflect.Modifier;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Method;
+import java.lang.reflect.Field;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
+
 import java.util.*;
 
 import koala.dynamicjava.classinfo.*;
