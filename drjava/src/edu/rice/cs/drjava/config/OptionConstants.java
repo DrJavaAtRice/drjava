@@ -127,9 +127,12 @@ public interface OptionConstants {
   /* ---------- Font Options ---------- */
   
   /** Main (definitions document, tab contents) */
-  
   public static final FontOption FONT_MAIN =
     new FontOption("font.main", Font.decode("Monospaced-PLAIN-12"));
+  
+  /** Line numbers */
+  public static final FontOption FONT_LINE_NUMBERS =
+    new FontOption("font.line.numbers", Font.decode("Monospaced-PLAIN-12"));
         
   /** List of open documents */
   public static final FontOption FONT_DOCLIST =

@@ -2335,34 +2335,42 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       // Now add the last package component
       packageStack.push(packageName.substring(curPartBegins));
 
-      File parentDir = sourceFile;
-      while (!packageStack.empty()) {
-        String part = (String) packageStack.pop();
+      // Must use the canonical path, in case there are dots in the path
+      //  (which will conflict with the package name)
+      try {
+        File parentDir = sourceFile.getCanonicalFile();
+        while (!packageStack.empty()) {
+          String part = (String) packageStack.pop();
+          parentDir = parentDir.getParentFile();
+          
+          if (parentDir == null) {
+            throw new RuntimeException("parent dir is null?!");
+          }
+          
+          // Make sure the package piece matches the directory name
+          if (! part.equals(parentDir.getName())) {
+            String msg = "The source file " + sourceFile.getAbsolutePath() +
+              " is in the wrong directory or in the wrong package. " +
+              "The directory name " + parentDir.getName() +
+              " does not match the package component " + part + ".";
+            
+            throw new InvalidPackageException(-1, msg);
+          }
+        }
+
+        // OK, now parentDir points to the directory of the first component of the
+        // package name. The parent of that is the root.
         parentDir = parentDir.getParentFile();
-
         if (parentDir == null) {
-          throw new RuntimeException("parent dir is null?!");
+          throw new RuntimeException("parent dir of first component is null?!");
         }
 
-        // Make sure the package piece matches the directory name
-        if (! part.equals(parentDir.getName())) {
-          String msg = "The source file " + sourceFile.getAbsolutePath() +
-            " is in the wrong directory or in the wrong package. " +
-            "The directory name " + parentDir.getName() +
-            " does not match the package component " + part + ".";
-
-          throw new InvalidPackageException(-1, msg);
-        }
+        return parentDir;
       }
-
-      // OK, now parentDir points to the directory of the first component of the
-      // package name. The parent of that is the root.
-      parentDir = parentDir.getParentFile();
-      if (parentDir == null) {
-        throw new RuntimeException("parent dir of first component is null?!");
+      catch (IOException ioe) {
+        String msg = "Could not locate directory of the source file: " + ioe;
+        throw new InvalidPackageException(-1, msg);
       }
-
-      return parentDir;
     }
   }
 

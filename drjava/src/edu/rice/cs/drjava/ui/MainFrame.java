@@ -1219,6 +1219,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     // Add option listeners for changes to config options
     DrJava.getConfig().addOptionListener(OptionConstants.FONT_MAIN, new MainFontOptionListener());
+    DrJava.getConfig().addOptionListener(OptionConstants.FONT_LINE_NUMBERS, new LineNumbersFontOptionListener());
     DrJava.getConfig().addOptionListener(OptionConstants.FONT_DOCLIST, new DoclistFontOptionListener());
     DrJava.getConfig().addOptionListener(OptionConstants.FONT_TOOLBAR, new ToolbarFontOptionListener());
     DrJava.getConfig().addOptionListener(OptionConstants.TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
@@ -4540,7 +4541,7 @@ public class MainFrame extends JFrame implements OptionConstants {
                                     _switchToNextPaneAction, null, "Switch Focus To Interactions Pane");
   }
   
-   /**
+  /**
    * @param listener The ComponentListener to add to the open documents list
    * This method allows for testing of the dancing UI (See MainFrameTest.testDancingUI()).
    */
@@ -4556,7 +4557,31 @@ public class MainFrame extends JFrame implements OptionConstants {
       _setMainFont();
     }
   }
-    
+  
+  /**
+   * The OptionListener for FONT_LINE_NUMBERS
+   */
+  private class LineNumbersFontOptionListener implements OptionListener<Font> {
+    public void optionChanged(OptionEvent<Font> oce) {
+      if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
+        Iterator<JScrollPane> it = _defScrollPanes.values().iterator();
+        
+        // Iterate over all definitions scroll panes.
+        while (it.hasNext()) {
+          // Update the font for all line number displays.
+          JScrollPane spane = it.next();
+          
+          LineEnumRule ler = (LineEnumRule) spane.getRowHeader().getView();
+          ler.updateFont();
+        }
+        
+        // We also need to immediately repaint the foremost scroll pane.
+        JScrollPane front = _defScrollPanes.get(_model.getActiveDocument());
+        front.getRowHeader().getView().repaint();
+      }
+    }
+  }
+  
   /**
    * The OptionListener for FONT_DOCLIST
    */

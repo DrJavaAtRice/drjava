@@ -481,6 +481,9 @@ public class ConfigFrame extends JFrame {
   private void _setupFontPanel(ConfigPanel panel) {
     panel.addComponent(new FontOptionComponent(OptionConstants.FONT_MAIN, "Main Font", this,
                                                "The font used for most text in DrJava."));
+    panel.addComponent(new FontOptionComponent(OptionConstants.FONT_LINE_NUMBERS, "Line Numbers Font", this,
+                                               "<html>The font for displaying line numbers.<br>" +
+                                               "Cannot be displayed larger than the main font.</html>"));
     panel.addComponent(new FontOptionComponent(OptionConstants.FONT_DOCLIST, "Document List Font", this,
                                                "The font used in the list of open documents."));
     panel.addComponent(new FontOptionComponent(OptionConstants.FONT_TOOLBAR, "Toolbar Font", this,

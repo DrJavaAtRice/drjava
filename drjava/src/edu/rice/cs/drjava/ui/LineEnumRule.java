@@ -42,6 +42,9 @@ package edu.rice.cs.drjava.ui;
 import java.awt.*;
 import javax.swing.*;
 
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
+
 /**
  * The row header of the DefinitionsPane which displays the line numbers
  * @version $Id$
@@ -59,7 +62,7 @@ public class LineEnumRule extends JComponent {
   
   /** font metrics for the DefPane's font */
   protected FontMetrics _fm;
-  /** an 8pt font derived from the DefPane's font */
+  /** custom font for the line numbers */
   protected Font _newFont;
   /** font metrics for the new font */
   protected FontMetrics _nfm;
@@ -73,7 +76,8 @@ public class LineEnumRule extends JComponent {
     _pane = p;
     _fm = _pane.getFontMetrics(_pane.getFont());
     _increment = _fm.getHeight();
-    _newFont = _pane.getFont().deriveFont( 8f );
+    
+    _newFont = _getLineNumFont();
     _nfm = getFontMetrics(_newFont);
     SIZE = _nfm.stringWidth("99999");
   }
@@ -87,12 +91,13 @@ public class LineEnumRule extends JComponent {
   }
   
   /**
-   * Updates the row header's font information, deriving it from the pane
-   * once again.
+   * Updates the row header's font information.
+   * Uses a custom config setting for this purpose.
    */
   public void updateFont() {
     _fm = _pane.getFontMetrics(_pane.getFont());
-    _newFont = _pane.getFont().deriveFont( 8f );
+    _newFont = _getLineNumFont();
+      //_pane.getFont().deriveFont( 8f );
     _nfm = getFontMetrics(_newFont);
   }
   
@@ -103,7 +108,9 @@ public class LineEnumRule extends JComponent {
     Rectangle drawHere = g.getClipBounds();
     
     // Set a white background
-    g.setColor(Color.white);
+    Color backg = DrJava.getConfig().getSetting
+      (OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
+    g.setColor(backg);
     g.fillRect(drawHere.x, drawHere.y, drawHere.width, drawHere.height);
     
     // Do the ruler labels in a small font that's black.
@@ -130,9 +137,47 @@ public class LineEnumRule extends JComponent {
       int offset = SIZE - (_nfm.stringWidth(text) + 1);
       
       //g.drawLine(SIZE-1, i, SIZE-tickLength-1, i);
-      if (text != null)
-        g.drawString(text, offset, i + baseline);
+      if (text != null) {
+        // Add an arbitrary 3 pixels to line up the text properly with the
+        // def pane text baseline.
+        g.drawString(text, offset, i + baseline + 3);
+      }
     }
+  }
+  
+  /**
+   * Get the font for line numbers, making sure that it is vertically smaller
+   * than the definitions pane font.
+   * @return a valid font for displaying line numbers
+   */
+  private Font _getLineNumFont() {
+    Font lnf = DrJava.getConfig().getSetting(OptionConstants.FONT_LINE_NUMBERS);
+    FontMetrics mets = getFontMetrics(lnf);
+    Font mainFont = _pane.getFont();
+    
+    // Check the height of the line num font against the def pane font.
+    if (mets.getHeight() > _fm.getHeight()) {
+      // If the line num font has a larger size than the main font, try deriving
+      // a new version with the same size.  (This may or may not produce a height
+      // smaller than the main font.)
+      float newSize;
+      if (lnf.getSize() > mainFont.getSize()) {
+        newSize = mainFont.getSize2D();
+      }
+      // Otherwise, just reduce the current size by one and try that.
+      else {
+        newSize = lnf.getSize2D() - 1f;
+      }
+      
+      // If that doesn't work, try reducing the size by one until it fits.
+      do {
+        lnf = lnf.deriveFont(newSize);
+        mets = getFontMetrics(lnf);
+        newSize -= 1f;
+      } while (mets.getHeight() > _fm.getHeight());
+    }
+    
+    return lnf;
   }
 }
 

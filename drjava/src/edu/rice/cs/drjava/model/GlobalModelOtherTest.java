@@ -536,6 +536,38 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     assertEquals("source root", baseTempDir, roots[0]);
 
   }
+  
+  /**
+   * Tests that getSourceRoot works with a relative path
+   * when a package name is present.
+   */
+  public void testGetSourceRootPackageThreeDeepValidRelative()
+    throws BadLocationException, IOException, InvalidPackageException
+  {
+    // Create temp directory
+    File baseTempDir = tempDirectory();
+    File subdir = new File(baseTempDir, "a");
+    subdir = new File(subdir, "b");
+    subdir = new File(subdir, "c");
+    subdir.mkdirs();
+
+    // Save the footext to DrJavaTestFoo.java in a relative directory
+    //   temp/./a/b/../b/c == temp/a/b/c
+    File relDir = new File(baseTempDir, "./a/b/../b/c");
+    File fooFile = new File(relDir, "DrJavaTestFoo.java");
+    OpenDefinitionsDocument doc =
+      setupDocument("package a.b.c;\n" + FOO_TEXT);
+    doc.saveFileAs(new FileSelector(fooFile));
+
+    // No events should fire
+    _model.addListener(new TestListener());
+
+    // Since we had the package statement the source root should be base dir
+    File[] roots = _model.getSourceRootSet();
+    assertEquals("number of source roots", 1, roots.length);
+    assertEquals("source root", baseTempDir, roots[0]);
+
+  }
 
   public void testGetSourceRootPackageThreeDeepInvalid()
     throws BadLocationException, IOException
