@@ -254,7 +254,7 @@
 
      This version works with JDK 1.4.1 and JSR-14 v2.0.
      (Be sure to have the right version of tools.jar on your classpath.)
--->
+
 <target name="do-compile" depends="init">
   <mkdir dir="${built}"/>
   <javac srcdir="${srcroot}"
@@ -271,6 +271,31 @@
     <compilerarg value="-novariance"/>
   </javac>
 </target>
+-->
+
+
+<!-- Compile. We have to start at srcroot and then selectively include
+     just this project in order for it to realize what files have already
+     been compiled (preventing needless recompilation).
+
+     This version works with JDK 1.4.2 and JSR-14 v2.2.
+     (Be sure to have the right version of tools.jar on your classpath.)
+-->
+<target name="do-compile" depends="init">
+  <mkdir dir="${built}"/>
+  <javac srcdir="${srcroot}"
+         includes="${projpath}/**/*java"
+         destdir="${built}"
+         bootclasspath="${jsr14_collect_classpath}:{sun.boot.class.path}" 
+	 classpath="${classpath_text}"
+         source="1.5"
+         debug="on"
+         fork="on"
+         optimize="off">
+    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
+  </javac>
+</target>
+
 
 
 <!-- Now you can run a subset of tests by doing:
@@ -335,6 +360,10 @@
 
     <arg value="-sourcepath" />
     <arg value="${srcroot}" />
+
+    <arg value="-bootclasspath" />
+    <arg value="${jsr14_collect_classpath}:${sun.boot.class.path}" />
+
 
     <!-- Generate Java source without generics -->
     <arg value="-s" />
@@ -418,7 +447,13 @@
 
   <target name="with.clover">
     <mkdir dir="${clover_db_dir}" />
-    <clover-setup initString="${clover_db_dir}/test_coverage.db"/>
+    <clover-setup initString="${clover_db_dir}/test_coverage.db">
+      <files>
+        <exclude name="**/*Test.java" />
+        <exclude name="**/*TestCase.java" />
+        <exclude name="**/*Test$*.java" />
+      </files>
+    </clover-setup>
   </target>
 
   <target name="clover-report" depends="with.clover">
