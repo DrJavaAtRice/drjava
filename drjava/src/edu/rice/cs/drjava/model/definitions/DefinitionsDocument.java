@@ -96,11 +96,23 @@ public class DefinitionsDocument extends PlainDocument {
   private static final int DOCSTART = 0;
 
   /**
+   * Constant used by helper methods to indicate an error
+   */
+  public static final int ERROR_INDEX = -1;
+
+  /**
    * Constructor.
    */
   public DefinitionsDocument() {
     super();
     _file = null;
+  }
+
+  /**
+   * @return The reduced model of this document.
+   */
+  public BraceReduction getReduced() {
+    return _reduced;
   }
 
   /**
@@ -434,41 +446,96 @@ public class DefinitionsDocument extends PlainDocument {
   }
 
   /**
-   * For new indent system, not yet implemented
+   * Searching backwards, finds the position of the first character that is one
+   * of the given delimiters.
+   * NB: ignores comments.
+   * @param pos Position to start from
+   * @param delims array of characters to search for
+   * @return position of first matching delimiter, or ERROR_INDEX if beginning
+   * of document is reached.
    */
-  public int findPrevDelimiter(int pos, char[] delims) {
-    // Not implemented...
-    return 0;
+  public int findPrevDelimiter(int pos, char[] delims) throws BadLocationException {
+    
+    int j, i;
+    char c;
+    String text = getText(DOCSTART, pos);
+
+    // Move reduced model to location pos
+    _reduced.move(pos - _currentLocation);
+
+    // Walk backwards from specificed position
+    for (i = pos-1; i != DOCSTART-1; i--) {
+      c = text.charAt(i);
+      // Check if character is one of the delimiters
+      for (j = 0; j < delims.length; j++) {
+	if (c == delims[j]) {
+	  // Move reduced model to walker's location
+	  _reduced.move(i - pos);
+	  // Check if matching char is in comment or quotes
+	  if((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
+	     (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT)) ||
+	     (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_SINGLE_QUOTE)) ||
+	     (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_DOUBLE_QUOTE))) {
+	    // Ignore matching char
+	  } else {
+	    // Return position of matching char
+	    _reduced.move(_currentLocation - i);
+	    return i;
+	  }
+	  _reduced.move(pos - i);
+	}
+      }
+    }
+    _reduced.move(_currentLocation - pos);
+    return ERROR_INDEX;
   }
   
   /**
    * Returns the absolute position of the beginning of the
-   * current line.  (Just after most recent newline.)
+   * current line.  (Just after most recent newline, or DOCSTART)
+   * Doesn't ignore comments.
    * @param pos Any position on the current line
+   * @return position of the beginning of this line
    */
-  public int getLineStartPos() {
+  public int getLineStartPos(int pos) {
+    int location = _reduced.absOffset();
+    _reduced.move(pos - location);
     int dist = _reduced.getDistToPreviousNewline(0);
-    return _currentLocation - dist;
+    _reduced.move(location - pos);
+    if(dist == -1) {
+      // If no previous newline was found
+      // return DOCSTART
+      return DOCSTART;
+    } else {
+      return pos - dist;
+    }
   }
   
   /**
    * Returns the absolute position of the end of the current
-   * line.  (Just before the next newline.)
+   * line.  (At the next newline, or the end of the document.)
    * @param pos Any position on the current line
+   * @return position of the end of this line
    */
-  public int getLineEndPos() {
+  public int getLineEndPos(int pos) {
+    int location = _reduced.absOffset();
+    _reduced.move(pos - location);
     int dist = _reduced.getDistToNextNewline();
-    return _currentLocation + dist;
+    _reduced.move(location - pos);
+    return pos + dist;
   }
 
   /**
    * Returns the absolute position of the first non-whitespace character
    * on the current line.
-   * @return position at the end of the line if no non-whitespace character is found.
+   * NB: Doesn't ignore comments.
+   * @param pos position on the line
+   * @return position of first non-whitespace character on this line, or the end
+   * of the line if no non-whitespace character is found.
    */
-  public int getLineFirstCharPos() throws BadLocationException {  
-    int startLinePos = getLineStartPos();
-    int endLinePos = getLineEndPos();
+  public int getLineFirstCharPos(int pos) throws BadLocationException {  
+    int startLinePos = getLineStartPos(pos);
+    int endLinePos = getLineEndPos(pos);
     
     // Get all text on this line
     String text = this.getText(startLinePos, endLinePos - startLinePos);
@@ -485,7 +552,46 @@ public class DefinitionsDocument extends PlainDocument {
     // No non-WS char found, so return last position on line
     return endLinePos;
   }
-  
+
+  /**
+   * Finds the position of the first non-whitespace character after pos.
+   * NB: Comments count as non-whitespace.
+   * @param pos Position to start from
+   * @return position of first non-whitespace character after pos,
+   * or ERROR_INDEX if end of document is reached
+   */
+  public int getFirstNonWSCharPos(int pos) throws BadLocationException {
+    int j, i;
+    char c;
+    int endPos = getLength();
+    String text = getText(pos, endPos - pos);
+    char[] whitespace = {' ', '\t', '\n'};
+
+    // Move reduced model to location pos
+    _reduced.move(pos - _currentLocation);
+
+    // Walk forward from specificed position
+    for (i = pos; i != endPos; i++) {
+      boolean isWhitespace = false;
+      c = text.charAt(i - pos);
+      // Check if character is whitespace
+      for (j = 0; j < whitespace.length; j++) {
+	if (c == whitespace[j]) {
+	  isWhitespace = true;
+	}
+      }
+      if (!isWhitespace) {
+	// Move reduced model to walker's location
+	_reduced.move(i - pos);
+	// Check if matching char is in comment
+	// Return position of matching char
+	_reduced.move(_currentLocation - i);
+	return i;
+      }
+    }
+    _reduced.move(_currentLocation - pos);
+    return ERROR_INDEX;
+  }
   
   /**
    * Returns true iff tabs are to removed on text insertion.
@@ -743,10 +849,10 @@ public class DefinitionsDocument extends PlainDocument {
    * @param tab String to be placed between previous newline and first
    * non-whitespace character
    */
-  public void setTab(String tab) {
+  public void setTab(String tab, int pos) {
     try {
-      int startPos = getLineStartPos();
-      int firstNonWSPos = getLineFirstCharPos();
+      int startPos = getLineStartPos(pos);
+      int firstNonWSPos = getLineFirstCharPos(pos);
       
       // Removes old prefix, then adds new one
       // FIXME: If tab only contains spaces, then just adjust as necessary
