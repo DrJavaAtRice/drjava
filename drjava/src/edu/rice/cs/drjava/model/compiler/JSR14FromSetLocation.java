@@ -62,7 +62,7 @@ public class JSR14FromSetLocation extends CompilerProxy implements OptionConstan
    */
   
   public JSR14FromSetLocation() {
-    super("edu.rice.cs.drjava.model.compiler.JSR14Compiler",
+    super("edu.rice.cs.drjava.model.compiler.JSR14v10Compiler",
           _getClassLoader());
   }
 

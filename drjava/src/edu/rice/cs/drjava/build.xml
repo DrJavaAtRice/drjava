@@ -147,6 +147,71 @@
 
   </target>
 
+  <!-- Compiles only the JSR-14 v1.0 specific classes, and adds
+       them to compilers-jsr14v1_0.jar in the lib directory.
+       Deletes the compiled classes when finished.
+    -->
+  <target name="compile-jsr14v1_0">
+    <property name="projpath_jsr14v1_0" 
+              value="src-jsr14v1_0/edu/rice/cs/${ant.project.name}" />
+    <property name="built_jsr14v1_0"
+              value="${srcroot}/../built-jsr14v1_0/" />
+
+    <!-- Build the classes -->
+    <mkdir dir="${built_jsr14v1_0}" />
+    <antcall target="do-compile">
+      <param name="projpath" value="${projpath_jsr14v1_0}" />
+      <param name="built" value="${built_jsr14v1_0}" />
+    </antcall>
+
+    <!-- Make a jar in the lib directory. No tests are included. -->
+    <delete file="${lib_dir}/compilers-jsr14v1_0.jar" />
+    <jar jarfile="${lib_dir}/compilers-jsr14v1_0.jar" >
+      <fileset dir="${built_jsr14v1_0}" excludes="**/*Test.class">
+        <include name="${projpath}/**" />
+
+        <!-- include the GPL -->
+        <include name="edu/rice/cs/LICENSE" />
+      </fileset>
+    </jar>
+
+    <!-- Delete the compiled classes -->
+    <delete dir="${built_jsr14v1_0}" />
+  </target>
+
+  <!-- Compiles only the JSR-14 v1.2 specific classes, and adds
+       them to compilers-jsr14v1_2.jar in the lib directory.
+       Deletes the compiled classes when finished.
+    -->
+  <target name="compile-jsr14v1_2">
+    <property name="projpath_jsr14v1_2" 
+              value="src-jsr14v1_2/edu/rice/cs/${ant.project.name}" />
+    <property name="built_jsr14v1_2"
+              value="${srcroot}/../built-jsr14v1_2/" />
+
+    <!-- Build the classes -->
+    <mkdir dir="${built_jsr14v1_2}" />
+    <antcall target="do-compile">
+      <param name="projpath" value="${projpath_jsr14v1_2}" />
+      <param name="built" value="${built_jsr14v1_2}" />
+    </antcall>
+
+    <!-- Make a jar in the lib directory. No tests are included. -->
+    <delete file="${lib_dir}/compilers-jsr14v1_2.jar" />
+    <jar jarfile="${lib_dir}/compilers-jsr14v1_2.jar" >
+      <fileset dir="${built_jsr14v1_2}" excludes="**/*Test.class">
+        <include name="${projpath}/**" />
+
+        <!-- include the GPL -->
+        <include name="edu/rice/cs/LICENSE" />
+      </fileset>
+    </jar>
+
+    <!-- Delete the compiled classes -->
+    <delete dir="${built_jsr14v1_2}" />
+  </target>
+
+
   <target name="osxapp" depends="jar">
     <mkdir dir="${osxdir}/${osxtag}/DrJava.app" />
     <copy todir="${osxdir}/${osxtag}/DrJava.app/">
@@ -174,14 +239,20 @@
 
   <!-- Makes a jar with dependencies. No tests are included. -->
   <target name="jar">
-    <!-- copy external dependencies -->
-    <zip zipfile="${jarfile}">
-      <zipfileset src="${lib_dir}/gj-util.jar" />
-      <zipfileset src="${lib_dir}/dynamicjava.jar" />
-      <zipfileset src="${lib_dir}/junit.jar" />
-    </zip>
+    <delete file="${jarfile}" />
 
     <jar jarfile="${jarfile}" manifest="${manifest}" update="true" >
+      <!-- Include dependencies -->
+      <zipfileset src="${lib_dir}/gj-util.jar"
+                  excludes="META-INF/MANIFEST.MF" />
+      <zipfileset src="${lib_dir}/dynamicjava.jar"
+                  excludes="META-INF/MANIFEST.MF" />
+      <zipfileset src="${lib_dir}/junit.jar"
+                  excludes="META-INF/MANIFEST.MF" />
+      <zipfileset src="${lib_dir}/compilers-jsr14v1_0.jar"
+                  excludes="META-INF/MANIFEST.MF" />
+
+      <!-- Include DrJava classes -->
       <fileset dir="${built}" excludes="**/*Test.class">
         <include name="${projpath}/**" />
         <include name="edu/rice/cs/util/**" />

@@ -131,12 +131,12 @@ public class CompilerRegistry {
 
     while (itor.hasNext()) {
       String name = (String) itor.next();
-      //System.err.print("compiler " + name + " check: ");
+      //DrJava.consoleOut().print("REGISTRY:  Checking compiler: " + name + ": ");
 
       try {
         CompilerInterface compiler = _instantiateCompiler(name);
         if (compiler.isAvailable()) {
-          //System.err.println("ok.");
+          //DrJava.consoleOut().println("ok.");
 
           // can't use getActiveCompiler() because it will call back to
           // getAvailableCompiler, forming an infinite recursion!!
@@ -148,13 +148,13 @@ public class CompilerRegistry {
           availableCompilers.add(compiler);
         }
         else {
-          //System.err.println("! .isAvailable.");
+          //DrJava.consoleOut().println("not available.");
         }
       }
       catch (Throwable t) {
         // This compiler didn't load. Keep on going.
-        //System.err.println("failed to load:");
-        //t.printStackTrace();
+        //DrJava.consoleOut().println("failed to load:");
+        //t.printStackTrace(DrJava.consoleOut());
         //System.err.println();
       }
     }

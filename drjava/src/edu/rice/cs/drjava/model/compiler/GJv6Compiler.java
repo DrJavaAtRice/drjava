@@ -100,7 +100,7 @@ public class GJv6Compiler implements CompilerInterface{
     // Since GJ doesn't have a sourcepath attribute, we just
     // put the sourcepath into the classpath instead
     String oldclasspath = System.getProperty("java.class.path");
-    String sourceRootString = JavacGJCompiler.getSourceRootString(sourceRoots);
+    String sourceRootString = getSourceRootString(sourceRoots);
     StringBuffer newclasspath = new StringBuffer(sourceRootString /*sourceRoot.getAbsolutePath()*/);
     if (oldclasspath.length() > 0) {
       newclasspath.append(File.pathSeparator);
@@ -191,6 +191,21 @@ public class GJv6Compiler implements CompilerInterface{
    */
   public void addToBootClassPath( File cp) {
     throw new UnexpectedException( new Exception("Method only implemented in JSR14Compiler"));
+  }
+  
+  /**
+   * Utility method for getting a properly formatted
+   * string with several source paths from an array of files.
+   */
+  protected String getSourceRootString(File[] sourceRoots) {
+    StringBuffer roots = new StringBuffer();
+    for (int i = 0; i < sourceRoots.length; i++) {
+      roots.append(sourceRoots[i].getAbsolutePath());
+      if (i < sourceRoots.length - 1) {
+        roots.append(File.pathSeparator);
+      }
+    }
+    return roots.toString();
   }
   
   /**
