@@ -40,11 +40,10 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.repl;
 
 /**
- * Interface for any listener to a SimpleInteractionsDocument,
- * which can be used in a standalone interactions window.
+ * Interface for any listener to an InteractionsModel.
  * @version $Id$
  */
-public interface SimpleInteractionsListener {
+public interface InteractionsListener {
 
   /**
    * Called when an interaction has started.
@@ -55,5 +54,20 @@ public interface SimpleInteractionsListener {
    * Called when an interaction has ended.
    */
   public void interactionEnded();
+  
+  /**
+   * Called when the interpreter is resetting.
+   */
+  public void interpreterResetting();
+  
+  /**
+   * Called when the interpreter is ready to use.
+   */
+  public void interpreterReady();
+  
+  /**
+   * Called when the interpreter exits unexpectedly.
+   */
+  public void interpreterExited(int status);
 
 }

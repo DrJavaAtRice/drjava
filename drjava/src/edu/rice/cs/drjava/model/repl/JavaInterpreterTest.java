@@ -319,6 +319,15 @@ public class JavaInterpreterTest extends TestCase {
       fail("testEvaluationVisitorExtension Exception returned for none exceptional code!" + e);
     }
   }
+  
+  /**
+   * Tests that a variable can be defined in the interpreter by an external source.
+   */
+  public void testDefineVariableExternally() throws ExceptionReturnedException {
+    _interpreter.defineVariable("foo", new String("hello"));
+    assertEquals("manipulated externally defined variable",
+                 "\"ello\"", _interpreter.interpret("foo.substring(1,5)"));
+  }
 }
 
 /**

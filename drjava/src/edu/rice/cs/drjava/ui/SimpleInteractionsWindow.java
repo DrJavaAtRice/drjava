@@ -43,8 +43,9 @@ import javax.swing.*;
 import java.awt.Font;
 import java.awt.event.*;
 
-import edu.rice.cs.drjava.model.repl.SimpleInteractionsDocument;
-import edu.rice.cs.drjava.model.repl.SimpleInteractionsListener;
+import edu.rice.cs.drjava.model.repl.SimpleInteractionsModel;
+//import edu.rice.cs.drjava.model.repl.SimpleRMIInteractionsModel;
+import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
 
 /**
@@ -54,24 +55,30 @@ import edu.rice.cs.util.text.SwingDocumentAdapter;
  * @version $Id$
  */
 public class SimpleInteractionsWindow extends JFrame {
-  private final SimpleInteractionsDocument _doc;
+  //private final SimpleRMIInteractionsModel _rmiModel;
+  private final SimpleInteractionsModel _model;
   private final SwingDocumentAdapter _adapter;
   private final InteractionsPane _pane;
   private final InteractionsController _controller;
   
   public SimpleInteractionsWindow() {
-    super("Interactions Window");
+    this("Interactions Window");
+  }
+  
+  public SimpleInteractionsWindow(String title) {
+    super(title);
     setSize(600, 400);
     
     _adapter = new SwingDocumentAdapter();
-    _doc = new SimpleInteractionsDocument(_adapter);
+    //_rmiModel = new SimpleRMIInteractionsModel(_adapter);
+    _model = new SimpleInteractionsModel(_adapter);
     _pane = new InteractionsPane(_adapter);
-    _controller = new InteractionsController(_doc, _adapter, _pane);
+    _controller = new InteractionsController(_model, _adapter, _pane);
     
     _pane.setFont(Font.decode("monospaced"));
 
 
-    _doc.addInteractionListener(new SimpleInteractionsListener() {
+    _model.addInteractionsListener(new InteractionsListener() {
       public void interactionStarted() {
         _pane.setEditable(false);
       }
@@ -79,6 +86,14 @@ public class SimpleInteractionsWindow extends JFrame {
         _controller.moveToPrompt();
         _pane.setEditable(true);
       }
+      public void interpreterResetting() {
+        _pane.setEditable(false);
+      }
+      public void interpreterReady() {
+        _controller.moveToPrompt();
+        _pane.setEditable(true);
+      }
+      public void interpreterExited(int status) {}
     });
 
     JScrollPane scroll = new JScrollPane(_pane);
@@ -90,17 +105,42 @@ public class SimpleInteractionsWindow extends JFrame {
         System.exit(0);
       }
     });
+    
+  }
+  
+  /**
+   * Accessor for the controller.
+   */
+  public InteractionsController getController() {
+    return _controller;
+  }
+  
+  /**
+   * Defines a variable in this window to the given value.
+   */
+  public void defineVariable(String name, Object value) {
+    _model.defineVariable(name, value);
   }
 
+  /**
+   * Sets whether protected and private variables and methods can be accessed 
+   * from within the interpreter.
+   */
+  public void setInterpreterPrivateAccessible(boolean accessible) {
+    _model.setInterpreterPrivateAccessible(accessible);
+  }
+  
   /**
    * Main method to create a SimpleInteractionsWindow from the console.
    * Doesn't take any command line arguments.
    */
   public static void main(String[] args) {
     SimpleInteractionsWindow w = new SimpleInteractionsWindow();
+    if (args.length > 0 && args[0].equals("-debug")) {
+      w.defineVariable("FRAME", w);
+      w.defineVariable("CONTROLLER", w.getController());
+      w.setInterpreterPrivateAccessible(true);
+    }
     w.show();
   }
 }
-  
-  
-    

@@ -2520,11 +2520,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     _errorPanel = new CompilerErrorPanel(_model, this);
     
     // Interactions
-    SwingDocumentAdapter adapter = _model.getSwingInteractionsDocument();
-    _interactionsPane = new InteractionsPane(adapter);
     _interactionsController = 
-      new InteractionsController(_model.getInteractionsDocument(),
-                                 adapter, _interactionsPane);
+      new InteractionsController(_model.getInteractionsModel(),
+                                 _model.getSwingInteractionsDocument());
+    _interactionsPane = _interactionsController.getPane();
     
     _findReplace = new FindReplaceDialog(this, _model);
     

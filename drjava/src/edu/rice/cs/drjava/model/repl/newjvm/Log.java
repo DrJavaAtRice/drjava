@@ -41,10 +41,12 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 
 import java.io.*;
 
+import edu.rice.cs.drjava.CodeStatus;
+
 /**
  * Simple logging class to help debug the JVM communication code.
  * Set the ENABLED flag to true to use the log.  It will place
- * "MainJVM" and "IntJVM" files in your "~/drjava" directory.
+ * "MainJVM" and "IntJVM" files in your home directory.
  * 
  * @version $Id$
  */
@@ -54,10 +56,9 @@ public class Log {
   private PrintWriter _writer;
 
   public Log(String s) {
-    if (ENABLED) {
+    if (ENABLED && CodeStatus.DEVELOPMENT) {
       try {
         String dir = System.getProperty("user.home") +
-          System.getProperty("file.separator") + "drjava" +
           System.getProperty("file.separator");
         
         File f = new File(dir, s);
@@ -71,7 +72,7 @@ public class Log {
   }
 
   public synchronized void log(String s) {
-    if (ENABLED) {
+    if (ENABLED && CodeStatus.DEVELOPMENT) {
       long t = System.currentTimeMillis();
       _writer.println(t + ": " + s);
       _writer.flush();

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -37,48 +37,51 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
+package edu.rice.cs.drjava.model.junit;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030314-2254;
- *
+ * Callback interface which allows an JUnitModel to respond to
+ * tests running in a remote JVM.
+ * 
  * @version $Id$
  */
-public abstract class Version {
+public interface JUnitModelCallback {
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Called from the JUnitTestManager if its given className is not a test case.
    */
-  private static final String BUILD_TIME_STRING = "20030314-2254";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+  public void nonTestCase();
+  
+  /**
+   * Called to indicate that a suite of tests has started running.
+   * @param numTests The number of tests in the suite to be run.
+   */
+  public void testSuiteStarted(int numTests);
+  
+  /**
+   * Called when a particular test is started.
+   * @param testName The name of the test being started.
+   */
+  public void testStarted(String testName);
+  
+  /**
+   * Called when a particular test has ended.
+   * @param testName The name of the test that has ended.
+   * @param wasSuccessful Whether the test passed or not.
+   * @param causedError If not successful, whether the test caused an error
+   *  or simply failed.
+   */
+  public void testEnded(String testName, boolean wasSuccessful,
+                        boolean causedError);
+  
+  /**
+   * Called when a full suite of tests has finished running.
+   * @param errors The array of errors from all failed tests in the suite.
+   */
+  public void testSuiteEnded(JUnitError[] errors);
+  
+  /**
+   * Called when the JVM used for unit tests has registered.
+   */
+  public void junitJVMReady();
+}

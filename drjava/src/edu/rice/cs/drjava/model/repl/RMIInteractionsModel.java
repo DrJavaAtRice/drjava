@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -39,33 +39,61 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-import edu.rice.cs.drjava.model.GlobalModel;
+import java.io.IOException;
+
+import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
+import edu.rice.cs.util.text.DocumentAdapter;
 
 /**
- * Default implementation of the InteractionsDocument, which uses a
- * GlobalModel to perform interpretations.
+ * An InteractionsModel which can serve as the glue between a local
+ * InteractionsDocument and a remote JavaInterpreter in another JVM.
  * @version $Id$
  */
-public class DefaultInteractionsDocument extends AbstractInteractionsDocument {
+public abstract class RMIInteractionsModel extends InteractionsModel {
+  
   /**
-   * Model that contains the interpreter to use.
+   * RMI interface to the remote Java interpreter.
    */
-  protected final GlobalModel _model;
-
+  protected final MainJVM _interpreterControl;
+  
+  
   /**
-   * Creates a new InteractionsDocument for the given model.
-   * @param model GlobalModel to perform the interpretation.
+   * Constructs an InteractionsModel which can communicate with another JVM.
+   * @param control RMI interface to the Java interpreter
+   * @param adapter DocumentAdapter to use in the InteractionsDocument
+   * @param historySize Number of lines to store in the history
+   * @param writeDelay Number of milliseconds to wait after each println
    */
-  public DefaultInteractionsDocument(GlobalModel model) {
-    super(model.getSwingInteractionsDocument());
-    _model = model;
+  public RMIInteractionsModel(MainJVM control, 
+                              DocumentAdapter adapter,
+                              int historySize,
+                              int writeDelay)
+  {
+    super(adapter, historySize, writeDelay);
+    _interpreterControl = control;
+  }
+  
+  
+  /**
+   * Interprets the given command.
+   * @param toEval command to be evaluated
+   */
+  public void interpret(String toEval) {
+    _interpreterControl.interpret(toEval);
   }
   
   /**
-   * Interprets the current command at the prompt.
+   * Adds the given path to the interpreter's classpath.
+   * @param path Path to add
    */
-  public void interpretCurrentInteraction() {
-    _model.interpretCurrentInteraction();
+  public void addToClassPath(String path) {
+    _interpreterControl.addClassPath(path);
   }
   
+  /**
+   * Resets the Java interpreter.
+   */
+  public void resetInterpreter() {
+    _interpreterControl.killInterpreter(true);
+  }
 }

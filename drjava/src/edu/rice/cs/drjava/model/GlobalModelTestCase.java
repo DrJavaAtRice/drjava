@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -73,7 +73,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    * the prototype global model to hold the interpreter. This prevents
    * us from having to re-invoke the interpreter every time!
    */
-  protected static final DefaultGlobalModel _originalModel = 
+  protected static final DefaultGlobalModel _originalModel =
     new DefaultGlobalModel();
 
   protected DefaultGlobalModel _model;
@@ -81,7 +81,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
   protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
   protected static final String BAR_TEXT = "class DrJavaTestBar {}";
-  protected static final String BAZ_TEXT = 
+  protected static final String BAZ_TEXT =
     "class DrJavaTestBaz extends DrJavaTestFoo { public static int x = 3; }";
   protected static final String FOO_MISSING_CLOSE_TEXT =
     "class DrJavaTestFoo {";
@@ -171,7 +171,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return File.createTempFile("DrJava-test", ".java", _tempDir);
   }
 
-  /** 
+  /**
    * Create a new temporary file in _tempDir.  Calls with the same
    * int will return the same filename, while calls with different
    * ints will return different filenames.
@@ -323,8 +323,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    *         printed to the interactions document.
    */
   protected String interpret(String input) throws DocumentAdapterException {
-    DocumentAdapter interactionsDoc = _model.getInteractionsDocument();
-    interactionsDoc.insertText(interactionsDoc.getDocLength(), input, 
+    InteractionsDocument interactionsDoc = _model.getInteractionsDocument();
+    interactionsDoc.insertText(interactionsDoc.getDocLength(), input,
                                InteractionsDocument.DEFAULT_STYLE);
 
     // skip 1 for newline
@@ -366,20 +366,20 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     // skip 1 for newline
     final int resultsEndLocation = interactionsDoc.getDocLength() - 1 -
-                                   InteractionsDocument.PROMPT.length();
+                                   interactionsDoc.getPrompt().length();
 
     final int resultsLen = resultsEndLocation - resultsStartLocation;
     //System.out.println("resultsStartLoc = " + resultsStartLocation + " resultsEndLocation = " + resultsEndLocation);
     // There was no output from this interaction
     if (resultsLen <= 0)
-      return "";    
+      return "";
     return interactionsDoc.getDocText(resultsStartLocation, resultsLen);
   }
 
   protected void interpretIgnoreResult(String input) throws DocumentAdapterException
   {
     DocumentAdapter interactionsDoc = _model.getInteractionsDocument();
-    interactionsDoc.insertText(interactionsDoc.getDocLength(), input, 
+    interactionsDoc.insertText(interactionsDoc.getDocLength(), input,
                                InteractionsDocument.DEFAULT_STYLE);
 
     _model.interpretCurrentInteraction();
@@ -409,7 +409,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
                (shouldContain ? "" : "not ")
                  + "contain: "
                  +text,
-               (contains != -1) == shouldContain);    
+               (contains != -1) == shouldContain);
   }
   
   /**
@@ -476,7 +476,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
   
     // These exceptions are specially used only in this test case.
-    // They are used to verify that the code blocks 
+    // They are used to verify that the code blocks
   public static class OverwriteException extends RuntimeException{}
   public static class OpenWarningException extends RuntimeException{}
   public static class FileMovedWarningException extends RuntimeException{}
@@ -499,13 +499,13 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public boolean verifyOverwrite() {
       throw new OverwriteException();
     }
-    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, 
+    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc,
                                             File oldFile) {
       throw new FileMovedWarningException();
     }
   }
 
-  /** 
+  /**
    * this class is used by several test cases in Compile Tests that expect
    * incorrect behavior concerning the saving of files.  This special
    * FileSelector is included to ensure compliance with these test cases,

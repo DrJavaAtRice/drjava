@@ -245,8 +245,9 @@ public class MainFrameTest extends MultiThreadedTestCase {
     InteractionsPane pane = _frame.getInteractionsPane();
     SingleDisplayModel model = _frame.getModel();
     SwingDocumentAdapter doc = model.getSwingInteractionsDocument();
-    // Make tests silent
-    model.getInteractionsDocument().setBeep(new TestBeep());
+    
+    // Make the test silent
+    model.getInteractionsModel().getDocument().setBeep(new TestBeep());
 
     // Test for strict == equality
     assertTrue("UI's int. doc. should equals Model's int. doc.",

@@ -39,78 +39,246 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-import java.io.IOException;
+import java.util.*;
+import java.io.*;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.DocumentAdapter;
+import edu.rice.cs.util.text.DocumentEditCondition;
+import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 
 /**
- * Interface for a document that handles input to the repl and the 
- * interpretation of this input.
+ * Toolkit-independent document that provides console-like interaction
+ * with a Java interpreter.
  * @version $Id$
  */
-public interface InteractionsDocument extends DocumentAdapter {
-  public static final String BANNER = "Welcome to DrJava.\n";
-  public static final String PROMPT = "> ";
+public class InteractionsDocument implements DocumentAdapter {
   
   /** Default text style. */
   public static final String DEFAULT_STYLE = "default";
-  
+
   /** Style for System.out */
   public static final String SYSTEM_OUT_STYLE = "System.out";
-  
+
   /** Style for System.err */
   public static final String SYSTEM_ERR_STYLE = "System.err";
-  
+
   /** Style for error messages */
   public static final String ERROR_STYLE = "error";
-  
+
   /** Style for debugger messages */
   public static final String DEBUGGER_STYLE = "debugger";
+  
+  
+  /**
+   * The document storing the text for this interactions model.
+   */
+  protected DocumentAdapter _document;
+  
+  /**
+   * Whether the interpreter is currently interpreting an interaction
+   */
+  protected boolean _inProgress;
+  
+  /**
+   * A runnable command to use for a notification beep.
+   */
+  protected Runnable _beep;
+  
+  /** 
+   * Index in the document of the first place that is editable.
+   */
+  protected int _promptPos;
+  
+  /**
+   * String to print when the document is reset.
+   * Defaults to "Welcome to DrJava."
+   */
+  protected String _banner;
+  
+  /**
+   * String to use for the prompt.
+   * Defaults to "> ".
+   */
+  protected String _prompt;
 
   /**
-   * Interprets the current command at the prompt.
+   * Command-line history. It's not reset when the interpreter is reset.
    */
-  public void interpretCurrentInteraction();
+  protected History _history;
+
+  /**
+   * Reset the document on startup.  Uses a history with configurable size.
+   * @param document DocumentAdapter to use for the model
+   */
+  public InteractionsDocument(DocumentAdapter document) {
+    this(document, new History());
+  }
   
+  /**
+   * Reset the document on startup.  Uses a history with the given
+   * maximum size.  This history will not use the config framework.
+   * @param document DocumentAdapter to use for the model
+   * @param maxHistorySize Number of commands to remember in the history
+   */
+  public InteractionsDocument(DocumentAdapter document, int maxHistorySize) {
+    this(document, new History(maxHistorySize));
+  }
+  
+  /**
+   * Reset the document on startup.  Uses the given history.
+   * @param document DocumentAdapter to use for the model
+   * @param history History of commands
+   */
+  public InteractionsDocument(DocumentAdapter document, History history) {
+    _document = document;
+    _history = history;
+    
+    _inProgress = false;
+    _beep = new Runnable() {
+      public void run() {}
+    };
+    _promptPos = 0;
+    _banner = "Welcome to DrJava.\n";
+    _prompt = "> ";
+    
+    // Prevent any edits before the prompt!
+    _document.setEditCondition(new InteractionsEditCondition());
+    
+    reset();
+  }
+  
+  
+  /**
+   * Accessor for the banner, which is printed when the document resets.
+   */
+  public String getBanner() {
+    return _banner;
+  }
+  
+  /**
+   * Accessor for the string used for the prompt.
+   */
+  public String getPrompt() {
+    return _prompt;
+  }
+  
+  /**
+   * Sets the string to use for the banner when the document resets.
+   * @param banner String to be printed when the document resets.
+   */
+  public void setBanner(String banner) {
+    _banner = banner;
+  }
+  
+  /**
+   * Sets the string to use for the prompt.
+   * @param prompt String to use for the prompt.
+   */
+  public void setPrompt(String prompt) {
+    _prompt = prompt;
+  }
+  
+  
+  /**
+   * Gets the object which can determine whether an insert
+   * or remove edit should be applied, based on the inputs.
+   * @param condition Object to determine legality of inputs
+   */
+  public DocumentEditCondition getEditCondition() {
+    return _document.getEditCondition();
+  }
+  
+  /**
+   * Provides an object which can determine whether an insert
+   * or remove edit should be applied, based on the inputs.
+   * @param condition Object to determine legality of inputs
+   */
+  public void setEditCondition(DocumentEditCondition condition) {
+    _document.setEditCondition(condition);
+  }
+
   /**
    * Returns the first location in the document where editing is allowed.
    */
-  public int getPromptPos();
+  public int getPromptPos() {
+    return _promptPos;
+  }
 
   /**
    * Lets this document know whether an interaction is in progress.
-   * @param inProgress Whether an interaction is in progress
+   * @param inProgress whether an interaction is in progress
    */
-  public void setInProgress(boolean inProgress);
+  public void setInProgress(boolean inProgress) {
+    _inProgress = inProgress;
+  }
 
   /**
    * Returns whether an interaction is currently in progress.
    */
-  public boolean inProgress();
+  public boolean inProgress() {
+    return _inProgress;
+  }
   
   /**
    * Sets a runnable action to use as a beep.
    * @param beep Runnable beep command
    */
-  public void setBeep(Runnable beep);
+  public void setBeep(Runnable beep) {
+    _beep = beep;
+  }
   
   /** 
    * Resets the document to a clean state.  Does not reset the history.
    */
-  public void reset();
+  public void reset() {
+    try {
+      forceRemoveText(0, _document.getDocLength());
+      forceInsertText(0, _banner, DEFAULT_STYLE);
+      insertPrompt();
+      _history.moveEnd();
+      setInProgress(false);
+    }
+    catch (DocumentAdapterException e) {
+      throw new UnexpectedException(e);
+    }
+  }
 
   /**
    * Prints a prompt for a new interaction.
    */
-  public void insertPrompt();
+  public void insertPrompt() {
+    try {
+      forceInsertText(_document.getDocLength(), _prompt, DEFAULT_STYLE);
+      _promptPos = _document.getDocLength();
+    }
+    catch (DocumentAdapterException e) {
+      throw new UnexpectedException(e);
+    }
+  }
   
   /**
    * Inserts a new line at the given position.
    * @param pos Position to insert the new line
    */
-  public void insertNewLine(int pos);
+  public void insertNewLine(int pos) {
+    // Correct the position if necessary
+    if (pos > getDocLength()) {
+      pos = getDocLength();
+    }
+    else if (pos < 0) {
+      pos = 0;
+    }
+    
+    try {
+      insertText(pos, "\n", DEFAULT_STYLE);
+    }
+    catch (DocumentAdapterException e) {
+      // Shouldn't happen after we've corrected it
+      throw new UnexpectedException(e);
+    }
+  }
 
   /**
    * Inserts the given string with the given attributes just before the
@@ -118,31 +286,172 @@ public interface InteractionsDocument extends DocumentAdapter {
    * @param text String to insert
    * @param style name of style to format the string
    */
-  public void insertBeforeLastPrompt(String text, String style);
+  public void insertBeforeLastPrompt(String text, String style) {
+    try {
+      int pos;
+      if (_inProgress) {
+        pos = getDocLength();
+      }
+      else {
+        pos = _promptPos - _prompt.length();
+      }
+
+      _promptPos += text.length();
+      _document.forceInsertText(pos, text, style);
+      
+    }
+    catch (DocumentAdapterException ble) {
+      throw new UnexpectedException(ble);
+    }
+  }
   
+  /**
+   * Inserts a string into the document at the given offset
+   * and the given named style, if the edit condition allows it.
+   * @param offs Offset into the document
+   * @param str String to be inserted
+   * @param style Name of the style to use.  Must have been
+   * added using addStyle.
+   * @throws DocumentAdapterException if the offset is illegal
+   */
+  public void insertText(int offs, String str, String style)
+    throws DocumentAdapterException
+  {
+    if (offs < _promptPos) {
+      _beep.run();
+    }
+    else {
+      _document.insertText(offs, str, style);
+    }
+  }
+  
+  /**
+   * Inserts a string into the document at the given offset
+   * and the given named style, regardless of the edit condition.
+   * @param offs Offset into the document
+   * @param str String to be inserted
+   * @param style Name of the style to use.  Must have been
+   * added using addStyle.
+   * @throws DocumentAdapterException if the offset is illegal
+   */
+  public void forceInsertText(int offs, String str, String style)
+    throws DocumentAdapterException
+  {
+    _document.forceInsertText(offs, str, style);
+  }
+
+  /**
+   * Removes a portion of the document, if the edit condition allows it.
+   * @param offs Offset to start deleting from
+   * @param len Number of characters to remove
+   * @throws DocumentAdapterException if the offset or length are illegal
+   */
+  public void removeText(int offs, int len) throws DocumentAdapterException {
+    if (offs < _promptPos) {
+      _beep.run();
+    } 
+    else {
+      _document.removeText(offs, len);
+    }
+  }
+  
+  /**
+   * Removes a portion of the document, regardless of the edit condition.
+   * @param offs Offset to start deleting from
+   * @param len Number of characters to remove
+   * @throws DocumentAdapterException if the offset or length are illegal
+   */
+  public void forceRemoveText(int offs, int len) throws DocumentAdapterException {
+    _document.forceRemoveText(offs, len);
+  }
+  
+  /**
+   * Returns the length of the document.
+   */
+  public int getDocLength() {
+    return _document.getDocLength();
+  }
+  
+  /**
+   * Returns a portion of the document.
+   * @param offs First offset of the desired text
+   * @param len Number of characters to return
+   * @throws DocumentAdapterException if the offset or length are illegal
+   */
+  public String getDocText(int offs, int len) throws DocumentAdapterException {
+    return _document.getDocText(offs, len);
+  }
   
   /**
    * Returns the string that the user has entered at the current prompt.
    * May contain newline characters.
    */
-  public String getCurrentInteraction();
+  public String getCurrentInteraction() {
+    try {
+      return getDocText(_promptPos, getDocLength() - _promptPos);
+    }
+    catch (DocumentAdapterException e) {
+      throw new UnexpectedException(e);
+    }
+  }
 
   /**
    * Clears the current interaction text and then moves
    * to the end of the command history.
    */
-  public void clearCurrentInteraction();
+  public void clearCurrentInteraction() {
+    _clearCurrentInteractionText();
+    _history.moveEnd();
+  }
+
+  /**
+   * Removes the text from the current prompt to the end of the document.
+   */
+  protected void _clearCurrentInteractionText() {
+    try {
+      // Delete old value of current line
+      removeText(_promptPos, getDocLength() - _promptPos);
+    }
+    catch (DocumentAdapterException ble) {
+      throw new UnexpectedException(ble);
+    }
+  }
+  
+  /**
+   * Replaces any text entered past the prompt with the current
+   * item in the history.
+   */
+  protected void _replaceCurrentLineFromHistory() {
+    try {
+      _clearCurrentInteractionText();
+      insertText(getDocLength(), _history.getCurrent(), DEFAULT_STYLE);
+    }
+    catch (DocumentAdapterException ble) {
+      throw new UnexpectedException(ble);
+    }
+  }
+  
+  /**
+   * Accessor method for the history of commands.
+   */
+  public History getHistory() {
+    return _history;
+  }
   
   /**
    * Adds the given text to the history of commands.
    */
-  public void addToHistory(String text);
+  public void addToHistory(String text) {
+    _history.add(text);
+  }
   
   /**
    * Saves the unedited version of the current history to a file
    * @param selector File to save to
    */
-  public void saveHistory(FileSaveSelector selector) throws IOException;
+  public void saveHistory(FileSaveSelector selector) throws IOException {
+    _history.writeToFile(selector);
+  }
 
   /**
    * Saves the edited version of the current history to a file
@@ -153,65 +462,94 @@ public interface InteractionsDocument extends DocumentAdapter {
    * interactions file.
    */
   public void saveHistory(FileSaveSelector selector, String editedVersion)
-    throws IOException;
+    throws IOException
+  {
+    _history.writeToFile(selector, editedVersion);
+  }
 
   /**
    * Returns the entire history as a single string.  Commands should
    * be separated by semicolons. If an entire command does not end in a
    * semicolon, one is added.
    */
-  public String getHistoryAsStringWithSemicolons();
+  public String getHistoryAsStringWithSemicolons() {
+      return _history.getHistoryAsStringWithSemicolons();
+  }
 
   /**
    * Returns the entire history as a single string.  Commands should
    * be separated by semicolons.
    */
-  public String getHistoryAsString();
-  
+  public String getHistoryAsString() {
+    return _history.getHistoryAsString();
+  }
+
   /**
    * Clears the history
    */
-  public void clearHistory();
+  public void clearHistory() {
+    _history.clear();
+  }
 
   /**
    * Puts the previous line from the history on the current line
    * and moves the history back one line.
    */
-  public void moveHistoryPrevious();
+  public void moveHistoryPrevious() {
+    _history.movePrevious();
+    _replaceCurrentLineFromHistory();
+  }
 
   /**
    * Puts the next line from the history on the current line
    * and moves the history forward one line.
    */
-  public void moveHistoryNext();
+  public void moveHistoryNext() {
+    _history.moveNext();
+    _replaceCurrentLineFromHistory();
+  }
 
   /**
    * Returns whether there is a previous command in the history.
    */
-  public boolean hasHistoryPrevious();
+  public boolean hasHistoryPrevious() {
+    return  _history.hasPrevious();
+  }
 
   /**
    * Returns whether there is a next command in the history.
    */
-  public boolean hasHistoryNext();
+  public boolean hasHistoryNext() {
+    return _history.hasNext();
+  }
   
   /**
    * Gets the previous interaction in the history and
    * replaces whatever is on the current
    * interactions input line with this interaction.
-   * @param failed Something to run if there is no previous command
    */
-  public void recallPreviousInteractionInHistory(Runnable failed);
+  public void recallPreviousInteractionInHistory() {
+    if (hasHistoryPrevious()) {
+      moveHistoryPrevious();
+    }
+    else {
+      _beep.run();
+    }
+  }
 
   /**
    * Gets the next interaction in the history and
    * replaces whatever is on the current
    * interactions input line with this interaction.
-   * @param failed Something to run if there is no next command
    */
-  public void recallNextInteractionInHistory(Runnable failed);
-
-  
+  public void recallNextInteractionInHistory() {
+    if (hasHistoryNext()) {
+      moveHistoryNext();
+    }
+    else {
+      _beep.run();
+    }
+  }
 
   /**
    * Inserts the given exception data into the document with the given style.
@@ -223,5 +561,121 @@ public interface InteractionsDocument extends DocumentAdapter {
   public void appendExceptionResult(String exceptionClass,
                                     String message,
                                     String stackTrace,
-                                    String styleName);
+                                    String styleName)
+  {
+    //writeLock();
+    try {
+
+      if (null == message || "null".equals(message)) {
+        message = "";
+      }
+
+      // Simplify the common error messages
+      if ("koala.dynamicjava.interpreter.error.ExecutionError".equals(exceptionClass) ||
+          "edu.rice.cs.drjava.model.repl.InteractionsException".equals(exceptionClass)) {
+        exceptionClass = "Error";
+      }
+      
+      insertText(getDocLength(), 
+                 exceptionClass + ": " + message + "\n", styleName);
+
+      // An example stack trace:
+      //
+      // java.lang.IllegalMonitorStateException: 
+      // at java.lang.Object.wait(Native Method)
+      // at java.lang.Object.wait(Object.java:425)
+      if (! stackTrace.trim().equals("")) {
+        BufferedReader reader=new BufferedReader(new StringReader(stackTrace));
+        
+        String line;
+        // a line is parsable if it has ( then : then ), with some
+        // text between each of those
+        while ((line = reader.readLine()) != null) {
+          String fileName = null;
+          int lineNumber = -1;
+
+          int openLoc = line.indexOf('(');
+
+          if (openLoc != -1) {
+            int closeLoc = line.indexOf(')', openLoc + 1);
+
+            if (closeLoc != -1) {
+              int colonLoc = line.indexOf(':', openLoc + 1);
+              if ((colonLoc > openLoc) && (colonLoc < closeLoc)) {
+                // ok this line is parsable!
+                String lineNumStr = line.substring(colonLoc + 1, closeLoc);
+                try {
+                  lineNumber = Integer.parseInt(lineNumStr);
+                  fileName = line.substring(openLoc + 1, colonLoc);
+                }
+                catch (NumberFormatException nfe) {
+                  // do nothing; we failed at parsing
+                }
+              }
+            }
+          }
+
+          insertText(getDocLength(), line, styleName);
+
+          // OK, now if fileName != null we did parse out fileName
+          // and lineNumber.
+          // Here's where we'd add the button, etc.
+          if (fileName != null) {
+            /*
+            JButton button = new JButton("go");
+            button.addActionListener(new ExceptionButtonListener(fileName,
+                                                                 lineNumber));
+
+            SimpleAttributeSet buttonSet = new SimpleAttributeSet(set);
+            StyleConstants.setComponent(buttonSet, button);
+            insertString(getDocLength(), "  ", null);
+            insertString(getDocLength() - 1, " ", buttonSet);
+            */
+            //JOptionPane.showMessageDialog(null, "button in");
+            //insertString(getDocLength(), " ", null);
+            //JOptionPane.showMessageDialog(null, "extra space");
+          }
+
+          //JOptionPane.showMessageDialog(null, "\\n");
+          insertText(getDocLength(), "\n", styleName);
+
+        } // end the while
+      }
+    }
+    catch (IOException ioe) {
+      // won't happen; we're readLine'ing from a String!
+      throw new UnexpectedException(ioe);
+    }
+    catch (DocumentAdapterException ble) {
+      throw new UnexpectedException(ble);
+    }
+    finally {
+      //writeUnlock();
+    }
+  }
+  
+  /**
+   * Class to ensure that any attempt to edit the document
+   * above the prompt is rejected.
+   */
+  class InteractionsEditCondition extends DocumentEditCondition {
+    public boolean canInsertText(int offs, String str, String style) {
+      if (offs < getPromptPos()) {
+        _beep.run();
+        return false;
+      }
+      else {
+        return true;
+      }
+    }
+    public boolean canRemoveText(int offs, int len) {
+      if (offs < getPromptPos()) {
+        _beep.run();
+        return false;
+      }
+      else {
+        return true;
+      }
+    }
+  }
 }

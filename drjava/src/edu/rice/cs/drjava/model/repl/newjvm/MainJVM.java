@@ -46,11 +46,12 @@ import java.io.*;
 
 import gj.util.Vector;
 
-import edu.rice.cs.drjava.DrJava;
+// NOTE: Do NOT import/use the config framework in this class!
+//  (It seems to crash Eclipse...)
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.junit.JUnitError;
+import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.util.newjvm.*;
 
 /**
@@ -60,9 +61,12 @@ import edu.rice.cs.util.newjvm.*;
  */
 public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   private Log _log = new Log("MainJVM");
-
-  /** The global model. */
-  private GlobalModel _model;
+  
+  /** Listens to interactions-related events. */
+  private InteractionsModelCallback _interactionsModel;
+  
+  /** Listens to JUnit-related events. */
+  private JUnitModelCallback _junitModel;
 
   /**
    * This flag is set to false to inhibit the automatic restart of the JVM.
@@ -77,12 +81,25 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 
   /** Instance of inner class to handle interpret result. */
   private final ResultHandler _handler = new ResultHandler();
+  
+  /** Whether to allow "assert" statements to run in the remote JVM. */
+  private boolean _allowAssertions = false;
+  
+  /** Classpath to use for starting the interpreter JVM */
+  private String _startupClasspath;
 
-  public MainJVM(final GlobalModel model) throws RemoteException {
+  /**
+   * Creates a new MainJVM to interface to another JVM, but does not
+   * automatically start the Interpreter JVM.  Callers should set the
+   * InteractionsModel and JUnitModel, and then call startInterpreterJVM().
+   */
+  public MainJVM() {
     super(InterpreterJVM.class.getName());
 
-    _model = model;
-    startInterpreterJVM();
+    _interactionsModel = new DummyInteractionsModel();
+    _junitModel = new DummyJUnitModel();
+    _startupClasspath = System.getProperty("java.class.path");
+    //startInterpreterJVM();
   }
 
   public boolean isInterpreterRunning() {
@@ -90,14 +107,25 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
 
   /**
-   * For test cases, we reuse the same MainJVM for efficiency.
-   * This method is used to retarget the model pointer.
-   *
-   * Note: This feature should only be used for test cases! Otherwise
-   * we're all better off making a new MainJVM when we need it.
+   * Provides an object to listen to interactions-related events.
    */
-  public void setModel(GlobalModel model) {
-    _model = model;
+  public void setInteractionsModel(InteractionsModelCallback model) {
+    _interactionsModel = model;
+  }
+  
+  /**
+   * Provides an object to listen to test-related events.
+   */
+  public void setJUnitModel(JUnitModelCallback model) {
+    _junitModel = model;
+  }
+  
+  /**
+   * Sets whether the remote JVM will run "assert" statements after
+   * the next restart.
+   */
+  public void setAllowAssertions(boolean allow) {
+    _allowAssertions = allow;
   }
 
   public void interpret(final String s) {
@@ -109,7 +137,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     // Spawn thread on InterpreterJVM side
     //  (will receive result in the interpretResult(...) method)
     try {
-      //_log.log("main.interp: " + s);
+      _log.log("main.interp: " + s);
       _interpreterJVM().interpret(s);
     }
     catch (java.rmi.UnmarshalException ume) {
@@ -121,32 +149,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException re) {
       _threwException(re);
     }
-    
-    // Spawn thread on this side (receive result "immediately")
-    /*
-    Thread thread = new Thread("interpret thread: " + s) {
-      public void run() {
-        try {
-          //System.err.println("interpret to " + _interpreterJVM() + ": " + s);
-          InterpretResult result = _interpreterJVM().interpret(s);
-          _log.log("main.interp: " + s + " --> " + result);
-          result.apply(getResultHandler());
-        }
-        catch (java.rmi.UnmarshalException ume) {
-          // Could not receive result from interpret; system probably exited.
-          // We will silently fail and let the interpreter restart.
-          _log.log("main.interp: UnmarshalException, so interpreter is dead:\n"
-                     + ume);
-        }
-        catch (RemoteException re) {
-          _threwException(re);
-        }
-      }
-    };
-
-    thread.setDaemon(true);
-    thread.start();
-    */
   }
   
   /**
@@ -154,10 +156,19 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * @param result The result of the interpretation
    */
   public void interpretResult(InterpretResult result) throws RemoteException {
-    //_log.log("main.interp result: " + s);
-    result.apply(getResultHandler());
+//     try {
+      _log.log("main.interp result: " + result);
+      result.apply(getResultHandler());
+//      }
+//      catch (Throwable t) {
+//        _log.log("EXCEPTION in interpretResult: " + t.toString());
+//      }
   }
 
+  /**
+   * Adds the given path to the Interpreter's class path.
+   * @param path Path to be added to classpath
+   */
   public void addClassPath(String path) {
     // silently fail if diabled. see killInterpreter docs for details.
     if (! _enabled) return;
@@ -173,6 +184,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
   }
 
+  /**
+   * Sets the Interpreter to be in the given package.
+   * @param packageName Name of the package to enter.
+   */
   public void setPackageScope(String packageName) {
     // silently fail if diabled. see killInterpreter docs for details.
     if (! _enabled) return;
@@ -187,8 +202,13 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
   }
 
+  /**
+   * "Soft" resets the interpreter, without killing the JVM.  This method
+   * is not really used anymore, since this doesn't reset any threads that
+   * have been spawned.
+   */
   public void reset() {
-    // silently fail if diabled. see killInterpreter docs for details.
+    // silently fail if disabled. see killInterpreter docs for details.
     if (! _enabled) return;
 
     ensureInterpreterConnected();
@@ -201,13 +221,24 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
   }
 
+  /**
+   * Forwards a call to System.err from InterpreterJVM to the 
+   * local InteractionsModel.
+   * @param s String that was printed in the other JVM
+   */
   public void systemErrPrint(String s) throws RemoteException {
-    _model.replSystemErrPrint(s);
+    _interactionsModel.replSystemErrPrint(s);
   }
 
+  /**
+   * Forwards a call to System.out from InterpreterJVM to the 
+   * local InteractionsModel.
+   * @param s String that was printed in the other JVM
+   */
   public void systemOutPrint(String s) throws RemoteException {
-    _model.replSystemOutPrint(s);
+    _interactionsModel.replSystemOutPrint(s);
   }
+  
   
   /**
    * Runs a JUnit Test class in the Interpreter JVM.
@@ -229,30 +260,34 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   /**
-   * Called if JUnit is invoked on a non TestCase class.
+   * Called if JUnit is invoked on a non TestCase class.  Forwards from
+   * the other JVM to the local JUnit model.
    */
   public void nonTestCase() throws RemoteException {
-    _model.nonTestCase();
+    _junitModel.nonTestCase();
   }
   
   /**
    * Called to indicate that a suite of tests has started running.
+   * Forwards from the other JVM to the local JUnit model.
    * @param numTests The number of tests in the suite to be run.
    */
   public void testSuiteStarted(int numTests) throws RemoteException {
-    _model.testSuiteStarted(numTests);
+    _junitModel.testSuiteStarted(numTests);
   }
   
   /**
    * Called when a particular test is started.
+   * Forwards from the other JVM to the local JUnit model.
    * @param testName The name of the test being started.
    */
   public void testStarted(String testName) throws RemoteException {
-    _model.testStarted(testName);
+    _junitModel.testStarted(testName);
   }
   
   /**
    * Called when a particular test has ended.
+   * Forwards from the other JVM to the local JUnit model.
    * @param testName The name of the test that has ended.
    * @param wasSuccessful Whether the test passed or not.
    * @param causedError If not successful, whether the test caused an error
@@ -260,15 +295,16 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public void testEnded(String testName, boolean wasSuccessful, boolean causedError)
     throws RemoteException {
-    _model.testEnded(testName, wasSuccessful, causedError);
+    _junitModel.testEnded(testName, wasSuccessful, causedError);
   }
   
   /**
    * Called when a full suite of tests has finished running.
+   * Forwards from the other JVM to the local JUnit model.
    * @param errors The array of errors from all failed tests in the suite.
    */
   public void testSuiteEnded(JUnitError[] errors) throws RemoteException {
-    _model.testSuiteEnded(errors);
+    _junitModel.testSuiteEnded(errors);
   }
 
   /**
@@ -294,6 +330,15 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       _threwException(re);
     }
   }
+  
+  /**
+   * Sets the classpath to use for starting the interpreter JVM.
+   * Must include the classes for the interpreter.
+   * @param classpath Classpath for the interpreter JVM
+   */
+  public void setStartupClasspath(String classpath) {
+    _startupClasspath = classpath;
+  }
 
   /**
    * Starts the interpreter if it's not running already.
@@ -309,6 +354,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       jvmArgs.addElement("-ea");
     }
     int debugPort = getDebugPort();
+    _log.log("starting with debug port: " + debugPort);
     if (debugPort > -1) {
       jvmArgs.addElement("-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=" + 
                          debugPort);
@@ -323,7 +369,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     
     // Invoke the Interpreter JVM
     try {
-      invokeSlave(jvmArgsArray);
+      invokeSlave(jvmArgsArray, _startupClasspath);
     }
     catch (RemoteException re) {
       _threwException(re);
@@ -333,23 +379,28 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
   }
 
+  /**
+   * React if the slave JVM quits.  Restarts the JVM unless _enabled is false,
+   * and notifies the InteractionsModel if the quit was unexpected.
+   * @param status Status returned by the dead process.
+   */
   protected void handleSlaveQuit(int status) {
     // Only restart the slave if _enabled is true
     if (_enabled) {
-      // _model may be null if we're running a test on this
-      if (_model != null) {
-        _model.interactionsResetting();
-      }
+      _interactionsModel.interpreterResetting();
 
       startInterpreterJVM();
     }
 
-    if (!_cleanlyRestarting && (_model != null)) {
-      _model.replCalledSystemExit(status);
+    if (!_cleanlyRestarting) {
+      _interactionsModel.replCalledSystemExit(status);
     }
     _cleanlyRestarting = false;
   }
 
+  /**
+   * Returns whether a JVM is currently starting.
+   */
   public boolean isStartupInProgress() {
     return super.isStartupInProgress();
   }
@@ -363,10 +414,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _enabled = true;
     _cleanlyRestarting = false;
     
-    // _model may be null if we're running a test on this
-    if (_model != null) {
-      _model.interactionsReady();
-    }
+    _interactionsModel.interpreterReady();
+    _junitModel.junitJVMReady();
 
     _log.log("thread in connected: " + Thread.currentThread());
 
@@ -391,9 +440,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   protected int getDebugPort() {
     int port = -1;
     try {
-      if (_model != null) {
-        port = _model.getDebugPort();
-      }
+      port = _interactionsModel.getDebugPort();
     }
     catch (IOException ioe) {
       // Can't find port; don't use debugger
@@ -405,9 +452,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * Return whether to allow assertions in the InterpreterJVM.
    */
   protected boolean allowAssertions() {
-    Boolean allow = DrJava.getConfig().getSetting(OptionConstants.JAVAC_ALLOW_ASSERT);
     String version = System.getProperty("java.version");
-    return ((allow.booleanValue()) && (version != null) &&
+    return (_allowAssertions && (version != null) &&
         ("1.4.0".compareTo(version) <= 0));
   }
 
@@ -419,12 +465,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     StringWriter writer = new StringWriter();
     t.printStackTrace(new PrintWriter(writer));
 
-    // model may be null if we're running a test
-    if (_model != null) {
-      _model.replThrewException(t.getClass().getName(),
-                                t.getMessage(),
-                                writer.toString());
-    }
+    _interactionsModel.replThrewException(t.getClass().getName(),
+                                          t.getMessage(),
+                                          writer.toString());
   }
 
   /**
@@ -442,8 +485,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
         //}
 
         while (_interpreterJVM() == null) {
+          //_log.log("interpreter is null, waiting for it to register");
           wait();
         }
+        //_log.log("interpreter registered; moving on");
       }
     }
     catch (InterruptedException ie) {
@@ -468,7 +513,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
      * @returns null
      */
     public Object forVoidResult(VoidResult that) {
-      _model.replReturnedVoid();
+      _interactionsModel.replReturnedVoid();
       return null;
     }
 
@@ -478,9 +523,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
      */
     public Object forValueResult(ValueResult that) {
       String result = that.getValueStr();
-      _log.log("return called: " + result);
-      _model.replReturnedResult(result);
-      _log.log("return call over: " + result);
+      _interactionsModel.replReturnedResult(result);
       return null;
     }
 
@@ -489,11 +532,42 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
      * @returns null
      */
     public Object forExceptionResult(ExceptionResult that) {
-      _model.replThrewException(that.getExceptionClass(),
+      _interactionsModel.replThrewException(that.getExceptionClass(),
                                 that.getExceptionMessage(),
                                 that.getStackTrace());
       return null;
     }
   }
 
+  /**
+   * InteractionsModel which does not react to events.
+   */
+  public static class DummyInteractionsModel 
+    implements InteractionsModelCallback
+  {
+    public int getDebugPort() throws IOException { return -1; }
+    public void replSystemOutPrint(String s) {}
+    public void replSystemErrPrint(String s) {}
+    public void replReturnedVoid() {}
+    public void replReturnedResult(String result) {}
+    public void replThrewException(String exceptionClass,
+                                   String message,
+                                   String stackTrace) {}
+    public void replCalledSystemExit(int status) {}
+    public void interpreterResetting() {}
+    public void interpreterReady() {}
+  }
+  
+  /**
+   * JUnitModel which does not react to events.
+   */
+  public static class DummyJUnitModel implements JUnitModelCallback {
+    public void nonTestCase() {}
+    public void testSuiteStarted(int numTests) {}
+    public void testStarted(String testName) {}
+    public void testEnded(String testName, boolean wasSuccessful,
+                          boolean causedError) {}
+    public void testSuiteEnded(JUnitError[] errors) {}
+    public void junitJVMReady() {}
+  }
 }

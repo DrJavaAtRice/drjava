@@ -66,4 +66,24 @@ public interface JavaInterpreter {
    * @param packageName Package to assume scope of.
    */
   public void setPackageScope(String packageName);
+  
+  /**
+   * Assigns the given value to the given name in the interpreter.
+   * @param name Name of the variable
+   * @param value Value to assign
+   */
+  public void defineVariable(String name, Object value);
+  
+  /**
+   * Sets whether protected and private variables should be accessible in
+   * the interpreter.
+   * @param accessible Whether protected and private variable are accessible
+   */
+  public void setPrivateAccessible(boolean accessible);
+  
+  /**
+   * Temporary accessor for DynamicJava's interpreter, to be
+   * used for debugging.
+   */
+  public koala.dynamicjava.interpreter.Interpreter getDynamicJavaInterpreter();
 }

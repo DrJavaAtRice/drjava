@@ -49,6 +49,7 @@ import java.awt.Toolkit;
 import java.awt.Color;
 
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
+import edu.rice.cs.drjava.model.repl.InteractionsModel;
 import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
 
@@ -61,6 +62,9 @@ import edu.rice.cs.util.text.SwingDocumentAdapter;
  * @version $Id$
  */
 public class InteractionsController {
+  /** InteractionsModel to handle interpretation */
+  protected InteractionsModel _model;
+  
   /** Document from the model */
   protected InteractionsDocument _doc;
   
@@ -71,21 +75,41 @@ public class InteractionsController {
   protected InteractionsPane _pane;
   
   /**
-   * Glue together the given model and view.
-   * @param doc InteractionsDocument from the model
-   * @param adapter DocumentAdapter that lets the model use a Swing document
-   * @param pane InteractionsPane in the view
+   * Glue together the given model and a new view.
+   * @param model An InteractionsModel
+   * @param adapter SwingDocumentAdapter being used by the model's doc
    */
-  public InteractionsController(InteractionsDocument doc,
-                                SwingDocumentAdapter adapter,
-                                InteractionsPane pane) {
-    _doc = doc;
+  public InteractionsController(InteractionsModel model, 
+                                SwingDocumentAdapter adapter)
+  {
+    this(model, adapter, new InteractionsPane(adapter));
+  }
+  
+  /**
+   * Glue together the given model and view.
+   * @param model An InteractionsModel
+   * @param adapter SwingDocumentAdapter being used by the model's doc
+   * @param pane An InteractionsPane
+   */
+  public InteractionsController(InteractionsModel model, 
+                                SwingDocumentAdapter adapter, 
+                                InteractionsPane pane)
+  {
+    _model = model;
+    _doc = model.getDocument();
     _adapter = adapter;
     _pane = pane;
     
     _addDocumentStyles();
-    _addModelListeners();
-    _addViewActions();
+    _setupModel();
+    _setupView();
+  }
+  
+  /**
+   * Accessor method for the InteractionsModel.
+   */
+  public InteractionsModel getInteractionsModel() {
+    return _model;
   }
   
   /**
@@ -145,7 +169,7 @@ public class InteractionsController {
   /**
    * Adds listeners to the model.
    */
-  protected void _addModelListeners() {
+  protected void _setupModel() {
     _adapter.addDocumentListener(new CaretUpdateListener());
     _doc.setBeep(_pane.getBeep());
   }
@@ -159,6 +183,7 @@ public class InteractionsController {
     public void insertUpdate(DocumentEvent e) {
       int caretPos = _pane.getCaretPosition();
       int promptPos = _doc.getPromptPos();
+      int prevPromptPos = promptPos - e.getLength();
       int length = _doc.getDocLength();
 
       if (_doc.inProgress()) {
@@ -166,12 +191,18 @@ public class InteractionsController {
         // inserted after the prompt.
         moveToEnd();
       }
-      else {
-        // Only update caret if it has fallen behind the prompt.
-        // (And be careful not to move it during a reset, when the
-        //  prompt pos is temporarily far greater than the length.)
-        if ((caretPos < promptPos) && (promptPos <= length)) {
+      // (Be careful not to move caret during a reset, when the
+      //  prompt pos is temporarily far greater than the length.)
+      else if (promptPos <= length) {
+        if (caretPos < prevPromptPos) {
+          // Caret has fallen behind prompt, so make it catch up so
+          //  the new input is visible.
           moveToPrompt();
+        }
+        else {
+          // Caret was on or after prompt, so move it right by the size
+          //  of the insert.
+          moveTo(caretPos + e.getLength());
         }
       }
     }
@@ -195,7 +226,7 @@ public class InteractionsController {
   /**
    * Adds actions to the view.
    */
-  protected void _addViewActions() {
+  protected void _setupView() {
     
     // Get proper cross-platform mask.
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -252,7 +283,7 @@ public class InteractionsController {
     public void actionPerformed(ActionEvent e) {
       SwingWorker worker = new SwingWorker() {
         public Object construct() {
-          _doc.interpretCurrentInteraction();
+          _model.interpretCurrentInteraction();
           return null;
         }
       };
@@ -270,7 +301,7 @@ public class InteractionsController {
   /** Recalls the previous command from the history. */
   AbstractAction historyPrevAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      _doc.recallPreviousInteractionInHistory(_pane.getBeep());
+      _doc.recallPreviousInteractionInHistory();
       moveToEnd();
     }
   };
@@ -278,7 +309,7 @@ public class InteractionsController {
   /** Recalls the next command from the history. */
   AbstractAction historyNextAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      _doc.recallNextInteractionInHistory(_pane.getBeep());
+      _doc.recallNextInteractionInHistory();
       moveToEnd();
     }
   };
@@ -340,11 +371,20 @@ public class InteractionsController {
   
   /** Moves the pane's caret to the end of the document. */
   void moveToEnd() {
-    _pane.setCaretPosition(_doc.getDocLength());
+    moveTo(_doc.getDocLength());
   }
   
   /** Moves the pane's caret to the document's prompt. */
   void moveToPrompt() {
-    _pane.setCaretPosition(_doc.getPromptPos());
+    moveTo(_doc.getPromptPos());
+  }
+  
+  /** Moves the pane's caret to the given position, as long as it's legal. */
+  void moveTo(int pos) {
+    // Sanity check
+    if (pos < 0) pos = 0;
+    if (pos > _doc.getDocLength()) pos = _doc.getDocLength();
+    
+    _pane.setCaretPosition(pos);
   }
 }

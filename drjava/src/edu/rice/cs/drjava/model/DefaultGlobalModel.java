@@ -99,7 +99,8 @@ import junit.runner.ReloadingTestSuiteLoader;
  *
  * @version $Id$
  */
-public class DefaultGlobalModel implements GlobalModel, OptionConstants {
+public class DefaultGlobalModel implements GlobalModel, OptionConstants,
+  JUnitModelCallback {
   
   // ----- FIELDS -----
 
@@ -129,7 +130,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     // Statically create the indenter from the config values
     int ind = DrJava.getConfig().getSetting(OptionConstants.INDENT_LEVEL).intValue();
     INDENTER = new Indenter(ind);
-    DrJava.getConfig().addOptionListener(OptionConstants.INDENT_LEVEL, 
+    DrJava.getConfig().addOptionListener(OptionConstants.INDENT_LEVEL,
                                     new OptionListener<Integer>() {
       public void optionChanged(OptionEvent<Integer> oce) {
         INDENTER.buildTree(DrJava.getConfig().getSetting(OptionConstants.INDENT_LEVEL).intValue());
@@ -144,21 +145,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * RMI interface to the Interactions JVM.
    * Final, but set differently in the two constructors.
    * Package private so we can access it from test cases.
-   * All accesses should be synchronized on _interpreterLock.
    */
   final MainJVM _interpreterControl;
   
   /**
-   * Lock to prevent multiple threads from accessing the interpreter at
-   * the same time.
+   * Interface between the InteractionsDocument and the JavaInterpreter,
+   * which runs in a separate JVM.
    */
-  private Object _interpreterLock = new Object();
-  
-  /**
-   * Flag to indicate DrJava is first starting up, and that the interpreter
-   * JVM is connecting for the first time.
-   */
-  private boolean _waitingForFirstInterpreter;
+  protected DefaultInteractionsModel _interactionsModel;
   
   
   // ---- Compiler Fields ----
@@ -215,18 +209,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   // ---- Input/Output Document Fields ----
   
   /**
-   * The Swing document used in the InteractionsDocument.
-   * This should ideally be refactored out so the model doesn't have
-   * to use Swing, but all the other documents are Swing anyway.
-   * (Interactions are special because they're used in Eclipse.)
+   * The document adapter used in the Interactions model.
    */
-  private final SwingDocumentAdapter _swingInteractionsDoc
-    = new SwingDocumentAdapter();
-  /**
-   * The document used to interact with the repl.
-   */
-  private final InteractionsDocument _interactionsDoc
-    = new DefaultInteractionsDocument(this);
+  private final SwingDocumentAdapter _interactionsDocAdapter;
   
   /**
    * The document used to display System.out and System.err.
@@ -248,7 +233,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * Number of milliseconds to wait after each println, to prevent
    * the JVM from being flooded with print calls.
    */
-  private static final int WRITE_DELAY = 50;
+  public static final int WRITE_DELAY = 50;
 
   /**
    * A PageFormat object for printing to paper.
@@ -276,24 +261,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   
   /**
    * Constructs a new GlobalModel.
+   * Creates a new MainJVM and starts its Interpreter JVM.
    */
   public DefaultGlobalModel() {
-    // Create the interpreter
-    try {
-      _waitingForFirstInterpreter = true;
-      _interpreterControl = new MainJVM(this);
-      _resetInteractionsClasspath();
-    }
-    catch (java.rmi.RemoteException re) {
-      throw new UnexpectedException(re);
-    }
-
-    _createDebugger();
+    this(new MainJVM());
     
-    // Listen to any relevant config options
-    DrJava.getConfig().addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
+    // Perhaps do this in another thread to allow startup to continue...
+    _interpreterControl.startInterpreterJVM();
+    resetInteractionsClasspath();
   }
-
+  
   /**
    * Constructor.  Initializes all the documents, but take the interpreter
    * from the given previous model. This is used only for test cases,
@@ -304,26 +281,40 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    *   now that we're always restarting the JVM.  Needs to be looked at...)
    */
   public DefaultGlobalModel(DefaultGlobalModel other) {
-    // Take interpreter from old model
-    _waitingForFirstInterpreter = false;
-    _interpreterControl = other._interpreterControl;
-    _interpreterControl.setModel(this);
+    this(other._interpreterControl);
+    
     _interpreterControl.reset();
-
-    // Create debugger, but use same port as before
-    _createDebugger();
     try {
-      _debugPort = other.getDebugPort();
+      _interactionsModel.setDebugPort(other.getDebugPort());
+      _interactionsModel.setWaitingForFirstInterpreter(false);
     }
     catch (IOException ioe) {
       // Other model should already have a port, or it should be -1.
       //  We shouldn't ever get an IOException here.
       throw new UnexpectedException(ioe);
     }
+  }
+  
+  /**
+   * Constructs a new GlobalModel with the given MainJVM to act as an
+   * RMI interface to the Interpreter JVM.  Does not attempt to start
+   * the InterpreterJVM.
+   * @param control RMI interface to the Interpreter JVM
+   */
+  public DefaultGlobalModel(MainJVM control) {
+    _interpreterControl = control;
+    _interactionsDocAdapter = new SwingDocumentAdapter();
+    _interactionsModel =
+      new DefaultInteractionsModel(this, control, _interactionsDocAdapter);
+    _interpreterControl.setInteractionsModel(_interactionsModel);
+    _interpreterControl.setJUnitModel(this);  // to be replaced by JUnitModel
+
+    _createDebugger();
     
     // Listen to any relevant config options
     DrJava.getConfig().addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
   }
+
 
   
   // ----- METHODS -----
@@ -358,13 +349,23 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   public ListModel getDefinitionsDocuments() {
     return _definitionsDocs;
   }
-
-  public InteractionsDocument getInteractionsDocument() {
-    return _interactionsDoc;
+  
+  /**
+   * Returns the interactions model.
+   */
+  public InteractionsModel getInteractionsModel() {
+    return _interactionsModel;
   }
   
+  /**
+   * Returns SwingDocumentAdapter in use by the InteractionsDocument.
+   */
   public SwingDocumentAdapter getSwingInteractionsDocument() {
-    return _swingInteractionsDoc;
+    return _interactionsDocAdapter;
+  }
+  
+  public InteractionsDocument getInteractionsDocument() {
+    return _interactionsModel.getDocument();
   }
 
   public StyledDocument getConsoleDocument() {
@@ -440,7 +441,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     // Make sure this is on the classpath
     try {
       File classpath = odd.getSourceRoot();
-      _interpreterControl.addClassPath(classpath.getAbsolutePath());
+      _interactionsModel.addToClassPath(classpath.getAbsolutePath());
     }
     catch (InvalidPackageException e) {
       // Invalid package-- don't add it to classpath
@@ -472,7 +473,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     final File[] files = com.getFiles();
     OpenDefinitionsDocument retDoc = null;
     
-    if (files == null) 
+    if (files == null)
       throw new IOException("No Files returned from FileSelector");
 
     AlreadyOpenException storedAOE = null;
@@ -487,7 +488,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       retDoc = _openFile(files[i].getAbsoluteFile());
       }
       catch (AlreadyOpenException aoe) {
-        retDoc = aoe.getOpenDocument(); 
+        retDoc = aoe.getOpenDocument();
         //Remember the first AOE
         if (storedAOE == null) {
           storedAOE = aoe;
@@ -497,7 +498,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       // Make sure this is on the classpath
       try {
         File classpath = retDoc.getSourceRoot();
-        _interpreterControl.addClassPath(classpath.getAbsolutePath());
+        _interactionsModel.addToClassPath(classpath.getAbsolutePath());
       }
       catch (InvalidPackageException e) {
         // Invalid package-- don't add it to classpath
@@ -512,7 +513,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
     else {
       //if no OperationCanceledException, then getFiles should
-      //have at least one file. 
+      //have at least one file.
       throw new IOException("No Files returned from FileChooser");
     }
     
@@ -677,7 +678,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       }
     }
     return doc;
-  }    
+  }
 
   /**
    * Set the indent tab size for all definitions documents.
@@ -711,8 +712,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     if ((_debugger.isAvailable()) && (_debugger.isReady())){
       _debugger.shutdown();
     }
-    //_interpreterControl.restartInterpreterJVM();
-    _interpreterControl.killInterpreter(true);
+    
+    _interactionsModel.resetInterpreter();
     //_restoreInteractionsState();
     
     /* Old approach.  (Didn't kill leftover interactions threads)
@@ -746,145 +747,23 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * pane.
    */
   public void interpretCurrentInteraction() {
-    synchronized(_interpreterLock) {
-      // Don't start a new interaction while one is in progress
-      if (_interactionsDoc.inProgress()) {
-        return;
-      }
-      
-      _notifier.notifyListeners(new EventNotifier.Notifier() {
-        public void notifyListener(GlobalModelListener l) {
-          l.interactionStarted();
-        }
-      });
-      
-      String text = _interactionsDoc.getCurrentInteraction();
-      _interactionsDoc.setInProgress(true);
-      _interactionsDoc.addToHistory(text);
-      
-      // there is no return at the end of the last line
-      // better to put it on now and not later.
-      _docAppend(_interactionsDoc, "\n", InteractionsDocument.DEFAULT_STYLE);
-      
-      String toEval = text.trim();
-      if (toEval.startsWith("java ")) {
-        toEval = _testClassCall(toEval);
-      }
-      
-      _interpreterControl.interpret(toEval);
-    }
+    _interactionsModel.interpretCurrentInteraction();
   }
 
   /**
-   * Interprets the file selected in the FileOpenSelector. Assumes all strings 
-   * have no trailing whitespace. Interprets the array all at once so if there are 
+   * Interprets the file selected in the FileOpenSelector. Assumes all strings
+   * have no trailing whitespace. Interprets the array all at once so if there are
    * any errors, none of the statements after the first erroneous one are processed.
    */
-  public void loadHistory(FileOpenSelector selector) 
-    throws IOException {//Vector<String> interactions) {
-    
-    File[] files = null;
-    try {
-      files = selector.getFiles();
-    }
-    catch (OperationCanceledException oce) {
-      return;
-      // don't need to do anything
-    }
-    Vector<String> strings = new Vector<String>();
-    if (files == null) 
-      throw new IOException("No Files returned from FileSelector");
-    
-    for (int i=0; i < files.length; i++) {
-      if (files[i] == null) {
-        throw new IOException("File name returned from FileSelector is null");
-      }
-      File c = files[i];
-      if (c != null) {
-        try {
-          FileInputStream fis = new FileInputStream(c);
-          InputStreamReader isr = new InputStreamReader(fis);
-          BufferedReader br = new BufferedReader(isr);
-          String currLine;
-          while ((currLine = br.readLine()) != null) {
-            strings.addElement(currLine);
-          }
-          br.close(); // win32 needs readers closed explicitly!
-        }
-        catch (IOException ioe) {
-          throw new IOException("File name returned from FileSelector is null");
-          //_showIOError(ioe);
-        }
-        
-      }
-      _notifier.notifyListeners(new EventNotifier.Notifier() {
-        public void notifyListener(GlobalModelListener l) {
-          l.interactionStarted();
-        }
-      });
-      String text = "";
-      String currString;
-      boolean firstLine = true;
-      int formatVersion = 1;
-      for (int j = 0; j < strings.size(); j++) {
-        currString = strings.elementAt(j);
-        if (currString.length() > 0) {
-          // check for file format version string.
-          // NOTE: the original file format did not have a version string
-          if (firstLine && (currString.trim().equals(History.HISTORY_FORMAT_VERSION_2.trim()))) {
-            formatVersion = 2;
-          }
-          switch (formatVersion) {
-            case (1):
-              // When reading this format, we need to make sure each line ends in a semicolon.
-              // This behavior can be buggy; that's why the format was changed.
-              if (currString.charAt(currString.length() - 1) == ';') {
-                text += currString + "\n";
-              }
-              else {
-                text += currString + ";\n";
-              }
-              break;
-            case(2):
-              if (!firstLine) { // don't include format version string in output
-                text += currString + "\n";
-              }
-              break;
-          }
-          firstLine = false;
-        }
-      }
-      _interactionsDoc.clearCurrentInteraction();
-      _docAppend(_interactionsDoc, text, InteractionsDocument.DEFAULT_STYLE);
-      _interactionsDoc.setInProgress(true);
-      _interactionsDoc.addToHistory(text);
-      // there is no return at the end of the last line
-      // better to put it on now and not later.
-      //_docAppend(_interactionsDoc, "\n", InteractionsDocument.DEFAULT_STYLE);
-      
-      String toEval = text.trim();
-      if (toEval.startsWith("java ")) {
-        toEval = _testClassCall(toEval);
-      }
-      
-      _interpreterControl.interpret(toEval);
-      
-      // Might need this if trying to implement line-by-line interpretation
-      /*
-       _notifier.notifyListeners(new EventNotifier.Notifier() {
-       public void notifyListener(GlobalModelListener l) {
-       l.interactionCaretPositionChanged(getInteractionsFrozenPos());
-       }
-       });
-       */
-    }
+  public void loadHistory(FileOpenSelector selector) throws IOException {
+    _interactionsModel.loadHistory(selector);
   }
   
   /**
    * Clears the interactions history
    */
   public void clearHistory() {
-    _interactionsDoc.clearHistory();
+    _interactionsModel.getDocument().clearHistory();
   }
   
   /**
@@ -892,41 +771,41 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * @param selector File to save to
    */
   public void saveHistory(FileSaveSelector selector) throws IOException {
-    _interactionsDoc.saveHistory(selector);
+    _interactionsModel.getDocument().saveHistory(selector);
   }
 
   /**
    * Saves the edited version of the current history to a file
    * @param selector File to save to
-   * @param editedVersion Edited verison of the history which will be 
-   * saved to file instead of the lines saved in the history. The saved 
-   * file will still include any tags needed to recognize it as a saved 
+   * @param editedVersion Edited verison of the history which will be
+   * saved to file instead of the lines saved in the history. The saved
+   * file will still include any tags needed to recognize it as a saved
    * interactions file.
    */
   public void saveHistory(FileSaveSelector selector, String editedVersion)
     throws IOException
   {
-      _interactionsDoc.saveHistory(selector, editedVersion);
+    _interactionsModel.getDocument().saveHistory(selector, editedVersion);
   }
  
   /**
-   * Returns the entire history as a Vector<String> with semicolons as needed
+   * Returns the entire history as a String with semicolons as needed
    */
   public String getHistoryAsStringWithSemicolons() {
-    return _interactionsDoc.getHistoryAsStringWithSemicolons();
+    return _interactionsModel.getDocument().getHistoryAsStringWithSemicolons();
   }
   
   /**
-   * Returns the entire history as a Vector<String>
+   * Returns the entire history as a String
    */
   public String getHistoryAsString() {
-    return _interactionsDoc.getHistoryAsString();
+    return _interactionsModel.getDocument().getHistoryAsString();
   }
   
   /**
    * Appends a string to the given document using a particular attribute set.
    * Also waits for a small amount of time (WRITE_DELAY) to prevent any one
-   * writer from flooding the model with print calls to the point that the 
+   * writer from flooding the model with print calls to the point that the
    * user interface could become unresponsive.
    * @param doc Document to append to
    * @param s String to append to the end of the document
@@ -949,31 +828,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
   }
   
-  /**
-   * Appends a string to the given document using a named style.
-   * Also waits for a small amount of time (WRITE_DELAY) to prevent any one
-   * writer from flooding the model with print calls to the point that the 
-   * user interface could become unresponsive.
-   * @param doc InteractionsDocument to append to
-   * @param s String to append to the end of the document
-   * @param styleName Name of the style to use for s
-   */
-  private void _docAppend(InteractionsDocument doc, String s, String styleName) {
-    synchronized(_systemWriterLock) {
-      try {
-        doc.insertText(doc.getDocLength(), s, styleName);
-        
-        // Wait to prevent being flooded with println's
-        _systemWriterLock.wait(WRITE_DELAY);
-      }
-      catch (DocumentAdapterException e) {
-        throw new UnexpectedException(e);
-      }
-      catch (InterruptedException e) {
-        // It's ok, we'll go ahead and resume
-      }
-    }
-  }
  
   /** Prints System.out to the DrJava console. */
   public void systemOutPrint(String s) {
@@ -986,34 +840,24 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
   
 
-  /** Called when the repl prints to System.out. */
+  /** Called when the repl prints to System.out.
   public void replSystemOutPrint(String s) {
     systemOutPrint(s);
     _interactionsDoc.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_OUT_STYLE);
-  }
+  } */
 
-  /** Called when the repl prints to System.err. */
+  /** Called when the repl prints to System.err.
   public void replSystemErrPrint(String s) {
     systemErrPrint(s);
     _interactionsDoc.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_ERR_STYLE);
-  }
+  } */
 
   /** Called when the debugger wants to print a message.  Inserts a newline. */
   public void printDebugMessage(String s) {
-    _interactionsDoc.insertBeforeLastPrompt(s + "\n", InteractionsDocument.DEBUGGER_STYLE);
+    _interactionsModel.getDocument().
+      insertBeforeLastPrompt(s + "\n", InteractionsDocument.DEBUGGER_STYLE);
   }
 
-
-  private void _interactionIsOver() {
-    _interactionsDoc.setInProgress(false);
-    _interactionsDoc.insertPrompt();
-
-    _notifier.notifyListeners(new EventNotifier.Notifier() {
-      public void notifyListener(GlobalModelListener l) {
-      l.interactionEnded();
-    }
-    });
-  }
   
   /**
    * Blocks until the interpreter has registered.
@@ -1022,63 +866,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     _interpreterControl.ensureInterpreterConnected();
   }
 
-  /**
-   * Signifies that the most recent interpretation completed successfully,
-   * returning no value.
-   */
-  public void replReturnedVoid() {
-    _interactionIsOver();
-  }
-
-  /**
-   * Signifies that the most recent interpretation completed successfully,
-   * returning a value.
-   *
-   * @param result The .toString-ed version of the value that was returned
-   *               by the interpretation. We must return the String form
-   *               because returning the Object directly would require the
-   *               data type to be serializable.
-   */
-  public void replReturnedResult(String result) {
-    _docAppend(_interactionsDoc, result + "\n", InteractionsDocument.DEFAULT_STYLE);
-    _interactionIsOver();
-  }
-
-  /**
-   * Signifies that the most recent interpretation was ended
-   * due to an exception being thrown.
-   *
-   * @param exceptionClass The name of the class of the thrown exception
-   * @param message The exception's message
-   * @param stackTrace The stack trace of the exception
-   */
-  public void replThrewException(String exceptionClass,
-                                 String message,
-                                 String stackTrace)
-  {
-    _interactionsDoc.appendExceptionResult(exceptionClass,
-                                           message,
-                                           stackTrace,
-                                           InteractionsDocument.ERROR_STYLE);
-    _interactionIsOver();
-  }
-
-  /**
-   * Signifies that the most recent interpretation contained a call to
-   * System.exit.
-   *
-   * @param status The exit status that will be returned.
-   */
-  public void replCalledSystemExit(final int status) {
-    _notifier.notifyListeners(new EventNotifier.Notifier() {
-      public void notifyListener(GlobalModelListener l) {
-      l.interactionsExited(status);
-    }
-    });
-
-    // all old interactions are irrelevant, so reset them
-    //_restoreInteractionsState();
-  }
 
   /**
    * Returns all registered compilers that are actually available.
@@ -1141,7 +928,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * Gets an array of all sourceRoots for the open definitions
    * documents, without duplicates. Note that if any of the open
    * documents has an invalid package statement, it won't be added
-   * to the source root set. On 8.7.02 changed the sourceRootSet such that 
+   * to the source root set. On 8.7.02 changed the sourceRootSet such that
    * the directory DrJava was executed from is now after the sourceRoots
    * of the currently open documents in order that whatever version the user
    * is looking at corresponds to the class file the interactions window
@@ -1167,7 +954,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         // can't add it to roots
       }
     }
-    /*    
+    /*
     File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
         
     if (workDir == FileOption.NULL_FILE) {
@@ -1192,7 +979,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   
   /**
    * Compiles all open documents, after ensuring that all are saved.
-   * 
+   *
    * This method used to only compile documents which were out of sync
    * with their class file, as a performance optimization.  However,
    * bug #634386 pointed out that unmodified files could depend on
@@ -1294,19 +1081,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * @throws IOException if unable to get a valid port number.
    */
   public int getDebugPort() throws IOException {
-    if (_debugPort == -1) {
-      try {
-        ServerSocket socket = new ServerSocket(0);
-        _debugPort = socket.getLocalPort();
-        socket.close();
-      }
-      catch (java.net.SocketException se) {
-        // something wrong with sockets, can't use for debugger
-        _debugPort = -1;
-      }
-    }
-//    System.out.println("debug port: " + _debugPort);
-    return _debugPort;
+    return _interactionsModel.getDebugPort();
   }
   
   /**
@@ -1328,14 +1103,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
   
   /**
-   * Checks if any open definitions documents have been modified 
-   * since last being saved. 
+   * Checks if any open definitions documents have been modified
+   * since last being saved.
    * @return whether any documents have been modified
    */
   public boolean areAnyModifiedSinceSave() {
     boolean modified = false;
     for (int i = 0; i < _definitionsDocs.getSize(); i++) {
-      OpenDefinitionsDocument doc = 
+      OpenDefinitionsDocument doc =
         (OpenDefinitionsDocument)_definitionsDocs.getElementAt(i);
       if (doc.isModifiedSinceSave()) {
         modified = true;
@@ -1489,7 +1264,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * Returns the name of the top level class, if any.
      * @throws ClassNameNotFoundException if no top level class name found.
      */
-    public String getFirstTopLevelClassName() throws ClassNameNotFoundException { 
+    public String getFirstTopLevelClassName() throws ClassNameNotFoundException {
       return _doc.getFirstTopLevelClassName();
     }
     
@@ -1508,7 +1283,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * @return the file for this document
      * @exception IllegalStateException if no file exists
      */
-    public File getFile() 
+    public File getFile()
       throws IllegalStateException, FileMovedException
     {
       return _doc.getFile();
@@ -1623,7 +1398,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
           // Make sure this file is on the classpath
           try {
             File classpath = getSourceRoot();
-            _interpreterControl.addClassPath(classpath.getAbsolutePath());
+            _interactionsModel.addToClassPath(classpath.getAbsolutePath());
           }
           catch (InvalidPackageException e) {
             // Invalid package-- don't add to classpath
@@ -1648,7 +1423,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * This method tells the document to prepare all the DrJavaBook
      * and PagePrinter objects.
      */
-    public void preparePrintJob() throws BadLocationException, 
+    public void preparePrintJob() throws BadLocationException,
       FileMovedException {
       
       String filename = "(untitled)";
@@ -1700,7 +1475,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * package as determined by getSourceRoot(String) and getPackageName()
      * is invalid, compileStarted and compileEnded will fire, and
      * an error will be put in compileErrors.
-     * 
+     *
      * (Interactions are not reset if the _resetAfterCompile field is
      * set to false, which allows some test cases to run faster.)
      */
@@ -1804,7 +1579,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
               public void notifyListener(GlobalModelListener l) {
                 l.compileErrorDuringJUnit();
               }
-            });        
+            });
             return;
           }
           */
@@ -1841,11 +1616,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
           if(!packageName.equals("")) {
             testFilename = packageName + "." + testFilename;
           }
-          _interpreterControl.runTestSuite(testFilename, 
+          _interpreterControl.runTestSuite(testFilename,
                                            testFile.getAbsolutePath());
           // Assign _docBeingTested after calling runTest because we know at
-          // this point that the interpreterJVM has registered itself. We also 
-          // know that the testFinished cannot be entered before this because 
+          // this point that the interpreterJVM has registered itself. We also
+          // know that the testFinished cannot be entered before this because
           // it has to acquire the same lock as this method.
           _docBeingTested = this;
           
@@ -1936,7 +1711,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   
   /**
    * Checks if the document is modified. If not, searches for the class file
-   * corresponding to this document and compares the timestamps of the 
+   * corresponding to this document and compares the timestamps of the
    * class file to that of the source file.
    */
     public boolean checkIfClassFileInSync() {
@@ -1984,7 +1759,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     
     /**
      * Returns the class file for this source document, if one could be found.
-     * Looks in the source root directories of the open documents, the 
+     * Looks in the source root directories of the open documents, the
      * system classpath, and the "extra.classpath".  Returns null if the
      * class file could not be found.
      */
@@ -2058,10 +1833,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
     
       
-    /** 
+    /**
      * Determines if the defintions document has been changed
      * by an outside program. If the document has changed,
-     * then asks the listeners if the GlobalModel should 
+     * then asks the listeners if the GlobalModel should
      * revert the document to the most recent version saved.
      * @return true if document has been reverted
      */
@@ -2070,15 +1845,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       if (isModifiedOnDisk()) {
         
         boolean shouldRevert = _notifier.pollListeners(new EventNotifier.Poller() {
-            public boolean poll(GlobalModelListener l) {
-              return l.shouldRevertFile(doc);
-            }
-          });
-        if (shouldRevert) { 
+          public boolean poll(GlobalModelListener l) {
+            return l.shouldRevertFile(doc);
+          }
+        });
+        if (shouldRevert) {
           doc.revertFile();
         }
         return shouldRevert;
-      } else {
+      }
+      else {
         return false;
       }
     }
@@ -2106,13 +1882,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         
         tempDoc.resetModification();
         doc.checkIfClassFileInSync();
-
+        
         syncCurrentLocationWithDefinitions(0);
         
         _notifier.notifyListeners(new EventNotifier.Notifier() {
           public void notifyListener(GlobalModelListener l) {
-              l.fileReverted(doc);
-            }
+            l.fileReverted(doc);
+          }
         });
       }
       catch (IllegalStateException docFailed) {
@@ -2136,8 +1912,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       if (isModifiedSinceSave()) {
         return _notifier.pollListeners(new EventNotifier.Poller() {
           public boolean poll(GlobalModelListener l) {
-          return l.canAbandonFile(doc);
-        }
+            return l.canAbandonFile(doc);
+          }
         });
       }
       else {
@@ -2231,16 +2007,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      */
     public FindReplaceMachine createFindReplaceMachine() {
       //try {
-        //return new FindReplaceMachine(_doc, _doc.getCurrentLocation());
-        return new FindReplaceMachine();
-        //}
-        //catch (BadLocationException e) {
-        //throw new UnexpectedException(e);
-        //}
+      //return new FindReplaceMachine(_doc, _doc.getCurrentLocation());
+      return new FindReplaceMachine();
+      //}
+      //catch (BadLocationException e) {
+      //throw new UnexpectedException(e);
+      //}
     }
 
     /**
-     * Returns the first Breakpoint in this OpenDefinitionsDocument whose region 
+     * Returns the first Breakpoint in this OpenDefinitionsDocument whose region
      * includes the given offset, or null if one does not exist.
      * @param offset an offset at which to search for a breakpoint
      * @return the Breakpoint at the given lineNumber, or null if it does not exist.
@@ -2262,7 +2038,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * @param breakpoint the Breakpoint to be inserted
      */
     public void addBreakpoint( Breakpoint breakpoint) {
-      //_breakpoints.put( new Integer(breakpoint.getLineNumber()), breakpoint); 
+      //_breakpoints.put( new Integer(breakpoint.getLineNumber()), breakpoint);
       
       for (int i=0; i<_breakpoints.size();i++) {
         Breakpoint bp = _breakpoints.elementAt(i);
@@ -2552,11 +2328,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
 
   /**
-   * Creates a document from a file. 
+   * Creates a document from a file.
    * @param file File to read document from
    * @return openened document
    */
-  private OpenDefinitionsDocument _openFile(File file) 
+  private OpenDefinitionsDocument _openFile(File file)
     throws IOException, AlreadyOpenException {
 
       DefinitionsDocument tempDoc = (DefinitionsDocument)
@@ -2618,50 +2394,29 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
 
 
-
   /**
-   * Assumes a trimmed String. Returns a string of the main call that the
-   * interpretor can use.
+   * Adds the source roots for all open documents and the paths on the
+   * "extra classpath" config option to the interpreter's classpath.
    */
-  private String _testClassCall(String s) {
-    LinkedList ll = new LinkedList();
-    if (s.endsWith(";"))
-      s = _deleteSemiColon(s);
-    StringTokenizer st = new StringTokenizer(s);
-    st.nextToken();             //don't want to get back java
-    String argument = st.nextToken();           // must have a second Token
-    while (st.hasMoreTokens())
-      ll.add(st.nextToken());
-    argument = argument + ".main(new String[]{";
-    ListIterator li = ll.listIterator(0);
-    while (li.hasNext()) {
-      argument = argument + "\"" + (String)(li.next()) + "\"";
-      if (li.hasNext())
-        argument = argument + ",";
-    }
-    argument = argument + "});";
-    return  argument;
-  }
-
-  private void _resetInteractionsClasspath() {
+  public void resetInteractionsClasspath() {
     // Ideally, we'd like to put the open docs before the config option,
     //  but this is inconsistent with how the classpath was defined
     //  as it was built up.  (The config option is inserted on startup,
     //  and docs are added as they are opened.  It shouldn't switch after
     //  a reset.)
+
     Vector<File> cp = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
     if(cp!=null) {
       Enumeration<File> enum = cp.elements();
       while(enum.hasMoreElements()) {
-        _interpreterControl.addClassPath(enum.nextElement().getAbsolutePath());
+        _interactionsModel.addToClassPath(enum.nextElement().getAbsolutePath());
       }
     }
-
-     File[] sourceRoots = getSourceRootSet();
-     for (int i = 0; i < sourceRoots.length; i++) {
-       _interpreterControl.addClassPath(sourceRoots[i].getAbsolutePath());
-     }
-     
+    
+    File[] sourceRoots = getSourceRootSet();
+    for (int i = 0; i < sourceRoots.length; i++) {
+      _interactionsModel.addToClassPath(sourceRoots[i].getAbsolutePath());
+    }
   }
 
   private class ExtraClasspathOptionListener implements OptionListener<Vector<File>> {
@@ -2671,77 +2426,38 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       if(cp!=null) {
         Enumeration<File> enum = cp.elements();
         while(enum.hasMoreElements()) {
-          _interpreterControl.addClassPath(enum.nextElement().getAbsolutePath());
+          _interactionsModel.addToClassPath(enum.nextElement().getAbsolutePath());
         }
-      } 
-    }    
-  }
-  
-  /**
-   * Called when the interactions reset process begins. This will diabled the
-   * reset and make the interactions pane uneditable.
-   */
-  public void interactionsResetting() {
-    if (!_waitingForFirstInterpreter) {
-      _interactionsDoc.insertBeforeLastPrompt("Resetting Interactions...\n",
-                                              InteractionsDocument.ERROR_STYLE);
-      _notifier.notifyListeners(new EventNotifier.Notifier() {
-        public void notifyListener(GlobalModelListener l) {
-          l.interactionsResetting();
-        }
-      });
-    }
-  }
-
-  /**
-   * Called when a new interpreter has been registered.
-   * If the setup works and the package directory exists,
-   * interactionsReset() is fired.
-   */
-  public void interactionsReady() {
-    if (!_waitingForFirstInterpreter) {
-      _resetInteractionsClasspath();
-      _interactionsDoc.reset();
-
-      _notifier.notifyListeners(new EventNotifier.Notifier() {
-        public void notifyListener(GlobalModelListener l) {
-          l.interactionsReset();
-        }
-      });
-      
-      if (_docBeingTested != null) {
-        JUnitError[] errors = new JUnitError[1];
-        String fileName = null;
-        try {
-          fileName = _docBeingTested.getDocument().getFile().getAbsolutePath();
-        }
-        catch (IllegalStateException ise) {
-        }
-        catch (FileMovedException fme) {
-          fileName = fme.getFile().getAbsolutePath();
-        }
-        errors[0] = new JUnitError(fileName, -1, -1, "Previous test was interrupted", true, 
-                                   "", "No associated stack trace");
-        _docBeingTested.setJUnitErrorModel(new JUnitErrorModel(_docBeingTested.getDocument(), errors));
-        _docBeingTested = null;
-        _notifier.notifyListeners(new EventNotifier.Notifier() {
-          public void notifyListener(GlobalModelListener l) {
-            l.junitEnded();
-          }
-        });
       }
     }
-    _waitingForFirstInterpreter = false;
   }
 
   /**
-   * Deletes the last character of a string.  Assumes semicolon at the
-   * end, but does not check.  Helper for _testClassCall(String).
-   * @param s
-   * @return
+   * Called when the JVM used for unit tests has registered.
    */
-  private String _deleteSemiColon(String s) {
-    return  s.substring(0, s.length() - 1);
+  public void junitJVMReady() {
+    
+    if (_docBeingTested != null) {
+      JUnitError[] errors = new JUnitError[1];
+      String fileName = null;
+      try {
+        fileName = _docBeingTested.getDocument().getFile().getAbsolutePath();
+      }
+      catch (IllegalStateException ise) {
+      }
+      catch (FileMovedException fme) {
+        fileName = fme.getFile().getAbsolutePath();
+      }
+      errors[0] = new JUnitError(fileName, -1, -1, "Previous test was interrupted", true,
+                                 "", "No associated stack trace");
+      _docBeingTested.setJUnitErrorModel(new JUnitErrorModel(_docBeingTested.getDocument(), errors));
+      _docBeingTested = null;
+      _notifier.notifyListeners(new EventNotifier.Notifier() {
+        public void notifyListener(GlobalModelListener l) {
+          l.junitEnded();
+        }
+      });
+    }
   }
 
 }

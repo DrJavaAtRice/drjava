@@ -97,19 +97,16 @@ public interface GlobalModel {
    * Gets a ListModel of the open definitions documents.
    */
   public ListModel getDefinitionsDocuments();
+  
+  /**
+   * Returns the interactions model.
+   */
+  public InteractionsModel getInteractionsModel();
 
   /**
    * Gets the (toolkit-independent) interactions document.
    */
   public InteractionsDocument getInteractionsDocument();
-  
-  /**
-   * Gets the Swing adapter used in the Interactions document.
-   * This should ideally be refactored so the model doesn't have
-   * to use Swing, but all the other documents are Swing anyway.
-   * (Interactions are special because they're used in Eclipse.)
-   */
-  public SwingDocumentAdapter getSwingInteractionsDocument();
 
   /**
    * Gets the junit document.
@@ -216,17 +213,6 @@ public interface GlobalModel {
   public void resetInteractions();
   
   /**
-   * Called when the interactionsJVM has begun to be resetted
-   */
-  public void interactionsResetting();
-  
-  /**
-   * Called when a new InteractionsJVM has registered as is ready 
-   * for use.
-   */
-  public void interactionsReady();
-
-  /**
    * Resets the console.
    * Fires consoleReset() event.
    */
@@ -244,11 +230,6 @@ public interface GlobalModel {
   /** Prints System.err to the DrJava console. */
   public void systemErrPrint(String s);
 
-  /** Called when the repl prints to System.out. */
-  public void replSystemOutPrint(String s);
-
-  /** Called when the repl prints to System.err. */
-  public void replSystemErrPrint(String s);
 
   /** Called when the debugger wants to print a message. */
   public void printDebugMessage(String s);
@@ -257,43 +238,6 @@ public interface GlobalModel {
    * Blocks until the interpreter has registered.
    */
   public void waitForInterpreter();
-
-  /**
-   * Signifies that the most recent interpretation completed successfully,
-   * returning no value.
-   */
-  public void replReturnedVoid();
-
-  /**
-   * Signifies that the most recent interpretation completed successfully,
-   * returning a value.
-   *
-   * @param result The .toString-ed version of the value that was returned
-   *               by the interpretation. We must return the String form
-   *               because returning the Object directly would require the
-   *               data type to be serializable.
-   */
-  public void replReturnedResult(String result);
-
-  /**
-   * Signifies that the most recent interpretation was ended
-   * due to an exception being thrown.
-   *
-   * @param exceptionClass The name of the class of the thrown exception
-   * @param message The exception's message
-   * @param stackTrace The stack trace of the exception
-   */
-  public void replThrewException(String exceptionClass,
-                                 String message,
-                                 String stackTrace);
-
-  /**
-   * Signifies that the most recent interpretation contained a call to
-   * System.exit.
-   *
-   * @param status The exit status that will be returned.
-   */
-  public void replCalledSystemExit(int status);
 
   /**
    * Returns all registered compilers that are actually available.

@@ -40,8 +40,8 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestInteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
+import edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractionsModel;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 
@@ -61,6 +61,7 @@ import java.rmi.registry.Registry;
 public class InteractionsPaneTest extends TestCase {
   
   protected SwingDocumentAdapter _adapter;
+  protected InteractionsModel _model;
   protected InteractionsDocument _doc;
   protected InteractionsPane _pane;
   protected InteractionsController _controller;
@@ -88,17 +89,19 @@ public class InteractionsPaneTest extends TestCase {
    */
   public void setUp() {
     _adapter = new SwingDocumentAdapter();
-    _doc = new TestInteractionsDocument(_adapter);
+    _model = new TestInteractionsModel(_adapter);
+    _doc = _model.getDocument();
     _pane = new InteractionsPane(_adapter);
     // Make tests silent
     _pane.setBeep(new TestBeep());
-    
-    _controller = new InteractionsController(_doc, _adapter, _pane);
+
+    _controller = new InteractionsController(_model, _adapter, _pane);
   }
   
   public void tearDown() {
     _controller = null;
     _doc = null;
+    _model = null;
     _pane = null;
     _adapter = null;
     System.gc();
@@ -244,5 +247,32 @@ public class InteractionsPaneTest extends TestCase {
     assertEquals("Document should not have changed.",
                  origLength,
                  _doc.getDocLength());
+  }
+  
+  /**
+   * Tests that the caret is put in the correct position after an insert.
+   */
+  public void testCaretUpdatedOnInsert() throws DocumentAdapterException {
+    _doc.insertText(_doc.getDocLength(), "typed text",
+                    InteractionsDocument.DEFAULT_STYLE);
+    int pos = _doc.getDocLength() - 5;
+    _pane.setCaretPosition(pos);
+    
+    // Insert text before the prompt
+    _doc.insertBeforeLastPrompt("aa", InteractionsDocument.DEFAULT_STYLE);
+    assertEquals("caret should be in correct position",
+                 pos + 2, _pane.getCaretPosition());
+    
+    // Move caret to prompt and insert more text
+    _pane.setCaretPosition(_doc.getPromptPos());
+    _doc.insertBeforeLastPrompt("b", InteractionsDocument.DEFAULT_STYLE);
+    assertEquals("caret should be at prompt",
+                 _doc.getPromptPos(), _pane.getCaretPosition());
+    
+    // Move caret before prompt and insert more text
+    _pane.setCaretPosition(0);
+    _doc.insertBeforeLastPrompt("ccc", InteractionsDocument.DEFAULT_STYLE);
+    assertEquals("caret should be at prompt",
+                 _doc.getPromptPos(), _pane.getCaretPosition());
   }
 }

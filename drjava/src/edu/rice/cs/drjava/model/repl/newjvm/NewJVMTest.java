@@ -211,8 +211,9 @@ public class NewJVMTest extends TestCase {
     private InterpretResultVisitor<Object> _testHandler;
 
     public TestJVMExtension() throws RemoteException { 
-      super(null);
+      super();
       _testHandler = new TestResultHandler();
+      startInterpreterJVM();
       ensureInterpreterConnected();
     }
     

@@ -147,6 +147,32 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     StringReader reader = new StringReader("package " + packageName + ";");
     _djInterpreter.interpret(reader, "DrJava");
   }
+  
+  /**
+   * Assigns the given value to the given name in the interpreter.
+   * @param name Name of the variable
+   * @param value Value to assign
+   */
+  public void defineVariable(String name, Object value) {
+    _djInterpreter.defineVariable(name, value);
+  }
+  
+  /**
+   * Sets whether protected and private variables should be accessible in
+   * the interpreter.
+   * @param accessible Whether protected and private variable are accessible
+   */
+  public void setPrivateAccessible(boolean accessible) {
+    _djInterpreter.setAccessible(accessible);
+  }
+  
+  /**
+   * Temporary accessor for DynamicJava's interpreter, to be
+   * used for debugging.
+   */
+  public Interpreter getDynamicJavaInterpreter() {
+    return _djInterpreter;
+  }
 
   /**
    * An extension of DynamicJava's interpreter that makes sure classes are
@@ -224,9 +250,11 @@ public class DynamicJavaAdapter implements JavaInterpreter {
         }
 
         return result;
-      } catch (ExecutionError e) {
+      }
+      catch (ExecutionError e) {
         throw new InterpreterException(e);
-      } catch (ParseError e) {
+      }
+      catch (ParseError e) {
         throw new InteractionsException("There was a syntax error in the " +
                                         "previous input.");
         //throw new InterpreterException(e);

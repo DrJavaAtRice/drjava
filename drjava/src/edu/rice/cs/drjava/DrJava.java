@@ -50,6 +50,7 @@ import javax.swing.*;
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.drjava.ui.SplashScreen;
 import edu.rice.cs.drjava.ui.AWTExceptionHandler;
+import edu.rice.cs.drjava.ui.SimpleInteractionsWindow;
 import edu.rice.cs.util.PreventExitSecurityManager;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.OutputStreamRedirector;
@@ -72,6 +73,7 @@ public class DrJava implements OptionConstants {
   private static PreventExitSecurityManager _manager;
   private static String[] _filesToOpen = new String[0];
   private static boolean _attemptingAugmentedClasspath = false;
+  private static boolean _showDrJavaDebugConsole = false;
   
   /*
    * Config objects can't be public static final, since we have to delay 
@@ -172,6 +174,10 @@ public class DrJava implements OptionConstants {
           }
         }));
         
+        // Show debug console if enabled
+        if (_showDrJavaDebugConsole) {
+          _showDrJavaDebugConsole(mf);
+        }
       }
         
     } 
@@ -202,11 +208,15 @@ public class DrJava implements OptionConstants {
         }
       }
       
-      if (args[i].equals("-attemptingAugmentedClasspath")) {
+      else if (args[i].equals("-attemptingAugmentedClasspath")) {
         _attemptingAugmentedClasspath = true;
       }
       
-      if (args[i].equals("-help") || args[i].equals("-?")) {
+      else if (args[i].equals("-debugConsole")) {
+        _showDrJavaDebugConsole = true;
+      }
+      
+      else if (args[i].equals("-help") || args[i].equals("-?")) {
         displayUsage();
         return false;
       }
@@ -605,6 +615,21 @@ public class DrJava implements OptionConstants {
                                                JOptionPane.YES_NO_OPTION);
     
     return result == JOptionPane.YES_OPTION;
+  }
+  
+  /**
+   * Shows a separate interactions window with a reference to DrJava's
+   * MainFrame defined as "mainFrame".  Useful for debugging DrJava.
+   * @param mf MainFrame to define in the new window
+   */
+  private static void _showDrJavaDebugConsole(MainFrame mf) {
+    SimpleInteractionsWindow window = 
+      new SimpleInteractionsWindow("DrJava Debug Console");
+    window.defineVariable("mainFrame", mf);
+    window.defineVariable("model", mf.getModel());
+    window.defineVariable("config", DrJava.getConfig());
+    window.setInterpreterPrivateAccessible(true);
+    window.show();
   }
   
   public static PreventExitSecurityManager getSecurityManager() {

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -82,9 +82,9 @@ public class InterpreterJVM extends AbstractSlaveJVM
     _junitTestManager = new JUnitTestManager(this);
   }
 
-  protected void handleStart(MasterRemote mainJVM) 
+  protected void handleStart(MasterRemote mainJVM)
   {
-    //_log.log("handleStart...");
+    //_dialog("handleStart");
     _mainJVM = (MainJVMRemoteI) mainJVM;
 
     // redirect stdout
@@ -116,10 +116,10 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }));
     
     // On Windows, any frame or dialog opened from Interactions pane will
-    // appear *behind* DrJava's frame, unless a previous frame or dialog 
-    // is shown here.  Not sure what the difference is, but this hack 
+    // appear *behind* DrJava's frame, unless a previous frame or dialog
+    // is shown here.  Not sure what the difference is, but this hack
     // seems to work.  (I'd be happy to find a better solution, though.)
-    // Only necessary on Windows, since frames and dialogs on other 
+    // Only necessary on Windows, since frames and dialogs on other
     // platforms appear correctly in front of DrJava.
     if (PlatformFactory.ONLY.isWindowsPlatform()) {
       JDialog d = new JDialog();
@@ -127,6 +127,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
       d.show();
       d.hide();
     }
+    //_dialog("interpreter JVM started");
   }
 
   //public InterpretResult interpret(final String s) {

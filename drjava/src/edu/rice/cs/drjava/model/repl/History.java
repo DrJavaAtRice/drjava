@@ -74,6 +74,11 @@ public class History implements OptionConstants {
     DrJava.getConfig().addOptionListener(HISTORY_MAX_SIZE, new HistorySizeOptionListener());
   }
   
+  /**
+   * Creates a new History with the given size.  An option listener is not
+   * added for the config framework.
+   * @param maxSize Number of lines to remember in the history.
+   */
   public History(int maxSize) {
     MAX_SIZE = maxSize;
     // Sanity check on MAX_SIZE
@@ -247,7 +252,7 @@ public class History implements OptionConstants {
   /**
    * The OptionListener for HISTORY_MAX_SIZE
    */
-  private class HistorySizeOptionListener implements OptionListener<Integer> {
+  public class HistorySizeOptionListener implements OptionListener<Integer> {
    
     public void optionChanged (OptionEvent<Integer> oce) {
       int newSize = oce.value.intValue();

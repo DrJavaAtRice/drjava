@@ -40,17 +40,19 @@
 package edu.rice.cs.drjava.model.repl;
 
 import junit.framework.*;
+
 import java.util.Vector;
-import junit.extensions.*;
 import javax.swing.text.BadLocationException;
 import java.io.File;
 import java.io.IOException;
 import java.io.FileReader;
+
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.CodeStatus;
+
 import edu.rice.cs.util.text.DocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
@@ -75,7 +77,7 @@ public class InteractionsDocumentTest extends TestCase {
    * Initialize fields for each test.
    */
   protected void setUp() {
-    _doc = new TestInteractionsDocument(new SwingDocumentAdapter());
+    _doc = new InteractionsDocument(new SwingDocumentAdapter());
   }
   
   /**
@@ -119,14 +121,25 @@ public class InteractionsDocumentTest extends TestCase {
   }
   
   /**
-   * Tests that reset works.
+   * Tests that initial contents are the banner and prompt, and that
+   * reset works.
    */
-  public void testReset() throws DocumentAdapterException {
-    int origLength = _doc.getDocLength();
-    _doc.insertText(origLength, "text", InteractionsDocument.DEFAULT_STYLE);
+  public void testContentsAndReset() throws DocumentAdapterException {
+    String origText = _doc.getBanner() + _doc.getPrompt();
+    assertEquals("Contents before insert", 
+                 origText, _doc.getDocText(0, _doc.getDocLength()));
+    
+    // Insert some text
+    _doc.insertText(_doc.getDocLength(), "text", InteractionsDocument.DEFAULT_STYLE);
     _doc.insertBeforeLastPrompt("before", InteractionsDocument.DEFAULT_STYLE);
+    assertEquals("Contents before reset", 
+                 _doc.getBanner() + "before" + _doc.getPrompt() + "text",
+                 _doc.getDocText(0, _doc.getDocLength()));
+    
+    // Reset should clear
     _doc.reset();
-    assertEquals("Length after reset", origLength, _doc.getDocLength());
+    assertEquals("Contents after reset", 
+                 origText, _doc.getDocText(0, _doc.getDocLength()));
   }
   
   /**
@@ -145,17 +158,23 @@ public class InteractionsDocumentTest extends TestCase {
   }
   
   /**
-   * Dummy InteractionsDocument which cannot interpret anything.
-   * Uses a Swing document for its model.
+   * Tests that recalling commands from the history works.
    */
-  public static class TestInteractionsDocument extends AbstractInteractionsDocument {
-    public TestInteractionsDocument(DocumentAdapter adapter) {
-      super(adapter);
-    }
-    public void interpretCurrentInteraction() {
-      fail("interpretCurrentInteraction called unexpectedly");
-    }
+  public void testRecallFromHistory() throws DocumentAdapterException {
+    String origText = _doc.getDocText(0, _doc.getDocLength());
+    _doc.addToHistory("command");
+    assertEquals("Contents before recall prev", 
+                 origText, _doc.getDocText(0, _doc.getDocLength()));
+    
+    _doc.recallPreviousInteractionInHistory();
+    assertEquals("Contents after recall prev", 
+                 origText + "command", _doc.getDocText(0, _doc.getDocLength()));
+    
+    _doc.recallNextInteractionInHistory();
+    assertEquals("Contents after recall next", 
+                 origText, _doc.getDocText(0, _doc.getDocLength()));
   }
+  
   
   /**
    * Silent beep for a test class.
