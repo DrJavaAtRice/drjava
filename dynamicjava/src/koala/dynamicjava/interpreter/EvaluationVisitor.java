@@ -906,6 +906,13 @@ public class EvaluationVisitor extends VisitorObject<Object> {
           }
         }
       }
+      else { // larg == null, meaning that no args were given
+        if (TigerUtilities.isVarArgs(m) && typs.length==1) {
+            Class<?> compType = typs[0].getComponentType();
+            args = new Object[]{Array.newInstance(compType, 0)};
+        }
+      }
+      
       // Invoke the method
       try {
         Object res = m.invoke(obj, args);
@@ -1008,6 +1015,12 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         }
       }
     }
+    else { // larg == null, meaning that no args were given
+      if (TigerUtilities.isVarArgs(m) && typs.length==1) {
+        Class<?> compType = typs[0].getComponentType();
+        args = new Object[]{Array.newInstance(compType, 0)};
+      }
+    }
 
     // Invoke the method
     try {
@@ -1064,6 +1077,12 @@ public class EvaluationVisitor extends VisitorObject<Object> {
           it.previous(); // back up since we pulled the expression out a few lines above
           args[i] = buildArrayOfRemainingArgs(typs, larg.size(), it);
         }
+      }
+    }
+    else { // larg == null, meaning that no args were given
+      if (TigerUtilities.isVarArgs(m) && typs.length==1) {
+        Class<?> compType = typs[0].getComponentType();
+        args = new Object[]{Array.newInstance(compType, 0)};
       }
     }
 
@@ -1158,6 +1177,12 @@ public class EvaluationVisitor extends VisitorObject<Object> {
           it.previous(); // back up since we pulled the expression out a few lines above
           args[i] = buildArrayOfRemainingArgs(typs, larg.size(), it);
         }
+      }
+    }
+    else { // larg == null, meaning that no args were given
+      if (TigerUtilities.isVarArgs(cons) && typs.length==1) {
+        Class<?> compType = typs[0].getComponentType();
+        args = new Object[]{Array.newInstance(compType, 0)};
       }
     }
 
@@ -1268,8 +1293,14 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         }
       }
     } 
-    else {
-      args = new Object[] { node.getExpression().acceptVisitor(this) };
+    else { // larg == null, meaning that no args were given
+      if (TigerUtilities.isVarArgs(cons) && typs.length==1) {
+        Class<?> compType = typs[0].getComponentType();
+        args = new Object[]{node.getExpression().acceptVisitor(this), Array.newInstance(compType, 0)};
+      }
+      else {
+        args = new Object[] { node.getExpression().acceptVisitor(this) };
+      }
     }
 
     // Invoke the constructor
@@ -1326,6 +1357,12 @@ public class EvaluationVisitor extends VisitorObject<Object> {
           it.previous(); // back up since we pulled the expression out a few lines above
           args[i] = buildArrayOfRemainingArgs(typs, larg.size(), it);
         }
+      }
+    }
+    else { // larg == null, meaning that no args were given
+      if (TigerUtilities.isVarArgs(cons) && typs.length==1) {
+        Class<?> compType = typs[0].getComponentType();
+        args = new Object[]{Array.newInstance(compType, 0)};
       }
     }
 

@@ -404,25 +404,62 @@ public class EvaluationVisitorTest extends DynamicJavaTestCase {
       "(new ClassG()).new Inner(\"a\",\"b\",\"c\",\"d\").getStr();\n";
     res = interpret(text);
     assertEquals("Wrong Output.", "abcd", res);
+   
     
     text =
-      "public class B {\n"+
-      "  public class C {\n"+
-      "    String str = \"\";\n"+
-      "    public C(String ... args){\n"+
-      "      for(String  s: args) {\n"+
-      "        str = str+s;\n"+
-      "      }\n"+
-      "    }\n"+
-      "    public String getStr(){\n"+
-      "      return str;\n"+
-      "    }\n"+
-      "  }\n"+
-      "}\n"+
-      "(new B()).new C(\"Str1\",\"Str2\",\"Str3\",\"Str4\").getStr();\n";
+      "interface Lambda { public Object apply(Object ... args); } \n" +
+      "Lambda l = new Lambda() { \n" +
+      "  public Object apply(Object... args) { \n" +
+      "    return true; \n" +
+      "  } \n" +
+      "}; \n" +
+      "l.apply()";
     res = interpret(text);
-    assertEquals("Wrong Output.", "Str1Str2Str3Str4", res);
+    assertEquals("Wrong output.", Boolean.TRUE, res);
+    
   }
+  
+  public void testInnerClassScoping() {
+    String text;
+    Object res;
     
+    text = 
+      "interface I { \n" +
+      "  String foo(); \n" +
+      "} \n" +
+      "class ClassH { \n" +
+      "  public String run() { \n" +
+      "    final String str = \"hi\"; \n" +
+      "    return new I() { \n" +
+      "      public String foo() { \n" +
+      "        return str + \" there!\"; \n" +
+      "      } \n" +
+      "    }.foo(); \n" +
+      "  } \n" +
+      "} \n" +
+      "new ClassH().run()";
     
+    res = interpret(text);
+    assertEquals("Wrong Output.", "hi there!", res);
+    
+    // The feature tested by this block of code was not
+    // implemented in dynamicjava since the beginning
+    text =
+      "public class ClassF { \n" +
+      "  public String run() { \n" +
+      "    final String str = \"hi\"; \n" +
+      "    class B { \n" +
+      "      public String foo() { \n" +
+      "        return str + \" there!\"; \n" +
+      "      } \n" +
+      "    } \n" +
+      "    return new B().foo(); \n" +
+      "  } \n" +
+      "} \n" +
+      "new ClassF().run()";
+//    res = interpret(text);
+//    assertEquals("Wrong Output.", "hi there!", res);
+    
+  }
+  
 }
