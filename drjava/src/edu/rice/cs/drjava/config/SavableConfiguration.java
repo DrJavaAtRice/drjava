@@ -75,7 +75,7 @@ public class SavableConfiguration extends Configuration {
    * Used to save the values from this Configuration into the given OutputStream
    * as a Properties file. The elements weren't ordered, so now the properties
    * are written in the same way as the about dialog.
-   * Values equals to their defaults are not written to disk.
+   * Values equal to their defaults are not written to disk.
    */
   public void saveConfiguration(OutputStream os, String header) throws IOException {
     OutputStreamWriter osw = new OutputStreamWriter(os);

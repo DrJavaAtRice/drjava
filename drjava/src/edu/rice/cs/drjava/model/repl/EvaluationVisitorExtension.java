@@ -180,7 +180,39 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
       if (node.isFinal()) {
         _context.setConstant(node.getName(), UninitializedObject.INSTANCE);
       } else {
-        _context.set(node.getName(), UninitializedObject.INSTANCE);
+        // Non-final variables have default values, and are not uninitialized.
+        // Primitive variables have special default values, Objects default to null.
+        // Fixes bug #797515.
+//        _context.set(node.getName(), UninitializedObject.INSTANCE);
+        Object value = null;
+        if (!c.isPrimitive()) {
+          value = null;
+        }
+        else if (c == byte.class) {
+          value = new Byte((byte)0);
+        }
+        else if (c == short.class) {
+          value = new Short((short)0);
+        }
+        else if (c == int.class) {
+          value = new Integer(0);
+        }
+        else if (c == long.class) {
+          value = new Long(0L);
+        }
+        else if (c == float.class) {
+          value = new Float(0.0f);
+        }
+        else if (c == double.class) {
+          value = new Double(0.0d);
+        }
+        else if (c == char.class) {
+          value = new Character('\u0000');
+        }
+        else if (c == boolean.class) {
+          value = new Boolean(false);
+        }
+        _context.set(node.getName(), value);
       }
     }
     return Interpreter.NO_RESULT;

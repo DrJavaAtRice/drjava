@@ -289,6 +289,33 @@ public final class JavaInterpreterTest extends TestCase {
 
     _interpreter.interpret("int c = a++;");
   }
+  
+  /** 
+   * Tests that variables are assigned default values.
+   */
+  public void testVariableDefaultValues() throws ExceptionReturnedException {
+    _interpreter.interpret("byte b");
+    _interpreter.interpret("short s");
+    _interpreter.interpret("int i");
+    _interpreter.interpret("long l");
+    _interpreter.interpret("float f");
+    _interpreter.interpret("double d");
+    _interpreter.interpret("char c");
+    _interpreter.interpret("boolean bool");
+    _interpreter.interpret("String str");
+    Pair[] cases = new Pair[] {
+      Pair.make("b", new Byte((byte)0)),
+      Pair.make("s", new Short((short)0)),
+      Pair.make("i", new Integer(0)),
+      Pair.make("l", new Long(0L)),
+      Pair.make("f", new Float(0.0f)),
+      Pair.make("d", new Double(0.0d)),
+      Pair.make("c", "'" + new Character('\u0000') + "'"), // quotes are added around chars
+      Pair.make("bool", new Boolean(false)),        
+      Pair.make("str", null)
+    };
+    tester(cases);
+  }
 
   /**
    * Tests that variable declarations with errors will not allow the interpreter

@@ -86,7 +86,12 @@ public class OptionMapLoader implements OptionConstants {
    */
   public OptionMapLoader(InputStream is) throws IOException {
     this(new Properties(DEFAULT_STRINGS));
-    prop.load(is);
+    try {
+      prop.load(is);
+    }
+    finally {
+      is.close();
+    }
   }
   
   private final Properties prop;

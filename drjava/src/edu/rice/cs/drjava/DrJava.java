@@ -306,7 +306,12 @@ public class DrJava implements OptionConstants {
       getConfig().saveConfiguration();
     }
     catch(IOException e) {
-      // for now, do nothing
+      JOptionPane.showMessageDialog(null,
+                                    "Could not save the location of tools.jar in \n" +
+                                    "the '.drjava' file in your home directory. \n" +
+                                    "Another process may be using the file.\n\n" + e,
+                                    "Could Not Save Changes",
+                                    JOptionPane.ERROR_MESSAGE);  
       // TODO: log this error
     }
   }
