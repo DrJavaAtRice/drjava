@@ -90,7 +90,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   private final OpenDefinitionsDocument _doc;
   private UndoAction _undoAction;
   private RedoAction _redoAction;
-  
+  private boolean testVariable;   //For Tests ONLY
 //  private Document _defdoc;
   
   /**
@@ -461,23 +461,29 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
              CompoundUndoManager undoMan = _doc.getUndoManager();
           //int key = undoMan.startCompoundEdit();
           //        System.out.println("supering 1 " + isAltF4);
-          super.processKeyEvent(e);
+             
+             super.processKeyEvent(e);
           // We call endCompoundEdit() here because one will automatically start when processKeyEvent finishes (see the definition of _undoListener).
           endCompoundEdit();
 //          undoMan.endCompoundEdit(key); //commented out because of frenchkeyboard fix
           //        e.consume();
         }
         else {
+          
+
+          
           // The following conditional fixes bug #676586 by ignoring typed events when the meta key is down
           // and fixes bug #905405 "Undo Alt+Anything Causes Exception" by ignoring typed events when
           // the alt key is down.
           // NOTE: no longer need to check for alt since we now only start a new compound edit if an undoable edit actually happened.
           if ((((e.getModifiers() & InputEvent.META_MASK) != 0)) // || ((e.getModifiers() & InputEvent.ALT_MASK) != 0)) //fixed for frenchkeyboard support
                 && e.getKeyCode() == KeyEvent.VK_UNDEFINED) {
+            
             //            //          System.out.println("not supering 1 " + isAltF4);
             return;
           }
           
+                    
           // The following conditional fixes ease of use issue 693253 by checking if a typed event is
           // shift-delete or shift-backspace and then performing a delete or backspace operation,
           // respectively
@@ -536,7 +542,17 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
               //            }
             }
             //          System.out.println("supering 3 " + isAltF4);
-            super.processKeyEvent(e);
+        
+        if((e.getModifiers()&InputEvent.ALT_MASK)!=0){   //If ALT_MASK is actually pressed, which means !=0 // For tests only
+          testVariable = true;// For tests only
+        }// For tests only
+        else{// For tests only
+          testVariable = false;// For tests only
+        }// For tests only
+        
+            
+        
+        super.processKeyEvent(e);
           }
           //        else {
           //          e.consume();
@@ -896,6 +912,11 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     super.setDocument(doc);
   }
 
+  public boolean checkAltKey(){ // For tests only
+    return testVariable;
+  }
+  
+  
   /**
    * Add a ErrorCaretListener to this pane, keeping it
    * accessible so its error model can be updated later.
