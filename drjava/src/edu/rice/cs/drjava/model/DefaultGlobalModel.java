@@ -49,6 +49,7 @@ import javax.swing.ListModel;
 import javax.swing.DefaultListModel;
 import java.io.*;
 import java.util.*;
+import java.net.ServerSocket;
 
 import java.text.AttributedString;
 import java.text.AttributedCharacterIterator;
@@ -116,6 +117,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
   // Create a debug manager
   private DebugManager _debugManager = null;
+  private int _debugPort = -1;
 
   public static final Indenter INDENTER;
 
@@ -491,9 +493,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       _interpreterControl.killInterpreter();
 
       // Clean up debugger if necessary
-      if ((_debugManager != null) && (_debugManager.isReady())) {
-        _debugManager.endSession();
-      }
+      //if ((_debugManager != null) && (_debugManager.isReady())) {
+      //  _debugManager.endSession();
+      //}
 
       DrJava.getSecurityManager().exitVM(0);
     }
@@ -1085,6 +1087,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    */
   public DebugManager getDebugManager() {
     return _debugManager;
+  }
+  
+  /**
+   * Returns an available port number to use for debugging the interactions JVM.
+   * @throws IOException if unable to get a valid port number.
+   */
+  public int getDebugPort() throws IOException {
+    if (_debugPort == -1) {
+      ServerSocket socket = new ServerSocket(0);
+      _debugPort = socket.getLocalPort();
+      socket.close();
+    }
+    return _debugPort;
   }
 
   /**
@@ -1986,7 +2001,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
           _debugManager = new DebugManager(this);
         }
         catch( NoClassDefFoundError ncdfe ){
-          // JSwat not present, so we won't use it.
+          // JPDA not available, so we won't use it.
+          _debugManager = null;
+        }
+        catch(DebugException de) {
+          // Problem while connecting, so we won't use debugger.
+          _debugManager = null;
         }
       }
       else {

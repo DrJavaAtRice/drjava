@@ -526,7 +526,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   /** Enables the debugger */
   private Action _toggleDebuggerAction =
-    new AbstractAction("Debugger Enabled")
+    new AbstractAction("Debug Mode")
   {
     public void actionPerformed(ActionEvent ae) {
       toggleDebugger();
@@ -544,7 +544,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** Resumes debugging */
   private Action _resumeDebuggerAction =
-    new AbstractAction("Resume Debugging")
+    new AbstractAction("Resume Debugger")
   {
     public void actionPerformed(ActionEvent ae) {
       _resumeDebugger();
@@ -570,7 +570,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   private Action _suspendDebugAction =
-    new AbstractAction("Suspend Debugging")
+    new AbstractAction("Suspend Debugger")
   {
     public void actionPerformed(ActionEvent ae) {
       _debugSuspend();
@@ -579,7 +579,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** Toggles a breakpoint on the current line */
   private Action _toggleBreakpointAction =
-    new AbstractAction("Toggle Breakpoint on Current Line")
+    new AbstractAction("Set Breakpoint on Current Line")
   {
     public void actionPerformed(ActionEvent ae) {
       _toggleBreakpoint();
@@ -874,12 +874,19 @@ public class MainFrame extends JFrame implements OptionConstants {
       DebugManager debugger = _model.getDebugManager();
       if (debugger.isReady()) {
         // Turn off debugger
-        debugger.endSession();
+        debugger.shutdown();
         hideDebugger();
       }
       else {
         // Turn on debugger
-        showDebugger();
+        try {
+          debugger.startup();
+          showDebugger();
+        }
+        catch (DebugException de) {
+          _showError(de, "Debugger Error",
+                     "Could not start the debugger.");
+        }
       }
     }
     catch (NoClassDefFoundError err) {
@@ -889,26 +896,33 @@ public class MainFrame extends JFrame implements OptionConstants {
                  "in your classpath when you start DrJava.");
       _setDebugMenuItemsEnabled(false);
     }
+    
   }
 
   /**
    * Display the debugger tab and update the Debug menu accordingly.
    */
   public void showDebugger() {
-     _model.getDebugManager().init(_debugPanel.getUIAdapter());
+    /*
+    _model.getDebugManager().init(_debugPanel.getUIAdapter());
     _tabbedPane.add("Debug", _debugPanel);
     _tabbedPane.setSelectedComponent(_debugPanel);
+    */
     _setDebugMenuItemsEnabled(true);
+    
   }
 
   /**
    * Hide the debugger tab and update the Debug menu accordingly.
    */
   public void hideDebugger() {
+    /**
     _model.getDebugManager().cleanUp();
     _tabbedPane.remove(_debugPanel);
     _debugPanel.reset();
+    */
     _setDebugMenuItemsEnabled(false);
+    
   }
 
 
@@ -1186,6 +1200,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Runs the debugger on the currently active document
    */
   private void _runDebugger() {
+    /*
     OpenDefinitionsDocument doc = _model.getActiveDocument();
     try{
       _model.getDebugManager().start(doc);
@@ -1195,6 +1210,14 @@ public class MainFrame extends JFrame implements OptionConstants {
       // issue
       _showClassNotFoundError(cnfe);
     }
+    */
+  }
+  
+  /**
+   * Suspends the current execution of the debugger
+   */
+  private void _debugSuspend(){
+    _model.getDebugManager().suspend();
   }
 
   /**
@@ -1208,28 +1231,31 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Steps the debugger
    */
   private void _debugStep() {
-    _model.getDebugManager().step();
+    //_model.getDebugManager().step();
   }
 
   /**
    * Runs the next line through the debugger
    */
   private void _debugNext(){
-    _model.getDebugManager().next();
+    //_model.getDebugManager().next();
   }
 
-  /**
-   * Suspends the current execution of the debugger
-   */
-  private void _debugSuspend(){
-    _model.getDebugManager().suspend();
-  }
+  
 
   /**
    * Toggles a breakpoint on the current line
    */
   private void _toggleBreakpoint() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
+    try {
+      _model.getDebugManager().setBreakpoint(doc, _currentDefPane.getCurrentLine());
+    }
+    catch (DebugException de) {
+      _showError(de, "Debugger Error",
+                 "Could not set a breakpoint at the current line.");
+    }
+    /**
     try {
       _model.getDebugManager().
         toggleBreakpoint(doc, doc.getDocument().getCurrentLine());
@@ -1243,20 +1269,21 @@ public class MainFrame extends JFrame implements OptionConstants {
     catch (DebugException de) {
       _showDebugError(de);
     }
+    */
   }
 
   /**
    * Displays all breakpoints currently set in the debugger
    */
   private void _printBreakpoints() {
-    _model.getDebugManager().printBreakpoints();
+    //_model.getDebugManager().printBreakpoints();
   }
 
   /**
    * Clears all breakpoints from the debugger
    */
   private void _clearAllBreakpoints() {
-    _model.getDebugManager().clearAllBreakpoints(true);
+    //_model.getDebugManager().clearAllBreakpoints(true);
   }
 
 
@@ -1779,7 +1806,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private JMenu _setUpDebugMenu(int mask) {
     JMenuItem tempItem;
-    JMenu debugMenu = new JMenu("Debug");
+    JMenu debugMenu = new JMenu("Debugger");
 
     // Enable debugging item
     _debuggerEnabledMenuItem = new JCheckBoxMenuItem(_toggleDebuggerAction);
@@ -1789,17 +1816,17 @@ public class MainFrame extends JFrame implements OptionConstants {
     debugMenu.addSeparator();
 
     // TO DO: Add accelerators?
-    _runDebuggerMenuItem = debugMenu.add(_runDebuggerAction);
+    //_runDebuggerMenuItem = debugMenu.add(_runDebuggerAction);
     _suspendDebugMenuItem = debugMenu.add(_suspendDebugAction);
     _resumeDebugMenuItem = debugMenu.add(_resumeDebuggerAction);
-    _stepDebugMenuItem = debugMenu.add(_stepDebugAction);
-    _nextDebugMenuItem = debugMenu.add(_nextDebugAction);
+    //_stepDebugMenuItem = debugMenu.add(_stepDebugAction);
+    //_nextDebugMenuItem = debugMenu.add(_nextDebugAction);
 
     debugMenu.addSeparator(); // breakpoints section:
 
     _toggleBreakpointMenuItem = debugMenu.add(_toggleBreakpointAction);
-    _printBreakpointsMenuItem = debugMenu.add(_printBreakpointsAction);
-    _clearAllBreakpointsMenuItem = debugMenu.add(_clearAllBreakpointsAction);
+    //_printBreakpointsMenuItem = debugMenu.add(_printBreakpointsAction);
+    //_clearAllBreakpointsMenuItem = debugMenu.add(_clearAllBreakpointsAction);
 
     // Start off disabled
     _setDebugMenuItemsEnabled(false);
@@ -1813,14 +1840,14 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _setDebugMenuItemsEnabled(boolean enabled) {
     _debuggerEnabledMenuItem.setState(enabled);
-    _runDebuggerMenuItem.setEnabled(enabled);
-    _resumeDebugMenuItem.setEnabled(enabled);
-    _stepDebugMenuItem.setEnabled(enabled);
-    _nextDebugMenuItem.setEnabled(enabled);
+    //_runDebuggerMenuItem.setEnabled(enabled);
     _suspendDebugMenuItem.setEnabled(enabled);
+    _resumeDebugMenuItem.setEnabled(enabled);
+    //_stepDebugMenuItem.setEnabled(enabled);
+    //_nextDebugMenuItem.setEnabled(enabled);
     _toggleBreakpointMenuItem.setEnabled(enabled);
-    _printBreakpointsMenuItem.setEnabled(enabled);
-    _clearAllBreakpointsMenuItem.setEnabled(enabled);
+    //_printBreakpointsMenuItem.setEnabled(enabled);
+    //_clearAllBreakpointsMenuItem.setEnabled(enabled);
   }
 
   /**
@@ -2498,6 +2525,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     public void interactionsReset() {
+      if (_debugPanel != null) {
+        _model.getDebugManager().shutdown();
+        hideDebugger();
+      }
       interactionEnded();
     }
 

@@ -52,7 +52,6 @@ import edu.rice.cs.drjava.model.*;
  * @version $Id$
  */
 public class NewJVMTest extends TestCase {
-  private static GlobalModel _model;
   private static TestJVMExtension _jvm;
 
   public NewJVMTest(String name) {
@@ -67,8 +66,7 @@ public class NewJVMTest extends TestCase {
     TestSuite suite = new TestSuite(NewJVMTest.class);
     TestSetup setup = new TestSetup(suite) {
       protected void setUp() throws RemoteException {
-        _model = new DefaultGlobalModel();
-        _jvm = new TestJVMExtension(_model);
+        _jvm = new TestJVMExtension();
       }
 
       protected void tearDown() {
@@ -166,8 +164,8 @@ public class NewJVMTest extends TestCase {
     public String exceptionTraceBuf;
     public boolean voidReturnFlag;
 
-    public TestJVMExtension(final GlobalModel model) throws RemoteException { 
-      super(model);
+    public TestJVMExtension() throws RemoteException { 
+      super();
     }
 
     public void resetFlags() {
@@ -187,7 +185,7 @@ public class NewJVMTest extends TestCase {
         this.notify();
       }
     }
-
+    
     public void systemOutPrint(String s) throws RemoteException {
       synchronized(this) {
         outBuf = s;
@@ -226,6 +224,13 @@ public class NewJVMTest extends TestCase {
         //System.out.println("notify void");
         this.notify();
       }
+    }
+    
+    protected int getDebugPort() {
+      return -1;
+    }
+    
+    protected void replCalledSystemExit(int status) {
     }
   }
 }

@@ -58,9 +58,11 @@ import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.config.OptionConstants;
 
+/**
 import com.bluemarsh.jswat.*;
 import com.bluemarsh.jswat.ui.*;
 import com.bluemarsh.jswat.view.*;
+*/
 
 /** 
  * Panel for displaying the debugger input and output in MainFrame.
@@ -75,7 +77,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private final DebugManager _debugger;
   
   private final Hashtable _jswatProperties;
-  private final UIAdapter _uiAdapter;
+  //private final UIAdapter _uiAdapter;
 
   private final StyledDocument _outputDoc;
   private final JScrollPane _scrollPane;
@@ -123,7 +125,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _debugger = _model.getDebugManager();
     
     _jswatProperties = new Hashtable();
-    _uiAdapter = new DebugPanelUIAdapter();
+    //_uiAdapter = new DebugPanelUIAdapter();
     
     // Set up layout of panel
     setLayout(new BorderLayout());
@@ -158,10 +160,10 @@ public class DebugPanel extends JPanel implements OptionConstants {
   
   /**
    * Returns the UIAdapter used by JSwat.
-   */
+   *
   public UIAdapter getUIAdapter() {
     return _uiAdapter;
-  }
+  }*/
   
   /**
    * Sets the font for displaying text.
@@ -183,7 +185,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       _appendString(cmd + "\n");
 
       // Execute command
-      _model.getDebugManager().performCommand(cmd);
+      //_model.getDebugManager().performCommand(cmd);
     }
   }
   
@@ -239,65 +241,65 @@ public class DebugPanel extends JPanel implements OptionConstants {
   /**
    * A UIAdapter for JSwat, to be used for displaying JSwat's status.
    */
-  class DebugPanelUIAdapter implements UIAdapter {
+  //class DebugPanelUIAdapter implements UIAdapter {
     
     /**
      * Construct the appropriate user interface and connect all
      * the pieces together. The result should be a fully
      * functional interface that is ready to be used.
-     */
+     *
     public void buildInterface() {
       //DrJava.consoleErr().println("DP: building interface...");
       _debugger.attachLogWriter(_logger);
-    }
+    }*/
     
     /**
      * Indicate if this interface adapter has the ability to find
      * a string in the currently selected source view.
      *
      * @return  true if the ability exists, false otherwise.
-     */
+     *
     public boolean canFindString() {
       // False for now, but we can use Find/Replace later
       return false;
-    }
+    }*/
     
     /**
      * Indicate if this interface adapter has the ability to show
      * source files in a manner appropriate for the user to read.
      *
      * @return  true if the ability exists, false otherwise.
-     */
+     *
     public boolean canShowFile() {
       //DrJava.consoleErr().println("DP: saying that I can show a file...");
       return true;
-    }    
+    }*/
     
     /**
      * Indicate if this interface adapter has the ability to show
      * the status in a manner appropriate for the user to view.
      *
      * @return  true if the ability exists, false otherwise.
-     */
+     *
     public boolean canShowStatus() {
       return false;
-    }
+    }*/
     
     /**
      * Deconstruct the user interface such that all components
      * are made invisible and prepared for non-use.
-     */
+     *
     public void destroyInterface() {
-    }
+    }*/
     
     /**
      * This is called when there are no more open Sessions. The
      * adapter should take the appropriate action at this time.
      * In most cases that will be to exit the JVM.
-     */
+     *
     public void exit() {
       _frame.hideDebugger();
-    }
+    }*/
     
     /**
      * Search for the given string in the currently selected source view.
@@ -309,12 +311,12 @@ public class DebugPanel extends JPanel implements OptionConstants {
      * @return  true if string was found.
      * @exception  NoOpenViewException
      *             Thrown if there is no view to be searched.
-     */
+     *
     public boolean findString(String query, boolean ignoreCase)
       throws NoOpenViewException {
       
       return false;
-    }
+    }*/
     
     /**
      * Searches for the property with the specified key in the property
@@ -322,43 +324,43 @@ public class DebugPanel extends JPanel implements OptionConstants {
      *
      * @param  key  the property key.
      * @return  the value in the property list with the specified key value.
-     */
+     *
     public Object getProperty(String key) {
       return _jswatProperties.get(key);
-    }
+    }*/
     
     /**
      * Retrieves the currently active view in JSwat.
      *
      * @return  selected view, or null if none selected.
-     */
+     *
     public JSwatView getSelectedView() {
       return null;
-    }
+    }*/
     
     /**
      * Called when the Session initialization has completed.
-     */
+     *
     public void initComplete() {
       //DrJava.consoleErr().println("DP: init complete...");
-    }
+    }*/
     
     /**
      * Refresh the display to reflect changes in the program.
      * Generally this means refreshing the panels.
-     */
+     *
     public void refreshDisplay() {
       //DrJava.consoleErr().println("DP: refreshing display...");
       _outputPane.repaint();
       _inputField.repaint();
-    }
+    }*/
     
     /**
      * Save any settings to the appropriate places, the program
      * is about the terminate.
-     */
+     *
     public void saveSettings() {
-    }
+    }*/
     
     /**
      * Stores the given value in the properties list with the given
@@ -369,7 +371,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
      * @param  value  the value corresponding to key, or null to remove
      *                the key and value from the properties.
      * @return  previous value stored using this key.
-     */
+     *
     public Object setProperty(String key, Object value) {
       if (value == null) {
         return _jswatProperties.remove(value);
@@ -377,7 +379,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       else {
         return _jswatProperties.put(key, value);
       }
-    }
+    }*/
     
     /**
      * Show the given file in the appropriate view and make the
@@ -391,8 +393,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
      *                this value if, for instance, they utilize a
      *                scrollable view.
      * @return  true if successful, false if error.
-     */
-
+     *
     public boolean showFile(SourceSource src, int line, int count) {
       //DrJava.consoleErr().println("DP: showFile()...");
       if (src instanceof FileSource) {
@@ -404,13 +405,13 @@ public class DebugPanel extends JPanel implements OptionConstants {
             _model.setActiveDocument(doc);     
      //            DrJava.consoleErr().println("Showing line " + line);     
             if (line > 0) {
-  /*
-        if (_curBP>0 && line != _curBP) // remove existing bp
-  _frame.getCurrentDefPane().getHighlighter().removeHighlight(_curBreakpointTag);
+ 
+        //if (_curBP>0 && line != _curBP) // remove existing bp
+//  _frame.getCurrentDefPane().getHighlighter().removeHighlight(_curBreakpointTag);
 
-       _curBreakpointTag = highlightLine(line, _activeBreakpointHighlightPainter);
-       _curBP = line;
-  */    
+  //     _curBreakpointTag = highlightLine(line, _activeBreakpointHighlightPainter);
+    //   _curBP = line;
+   
        // _frame.getCurrentDefPane().setCaretPosition(doc.getDocument().getCurrentLocation());
        
             }
@@ -438,13 +439,13 @@ public class DebugPanel extends JPanel implements OptionConstants {
               _model.setActiveDocument(doc);
        //              DrJava.consoleErr().println("Showing line " + line);
               if (line > 0) {
-    /* no highlighting
-  if (_curBP>0 && line != _curBP) // remove existing bp
-    _frame.getCurrentDefPane().getHighlighter().removeHighlight(_curBreakpointTag);
+    // no highlighting
+//  if (_curBP>0 && line != _curBP) // remove existing bp
+//    _frame.getCurrentDefPane().getHighlighter().removeHighlight(_curBreakpointTag);
 
-           _curBreakpointTag = highlightLine(line, _activeBreakpointHighlightPainter);
-         _curBP = line;
-    */
+//           _curBreakpointTag = highlightLine(line, _activeBreakpointHighlightPainter);
+//         _curBP = line;
+    
          // _frame.getCurrentDefPane().setCaretPosition(doc.getDocument().getCurrentLocation());
 
               }
@@ -465,16 +466,16 @@ public class DebugPanel extends JPanel implements OptionConstants {
         }
       }
       return false;
-    }
+    }*/
     
     /**
      * Show a status message in a reasonable location.
      *
      * @param  status  message to be shown to the user.
-     */
+     *
     public void showStatus(String status) {
-    }
-  }
+    }*/
+  //}
 
   /**
     * Highlights the given line.

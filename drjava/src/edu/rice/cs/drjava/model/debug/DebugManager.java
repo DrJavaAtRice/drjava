@@ -40,7 +40,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.debug;
 
 import java.io.*;
-import java.util.Iterator;
+import java.util.*;
 
 // DrJava stuff
 import edu.rice.cs.drjava.DrJava;
@@ -50,14 +50,19 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
 // JSwat stuff
+/**
 import com.bluemarsh.jswat.*;
 import com.bluemarsh.jswat.ui.*;
 import com.bluemarsh.jswat.breakpoint.*;
 import com.bluemarsh.util.StringTokenizer;
-import com.sun.jdi.Bootstrap;
+*/
+
+import com.sun.jdi.*;
+import com.sun.jdi.connect.*;
+import com.sun.jdi.request.*;
 
 /**
- * Interface between DrJava and JSwat, a Java debugger.
+ * Interface between DrJava and JPDA.
  * 
  * @version $Id$
  */
@@ -65,17 +70,17 @@ public class DebugManager {
   /**
    * Whether the debugger has been initialized and is ready for use.
    */
-  private boolean _isReady;
+  //private boolean _isReady;
 
   /**
    * Session object used by JSwat.
    */
-  private Session _session;
+  //private Session _session;
   
   /**
    * Instance of JSwat.
    */
-  private JSwat _swat;
+  //private JSwat _swat;
   
   /**
    * Reference to DrJava's model.
@@ -83,32 +88,94 @@ public class DebugManager {
   private GlobalModel _model;
   
   /**
+   * VirtualMachine of the interactions JVM.
+   */
+  private VirtualMachine _vm = null;
+  
+  /**
+   * Manages all event requests in JDI.
+   */
+  private EventRequestManager _eventManager = null;
+  
+  /**
    * Writer to use for output messages.
    */
-  private Writer _logwriter;
+  //private Writer _logwriter;
   
   /**
    * Builds a new DebugManager which interfaces to JSwat.
    * Does not instantiate JSwat until init is called.
    */
-  public DebugManager(GlobalModel model) {
-    _isReady = false;
-    _session = null;
-    _swat = null;
+  public DebugManager(GlobalModel model) throws DebugException {
+    //_isReady = false;
+    //session = null;
+    //_swat = null;
     _model = model;
-    _logwriter = new PrintWriter(DrJava.consoleOut());
+    //_logwriter = new PrintWriter(DrJava.consoleOut());
+  }
+  
+  private void _attachToVM() throws DebugException {
+    VirtualMachineManager vmm = Bootstrap.virtualMachineManager();
+    List connectors = vmm.attachingConnectors();
+    AttachingConnector connector = null;
+    Iterator iter = connectors.iterator();
+    while (iter.hasNext()) {
+      AttachingConnector conn = (AttachingConnector)iter.next();
+      if (conn.name().equals("com.sun.jdi.SocketAttach")) {
+        connector = conn;
+      }
+    }
+    if (connector == null) {
+      throw new DebugException("Could not find an AttachingConnector!");
+    }
+    
+    // Try to connect
+    Map args = connector.defaultArguments();
+    Connector.Argument port = (Connector.Argument) args.get("port");
+    try {
+      int debugPort = _model.getDebugPort();
+      port.setValue("" + debugPort);
+      _vm = connector.attach(args);
+      _eventManager = _vm.eventRequestManager();
+    }
+    catch (IOException ioe) {
+      throw new DebugException("Could not connect to VM: " + ioe);
+    }
+    catch (IllegalConnectorArgumentsException icae) {
+      throw new DebugException("Could not connect to VM: " + icae);
+    }
+  }
+  
+  public void startup() throws DebugException {
+    if (!isReady()) {
+      _attachToVM();
+      
+      //_vm.setDebugTraceMode(0);
+      //String[] excludes = {"java.*", "javax.*", "sun.*", "com.sun.*", "koala.*"};
+      //EventThread eventThread = new EventThread(_vm, excludes, 
+      //                                          new PrintWriter(DrJava.consoleOut())); 
+      //eventThread.setEventRequests(false);
+      //eventThread.start();
+    }
+  }
+  
+  public void shutdown() {
+    if (isReady()) {
+      _vm.dispose();
+      _vm = null;
+    }
   }
   
   /**
    * Returns the status of the debugger
    */
   public boolean isReady() {
-    return _isReady;
+    return _vm != null;
   }
   
   /**
    * Prepares an instantiation of the debugger.
-   */
+   *
   public void init(UIAdapter adapter) {
     _session = new Session();
     
@@ -136,49 +203,49 @@ public class DebugManager {
     // TO DO: start without a file loaded?
     
      _isReady = true;
-   }
+   }*/
   
   /**
    * Cleans up JSwat's session object when the debugger is finished.
-   */
+   *
   public void endSession() {
     Main.endSession(_session);
-  }
+  }*/
   
   /**
    * Cleans up all parts of the debugger after it is finished.
-   */
+   *
   public void cleanUp() {
     _session = null;
     _swat = null;
     
     _isReady = false;
-  }
+  }*/
     
   /**
    * Sends a command directly to JSwat.
    * @param command JSwat command to perform
-   */
+   *
   public void performCommand(String command) {
     Manager manager = _session.getManager(CommandManager.class);
     ((CommandManager)manager).handleInput(command);
-  }
+  }*/
   
   /**
    * Attaches the given Writer directly to JSwat's status Log.
    * @param w Writer to which to write log messages
-   */
+   *
   public void attachLogWriter(Writer w) {
     Log log = _session.getStatusLog();
     log.attach(w);
     log.start();
     _logwriter = w;
-  }
+  }*/
   
  
   /**
    * Starts executing the currently loaded document.
-   */
+   *
   public void start(OpenDefinitionsDocument doc) throws ClassNotFoundException{
 
       _model.saveAllBeforeProceeding(GlobalModelListener.DEBUG_REASON);
@@ -192,43 +259,47 @@ public class DebugManager {
 
     performCommand( "run " + className );
     
+  }*/
+  
+  /**
+   * Suspends execution of the currently running document.
+   */
+  public void suspend() {
+    //performCommand( "suspend" );
+    _vm.suspend();
   }
   
   /**
    * Resumes execution of the currently loaded document.
    */
   public void resume() {
-    performCommand( "resume" );
+    //performCommand( "resume" );
+    _vm.resume();
   }
     
   /** 
    * Steps forward in the execution of the currently loaded document.
    * Stepping will walk into method calls.
-   */
+   *
   public void step() {
     performCommand( "step" );
-  }
+  }*/
   
   /** 
    * Executes the next line of the currently loaded document.
    * Calling next will not walk into method calls.
-   */
+   *
   public void next() {
     performCommand( "next" );
-  }
+  }*/
   
-  /**
-   * Suspends execution of the currently running document.
-   */
-  public void suspend() {
-    performCommand( "suspend" );
-  }
+  
 
 
   /**
    * Removes all breakpoints from the session.
    * @param visibleMessage Whether to display a status message after clearing
-   */
+   *
   public void clearAllBreakpoints(boolean visibleMessage) {
     BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
     Iterator i=bpManager.breakpoints(true);
@@ -240,7 +311,7 @@ public class DebugManager {
     }
     if (visibleMessage) 
       writeToLog("All breakpoints removed.\n");      
-  }
+  }*/
 
   /**
    * Toggles whether a breakpoint is set at the given line in the given
@@ -251,6 +322,7 @@ public class DebugManager {
   public void toggleBreakpoint(OpenDefinitionsDocument doc, int lineNumber)
     throws IOException, ClassNotFoundException, DebugException {  
     
+    /**
     BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
 
     _model.saveAllBeforeProceeding(GlobalModelListener.DEBUG_REASON);
@@ -283,27 +355,76 @@ public class DebugManager {
     }
 
     setBreakpoint(className, lineNumber);
+    */
   }
 
   /**
    * Writes the given string to the log, ignoring exceptions.
    *
    * @param s the string to write to the stream.
-   */
+   *
   protected void writeToLog(String s) {
     try {
       _logwriter.write(s);
     }
     catch (IOException ioe) {}
-  }
+  }*/
   
   /**
    * Sets a breakpoint.
    *
    * @param className the name of the class in which to break
    * @param lineNumber the line number at which to break
-   */    
-  protected void setBreakpoint(String className, int lineNumber) throws DebugException {
+   * @return Whether the breakpoint was successfully set
+   */
+  public boolean setBreakpoint(OpenDefinitionsDocument doc, int lineNumber)
+    throws DebugException
+  {
+    String packageName = "";
+    try {
+      doc.getDocument().getPackageName();
+    }
+    catch (InvalidPackageException e) {
+      // Couldn't find package, pretend there's none
+    }
+    String className = packageName + doc.getClassName();
+    //System.out.println("Setting breakpoint in class: " + className + 
+    //                   ", line: " + lineNumber);
+    
+    // Get all classes that match this name
+    List classes = _vm.classesByName(className);
+    //System.out.println("Num of classes found: " + classes.size());
+    ReferenceType rt = null;
+    Iterator it = classes.iterator();
+    // Assume first one is correct, for now
+    if (it.hasNext()) {
+      rt = (ReferenceType) it.next();
+    }
+    if (rt == null) {
+      //System.out.println("No reference type found");
+      return false;
+    }
+    
+    // Get locations for the line number, use the first
+    try {
+      List lines = rt.locationsOfLine(lineNumber);
+      if (lines.size() == 0) {
+        // Can't find a location on this line
+        //System.out.println("No locations found.");
+        return false;
+      }
+      Location loc = (Location) lines.get(0);
+      BreakpointRequest req = _eventManager.createBreakpointRequest(loc);
+      req.setSuspendPolicy(EventRequest.SUSPEND_ALL);
+      req.enable();
+      //System.out.println("Breakpoint: " + req);
+      return true;
+    }
+    catch (AbsentInformationException aie) {
+      throw new DebugException("Could not find line number: " + aie);
+    }
+    
+    /**
     BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
     try {
       bpManager.createBreakpoint(className, lineNumber);
@@ -313,6 +434,7 @@ public class DebugManager {
       throw new DebugException(cnfe.toString());
     }
     writeToLog("Breakpoint added: " + className + ":" + lineNumber + "\n");
+    */
   }
 
  /**
@@ -323,16 +445,16 @@ public class DebugManager {
   *
   * @param bp The breakpoint to remove.
   * @param className the name of the class the BP is being removed from.
-  */    
+  *
   protected void removeBreakpoint(LineBreakpoint bp, String className) {
     BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);    
     bpManager.removeBreakpoint(bp);
     writeToLog("Breakpoint removed: " + className + ":" + bp.getLineNumber() + "\n");
-  }
+  }*/
 
   /**
    * Prints all location breakpoints via writeToLog().
-   */    
+   *
   public void printBreakpoints() {
     BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
     Iterator i = bpManager.breakpoints(true);
@@ -363,7 +485,7 @@ public class DebugManager {
                    "\n");     
       }
     }
-  }
+  }*/
   
   /*   
   public void addWatch();
@@ -382,7 +504,7 @@ public class DebugManager {
    * 
    * @param doc   document containing class.
    * @return  Classname, or null if error.
-   */
+   *
   private final static String mapClassName(final OpenDefinitionsDocument doc) {
     File source;
     String fpath, rpath;
@@ -425,7 +547,7 @@ public class DebugManager {
     } else {
       return null;
     }    
-  }
+  }*/
   
   
   /*
@@ -436,16 +558,16 @@ public class DebugManager {
    *
    * @author  Nathan Fiedler, with modifications
    */
-  class DebugOutputAdapter implements SessionListener {
+  //class DebugOutputAdapter implements SessionListener {
     /** When this reaches 2, the output streams are finished. */
-    protected int outputCompleteCount;
+    //protected int outputCompleteCount;
     
     
     /**
      * Constructs a DebugOutputAdapter to output to the manager's log.
-     */
+     *
     public DebugOutputAdapter() {
-    }
+    }*/
     
     /**
      * Called when the Session is about to begin an active debugging
@@ -453,7 +575,7 @@ public class DebugManager {
      * Panels are not activated in any particular order.
      *
      * @param  session  Session being activated.
-     */
+     *
     public void activate(Session session) {
       // Attach to the stderr and stdout input streams of the passed
       // VirtualMachine and begin reading from them. Everything read
@@ -471,15 +593,15 @@ public class DebugManager {
         displayOutput(vm.process().getErrorStream(),false);
         displayOutput(vm.process().getInputStream(),true);
       }
-    }
+    }*/
     
     /**
      * Called when the Session is about to close down.
      *
      * @param  session  Session being closed.
-     */
+     *
     public void close(Session session) {
-    }
+    }*/
     
     /**
      * Called when the Session is about to end an active debugging
@@ -488,7 +610,7 @@ public class DebugManager {
      * Panels are not deactivated in any particular order.
      *
      * @param  session  Session being deactivated.
-     */
+     *
     public synchronized void deactivate(Session session) {
       // Wait for the output readers to finish.
       while (outputCompleteCount < 2) {
@@ -498,14 +620,14 @@ public class DebugManager {
           break;
         }
       }
-    }
+    }*/
     
     /** 
      * Create a thread that will retrieve and display any output
      * from the given input stream.
      *
      * @param  is  InputStream to read from.
-     */
+     *
     protected void displayOutput(final InputStream is, final boolean isOut) {
       Thread thr = new Thread("output reader") { 
         public void run() {
@@ -530,25 +652,25 @@ public class DebugManager {
       };
       thr.setPriority(Thread.MIN_PRIORITY);
       thr.start();
-    }
+    }*/
     
     /**
      * Called after the Session has added this listener to the
      * Session listener list.
      *
      * @param  session  Session adding this listener.
-     */
+     *
     public void init(Session session) {
-    }
+    }*/
     
     /**
      * Notify any waiters that one of the reader threads has
      * finished reading its output. This must be a separate
      * method in order to be synchronized on 'this' object.
-     */
+     *
     protected synchronized void notifyOutputComplete() {
       outputCompleteCount++;
       notifyAll();
-    }
-  }
+    }*/
+  //}
 }

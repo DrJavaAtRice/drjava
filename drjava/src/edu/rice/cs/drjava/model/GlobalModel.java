@@ -329,6 +329,12 @@ public interface GlobalModel {
    * Gets the DebugManager, which interfaces with the integrated debugger.
    */
   public DebugManager getDebugManager();
+  
+  /**
+   * Returns an available port number to use for debugging the interactions JVM.
+   * @throws IOException if unable to get a valid port number.
+   */
+  public int getDebugPort() throws IOException;
 
   /**
    * Called to demand that one or more listeners saves all the

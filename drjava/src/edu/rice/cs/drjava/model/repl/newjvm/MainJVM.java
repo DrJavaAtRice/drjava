@@ -57,7 +57,11 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
   /** The name of the RMI object for the present JVM. */
   private final String _identifier;
 
-  /** The global model. */
+  /**
+   * The global model.
+   * This field might be null if the MainJVM is running in a test,
+   * but will never be null in actual use.
+   */
   private GlobalModel _model;
 
   /**
@@ -108,6 +112,13 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     }
 
     restartInterpreterJVM();
+  }
+  
+  /**
+   * Creates a MainJVM without a model.
+   */
+  public MainJVM() throws RemoteException {
+    this(null);
   }
 
   /**
@@ -268,12 +279,28 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
       _startupInProgress = true;
 
       killInterpreter();
+      
+      int debugPort = getDebugPort();
 
       String className = InterpreterJVM.class.getName();
       String[] args = new String[] { getIdentifier() };
       // headless AWT in Java 1.3 on MacOS-X
       // (headless AWT is not supposed to be available until 1.4)
-      String[] jvmargs = new String[] {"-Dcom.apple.backgroundOnly=true"};
+      String[] jvmargs;
+      if (debugPort > -1) {
+        jvmargs = new String[] {
+          "-Dcom.apple.backgroundOnly=true",
+            // For debug interface:
+            "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=" + debugPort,
+            "-Xdebug",
+            "-Xnoagent",
+            "-Djava.compiler=NONE"
+        };
+      }
+      else {
+        jvmargs = new String[] { "-Dcom.apple.backgroundOnly=true" };
+      }
+      
       try {
         //System.err.println("started interpreter jvm");
         _interpreterProcess = ExecJVM.
@@ -287,7 +314,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
               int status = _interpreterProcess.waitFor();
               restartInterpreterJVM();
               if (!_isResetting()) {
-                _model.replCalledSystemExit(status);
+                replCalledSystemExit(status);
               }
             }
             catch (InterruptedException ie) {
@@ -303,6 +330,29 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
       }
       
     }
+  }
+  
+  /**
+   * Returns the debug port to use, as specified by the model.
+   * Returns -1 if no usable port could be found.
+   */
+  protected int getDebugPort() {
+    int port = -1;
+    try {
+      port = _model.getDebugPort();
+    }
+    catch (IOException ioe) {
+      // Can't find port; don't use debugger
+    }
+    return port;
+  }
+  
+  /**
+   * Action to take if the Repl tries to exit.
+   * @param status Exit code from the interpreter JVM
+   */
+  protected void replCalledSystemExit(int status) {
+    _model.replCalledSystemExit(status);
   }
 
   
