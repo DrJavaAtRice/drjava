@@ -45,6 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.text;
 
+import java.io.Serializable;
+
 /**
  * Provides a toolkit-independent way to interact with a
  * Swing-style document.  Allows components to use documents
@@ -57,7 +59,7 @@ package edu.rice.cs.util.text;
  *
  * @version $Id$
  */
-public interface DocumentAdapter {
+public interface DocumentAdapter extends Serializable {
 
   /**
    * Gets the object which can determine whether an insert

@@ -49,12 +49,13 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
+import java.io.Serializable;
 
 /**
  * Manages a JDialog with a scrollable text area and a button panel.
  * @version $Id$
  */
-public class ScrollableDialog {
+public class ScrollableDialog implements Serializable {
   /** Default width for all ScrollableDialogs. */
   public static final int DEFAULT_WIDTH = 500;
   /** Default height for all ScrollableDialogs. */

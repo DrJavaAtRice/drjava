@@ -98,9 +98,9 @@ import sun.awt.shell.ShellFolder;
 
 public class DirectoryChooser extends JPanel {
   
-  public static int APPROVE_OPTION = JFileChooser.APPROVE_OPTION;
-  public static int CANCEL_OPTION = JFileChooser.CANCEL_OPTION;
-  public static int ERROR_OPTION = JFileChooser.ERROR_OPTION;
+  public static final int APPROVE_OPTION = JFileChooser.APPROVE_OPTION;
+  public static final int CANCEL_OPTION = JFileChooser.CANCEL_OPTION;
+  public static final int ERROR_OPTION = JFileChooser.ERROR_OPTION;
     
   protected JTree _tree;
   protected FileDisplayManager _fdManager;
@@ -1317,7 +1317,7 @@ public class DirectoryChooser extends JPanel {
       return; // children are not generated yet
     }
     File parentFile = ((FileDisplay)parent.getUserObject()).getFile();
-    Enumeration<TreeNode> e = parent.children(); /** This warning is expected **/
+    Enumeration<TreeNode> e = parent.children(); /** The Swing API uses raw types!  This warning should be corrected in J2SE 6.0 **/
     while (e.hasMoreElements()) {
       DefaultMutableTreeNode child = (DefaultMutableTreeNode)e.nextElement();
       File oldFile = getFileForTreeNode(child);
@@ -1332,7 +1332,7 @@ public class DirectoryChooser extends JPanel {
     if (!_treeIsGenerated) return;
     DefaultMutableTreeNode parent = (DefaultMutableTreeNode)node.getParent();
     node.removeFromParent();
-    Enumeration<TreeNode> e = parent.children(); /** This warning is expected **/
+    Enumeration<TreeNode> e = parent.children(); /** The Swing API uses raw types!  This warning should be corrected in J2SE 6.0 **/
     while (e.hasMoreElements()) {
       DefaultMutableTreeNode child = (DefaultMutableTreeNode)e.nextElement();
       if (node.toString().compareTo(child.toString()) < 0) {
@@ -1507,7 +1507,7 @@ public class DirectoryChooser extends JPanel {
    * method, it can ask the FileDisplay in the node whether it
    * is editable.
    */
-  private class CustomJTree extends JTree {
+  private static class CustomJTree extends JTree {
     public CustomJTree(TreeNode node) {
       super(node);
     }
@@ -1533,7 +1533,7 @@ public class DirectoryChooser extends JPanel {
    * text is finished being edited, the new name is appended 
    * to the stored parent directory.
    */
-  private class FileTextField extends JTextField {
+  private static class FileTextField extends JTextField {
     File _parent;
     
     public void setFile(FileDisplay fd) {
@@ -1569,7 +1569,7 @@ public class DirectoryChooser extends JPanel {
   /**
    * Blocks access to DrJava while the hourglass cursor is on
    */
-  private class GlassPane extends JComponent {
+  private static class GlassPane extends JComponent {
     /**
      * Creates a new GlassPane over the DrJava window
      */

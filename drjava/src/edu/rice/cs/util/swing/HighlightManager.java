@@ -82,6 +82,14 @@ public class HighlightManager {
       _component = jtc;
       _highlights = new Vector<Stack<HighlightInfo>>();
     }
+    
+    /** Overrides to toString() to support unit testing */
+
+    public String toString() { return "HighLightManager(" + _highlights + ")"; }
+    
+    /** Size of highlight stack; used only for unit testing */
+    
+    public int size() { return _highlights.size(); }
 
     /**
      * Adds a highlight using the supplied painter to the vector element(Stack) that exactly corresponds
@@ -99,7 +107,7 @@ public class HighlightManager {
       HighlightInfo newLite = new HighlightInfo(startOffset,endOffset,p);
 
       //System.out.println("Adding highlight from "+startOffset+" to "+endOffset);
-      Stack<HighlightInfo> lineStack = _getStackAt(startOffset, endOffset);
+      Stack<HighlightInfo> lineStack = _getStackAt(newLite);
 
       if (lineStack != null) {
         int searchResult = lineStack.search(newLite);
@@ -140,16 +148,11 @@ public class HighlightManager {
      * @param to the ending offset
      * @return the corresponding Stack, or null
      */
-    private Stack<HighlightInfo> _getStackAt ( int from, int to) {
+    private Stack<HighlightInfo> _getStackAt (HighlightInfo h) {
 
-      for (int i=0; i<_highlights.size(); i++) {
-
-        Stack<HighlightInfo> stack = _highlights.get(i);
-
-        if (stack.isEmpty()) continue;
-
-        if (stack.get(0).matchesRegion(from, to)) {
-          return _highlights.get(i);
+      for (Stack<HighlightInfo> stack : _highlights) {
+        if (stack.get(0).matchesRegion(h)) {
+          return stack;
         }
       }
       //if here, no corresponding stack, so return null
@@ -175,10 +178,10 @@ public class HighlightManager {
     public void removeHighlight (HighlightInfo newLite) {
 
 
-      int startOffset = newLite.getStartOffset();
-      int endOffset = newLite.getEndOffset();
+//      int startOffset = newLite.getStartOffset();
+//      int endOffset = newLite.getEndOffset();
 
-      Stack<HighlightInfo> lineStack = _getStackAt(startOffset, endOffset);
+      Stack<HighlightInfo> lineStack = _getStackAt(newLite);
 
       if (lineStack== null) {
         //System.out.println("Error! No stack to access in region from " + startOffset+ " to "+ endOffset);
@@ -190,7 +193,7 @@ public class HighlightManager {
 
       if (searchResult == 1) {
         HighlightInfo liteToRemove = lineStack.pop();
-        _component.getHighlighter().removeHighlight( liteToRemove.getHighlightTag());
+        _component.getHighlighter().removeHighlight(liteToRemove.getHighlightTag());
         //System.out.println("Removed highlight @ "+startOffset);
 
         if (!lineStack.isEmpty()) {
@@ -229,7 +232,7 @@ public class HighlightManager {
       private Object _highlightTag;
       private Position _startPos;
       private Position _endPos;
-      private Highlighter.HighlightPainter _p;
+      private Highlighter.HighlightPainter _painter;
 
       /**
        * Constructor takes the bounds and the painter for a highlighter
@@ -237,7 +240,7 @@ public class HighlightManager {
        * @param to the offset at which the new highlight will end.
        * @param p the Highlighter.HighlightPainter for painting
        */
-      public HighlightInfo( int from, int to, Highlighter.HighlightPainter p) {
+      public HighlightInfo(int from, int to, Highlighter.HighlightPainter p) {
 
         _highlightTag = null;
         try {
@@ -248,7 +251,7 @@ public class HighlightManager {
           throw new UnexpectedException(ble);
         }
 
-        _p = p;
+        _painter = p;
       }
 
       /**
@@ -267,6 +270,8 @@ public class HighlightManager {
        *  @return boolean true, if equivalent; false otherwise.
        */
       public boolean equals( Object o) {
+        
+        if (o == null) return false;
 
         if (o instanceof HighlightInfo) {
 
@@ -276,73 +281,63 @@ public class HighlightManager {
            //System.out.println("p1: "+p1+"  obj.p1: "+obj.p1);
            //System.out.println("p: "+p+"  obj.p: "+obj.p);
            */
-          boolean result = ( matchesRegion(obj.getStartOffset(), obj.getEndOffset())
-                              && _p == obj.getPainter());
+          boolean result = getStartOffset() == obj.getStartOffset() && 
+            getEndOffset() == obj.getEndOffset() &&
+            getPainter() == obj.getPainter();
 
           //System.out.println("HighlightInfo.equals() = "+result);
           return result;
         }
         else return false;
       }
+      
+      /** Overrides hashCode() for consistency with override of equals(...) 
+       */
+      public int hashCode() { return getPainter().hashCode() ^ getStartOffset() ^ getEndOffset(); }
 
       public void remove() {
         removeHighlight(this);
       }
 
-      /**
-       * Accessor for the highlight tag
-       * @return the highlight tag
+      /** Accessor for the highlight tag
+       *  @return the highlight tag which might be null
        */
-      public Object getHighlightTag() {
-        //might be null
-        return _highlightTag;
-      }
+      public Object getHighlightTag() { return _highlightTag; }
 
-      /**
-       * Accessor for the painter
-       * @return the painter
+      /** Accessor for the painter
+       *  @return the painter
        */
-      public Highlighter.HighlightPainter getPainter() {
-        return _p;
-      }
+      public Highlighter.HighlightPainter getPainter() { return _painter; }
 
-      /**
-       * Accessor for the starting offset of this highlight
-       * @return the start offset
+      /** Accessor for the starting offset of this highlight
+       *  @return the start offset
        */
-      public int getStartOffset() {
-        return _startPos.getOffset();
-      }
+      public int getStartOffset() { return _startPos.getOffset(); }
 
-      /**
-       * Accessor for the ending offset of this highlight
-       * @return the end offset
+      /** Accessor for the ending offset of this highlight
+       *  @return the end offset
        */
-      public int getEndOffset() {
-        return _endPos.getOffset();
-      }
+      public int getEndOffset() { return _endPos.getOffset(); }
 
-      /**
-       * Tests to see if the given offsets correspond to the offsets specified within this
-       * highlight.
-       * @param from the start offset
-       * @param to the end offset
-       * @return true, if the supplied offsets are the same as those of this highlight.
+      /** Tests to see if the given offsets correspond to the offsets specified within this
+       *  highlight.
+       *  @param from the start offset
+       *  @param to the end offset
+       *  @return true, if the supplied offsets are the same as those of this highlight.
        */
-      public boolean matchesRegion( int from, int to) {
-        return (getStartOffset() == from && getEndOffset() == to);
+      public boolean matchesRegion(HighlightInfo h) {
+        return (getStartOffset() == h.getStartOffset() && getEndOffset() == h.getEndOffset());
       }
-
-      /**
-       * Refreshes this HighlightInfo object, obtaining a new Highlighter
+      
+      /** Refreshes this HighlightInfo object, obtaining a new Highlighter
        */
-      public void refresh ( Highlighter.HighlightPainter p ) {
+      public void refresh (Highlighter.HighlightPainter p ) {
 
         this.remove();
-        HighlightInfo newHighlight = addHighlight(getStartOffset(),
-                                                  getEndOffset(),
-                                                  p);
-        _p = p;
+        HighlightInfo newHighlight = 
+          addHighlight(getStartOffset(), getEndOffset(), p);
+        
+        _painter = p;
         // turn this HighlightInfo object into the newHighlight
         _highlightTag = newHighlight.getHighlightTag();
       }

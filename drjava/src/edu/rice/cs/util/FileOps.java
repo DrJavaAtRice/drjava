@@ -170,7 +170,7 @@ public abstract class FileOps {
   /**
    * This filter checks for files that end in .java
    */
-  public static FileFilter JAVA_FILE_FILTER = new FileFilter(){
+  public static final FileFilter JAVA_FILE_FILTER = new FileFilter(){
     public boolean accept(File f){
       //Do this runaround for filesystems that are case preserving
       //but case insensitive

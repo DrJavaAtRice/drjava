@@ -57,8 +57,8 @@ import java.util.Hashtable;
  * @version $Id$
  */
 public class SwingDocumentAdapter extends DefaultStyledDocument
-  implements DocumentAdapter
-{
+  implements DocumentAdapter {
+  
   /** Maps names to attribute sets */
   protected Hashtable<String, AttributeSet> _styles;
 
