@@ -438,7 +438,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _aboutAction = new AbstractAction("About") {
 
     public void actionPerformed(ActionEvent ae) {
-      //JOptionPane.showMessageDialog(MainFrame.this, _model.getAboutText());
       new AboutDialog(MainFrame.this, _model.getAboutText()).show();
     }
   };
@@ -2383,6 +2382,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           _saveAll();
           break;
         case JOptionPane.NO_OPTION:
+        case JOptionPane.CANCEL_OPTION:
+        case JOptionPane.CLOSED_OPTION:
           // do nothing
           break;
         default:
@@ -2480,17 +2481,18 @@ public class MainFrame extends JFrame implements OptionConstants {
                                              fname + " Modified on Disk",
                                              JOptionPane.YES_NO_OPTION);
       
-     switch (rc) {
-     case JOptionPane.YES_OPTION:
-       return true;
-     case JOptionPane.NO_OPTION:
-       return false;
-     case JOptionPane.CLOSED_OPTION:
-       return false;
-     default:
-       throw new RuntimeException("Invalid rc: " + rc);
-     }
-   }
+      switch (rc) {
+        case JOptionPane.YES_OPTION:
+          return true;
+        case JOptionPane.NO_OPTION:
+          return false;
+        case JOptionPane.CLOSED_OPTION:
+        case JOptionPane.CANCEL_OPTION:
+          return false;
+        default:
+          throw new RuntimeException("Invalid rc: " + rc);
+      }
+    }
 
   }
  
@@ -2632,6 +2634,10 @@ public class MainFrame extends JFrame implements OptionConstants {
                                             "Down");
       _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionDownAction), 
                                             "Selection Down");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.endAction), 
+                                            "End Document");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionEndAction), 
+                                            "Selection End Document");
       _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.endLineAction), 
                                             "End Line");
       _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionEndLineAction), 
@@ -2706,6 +2712,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       _keyBindingManager.addShiftAction(KEY_DOWN, 
                                         DefaultEditorKit.downAction, 
                                         DefaultEditorKit.selectionDownAction);
+      
+      _keyBindingManager.addShiftAction(KEY_END_DOCUMENT, 
+                                        DefaultEditorKit.endAction, 
+                                        DefaultEditorKit.selectionEndAction);
        
       _keyBindingManager.addShiftAction(KEY_END_LINE, 
                                         DefaultEditorKit.endLineAction, 
