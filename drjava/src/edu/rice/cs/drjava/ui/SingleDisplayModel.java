@@ -255,10 +255,12 @@ public class SingleDisplayModel extends DefaultGlobalModel {
     catch (IllegalStateException ise) {
       // No file, filename stays "Untitled"
     }
-    // Remove ".java"
-    int extIndex = filename.lastIndexOf(".java");
-    if (extIndex > 0) {
-      filename = filename.substring(0, extIndex);
+    // Remove ".java" if at the end of name
+    if (filename.endsWith(".java")) {
+      int extIndex = filename.lastIndexOf(".java");
+      if (extIndex > 0) {
+        filename = filename.substring(0, extIndex);
+      }
     }
 
     // Mark if modified

@@ -371,4 +371,44 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     getSDModel().removeListener(listener);
   }
   
+  /**
+   * Tests that active document is switched on close, and that
+   * a new file is created after the last one is closed.
+   */
+  public void testDisplayFilename() 
+    throws BadLocationException, IOException,
+      OperationCanceledException, AlreadyOpenException
+  {
+    SingleDisplayModel sdm = getSDModel();
+    
+    // Untitled
+    OpenDefinitionsDocument doc = sdm.getActiveDocument();
+    assertEquals("untitled display filename", "(untitled)", 
+                 sdm.getDisplayFilename(doc));
+    
+    // Ends in ".java"
+    File file = File.createTempFile("DrJava-filename-test", ".java", _tempDir);
+    String name = file.getName();
+    doc = sdm.openFile(new FileSelector(file));
+    assertEquals(".java display filename",
+                 name.substring(0, name.length()-5),
+                 sdm.getDisplayFilename(doc));
+    
+    // Doesn't contain ".java"
+    file = File.createTempFile("DrJava-filename-test", ".txt", _tempDir);
+    name = file.getName();
+    doc = sdm.openFile(new FileSelector(file));
+    assertEquals(".txt display filename", 
+                 name,
+                 sdm.getDisplayFilename(doc));
+    
+    // Doesn't end in ".java"
+    file = File.createTempFile("DrJava-filename-test", ".java.txt", _tempDir);
+    name = file.getName();
+    doc = sdm.openFile(new FileSelector(file));
+    assertEquals(".java.txt display filename", 
+                 name,
+                 sdm.getDisplayFilename(doc));
+    
+  }
 }
