@@ -527,6 +527,49 @@ public class DebugManager {
   }
   
   /**
+   * Returns the Vector of WatchpointData
+   */
+  public synchronized Vector<WatchpointData> getWatchpoints() {
+    return _watchpoints;
+  }
+  
+  /**
+   * Returns a Vector of ThreadReference that contains all of the vm's threads
+   * or null if the vm is null
+   */
+  public synchronized Vector<ThreadReference> getThreads() {
+    if (_vm == null)
+      return null;
+    Iterator iter = _vm.allThreads().iterator();
+    Vector<ThreadReference> threads = new Vector<ThreadReference>();
+    while (iter.hasNext()) {
+      threads.addElement((ThreadReference)iter.next());
+    }
+    return threads;
+  }
+  
+  /**
+   * Returns a Vector of StackFrame for the current thread or null if the 
+   * curretn thread is null
+   */
+  public synchronized Vector<StackFrame> getFrames() {
+    if (_thread == null || !_thread.isSuspended()) 
+      return null;
+    Iterator iter = null;
+    try {
+      iter = _thread.frames().iterator();
+    }
+    catch (IncompatibleThreadStateException itse) {
+      return null;
+    }
+    Vector<StackFrame> frames = new Vector<StackFrame>();
+    while (iter.hasNext()) {
+      frames.addElement((StackFrame)iter.next());
+    }
+    return frames;
+  }
+  
+  /**
    * Takes the location of event e, opens the document corresponding to its class
    * and centers the definition pane's view on the appropriate line number
    * @param e should be a LocatableEvent
@@ -676,7 +719,7 @@ public class DebugManager {
         localVar = currFrame.visibleVariableByName(currName);
       }
       catch (AbsentInformationException aie) {
-        DrJava.consoleOut().println("No line number information for this method");
+        //DrJava.consoleOut().println("No line number information for this method");
       }
       
       // if the variable being watched is not a local variable, check if it's a field
@@ -764,15 +807,11 @@ public class DebugManager {
   }
   
   private void _displayWatchpoints() {
-    DrJava.consoleOut().println("Watchpoints:");
     for (int i = 0; i < _watchpoints.size(); i ++) {
       WatchpointData currWatchpoint = _watchpoints.elementAt(i);  
       if (currWatchpoint.getChanged()) {
-        DrJava.consoleOut().print("! ");
-        DrJava.consoleOut().println(currWatchpoint);
       }
       else {
-        DrJava.consoleOut().println(currWatchpoint);
       }
     }
   }
@@ -872,7 +911,7 @@ public class DebugManager {
     public abstract void notifyListener(DebugListener l);
   }
   
-  private class WatchpointData {
+  public class WatchpointData {
     String _name;
     Object _value;
     Type _type;

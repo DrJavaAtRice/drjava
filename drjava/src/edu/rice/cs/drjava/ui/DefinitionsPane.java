@@ -347,16 +347,14 @@ public class DefinitionsPane extends JEditorPane
       KeyStroke ks = KeyStroke.getKeyStrokeForEvent(e);
       Action a = KeyBindingManager.Singleton.get(ks);
       if (a != null) {
-        // prevents the user from undoing (for example) if it's not enabled
-        if (a.isEnabled()) {
-          a.actionPerformed(null);
-        }
+        SwingUtilities.notifyAction(a, ks, e, e.getSource(), e.getModifiers());
       }
-      else {        
+      else {    
         // backspace deletes twice without this check, overrides other keystrokes
         // that use the mask modifier
-        if (((ks.getModifiers() & mask) == 0) && ks.getKeyChar() != '\010')
-          super.processKeyEvent(e);        
+        if (((ks.getModifiers() & mask) == 0) && ks.getKeyChar() != '\010') {
+          super.processKeyEvent(e);       
+        }
       }
     }
     else

@@ -39,12 +39,20 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
+import com.sun.jdi.*;
+
+import gj.util.Vector;
+
+
 import java.io.*;
 import java.util.Hashtable;
+import java.util.Enumeration;
 
 import javax.swing.*;
 import javax.swing.text.*;
+import javax.swing.tree.*;
 import javax.swing.event.*;
+import javax.swing.table.*;
 import java.awt.event.*;
 import java.awt.*;
 
@@ -69,13 +77,16 @@ import com.bluemarsh.jswat.view.*;
  * @version $Id$
  */
 public class DebugPanel extends JPanel implements OptionConstants {
+  private static final int SPLIT_DIVIDER_SIZE = 12;
 
   private JSplitPane _tabsPane;
   private JTabbedPane _leftPane;
   private JTabbedPane _rightPane;
   
   private JTable _watchTable;
-  private JTable _breakpointTable;
+  private DefaultMutableTreeNode _breakpointNode;
+  private DefaultTreeModel _bpTreeModel;
+  private JTree _bpTree;
   private JTable _stackTable;
   private JTable _threadTable;
     
@@ -85,7 +96,14 @@ public class DebugPanel extends JPanel implements OptionConstants {
   
   private JPanel _buttonPanel;
   private JButton _closeButton; 
+  private JButton _resumeButton;
+  private JButton _stepIntoButton;
+  private JButton _stepOverButton;
+  private JButton _stepOutButton;
   
+  private Vector<DebugManager.WatchpointData> _watchpoints;
+  private Vector<ThreadReference> _threads;
+  private Vector<StackFrame> _frames;
 
   public DebugPanel( SingleDisplayModel model, MainFrame frame, DebugManager debugger) {
     
@@ -94,19 +112,339 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _model = model;
     _frame = frame;
     _debugger = debugger;
+    //this.updateData();
+    _watchpoints = _debugger.getWatchpoints();
+    _threads = _debugger.getThreads();
+    _frames = _debugger.getFrames();
     _leftPane = new JTabbedPane();
     _rightPane = new JTabbedPane();
     
-    //_setupTables();
+    _setupTabPanes();
     
-    _tabsPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+    _tabsPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                true,
                                _leftPane,
                                _rightPane);
+    _tabsPane.setDividerSize(SPLIT_DIVIDER_SIZE);
+    _tabsPane.setOneTouchExpandable(true);
+    _tabsPane.setDividerLocation((int)(_frame.getWidth()/2.5));
     
+    this.add(_tabsPane, BorderLayout.CENTER);
+    
+    _buttonPanel = new JPanel(new BorderLayout());
+    _setupButtonPanel();
+    this.add(_buttonPanel, BorderLayout.EAST);    
+  }
+  
+  public void updateData() {
+    _watchpoints = _debugger.getWatchpoints();
+    _threads = _debugger.getThreads();
+    _frames = _debugger.getFrames();
+    
+    ((AbstractTableModel)_watchTable.getModel()).fireTableDataChanged();
+    ((AbstractTableModel)_stackTable.getModel()).fireTableDataChanged();
+    ((AbstractTableModel)_threadTable.getModel()).fireTableDataChanged();
+  }
+  
+  
+  public void _setupTabPanes() {
+    
+    _breakpointNode = new DefaultMutableTreeNode("Breakpoints");
+    _bpTreeModel = new DefaultTreeModel(_breakpointNode);
+    _bpTree = new JTree(_bpTreeModel);
+    _bpTree.setEditable(false);
+    _bpTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+    _bpTree.setShowsRootHandles(true);
+    _bpTree.setRootVisible(false);
+    _bpTree.putClientProperty("JTree.lineStyle", "Angled");
+    _bpTree.setScrollsOnExpand(true);
+    
+    DefaultTreeCellRenderer dtcr = new DefaultTreeCellRenderer();
+    dtcr.setLeafIcon(null);
+    dtcr.setOpenIcon(null);
+    dtcr.setClosedIcon(null);
+    _bpTree.setCellRenderer(dtcr);
+        
+    _leftPane.addTab("Breakpoints", new JScrollPane(_bpTree));
+    
+    
+    _watchTable = new JTable( new WatchTableModel());
+    _leftPane.addTab("Watches", new JScrollPane(_watchTable));
+    
+    _stackTable = new JTable( new StackTableModel());
+    _rightPane.addTab("Stack", new JScrollPane(_stackTable));
+    
+    _threadTable = new JTable( new ThreadTableModel());
+    _rightPane.addTab("Threads", new JScrollPane(_threadTable));
     
   }
   
+  
+  public class WatchTableModel extends AbstractTableModel {
+   
+    private String[] _columnNames = {"Identifier", "Value", "Type"};
+    
+    public String getColumnName(int col) { 
+        return _columnNames[col]; 
+    }
+    public int getRowCount() { return _watchpoints.size(); }
+    public int getColumnCount() { return _columnNames.length; }
+    public Object getValueAt(int row, int col) { 
+      DebugManager.WatchpointData watchpoint = _watchpoints.elementAt(row);
+      switch(col) {
+        case 0: return watchpoint.getName();
+        case 1: return watchpoint.getValue();
+        case 2: return watchpoint.getType();
+      }
+      return null;
+    }
+    public boolean isCellEditable(int row, int col) { 
+      return false; 
+    }
+  }
+
+  public class StackTableModel extends AbstractTableModel {
+   
+    private String[] _columnNames = {"#", "Method", "Line"};
+    
+    public String getColumnName(int col) { 
+        return _columnNames[col]; 
+    }
+    public int getRowCount() { 
+      if (_frames == null)
+        return 0;
+      return _frames.size(); }
+    public int getColumnCount() { return _columnNames.length; }
+    public Object getValueAt(int row, int col) { 
+      StackFrame frame = _frames.elementAt(row);
+      switch(col) {
+        case 0: return new Integer(row);
+        case 1: return frame.location().declaringType().name() + "." + frame.location().method().name();
+        case 2: return new Integer (frame.location().lineNumber());
+      }
+      return null;
+    }
+    public boolean isCellEditable(int row, int col) { 
+      return false; 
+    }
+  }
+  
+   public class ThreadTableModel extends AbstractTableModel {
+   
+    private String[] _columnNames = {"ID", "Name", "Status"};
+    
+    public String getColumnName(int col) { 
+      return _columnNames[col]; 
+    }
+    public int getRowCount() { 
+      if (_threads == null)
+        return 0;
+      return _threads.size(); }
+    public int getColumnCount() { return _columnNames.length; }
+    public Object getValueAt(int row, int col) { 
+      ThreadReference threadRef  = _threads.elementAt(row);
+      switch(col) {
+        case 0: return new Long(threadRef.uniqueID());
+        case 1: return threadRef.name();
+        case 2: switch (threadRef.status()) {
+          case ThreadReference.THREAD_STATUS_MONITOR: 
+            return "MONITOR";
+          case ThreadReference.THREAD_STATUS_NOT_STARTED:
+            return "NOT STARTED";
+          case ThreadReference.THREAD_STATUS_RUNNING:
+            return "RUNNING";
+          case ThreadReference.THREAD_STATUS_SLEEPING:
+            return "SLEEPING";
+          case ThreadReference.THREAD_STATUS_UNKNOWN:
+            return "UNKNOWN";
+          case ThreadReference.THREAD_STATUS_WAIT:
+            return "WAIT";
+          case ThreadReference.THREAD_STATUS_ZOMBIE:
+            return "ZOMBIE";
+        }
+      }
+      
+      return null;
+    }
+    public boolean isCellEditable(int row, int col) { 
+      return false; 
+    }
+   }
+   
+   
+   private void _setupButtonPanel() {
+     JPanel mainButtons = new JPanel();
+     JPanel closeButtonPanel = new JPanel(new BorderLayout());
+     mainButtons.setLayout( new GridLayout(0,1));
+    
+     Action resumeAction = new AbstractAction( "Resume" ) {
+       public void actionPerformed(ActionEvent ae) {
+         _debugger.resume();
+       }
+     };
+     _resumeButton = new JButton(resumeAction);
+    
+     Action stepIntoAction = new AbstractAction( "Step Into" ) {
+       public void actionPerformed(ActionEvent ae) {
+         try {
+           _debugger.step(DebugManager.STEP_INTO);
+         }
+         catch (DebugException de) {}
+       }
+     };
+     _stepIntoButton = new JButton(stepIntoAction);
+    
+     Action stepOverAction = new AbstractAction( "Step Over" ) {
+       public void actionPerformed(ActionEvent ae) {
+         try {
+           _debugger.step(DebugManager.STEP_OVER);
+         }
+         catch (DebugException de) {}
+       }
+     };
+     _stepOverButton = new JButton(stepOverAction);
+    
+     Action stepOutAction = new AbstractAction( "Step Out" ) {
+       public void actionPerformed(ActionEvent ae) {
+         try {
+           _debugger.step(DebugManager.STEP_OUT);
+         }
+         catch (DebugException de) {}
+       }
+     };
+     _stepOutButton = new JButton(stepOutAction);
+    
+     Action closeAction = new AbstractAction( "X" ) {
+       public void actionPerformed(ActionEvent ae) {
+         _debugger.shutdown();
+       }
+     };
+     _closeButton = new JButton(closeAction);
+     
+     closeButtonPanel.add(_closeButton, BorderLayout.NORTH);
+     mainButtons.add(_resumeButton);
+     mainButtons.add(_stepIntoButton);
+     mainButtons.add(_stepOverButton);
+     mainButtons.add(_stepOutButton);     
+     disableButtons();
+     _buttonPanel.add(mainButtons, BorderLayout.CENTER);
+     _buttonPanel.add(closeButtonPanel, BorderLayout.EAST);
+   }
+   
+   public void breakpointAdded(Breakpoint bp) {
+     
+     DefaultMutableTreeNode bpDoc = new DefaultMutableTreeNode(bp.getClassName());
+     
+     Enumeration documents = _breakpointNode.children();
+     while (documents.hasMoreElements()) {
+       DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
+       if (doc.getUserObject().equals(bpDoc.getUserObject())) {
+         //DrJava.consoleOut().println("matched, classname: " + bpDoc.getUserObject());
+         DefaultMutableTreeNode newBreakpoint = new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
+         _bpTreeModel.insertNodeInto(newBreakpoint,
+                                     doc,
+                                     doc.getChildCount());
+                                     
+         _bpTree.scrollPathToVisible(new TreePath(newBreakpoint.getPath()));
+         
+         return;
+       }
+     }
+     _bpTreeModel.insertNodeInto(bpDoc,
+                                 _breakpointNode,
+                                 _breakpointNode.getChildCount());
+                                
+     _bpTreeModel.insertNodeInto(new DefaultMutableTreeNode(new Integer(bp.getLineNumber())),
+                                 bpDoc,
+                                 bpDoc.getChildCount());
+     
+     TreePath pathToNewBreakpoint = 
+       new TreePath(((DefaultMutableTreeNode)bpDoc.getChildAt(bpDoc.getChildCount() - 1)).getPath());
+     
+     _bpTree.scrollPathToVisible(pathToNewBreakpoint);
+     _bpTree.setSelectionPath(pathToNewBreakpoint);
+   }
+   
+   /**
+    * Enables and disables the appropriate buttons depending on if the current
+    * thread has been suspended or resumed
+    * @param isSuspended indicates if the current thread has been suspended
+    */
+   public void setThreadDependentButtons(boolean isSuspended) {
+     _resumeButton.setEnabled(isSuspended);
+     _stepIntoButton.setEnabled(isSuspended);
+     _stepOverButton.setEnabled(isSuspended);
+     _stepOutButton.setEnabled(isSuspended);
+   }
+   
+   public void disableButtons() {
+     _resumeButton.setEnabled(false);
+     _stepIntoButton.setEnabled(false);
+     _stepOverButton.setEnabled(false);
+     _stepOutButton.setEnabled(false);
+   }
+     
+   public void breakpointRemoved(Breakpoint bp) {
+     
+     DefaultMutableTreeNode bpDoc = new DefaultMutableTreeNode(bp.getClassName());
+     
+     Enumeration documents = _breakpointNode.children();
+     while (documents.hasMoreElements()) {
+       DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
+       if (doc.getUserObject().equals(bpDoc.getUserObject())) {
+         // have to remove the correct line number
+         //DrJava.consoleOut().println("matched, classname: " + bpDoc.getUserObject());
+         Enumeration lineNumbers = doc.children();
+         while (lineNumbers.hasMoreElements()) {
+           DefaultMutableTreeNode lineNumber = 
+             (DefaultMutableTreeNode)lineNumbers.nextElement();
+           if (lineNumber.getUserObject().equals(new Integer (bp.getLineNumber()))) {
+             //DrJava.consoleOut().println("matched, lineNumber: " + bp.getLineNumber());
+             //doc.remove(lineNumber);
+             _bpTreeModel.removeNodeFromParent(lineNumber);
+             if (doc.getChildCount() == 0) {
+               // this document has no more breakpoints, remove it
+               //_breakpointNode.remove(doc);
+               _bpTreeModel.removeNodeFromParent(doc);
+             }        
+             //_bpTree.scrollPathToVisible(new TreePath(childNode.getPath()));
+             //_bpTreeModel.reload();
+             return;
+           }
+         }
+       }
+     }    
+   }
+   
+   public void breakpointReached(Breakpoint bp) {
+     DefaultMutableTreeNode bpDoc = new DefaultMutableTreeNode(bp.getClassName());
+     
+     Enumeration documents = _breakpointNode.children();
+     while (documents.hasMoreElements()) {
+       DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
+       if (doc.getUserObject().equals(bpDoc.getUserObject())) {
+         // have to remove the correct line number
+         //DrJava.consoleOut().println("matched, classname: " + bpDoc.getUserObject());
+         Enumeration lineNumbers = doc.children();
+         while (lineNumbers.hasMoreElements()) {
+           DefaultMutableTreeNode lineNumber = 
+             (DefaultMutableTreeNode)lineNumbers.nextElement();
+           if (lineNumber.getUserObject().equals(new Integer (bp.getLineNumber()))) {
+             //DrJava.consoleOut().println("matched, lineNumber: " + bp.getLineNumber());
+             
+             //DefaultMutableTreeNode hitBreakpoint = new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
+             TreePath pathToNewBreakpoint = new TreePath(lineNumber.getPath());
+             
+             _bpTree.scrollPathToVisible(pathToNewBreakpoint);
+             _bpTree.setSelectionPath(pathToNewBreakpoint);
+             //DrJava.consoleOut().println("Set selection to new hit breakpoint.");
+           }
+         }
+       }
+     }
+   }
+   
+   
 /*
   private static final String BANNER_TEXT = "JSwat Debugger Console\n\n";
 

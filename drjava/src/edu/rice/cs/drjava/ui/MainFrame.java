@@ -118,8 +118,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private CompilerErrorPanel _errorPanel;
   private OutputPane _outputPane;
   private InteractionsPane _interactionsPane;
-  //private DebugPanel _debugPanel;
-  private JPanel _debugPanel;
+  private DebugPanel _debugPanel;
   private JUnitPanel _junitPanel;
   private FindReplaceDialog _findReplace;
   private LinkedList _tabs;
@@ -938,7 +937,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _tabbedPane.setSelectedComponent(_debugPanel);
     */
     _setDebugMenuItemsEnabled(true);
-    //_showDebuggerPanel();  uncomment when the debug panel exists
+    _showDebuggerPanel();
   }
 
   /**
@@ -1506,9 +1505,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     try {
       if (lineStr != null) {
         int lineNum = Integer.parseInt(lineStr);
+        _currentDefPane.centerViewOnLine(lineNum);
         int pos = _model.getActiveDocument().gotoLine(lineNum);
         _currentDefPane.setCaretPosition(pos);
-        _currentDefPane.centerViewOnLine(lineNum);
 /*
         // Center the destination line on the screen
         // (this code taken from FindReplaceDialog's _selectFoundItem method)
@@ -1948,7 +1947,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   /**
-   * Called every time the debug mode checkbox is toggled
+   * Called every time the debug mode checkbox is toggled. The resume and step
+   * functions should always be disabled.
    */
   private void _setDebugMenuItemsEnabled(boolean enabled) {
     _debuggerEnabledMenuItem.setSelected(enabled);
@@ -1961,6 +1961,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _toggleBreakpointAction.setEnabled(enabled);
     _printBreakpointsAction.setEnabled(enabled);
     _clearAllBreakpointsAction.setEnabled(enabled);
+    if (_debugPanel != null)
+      _debugPanel.disableButtons();
   }
   
   /**
@@ -1975,6 +1977,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _stepIntoDebugAction.setEnabled(isSuspended);
     _stepOverDebugAction.setEnabled(isSuspended);
     _stepOutDebugAction.setEnabled(isSuspended);
+    _debugPanel.setThreadDependentButtons(isSuspended);
   }
 
   /**
@@ -2221,19 +2224,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _errorPanel = new CompilerErrorPanel(_model, this);
     _interactionsPane = new InteractionsPane(_model);
     _findReplace = new FindReplaceDialog(this, _model);
-
-    // Try to create debug panel (see if JSwat is around)
-    /*if (_model.getDebugManager() != null) {
-      try {
-        _debugPanel = new DebugPanel(_model, this);
-      }
-      catch(NoClassDefFoundError e) {
-        // Don't use the debugger
-        _debugPanel = null;
-      }
-    } else {
-      _debugPanel = null;
-    }*/
+    
     final JScrollPane outputScroll = new JScrollPane(_outputPane);
     _junitPanel = new JUnitPanel(_model, this);
     _tabbedPane = new JTabbedPane();
@@ -2344,7 +2335,20 @@ public class MainFrame extends JFrame implements OptionConstants {
     JScrollPane defScroll = (JScrollPane)
       _defScrollPanes.get(_model.getActiveDocument());
 
-    _debugPanel = new JPanel();
+    //_debugPanel = new JPanel();
+
+    // Try to create debug panel (see if JSwat is around)
+    if (_model.getDebugManager() != null) {
+      try {
+        _debugPanel = new DebugPanel(_model, this, _model.getDebugManager());
+      }
+      catch(NoClassDefFoundError e) {
+        // Don't use the debugger
+        _debugPanel = null;
+      }
+    } else {
+      _debugPanel = null;
+    }
     
     // Overall layout
     _docSplitPane = new BorderlessSplitPane(JSplitPane.HORIZONTAL_SPLIT,
@@ -2611,20 +2615,25 @@ public class MainFrame extends JFrame implements OptionConstants {
       _currentDefPane.getHighlightManager().addHighlight(bp.getStartOffset(),
                                                          bp.getEndOffset(),
                                                          DefinitionsPane.BREAKPOINT_PAINTER);
+      _debugPanel.breakpointAdded(bp);
     }
     
-    public void breakpointReached(Breakpoint bp) {}
+    public void breakpointReached(Breakpoint bp) {
+      _debugPanel.breakpointReached(bp);
+    }
     
     public void breakpointRemoved(Breakpoint bp) {
       _model.setActiveDocument(bp.getDocument());
       _currentDefPane.getHighlightManager().removeHighlight(bp.getStartOffset(),
                                                             bp.getEndOffset(),
                                                             DefinitionsPane.BREAKPOINT_PAINTER);
+      _debugPanel.breakpointRemoved(bp);
     }
     
     public void currThreadSuspended() {
       //DrJava.consoleOut().println("showing resume, etc");
       _setThreadDependentDebugMenuItems(true);
+      _debugPanel.updateData();
     }
     
     public void currThreadResumed() {
@@ -2639,8 +2648,10 @@ public class MainFrame extends JFrame implements OptionConstants {
         _currentDefPane.revalidate();
         _currentDefPane.repaint();
       }
-      if (inDebugMode())
+      if (inDebugMode()) {
         _setDebugMenuItemsEnabled(true);
+        _debugPanel.updateData();
+      }
 
       // Make sure we're at the prompt
       // (This should really be fixed in InteractionsPane, not here.)
