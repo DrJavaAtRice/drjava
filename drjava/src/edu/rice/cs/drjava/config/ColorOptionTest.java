@@ -68,8 +68,8 @@ public class ColorOptionTest extends TestCase
   {
     ColorOption io = new ColorOption("max_files",null);
     
-    assertEquals(Color.BLACK, io.parse("0x000000"));
-    assertEquals(Color.GREEN, io.parse("0x00ff00"));
+    assertEquals(Color.black, io.parse("0x000000"));
+    assertEquals(Color.green, io.parse("0x00ff00"));
     
     try { io.parse("true"); fail(); }
     catch (OptionParseException e) {}
@@ -83,9 +83,9 @@ public class ColorOptionTest extends TestCase
     ColorOption io1 = new ColorOption("max_files",null);
     ColorOption io2 = new ColorOption("indent_size",null);
     
-    assertEquals("#000000",  io1.format(Color.BLACK));
-    assertEquals("#ff00ff",  io2.format(Color.MAGENTA));
-    assertEquals("#ffffff", io1.format(Color.WHITE));
+    assertEquals("#000000",  io1.format(Color.black));
+    assertEquals("#ff00ff",  io2.format(Color.magenta));
+    assertEquals("#ffffff", io1.format(Color.white));
 
   }
 }
