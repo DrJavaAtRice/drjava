@@ -95,8 +95,9 @@ public class CompoundUndoManager extends UndoManager {
    */
   public int startCompoundEdit() {
     _compoundEdits.insertElementAt(new CompoundEdit(), 0);
-    _keys.insertElementAt(new Integer(_nextKey++), 0);
-    return _keys.firstElement().intValue();
+    _keys.insertElementAt(new Integer(_nextKey), 0);
+    _nextKey++;
+    return _keys.elementAt(0).intValue();
   }
   
   /**
@@ -115,6 +116,7 @@ public class CompoundUndoManager extends UndoManager {
       else {
         _compoundEdits.firstElement().addEdit(compoundEdit);
       }
+      _keys.removeElementAt(0);
     } 
     else {
       throw new IllegalStateException("Improperly nested compound edits.");
