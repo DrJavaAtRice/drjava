@@ -293,7 +293,7 @@ public class ProjectPropertiesFrame extends JFrame {
 //    
     DirectoryChooser dirChooser = new DirectoryChooser(this);
     dirChooser.setSelectedDirectory(_getWorkDir());
-    dirChooser.setDialogTitle("Select Built Directory");
+    dirChooser.setDialogTitle("Select Build Directory");
     dirChooser.setApproveButtonText("Select");
     dirChooser.setEditable(true);
     _builtDirSelector = new DirectorySelectorComponent(this,dirChooser,20,12f);

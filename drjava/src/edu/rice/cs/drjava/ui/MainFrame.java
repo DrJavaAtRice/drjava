@@ -664,7 +664,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** cleans the build directory */
-  private Action _cleanAction = new AbstractAction("Clean Built Directory"){
+  private Action _cleanAction = new AbstractAction("Clean Build Directory"){
     public void actionPerformed(ActionEvent ae){
       _clean();
     }
@@ -3267,8 +3267,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       ConfirmCheckBoxDialog dialog =
         new ConfirmCheckBoxDialog(MainFrame.this,
-                                  "Clean Built Directory?",
-                                  "Cleaning your built directory will delete all\n" + 
+                                  "Clean Build Directory?",
+                                  "Cleaning your build directory will delete all\n" + 
                                   "class files and empty folders within that directory.\n" + 
                                   "Are you sure you want to clean\n" + 
                                   buildDirTxt + "?",
@@ -3890,7 +3890,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     _setUpAction(_saveAllAction, "Save All", "SaveAll", "Save all open documents");
 
-    _setUpAction(_cleanAction, "Clean", "Clean Built directory");
+    _setUpAction(_cleanAction, "Clean", "Clean Build directory");
     _cleanAction.setEnabled(false);
     _setUpAction(_compileAction, "Compile", "Compile the current document");
     _setUpAction(_compileAllAction, "Compile All", "CompileAll",
