@@ -82,7 +82,7 @@ public class TigerTest extends TestCase {
       "public void someMethod(int ... i){}";
     
     LinkedList<FormalParameter> params = new LinkedList<FormalParameter>();
-    FormalParameter fp = new FormalParameter(false,new IntType() ,"i");
+    FormalParameter fp = new FormalParameter(false,new ArrayType(new IntType(),1) ,"i");
     params.add(fp);
     List<Node> statements = new LinkedList<Node>();
     //statements.add(new EmptyStatement());

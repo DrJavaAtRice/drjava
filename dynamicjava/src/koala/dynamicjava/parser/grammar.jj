@@ -1769,6 +1769,11 @@ PARSER_END(Parser)
   {
     [ f="final" ] typ=type() <VAR_ARGS> id=<IDENTIFIER>
     {
+      // convert the type of the formal to be an array
+      typ = new ArrayType(typ, 1,
+                          filename,
+                          typ.getBeginLine(), typ.getBeginColumn(),
+                          typ.getEndLine(),   typ.getEndColumn());
       return new FormalParameter(f != null, typ, id.image,
                                  filename,
                                  (f != null) ? f.beginLine   : typ.getBeginLine(),
@@ -2379,9 +2384,9 @@ ForSlashEachStatement forStatement() :
 {
     Token      t;
     FormalParameter forEachInit = null;
-    List       init   = null;
+    List/*<Node>*/       init   = null;
     Expression exp    = null;
-    List       update = null;
+    List/*<Node>*/       update = null;
     Node       stmt;
     Token      colon  = null;
 }
