@@ -170,8 +170,8 @@ public class ReducedModelControl implements BraceReduction {
   }
   
   int getSize(ReducedToken rmbToken, ReducedToken rmcToken) {
-    int rmb_offset = rmb._offset;
-    int rmc_offset = rmc._offset;
+    int rmb_offset = rmb.getBlockOffset();
+    int rmc_offset = rmc.getBlockOffset();
     int rmb_size = rmbToken.getSize();
     int rmc_size = rmcToken.getSize();
     int size = 0;
@@ -228,29 +228,29 @@ public class ReducedModelControl implements BraceReduction {
       return;
     }
     
-    if (rmb._offset < rmc._offset) {
+    if (rmb.getBlockOffset() < rmc.getBlockOffset()) {
       rmb.prev();
-      size = rmb.current().getSize() + rmb._offset;
+      size = rmb.current().getSize() + rmb.getBlockOffset();
       rmb.next();
-      if (size < rmc._offset) 
+      if (size < rmc.getBlockOffset()) 
         move(-size);
       else
-        move(-rmc._offset);
+        move(-rmc.getBlockOffset());
     }
-    else if (rmb._offset == rmc._offset) {
+    else if (rmb.getBlockOffset() == rmc.getBlockOffset()) {
       rmb.prev();
       rmc.prev();
-      rmb._offset = 0;
-      rmc._offset = 0;
+      rmb.setBlockOffset(0);
+      rmc.setBlockOffset(0);
     }
     else {
       rmc.prev();
-      size = rmc.current().getSize() + rmc._offset;
+      size = rmc.current().getSize() + rmc.getBlockOffset();
       rmc.next();
-      if (size < rmb._offset) 
+      if (size < rmb.getBlockOffset()) 
         move(-size);
       else
-        move(-rmb._offset);
+        move(-rmb.getBlockOffset());
     }
     
   }
@@ -259,15 +259,15 @@ public class ReducedModelControl implements BraceReduction {
    * Get the previous token.
    */
   public ReducedToken prevItem() {
-    int rmbOffset = rmb._offset;
-    int rmcOffset = rmc._offset;
+    int rmbOffset = rmb.getBlockOffset();
+    int rmcOffset = rmc.getBlockOffset();
     
     prev();
     ReducedToken temp = currentToken();
     next();
     
-    rmb._offset = rmbOffset;
-    rmc._offset = rmcOffset;
+    rmb.setBlockOffset(rmbOffset);
+    rmc.setBlockOffset(rmcOffset);
     return temp;
   }
 
@@ -275,13 +275,13 @@ public class ReducedModelControl implements BraceReduction {
    * Get the next token.
    */
   public ReducedToken nextItem() {
-    int rmbOffset = rmb._offset;
-    int rmcOffset = rmc._offset;
+    int rmbOffset = rmb.getBlockOffset();
+    int rmcOffset = rmc.getBlockOffset();
     next();
     ReducedToken temp = currentToken();
     prev();
-    rmb._offset = rmbOffset;
-    rmc._offset = rmcOffset;
+    rmb.setBlockOffset(rmbOffset);
+    rmc.setBlockOffset(rmcOffset);
     return temp;
   }
 
@@ -303,9 +303,9 @@ public class ReducedModelControl implements BraceReduction {
    * Gets the offset within the current token.
    */
   int getBlockOffset() {
-    if (rmb._offset < rmc._offset)
-      return rmb._offset;
-    return rmc._offset;
+    if (rmb.getBlockOffset() < rmc.getBlockOffset())
+      return rmb.getBlockOffset();
+    return rmc.getBlockOffset();
   }
 
   /**
@@ -372,7 +372,7 @@ public class ReducedModelControl implements BraceReduction {
     TokenList.Iterator cursor = rmc._cursor.copy();
     int ct = rmc._braces.listenerCount();
     curLocation = start;
-    curLength = cursor.current().getSize() - rmc._offset;
+    curLength = cursor.current().getSize() - rmc.getBlockOffset();
     curState = cursor.current().getHighlightState();
 
     while ((curLocation + curLength) < (start + length)) {

@@ -46,10 +46,6 @@ public class ReducedModelBrace implements ReducedModelStates {
   TokenList.Iterator _cursor;
   ReducedModelControl parent;
   
-  /** a relative offset within the current ReducedToken */
-  int _offset;
-  
-  
   /**
    * Constructor.  Creates a new reduced model with the cursor
    * at the start of a blank "page."
@@ -58,8 +54,16 @@ public class ReducedModelBrace implements ReducedModelStates {
     _braces = new TokenList();
     _cursor = _braces.getIterator();
     // we should be pointing to the head of the list
-    _offset = 0;
+    _cursor.setBlockOffset(0);
     this.parent = parent;
+  }
+ 
+  int getBlockOffset() {
+    return _cursor.getBlockOffset();
+  }
+  
+  void setBlockOffset(int offset) {
+    _cursor.setBlockOffset(offset);
   }
   
   /**
@@ -68,7 +72,7 @@ public class ReducedModelBrace implements ReducedModelStates {
    * and trouble.
    */
   int absOffset() {
-    int off = _offset;
+    int off = _cursor.getBlockOffset();
     TokenList.Iterator it = _cursor.copy();
     if (!it.atStart())
       it.prev();
@@ -94,7 +98,7 @@ public class ReducedModelBrace implements ReducedModelStates {
     
     if (_cursor.atStart()) {
       val += PTR_CHAR;
-      val += _offset;
+      val += _cursor.getBlockOffset();
     }
     
     while(!it.atEnd()) {
@@ -102,7 +106,7 @@ public class ReducedModelBrace implements ReducedModelStates {
       
       if (!_cursor.atStart() && !_cursor.atEnd() && (tmp == _cursor.current())) {
         val += PTR_CHAR;
-        val += _offset;
+        val += _cursor.getBlockOffset();
       }
       
       val += "|";
@@ -114,7 +118,7 @@ public class ReducedModelBrace implements ReducedModelStates {
     
     if (_cursor.atEnd()) {
       val += PTR_CHAR;
-      val += _offset;
+      val += _cursor.getBlockOffset();
     }
     
     val += "|end|";
@@ -181,7 +185,7 @@ public class ReducedModelBrace implements ReducedModelStates {
     //1
     else if (_cursor.current().isGap()) {
       _cursor.current().grow(length);
-      _offset += length;
+      _cursor.setBlockOffset(_cursor.getBlockOffset() + length);
     }
     //2
     else if (!_cursor.atFirstItem() &&
@@ -232,7 +236,7 @@ public class ReducedModelBrace implements ReducedModelStates {
    */
   private void _augmentCurrentGap(int length) {
     _cursor.current().grow(length);
-    _offset = length;
+    _cursor.setBlockOffset(length);
   }
   
   /**
@@ -243,7 +247,7 @@ public class ReducedModelBrace implements ReducedModelStates {
   private void _insertNewGap(int length) {
     _cursor.insert(new Gap(length,FREE));
     _cursor.next();
-    _offset = 0;
+    _cursor.setBlockOffset(0);
   }
  
   /**
@@ -294,12 +298,12 @@ public class ReducedModelBrace implements ReducedModelStates {
   private void _insertBraceToGap(String text,
                                  TokenList.Iterator copyCursor)
   {
-    copyCursor.current().shrink(_offset);
+    copyCursor.current().shrink(_cursor.getBlockOffset());
     copyCursor.insert(Brace.MakeBrace(text, FREE));
-    copyCursor.insert(new Gap(_offset, FREE));
+    copyCursor.insert(new Gap(_cursor.getBlockOffset(), FREE));
     copyCursor.next(); // now pointing at new brace
     copyCursor.next(); // now pointing at second half of gap
-    _offset = 0;
+    _cursor.setBlockOffset(0);
   }
   
   /**
@@ -312,7 +316,7 @@ public class ReducedModelBrace implements ReducedModelStates {
   {
     copyCursor.insert(Brace.MakeBrace(text, FREE));
     copyCursor.next();
-    _offset = 0;
+    _cursor.setBlockOffset(0);
   }
   
   
@@ -324,119 +328,8 @@ public class ReducedModelBrace implements ReducedModelStates {
    * @param count indicates the direction and magnitude of cursor movement
    */
   public void move(int count) {
-    _offset = _move(count, _cursor, _offset);
+    _cursor.move(count);
   }
-  
-  /**
-   * Helper function for move(int).
-   * @param count the number of chars to move.  Negative values move back,
-   * positive values move forward.
-   * @param copyCursor the cursor being moved
-   * @param currentOffset the current offset for copyCursor
-   * @return the updated offset
-   */
-  private int _move(int count, 
-                    TokenList.Iterator copyCursor,
-                    int currentOffset)
-  {
-    int retval = currentOffset;
-    
-    TokenList.Iterator copyCursor2 = copyCursor.copy();
-
-    if (count == 0) {
-      copyCursor2.dispose();
-      return retval;
-    }
-    //make copy of cursor and return new iterator?
-    else if (count > 0)
-      retval = _moveRight(count,copyCursor2,currentOffset);
-    else
-      retval = _moveLeft(Math.abs(count),copyCursor2,currentOffset);
-
-    copyCursor.setTo(copyCursor2);
-    copyCursor2.dispose();
-    return retval;
-  }
-  
-  /**
-   * Helper function that performs forward moves.
-   * <ol>
-   *  <li> at head && count>0:  next
-   *  <li> LOOP:<BR>
-   *     if atEnd and count == 0, stop<BR>
-   *     if atEnd and count > 0, throw boundary exception<BR>
-   *     if count < size of current token, offset = count, stop<BR>
-   *     otherwise, reduce count by size of current token and go to
-   *     the next token, continuing the loop.
-   * </ol>
-   */
-  private int _moveRight(int count,
-                         TokenList.Iterator copyCursor,
-                         int currentOffset)
-  {
-    if (copyCursor.atStart()) {
-      currentOffset = 0;
-      copyCursor.next();
-    }
-    if (copyCursor.atEnd()) {
-      throw new IllegalArgumentException("At end");
-    }
-    while (count >= copyCursor.current().getSize() - currentOffset){
-      count = count - copyCursor.current().getSize()+currentOffset;
-      copyCursor.next();
-      currentOffset = 0;
-      if (copyCursor.atEnd()){
-        if (count == 0)
-          break;
-        else {throw new IllegalArgumentException("Moved into tail");}
-      }
-    }
-    return count+currentOffset; //returns the offset
-  }
-  
-  /**
-   * Helper function that performs forward moves.
-   * <ol>
-   *  <li> atEnd && count>0:  prev
-   *  <li> LOOP:<BR>
-   *     if atStart and count == 0, stop<BR>
-   *     if atStart and count > 0, throw boundary exception<BR>
-   *     if count < size of current token, offset = size - count, stop<BR>
-   *     otherwise, reduce count by size of current token and go to
-   *     the previous token, continuing the loop.
-   * </ol>
-   */
-  private int _moveLeft(int count,
-                        TokenList.Iterator copyCursor,
-                        int currentOffset)
-  {
-    if (copyCursor.atEnd()) {
-      copyCursor.prev();
-      if (!copyCursor.atStart()) //make sure list not empty
-        currentOffset = copyCursor.current().getSize();
-    }
-    
-    if (copyCursor.atStart()) {
-      throw new IllegalArgumentException("At Start");
-    }
-    while (count > currentOffset) {
-      count = count - currentOffset;
-      copyCursor.prev();
-      
-      if (copyCursor.atStart()) {
-        if (count > 0)
-          throw new IllegalArgumentException("At Start");
-        else {
-          copyCursor.next();
-          currentOffset = 0;
-        }
-      }
-      else {
-        currentOffset = copyCursor.current().getSize();
-      }
-    }
-    return currentOffset - count;
-  } 
   
   
   
@@ -454,7 +347,7 @@ public class ReducedModelBrace implements ReducedModelStates {
     TokenList.Iterator copyCursor = _cursor.copy();
     // from = the _cursor
     // to = _cursor.copy()
-    _offset = _delete(count, _offset, _cursor, copyCursor);
+    _cursor.setBlockOffset(_delete(count, _cursor, copyCursor));
     copyCursor.dispose();
     return;
   }
@@ -471,34 +364,30 @@ public class ReducedModelBrace implements ReducedModelStates {
   * @param delTo where to delete to
   * @return new offset after deletion
   */
-  private int _delete(int count, 
-                      int offset,
-                      TokenList.Iterator delFrom,
+  private int _delete(int count, TokenList.Iterator delFrom,
                       TokenList.Iterator delTo)
  {                     
    
    // Guarrantees that it's possible to delete count characters
    if (count >0) {
-     int endOffset = -1;
      try {
-       endOffset = _move(count,delTo, offset);
+       delTo.move(count);
      }
      catch (Exception e) {
        throw new IllegalArgumentException("Trying to delete" +
                                           " past end of file.");
      }
-     return _deleteRight(offset, endOffset,delFrom, delTo);
+     return _deleteRight(delFrom.getBlockOffset(), delTo.getBlockOffset(),delFrom, delTo);
    }
    else { // count < 0
-     int startOffset = -1;
      try {
-       startOffset = _move(count,delFrom, offset);
+       delFrom.move(count);
      }
      catch (Exception e) {
        throw new IllegalArgumentException("Trying to delete" +
                                           " past end of file.");
      }
-     return _deleteRight(startOffset,offset, delFrom, delTo);
+     return _deleteRight(delFrom.getBlockOffset(), delTo.getBlockOffset(), delFrom, delTo);
    }
  }
   
@@ -649,7 +538,7 @@ public class ReducedModelBrace implements ReducedModelStates {
       return -1;
     }
     //initialize the size.
-    dist += _offset;
+    dist += _cursor.getBlockOffset();
     relDistance = dist;
     
     // if we're in the middle of the first brace element, we're
@@ -688,8 +577,8 @@ public class ReducedModelBrace implements ReducedModelStates {
     
     if ( copyCursor.atStart())
       copyCursor.next();
-    if (_offset > 0){
-      dist = copyCursor.current().getSize() - _offset;
+    if (_cursor.getBlockOffset() > 0){
+      dist = copyCursor.current().getSize() - _cursor.getBlockOffset();
       relDistance = dist;
       copyCursor.next();
     }
@@ -794,12 +683,12 @@ public class ReducedModelBrace implements ReducedModelStates {
   }
   
   public boolean openBraceImmediatelyRight() {
-    return ((_offset == 0) && _cursor.current().isOpen() &&
+    return ((_cursor.getBlockOffset() == 0) && _cursor.current().isOpen() &&
             _isBraceMatchable(_cursor.current()));
   }
   
   public boolean closedBraceImmediatelyLeft() {
-    return ((_offset == 0) && _cursor.prevItem().isClosed() &&
+    return ((_cursor.getBlockOffset() == 0) && _cursor.prevItem().isClosed() &&
             _isBraceMatchable(_cursor.prevItem()));
   }
   
@@ -939,9 +828,9 @@ public class ReducedModelBrace implements ReducedModelStates {
     }
     //move to the proper location, then add the rest of the block
     // and go to the previous.
-    int offset = _move(-braceInfo.distToNewline - 1, iter,_offset);
-    relDistance += offset;
-    distance += offset;
+    iter.move(-braceInfo.distToNewline - 1);
+    relDistance += iter.getBlockOffset();
+    distance += iter.getBlockOffset();
     
     //reset the value of braceInfo signiling the necessary newline has
     //not been found.
