@@ -100,8 +100,6 @@ public class MethodDeclaration extends Node {
    */
   private BlockStatement body;
 
-  private boolean varargs;
-  
   /**
    * Creates a new method declaration
    * @param flags   the access flags
@@ -114,8 +112,8 @@ public class MethodDeclaration extends Node {
    *            params is null or excepts is null
    */
   public MethodDeclaration(int flags, Type type, String name,
-                           List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body, boolean va) {
-    this(flags, type, name, params, excepts, body, va, null, 0, 0, 0, 0);
+                           List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body) {
+    this(flags, type, name, params, excepts, body, null, 0, 0, 0, 0);
   }
 
   /**
@@ -135,7 +133,7 @@ public class MethodDeclaration extends Node {
    *            params is null or excepts is null
    */
   public MethodDeclaration(int flags, Type type, String name,
-                           List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body, boolean va,
+                           List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body,
                            String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
 
@@ -156,7 +154,6 @@ public class MethodDeclaration extends Node {
     while (it.hasNext()) {
       exceptions.add(it.next().getRepresentation());
     }
-    varargs        = va;
   }
 
   /**
@@ -256,8 +253,9 @@ public class MethodDeclaration extends Node {
     firePropertyChange(BODY, body, body = bs);
   }
 
+  // Not strictly needed. just added as a convenience /**/
   public boolean isVarArgs(){
-    return varargs;
+    return (accessFlags & 0x00000080) != 0; // Modifier.VARARGS == 0x00000080 /**/
   }
   
   /**

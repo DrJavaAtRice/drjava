@@ -88,7 +88,9 @@ public class TigerTest extends TestCase {
     //statements.add(new EmptyStatement());
     BlockStatement body = new BlockStatement(statements);
     
-    MethodDeclaration md = new MethodDeclaration(java.lang.reflect.Modifier.PUBLIC,new VoidType(),"someMethod",params,new LinkedList<ReferenceType>(),body,true,null, 0, 0, 0, 0);
+    MethodDeclaration md = new MethodDeclaration(
+                                                 java.lang.reflect.Modifier.PUBLIC | 0x00000080, // java.lang.reflect.Modifier.VARARGS == 0x00000080 /**/
+                                                 new VoidType(),"someMethod",params,new LinkedList<ReferenceType>(),body,null, 0, 0, 0, 0);
     assertEquals(md, parse(testString).get(0));
   }
 }

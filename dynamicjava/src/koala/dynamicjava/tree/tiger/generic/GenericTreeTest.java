@@ -130,7 +130,7 @@ public class GenericTreeTest extends TestCase {
     mstmts.add(mstmt);
     List<FormalParameter> mparams = new LinkedList<FormalParameter>();
     List<ReferenceType> mexcepts = new LinkedList<ReferenceType>();
-    MethodDeclaration m = new MethodDeclaration(accessFlags, t, "m", mparams, mexcepts, new BlockStatement(mstmts), false);
+    MethodDeclaration m = new MethodDeclaration(accessFlags, t, "m", mparams, mexcepts, new BlockStatement(mstmts));
     body.add(m);
     GenericClassDeclaration cls = new GenericClassDeclaration(accessFlags, "C", null, null, body, typeParams);
     

@@ -146,6 +146,17 @@ public class MethodInfo extends AttributeOwnerComponent {
   }
   
   /**
+   * Tests if the method is abstract
+   */
+  public boolean isVarArgs() {
+    //throw new RuntimeException("Modifier.VARARGS not supported (yet) by the 1.5 beta");
+    
+    //    return (accessFlags & Modifier.VARARGS) != 0; /**/
+    
+    return (accessFlags & 0x00000080) != 0; // Modifier.VARARGS == 0x00000080
+  }
+  
+  /**
    * Sets the public flag for this class
    */
   public void setPublic() {
@@ -199,6 +210,15 @@ public class MethodInfo extends AttributeOwnerComponent {
    */
   public void setAbstract() {
     accessFlags |= Modifier.ABSTRACT;
+  }
+  
+  /**
+   * Sets the abstract flag for this class
+   */
+  public void setVarArgs() {
+    //throw new RuntimeException("Modifier.VARARGS not supported (yet) by the 1.5 beta");
+    //accessFlags |= Modifier.VARARGS; /**/
+    accessFlags |= 0x00000080; // Modifier.VARARGS == 0x00000080
   }
   
   /**

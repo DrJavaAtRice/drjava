@@ -70,8 +70,8 @@ public class PolymorphicMethodDeclaration extends MethodDeclaration {
    *            params is null or excepts is null
    */
   public PolymorphicMethodDeclaration(int flags, Type type, String name,
-                                      List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body, boolean va, TypeParameter[] typeParams) {
-    this(flags, type, name, params, excepts, body, va, null, 0, 0, 0, 0, typeParams);
+                                      List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body, TypeParameter[] typeParams) {
+    this(flags, type, name, params, excepts, body, null, 0, 0, 0, 0, typeParams);
   }
   
   /**
@@ -92,9 +92,9 @@ public class PolymorphicMethodDeclaration extends MethodDeclaration {
    *            params is null or excepts is null
    */
   public PolymorphicMethodDeclaration(int flags, Type type, String name,
-                                      List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body, boolean va,
+                                      List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body,
                                       String fn, int bl, int bc, int el, int ec, TypeParameter[] typeParams) {
-    super(flags, type, name, params, excepts, body, va, fn, bl, bc, el, ec);
+    super(flags, type, name, params, excepts, body, fn, bl, bc, el, ec);
     
     _typeParameters = typeParams;
   }

@@ -1674,13 +1674,12 @@ PARSER_END(Parser)
                               typ.getBeginLine(), typ.getBeginColumn(),
                               typ.getEndLine(),   typ.getEndColumn());
         }
-        
+        if(lastFormalParameterIsVarArgs) flags |= 0x00000080; // Modifier.VARARGS == 0x00000080 /**/
         if (typeParameters == null){
           return new MethodDeclaration(flags, typ, id.image, params,
                                        exceptions,
                                        (body instanceof BlockStatement) ?
                                          (BlockStatement)body : null,
-                                       lastFormalParameterIsVarArgs,
                                        filename,
                                        bl, bc, body.getEndLine(), body.getEndColumn());
         } else {
@@ -1689,7 +1688,6 @@ PARSER_END(Parser)
                                                   exceptions,
                                                   (body instanceof BlockStatement) ?
                                                     (BlockStatement)body : null,
-                                                  lastFormalParameterIsVarArgs,
                                                   filename,
                                                   bl, bc, body.getEndLine(), body.getEndColumn(),
                                                   typeParameters);

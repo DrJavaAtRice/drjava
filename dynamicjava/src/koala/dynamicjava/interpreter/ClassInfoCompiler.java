@@ -193,8 +193,7 @@ public class ClassInfoCompiler {
                                "<clinit>",
                                new LinkedList<FormalParameter>(),
                                new LinkedList<ReferenceType>(),
-                               new BlockStatement(classInitializer),
-                               false),
+                               new BlockStatement(classInitializer)),
          importationManager);
     }
 
@@ -266,8 +265,7 @@ public class ClassInfoCompiler {
                             "<init>",
                             cd.getParameters(),
                             new LinkedList<ReferenceType>(),
-                            new BlockStatement(cd.getStatements()),
-                            false);
+                            new BlockStatement(cd.getStatements()));
     interpreter.registerMethod(sig, md, importationManager);
 
     // Add the instance initialization statement to the constructor statement
