@@ -154,6 +154,12 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     super.visit(node);
     return Interpreter.NO_RESULT;
   }
+  
+  public Object visit(AssertStatement node) {
+    _checkInterrupted(node);
+    super.visit(node);
+    return Interpreter.NO_RESULT;
+  }
 
   public Object visit(BlockStatement node) {
     _checkInterrupted(node);

@@ -293,6 +293,17 @@ public class IdentityVisitor implements Visitor<Node> {
     node.setElseStatement(node.getElseStatement().acceptVisitor(this));
     return node;
   }
+  
+  /**
+   * Visits an AssertStatement
+   * @param node the node to visit
+   */
+  public Node visit(AssertStatement node) {
+    node.setCondition((Expression)node.getCondition().acceptVisitor(this));
+    if(node.getFailString() != null)
+      node.setFailString((Expression)node.getFailString().acceptVisitor(this));
+    return node;
+  }
 
   /**
    * Visits a Literal
