@@ -581,18 +581,21 @@ public class GlobalContext extends VariableContext implements Context {
    * @param args the arguments
    */
   public Object invokeConstructor(SimpleAllocation node, Object[] args) {
-    Constructor cons = (Constructor)node.getProperty(NodeProperties.CONSTRUCTOR);
+    Constructor cons = (Constructor) node.getProperty(NodeProperties.CONSTRUCTOR);
 
     try {
       return cons.newInstance(args);
-    } catch (InvocationTargetException e) {
+    } 
+    catch (InvocationTargetException e) {
       if (e.getTargetException() instanceof Error) {
         throw (Error)e.getTargetException();
-      } else if (e.getTargetException() instanceof RuntimeException) {
+      } 
+      else if (e.getTargetException() instanceof RuntimeException) {
         throw (RuntimeException)e.getTargetException();
       }
       throw new ThrownException(e.getTargetException());
-    } catch (Exception e) {
+    } 
+    catch (Exception e) {
       throw new CatchedExceptionError(e, node);
     }
   }

@@ -164,12 +164,12 @@ public class TypeCheckerTest extends TestCase {
     Class type = exp.acceptVisitor(_typeChecker);
         
     String actual = exp.getLeftExpression().toString();
-    assertEquals("Left should have unboxed correctly.", leftExpected, actual);
+    assertEquals("Left should have typed correctly.", leftExpected, actual);
 
     actual = exp.getRightExpression().toString();
-    assertEquals("Right should have unboxed correctly.", rightExpected, actual);
+    assertEquals("Right should have typed correctly.", rightExpected, actual);
     
-    _interpreter.interpret(text);
+    _interpreter.interpret("int x; Integer X; Boolean B; boolean b; "+ text);
     
     return type;
   }
@@ -182,7 +182,7 @@ public class TypeCheckerTest extends TestCase {
     Class type = exp.acceptVisitor(_typeChecker);
         
     String actual = exp.getExpression().toString();
-    assertEquals("Expression should have unboxed correctly.", expected, actual);
+    assertEquals("Expression should have typed correctly.", expected, actual);
 
     _interpreter.interpret(text);
     
@@ -787,8 +787,11 @@ public class TypeCheckerTest extends TestCase {
   
   //////////// Other Operations //////////////////////
   
-  public void testSimpleAssignBox() {
-    Node exp = _parseCode("B = true;").get(0);
+  public void testSimpleAssignBox() throws ExceptionReturnedException {
+    String text = "B = true;";
+    String leftExpected = "(koala.dynamicjava.tree.QualifiedName: B)";
+    String rightExpected = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: true true boolean)])";
+    _checkBinaryExpression(text, leftExpected, rightExpected);
   }
   public void testSimpleAssignUnbox() {  
     Node exp = _parseCode("b = new Boolean(false);").get(0);

@@ -488,15 +488,19 @@ return null;
     Class lc = node.getType().acceptVisitor(this);
     if (node.isFinal()) {
       context.defineConstant(node.getName(), lc);
-    } else {
+    } 
+    else {
       context.define(node.getName(), lc);
     }
 
-    Node init = node.getInitializer();
+    // Get the type of the initializer
+    Expression init = node.getInitializer();
     if (init != null) {
       Class rc = init.acceptVisitor(this);
-      checkAssignmentStaticRules(lc, rc, node, init);
+      Expression exp = checkAssignmentStaticRules(lc, rc, node, init);
+      node.setInitializer(exp);
     }
+    
     return null;
   }
 
@@ -790,7 +794,7 @@ return null;
     Expression right = node.getRightExpression();
     Class rc = right.acceptVisitor(this);
 
-    // Perhaps is this assignment a variable declaration ?
+    // Perhaps is this assignment a variable declaration
     if (left instanceof QualifiedName) {
       String var = ((QualifiedName)left).getRepresentation();
       if (!context.exists(var)) {
@@ -798,6 +802,7 @@ return null;
       }
     }
 
+    // Get the type of the left hand side
     Class lc = left.acceptVisitor(this);
 
     // The left subexpression must be a variable
@@ -806,7 +811,8 @@ return null;
     }
 
     // Check the validity of the assignment
-    checkAssignmentStaticRules(lc, rc, node, right);
+    Expression exp = checkAssignmentStaticRules(lc, rc, node, right);
+    node.setRightExpression(exp);
 
     node.setProperty(NodeProperties.TYPE, lc);
     return lc;
@@ -2211,72 +2217,104 @@ return null;
    * !! This method has not yet been modified for boxing/unboxing !!
    * @param lc   the class of the left part of an assignment
    * @param rc   the class of the right part of an assignment
-   * @param node the current node
+   * @param node the entire assignment node
+   * @param v    The right-hand side of the expression
+   * @return The right-hand side of the assignment.  This expression will
+   * be the unboxing/boxing of the RHS if necessary.
    */
-  private static void checkAssignmentStaticRules(Class lc, Class rc,
-                                                 Node node, Node v) {
+  private static Expression checkAssignmentStaticRules(Class lc, Class rc,
+                                                 Node node, Expression v) {
     if (lc != null) {
       if (lc.isPrimitive()) {
         if (lc == boolean.class && rc != boolean.class) {
+          if (rc == Boolean.class) {
+            return _unbox(v,Boolean.class);
+          }
           throw new ExecutionError("assignment.types", node);
         }
         else if (lc == byte.class && rc != byte.class) {
+          if (rc == Byte.class) {
+            return _unbox(v,Byte.class);
+          }
           if (rc == int.class && v.hasProperty(NodeProperties.VALUE)) {
             Number n = (Number)v.getProperty(NodeProperties.VALUE);
             if (n.intValue() == n.byteValue()) {
-              return;
+              return v;
             }
           }
           throw new ExecutionError("assignment.types", node);
         }
-        else if ((lc == short.class || rc == char.class) &&
-                   (rc != byte.class && rc != short.class && rc != char.class)) {
+        else if ((lc == short.class || lc == char.class) &&
+                 (rc != byte.class && rc != short.class && rc != char.class)) {
+          if (lc == short.class && rc == Short.class) {
+            return _unbox(v, Short.class);
+          }
+          if (lc == char.class && rc == Character.class) {
+            return _unbox(v, Character.class);
+          }
           if (rc == int.class && v.hasProperty(NodeProperties.VALUE)) {
             Number n = (Number)v.getProperty(NodeProperties.VALUE);
             if (n.intValue() == n.shortValue()) {
-              return;
+              return v;
             }
           }
           throw new ExecutionError("assignment.types", node);
         }
         else if (lc == int.class    &&
-                   (rc != byte.class  &&
-                    rc != short.class &&
-                    rc != char.class  &&
-                    rc != int.class)) {
+                 (rc != byte.class  &&
+                  rc != short.class &&
+                  rc != char.class  &&
+                  rc != int.class)) {
+          if (rc == Byte.class      || rc == Short.class ||
+              rc == Character.class || rc == Integer.class) {
+            return _unbox(v, rc);
+          }
           throw new ExecutionError("assignment.types", node);
         }
         else if (lc == long.class   &&
-                   (rc == null          ||
-                    !rc.isPrimitive()   ||
-                    rc == void.class    ||
-                    rc == boolean.class ||
-                    rc == float.class   ||
-                    rc == double.class)) {
+                 (rc == null          ||
+                  !rc.isPrimitive()   ||
+                  rc == void.class    ||
+                  rc == boolean.class ||
+                  rc == float.class   ||
+                  rc == double.class)) {
+          if (_isBoxingType(rc) && _isIntegralType(rc)) {
+            return _unbox(v, rc);
+          }
           throw new ExecutionError("assignment.types", node);
         }
         else if (lc == float.class  &&
-                   (rc == null          ||
-                    !rc.isPrimitive()   ||
-                    rc == void.class    ||
-                    rc == boolean.class ||
-                    rc == double.class)) {
+                 (rc == null          ||
+                  !rc.isPrimitive()   ||
+                  rc == void.class    ||
+                  rc == boolean.class ||
+                  rc == double.class)) {
+          if (_isBoxingType(rc) && rc != Boolean.class && rc != Double.class) {
+            return _unbox(v, rc);
+          }
           throw new ExecutionError("assignment.types", node);
         }
         else if (lc == double.class &&
-                   (rc == null        ||
-                    !rc.isPrimitive() ||
-                    rc == void.class  ||
-                    rc == boolean.class)) {
+                 (rc == null        ||
+                  !rc.isPrimitive() ||
+                  rc == void.class  ||
+                  rc == boolean.class)) {
+          if (_isBoxingType(rc) && rc != Boolean.class) {
+            return _unbox(v, rc);
+          }
           throw new ExecutionError("assignment.types", node);
         }
       }
       else if (rc != null) {
+        if (_boxesTo(rc, lc)) { 
+          return _box(v, rc);
+        }
         if (!lc.isAssignableFrom(rc) && !rc.isAssignableFrom(lc)) {
           throw new ExecutionError("assignment.types", node);
         }
       }
     }
+    return v;
   }
 
   /**
@@ -2594,6 +2632,91 @@ return null;
             c == Boolean.class   || c == Double.class ||
             c == Character.class || c == Short.class  ||
             c == Byte.class      || c == Float.class );
+  }
+  
+  private static boolean _boxesTo(Class prim, Class ref) {
+    return 
+      (prim == int.class     && ref == Integer.class)   ||
+      (prim == long.class    && ref == Long.class)      ||
+      (prim == byte.class    && ref == Byte.class)      ||
+      (prim == char.class    && ref == Character.class) ||
+      (prim == short.class   && ref == Short.class)     ||
+      (prim == boolean.class && ref == Boolean.class)   ||
+      (prim == float.class   && ref == Float.class)     ||
+      (prim == double.class  && ref == Double.class);
+  }
+  
+  /**
+   * Boxes the given expression by returning the correct
+   * <code>SimpleAllocation</code> corresponding to the given
+   * primitive type.
+   * @param exp the expression to box
+   * @param primType the type of the primitive expression that is to be boxed
+   * @return the <code>SimpleAllocation</code> that boxes the expression
+   */
+  private static SimpleAllocation _box(Expression exp, Class primType) {
+    String refTypeName = "";
+    Class refType = null;
+    
+    if (primType == boolean.class) {
+      refTypeName = "Boolean";
+      refType = Boolean.class;
+    }
+    else if (primType == byte.class) {
+      refTypeName = "Byte";
+      refType = Byte.class;
+    }
+    else if (primType == char.class) {
+      refTypeName = "Character";
+      refType = Character.class;
+    }
+    else if (primType == short.class) {
+      refTypeName = "Short";
+      refType = Short.class;
+    }
+    else if (primType == int.class) {
+      refTypeName = "Integer";
+      refType = Integer.class;
+    }
+    else if (primType == long.class) {
+      refTypeName = "Long";
+      refType = Long.class;
+    }
+    else if (primType == float.class) {
+      refTypeName = "Float";
+      refType = Float.class;
+    }
+    else if (primType == double.class) {
+      refTypeName = "Double";
+      refType = Double.class;
+    }
+    else {
+      throw new ExecutionError("box.type", exp);
+    }
+    
+    Constructor constructor;
+    try {
+      constructor = refType.getConstructor(new Class[] {primType});
+    }
+    catch (NoSuchMethodException nsme) {
+      throw new RuntimeException("The constructor for " + refTypeName + " not found.");
+    }
+    ReferenceType ref = new ReferenceType(refTypeName,
+                                          exp.getFilename(),
+                                          exp.getBeginLine(),
+                                          exp.getBeginColumn(),
+                                          exp.getEndLine(),
+                                          exp.getEndColumn());
+    List<Expression> args = new LinkedList<Expression>();
+    args.add(exp);
+    SimpleAllocation alloc = new SimpleAllocation(ref, args,
+                                                  exp.getFilename(),
+                                                  exp.getBeginLine(),
+                                                  exp.getBeginColumn(),
+                                                  exp.getEndLine(),
+                                                  exp.getEndColumn());
+    alloc.setProperty(NodeProperties.CONSTRUCTOR, constructor);
+    return alloc;
   }
   
   /**
