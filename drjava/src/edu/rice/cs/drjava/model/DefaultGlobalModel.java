@@ -918,9 +918,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     // Adds extra.classpath to the classpath.
     Vector<File> extraClasspath = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
     if(extraClasspath != null) {
-        Enumeration<File> enum = extraClasspath.elements();
-        while(enum.hasMoreElements()) {
-            classpath += enum.nextElement().getAbsolutePath() + separator;
+        Enumeration<File> en = extraClasspath.elements();
+        while(en.hasMoreElements()) {
+            classpath += en.nextElement().getAbsolutePath() + separator;
         }
     }
     return classpath;
@@ -2518,9 +2518,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
     Vector<File> cp = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
     if(cp!=null) {
-      Enumeration<File> enum = cp.elements();
-      while(enum.hasMoreElements()) {
-        _interactionsModel.addToClassPath(enum.nextElement().getAbsolutePath());
+      Enumeration<File> en = cp.elements();
+      while(en.hasMoreElements()) {
+        _interactionsModel.addToClassPath(en.nextElement().getAbsolutePath());
       }
     }
     
@@ -2619,9 +2619,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public void optionChanged (OptionEvent<Vector<File>> oce) {
       Vector<File> cp = oce.value;
       if(cp!=null) {
-        Enumeration<File> enum = cp.elements();
-        while(enum.hasMoreElements()) {
-          _interactionsModel.addToClassPath(enum.nextElement().getAbsolutePath());
+        Enumeration<File> en = cp.elements();
+        while(en.hasMoreElements()) {
+          _interactionsModel.addToClassPath(en.nextElement().getAbsolutePath());
         }
       } 
     }    

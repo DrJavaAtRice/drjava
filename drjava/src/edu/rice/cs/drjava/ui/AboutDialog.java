@@ -128,8 +128,8 @@ public class AboutDialog extends JDialog implements ActionListener {
         return ((Comparable[]) o1)[0].compareTo(((Comparable[]) o2)[0]);
       }
     });
-    UneditableTableModel model = 
-      new UneditableTableModel(rowData,new String[]{"Name","Value"});
+    String[] nvStrings = new String[]{"Name","Value"};
+    UneditableTableModel model = new UneditableTableModel(rowData, nvStrings);
     JTable table = new JTable(model);
     JScrollPane scroller = new BorderlessScrollPane(table);
     wrapBorder(scroller,new EmptyBorder(5,0,0,0));

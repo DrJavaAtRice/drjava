@@ -59,8 +59,8 @@ public class VectorOptionTest extends TestCase {
   
   public void setUp() {
     // name fields are irrelevant at this point.
-    _ivo = new VectorOption<Integer>("whatever",new IntegerOption("",null),(Vector) null);
-    _bvo = new VectorOption<Boolean>("everwhat",new BooleanOption("",null),(Vector) null);
+    _ivo = new VectorOption<Integer>("whatever",new IntegerOption("",null),(Vector<Integer>) null);
+    _bvo = new VectorOption<Boolean>("everwhat",new BooleanOption("",null),(Vector<Boolean>) null);
   }
   
   public void testGetName() {

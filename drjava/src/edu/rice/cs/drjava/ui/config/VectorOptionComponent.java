@@ -69,7 +69,7 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
   private DefaultListModel _listModel;
   private FileFilter _fileFilter;
   
-  public VectorOptionComponent (VectorOption opt, String text, Frame parent) {
+  public VectorOptionComponent (VectorOption<File> opt, String text, Frame parent) {
     super(opt, text, parent);
     
     //set up list
