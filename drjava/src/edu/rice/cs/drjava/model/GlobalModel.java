@@ -125,9 +125,9 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
   /**
    * Gets the DocumentNavigator, which controls the document view.
    */
-  public IAWTContainerNavigatorActor getDocumentNavigator();
+  public IDocumentNavigator getDocumentNavigator();
    
-  public void setDocumentNavigator(IAWTContainerNavigatorActor newnav);
+  public void setDocumentNavigator(IDocumentNavigator newnav);
   
   //---------------------------- File Management ----------------------------//
 

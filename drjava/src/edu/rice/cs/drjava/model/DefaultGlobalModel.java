@@ -283,7 +283,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * the abstract container which contains views of open documents and allows user to 
    * navigate document focus among this collection of open documents
    */
-  protected IAWTContainerNavigatorActor _documentNavigator = AWTContainerNavigatorFactory.Singleton.makeListNavigator();
+  protected IDocumentNavigator _documentNavigator = AWTContainerNavigatorFactory.Singleton.makeListNavigator();
   
 
   // ----- CONSTRUCTORS -----
@@ -703,11 +703,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return _javadocModel;
   }
   
-  public IAWTContainerNavigatorActor getDocumentNavigator() {
+  public IDocumentNavigator getDocumentNavigator() {
     return _documentNavigator;
   }
   
-  public void setDocumentNavigator(IAWTContainerNavigatorActor newnav) {
+  public void setDocumentNavigator(IDocumentNavigator newnav) {
     _documentNavigator = newnav;
   }
   
@@ -1021,9 +1021,24 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     srcFiles = ir.getSourceFiles();
     String projfilepath = projectFile.getCanonicalPath();
 
-    IAWTContainerNavigatorActor newNav = 
-      AWTContainerNavigatorFactory.Singleton.makeTreeNavigator(projfilepath,
-                                                               getDocumentNavigator());
+    List<Pair<String, INavigatorItemFilter>> l = new LinkedList<Pair<String, INavigatorItemFilter>>();
+    l.add(new Pair<String, INavigatorItemFilter>("[ Source Files ]", new INavigatorItemFilter(){
+      public boolean accept(INavigatorItem n){
+        OpenDefinitionsDocument d = DefaultGlobalModel.this.getODDGivenIDoc(n);
+        return d.isProjectFile();
+      }
+    }));
+
+    l.add(new Pair<String, INavigatorItemFilter>("[ External Files ]", new INavigatorItemFilter(){
+      public boolean accept(INavigatorItem n){
+        OpenDefinitionsDocument d = DefaultGlobalModel.this.getODDGivenIDoc(n);
+        return !d.isProjectFile() || d.isUntitled();
+      }
+    }));
+    
+
+    IDocumentNavigator newNav = 
+      AWTContainerNavigatorFactory.Singleton.makeTreeNavigator(projfilepath, getDocumentNavigator(), l);
 
     
     setDocumentNavigator(newNav);
@@ -3484,8 +3499,23 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       
       String path = doc.getFile().getCanonicalPath();
       path = path.substring(0, path.lastIndexOf(File.separator));
+      String _topLevelPath;
+      if(getProjectFile() != null){
+        _topLevelPath = getProjectFile().getCanonicalPath();
+        _topLevelPath = _topLevelPath.substring(0, _topLevelPath.lastIndexOf(File.separator));;
+      }else{
+        _topLevelPath = "";
+      }
      
-      _documentNavigator.addDocument(idoc, path);
+      if (!path.equals(_topLevelPath) && !path.startsWith(_topLevelPath + File.separator) ){
+        /** it's in external files, so don't give it a path */
+        _documentNavigator.addDocument(idoc, "");
+      }else{
+        path = path.substring(_topLevelPath.length());
+        _documentNavigator.addDocument(idoc, path);
+      }
+      
+      
       //doc.checkIfClassFileInSync();
 
       // Make sure this is on the classpath
