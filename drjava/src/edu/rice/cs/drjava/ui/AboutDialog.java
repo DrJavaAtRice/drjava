@@ -70,7 +70,7 @@ public class AboutDialog extends JDialog implements ActionListener {
   }
   
   public AboutDialog(JFrame owner) {
-    super(owner, "About DrJava", true);
+    super(owner, "About DrJava", true); // (changed to non-modal for now)
 
     buildGUI(getContentPane());
     
@@ -98,7 +98,8 @@ public class AboutDialog extends JDialog implements ActionListener {
     }
     JTabbedPane tabs = new JTabbedPane();
     addTab(tabs,"About",createCopyrightTab());
-    addTab(tabs,"GNU Public License",createTextScroller(GPL));
+    if(GPL!=null)
+      addTab(tabs,"GNU Public License",createTextScroller(GPL));
     addTab(tabs,"DynamicJava License",createTextScroller(DYADE_LICENSE));
     cp.add(createBottomBar(),BorderLayout.SOUTH);
     cp.add(tabs,BorderLayout.CENTER);
@@ -178,6 +179,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     textArea.setEditable(false);
     textArea.setLineWrap(true);
     textArea.setWrapStyleWord(true);
+    textArea.setCaretPosition(0);
     return textArea;
   }
   
@@ -235,20 +237,28 @@ public class AboutDialog extends JDialog implements ActionListener {
     try {
       InputStream is = AboutDialog.class.getResourceAsStream("/edu/rice/cs/LICENSE");
       if(is!=null) {
-        //DrJava.consoleOut().println("gpl found");
         BufferedReader r = new BufferedReader(new InputStreamReader(is));
         StringBuffer sb = new StringBuffer();
-        char[] buf = new char[0x1000];
-        for(int c = r.read(buf); c > 0; c = r.read(buf))
-          sb.append(buf,0,c);
-        r.close();
+        for(String s = r.readLine(); s != null; s = r.readLine()) {
+          int lastSig = s.length()-1; // the last char index
+          
+          while(lastSig >= 0 && Character.isWhitespace(s.charAt(lastSig))) {
+            lastSig--;
+          }
+          if(lastSig<0) {
+            sb.append("\n\n"); // empty line, so insert two newlines.
+          } else {
+            sb.append(' ');
+            sb.append(s.substring(0,lastSig+1));
+          }
+        }
         gpl = sb.toString();
-      }
-      else {
-        //DrJava.consoleOut().println("no gpl found");
+        gpl = gpl.trim();
+        if(gpl.length() == 0) gpl = null;
       }
     }
     catch(Exception e) {
+      gpl = null;
     }
     GPL = gpl;
   }

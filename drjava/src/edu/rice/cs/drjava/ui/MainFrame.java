@@ -159,6 +159,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private ConfigFrame _configFrame;
   private RecentFileManager _recentFileManager;
   private HelpFrame _helpFrame;
+  private AboutDialog _aboutDialog = null;
   
   private Timer _debugStepTimer = null;
   private Object _debugStepTimerLock = new Object();
@@ -535,7 +536,10 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Pops up an info dialog. */
   private Action _aboutAction = new AbstractAction("About") {
     public void actionPerformed(ActionEvent ae) {
-      new AboutDialog(MainFrame.this, _model.getAboutText()).show();
+      if(_aboutDialog == null) {
+        _aboutDialog = new AboutDialog(MainFrame.this, _model.getAboutText());
+      }
+      _aboutDialog.show();
     }
   };
 
@@ -1776,7 +1780,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenu _setUpFileMenu(int mask) {
     JMenuItem tmpItem;
     JMenu fileMenu = new JMenu("File");
-
+    fileMenu.setMnemonic(KeyEvent.VK_F);
     // New, open 
     _addMenuItem(fileMenu, _newAction, KEY_NEW_FILE);
     _addMenuItem(fileMenu, _openAction, KEY_OPEN_FILE);
@@ -1815,7 +1819,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenu _setUpEditMenu(int mask) {
     JMenuItem tmpItem;
     JMenu editMenu = new JMenu("Edit");
-
+    editMenu.setMnemonic(KeyEvent.VK_E);
     // Undo, redo
     _addMenuItem(editMenu, _undoAction, KEY_UNDO);
     _addMenuItem(editMenu, _redoAction, KEY_REDO);
@@ -1851,7 +1855,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenu _setUpToolsMenu(int mask) {
     JMenuItem tmpItem;
     JMenu toolsMenu = new JMenu("Tools");
-
+    toolsMenu.setMnemonic(KeyEvent.VK_T);
     // Compile, Compile all
     _addMenuItem(toolsMenu, _compileAllAction, KEY_COMPILE_ALL);
     _addMenuItem(toolsMenu, _compileAction, KEY_COMPILE);
@@ -1881,7 +1885,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenu _setUpDebugMenu(int mask) {
     JMenuItem tempItem;
     JMenu debugMenu = new JMenu("Debugger");
-
+    debugMenu.setMnemonic(KeyEvent.VK_D);
     // Enable debugging item
     _debuggerEnabledMenuItem = _newCheckBoxMenuItem(_toggleDebuggerAction);
     _debuggerEnabledMenuItem.setSelected(false);
@@ -1945,6 +1949,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private JMenu _setUpHelpMenu(int mask) {
     JMenu helpMenu = new JMenu("Help");
+    helpMenu.setMnemonic(KeyEvent.VK_H);
     helpMenu.add(_helpAction);
     helpMenu.add(_aboutAction);
     return helpMenu;

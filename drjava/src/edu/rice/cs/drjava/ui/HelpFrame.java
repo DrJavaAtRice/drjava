@@ -43,6 +43,7 @@ import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.text.html.*;
 import javax.swing.event.*;
+import javax.swing.border.*;
 import java.awt.event.*;
 import java.awt.*;
 
@@ -56,7 +57,7 @@ import edu.rice.cs.drjava.CodeStatus;
  * The frame for displaying the HTML help files.
  * @version $Id$
  */ 
-public class HelpFrame extends JFrame implements HyperlinkListener {
+public class HelpFrame extends JFrame {
   
   private static final int FRAME_WIDTH = 750;
   private static final int FRAME_HEIGHT = 600;
@@ -70,6 +71,57 @@ public class HelpFrame extends JFrame implements HyperlinkListener {
   private JEditorPane _contentsDocPane;
   private JPanel _closePanel;
   private JButton _closeButton;
+  private JButton _backButton;
+  private JButton _forwardButton;
+  
+  private JPanel _navPane;
+
+  private HistoryList _history;
+  
+  private static class HistoryList {
+    private HistoryList next = null;
+    private final HistoryList prev;
+    private final URL contents;
+    private HistoryList(URL contents) {
+      this.contents = contents;
+      this.prev = null;
+    }
+    private HistoryList(URL contents, HistoryList prev) {
+      this.contents = contents; 
+      this.prev = prev;
+      prev.next = this;
+    }
+  }
+  
+  private Action _forwardAction = new AbstractAction("Forward") {
+    public void actionPerformed(ActionEvent e) {
+      _history = _history.next;
+
+      // user is always allowed to move back after a forward.
+      _backAction.setEnabled(true); 
+
+      if(_history.next == null) {
+        // no more forwards after this
+        _forwardAction.setEnabled(false);
+      }
+      _displayPage(_history.contents);
+    }
+  };
+  
+  private Action _backAction = new AbstractAction("Back") {
+    public void actionPerformed(ActionEvent e) {
+      _history = _history.prev;
+      
+      // user is always allowed to move forward after backing up
+      _forwardAction.setEnabled(true);
+      
+      if(_history.prev == null) {
+        // no more backing up
+        _backAction.setEnabled(false);
+      }
+      _displayPage(_history.contents);
+    }
+  };
   
   private Action _closeAction = new AbstractAction("Close") {
     public void actionPerformed(ActionEvent e) {        
@@ -77,39 +129,54 @@ public class HelpFrame extends JFrame implements HyperlinkListener {
     }
   };
  
+  
+  
   /**
    * Sets up the frame and displays it.
    */
   public HelpFrame() {
-    super("Help");
+    super("Help on using DrJava");
     
     _contentsDocPane = new JEditorPane();
     _contentsDocPane.setEditable(false);
-    _contentsDocPane.addHyperlinkListener(this);
-    JScrollPane contentsScroll = new JScrollPane(_contentsDocPane);
+    _contentsDocPane.addHyperlinkListener(_linkListener);
+    JScrollPane contentsScroll = new BorderlessScrollPane(_contentsDocPane);
     
     _mainDocPane = new JEditorPane();
     _mainDocPane.setEditable(false);
-    _mainDocPane.addHyperlinkListener(this);
-    JScrollPane mainScroll = new JScrollPane(_mainDocPane);
+    _mainDocPane.addHyperlinkListener(_linkListener);
+    JScrollPane mainScroll = new BorderlessScrollPane(_mainDocPane);
     
     _splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                 true,
                                 contentsScroll, 
                                 mainScroll);
     _splitPane.setDividerLocation(LEFT_PANEL_WIDTH);
-    
+    JPanel tempPanel = new JPanel(new GridLayout(1,1));
+    tempPanel.setBorder(new EmptyBorder(0,5,0,5));
+    tempPanel.add(_splitPane);
+    // _splitPane.setBorder(new CompoundBorder(new EmptyBorder(0,5,0,5),_splitPane.getBorder()));
     _closeButton = new JButton(_closeAction);
+    _backButton = new JButton(_backAction);
+    _forwardButton = new JButton(_forwardAction);
+    _backAction.setEnabled(false);
+    _forwardAction.setEnabled(false);
     _closePanel = new JPanel(new BorderLayout());
     _closePanel.add(_closeButton, BorderLayout.EAST);
-    
+    _closePanel.setBorder(new EmptyBorder(5,5,5,5)); // padding
+    _navPane = new JPanel();
+    _navPane.setLayout(new BoxLayout(_navPane,BoxLayout.X_AXIS));
+    _navPane.add(_backButton);
+    _navPane.add(_forwardButton);
+    _navPane.setBorder(new EmptyBorder(5,5,5,5));
     Container cp = getContentPane();
     cp.setLayout(new BorderLayout());
-    cp.add(_splitPane, BorderLayout.CENTER);
+    cp.add(_navPane, BorderLayout.NORTH);
+    cp.add(tempPanel, BorderLayout.CENTER);
     cp.add(_closePanel, BorderLayout.SOUTH);
     
     // Load contents page
-    URL indexUrl = this.getClass().getResource(HELP_PATH + CONTENTS_PAGE);
+    URL indexUrl = HelpFrame.class.getResource(HELP_PATH + CONTENTS_PAGE);
     if (indexUrl != null) {
       try {
         _contentsDocPane.setPage(indexUrl);
@@ -118,15 +185,14 @@ public class HelpFrame extends JFrame implements HyperlinkListener {
         // Show some error page?
         _displayError();
       }
-    }
-    else {
+    } else {
       _displayError();
     }
-    URL introUrl = this.getClass().getResource(HELP_PATH + HOME_PAGE);
+    URL introUrl = HelpFrame.class.getResource(HELP_PATH + HOME_PAGE);
     if (introUrl != null) {
-      displayPage(introUrl);
-    }
-    else {
+      _history = new HistoryList(introUrl);
+      _displayPage(introUrl);
+    } else {
       _displayError();
     }
     
@@ -150,9 +216,10 @@ public class HelpFrame extends JFrame implements HyperlinkListener {
 
   /**
    * Displays the given URL in the main pane.
+   * changed to private, because of history system.
    * @param url URL to display
    */
-  public void displayPage(URL url) {
+  public void _displayPage(URL url) {
     try {
       _mainDocPane.setPage(url);
     }
@@ -176,21 +243,32 @@ public class HelpFrame extends JFrame implements HyperlinkListener {
     _mainDocPane.setText(errorText);
   }
   
-  /**
-   * Shows the page selected by the hyperlink event.
-   */
-  public void hyperlinkUpdate(HyperlinkEvent event){
-    if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-      // Only follow links within the documentation
-      URL url = event.getURL();
-      String protocol = url.getProtocol();
-      String path = url.getPath();
-      if (("file".equals(protocol) || "jar".equals(protocol))
-            && path.indexOf(HELP_PATH) >= 0) {
-        displayPage(url);
-      }
-    }
+  public void jumpTo(URL url) {
+    _history = new HistoryList(url,_history); // current history is prev for this node
+    
+    _backAction.setEnabled(true); // now we can back up.
+    _forwardAction.setEnabled(false); // can't go any more forward
+    // (any applicable previous forward info is lost) because you nuked the forward list
+    _displayPage(url);
   }
   
+  /**
+   * Shows the page selected by the hyperlink event.
+   * (theo) changed to anonymous inner class for encapsulation purposes
+   */
+  private final HyperlinkListener _linkListener = new HyperlinkListener() {
+    public void hyperlinkUpdate(HyperlinkEvent event){
+      if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+        // Only follow links within the documentation
+        URL url = event.getURL();
+        String protocol = url.getProtocol();
+        String path = url.getPath();
+        if (("file".equals(protocol) || "jar".equals(protocol))
+              && path.indexOf(HELP_PATH) >= 0) {
+          jumpTo(url);
+        }
+      }
+    }
+  };
 }
 
