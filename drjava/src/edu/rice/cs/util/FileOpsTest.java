@@ -315,8 +315,8 @@ public class FileOpsTest extends TestCase {
     String[] res = FileOps.splitFile(f);
 
     assertTrue( "Inconsitent results. Expected " +
-               java.util.Arrays.toString(parts) + ", but found " +
-               java.util.Arrays.toString(res),
+               java.util.Arrays.asList(parts).toString() + ", but found " +
+               java.util.Arrays.asList(res).toString(),
                java.util.Arrays.equals(parts,res));
   }
 
