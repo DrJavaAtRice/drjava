@@ -831,6 +831,7 @@ public class JTreeSortNavigator extends JTree
    * if the selected node is not a leaf
    */
   public INavigatorItem getCurrentSelectedLeaf(){
+    if (_currSelected == null) return null;
     return _currSelected.execute(_leafVisitor);
   }
   
