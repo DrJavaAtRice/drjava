@@ -15,12 +15,12 @@
   <property name="projpath" value="edu/rice/cs/${ant.project.name}" />
 
   <!-- put new javadoc in this directory after each commit -->
-  <property name="public_javadoc_dir" value="/home/javaplt/public_html/drjava/javadoc" />
+  <property name="public_javadoc_dir" value="/home/javaplt/public_html/javadoc/${ant.project.name}" />
 
   <!-- put javadoc in this directory if generating private javadoc -->
-  <property name="private_javadoc_dir" value="${srcroot}/../javadoc" />
+  <property name="private_javadoc_dir" value="${srcroot}/../javadoc/${ant.project.name}" />
 
-  <property name="jarfile" value="${srcroot}/../util.jar" />
+  <property name="jarfile" value="${srcroot}/../${ant.project.name}.jar" />
   <property name="manifest" value="manifest" />
 
   <!-- Init target. All others depend on it. Initialize the directory. -->
@@ -68,33 +68,43 @@
 
     <cvs command="tag -c ${version-tag}" quiet="true" />
 
-    <!-- Create distribution jar.
-         We modify property jarfile for this call to put the jar in
-         the right place.
-    -->
-    <property name="distjar" value="${jars_dir}/${version-tag}.jar" />
+    <echo message="New version ${version-tag} committed to CVS." />
+    <echo message="Note: This version has not yet been released. To release it, type the following on a CS net host (sun or frosty): ant -Dversion-tag=${version-tag} release" />
+  </target>
 
+  <!-- generate jar and javadoc
+       Requires version-tag to be set (via command line -Dversion-tag=)
+       For example, to release drjava-20020101-0000, you'd type:
+
+       ant -Dversion-tag=drjava-20020101-0000 release
+
+       Note: Release must be run on CS net
+  -->
+  <target name="release" if="version-tag" depends="update">
+    <!-- util doesn't make its own jars right now -->
     <!--
     <antcall target="jar">
-      <param name="jarfile" value="${distjar}" />
+      <param name="jarfile" value="${jars_dir}/${version-tag}.jar" />
     </antcall>
     -->
 
     <!-- generate javadoc for the committed version! -->
-    <!--
     <antcall target="generate_javadoc">
       <param name="javadoc_dir" value="${public_javadoc_dir}" />
       <param name="javadoc_title" value="${version-tag}" />
     </antcall>
-    -->
 
     <!-- give group permissions to write over the javadoc -->
-    <!--
-    <chmod perm="g+w,a+rX" dir="${public_javadoc_dir}" type="both" />
-    <chmod perm="g+w,a+rX" file="${public_javadoc_dir}" type="both" />
-    -->
+    <chmod perm="g+w,a+rX" dir="${public_javadoc_dir}" type="both" includes="**" />
+  </target>
 
-    <echo message="New version ${version-tag} committed to CVS." />
+  <!-- commit this version and then release it. only will work on cs net. -->
+  <target name="commit-and-release">
+    <antcall target="commit" />
+    <antcall target="release">
+      <param name="version-tag"
+             value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
+    </antcall>
   </target>
 
   <!-- Compile. We have to start at srcroot and then selectively include
@@ -194,14 +204,14 @@
 
     <javadoc sourcepath="${javadoc_dir}/src"
              destdir="${javadoc_dir}"
-             packagenames="edu.rice.cs.util.*"
+             packagenames="edu.rice.cs.${ant.project.name}.*"
              Private="yes"
              Use="yes"
              Version="yes"
              Windowtitle="${javadoc_title}">
-      <link href="http://java.sun.com/j2se/1.3/docs/api" />
-      <link href="http://junit.org/junit/javadoc/3.7" />
-      <link href="http://www-sop.inria.fr/koala/djava/javadoc" />
+
+      <link href="http://www.cs.rice.edu/~javaplt/javadoc/java-api" />
+      <link href="http://www.cs.rice.edu/~javaplt/javadoc/junit" />
     </javadoc>
 
     <!-- delete source we generated without generics -->
