@@ -114,23 +114,23 @@ public class QuestionExistsCharInStmt extends IndentRuleQuestion {
     if(endCharPos == DefinitionsDocument.ERROR_INDEX) {
       // Should not happen, endChar must exist on the current line
       throw new UnexpectedException(new
-	IllegalArgumentException("Argument endChar to " + 
-				 "QuestionExistsCharInStmt must be a char " +
-				 "that exists on the current line."));
+        IllegalArgumentException("Argument endChar to " + 
+                                 "QuestionExistsCharInStmt must be a char " +
+                                 "that exists on the current line."));
     }
-
+    
     char[] findCharDelims = {_findChar};
     int prevFindChar;
-
+    
     // Find the position of the previous occurence findChar from the 
-    // position of endChar
+    // position of endChar (looking in paren phrases as well)
     try {
-      prevFindChar = doc.findPrevDelimiter(endCharPos, findCharDelims);
+      prevFindChar = doc.findPrevDelimiter(endCharPos, findCharDelims, false);
     } catch (BadLocationException e) {
       // Should not happen
       throw new UnexpectedException(e);
     }
-
+    
     if(prevFindChar == DefinitionsDocument.ERROR_INDEX) {
       // Couldn't find a previous occurence findChar
       return false;
@@ -138,10 +138,11 @@ public class QuestionExistsCharInStmt extends IndentRuleQuestion {
     
     char[] endStmtDelims = {';', '{', '}'};
     int prevEndStmtDelim;
-
+    
     // Find the end of the previous statement starting from the endChar
+    //  (not looking in paren phrases)
     try {
-      prevEndStmtDelim = doc.findPrevDelimiter(endCharPos, endStmtDelims);
+      prevEndStmtDelim = doc.findPrevDelimiter(endCharPos, endStmtDelims, true);
     } catch (BadLocationException e) {
       // Should not happen
       throw new UnexpectedException(e);

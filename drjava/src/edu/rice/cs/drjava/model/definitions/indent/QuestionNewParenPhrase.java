@@ -78,9 +78,9 @@ public class QuestionNewParenPhrase extends IndentRuleQuestion {
       int startLine = doc.getLineStartPos(here);
       
       if (startLine > DefinitionsDocument.DOCSTART) {
-        // Find previous delimiter
+        // Find previous delimiter (looking in paren phrases)
         char[] delims = {';', ',', '(', '['};
-        int prevDelim = doc.findPrevDelimiter(here, delims);
+        int prevDelim = doc.findPrevDelimiter(here, delims, false);
         
         if (prevDelim == DefinitionsDocument.ERROR_INDEX) {
           return false;

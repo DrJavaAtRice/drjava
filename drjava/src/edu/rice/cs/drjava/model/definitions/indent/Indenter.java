@@ -57,7 +57,7 @@ public class Indenter
   /**
    * Hardcoded indent size, for now.
    */
-  private int _indentSize = 2;
+  private String _indentLevel = "  ";  // 2 spaces
 
   /**
    * Root of decision tree.
@@ -106,8 +106,7 @@ public class Indenter
    */
   public void buildTree()
   {
-    /*
-    String oneLevel = _indentSize;
+    String oneLevel = _indentLevel;
     
     IndentRule 
       rule05 = new ActionDoNothing(),
@@ -115,23 +114,23 @@ public class Indenter
       rule03 = new QuestionCurrLineEmpty(rule04, rule05);
     
     IndentRule 
-      rule33 = new ActionStartStmtPlus(oneLevel),
+      rule33 = new ActionStartCurrStmtPlus(oneLevel),
       rule32 = new ActionStartStmtOfBracePlus(oneLevel),            
       rule31 = rule33,
-      rule30 = new QuestionInTernary(rule31, rule32),
-      rule29 = new QuestionLineContains(":", rule30, rule33),
-      rule28 = new ActionStartStmtPlus(""),                           
-      rule27 = new QuestionCurrLineStartsWith("{", rule28, rule29),
-      rule26 = rule28,
+      rule30 = new QuestionExistsCharInStmt('?', ':', rule31, rule32),
+      rule29 = new QuestionLineContains(':', rule30, rule33),
+      rule28 = new ActionStartStmtOfBracePlus(""),
+      rule27 = new QuestionCurrLineStartsWithSkipComments("{", rule28, rule29),
+      //rule26 = new ActionStartPrevStmtPlus(""),
       rule25 = rule32,
-      rule24 = rule28,
-      rule23 = new QuestionInTernary(rule24, rule25),
-      rule22 = new QuestionLineContains(":", rule23, rule24),
-      rule21 = new ActionStartStmtOfBracePlus(""),
-      rule20 = new QuestionCurrLineStartsWith("}", rule21, rule22),
+      //rule24 = rule26,
+      //rule23 = new QuestionExistsCharInStmt('?', ':', rule24, rule25),
+      //rule22 = new QuestionLineContains(':', rule23, rule24),
+      rule21 = rule28,
+      rule20 = new QuestionCurrLineStartsWithSkipComments("}", rule21, /**rule22*/ rule25),
       rule19 = new QuestionStartingNewStmt(rule20, rule27),
       rule18 = rule19,
-      rule17 = rule33,
+      rule17 = rule32,
       rule16 = new QuestionBraceOnPrevLine(rule17, rule18),
       rule15 = new QuestionBraceIsCurly(rule16, rule19),
       rule14 = new ActionBracePlus(" " + oneLevel),
@@ -139,15 +138,14 @@ public class Indenter
       rule12 = new QuestionNewParenPhrase(rule13, rule14),
       rule11 = new QuestionBraceIsParenOrBracket(rule12, rule15),
       rule10 = rule03,      
-      rule09 = new ActionStartPrevLinePlus(" * "),
-      rule08 = rule04,          
+      rule09 = new ActionStartPrevLinePlus("* "),
+      rule08 = new ActionStartPrevLinePlus(""),          
       rule07 = new QuestionCurrLineStartsWith("*", rule08, rule09),
       rule06 = new QuestionPrevLineStartsWith("*", rule07, rule10),
       rule02 = new QuestionPrevLineStartsComment(rule03, rule06),
       rule01 = new QuestionInsideComment(rule02, rule11);
     
     _topRule = rule01;
-    */
   }
 
   /**
@@ -155,8 +153,8 @@ public class Indenter
    */
   private Indenter() 
   {
-    //buildTree();
-    buildSimpleTree();
+    buildTree();
+    //buildSimpleTree();
   }
 
   /**

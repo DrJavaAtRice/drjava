@@ -447,7 +447,8 @@ public class DefinitionsDocument extends PlainDocument {
 
   /**
    * Searching backwards, finds the position of the first character that is one
-   * of the given delimiters.
+   * of the given delimiters.  Does not look for delimiters inside paren phrases.
+   * (eg. skips semicolons used inside for statements.)
    * NB: ignores comments.
    * @param pos Position to start from
    * @param delims array of characters to search for
@@ -455,11 +456,28 @@ public class DefinitionsDocument extends PlainDocument {
    * of document is reached.
    */
   public int findPrevDelimiter(int pos, char[] delims) throws BadLocationException {
-    
+    return findPrevDelimiter(pos, delims, true);
+  }
+  
+  /**
+   * Searching backwards, finds the position of the first character that is one
+   * of the given delimiters.  Will not look for delimiters inside a paren
+   * phrase if skipParenPhrases is true.
+   * NB: ignores comments.
+   * @param pos Position to start from
+   * @param delims array of characters to search for
+   * @param skipParenPhrases whether to look for delimiters inside paren phrases
+   *  (eg. semicolons in a for statement)
+   * @return position of first matching delimiter, or ERROR_INDEX if beginning
+   * of document is reached.
+   */
+  public int findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases)
+    throws BadLocationException
+  {
     int j, i;
     char c;
     String text = getText(DOCSTART, pos);
-
+    
     final int origLocation = _reduced.absOffset();
     // Move reduced model to location pos
     _reduced.move(pos - origLocation);
@@ -473,16 +491,23 @@ public class DefinitionsDocument extends PlainDocument {
           // Move reduced model to walker's location
           _reduced.move(i - pos);
           // Check if matching char is in comment or quotes
-          if((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
-             (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT)) ||
-             (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_SINGLE_QUOTE)) ||
-             (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_DOUBLE_QUOTE))) {
-	    // Ignore matching char
-	  } else {
-	    // Return position of matching char
-	    _reduced.move(origLocation - i);
-	    return i;
-	  }
+          ReducedModelState state = _reduced.getStateAtCurrent();
+          if((state.equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
+             (state.equals(ReducedModelState.INSIDE_BLOCK_COMMENT)) ||
+             (state.equals(ReducedModelState.INSIDE_SINGLE_QUOTE)) ||
+             (state.equals(ReducedModelState.INSIDE_DOUBLE_QUOTE))) {
+               // Ignore matching char
+             } else {
+               // Found a matching char, check if we should ignore it
+               if (skipParenPhrases && posInParenPhrase(i)) {
+                 // In a paren phrase, so ignore
+               }
+               else {
+                 // Return position of matching char
+                 _reduced.move(origLocation - i);
+                 return i;
+               }
+             }
           _reduced.move(pos - i);
         }
       }
@@ -512,7 +537,7 @@ public class DefinitionsDocument extends PlainDocument {
    */
   public String getIndentOfCurrStmt(int pos) throws BadLocationException {
     char[] delims = {';', '{', '}'};
-
+    
     // Get the start of the current line
     int lineStart = getLineStartPos(pos);
     
@@ -523,8 +548,8 @@ public class DefinitionsDocument extends PlainDocument {
       prevDelimiter = findPrevDelimiter(prevDelimiter, delims);
       // Check delimiter found was start of document
       if(prevDelimiter == ERROR_INDEX) {
-	reachedStart = true;
-	break;
+        reachedStart = true;
+        break;
       }
     } while(posInParenPhrase(prevDelimiter));
     
@@ -536,20 +561,20 @@ public class DefinitionsDocument extends PlainDocument {
     } else {
       nextNonWSChar = getFirstNonWSCharPos(prevDelimiter+1);
     }
-
-
+    
+    
     // If the end of the document was reached
     if(nextNonWSChar == ERROR_INDEX) {
       nextNonWSChar = getLength();
     }
-
+    
     // Get the start of the line of the non-ws char
     int lineStartStmt = getLineStartPos(nextNonWSChar);
-
+    
     // Get the position of the first non-ws character on 
     // this line
     int lineFirstNonWS = getLineFirstCharPos(lineStartStmt);
-
+    
     String lineText = "";
     try {
       lineText = getText(lineStartStmt, lineFirstNonWS - lineStartStmt);
@@ -557,7 +582,7 @@ public class DefinitionsDocument extends PlainDocument {
       // Should not be here
       throw new UnexpectedException(e);
     } 
-
+    
     return lineText;
   }
 
@@ -575,30 +600,30 @@ public class DefinitionsDocument extends PlainDocument {
     int lineStart = this.getLineStartPos(pos);
     int lineEnd = this.getLineEndPos(pos);
     String lineText;
-
+    
     try {
       lineText = this.getText(lineStart, lineEnd - lineStart);
     } catch(BadLocationException e) {
       // Should not be here
       throw new UnexpectedException(e);
     }
-
+    
     int i = lineText.indexOf(findChar, 0);
     while(i != -1) {
       // Move reduced model to walker's location
       this.getReduced().move(i + lineStart - reducedAbsOffset);
-
+      
       // Check if matching char is in comment or quotes
       if((this.getReduced().getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
-	 (this.getReduced().getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT)) ||
-	 (this.getReduced().getStateAtCurrent().equals(ReducedModelState.INSIDE_SINGLE_QUOTE)) ||
-	 (this.getReduced().getStateAtCurrent().equals(ReducedModelState.INSIDE_DOUBLE_QUOTE))) {
-	// Ignore matching char
-      } else {
-	// Return position of matching char
-	this.getReduced().move(reducedAbsOffset - (i + lineStart));
-	return (i + lineStart);
-      }
+         (this.getReduced().getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT)) ||
+         (this.getReduced().getStateAtCurrent().equals(ReducedModelState.INSIDE_SINGLE_QUOTE)) ||
+         (this.getReduced().getStateAtCurrent().equals(ReducedModelState.INSIDE_DOUBLE_QUOTE))) {
+           // Ignore matching char
+         } else {
+           // Return position of matching char
+           this.getReduced().move(reducedAbsOffset - (i + lineStart));
+           return (i + lineStart);
+         }
       this.getReduced().move(reducedAbsOffset - (i + lineStart));
       i = lineText.indexOf(findChar, i+1);
     }
@@ -681,11 +706,11 @@ public class DefinitionsDocument extends PlainDocument {
     int endPos = getLength();
     String text = getText(pos, endPos - pos);
     char[] whitespace = {' ', '\t', '\n'};
-
+    
     final int origLocation = _reduced.absOffset();
     // Move reduced model to location pos
     _reduced.move(pos - origLocation);
-
+    
     // Walk forward from specificed position
     for (i = pos; i != endPos; i++) {
       boolean isWhitespace = false;
@@ -700,22 +725,22 @@ public class DefinitionsDocument extends PlainDocument {
         // Move reduced model to walker's location
         _reduced.move(i - pos);
         // Check if matching char is in comment
-	if((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
-	   (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT))) {
-	  // Ignore matching char
-	} else { 
-	  if(_isStartOfComment(text, i - pos)) {
-	    // Move i past the start of comment characters
-	    // and continue searching
-	    i = i + 1;
-	    _reduced.move(1);
-	  } else {
-	  // Return position of matching char
-	  _reduced.move(origLocation - i);
-	  return i;
-	  }
-	}
-	_reduced.move(pos - i);
+        if((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
+           (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT))) {
+             // Ignore matching char
+           } else { 
+             if(_isStartOfComment(text, i - pos)) {
+               // Move i past the start of comment characters
+               // and continue searching
+               i = i + 1;
+               _reduced.move(1);
+             } else {
+               // Return position of matching char
+               _reduced.move(origLocation - i);
+               return i;
+             }
+           }
+        _reduced.move(pos - i);
       }
     }
     _reduced.move(origLocation - pos);
@@ -731,10 +756,10 @@ public class DefinitionsDocument extends PlainDocument {
     char currChar = text.charAt(pos);
     if(currChar == '/') {
       try {
-	char afterCurrChar = text.charAt(pos + 1);
-	if((afterCurrChar == '/') || (afterCurrChar == '*')) {
-	  return true;
-	}
+        char afterCurrChar = text.charAt(pos + 1);
+        if((afterCurrChar == '/') || (afterCurrChar == '*')) {
+          return true;
+        }
       } catch (StringIndexOutOfBoundsException e) {
       }
     }

@@ -80,29 +80,29 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion
     try
     {
       // Find the first non-whitespace character on the current line.
-
+      
       int
-	current = doc.getCurrentLocation(),
-	start   = doc.getLineFirstCharPos(current),
-	end     = doc.getLineEndPos(current);
-
+        current = doc.getCurrentLocation(),
+        start   = doc.getLineFirstCharPos(current),
+        end     = doc.getLineEndPos(current);
+      
       
       // Return false if the specified prefix doesn't "fit" on the current line.
-
+      
       if ((start + _prefix.length()) > end)
-	return false;
-
+        return false;
+      
       // Return false if the start of the line is inside a comment, or if
       // it is shadowed by single or double quotes.
-
+      
       BraceReduction reduced = doc.getReduced();
       reduced.move(start - current);
       ReducedModelState state = reduced.getStateAtCurrent();
       reduced.move(current - start);
       
       if (!state.equals(ReducedModelStates.FREE))
-	return false;
-
+        return false;
+      
       // Compare the specified prefix with the beginning of the current line.
       
       return _prefix.equals(doc.getText(start, _prefix.length()));
@@ -110,7 +110,7 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion
     catch (BadLocationException e)
     {
       // Control flow should never reach this point!
-	throw new UnexpectedException(new RuntimeException("Bug in QuestionCurrLineStartsWithSkipComments"));
+      throw new UnexpectedException(new RuntimeException("Bug in QuestionCurrLineStartsWithSkipComments"));
     }
   }
 }
