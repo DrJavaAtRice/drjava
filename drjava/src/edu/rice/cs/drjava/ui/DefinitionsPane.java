@@ -298,16 +298,18 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       _addHighlight(from, to);
       //      Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
     }
-    // TODO: finish this
-    //    else {
-    //      // Try to match a close brace to this open brace
-    //      from = _doc.balanceForward();
-    //      if (from > -1) {
-    //        from = to + from;
-    //        _addHighlight(to, from);
-    //        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
-    //      }
-    //    }
+    // if this wasn't a close brace, check for an open brace
+    else {
+      // (getCaretPosition will be the start of the highlight)
+      from = to;
+      
+      to = _doc.balanceForward();
+      if (to > -1) {
+        to = to + from;
+        _addHighlight(from - 1, to);
+//        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
+      }
+    }
   }
   
   /**
