@@ -774,7 +774,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Default cut action.  Returns focus to the correct pane. */
   Action cutAction = new DefaultEditorKit.CutAction() {
     public void actionPerformed(ActionEvent e) {
-      Component c = SwingUtilities.findFocusOwner(MainFrame.this);
+      Component c = MainFrame.this.getFocusOwner();
       super.actionPerformed(e);
       if (c != null) c.requestFocus();
     }
@@ -783,7 +783,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Default copy action.  Returns focus to the correct pane. */
   Action copyAction = new DefaultEditorKit.CopyAction() {
     public void actionPerformed(ActionEvent e) {
-      Component c = SwingUtilities.findFocusOwner(MainFrame.this);
+      Component c = MainFrame.this.getFocusOwner();
       super.actionPerformed(e);
       if (c != null) c.requestFocus();
     }
@@ -792,7 +792,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Default paste action.  Returns focus to the correct pane. */
   Action pasteAction = new DefaultEditorKit.PasteAction() {
     public void actionPerformed(ActionEvent e) {
-      Component c = SwingUtilities.findFocusOwner(MainFrame.this);
+      Component c = MainFrame.this.getFocusOwner();
 //      Component c = KeyboardFocusManager.getFocusOwner();
       if (_currentDefPane.hasFocus()) {
         _currentDefPane.endCompoundEdit();
@@ -2747,14 +2747,17 @@ public class MainFrame extends JFrame implements OptionConstants {
          * this highlights the document in the navigator
          */
         _model.setActiveDocument(_model.getActiveDocument());
+      
         return true;
       }
       else {
+           
         return false;
       }
     }
     catch (IOException ioe) {
       _showIOError(ioe);
+      
       return false;
     }
   }

@@ -2764,6 +2764,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           
           /* update the navigator */
           _documentNavigator.refreshDocument(getIDocGivenODD(this), fixPathForNavigator(file.getCanonicalPath()));
+          
         }
         return true;
       }
