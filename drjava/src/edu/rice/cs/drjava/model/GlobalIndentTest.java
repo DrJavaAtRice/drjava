@@ -15,8 +15,7 @@ import edu.rice.cs.drjava.model.compiler.*;
  * that the cursor position in the document is consistent with a standard.
  * @version $Id$
  */
-public class GlobalIndentTest extends TestCase {
-  private GlobalModel _model;
+public class GlobalIndentTest extends GlobalModelTestCase {
   private static final String FOO_EX_1 = "public class Foo {\n";
   private static final String FOO_EX_2 = "int foo;\n";
   private static final String BAR_CALL_1 = "bar(monkey,\n";
@@ -29,14 +28,6 @@ public class GlobalIndentTest extends TestCase {
    */
   public GlobalIndentTest(String name) {
     super(name);
-  }
-
-  /**
-   * put your documentation comment here
-   */
-  public void setUp() {
-    _model = new GlobalModel();
-    _model.setDefinitionsIndent(2);
   }
 
   /**
@@ -292,7 +283,8 @@ public class GlobalIndentTest extends TestCase {
    */
   private OpenDefinitionsDocument _getOpenDoc() {
     _assertNumOpenDocs(0);
-    _model.newFile();
+    OpenDefinitionsDocument doc = _model.newFile();
+    doc.setDefinitionsIndent(2);
     OpenDefinitionsDocument[] docs = _model.getDefinitionsDocuments();
     _assertNumOpenDocs(1);
     return docs[0];
