@@ -69,8 +69,8 @@ public class EventNotifierTest extends TestCase {
       public void junitSuiteStarted(int numTests) {
         junitSuiteStartedCount++;
       }
-      public void interactionsExited(int status) {
-        interactionsExitedCount++;
+      public void interpreterExited(int status) {
+        interpreterExitedCount++;
       }
     };
     TestListener listener2 = new TestListener() {
@@ -93,7 +93,7 @@ public class EventNotifierTest extends TestCase {
     _notifier.removeListener(listener2);
     _notifier.notifyListeners(new EventNotifier.Notifier() {
       public void notifyListener(GlobalModelListener l) {
-        l.interactionsExited(1);
+        l.interpreterExited(1);
       }
     });
     listener1.assertInteractionsExitedCount(1);

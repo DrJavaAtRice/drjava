@@ -57,6 +57,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Arrays;
 import java.net.URL;
+import java.net.MalformedURLException;
 
 import gj.util.Vector;
 
@@ -141,6 +142,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private InteractionsController _interactionsController;  // move to controller
   private DebugPanel _debugPanel;
   private JUnitPanel _junitErrorPanel;
+  private JavadocErrorPanel _javadocErrorPanel;
   private FindReplaceDialog _findReplace;
   private LinkedList _tabs;
   
@@ -1001,7 +1003,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _javadocChooser = new JFileChooser();
     _javadocChooser.setCurrentDirectory(workDir);
     _javadocChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    _javadocChooser.setDialogTitle("JavaDoc Destination Directory");
+    _javadocChooser.setDialogTitle("Javadoc Destination Directory");
     
 //     JPanel _jdAccPanel = new JPanel();
 //     JCheckBox _jdCheckBox = new JCheckBox("Start From Source Roots");
@@ -1042,6 +1044,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _compilerErrorPanel.reset();
     _junitErrorPanel.getErrorListPane().setLastDefPane(_currentDefPane);
     _junitErrorPanel.reset();
+    _javadocErrorPanel.getErrorListPane().setLastDefPane(_currentDefPane);
+    _javadocErrorPanel.reset();
 
     // set up menu bar and actions
     _setUpActions();
@@ -1139,7 +1143,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
    /**
-   * @return The frame's compileAll button (Package private accessor)
+   * @return The frame's close button (Package private accessor)
    */
   JButton getCloseButton() {
     return _closeButton;
@@ -1315,6 +1319,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     return _tabbedPane.getSelectedComponent() == _junitErrorPanel;
   }
 
+  /**
+   * Returns whether the JavaDoc output tab is currently showing.
+   */
+  public boolean isJavadocTabSelected() {
+    return _tabbedPane.getSelectedComponent() == _javadocErrorPanel;
+  }
+  
   /**
    * Makes sure save and compile buttons and menu items
    * are enabled and disabled appropriately after document
@@ -1613,7 +1624,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         catch (ExitingNotAllowedException enae) {
           JOptionPane.showMessageDialog(MainFrame.this,
                                         "An exception occurred while running JUnit, which could\n" +
-                                        "not be caught be DrJava.  Details about the exception should\n" +
+                                        "not be caught by DrJava.  Details about the exception should\n" +
                                         "have been printed to your console.\n\n",
                                         "Error Running JUnit",
                                         JOptionPane.ERROR_MESSAGE);
@@ -1630,7 +1641,23 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _javadocAll() {
     // Only javadoc if all are saved.
+    // This should really be in DefaultGlobalModel.
     _model.saveAllBeforeProceeding(GlobalModelListener.JAVADOC_REASON);
+    
+    // Make sure that there is at least one saved document.
+    ListModel docs = _model.getDefinitionsDocuments();
+    
+    boolean noneYet = true;
+    int numDocs = docs.getSize();
+    for (int i = 0; (noneYet && (i < numDocs)); i++) {
+      OpenDefinitionsDocument doc = (OpenDefinitionsDocument) docs.getElementAt(i);
+      noneYet = doc.isUntitled();
+    }
+    
+    // If there are no saved files, ignore the javadoc command.
+    if (noneYet) {
+      return;
+    }
     
     // Get the destination directory via a JFileChooser.
     try {
@@ -1654,26 +1681,41 @@ public class MainFrame extends JFrame implements OptionConstants {
       } while (!destDir.exists() || !destDir.canWrite());
       
       // Generate the output with the GlobalModel.
-      _model.javadocAll(destDir.getAbsolutePath());
+      final File destDirF = destDir;
+      final SwingWorker worker = new SwingWorker() {
+        public Object construct() {
+          try {
+            boolean success = _model.javadocAll(destDirF.getAbsolutePath());
 
-      // Display the results.
-      _javadocFrame = new JavadocFrame(destDir);
-      _javadocFrame.show();
-    }
-    catch (IOException ioe) {
-      _showIOError(ioe);
+            // Display the results.
+//             System.out.println("did we get this far?");
+            if (success) {
+              _javadocFrame = new JavadocFrame(destDirF);
+              _javadocFrame.show();
+            }
+          }
+          catch (InvalidPackageException ipe) {
+            _showError(ipe, "Javadoc Error",
+                       "Javadoc encountered an invalid package name.");
+          }
+//           catch (JavadocException jde) {
+//             _showError(jde, "JavaDoc Error",
+//                        "There was an error generating the javadoc.");
+//           }
+          catch (MalformedURLException me) {
+            throw new UnexpectedException(me);
+          }
+          catch (IOException ioe) {
+            _showIOError(ioe);
+          }
+          return "XXX: Unused return value!";
+        }
+      };
+      worker.start();
     }
     catch (OperationCanceledException oce) {
       // If the user cancels the prompt, silently return.
       return;
-    }
-    catch (InvalidPackageException ipe) {
-      _showError(ipe, "JavaDoc Error",
-                 "JavaDoc encountered an invalid package name.");
-    }
-    catch (JavadocException jde) {
-      _showError(jde, "JavaDoc Error",
-                 "There was an error generating the javadoc.");
     }
   }
 
@@ -2099,7 +2141,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_resetInteractionsAction, "Reset", "Reset interactions");
   
     _setUpAction(_junitAction, "Test", "Run JUnit over the current document");
-    _setUpAction(_javadocAction, "JavaDoc", "Test", "Create javadoc");
+    _setUpAction(_javadocAction, "Javadoc", "Test", "Create Javadoc for open documents");
 
   }
 
@@ -2461,7 +2503,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     _toolBar.setFloatable(false);
 
-    //_toolBar.addSeparator();
+//     _toolBar.addSeparator();
 
     // New, open, save, close
     _toolBar.add(_createToolbarButton(_newAction));
@@ -2634,7 +2676,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     final JScrollPane consoleScroll = new BorderlessScrollPane(_consolePane);
     final JScrollPane interactionsScroll = new BorderlessScrollPane(_interactionsPane);
+    
     _junitErrorPanel = new JUnitPanel(_model, this);
+    _javadocErrorPanel = new JavadocErrorPanel(_model, this);
+    
     _tabbedPane = new JTabbedPane();
     _tabbedPane.addChangeListener(new ChangeListener () {
       public void stateChanged(ChangeEvent e) {
@@ -2651,6 +2696,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           int pos = _currentDefPane.getCaretPosition();
           _currentDefPane.getErrorCaretListener().updateHighlight(pos);
           _currentDefPane.getJUnitErrorCaretListener().updateHighlight(pos);
+          _currentDefPane.getJavadocErrorCaretListener().updateHighlight(pos);
         }
       }
     });
@@ -2668,6 +2714,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     _tabs.addLast(_compilerErrorPanel);
     _tabs.addLast(_junitErrorPanel);
+    _tabs.addLast(_javadocErrorPanel);
     _tabs.addLast(_findReplace);
     
     // Show compiler output pane by default
@@ -2762,6 +2809,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     JUnitErrorCaretListener junitCaretListener =
       new JUnitErrorCaretListener(doc, _junitErrorPanel.getErrorListPane(), pane, this);
     pane.addJUnitErrorCaretListener(junitCaretListener);
+
+    JavadocErrorCaretListener javadocCaretListener =
+      new JavadocErrorCaretListener(doc, _javadocErrorPanel.getErrorListPane(), pane, this);
+    pane.addJavadocErrorCaretListener(javadocCaretListener);
 
     // add a listener to update line and column.
     pane.addCaretListener( _posListener );    
@@ -3006,6 +3057,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _findReplace.setFieldFont(f);
     _compilerErrorPanel.setListFont(f);
     _junitErrorPanel.setListFont(f);
+    _javadocErrorPanel.setListFont(f);
   }
   
   
@@ -3341,7 +3393,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Inner class to listen to all events in the model.
    */
-  private class ModelListener implements SingleDisplayModelListener{
+  private class ModelListener implements SingleDisplayModelListener {
     public void newFileCreated(OpenDefinitionsDocument doc) {
       _createDefScrollPane(doc);
     }
@@ -3478,10 +3530,12 @@ public class MainFrame extends JFrame implements OptionConstants {
           // Update error highlights
           _compilerErrorPanel.getErrorListPane().selectNothing();
           _junitErrorPanel.getErrorListPane().selectNothing();
+          _javadocErrorPanel.getErrorListPane().selectNothing();
           
           int pos = _currentDefPane.getCaretPosition();
           _currentDefPane.getErrorCaretListener().updateHighlight(pos);
           _currentDefPane.getJUnitErrorCaretListener().updateHighlight(pos);
+          _currentDefPane.getJavadocErrorCaretListener().updateHighlight(pos);
           
           // Update FileChoosers' directory
           _setCurrentDirectory(active);
@@ -3524,7 +3578,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _enableInteractionsPane();
     }
     
-    public void interactionsErrorOccurred(int offset, int length){      
+    public void interactionErrorOccurred(int offset, int length){      
       _interactionsPane.highlightError(offset, length);
     }
     
@@ -3625,7 +3679,32 @@ public class MainFrame extends JFrame implements OptionConstants {
       SwingUtilities.invokeLater(doCommand);
     }
 
-    public void interactionsExited(final int status) {
+    public void javadocStarted() {
+      
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          showTab(_javadocErrorPanel);
+          _javadocErrorPanel.setJavadocInProgress();
+          _javadocAction.setEnabled(false);
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
+    }
+
+    public void javadocEnded() {
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          showTab(_javadocErrorPanel);
+          _javadocAction.setEnabled(true);
+          _javadocErrorPanel.reset();
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
+    }
+
+    public void interpreterExited(final int status) {
       // Only show prompt if option is set
       if (DrJava.getConfig().getSetting(INTERACTIONS_EXIT_PROMPT).booleanValue()) {
         // Show the dialog in a Swing thread, so Interactions can
@@ -3648,7 +3727,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
     
-    public void interactionsResetting() {
+    public void interpreterResetting() {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
@@ -3667,7 +3746,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       SwingUtilities.invokeLater(doCommand);
     }
 
-    public void interactionsReset() {
+    public void interpreterReady() {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {

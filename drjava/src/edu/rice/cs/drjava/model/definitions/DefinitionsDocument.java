@@ -1666,7 +1666,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   /**
    * Indents a line using the Indenter decision tree.  Package private for testing purposes
    */
-void _indentLine(int reason) {
+  void _indentLine(int reason) {
     _indenter.indent(this, reason);
   }
   
@@ -1741,7 +1741,7 @@ void _indentLine(int reason) {
     // Insert "// " at the beginning of the line.
     // Using null for AttributeSet follows convention in this class.
     try {
-      insertString(getCurrentLocation() - getCurrentCol(), "// ", null);
+      insertString(getCurrentLocation() - getCurrentCol(), "//", null);
     } catch (BadLocationException e) {
       // Should not happen
       throw new UnexpectedException(e);

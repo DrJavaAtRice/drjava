@@ -45,11 +45,12 @@ import java.util.Arrays;
 import javax.swing.text.*;
 
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.model.GlobalModel;
+import edu.rice.cs.drjava.model.IGetDocuments;
 import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileMovedException;
 import gj.util.Hashtable;
+import java.lang.reflect.Array;
 
 /**
  * Contains the CompilerErrors for a particular file after
@@ -57,11 +58,39 @@ import gj.util.Hashtable;
  * @version $Id$
  */
 public class CompilerErrorModel<T extends CompilerError> {
-  private T[] _errors;
-  private Position[] _positions = null;
-  private int _numErrors;
-  private Hashtable<File, StartAndEndIndex> _filesToIndexes = new Hashtable<File, StartAndEndIndex>();
-  private GlobalModel _model;
+  /**
+   * An array of errors to be displayed in the CompilerErrorPanel associated
+   * with this model.  After the constructor, this should be sorted in this order:
+   *   Errors with no file.
+   *   Errors for each file in path-alphabetical order.
+   *     within each file:
+   *       errors with no line number
+   *       errors with line numbers, in order
+   * In all cases, where all else is equal, warnings are sorted below errors.
+   */
+  private final T[] _errors;
+  
+  /**
+   * An array of file offsets, parallel to the _errors array.
+   * NOTE: If there is no position associated with an error, its entry here
+   *       should be set to null.
+   */
+  private final Position[] _positions;
+  
+  /**
+   * The size of _errors and _positions.  This should never change after the constructor!
+   */
+  private final int _numErrors;
+  
+  /**
+   * Used internally in building _positions.
+   */
+  private final Hashtable<File, StartAndEndIndex> _filesToIndexes = new Hashtable<File, StartAndEndIndex>();
+  
+  /**
+   * The global model which created/controls this object.
+   */
+  private final IGetDocuments _model;
 
   /**
    * Constructs a new CompilerErrorModel to be maintained
@@ -69,17 +98,32 @@ public class CompilerErrorModel<T extends CompilerError> {
    * @param errors the list of CompilerError's (or a subclass).
    * @param model is the model to find documents from
    */
-  public CompilerErrorModel(T[] errors, GlobalModel model) {
+  public CompilerErrorModel(T[] errors, IGetDocuments model) {
     _model = model;
+    
+    // TODO: If we move to NextGen-style generics, ensure _errors is non-null.
     _errors = errors;
+    
+    // Next two lines are order-dependent!
+    _numErrors = errors.length;
+    _positions = new Position[_numErrors];
+    
     // Sort the errors by file and position
     Arrays.sort(_errors);
-    _numErrors = errors.length;
+    
+    // Populates _positions.
     _calculatePositions();
   }
 
-  public T[] getErrors(){
-    return _errors;
+  /**
+   * Accessor for errors maintained here.
+   * @param idx the index of the error to retrieve
+   * @returns the error at index idx
+   * @throws NullPointerException if this object was improperly initialized
+   * @throws ArrayIndexOutOfBoundsException if !(0 <= idx < this.getNumErrors())
+   */
+  public T getError(int idx) {
+    return _errors[idx];
   }
 
   /**
@@ -103,7 +147,7 @@ public class CompilerErrorModel<T extends CompilerError> {
   public String toString() {
     StringBuffer buf = new StringBuffer();
     buf.append(this.getClass().toString() + ":\n  ");
-    for (int i=0; i < _errors.length; i++) {
+    for (int i=0; i < _numErrors; i++) {
       buf.append(_errors[i].toString());
       buf.append("\n  ");
     }
@@ -227,85 +271,87 @@ public class CompilerErrorModel<T extends CompilerError> {
    * positions are related to the document that each error came from
    */
   private void _calculatePositions() {
-    _positions = new Position[_errors.length];
     try {
-      int numProcessed = 0;
-
-      //first skip errors with no file
-      while(numProcessed < _errors.length && _errors[numProcessed].file() == null){
-        _positions[numProcessed] = null;
-        numProcessed++;
-      }
-
-      while ((numProcessed < _errors.length)) {
-        //skip errors with no position
-        while(numProcessed < _errors.length && _errors[numProcessed].hasNoLocation()){
-          _positions[numProcessed] = null;
-          numProcessed++;
-        }
-        if (numProcessed >= _errors.length){
+      int curError = 0;
+      
+      // for(; numProcessed < _numErrors; numProcessed++) {
+      while ((curError < _numErrors)) {
+        
+        // find the next error with a line number (skipping others)
+        curError = nextErrorWithLine(curError);
+        if (curError >= _numErrors){
           break;
         }
 
         //Now find the file and document we are working on
-        File file = _errors[numProcessed].file();
+        File file = _errors[curError].file();
         Document document = null;
         try {
           document = _model.getDocumentForFile(file).getDocument();
-        } catch (IOException e) {
-          //skip positions for these errors if the document couldn't be loaded
-         do {
-            _positions[numProcessed] = null;
-            numProcessed++;
-          } while(numProcessed < _errors.length && _errors[numProcessed].file().equals(file));
-        } catch (OperationCanceledException e) {
-          //skip positions for these errors if the document couldn't be loaded
-         do {
-            _positions[numProcessed] = null;
-            numProcessed++;
-          } while(numProcessed < _errors.length && _errors[numProcessed].file().equals(file));
+        } 
+        catch (Exception e) {
+          // This is intended to catch IOException or OperationCanceledException
+          if ((e instanceof IOException) || (e instanceof OperationCanceledException)) {
+            // skip positions for these errors if the document couldn't be loaded
+            do {
+              curError++;
+            } while ((curError < _numErrors) && (_errors[curError].file().equals(file)));
+            
+            //If the document couldn't be loaded, start the loop over at the top
+            continue;
+          }
+          else {
+            throw new UnexpectedException(e);
+          }
         }
 
-        if (numProcessed >= _errors.length){
+        if (curError >= _numErrors){
           break;
         }
 
-        //If the document couldn't be loaded, start the loop over at the top
-        if (document == null){
-          continue;
-        }
-
-        int fileStartIndex = numProcessed;
-        String defsText = document.getText(0, document.getLength());
+        // curError is the first error in a file, and its document is open.
+        final int fileStartIndex = curError;
+        final int defsLength = document.getLength();
+        final String defsText = document.getText(0, defsLength);
         int curLine = 0;
         int offset = 0; // offset is number of chars from beginning of file
 
         // offset is always pointing to the first character in a line
-        // at the top of the loop
-        while(numProcessed < _errors.length &&
-          file.equals(_errors[numProcessed].file()) &&
-          (offset <= defsText.length())) {
+        // at the top of this loop
+        while ((curError < _numErrors) && // we still have errors to find
+               file.equals(_errors[curError].file()) &&  // the next error is in this file
+               (offset <= defsLength)) { // we haven't gone past the end of the file
 
-          // first figure out if we need to create any new positions on this line
-          for (int i = numProcessed;
-               (i < _errors.length) && (_errors[i].lineNumber() == curLine);
-               i++){
-            _positions[i] = document.createPosition(offset +  _errors[i].startColumn());
-            numProcessed++;
+          // create new positions for all errors on this line
+          while ((curError < _numErrors)
+                 && (_errors[curError].lineNumber() == curLine))
+          {
+            _positions[curError] =
+              document.createPosition(offset +  _errors[curError].startColumn());
+            curError++;
           }
 
-          int nextNewline = defsText.indexOf('\n', offset);
-          if (nextNewline == -1) {
-            break;
-          }
-          else {
-            curLine++;
-            offset = nextNewline + 1;
+          // At this point, offset is the starting index of the previous error's line.
+          // Update offset to be appropriate for the current error.
+          // ... but don't bother looking if it isn't in this file.
+          // ... or if we're done with all errors already.
+          if (curError < _numErrors) {
+            int curErrorLine = _errors[curError].lineNumber();
+            int nextNewline = 0;
+            while ((curLine != curErrorLine) 
+                     && (nextNewline != -1)
+                     && (file.equals(_errors[curError].file()))) {
+              nextNewline = defsText.indexOf('\n', offset);
+              if (nextNewline != -1) {
+                curLine++;
+                offset = nextNewline + 1;
+              }
+            }
           }
         }
 
         //Remember the indexes in the _errors and _positions arrays that are for errors in this file
-        int fileEndIndex = numProcessed;
+        int fileEndIndex = curError;
         if (fileEndIndex != fileStartIndex){
           _filesToIndexes.put(file, new StartAndEndIndex(fileStartIndex, fileEndIndex));
         }
@@ -316,10 +362,24 @@ public class CompilerErrorModel<T extends CompilerError> {
   }
 
   /**
+   * Finds the first error after numProcessed which has a file and line number.
+   * @param start the starting index of the search
+   * @return the index of the found error
+   */
+  private int nextErrorWithLine(int idx) {
+    while ((idx < _numErrors)
+           && (_errors[idx].hasNoLocation()
+               || (_errors[idx].file() == null))) {
+      idx++;
+    }
+    return idx;
+  }
+
+  /**
    * This class is used only to track where the errors with positions for a file
    * begin and end.  The beginning index is inclusive, the ending index is exclusive.
    */
-  private class StartAndEndIndex {
+  private static class StartAndEndIndex {
     private int startPos;
     private int endPos;
 

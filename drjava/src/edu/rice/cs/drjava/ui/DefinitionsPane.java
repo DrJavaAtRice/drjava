@@ -274,6 +274,11 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    * Listens to caret to highlight JUnit errors as appropriate.
    */
   private JUnitErrorCaretListener _junitErrorListener;  
+
+  /**
+   * Listens to caret to highlight Javadoc errors as appropriate.
+   */
+  private JavadocErrorCaretListener _javadocErrorListener;  
   
   private ActionListener _setSizeListener = null;
   
@@ -783,6 +788,15 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   }
 
   /**
+   * Add a JUnitErrorCaretListener to this pane, keeping it
+   * accessible so its error model can be updated later.
+   */
+  public void addJavadocErrorCaretListener(JavadocErrorCaretListener listener) {
+    _javadocErrorListener = listener;
+    addCaretListener(listener);
+  }
+
+  /**
    * Gets the CompilerErrorCaretListener for this pane.
    */
   public CompilerErrorCaretListener getErrorCaretListener() {
@@ -794,6 +808,13 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    */
   public JUnitErrorCaretListener getJUnitErrorCaretListener() {
     return _junitErrorListener;
+  }
+
+  /**
+   * Gets the JUnitErrorCaretListener for this pane.
+   */
+  public JavadocErrorCaretListener getJavadocErrorCaretListener() {
+    return _javadocErrorListener;
   }
 
   /**

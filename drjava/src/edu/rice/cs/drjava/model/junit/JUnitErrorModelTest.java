@@ -135,17 +135,17 @@ public class JUnitErrorModelTest extends GlobalModelJUnitTest {
     //JUnitError[] errorsWithoutPositions = _m.getErrorsWithoutPositions();
     //assertTrue("testResults should not be null", testResults != null);
     
-    assertEquals("the test results should have one error and one failure "+_m.getErrors().length,
+    assertEquals("the test results should have one error and one failure "+_m.getNumErrors(),
                  2,
-                  _m.getErrors().length);
+                  _m.getNumErrors());
     
-    assertEquals("test case has one error reported" + _m.getErrors()[0].message(),
-                 _m.getErrors()[0].isWarning(),
+    assertEquals("test case has one error reported" + _m.getError(0).message(),
+                 _m.getError(0).isWarning(),
                  false
                  );
 
-    assertEquals("test case has one failure reported" + _m.getErrors()[1].message(),
-                 _m.getErrors()[1].isWarning(),
+    assertEquals("test case has one failure reported" + _m.getError(1).message(),
+                 _m.getError(1).isWarning(),
                  true
                  );
     //_model.setResetAfterCompile(true);

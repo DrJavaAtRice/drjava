@@ -182,7 +182,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected void _notifySyntaxErrorOccurred(final int offset, final int length) {
     _notifier.notifyListeners(new EventNotifier.Notifier() {
       public void notifyListener(GlobalModelListener l) {
-        l.interactionsErrorOccurred(offset,length);
+        l.interactionErrorOccurred(offset,length);
       }
     });
   }
@@ -204,7 +204,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected void _notifyInterpreterResetting() {
     _notifier.notifyListeners(new EventNotifier.Notifier() {
       public void notifyListener(GlobalModelListener l) {
-        l.interactionsResetting();
+        l.interpreterResetting();
       }
     });
   }
@@ -215,7 +215,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected void _notifyInterpreterReady() {
     _notifier.notifyListeners(new EventNotifier.Notifier() {
       public void notifyListener(GlobalModelListener l) {
-        l.interactionsReset();
+        l.interpreterReady();
       }
     });
   }
@@ -227,7 +227,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected void _notifyInterpreterExited(final int status) {
     _notifier.notifyListeners(new EventNotifier.Notifier() {
       public void notifyListener(GlobalModelListener l) {
-        l.interactionsExited(status);
+        l.interpreterExited(status);
       }
     });
   }

@@ -570,12 +570,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected int interactionStartCount;
     protected int interactionEndCount;
     protected int interactionErrorCount;
+    protected int interpreterResettingCount;
+    protected int interpreterReadyCount;
+    protected int interpreterExitedCount;
     protected int interpreterChangedCount;
     //protected int interactionCaretPositionChangedCount;
     protected int consoleResetCount;
-    protected int interactionsResettingCount;
-    protected int interactionsResetCount;
-    protected int interactionsExitedCount;
     protected int saveAllBeforeProceedingCount;
     protected int nonTestCaseCount;
     protected int lastExitStatus;
@@ -606,8 +606,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       interpreterChangedCount = 0;
       //interactionCaretPositionChangedCount = 0;
       consoleResetCount = 0;
-      interactionsResettingCount = 0;
-      interactionsResetCount = 0;
+      interpreterResettingCount = 0;
+      interpreterReadyCount = 0;
       saveAllBeforeProceedingCount = 0;
       nonTestCaseCount = 0;
       lastExitStatus = 0;
@@ -688,19 +688,19 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void assertInteractionsResettingCount(int i) {
       assertEquals("number of times interactionsResetting fired",
                    i,
-                   interactionsResettingCount);
+                   interpreterResettingCount);
     }
     
     public void assertInteractionsResetCount(int i) {
       assertEquals("number of times interactionsReset fired",
                    i,
-                   interactionsResetCount);
+                   interpreterReadyCount);
     }
 
     public void assertInteractionsExitedCount(int i) {
-      assertEquals("number of times interactionsExited fired",
+      assertEquals("number of times interpreterExited fired",
                    i,
-                   interactionsExitedCount);
+                   interpreterExitedCount);
     }
     
     public void assertInteractionsErrorCount(int i) {
@@ -789,6 +789,14 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void junitEnded() {
       listenerFail("junitEnded fired unexpectedly");
     }
+  
+    public void javadocStarted() {
+      listenerFail("javadocStarted fired unexpectedly");
+    }
+  
+    public void javadocEnded() {
+      listenerFail("javadocEnded fired unexpectedly");
+    }
 
     public void interactionStarted() {
       listenerFail("interactionStarted fired unexpectedly");
@@ -798,7 +806,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("interactionEnded fired unexpectedly");
     }
     
-    public void interactionsErrorOccurred(int offset, int length){
+    public void interactionErrorOccurred(int offset, int length){
       listenerFail("interpreterErrorOccurred fired unexpectedly");
     }
     
@@ -819,16 +827,16 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("compileEnded fired unexpectedly");
     }
 
-    public void interactionsResetting() {
+    public void interpreterResetting() {
       listenerFail("interactionsResetting fired unexpectedly");
     }
     
-    public void interactionsReset() {
+    public void interpreterReady() {
       listenerFail("interactionsReset fired unexpectedly");
     }
 
-    public void interactionsExited(int status) {
-      listenerFail("interactionsExited(" + status + ") fired unexpectedly");
+    public void interpreterExited(int status) {
+      listenerFail("interpreterExited(" + status + ") fired unexpectedly");
     }
 
     public void consoleReset() {
@@ -892,23 +900,23 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       compileEndCount++;
     }
 
-    public void interactionsResetting() {
+    public void interpreterResetting() {
       assertInteractionsResettingCount(0);
       assertInteractionsResetCount(0);
       assertCompileStartCount(1);
       assertCompileEndCount(1);
       // don't care whether interactions or console are reset first
-      interactionsResettingCount++;
+      interpreterResettingCount++;
     }
     
-    public void interactionsReset() {
+    public void interpreterReady() {
       synchronized(this) {
         assertInteractionsResettingCount(1);
         assertInteractionsResetCount(0);
         assertCompileStartCount(1);
         assertCompileEndCount(1);
         // don't care whether interactions or console are reset first
-        interactionsResetCount++;
+        interpreterReadyCount++;
         notify();
       }
     }

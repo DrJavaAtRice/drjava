@@ -55,7 +55,7 @@ public class JUnitErrorCaretListener extends CompilerErrorCaretListener {
    * Constructs a new caret listener to highlight JUnit errors.
    */
   public JUnitErrorCaretListener(OpenDefinitionsDocument doc,
-                                 JUnitErrorListPane errorListPane,
+                                 ErrorPanel.ErrorListPane errorListPane,
                                  DefinitionsPane defPane,
                                  MainFrame frame) {
     super(doc, errorListPane, defPane, frame);

@@ -220,7 +220,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     }
 
     /**
-     * Returns JUnitError associated with the given visual coordinates.
+     * Returns CompilerError associated with the given visual coordinates.
      * Returns null if none.
      */
     protected CompilerError _errorAtPoint(Point p) {
@@ -318,15 +318,18 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       doc.insertString(doc.getLength(), numErrMsg.toString(), BOLD_ATTRIBUTES);
 
       int errorNum = 0;
+      CompilerErrorModel cem = getErrorModel();
+      int numErrors = cem.getNumErrors();
       // Show errors
-      CompilerError[] errors = getErrorModel().getErrors();
-      for (int i = 0; i < errors.length; i++, errorNum++) {
+      for (int i = 0; i < numErrors; i++, errorNum++) {
         int startPos = doc.getLength();
-        _insertErrorText(errors[i], doc);
+        CompilerError err = cem.getError(i);
+        
+        _insertErrorText(err, doc);
 
         Position pos = doc.createPosition(startPos);
         _errorListPositions[errorNum] = pos;
-        _errorTable.put(pos, errors[i]);
+        _errorTable.put(pos, err);
       }
 
       setDocument(doc);

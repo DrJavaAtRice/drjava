@@ -120,26 +120,26 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
         interactionStartCount++;
       }
 
-      public void interactionsExited(int status) {
+      public void interpreterExited(int status) {
         assertInteractionStartCount(1);
         assertInteractionsResettingCount(1);
-        interactionsExitedCount++;
+        interpreterExitedCount++;
         lastExitStatus = status;
       }
       
-      public void interactionsResetting() {
+      public void interpreterResetting() {
         assertInteractionStartCount(1);
         assertInteractionsExitedCount(0);
         assertInteractionsResetCount(0);
-        interactionsResettingCount++;
+        interpreterResettingCount++;
       }
 
-      public void interactionsReset() {
+      public void interpreterReady() {
         synchronized(this) {
           assertInteractionStartCount(1);
           assertInteractionsExitedCount(1);
           assertInteractionsResettingCount(1);
-          interactionsResetCount++;
+          interpreterReadyCount++;
           this.notify();
         }
       }
@@ -191,28 +191,28 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
         interactionEndCount++;
       }
 
-      public void interactionsExited(int status) {
+      public void interpreterExited(int status) {
         try {
           Thread.currentThread().sleep(1000);
         } catch (InterruptedException e) {
         }
         assertInteractionStartCount(1);
-        interactionsExitedCount++;
+        interpreterExitedCount++;
       }
 
-      public void interactionsResetting() {
+      public void interpreterResetting() {
         assertInteractionStartCount(1);
         assertInteractionsExitedCount(0);
         assertInteractionsResetCount(0);
-        interactionsResettingCount++;
+        interpreterResettingCount++;
       }
       
-      public void interactionsReset() {
+      public void interpreterReady() {
         synchronized(this) {
           assertInteractionStartCount(1);
           assertInteractionsExitedCount(0);
           assertInteractionsResettingCount(1);
-          interactionsResetCount++;
+          interpreterReadyCount++;
           this.notify();
         }
       }

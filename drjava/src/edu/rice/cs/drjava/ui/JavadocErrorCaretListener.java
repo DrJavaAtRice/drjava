@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -37,48 +37,35 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
+import edu.rice.cs.drjava.ui.JavadocErrorPanel.JavadocErrorListPane;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030609-1626;
+ * Listens to the caret in a particular DefinitionsPane and
+ * highlights the source containing JavadocErrors as appropriate.
  *
  * @version $Id$
  */
-public abstract class Version {
+public class JavadocErrorCaretListener extends CompilerErrorCaretListener {
+
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Constructs a new caret listener to highlight JUnit errors.
    */
-  private static final String BUILD_TIME_STRING = "20030609-1626";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public JavadocErrorCaretListener(OpenDefinitionsDocument doc,
+                                   ErrorPanel.ErrorListPane errorListPane,
+                                   DefinitionsPane defPane,
+                                   MainFrame frame) {
+    super(doc, errorListPane, defPane, frame);
   }
 
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  protected CompilerErrorModel getErrorModel(){
+    return _frame.getModel().getJavadocErrorModel();
   }
 
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+  protected boolean tabSelected(){
+    return _frame.isJavadocTabSelected();
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

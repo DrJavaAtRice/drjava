@@ -326,13 +326,13 @@ public class MainFrameTest extends MultiThreadedTestCase {
       "}\n";
     
     String commented =
-      "// public class stuff {\n" + 
-      "//   private int _int;\n" + 
-      "//   private Bar _bar;\n" +
-      "//   public void foo() {\n" +
-      "//     _bar.baz(_int);\n" +
-      "//   }\n" +
-      "// }\n";
+      "//public class stuff {\n" + 
+      "//  private int _int;\n" + 
+      "//  private Bar _bar;\n" +
+      "//  public void foo() {\n" +
+      "//    _bar.baz(_int);\n" +
+      "//  }\n" +
+      "//}\n";
 
     int newPos = 20;
 

@@ -57,11 +57,14 @@ public interface InteractionsListener {
   
   /**
    * Called when an interaction results in a syntax error.
+   * 
+   * @param offset the error's offset into the InteractionsDocument
+   * @param length the length of the error
    */
-  public void interactionsErrorOccurred(int offset, int length);
+  public void interactionErrorOccurred(int offset, int length);
   
   /**
-   * Called when the interpreter is resetting.
+   * Called when the interpreter has begun resetting.
    */
   public void interpreterResetting();
   
@@ -72,6 +75,7 @@ public interface InteractionsListener {
   
   /**
    * Called when the interpreter exits unexpectedly.
+   * @param status the exit code
    */
   public void interpreterExited(int status);
   

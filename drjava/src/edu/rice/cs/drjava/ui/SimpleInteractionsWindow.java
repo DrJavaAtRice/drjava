@@ -89,7 +89,7 @@ public class SimpleInteractionsWindow extends JFrame {
       public void interpreterResetting() {
         _pane.setEditable(false);
       }
-      public void interactionsErrorOccurred(int offset, int length){
+      public void interactionErrorOccurred(int offset, int length){
         _pane.highlightError(offset, length);
       }
       public void interpreterReady() {

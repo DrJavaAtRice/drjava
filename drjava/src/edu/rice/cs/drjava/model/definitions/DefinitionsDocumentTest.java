@@ -1153,13 +1153,13 @@ public class DefinitionsDocumentTest extends TestCase
       "}\n";
     
     String commented =
-      "// public class stuff {\n" + 
-      "//   private int _int;\n" + 
-      "//   private Bar _bar;\n" +
-      "//   public void foo() {\n" +
-      "//     _bar.baz(_int);\n" +
-      "//   }\n" +
-      "// }\n";
+      "//public class stuff {\n" + 
+      "//  private int _int;\n" + 
+      "//  private Bar _bar;\n" +
+      "//  public void foo() {\n" +
+      "//    _bar.baz(_int);\n" +
+      "//  }\n" +
+      "//}\n";
 
     _defModel.addUndoableEditListener(_defModel.getUndoManager());
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,new Integer(2));
@@ -1225,9 +1225,9 @@ public class DefinitionsDocumentTest extends TestCase
     // 2
     
     String commented = 
-      "// public class foo {\n" +
-      "//   int bar;\n" +
-      "// }";
+      "//public class foo {\n" +
+      "//  int bar;\n" +
+      "//}";
     
     // Start a compound edit and verify the returned key
     key = _defModel.getUndoManager().startCompoundEdit();

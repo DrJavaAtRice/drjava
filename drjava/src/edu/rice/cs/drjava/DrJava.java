@@ -294,7 +294,7 @@ public class DrJava implements OptionConstants {
     }
     catch(IOException e) {
       // for now, do nothing
-      // TO DO: log this error
+      // TODO: log this error
     }
   }
   
@@ -319,7 +319,7 @@ public class DrJava implements OptionConstants {
         OpenDefinitionsDocument doc = mf.getModel().openFile(command);
       }
       catch (FileNotFoundException ex) {
-        // To do: show a dialog? (file not found)
+        // TODO: show a dialog? (file not found)
       }
       catch (AlreadyOpenException aoe) {
         // This explicitly does nothing to ignore duplicate files.

@@ -193,8 +193,8 @@ public class CompilerError implements Comparable, Serializable {
 
   /**
    * Compares by file, then by line, then by column.
-   * Errors without files are considered equal, but less
-   * than any errors with files.
+   * Errors without files are considered equal, but less than any errors with
+   * files.  Warnings are considered greater than errors, all else equal.
    */
   public int compareTo(Object o) {
     CompilerError other = (CompilerError)o;
@@ -220,7 +220,9 @@ public class CompilerError implements Comparable, Serializable {
     else {
       // My file is null
       if (other.file() == null) {
-        return 0;
+        // All else equal.
+        //                        I'm a warning.           I'm not a warning.
+        return (this._isWarning? (other._isWarning? 0:1):(other._isWarning? -1:0));
       }
       else {
         // Errors without files are smaller
@@ -236,7 +238,9 @@ public class CompilerError implements Comparable, Serializable {
   private int compareByPosition(CompilerError other) {
     // Compare by line unless lines are equal
     if (_lineNumber == other._lineNumber) {
-      return  _startColumn - other._startColumn;
+      int byCol = _startColumn - other._startColumn;
+      //                        I'm a warning.               I'm not a warning.
+      return (this._isWarning? (other._isWarning? byCol:1):(other._isWarning? -1:byCol));
     }
     else {
       return  _lineNumber - other._lineNumber;

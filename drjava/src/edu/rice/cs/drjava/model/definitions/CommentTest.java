@@ -91,7 +91,7 @@ public class CommentTest extends TestCase {
     
     String commented =
       "Here is some abritrary text that should be commented.\n" +
-      "// /* It is on multiple lines, and contains slashes // and other\n" +
+      "///* It is on multiple lines, and contains slashes // and other\n" +
       "various */ obnoxious characters.\n";
     
     doc.insertString(0, text, null);
@@ -110,9 +110,9 @@ public class CommentTest extends TestCase {
       "various */ obnoxious characters.\n";
     
     String commented =
-      "// Here is some abritrary text that should be commented.\n" +
-      "// /* It is on multiple lines, and contains slashes // and other\n" +
-      "// various */ obnoxious characters.\n";
+      "//Here is some abritrary text that should be commented.\n" +
+      "///* It is on multiple lines, and contains slashes // and other\n" +
+      "//various */ obnoxious characters.\n";
     
     doc.insertString(0, text, null);
     _assertContents("Sample text is inserted improperly.", text, doc);

@@ -160,8 +160,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   
   private CompilerErrorModel _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], this);
 
-  private JUnitErrorModel _junitErrorModel = new JUnitErrorModel(new JUnitError[0], this, false);
-
   /**
    * The total number of current compiler errors, including both errors
    * with and without files.
@@ -176,6 +174,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   
   
   // ---- JUnit Fields ----
+
+  private JUnitErrorModel _junitErrorModel = new JUnitErrorModel(new JUnitError[0], this, false);
   
   /**
    * If a JUnit test is currently running, this is the OpenDefinitionsDocument
@@ -183,6 +183,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   private OpenDefinitionsDocument _docBeingTested = null;
   
+  
+  // ---- Javadoc Fields ----
+  
+  private CompilerErrorModel _javadocErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], this);
   
   // ---- Debugger Fields ----
   
@@ -336,10 +340,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public DefinitionsEditorKit getEditorKit() {
     return _editorKit;
   }
-
-  public ListModel getDefinitionsDocuments() {
-    return _definitionsDocs;
-  }
   
   /**
    * @return the interactions model.
@@ -363,6 +363,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return _junitErrorModel;
   }
 
+  public CompilerErrorModel getJavadocErrorModel() {
+    return _javadocErrorModel;
+  }
+  
   public ConsoleDocument getConsoleDocument() {
     return _consoleDoc;
   }
@@ -411,21 +415,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return doc;
   }
 
+  //---------------------- Specified by ILoadDocuments ----------------------//
+
   /**
-   * Open a file and read it into the definitions.
-   * The provided file selector chooses a file, and on a successful
-   * open, the fileOpened() event is fired.
-   * @param com a command pattern command that selects what file
-   *            to open
-   *
-   * @return The open document, or null if unsuccessful.
    * Note that .getFile called on the returned OpenDefinitionsDocument
    * is guaranteed to return an absolute path, as this method makes
    * it absolute.
-   *
-   * @exception IOException if an underlying I/O operation fails
-   * @exception OperationCanceledException if the open was canceled
-   * @exception AlreadyOpenException if the file is already open
+   * @see ILoadDocuments
    */
   public OpenDefinitionsDocument openFile(FileOpenSelector com)
     throws IOException, OperationCanceledException, AlreadyOpenException
@@ -446,20 +442,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
 
   /**
-   * Opens multiple files and reads them into the definitions.
-   * The provided file selector chooses multiple files, and for each
-   * successful open, the fileOpened() event is fired.
-   * @param com a command pattern command that selects which files
-   *            to open
-   *
-   * @return The last opened document, or null if unsuccessful.
    * Note that .getFile called on the returned OpenDefinitionsDocument
    * is guaranteed to return an absolute path, as this method makes
    * it absolute.
-   *
-   * @exception IOException if an underlying I/O operation fails
-   * @exception OperationCanceledException if the open was canceled
-   * @exception AlreadyOpenException if the file is already open
+   * @see ILoadDocuments
    */
   public OpenDefinitionsDocument openFiles(FileOpenSelector com)
     throws IOException, OperationCanceledException, AlreadyOpenException
@@ -511,9 +497,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       //have at least one file.
       throw new IOException("No Files returned from FileChooser");
     }
-    
-    
   }
+  
+  //----------------------- End ILoadDocuments Methods -----------------------//
  
   /**
    * Saves all open files, prompting for names if necessary.
@@ -637,13 +623,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     _definitionsDocs.clear();
   }
 
-  /**
-   * Returns the OpenDefinitionsDocument for the specified
-   * File, opening a new copy if one is not already open.
-   * @param file File contained by the document to be returned
-   * @return OpenDefinitionsDocument containing file
-   * @exception IOException if there are problems opening the file
-   */
+  //----------------------- Specified by IGetDocuments -----------------------//
+  
   public OpenDefinitionsDocument getDocumentForFile(File file)
     throws IOException
   {
@@ -652,6 +633,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     if (doc == null) {
       // If not, open and return it
       final File f = file;
+      
+      // TODO: Is this class construction overhead really necessary?
       FileOpenSelector selector = new FileOpenSelector() {
         public File getFile() throws OperationCanceledException {
           return f;
@@ -674,6 +657,24 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     return doc;
   }
+  
+  /**
+   * Iterates over OpenDefinitionsDocuments, looking for this file.
+   * TODO: This is not very efficient!
+   */
+  public boolean isAlreadyOpen(File file) {
+    return (_getOpenDocument(file) != null);
+  }
+  
+  /**
+   * Simply returns a reference to our internal ListModel.
+   * TODO: Protect this object from untrusted code!
+   */
+  public ListModel getDefinitionsDocuments() {
+    return _definitionsDocs;
+  }
+  
+  //----------------------- End IGetDocuments Methods -----------------------//
 
   /**
    * Set the indent tab size for all definitions documents.
@@ -686,8 +687,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       doc.setDefinitionsIndent(indent);
     }
   }
-
-
 
   /**
    * Clears and resets the interactions pane.
@@ -1055,10 +1054,20 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * Javadocs all open documents, after ensuring that all are saved.
    * @param destDir the absolute path to the destination directory
    * @pre The destination directory must be writable and exist.
+   * @return true if Javadoc succeeded in building the HTML, otherwise false
    */
-  public void javadocAll(String destDir)
-    throws IOException, JavadocException, InvalidPackageException {
-
+  public boolean javadocAll(String destDir) throws IOException, InvalidPackageException {
+    
+    // Notify all listeners that Javadoc is starting.
+    this.javadocStarted();
+    
+    if (areAnyModifiedSinceSave()) {
+      // if any files haven't been saved after we told our
+      // listeners to do so, don't proceed with the rest
+      // of the operation.
+      return false;
+    }
+    
     // Accumulate a set of arguments to JavaDoc - package or file names.
     HashSet docUnits = new HashSet();
     HashSet sourceRootSet = new HashSet();
@@ -1073,8 +1082,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
         _definitionsDocs.getElementAt(i);
       try {
-        File sourceRoot = doc.getSourceRoot();
+        // This call will abort the iteration if there is no file.
         File file = doc.getFile();
+        File sourceRoot = doc.getSourceRoot();
         String pack = doc.getPackageName();
         
         if (pack.equals("") && !defaultRoots.contains(sourceRoot)) {
@@ -1097,7 +1107,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           if (docAll && index != -1) {
             // We need to doc all packages from the root level down.
             
-            // TO DO: write a unit test for a package name w/ no dot!
+            // TODO: write a unit test for a package name w/ no dot!
             topLevelPack = pack.substring(0, index);
             searchRoot = new File(sourceRoot, topLevelPack);
           }
@@ -1114,6 +1124,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       catch (IllegalStateException ise) {
         // No file for this document; skip it
       }
+    }
+    
+    // Don't attempt to create Javadoc if no files are open, or if open file is unnamed.
+    if (docUnits.size() == 0) { 
+      return false;
     }
     
     // Build the source path.
@@ -1135,14 +1150,43 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     args.add("-d");
     args.add(destDir);
     args.addAll(docUnits);
-    
-    System.out.println("javadoc started with args:\n" + args);
 
     //TODO: put the following line in a new Thread and tell listeners javadoc has started
     //Pass the function some way to tell about its output (use the way compilers do it for
     //a model)
     //And finally, when we're done notify the listeners along with some sort of failure flag
-    javadoc_1_3((String[]) args.toArray(new String[0]));
+    boolean result;
+    try {
+      result = javadoc_1_3((String[]) args.toArray(new String[0]));
+    }
+    catch (Throwable e) {
+      throw new UnexpectedException(e);
+    }
+    finally {
+      // Notify all listeners that Javadoc is done.
+      this.javadocEnded();
+    }
+    return result;
+  }
+  
+  /**
+   * TODO:
+   */
+  static void ventBuffers(BufferedReader jdOut, BufferedReader jdErr,
+                          LinkedList outLines, LinkedList errLines)
+    throws IOException {
+    String output;
+    output = jdOut.readLine();
+    while (jdOut.ready() && (output != null)) {
+      outLines.add(output);
+      output = jdOut.readLine();
+    }
+      
+    output = jdErr.readLine();
+    while (jdErr.ready() && (output != null)) {
+      errLines.add(output);
+      output = jdErr.readLine();
+    }
   }
 
   /**
@@ -1152,71 +1196,255 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * javadoc is in the path.  Note: this should be moved to the platform
    * specific area of the code base when we develop the 1.4 javadoc process.
    * Of course, it can be a fallback for if tools.jar isn't found in the 1.4 jdk
+   * @return true if Javadoc succeeded in building the HTML, otherwise false
    */
-  private void  javadoc_1_3(String[] args) throws IOException, JavadocException {
-    final String JAVADOC_CLASS = "com.sun.tools.javadoc.Main" ;
-    Process javadocProcess = null;
-    boolean failed = true;
-    try {
-      Class.forName(JAVADOC_CLASS);
-      javadocProcess =  ExecJVM.runJVMPropogateClassPath(JAVADOC_CLASS, args);
-      failed = false;
-    }
-    catch (ClassNotFoundException cnfe) {
-    }
-    catch (UnsupportedClassVersionError ucve) {
-    }
+  private boolean javadoc_1_3(String[] args) 
+      throws IOException, ClassNotFoundException, InterruptedException {
+    final String JAVADOC_CLASS = "com.sun.tools.javadoc.Main";
+    Process javadocProcess;
+    BufferedReader jdOut;
+    BufferedReader jdErr;
     
-    if (failed) {
-      //If we get here, we will just have to try using the javadoc program
-      //which is hopefully on the system path
-      String[] fullArgs = new String[args.length + 1];
-      fullArgs[0] = "javadoc";
-      for(int a = 0; a < args.length; a++) {
-        fullArgs[a + 1] = args[a];
-      }
-      javadocProcess =  Runtime.getRuntime().exec(fullArgs);
-      //TODO: try/catch the previous line and prompt for javadoc's location
-      //on failure....and even keep the location in the drjava config
-    }
+    Class.forName(JAVADOC_CLASS);
+    javadocProcess =  ExecJVM.runJVMPropogateClassPath(JAVADOC_CLASS, args);
     
-    //Get a handle on the streams that the process produces
-    BufferedReader jdOut =
-      new BufferedReader(new InputStreamReader(javadocProcess.getInputStream()));
-    BufferedReader jdErr =
-      new BufferedReader(new InputStreamReader (javadocProcess.getErrorStream()));
+    System.err.println("javadoc started with args:\n" + Arrays.asList(args));
     
+    // getInputStream actually gives us the stdout from the Process.
+    jdOut = new BufferedReader(new InputStreamReader(javadocProcess.getInputStream()));
+    jdErr = new BufferedReader(new InputStreamReader(javadocProcess.getErrorStream()));
+    String sourceName = "ExecJVM";
+    int value = -1;
     
+    /* waitFor() call appears to block indefinitely in 1.4.1, because
+     * the process will block if output buffers get full.
+     * Yes, this is extremely retarded.
+     */ 
+//     value = javadocProcess.waitFor();
+    
+    // We have to use a busy-wait and vent output buffers.
+    LinkedList outLines = new LinkedList();
+    LinkedList errLines = new LinkedList();
+    String output;
     boolean done = false;
-    
-    //Loop until javadoc is done, putting its output on the console
     while (!done) {
-      String output = jdOut.readLine();
-      while (output != null){
-        System.out.println("[javadoc] " + output);
-        output = jdOut.readLine();
-      }
-      
-      do {
-        System.err.println("[javadoc] " + output);
-        output = jdErr.readLine();
-      } while(output!= null);
-
       try {
-        int value = javadocProcess.exitValue();
+        value = javadocProcess.exitValue();
         done = true;
-        System.out.println("Javadoc finished with exit code " + value);
-        if (value != 0) {
-          throw new JavadocException("Javadoc error:  finished with exit code " + value);
+      }
+      catch (IllegalThreadStateException e) {
+//          printProcessOutput(javadocProcess, "debug!", "ExecJVM");
+        ventBuffers(jdOut, jdErr, outLines, errLines);
+      }
+    }
+    ventBuffers(jdOut, jdErr, outLines, errLines);
+    System.err.println("got past first waitFor.");
+     
+    // Unfortunately, javadoc returns 1 for normal errors and for exceptions.
+    // We cannot tell them apart without parsing.
+    
+    
+//     if (value != 0) {
+//       // If we get here, we will just have to try using the javadoc program
+//       // which is hopefully on the system path
+//       if (CodeStatus.DEVELOPMENT) {
+//         String msg = ("Launching Javadoc with ExecJVM failed.  Messages:");
+//         printProcessOutput(javadocProcess, msg, "ExecJVM");
+//         
+//         System.err.println("Attempting to launch Javadoc from command path.");
+//       }
+//       
+//       String[] fullArgs = new String[args.length + 1];
+//       fullArgs[0] = "javadoc";
+//       //TODO: Use System.arraycopy() here.
+//       for(int a = 0; a < args.length; a++) {
+//         fullArgs[a + 1] = args[a];
+//       }
+//       javadocProcess =  Runtime.getRuntime().exec(fullArgs);
+//       
+//       // TODO: try/catch the previous line and prompt for javadoc's location
+//       // on failure....and even keep the location in the drjava config
+//       // DON'T USE waitFor! (See above.)
+// //       value = javadocProcess.waitFor();
+//       
+//       if (value != 0) {
+//         if (CodeStatus.DEVELOPMENT) {
+//           String msg = ("Launching Javadoc with Runtime.Exec failed.  Messages:");
+//           printProcessOutput(javadocProcess, msg, "Runtime.Exec");
+//         }
+//         
+//         // Handle the error condition at the caller!
+//         CompilerError err = new CompilerError(("finished with exit code " + value), false);
+//         _javadocErrorModel = new CompilerErrorModel(new CompilerError[] { err }, this);
+//       }
+//       // else we have a valid javadocProcess from Runtime.Exec - fall through.
+//     }
+//     // else or fall-through means we have a valid javadocProcess from ExecJVM or Runtime.Exec
+    
+    
+    ArrayList errors = new ArrayList(0);
+    
+    // We already know javadoc is done => process its error messages
+//     String output;
+    
+//     jdOut = new BufferedReader(new InputStreamReader(javadocProcess.getInputStream()));
+//     jdErr = new BufferedReader(new InputStreamReader(javadocProcess.getErrorStream()));
+    
+    // Ignore all of javadoc's inane jabber to stdout.
+    // Maybe dump this to console while debugging?
+//     output = jdOut.readLine();
+//     System.out.println("[Javadoc stdout] " + output);
+//     while (output != null) {
+//       System.out.println("[Javadoc stdout] " + output);
+//       output = jdOut.readLine();
+//     }
+    
+    // By this point, the Javadoc process is dead, so we can't block on reads.
+//     output = jdErr.readLine();
+//     while (output != null) {
+//       final String EXCEPTION_INDICATOR = "Exception: ";
+// //         System.out.println("[javadoc raw error] " + output);
+//       
+//       int errStart;
+//       // Check for the telltale signs of a thrown exception.
+//       errStart = output.indexOf(EXCEPTION_INDICATOR);
+//       if (errStart != -1) {
+//         // If we found one, put the entirety of stderr in one CompilerError.
+//         StringBuffer buf = new StringBuffer(2000);
+//         do {
+//           buf.append(output);
+//           output = jdErr.readLine();
+//         } while (output != null);
+//         errors.add(new CompilerError(buf.toString(), false));
+//       }
+//       else {
+//         CompilerError error = parseJavadocErrorLine(output);
+//         if (error != null) {
+//           errors.add(error);
+// //           System.err.println("[javadoc err]" + error);
+//         }
+//       }
+//       output = jdErr.readLine();
+//     }
+    
+    final String EXCEPTION_INDICATOR = "Exception: ";
+    while (errLines.size() > 0) {
+//         System.out.println("[javadoc raw error] " + output);
+      
+      output = (String) errLines.removeFirst();
+      
+      int errStart;
+      // Check for the telltale signs of a thrown exception.
+      errStart = output.indexOf(EXCEPTION_INDICATOR);
+      if (errStart != -1) {
+        // If we found one, put the entirety of stderr in one CompilerError.
+        StringBuffer buf = new StringBuffer(60 * errLines.size());
+        do {
+          buf.append(output);
+          output = (String) errLines.removeFirst();
+        } while (errLines.size() > 0);
+        errors.add(new CompilerError(buf.toString(), false));
+      }
+      else {
+        // Otherwise, parser for a normal error message.
+        CompilerError error = parseJavadocErrorLine(output);
+        if (error != null) {
+          errors.add(error);
+//           System.err.println("[javadoc err]" + error);
         }
       }
-      catch (IllegalThreadStateException itse) {
-        done = false;
-      }
+    }
+  
+    _javadocErrorModel = new CompilerErrorModel((CompilerError[])(errors.toArray(new CompilerError[0])), this);
+    System.out.println("built javadoc error model");
+    return (errors.size() == 0);
+  }
+  
+  /**
+   * TODO:
+   */
+  static void printProcessOutput(Process theProc, String msg, String sourceName)
+    throws IOException {
+    // First, write out our opening message.
+    System.err.println(msg);
+    
+    // Get a handle on the streams that the process produces
+    BufferedReader procOut = new BufferedReader
+      (new InputStreamReader(theProc.getInputStream()));
+    BufferedReader procErr = new BufferedReader
+      (new InputStreamReader(theProc.getErrorStream()));
+    
+    // Write System.out.
+    String output = "";
+    while (procOut.ready() && (output != null)) {
+      output = procOut.readLine();
+      System.err.println("    [" +sourceName + " stdout]: " + output);
+    }
+    
+    // Write System.err.
+    output = "";
+    while (procErr.ready() && (output != null)) {
+      output = procErr.readLine();
+      System.err.println("    [" +sourceName + " stderr]: " + output);
     }
   }
-
-
+  
+  /**
+   * Parses a line of text written by Javadoc to stderr in order to see if it lists a specific
+   * file (and optionally, a line number) and error message.
+   * If so, creates a corresponding CompilerError.
+   * 
+   * @param line the line of JavaDoc error output to parse - possibly null
+   * @return if the error output contains the text ".java:", a CompilerError with the file,
+   * message, and line number (if present) where the error occurred. Otherwise, returns null.
+   */
+  private CompilerError parseJavadocErrorLine(String line) {
+    // First things first: check input.
+    if (line == null) {
+      return null;
+    }
+    
+    final String ERR_INDICATOR = ".java:"; 
+    CompilerError error = null;
+    
+    // if the line doesn't have a file and a line number, it is context printed out for a previous error.
+    // We can ignore it, becuase the user gets this when they click the error message in our GUI.
+    int errStart = line.indexOf(ERR_INDICATOR);
+    if (errStart != -1) {
+      // filename is everything up to and including the '.java'
+      String filename = line.substring(0, errStart+5);
+      
+      // line number is all contiguous number characters after the colon
+      int lineno = -1;
+      StringBuffer linenoString = new StringBuffer();
+      int pos = errStart+6;
+      while ((line.charAt(pos)>='0') && (line.charAt(pos)<='9')) {
+        linenoString.append(line.charAt(pos));
+        pos++;
+      }
+      // Hopefully, there is a colon after the line number but before the error message.
+      // If so, record the line number.
+      // Otherwise, try to recover by just using everything after ERR_INDICATOR as the error message
+      if (line.charAt(pos) == ':') {
+        try {
+          lineno = Integer.valueOf(linenoString.toString()).intValue();
+        } catch (NumberFormatException e) {
+        }
+      } else {
+        pos = errStart;
+      }
+      
+      // error message is everything after the colon and space that are after the line number
+      String errMessage = line.substring(pos+2);
+      
+      if (lineno >= 0) {
+        error = new CompilerError(new File(filename), lineno, 0, errMessage, false);
+      } else {
+        error = new CompilerError(new File(filename), errMessage, false);
+      }   
+    }
+    return error;
+  }
 
   /**
    * Compile the given files (with the given sourceroots), and update
@@ -1384,6 +1612,26 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       _notifier.notifyListeners(new EventNotifier.Notifier() {
         public void notifyListener(GlobalModelListener l) {
           l.junitEnded();
+        }
+      });
+    }
+  }
+  
+  private void javadocStarted() {
+    synchronized(_compilerLock) {
+      _notifier.notifyListeners(new EventNotifier.Notifier() {
+        public void notifyListener(GlobalModelListener l) {
+          l.javadocStarted();
+        }
+      });
+    }
+  }
+  
+  private void javadocEnded() {
+    synchronized(_compilerLock) {
+      _notifier.notifyListeners(new EventNotifier.Notifier() {
+        public void notifyListener(GlobalModelListener l) {
+          l.javadocEnded();
         }
       });
     }
@@ -2357,6 +2605,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     //TODO: see if we can get by without this function
     _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], this);
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], this, false);
+    _javadocErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], this);
     _numErrors = 0;
   }
   

@@ -368,15 +368,15 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
         }
       }
       
-      public void interactionsResetting() {
+      public void interpreterResetting() {
         assertInteractionsResetCount(0);
-        interactionsResettingCount++;
+        interpreterResettingCount++;
       }
       
-      public void interactionsReset() {
+      public void interpreterReady() {
         assertInteractionsResettingCount(1);
         assertJUnitEndCount(0);
-        interactionsResetCount++;
+        interpreterReadyCount++;
       }
     };
     _model.addListener(listener);

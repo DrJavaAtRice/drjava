@@ -82,9 +82,9 @@ public class JUnitPanel extends ErrorPanel{
   protected JUnitErrorListPane _errorListPane;
   private int _testCount;
   private boolean _testsSuccessful;
-  private OpenDefinitionsDocument _odd = null;
 
   private JUnitProgressBar _progressBar;
+  private OpenDefinitionsDocument _odd = null;
 
   /**
    * Constructor.
@@ -152,14 +152,14 @@ public class JUnitPanel extends ErrorPanel{
     return _errorListPane;
   }
 
-  /** Called when compilation begins. */
+  protected JUnitErrorModel getErrorModel(){
+    return getModel().getJUnitErrorModel();
+  }
+
+  /** Called when work begins. */
   public void setJUnitInProgress(OpenDefinitionsDocument odd) {
     _odd = odd;
     _errorListPane.setJUnitInProgress();
-  }
-
-  protected JUnitErrorModel getErrorModel(){
-    return getModel().getJUnitErrorModel();
   }
 
   /**
@@ -178,7 +178,7 @@ public class JUnitPanel extends ErrorPanel{
     JUnitErrorModel juem = _model.getJUnitErrorModel();
     boolean testsHaveRun = false;
     if (juem != null) {
-      _numErrors = juem.getErrors().length;
+      _numErrors = juem.getNumErrors();
       testsHaveRun = juem.haveTestsRun();
     } else {
       _numErrors = 0;
@@ -277,7 +277,7 @@ public class JUnitPanel extends ErrorPanel{
 
       try {
         doc.insertString(doc.getLength(),
-                         "Testing in progress, please wait...\n",
+                         "Testing in progress.  Please wait...\n",
                          NORMAL_ATTRIBUTES);
       }
       catch (BadLocationException ble) {
@@ -442,46 +442,46 @@ public class JUnitPanel extends ErrorPanel{
 
   }
 
-}
-
-/**
- * A progress bar showing the status of JUnit tests.
- * Green until a test fails, then red.
- * Adapted from JUnit code.
- */
-class JUnitProgressBar extends JProgressBar {
-  private boolean _hasError = false;
-  
-  public JUnitProgressBar() {
-    super();
-    setForeground(getStatusColor());
-  }
-  
-  private Color getStatusColor() {
-    if (_hasError) {
-      return Color.red;
-    }
-    else {
-      return Color.green;
-    }
-  }
-  
-  public void reset() {
-    _hasError = false;
-    setForeground(getStatusColor());
-    setValue(0);
-  }
-  
-  public void start(int total) {
-    setMaximum(total);
-    reset();
-  }
-  
-  public void step(int value, boolean successful) {
-    setValue(value);
-    if (!_hasError && !successful) {
-      _hasError= true;
+  /**
+   * A progress bar showing the status of JUnit tests.
+   * Green until a test fails, then red.
+   * Adapted from JUnit code.
+   */
+  static class JUnitProgressBar extends JProgressBar {
+    private boolean _hasError = false;
+    
+    public JUnitProgressBar() {
+      super();
       setForeground(getStatusColor());
     }
+    
+    private Color getStatusColor() {
+      if (_hasError) {
+        return Color.red;
+      }
+      else {
+        return Color.green;
+      }
+    }
+    
+    public void reset() {
+      _hasError = false;
+      setForeground(getStatusColor());
+      setValue(0);
+    }
+    
+    public void start(int total) {
+      setMaximum(total);
+      reset();
+    }
+    
+    public void step(int value, boolean successful) {
+      setValue(value);
+      if (!_hasError && !successful) {
+        _hasError= true;
+        setForeground(getStatusColor());
+      }
+    }
   }
+
 }

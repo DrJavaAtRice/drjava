@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -37,48 +37,46 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.io.File;
+import java.io.IOException;
+import javax.swing.ListModel;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030609-1626;
- *
+ * This interface encapsulates the behavior of a document store.
+ * Model components which simply need to work with document text
+ * should use this interface rather than the entire GlobalModel.
+ * Documents which need to be loaded will most likely be retrieved from an
+ * ILoadDocuments by a concrete implemention.
+ * @see ILoadDocuments, GlobalModel, DefaultGlobalModel
  * @version $Id$
  */
-public abstract class Version {
+public interface IGetDocuments {
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Returns the OpenDefinitionsDocument for the specified
+   * File, opening a new copy if one is not already open.
+   * @param file File contained by the document to be returned
+   * @return OpenDefinitionsDocument containing file
    */
-  private static final String BUILD_TIME_STRING = "20030609-1626";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+  public OpenDefinitionsDocument getDocumentForFile(File file)
+    throws IOException, OperationCanceledException;
+  
+  /**
+   * Determines whether the named file is already open, or if it must be loaded.
+   * Clients which want to avoid visual side-effects should check this before
+   * calling getDocumentForFile.
+   * @param file the File in question
+   * @return true if the document is already open in this IGetDocument
+   */
+  public boolean isAlreadyOpen(File file);
+  
+  /**
+   * Returns a collection of all documents currently open for editing.
+   * This is equivalent to the results of getDocumentForFile for the set
+   * of all files for which isAlreadyOpen returns true.
+   * TODO: Remove dependence on Swing implementation.
+   * @return a Swing ListModel of the open definitions documents.
+   */
+  public ListModel getDefinitionsDocuments();
+}
