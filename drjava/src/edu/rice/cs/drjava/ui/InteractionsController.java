@@ -48,6 +48,8 @@ import java.awt.event.KeyEvent;
 import java.awt.Toolkit;
 import java.awt.Color;
 
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.repl.ConsoleDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsModel;
@@ -200,6 +202,11 @@ public class InteractionsController extends AbstractConsoleController {
                                 moveRightAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0),
                                 moveRightAction);
+    // Prevent previous word action from going past the prompt
+    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD),
+                                prevWordAction);
+    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD),
+                                nextWordAction);
   }
 
   /**
@@ -279,6 +286,40 @@ public class InteractionsController extends AbstractConsoleController {
       }
       else { // position between prompt and end
         _pane.setCaretPosition(position + 1);
+      }
+    }
+  };
+
+  AbstractAction prevWordAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      int position = _pane.getCaretPosition();
+      int promptPos = _doc.getPromptPos();
+      if (position < promptPos) {
+        moveToPrompt();
+      }
+      else if (position == promptPos) {
+        // Wrap around to the end
+        moveToEnd();
+      }
+     else {
+        _pane.getActionMap().get(DefaultEditorKit.previousWordAction).actionPerformed(e);
+      }
+    }
+  };
+
+  AbstractAction nextWordAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      int position = _pane.getCaretPosition();
+      int promptPos = _doc.getPromptPos();
+      if (position < promptPos) {
+        moveToEnd();
+      }
+      else if (position >= _doc.getDocLength()) {
+        // Wrap around to the start
+        moveToPrompt();
+      }
+      else {
+        _pane.getActionMap().get(DefaultEditorKit.nextWordAction).actionPerformed(e);
       }
     }
   };
