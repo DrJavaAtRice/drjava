@@ -42,6 +42,8 @@ package edu.rice.cs.util.classloader;
 import java.net.*;
 import java.io.File;
 
+import gj.util.Vector;
+
 /**
  * A class loader that tries to load classes from tools.jar.
  * It will never delegate to the system loader.
@@ -61,14 +63,23 @@ public class ToolsJarClassLoader extends URLClassLoader {
    * Returns an array of possible Files for the tools.jar file.
    */
   public static File[] getToolsJarFiles() {
-    File home = new File(System.getProperty("java.home"));
+    String javaHome = System.getProperty("java.home");
+    File home = new File(javaHome);
     File libDir = new File(home, "lib");
     File libDir2 = new File(home.getParentFile(), "lib");
+    
+    Vector<File> files = new Vector<File>();
+    files.addElement(new File(libDir, "tools.jar"));
+    files.addElement(new File(libDir2, "tools.jar"));
+    
+    if (javaHome.indexOf("Program Files") != -1) {
+      // Windows: JavaHome is JRE; guess where SDK is
+      files.addElement(new File(getWindowsToolsJar(javaHome)));
+    }
 
-    return new File[] {
-      new File(libDir, "tools.jar"),
-      new File(libDir2, "tools.jar")
-    };
+    File[] fileArray = new File[files.size()];
+    files.copyInto(fileArray);
+    return fileArray;
   }
   
   /**
@@ -102,6 +113,36 @@ public class ToolsJarClassLoader extends URLClassLoader {
       classpath += files[i].getAbsolutePath();
     }
     return classpath;
+  }
+  
+  /**
+   * Returns a guess for the location of tools.jar based on the default
+   * installation directory for the Windows Java SDK.  In Windows,
+   * JAVA_HOME is set to the JRE directory in "Program Files", but tools.jar
+   * is located in the SDK directory.  Guess is simplistic: only looks on C:.
+   *
+   * PRECONDITION: javaHome contains "Program Files"
+   *
+   * @param javaHome The current JAVA_HOME System property
+   */
+  public static String getWindowsToolsJar(String javaHome) {
+    if (javaHome.indexOf("Program Files") == -1) return "";
+    
+    String prefix = "C:\\j2sdk";
+    String suffix = "\\lib\\tools.jar";
+    String version = "";
+    
+    if (javaHome.indexOf("JavaSoft") != -1) {
+      prefix = "C:\\jdk";
+      int versionIndex = javaHome.indexOf("JRE\\") + 4;
+      version = javaHome.substring(versionIndex);
+    }
+    else {
+      int versionIndex = javaHome.indexOf("j2re") + 4;
+      version = javaHome.substring(versionIndex);
+    }
+    
+    return prefix + version + suffix;
   }
 
   /**

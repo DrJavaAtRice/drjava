@@ -37,48 +37,46 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
+package edu.rice.cs.util.classloader;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import junit.framework.*;
 
 /**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20030209-0134;
+ * Test cases for {@link ToolsJarClassLoader}.
  *
  * @version $Id$
  */
-public abstract class Version {
+public class ToolsJarClassLoaderTest extends TestCase {
+
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Constructor.
+   * @param String name
    */
-  private static final String BUILD_TIME_STRING = "20030209-0134";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public ToolsJarClassLoaderTest(String name) {
+    super(name);
   }
 
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  /**
+   * Test that ToolsJarClassLoader can correctly guess the default
+   * SDK installation directory on Windows.
+   * Precondition: JAVA_HOME contains "Program Files"
+   */
+  public void testWindowsSDKDirectory() throws Throwable {
+    String javahome1 = "C:\\Program Files\\Java\\j2re1.4.0_01";
+    String javahome2 = "C:\\Program Files\\Java\\j2re1.4.1";
+    String javahome3 = "C:\\Program Files\\JavaSoft\\JRE\\1.3.1_04";
+    
+    assertEquals("new versions of Windows J2SDK (1)",
+                 "C:\\j2sdk1.4.0_01\\lib\\tools.jar",
+                 ToolsJarClassLoader.getWindowsToolsJar(javahome1));
+                 
+    assertEquals("new versions of Windows J2SDK (2)",
+                 "C:\\j2sdk1.4.1\\lib\\tools.jar",
+                 ToolsJarClassLoader.getWindowsToolsJar(javahome2));
+    
+    assertEquals("old versions of Windows J2SDK",
+                 "C:\\jdk1.3.1_04\\lib\\tools.jar",
+                 ToolsJarClassLoader.getWindowsToolsJar(javahome3));
   }
 
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+}
