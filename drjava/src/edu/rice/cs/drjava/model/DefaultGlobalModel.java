@@ -914,7 +914,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   /**
    * Returns the current classpath in use by the Interpreter JVM.
    */
-  public String getClasspath() {
+  public Vector<String> getClasspath() {
+    return _interpreterControl.getClasspath();
+    /*
     String separator= System.getProperty("path.separator");
     String classpath= "";
     File[] sourceFiles = getSourceRootSet();
@@ -932,8 +934,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         }
     }
     return classpath;
+    */
   }
-
+  
   /**
    * Gets an array of all sourceRoots for the open definitions
    * documents, without duplicates. Note that if any of the open

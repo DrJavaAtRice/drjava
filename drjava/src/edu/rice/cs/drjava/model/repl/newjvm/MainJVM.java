@@ -98,6 +98,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   private String _startupClasspath;
 
   /**
+   * Starting classpath reorganized into a vector.
+   */
+  private Vector<String> _startupClasspathVector;
+
+  /**
    * Creates a new MainJVM to interface to another JVM, but does not
    * automatically start the Interpreter JVM.  Callers should set the
    * InteractionsModel and JUnitModel, and then call startInterpreterJVM().
@@ -109,7 +114,20 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _junitModel = new DummyJUnitModel();
     _debugModel = new DummyDebugModel();
     _startupClasspath = System.getProperty("java.class.path");
+    _parseStartupClasspath();
     //startInterpreterJVM();
+  }
+  
+  private void _parseStartupClasspath() {
+    String separator = System.getProperty("path.separator");
+    int index = _startupClasspath.indexOf(separator);
+    int lastIndex = 0;
+    _startupClasspathVector = new Vector<String>();
+    while (index != -1) {
+      _startupClasspathVector.addElement(_startupClasspath.substring(lastIndex, index));
+      lastIndex = index + separator.length();
+      index = _startupClasspath.indexOf(separator, lastIndex);
+    }
   }
 
   public boolean isInterpreterRunning() {
@@ -203,6 +221,36 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException re) {
       _threwException(re);
     }
+  }
+  
+  /**
+   * Returns the current classpath of the interpreter as a list of
+   * unique entries.  The list is empty if a remote exception occurs.
+   */
+  public Vector<String> getClasspath() {
+    // silently fail if disabled. see killInterpreter docs for details.
+    if (_enabled) {
+
+      ensureInterpreterConnected();
+      
+      try {
+        Vector<String> classpath = new Vector<String>();
+//        classpath.addAll(_startupClasspathVector);
+//        classpath.addAll(_interpreterJVM().getAugmentedClasspath());
+        for(int i = 0; i < _startupClasspathVector.size(); i++) {
+          classpath.addElement(_startupClasspathVector.elementAt(i));
+        }
+        Vector<String> augmentedClasspath = _interpreterJVM().getAugmentedClasspath();
+        for(int i = 0; i < augmentedClasspath.size(); i++) {
+          classpath.addElement(augmentedClasspath.elementAt(i));
+        }
+        return classpath;
+      }
+      catch (RemoteException re) {
+        _threwException(re);
+      }
+    }
+    return new Vector<String>();
   }
 
   /**

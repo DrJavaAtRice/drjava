@@ -49,27 +49,36 @@ interface InteractionsProcessorI {
   public String postProcess(String s, Object result);
 }
 
-
+/**
+ * Processes any commands sent to or from the interpreter.
+ * 
+ * @version $Id$
+ */
 public class InteractionsProcessor implements InteractionsProcessorI {
 
-  boolean precalled = false;
-  boolean postcalled = false;
   
-
+  /**
+   * Processes each command sent to the interpreter.
+   * @param s String typed by the user
+   * @return Processed String to send to the interpreter
+   */
   public String preProcess(String s) throws ParseException
   {
     InteractionsInput tree = new GJParser( new StringReader( s ) ).InteractionsInput();
     JavaASTVisitor typeEraser = (JavaASTVisitor) new TypeEraser();
-    // WHY do we need the cast?
     JavaAST typeErasedTree = (JavaAST) tree.accept( typeEraser );
-    precalled = true;
-    return InteractionsPrinter.generateSource( typeErasedTree );
-    //return s;
+    //precalled = true;
+    String source =  InteractionsPrinter.generateSource( typeErasedTree );
+    System.out.println("Interpreting: " + source);
+    return source;
   }
 
+  /**
+   * 
+   */
   public String postProcess(String s, Object result)
   {
-    postcalled = true;
+    //postcalled = true;
     return s;
   }
 } 

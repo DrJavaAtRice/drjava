@@ -44,9 +44,13 @@ import edu.rice.cs.javaast.parser.*;
 import edu.rice.cs.javaast.tree.*;
 import edu.rice.cs.javaast.*;
 
+/**
+ * Tests the behavior of the InteractionsProcessor.
+ * @version $Id$
+ */
 public final class InteractionsProcessorTest extends TestCase {
 
-  InteractionsProcessor _ip;
+  TestInteractionsProcessor _ip;
 
   public InteractionsProcessorTest(String s)
   {
@@ -55,23 +59,21 @@ public final class InteractionsProcessorTest extends TestCase {
 
   protected void setUp()
   {
-    _ip = new InteractionsProcessor();
+    _ip = new TestInteractionsProcessor();
   }
 
-  public void testPreProcess()
+  public void testPreProcess() throws ParseException
   {
-    try{
-      String s = _ip.preProcess("0");
-    }
-    catch( ParseException pe ){
-      assertTrue("preProcess failed", false);
-    }
+    String s = _ip.preProcess("0");
     assertTrue("InteractionProcessor.testPreProcess:", _ip.precalled);
     
     // this test is presumptive for the real preprocessor, correct? -jvf
     //assertEquals("InteractionProcessor.testPreProcess:", "0", s);
   }
   
+  /**
+   * Tests that the correct exception is thrown on a syntax error.
+   */
   public void testPreProcessSyntaxError()
   {
     try{
@@ -83,7 +85,9 @@ public final class InteractionsProcessorTest extends TestCase {
     }
   }
   
-  
+  /**
+   * Tests that the correct exception is thrown on a token manager error.
+   */
   public void testPreProcessTokenMgrError()
   {
     try{
@@ -98,10 +102,26 @@ public final class InteractionsProcessorTest extends TestCase {
     }
   }
 
+  /**
+   * Tests that post-process currently does nothing.
+   */
   public void testPostProcess()
   {
     String s = _ip.postProcess("0", null);
     assertTrue("InteractionProcessor.testPostProcess:", _ip.postcalled);
     assertEquals("InteractionProcessor.testPostProcess:", "0", s);
+  }
+  
+  static class TestInteractionsProcessor extends InteractionsProcessor {
+    boolean precalled = false;
+    boolean postcalled = false;
+    public String preProcess(String s) throws ParseException {
+      precalled = true;
+      return super.preProcess(s);
+    }
+    public String postProcess(String s, Object result) {
+      postcalled = true;
+      return super.postProcess(s, result);
+    }
   }
 }

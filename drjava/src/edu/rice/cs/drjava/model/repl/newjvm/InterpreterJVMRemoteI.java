@@ -41,6 +41,7 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import gj.util.Vector;
 import edu.rice.cs.util.newjvm.*;
 
 /**
@@ -90,4 +91,9 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    * with an interaction
    */
   public boolean setToDefaultInterpreter() throws RemoteException;
+  
+  /**
+   * Returns a copy of the list of unique entries on the classpath.
+   */
+  public Vector<String> getAugmentedClasspath() throws RemoteException;
 }

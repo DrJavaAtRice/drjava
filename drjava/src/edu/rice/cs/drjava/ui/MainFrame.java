@@ -622,6 +622,25 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
+  /**
+   * Displays the interactions classpath.
+   */
+  private Action _viewInteractionsClasspathAction = new AbstractAction("View Interactions Classpath") {
+    public void actionPerformed(ActionEvent e) {
+      String classpath = "";
+      Vector<String> classpathElements = _model.getClasspath();
+      for(int i = 0; i < classpathElements.size(); i++) {
+        classpath += classpathElements.elementAt(i);
+        if (i + 1 < classpathElements.size()) {
+          classpath += "\n";
+        }
+      }
+      
+      new ScrollableDialog(MainFrame.this, "Interactions Classpath",
+                           "Current Interpreter Classpath", classpath).show();
+    }
+  };
+
   /** Shows the user documentation. */
   private Action _helpAction = new AbstractAction("Help") {
     public void actionPerformed(ActionEvent ae) {
@@ -2768,6 +2787,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     interactionsPanePopupMenu.add(_saveHistoryAction);
     interactionsPanePopupMenu.add(_clearHistoryAction);
     interactionsPanePopupMenu.addSeparator();
+    interactionsPanePopupMenu.add(_viewInteractionsClasspathAction);
     interactionsPanePopupMenu.add(_copyInteractionToDefinitionsAction);
     _interactionsPane.addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {

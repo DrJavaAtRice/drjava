@@ -265,7 +265,7 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
   /**
    * Returns the current classpath in use by the Interpreter JVM.
    */
-  public String getClasspath();
+  public Vector<String> getClasspath();
 
   /**
    * Gets an array of all sourceRoots for the open definitions

@@ -77,21 +77,12 @@ public final class MainFrameTest extends MultiThreadedTestCase {
    */
   private String user = System.getProperty("user.name");
 
-  
   /**
    * Constructor.
    * @param  String name
    */
   public MainFrameTest(String name) {
     super(name);
-  }
-  
-  /**
-   * Creates a test suite for JUnit to run.
-   * @return a test suite based on the methods in this class
-   */
-  public static Test suite() {
-    return  new TestSuite(MainFrameTest.class);
   }
   
   /**
@@ -308,63 +299,6 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     assertEquals("redo restores caret position", oldPos, pane.getCaretPosition());
   }
 
-  /**
-   * tests that undoing/redoing a multi-line comment/uncomment will restore the caret position
-   */
-  public void testMultilineCommentOrUncommentAfterScroll() 
-    throws BadLocationException, InterruptedException
-  {
-    DefinitionsPane pane = _frame.getCurrentDefPane();
-    DefinitionsDocument doc = pane.getOpenDocument().getDocument();
-    String text =
-      "public class stuff {\n" + 
-      "  private int _int;\n" + 
-      "  private Bar _bar;\n" +
-      "  public void foo() {\n" +
-      "    _bar.baz(_int);\n" +
-      "  }\n" +
-      "}\n";
-    
-    String commented =
-      "//public class stuff {\n" + 
-      "//  private int _int;\n" + 
-      "//  private Bar _bar;\n" +
-      "//  public void foo() {\n" +
-      "//    _bar.baz(_int);\n" +
-      "//  }\n" +
-      "//}\n";
-
-    int newPos = 20;
-
-    doc.insertString(0, text, null);
-    assertEquals("insertion",text, doc.getText(0,doc.getLength()));
-    
-    doc.commentLines(0,doc.getLength());
-    assertEquals("commenting",commented, doc.getText(0,doc.getLength()));
-    int oldPos = pane.getCaretPosition();
-    pane.setCaretPosition(newPos);
-    doc.getUndoManager().undo();
-    assertEquals("undo commenting",text, doc.getText(0,doc.getLength()));
-    assertEquals("undoing commenting restores caret position", oldPos, pane.getCaretPosition());
-    pane.setCaretPosition(newPos);
-    doc.getUndoManager().redo();
-    assertEquals("redo commenting",commented, doc.getText(0,doc.getLength()));
-    assertEquals("redoing commenting restores caret position", oldPos, pane.getCaretPosition());
-
-    doc.uncommentLines(0,doc.getLength());
-    assertEquals("uncommenting",text, doc.getText(0,doc.getLength()));
-    oldPos = pane.getCaretPosition();
-    pane.setCaretPosition(newPos);
-    doc.getUndoManager().undo();
-    assertEquals("undo uncommenting",commented, doc.getText(0,doc.getLength()));
-    assertEquals("undoing uncommenting restores caret position", oldPos, pane.getCaretPosition());
-    pane.setCaretPosition(newPos);
-    doc.getUndoManager().redo();
-    assertEquals("redo uncommenting",text, doc.getText(0,doc.getLength()));
-    assertEquals("redoing uncommenting restores caret position", oldPos, pane.getCaretPosition());
-  }
-
-  
   /**
    * Ensure that a document's editable status is set appropriately throughout
    * the compile process.  Since the behavior is interesting only when the model

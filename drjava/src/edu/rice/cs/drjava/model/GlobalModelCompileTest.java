@@ -125,7 +125,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   public void runBare() throws Throwable {
     CompilerInterface[] compilers = CompilerRegistry.ONLY.getAvailableCompilers();
     for (int i = 0; i < compilers.length; i++) {
-      System.out.println("Run " + i + ": " + compilers[i]);
+      //System.out.println("Run " + i + ": " + compilers[i]);
       setUp();
       _model.setActiveCompiler(compilers[i]);
 

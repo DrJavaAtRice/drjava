@@ -98,7 +98,10 @@ public class InterpreterJVM extends AbstractSlaveJVM
   
   private InterpreterData _activeInterpreter;
 
-  /** The currently accumulated classpath for all Java interpreters. */
+  /** 
+   * The currently accumulated classpath for all Java interpreters.
+   * List contains unqiue entries.
+   */
   private Vector<String> _classpath;
   
   /** Responsible for running JUnit tests in this JVM. */
@@ -547,9 +550,14 @@ public class InterpreterJVM extends AbstractSlaveJVM
    * Adds the given path to the classpath shared by ALL Java interpreters.
    * This method <b>cannot</b> take multiple paths separated by
    * a path separator; it must be called separately for each path.
+   * Only unique paths are added.
    * @param s Entry to add to the accumulated classpath
    */
   public void addClassPath(String s) {
+    if (_classpath.contains(s)) {
+      return;
+    }
+    
     //_dialog("add classpath: " + s);
     if (_classpath.contains(s)) {
       // Don't add it again
@@ -575,9 +583,17 @@ public class InterpreterJVM extends AbstractSlaveJVM
   }
   
   /**
-   * Returns the accumulated classpath in use by all Java interpreters.
+   * Returns a copy of the list of unique entries on the classpath.
    */
-  public String getClasspath() {
+  public Vector<String> getAugmentedClasspath() {
+    return _classpath;
+  }
+  
+  /**
+   * Returns the accumulated classpath in use by all Java interpreters,
+   * in the form of a path-separator delimited string.
+   */
+  public String getClasspathString() {
     StringBuffer cp = new StringBuffer();
     for (int i=0; i < _classpath.size(); i++) {
       cp.append(_classpath.elementAt(i));

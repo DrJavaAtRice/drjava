@@ -39,62 +39,63 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.FileSaveSelector;
-import edu.rice.cs.drjava.model.OperationCanceledException;
-import edu.rice.cs.drjava.config.OptionConstants;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.*;
+import javax.swing.*;
+import javax.swing.border.*;
 
-/**
- * Displayed when the user chooses to save the interactions history. It will show
- * the current history and allow the user to edit or save it to a file.
- * $Id$
- */
-public class HistorySaveDialog extends ScrollableDialog {
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 
-  // a history pointer
-  private String _history;
-  private Object _historyLock = new Object();
+public class ScrollableDialog {
+  protected JDialog _dialog;
+  protected JTextArea _textArea;
+  protected JPanel _buttonPanel;
   
-  public HistorySaveDialog (JFrame frame) {
-    super(frame, "Save Interactions History",
-          "Make any changes to the history, and then click \"Save\".", "");
+  public ScrollableDialog (JFrame frame, String title, String header, String text) {
+    _dialog = new JDialog(frame, title, true);    
+    Container content = _dialog.getContentPane();
+
+    content.setLayout(new BorderLayout());
+
+    _textArea = new JTextArea();
+    _textArea.setFont(DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
+    _textArea.setEditable(false);
+    _textArea.setText(text);
+    _dialog.setSize(400,300);
+    _dialog.setLocationRelativeTo(frame);
+    
+    JScrollPane textScroll = 
+      new BorderlessScrollPane(_textArea,
+                               JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                               JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    JPanel scrollWrapper = new JPanel(new BorderLayout(0,5));
+    scrollWrapper.setBorder(new EmptyBorder(5,5,0,5));
+    scrollWrapper.add(new JLabel(header),BorderLayout.NORTH);
+    scrollWrapper.add(textScroll,BorderLayout.CENTER);
+    JPanel bottomPanel = new JPanel(new BorderLayout());
+    _buttonPanel = new JPanel(new GridLayout(1,0,5,5));
+    bottomPanel.add(_buttonPanel,BorderLayout.EAST);
+    bottomPanel.setBorder(new EmptyBorder(5,5,5,5));
+    _addButtons();
+    
+    content.add(scrollWrapper, BorderLayout.CENTER);
+    content.add(bottomPanel, BorderLayout.SOUTH);
+    
+    _textArea.requestDefaultFocus();
   }
 
   protected void _addButtons() {
-    Action saveAction = new AbstractAction("Save") {
-      public void actionPerformed (ActionEvent ae) {
-        _history = _textArea.getText(); 
-        _dialog.dispose();
-      }
-    };
-  
-    Action cancelAction = new AbstractAction("Cancel") {
-      public void actionPerformed (ActionEvent ae) {
-        _dialog.dispose();
-      }
-    };
-
-    JButton saveButton = new JButton(saveAction);
-    JButton cancelButton = new JButton(cancelAction);
-    _buttonPanel.add(saveButton);
-    _buttonPanel.add(cancelButton);
-    _dialog.getRootPane().setDefaultButton(saveButton);
+    _buttonPanel.add(new JButton(_okAction));
   }
 
-  public String editHistory(String history) {
-    synchronized(_historyLock) {
-      _history = null; // make it null by default
-      _textArea.setText(history);
-      _textArea.setEditable(true);
-      show();
-      return _history;
+  private Action _okAction = new AbstractAction("OK") {
+    public void actionPerformed(ActionEvent e) {
+      _dialog.dispose();
     }
+  };
+
+  public void show() {
+    _dialog.show();
   }
-  
 }
