@@ -252,7 +252,7 @@ Welcome to DrJava.
 
     <para>DrJava makes the process of running unit tests very simple by providing support for JUnit.  Once you have written a JUnit test class (as described in the next section), you can simply choose the "Test Current Document" command from the Tools menu to run the tests and view the results.  The name of the tests being run will shown in the "Test Output" tab, with each test method turning green if it completes successfully and red if it fails.  Any failures will be displayed after the list of methods in the same way as the <link linkend="compiling-errors">compiler errors</link>.  A progress bar will keep you updated on how many tests have been run.</para>
 
-    <para>Also, clicking the "Test" button on the toolbar or choosing "Test All Documents" from the Tools menu will run JUnit on any open testcases, making running multiple test files very simple.
+    <para>Also, clicking the "Test" button on the toolbar or choosing "Test All Documents" from the Tools menu will run JUnit on any open testcases, making running multiple test files very simple.</para>
 
 
     <section id="junit-writing">
