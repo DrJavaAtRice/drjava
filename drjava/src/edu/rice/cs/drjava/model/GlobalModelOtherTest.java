@@ -65,7 +65,6 @@ import edu.rice.cs.drjava.CodeStatus;
  * @version $Id$
  */
 public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
-  
   /**
    * Constructor.
    * @param  String name
@@ -315,6 +314,26 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     assertEquals("interactions result",
                  "\"DrJavaTestFoo\"",
                  interpret("new DrJavaTestFoo().getClass().getName()"));
+  }
+  
+  /**
+   * Compiles a new class in the default package with a mixed case name,
+   * and ensures that it can be instantiated on a variable with an
+   * identical name (but a lowercase first letter).
+   * Catches SF bug #689026 ("DynamicJava can't handle certain variable names")
+   */
+  public void testInteractionsVariableWithLowercaseClassName()
+    throws BadLocationException, IOException, InterruptedException
+  {
+    // Compile a test file
+    OpenDefinitionsDocument doc1 = 
+      setupDocument("public class DrJavaTestClass {}");
+    File file1 = new File(_tempDir, "DrJavaTestClass.java");
+    doCompile(doc1, file1);
+
+    // This shouldn't cause an error (no output should be displayed)
+    assertEquals("interactions result", "",
+                 interpret("drJavaTestClass = new DrJavaTestClass();"));
   }
 
   /**

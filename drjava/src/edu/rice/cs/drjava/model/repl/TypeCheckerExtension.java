@@ -49,6 +49,10 @@ import koala.dynamicjava.interpreter.error.ExecutionError;
  * the type checker since this may cause divide by zero exceptions even when
  * short circuiting should occur (e.g. (false) ? 2/0 else 1 will cause an
  * exception).
+ * 
+ * NOTE: These problems have been corrected in newer versions of
+ * DynamicJava, so this class is no longer used.
+ * 
  * $Id$
  */
 public class TypeCheckerExtension extends TypeChecker {

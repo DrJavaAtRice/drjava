@@ -205,7 +205,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
             n = (Node)o;
           }
 
-          v = new TypeCheckerExtension(checkVisitorContext);
+          v = new TypeChecker(checkVisitorContext);
           n.acceptVisitor(v);
 
           evalVisitorContext.defineVariables

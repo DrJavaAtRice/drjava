@@ -257,6 +257,24 @@ public class JavaInterpreterTest extends TestCase {
     };
     tester(cases);
   }
+  
+  /**
+   * Ensure that the interpreter rejects assignments where the right type
+   * is not a subclass of the left type.
+   */
+  public void testIncompatibleAssignment() throws ExceptionReturnedException {
+    Object out = null;
+    try {
+      out = _interpreter.interpret("Integer i = new Object()");
+      fail("incompatible assignment should have failed");
+    }
+    catch (ExceptionReturnedException e) {
+      // Correct; it should fail
+    }
+    
+    // Check that a correct assignment doesn't fail
+    _interpreter.interpret("Object o = new Integer(3)");
+  }
 
  /**
   * Tests the operation of the TypeCheckerExtension by performing the 
