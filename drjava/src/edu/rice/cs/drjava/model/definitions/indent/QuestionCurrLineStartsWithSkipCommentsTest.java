@@ -47,6 +47,8 @@ import javax.swing.text.Document;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
 /**
+ * Test class according to the JUnit protocol. Tests the proper functionality
+ * of the class QuestionCurrLineStartsWithSkipComments.
  * @version $Id$
  */
 public class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRulesTestCase
@@ -65,7 +67,7 @@ public class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRulesTestC
       "class A                 \n" + /*   0 */
       "{                       \n" + /*  25 */
       "    // one line comment \n" + /*  50 */
-      "    int field;          \n" + /*  75 */
+      "    int method1         \n" + /*  75 */
       "    /**                 \n" + /* 100 */
       "     * javadoc comment  \n" + /* 125 */
       "     */                 \n" + /* 150 */
@@ -84,7 +86,7 @@ public class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRulesTestC
 
     IndentRuleQuestion rule = new QuestionCurrLineStartsWithSkipComments("", null, null);
 
-    // This rule should always apply, unless we are inside a comment.
+    // This rule should always apply, unless the entire line is inside a comment.
     
     assertTrue("At DOCSTART.", rule.applyRule(_doc, 0));
     assertTrue("At start of block.", rule.applyRule(_doc, 25));
@@ -92,13 +94,14 @@ public class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRulesTestC
     assertTrue("START starts one-line comment.", rule.applyRule(_doc, 60));
     assertTrue("START starts javadoc comment.", rule.applyRule(_doc, 104));
     assertTrue("START starts javadoc comment.", rule.applyRule(_doc, 110));
-    assertTrue("START inside javadoc comment.", !rule.applyRule(_doc, 130));
+    assertTrue("Line inside javadoc comment.", !rule.applyRule(_doc, 130));
+    assertTrue("Line closes javadoc comment.", rule.applyRule(_doc, 150));
     assertTrue("START is free.", rule.applyRule(_doc, 180));
     assertTrue("START is free.", rule.applyRule(_doc, 230));
     assertTrue("START starts multi-line comment.", rule.applyRule(_doc, 260));
-    assertTrue("START inside multi-line comment.", !rule.applyRule(_doc, 275));
-    assertTrue("START inside multi-line comment.", !rule.applyRule(_doc, 300));
-    assertTrue("START inside multi-line comment.", !rule.applyRule(_doc, 399));
+    assertTrue("Line inside multi-line comment.", !rule.applyRule(_doc, 275));
+    assertTrue("Line inside multi-line comment.", !rule.applyRule(_doc, 300));
+    assertTrue("Line closes multi-line comment.", rule.applyRule(_doc, 399));
     assertTrue("START is free.", rule.applyRule(_doc, 400));
     assertTrue("At end of document.", rule.applyRule(_doc, 401));
   }
@@ -108,20 +111,20 @@ public class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRulesTestC
     _text =
       "class A extends         \n" + /*   0 */
       "B {                     \n" + /*  25 */
-      "    // one line comment \n" + /*  50 */
+      "    // {        }       \n" + /*  50 */
       "    int field;          \n" + /*  75 */
       "    /**                 \n" + /* 100 */
-      "     * javadoc comment  \n" + /* 125 */
+      "     * {        }       \n" + /* 125 */
       "     */                 \n" + /* 150 */
-      "    int method()        \n" + /* 175 */
-      "    {                   \n" + /* 200 */
+      "    int method() /*     \n" + /* 175 */
+      " */ {                   \n" + /* 200 */
       "    }                   \n" + /* 225 */
       "    /* multi line       \n" + /* 250 */
       "       comment          \n" + /* 275 */
       "    boolean method()    \n" + /* 300 */
-      "    { // one line       \n" + /* 325 */
-      "    }                   \n" + /* 350 */
-      "    */                  \n" + /* 375 */
+      "/**stuff*/   {  // stuff\n" + /* 325 */
+      "             }          \n" + /* 350 */
+      "                        \n" + /* 375 */
       "}";                           /* 400 */
 
     _setDocText(_text);
@@ -138,13 +141,15 @@ public class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRulesTestC
     assertTrue("Line starts a javadoc comment.",                            !_rule.applyRule(_doc, 110));
     assertTrue("Line inside javadoc comment.",                              !_rule.applyRule(_doc, 130));
     assertTrue("Line starts with alphanumeric character.",                  !_rule.applyRule(_doc, 180));
-    assertTrue("At start of block - line starts with an open brace.",        _rule.applyRule(_doc, 221));
+    assertTrue("Line closes comment. It follows an open brace.",             _rule.applyRule(_doc, 201));
+    assertTrue("Line closes comment. It follows an open brace.",             _rule.applyRule(_doc, 221));
     assertTrue("At end of block - line starts with a close brace.",         !_rule.applyRule(_doc, 225));
     assertTrue("Line starts a multi-line comment.",                         !_rule.applyRule(_doc, 260));
     assertTrue("Line inside multi-line comment.",                           !_rule.applyRule(_doc, 275));
     assertTrue("Line inside multi-line comment.",                           !_rule.applyRule(_doc, 300));
-    assertTrue("Line inside multi-line comment, starts with an open brace", !_rule.applyRule(_doc, 325));
-    assertTrue("Line inside multi-line comment, starts with a close brace", !_rule.applyRule(_doc, 355));
+    assertTrue("Line closes comment. It follows an open brace.",             _rule.applyRule(_doc, 325));
+    assertTrue("Line starts with a close brace.",                           !_rule.applyRule(_doc, 355));
+    assertTrue("Empty line.",                                               !_rule.applyRule(_doc, 390));
     assertTrue("At last character - line starts with a close brace.",       !_rule.applyRule(_doc, 400));
     assertTrue("At end of document - line starts with a close brace.",      !_rule.applyRule(_doc, 401));
   }
@@ -154,24 +159,24 @@ public class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRulesTestC
     _text =
       "class A                 \n" + /*   0 */
       "{                       \n" + /*  25 */
-      "    // one line comment \n" + /*  50 */
+      "    // }         }      \n" + /*  50 */
       "    int field;          \n" + /*  75 */
       "    /**                 \n" + /* 100 */
       "     * javadoc comment  \n" + /* 125 */
-      "     */                 \n" + /* 150 */
+      "     */   }             \n" + /* 150 */
       "    int method()        \n" + /* 175 */
-      "    {                   \n" + /* 200 */
-      "    }                   \n" + /* 225 */
+      "/**/}                   \n" + /* 200 */
+      "/ * }                   \n" + /* 225 */
       "    /* multi line       \n" + /* 250 */
       "       comment          \n" + /* 275 */
       "    boolean method()    \n" + /* 300 */
       "    {                   \n" + /* 325 */
-      "    }                   \n" + /* 350 */
-      "    */                  \n" + /* 375 */
+      "*/ / }                  \n" + /* 350 */
+      "   * }                  \n" + /* 375 */
       "}";                           /* 400 */
 
     _setDocText(_text);
-
+    
     _rule = new QuestionCurrLineStartsWithSkipComments("}", null, null);
 
     assertTrue("At DOCSTART - line doesn't start with a close brace.",      !_rule.applyRule(_doc,   0));
@@ -183,14 +188,16 @@ public class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRulesTestC
     assertTrue("Line starts a javadoc comment.",                            !_rule.applyRule(_doc, 104));
     assertTrue("Line starts a javadoc comment.",                            !_rule.applyRule(_doc, 110));
     assertTrue("Line inside javadoc comment.",                              !_rule.applyRule(_doc, 130));
+    assertTrue("Line closes multi-line comment, it follows a close brace.",  _rule.applyRule(_doc, 150));
     assertTrue("Line starts with alphanumeric character.",                  !_rule.applyRule(_doc, 180));
-    assertTrue("At start of block - line starts with an open brace.",       !_rule.applyRule(_doc, 221));
-    assertTrue("At end of block - line starts with a close brace.",          _rule.applyRule(_doc, 225));
+    assertTrue("Line starts with a comment, it follows a close brace.",      _rule.applyRule(_doc, 221));
+    assertTrue("At end of block - line starts with a slash.",               !_rule.applyRule(_doc, 225));
     assertTrue("Line starts a multi-line comment.",                         !_rule.applyRule(_doc, 260));
     assertTrue("Line inside multi-line comment.",                           !_rule.applyRule(_doc, 275));
     assertTrue("Line inside multi-line comment.",                           !_rule.applyRule(_doc, 300));
-    assertTrue("Line inside multi-line comment, starts with an open brace", !_rule.applyRule(_doc, 325));
-    assertTrue("Line inside multi-line comment, starts with a close brace", !_rule.applyRule(_doc, 355));
+    assertTrue("Line inside multi-line comment.",                           !_rule.applyRule(_doc, 325));
+    assertTrue("Line closes multi-line comment, it follows a slash.",       !_rule.applyRule(_doc, 355));
+    assertTrue("Line starts with a star.",                                  !_rule.applyRule(_doc, 376));
     assertTrue("At last character - line starts with a close brace.",        _rule.applyRule(_doc, 400));
     assertTrue("At end of document - line starts with a close brace.",       _rule.applyRule(_doc, 401));
   }

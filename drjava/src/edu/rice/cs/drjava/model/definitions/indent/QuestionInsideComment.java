@@ -58,7 +58,7 @@ class QuestionInsideComment extends IndentRuleQuestion {
   }
 
   /**
-   * Determines if the current line in the document is in a block comment.
+   * Determines if the (start of the!!) current line in the document is in a block comment.
    * @param doc DefinitionsDocument containing the line to be indented.
    * @return true if this node's rule holds.
    */
