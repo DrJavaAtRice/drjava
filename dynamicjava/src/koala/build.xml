@@ -539,7 +539,7 @@
 -->
     <jar jarfile="${jarfile}" manifest="${manifest}" update="true" >
       <!-- Include dependencies -->
-      <zipfileset src="${lib_dir}/gj-util.jar"
+      <!--zipfileset src="${lib_dir}/gj-util.jar"
                   excludes="META-INF/MANIFEST.MF" />
       <zipfileset src="${lib_dir}/dynamicjava.jar"
                   excludes="META-INF/MANIFEST.MF" />
@@ -550,21 +550,21 @@
       <zipfileset src="${lib_dir}/platform.jar"
                   excludes="META-INF/MANIFEST.MF" />
       <zipfileset src="${lib_dir}/javaast.jar"
-                  excludes="META-INF/MANIFEST.MF" />
+                  excludes="META-INF/MANIFEST.MF" /-->
     <!-- These two jars to be included when language levels are integrated -->
       <!--zipfileset src="${lib_dir}/jexpression.jar"
                   excludes="META-INF/MANIFEST.MF" /-->
       <!--zipfileset src="${lib_dir}/bcel-5.1.jar"
                   excludes="META-INF/MANIFEST.MF" /-->
 
-      <!-- Include DrJava classes -->
+      <!-- Include Koala classes -->
       <fileset dir="${built}">
         <include name="${projpath}/**" />
         <exclude name="**/*Test.class" />
         <exclude name="**/*TestCase.class" />
         <exclude name="**/*Test$*.class" />
         <exclude name="${projpath}/docs/developer/**" />
-        <include name="edu/rice/cs/util/**" />
+        <!--include name="edu/rice/cs/util/**" /-->
 
         <!-- include the GPL -->
         <include name="edu/rice/cs/LICENSE" />
