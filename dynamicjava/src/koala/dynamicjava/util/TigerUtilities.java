@@ -231,7 +231,47 @@ public class TigerUtilities {
             c == char.class  || c == Character.class ||
             c == short.class || c == Short.class);
   }
+//  
+//  /**
+//   * Returns true iff the given primitive class can be boxed 
+//   * to the given reference class.
+//   * @param prim - the primitive class being boxed
+//   * @param ref - the reference class being boxed to
+//   * @return true iff the given primitive class can be boxed to the given reference class
+//   */  
+//  public static boolean boxesTo(Class prim, Class ref) {
+//    return 
+//      (prim == int.class     && (ref == Integer.class   || 
+//                                 ref == Long.class      || 
+//                                 ref == Double.class    || 
+//                                 ref == Float.class))   ||
+//      (prim == long.class    && (ref == Long.class      || 
+//                                 ref == Double.class    || 
+//                                 ref == Float.class))   ||
+//      (prim == byte.class    && (ref == Byte.class      || 
+//                                 ref == Short.class     || 
+//                                 ref == Integer.class   || 
+//                                 ref == Long.class      || 
+//                                 ref == Double.class    || 
+//                                 ref == Float.class))   ||
+//      (prim == char.class    && (ref == Character.class || 
+//                                 ref == Integer.class   || 
+//                                 ref == Long.class      || 
+//                                 ref == Double.class    || 
+//                                 ref == Float.class))   ||
+//      (prim == short.class   && (ref == Short.class     || 
+//                                 ref == Integer.class   || 
+//                                 ref == Long.class      || 
+//                                 ref == Double.class    || 
+//                                 ref == Float.class))   ||
+//      (prim == boolean.class && ref == Boolean.class)   ||
+//      (prim == float.class   && (ref == Float.class     || 
+//                                 ref == Double.class))  ||
+//      (prim == double.class  && ref == Double.class);
+//  }
   
+  //The above was written off of a proposed specification for boxing, but is not the way that it has been set up to work in 
+  //Java 1.5. Primitives only box to their corresponding boxing type, not to any widening types, as the above allows
   /**
    * Returns true iff the given primitive class can be boxed 
    * to the given reference class.
@@ -241,32 +281,13 @@ public class TigerUtilities {
    */  
   public static boolean boxesTo(Class prim, Class ref) {
     return 
-      (prim == int.class     && (ref == Integer.class   || 
-                                 ref == Long.class      || 
-                                 ref == Double.class    || 
-                                 ref == Float.class))   ||
-      (prim == long.class    && (ref == Long.class      || 
-                                 ref == Double.class    || 
-                                 ref == Float.class))   ||
-      (prim == byte.class    && (ref == Byte.class      || 
-                                 ref == Short.class     || 
-                                 ref == Integer.class   || 
-                                 ref == Long.class      || 
-                                 ref == Double.class    || 
-                                 ref == Float.class))   ||
-      (prim == char.class    && (ref == Character.class || 
-                                 ref == Integer.class   || 
-                                 ref == Long.class      || 
-                                 ref == Double.class    || 
-                                 ref == Float.class))   ||
-      (prim == short.class   && (ref == Short.class     || 
-                                 ref == Integer.class   || 
-                                 ref == Long.class      || 
-                                 ref == Double.class    || 
-                                 ref == Float.class))   ||
-      (prim == boolean.class && ref == Boolean.class)   ||
-      (prim == float.class   && (ref == Float.class     || 
-                                 ref == Double.class))  ||
-      (prim == double.class  && ref == Double.class);
+      ((prim == int.class    && ref == Integer.class)     ||
+      (prim == long.class    && ref == Long.class)        ||
+      (prim == byte.class    && ref == Byte.class)        ||
+      (prim == char.class    && ref == Character.class)   ||
+      (prim == short.class   && ref == Short.class)       ||
+      (prim == boolean.class && ref == Boolean.class)     ||
+      (prim == float.class   && ref == Float.class)       ||
+      (prim == double.class  && ref == Double.class));
   }
 }

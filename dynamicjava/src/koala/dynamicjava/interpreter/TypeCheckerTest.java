@@ -1062,16 +1062,16 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
     assertEquals("The initializer should have been boxed.", initExpected, actual);
     _interpretText(text);
     
-    text = "Long L = 1;";
-    initExpected = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: java.lang.Long) [(koala.dynamicjava.tree.CastExpression: (koala.dynamicjava.tree.IntegerLiteral: 1 1 int) (koala.dynamicjava.tree.LongType: long))])";
+    text = "Long L = (long)1;";
+    initExpected = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: java.lang.Long) [(koala.dynamicjava.tree.CastExpression: (koala.dynamicjava.tree.CastExpression: (koala.dynamicjava.tree.IntegerLiteral: 1 1 int) (koala.dynamicjava.tree.LongType: long)) (koala.dynamicjava.tree.LongType: long))])";
     exp = (VariableDeclaration)_parseCode(text).get(0);
     type = exp.acceptVisitor(_typeChecker);
     actual = exp.getInitializer().toString();
     assertEquals("The initializer should have been boxed.", initExpected, actual);
     _interpretText(text);
     
-    text = "Double D = 1;";
-    initExpected = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: java.lang.Double) [(koala.dynamicjava.tree.CastExpression: (koala.dynamicjava.tree.IntegerLiteral: 1 1 int) (koala.dynamicjava.tree.DoubleType: double))])";
+    text = "Double D = 1.0;";
+    initExpected = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: java.lang.Double) [(koala.dynamicjava.tree.CastExpression: (koala.dynamicjava.tree.DoubleLiteral: 1.0 1.0 double) (koala.dynamicjava.tree.DoubleType: double))])";
     exp = (VariableDeclaration)_parseCode(text).get(0);
     type = exp.acceptVisitor(_typeChecker);
     actual = exp.getInitializer().toString();
