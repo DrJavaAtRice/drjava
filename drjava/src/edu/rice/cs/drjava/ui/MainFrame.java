@@ -403,8 +403,8 @@ public class MainFrame extends JFrame {
 
     if (frameSize.height > screenSize.height - menubarHeight) {
 //       System.out.println("Too Tall! " + 
-// 			 screenSize.height + " vs. " + frameSize.height);
-	
+//     screenSize.height + " vs. " + frameSize.height);
+ 
       frameSize.height = screenSize.height - menubarHeight;
 
 //       System.out.println("Frame Height: " + frameSize.height);
@@ -412,7 +412,7 @@ public class MainFrame extends JFrame {
 
     if (frameSize.width > screenSize.width) {
 //       System.out.println("Too Wide! " +
-// 			 screenSize.width + " vs. " + frameSize.width);
+//     screenSize.width + " vs. " + frameSize.width);
 
       frameSize.width = screenSize.width;
 
@@ -943,7 +943,7 @@ public class MainFrame extends JFrame {
     return helpMenu;
   }
 
-  private JButton _createManualToolbarButton(Action a) {
+  JButton _createManualToolbarButton(Action a) {
     final JButton ret;
     final Icon icon = (Icon) a.getValue(Action.SMALL_ICON);
     if (icon == null) {
@@ -955,6 +955,8 @@ public class MainFrame extends JFrame {
 
     ret.setEnabled(false);
     ret.addActionListener(a);
+    ret.setToolTipText( (String) a.getValue(Action.SHORT_DESCRIPTION));
+    
     a.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent evt) {
         if ("enabled".equals(evt.getPropertyName())) {
@@ -1028,9 +1030,9 @@ public class MainFrame extends JFrame {
     _fileNameField = new JLabel();
     _fileNameField.setFont(_fileNameField.getFont().deriveFont(Font.PLAIN));
     _fileNameField.setBorder(new 
-	CompoundBorder(new EmptyBorder(2,2,2,2),
-		       new CompoundBorder(new BevelBorder(BevelBorder.LOWERED),
-					  new EmptyBorder(2,2,2,2))));
+ CompoundBorder(new EmptyBorder(2,2,2,2),
+         new CompoundBorder(new BevelBorder(BevelBorder.LOWERED),
+       new EmptyBorder(2,2,2,2))));
     // _fileNameField.setBorder(new javax.swing.border.EmptyBorder(2,2,2,2));
     // _fileNameField.setBorder(new javax.swing.border.BevelBorder(BevelBorder.LOWERED));
     getContentPane().add(_fileNameField, BorderLayout.SOUTH);

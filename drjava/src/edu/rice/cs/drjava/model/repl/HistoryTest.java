@@ -39,87 +39,61 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-import  gj.util.Vector;
+import  junit.framework.*;
+import  java.util.Vector;
+import  junit.extensions.*;
+import  javax.swing.text.BadLocationException;
+import  java.io.File;
 
 
 /**
- * Keeps track of what was typed in the interactions pane.
+ * Tests the functionality of the repl History.
  * @version $Id$
  */
-public class History {
-  private Vector<String> _vector = new Vector<String>();
-  private int _cursor = -1;
+public class HistoryTest extends TestCase {
+  private History _history;
 
   /**
-   * Adds an item to the history and moves the cursor to point
-   * to the place after it.
-   * Note: Items are not inserted if they would duplicate the last item,
-   * or if they are empty. (This is in accordance with bug #522123 and
-   * feature #522213.)
-   *
-   * Thus, to access the newly inserted item, you must movePrevious first.
+   * Create a new instance of this TestCase.
+   * @param     String name
    */
-  public void add(String item) {
-    if (item.trim().length() > 0) {
-      if (_vector.isEmpty() || ! _vector.lastElement().equals(item)) {
-        _vector.addElement(item);
-      }
-    }
-
-    moveEnd();
+  public HistoryTest(String name) {
+    super(name);
   }
 
   /**
-   * Move the cursor to just past the end. Thus, to access the last element,
-   * you must movePrevious.
+   * Initialize fields for each test.
    */
-  public void moveEnd() {
-    _cursor = _vector.size();
-  }
-
-  /** Moves cursor back 1, or throws exception if there is none. */
-  public void movePrevious() {
-    if (!hasPrevious()) {
-      throw  new ArrayIndexOutOfBoundsException();
-    }
-    _cursor--;
-  }
-
-  /** Moves cursor forward 1, or throws exception if there is none. */
-  public void moveNext() {
-    if (!hasNext()) {
-      throw  new ArrayIndexOutOfBoundsException();
-    }
-    _cursor++;
-  }
-
-  /** Returns whether moveNext() would succeed right now. */
-  public boolean hasNext() {
-    return  _cursor < (_vector.size());
-  }
-
-  /** Returns whether movePrevious() would succeed right now. */
-  public boolean hasPrevious() {
-    return  _cursor > 0;
+  protected void setUp() {
+    _history = new History();
   }
 
   /**
-   * Returns item in history at current position, or throws exception if none.
+   * Return a new TestSuite for this class.
+   * @return Test
    */
-  public String getCurrent() {
-    if (hasNext()) {
-      return  _vector.elementAt(_cursor);
-    }
-    else {
-      return "";
-    }
+  public static Test suite() {
+    return  new TestSuite(HistoryTest.class);
+  }
+
+  public void testMultipleInsert() {
+    _history.add("new Object()");
+    _history.add("new Object()");
+    assertEquals("Duplicate elements inserted", 1, _history.size());
   }
   
-  /**
-   * Returns the number of items in this History.
-   */
-  public int size() {
-    return _vector.size();
+  public void testCanMoveToEmptyAtEnd() {
+    _history.add("some text");
+    
+    _history.movePrevious();
+    assertEquals("Prev did not move to correct item", 
+                 "some text", 
+                 _history.getCurrent());
+    
+    _history.moveNext();
+    assertEquals("Can't move to blank line at end",
+                 "",
+                 _history.getCurrent());
   }
 }
 

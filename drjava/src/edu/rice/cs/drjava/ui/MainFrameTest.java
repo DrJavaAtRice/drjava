@@ -37,91 +37,60 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.repl;
+package edu.rice.cs.drjava.ui;
 
-import  gj.util.Vector;
+import  junit.framework.*;
+import  junit.extensions.*;
 
+import java.awt.event.*;
+import javax.swing.*;
 
 /**
- * Keeps track of what was typed in the interactions pane.
+ * Test functions of MainFrame.
+ *
  * @version $Id$
  */
-public class History {
-  private Vector<String> _vector = new Vector<String>();
-  private int _cursor = -1;
-
+public class MainFrameTest extends TestCase {
+  
+  private MainFrame _frame;
+  
   /**
-   * Adds an item to the history and moves the cursor to point
-   * to the place after it.
-   * Note: Items are not inserted if they would duplicate the last item,
-   * or if they are empty. (This is in accordance with bug #522123 and
-   * feature #522213.)
-   *
-   * Thus, to access the newly inserted item, you must movePrevious first.
+   * Constructor.
+   * @param  String name
    */
-  public void add(String item) {
-    if (item.trim().length() > 0) {
-      if (_vector.isEmpty() || ! _vector.lastElement().equals(item)) {
-        _vector.addElement(item);
-      }
-    }
-
-    moveEnd();
-  }
-
-  /**
-   * Move the cursor to just past the end. Thus, to access the last element,
-   * you must movePrevious.
-   */
-  public void moveEnd() {
-    _cursor = _vector.size();
-  }
-
-  /** Moves cursor back 1, or throws exception if there is none. */
-  public void movePrevious() {
-    if (!hasPrevious()) {
-      throw  new ArrayIndexOutOfBoundsException();
-    }
-    _cursor--;
-  }
-
-  /** Moves cursor forward 1, or throws exception if there is none. */
-  public void moveNext() {
-    if (!hasNext()) {
-      throw  new ArrayIndexOutOfBoundsException();
-    }
-    _cursor++;
-  }
-
-  /** Returns whether moveNext() would succeed right now. */
-  public boolean hasNext() {
-    return  _cursor < (_vector.size());
-  }
-
-  /** Returns whether movePrevious() would succeed right now. */
-  public boolean hasPrevious() {
-    return  _cursor > 0;
-  }
-
-  /**
-   * Returns item in history at current position, or throws exception if none.
-   */
-  public String getCurrent() {
-    if (hasNext()) {
-      return  _vector.elementAt(_cursor);
-    }
-    else {
-      return "";
-    }
+  public MainFrameTest(String name) {
+    super(name);
   }
   
   /**
-   * Returns the number of items in this History.
+   * Creates a test suite for JUnit to run.
+   * @return a test suite based on the methods in this class
    */
-  public int size() {
-    return _vector.size();
+  public static Test suite() {
+    return  new TestSuite(MainFrameTest.class);
+  }
+  
+  /**
+   * Setup method for each JUnit test case.
+   */
+  public void setUp() {
+    _frame = new MainFrame();
+  }
+  
+  /**
+   * Tests that the returned JButton of <code>createManualToolbarButton</code>:
+   *  1. Is disabled upon return.
+   *  2. Inherits the tooltip of the Action parameter <code>a</code>.
+   */
+  public void testCreateManualToolbarButton() {
+    Action a = new AbstractAction("Test Action") {
+      public void actionPerformed(ActionEvent ae) {
+      }
+    };
+    a.putValue(Action.SHORT_DESCRIPTION, "test tooltip");
+    JButton b = _frame._createManualToolbarButton(a);
+    
+    assertTrue("Returned JButton is enabled.", ! b.isEnabled());
+    assertEquals("Tooltip text not set.", "test tooltip", b.getToolTipText());
   }
 }
-
-
-
