@@ -40,6 +40,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util;
 
 import java.io.*;
+import java.util.*;
 
 /**
  * A class to provide some convenient file operations as static methods.
@@ -183,5 +184,137 @@ public abstract class FileOps {
     // Now we should have an empty directory
     ret = ret && dir.delete();
     return ret;
+  }
+
+  /**
+   * This method writes files correctly; it takes care of catching errors and
+   * making backups and keeping an unsuccessful file save from destroying the old
+   * file (unless a backup is made).  Note: if saving fails and a backup was being
+   * created, any existing backup will be destroyed (this is because the backup is
+   * written before saving begins, and then moved back over the original file when
+   * saving fails).  As the old backup would have been destroyed anyways if saving
+   * had succeeded, I do not think that this is incorrect or unreasonable behavior.
+   * @param fileWriter keeps track of the name of the file to write, whether to back
+   * up the file, and has a method that actually performs the writing of the file
+   * @throws IOException if the saving or backing up of the file fails for any reason
+   */
+  public static void saveFile(FileSaver fileSaver) throws IOException{
+    boolean makeBackup = fileSaver.shouldBackup();
+    boolean success = false;
+    File file = fileSaver.getTargetFile();
+    File backup = null;
+    /* First back up the file, if necessary */
+    if (makeBackup){
+      backup = fileSaver.getBackupFile();
+      if (!file.renameTo(backup)){
+	throw new IOException("Save failed: Could not create backup file "
+			      + backup.getAbsolutePath());
+      }
+      fileSaver.backupDone();
+    }
+
+    //Create a temp file in the same directory as the file to be saved.
+    File parent = file.getParentFile();
+    File tempFile = File.createTempFile("drjava", ".temp", parent);
+    try {
+      /* Now, write your output to the temp file, then rename it to the correct
+	 name.  This way, if writing fails in the middle, the old file is not
+	 lost. */
+      fileSaver.saveTo(tempFile);
+      if (!tempFile.renameTo(fileSaver.getTargetFile())){
+	throw new IOException("Save failed: Could not rename temp file " +
+			      tempFile + " to " + file);
+      }
+      success = true;
+    } finally{
+      if (makeBackup){
+	/* On failure, attempt to move the backup back to its original location if we
+	   made one.  On success, register that a backup was successfully made */
+	if (success){
+	  fileSaver.backupDone();
+	} else {
+	  backup.renameTo(file);
+	}
+      }
+      /* Delete the temp file */
+      tempFile.delete();
+    }
+  }
+
+  public interface FileSaver {
+    
+    /**
+     * This method tells what to name the backup of the file, if a backup is to be made
+     */
+    public abstract File getBackupFile();
+    
+    /**
+     * This method indicates whether or not a backup of the file should be made
+     */
+    public abstract boolean shouldBackup();
+
+    /**
+     * This method is called to tell the file saver that a backup was successfully made
+     */
+    public abstract void backupDone();
+
+    /**
+     * This method actually writes info to a file.  NOTE: It is important that this
+     * method write to the file it is passed, not the target file.  If you write
+     * directly to the target file, the target file will be destroyed if saving fails.
+     * Also, it is important that when saving fails this method throw an IOException
+     * @throws IOException when saving fails for any reason
+     */
+    public abstract void saveTo(File file) throws IOException;
+
+    /**
+     * This method tells what the file is that we want to save to
+     */
+    public abstract File getTargetFile();
+  }
+
+  /**
+   * This class is a default implementation of FileSaver that makes only 1 backup
+   * of each file per instantiation of the program.  It backs up to files named
+   * <file>~.  It does not implement the saveTo method.
+   */
+  public abstract static class DefaultFileSaver implements FileSaver{
+
+    private File outputFile = null;
+    private static Set filesNotNeedingBackup = new HashSet();
+    private static boolean backupsEnabled = true;
+
+    public static void setBackupsEnabled(boolean enabled){
+      backupsEnabled = enabled;
+    }
+    
+    public DefaultFileSaver(File file){
+      outputFile = file.getAbsoluteFile();
+    }
+    
+    public File getBackupFile(){
+      return new File(outputFile.getPath() + "~");
+    }
+
+    public boolean shouldBackup(){
+      if (!backupsEnabled){
+	return false;
+      }
+      if (!outputFile.exists()){
+	return false;
+      }
+      if(filesNotNeedingBackup.contains(outputFile)){
+	return false;
+      }
+      return true;
+    }
+
+    public void backupDone(){
+      filesNotNeedingBackup.add(outputFile);
+    }
+
+    public File getTargetFile() {
+      return outputFile;
+    }
   }
 }
