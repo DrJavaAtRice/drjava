@@ -51,6 +51,8 @@ import java.io.PrintWriter;
 import java.io.IOException;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 
 import java.util.LinkedList;
 
@@ -71,10 +73,13 @@ import edu.rice.cs.util.newjvm.ExecJVM;
 
 /**
  * An implementation of the CompilerInterface that supports compiling with
- * JSR14v20 or JSR14v22. This class can only be compiled with one of the 
+ * JSR14v2.0, JSR14v2.2, or JSR14v2.3. This class can only be compiled with one of the 
  * versions because of the change in the syntax of a variable number of arguments
  * to a method. It was (Object[] args ...), now it's (Object ... args). Right now
- * we will use the JSR14v22 version since it is now the current version.
+ * we will use the JSR14v2.2 version since it is now the current version.  As far as
+ * we are concerned here, JSR14v2.3 differs from JSR14v2.2 only in that the "make"
+ * method in JavaCompiler is now called "instance".  Reflection is used to dynamically
+ * get the appropriate method to use once the correct version is detected.
  *
  * @version $Id$
  */
@@ -299,7 +304,55 @@ public class JSR14v20Compiler implements CompilerInterface {
     context = createContext(sourceRoots);
     compilerLog = new OurLog(context);
 
-    compiler = JavaCompiler.make(context);
+    
+    // Using reflection to allow for JSR14v2.3 since the "make"
+    // method was changed to "instance".
+    Class javaCompilerClass = JavaCompiler.class;
+    Class[] validArgs1 = {
+      Context.class
+    };
+    Method m;    
+    if (_isJSR14v2_3()) {    
+      try { 
+        m = javaCompilerClass.getMethod("instance", validArgs1);
+        compiler = (JavaCompiler)m.invoke(null, new Object[] {context});
+      }
+      catch (NoSuchMethodException e) {
+        throw new UnexpectedException(e);
+      }
+      catch (IllegalAccessException e) {
+        throw new UnexpectedException(e);
+      }
+      catch (InvocationTargetException e) {
+        throw new UnexpectedException(e);
+      }      
+    }
+    else {
+      try { 
+        m = javaCompilerClass.getMethod("make", validArgs1);
+        compiler = (JavaCompiler)m.invoke(null, new Object[] {context});
+      }
+      catch (NoSuchMethodException e) {
+        throw new UnexpectedException(e);
+      }
+      catch (IllegalAccessException e) {
+        throw new UnexpectedException(e);
+      }
+      catch (InvocationTargetException e) {
+        throw new UnexpectedException(e);
+      }
+//      compiler = JavaCompiler.make(context);
+    }
+  }
+  
+  private boolean _isJSR14v2_3() {
+    try {
+      Class.forName("com.sun.tools.javac.main.Main$14");
+      return true;
+    }
+    catch (Exception e) {
+      return false;
+    }    
   }
 
   /**
