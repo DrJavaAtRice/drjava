@@ -459,8 +459,10 @@ public class JTreeSortNavigator extends JTree
     }
   }
   
+  Object _lock = new Object();
   /** sets the input document to be active */
   public void setActiveDoc(INavigatorItem doc){
+    
     DefaultMutableTreeNode node = _doc2node.get(doc);
     if(this.contains(doc)){
       TreeNode[] nodes = node.getPath();
@@ -966,6 +968,15 @@ public class JTreeSortNavigator extends JTree
     }
     
     return path;
+  }
+  
+  /**
+   * If the currently selected item is not an INavigatorItem, select the one given.
+   */
+  public void requestSelectionUpdate(INavigatorItem ini) {
+    if (getCurrentSelectedLeaf() == null) { // the currently selected node is not a leaf
+      setActiveDoc(ini);
+    }
   }
 }
 

@@ -227,4 +227,15 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
      */
     public String getNameOfSelectedTopLevelGroup() throws GroupNotSelectedException;
     
+    /**
+     * Switches the selection to the given INavigatorItem if the current selection
+     * is not already on an INavigatorItem.  Since it may be possible that the currently 
+     * selected item in the navigator does not correspond to an INavigatorItem, this
+     * method forces the navigator to select an item that does; specifically the one
+     * given.  If the navigator already has an INavigatorItem selected, this method does
+     * nothing.
+     * @param ini The suggested current INavigatorItem.
+     */
+    public void requestSelectionUpdate(INavigatorItem ini);
+    
 }

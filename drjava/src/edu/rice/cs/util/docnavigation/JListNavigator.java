@@ -389,5 +389,11 @@ class JListNavigator extends JList implements IDocumentNavigator, ListSelectionL
       throw new GroupNotSelectedException("A top level group is not selected");
   }
 
-
+  /**
+   * Since in the JListNavigator it is impossible to select anything but an INavigatorItem,
+   * this method doesn't need to do anything.
+   */
+  public void requestSelectionUpdate(INavigatorItem ini) {
+    // nothing
+  }
 }
