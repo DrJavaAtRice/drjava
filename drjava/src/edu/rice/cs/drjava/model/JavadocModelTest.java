@@ -60,16 +60,62 @@ import junit.framework.TestCase;
  * @version $Id$
  */
 public class JavadocModelTest extends TestCase {
+  
+  /**
+   * Field needed by testUnsavedSuggestedDirectory
+   */
+  private File _storedFile;
 
   /**
    * Tests that a simple suggestion can be made for the destination directory.
    */
   public void testSimpleSuggestedDirectory() {
-    JavadocModel jModel = new DefaultJavadocModel(new DummyGetDocuments());
+    IGetDocuments getDocs = new DummyGetDocuments() {
+      public boolean hasModifiedDocuments() {
+        return false;  // pretend all docs are saved
+      }
+    };
+    JavadocModel jModel = new DefaultJavadocModel(getDocs);
     final File file = new File(System.getProperty("user.dir"));
     OpenDefinitionsDocument doc = new DummyOpenDefDoc() {
       public File getSourceRoot() throws InvalidPackageException {
         return file;
+      }
+    };
+
+    File suggestion = jModel.suggestJavadocDestination(doc);
+    File expected = new File(file, JavadocModel.SUGGESTED_DIR_NAME);
+    assertEquals("simple suggested destination", expected, suggestion);
+  }
+  
+  /**
+   * Tests that a suggestion can be made for an unsaved file,
+   * if the user chooses to save it.
+   */
+  public void testUnsavedSuggestedDirectory() {
+    _storedFile = null;
+    
+    IGetDocuments getDocs = new DummyGetDocuments() {
+      public boolean hasModifiedDocuments() {
+        return true;  // pretend doc is unsaved
+      }
+    };
+    JavadocModel jModel = new DefaultJavadocModel(getDocs);
+    final File file = new File(System.getProperty("user.dir"));
+
+    // Make sure it doesn't return a file until it's saved.
+    JavadocListener listener = new JavadocListener() {
+      public void saveBeforeJavadoc() {
+        _storedFile = file;
+      }
+      public void javadocStarted() {}
+      public void javadocEnded(boolean success, File destDir, boolean allDocs) {}
+    };
+    jModel.addListener(listener);
+    
+    OpenDefinitionsDocument doc = new DummyOpenDefDoc() {
+      public File getSourceRoot() throws InvalidPackageException {
+        return _storedFile;
       }
     };
 
@@ -83,7 +129,12 @@ public class JavadocModelTest extends TestCase {
    * if there is no valid source root.
    */
   public void testNoSuggestedDirectory() {
-    JavadocModel jModel = new DefaultJavadocModel(new DummyGetDocuments());
+    IGetDocuments getDocs = new DummyGetDocuments() {
+      public boolean hasModifiedDocuments() {
+        return false;  // pretend all docs are saved
+      }
+    };
+    JavadocModel jModel = new DefaultJavadocModel(getDocs);
 //    final File file = new File(System.getProperty("user.dir"));
     OpenDefinitionsDocument doc = new DummyOpenDefDoc() {
       public File getSourceRoot() throws InvalidPackageException {

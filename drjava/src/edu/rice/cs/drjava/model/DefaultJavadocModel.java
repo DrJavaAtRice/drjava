@@ -160,9 +160,7 @@ public class DefaultJavadocModel implements JavadocModel {
     throws IOException
   {
     // Only javadoc if all are saved.
-    if (_getter.hasModifiedDocuments()) {
-      _notifier.saveBeforeJavadoc();
-    }
+    _attemptSaveAllDocuments();
 
     if (_getter.hasModifiedDocuments()) {
       // if any files haven't been saved after we told our
@@ -204,7 +202,7 @@ public class DefaultJavadocModel implements JavadocModel {
 
       // Make sure the destination is usable.
       while (!destDir.exists() || !destDir.isDirectory() || !destDir.canWrite()) {
-        if (!destDir.exists()) {
+        if (!destDir.getPath().equals("") && !destDir.exists()) {
           // If the choice doesn't exist, ask to create it.
           boolean create = select.askUser
             ("The directory you chose does not exist:\n" +
@@ -221,7 +219,7 @@ public class DefaultJavadocModel implements JavadocModel {
             return;
           }
         }
-        else if (!destDir.isDirectory()) {
+        else if (!destDir.isDirectory() || destDir.getPath().equals("")) {
           // We can't use it if it isn't a directory
           select.warnUser("The file you chose is not a directory:\n" +
                           "'" + destDir + "'\n" +
@@ -472,17 +470,37 @@ public class DefaultJavadocModel implements JavadocModel {
    * Suggests a default location for generating Javadoc, based on the given
    * document's source root.  (Appends JavadocModel.SUGGESTED_DIR_NAME to
    * the sourceroot.)
+   * 
+   * Ensures that the document is saved first, or else no reasonable
+   * suggestion will be found.
+   * 
    * @param doc Document with the source root to use as the default.
    * @return Suggested destination directory, or null if none could be
    * determined.
    */
   public File suggestJavadocDestination(OpenDefinitionsDocument doc) {
+    _attemptSaveAllDocuments();
+    
     try {
       File sourceRoot = doc.getSourceRoot();
       return new File(sourceRoot, SUGGESTED_DIR_NAME);
     }
     catch (InvalidPackageException ipe) {
       return null;
+    }
+  }
+  
+  /**
+   * If any documents are modified, this gives the user a chance
+   * to save them before proceeding.
+   * 
+   * Callers can check _getter.hasModifiedDocuments() after calling
+   * this method to determine if the user cancelled the save process.
+   */
+  private void _attemptSaveAllDocuments() {
+    // Only javadoc if all are saved.
+    if (_getter.hasModifiedDocuments()) {
+      _notifier.saveBeforeJavadoc();
     }
   }
   
