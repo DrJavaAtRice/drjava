@@ -82,13 +82,13 @@ public class SimpleInteractionsModel extends InteractionsModel {
 
     _interpreter.defineVariable("INTERPRETER", _interpreter);
 
-    setInputListener(new InputListener() {
-      public String getConsoleInput() {
-        _document.insertBeforeLastPrompt("Cannot read from System.in." + _newLine,
-                                         InteractionsDocument.ERROR_STYLE);
-        return null;
-      }
-    });
+//    setInputListener(new InputListener() {
+//      public String getConsoleInput() {
+//        _document.insertBeforeLastPrompt("Cannot read from System.in." + _newLine,
+//                                         InteractionsDocument.ERROR_STYLE);
+//        return null;
+//      }
+//    });
   }
 
   /**

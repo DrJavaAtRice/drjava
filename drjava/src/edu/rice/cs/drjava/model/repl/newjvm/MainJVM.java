@@ -114,6 +114,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * Starting classpath reorganized into a vector.
    */
   private Vector<String> _startupClasspathVector;
+  
+  /**
+   * A list of user-defined arguments to pass to the interpreter.
+   */
+  private List<String> _optionArgs;
 
   /**
    * The name of the current interpreter.
@@ -135,6 +140,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _debugModel = new DummyDebugModel();
     _startupClasspath = System.getProperty("java.class.path");
     _parseStartupClasspath();
+    _optionArgs = new ArrayList<String>();
     //startInterpreterJVM();
   }
 
@@ -185,6 +191,14 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public void setAllowAssertions(boolean allow) {
     _allowAssertions = allow;
+  }
+  
+  /**
+   * Sets the extra (optional) arguments to be passed to the interpreter.
+   * @param argString the arguments as they would be typed at the command-line
+   */
+  public void setOptionArgs(String argString) {
+    _optionArgs = ArgumentTokenizer.tokenize(argString);
   }
 
   public void interpret(final String s) {
@@ -714,9 +728,12 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       File jsr14 = DrJava.getConfig().getSetting(OptionConstants.JSR14_LOCATION);
       jvmArgs.add("-Xbootclasspath/p:" + jsr14.getAbsolutePath());
     }
-    String optionArgString = DrJava.getConfig().getSetting(OptionConstants.JVM_ARGS);
-    List<String> optionArgs = ArgumentTokenizer.tokenize(optionArgString);
-    jvmArgs.addAll(optionArgs);
+    // Cannot do the following line because it causes an error on Macs in the Eclipse plug-in.
+    // By instantiating the config, somehow the Apple JVM tries to start up AWT, which seems
+    // to be prohibited by Eclipse.  Badness ensues.
+//    String optionArgString = DrJava.getConfig().getSetting(OptionConstants.JVM_ARGS);
+//    List<String> optionArgs = ArgumentTokenizer.tokenize(optionArgString);
+    jvmArgs.addAll(_optionArgs);
     String[] jvmArgsArray = new String[jvmArgs.size()];
     for (int i=0; i < jvmArgs.size(); i++) {
       jvmArgsArray[i] = jvmArgs.get(i);

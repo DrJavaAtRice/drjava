@@ -45,7 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 
-import junit.framework.*;
+import junit.framework.TestCase;
 import java.awt.Font;
 
 /**

@@ -303,9 +303,10 @@
            classpath="${classpath_text}"
            debug="on"
            source="1.5"
+           target="jsr14"
            fork="on"
            optimize="off">
-       <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
+       <!--<compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>-->
     </javac>
 <!--  commented out because the jsr14 v2.0 compiler adapter must be compiled using
       variance, whereas the rest of DrJava should be compiled with -novariance.

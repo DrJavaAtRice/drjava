@@ -352,6 +352,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     _interpreterControl.setInteractionsModel(_interactionsModel);
     _interpreterControl.setJUnitModel(_junitModel);
 
+    _interpreterControl.setOptionArgs(DrJava.getConfig().getSetting(JVM_ARGS));
+    DrJava.getConfig().addOptionListener(JVM_ARGS, new OptionListener<String>() {
+      public void optionChanged(OptionEvent<String> oe) {
+        _interpreterControl.setOptionArgs(oe.value);
+      }
+    });
+
     _consoleDocAdapter = new InteractionsDocumentAdapter();
     _consoleDoc = new ConsoleDocument(_consoleDocAdapter);
 
