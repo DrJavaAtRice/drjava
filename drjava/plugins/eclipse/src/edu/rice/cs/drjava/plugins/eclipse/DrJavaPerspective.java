@@ -89,5 +89,4 @@ public class DrJavaPerspective implements IPerspectiveFactory {
     // DrJava never claimed to be a general file editor, so we won't
     // include general file creation from here
   }
-  
 }

@@ -104,8 +104,7 @@ public class SWTDocumentAdapterTest extends TestCase {
     
     _doc.removeText(0, 3);
     _doc.insertText(0, "two", null);
-    assertEquals("third doc contents", "two thr",
-                 _doc.getDocText(0, 7));
+    assertEquals("third doc contents", "two thr", _doc.getDocText(0, 7));
   }
   
   /**

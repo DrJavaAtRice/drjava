@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -43,11 +43,12 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.*;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.*;
+import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.SWT;
 
@@ -57,65 +58,104 @@ import edu.rice.cs.drjava.plugins.eclipse.repl.EclipseInteractionsModel;
 
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
-import edu.rice.cs.drjava.model.repl.SimpleInteractionsModel;
+import edu.rice.cs.drjava.model.repl.InputListener;
 import edu.rice.cs.util.text.SWTDocumentAdapter;
 import edu.rice.cs.util.text.SWTDocumentAdapter.SWTStyle;
 import edu.rice.cs.util.text.DocumentAdapter;
-import edu.rice.cs.util.text.DocumentEditCondition;
+
+import java.io.File;
 
 /**
  * This class installs listeners and actions between an InteractionsDocument
  * in the model and an InteractionsPane in the view.
- * 
+ *
  * We may want to refactor this class into a different package.
- * 
+ *
  * @version $Id$
  */
 public class InteractionsController {
-  
-  // TO DO:
-  //  - What to do with unexpected exceptions?
-  
+
+  // TODO: What to do with unexpected exceptions?
+
   /** InteractionsModel to handle the interpreter */
   protected EclipseInteractionsModel _model;
-  
+
   /** Adapter for an SWT document */
   protected SWTDocumentAdapter _adapter;
-  
+
   /** Document from the model */
   protected InteractionsDocument _doc;
-  
+
   /** Pane from the SWT view */
   protected InteractionsView _view;
 
-  
+  /** The last input entered to System.in. */
+  private String _input;
+
   // Colors created by the controller
   protected Color _colorRed;
   protected Color _colorDarkRed;
   protected Color _colorDarkGreen;
   protected Color _colorDarkBlue;
   protected Color _colorYellow;
-  
+
   /** Whether the Interactions Pane is currently enabled. */
   protected boolean _enabled;
-  
+
+  protected static final String INPUT_ENTERED_NAME = "Input Entered";
+  protected static final String INSERT_NEWLINE_NAME = "Insert Newline";
+
+  private IInputValidator _inputValidator = new IInputValidator() {
+    public String isValid(String newText) {
+      return null;
+    }
+  };
+
+  /**
+   * Listens for input requests from System.in, displaying an input box as needed.
+   */
+  protected InputListener _inputListener = new InputListener() {
+    public String getConsoleInput() {
+//      String msg = "System.in is not yet supported!" + System.getProperty("line.separator");
+//      _model.getDocument().insertBeforeLastPrompt(msg, InteractionsDocument.ERROR_STYLE);
+//      return "\n";
+      Display d = _view.getTextPane().getDisplay();
+      d.syncExec(new Runnable() {
+        public void run() {
+          try {
+            InputDialog input = new InputDialog(_view.getSite().getShell(), "System.in",
+                                                "Please enter the input to System.in",
+                                                "", _inputValidator);
+            input.open();
+            _input = input.getValue();
+          }
+          catch (Throwable t) {
+            t.printStackTrace();
+            _input = t.getMessage();
+          }
+        }
+      });
+      return _input + "\n";
+    }
+  };
+
   // ---- Preferences ----
-  
+
   /** Listens to changes to preferences. */
   protected IPropertyChangeListener _preferenceListener;
-  
+
   /** Whether to prompt before resetting Interactions. */
   protected boolean _promptToReset;
-  
+
   /** Whether to prompt if Interactions are reset unexpectedly. */
   protected boolean _promptIfExited;
-  
-  
+
+
   /**
    * Glue together the given model and view.
    * @param model EclipseInteractionsModel to handle the interpreter
    * @param adapter DocumentAdapter that the document uses
-   * @param pane InteractionsPane in the view
+   * @param view InteractionsView in the view
    */
   public InteractionsController(EclipseInteractionsModel model,
                                 SWTDocumentAdapter adapter,
@@ -125,22 +165,22 @@ public class InteractionsController {
     _doc = model.getDocument();
     _view = view;
     _enabled = true;
-    
+
     // Initialize preferences
     IPreferenceStore store = EclipsePlugin.getDefault().getPreferenceStore();
     _preferenceListener = new PrefChangeListener();
     store.addPropertyChangeListener(_preferenceListener);
     JFaceResources.getFontRegistry().addListener(_preferenceListener);
     _updatePreferences();
-    
+
     // Put the caret at the end
     _view.getTextPane().setCaretOffset(_doc.getDocLength());
-    
+
     _addDocumentStyles();
     _setupModel();
     _setupView();
   }
-  
+
   /**
    * Cleans up any resources this controller created, as well as the model.
    */
@@ -151,7 +191,7 @@ public class InteractionsController {
     _colorDarkGreen.dispose();
     _colorDarkBlue.dispose();
     _colorYellow.dispose();
-    
+
     // Remove preference listener
     IPreferenceStore store = EclipsePlugin.getDefault().getPreferenceStore();
     store.removePropertyChangeListener(_preferenceListener);
@@ -164,28 +204,28 @@ public class InteractionsController {
    */
   private void _updatePreferences() {
     IPreferenceStore store = EclipsePlugin.getDefault().getPreferenceStore();
-    
+
     // Notifications
     _promptToReset = store.getBoolean(DrJavaConstants.INTERACTIONS_RESET_PROMPT);
     _promptIfExited = store.getBoolean(DrJavaConstants.INTERACTIONS_EXIT_PROMPT);
-    
+
     // Set the interpreter's accessibility
     _model.setPrivateAccessible(store.getBoolean(DrJavaConstants.ALLOW_PRIVATE_ACCESS));
-    
+
     // History size
     _doc.getHistory().setMaxSize(store.getInt(DrJavaConstants.HISTORY_MAX_SIZE));
-    
+
     // Update the font
     _view.updateFont();
   }
-  
+
   /**
    * Accessor method for the InteractionsModel.
    */
   public EclipseInteractionsModel getInteractionsModel() {
     return _model;
   }
-  
+
   /**
    * Accessor method for the DocumentAdapter.
    */
@@ -206,7 +246,7 @@ public class InteractionsController {
   public InteractionsView getView() {
     return _view;
   }
-  
+
   /**
    * Adds AttributeSets as named styles to the document adapter.
    */
@@ -217,24 +257,24 @@ public class InteractionsController {
     _colorDarkGreen = new Color(display, 0, 124, 0);
     _colorDarkBlue = new Color(display, 0, 0, 178);
     _colorYellow = new Color(display, 255, 255, 0);
-    
+
     // System.out
     SWTStyle out = new SWTStyle(_colorDarkGreen, 0);
     _adapter.addDocStyle(InteractionsDocument.SYSTEM_OUT_STYLE, out);
-    
+
     // System.err
     SWTStyle err = new SWTStyle(_colorRed, 0);
     _adapter.addDocStyle(InteractionsDocument.SYSTEM_ERR_STYLE, err);
-    
+
     // Error
     SWTStyle error = new SWTStyle(_colorDarkRed, SWT.BOLD);
     _adapter.addDocStyle(InteractionsDocument.ERROR_STYLE, error);
-    
+
     // Debug
     SWTStyle debug = new SWTStyle(_colorDarkBlue, SWT.BOLD);
     _adapter.addDocStyle(InteractionsDocument.DEBUGGER_STYLE, debug);
   }
-  
+
   /**
    * Adds listeners to the model.
    */
@@ -242,8 +282,9 @@ public class InteractionsController {
     _adapter.addModifyListener(new DocumentUpdateListener());
     _doc.setBeep(_view.getBeep());
     _model.addInteractionsListener(new EclipseInteractionsListener());
+    _model.setInputListener(_inputListener);
   }
-  
+
   /**
    * Listener to ensure that the caret always stays on or after the
    * prompt, so that output is always scrolled to the bottom.
@@ -255,7 +296,7 @@ public class InteractionsController {
       int caretPos = pane.getCaretOffset();
       int promptPos = _doc.getPromptPos();
       int docLength = _doc.getDocLength();
-      
+
       if (_doc.inProgress()) {
         // Scroll to the end of the document, since output has been
         // inserted after the prompt.
@@ -274,7 +315,7 @@ public class InteractionsController {
       }
     }
   }
-  
+
   /** Enables the Interactions Pane. */
   protected void _enableInteractionsPane() {
     _enabled = true;
@@ -288,7 +329,7 @@ public class InteractionsController {
     _view.setBusyCursorShown(true);
     _view.setEditable(false);
   }
-  
+
   /**
    * Listens and reacts to interactions-related events.
    */
@@ -296,12 +337,12 @@ public class InteractionsController {
     public void interactionStarted() {
       _disableInteractionsPane();
     }
-    
+
     public void interactionEnded() {
       _enableInteractionsPane();
       moveToPrompt();
     }
-    
+
     public void interactionErrorOccurred(final int offset, final int length) {
       _view.getTextPane().getDisplay().asyncExec(new Runnable() {
         public void run() {
@@ -309,16 +350,16 @@ public class InteractionsController {
         }
       });
     }
-    
+
     public void interpreterResetting() {
       _disableInteractionsPane();
     }
-    
+
     public void interpreterReady() {
       _enableInteractionsPane();
       moveToPrompt();
     }
-    
+
     public void interpreterExited(int status) {
       if (_promptIfExited) {
         String title = "Interactions terminated by System.exit(" + status + ")";
@@ -328,7 +369,7 @@ public class InteractionsController {
         _view.showInfoDialog(title, msg);
       }
     }
-    
+
     public void interpreterChanged(boolean inProgress) {
       if (inProgress) {
         _disableInteractionsPane();
@@ -337,7 +378,7 @@ public class InteractionsController {
         _enableInteractionsPane();
       }
     }
-    
+
     public void interpreterResetFailed(Throwable t) {
       String title = "Interactions Could Not Reset";
       String msg = "The interactions window could not be reset:\n" +
@@ -345,7 +386,7 @@ public class InteractionsController {
       _view.showInfoDialog(title, msg);
       interpreterReady();
     }
-    
+
     public void interactionIncomplete() {
 //      newLineAction();
       StyledText pane = _view.getTextPane();
@@ -354,17 +395,17 @@ public class InteractionsController {
       pane.setCaretOffset(offs + 1);
     }
   }
-  
+
   /**
    * Assigns key bindings to the view.
    */
   protected void _setupView() {
     _view.getTextPane().addVerifyKeyListener(new KeyUpdateListener());
-    
+
     // Set up menu
     _setupMenu();
   }
-  
+
   /**
    * Adds actions to the toolbar menu.
    */
@@ -382,21 +423,21 @@ public class InteractionsController {
     resetInteractionsAction.setToolTipText("Reset Interactions Pane");
     _view.addMenuItem(resetInteractionsAction);
   }
-  
+
   /**
    * Listener to perform the correct action when a key is pressed.
    */
   class KeyUpdateListener implements VerifyKeyListener {
     public void verifyKey(VerifyEvent event) {
-      StyledText pane = _view.getTextPane();
+      //StyledText pane = _view.getTextPane();
       //System.out.println("event consumer: keycode: " + event.keyCode + ", char: " + event.character);
-      
+
       // -- Branch to an action on certain keystrokes --
       //  (needs to be refactored for better OO code)
-      
+
       // Keys have no action if Interactions pane is not enabled.
       if (!_enabled) return;
-      
+
       // enter
       if (event.keyCode == 13 && event.stateMask == 0) {
         event.doit = evalAction();
@@ -439,8 +480,8 @@ public class InteractionsController {
       }
       // shortcut for clear command?  (ctrl+B is build project)
     }
-  } 
-    
+  }
+
   /**
    * Submits the text in the view to the model, and appends the
    * result to the view.
@@ -464,7 +505,7 @@ public class InteractionsController {
     moveToEnd();
     return false;
   }
-  
+
   /** Recalls the next command from the history. */
   boolean historyNextAction() {
     _doc.recallNextInteractionInHistory();
@@ -491,13 +532,13 @@ public class InteractionsController {
     _doc.clearCurrentInteraction();
     return false;
   }
-  
+
   /** Moves the caret to the prompt. */
   boolean gotoPromptPosAction() {
     moveToPrompt();
     return false;
   }
-  
+
   /** Selects all text between the caret and the prompt */
   boolean selectToPromptPosAction() {
     // Selects the text between the old pos and the prompt
@@ -509,11 +550,11 @@ public class InteractionsController {
       start = end;
       end = t;
     }
-    
+
     pane.setSelection(start, end);
     return false;
   }
-  
+
   /** Moves the caret left or wraps around. */
   boolean moveLeftAction() {
     int position = _view.getTextPane().getCaretOffset();
@@ -531,11 +572,11 @@ public class InteractionsController {
       return true;
     }
   }
-  
+
   /** Moves the caret right or wraps around. */
   boolean moveRightAction() {
     int position = _view.getTextPane().getCaretOffset();
-    if (position < _doc.getPromptPos()) { 
+    if (position < _doc.getPromptPos()) {
       moveToEnd();
       return false;
     }
@@ -549,7 +590,7 @@ public class InteractionsController {
       return true;
     }
   }
-  
+
   /** Moves the pane's caret to the end of the document. */
   void moveToEnd() {
     final StyledText pane = _view.getTextPane();
@@ -560,7 +601,7 @@ public class InteractionsController {
       }
     });
   }
-  
+
   /** Moves the pane's caret to the document's prompt. */
   void moveToPrompt() {
     final StyledText pane = _view.getTextPane();
@@ -571,7 +612,7 @@ public class InteractionsController {
       }
     });
   }
-  
+
   /**
    * Class to listen to preference changes and update the
    * controller accordingly.

@@ -60,30 +60,29 @@ import edu.rice.cs.util.UnexpectedException;
  * @version $Id$
  */
 public class EclipseInteractionsModel extends RMIInteractionsModel {
-  
-  // TO DO:
-  // - Read input from System.in
-  
+
+  // TODO: Read input from System.in
+
   /** Number of lines to remember in the history */
   protected static final int HISTORY_SIZE = 1000;
-  
+
   /** Milliseconds to wait after each println */
   protected static final int WRITE_DELAY = 50;
-  
+
   /** Whether to print System.out and System.err to files for debugging. */
   private static final boolean DEBUG = false;
-  
+
   /**
    * List of listeners to this document.
    */
   protected final LinkedList _listeners;
-  
+
   /**
-   * Whether we have already warned the user to reset after a compilation 
+   * Whether we have already warned the user to reset after a compilation
    * occurs.
    */
   protected boolean _warnedToReset;
-  
+
   /**
    * Creates a new InteractionsModel with a new MainJVM.
    * @param adapter SWTDocumentAdapter to use for the document
@@ -91,7 +90,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
   public EclipseInteractionsModel(SWTDocumentAdapter adapter) {
     this(new MainJVM(), adapter);
   }
-  
+
   /**
    * Creates a new InteractionsModel.
    * @param control RMI interface to the Interpreter JVM
@@ -106,7 +105,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
     if (DEBUG) {
       _debugSystemOutAndErr();
     }
-    
+
     _interpreterControl.setInteractionsModel(this);
     try {
       EclipsePlugin plugin = EclipsePlugin.getDefault();
@@ -121,14 +120,14 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
     _interpreterControl.startInterpreterJVM();
     _addChangeListener();
   }
-  
+
   /**
    * Cleans up any resources this model created, including the Interactions JVM.
    */
   public void dispose() {
     _interpreterControl.killInterpreter(false);
   }
-  
+
   /**
    * Adds a listener to this model.
    */
@@ -149,17 +148,6 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
   public void removeAllInteractionsListeners() {
     _listeners.clear();
   }
-  
-  /**
-   * Called when input is requested from System.in.
-   * @return the input (currently just a newline)
-   */
-  public String getConsoleInput() {
-    // TODO: Read input from a console?
-    _document.insertBeforeLastPrompt("System.in is not yet supported!" + _newLine,
-                                     InteractionsDocument.ERROR_STYLE);
-    return "\n";
-  }
 
   /**
    * Any extra action to perform (beyond notifying listeners) when
@@ -170,7 +158,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
     _document.insertBeforeLastPrompt("Reset Failed!" + _newLine,
                                      InteractionsDocument.ERROR_STYLE);
   }
-  
+
   /**
    * Called when the Java interpreter is ready to use.
    * Adds any open documents to the classpath.
@@ -179,7 +167,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
     _resetInteractionsClasspath();
     super.interpreterReady();
   }
-  
+
   /**
    * Resets the warning flag after the Interactions Pane is reset.
    */
@@ -196,7 +184,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
       ((InteractionsListener)_listeners.get(i)).interactionStarted();
     }
   }
-  
+
   /**
    * Notifies listeners that an interaction has ended.
    */
@@ -205,7 +193,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
       ((InteractionsListener)_listeners.get(i)).interactionEnded();
     }
   }
-  
+
   /**
    * Notifies listeners that an error was present in the interaction.
    */
@@ -215,7 +203,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
         interactionErrorOccurred(offset, length);
     }
   }
-  
+
   /**
    * Notifies listeners that the interpreter is resetting.
    */
@@ -224,7 +212,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
       ((InteractionsListener)_listeners.get(i)).interpreterResetting();
     }
   }
-  
+
   /**
    * Notifies listeners that the interpreter is ready.
    */
@@ -233,7 +221,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
       ((InteractionsListener)_listeners.get(i)).interpreterReady();
     }
   }
-  
+
   /**
    * Notifies listeners that the interpreter has exited unexpectedly.
    * @param status Status code of the dead process
@@ -243,7 +231,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
       ((InteractionsListener)_listeners.get(i)).interpreterExited(status);
     }
   }
-  
+
   /**
    * Notifies listeners that the interpreter reset failed.
    * @param t Throwable explaining why the reset failed.
@@ -253,7 +241,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
       ((InteractionsListener)_listeners.get(i)).interpreterResetFailed(t);
     }
   }
-  
+
   /**
    * Notifies listeners that the interpreter has changed.
    * @param inProgress Whether the new interpreter is currently in progress.
@@ -280,13 +268,13 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
     try {
       // Get the workspace root, home of random global data.
       IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-      
+
       // Get the IJavaModel, which corresponds to all open Java projects.
       IJavaModel jModel = JavaCore.create(root);
-      
+
       // Ask the IJavaModel for all open IJavaProjects.
       IJavaProject jProjects[] = jModel.getJavaProjects();
-      
+
       // For each of the projects...
       for(int i = 0; i < jProjects.length; i++) {
         IJavaProject jProj = jProjects[i];
@@ -299,37 +287,37 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
       throw new UnexpectedException(ce);
     }
   }
-  
+
   private void _addProjectToClasspath(IJavaProject jProj) throws CoreException {
     // Get the workspace root, home of random global data.
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-    
+
     // Get the IJavaModel, which corresponds to all open Java projects.
     IJavaModel jModel = JavaCore.create(root);
-    
+
     _addProjectToClasspath(jProj, jModel, root);
   }
-  
-  private void _addProjectToClasspath(IJavaProject jProj, IJavaModel jModel, IWorkspaceRoot root) 
-    throws CoreException 
+
+  private void _addProjectToClasspath(IJavaProject jProj, IJavaModel jModel, IWorkspaceRoot root)
+    throws CoreException
   {
     // Get the project's location on disk
     IProject proj = jProj.getProject();
     IPath projRoot = proj.getDescription().getLocation();
     // Note: getLocation returns null if the default location is used
     //  (brilliant...)
-    
+
     // Get the resolved classpath entries - this should filter out
     //   all CPE_VARIABLE and CPE_CONTAINER entries.
     IClasspathEntry entries[] = jProj.getResolvedClasspath(true);
-    
+
     // For each of the classpath entries...
     for(int j = 0; j < entries.length; j++) {
       IClasspathEntry entry = entries[j];
-      
+
       // Check what kind of entry it is...
       int kind = entry.getEntryKind();
-      
+
       // And get the appropriate path.
       IPath path;
       switch (kind) {
@@ -347,10 +335,10 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
             path = jProj.getOutputLocation();
             //System.out.println(" output location from proj: " + path);
           }
-          
+
           // At this point, the output location contains the project
           //  name followed by the actual output folder name
-          
+
           if (projRoot != null) {
             // We have a custom project location, so the project name
             //  is not part of the *actual* output directory.  We need
@@ -364,7 +352,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
             //  *does* include the project name in the output directory.
             path = root.getLocation().append(path);
           }
-          
+
           //System.out.println("Adding source: " + path.toOSString());
           addToClassPath(path.toOSString());
           break;
@@ -380,7 +368,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
       }
     }
   }
-  
+
   /**
    * Prints a message warning the user to reset the Interactions Pane
    * once a compilation has occurred.  The warning is only printed if
@@ -388,7 +376,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
    */
   protected void _warnUserToReset() {
     if (!_warnedToReset && interpreterUsed()) {
-      String warning = 
+      String warning =
         "Warning: Interactions are out of sync with the current class files.\n" +
         "You should reset interactions from the toolbar menu.\n";
       _document.insertBeforeLastPrompt(warning,
@@ -396,12 +384,12 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
       _warnedToReset = true;
     }
   }
-  
+
   /**
    * Adds a listener to Eclipse for any changes to Java projects.
    * The listener will warn the user to reset the Interactions Pane if
    * new class files are generated.
-   * 
+   *
    * Note: We'd also like to dynamically add elements to the classpath
    * if the classpath of a project changes.  (This is tricky to identify.)
    */
@@ -422,11 +410,11 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
    * Walks the tree of deltas, looking for changes to the classpath or
    * compilation units.
    * @param delta Tree to search
-   * @param int depth Current depth of original tree. Pass 0 on the first call.
+   * @param depth Current depth of original tree. Pass 0 on the first call.
    */
   protected void _visitDelta(IJavaElementDelta delta, int depth) {
     int kind = delta.getKind();
-    int flags = delta.getFlags();
+//    int flags = delta.getFlags();
     IJavaElement element = delta.getElement();
 
 //    System.out.println("\nVisiting: " + delta);
@@ -447,8 +435,8 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
       // Class files have changed
       _warnUserToReset();
     }
-    
-    
+
+
     // Case: has children
     if ((delta.getFlags() & IJavaElementDelta.F_CHILDREN) != 0) {
       IJavaElementDelta[] children = delta.getAffectedChildren();
@@ -457,7 +445,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
         _visitDelta(children[i], depth + 1);
       }
     }
-    
+
     // Case: project opened
     else if (kind == IJavaElementDelta.ADDED) {
       if (element instanceof IJavaProject) {
@@ -479,7 +467,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
       }
       System.out.println("element: " + delta.getElement());
     }
-    
+
     // Case: removed from classpath
     else if ((delta.getFlags() & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0) {
       System.out.println("looking at remove classpath delta...");
@@ -489,7 +477,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
       System.out.println("element: " + delta.getElement());
     }
     */
-    
+
     // Otherwise, ignore
   }
 
@@ -516,10 +504,10 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
     boolean isCompilationUnit = element instanceof ICompilationUnit;
     boolean isWorkingCopy = (element instanceof IWorkingCopy) &&
       ((IWorkingCopy)element).isWorkingCopy();
-    
+
     return isCompilationUnit && !isWorkingCopy;
   }
-  
+
   /**
    * Redirects System.out and System.err to a file for debugging Eclipse.
    */

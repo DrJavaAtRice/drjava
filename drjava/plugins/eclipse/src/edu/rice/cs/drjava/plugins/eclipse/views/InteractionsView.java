@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -51,12 +51,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.SWT;
 
 import edu.rice.cs.drjava.plugins.eclipse.DrJavaConstants;
 import edu.rice.cs.drjava.plugins.eclipse.repl.EclipseInteractionsModel;
-import edu.rice.cs.drjava.model.repl.SimpleInteractionsModel;
 import edu.rice.cs.util.text.SWTDocumentAdapter;
 
 /**
@@ -71,37 +69,37 @@ public class InteractionsView extends ViewPart {
    * We have to have a reference to it so we can dispose it.
    */
   protected InteractionsController _controller;
-  
+
   /**
    * The widget displaying the text.  Equivalent of a JTextPane.
    */
   protected StyledText _styledText;
-  
+
   /**
    * An arrow cursor to display when the pane is not busy.
    */
   protected Cursor _arrowCursor;
-  
+
   /**
    * An hourglass cursor to display when the pane is busy.
    */
   protected Cursor _waitCursor;
-  
+
   /**
    * A runnable command to sound a beep as an alert.
    */
   protected Runnable _beep;
-  
+
   /**
    * Toolbar menu for this view.
    */
   protected IMenuManager _toolbarMenu;
-  
+
   /**
    * Context menu for this view.
    */
   protected MenuManager _contextMenu;
-  
+
 
   /**
    * Constructor.
@@ -124,21 +122,21 @@ public class InteractionsView extends ViewPart {
     _styledText.dispose();
     super.dispose();
   }
-  
+
   /**
    * Accessor method for the text widget.
    */
   public StyledText getTextPane() {
     return _styledText;
   }
-  
+
   /**
    * Returns a command that creates a beep when run.
    */
   public Runnable getBeep() {
     return _beep;
   }
-  
+
   /**
    * Sets the command that creates a beep when run.
    * @param beep Command to create a beep
@@ -146,7 +144,7 @@ public class InteractionsView extends ViewPart {
   public void setBeep(Runnable beep) {
     _beep = beep;
   }
-  
+
   /**
    * Sets the font of the Interactions Pane to be the value
    * stored in JFace's FontRegistry under the key corresponding
@@ -156,7 +154,7 @@ public class InteractionsView extends ViewPart {
     Font font = JFaceResources.getFont(DrJavaConstants.FONT_MAIN);
     _styledText.setFont(font);
   }
-  
+
   /**
    * Callback method that creates and initializes the view.
    */
@@ -170,13 +168,13 @@ public class InteractionsView extends ViewPart {
     _contextMenu = new MenuManager("#PopupMenu");
     Menu menu = _contextMenu.createContextMenu(_styledText);
     _styledText.setMenu(menu);
-    
+
     SWTDocumentAdapter adapter = new SWTDocumentAdapter(_styledText);
     EclipseInteractionsModel model = new EclipseInteractionsModel(adapter);
     setController(new InteractionsController(model, adapter, this));
 
   }
-  
+
   /**
    * Sets which text pane this view uses.  Package-private; for tests only.
    * NOTE: Should only be called once!
@@ -187,7 +185,7 @@ public class InteractionsView extends ViewPart {
     _arrowCursor = new Cursor(_styledText.getDisplay(), SWT.CURSOR_ARROW);
     _waitCursor = new Cursor(_styledText.getDisplay(), SWT.CURSOR_WAIT);
   }
-  
+
   /**
    * Sets which controller is managing this view, so we can dispose it.
    * Package-private; for tests only.
@@ -196,7 +194,7 @@ public class InteractionsView extends ViewPart {
   void setController(InteractionsController controller) {
     _controller = controller;
   }
-  
+
   /**
    * Returns any text that is after the current prompt.
    */
@@ -204,7 +202,7 @@ public class InteractionsView extends ViewPart {
     int length = _styledText.getText().length();
     return _styledText.getText(promptPos, length - 1);
   }
-  
+
   /**
    * Sets whether the StyledText widget is editable.
    * @param editable whether the widget should be editable
@@ -216,7 +214,7 @@ public class InteractionsView extends ViewPart {
       }
     });
   }
-  
+
   /**
    * Sets whether a busy (hourglass) cursor is currently shown.
    * @param busy Whether to show a busy cursor
@@ -233,7 +231,7 @@ public class InteractionsView extends ViewPart {
       }
     });
   }
-  
+
   /**
    * Shows a modal dialog without halting the thread of execution.
    * @param title Title of the dialog box
@@ -247,7 +245,7 @@ public class InteractionsView extends ViewPart {
       }
     });
   }
-  
+
   /**
    * Shows a modal dialog to confirm an operation.
    * @param title Title of the dialog box
@@ -258,14 +256,14 @@ public class InteractionsView extends ViewPart {
     return MessageDialog.openQuestion(_styledText.getShell(),
                                       title, msg);
   }
-  
+
   /**
    * Gives the focus to this component.
    */
   public void setFocus() {
     _styledText.setFocus();
   }
-  
+
   /**
    * Add a menu item to both the toolbar menu and context menu.
    * @param action Menu item to add
@@ -274,7 +272,7 @@ public class InteractionsView extends ViewPart {
     addToolbarMenuItem(action);
     addContextMenuItem(action);
   }
-  
+
   /**
    * Add a menu item to the toolbar.
    * @param action Menu item to add
@@ -282,7 +280,7 @@ public class InteractionsView extends ViewPart {
   public void addToolbarMenuItem(Action action) {
     _toolbarMenu.add(action);
   }
-  
+
   /**
    * Add a menu item to the context menu.
    * @param action Menu item to add
