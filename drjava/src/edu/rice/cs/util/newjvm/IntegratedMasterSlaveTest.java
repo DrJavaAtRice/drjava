@@ -77,7 +77,9 @@ public class IntegratedMasterSlaveTest extends TestCase {
   }
   
   public void testImmediateQuit() throws Exception {
-    _testMaster.runImmediateQuitTest();
+    for (int i = 0; i < 5; i++) {
+      _testMaster.runImmediateQuitTest();
+    }
   }
   
   private class MasterImpl extends AbstractMasterJVM implements MasterI

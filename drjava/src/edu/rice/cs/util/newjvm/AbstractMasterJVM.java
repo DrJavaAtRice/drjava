@@ -117,11 +117,24 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   protected abstract void handleSlaveQuit(int status);
   
   /**
-   * Invokes slave JVM.
+   * Invokes slave JVM without any JVM arguments.
    * @throws IllegalStateException if slave JVM already connected or
    * startup is in progress.
    */
-  protected synchronized final void invokeSlave() throws IOException, RemoteException
+  protected synchronized final void invokeSlave()
+    throws IOException, RemoteException
+  {
+    invokeSlave(new String[0]);
+  }
+  
+  /**
+   * Invokes slave JVM.
+   * @param jvmArgs Array of arguments to pass to the JVM on startup
+   * @throws IllegalStateException if slave JVM already connected or
+   * startup is in progress.
+   */
+  protected synchronized final void invokeSlave(String[] jvmArgs)
+    throws IOException, RemoteException
   {
     if (_startupInProgress) { 
       throw new IllegalStateException("startup is in progress in invokeSlave");
@@ -132,7 +145,30 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
     }
     
     _startupInProgress = true;
-    _stub = UnicastRemoteObject.exportObject(this);
+    Thread t = new Thread() {
+      public void run() {
+        synchronized(AbstractMasterJVM.this) {
+          try {
+            _stub = UnicastRemoteObject.exportObject(AbstractMasterJVM.this);
+          }
+          catch (RemoteException re) {
+            throw new edu.rice.cs.util.UnexpectedException(re);
+          }
+          AbstractMasterJVM.this.notify();
+        }
+      }
+    };
+
+    t.start();
+    while (_stub == null) {
+      try {
+        wait();
+      }
+      catch (InterruptedException ie) {
+        throw new edu.rice.cs.util.UnexpectedException(ie);
+      }
+    }
+
     _stubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
 
     // serialize stub to _stubFile
@@ -147,7 +183,8 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       _slaveClassName
     };
     
-    final Process process = ExecJVM.runJVMPropogateClassPath(RUNNER, args);
+    final Process process = 
+      ExecJVM.runJVMPropogateClassPath(RUNNER, args, jvmArgs);
     
     // Start a thread to wait for the slave to die
     // When it dies,

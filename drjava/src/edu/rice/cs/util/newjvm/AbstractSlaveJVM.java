@@ -110,5 +110,9 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
     handleStart(master);
   }
 
+  /**
+   * Called when the slave JVM has started running.  Subclasses must implement
+   * this method.
+   */
   protected abstract void handleStart(MasterRemote master);
 }

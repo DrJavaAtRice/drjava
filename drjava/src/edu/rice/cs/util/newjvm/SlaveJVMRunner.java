@@ -87,7 +87,7 @@ public final class SlaveJVMRunner {
         // Must export slave object to RMI so we can pass stub to the master
         SlaveRemote stub= (SlaveRemote) UnicastRemoteObject.exportObject(slave);
 
-        // start the slave before notifying the master
+        // start the slave and notify the master
         remote.registerSlave(slave);
         slave.start(remote);
       }
