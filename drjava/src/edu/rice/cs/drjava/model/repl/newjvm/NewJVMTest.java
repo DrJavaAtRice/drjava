@@ -78,7 +78,7 @@ public class NewJVMTest extends TestCase {
 
     return setup;
   }
-
+  
   public void testPrintln() throws Throwable {
     synchronized(_jvm) {
       _jvm.interpret("System.err.print(\"err\");");

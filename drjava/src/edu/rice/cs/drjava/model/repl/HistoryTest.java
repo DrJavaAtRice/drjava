@@ -95,6 +95,24 @@ public class HistoryTest extends TestCase {
                  "",
                  _history.getCurrent());
   }
+  
+  /**
+   * Ensures that Histories are bound to 500 entries.
+   */
+  public void testHistoryIsBounded() {
+    
+    int maxLength = 500;
+    
+    for (int i = 0; i < maxLength + 100; i++) {
+      _history.add("testing " + i);
+    }
+    while(_history.hasPrevious()) {
+      _history.movePrevious();
+    }
+    assertEquals("history length is not bound to " + maxLength,
+                 "testing 100",
+                 _history.getCurrent());
+  }
 }
 
 

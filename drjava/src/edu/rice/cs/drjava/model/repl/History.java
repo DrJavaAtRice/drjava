@@ -47,6 +47,9 @@ import  gj.util.Vector;
  * @version $Id$
  */
 public class History {
+  
+  private static final int MAX_SIZE = 500;
+  
   private Vector<String> _vector = new Vector<String>();
   private int _cursor = -1;
 
@@ -60,13 +63,19 @@ public class History {
    * Thus, to access the newly inserted item, you must movePrevious first.
    */
   public void add(String item) {
+    
     if (item.trim().length() > 0) {
       if (_vector.isEmpty() || ! _vector.lastElement().equals(item)) {
         _vector.addElement(item);
+        
+        // If adding the new element has filled _vector to beyond max 
+        // capacity, spill the oldest element out of the History.
+        if (_vector.size() > MAX_SIZE) {
+          _vector.removeElementAt(0);
+        }
       }
+      moveEnd();
     }
-
-    moveEnd();
   }
 
   /**

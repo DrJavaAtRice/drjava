@@ -179,7 +179,7 @@ public class DefaultGlobalModel implements GlobalModel {
     return _definitionsDocs;
   }
 
-  public StyledDocument getInteractionsDocument() {
+  public InteractionsDocument getInteractionsDocument() {
     return _interactionsDoc;
   }
 

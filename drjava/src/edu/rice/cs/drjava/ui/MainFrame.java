@@ -75,7 +75,7 @@ public class MainFrame extends JFrame {
 
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
 
-  private final SingleDisplayModel _model;
+  final SingleDisplayModel _model;
 
   private Hashtable _defScrollPanes;
   private DefinitionsPane _currentDefPane;

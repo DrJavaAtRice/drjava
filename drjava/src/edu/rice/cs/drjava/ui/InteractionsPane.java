@@ -57,39 +57,73 @@ public class InteractionsPane extends JTextPane {
 
   private final GlobalModel _model;
 
-  private AbstractAction _evalAction = new AbstractAction() {
+  // The fields below were made package private for testing purposes.
+  
+  AbstractAction _evalAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       _model.interpretCurrentInteraction();
     }
   };
   
-  private Runnable BEEP = new Runnable() {
+  Runnable BEEP = new Runnable() {
     public void run() {
         Toolkit.getDefaultToolkit().beep();      
     }
   };
   
-  private AbstractAction _historyPrevAction = new AbstractAction() {
+  AbstractAction _historyPrevAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       _model.recallPreviousInteractionInHistory(BEEP);
+      moveToEnd();
     }
   };
 
-  private AbstractAction _historyNextAction = new AbstractAction() {
+  AbstractAction _historyNextAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       _model.recallNextInteractionInHistory(BEEP);
+      moveToEnd();
     }
   };
 
-  private AbstractAction _clearCurrentAction = new AbstractAction() {
+  AbstractAction _clearCurrentAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       _model.clearCurrentInteraction();
     }
   };
 
-  private AbstractAction _gotoFrozenPosAction = new AbstractAction() {
+  AbstractAction _gotoFrozenPosAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      setCaretPosition(_model.getInteractionsFrozenPos());
+      moveToPrompt();
+    }
+  };
+  
+  AbstractAction _moveLeft = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      if (getCaretPosition() < _model.getInteractionsFrozenPos()) {
+        moveToPrompt();
+      }
+      else if (getCaretPosition() == _model.getInteractionsFrozenPos()) {
+        moveToEnd();
+      }
+      else { // getCaretPosition() > _model.getInteractionsFrozenPos()
+        moveLeft();
+      }
+    }
+  };
+
+  AbstractAction _moveRight = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      int position = getCaretPosition();
+      if (position < _model.getInteractionsFrozenPos()) { 
+        moveToEnd();
+      }
+      else if (position >= _model.getInteractionsDocument().getLength())
+      {
+        moveToPrompt();
+      }
+      else { // getCaretPosition() between prompt and end
+        moveRight();
+      }
     }
   };
 
@@ -125,10 +159,39 @@ public class InteractionsPane extends JTextPane {
                                  _historyNextAction);
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), 
                                  _historyNextAction);
+    
+    // Left needs to be prevented from rolling cursor back before the prompt.
+    // Both left and right should lock when caret is before the prompt.
+    // Caret is allowed before the prompt for the purposes of mouse-based copy-
+    // and-paste.
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, 0),
+                                 _moveLeft);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0),
+                                 _moveLeft);
+    
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_RIGHT, 0),
+                                 _moveRight);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0),
+                                 _moveRight);
+    
     setKeymap(ourMap);
-
   }
-
+  
+  private void moveToEnd() {
+    setCaretPosition(_model.getInteractionsDocument().getLength());
+  }
+  
+  private void moveToPrompt() {
+    setCaretPosition(_model.getInteractionsFrozenPos());
+  }
+  
+  private void moveLeft() {
+    setCaretPosition(getCaretPosition() - 1);
+  }
+  
+  private void moveRight() {
+    setCaretPosition(getCaretPosition() + 1);
+  }
 }
 
 
