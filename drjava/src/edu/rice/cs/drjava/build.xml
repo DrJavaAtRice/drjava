@@ -669,7 +669,7 @@
   </target>
 
   <!-- Create documentation html -->
-  <target name="docs" depends="userdocs,devdocs" unless="docbook.present">
+  <target name="docs" depends="userdocs,devdocs, userqsdocs" unless="docbook.present">
     <echo message="Could not find docbook2html.  Not generating docs." />
   </target>
 
@@ -714,6 +714,85 @@
       <arg value="${doc_dir}/developer/"/>
       <fileset dir="${srcroot}/${projpath}/docs/developer">
         <include name="devdoc.docbook" />
+      </fileset>
+    </apply>
+  </target>
+
+  <!-- Create the user quick start guide documentation -->
+  <target name="userqsdocs" depends="docbook-present" if="docbook.present">
+    <delete dir="${doc_dir}/quickstart/" />
+    <mkdir dir="${doc_dir}/quickstart/" />
+    <echo message="Creating documentation HTML..." />
+    <apply executable="docbook2html" failonerror="yes" type="file">
+      <arg value="-o"/>
+      <arg value="${doc_dir}/quickstart/"/>
+      <arg value="-V"/>
+      <arg value="%use-id-as-filename%"/>
+      <fileset dir="${srcroot}/${projpath}/docs/quickstart">
+        <include name="quickstart.docbook" />
+      </fileset>
+    </apply>
+
+    <!-- Include the jpgs -->
+    <copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/JDKDownload.jpg" />
+    <copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/CurrentStableRelease.jpg" />
+    <copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/DownloadServer.jpg" />
+    <copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/OpenDialog.jpg" />    
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/PlainOldDrJavaDefault.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/CompilerErrors.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/InteractionsPaneFull.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/InteractionsPane1Plus1.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/InteractionsPaneTom.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/InteractionsPaneTryMe.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/InteractionsPanePackageImport.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/SaveDialog.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/FindReplace.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/TestsPassed.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/TestFails.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/JavaDocMenu.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/Javadoc.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/HitBreakpoint.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/BreakpointSet.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ToggleBreakpoint.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/Threads.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/StackStuff.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/BreakpointWatch.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/VariableWatch2.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/EnableDebugger.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ResourceLocation.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/FullTreeView.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectProperties.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectCleanBuildDirectory.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectCompileFromSideMenu.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectCompileFromTopMenu.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectFolderOptions.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectOpen.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectRunMainDocument.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectTest.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectSaveDialogFromFiles.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/NewProjectSaveDialog.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/DisplayOptions.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/DisplayOptionsFonts.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/DisplayOptionsColors.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/KeyBindings.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/CompilerOptions.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/DebuggerPreferences.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/JavadocPreferences.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/Notifications.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/Miscellaneous.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/SystemInInput.jpg" />
+<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/SystemInInputInteractionsPane.jpg" />
+  </target>
+
+
+  <!-- Create the user documentation as a PDF -->
+  <target name="userqsdocs-pdf" depends="docbook2pdf-present" if="docbook2pdf.present">
+    <echo message="Creating documentation PDF..." />
+    <apply executable="docbook2pdf" failonerror="yes" type="file">
+      <arg value="-o"/>
+      <arg value="${srcroot}/../userdocs"/>
+      <fileset dir="${srcroot}/${projpath}/docs/quickstart">
+        <include name="quickstart.docbook" />
       </fileset>
     </apply>
   </target>
