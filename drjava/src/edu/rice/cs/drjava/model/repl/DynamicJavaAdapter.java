@@ -205,6 +205,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       if (classes.containsKey(name)) {
         return  (Class)classes.get(name);
       }
+
       try {
         // classLoader contains URL class loaders to load from other
         // paths/urls. if we have one, try to load there.
@@ -225,7 +226,27 @@ public class DynamicJavaAdapter implements JavaInterpreter {
           stream.read(data);
           return  defineClass(name, data, 0, data.length);
         }
-      } catch (IOException ioe) {}
+      }
+      catch (Throwable t) {}
+
+      // Now try to just use the standard loader
+      // Before, we didn't do this, and it resulted in getting some
+      // class format errors (illegal constant pool) when loading.
+      // i don't know why, but some classes seem to need to be loaded
+      // using standard loader.
+      ClassLoader l;
+      if (classLoader != null) {
+        l = classLoader;
+      }
+      else {
+        l = ClassLoader.getSystemClassLoader();
+      }
+
+      try {
+        return l.loadClass(name);
+      }
+      catch (Throwable t) {}
+
       // If it exceptions, just fall through to here to try the interpreter.
       // If all else fails, try loading the class through the interpreter.
       // That's used for classes defined in the interpreter.
