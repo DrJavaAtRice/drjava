@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,22 +32,21 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
 
 import junit.framework.TestCase;
 import java.util.*;
-import java.io.*;
 
 /**
  * Tests that an ArgumentTokenizer can correctly divide up a string
@@ -56,14 +55,14 @@ import java.io.*;
  * @version $Id$
  */
 public class ArgumentTokenizerTest extends TestCase {
-  
+
   /**
    * Creates a new ArgumentTokenizer to be used in every test.
    */
   public ArgumentTokenizerTest(String name) {
     super(name);
   }
-  
+
   /**
    * Asserts that the given string is tokenized to become the
    * given array of string arguments.
@@ -73,7 +72,7 @@ public class ArgumentTokenizerTest extends TestCase {
   protected void _assertTokenized(String typed, String[] expected) {
     _assertTokenized(typed, expected, false);
   }
-  
+
   /**
    * Asserts that the given string is tokenized to become the
    * given array of string arguments.
@@ -89,7 +88,7 @@ public class ArgumentTokenizerTest extends TestCase {
     assertEquals("tokenized argument list should match expected",
                  expectedList, actual);
   }
-  
+
   /**
    * Tests that the argument tokenizer can split up a simple list of arguments.
    */
@@ -102,7 +101,7 @@ public class ArgumentTokenizerTest extends TestCase {
     // [a b c]
     _assertTokenized("\"a b c\"",
                      new String[]{"a b c"});
-    
+
     // "a b"c d
     // [a bc, d]
     // This behavior seems unintuitive, but it's the way both DOS and Unix
@@ -145,7 +144,7 @@ public class ArgumentTokenizerTest extends TestCase {
     // [/home/user/file]
     _assertTokenized("/home/user/file",
                      new String[]{"/home/user/file"});
-    
+
     // "asdf
     // [asdf]
     _assertTokenized("\"asdf",
@@ -178,7 +177,7 @@ public class ArgumentTokenizerTest extends TestCase {
     _assertTokenized("a\\ b",
                      new String[]{"a b"});
   }
-  
+
   /**
    * Tests that within a quote, everything is correctly escaped.
    * (Special characters are passed to the program correctly.)
@@ -240,7 +239,7 @@ public class ArgumentTokenizerTest extends TestCase {
     _assertTokenized("'\\'",
                      new String[]{"\\"});
   }
-  
+
   /**
    * Tests that arguments can be "stringified" properly.
    * (ie. formatted to be printed as a String)

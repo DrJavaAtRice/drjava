@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
@@ -61,22 +61,6 @@ public class FileOpsTest extends TestCase {
   public static final String TEXT = "hi, dude.";
   public static final String PREFIX = "prefix";
   public static final String SUFFIX = ".suffix";
-
-  /**
-   * Constructor.
-   * @param  String name
-   */
-  public FileOpsTest(String name) {
-    super(name);
-  }
-
-  /**
-   * Creates a test suite for JUnit to run.
-   * @return a test suite based on the methods in this class
-   */
-  public static Test suite() {
-    return new TestSuite(FileOpsTest.class);
-  }
 
   public void testCreateTempDirectory() throws IOException {
     File dir = FileOps.createTempDirectory(PREFIX);
@@ -134,7 +118,7 @@ public class FileOpsTest extends TestCase {
     assertEquals("directory exists after deleting it", false, baseDir.exists());
   }
 
-  
+
   /**
    * This method checks that backups are made correctly, that when a save fails,
    * no data is lost, and that when a save is attempted on a write-protected file,
@@ -144,7 +128,7 @@ public class FileOpsTest extends TestCase {
     File writeTo = File.createTempFile("fileops", ".test");
     writeTo.deleteOnExit();
     File backup = new File(writeTo.getPath() + "~");
-    
+
     FileOps.saveFile(new FileOps.DefaultFileSaver(writeTo) {
       public void saveTo(OutputStream os) throws IOException {
         String output = "version 1";
@@ -156,7 +140,7 @@ public class FileOpsTest extends TestCase {
     });
     assertEquals("save w/o backup", "version 1", FileOps.readFileAsString(writeTo));
     assertEquals("save w/o backup did not backup", false, backup.exists());
-    
+
     FileOps.saveFile(new FileOps.DefaultFileSaver(writeTo) {
       public void saveTo(OutputStream os) throws IOException {
         String output = "version 2";
@@ -166,7 +150,7 @@ public class FileOpsTest extends TestCase {
     assertEquals("save2 w backup", "version 2", FileOps.readFileAsString(writeTo));
     assertEquals("save2 w backup did backup", "version 1",
                  FileOps.readFileAsString(backup));
-    
+
     FileOps.saveFile(new FileOps.DefaultFileSaver(writeTo) {
       public void saveTo(OutputStream os) throws IOException {
         String output =  "version 3";
@@ -176,8 +160,8 @@ public class FileOpsTest extends TestCase {
     assertEquals("save3 w backup on", "version 3", FileOps.readFileAsString(writeTo));
     assertEquals("save3 w backup on did not backup", "version 1",
                  FileOps.readFileAsString(backup));
-    
-    
+
+
     /* Now see what happens when saving fails and we were not making a backup
      * Nothing should change. */
     try {
@@ -189,13 +173,13 @@ public class FileOpsTest extends TestCase {
         }
       });
       fail("IOException not propagated");
-    } 
+    }
     catch (IOException ioe){}//do nothing, this is expected
     assertEquals("failed save4 w/o backup", "version 3",
                  FileOps.readFileAsString(writeTo));
     assertEquals("failed save4 w/o backup check original backup", "version 1",
                  FileOps.readFileAsString(backup));
-    
+
     /* Now see what happens when saving fails and we were making a backup */
     try {
       FileOps.saveFile(new FileOps.DefaultFileSaver(writeTo) {
@@ -213,15 +197,15 @@ public class FileOpsTest extends TestCase {
     catch(IOException ioe){} //do nothing, we expected this
     assertEquals("failed save5 w backup", "version 3",
                  FileOps.readFileAsString(writeTo));
-    
-    // Make sure that the backup file no longer exists since it was 
+
+    // Make sure that the backup file no longer exists since it was
     // copied over the original
     try {
       FileOps.readFileAsString(backup);
       fail("The backup file should no longer exist.");
     }
     catch(FileNotFoundException e) {} //do nothing, we expected this
-    
+
     // Test that save fails if the file is write-protected.
     writeTo.setReadOnly();
     try {
@@ -239,7 +223,7 @@ public class FileOpsTest extends TestCase {
     catch(IOException ioe){} //do nothing, we expected this
     assertEquals("failed save6 w backup", "version 3",
                  FileOps.readFileAsString(writeTo));
-    
+
     // Make sure that the backup file still doesn't exist since the file
     // was read-only.
     try {
@@ -284,12 +268,12 @@ public class FileOpsTest extends TestCase {
 
     assertTrue("deleting temp directory", FileOps.deleteDirectory(rootDir));
   }
-  
-  
+
+
   /**
    * Tests that non-empty directories can be deleted on exit.
    */
-  public void testDeleteDirectoryOnExit() 
+  public void testDeleteDirectoryOnExit()
     throws IOException, InterruptedException
   {
     // Create files:
@@ -305,41 +289,39 @@ public class FileOpsTest extends TestCase {
     assertTrue("dir2 exists", dir2.exists());
     File file2 = File.createTempFile("DrJavaTest-", ".temp", dir2);
     assertTrue("file2 exists", file2.exists());
-    
+
     String className = "edu.rice.cs.util.FileOpsTest";
     String[] args = new String[] { dir1.getAbsolutePath() };
-    
+
     Process process = ExecJVM.
       runJVMPropogateClassPath(className, args);
     int status = process.waitFor();
     assertEquals("Delete on exit test exited with an error!", 0, status);
-    
+
     assertTrue("dir1 should be deleted", !dir1.exists());
     assertTrue("file1 should be deleted", !file1.exists());
     assertTrue("dir2 should be deleted", !dir2.exists());
     assertTrue("file2 should be deleted", !file2.exists());
   }
-  
+
   /**
    * Main method to be called by testDeleteDirectoryOnExit.  Runs in
    * a new JVM so the files can be deleted.
    * Exits with status 1 if wrong number of arguments.
    * Exits with status 2 if file doesn't exist
-   * 
-   * @params args should contain the file name of the directory
-   * to delete on exit
+   * @param args should contain the file name of the directory to delete on exit
    */
   public static void main(String[] args) {
     if (args.length != 1) {
       System.exit(1);
     }
-    
+
     File dir = new File(args[0]);
     if (!dir.exists()) {
       System.exit(2);
     }
     FileOps.deleteDirectoryOnExit(dir);
-    
+
     // Ok, exit cleanly
     System.exit(0);
   }

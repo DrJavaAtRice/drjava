@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,21 +32,20 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.classloader;
 
 import junit.framework.*;
-import java.io.*;
 import java.net.URL;
 import java.security.SecureClassLoader;
 
@@ -58,22 +57,6 @@ import java.security.SecureClassLoader;
 public class StickyClassLoaderTest extends TestCase {
   private final String myName = getClass().getName();
   private final ClassLoader myLoader = getClass().getClassLoader();
-
-  /**
-   * Constructor.
-   * @param String name
-   */
-  public StickyClassLoaderTest(String name) {
-    super(name);
-  }
-
-  /**
-   * Creates a test suite for JUnit to run.
-   * @return a test suite based on the methods in this class
-   */
-  public static Test suite() {
-    return new TestSuite(StickyClassLoaderTest.class);
-  }
 
   /**
    * Make sure getClass().getClassLoader() sticks, regardless of where
@@ -96,7 +79,7 @@ public class StickyClassLoaderTest extends TestCase {
     Class c = loader.loadClass("java.lang.Object");
     assertEquals("java.lang.Object", c.getName());
   }
-  
+
   /**
    * Tests that add-on Java packages, such as javax.mail.*, can be
    * loaded through the secondary loader if not found in the system
@@ -104,16 +87,16 @@ public class StickyClassLoaderTest extends TestCase {
    */
   public void testLoaderFindsNonSystemJavaClasses() throws Throwable {
     class LoadingClassException extends RuntimeException {}
-    
+
     ClassLoader testLoader = new SecureClassLoader() {
       public URL getResource(String name) {
         throw new LoadingClassException();
       }
     };
     StickyClassLoader loader = new StickyClassLoader(myLoader, testLoader);
-    
+
     try {
-      Class c = loader.loadClass("javax.mail.FakeClass");
+      loader.loadClass("javax.mail.FakeClass");
       // Should not have actually found it...
       fail("FakeClass should not exist.");
     }
@@ -139,7 +122,7 @@ public class StickyClassLoaderTest extends TestCase {
   }
 
   /**
-   * Make sure that if we load A through sticky loader, and A requires B 
+   * Make sure that if we load A through sticky loader, and A requires B
    * to be loaded, B is also loaded through sticky loader.
    * We load the BMaker interface through the old loader so we can
    * cast to that interface.
@@ -174,8 +157,8 @@ public class StickyClassLoaderTest extends TestCase {
    */
   public void testDoesntLoadSameClassTwice() throws Throwable {
     StickyClassLoader loader = new StickyClassLoader(myLoader, myLoader);
-    Class two = loader.loadClass(myName + "$Two");
-    Class one = loader.loadClass(myName + "$One");
+    loader.loadClass(myName + "$Two");
+    loader.loadClass(myName + "$One");
   }
 
   public static class One {}
