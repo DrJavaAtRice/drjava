@@ -1542,7 +1542,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     JPanel button_row = (JPanel)buttons.getComponent(3);
     JPanel bottom_row = new JPanel();
     bottom_row.setLayout(new BorderLayout());
-    bottom_row.add(new JCheckBox("Recursive Open"), BorderLayout.CENTER);
+    bottom_row.add(_openRecursiveCheckBox, BorderLayout.CENTER);
     bottom_row.add(button_row, BorderLayout.EAST);
     buttons.add(bottom_row, 3);
     
