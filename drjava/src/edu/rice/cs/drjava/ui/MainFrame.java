@@ -362,7 +362,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Redoes the last undo to the active definitions document. */
   private DelegatingAction _redoAction = new DelegatingAction();
 
-  /** Aborts current interaction. */
+  /** Aborts current interaction.  (Replaced by Reset.)
   private Action _abortInteractionAction = new AbstractAction("Abort Current Interaction") {  
     public void actionPerformed(ActionEvent ae) {
       String title = "Confirm abort interaction";
@@ -379,6 +379,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
   };
+  */
 
   /** Closes the program. */
   private Action _quitAction = new AbstractAction("Quit") {
@@ -443,7 +444,18 @@ public class MainFrame extends JFrame implements OptionConstants {
     new AbstractAction("Reset Interactions")
   {
     public void actionPerformed(ActionEvent ae) {
-      _model.resetInteractions();
+      String title = "Confirm Reset Interactions";
+      
+      String message = "Are you sure you want to reset the " +
+        "Interactions Pane?";
+      
+      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
+                                             message,
+                                             title,
+                                             JOptionPane.YES_NO_OPTION);
+      if (rc == JOptionPane.YES_OPTION) {
+        _model.resetInteractions();
+      }
     }
   };
 
@@ -1340,7 +1352,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _undoAction.putValue(Action.NAME, "Undo Previous Command");
     _redoAction.putValue(Action.NAME, "Redo Last Undo");
 
-    _setUpAction(_abortInteractionAction, "Break", "Abort the current interaction");
+    //_setUpAction(_abortInteractionAction, "Break", "Abort the current interaction");
     _setUpAction(_resetInteractionsAction, "Reset", "Reset interactions");
   
     _setUpAction(_junitAction, "Test", "Run JUnit over the current document");
@@ -1591,6 +1603,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // Abort/reset interactions, clear console
     toolsMenu.addSeparator();
+    /*
     _abortInteractionAction.setEnabled(false);
     if (!CodeStatus.DEVELOPMENT) {
       tmpItem = toolsMenu.add(_abortInteractionAction);
@@ -1599,6 +1612,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     else {
       _addMenuItem(toolsMenu, _abortInteractionAction, KEY_ABORT_INTERACTION);
     }
+    */
     toolsMenu.add(_resetInteractionsAction);
     toolsMenu.add(_clearOutputAction);
 
@@ -1781,7 +1795,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _compileButton = _createToolbarButton(_compileAction);
     _toolBar.add(_compileButton);
     _toolBar.add(_createToolbarButton(_resetInteractionsAction));
-    _toolBar.add(_createToolbarButton(_abortInteractionAction));
+    //_toolBar.add(_createToolbarButton(_abortInteractionAction));
 
     // Junit
     _toolBar.addSeparator();
@@ -2274,11 +2288,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void interactionStarted() {
       _interactionsPane.setEditable(false);
       _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-      _abortInteractionAction.setEnabled(true);
+      //_abortInteractionAction.setEnabled(true);
     }
 
     public void interactionEnded() {
-      _abortInteractionAction.setEnabled(false);
+      //_abortInteractionAction.setEnabled(false);
       _interactionsPane.setCursor(null);
       _interactionsPane.setEditable(true);
       int pos = _interactionsPane.getDocument().getLength();

@@ -328,13 +328,15 @@ public interface OptionConstants extends ConfigurationTool {
     new KeyStrokeOption("key.compile", 
                         KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
   /**
-   * The key binding for aborting the current interaction
-   */
+   * The key binding for aborting the current interaction.
+   * (eplaced by Reset Interactions, with no shortcut.)
+   *
   public static final KeyStrokeOption KEY_ABORT_INTERACTION =
     (!CodeStatus.DEVELOPMENT)?
     null:
     new KeyStrokeOption("key.abort.interaction", 
                         KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
+                        */
   /**
    * The key binding for moving the cursor backwards
    */

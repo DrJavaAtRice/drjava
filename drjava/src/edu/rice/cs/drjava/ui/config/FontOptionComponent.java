@@ -91,7 +91,10 @@ public class FontOptionComponent extends OptionComponent<FontOption> {
   }
   
   public boolean update() {
-    if (!_newFont.equals(_currentFont)) DrJava.CONFIG.setSetting(_option, _newFont);
+    if (!_newFont.equals(_currentFont)) {
+      DrJava.CONFIG.setSetting(_option, _newFont);
+      _currentFont = _newFont;
+    }
     return true;
   }
   

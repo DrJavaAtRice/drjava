@@ -71,7 +71,9 @@ public class ColorOptionComponent extends OptionComponent<ColorOption> {
   public boolean update() {
     if (!_newColor.equals(_currentColor)) {
       DrJava.CONFIG.setSetting(_option, _newColor);
+      _currentColor = _newColor;
     }
+
     return true;
   } 
   

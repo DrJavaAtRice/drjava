@@ -521,15 +521,29 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
   /**
    * Clears and resets the interactions pane.
+   * Bug #576179 pointed out that this needs to end any threads that were
+   * running in the interactions JVM, so we completely restart the JVM now.
+   * Ideally, we'd like a way to end any running threads and cleanly reset
+   * the interpreter (to speed up this method), but that might be too complex...
+   * <p>
+   * (Old approach:
    * First it makes sure it's in the right package given the
    * package specified by the definitions.  If it can't,
    * the package for the interactions becomes the defualt
    * top level. In either case, this method calls a helper
-   * which fires the interactionsReset() event.
+   * which fires the interactionsReset() event.)
    */
   public void resetInteractions() {
+    // Keep a note that we're resetting so that the exit message is not displayed
+    _interpreterControl.setIsResetting(true);
+    _interpreterControl.restartInterpreterJVM();
+    _restoreInteractionsState();
+    _interpreterControl.setIsResetting(false);
+    
+    /* Old approach.  (Didn't kill leftover interactions threads)
     _interpreterControl.reset();
     _restoreInteractionsState();
+    */
   }
 
 
@@ -583,6 +597,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
   }
 
+  /**
+   * Aborts any threads running in the Interactions JVM by completely
+   * restarting that JVM.
+   */
   public void abortCurrentInteraction() {
     _interpreterControl.restartInterpreterJVM();
   }

@@ -65,6 +65,16 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
    * This variable is protected by synchronized(this).
    */
   private boolean _startupInProgress = false;
+  
+  /**
+   * Keeps track of whether we are currently in the process of cleanly
+   * resetting the interactions JVM, as opposed to having it killed by
+   * a thread in that JVM.  Used to determine whether or not to display
+   * an information message when the JVM restarts.
+   * This variable is protected by synchronized(this).
+   * @see #setIsResetting
+   */
+  private boolean _resetInProgress = false;
 
   /**
    * This is the pointer to the interpreter JVM remote object, used to call
@@ -251,7 +261,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
    */
   public void restartInterpreterJVM() {
     synchronized(this) {
-     if (_startupInProgress) {
+      if (_startupInProgress) {
         return;
       }
 
@@ -276,7 +286,9 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
             try {
               int status = _interpreterProcess.waitFor();
               restartInterpreterJVM();
-              _model.replCalledSystemExit(status);
+              if (!_isResetting()) {
+                _model.replCalledSystemExit(status);
+              }
             }
             catch (InterruptedException ie) {
               throw new edu.rice.cs.util.UnexpectedException(ie);
@@ -289,9 +301,34 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
       catch (IOException ioe) {
         _threwException(ioe);
       }
+      
     }
   }
 
+  
+  /**
+   * Lets us know whether or not we are in the process of a clean reset.
+   * If we are, the message explaining that the JVM was exited should not
+   * be displayed.  For some reason, this needs to be set from outside this
+   * class, rather than simply setting the field in restartInteractionsJVM.
+   * (Timing issues, maybe?)
+   * @param b whether we are in the process of resetting
+   */
+  public void setIsResetting(boolean b) { 
+    synchronized(this) {
+      _resetInProgress = b;
+    }
+  }
+  
+  /**
+   * Returns whether we are in the process of cleanly resetting the
+   * interactions JVM.
+   * @see #setIsResetting
+   */
+  private boolean _isResetting() {
+    return _resetInProgress;
+  }
+  
   public void checkStillAlive() throws RemoteException {
     // do nothing.
   }
