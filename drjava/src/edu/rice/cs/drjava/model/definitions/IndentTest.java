@@ -1021,9 +1021,13 @@ public class IndentTest extends TestCase {
    * it has been fixed
   public void testNestedUnbraced() throws BadLocationException {
     String text =
-      "for (int a =0; a < 5; a++)\nfor(int b = 0; b < 5; b++){\nSystem.out.println(a + b);";
+      "for (int a =0; a < 5; a++)\n" +
+      "for(int b = 0; b < 5; b++){\n" +
+      "System.out.println(a + b);";
     String indented =
-      "for (int a =0; a < 5; a++)\n  for(int b = 0; b < 5; b++){\n    System.out.println(a + b);";
+      "for (int a =0; a < 5; a++)\n" +
+      "  for(int b = 0; b < 5; b++){\n" +
+      "    System.out.println(a + b);";
     doc.insertString(0, text, null);
     _assertContents(text, doc);
     doc.indentLines(0, doc.getLength());
@@ -1290,5 +1294,5 @@ public class IndentTest extends TestCase {
     _assertContents(_aligned, doc);
     assertEquals("Line aligned to open paren.", _aligned.length(), doc.getLength());
   }
-*/
+*/  
 }
