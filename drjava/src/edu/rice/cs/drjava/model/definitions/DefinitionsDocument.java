@@ -846,7 +846,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * Uncomments a single line.  This simply looks for a leading "//".
    * Also indents the line, once the comments have been removed.
    */
-  private void _uncommentLine() {
+  private synchronized void _uncommentLine() {
     throwErrorHuh();
     try {
       // Look for "//" at the beginning of the line, and remove it.

@@ -551,11 +551,10 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   
   
   /**
-   * This method should never be called outside of this class. Doing so can create
-   * all sorts of synchronization issues. It is public for test purposes.
+   * This method is used ONLY for testing.
    * @return The reduced model of this document.
    */
-  public BraceReduction getReduced() {
+  public synchronized BraceReduction getReduced() {
     throwErrorHuh();
     return _reduced;
   }
@@ -572,24 +571,25 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     if (cached != null) {
       return cached;
     }
-    IndentInfo info = getReduced().getIndentInformation();
+    throwErrorHuh(); // necessary? Corky 10/5/04
+    IndentInfo info = _reduced.getIndentInformation();
     _storeInCache(key, info);
     return info;
   }
   
   public synchronized ReducedModelState stateAtRelLocation(int dist){
     throwErrorHuh();
-    return getReduced().moveWalkerGetState(dist);
+    return _reduced.moveWalkerGetState(dist);
   }
   
   public synchronized ReducedModelState getStateAtCurrent(){
     throwErrorHuh();
-    return getReduced().getStateAtCurrent();
+    return _reduced.getStateAtCurrent();
   }
   
   public synchronized void resetReducedModelLocation() {
     throwErrorHuh();
-    getReduced().resetLocation();
+    _reduced.resetLocation();
   }
   
   
@@ -1172,7 +1172,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @param findChar Character to search for
    * @return true if this node's rule holds.
    */
-  public int findCharOnLine(int pos, char findChar) {
+  public synchronized int findCharOnLine(int pos, char findChar) {
     throwErrorHuh();
     // Check cache
     String key = "findCharOnLine:" + pos + ":" + findChar;
