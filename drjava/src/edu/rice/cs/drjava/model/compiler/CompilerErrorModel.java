@@ -195,11 +195,11 @@ public class CompilerErrorModel {
       int curLine = 0;
       int offset = 0; // offset is number of chars from beginning of file
       int numProcessed = 0;
-
+      
       // offset is always pointing to the first character in a line
       // at the top of the loop
       while ((numProcessed < _errors.length) &&
-             (offset < defsText.length()))
+             (offset <= defsText.length()))
       {
         //DrJava.consoleErr().println("num processed: " + numProcessed);
 

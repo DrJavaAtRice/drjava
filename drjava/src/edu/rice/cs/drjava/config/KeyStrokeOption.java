@@ -90,12 +90,24 @@ public class KeyStrokeOption extends Option<KeyStroke> {
    */
   public KeyStroke parse(String s) {
     if (CodeStatus.DEVELOPMENT) {
-      if (s.equals("<none>"))
+      if (s.equals("<none>")) {
         return NULL_KEYSTROKE;
+      }
+      
+      // Replace "command" with "meta"
+      int cIndex = s.indexOf("command");
+      if (cIndex > -1) {
+        StringBuffer sb = new StringBuffer(s.substring(0, cIndex));
+        sb.append("meta");
+        sb.append(s.substring("command".length(), s.length()));
+        s = sb.toString();
+      }
+      
       KeyStroke ks = KeyStroke.getKeyStroke(s);
-      if (ks == null)
-        throw new IllegalArgumentException("Input "+s+" must be a string that is a valid " +
-                                           "representation of a Keystroke");
+      if (ks == null) {
+        throw new OptionParseException(name, s,
+                                     "Must be a valid string representation of a Keystroke.");
+      }
       return ks;
     }
     else return NULL_KEYSTROKE;
