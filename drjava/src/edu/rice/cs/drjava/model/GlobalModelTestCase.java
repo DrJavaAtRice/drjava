@@ -448,7 +448,6 @@ public abstract class GlobalModelTestCase extends TestCase {
     protected int consoleResetCount;
     protected int interactionsResetCount;
     protected int interactionsExitedCount;
-    protected int saveBeforeProceedingCount;
     protected int saveAllBeforeProceedingCount;
     protected int nonTestCaseCount;
     protected int lastExitStatus;
@@ -471,7 +470,6 @@ public abstract class GlobalModelTestCase extends TestCase {
       interactionEndCount = 0;
       consoleResetCount = 0;
       interactionsResetCount = 0;
-      saveBeforeProceedingCount = 0;
       saveAllBeforeProceedingCount = 0;
       nonTestCaseCount = 0;
       lastExitStatus = 0;
@@ -541,12 +539,6 @@ public abstract class GlobalModelTestCase extends TestCase {
                    consoleResetCount);
     }
 
-    public void assertSaveBeforeProceedingCount(int i) {
-      assertEquals("number of times saveBeforeProceeding fired",
-                   i,
-                   saveBeforeProceedingCount);
-    }
-
     public void assertSaveAllBeforeProceedingCount(int i) {
       assertEquals("number of times saveAllBeforeProceeding fired",
                    i,
@@ -559,13 +551,13 @@ public abstract class GlobalModelTestCase extends TestCase {
                    nonTestCaseCount);
     }
 
-		public void assertFileRevertedCount(int i) {
+  public void assertFileRevertedCount(int i) {
       assertEquals("number of times fileReverted fired",
                    i,
                    fileRevertedCount);
     }
 
-		public void assertShouldRevertFileCount(int i) {
+  public void assertShouldRevertFileCount(int i) {
       assertEquals("number of times shouldRevertFile fired",
                    i,
                    shouldRevertFileCount);
@@ -627,10 +619,6 @@ public abstract class GlobalModelTestCase extends TestCase {
     public void consoleReset() {
       fail("consoleReset fired unexpectedly");
     }
-
-    public void saveBeforeProceeding(GlobalModelListener.SaveReason reason) {
-      fail("saveBeforeProceeding fired unexpectedly");
-    }    
 
     public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
       fail("saveAllBeforeProceeding fired unexpectedly");

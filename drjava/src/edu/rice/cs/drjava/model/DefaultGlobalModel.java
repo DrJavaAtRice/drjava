@@ -286,10 +286,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
 
   /**
-   * Opens multiple files and read it into the definitions.
-   * The provided file selector chooses multiple files, and fore each
+   * Opens multiple files and reads them into the definitions.
+   * The provided file selector chooses multiple files, and for each
    * successful open, the fileOpened() event is fired.
-   * @param com a command pattern command that selects what file
+   * @param com a command pattern command that selects which files
    *            to open
    *
    * @return The last opened document, or null if unsuccessful.
@@ -319,7 +319,17 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       //always return last opened Doc
       retDoc = _openFile(files[i].getAbsoluteFile());
       
+      // Make sure this is on the classpath
+      try {
+        File classpath = retDoc.getSourceRoot();
+        _interpreterControl.addClassPath(classpath.getAbsolutePath());
+      }
+      catch (InvalidPackageException e) {
+        // Invalid package-- don't add it to classpath
+      }
+      
     }
+    
     if (retDoc != null) {
       return retDoc;
     } else {
@@ -794,10 +804,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
 
   /**
-   * Called to demand that one or more listeners saves the
-   * definitions document before proceeding.  It is up to the caller
-   * of this method to check if the document has been saved.
-   * Fires saveBeforeProceeding(SaveReason) if isModifiedSinceSave() is true.
+   * Called to demand that one or more listeners saves all the
+   * definitions documents before proceeding.  It is up to the caller
+   * of this method to check if the documents have been saved.
+   * Fires saveAllBeforeProceeding(SaveReason) if areAnyModifiedSinceSave() is true.
    * @param reason the reason behind the demand to save the file
    */
     public void saveAllBeforeProceeding(final GlobalModelListener.SaveReason reason)
@@ -817,15 +827,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * @return whether any documents have been modified
      */
     public boolean areAnyModifiedSinceSave() {
-	boolean modified = false;
-	for (int i = 0; i < _definitionsDocs.getSize(); i++) {
-	    OpenDefinitionsDocument doc = (OpenDefinitionsDocument)_definitionsDocs.getElementAt(i);
-	    if (doc.isModifiedSinceSave()) {
-		modified = true;
-		break;
-	    }
-	}
-	return modified;
+      boolean modified = false;
+      for (int i = 0; i < _definitionsDocs.getSize(); i++) {
+        OpenDefinitionsDocument doc = 
+          (OpenDefinitionsDocument)_definitionsDocs.getElementAt(i);
+        if (doc.isModifiedSinceSave()) {
+          modified = true;
+          break;
+        }
+      }
+      return modified;
     }
     
 
@@ -947,30 +958,21 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
           l.fileSaved(openDoc);
         }
         });
+        
+        // Make sure this is on the classpath
+        try {
+          File classpath = getSourceRoot();
+          _interpreterControl.addClassPath(classpath.getAbsolutePath());
+        }
+        catch (InvalidPackageException e) {
+          // Invalid package-- don't add to classpath
+        }
       }
       catch (OperationCanceledException oce) {
         // OK, do nothing as the user wishes.
       }
       catch (BadLocationException docFailed) {
         throw new UnexpectedException(docFailed);
-      }
-    }
-
-    /**
-     * Called to demand that one or more listeners saves the
-     * definitions document before proceeding.  It is up to the caller
-     * of this method to check if the document has been saved.
-     * Fires saveBeforeProceeding(SaveReason) if isModifiedSinceSave() is true.
-     * @param reason the reason behind the demand to save the file
-     */
-    public void saveBeforeProceeding(final GlobalModelListener.SaveReason reason)
-    {
-      if (isModifiedSinceSave()) {
-        notifyListeners(new EventNotifier() {
-          public void notifyListener(GlobalModelListener l) {
-          l.saveBeforeProceeding(reason);
-        }
-        });
       }
     }
 
@@ -1259,18 +1261,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
     /**
      * Determines if the definitions document has changed on disk
-		 * since the last time the document was read.
+   * since the last time the document was read.
      * @return true if the document has been modified on disk
      */
     public boolean isModifiedOnDisk() {
       return _doc.isModifiedOnDisk();
     }
     
-    /** Determines if the defintions document has been changed
-     *  by an outside program. If the document has changed,
-     *  then asks the listeners if the GlobalModel should 
-     *  revert the document to the most recent version saved.
-     *  @return true if document has been reverted
+    /**
+     * Determines if the defintions document has been changed
+     * by an outside program. If the document has changed,
+     * then asks the listeners if the GlobalModel should 
+     * revert the document to the most recent version saved.
+     * @return true if document has been reverted
      */
     public boolean revertIfModifiedOnDisk() throws IOException{
       final OpenDefinitionsDocument doc = this;
@@ -1317,6 +1320,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         throw new UnexpectedException(docFailed);
       }
     }
+
     /**
      * Asks the listeners if the GlobalModel can abandon the current document.
      * Fires the canAbandonFile(File) event if isModifiedSinceSave() is true.
@@ -1702,9 +1706,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
     Vector<String> cp = DrJava.CONFIG.getSetting(EXTRA_CLASSPATH);
     if(cp!=null) {
-        Enumeration<String> enum = cp.elements();
-        while(enum.hasMoreElements())
-            _interpreterControl.addClassPath(enum.nextElement());
+      Enumeration<String> enum = cp.elements();
+      while(enum.hasMoreElements()) {
+        _interpreterControl.addClassPath(enum.nextElement());
+      }
     }
   }
 

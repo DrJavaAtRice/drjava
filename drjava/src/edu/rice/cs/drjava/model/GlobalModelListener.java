@@ -144,12 +144,6 @@ public interface GlobalModelListener {
   public void consoleReset();
 
   /**
-   * Called to demand that the listeners save the current document
-   * before the GlobalModel can proceed with another action.  
-   */
-  public void saveBeforeProceeding(SaveReason reason);
-
-  /**
    * Called to demand that the listeners save all open documents
    * before the GlobalModel can proceed with another action.  
    */
@@ -171,5 +165,5 @@ public interface GlobalModelListener {
    * document to a newer version saved on file.
    */
   public boolean shouldRevertFile(OpenDefinitionsDocument doc);
-	
+ 
 }

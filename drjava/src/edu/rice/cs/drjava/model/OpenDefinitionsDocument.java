@@ -106,15 +106,6 @@ public interface OpenDefinitionsDocument {
   public void saveFileAs(FileSaveSelector com) throws IOException;
 
   /**
-   * Called to demand that one or more listeners saves the
-   * definitions document before proceeding.  It is up to the caller
-   * of this method to check if the document has been saved.
-   * Fires saveBeforeProceeding(SaveReason) if isModifiedSinceSave() is true.
-   * @param reason the reason behind the demand to save the file
-   */
-  public void saveBeforeProceeding(final GlobalModelListener.SaveReason reason);
-
-  /**
    * Starts compiling the source.  Demands that the definitions be
    * saved before proceeding with the compile.  Fires the appropriate
    * events as the compiliation proceeds and finishes.
@@ -172,14 +163,13 @@ public interface OpenDefinitionsDocument {
    */
   public boolean isModifiedOnDisk();
 
-	/**
+  /**
    * Asks the GlobalModel if it can revert current definitions
-	 * to version on disk. If ok, it reverts the file to the
-	 * version on disk
-   * last save.
+   * to version on disk. If ok, it reverts the file to the
+   * version on disk.
    * @return true if the document has been reverted
    */
-	public boolean revertIfModifiedOnDisk() throws IOException;
+  public boolean revertIfModifiedOnDisk() throws IOException;
 
   /**
    * Returns whether the GlobalModel can abandon this document,

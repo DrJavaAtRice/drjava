@@ -334,7 +334,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
 
   /**
    * If we try to compile an unsaved file but we do save it from within
-   * saveBeforeProceeding, the compile should occur happily.
+   * saveAllBeforeProceeding, the compile should occur happily.
    */
   public void testCompileUnsavedButSaveWhenAsked()
     throws BadLocationException, IOException
@@ -399,7 +399,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
 
   /**
    * If we try to compile an unsaved file, and if we don't save when
-   * asked to saveBeforeProceeding, it should not do the compile
+   * asked to saveAllBeforeProceeding, it should not do the compile
    * or any other actions.
    */
   public void testCompileAbortsIfUnsaved()
@@ -425,7 +425,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
 
   /**
    * If we try to compile while any files are unsaved, and if we don't 
-   * save when asked to saveBeforeProceeding, it should not do the compile
+   * save when asked to saveAllBeforeProceeding, it should not do the compile
    * or any other actions.
    */
   public void testCompileAbortsIfAnyUnsaved()
@@ -437,7 +437,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     TestListener listener = new TestListener() {
       public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
         assertModified(true, doc);
-	assertModified(true, doc2);
+ assertModified(true, doc2);
         assertEquals(_name() + "save reason", COMPILE_REASON, reason);
         saveAllBeforeProceedingCount++;
         // since we don't actually save the compile should abort
@@ -455,7 +455,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
 
 /**
    * If we try to compile while any files (including the active file) are unsaved 
-   * but we do save it from within saveBeforeProceeding, the compile should 
+   * but we do save it from within saveAllBeforeProceeding, the compile should 
    * occur happily.
    */
   public void testCompileAnyUnsavedButSaveWhenAsked()
@@ -470,7 +470,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
       public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
         assertEquals(_name() + "save reason", COMPILE_REASON, reason);
         assertModified(true, doc);
-	assertModified(true, doc2);
+ assertModified(true, doc2);
         assertSaveCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
@@ -479,7 +479,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
 
         try {
           doc.saveFile(new FileSelector(file));
-	  doc2.saveFile(new FileSelector(file2));
+   doc2.saveFile(new FileSelector(file2));
         }
         catch (IOException ioe) {
           fail("Save produced exception: " + ioe);
@@ -523,9 +523,9 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
   }
 
-/**
+  /**
    * If we try to compile while any files (but not the active file) are unsaved 
-   * but we do save it from within saveBeforeProceeding, the compile should occur 
+   * but we do save it from within saveAllBeforeProceeding, the compile should occur 
    * happily.
    */
   public void testCompileActiveSavedAnyUnsavedButSaveWhenAsked()
@@ -540,7 +540,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
       public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
         assertEquals(_name() + "save reason", COMPILE_REASON, reason);
         assertModified(false, doc);
-	assertModified(true, doc2);
+ assertModified(true, doc2);
         assertSaveCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
@@ -548,16 +548,16 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
         assertConsoleResetCount(0);
 
         try {
-	  doc2.saveFile(new FileSelector(file2));
+   doc2.saveFile(new FileSelector(file2));
         }
         catch (IOException ioe) {
           fail("Save produced exception: " + ioe);
         }
 
         saveAllBeforeProceedingCount++;
-	assertModified(false, doc);
-	assertModified(false, doc2);
-	assertTrue(!_model.areAnyModifiedSinceSave());
+ assertModified(false, doc);
+ assertModified(false, doc2);
+ assertTrue(!_model.areAnyModifiedSinceSave());
       }
 
       public void fileSaved(OpenDefinitionsDocument doc) {

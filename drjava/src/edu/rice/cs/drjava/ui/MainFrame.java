@@ -228,17 +228,17 @@ public class MainFrame extends JFrame {
   /** Reverts the current document. */
   private Action _revertAction = new AbstractAction("Revert") {
     public void actionPerformed(ActionEvent ae) {
-      String title = "Confirm revert file";
+      String title = "Revert to Saved?";
 
-      String message = "Are you sure you would like to revert the " +
-        "current file to the version on disk?";
+      String message = "Are you sure you want to revert the current " +
+        "file to the version on disk?";
 
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
                                              message,
                                              title,
                                              JOptionPane.YES_NO_OPTION);
       if (rc == JOptionPane.YES_OPTION) {
-					_revert();
+     _revert();
       }
 
     }
@@ -321,7 +321,7 @@ public class MainFrame extends JFrame {
     public void actionPerformed(ActionEvent ae) {
       String title = "Confirm abort interaction";
 
-      String message = "Are you sure you would like to abort the " +
+      String message = "Are you sure you want to abort the " +
         "current interaction?";
 
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
@@ -1044,7 +1044,7 @@ public class MainFrame extends JFrame {
    */
   private void _gotoLine() {
     final String msg = "What line would you like to go to?";
-    final String title = "Jump to line";
+    final String title = "Go to Line";
     String lineStr = JOptionPane.showInputDialog(this,
                                                  msg,
                                                  title,
@@ -1228,8 +1228,8 @@ public class MainFrame extends JFrame {
     tmpItem = fileMenu.add(_saveAllAction);
 
     tmpItem = fileMenu.add(_revertAction);
-		_revertMenuItem = tmpItem;
-		_revertAction.setEnabled(false);
+  _revertMenuItem = tmpItem;
+  _revertAction.setEnabled(false);
 
     // Close, Close all
     fileMenu.addSeparator();
@@ -1760,16 +1760,16 @@ public class MainFrame extends JFrame {
       _defScrollPanes.remove(doc);
     }
     public void fileReverted(OpenDefinitionsDocument doc) {
-				updateFileTitle();
-				_currentDefPane.setPositionAndScroll(0);
-		}
+    updateFileTitle();
+    _currentDefPane.setPositionAndScroll(0);
+  }
     public void activeDocumentChanged(OpenDefinitionsDocument active) {
       _switchDefScrollPane();
 
       boolean isModified = active.isModifiedSinceSave();
       boolean canCompile = (!isModified && !active.isUntitled());
       _saveAction.setEnabled(isModified);
-			_revertAction.setEnabled(!active.isUntitled());
+   _revertAction.setEnabled(!active.isUntitled());
 
       //_compileAction.setEnabled(canCompile);
 
@@ -1783,11 +1783,11 @@ public class MainFrame extends JFrame {
       updateFileTitle();
       _posListener.updateLocation();
       _currentDefPane.requestFocus();
-			try {
-					active.revertIfModifiedOnDisk();
-			} catch (IOException e) {
-					_showIOError(e);
-			}
+   try {
+     active.revertIfModifiedOnDisk();
+   } catch (IOException e) {
+     _showIOError(e);
+   }
     }
 
     public void interactionStarted() {
@@ -1819,7 +1819,7 @@ public class MainFrame extends JFrame {
     }
 
     public void junitStarted() {
-	//_tabbedPane.setSelectedIndex(JUNIT_TAB);
+ //_tabbedPane.setSelectedIndex(JUNIT_TAB);
       _saveAction.setEnabled(false);
       hourglassOn();
     }
@@ -1854,63 +1854,28 @@ public class MainFrame extends JFrame {
     public void consoleReset() {
     }
 
-    public void saveBeforeProceeding(GlobalModelListener.SaveReason reason) {
-      String message;
-      if (reason == COMPILE_REASON) {
-        message =
-          "To compile, you must first save the current file.\n" +
-          "Would you like to save and then compile?";
-      }
-      else if (reason == JUNIT_REASON) {
-        message =
-          "To run JUnit, you must first save and compile the current\n" +
-          "file. Would like to save and then compile?";
-      }
-      else if (reason == DEBUG_REASON) {
-        message =
-          "To use debugging commands, you must first save and compile\n" +
-          "the current file. Would like to save and then compile?";
-      }
-      else {
-        throw new RuntimeException("Invalid reason for forcing a save.");
-      }
-      int rc = JOptionPane.showConfirmDialog(MainFrame.this, message,
-                                             "Must save to continue",
-                                             JOptionPane.YES_NO_OPTION);
-      switch (rc) {
-        case JOptionPane.YES_OPTION:
-          _save();
-          break;
-        case JOptionPane.NO_OPTION:
-          // do nothing
-          break;
-        default:
-          throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
-      }
-    }
-
     public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
       String message;
       if (reason == COMPILE_REASON) {
         message =
-          "To compile, you must first save all modified files.\n" +
+          "To compile, you must first save ALL modified files.\n" +
           "Would you like to save and then compile?";
       }
       else if (reason == JUNIT_REASON) {
         message =
-          "To run JUnit, you must first save and compile all modified\n" +
+          "To run JUnit, you must first save and compile ALL modified\n" +
           "files. Would like to save and then compile?";
       }
       else if (reason == DEBUG_REASON) {
         message =
           "To use debugging commands, you must first save and compile\n" +
-          "all modified files. Would like to save and then compile?";
+          "ALL modified files. Would like to save and then compile?";
       }
       else {
         throw new RuntimeException("Invalid reason for forcing a save.");
       }
       int rc = JOptionPane.showConfirmDialog(MainFrame.this, message,
-                                             "Must save to continue",
+                                             "Must save all files to continue",
                                              JOptionPane.YES_NO_OPTION);
       switch (rc) {
         case JOptionPane.YES_OPTION:
@@ -1963,12 +1928,12 @@ public class MainFrame extends JFrame {
       }
       catch (IllegalStateException ise) {
         // No file exists
-        fname = "untitled file";
+        fname = "Untitled file";
       }
 
-      String text = fname + " has been modified. Would you like to " + "save?";
+      String text = fname + " has been modified. Would you like to save it?";
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
-                                             "Would you like to save " + fname + "?",
+                                             "Save " + fname + "?",
                                              text,
                                              JOptionPane.YES_NO_CANCEL_OPTION);
 
@@ -1985,47 +1950,49 @@ public class MainFrame extends JFrame {
           throw new RuntimeException("Invalid rc: " + rc);
       }
     }
-		/**
-		 * Called to ask the listener if it is OK to revert the current
-		 * document to a newer version saved on file.
- 		 */
-			public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
-				 
-					String fname;
-					
-					if (! _model.getActiveDocument().equals(doc)) {
-							_model.setActiveDocument(doc);
-					}
-					
-					try {
-							File file = doc.getFile();
-							fname = file.getName();
-					}
-					catch (IllegalStateException ise) {
-							// No file exists
-							fname = "untitled file";
-					}
-					
-					String text = fname + " has changed on disk. Would you like to revert?";
-					int rc = JOptionPane.showConfirmDialog(MainFrame.this,
-																								 text,
-                                             "Would you like to revert " + fname + "?",
+    
+    /**
+     * Called to ask the listener if it is OK to revert the current
+     * document to a newer version saved on file.
+     */
+    public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
+      
+      String fname;
+      
+      if (! _model.getActiveDocument().equals(doc)) {
+        _model.setActiveDocument(doc);
+      }
+      
+      try {
+        File file = doc.getFile();
+        fname = file.getName();
+      }
+      catch (IllegalStateException ise) {
+        // No file exists
+        fname = "Untitled file";
+      }
+      
+      String text = fname + " has changed on disk. Would you like to " +
+        "reload it?\nThis will discard any changes you have made.";
+      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
+                                             text,
+                                             fname + " Modified on Disk",
                                              JOptionPane.YES_NO_OPTION);
 
-					switch (rc) {
-					case JOptionPane.YES_OPTION:
-							return true;
-					case JOptionPane.NO_OPTION:
-							return false;
-					case JOptionPane.CLOSED_OPTION:
-							return false;
-					default:
-							throw new RuntimeException("Invalid rc: " + rc);
-					}
-			}
+     switch (rc) {
+     case JOptionPane.YES_OPTION:
+       return true;
+     case JOptionPane.NO_OPTION:
+       return false;
+     case JOptionPane.CLOSED_OPTION:
+       return false;
+     default:
+       throw new RuntimeException("Invalid rc: " + rc);
+     }
+   }
 
   }
-	
+ 
 
   /**
    * Prints a display label for each item in the document list.
