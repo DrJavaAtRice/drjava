@@ -2660,14 +2660,23 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         final File file = com.getFile();
         OpenDefinitionsDocument otherDoc = _getOpenDocument(file);
         boolean shouldSave = false;
+        boolean openInOtherDoc = ((otherDoc != null) && (openDoc != otherDoc));
         // Check if file is already open in another document
-        if ( otherDoc != null && openDoc != otherDoc ) {
+        if ( openInOtherDoc ) {
           // Can't save over an open document
           shouldSave = com.warnFileOpen(file);
         }
         
         // If the file exists, make sure it's ok to overwrite it
-        if (shouldSave || !file.exists() || com.verifyOverwrite()) {
+        if ((shouldSave && openInOtherDoc) || (!openInOtherDoc && (!file.exists() || com.verifyOverwrite()))) {
+//        // Check if file is already open in another document
+//        if ( otherDoc != null && openDoc != otherDoc ) {
+//          // Can't save over an open document
+//          shouldSave = com.warnFileOpen(file);
+//        }
+//        
+//        // If the file exists, make sure it's ok to overwrite it
+//        if (shouldSave || !file.exists() || com.verifyOverwrite()) {
           // Correct the case of the filename (in Windows)
           if (! file.getCanonicalFile().getName().equals(file.getName())) {
             file.renameTo(file);
