@@ -222,7 +222,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   }
   
   /** Returns true if the slave is in the process of starting. */
-  protected synchronized final boolean isStartupInProgress() {
+  protected synchronized boolean isStartupInProgress() {
     return _startupInProgress;
   }
 }
