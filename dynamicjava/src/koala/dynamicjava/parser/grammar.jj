@@ -1,0 +1,4335 @@
+/* -*- Java -*- */
+// Parser options
+//
+options {
+  JAVA_UNICODE_ESCAPE    = true;
+  OPTIMIZE_TOKEN_MANAGER = true;
+  STATIC                 = false;
+}
+
+PARSER_BEGIN(Parser)
+package koala.dynamicjava.parser;
+
+import java.lang.reflect.*;
+import java.util.*;
+
+import koala.dynamicjava.parser.wrapper.*;
+import koala.dynamicjava.tree.*;
+import koala.dynamicjava.tree.visitor.*;
+import koala.dynamicjava.util.*;
+
+/**
+ * This class represents a (interpreted) Java 1.1 language parser
+ *
+ * @author  Stephane Hillion
+ * @version 1.1 - 1999/10/25
+ */
+
+public class Parser {
+    /**
+     * The name of the file currenty interpreted
+     */
+    private String filename;
+
+    /**
+     * The message reader
+     */
+    private LocalizedMessageReader reader =
+	new LocalizedMessageReader("koala.dynamicjava.parser.resources.messages");
+
+    /**
+     * Sets the current filename
+     * @param fname the name of the input file
+     */
+    public void setFilename(String fname) {
+	filename = fname;
+    }
+
+    /**
+     * Creates a primary expression from a refix and a list of suffixes
+     * @param prefix   the prefix expression
+     * @param suffixes the suffix list built in reverse order
+     */
+    private static Expression createPrimaryExpression(Expression prefix,
+						      List       suffixes) {
+        Iterator it = suffixes.iterator();
+	if (it.hasNext()) {
+	    return ((ExpressionSuffix)it.next()).createExpression(prefix, it);
+	} else {
+	    if (prefix instanceof CompileTimeQualifiedName) {
+		return ((CompileTimeQualifiedName)prefix).createFieldAccess();
+	    } else if (prefix instanceof CompileTimeExpression) {
+		return ((CompileTimeExpression)prefix).createRuntimeExpression();
+	    } else {
+		return prefix;
+	    }
+	}
+    }
+    
+    /**
+     * Creates a field declaration
+     */
+    private FieldDeclaration createFieldDeclaration(ModifierFlags  mf,
+						    Type           typ,
+						    Token          name,
+						    Expression     exp,
+						    int            dim) {
+	int bl;
+	int bc;
+	int el;
+	int ec;
+	int flags = 0;
+
+	// Compute the position of the declaration in the source code
+	if (mf != null) {
+	    bl    = mf.beginLine;
+	    bc    = mf.beginColumn;
+	    flags = mf.accessFlags;
+	} else {
+	    bl = typ.getBeginLine();
+	    bc = typ.getBeginColumn();
+	}
+
+	if (exp != null) {
+	    el = exp.getEndLine();
+	    ec = exp.getEndColumn();
+	} else {
+	    el = name.endLine;
+	    ec = name.endColumn;
+	}
+
+	// If the field is an array, create an array type node
+	if (dim > 0) {
+	    typ = new ArrayType(typ, dim,
+				filename,
+				typ.getBeginLine(), typ.getBeginColumn(),
+				typ.getEndLine(),   typ.getEndColumn());
+	}
+
+	return new FieldDeclaration(flags, typ, name.image, exp,
+				    filename, bl, bc, el, ec);
+    }
+
+    /**
+     * Creates a variable declaration
+     */
+    private VariableDeclaration createVariableDeclaration(Token          mf,
+							  Type           typ,
+							  Token          name,
+							  Expression     exp,
+							  int            dim) {
+	int     bl;
+	int     bc;
+	int     el;
+	int     ec;
+	boolean isFinal = false;
+
+	// Compute the position of the declaration in the source code
+	if (mf != null) {
+	    bl      = mf.beginLine;
+	    bc      = mf.beginColumn;
+	    isFinal = true;
+	} else {
+	    bl = typ.getBeginLine();
+	    bc = typ.getBeginColumn();
+	}
+
+	if (exp != null) {
+	    el = exp.getEndLine();
+	    ec = exp.getEndColumn();
+	} else {
+	    el = name.endLine;
+	    ec = name.endColumn;
+	}
+
+	// If the variable contains an array, create an array type node
+	if (dim > 0) {
+	    typ = new ArrayType(typ, dim,
+				filename,
+				typ.getBeginLine(), typ.getBeginColumn(),
+				typ.getEndLine(),   typ.getEndColumn());
+	}
+
+	return new VariableDeclaration(isFinal, typ, name.image, exp,
+				       filename, bl, bc, el, ec);
+    }
+
+    /*
+     * The classes derived from this one are used for parsing only
+     */
+
+    abstract class ExpressionSuffix {
+	/**
+	 * Creates an expression node
+	 * @param prefix the prefix expression
+	 * @param it     an iterator over the suffixes
+	 */
+	public abstract Expression createExpression(Expression prefix, Iterator it);
+    }
+
+    class DotAllocationSuffix extends ExpressionSuffix {
+	/**
+	 * The allocation expression
+	 */
+	public Allocation expression;
+
+	/**
+	 * Creates a new suffix
+	 * @param exp the expression
+	 */
+	public DotAllocationSuffix(Allocation exp) {
+	    expression = exp;
+	}
+
+	/**
+	 * Creates an expression node
+	 * @param prefix the prefix expression
+	 * @param it     an iterator over the suffixes
+	 */
+	public Expression createExpression(Expression prefix, Iterator it) {
+	    Expression exp = prefix;
+	    if (it.hasNext()) {
+		exp = ((ExpressionSuffix)it.next()).createExpression(prefix, it);
+	    } else {
+		if (prefix instanceof CompileTimeExpression) {
+		    exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
+		}
+	    }
+	    if (expression instanceof SimpleAllocation) {
+		SimpleAllocation sa = (SimpleAllocation)expression;
+		return new InnerAllocation
+		    (exp, sa.getCreationType(), sa.getArguments(),
+		     filename,
+		     exp.getBeginLine(), exp.getBeginColumn(),
+		     sa.getEndLine(),    sa.getEndColumn());
+	    } else {
+		ClassAllocation ca = (ClassAllocation)expression;
+		return new InnerClassAllocation
+		    (exp, ca.getCreationType(), ca.getArguments(), ca.getMembers(),
+		     filename,
+		     exp.getBeginLine(), exp.getBeginColumn(),
+		     ca.getEndLine(),    ca.getEndColumn());		
+	    }
+	}
+    }
+
+    class DotIdentifierSuffix extends ExpressionSuffix {
+	/**
+	 * The identifier
+	 */
+	public Token identifier;
+
+	/**
+	 * Creates a new suffix
+	 * @param ident the identifier
+	 */
+	public DotIdentifierSuffix(Token ident) {
+	    identifier = ident;
+	}
+
+	/**
+	 * Creates an expression node
+	 * @param prefix the prefix expression
+	 * @param it     an iterator over the suffixes
+	 */
+	public Expression createExpression(Expression prefix, Iterator it) {
+	    Expression exp = prefix;
+	    if (it.hasNext()) {
+		exp = ((ExpressionSuffix)it.next()).createExpression(prefix, it);
+	    } else {
+		if (prefix instanceof CompileTimeExpression) {
+		    exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
+		}
+	    }
+	    return new ObjectFieldAccess
+		(exp, identifier.image,
+		 filename,
+		 exp.getBeginLine(), exp.getBeginColumn(),
+		 identifier.endLine, identifier.endColumn);
+	}
+    }
+
+    class ArrayReferenceSuffix extends ExpressionSuffix {
+	/**
+	 * The expression
+	 */
+	public Expression expression;
+
+	/**
+	 * The end line
+	 */
+	public int endLine;
+
+	/**
+	 * The end column
+	 */
+	public int endColumn;
+
+	/**
+	 * Creates a new suffix
+	 * @param exp the expression
+	 * @param el  the end line
+	 * @param ec  the end column
+	 */
+	public ArrayReferenceSuffix(Expression exp, int el, int ec) {
+	    expression = exp;
+	    endLine    = el;
+	    endColumn  = ec;
+	}
+
+	/**
+	 * Creates an expression node
+	 * @param prefix the prefix expression
+	 * @param it     an iterator over the suffixes
+	 */
+	public Expression createExpression(Expression prefix, Iterator it) {
+	    Expression exp = prefix;
+	    if (it.hasNext()) {
+		exp = ((ExpressionSuffix)it.next()).createExpression(prefix, it);
+	    } else {
+		if (prefix instanceof CompileTimeExpression) {
+		    exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
+		}
+	    }
+	    return new ArrayAccess
+		(exp, expression,
+		 filename,
+		 exp.getBeginLine(), exp.getBeginColumn(),
+		 endLine, endColumn);
+	}
+    }
+    
+    class DotThisSuffix extends ExpressionSuffix {
+	/**
+	 * The end line
+	 */
+	public int endLine;
+	
+	/**
+	 * The end column
+	 */
+	public int endColumn;
+
+	/**
+	 * Creates a new suffix
+	 * @param el  the end line
+	 * @param ec  the end column
+	 * @param fn  the file name
+	 */
+	public DotThisSuffix(int el, int ec) {
+	    endLine    = el;
+	    endColumn  = ec;
+	}
+
+	/**
+	 * Creates an expression node
+	 * @param prefix the prefix expression
+	 * @param it     an iterator over the suffixes
+	 */
+	public Expression createExpression(Expression prefix, Iterator it) {
+	    Expression exp = prefix;
+	    if (it.hasNext()) {
+		exp = ((ExpressionSuffix)it.next()).createExpression(prefix, it);
+	    } else {
+		if (prefix instanceof CompileTimeExpression) {
+		    exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
+		}
+	    }
+	    if (exp instanceof QualifiedName) {
+		return new ThisExpression
+		    (((QualifiedName)exp).getIdentifiers(),
+		     filename,
+		     exp.getBeginLine(), exp.getBeginColumn(),
+		     endLine, endColumn);
+	    } else {
+		throw new ParseError(reader.getMessage("this.prefix", null),
+				     filename,
+				     exp.getBeginLine(), exp.getBeginColumn());
+	    }
+	}
+    }
+
+    class ArgumentsSuffix extends ExpressionSuffix {
+	/**
+	 * The arguments
+	 */
+	public List arguments;
+	
+	/**
+	 * The end line
+	 */
+	public int endLine;
+
+	/**
+	 * The end column
+	 */
+	public int endColumn;
+
+	/**
+	 * Creates a new argument suffix
+	 * @param args  the list of argument
+	 * @param el    the end line
+	 * @param ec    the end column
+	 */
+	public ArgumentsSuffix(List args, int el, int ec) {
+	    arguments = args;
+	    endLine   = el;
+	    endColumn = ec;
+	}
+
+	/**
+	 * Creates an expression node
+	 * @param prefix the prefix expression
+	 * @param it     an iterator over the suffixes
+	 */
+	public Expression createExpression(Expression prefix, Iterator it) {
+	    if (it.hasNext()) {
+		ExpressionSuffix es = (ExpressionSuffix)it.next();
+		if (es instanceof DotIdentifierSuffix) {
+		    DotIdentifierSuffix dis = (DotIdentifierSuffix)es;
+		    Expression exp = prefix;
+		    if (it.hasNext()) {
+			exp = ((ExpressionSuffix)it.next()).createExpression(prefix, it);
+		    } else if (prefix instanceof CompileTimeExpression) {
+			exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
+		    }
+		    return new ObjectMethodCall
+			(exp, dis.identifier.image, arguments,
+			 filename,
+			 exp.getBeginLine(), exp.getBeginColumn(),
+			 endLine,            endColumn);
+		} else {
+		    throw new ParseError(reader.getMessage("parameter.list", null),
+					 filename,
+					 endLine, endColumn);
+		}
+	    } else {
+		if (prefix instanceof CompileTimeQualifiedName) {
+		    // Remove the last identifier from the qualified name
+		    List  l = ((CompileTimeQualifiedName)prefix).identifiers;
+		    Token f = ((TreeToken)l.get(0)).getToken();
+		    Token t = ((TreeToken)l.remove(l.size()-1)).getToken();
+		    Expression exp = null;
+		    if (l.size() >= 1) {
+			exp = ((CompileTimeQualifiedName)prefix).
+			    createRuntimeExpression();
+		    }
+		    return new ObjectMethodCall(exp, t.image, arguments,
+						filename,
+						f.beginLine, f.beginColumn,
+						endLine,   endColumn);
+		} else if (prefix instanceof CompileTimeSuperExpression) {
+		    // Transform the super expression into a super method call
+		    CompileTimeSuperExpression se = (CompileTimeSuperExpression)prefix;
+		    return new SuperMethodCall(se.identifier, arguments,
+					       filename,
+					       se.getBeginLine(), se.getBeginColumn(),
+					       endLine,           endColumn);
+		} else {
+		    throw new ParseError(reader.getMessage("parameter.list", null),
+					 filename,
+					 endLine, endColumn);
+		}
+	    }
+	}
+    }
+
+    interface CompileTimeExpression {
+	/**
+	 * Builds a runtime expression from this compile-time one.
+	 * This method must only be called when the expression has no suffix.
+	 */
+	Expression createRuntimeExpression();
+
+    }
+
+    class CompileTimeSuperExpression
+	extends Expression implements CompileTimeExpression {
+	/**
+	 * The identifier from the superclass
+	 */
+	public String identifier;
+    
+	/**
+	 * Initializes the expression
+	 * @param ident the identifier from the super class
+	 * @param bl    the begin line
+	 * @param bc    the begin column
+	 * @param el    the end line
+	 * @param ec    the end column
+	 */
+	public CompileTimeSuperExpression(String ident, int bl, int bc, int el, int ec) {
+	    super("", bl, bc, el, ec);
+	    identifier = ident;
+	}
+
+	/**
+	 * Builds a runtime expression from this compile-time one.
+	 * This method must be called when the expression has no suffix
+	 */
+	public Expression createRuntimeExpression() {
+	    return new SuperFieldAccess(identifier,
+					filename,
+					getBeginLine(), getBeginColumn(),
+					getEndLine(),   getEndColumn());
+	}
+
+	/**
+	 * Not used
+	 */
+	public Object acceptVisitor(Visitor visitor) {
+	    return null;
+	}
+    }
+
+    class CompileTimeQualifiedName extends Expression implements CompileTimeExpression {
+	/**
+	 * The identifiers (tokens)
+	 */
+	public List identifiers;
+    
+	/**
+	 * Initializes the expression
+	 * @param ids a list of token
+	 */
+	public CompileTimeQualifiedName(List ids) {
+	    super("", 0, 0, 0, 0);
+	    identifiers = ids;
+	}
+
+	/**
+	 * Creates a runtime qualified name
+	 */
+	public Expression createFieldAccess() {
+	    if (identifiers.size() == 1) {
+		Token t = ((TreeToken)identifiers.get(0)).getToken();
+		return new QualifiedName(identifiers,
+					 filename,
+					 t.beginLine, t.beginColumn,
+					 t.endLine,   t.endColumn);
+	    } else {
+		Token f = ((TreeToken)identifiers.get(0)).getToken();
+		Token t = ((TreeToken)identifiers.remove
+			      (identifiers.size()-1)).getToken();;
+		Token l = ((TreeToken)identifiers.get
+			      (identifiers.size()-1)).getToken();
+		return new ObjectFieldAccess
+		    (new QualifiedName(identifiers,
+				       filename,
+				       f.beginLine, f.beginColumn,
+				       l.endLine,   l.endColumn),
+		     t.image,
+		     filename,
+		     f.beginLine, f.beginColumn,
+		     t.endLine,   t.endColumn);
+	    }
+	}
+
+	/**
+	 * Builds a runtime expression from this compile-time one.
+	 * This method must be called when the expression has no suffix
+	 */
+	public Expression createRuntimeExpression() {
+	    Token first = ((TreeToken)identifiers.get(0)).getToken();
+	    Token last  = ((TreeToken)identifiers.get(identifiers.size()-1)).getToken();
+	    return new QualifiedName(identifiers,
+				     filename,
+				     first.beginLine, first.beginColumn,
+				     last.endLine,    last.endColumn);
+	}
+
+	/**
+	 * Not used
+	 */
+	public Object acceptVisitor(Visitor visitor) {
+	    return null;
+	}
+    }
+
+    /**
+     * To store modifier flags
+     */
+    static class ModifierFlags {
+	int accessFlags;
+	int beginLine;
+	int beginColumn;
+
+	ModifierFlags(int flags, int bl, int bc) {
+	    accessFlags = flags;
+	    beginLine   = bl;
+	    beginColumn = bc;
+	}
+    }
+
+    /**
+     * To store a class body
+     */
+    static class ClassBody {
+	List list;
+	int  endLine;
+	int  endColumn;
+
+	ClassBody(List l, int el, int ec) {
+	    list      = l;
+	    endLine   = el;
+	    endColumn = ec;
+	}
+    }
+}
+PARSER_END(Parser)
+
+/*
+ * The lexical grammar
+ */
+
+/* WHITE SPACE */
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+}
+
+/* COMMENTS */
+
+MORE :
+{
+  "//" : IN_SINGLE_LINE_COMMENT
+|
+  "#" : IN_SINGLE_LINE_COMMENT
+|
+  <"/**" ~["/"]> { input_stream.backup(1); } : IN_FORMAL_COMMENT
+|
+  "/*" : IN_MULTI_LINE_COMMENT
+}
+
+<IN_SINGLE_LINE_COMMENT>
+SPECIAL_TOKEN :
+{
+  <SINGLE_LINE_COMMENT: "\n" | "\r" | "\r\n" > : DEFAULT
+}
+
+<IN_FORMAL_COMMENT>
+SPECIAL_TOKEN :
+{
+  <FORMAL_COMMENT: "*/" > : DEFAULT
+}
+
+<IN_MULTI_LINE_COMMENT>
+SPECIAL_TOKEN :
+{
+  <MULTI_LINE_COMMENT: "*/" > : DEFAULT
+}
+
+<IN_SINGLE_LINE_COMMENT,IN_FORMAL_COMMENT,IN_MULTI_LINE_COMMENT>
+MORE :
+{
+  < ~[] >
+}
+
+/* RESERVED WORDS AND LITERALS */
+
+TOKEN :
+{
+  < ABSTRACT: "abstract" >
+| < BOOLEAN: "boolean" >
+| < BREAK: "break" >
+| < BYTE: "byte" >
+| < CASE: "case" >
+| < CATCH: "catch" >
+| < CHAR: "char" >
+| < CLASS: "class" >
+| < CONST: "const" >
+| < CONTINUE: "continue" >
+| < _DEFAULT: "default" >
+| < DO: "do" >
+| < DOUBLE: "double" >
+| < ELSE: "else" >
+| < EXTENDS: "extends" >
+| < FALSE: "false" >
+| < FINAL: "final" >
+| < FINALLY: "finally" >
+| < FLOAT: "float" >
+| < FOR: "for" >
+| < GOTO: "goto" >
+| < IF: "if" >
+| < IMPLEMENTS: "implements" >
+| < IMPORT: "import" >
+| < INSTANCEOF: "instanceof" >
+| < INT: "int" >
+| < INTERFACE: "interface" >
+| < LONG: "long" >
+| < NATIVE: "native" >
+| < NEW: "new" >
+| < NULL: "null" >
+| < PACKAGE: "package">
+| < PRIVATE: "private" >
+| < PROTECTED: "protected" >
+| < PUBLIC: "public" >
+| < RETURN: "return" >
+| < SHORT: "short" >
+| < STATIC: "static" >
+| < SUPER: "super" >
+| < SWITCH: "switch" >
+| < SYNCHRONIZED: "synchronized" >
+| < THIS: "this" >
+| < THROW: "throw" >
+| < THROWS: "throws" >
+| < TRANSIENT: "transient" >
+| < TRUE: "true" >
+| < TRY: "try" >
+| < VOID: "void" >
+| < VOLATILE: "volatile" >
+| < WHILE: "while" >
+}
+
+/* LITERALS */
+
+TOKEN :
+{
+  < INTEGER_LITERAL:
+        <DECIMAL_LITERAL>
+      | <HEX_LITERAL>
+      | <OCTAL_LITERAL>
+  >
+|
+  < LONG_LITERAL:
+        <DECIMAL_LITERAL> ["l","L"]
+      | <HEX_LITERAL>     ["l","L"]
+      | <OCTAL_LITERAL>   ["l","L"]
+  >
+|
+  < #DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* >
+|
+  < #HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
+|
+  < #OCTAL_LITERAL: "0" (["0"-"7"])* >
+|
+  < FLOAT_LITERAL:
+        (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? ["f","F"]
+      | "." (["0"-"9"])+ (<EXPONENT>)? ["f","F"]
+      | (["0"-"9"])+ <EXPONENT> ["f","F"]
+      | (["0"-"9"])+ (<EXPONENT>)? ["f","F"]
+  >
+|
+  < DOUBLE_LITERAL:
+        (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["d","D"])?
+      | "." (["0"-"9"])+ (<EXPONENT>)? (["d","D"])?
+      | (["0"-"9"])+ <EXPONENT> (["d","D"])?
+      | (["0"-"9"])+ (<EXPONENT>)? ["d","D"]
+  >
+|
+  < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
+|
+  < CHARACTER_LITERAL:
+      "'"
+      (   (~["'","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )
+      "'"
+  >
+|
+  < STRING_LITERAL:
+      "\""
+      (   (~["\"","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )*
+      "\""
+  >
+}
+
+/* IDENTIFIERS */
+
+TOKEN :
+{
+  < IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
+|
+  < #LETTER:
+      [
+       "\u0024",
+       "\u0041"-"\u005a",
+       "\u005f",
+       "\u0061"-"\u007a",
+       "\u00c0"-"\u00d6",
+       "\u00d8"-"\u00f6",
+       "\u00f8"-"\u00ff",
+       "\u0100"-"\u1fff",
+       "\u3040"-"\u318f",
+       "\u3300"-"\u337f",
+       "\u3400"-"\u3d2d",
+       "\u4e00"-"\u9fff",
+       "\uf900"-"\ufaff"
+      ]
+  >
+|
+  < #DIGIT:
+      [
+       "\u0030"-"\u0039",
+       "\u0660"-"\u0669",
+       "\u06f0"-"\u06f9",
+       "\u0966"-"\u096f",
+       "\u09e6"-"\u09ef",
+       "\u0a66"-"\u0a6f",
+       "\u0ae6"-"\u0aef",
+       "\u0b66"-"\u0b6f",
+       "\u0be7"-"\u0bef",
+       "\u0c66"-"\u0c6f",
+       "\u0ce6"-"\u0cef",
+       "\u0d66"-"\u0d6f",
+       "\u0e50"-"\u0e59",
+       "\u0ed0"-"\u0ed9",
+       "\u1040"-"\u1049"
+      ]
+  >
+}
+
+/* SEPARATORS */
+
+TOKEN :
+{
+  < LPAREN: "(" >
+| < RPAREN: ")" >
+| < LBRACE: "{" >
+| < RBRACE: "}" >
+| < LBRACKET: "[" >
+| < RBRACKET: "]" >
+| < SEMICOLON: ";" >
+| < COMMA: "," >
+| < DOT: "." >
+}
+
+/* OPERATORS */
+
+TOKEN :
+{
+  < ASSIGN: "=" >
+| < GREATER_THAN: ">" >
+| < LESS: "<" >
+| < BANG: "!" >
+| < TILDE: "~" >
+| < HOOK: "?" >
+| < COLON: ":" >
+| < EQUAL: "==" >
+| < LESS_OR_EQUAL: "<=" >
+| < GREATER_OR_EQUAL: ">=" >
+| < NOT_EQUAL: "!=" >
+| < CONDITIONAL_OR: "||" >
+| < CONDITIONAL_AND: "&&" >
+| < INCREMENT: "++" >
+| < DECREMENT: "--" >
+| < PLUS: "+" >
+| < MINUS: "-" >
+| < STAR: "*" >
+| < SLASH: "/" >
+| < BITWISE_AND: "&" >
+| < BITWISE_OR: "|" >
+| < XOR: "^" >
+| < REMAINDER: "%" >
+| < LEFT_SHIFT: "<<" >
+| < RIGHT_SIGNED_SHIFT: ">>" >
+| < RIGHT_UNSIGNED_SHIFT: ">>>" >
+| < PLUS_ASSIGN: "+=" >
+| < MINUS_ASSIGN: "-=" >
+| < STAR_ASSIGN: "*=" >
+| < SLASH_ASSIGN: "/=" >
+| < AND_ASSIGN: "&=" >
+| < OR_ASSIGN: "|=" >
+| < XOR_ASSIGN: "^=" >
+| < REMAINDER_ASSIGN: "%=" >
+| < LEFT_SHIFT_ASSIGN: "<<=" >
+| < RIGHT_SIGNED_SHIFT_ASSIGN: ">>=" >
+| < RIGHT_UNSIGNED_SHIFTASSIGN: ">>>=" >
+}
+
+/*
+ * The syntactic grammar
+ */
+
+// Productions for the intepreter ////////////////////////////////////////////////
+
+/**
+ * Parses top level statements. This production is
+ * not a Java language rule. It is used by DynamicJava.
+ * @return a list of nodes (possibly empty)
+ * @see koala.dynamicjava.tree.Node
+ */
+List parseStream() :
+{
+    List list = new LinkedList();
+    List l;
+    Node root = null;
+}
+{
+    ( ( root=packageDeclaration()
+      | root=importDeclaration()
+      | LOOKAHEAD( methodDeclarationLookahead() )
+        root=methodDeclaration()
+      |	LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
+	l=localVariableDeclaration() ";"
+	{
+	    list.addAll(l);
+	}
+      | LOOKAHEAD(2)
+        root=topLevelStatement()
+      | root=typeDeclaration()
+	)
+      {
+	  if (root != null) {
+	      list.add(root);
+	      root = null;
+	  }
+      }
+      )*
+    <EOF>
+    {
+	return list;
+    }
+}
+
+/**
+ * Parses one top level statement. This production is
+ * not a Java language rule. It is used by DynamicJava.
+
+ * @return a node
+ * @see koala.dynamicjava.tree.Node
+ */
+Node topLevelStatement() :
+{
+    Node node;
+}
+{
+    ( LOOKAHEAD(2)
+      node=labeledStatement()
+    | node=emptyStatement()
+    | node=expression() ";"
+    | node=block()
+    | node=ifStatement()
+    | node=whileStatement()
+    | node=doStatement()
+    | node=switchStatement()
+    | node=forStatement()
+    | node=breakStatement()
+    | node=continueStatement()
+    | node=returnStatement()
+    | node=throwStatement()
+    | node=synchronizedStatement()
+    | node=tryStatement()
+      )
+    {
+	return node;
+    }
+}
+
+// Productions for Packages ////////////////////////////////////////////////////////
+
+/**
+ * Parses a Java compilation unit
+ * @return a list of nodes (possibly empty)
+ * @see koala.dynamicjava.tree.Node
+ */
+List parseCompilationUnit() :
+{
+    List list = new LinkedList();
+    Node node;
+}
+{
+    [ node=packageDeclaration()
+      {
+	  list.add(node);
+      }
+      ]
+    ( node=importDeclaration()
+      {
+	  list.add(node);
+      }
+      )*
+    ( ( node=typeDeclaration() 
+        {
+	    list.add(node);
+	}
+      | ";" )
+      )*
+  <EOF>
+  {
+	return list;
+  }
+}
+
+/**
+ * Parses a package declaration
+ * @see koala.dynamicjava.tree.PackageDeclaration
+ */
+PackageDeclaration packageDeclaration() :
+{
+    List  list = null;
+    Token t1, t2;
+}
+{
+    t1="package" [ list=name() ] t2=";"
+    {
+	return new PackageDeclaration(list,
+				      filename,
+				      t1.beginLine, t1.beginColumn,
+				      t2.endLine,   t2.endColumn);
+    }
+}
+
+/**
+ * Parses an import declaration
+ * @see koala.dynamicjava.tree.ImportDeclaration
+ */
+ImportDeclaration importDeclaration() :
+{
+    List  list;
+    Token star = null;
+    Token t1, t2;
+}
+{
+    t1="import" list=name() [ "." star="*" ] t2=";"
+    {
+	return new ImportDeclaration(list, star != null,
+				     filename,
+				     t1.beginLine, t1.beginColumn,
+				     t2.endLine,   t2.endColumn);
+    }
+}
+
+/**
+ * Parses a type declaration
+ * @see koala.dynamicjava.tree.TypeDeclaration
+ */
+TypeDeclaration typeDeclaration() :
+{
+    TypeDeclaration node;
+}
+{
+    ( LOOKAHEAD( ( "abstract" | "final" | "public" )* "class" )
+      node=classDeclaration()
+    |
+      node=interfaceDeclaration()
+    )
+    {
+	return node;
+    }
+}
+
+// Productions for Names ////////////////////////////////////////////////////////
+
+/**
+ * Parses a name
+ * @return a list of tree token
+ * @see koala.dynamicjava.parser.wrapper.TreeToken
+ */
+List name() :
+{
+    Token id;
+    List  list = new LinkedList();
+}
+{
+    id=<IDENTIFIER>
+    {
+	list.add(new TreeToken(id));
+    }
+    ( LOOKAHEAD(2)
+      "." id=<IDENTIFIER>
+      {
+	  list.add(new TreeToken(id));
+      }
+      )*
+    {
+	return list;
+    }
+}
+
+/**
+ * Parses a comma separated list of names
+ * @return a list of list of token
+ * @see koala.dynamicjava.parser.wrapper.TreeToken
+ */
+List nameList() :
+{
+    List   list = new LinkedList();
+    Object obj;
+}
+{
+    obj=name()
+    {
+	list.add(obj);
+    }
+    ( "," obj=name() 
+      {
+	  list.add(obj);
+      }
+      )*
+    {
+	return list;
+    }
+}
+
+// Productions for Classes //////////////////////////////////////////////////////
+
+// Productions for Class Declaration ============================================
+
+/**
+ * Parses a class declaration
+ * @see koala.dynamicjava.tree.ClassDeclaration
+ */
+ClassDeclaration classDeclaration() :
+{
+    ClassDeclaration cd;
+    ModifierFlags    md;
+}
+{
+    md=modifiers() cd=unmodifiedClassDeclaration(md)
+    {
+	return cd;
+    }
+}
+
+/**
+ * Used internally to parse a modifier
+ */
+ModifierFlags modifiers() :
+{
+    Token t;
+    int   flags = 0;
+    Token ft    = null;
+}
+{
+    ( t="abstract"
+      {
+	  if (ft == null) {
+	      ft = t;
+	  } else if ((flags & Modifier.ABSTRACT) != 0) {
+	      throw new ParseError(reader.getMessage("abstract.abstract", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  } else if ((flags & Modifier.FINAL) != 0) {
+	      throw new ParseError(reader.getMessage("abstract.final", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  }
+	  flags |= Modifier.ABSTRACT;
+      }
+    | t="final" 
+      {
+	  if (ft == null) {
+	      ft = t;
+	  } else if ((flags & Modifier.FINAL) != 0) {
+	      throw new ParseError(reader.getMessage("final.final", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  } else if ((flags & Modifier.ABSTRACT) != 0) {
+	      throw new ParseError(reader.getMessage("abstract.final", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  }
+	  flags |= Modifier.FINAL;
+      }
+    | t="public"
+      {
+	  if (ft == null) {
+	      ft = t;
+	  } else if ((flags & Modifier.PUBLIC) != 0) {
+	      throw new ParseError(reader.getMessage("public.public", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  } else if ((flags & Modifier.PROTECTED) != 0) {
+	      throw new ParseError(reader.getMessage("public.protected", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  } else if ((flags & Modifier.PRIVATE) != 0) {
+	      throw new ParseError(reader.getMessage("public.private", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  }
+
+	  flags |= Modifier.PUBLIC;
+      }
+    | t="protected" 
+      {
+	  if (ft == null) {
+	      ft = t;
+	  } else if ((flags & Modifier.PROTECTED) != 0) {
+	      throw new ParseError(reader.getMessage("protected.protected", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  } else if ((flags & Modifier.PUBLIC) != 0) {
+	      throw new ParseError(reader.getMessage("public.protected", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  } else if ((flags & Modifier.PRIVATE) != 0) {
+	      throw new ParseError(reader.getMessage("protected.private", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  }
+	  flags |= Modifier.PROTECTED;
+      }
+    | t="private"
+      {
+	  if (ft == null) {
+	      ft = t;
+	  }  else if ((flags & Modifier.PRIVATE) != 0) {
+	      throw new ParseError(reader.getMessage("private.private", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  } else if ((flags & Modifier.PUBLIC) != 0) {
+	      throw new ParseError(reader.getMessage("public.private", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  } else if ((flags & Modifier.PROTECTED) != 0) {
+	      throw new ParseError(reader.getMessage("protected.private", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  }
+	  flags |= Modifier.PRIVATE;
+      }
+     | t="transient"
+      {
+	  if (ft == null) {
+	      ft = t;
+	  } else if ((flags & Modifier.TRANSIENT) != 0) {
+	      throw new ParseError(reader.getMessage("transient.transient", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  }
+	  flags |= Modifier.TRANSIENT;
+      }
+    | t="volatile"
+      {
+	  if (ft == null) {
+	      ft = t;
+	  } else if ((flags & Modifier.VOLATILE) != 0) {
+	      throw new ParseError(reader.getMessage("volatile.volatile", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  }
+	  flags |= Modifier.VOLATILE;
+      }
+    | t="native"
+      {
+	  if (ft == null) {
+	      ft = t;
+	  } else if ((flags & Modifier.NATIVE) != 0) {
+	      throw new ParseError(reader.getMessage("native.native", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  }  else if ((flags & Modifier.ABSTRACT) != 0) {
+	      throw new ParseError(reader.getMessage("abstract.native", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  }
+	  flags |= Modifier.NATIVE;
+      }
+    | t="static"
+      {
+	  if (ft == null) {
+	      ft = t;
+	  } else if ((flags & Modifier.STATIC) != 0) {
+	      throw new ParseError(reader.getMessage("static.static", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  }
+	  flags |= Modifier.STATIC;
+      }
+    | t="synchronized"
+      {
+	  if (ft == null) {
+	      ft = t;
+	  } else if ((flags & Modifier.SYNCHRONIZED) != 0) {
+	      throw new ParseError(reader.getMessage("synchronized.synchronized", null),
+				   filename,
+				   t.beginLine, t.beginColumn);
+	  }
+	  flags |= Modifier.SYNCHRONIZED;
+      }
+     )*
+    {
+	return (ft == null)
+	    ? null
+	    : new ModifierFlags(flags, ft.beginLine, ft.beginColumn);
+    }
+}
+
+/**
+ * Parses a class declaration without modifier
+ * @see koala.dynamicjava.tree.ClassDeclaration
+ */
+ClassDeclaration unmodifiedClassDeclaration(ModifierFlags mf) :
+{
+    Token t;
+    Token id;
+    List  ext  = null;
+    List  impl = null;
+    ClassBody body;
+}
+{
+    t="class" id=<IDENTIFIER> [ "extends" ext=name() ] [ "implements" impl=nameList() ]
+    body=classBody()
+    {
+	if (mf == null) {
+	    return new ClassDeclaration(0, id.image, ext, impl, body.list,
+					filename,
+					t.beginLine,  t.beginColumn,
+					body.endLine, body.endColumn);
+	} else {
+	    return new ClassDeclaration(mf.accessFlags, id.image, ext, impl, body.list,
+					filename,
+					mf.beginLine, mf.beginColumn,
+					body.endLine, body.endColumn);
+	}
+    }
+}
+
+/**
+ * Used internally to parse the body of a class
+ */
+ClassBody classBody() :
+{
+    Token t;
+    List list = new LinkedList();
+    List decl;
+}
+{
+    "{" 
+    ( 
+     decl=classBodyDeclaration()
+     {
+	 list.addAll(decl);
+     }
+      )*
+    t="}"
+    {
+	return new ClassBody(list, t.endLine, t.endColumn);
+    }
+}
+
+/**
+ * Parses one declaration in the body of a class.
+ * @return a list of node because one field declaration can
+ *         contain multiple declarations.
+ * @see koala.dynamicjava.tree.Node
+ */
+List classBodyDeclaration() :
+{
+    Node node = null;
+    List list = new LinkedList();
+}
+{
+    ( LOOKAHEAD(2)
+      node=initializer()
+    |
+      LOOKAHEAD( classDeclarationLookahead() )
+      node=classDeclaration()
+    |
+      LOOKAHEAD( interfaceDeclarationLookahead() )
+      node=interfaceDeclaration()
+    |
+      LOOKAHEAD( constructorDeclarationLookahead() )
+      node=constructorDeclaration()
+    |
+      LOOKAHEAD( methodDeclarationLookahead() )
+      node=methodDeclaration()
+    |
+      list=fieldDeclaration()
+    |
+      ";"
+      )
+    {
+	if (node != null) {
+	    list.add(node);
+	}
+	return list;
+    }
+}
+
+// Productions for Field Declaration ============================================
+
+/**
+ * Parses a field declaration.
+ * @return a list of field declaration because one field declaration can
+ *         contain multiple declarations.
+ * @see koala.dynamicjava.tree.FieldDeclaration
+ */
+List fieldDeclaration() :
+{
+    ModifierFlags mf;
+    Type          typ;
+    Token         id;
+    int           dim  = 0;
+    Expression    exp  = null;
+    List          list = new LinkedList();
+}
+{
+    mf=modifiers()
+    typ=type() id=<IDENTIFIER>
+    ( "[" "]" { dim++; } )*
+    [ "=" exp=variableInitializer() ]
+	{
+	    list.add(createFieldDeclaration(mf, typ, id, exp, dim));
+	}
+    ( "," { dim = 0; exp = null; }
+      id=<IDENTIFIER>
+      ( "[" "]" { dim++; } )*
+      [ "=" exp=variableInitializer() ]
+          {
+	    list.add(createFieldDeclaration(mf, typ, id, exp, dim));
+          }
+      )* ";"
+    {
+	return list;
+    }
+}
+
+// Productions for Method Declaration ===========================================
+
+/**
+ * Parses a method declaration
+ * @see koala.dynamicjava.tree.MethodDeclaration
+ */
+MethodDeclaration methodDeclaration() :
+{
+    MethodDeclaration md;
+    ModifierFlags     mf;
+    int               bl;
+    int               bc;
+    int               flags = 0;
+    Type              typ;
+    Token             id;
+    int               dim = 0;
+    List              params;
+    List              exceptions = new LinkedList();
+    Node              body = null;
+}
+{
+    mf=modifiers()
+    typ=resultType()
+    id=<IDENTIFIER>
+    params=formalParameters() 
+    ( "[" "]" { dim++; } )* 
+    [ "throws" exceptions=nameList() ]
+    ( body=block() | body=emptyStatement() )
+    {
+	if (mf != null) {
+	    bl    = mf.beginLine;
+	    bc    = mf.beginColumn;
+	    flags = mf.accessFlags;
+	} else {
+	    bl = typ.getBeginLine();
+	    bc = typ.getBeginColumn();
+	}
+
+	if (dim > 0) {
+	    typ = new ArrayType(typ, dim,
+				filename,
+				typ.getBeginLine(), typ.getBeginColumn(),
+				typ.getEndLine(),   typ.getEndColumn());
+	}
+
+	return new MethodDeclaration(flags, typ, id.image, params,
+				     exceptions,
+				     (body instanceof BlockStatement) ?
+				     (BlockStatement)body : null,
+				     filename,
+				     bl, bc, body.getEndLine(), body.getEndColumn());
+    }
+}
+
+/**
+ * Parses formal parameters of the form '(param, param, ...)'
+ * @see koala.dynamicjava.tree.FormalParameter
+ */
+List formalParameters() :
+{
+    List list = new LinkedList();
+    Node node;
+}
+{
+    "(" [ node=formalParameter()
+	  {
+	      list.add(node);
+	  }
+    ( "," node=formalParameter() 
+          {
+	      list.add(node);
+	  }
+      )* ] ")"
+    {
+	return list;
+    }
+}
+
+/**
+ * Parses one formal parameter
+ * @see koala.dynamicjava.tree.FormalParameter
+ */
+FormalParameter formalParameter() :
+{
+    Type  typ;
+    Token id;
+    Token f   = null;
+    int   dim = 0;
+}
+{
+    [ f="final" ] typ=type() id=<IDENTIFIER> ( "[" "]" { dim++; } )*
+    {
+	if (dim > 0) {
+	    typ = new ArrayType(typ, dim,
+				filename,
+				typ.getBeginLine(), typ.getBeginColumn(),
+				typ.getEndLine(),   typ.getEndColumn());
+	}
+	return new FormalParameter(f != null, typ, id.image,
+				   filename,
+				   (f != null) ? f.beginLine   : typ.getBeginLine(),
+				   (f != null) ? f.beginColumn : typ.getBeginColumn(),
+				   id.endLine, id.endColumn);
+    }
+}
+
+// Production for Initializer ===================================================
+
+/**
+ * Parses one initializer
+ * @see koala.dynamicjava.tree.Initializer
+ */
+Initializer initializer() :
+{
+    Token t = null;
+    BlockStatement node;
+}
+{
+    [ t="static" ] node=block()
+    {
+	if (t == null) {
+	    return new InstanceInitializer(node,
+					   filename,
+					   node.getBeginLine(), node.getEndColumn(),
+					   node.getEndLine(), node.getEndColumn());
+	} else {
+	    return new ClassInitializer(node,
+					filename,
+					t.beginLine, t.beginColumn,
+					node.getEndLine(), node.getEndColumn());
+	}
+    }
+}
+
+// Productions for Constructor Declaration ======================================
+
+/**
+ * Parses a constructor declaration
+ * @see koala.dynamicjava.tree.ConstructorDeclaration
+ */
+ConstructorDeclaration constructorDeclaration() :
+{
+    Token                 t = null;
+    int                   flag = 0;
+    Token                 id;
+    List                  params;
+    List                  exceptions = new LinkedList();
+    ConstructorInvocation ci = null;
+    List                  stmt;
+    List                  stmts = new LinkedList();
+    int                   bl, bc;
+    Token                 e;
+}
+{
+    [ t="public"
+      {
+	  flag = Modifier.PUBLIC;
+      }
+    | t="protected"
+      {
+	  flag = Modifier.PROTECTED;
+      }
+    | t="private"
+      {
+	  flag = Modifier.PRIVATE;
+      }
+    ]
+    id=<IDENTIFIER> 
+    params=formalParameters()
+    [ "throws" exceptions=nameList() ]
+    "{"
+	[ LOOKAHEAD( explicitConstructorInvocationLookahead() )
+	  ci=explicitConstructorInvocation() ]
+	( stmt=blockStatement()
+	  {
+	      stmts.addAll(stmt);
+	  }
+	  )*
+    e="}"
+    {
+	if (t == null) {
+	    bl = id.beginLine;
+	    bc = id.beginColumn;
+	} else {
+	    bl = t.beginLine;
+	    bc = t.beginColumn;
+	}
+	return new ConstructorDeclaration(flag, id.image, params, exceptions, ci, stmts,
+					  filename,
+					  bl, bc,
+					  e.endLine, e.endColumn);
+    }
+}
+
+/**
+ * Parses a constructor invocation
+ * @see koala.dynamicjava.tree.ConstructorInvocation
+ */
+ConstructorInvocation explicitConstructorInvocation() :
+{
+    Token           b, e;
+    ArgumentsSuffix args;
+    Expression      exp = null;
+}
+{
+    ( LOOKAHEAD("this" arguments() ";")
+      b="this" args=arguments() e=";"
+    |
+      [ LOOKAHEAD(2) exp=primaryExpression() "." ]
+      b="super" args=arguments() e=";"
+      )
+    {
+	return new ConstructorInvocation(exp, args.arguments, b.image.equals("super"),
+					 filename,
+					 b.beginLine, b.beginColumn,
+					 e.endLine,   e.endColumn);
+    }
+}
+
+// Productions for Interfaces ///////////////////////////////////////////////////
+
+/**
+ * Parses a interface declaration
+ * @see koala.dynamicjava.tree.InterfaceDeclaration
+ */
+InterfaceDeclaration interfaceDeclaration() :
+{
+    InterfaceDeclaration id;
+    ModifierFlags        md;
+}
+{
+    md=modifiers() id=unmodifiedInterfaceDeclaration(md)
+    {
+	return id;
+    }
+}
+
+/**
+ * Parses a interface declaration without modifier
+ * @see koala.dynamicjava.tree.InterfaceDeclaration
+ */
+InterfaceDeclaration unmodifiedInterfaceDeclaration(ModifierFlags mf) :
+{
+    Token t;
+    Token id;
+    Token e;
+    List  impl = null;
+    List  list = new LinkedList();
+    List  decl;
+    int   m = 0;
+}
+{
+    t="interface" id=<IDENTIFIER> [ "extends" impl=nameList() ]
+    "{"
+    ( 
+        decl=interfaceMemberDeclaration()
+	{
+	    list.addAll(decl);
+	}
+    )*
+    e="}"
+    {
+	if (mf != null) {
+	    m = mf.accessFlags;
+	}
+	return new InterfaceDeclaration(m, id.image, impl, list,
+					filename,
+					t.beginLine, t.beginColumn,
+					e.endLine,   e.endColumn);
+    }
+}
+
+/**
+ * Parses one declaration in the body of an interface.
+ * @return a list of node because one field declaration can
+ *         contain multiple declarations.
+ * @see koala.dynamicjava.tree.Node
+ */
+List interfaceMemberDeclaration() :
+{
+    Node node = null;
+    List list = new LinkedList();
+}
+{
+    ( LOOKAHEAD( classDeclarationLookahead() )
+      node=classDeclaration()
+    |
+      LOOKAHEAD( interfaceDeclarationLookahead() )
+      node=interfaceDeclaration()
+    |
+      LOOKAHEAD( methodDeclarationLookahead() )
+      node=methodDeclaration()
+    |
+      list=fieldDeclaration()
+      )
+    {
+	if (node != null) {
+	    list.add(node);
+	}
+	return list;
+    }
+}
+
+// Productions for Arrays ////////////////////////////////////////////////////////
+
+/**
+ * Parses an array initializer
+ * @see koala.dynamicjava.tree.ArrayInitializer
+ */
+ArrayInitializer arrayInitializer() :
+{
+    Expression init;
+    Token      t = null, b, e;
+    List       list = new LinkedList();
+}
+{
+    b="{" [ init=variableInitializer()
+	    {
+	        list.add(init);
+	    }
+	    ( LOOKAHEAD(2)
+	      "," init=variableInitializer()
+	      {
+		  list.add(init);
+	      }
+	      )* ]
+      [ t="," ] e="}"
+    {
+	return new ArrayInitializer(list,
+				    filename,
+				    b.beginLine, b.beginColumn,
+				    e.endLine,   e.endColumn);
+    }
+}
+
+/**
+ * Parses a variable initializer (ie. an expression or an array initializer)
+ * @see koala.dynamicjava.tree.Expression
+ */
+Expression variableInitializer() :
+{
+    Expression exp;
+}
+{
+    ( exp=arrayInitializer()
+    | exp=expression() )
+    {
+	return exp;
+    }
+}
+
+// Productions for Blocks And Statements ////////////////////////////////////////////
+
+/**
+ * Parses a block
+ * @see koala.dynamicjava.tree.BlockStatement
+ */
+BlockStatement block() :
+{
+    Token p1;
+    Token p2;
+    List  nodes;
+    List  list = new LinkedList();
+}
+{
+    p1="{"
+	(
+	 nodes=blockStatement()
+	 {
+	     list.addAll(nodes);
+	 }
+	 )* 
+    p2="}"
+    {
+	return new BlockStatement(list,
+				  filename,
+				  p1.beginLine, p1.beginColumn,
+				  p2.endLine,   p2.endColumn);
+    }
+}
+
+/**
+ * Parses one block statement.
+ * @return a list of node because one variable declaration can
+ *         contain multiple declarations.
+ * @see koala.dynamicjava.tree.Node
+ */
+List blockStatement() :
+{
+    Node node = null;
+    List list = new LinkedList();
+}
+{
+  ( LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
+    list=localVariableDeclaration() ";"
+  |
+    node=statement()
+    {
+	list.add(node);
+    }
+  |
+    node=unmodifiedClassDeclaration(null)
+    {
+	list.add(node);
+    }
+  |
+    node=unmodifiedInterfaceDeclaration(null)
+    {
+	list.add(node);
+    }
+    )
+  {
+      return list;
+  }
+}
+
+/**
+ * Parses one variable declaration
+ * @return a list of node because one variable declaration can
+ *         contain multiple declarations.
+ * @see koala.dynamicjava.tree.VariableDeclaration
+ */
+List localVariableDeclaration() :
+{
+    Token      t    = null;
+    Expression init = null;
+    Type       typ;
+    Token      id;
+    int        dim  = 0;
+    List       list = new LinkedList();
+}
+{
+    [ t="final" ]
+    typ=type() id=<IDENTIFIER> ( "[" "]" { dim++; } )*
+    [ "=" init=variableInitializer() ]
+    {
+	list.add(createVariableDeclaration(t, typ, id, init, dim));
+    }
+    ( { init = null; dim = 0; } 
+      ","  id=<IDENTIFIER> ( "[" "]" { dim++; } )* 
+      [ "=" init=variableInitializer() ]
+      {
+	  list.add(createVariableDeclaration(t, typ, id, init, dim));
+      }
+      )*
+    {
+	return list;
+    }
+}
+
+/**
+ * Parses one statement
+ * @see koala.dynamicjava.tree.Node
+ */
+Node statement() :
+{
+    Node node = null;
+}
+{
+    ( LOOKAHEAD(2)
+      node=labeledStatement()
+    | node=emptyStatement()
+    | node=statementExpression() ";"
+    | node=block()
+    | node=ifStatement()
+    | node=whileStatement()
+    | node=doStatement()
+    | node=switchStatement()
+    | node=forStatement()
+    | node=breakStatement()
+    | node=continueStatement()
+    | node=returnStatement()
+    | node=throwStatement()
+    | node=synchronizedStatement()
+    | node=tryStatement()
+      )
+    {
+	return node;
+    }
+}
+
+/**
+ * Parses a labeled statement
+ * @see koala.dynamicjava.tree.ContinueTarget
+ * @see koala.dynamicjava.tree.LabeledStatement
+ */
+Statement labeledStatement() :
+{
+    Token id;
+    Node  node;
+}
+{
+    id=<IDENTIFIER> ":" node=statement()
+    {
+	if (node instanceof ContinueTarget) {
+	    ((ContinueTarget)node).addLabel(id.image);
+	    return (Statement)node;
+	} else {
+	    return new LabeledStatement(id.image, node,
+					filename,
+					id.beginLine,      id.beginColumn,
+					node.getEndLine(), node.getEndColumn());
+	}
+    }
+}
+
+/**
+ * Parses an empty statement
+ * @see koala.dynamicjava.tree.EmptyStatement
+ */
+EmptyStatement emptyStatement() :
+{
+    Token t;
+}
+{
+    t=";"
+    {
+	return new EmptyStatement(filename, t.beginLine, t.beginColumn);
+    }
+}
+
+/**
+ * Parses an if statement
+ * @see koala.dynamicjava.tree.IfThenStatement
+ * @see koala.dynamicjava.tree.IfThenElseStatement
+ */
+Statement ifStatement() :
+{
+    Token t;
+    Expression exp;
+    Node       stat1;
+    Node       stat2 = null;
+}
+{
+    t="if" "(" exp=expression() ")"
+      stat1=statement()
+      [ LOOKAHEAD(1) "else" stat2=statement() ]
+    {
+	if (stat2 == null) {
+	    return new IfThenStatement(exp, stat1,
+				       filename,
+				       t.beginLine,       t.beginColumn,
+				       stat1.getEndLine(), stat1.getEndColumn());
+	} else {
+	    return new IfThenElseStatement(exp, stat1, stat2,
+					   filename,
+					   t.beginLine,       t.beginColumn,
+					   stat2.getEndLine(), stat2.getEndColumn());
+	}
+    }
+}
+
+/**
+ * Parses a while statement
+ * @see koala.dynamicjava.tree.WhileStatement
+ */
+WhileStatement whileStatement() :
+{
+    Token      t;
+    Expression exp;
+    Node       stat;
+}
+{
+    t="while" "(" exp=expression() ")" stat=statement()
+    {
+	return new WhileStatement(exp, stat,
+				  filename,
+				  t.beginLine,       t.beginColumn,
+				  stat.getEndLine(), stat.getEndColumn());
+    }
+}
+
+/**
+ * Parses a do statement
+ * @see koala.dynamicjava.tree.DoStatement
+ */
+DoStatement doStatement() :
+{
+    Token      t1, t2;
+    Expression exp;
+    Node       stat;
+}
+{
+    t1="do" stat=statement() "while" "(" exp=expression() ")" t2=";"
+    {
+	return new DoStatement(exp, stat,
+			       filename,
+			       t1.beginLine, t1.beginColumn,
+			       t2.endLine,   t2.endColumn);
+    }
+}
+
+/**
+ * Parses a switch statement
+ * @see koala.dynamicjava.tree.SwitchStatement
+ */
+SwitchStatement switchStatement() :
+{
+    Token      b, e;
+    Expression sel;
+    Expression val         = null;
+    List       stat        = null;
+    List       cases       = new LinkedList();
+    List       list        = new LinkedList();
+    Token      t           = null;
+}
+{
+  b="switch" "(" sel=expression() ")" "{"
+    ( ( "case" val=expression() | t="default" ) ":"
+      ( stat=blockStatement()
+	{
+	    list.addAll(stat);
+	}
+	)*
+        {
+	    int bl, bc, el, ec;
+	    if (t != null) {
+		bl = t.beginLine;
+		bc = t.beginColumn;
+		el = t.endLine;
+		ec = t.endColumn;
+	    } else {
+		bl = val.getBeginLine();
+		bc = val.getBeginColumn();
+		el = val.getEndLine();
+		ec = val.getEndColumn();
+	    }
+
+	    if (list.size() != 0) {
+		Node n = (Node)list.get(list.size() - 1);
+		el = n.getEndLine();
+		ec = n.getEndColumn();
+	    }
+
+	    cases.add(new SwitchBlock(val, (list.size() != 0) ? list : null,
+				      filename,
+				      bl, bc, el, ec));
+	    val = null;
+	    t   = null;
+	    if (list.size() != 0) {
+		list = new LinkedList();
+	    }
+	}
+      )*
+  e="}"
+    {
+	return new SwitchStatement(sel, cases,
+				   filename,
+				   b.beginLine, b.beginColumn,
+				   e.endLine,   e.endColumn);
+    }
+}
+
+/**
+ * Parses a for statement
+ * @see koala.dynamicjava.tree.ForStatement
+ */
+ForStatement forStatement() :
+{
+    Token      t;
+    List       init   = null;
+    Expression exp    = null;
+    List       update = null;
+    Node       stmt;
+}
+{
+    t="for" "(" [ init=forInit() ] ";"
+                [ exp=expression() ] ";"
+                [ update=statementExpressionList() ] ")"
+      stmt=statement()
+    {
+	return new ForStatement(init, exp, update, stmt,
+				filename,
+				t.beginLine, t.beginColumn,
+				stmt.getEndLine(), stmt.getEndColumn());
+    }
+}
+
+/**
+ * Used internally to parse a 'for' statement
+ */
+List forInit() :
+{
+    List list;
+}
+{
+    ( LOOKAHEAD( [ "final" ] typeLookahead() <IDENTIFIER> )
+      list=localVariableDeclaration()
+    |
+      list=statementExpressionList()
+      )
+    {
+	return list;
+    }
+}
+
+/**
+ * Parses a comma separated list of expression
+ */
+List statementExpressionList() :
+{
+    List list = new LinkedList();
+    Node node;
+}
+{
+    node=statementExpression()
+    {
+	list.add(node);
+    }
+    ( "," node=statementExpression()
+      {
+	  list.add(node);
+      }
+      )*
+    {
+	return list;
+    }
+}
+
+/**
+ * Parses a break statement
+ * @see koala.dynamicjava.tree.BreakStatement
+ */
+BreakStatement breakStatement() :
+{
+    Token b, e;
+    Token id = null;
+}
+{
+    b="break" [ id=<IDENTIFIER> ] e=";"
+    {
+	return new BreakStatement((id != null) ? id.image : null,
+				  filename,
+				  b.beginLine, b.beginColumn,
+				  e.endLine,   e.endColumn);
+    }
+}
+
+/**
+ * Parses a continue statement
+ * @see koala.dynamicjava.tree.ContinueStatement
+ */
+ContinueStatement continueStatement() :
+{
+    Token b, e;
+    Token id = null;
+}
+{
+    b="continue" [ id=<IDENTIFIER> ] e=";"
+    {
+	return new ContinueStatement((id != null) ? id.image : null,
+				     filename,
+				     b.beginLine, b.beginColumn,
+				     e.endLine,   e.endColumn);
+    }
+}
+
+/**
+ * Parses a return statement
+ * @see koala.dynamicjava.tree.ReturnStatement
+ */
+ReturnStatement returnStatement() :
+{
+    Token b, e;
+    Expression exp = null;
+}
+{
+    b="return" [ exp=expression() ] e=";"
+    {
+	return new ReturnStatement(exp,
+				   filename,
+				   b.beginLine, b.beginColumn,
+				   e.endLine,   e.endColumn);
+    }
+}
+
+/**
+ * Parses a throw statement
+ * @see koala.dynamicjava.tree.ThrowStatement
+ */
+ThrowStatement throwStatement() :
+{
+    Token b, e;
+    Expression exp;
+}
+{
+    b="throw" exp=expression() e=";"
+    {
+	return new ThrowStatement(exp,
+				  filename,
+				  b.beginLine, b.beginColumn,
+				  e.endLine,   e.endColumn);
+    }
+}
+
+/**
+ * Parses a synchronized statement
+ * @see koala.dynamicjava.tree.SynchronizedStatement
+ */
+SynchronizedStatement synchronizedStatement() :
+{
+    Token      t;
+    Expression exp;
+    Node       stmt;
+}
+{
+    t="synchronized" "(" exp=expression() ")" stmt=block()
+    {
+	return new SynchronizedStatement(exp, stmt,
+					 filename,
+					 t.beginLine, t.beginColumn,
+					 stmt.getEndLine(), stmt.getEndColumn());
+    }
+}
+
+/**
+ * Parses a try statement
+ * @see koala.dynamicjava.tree.TryStatement
+ */
+TryStatement tryStatement() :
+{
+    Token           t, u;
+    Node            tryBlock;
+    Node            catchBlock;
+    List            catches = new LinkedList();
+    FormalParameter formal;
+    Node            finallyBlock = null;
+    int             el = 0, ec = 0;
+}
+{
+    t="try" tryBlock=block()
+    ( u="catch" "(" formal=formalParameter() ")" catchBlock=block()
+      {
+	  el = catchBlock.getEndLine();
+	  ec = catchBlock.getEndColumn();
+	  catches.add(new CatchStatement(formal, catchBlock,
+					 filename,
+					 u.beginLine, u.beginColumn,
+					 el, ec));
+      }
+      )*
+    [ "finally" finallyBlock=block()
+      {
+	  el = finallyBlock.getEndLine();
+	  ec = finallyBlock.getEndColumn();
+      }
+    ]
+    {
+	if (finallyBlock == null && catches.size() == 0) {
+	    throw new ParseError(reader.getMessage("try.without.catch", null),
+				 filename,
+				 t.beginLine, t.beginColumn);
+	}
+	return new TryStatement(tryBlock, catches, finallyBlock,
+				filename,
+				t.beginLine, t.beginColumn,
+				el, ec);
+    }
+}
+
+/**
+ * Parses one statement expression
+ * @see koala.dynamicjava.tree.Expression
+ */
+Node statementExpression() :
+{
+    Expression exp;
+    Expression exp2;
+    Expression exp3 = null;
+    Token      t;
+}
+{
+    ( exp=preIncrementExpression()
+    | exp=preDecrementExpression()
+    | exp=primaryExpression() 
+      [ t="++"
+        {
+	    exp = new PostIncrement(exp,
+				    filename,
+				    exp.getBeginLine(), exp.getBeginColumn(),
+				    t.endLine,          t.endColumn);
+        }
+      | t="--" 
+        {
+	    exp = new PostDecrement(exp,
+				    filename,
+				    exp.getBeginLine(), exp.getBeginColumn(),
+				    t.endLine,          t.endColumn);
+        }
+      | exp=expressionSuffix(exp)
+      ]
+    )
+    {
+	if (exp instanceof ExpressionStatement) {
+	    return exp;
+	} else {
+	    throw new ParseError(reader.getMessage("expression.statement", null),
+				 filename,
+				 exp.getBeginLine(), exp.getBeginColumn());
+	}
+    }
+}
+
+// Productions for Statements /////////////////////////////////////////////////////////
+
+/**
+ * Parses an expression
+ * @see koala.dynamicjava.tree.Expression
+ */
+Expression expression() :
+{
+    Expression exp;
+}
+{
+    exp=conditionalExpression() [ exp=expressionSuffix(exp) ]
+    {
+	return exp;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression expressionSuffix(Expression pre) :
+{
+    Expression exp2;
+    Expression exp;
+}
+{
+    ( "="    exp2=expression()
+      {
+	  exp = new SimpleAssignExpression(pre, exp2,
+					   filename,
+					   pre.getBeginLine(), pre.getBeginColumn(),
+					   exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | "*="   exp2=expression()
+      {
+	  exp = new MultiplyAssignExpression(pre, exp2,
+					     filename,
+					     pre.getBeginLine(), pre.getBeginColumn(),
+					     exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | "/="   exp2=expression()
+      {
+	  exp = new DivideAssignExpression(pre, exp2,
+					   filename,
+					   pre.getBeginLine(), pre.getBeginColumn(),
+					   exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | "%="   exp2=expression()
+      {
+	  exp = new RemainderAssignExpression(pre, exp2,
+					      filename,
+					      pre.getBeginLine(), pre.getBeginColumn(),
+					      exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | "+="   exp2=expression()
+      {
+	  exp = new AddAssignExpression(pre, exp2,
+					filename,
+					pre.getBeginLine(), pre.getBeginColumn(),
+					exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | "-="   exp2=expression()
+      {
+	  exp = new SubtractAssignExpression(pre, exp2,
+					     filename,
+					     pre.getBeginLine(), pre.getBeginColumn(),
+					     exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | "<<="  exp2=expression()
+      {
+	  exp = new ShiftLeftAssignExpression(pre, exp2,
+					      filename,
+					      pre.getBeginLine(), pre.getBeginColumn(),
+					      exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | ">>="  exp2=expression()
+      {
+	  exp = new ShiftRightAssignExpression
+	      (pre, exp2,
+	       filename,
+	       pre.getBeginLine(), pre.getBeginColumn(),
+	       exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | ">>>=" exp2=expression()
+      {
+	  exp = new UnsignedShiftRightAssignExpression
+	      (pre, exp2,
+	       filename,
+	       pre.getBeginLine(), pre.getBeginColumn(),
+	       exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | "&="   exp2=expression()
+      {
+	  exp = new BitAndAssignExpression(pre, exp2,
+					   filename,
+					   pre.getBeginLine(), pre.getBeginColumn(),
+					   exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | "^="   exp2=expression()
+      {
+	  exp = new ExclusiveOrAssignExpression(pre, exp2,
+						filename,
+						pre.getBeginLine(), pre.getBeginColumn(),
+						exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | "|="   exp2=expression()
+      {
+	  exp = new BitOrAssignExpression(pre, exp2,
+					  filename,
+					  pre.getBeginLine(), pre.getBeginColumn(),
+					  exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    )
+    {
+	if (!(pre instanceof LeftHandSide)) {
+	    throw new ParseError(reader.getMessage("left.expression.in.assignment",
+						   null),
+				 filename,
+				 pre.getBeginLine(), pre.getBeginColumn());
+	}
+	return exp;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression conditionalExpression() :
+{
+    Expression exp;
+    Expression exp2;
+    Expression exp3;
+}
+{
+    exp=conditionalOrExpression()
+    [ "?" exp2=expression() ":" exp3=conditionalExpression()
+      {
+	  exp = new ConditionalExpression(exp, exp2, exp3,
+					  filename,
+					  exp.getBeginLine(), exp.getBeginColumn(),
+					  exp3.getEndLine(),  exp3.getEndColumn());
+      }
+    ]
+    {
+	return exp;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression conditionalOrExpression() :
+{
+    Expression exp;
+    Expression exp2;
+}
+{
+    exp=conditionalAndExpression()
+    ( "||" exp2=conditionalAndExpression()
+      {
+	  exp = new OrExpression(exp, exp2,
+				 filename,
+				 exp.getBeginLine(), exp.getBeginColumn(),
+				 exp2.getEndLine(),  exp2.getEndColumn());
+      }
+      )*
+    {
+	return exp;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression conditionalAndExpression() :
+{
+    Expression exp;
+    Expression exp2;
+}
+{
+    exp=inclusiveOrExpression()
+    ( "&&" exp2=inclusiveOrExpression()
+      {
+	  exp = new AndExpression(exp, exp2,
+				  filename,
+				  exp.getBeginLine(), exp.getBeginColumn(),
+				  exp2.getEndLine(),  exp2.getEndColumn());
+      }
+      )*
+    {
+	return exp;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression inclusiveOrExpression() :
+{
+    Expression exp;
+    Expression exp2;
+}
+{
+    exp=exclusiveOrExpression()
+    ( "|" exp2=exclusiveOrExpression()
+      {
+	  exp = new BitOrExpression(exp, exp2,
+				    filename,
+				    exp.getBeginLine(), exp.getBeginColumn(),
+				    exp2.getEndLine(),  exp2.getEndColumn());
+      }
+      )*
+    {
+	return exp;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression exclusiveOrExpression() :
+{
+    Expression exp;
+    Expression exp2;
+}
+{
+    exp=andExpression() 
+    ( "^" exp2=andExpression()
+      {
+	  exp = new ExclusiveOrExpression(exp, exp2,
+					  filename,
+					  exp.getBeginLine(), exp.getBeginColumn(),
+					  exp2.getEndLine(),  exp2.getEndColumn());
+      }
+      )*
+    {
+	return exp;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression andExpression() :
+{
+    Expression exp;
+    Expression exp2;
+}
+{
+    exp=equalityExpression() 
+    ( "&" exp2=equalityExpression()
+      {
+	  exp = new BitAndExpression(exp, exp2,
+				     filename,
+				     exp.getBeginLine(), exp.getBeginColumn(),
+				     exp2.getEndLine(),  exp2.getEndColumn());
+      }
+      )*
+    {
+	return exp;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression equalityExpression() :
+{
+    Expression exp;
+    Expression exp2;
+}
+{
+    exp=instanceOfExpression() 
+    ( "==" exp2=instanceOfExpression()
+      {
+	  exp = new EqualExpression(exp, exp2,
+				    filename,
+				    exp.getBeginLine(), exp.getBeginColumn(),
+				    exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | "!=" exp2=instanceOfExpression()
+      {
+	  exp = new NotEqualExpression(exp, exp2,
+				       filename,
+				       exp.getBeginLine(), exp.getBeginColumn(),
+				       exp2.getEndLine(),  exp2.getEndColumn());
+      }
+      )*
+    {
+	return exp;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression instanceOfExpression() :
+{
+    Expression exp;
+    Type       typ = null;
+}
+{
+    exp=relationalExpression() [ "instanceof" typ=type() ]
+    {
+	if (typ != null) {
+	    return new InstanceOfExpression(exp, typ,
+					    filename,
+					    exp.getBeginLine(), exp.getBeginColumn(),
+					    typ.getEndLine(),   typ.getEndColumn());
+	} else {
+	    return exp;
+	}
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression relationalExpression() :
+{
+    Expression exp;
+    Expression exp2;
+}
+{
+    exp=shiftExpression() 
+    ( "<"  exp2=shiftExpression()
+      {
+	  exp = new LessExpression(exp, exp2,
+				   filename,
+				   exp.getBeginLine(), exp.getBeginColumn(),
+				   exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | ">"  exp2=shiftExpression()
+      {
+	  exp = new GreaterExpression(exp, exp2,
+				      filename,
+				      exp.getBeginLine(), exp.getBeginColumn(),
+				      exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | "<=" exp2=shiftExpression()
+      {
+	  exp = new LessOrEqualExpression(exp, exp2,
+					  filename,
+					  exp.getBeginLine(), exp.getBeginColumn(),
+					  exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | ">=" exp2=shiftExpression()
+      {
+	  exp = new GreaterOrEqualExpression(exp, exp2,
+					     filename,
+					     exp.getBeginLine(), exp.getBeginColumn(),
+					     exp2.getEndLine(),  exp2.getEndColumn());
+      }
+      )*
+    {
+	return exp;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression shiftExpression() :
+{
+    Expression exp;
+    Expression exp2;
+}
+{
+    exp=additiveExpression()
+    ( "<<"  exp2=additiveExpression()
+      {
+	  exp = new ShiftLeftExpression(exp, exp2,
+					filename,
+					exp.getBeginLine(), exp.getBeginColumn(),
+					exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | ">>"  exp2=additiveExpression()
+      {
+	  exp = new ShiftRightExpression(exp, exp2,
+					 filename,
+					 exp.getBeginLine(), exp.getBeginColumn(),
+					 exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | ">>>" exp2=additiveExpression()
+      {
+	  exp = new UnsignedShiftRightExpression
+	      (exp, exp2,
+	       filename,
+	       exp.getBeginLine(), exp.getBeginColumn(),
+	       exp2.getEndLine(),  exp2.getEndColumn());
+      }
+      )*
+    {
+	return exp;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression additiveExpression() :
+{
+    Expression exp;
+    Expression exp2;
+}
+{
+    exp=multiplicativeExpression() 
+    ( "+" exp2=multiplicativeExpression() 
+      {
+	  exp = new AddExpression(exp, exp2,
+				  filename,
+				  exp.getBeginLine(), exp.getBeginColumn(),
+				  exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | "-" exp2=multiplicativeExpression()
+      {
+	  exp = new SubtractExpression(exp, exp2,
+				       filename,
+				       exp.getBeginLine(), exp.getBeginColumn(),
+				       exp2.getEndLine(),  exp2.getEndColumn());
+      }
+      )*
+    {
+	return exp;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression multiplicativeExpression() :
+{
+    Expression exp;
+    Expression exp2;
+}
+{
+    exp=unaryExpression() 
+    ( "*" exp2=unaryExpression()
+      {
+	  exp = new MultiplyExpression(exp, exp2,
+				       filename,
+				       exp.getBeginLine(), exp.getBeginColumn(),
+				       exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | "/" exp2=unaryExpression()
+      {
+	  exp = new DivideExpression(exp, exp2,
+				     filename,
+				     exp.getBeginLine(), exp.getBeginColumn(),
+				     exp2.getEndLine(),  exp2.getEndColumn());
+      }
+    | "%" exp2=unaryExpression()
+      {
+	  exp = new RemainderExpression(exp, exp2,
+					filename,
+					exp.getBeginLine(), exp.getBeginColumn(),
+					exp2.getEndLine(),  exp2.getEndColumn());
+      }
+      )*
+    {
+	return exp;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression unaryExpression() :
+{
+    Expression exp = null;
+    Token      t;
+}
+{
+    ( t="+" exp=unaryExpression()
+      {
+	  return new PlusExpression(exp,
+				    filename,
+				    t.beginLine,      t.beginColumn,
+				    exp.getEndLine(), exp.getEndColumn());
+      }
+    |
+      t="-" exp=unaryExpression()
+      {
+	  return new MinusExpression(exp,
+				     filename,
+				     t.beginLine,      t.beginColumn,
+				     exp.getEndLine(), exp.getEndColumn());
+      }
+    |
+      exp=preIncrementExpression()
+    |
+      exp=preDecrementExpression()
+    |
+      exp=unaryExpressionNotPlusMinus() )
+    {
+	return exp;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression unaryExpressionNotPlusMinus() :
+{
+    Expression exp;
+    Token      t;
+}
+{
+    ( t="~" exp=unaryExpression()
+      {
+	  return new ComplementExpression(exp,
+					  filename,
+					  t.beginLine,      t.beginColumn,
+					  exp.getEndLine(), exp.getEndColumn());
+      }
+    |
+      t="!" exp=unaryExpression()
+      {
+	  return new NotExpression(exp,
+				   filename,
+				   t.beginLine,      t.beginColumn,
+				   exp.getEndLine(), exp.getEndColumn());
+      }
+    |
+      LOOKAHEAD( castLookahead() )
+      exp=castExpression()
+    |
+      exp=postfixExpression() )
+    {
+	return exp;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression castExpression() :
+{
+    Type       typ;
+    Token      t;
+    Expression exp;
+}
+{
+    ( LOOKAHEAD("(" primitiveTypeLookahead())
+      t="(" typ=type() ")" exp=unaryExpression()
+    |
+      t="(" typ=type() ")" exp=unaryExpressionNotPlusMinus() )
+    {
+	return new CastExpression(typ, exp,
+				  filename,
+				  t.beginLine, t.beginColumn,
+				  exp.getEndLine(), exp.getEndColumn());
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression preIncrementExpression() :
+{
+    Expression pe;
+    Token      t;
+}
+{
+    t="++" pe=primaryExpression()
+    {
+	return new PreIncrement(pe,
+				filename,
+				pe.getBeginLine(), pe.getBeginColumn(),
+				t.endLine,         t.endColumn);
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression preDecrementExpression() :
+{
+    Expression pe;
+    Token      t;
+}
+{
+    t="--" pe=primaryExpression()
+    {
+	return new PreDecrement(pe,
+				filename,
+				pe.getBeginLine(), pe.getBeginColumn(),
+				t.endLine,         t.endColumn);
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression postfixExpression() :
+{
+    Expression pe;
+    Token      t;
+}
+{
+    pe=primaryExpression() 
+	[ t="++"
+	  {
+	      return new PostIncrement(pe,
+				       filename,
+				       pe.getBeginLine(), pe.getBeginColumn(),
+				       t.endLine,         t.endColumn);
+	  }
+	| t="--"
+	  {
+	      return new PostDecrement(pe,
+				       filename,
+				       pe.getBeginLine(), pe.getBeginColumn(),
+				       t.endLine,         t.endColumn);
+	  }
+	]
+    {
+	return pe;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression primaryExpression() :
+{
+    Expression       pp;
+    ExpressionSuffix es;
+    List             list = new LinkedList();
+}
+{
+    pp=primaryPrefix() 
+    ( LOOKAHEAD(2) es=primarySuffix()
+      {
+	  // Build the list of suffixes in reverse order
+	  list.add(0, es);
+      }
+      )*
+    {
+	return createPrimaryExpression(pp, list);
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression primaryPrefix() :
+{
+    Expression exp;
+}
+{
+    ( exp=literal()
+    | exp=thisExpression()
+    | exp=superExpression()
+    | exp=allocationExpression()
+    | "(" exp=expression() ")"
+    | LOOKAHEAD( resultTypeLookahead() "." "class" ) exp=classExpression()
+    | exp=qualifiedName()
+      )
+    {
+	return exp;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+ExpressionSuffix primarySuffix() :
+{
+    ExpressionSuffix es;
+}
+{
+    ( LOOKAHEAD(2) es=dotThis()
+    | LOOKAHEAD(2) es=dotAllocationExpression()
+    | es=arrayReference()
+    | es=dotIdentifier()
+    | es=arguments()
+      )
+    {
+	return es;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+ExpressionSuffix dotThis() :
+{
+    Token t;
+}
+{
+    "." t="this"
+    {
+	return new DotThisSuffix(t.endLine, t.endColumn);
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+ExpressionSuffix dotAllocationExpression() :
+{
+    Allocation a;
+}
+{
+    "." a=simpleAllocationExpression()
+    {
+	return new DotAllocationSuffix(a);
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Allocation simpleAllocationExpression() :
+{
+    Token           t;
+    List            ls;
+    ArgumentsSuffix as;
+    ClassBody       cb = null;
+}
+{
+    
+    t="new" ls=name() as=arguments() [ cb=classBody() ]
+    {
+	IdentifierToken f  = (IdentifierToken)ls.get(0);
+	IdentifierToken l  = (IdentifierToken)ls.get(ls.size()-1);
+	if (cb == null) {
+	    return new SimpleAllocation(new ReferenceType(ls,
+							  filename,
+							  f.beginLine(), f.beginColumn(),
+							  l.endLine(),   l.endColumn()),
+					as.arguments,
+					filename,
+					t.beginLine, t.beginColumn,
+					as.endLine,  as.endColumn);
+	} else {
+	    return new ClassAllocation(new ReferenceType(ls,
+							 filename,
+							 f.beginLine(), f.beginColumn(),
+							 l.endLine(),   l.endColumn()),
+				       as.arguments,
+				       cb.list,
+				       filename,
+				       t.beginLine, t.beginColumn,
+				       cb.endLine,  cb.endColumn);
+	}
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+ExpressionSuffix dotIdentifier() :
+{
+    Token id;
+}
+{
+    "." id=<IDENTIFIER>
+    {
+	return new DotIdentifierSuffix(id);
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+ExpressionSuffix arrayReference() :
+{
+    Expression exp;
+    Token      t;
+}
+{
+    "[" exp=expression() t="]"
+    {
+	return new ArrayReferenceSuffix(exp, t.endLine, t.endColumn);
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+ArgumentsSuffix arguments() :
+{
+    List  list = null;
+    Token t;
+}
+{
+    "(" [ list=argumentList() ] t=")"
+    {
+	return new ArgumentsSuffix(list, t.endLine, t.endColumn);
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+List argumentList() :
+{
+    List       list = new LinkedList();
+    Expression exp;
+}
+{
+    exp=expression()
+    {
+	list.add(exp);
+    }
+    ( "," exp=expression()
+      {
+	  list.add(exp);
+      }
+      )*
+    {
+	return list;
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression literal() :
+{
+    Token t;
+}
+{
+    t=<INTEGER_LITERAL>
+    {
+	return new IntegerLiteral(t.image,
+				  filename,
+				  t.beginLine, t.beginColumn,
+				  t.endLine,   t.endColumn);
+    }
+  |
+    t=<LONG_LITERAL>
+    {
+	return new LongLiteral(t.image,
+			       filename,
+			       t.beginLine, t.beginColumn,
+			       t.endLine,   t.endColumn);
+    }
+  |
+    t=<FLOAT_LITERAL>
+    {
+	return new FloatLiteral(t.image,
+				filename,
+				t.beginLine, t.beginColumn,
+				t.endLine,   t.endColumn);
+    }
+  |
+    t=<DOUBLE_LITERAL>
+    {
+	return new DoubleLiteral(t.image,
+				 filename,
+				 t.beginLine, t.beginColumn,
+				 t.endLine,   t.endColumn);
+    }
+  |
+    t=<CHARACTER_LITERAL>
+    {
+	return new CharacterLiteral(t.image,
+				    filename,
+				    t.beginLine, t.beginColumn,
+				    t.endLine,   t.endColumn);
+    }
+  |
+    t=<STRING_LITERAL>
+    {
+	return new StringLiteral(t.image,
+				 filename,
+				 t.beginLine, t.beginColumn,
+				 t.endLine,   t.endColumn);
+    }
+  |
+    t="true"
+    {
+	return new BooleanLiteral(true,
+				  filename,
+				  t.beginLine, t.beginColumn,
+				  t.endLine,   t.endColumn);
+    }
+  |
+    t="false"
+    {
+	return new BooleanLiteral(false,
+				  filename,
+				  t.beginLine, t.beginColumn,
+				  t.endLine,   t.endColumn);
+    }
+  |
+    t="null"
+    {
+	return new NullLiteral(filename, 
+			       t.beginLine, t.beginColumn,
+			       t.endLine,   t.endColumn);
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression thisExpression() :
+{
+    Token t;
+}
+{
+    t="this"
+    {
+	return new ThisExpression(new LinkedList(),
+				  filename,
+				  t.beginLine, t.beginColumn,
+				  t.endLine,   t.endColumn);
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression superExpression() :
+{
+    Token t;
+    Token id;
+}
+{
+    t="super" "." id=<IDENTIFIER>
+    {
+	return new CompileTimeSuperExpression(id.image,
+					      t.beginLine,  t.beginColumn,
+					      id.endLine,   id.endColumn);
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression qualifiedName() :
+{
+    List list;
+}
+{
+    list=name()
+    {
+	return new CompileTimeQualifiedName(list);
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression classExpression() :
+{
+    Type  typ;
+    Token t;
+}
+{
+    typ=resultType() "." t="class"
+    {
+	return new TypeExpression(typ,
+				  filename,
+				  typ.getBeginLine(), typ.getBeginColumn(),
+				  t.endLine,   t.endColumn);
+    }
+}
+
+/**
+ * Used internally to parse an expression
+ */
+Expression allocationExpression() :
+{
+    Token t;
+    ArrayAllocation.TypeDescriptor td;
+    Type            pt;
+    List            ls;
+    ArgumentsSuffix as;
+    ClassBody       cb = null;
+}
+{
+    ( LOOKAHEAD(2)
+      t="new" pt=primitiveType() td=arrayDimsAndInits()
+      {
+	  return new ArrayAllocation(pt, td, 
+				     filename,
+				     t.beginLine, t.beginColumn,
+				     td.endLine,  td.endColumn);
+      }
+    |
+      t="new" ls=name()
+      {
+	  IdentifierToken f  = (IdentifierToken)ls.get(0);
+	  IdentifierToken l  = (IdentifierToken)ls.get(ls.size()-1);
+	  pt = new ReferenceType(ls,
+				 filename,
+				 f.beginLine(), f.beginColumn(),
+				 l.endLine(),   l.endColumn());
+      }
+      ( td=arrayDimsAndInits()
+        {
+	    return new ArrayAllocation(pt, td,
+				       filename,
+				       t.beginLine, t.beginColumn,
+				       td.endLine, td.endColumn);
+        }
+      | as=arguments() [ cb=classBody() ]
+        {
+	    if (cb == null) {
+		return new SimpleAllocation(pt, as.arguments,
+					    filename,
+					    t.beginLine, t.beginColumn,
+					    as.endLine,  as.endColumn);
+	    } else {
+		return new ClassAllocation(pt, as.arguments, cb.list,
+					   filename,
+					   t.beginLine, t.beginColumn,
+					   cb.endLine,  cb.endColumn);
+	    }
+        }
+	)
+      )
+}
+
+/**
+ * Used internally to parse an expression
+ */
+ArrayAllocation.TypeDescriptor arrayDimsAndInits() :
+{
+    List  dims = new LinkedList();
+    int   dim  = 0;
+    Token t;
+    Expression exp;
+    ArrayInitializer ai;
+}
+{
+    ( LOOKAHEAD(2)
+     ( LOOKAHEAD(2)
+       "[" exp=expression() t="]"
+       {
+	   dims.add(exp);
+       }
+       )+
+       ( LOOKAHEAD(2) "[" t="]"
+	 {
+	     dim++;
+	 }
+	 )*
+       {
+	   return new ArrayAllocation.TypeDescriptor(dims, dim+dims.size(), null,
+						     t.endLine, t.endColumn);
+       }
+     |
+     ( "[" "]"
+	 {
+	     dim++;
+	 }
+       )+
+       ai=arrayInitializer()
+       {
+	   return new ArrayAllocation.TypeDescriptor
+	       (dims, dim, ai,
+		ai.getEndLine(), ai.getEndColumn());
+       }     
+      )
+}
+
+// Productions for Types ///////////////////////////////////////////////////////////
+
+/**
+ * Used internally to parse types
+ */
+Type type() :
+{
+    int   dim = 0;
+    Type  pt  = null;
+    List  ls  = null;
+    Token t   = null;
+}
+{
+    ( pt=primitiveType()
+    | ls=name() ) 
+    ( "[" t="]"
+      {
+	  dim++;
+      }
+      )*
+    {
+	Type rt;
+	if (pt != null) {
+	    rt = pt;
+	} else {
+	    IdentifierToken f  = (IdentifierToken)ls.get(0);
+	    IdentifierToken l  = (IdentifierToken)ls.get(ls.size()-1);
+	    rt = new ReferenceType(ls,
+				   filename,
+				   f.beginLine(), f.beginColumn(),
+				   l.endLine(),   l.endColumn());
+	}
+	if (dim == 0) {
+	    return rt;
+	} else {
+	    return new ArrayType(rt, dim,
+				 filename,
+				 rt.getBeginLine(), rt.getBeginColumn(),
+				 t.endLine,         t.endColumn);
+	}
+    }
+}
+
+/**
+ * Used internally to parse types
+ */
+Type resultType() :
+{
+    Type  typ;
+    Token t;
+}
+{
+    t="void"
+    {
+	return new VoidType(filename,
+			    t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+    }
+  |
+    typ=type()
+    {
+	return typ;
+    }
+}
+
+/**
+ * Used internally to parse types
+ */
+Type primitiveType() :
+{
+    Token t;
+}
+{
+    t="boolean"
+    {
+	return new BooleanType(filename, 
+			       t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+    }
+  |
+    t="char"
+    {
+	return new CharType(filename,
+			    t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+    }
+  |
+    t="byte"
+    {
+	return new ByteType(filename,
+			    t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+    }
+  |
+    t="short"
+    {
+	return new ShortType(filename,
+			     t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+    }
+  |
+    t="int"
+    {
+	return new IntType(filename,
+			   t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+    }
+  |
+    t="long"
+    {
+	return new LongType(filename,
+			    t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+    }
+  |
+    t="float"
+    {
+	return new FloatType(filename,
+			     t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+    }
+  |
+    t="double"
+    {
+	return new DoubleType(filename,
+			      t.beginLine, t.beginColumn, t.endLine, t.endColumn);
+    }
+}
+
+// Lookahead productions ////////////////////////////////////////////////////////
+
+/**
+ * Used internally for lookahead
+ */
+void castLookahead() :
+{}
+{
+    LOOKAHEAD(2)
+    "(" primitiveTypeLookahead()
+  |
+    LOOKAHEAD("(" nameLookahead() "[")
+    "(" nameLookahead() "[" "]"
+  |
+    "(" nameLookahead() ")"
+    ( "~" | "!" | "(" | <IDENTIFIER> | "this" | "super" | "new" | literalLookahead() )
+}
+
+/**
+ * Used internally for lookahead
+ */
+void typeLookahead() :
+{}
+{
+    ( primitiveTypeLookahead() | nameLookahead() ) ( "[" "]" )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void resultTypeLookahead() :
+{}
+{
+    "void" | typeLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void nameLookahead() :
+{}
+{
+    <IDENTIFIER> ( LOOKAHEAD(2) "." <IDENTIFIER> )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void primitiveTypeLookahead() :
+{}
+{
+    "boolean" | "char" | "byte" | "short" | "int" | "long" | "float" | "double"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void literalLookahead() :
+{}
+{
+    <INTEGER_LITERAL>
+  |
+    <LONG_LITERAL>
+  |
+    <FLOAT_LITERAL>
+  |
+    <DOUBLE_LITERAL>
+  |
+    <CHARACTER_LITERAL>
+  |
+    <STRING_LITERAL>
+  |
+    "true"
+  |
+    "false"
+  |
+    "null"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void explicitConstructorInvocationLookahead() :
+{}
+{
+    LOOKAHEAD( "this" argumentsLookahead() ";" )
+    "this" argumentsLookahead() ";"
+  |
+    [ LOOKAHEAD(2) primaryExpressionLookahead() "." ]
+    "super" argumentsLookahead() ";"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void argumentsLookahead() :
+{}
+{
+  "(" [ expressionLookahead() ( "," expressionLookahead() )* ] ")"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void expressionLookahead() :
+{}
+{
+  conditionalExpressionLookahead()
+      [  assignmentOperatorLookahead() expressionLookahead() ]
+}
+
+/**
+ * Used internally for lookahead
+ */
+void assignmentOperatorLookahead() :
+{}
+{
+    "=" | "*=" | "/=" | "%=" | "+=" | "-=" | "<<=" | ">>=" | ">>>=" | "&=" | "^=" | "|="
+}
+
+/**
+ * Used internally for lookahead
+ */
+void conditionalExpressionLookahead() :
+{}
+{
+    conditionalOrExpressionLookahead()
+	[ "?" expressionLookahead() ":" conditionalExpressionLookahead() ]
+}
+
+/**
+ * Used internally for lookahead
+ */
+void conditionalOrExpressionLookahead() :
+{}
+{
+    conditionalAndExpressionLookahead() ( "||" conditionalAndExpressionLookahead() )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void conditionalAndExpressionLookahead() :
+{}
+{
+    inclusiveOrExpressionLookahead() ( "&&" inclusiveOrExpressionLookahead() )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void inclusiveOrExpressionLookahead() :
+{}
+{
+    exclusiveOrExpressionLookahead() ( "|" exclusiveOrExpressionLookahead() )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void exclusiveOrExpressionLookahead() :
+{}
+{
+    andExpressionLookahead() ( "^" andExpressionLookahead() )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void andExpressionLookahead() :
+{}
+{
+    equalityExpressionLookahead() ( "&" equalityExpressionLookahead() )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void equalityExpressionLookahead() :
+{}
+{
+    instanceOfExpressionLookahead() ( ( "==" | "!=" ) instanceOfExpressionLookahead() )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void instanceOfExpressionLookahead() :
+{}
+{
+    relationalExpressionLookahead() [ "instanceof" typeLookahead() ]
+}
+
+/**
+ * Used internally for lookahead
+ */
+void relationalExpressionLookahead() :
+{}
+{
+    shiftExpressionLookahead()
+	( ( "<" | ">" | "<=" | ">=" ) shiftExpressionLookahead() )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void shiftExpressionLookahead() :
+{}
+{
+    additiveExpressionLookahead()
+	( ( "<<" | ">>" | ">>>" ) additiveExpressionLookahead() )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void additiveExpressionLookahead() :
+{}
+{
+    multiplicativeExpressionLookahead()
+	( ( "+" | "-" ) multiplicativeExpressionLookahead() )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void multiplicativeExpressionLookahead() :
+{}
+{
+    unaryExpressionLookahead() ( ( "*" | "/" | "%" ) unaryExpressionLookahead() )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void unaryExpressionLookahead() :
+{}
+{
+    ( "+" | "-" ) unaryExpressionLookahead()
+  |
+    preIncrementExpressionLookahead()
+  |
+    preDecrementExpressionLookahead()
+  |
+    unaryExpressionNotPlusMinusLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void preIncrementExpressionLookahead() :
+{}
+{
+    "++" primaryExpressionLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void preDecrementExpressionLookahead() :
+{}
+{
+    "--" primaryExpressionLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void unaryExpressionNotPlusMinusLookahead() :
+{}
+{
+    ( "~" | "!" ) unaryExpressionLookahead()
+  |
+    LOOKAHEAD( castLookahead() ) castExpressionLookahead()
+  |
+    postfixExpressionLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void postfixExpressionLookahead() :
+{}
+{
+    primaryExpressionLookahead() [ "++" | "--" ]
+}
+
+/**
+ * Used internally for lookahead
+ */
+void castExpressionLookahead() :
+{}
+{
+    LOOKAHEAD( "(" primitiveTypeLookahead() )
+    "(" typeLookahead() ")" unaryExpressionLookahead()
+  |
+    "(" typeLookahead() ")" unaryExpressionNotPlusMinusLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void primaryExpressionLookahead() :
+{}
+{
+    primaryPrefixLookahead() ( LOOKAHEAD(2) primarySuffixLookahead() )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void primaryPrefixLookahead() :
+{}
+{
+    literalLookahead()
+  |
+    "this"
+  |
+    "super" "." <IDENTIFIER>
+  |
+    "(" expressionLookahead() ")"
+  |
+    allocationExpressionLookahead()
+  |
+    LOOKAHEAD( resultTypeLookahead() "." "class" )
+    resultTypeLookahead() "." "class"
+  |
+    nameLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void primarySuffixLookahead() :
+{}
+{
+    LOOKAHEAD(2) "." "this"
+  |
+    LOOKAHEAD(2) "." allocationExpressionLookahead()
+  |
+    "[" expressionLookahead() "]"
+  |
+    "." <IDENTIFIER>
+  |
+    argumentsLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void allocationExpressionLookahead() :
+{}
+{
+    LOOKAHEAD(2) "new" primitiveTypeLookahead() arrayDimsAndInitsLookahead()
+  |
+    "new" nameLookahead()
+      ( arrayDimsAndInitsLookahead()
+      | argumentsLookahead() [ classBodyLookahead() ] )
+}
+
+/**
+ * Used internally for lookahead
+ */
+void classBodyLookahead() :
+{}
+{
+    "{" ( classBodyDeclarationLookahead() )* "}"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void classBodyDeclarationLookahead() :
+{}
+{
+    LOOKAHEAD(2) initializerLookahead()
+  |
+    LOOKAHEAD( classDeclarationLookahead() )
+    classDeclarationLookahead2()
+  |
+    LOOKAHEAD( interfaceDeclarationLookahead() )
+    interfaceDeclarationLookahead2()
+  |
+    LOOKAHEAD( constructorDeclarationLookahead() )
+    constructorDeclarationLookahead2()
+  |
+    LOOKAHEAD( methodDeclarationLookahead() )
+    methodDeclarationLookahead2()
+  |
+    fieldDeclarationLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void initializerLookahead() :
+{}
+{
+    [ "static" ] blockLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void modifiersLookahead() :
+{}
+{
+    ( "public"   | "protected" | "private" |
+      "static"   |
+      "abstract" | "final" | "native" |  "synchronized" | "transient" | "volatile" )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void constructorDeclarationLookahead() :
+{}
+{
+    modifiersLookahead() <IDENTIFIER> "("
+}
+
+/**
+ * Used internally for lookahead
+ */
+void constructorDeclarationLookahead2() :
+{}
+{
+    modifiersLookahead()
+    <IDENTIFIER> formalParametersLookahead() [ "throws" nameListLookahead() ]
+    "{"
+      [ LOOKAHEAD(explicitConstructorInvocationLookahead())
+        explicitConstructorInvocationLookahead() ]
+      ( statementLookahead() )*
+    "}"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void methodDeclarationLookahead() :
+{}
+{
+    modifiersLookahead() resultTypeLookahead() <IDENTIFIER> "("
+}
+
+/**
+ * Used internally for lookahead
+ */
+void methodDeclarationLookahead2() :
+{}
+{
+    modifiersLookahead()
+    resultTypeLookahead() methodDeclaratorLookahead() [ "throws" nameListLookahead() ]
+    ( blockLookahead() | ";" )
+}
+
+/**
+ * Used internally for lookahead
+ */
+void nameListLookahead() :
+{}
+{
+    nameLookahead() ( "," nameLookahead() )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void methodDeclaratorLookahead() :
+{}
+{
+    <IDENTIFIER> formalParametersLookahead() ( "[" "]" )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void formalParametersLookahead() :
+{}
+{
+    "(" [ formalParameterLookahead() ( "," formalParameterLookahead() )* ] ")"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void formalParameterLookahead() :
+{}
+{
+    [ "final" ] typeLookahead() variableDeclaratorIdLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void fieldDeclarationLookahead() :
+{}
+{
+    modifiersLookahead()
+    typeLookahead() variableDeclaratorLookahead()
+    ( "," variableDeclaratorLookahead() )* ";"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void variableDeclaratorLookahead() :
+{}
+{
+    variableDeclaratorIdLookahead() [ "=" variableInitializerLookahead() ]
+}
+
+/**
+ * Used internally for lookahead
+ */
+void variableDeclaratorIdLookahead() :
+{}
+{
+    <IDENTIFIER> ( "[" "]" )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void blockLookahead() :
+{}
+{
+    "{" ( blockStatementLookahead() )* "}"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void blockStatementLookahead() :
+{}
+{
+    LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
+    localVariableDeclarationLookahead() ";"
+  |
+    statementLookahead()
+  |
+    unmodifiedClassDeclarationLookahead()
+  |
+    unmodifiedInterfaceDeclarationLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void statementLookahead() :
+{}
+{
+    LOOKAHEAD(2)
+    labeledStatementLookahead()
+  |
+    blockLookahead()
+  |
+    ";"
+  |
+    statementExpressionLookahead() ";"
+  |
+    switchStatementLookahead()
+  |
+    ifStatementLookahead()
+  |
+    whileStatementLookahead()
+  |
+    doStatementLookahead()
+  |
+    forStatementLookahead()
+  |
+    breakStatementLookahead()
+  |
+    continueStatementLookahead()
+  |
+    returnStatementLookahead()
+  |
+    throwStatementLookahead()
+  |
+    synchronizedStatementLookahead()
+  |
+    tryStatementLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void labeledStatementLookahead() :
+{}
+{
+    <IDENTIFIER> ":" statementLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void statementExpressionLookahead() :
+{}
+{
+    preIncrementExpressionLookahead()
+  |
+    preDecrementExpressionLookahead()
+  |
+    primaryExpressionLookahead()
+    [ "++"
+    | "--"
+    | assignmentOperatorLookahead() expressionLookahead() ]
+}
+
+/**
+ * Used internally for lookahead
+ */
+void switchStatementLookahead() :
+{}
+{
+    "switch" "(" expressionLookahead() ")" "{"
+      ( ( "case" expressionLookahead() | "default" ) ":"
+	( blockStatementLookahead() )* )*
+    "}"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void ifStatementLookahead() :
+{}
+{
+    "if" "(" expressionLookahead() ")"
+	statementLookahead() [ LOOKAHEAD(1) "else" statementLookahead() ]
+}
+
+/**
+ * Used internally for lookahead
+ */
+void whileStatementLookahead() :
+{}
+{
+    "while" "(" expressionLookahead() ")" statementLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void doStatementLookahead() :
+{}
+{
+    "do" statementLookahead() "while" "(" expressionLookahead() ")" ";"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void forStatementLookahead() :
+{}
+{
+    "for" "(" [ forInitLookahead() ] ";"
+	      [ expressionLookahead() ] ";"
+              [ statementExpressionListLookahead() ] ")"
+	statementLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void forInitLookahead() :
+{}
+{
+    LOOKAHEAD( [ "final" ] typeLookahead() <IDENTIFIER> )
+    localVariableDeclarationLookahead()
+  |
+    statementExpressionListLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void statementExpressionListLookahead() :
+{}
+{
+    statementExpressionLookahead() ( "," statementExpressionLookahead() )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void breakStatementLookahead() :
+{}
+{
+    "break" [ <IDENTIFIER> ] ";"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void continueStatementLookahead() :
+{}
+{
+    "continue" [ <IDENTIFIER> ] ";"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void returnStatementLookahead() :
+{}
+{
+    "return" [ expressionLookahead() ] ";"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void throwStatementLookahead() :
+{}
+{
+    "throw" expressionLookahead() ";"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void synchronizedStatementLookahead() :
+{}
+{
+    "synchronized" "(" expressionLookahead() ")" blockLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void localVariableDeclarationLookahead() :
+{}
+{
+    [ "final" ] typeLookahead() variableDeclaratorLookahead()
+	( "," variableDeclaratorLookahead() )*
+}
+
+/**
+ * Used internally for lookahead
+ */
+void tryStatementLookahead() :
+{}
+{
+    "try" blockLookahead()
+	( "catch" "(" formalParameterLookahead() ")" blockLookahead() )*
+	[ "finally" blockLookahead() ]
+}
+
+/**
+ * Used internally for lookahead
+ */
+void arrayDimsAndInitsLookahead() :
+{}
+{
+    LOOKAHEAD(2)
+	( LOOKAHEAD(2) "[" expressionLookahead() "]" )+ ( LOOKAHEAD(2) "[" "]" )*
+  |
+	( "[" "]" )+ arrayInitializerLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void arrayInitializerLookahead() :
+{}
+{
+    "{" [ variableInitializerLookahead()
+	( LOOKAHEAD(2) "," variableInitializerLookahead() )* ] [ "," ] "}"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void variableInitializerLookahead() :
+{}
+{
+    arrayInitializerLookahead() | expressionLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void classDeclarationLookahead() :
+{}
+{
+    modifiersLookahead() "class"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void classDeclarationLookahead2() :
+{}
+{
+    modifiersLookahead() unmodifiedClassDeclarationLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void unmodifiedClassDeclarationLookahead() :
+{}
+{
+    "class" <IDENTIFIER> [ "extends" nameLookahead() ]
+    [ "implements" nameListLookahead() ]
+    classBodyLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void interfaceDeclarationLookahead() :
+{}
+{
+    modifiersLookahead() "interface"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void interfaceDeclarationLookahead2() :
+{}
+{
+    modifiersLookahead() unmodifiedInterfaceDeclarationLookahead()
+}
+
+/**
+ * Used internally for lookahead
+ */
+void unmodifiedInterfaceDeclarationLookahead() :
+{}
+{
+    "interface" <IDENTIFIER> [ "extends" nameListLookahead() ]
+    "{" ( interfaceMemberDeclarationLookahead() )* "}"
+}
+
+/**
+ * Used internally for lookahead
+ */
+void interfaceMemberDeclarationLookahead() :
+{}
+{
+    LOOKAHEAD( classDeclarationLookahead() )
+    classDeclarationLookahead2()
+  |
+    LOOKAHEAD( interfaceDeclarationLookahead() )
+    interfaceDeclarationLookahead2()
+  |
+    LOOKAHEAD( methodDeclarationLookahead() )
+    methodDeclarationLookahead2()
+  |
+    fieldDeclarationLookahead()
+}
