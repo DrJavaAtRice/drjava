@@ -39,384 +39,157 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-import java.awt.Toolkit;
 import java.awt.event.*;
 import javax.swing.text.*;
 import javax.swing.*;
-import java.util.*;
-import java.io.*;
+import java.io.IOException;
 
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 
 /**
- * The document that handles input to the repl and the interpretation
- * of said input.
+ * Interface for a document that handles input to the repl and the 
+ * interpretation of this input.
  * @version $Id$
  */
-public class InteractionsDocument extends DefaultStyledDocument {
+public interface InteractionsDocument extends StyledDocument {
   public static final String BANNER = "Welcome to DrJava.\n";
   public static final String PROMPT = "> ";
 
-  private boolean _inProgress = false;
-
-  /** Index in the document of the first place that is editable. */
-  private int _frozenPos = 0;
-
   /**
-   * Command-line history. It's not reset when the interpreter is reset.
+   * Interprets the current command at the prompt.
    */
-  private History _history = new History();
-
-  /**
-   * put your documentation comment here
-   */
-  public InteractionsDocument() {
-    reset();
-
-    /*
-    ActionListener l = new ActionListener() {
-      public void actionPerformed(ActionEvent ae) {
-        JOptionPane.showMessageDialog(null, "clicked");
-      }
-    };
-
-    JButton b = new JButton("clicky");
-    b.setAlignmentY(.8f);
-    b.addActionListener(l);
-
-    SimpleAttributeSet buttonSet = new SimpleAttributeSet();
-    StyleConstants.setComponent(buttonSet, b);
-    try {
-      insertString(getLength(), " ", buttonSet);
-      insertString(getLength(), " ", null);
-    }
-    catch (BadLocationException ble) {}
-
-    _frozenPos = getLength();
-    */
-  }
-
+  public void interpretCurrentInteraction();
+  
   /**
    * Returns the first location in the document where editing is allowed.
    */
-  public int getFrozenPos() {
-    return _frozenPos;
-  }
+  public int getPromptPos();
 
   /**
-   * Override superclass insertion to prevent insertion past frozen point. 
+   * Lets this document know whether an interaction is in progress.
+   */
+  public void setInProgress(boolean b);
+
+  /**
+   * Returns whether an interaction is currently in progress.
+   */
+  public boolean inProgress();
+  
+  /** 
+   * Resets the document to a clean state.  Does not reset the history.
+   */
+  public void reset();
+
+  /**
+   * Prints a prompt for a new interaction.
+   */
+  public void prompt();
+
+  /**
+   * Inserts the given string with the given attributes just before the
+   * most recent prompt.
+   * @param s String to insert
+   * @param a Attributes to control formatting of string
+   */
+  public void insertBeforeLastPrompt(String s, AttributeSet a);
+  
+  /**
+   * Insert a string into this document, but not before prompt. 
    * @exception BadLocationException
    */
   public void insertString(int offs, String str, AttributeSet a)
-    throws BadLocationException
-  {
-    if (offs < _frozenPos) {
-      Toolkit.getDefaultToolkit().beep();
-    } 
-    else {
-      super.insertString(offs, str, a);
-    }
-  }
-
-  public void setInProgress(boolean b) {
-    _inProgress = b;
-  }
-
-  public boolean inProgress() {
-    return _inProgress;
-  }
-
-  public void insertBeforeLastPrompt(String s, AttributeSet a) {
-    try {
-      int pos;
-      if (_inProgress) {
-        pos = getLength();
-      }
-      else {
-        pos = _frozenPos - PROMPT.length();
-      }
-
-      super.insertString(pos, s, a);
-      _frozenPos += s.length();
-    }
-    catch (BadLocationException ble) {
-      throw new UnexpectedException(ble);
-    }
-  }
+    throws BadLocationException;
 
   /**
-   * Override superclass deletion to prevent deletion past frozen point. 
+   * Remove a string from this document, but not before prompt. 
    * @exception BadLocationException
    */
-  public void remove(int offs, int len) throws BadLocationException {
-    if (offs < _frozenPos) {
-      Toolkit.getDefaultToolkit().beep();
-    } 
-    else {
-      super.remove(offs, len);
-    }
-  }
-
-  /** Clear the UI. */
-  public void reset() {
-    try {
-      super.remove(0, getLength());
-      super.insertString(0, BANNER, null);
-      prompt();
-      _history.moveEnd();
-      setInProgress(false);
-    } catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
-  }
-
-  public void prompt() {
-    try {
-      super.insertString(getLength(), PROMPT, null);
-      _frozenPos = getLength();
-    } catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
-  }
+  public void remove(int offs, int len) throws BadLocationException;
+  
   
   /**
-   * Clears the history
+   * Returns the string that the user has entered at the current prompt.
+   * May contain newline characters.
    */
-  public void clearHistory() {
-    _history.clear();
-  }
-
-  /**
-   * put your documentation comment here
-   */
-  public void moveHistoryPrevious() {
-    _history.movePrevious();
-    _replaceCurrentLineFromHistory();
-  }
-
-  /**
-   * put your documentation comment here
-   */
-  public void moveHistoryNext() {
-    _history.moveNext();
-    _replaceCurrentLineFromHistory();
-  }
-
-  public String getCurrentInteraction() {
-    try {
-      return getText(_frozenPos, getLength() - _frozenPos);
-    }
-    catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
-  }
+  public String getCurrentInteraction();
 
   /**
    * Clears the current interaction text and then moves
    * to the end of the command history.
    */
-  public void clearCurrentInteraction() {
-    _clearCurrentInteractionText();
-    _history.moveEnd();
-  }
-
-  private void _clearCurrentInteractionText() {
-    try {
-      // Delete old value of current line
-      remove(_frozenPos, getLength() - _frozenPos);
-    }
-    catch (BadLocationException ble) {
-      throw new UnexpectedException(ble);
-    }
-  }
+  public void clearCurrentInteraction();
   
   /**
-   * Replaces any text entered past the prompt with the current
-   * item in the history.
+   * Adds the given text to the history of commands.
    */
-  private void _replaceCurrentLineFromHistory() {
-    try {
-      _clearCurrentInteractionText();
-      insertString(getLength(), _history.getCurrent(), null);
-    }
-    catch (BadLocationException ble) {
-      throw new UnexpectedException(ble);
-    }
-  }
+  public void addToHistory(String text);
+  
+  /**
+   * Saves the interactions history with the given file selector.
+   */
+  public void saveHistory(FileSaveSelector selector) throws IOException;
+  
+  /**
+   * Returns the entire history as a single string.  Commands should
+   * be separated by semicolons.
+   */
+  public String getHistoryAsString();
+  
+  /**
+   * Clears the history
+   */
+  public void clearHistory();
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Puts the previous line from the history on the current line
+   * and moves the history back one line.
    */
-  public boolean hasHistoryPrevious() {
-    return  _history.hasPrevious();
-  }
+  public void moveHistoryPrevious();
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Puts the next line from the history on the current line
+   * and moves the history forward one line.
    */
-  public boolean hasHistoryNext() {
-    return  _history.hasNext();
-  }
+  public void moveHistoryNext();
 
-  public void addToHistory(String text) {
-    _history.add(text);
-  }
+  /**
+   * Returns whether there is a previous command in the history.
+   */
+  public boolean hasHistoryPrevious();
 
+  /**
+   * Returns whether there is a next command in the history.
+   */
+  public boolean hasHistoryNext();
+  
+  /**
+   * Gets the previous interaction in the history and
+   * replaces whatever is on the current
+   * interactions input line with this interaction.
+   * @param failed Something to run if there is no previous command
+   */
+  public void recallPreviousInteractionInHistory(Runnable failed);
+
+  /**
+   * Gets the next interaction in the history and
+   * replaces whatever is on the current
+   * interactions input line with this interaction.
+   * @param failed Something to run if there is no next command
+   */
+  public void recallNextInteractionInHistory(Runnable failed);
+
+  
+
+  /**
+   * Inserts the given exception data into the document with the given style.
+   * @param exceptionClass Name of the exception that was thrown
+   * @param message Message contained in the exception
+   * @param stackTrace String representation of the stack trace
+   * @param set AttributeSet for formatting the exception
+   */
   public void appendExceptionResult(String exceptionClass,
                                     String message,
                                     String stackTrace,
-                                    AttributeSet set)
-  {
-    //writeLock();
-    try {
-
-      if (null == message || "null".equals(message)) {
-        message = "";
-      }
-
-      insertString(getLength(), exceptionClass + ": " + message + "\n", set);
-
-      // An example stack trace:
-      //
-      // java.lang.IllegalMonitorStateException: 
-      // at java.lang.Object.wait(Native Method)
-      // at java.lang.Object.wait(Object.java:425)
-      if (! stackTrace.trim().equals("")) {
-        BufferedReader reader=new BufferedReader(new StringReader(stackTrace));
-        
-        String line;
-        // a line is parsable if it has ( then : then ), with some
-        // text between each of those
-        while ((line = reader.readLine()) != null) {
-          String fileName = null;
-          int lineNumber = -1;
-
-          int openLoc = line.indexOf('(');
-
-          if (openLoc != -1) {
-            int closeLoc = line.indexOf(')', openLoc + 1);
-
-            if (closeLoc != -1) {
-              int colonLoc = line.indexOf(':', openLoc + 1);
-              if ((colonLoc > openLoc) && (colonLoc < closeLoc)) {
-                // ok this line is parsable!
-                String lineNumStr = line.substring(colonLoc + 1, closeLoc);
-                try {
-                  lineNumber = Integer.parseInt(lineNumStr);
-                  fileName = line.substring(openLoc + 1, colonLoc);
-                }
-                catch (NumberFormatException nfe) {
-                  // do nothing; we failed at parsing
-                }
-              }
-            }
-          }
-
-          insertString(getLength(), line, set);
-
-          // OK, now if fileName != null we did parse out fileName
-          // and lineNumber.
-          // Here's where we'd add the button, etc.
-          if (fileName != null) {
-            /*
-            JButton button = new JButton("go");
-            button.addActionListener(new ExceptionButtonListener(fileName,
-                                                                 lineNumber));
-
-            SimpleAttributeSet buttonSet = new SimpleAttributeSet(set);
-            StyleConstants.setComponent(buttonSet, button);
-            insertString(getLength(), "  ", null);
-            insertString(getLength() - 1, " ", buttonSet);
-            */
-            //JOptionPane.showMessageDialog(null, "button in");
-            //insertString(getLength(), " ", null);
-            //JOptionPane.showMessageDialog(null, "extra space");
-          }
-
-          //JOptionPane.showMessageDialog(null, "\\n");
-          insertString(getLength(), "\n", set);
-
-        } // end the while
-      }
-    }
-    catch (IOException ioe) {
-      // won't happen; we're readLine'ing from a String!
-      throw new UnexpectedException(ioe);
-    }
-    catch (BadLocationException ble) {
-      throw new UnexpectedException(ble);
-    }
-    finally {
-      //writeUnlock();
-    }
-  }
-  
-  public void saveHistory(FileSaveSelector selector) throws IOException {
-    _history.writeToFile(selector);
-  }
-  
-  public String getHistoryAsString() {
-    return _history.getHistoryAsString();
-  }
-
-  private class ExceptionButtonListener implements ActionListener {
-    private final String _fileName;
-    private final int _lineNumber;
-
-    public ExceptionButtonListener(final String fileName, final int lineNumber)
-    {
-      _fileName = fileName;
-      _lineNumber = lineNumber;
-    }
-
-    public void actionPerformed(ActionEvent e) {
-      javax.swing.JOptionPane.showMessageDialog(null, "exception at line " + 
-                                                      _lineNumber +
-                                                      " in file " +
-                                                      _fileName);
-    }
-  }
+                                    AttributeSet set);
 }
-
-/*
-class LinkInfo implements Comparable {
-  private final String _text;
-  private final Position _start;
-  private final Position _end;
-
-  public LinkInfo(final Position start, final Position end, final String text) {
-    _start = start;
-    _end = end;
-    _text = text;
-  }
-
-  public int compareTo(Object o) {
-    LinkInfo other = (LinkInfo) o;
-
-    if (_start.getOffset() == other._start.getOffset()) {
-      return _end.getOffset() < other._end.getOffset();
-    }
-    else {
-      if (_end.getOffset() == other._end.getOffset()) {
-        return 0;
-      }
-      else {
-        return _start.getOffset() < o._start.getOffset();
-      }
-    }
-  }
-
-  public boolean containsOffset(int offset) {
-    return (offset >= _start.getOffset()) &&
-           (offset < _end.getOffset());
-  }
-
-  public String getText() {
-    return _text;
-  }
-}
-*/

@@ -140,6 +140,10 @@ public abstract class GlobalModelTestCase extends TestCase {
     boolean ret = FileOps.deleteDirectory(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);
     if (_testFailed) fail("test failed in another thread");
+    
+    _tempDir = null;
+    _model = null;
+    System.gc();
   }
 
   /**

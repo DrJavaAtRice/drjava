@@ -208,7 +208,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
    * This would be much easier to do in JDK 1.4, since you can get the
    * stack trace frames directly, instead of having to parse this!
    */
-  protected static String getStackTrace(Throwable t) {
+  public static String getStackTrace(Throwable t) {
     StringWriter writer = new StringWriter();
     t.printStackTrace(new PrintWriter(writer));
 

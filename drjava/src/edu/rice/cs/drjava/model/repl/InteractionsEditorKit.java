@@ -45,6 +45,7 @@ import javax.swing.*;
 import java.util.*;
 
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.drjava.model.GlobalModel;
 
 /**
  * This mediates the model and view of interactions.
@@ -52,9 +53,14 @@ import edu.rice.cs.util.UnexpectedException;
  */
 public class InteractionsEditorKit extends StyledEditorKit {
   //private final HashMap _listenerMap = new HashMap();
+  private final GlobalModel _model;
 
+  public InteractionsEditorKit(GlobalModel model) {
+    _model = model;
+  }
+  
   public Document createDefaultDocument() {
-    return new InteractionsDocument();
+    return new DefaultInteractionsDocument(_model);
   }
 
   /*

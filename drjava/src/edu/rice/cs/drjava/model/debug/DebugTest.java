@@ -128,9 +128,9 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   }
   
   public void tearDown() throws IOException {
-    super.tearDown();
     _debugger = (JPDADebugger) _model.getDebugger();
     assertTrue("Debug Manager should not be null", _debugger != null);
+    super.tearDown();
   }
   
   /**

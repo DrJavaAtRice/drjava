@@ -95,7 +95,7 @@ public interface GlobalModel {
   /**
    * Gets the interactions document.
    */
-  public StyledDocument getInteractionsDocument();
+  public InteractionsDocument getInteractionsDocument();
 
   /**
    * Gets the junit document.
@@ -219,36 +219,11 @@ public interface GlobalModel {
   public void resetConsole();
 
   /**
-   * Clears the current interaction text and then moves
-   * to the end of the command history.
-   */
-  public void clearCurrentInteraction();
-
-  /**
-   * Forwarding method to remove logical dependency of InteractionsPane on
-   * the InteractionsDocument.  Gets the previous interaction in the
-   * InteractionsDocument's history and replaces whatever is on the current
-   * interactions input line with this interaction.
-   */
-  public void recallPreviousInteractionInHistory(Runnable failed);
-
-  /**
-   * Forwarding method to remove logical dependency of InteractionsPane on
-   * the InteractionsDocument.  Gets the next interaction in the
-   * InteractionsDocument's history and replaces whatever is on the current
-   * interactions input line with this interaction.
-   */
-  public void recallNextInteractionInHistory(Runnable failed);
-
-  /**
    * Interprets the current given text at the prompt in the interactions
    * pane.
    */
   public void interpretCurrentInteraction();
 
-  /** Returns the first location in the document where editing is allowed. */
-  public int getInteractionsFrozenPos();
-  
   /** Prints System.out to the DrJava console. */
   public void systemOutPrint(String s);
 

@@ -37,48 +37,64 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import javax.swing.*;
+import java.awt.Font;
+import java.awt.event.*;
+
+import edu.rice.cs.drjava.model.repl.SimpleInteractionsDocument;
+import edu.rice.cs.drjava.model.repl.SimpleInteractionsListener;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030206-0618;
- *
+ * A standalone Interactions Window that provides the functionality of
+ * DrJava's Interactions Pane in a single JVM.  Useful for quickly
+ * testing small pieces of code if DrJava is not running.
  * @version $Id$
  */
-public abstract class Version {
+public class SimpleInteractionsWindow extends JFrame {
+  private final SimpleInteractionsDocument _doc;
+  private final InteractionsPane _pane;
+  
+  public SimpleInteractionsWindow() {
+    super("Interactions Window");
+    setSize(600, 400);
+    
+    _doc = new SimpleInteractionsDocument();
+    _pane = new InteractionsPane(_doc);
+    _pane.setFont(Font.decode("monospaced"));
+
+
+    _doc.addInteractionListener(new SimpleInteractionsListener() {
+      public void interactionStarted() {
+        _pane.setEditable(false);
+      }
+      public void interactionEnded() {
+        _pane.moveToPrompt();
+        _pane.setEditable(true);
+      }
+    });
+
+    JScrollPane scroll = new JScrollPane(_pane);
+    getContentPane().add(scroll);
+    
+    // Add listener to quit if window is closed
+    this.addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent ev) {
+        System.exit(0);
+      }
+    });
+  }
+
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Main method to create a SimpleInteractionsWindow from the console.
+   * Doesn't take any command line arguments.
    */
-  private static final String BUILD_TIME_STRING = "20030206-0618";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
   public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
+    SimpleInteractionsWindow w = new SimpleInteractionsWindow();
+    w.show();
   }
-} 
+}
+  
+  
+    

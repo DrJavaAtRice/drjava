@@ -217,7 +217,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * The document used to interact with the repl.
    */
   private final InteractionsDocument _interactionsDoc
-    = new InteractionsDocument();
+    = new DefaultInteractionsDocument(this);
   
   /**
    * The document used to display System.out and System.err.
@@ -390,7 +390,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     return _definitionsDocs;
   }
 
-  public StyledDocument getInteractionsDocument() {
+  public InteractionsDocument getInteractionsDocument() {
     return _interactionsDoc;
   }
 
@@ -757,52 +757,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     });
   }
 
-
-  /**
-   * Forwarding method to remove logical dependency of InteractionsPane on
-   * the InteractionsDocument.  Gets the previous interaction in the
-   * InteractionsDocument's history and replaces whatever is on the current
-   * interactions input line with this interaction.
-   */
-  public void recallPreviousInteractionInHistory(Runnable failed) {
-    if (_interactionsDoc.hasHistoryPrevious()) {
-      _interactionsDoc.moveHistoryPrevious();
-    }
-    else {
-      failed.run();
-    }
-  }
-
-  /**
-   * Forwarding method to remove logical dependency of InteractionsPane on
-   * the InteractionsDocument.  Gets the next interaction in the
-   * InteractionsDocument's history and replaces whatever is on the current
-   * interactions input line with this interaction.
-   */
-  public void recallNextInteractionInHistory(Runnable failed) {
-    if (_interactionsDoc.hasHistoryNext()) {
-      _interactionsDoc.moveHistoryNext();
-    }
-    else {
-      failed.run();
-    }
-  }
-
-  /**
-   * Returns the first location in the document where editing is allowed.
-   */
-  public int getInteractionsFrozenPos() {
-    return _interactionsDoc.getFrozenPos();
-  }
-
-  /**
-   * Clears the current interaction text and then moves
-   * to the end of the command history.
-   */
-  public void clearCurrentInteraction() {
-    _interactionsDoc.clearCurrentInteraction();
-  }
-
   /**
    * Interprets the current given text at the prompt in the interactions
    * pane.
@@ -897,7 +851,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
             text += currString + ";\n";
         }
       }
-      clearCurrentInteraction();
+      _interactionsDoc.clearCurrentInteraction();
       _docAppend(_interactionsDoc, text, null);
       //  _docAppend(_interactionsDoc, currString, null);
       _interactionsDoc.setInProgress(true);

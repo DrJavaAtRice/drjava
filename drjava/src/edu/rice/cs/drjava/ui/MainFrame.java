@@ -70,6 +70,7 @@ import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.drjava.model.debug.DebugListener;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
+import edu.rice.cs.drjava.model.repl.InteractionsEditorKit;
 import edu.rice.cs.drjava.ui.config.*;
 import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
 import edu.rice.cs.drjava.ui.JUnitPanel.JUnitErrorListPane;
@@ -2419,7 +2420,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _setUpTabs() {
     _outputPane = new OutputPane(_model);
     _errorPanel = new CompilerErrorPanel(_model, this);
-    _interactionsPane = new InteractionsPane(_model);
+    _interactionsPane = new InteractionsPane(_model.getInteractionsDocument());
+    _interactionsPane.setEditorKit(new InteractionsEditorKit(_model));
     _findReplace = new FindReplaceDialog(this, _model);
     
     final JScrollPane outputScroll = 
@@ -2985,7 +2987,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
           // Make sure we're at the prompt
           // (This should really be fixed in InteractionsPane, not here.)
-          _interactionsPane.setCaretPosition(_model.getInteractionsFrozenPos());
+          _interactionsPane.moveToPrompt();
         }
       };
       SwingUtilities.invokeLater(doCommand);

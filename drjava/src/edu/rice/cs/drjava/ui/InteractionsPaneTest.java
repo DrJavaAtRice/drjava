@@ -39,11 +39,10 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.repl.*;
 
-import  junit.framework.*;
-import  junit.extensions.*;
+import junit.framework.*;
+import junit.extensions.*;
 
 import java.awt.event.*;
 import javax.swing.*;
@@ -57,8 +56,7 @@ import java.rmi.registry.Registry;
  */
 public class InteractionsPaneTest extends TestCase {
   
-  private GlobalModel _model;
-  private InteractionsDocument _interactions;
+  private InteractionsDocument _doc;
   private InteractionsPane _pane;
   private boolean _ready = false;
   
@@ -82,15 +80,16 @@ public class InteractionsPaneTest extends TestCase {
    * Setup method for each JUnit test case.
    */
   public void setUp() {
-    _model = new DefaultGlobalModel();
-    _interactions = (InteractionsDocument)_model.getInteractionsDocument();
-    _pane = new InteractionsPane(_model);
-    _pane.setCaretPosition(_model.getInteractionsFrozenPos());
+    _doc = new TestInteractionsDocument();
+    _pane = new InteractionsPane(_doc);
+    _pane.setCaretPosition(_doc.getPromptPos());
     _ready = true;
   }
   
   public void tearDown() {
-    //_model.quit();
+    _doc = null;
+    _pane = null;
+    System.gc();
   }
   
   /**
@@ -100,7 +99,7 @@ public class InteractionsPaneTest extends TestCase {
     assertEquals("Initial caret not in the correct position.",
                  1,
                  _pane.getCaretPosition(),
-                 _model.getInteractionsFrozenPos());
+                 _doc.getPromptPos());
   }
   
   /**
@@ -110,12 +109,12 @@ public class InteractionsPaneTest extends TestCase {
   public void testCaretMovementCyclesWhenAtPrompt() {
     while (! _ready);
     
-    _interactions.insertBeforeLastPrompt("test", new SimpleAttributeSet());
-    _pane.setCaretPosition(_model.getInteractionsFrozenPos());
+    _doc.insertBeforeLastPrompt("test", new SimpleAttributeSet());
+    _pane.setCaretPosition(_doc.getPromptPos());
     
     _pane._moveLeft.actionPerformed(null);
     assertEquals("Caret was not cycled when moved left at the prompt.",
-                 _interactions.getLength(),
+                 _doc.getLength(),
                  _pane.getCaretPosition());
   }
   
@@ -126,12 +125,12 @@ public class InteractionsPaneTest extends TestCase {
   public void testCaretMovementCyclesWhenAtEnd() {
     while (! _ready);
     
-    _interactions.insertBeforeLastPrompt("test", new SimpleAttributeSet());
-    _pane.setCaretPosition(_interactions.getLength());
+    _doc.insertBeforeLastPrompt("test", new SimpleAttributeSet());
+    _pane.setCaretPosition(_doc.getLength());
     
     _pane._moveLeft.actionPerformed(null);
     assertEquals("Caret was not cycled when moved right at the end.",
-                 _model.getInteractionsFrozenPos(),
+                 _doc.getPromptPos(),
                  _pane.getCaretPosition());
   }
 
@@ -145,7 +144,7 @@ public class InteractionsPaneTest extends TestCase {
     _pane.setCaretPosition(10);
     _pane._moveLeft.actionPerformed(null);
     assertEquals("Left arrow doesn't move to prompt when caret is before prompt.",
-                 _model.getInteractionsFrozenPos(),
+                 _doc.getPromptPos(),
                  _pane.getCaretPosition());
   }
   
@@ -159,7 +158,7 @@ public class InteractionsPaneTest extends TestCase {
     _pane.setCaretPosition(10);
     _pane._moveRight.actionPerformed(null);
     assertEquals("Right arrow doesn't move to end when caret is before prompt.",
-                 _interactions.getLength(),
+                 _doc.getLength(),
                  _pane.getCaretPosition());
   }
   
@@ -173,7 +172,13 @@ public class InteractionsPaneTest extends TestCase {
     _pane.setCaretPosition(10);
     _pane._historyPrevAction.actionPerformed(null);
     assertEquals("Caret not moved to end on up arrow.",
-                 _interactions.getLength(),
+                 _doc.getLength(),
                  _pane.getCaretPosition());
-  }    
+  }
+  
+  public class TestInteractionsDocument extends AbstractInteractionsDocument {
+    public void interpretCurrentInteraction() {
+      fail("interpretCurrentInteraction called unexpectedly");
+    }
+  }
 }

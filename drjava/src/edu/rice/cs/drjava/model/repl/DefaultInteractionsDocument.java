@@ -37,48 +37,35 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.repl;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import edu.rice.cs.drjava.model.GlobalModel;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030206-0618;
- *
+ * Default implementation of the InteractionsDocument, which uses a
+ * GlobalModel to perform interpretations.
  * @version $Id$
  */
-public abstract class Version {
+public class DefaultInteractionsDocument extends AbstractInteractionsDocument {
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Model that contains the interpreter to use.
    */
-  private static final String BUILD_TIME_STRING = "20030206-0618";
+  protected final GlobalModel _model;
 
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  /**
+   * Creates a new InteractionsDocument for the given model.
+   * @param model GlobalModel to perform the interpretation.
+   */
+  public DefaultInteractionsDocument(GlobalModel model) {
+    super();
+    _model = model;
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  /**
+   * Interprets the current command at the prompt.
+   */
+  public void interpretCurrentInteraction() {
+    _model.interpretCurrentInteraction();
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+  
+}

@@ -46,7 +46,6 @@ import javax.swing.event.DocumentEvent;
 import java.awt.Toolkit;
 import java.awt.event.*;
 
-import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.util.swing.SwingWorker;
 
@@ -56,9 +55,7 @@ import edu.rice.cs.util.swing.SwingWorker;
  * @version $Id$
  */
 public class InteractionsPane extends JTextPane {
-  private static final EditorKit EDITOR_KIT = new InteractionsEditorKit();
-
-  private final GlobalModel _model;
+  private final InteractionsDocument _doc;
   
   /**
    * Listener to ensure that the caret always stays on or after the
@@ -68,10 +65,10 @@ public class InteractionsPane extends JTextPane {
   private class CaretUpdateListener implements DocumentListener {
     public void insertUpdate(DocumentEvent e) {
       int caretPos = getCaretPosition();
-      int frozenPos = _model.getInteractionsFrozenPos();
-      int length = _model.getInteractionsDocument().getLength();
+      int promptPos = _doc.getPromptPos();
+      int length = _doc.getLength();
 
-      if (((InteractionsDocument)_model.getInteractionsDocument()).inProgress()) {
+      if (_doc.inProgress()) {
         // Scroll to the end of the document, since output has been
         // inserted after the prompt.
         setCaretPosition(e.getDocument().getLength());
@@ -79,9 +76,9 @@ public class InteractionsPane extends JTextPane {
       else {
         // Only update caret if it has fallen behind the prompt.
         // (And be careful not to move it during a reset, when the
-        //  frozen pos is temporarily far greater than the length.)
-        if ((caretPos < frozenPos) && (frozenPos < length)) {
-          setCaretPosition(frozenPos);
+        //  prompt pos is temporarily far greater than the length.)
+        if ((caretPos < promptPos) && (promptPos < length)) {
+          setCaretPosition(promptPos);
         }
       }
     }
@@ -95,7 +92,7 @@ public class InteractionsPane extends JTextPane {
     public void actionPerformed(ActionEvent e) {
       SwingWorker worker = new SwingWorker() {
         public Object construct() {
-          _model.interpretCurrentInteraction();
+          _doc.interpretCurrentInteraction();
           return null;
         }
       };
@@ -117,31 +114,31 @@ public class InteractionsPane extends JTextPane {
   
   AbstractAction _historyPrevAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      _model.recallPreviousInteractionInHistory(BEEP);
+      _doc.recallPreviousInteractionInHistory(BEEP);
       moveToEnd();
     }
   };
 
   AbstractAction _historyNextAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      _model.recallNextInteractionInHistory(BEEP);
+      _doc.recallNextInteractionInHistory(BEEP);
       moveToEnd();
     }
   };
 
   AbstractAction _clearCurrentAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      _model.clearCurrentInteraction();
+      _doc.clearCurrentInteraction();
     }
   };
 
-  AbstractAction _gotoFrozenPosAction = new AbstractAction() {
+  AbstractAction _gotoPromptPosAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       moveToPrompt();
     }
   };
   
-  AbstractAction _selectToFrozenPosAction = new AbstractAction() {
+  AbstractAction _selectToPromptPosAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       selectToPrompt();
     }
@@ -149,13 +146,13 @@ public class InteractionsPane extends JTextPane {
   
   AbstractAction _moveLeft = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      if (getCaretPosition() < _model.getInteractionsFrozenPos()) {
+      if (getCaretPosition() < _doc.getPromptPos()) {
         moveToPrompt();
       }
-      else if (getCaretPosition() == _model.getInteractionsFrozenPos()) {
+      else if (getCaretPosition() == _doc.getPromptPos()) {
         moveToEnd();
       }
-      else { // getCaretPosition() > _model.getInteractionsFrozenPos()
+      else { // getCaretPosition() > _doc.getPromptPos()
         moveLeft();
       }
     }
@@ -164,10 +161,10 @@ public class InteractionsPane extends JTextPane {
   AbstractAction _moveRight = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       int position = getCaretPosition();
-      if (position < _model.getInteractionsFrozenPos()) { 
+      if (position < _doc.getPromptPos()) { 
         moveToEnd();
       }
-      else if (position >= _model.getInteractionsDocument().getLength())
+      else if (position >= _doc.getLength())
       {
         moveToPrompt();
       }
@@ -178,16 +175,15 @@ public class InteractionsPane extends JTextPane {
   };
 
   /**
-   * Overriding this method ensures that all new documents created in this
-   * editor pane use our editor kit (and thus our model).
+   * Creates an InteractionsPane with the given InteractionsDocument.
+   * It is recommended to also install an InteractionsEditorKit with
+   * the setEditorKit() method, although there will usually only be
+   * one document created in this pane.
+   * @param doc InteractionsDocument to display in this pane.
    */
-  protected EditorKit createDefaultEditorKit() {
-    return EDITOR_KIT;
-  }
-
-  public InteractionsPane(GlobalModel model) {
-    super(model.getInteractionsDocument());
-    _model = model;
+  public InteractionsPane(InteractionsDocument doc) {
+    super(doc);
+    _doc = doc;
     
     // Get proper cross-platform mask.
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -204,11 +200,11 @@ public class InteractionsPane extends JTextPane {
                                  _clearCurrentAction);
 
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0), 
-                                 _gotoFrozenPosAction);
+                                 _gotoPromptPosAction);
     
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_HOME,
                                                         java.awt.Event.SHIFT_MASK), 
-                                 _selectToFrozenPosAction);
+                                 _selectToPromptPosAction);
 
     // Up and down need to be bound both for keypad and not
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0), 
@@ -236,38 +232,37 @@ public class InteractionsPane extends JTextPane {
     
     setKeymap(ourMap);
     
-    getDocument().addDocumentListener(new CaretUpdateListener());
+    _doc.addDocumentListener(new CaretUpdateListener());
     moveToEnd();
   }
   
-  private void insertNewline() {
-    StyledDocument interactionsDoc = _model.getInteractionsDocument();
+  public void insertNewline() {
     try {
-      interactionsDoc.insertString(interactionsDoc.getLength(), "\n  ", null);
+      _doc.insertString(_doc.getLength(), "\n  ", null);
     }
     catch (BadLocationException ble) {
       // the end should be legal
     }
   }
   
-  private void moveToEnd() {
-    setCaretPosition(_model.getInteractionsDocument().getLength());
+  public void moveToEnd() {
+    setCaretPosition(_doc.getLength());
   }
   
-  private void moveToPrompt() {
-    setCaretPosition(_model.getInteractionsFrozenPos());
+  public void moveToPrompt() {
+    setCaretPosition(_doc.getPromptPos());
   }
   
   private void selectToPrompt() {
     // Selects the text between the old pos and the prompt
-    moveCaretPosition(_model.getInteractionsFrozenPos());
+    moveCaretPosition(_doc.getPromptPos());
   }
   
-  private void moveLeft() {
+  public void moveLeft() {
     setCaretPosition(getCaretPosition() - 1);
   }
   
-  private void moveRight() {
+  public void moveRight() {
     setCaretPosition(getCaretPosition() + 1);
   }
 }
