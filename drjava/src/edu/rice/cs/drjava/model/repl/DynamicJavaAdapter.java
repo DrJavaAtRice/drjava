@@ -208,6 +208,13 @@ public class DynamicJavaAdapter implements JavaInterpreter {
           v = new EvaluationVisitorExtension(evalVisitorContext);
           result = n.acceptVisitor(v);
         }
+        
+        if (result instanceof String) {
+          result = "\"" + result + "\"";
+        }
+        else if (result instanceof Character) {
+          result = "'" + result + "'";
+        }
 
         return result;
       } catch (ExecutionError e) {

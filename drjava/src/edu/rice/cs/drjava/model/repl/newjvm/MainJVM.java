@@ -73,7 +73,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
    * How long to wait for an interpreter to register itself before 
    * starting another attempt.
    */
-  private final static int RESET_TIME_OUT = 60;
+  private final static int RESET_TIME_OUT = 30;
 
   /** 
    * Port on which RMI registry is running.
@@ -414,12 +414,12 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
                   return;
                 }
                 if (count < 2) {
-                  _model.printDebugMessage("Could not connect to InterpreterJVM, trying again...");
+                  _model.printDebugMessage("Could not connect to Interpreter JVM, trying again...");
                   restartInterpreterJVM();
                   count++;
                   return;
                 }
-                _model.printDebugMessage("Connection failed, the interactions window will not work");
+                _model.printDebugMessage("Unable to connect to Interpreter JVM, so the Interactions Pane is unavailable.");
                 _stopTimerThread();
               }
             }

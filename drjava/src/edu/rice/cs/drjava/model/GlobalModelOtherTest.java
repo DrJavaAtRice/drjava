@@ -151,7 +151,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
   {
     _doCompile(setupDocument(FOO_TEXT), tempFile());
     final String beforeAbort = interpret("DrJavaTestFoo.class.getName()");
-    assertEquals("DrJavaTestFoo", beforeAbort);
+    assertEquals("\"DrJavaTestFoo\"", beforeAbort);
     
     TestListener listener = new TestListener() {
       public void interactionStarted() {
@@ -208,7 +208,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
 
     // make sure we can still see class foo
     final String afterAbort = interpret("DrJavaTestFoo.class.getName()");
-    assertEquals("DrJavaTestFoo", afterAbort);
+    assertEquals("\"DrJavaTestFoo\"", afterAbort);
   }
 
   /**
@@ -307,7 +307,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
 
     String result = interpret("new DrJavaTestFoo().getClass().getName()");
     assertEquals("interactions result",
-                 "DrJavaTestFoo",
+                 "\"DrJavaTestFoo\"",
                  result);
     
     // Add directory 1 to extra classpath and close doc1
@@ -326,13 +326,13 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     // Ensure that Baz can use the Foo class from extra classpath
     result = interpret("new DrJavaTestBaz().getClass().getName()");
     assertEquals("interactions result",
-                 "DrJavaTestBaz",
+                 "\"DrJavaTestBaz\"",
                  result);
     
     // Also ensure that Foo can be used directly
     result = interpret("new DrJavaTestFoo().getClass().getName()");
     assertEquals("interactions result",
-                 "DrJavaTestFoo",
+                 "\"DrJavaTestFoo\"",
                  result);
   }
 
@@ -588,7 +588,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     // Should cause a NoClassDefFound, but we shouldn't check exact syntax.
     //  Instead, make sure it isn't "DrJavaTestFoo", as if the class was found.
     assertTrue("interactions should have an error, not the correct answer",
-               !"DrJavaTestFoo".equals(result));
+               !"\"DrJavaTestFoo\"".equals(result));
 
     // Add new directory to classpath through Config
     Vector<File> cp = new Vector<File>();
@@ -599,7 +599,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     
     // Now it should be on the classpath
     assertEquals("interactions result",
-                 "DrJavaTestFoo",
+                 "\"DrJavaTestFoo\"",
                  result);
     
     

@@ -124,6 +124,17 @@ public class NewJVMTest extends TestCase {
                    _jvm.exceptionClassBuf);
     }
   }
+  
+  public void testToStringThrowsRuntimeException() throws Throwable {
+    synchronized(_jvm) {
+      _jvm.interpret(
+        "class A { public String toString() { throw new RuntimeException(); } };" +
+        "new A()");
+      _jvm.wait();
+      assertTrue("exception should have been thrown by toString",
+                 _jvm.exceptionClassBuf != null);
+    }
+  }
 
   public void testThrowNPE() throws Throwable {
     synchronized(_jvm) {

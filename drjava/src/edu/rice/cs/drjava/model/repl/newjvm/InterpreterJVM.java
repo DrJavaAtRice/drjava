@@ -182,6 +182,18 @@ public class InterpreterJVM extends UnicastRemoteObject
             // what do do? nothing I guess. main jvm is dead!
           }
         }
+        catch (Throwable t) {
+          // A toString method might throw anything, so we need to be careful
+          //_dialog("thrown by toString: " + t);
+          try {
+            _mainJVM.threwException(t.getClass().getName(),
+                                    t.getMessage(),
+                                    getStackTrace(t));
+          }
+          catch (RemoteException re) {
+            // what do do? nothing I guess. main jvm is dead!
+          }
+        }
       }
     };
 

@@ -92,14 +92,17 @@ public class JavaInterpreterTest extends TestCase {
     }
   }
 
-  /** Make sure interpreting simple constants works. */
+  /** 
+   * Make sure interpreting simple constants works.
+   * Note that strings and characters are quoted.
+   */
   public void testConstants() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       Pair.make("5", new Integer(5)), Pair.make("1356", new Integer(1356)), Pair.make("true", 
-          Boolean.TRUE), Pair.make("false", Boolean.FALSE), Pair.make("\'c\'", new Character('c')), 
+          Boolean.TRUE), Pair.make("false", Boolean.FALSE), Pair.make("\'c\'", "'" + new Character('c') + "'"), 
           Pair.make("1.345", new Double(1.345)), Pair.make("\"buwahahahaha!\"", 
-          new String("buwahahahaha!")), Pair.make("\"yah\\\"eh\\\"\"", new String("yah\"eh\"")), 
-          Pair.make("'\\''", new Character('\'')), 
+          new String("\"buwahahahaha!\"")), Pair.make("\"yah\\\"eh\\\"\"", new String("\"yah\"eh\"\"")), 
+          Pair.make("'\\''", "'" + new Character('\'') + "'"), 
     };
     tester(cases);
   }
@@ -217,7 +220,7 @@ public class JavaInterpreterTest extends TestCase {
   public void testStringOps() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       // concatenation
-      Pair.make("\"yeah\" + \"and\"", new String("yeah" + "and")), 
+      Pair.make("\"yeah\" + \"and\"", new String("\"yeah" + "and\"")), 
       // equals
       Pair.make("\"yeah\".equals(\"yeah\")", new Boolean("yeah".equals("yeah"))), 
     
@@ -237,7 +240,8 @@ public class JavaInterpreterTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Tests that String and character declarations do not return
+   * a result, while the variables themselves return a quoted result.
    */
   public void testSemicolon() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
@@ -245,8 +249,11 @@ public class JavaInterpreterTest extends TestCase {
       Pair.make("'c' == 'c';", JavaInterpreter.NO_RESULT), 
       Pair.make("String s = \"hello\"", JavaInterpreter.NO_RESULT), 
       Pair.make("String x = \"hello\";", JavaInterpreter.NO_RESULT), 
-      Pair.make("s", "hello"), Pair.make("s;", JavaInterpreter.NO_RESULT), 
-      Pair.make("x", "hello"), Pair.make("x;", JavaInterpreter.NO_RESULT)
+      Pair.make("char c = 'c'", JavaInterpreter.NO_RESULT),
+      Pair.make("Character d = new Character('d')", JavaInterpreter.NO_RESULT),
+      Pair.make("s", "\"hello\""), Pair.make("s;", JavaInterpreter.NO_RESULT), 
+      Pair.make("x", "\"hello\""), Pair.make("x;", JavaInterpreter.NO_RESULT),
+      Pair.make("c", "'c'"), Pair.make("d", "'d'")
     };
     tester(cases);
   }
