@@ -672,7 +672,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void listenerFail(String message) {
       String header = "\nTestListener creation stack trace:\n" +
         StringOps.getStackTrace(_startupTrace);
-      GlobalModelTestCase.listenerFail(header + message);
+      GlobalModelTestCase.listenerFail(message + header);
     }
 
     public void assertFileNotFoundCount(int i) {

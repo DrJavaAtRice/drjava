@@ -167,8 +167,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
 
       public void interpreterResetFailed(Throwable t) {
         synchronized(this) {
-          assertInterpreterResettingCount(1);
           interpreterResetFailedCount++;
+          assertInterpreterResetFailedCount(1);
           this.notify();
         }
       }
@@ -179,7 +179,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     };
 
     // Prevent the Interactions JVM from quitting
-    interpret("edu.rice.cs.drjava.DrJava.enableSecurityManager();");
+    _model.enableSecurityManager();
 
     // Don't show the pop-up message
     _model._interpreterControl.setShowMessageOnResetFailure(false);
@@ -190,7 +190,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
       listener.wait();
     }
     _model.removeListener(listener);
-    interpret("edu.rice.cs.drjava.DrJava.disableSecurityManager();");
+    _model.disableSecurityManager();
 
     listener.assertConsoleResetCount(1);
     listener.assertInterpreterResettingCount(1);

@@ -507,6 +507,21 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
 
   /**
+   * updates the security manager in DrJava
+   */
+  public void enableSecurityManager() throws RemoteException{
+    _interpreterJVM().enableSecurityManager();
+  }
+  
+  /**
+   * updates the security manager in DrJava
+   */
+  public void disableSecurityManager() throws RemoteException{
+    _interpreterJVM().disableSecurityManager();
+  }
+
+  
+  /**
    * Adds a named DynamicJavaAdapter to the list of interpreters.
    * @param name the unique name for the interpreter
    * @throws IllegalArgumentException if the name is not unique

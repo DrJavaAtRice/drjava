@@ -133,4 +133,14 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    * Sets whether to allow private access.
    */
   public void setPrivateAccessible(boolean allow) throws RemoteException;
+
+  /**
+   * updates the security manager in DrJava
+   */
+  public void enableSecurityManager() throws RemoteException;
+  
+  /**
+   * updates the security manager in DrJava
+   */
+  public void disableSecurityManager() throws RemoteException;
 }

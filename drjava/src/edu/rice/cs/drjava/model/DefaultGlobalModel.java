@@ -56,6 +56,7 @@ import javax.swing.ProgressMonitor;
 import javax.swing.event.UndoableEditListener;
 import java.io.*;
 import java.util.*;
+import java.rmi.RemoteException;
 
 import java.util.Vector;
 import java.util.Enumeration;
@@ -428,64 +429,82 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
   
   // ----- returns a source root given a package and filename ----
-    protected File getSourceRoot(String packageName, File sourceFile) throws InvalidPackageException{
-      if (packageName.equals("")) {
-        return sourceFile.getParentFile();
-      }
-      
-      Stack<String> packageStack = new Stack<String>();
-      int dotIndex = packageName.indexOf('.');
-      int curPartBegins = 0;
-      
-      while (dotIndex != -1) {
-        packageStack.push(packageName.substring(curPartBegins, dotIndex));
-        curPartBegins = dotIndex + 1;
-        dotIndex = packageName.indexOf('.', dotIndex + 1);
-      }
-      
-      // Now add the last package component
-      packageStack.push(packageName.substring(curPartBegins));
-      
-      // Must use the canonical path, in case there are dots in the path
-      //  (which will conflict with the package name)
-      try {
-        File parentDir = sourceFile.getCanonicalFile();
-        while (!packageStack.empty()) {
-          String part = packageStack.pop();
-          parentDir = parentDir.getParentFile();
-
-          if (parentDir == null) {
-            throw new RuntimeException("parent dir is null?!");
-          }
-
-          // Make sure the package piece matches the directory name
-          if (! part.equals(parentDir.getName())) {
-            String msg = "The source file " + sourceFile.getAbsolutePath() +
-              " is in the wrong directory or in the wrong package. " +
-              "The directory name " + parentDir.getName() +
-              " does not match the package component " + part + ".";
-
-            throw new InvalidPackageException(-1, msg);
-          }
-        }
-
-        // OK, now parentDir points to the directory of the first component of the
-        // package name. The parent of that is the root.
-        parentDir = parentDir.getParentFile();
-        if (parentDir == null) {
-          throw new RuntimeException("parent dir of first component is null?!");
-        }
-
-        return parentDir;
-      }
-      catch (IOException ioe) {
-        String msg = "Could not locate directory of the source file: " + ioe;
-        throw new InvalidPackageException(-1, msg);
-      }
+  protected File getSourceRoot(String packageName, File sourceFile) throws InvalidPackageException{
+    if (packageName.equals("")) {
+      return sourceFile.getParentFile();
     }
+    
+    Stack<String> packageStack = new Stack<String>();
+    int dotIndex = packageName.indexOf('.');
+    int curPartBegins = 0;
+    
+    while (dotIndex != -1) {
+      packageStack.push(packageName.substring(curPartBegins, dotIndex));
+      curPartBegins = dotIndex + 1;
+      dotIndex = packageName.indexOf('.', dotIndex + 1);
+    }
+    
+    // Now add the last package component
+    packageStack.push(packageName.substring(curPartBegins));
+    
+    // Must use the canonical path, in case there are dots in the path
+    //  (which will conflict with the package name)
+    try {
+      File parentDir = sourceFile.getCanonicalFile();
+      while (!packageStack.empty()) {
+        String part = packageStack.pop();
+        parentDir = parentDir.getParentFile();
+        
+        if (parentDir == null) {
+          throw new RuntimeException("parent dir is null?!");
+        }
+        
+        // Make sure the package piece matches the directory name
+        if (! part.equals(parentDir.getName())) {
+          String msg = "The source file " + sourceFile.getAbsolutePath() +
+            " is in the wrong directory or in the wrong package. " +
+            "The directory name " + parentDir.getName() +
+            " does not match the package component " + part + ".";
+          
+          throw new InvalidPackageException(-1, msg);
+        }
+      }
+      
+      // OK, now parentDir points to the directory of the first component of the
+      // package name. The parent of that is the root.
+      parentDir = parentDir.getParentFile();
+      if (parentDir == null) {
+        throw new RuntimeException("parent dir of first component is null?!");
+      }
+      
+      return parentDir;
+    }
+    catch (IOException ioe) {
+      String msg = "Could not locate directory of the source file: " + ioe;
+      throw new InvalidPackageException(-1, msg);
+    }
+  }
+  
+  // ----- INTERACTIONS -----
+  public void enableSecurityManager(){
+    edu.rice.cs.drjava.DrJava.enableSecurityManager();
+    try{
+      _interpreterControl.enableSecurityManager();
+    }catch(RemoteException e){
+      // couldn't enable security on the slave...
+    }
+  }
+  
+  public void disableSecurityManager(){
+    edu.rice.cs.drjava.DrJava.disableSecurityManager();
+    try{
+      _interpreterControl.disableSecurityManager();
+    }catch(RemoteException e){
+      // couldn't enable security on the slave...
+    }
+  }
   
   
-
   // ----- STATE -----
   protected FileGroupingState _state;
   
@@ -1201,13 +1220,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 //        SHOW_GETDOC = true;
         
     LinkedList<File> filesNotFound = new LinkedList<File>();
+    final LinkedList<OpenDefinitionsDocument> filesOpened = new LinkedList<OpenDefinitionsDocument>();
     for (File f: files) {
       if (f == null) {
         throw new IOException("File name returned from FileSelector is null");
       }
       try {
         //always return last opened Doc
-        retDoc = _openFile(f.getAbsoluteFile());
+        retDoc = _rawOpenFile(f.getAbsoluteFile());
+        filesOpened.add(retDoc);
       }
       catch (AlreadyOpenException aoe) {
         retDoc = aoe.getOpenDocument();
@@ -1219,6 +1240,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         filesNotFound.add(f);
       }
     }
+    
+    for(final OpenDefinitionsDocument d: filesOpened){
+      addDocToNavigator(d);
+      addDocToClasspath(d);
+      _notifier.fileOpened(d);
+    }
+    
+    
     
 //        SHOW_GETDOC = false;
     for(File f: filesNotFound){
@@ -2104,6 +2133,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return GlobalModelNaming.getDisplayFullPath(doc);
   }
 
+  
+  
+  
+  
   /**
    * Sets whether or not the Interactions JVM will be reset after
    * a compilation succeeds.  This should ONLY be used in tests!
@@ -3948,14 +3981,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       }
   }
   
+  
   /**
-   * Creates a document from a file.
-   * @param file File to read document from
-   * @return openened document
+   * creates an opendefinitionsdocument for a file.
+   * does not add to the navigator or notify that the file's open.
+   * this should be called only from within another open method that will
+   * do all of this clean up.
+   * @param file the file to open
    */
-  private OpenDefinitionsDocument _openFile(File file)
-    throws IOException, AlreadyOpenException
-  {
+  private OpenDefinitionsDocument _rawOpenFile(File file) throws IOException, AlreadyOpenException{
       OpenDefinitionsDocument openDoc = _getOpenDocument(file);
       if (openDoc != null) {
         throw new AlreadyOpenException(openDoc);
@@ -3971,25 +4005,48 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         doc.setInitialSelStart(sel.getFirst());
         doc.setInitialSelEnd(sel.getSecond());
       }
-      
-      INavigatorItem idoc = makeIDocFromODD(doc);
-      _documentsRepos.put(idoc, doc);
-      
-      String path = doc.getFile().getCanonicalPath();
-     
-      _documentNavigator.addDocument(idoc, fixPathForNavigator(path));
-      
-      
-      //doc.checkIfClassFileInSync();
-
-      // Make sure this is on the classpath
-      try {
-        File classpath = doc.getSourceRoot();
-        _interactionsModel.addToClassPath(classpath.getAbsolutePath());
-      }
-      catch (InvalidPackageException e) {
-        // Invalid package-- don't add it to classpath
-      }
+      return doc;
+  }
+  
+  
+  /**
+   * creates an iNavigatorItem for a document, and adds it to the navigator
+   * this function is a helper for opening a file
+   * @param doc the document to add to the navigator
+   */
+  private void addDocToNavigator(OpenDefinitionsDocument doc) throws IOException{
+    INavigatorItem idoc = makeIDocFromODD(doc);
+    _documentsRepos.put(idoc, doc);
+    String path = doc.getFile().getCanonicalPath();
+    _documentNavigator.addDocument(idoc, fixPathForNavigator(path));
+  }
+  
+  /**
+   * adds a documents source root to the interactions classpath
+   * this function is a helper to open file
+   * @param doc the document to add to the classpath
+   */
+  private void addDocToClasspath(OpenDefinitionsDocument doc){
+    try {
+      File classpath = doc.getSourceRoot();
+      _interactionsModel.addToClassPath(classpath.getAbsolutePath());
+    }
+    catch (InvalidPackageException e) {
+      // Invalid package-- don't add it to classpath
+    }
+  }
+  
+  
+  /**
+   * Creates a document from a file.
+   * @param file File to read document from
+   * @return openened document
+   */
+  private OpenDefinitionsDocument _openFile(File file) throws IOException, AlreadyOpenException
+  {
+    OpenDefinitionsDocument doc = _rawOpenFile(file);
+    addDocToNavigator(doc);
+    addDocToClasspath(doc);
     _notifier.fileOpened(doc);
     return doc;
   }

@@ -550,11 +550,20 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    * @param mf the parent window
    */
   public DefinitionsPane(MainFrame mf,
-                         OpenDefinitionsDocument doc)
+                         final OpenDefinitionsDocument doc)
   {
     super(new DefaultStyledDocument());
+    
     _mainFrame = mf;
     
+    addFocusListener(new FocusListener(){
+      public void focusGained(FocusEvent e){
+        _mainFrame.getModel().getDocumentNavigator().setActiveDoc(_mainFrame.getModel().getIDocGivenODD(doc));
+      }
+      public void focusLost(FocusEvent e){  }
+    });
+    
+
     // Start the pane out with the NULL_DOCUMENT so that
     // it doesn't start out with a reference to the defdoc
     _doc = doc;

@@ -622,7 +622,23 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * A class loader for the interpreter.
    */
   public static class ClassLoaderExtension extends TreeClassLoader {
-    private static boolean classLoaderCreated = false;
+    private class WrapperClassLoader extends ClassLoader{
+      ClassLoader cl;
+      public WrapperClassLoader(ClassLoader c){
+        cl = c;
+      }
+      
+      public URL getResource(String name){
+        if(name.startsWith("edu/rice/cs/")){
+          return null;
+        }else{
+          return cl.getResource(name);
+        }
+      }
+    }
+    
+  
+  private static boolean classLoaderCreated = false;
 
     private static StickyClassLoader _stickyLoader;
 
@@ -637,7 +653,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       // it adds on an auxilary classloader and chains the old classLoader
       // onto the end.
       // Here we initialize classLoader to be the system class loader.
-      classLoader = getClass().getClassLoader(); // classLoader is only used in getResource()
+      classLoader = new WrapperClassLoader(getClass().getClassLoader()); // classLoader is only used in getResource()
       // NOTE that the superclass of ClassLoaderExtension (TreeClassLoader) adds (appends)
       // URLs to the classpath of this classloader
 
@@ -650,7 +666,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
 
       if (!classLoaderCreated) {
         _stickyLoader = new StickyClassLoader(this, // Sticky's newLoader, indirectly points to the (dynamic) classLoader
-                                              getClass().getClassLoader(), // Sticky's oldLoader
+                                              classLoader, // Sticky's oldLoader
                                               excludes);
         classLoaderCreated = true;
       }
@@ -658,6 +674,43 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       // we will use this to getResource classes
     }
 
+    /**
+     * Delegates all resource requests to {@link #classLoader} (the system class loader by default).
+     * This method is called by the {@link StickyClassLoader}.
+     */
+    public URL getResource(String name) {
+      return classLoader.getResource(name);
+    }
+
+    protected Class loadClass(String name, boolean resolve)
+      throws ClassNotFoundException
+    {
+      Class clazz;
+
+      // check the cache
+      if (classes.containsKey(name)) {
+        clazz = (Class) classes.get(name);
+      }
+      else {
+        try {
+          clazz = _stickyLoader.loadClass(name);
+        }
+        catch (ClassNotFoundException e) {
+          // If it exceptions, just fall through to here to try the interpreter.
+          // If all else fails, try loading the class through the interpreter.
+          // That's used for classes defined in the interpreter.
+          clazz = interpreter.loadClass(name);
+        }
+      }
+
+      if (resolve) {
+        resolveClass(clazz);
+      }
+
+      return clazz;
+    }
+    
+    
     /**
      * Adds an URL to the class path.  DynamicJava's version of this creates a
      * new URLClassLoader with the given URL, using the old loader as a parent.
@@ -705,41 +758,5 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       return c;
     }
     */
-
-    /**
-     * Delegates all resource requests to {@link #classLoader}.
-     * This method is called by the {@link StickyClassLoader}.
-     */
-    public URL getResource(String name) {
-      return classLoader.getResource(name);
-    }
-
-    protected Class loadClass(String name, boolean resolve)
-      throws ClassNotFoundException
-    {
-      Class clazz;
-
-      // check the cache
-      if (classes.containsKey(name)) {
-        clazz = (Class) classes.get(name);
-      }
-      else {
-        try {
-          clazz = _stickyLoader.loadClass(name);
-        }
-        catch (ClassNotFoundException e) {
-          // If it exceptions, just fall through to here to try the interpreter.
-          // If all else fails, try loading the class through the interpreter.
-          // That's used for classes defined in the interpreter.
-          clazz = interpreter.loadClass(name);
-        }
-      }
-
-      if (resolve) {
-        resolveClass(clazz);
-      }
-
-      return clazz;
-    }
   }
 }

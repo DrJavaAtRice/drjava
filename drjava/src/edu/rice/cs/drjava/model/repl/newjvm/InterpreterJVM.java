@@ -160,6 +160,21 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
   }
 
+  /**
+   * updates the security manager in DrJava
+   */
+  public void enableSecurityManager() throws RemoteException{
+    edu.rice.cs.drjava.DrJava.enableSecurityManager();
+  }
+  
+  /**
+   * updates the security manager in DrJava
+   */
+  public void disableSecurityManager() throws RemoteException{
+    edu.rice.cs.drjava.DrJava.disableSecurityManager();
+  }
+
+  
   private static final Log _log = new Log("IntJVMLog", false);
   private static void _dialog(String s) {
     //javax.swing.JOptionPane.showMessageDialog(null, s);

@@ -58,6 +58,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.io.*;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -456,7 +457,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private Action _openFolderAction  = new AbstractAction("Open Folder...") {
     public void actionPerformed(ActionEvent ae) {
-      openFolder(_folderChooser);
+      _openFolder();
     }
   };
   
@@ -2604,11 +2605,14 @@ public class MainFrame extends JFrame implements OptionConstants {
       
       final File[] sfiles = files.toArray(new File[0]);
       
+
       open(new FileOpenSelector(){
         public File[] getFiles() {
           return sfiles;
         }
       });
+    }else{
+      // our directory was bad, so don't open anything.
     }
   }
 
@@ -2731,7 +2735,6 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   private boolean _saveAs() {
     try {
-      //If file becomes project file it should enable the save project option in the menu
       boolean toReturn = _model.getActiveDocument().saveFileAs(_saveSelector);
       /**
        * this highlights the document in the navigator
@@ -4773,6 +4776,14 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void nextRecentDoc(){
     if(_df.isVisible()){
       _df.next();
+    }else{
+      _df.setVisible(true);
+    }
+  }
+  
+  private void prevRecentDoc(){
+    if(_df.isVisible()){
+      _df.prev();
     }else{
       _df.setVisible(true);
     }

@@ -128,7 +128,6 @@ public class RecentDocFrame extends JWindow{
             Graphics2D g2d = (Graphics2D)g;
             g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                                  RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-            System.out.println("anti-alias!");
           }
         }
         super.paintComponent(g);
@@ -144,7 +143,6 @@ public class RecentDocFrame extends JWindow{
             Graphics2D g2d = (Graphics2D)g;
             g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                                  RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-            System.out.println("anti-alias!");
           }
         }
         super.paintComponent(g);
@@ -214,16 +212,7 @@ public class RecentDocFrame extends JWindow{
     _docs.remove(d);
   }
   
-  /**
-   * sets the current document to be the next document in the list
-   */
-  public void next(){
-    if(_docs.size() > 0){
-      _current++;
-      if(_current >= _docs.size()){
-        _current = 0;
-      }
-      
+  private void show(int _current){
       OpenDefinitionsDocument doc = _docs.get(_current);
       
       String filename = doc.getFilename();
@@ -249,6 +238,31 @@ public class RecentDocFrame extends JWindow{
       _label.setVerticalAlignment(SwingConstants.CENTER);
       pack();
       centerH();
+  }
+  
+  /**
+   * sets the current document to be the next document in the list
+   */
+  public void next(){
+    if(_docs.size() > 0){
+      _current++;
+      if(_current >= _docs.size()){
+        _current = 0;
+      }
+      show(_current);
+    }
+  }
+  
+  /**
+   * sets the current document to be the previous document in the list
+   */
+  public void prev(){
+    if(_docs.size() > 0){
+      _current--;
+      if(_current < 0){
+        _current = _docs.size()-1;
+      }
+      show(_current);
     }
   }
   
