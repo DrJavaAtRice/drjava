@@ -978,6 +978,40 @@ public class IndentTest extends TestCase {
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n\n", doc);
   }
+
+  /**
+   * Regression test for arrays.
+   */
+ public void testAnonymousInnerClass() throws BadLocationException {
+   String text =
+     "addWindowListener(new WindowAdapter() {\n" +
+     "public void windowClosing(WindowEvent e) {\n" +
+     "dispose();\n" +
+     "}\n" +
+     "void x() {\n" +
+     "\n" +
+     "}\n" + 
+     "\n" +
+     "}\n" +
+     ");\n";
+   String indented =
+     "addWindowListener(new WindowAdapter() {\n" +
+     "  public void windowClosing(WindowEvent e) {\n" +
+     "    dispose();\n" +
+     "  }\n" +
+     "  void x() {\n" +
+     "    \n" +
+     "  }\n" + 
+     "  \n" +
+     "}\n" +
+     ");\n";
+
+   
+   doc.insertString(0, text, null);
+   _assertContents(text, doc);
+   doc.indentLines(0, doc.getLength());
+   _assertContents(indented, doc);
+ }
   
   private void _assertContents(String expected, Document document) 
     throws BadLocationException

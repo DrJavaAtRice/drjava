@@ -77,7 +77,7 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
     // Get distance to brace
     IndentInfo info = doc.getReduced().getIndentInformation();
     int distToBrace = info.distToBrace;
-      
+
     // If there is no brace, align to left margin
     if (distToBrace == -1) {
       doc.setTab(_suffix, pos);
@@ -94,7 +94,6 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
       // Should not happen
       throw new UnexpectedException(e);
     }
-
     indent = indent + _suffix;
 
     doc.setTab(indent, pos);

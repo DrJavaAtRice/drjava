@@ -103,7 +103,8 @@ public class Indenter implements OptionConstants {
       rule17 = new QuestionBraceIsCurly(rule18, rule25),
       rule16 = new ActionBracePlus(" " + oneLevel),
       rule15 = new ActionBracePlus(" "),
-      rule14 = new QuestionNewParenPhrase(rule15, rule16),
+      rule38 = new QuestionCurrLineStartsWith(")",rule30,rule15),
+      rule14 = new QuestionNewParenPhrase(rule38, rule16), //rule15->rule38
       rule13 = new QuestionBraceIsParenOrBracket(rule14, rule17),
       rule12 = new ActionStartPrevLinePlus(""),
       rule11 = rule12,

@@ -672,15 +672,23 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
 
     // Find the previous delimiter that closes a statement
     boolean reachedStart = false;
+    boolean ignoreParens;
     int prevDelimiter = lineStart; 
     do {
-      prevDelimiter = findPrevDelimiter(prevDelimiter, delims);
+      ignoreParens = posInParenPhrase(prevDelimiter);
+      prevDelimiter = findPrevDelimiter(prevDelimiter, delims, ignoreParens);
+      try {
+      if (getText(prevDelimiter,1).charAt(0) == '{') {
+        break;
+      }
+      } catch (BadLocationException e) { }
       // Check delimiter found was start of document
       if(prevDelimiter == ERROR_INDEX) {
         reachedStart = true;
         break;
       }
     } while(posInParenPhrase(prevDelimiter));
+
 
     // From the previous delimiter, find the next
     // non-whitespace character
