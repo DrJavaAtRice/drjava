@@ -203,6 +203,55 @@
   </target>
 
 
+  <!-- Initializes properties used in all jEdit tasks -->
+  <target name="jedit">
+    <property name="jedit_dir" value="${plugins_dir}/jedit" />
+    <property name="jedit_srcroot" value="${jedit_dir}/src" />
+    <property name="jedit_built" value="${jedit_dir}/built" />
+  </target>
+
+  <target name="clean-jedit" depends="jedit">
+    <delete dir="${jedit_built}" />
+    <delete file="${jedit_dir}/drjava-jedit.jar" />
+  </target>
+
+  <!-- Compiles the jEdit specific classes. -->
+  <target name="compile-jedit" depends="jedit">
+    <!-- Build the classes -->
+    <mkdir dir="${jedit_built}" />
+    <antcall target="do-compile">
+      <param name="srcroot" value="${jedit_srcroot}" />
+      <param name="projpath" value="edu/rice/cs" />
+      <param name="built" value="${jedit_built}" />
+    </antcall>
+  </target>
+
+  <!-- Creates a distributable jar for the jEdit plugin -->
+  <target name="jar-jedit" depends="compile-jedit">
+
+    <!-- Make a jar to include DrJava classes -->
+    <antcall target="jar">
+      <param name="jarfile" value="${jedit_dir}/drjava-jedit.jar"/>
+    </antcall>
+    <!-- Add the plugin classes -->
+    <jar jarfile="${jedit_dir}/drjava-jedit.jar" update="yes">
+      <fileset dir="${jedit_built}">
+        <exclude name="**/*Test.class" />
+        <exclude name="**/*Test$*.class" />
+        <include name="**/*.class" />
+      </fileset>
+    </jar>
+    <!-- Add the plugin xml and properties data -->
+    <jar jarfile="${jedit_dir}/drjava-jedit.jar" update="yes">
+      <fileset dir="${jedit_dir}">
+        <include name="drjava-jedit.props" />
+	<include name="actions.xml" />
+	<include name="dockables.xml" />
+      </fileset>
+    </jar>
+  </target>
+
+
   <!-- Compiles only the JSR-14 v1.0 specific classes, and adds
        them to compilers.jar in the lib directory.
        Deletes the compiled classes when finished.
