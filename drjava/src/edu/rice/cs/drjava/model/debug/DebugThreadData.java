@@ -57,7 +57,14 @@ public class DebugThreadData {
    */
   public DebugThreadData(ThreadReference thread) {
     _thread = thread;
-    _name = _thread.name();
+    String name;
+    try {
+      name = _thread.name();
+    }
+    catch (VMDisconnectedException vmde) {
+      name = "";
+    }
+    _name = name;
     String status = "(unknown)";
     switch (_thread.status()) {
       case ThreadReference.THREAD_STATUS_MONITOR: 

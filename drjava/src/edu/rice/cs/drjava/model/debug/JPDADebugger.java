@@ -90,12 +90,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   private static final boolean printMessages = false;
   
   /**
-   * The maximum number of times to call invokeMethod
-   * to avoid ObjectCollectedExceptions.
-   */
-  private static final int MAXINVOKETRIES = 5;
-  
-  /**
    * Reference to DrJava's model.
    */
   private DefaultGlobalModel _model;
@@ -633,6 +627,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         }
         catch (AbsentInformationException aie) {
           // try looking in inner classes
+        }
+        catch (ClassNotPreparedException cnpe) {
+          // try the next class, maybe loaded by a different classloader
+          continue;
         }
         // If lines.size > 0, lineNumber was found in ref
         if (lines.size() == 0) {
@@ -1823,30 +1821,33 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     
     // invokeMethod would throw an ObjectCollectedException if the StringReference
     // declared by _vm.mirrorOf(name) had been garbage collected before
-    // invokeMethod could execute. This happened infrequently so by trying this
-    // multiple times, the chance of failure each time should be acceptably low.
+    // invokeMethod could execute. We now just disable collection until after the
+    // method is invoked.
     
-    int tries = 0;
-    while (tries < MAXINVOKETRIES) {
-      LinkedList args = new LinkedList();
-      args.add(_vm.mirrorOf(interpreterName)); // make the String a JDI Value
-      if( printMessages ) {
-        System.out.println("Invoking " + m.toString() + " on " + args.toString());
-        System.out.println("Thread is " + threadRef.toString() + " <suspended = " + threadRef.isSuspended() + ">");
-      }
+    
+    LinkedList args = new LinkedList();
+    StringReference sr = _vm.mirrorOf(interpreterName);
+    sr.disableCollection();
+    args.add(sr); // make the String a JDI Value
+    if( printMessages ) {
+      System.out.println("Invoking " + m.toString() + " on " + args.toString());
+      System.out.println("Thread is " + threadRef.toString() + " <suspended = " + threadRef.isSuspended() + ">");
+    }    
+    
+    try {
+      ObjectReference tmpInterpreter = (ObjectReference) _interpreterJVM.invokeMethod(threadRef, m, args,
+                                                                                      ObjectReference.INVOKE_SINGLE_THREADED);
       
-      try {
-        ObjectReference tmpInterpreter = (ObjectReference) _interpreterJVM.invokeMethod(threadRef, m, args,
-                                     ObjectReference.INVOKE_SINGLE_THREADED);
-        if( printMessages ) System.out.println("Returning...");
-        return tmpInterpreter;
-      }
-      catch (ObjectCollectedException oce) {
-        tries++;
-      }
+      
+      if( printMessages ) System.out.println("Returning...");
+      return tmpInterpreter;
     }
-    throw new DebugException("The debugInterpreter: " + interpreterName + " could not be obtained from interpreterJVM");
-    
+    catch (ObjectCollectedException e) {
+      throw new DebugException("The debugInterpreter: " + interpreterName + " could not be obtained from interpreterJVM");
+    }    
+    finally {
+      sr.enableCollection();
+    }
   }
   
   /**
@@ -1990,34 +1991,36 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     
     // invokeMethod would throw an ObjectCollectedException if the StringReference
     // declared by _vm.mirrorOf(name) had been garbage collected before
-    // invokeMethod could execute. This happened infrequently so by trying this
-    // multiple times, the chance of failure each time should be acceptably low.
-     
-    int tries = 0;
-    while (tries < MAXINVOKETRIES) {
-      List args = new LinkedList();
-      args.add(_vm.mirrorOf(name));
-      args.add(val);
-      if (type == null) {
-        args.add(null);
-      }
-      else if (type instanceof ReferenceType) {
-        args.add(((ReferenceType)type).classObject());
-      }
-      
-      /* System.out.println("Calling " + method2Call.toString() + "with " + args.get(0).toString()); */
-      try {
-        debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args,
-                                      ObjectReference.INVOKE_SINGLE_THREADED);
-        return;
-      }
-      catch (ObjectCollectedException oce) {
-        tries++;
-      }
+    // invokeMethod could execute. We now just disable collection until after the
+    // method is invoked.
+    
+    List args = new LinkedList();
+    StringReference sr = _vm.mirrorOf(name);
+    sr.disableCollection();
+    args.add(sr);
+    args.add(val);
+    if (type == null) {
+      args.add(null);
     }
-    throw new DebugException("The variable: " + name +
-                             " could not be defined in the debug interpreter");
-  }  
+    else if (type instanceof ReferenceType) {
+      args.add(((ReferenceType)type).classObject());
+    }
+    
+    /* System.out.println("Calling " + method2Call.toString() + "with " + args.get(0).toString()); */
+    try {
+      debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args,
+                                    ObjectReference.INVOKE_SINGLE_THREADED);
+      return;
+    }
+    catch (ObjectCollectedException oce) {
+      throw new DebugException("The variable: " + name +
+                               " could not be defined in the debug interpreter");
+    }
+    finally {
+      sr.enableCollection();
+    } 
+  }
+  
   
   /**
    * Notifies all listeners that the current thread has been suspended.
@@ -2226,27 +2229,29 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     
     // invokeMethod would throw an ObjectCollectedException if the StringReference
     // declared by _vm.mirrorOf(name) had been garbage collected before
-    // invokeMethod could execute. This happened infrequently so by trying this
-    // multiple times, the chance of failure each time should be acceptably low.
-    int tries = 0;
-    while (tries < MAXINVOKETRIES) {
-      try {
-        List args = new LinkedList();
-        args.add(_vm.mirrorOf(var.name()));
-        v = interpreter.invokeMethod(thread, method2Call, args,
-                                           ObjectReference.INVOKE_SINGLE_THREADED);
-        break;
+    // invokeMethod could execute. We now just disable collection until after the
+    // method is invoked.
+    List args = new LinkedList();
+    String varName = var.name();
+    StringReference sr = _vm.mirrorOf(varName);
+    sr.disableCollection();
+    args.add(sr);
+    try {
+      v = interpreter.invokeMethod(thread, method2Call, args,
+                                   ObjectReference.INVOKE_SINGLE_THREADED);
+      if (v != null) {
+        v = _convertToActualType(thread, var, v);
       }
-      catch (ObjectCollectedException oce) {
-        if (printMessages) System.out.println("Got ObjectCollectedException");
-        tries++;      
-      }
+      
+      return v;
     }
-    if (v != null) {
-      v = _convertToActualType(thread, var, v);
+    catch (ObjectCollectedException oce) {
+      throw new DebugException("The value of variable: " + varName +
+                               " could not be obtained from the debug interpreter");
     }
-
-    return v;
+    finally {
+      sr.enableCollection();
+    }
   }
 
   /**
@@ -2269,34 +2274,16 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       if( printMessages ) System.out.println("Iterating through vars");
       LocalVariable localVar = (LocalVariable)varsIterator.next();
       
-      // invokeMethod would throw an ObjectCollectedException if the StringReference
-      // declared by _vm.mirrorOf(name) had been garbage collected before
-      // invokeMethod could execute. This happened infrequently so by trying this
-      // multiple times, the chance of failure each time should be acceptably low.
-      
-      int tries = 0;
-      while (tries < MAXINVOKETRIES) {
-        try {
-          Value v = _getValueOfLocalVariable(localVar, threadRef);
-          frame = threadRef.frame(0);
-          frame.setValue(localVar, v);
-          break;
-        }
-        catch (ObjectCollectedException oce) {
-          if (printMessages) System.out.println("Got ObjectCollectedException");
-          tries++;
-        }
-        catch (ClassNotLoadedException cnle) {
-          printMessage("Could not update the value of '" + localVar.name() + "' (class not loaded)");
-          break;
-        }
-        catch (InvalidTypeException ite) {
-          printMessage("Could not update the value of '" + localVar.name() + "' (invalid type exception)");
-          break;
-        }
+      try {
+        Value v = _getValueOfLocalVariable(localVar, threadRef);
+        frame = threadRef.frame(0);
+        frame.setValue(localVar, v);
       }
-      if (tries >= MAXINVOKETRIES) {
-        throw new DebugException("The value of the variable: " + localVar.name() + " could not be obtained from interpreterJVM");
+      catch (ClassNotLoadedException cnle) {
+        printMessage("Could not update the value of '" + localVar.name() + "' (class not loaded)");
+      }
+      catch (InvalidTypeException ite) {
+        printMessage("Could not update the value of '" + localVar.name() + "' (invalid type exception)");
       }
     }
   }
