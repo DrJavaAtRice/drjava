@@ -215,6 +215,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
           // We know file should exist
           fail("file does not exist");
         }
+        catch (FileMovedException fme) {
+          // We know file should exist
+          fail("file does not exist");
+        }
         assertEquals("file to open", tempFile, file);
         openCount++;
       }
@@ -329,6 +333,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
           // We know file should exist
           fail("file does not yet exist");
         }
+        catch (FileMovedException fme) {
+          // We know file should exist
+          fail("file does not exist");
+        }
         assertEquals("file to open", tempFile, file);
         openCount++;
       }
@@ -382,6 +390,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
           file = doc.getFile();
         }
         catch (IllegalStateException ise) {
+          // We know file should exist
+          fail("file does not exist");
+        }
+        catch (FileMovedException fme) {
           // We know file should exist
           fail("file does not exist");
         }
@@ -490,6 +502,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
           // We know file should exist
           fail("file does not exist");
         }
+        catch (FileMovedException fme) {
+          // We know file should exist
+          fail("file does not exist");
+        }
         assertEquals("file to open", tempFile1, file);
 
         openCount++;
@@ -590,6 +606,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
           // We know file should exist
           fail("file does not exist");
         }
+        catch (FileMovedException fme) {
+          // We know file should exist
+          fail("file does not exist");
+        }
         openCount++;
       }
     };
@@ -646,6 +666,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
           // We know file exists
           fail("file does not exist");
         }
+        catch (FileMovedException fme) {
+          // We know file should exist
+          fail("file does not exist");
+        }
         assertEquals("saved file name", file, f);
         saveCount++;
       }
@@ -688,6 +712,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
         }
         catch (IllegalStateException ise) {
           // We know file exists
+          fail("file does not exist");
+        }
+        catch (FileMovedException fme) {
+          // We know file should exist
           fail("file does not exist");
         }
         assertEquals("saved file name", file, f);
@@ -737,6 +765,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
         }
         catch (IllegalStateException ise) {
           // We know file exists
+          fail("file does not exist");
+        }
+        catch (FileMovedException fme) {
+          // We know file should exist
           fail("file does not exist");
         }
         assertEquals("saved file name", file, f);
@@ -819,6 +851,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
         }
         catch (IllegalStateException ise) {
           // We know file exists
+          fail("file does not exist");
+        }
+        catch (FileMovedException fme) {
+          // We know file should exist
           fail("file does not exist");
         }
         assertEquals("saved file name", file2, f);
@@ -921,6 +957,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
   {
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
 // don't catch and fail!
+ 
     
     TestListener listener = new TestListener() {
       public void fileOpened(OpenDefinitionsDocument doc) {
@@ -932,10 +969,14 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
           // We know file should exist
           fail("file does not exist");
         }
+        catch (FileMovedException fme) {
+          // We know file should exist
+          fail("file does not exist");
+        }
         openCount++;
       }
       public void fileReverted(OpenDefinitionsDocument doc) {
-     fileRevertedCount++;
+        fileRevertedCount++;
       }
     };
 
@@ -945,14 +986,20 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     listener.assertOpenCount(1);
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
-
-  
-  assertEquals("original doc unmodified",doc.isModifiedSinceSave(), false);
-  changeDocumentText(BAR_TEXT, doc);
-  assertEquals("doc now modified",doc.isModifiedSinceSave(), true);
-  doc.revertFile();
-  assertEquals("doc reverted",doc.isModifiedSinceSave(), false);
-  assertContents(FOO_TEXT, doc);
+    
+    assertEquals("original doc unmodified",doc.isModifiedSinceSave(), false);
+    changeDocumentText(BAR_TEXT, doc);
+    assertEquals("doc now modified",doc.isModifiedSinceSave(), true);
+    tempFile1.delete();
+    try {
+      doc.revertFile();
+      fail("File should not be on disk.");
+    }
+    catch (FileMovedException fme) {
+      // Revert should not take place because file is not there.
+    }
+    assertEquals("doc NOT reverted",doc.isModifiedSinceSave(), true);
+    assertContents(BAR_TEXT, doc);
   }
 
 
@@ -1147,5 +1194,36 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     listener.assertInteractionStartCount(3);
     listener.assertInteractionEndCount(3);
     _model.removeListener(listener);
+  }
+  
+  /**
+   * Test for the possibility that the file has been moved or deleted
+   *  since it was last referenced
+   */
+  public void testFileMovedWhenTriedToSave()
+    throws BadLocationException, IOException {
+
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final File file = tempFile();
+    
+    doc.saveFile(new FileSelector(file));
+    
+    TestListener listener = new TestListener();
+
+    _model.addListener(listener);
+
+    file.delete();
+    changeDocumentText(BAR_TEXT, doc);
+    try {
+      doc.saveFile(new FileSelector(file));
+      fail("Save file should have thrown an exception");
+    }
+    catch (FileMovedException fme) {
+      //this is expected to occur
+    }
+   
+    assertModified(true, doc);
+    assertContents(BAR_TEXT, doc);
+
   }
 }

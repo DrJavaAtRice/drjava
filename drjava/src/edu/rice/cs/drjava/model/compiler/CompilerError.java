@@ -73,6 +73,7 @@ public class CompilerError implements Comparable {
     _message = message;
     _isWarning = isWarning;
   }
+  
 
   /**
    * Constructor for CompilerErrors without files.
@@ -92,7 +93,7 @@ public class CompilerError implements Comparable {
    * @return the error as a String
    */
   public String toString() {
-    return  "CompilerError(file=" + _file.getAbsolutePath() + ", line=" +
+    return  "CompilerError(file=" + fileName() + ", line=" +
       _lineNumber + ", col=" + _startColumn + ", msg=" + _message + ")";
   }
 

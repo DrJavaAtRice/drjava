@@ -79,10 +79,16 @@ public interface OpenDefinitionsDocument {
    * Returns the file for this document.  If the document
    * is untitled and has no file, it throws an IllegalStateException.
    * @return the file for this document
-   * @exception IllegalStateException if no file exists
+   * @throws IllegalStateException if document never had a file
+   * @throws FileMovedException if the document's file no longer exists
    */
-  public File getFile() throws IllegalStateException;
+  public File getFile() throws IllegalStateException, FileMovedException;
 
+  /**
+   * Returns the name of this file, or "(untitled)" if no file.
+   */
+  public String getFilename();
+  
   /**
    * Saves the document with a FileWriter.  If the file name is already
    * set, the method will use that name instead of whatever selector
@@ -242,9 +248,9 @@ public interface OpenDefinitionsDocument {
   /**
    *
    */
-  public void preparePrintJob() throws BadLocationException;
+  public void preparePrintJob() throws BadLocationException, FileMovedException;
 
-  public void print() throws PrinterException, BadLocationException;
+  public void print() throws PrinterException, BadLocationException, FileMovedException;
 
   public Pageable getPageable() throws IllegalStateException;
 

@@ -212,7 +212,13 @@ public class JUnitErrorModel {
     int lineNum = _lineNumber( swFail.toString(), classnameFail);
     if (lineNum > -1) _errorsWithPos++;
     
-    _file = _document.getFile();
+    try {
+      _file = _document.getFile();
+    }
+    catch (FileMovedException fme) {
+      // Recover, even though file was deleted
+      _file = fme.getFile();
+    }
     
     String exception =  (isError) ? 
       tFail.thrownException().toString(): 

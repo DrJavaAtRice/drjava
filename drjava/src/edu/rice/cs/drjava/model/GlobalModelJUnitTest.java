@@ -177,6 +177,10 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
           // We know file should exist
           throw new UnexpectedException(ise);
         }
+        catch (FileMovedException fme) {
+          // We know file should exist
+          fail("file does not exist");
+        }
         assertEquals("JUNIT file saved", file, f);
         saveCount++;
       }
@@ -273,6 +277,10 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
           // We know file should exist
           throw new UnexpectedException(ise);
         }
+        catch (FileMovedException fme) {
+          // We know file should exist
+          fail("file does not exist");
+        }
         assertEquals("JUNIT file saved", file, f);
         saveCount++;
       }
@@ -348,6 +356,25 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertEquals("test case has one error reported",
                  1,
                  testResults.failureCount());
+  }
+  
+  public void testDoNotRunJUnitIfFileHasBeenMoved() throws Exception {
+    final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
+    final File file = new File(_tempDir, "MonkeyTestPass.java");
+    doc.saveFile(new FileSelector(file));
+    
+    TestListener listener = new TestListener();
+    
+    _model.addListener(listener);
+    file.delete();
+    try {
+      doc.startJUnit();
+      fail("JUnit should not have started.");
+    }
+    catch (FileMovedException fme) {
+      //JUnit should not have started, because the documents file is not
+      // where it should be on the disk.
+    }
   }
 }
 

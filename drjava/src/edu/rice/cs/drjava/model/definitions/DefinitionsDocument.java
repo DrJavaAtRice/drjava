@@ -54,6 +54,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.DefaultGlobalModel;
+import edu.rice.cs.drjava.model.FileMovedException;
 
 /**
  * The model for the definitions pane.
@@ -218,15 +219,45 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * Returns the file for this document.  If the document
    * is untitled and has no file, it throws an IllegalStateException.
    * @return the file for this document
-   * @exception IllegalStateException if no file exists
+   * @throws IllegalStateException if file has not been set
+   * @throws FileMovedException if file has been moved or deleted from its previous location
    */
-  public File getFile() throws IllegalStateException {
+  public File getFile() 
+    throws IllegalStateException , FileMovedException {
     if (_file == null) {
       throw new IllegalStateException(
         "This document does not yet have a file.");
     }
-    return _file;
+    //does the file actually exist?
+    if (_file.exists()) {
+      return _file;
+    }
+    else {
+      throw new FileMovedException(_file,
+        "This document's file has been moved or deleted.");
+    }
   }
+  
+  /**
+   * Returns the name of this file, or "(untitled)" if no file.
+   */
+  public String getFilename() {
+    String filename = "(Untitled)";
+    try {
+      File file = getFile();
+      filename = file.getName();
+    }
+    catch (IllegalStateException ise) {
+      // No file, leave as "untitled"
+    }
+    catch (FileMovedException fme) {
+      // Recover, even though file has been deleted
+      File file = fme.getFile();
+      filename = file.getName();
+    }
+    return filename;
+  }
+      
 
   public void setFile(File file) {
     _file = file;

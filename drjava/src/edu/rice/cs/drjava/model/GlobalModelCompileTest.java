@@ -447,6 +447,10 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
           // We know file should exist
           throw new UnexpectedException(ise);
         }
+        catch (FileMovedException fme) {
+          // We know file should exist
+          fail("file does not exist");
+        }
         assertEquals(_name() + "file saved", file, f);
         saveCount++;
       }
@@ -573,6 +577,10 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
           // We know file should exist
           throw new UnexpectedException(ise);
         }
+        catch (FileMovedException fme) {
+          // We know file should exist
+          fail("file does not exist");
+        }
         //assertEquals(_name() + "file saved", file, f);
         saveCount++;
       }
@@ -644,6 +652,10 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
         catch (IllegalStateException ise) {
           // We know file should exist
           throw new UnexpectedException(ise);
+        }
+        catch (FileMovedException fme) {
+          // We know file should exist
+          fail("file does not exist");
         }
         assertEquals(_name() + "file saved", file2, f);
         saveCount++;
@@ -723,5 +735,31 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     // Make sure .class exists
     File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
+  }
+  
+   /**
+   * Tests a compile after a file has unexpectedly been moved or deleted.
+   */
+  public void testCompileAfterFileMoved() throws BadLocationException, IOException {
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final File file = tempFile();
+    doc.saveFile(new FileSelector(file));    
+    TestListener listener = new TestListener();
+    _model.addListener(listener);
+    file.delete();
+    try {
+      doc.startCompile();
+      fail("Compile should not have begun.");
+    }
+    catch (FileMovedException fme) {
+      //compile should never have begun because the file was not where it was expected
+      // to be on disk.
+    }
+    
+    assertCompileErrorsPresent(_name(), false);
+    
+    // Make sure .class exists
+    File compiled = classForJava(file, "DrJavaTestFoo");
+    assertTrue(_name() + "Class file shouldn't exist after compile", !compiled.exists());
   }
 }

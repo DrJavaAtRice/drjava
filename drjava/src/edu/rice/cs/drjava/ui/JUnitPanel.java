@@ -541,15 +541,7 @@ public class JUnitPanel extends TabbedPanel
             (errorsWithPositions.length > 0)) {
 
         // Grab filename for this set of errors
-        String filename = "(Untitled)";
-        try {
-          File file = openDoc.getFile();
-          filename = file.getName();
-        }
-        catch (IllegalStateException ise) {
-          // Not possible: compiled documents must have files
-          throw new UnexpectedException(ise);
-        }
+        String filename = openDoc.getFilename();
         
         // Show errors without source locations
         for (int j = 0; j < errorsWithoutPositions.length; j++, errorNum++) {

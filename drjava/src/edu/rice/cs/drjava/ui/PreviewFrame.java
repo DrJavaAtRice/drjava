@@ -185,9 +185,14 @@ public class PreviewFrame extends JFrame {
   private void _print() {
     try {
       _document.print();
-    } catch (PrinterException e) {
+    }
+    catch (FileMovedException fme) {
+      _mainFrame._showFileMovedError(fme);
+    }
+    catch (PrinterException e) {
       _showError(e, "Print Error", "An error occured while printing.");
-    } catch (BadLocationException e) {
+    }
+    catch (BadLocationException e) {
       _showError(e, "Print Error", "An error occured while printing.");
     }
   }

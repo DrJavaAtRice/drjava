@@ -68,10 +68,10 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
    private Position _endPos;
    
   /**
-   * @throws IllegalStateException if the document does not have a file
+   * @throws DebugException if the document does not have a file
    */
   public Breakpoint( OpenDefinitionsDocument doc, int offset, int lineNumber, DebugManager manager) 
-    throws DebugException, IllegalStateException {    
+    throws DebugException {    
     
     super (manager, doc);
     _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;

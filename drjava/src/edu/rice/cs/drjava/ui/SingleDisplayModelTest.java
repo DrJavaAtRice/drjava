@@ -276,6 +276,10 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
           // We know file should exist
           fail("file does not exist");
         }
+        catch (FileMovedException fme) {
+          // We know file should exist
+          fail("file does not exist");
+        }
         assertEquals("file to open", tempFile, file);
         openCount++;
       }
@@ -383,7 +387,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     
     // Untitled
     OpenDefinitionsDocument doc = sdm.getActiveDocument();
-    assertEquals("untitled display filename", "(untitled)", 
+    assertEquals("untitled display filename", "(Untitled)", 
                  sdm.getDisplayFilename(doc));
     
     // Ends in ".java"

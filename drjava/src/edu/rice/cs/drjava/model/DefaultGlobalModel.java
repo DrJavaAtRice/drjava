@@ -1075,21 +1075,30 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
           l.compileStarted();
         }
       });
+      
+      try {
+        // Compile the files
+        _compileFiles(sourceRoots, outOfSyncFiles);
+      }
+      catch (Throwable t) {
+        CompilerError err = new CompilerError(t.getMessage(),
+                                              false);
+        CompilerError[] errors = new CompilerError[] { err };
+        _distributeErrors(errors);
+      }
+      finally {
+        // Fire a compileEnded event
+        notifyListeners(new EventNotifier() {
+          public void notifyListener(GlobalModelListener l) {
+            l.compileEnded();
+          }
+        });
         
-      // Compile the files
-      _compileFiles(sourceRoots, outOfSyncFiles);
-
-      // Fire a compileEnded event
-      notifyListeners(new EventNotifier() {
-        public void notifyListener(GlobalModelListener l) {
-          l.compileEnded();
+        // Only clear console/interactions if there were no errors
+        if (_numErrors == 0) {
+          resetConsole();
+          resetInteractions();
         }
-      });
-        
-      // Only clear console/interactions if there were no errors
-      if (_numErrors == 0) {
-        resetConsole();
-        resetInteractions();
       }
     }
   }
@@ -1249,8 +1258,17 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * @return the file for this document
      * @exception IllegalStateException if no file exists
      */
-    public File getFile() throws IllegalStateException {
+    public File getFile() 
+      throws IllegalStateException, FileMovedException
+    {
       return _doc.getFile();
+    }
+    
+    /**
+     * Returns the name of this file, or "(untitled)" if no file.
+   */
+    public String getFilename() {
+      return _doc.getFilename();
     }
 
 
@@ -1351,7 +1369,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * This method tells the document to prepare all the DrJavaBook
      * and PagePrinter objects.
      */
-    public void preparePrintJob() throws BadLocationException {
+    public void preparePrintJob() throws BadLocationException, 
+      FileMovedException {
+      
       String filename = "(untitled)";
       try {
         filename = _doc.getFile().getAbsolutePath();
@@ -1365,7 +1385,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * Prints the given document by bringing up a
      * "Print" window.
      */
-    public void print() throws PrinterException, BadLocationException {
+    public void print() throws PrinterException, BadLocationException,
+      FileMovedException
+    {
       preparePrintJob();
       PrinterJob printJob = PrinterJob.getPrinterJob();
       printJob.setPageable(_book);
@@ -1424,7 +1446,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         
             _compileFiles(sourceRoots, files);
           }
-          catch (InvalidPackageException e) {
+          catch (Throwable e) {
             CompilerError err = new CompilerError(file,
                                                   -1,
                                                   -1,
@@ -1483,7 +1505,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         File testFile = getFile();
 
         startCompile();
-        if(getNumErrors() != 0) {
+        if(getNumErrors() > 0) {
           notifyListeners(new EventNotifier() {
             public void notifyListener(GlobalModelListener l) {
             l.compileErrorDuringJUnit();
@@ -1726,6 +1748,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       }
       catch (IllegalStateException ise) {
         throw new UnexpectedException(ise);
+      }
+      catch (FileMovedException fme) {
+        _doc.setClassFileInSync(false);
+        return false;
       }
       if (sourceFile.lastModified() > classFile.lastModified()) {
         _doc.setClassFileInSync(false);
@@ -2005,7 +2031,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         throw new InvalidPackageException(-1, "Can not get source root for " +
                                           "unsaved file. Please save.");
       }
-
+      catch (FileMovedException fme) {
+        throw new InvalidPackageException(-1, "File has been moved or deleted " +
+                                          "from its previous location. Please save.");
+      }
+      
       if (packageName.equals("")) {
         return sourceFile.getParentFile();
       }
@@ -2152,13 +2182,23 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       OpenDefinitionsDocument thisDoc =
         (OpenDefinitionsDocument) _definitionsDocs.get(i);
       try {
-        if (thisDoc.getFile().equals(file)) {
-          doc = thisDoc;
+        File thisFile = null;
+        try {
+          thisFile = thisDoc.getFile();
+        }
+        catch (FileMovedException fme) {
+          // Ok, file is invalid, but compare anyway
+          thisFile = fme.getFile();
+        }
+        finally {
+          // Always do the comparison
+          if ((thisFile != null) && thisFile.equals(file)) {
+            doc = thisDoc;
+          }
         }
       }
       catch (IllegalStateException ise) {
         // No file in thisDoc
-        //throw new UnexpectedException(ise, "Exception on doc #" + i);
       }
     }
 

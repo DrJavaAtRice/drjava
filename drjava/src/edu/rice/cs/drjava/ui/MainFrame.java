@@ -448,7 +448,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           DrJava.CONFIG.saveConfiguration();
         }
         catch (IOException ioe) {
-          throw new UnexpectedException(ioe);
+          _showIOError(ioe);
         }
       }
       _model.quit();
@@ -711,6 +711,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       try {
         _model.loadHistory(selector);
       }
+      catch (FileNotFoundException fnf) {
+        _showFileNotFoundError(fnf);
+      }
       catch (IOException ioe) {
         _showIOError(ioe);
       }
@@ -814,9 +817,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void windowDeiconified(WindowEvent ev) {
       try {
         _model.getActiveDocument().revertIfModifiedOnDisk();
-       } catch (IOException e) {
-         _showIOError(e);
-       }
+      }
+      catch (FileMovedException fme) {
+        _showFileMovedError(fme);
+      }
+      catch (IOException e) {
+        _showIOError(e);
+      }
     }
     public void windowIconified(WindowEvent ev) {
     }
@@ -1074,13 +1081,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     OpenDefinitionsDocument active = _model.getActiveDocument();
     
-    // Fill in class name if untitled
-    if (active.isUntitled()) {
-      String className = active.getClassName();
-      if (!className.equals("")) {
-        jfc.setSelectedFile(new File(jfc.getCurrentDirectory(), className));
-      }
+    // Fill in class name
+    //if (active.isUntitled()) {
+    String className = active.getClassName();
+    if (!className.equals("")) {
+      jfc.setSelectedFile(new File(jfc.getCurrentDirectory(), className));
     }
+    //}
     int rc = jfc.showSaveDialog(this);//_saveChooser.showSaveDialog(this);
     return getChosenFile(jfc, rc);//_saveChooser, rc);
   }
@@ -1147,6 +1154,10 @@ public class MainFrame extends JFrame implements OptionConstants {
         // Can't happen: this open document must have a file
         throw new UnexpectedException(ise);
       }
+      catch (FileMovedException fme) {
+        // File was deleted, but use the same name anyway
+        filename = fme.getFile().getName();
+      }
       // Always switch to doc
       _model.setActiveDocument(openDoc);
       
@@ -1163,10 +1174,23 @@ public class MainFrame extends JFrame implements OptionConstants {
           _revert();
         }
       }
-      _recentFileManager.updateOpenFiles(openDoc.getFile());
+      try {
+        _recentFileManager.updateOpenFiles(openDoc.getFile());
+      }
+      catch (IllegalStateException ise) {
+        // Impossible: saved => has a file
+        throw new UnexpectedException(ise);
+      }
+      catch (FileMovedException fme) {
+        // Recover, show it in the list anyway
+        _recentFileManager.updateOpenFiles(fme.getFile());
+      }
     }
     catch (OperationCanceledException oce) {
       // Ok, don't open a file
+    }
+    catch (FileNotFoundException fnf) {
+      _showFileNotFoundError(fnf);
     }
     catch (IOException ioe) {
       _showIOError(ioe);
@@ -1180,9 +1204,14 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _print() {
     try {
       _model.getActiveDocument().print();
-    } catch (PrinterException e) {
+    }
+    catch (FileMovedException fme) {
+      _showFileMovedError(fme);
+    }
+    catch (PrinterException e) {
       _showError(e, "Print Error", "An error occured while printing.");
-    } catch (BadLocationException e) {
+    }
+    catch (BadLocationException e) {
       _showError(e, "Print Error", "An error occured while printing.");
     }
   }
@@ -1194,10 +1223,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     try {
       _model.getActiveDocument().preparePrintJob();
       new PreviewFrame(_model, this);
-    } catch (BadLocationException e) {
+    }
+    catch (FileMovedException fme) {
+      _showFileMovedError(fme);
+    } 
+    catch (BadLocationException e) {
       _showError(e, "Print Error",
                  "An error occured while preparing the print preview.");
-    } catch (IllegalStateException e) {
+    } 
+    catch (IllegalStateException e) {
       _showError(e, "Print Error",
                  "An error occured while preparing the print preview.");
     }
@@ -1218,6 +1252,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       _model.getActiveDocument().saveFile(_saveSelector);
       _currentDefPane.hasWarnedAboutModified(false);
     }
+    catch (FileMovedException fme) {
+      _showFileMovedError(fme);
+    }
     catch (IOException ioe) {
       _showIOError(ioe);
     }
@@ -1237,6 +1274,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     try {
       _model.saveAllFiles(_saveSelector);
     }
+    catch (FileMovedException fme) {
+      _showFileMovedError(fme);
+    }
     catch (IOException ioe) {
       _showIOError(ioe);
     }
@@ -1245,6 +1285,9 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _revert() {
     try {
       _model.getActiveDocument().revertFile();
+    }
+    catch (FileMovedException fme) {
+      _showFileMovedError(fme);
     }
     catch (IOException ioe) {
       _showIOError(ioe);
@@ -1255,6 +1298,9 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _revertAll() {
     try {
       _model.revertAllFiles();
+    }
+    catch (FileMovedException fme) {
+      _showFileMovedError(fme);
     }
     catch (IOException ioe) {
       _showIOError(ioe);
@@ -1276,11 +1322,17 @@ public class MainFrame extends JFrame implements OptionConstants {
           _interactionsPane.setEditable(false);
           _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
           _model.getActiveDocument().startCompile();
-          _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-          _interactionsPane.setEditable(true);
+        }
+        catch (FileMovedException fme) {
+          _showFileMovedError(fme);
         }
         catch (IOException ioe) {
           _showIOError(ioe);
+        }
+        finally {
+          // Make sure interactions pane always comes back!
+          _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+          _interactionsPane.setEditable(true);
         }
         return null;
       }
@@ -1296,11 +1348,17 @@ public class MainFrame extends JFrame implements OptionConstants {
           _interactionsPane.setEditable(false);
           _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
           _model.compileAll();
-          _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-          _interactionsPane.setEditable(true);
+        }
+        catch (FileMovedException fme) {
+          _showFileMovedError(fme);
         }
         catch (IOException ioe) {
           _showIOError(ioe);
+        }
+        finally {
+          // Make sure interactions pane always comes back
+          _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+          _interactionsPane.setEditable(true);
         }
         return null;
       }
@@ -1312,6 +1370,9 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _junit() {
     try {
       _model.getActiveDocument().startJUnit();
+    }
+    catch (FileMovedException fme) {
+      _showFileMovedError(fme);
     }
     catch (IOException ioe) {
       _showIOError(ioe);
@@ -1470,6 +1531,32 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
 
+  void _showFileMovedError(FileMovedException fme) {
+    String text = "File " + fme.getFile().getAbsolutePath() +
+      "\ncould not be found on disk!  It was probably moved\n" +
+      "or deleted.  Would you like to save it in a new file?";
+    int rc = JOptionPane.showConfirmDialog(MainFrame.this,
+                                           text,
+                                           "File Moved or Deleted",
+                                           JOptionPane.YES_NO_OPTION);
+    
+    switch (rc) {
+      case JOptionPane.YES_OPTION:
+        _saveAs();
+      case JOptionPane.NO_OPTION:
+      case JOptionPane.CLOSED_OPTION:
+      case JOptionPane.CANCEL_OPTION:
+        return;
+      default:
+        throw new RuntimeException("Invalid rc: " + rc);
+    }
+  }
+  
+  void _showFileNotFoundError(FileNotFoundException fnf) {
+    _showError(fnf, "File Not Found",
+               "The specified file was not found on disk.");
+  }
+  
   void _showIOError(IOException ioe) {
     _showError(ioe, "Input/output error",
                "An I/O exception occurred during the last operation.");
@@ -2495,6 +2582,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     catch (IllegalStateException ise) {
       // no file, leave in current directory
     }
+    catch (FileMovedException fme) {
+      // file was deleted, but try to go the directory
+      _setCurrentDirectory(fme.getFile());
+    }
   }
 
   /**
@@ -2796,14 +2887,34 @@ public class MainFrame extends JFrame implements OptionConstants {
       _revertAction.setEnabled(true);
       updateFileTitle();
       _currentDefPane.requestFocus();
-      _recentFileManager.updateOpenFiles(doc.getFile());
+      try {
+        _recentFileManager.updateOpenFiles(doc.getFile());
+      }
+      catch (IllegalStateException ise) {
+        // Impossible: saved => has a file
+        throw new UnexpectedException(ise);
+      }
+      catch (FileMovedException fme) {
+        // Recover, show it in the list anyway
+        _recentFileManager.updateOpenFiles(fme.getFile());
+      }
     }
 
     public void fileOpened(final OpenDefinitionsDocument doc) { 
       // Fix OS X scrollbar bug before switching
       _reenableScrollBar();
       _createDefScrollPane(doc);
-      _recentFileManager.updateOpenFiles(doc.getFile());
+      try {
+        _recentFileManager.updateOpenFiles(doc.getFile());
+      }
+      catch (IllegalStateException ise) {
+        // Impossible: opened => has a file
+        throw new UnexpectedException(ise);
+      }
+      catch (FileMovedException fme) {
+        // Recover, show it in the list anyway
+        _recentFileManager.updateOpenFiles(fme.getFile());
+      }
     }
 
     public void fileClosed(OpenDefinitionsDocument doc) {
@@ -2850,7 +2961,11 @@ public class MainFrame extends JFrame implements OptionConstants {
           if (!_model.isClosingAllFiles()) {
             try {
               active.revertIfModifiedOnDisk();
-            } catch (IOException e) {
+            }
+            catch (FileMovedException fme) {
+              _showFileMovedError(fme);
+            } 
+            catch (IOException e) {
               _showIOError(e);
             }
           }
@@ -3038,6 +3153,10 @@ public class MainFrame extends JFrame implements OptionConstants {
         // No file exists
         fname = "Untitled file";
       }
+      catch (FileMovedException fme) {
+        // File was deleted, but use the same name anyway
+        fname = fme.getFile().getName();
+      }
 
       String text = fname + " has been modified. Would you like to save it?";
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
@@ -3078,6 +3197,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       catch (IllegalStateException ise) {
         // No file exists
         fname = "Untitled file";
+      }
+      catch (FileMovedException fme) {
+        // File was deleted, but use the same name anyway
+        fname = fme.getFile().getName();
       }
       
       String text = fname + " has changed on disk. Would you like to " +

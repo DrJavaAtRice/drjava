@@ -247,14 +247,8 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    */
   public String getDisplayFilename(OpenDefinitionsDocument doc) {
 
-    String filename = "(untitled)";
-    try {
-      File file = doc.getFile();
-      filename = file.getName();
-    }
-    catch (IllegalStateException ise) {
-      // No file, filename stays "Untitled"
-    }
+    String filename = doc.getFilename();
+    
     // Remove ".java" if at the end of name
     if (filename.endsWith(".java")) {
       int extIndex = filename.lastIndexOf(".java");
@@ -284,6 +278,12 @@ public class SingleDisplayModel extends DefaultGlobalModel {
     catch (IllegalStateException ise) {
       // No file, filename stays "Untitled"
     }
+    catch (FileMovedException fme) {
+      // Recover, even though file was deleted
+      File file = fme.getFile();
+      path = file.getAbsolutePath();
+    }
+    
     // Mark if modified
     if (doc.isModifiedSinceSave()) {
       path = path + " *";

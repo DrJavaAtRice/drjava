@@ -70,10 +70,20 @@ public abstract class DocumentDebugAction<T extends EventRequest>
    * @param doc Document this action corresponds to
    */
   public DocumentDebugAction (DebugManager manager, OpenDefinitionsDocument doc) 
-    throws DebugException, IllegalStateException {
+    throws DebugException {
     super(manager);
     _className = doc.getDocument().getQualifiedClassName();
-    _file = doc.getFile();
+    try {
+      _file = doc.getFile();
+    }
+    catch (FileMovedException fme) {
+      throw new DebugException("This document's file no longer exists: " +
+                               fme.getMessage());
+    }
+    catch (IllegalStateException ise) {
+      throw new DebugException("This document has no file: " +
+                               ise.getMessage());
+    }
     _doc = doc;
   }  
   
