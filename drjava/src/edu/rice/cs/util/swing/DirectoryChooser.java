@@ -1479,7 +1479,6 @@ public class DirectoryChooser extends JDialog {
       public String getDescription() { return "Only allow java files"; };
     });
     d.setSelectedDirectory(new File("/home/jlugo/junk"));
-    d.setFileDisplayManager(edu.rice.cs.drjava.ui.MainFrame.getFileDisplayManager());
     int res = d.showDialog();
     
     System.out.println("done with success: " + res);
