@@ -15,6 +15,7 @@ How to commit changes:
  - Note: these are temporary instructions.  DO NOT USE "ant commit"!
  - Change to the plugins/eclipse directory and run "cvs commit".
  - Commit the build.xml if the version number has changed.
+ - If it's a release, tag the plugins/eclipse directory.
  - To do:
    - The ant script needs to be modified to work at the top level.
      Ideally, all DrJava development could be done from that build.xml,
@@ -43,9 +44,7 @@ How to add a preference to the plug-in:
 
  - Add a constant to DrJavaConstants
  - In DrJavaPreferencePage:
-   - Create a component in createContents()
-   - Add appropriate lines to initializeDefaults, initializeValues,
-     and storeValues
+   - Add a field in createFieldEditors()
  - Add a default value to EclipsePlugin
  - Add an IPropertyChangeListener to the PreferenceStore
    (EclipsePlugin.getDefault().getPreferenceStore())
