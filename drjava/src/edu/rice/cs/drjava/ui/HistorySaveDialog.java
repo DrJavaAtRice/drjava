@@ -39,8 +39,10 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.OperationCanceledException;
+import edu.rice.cs.drjava.config.OptionConstants;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -70,6 +72,7 @@ public class HistorySaveDialog {
     
     
     _textArea = new JTextArea();
+    _textArea.setFont(DrJava.CONFIG.getSetting(OptionConstants.FONT_MAIN));
     JButton _saveButton = new JButton("Save"),
       _cancelButton = new JButton("Cancel");
     _cancelButton.addActionListener(_cancelListener);
@@ -84,13 +87,13 @@ public class HistorySaveDialog {
                                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     JPanel scrollWrapper = new JPanel(new BorderLayout(0,5));
     scrollWrapper.setBorder(new EmptyBorder(5,5,0,5));
-    scrollWrapper.add(new JLabel("Make your editing changes, and then click \"Save\"."),BorderLayout.NORTH);
+    scrollWrapper.add(new JLabel("Make any changes to the history, and then click \"Save\"."),BorderLayout.NORTH);
     scrollWrapper.add(_textScroll,BorderLayout.CENTER);
     JPanel bottomPanel = new JPanel(new BorderLayout());
     JPanel _buttonPanel = new JPanel(new GridLayout(1,0,5,5));
 
-    _buttonPanel.add(_cancelButton);
     _buttonPanel.add(_saveButton);
+    _buttonPanel.add(_cancelButton);
     bottomPanel.add(_buttonPanel,BorderLayout.EAST);
     bottomPanel.setBorder(new EmptyBorder(5,5,5,5));
     content.add(scrollWrapper, BorderLayout.CENTER);

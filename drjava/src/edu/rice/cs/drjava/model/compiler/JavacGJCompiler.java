@@ -201,9 +201,9 @@ public class JavacGJCompiler implements CompilerInterface {
     // We must re-initialize the compiler on each compile. Otherwise
     // it gets very confused.
     //DrJava.consoleOut().println("-- In JavacGJCompiler: SourceRoots:");
-    for (int i = 0 ; i < sourceRoots.length; i ++) {
-      DrJava.consoleOut().println(sourceRoots[i]);
-    }
+    //for (int i = 0 ; i < sourceRoots.length; i ++) {
+    //  DrJava.consoleOut().println(sourceRoots[i]);
+    //}
     initCompiler(sourceRoots);
     List<String> filesToCompile = new List<String>();
 

@@ -468,7 +468,7 @@ public class CompilerErrorPanel extends TabbedPanel
 
       try {
         doc.insertString(0,
-                         "Compilation in progress, please wait ...",
+                         "Compilation in progress, please wait...",
                          NORMAL_ATTRIBUTES);
       }
       catch (BadLocationException ble) {
@@ -498,6 +498,16 @@ public class CompilerErrorPanel extends TabbedPanel
      */
     private void _updateWithErrors() throws BadLocationException {
       DefaultStyledDocument doc = new DefaultStyledDocument();
+      
+      // Print how many errors
+      StringBuffer numErrMsg = new StringBuffer("" + _numErrors);
+      numErrMsg.append(" error");
+      if (_numErrors > 1) {
+        numErrMsg.append("s");
+      }
+      numErrMsg.append(" found:\n");
+      doc.insertString(doc.getLength(), numErrMsg.toString(), BOLD_ATTRIBUTES);
+      
       int errorNum = 0;
       // Show errors without files
       CompilerError[] errorsNoFiles = _model.getCompilerErrorsWithoutFiles();

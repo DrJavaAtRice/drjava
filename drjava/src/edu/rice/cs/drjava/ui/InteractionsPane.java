@@ -221,6 +221,7 @@ public class InteractionsPane extends JTextPane {
     setKeymap(ourMap);
     
     getDocument().addDocumentListener(new CaretUpdateListener());
+    moveToEnd();
   }
   
   private void moveToEnd() {
