@@ -920,6 +920,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @return its corresponding OpenDefinitionsDocument
    */
   public OpenDefinitionsDocument getODDForDocument(Document doc) {
+    /**
+     * this function needs to be phased out altogether.
+     * the goal is for the OpenDefinitionsDocument to also function as its own Document,
+     * so this function will be useless
+     */
+    if(doc instanceof OpenDefinitionsDocument){
+      return (OpenDefinitionsDocument)doc;
+    }
     if (! (doc instanceof DefinitionsDocument) ) {
       throw new IllegalStateException("Could not get the OpenDefinitionsDocument for Document: " + doc);
     }
@@ -952,9 +960,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         nextitem = _documentNavigator.getPrevious(item);
         i++;
       }while(nextitem != item);
-      return getODDGivenIDoc(nextitem).getDocument();
+      return getODDGivenIDoc(nextitem);
     }else{
-      return getODDGivenIDoc(nextitem).getDocument();
+      return getODDGivenIDoc(nextitem);
     }
   }
 
@@ -977,9 +985,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         nextitem = _documentNavigator.getNext(item);
         i++;
       }while(nextitem != item);
-      return getODDGivenIDoc(nextitem).getDocument();
+      return getODDGivenIDoc(nextitem);
     }else{
-      return getODDGivenIDoc(nextitem).getDocument();
+      return getODDGivenIDoc(nextitem);
     }
   }
 
@@ -1465,7 +1473,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * This was at one time called the <code>DefinitionsDocumentHandler</code>
    * but was renamed (2004-Jun-8) to be more descriptive/intuitive.
    */
-  private class ConcreteOpenDefDoc implements OpenDefinitionsDocument {
+  private class ConcreteOpenDefDoc implements OpenDefinitionsDocument{
 //    private DefinitionsDocument _doc;
     // TODO: Should these be document-specific?  They aren't used as such now.
 //    private CompilerErrorModel _errorModel;
@@ -2607,6 +2615,83 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public void addUndoableEditListener(UndoableEditListener listener){
       getDocument().addUndoableEditListener(listener);
     }
+    
+    public Position createPosition(int offs) throws BadLocationException{
+      return getDocument().createPosition(offs);
+    }
+    
+    public Element getDefaultRootElement(){
+      return getDocument().getDefaultRootElement();
+    }
+    
+    public Position getEndPosition() {
+      return getDocument().getEndPosition();
+    }
+    
+    public int getLength(){
+      return getDocument().getLength();
+    }
+        
+    public Object getProperty(Object key){
+      return getDocument().getProperty(key);
+    }
+    
+    public Element[] getRootElements(){
+      return getDocument().getRootElements();
+    }
+    
+    public Position getStartPosition(){
+      return getDocument().getStartPosition();
+    }
+    
+    public String getText(int offset, int length) throws BadLocationException{
+      return getDocument().getText(offset, length);
+    }
+    
+    public void getText(int offset, int length, Segment txt) throws BadLocationException{
+      getDocument().getText(offset, length, txt);
+    }
+    
+    public void insertString(int offset, String str, AttributeSet a) throws BadLocationException{
+      getDocument().insertString(offset, str, a);
+    }
+    
+    public void putProperty(Object key, Object value){
+      getDocument().putProperty(key, value);
+    }
+    
+    public void remove(int offs, int len) throws BadLocationException{
+      getDocument().remove(offs, len);
+    }
+    
+    public void removeDocumentListener(DocumentListener listener) {
+      getDocument().removeDocumentListener(listener);
+    }
+    
+    public void removeUndoableEditListener(UndoableEditListener listener){
+      getDocument().removeUndoableEditListener(listener);
+    }
+    
+    public void render(Runnable r) {
+      getDocument().render(r);
+    }
+    
+    /**
+     * end implementation of javax.swing.text.Document interface
+     */
+    
+    
+    /**
+     * decorater patter for the definitions document
+     */
+    public int getLineStartPos(int pos) {
+      return getDocument().getLineStartPos(pos);
+    }
+    
+    public int getLineEndPos(int pos){
+      return getDocument().getLineEndPos(pos);
+    }
+
     
   }
 

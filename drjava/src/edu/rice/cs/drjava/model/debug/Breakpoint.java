@@ -77,11 +77,9 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
     _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;
     _lineNumber = lineNumber;
 
-    DefinitionsDocument defDoc = doc.getDocument();
-
     try {
-      _startPos = defDoc.createPosition(defDoc.getLineStartPos(offset));
-      _endPos = defDoc.createPosition( defDoc.getLineEndPos(offset));
+      _startPos = doc.createPosition(doc.getLineStartPos(offset));
+      _endPos = doc.createPosition( doc.getLineEndPos(offset));
     }
     catch (BadLocationException ble) {
       throw new UnexpectedException(ble);

@@ -610,7 +610,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private void _updateMachine() {
     if (_caretChanged) {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
-      _machine.setDocument(doc.getDocument());
+      _machine.setDocument(doc);
       _machine.setStart(_defPane.getCaretPosition());
       _machine.setPosition(_defPane.getCaretPosition());
       _caretChanged = false;

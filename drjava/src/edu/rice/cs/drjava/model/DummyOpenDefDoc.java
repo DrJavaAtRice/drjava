@@ -49,8 +49,9 @@ import java.util.Vector;
 import java.io.*;
 import java.awt.print.*;
 import javax.swing.ProgressMonitor;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.text.*;
 import junit.framework.TestResult;
 
 import edu.rice.cs.util.swing.FindReplaceMachine;
@@ -475,7 +476,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public void close() {
     // no body
   }
-
+  
   public boolean isProjectFile(){
     return false;
   }
@@ -483,4 +484,87 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public boolean belongsHuh(Document doc){
     return false;
   }
+  
+  public int getLineStartPos(int pos){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int getLineEndPos(int pos){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  /**
+   * Implementation of the javax.swing.text.Document interface
+   */
+  public void addDocumentListener(DocumentListener listener){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void addUndoableEditListener(UndoableEditListener listener){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public Position createPosition(int offs) throws BadLocationException{
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public Element getDefaultRootElement(){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public Position getEndPosition() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int getLength(){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public Object getProperty(Object key){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public Element[] getRootElements(){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public Position getStartPosition(){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public String getText(int offset, int length) throws BadLocationException{
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void getText(int offset, int length, Segment txt) throws BadLocationException{
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void insertString(int offset, String str, AttributeSet a) throws BadLocationException{
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void putProperty(Object key, Object value){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void remove(int offs, int len) throws BadLocationException{
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void removeDocumentListener(DocumentListener listener) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void removeUndoableEditListener(UndoableEditListener listener){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void render(Runnable r) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  /**
+     * end implementation of javax.swing.text.Document interface
+     */
 }

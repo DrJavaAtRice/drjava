@@ -64,7 +64,13 @@ import edu.rice.cs.drjava.model.definitions.*;
  *
  * @version $Id$
  */
-public interface OpenDefinitionsDocument {
+public interface OpenDefinitionsDocument extends Document {
+
+  
+  public int getLineStartPos(int pos);
+  public int getLineEndPos(int pos);
+
+    
   /**
    * Gets the definitions document being handled.
    * @return document being handled
