@@ -39,6 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.plugins.eclipse.views;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -232,7 +233,7 @@ public class InteractionsController {
       _enableInteractionsPane();
     }
     
-    public void interactionsErrorOccurred(final int offset, final int length) {
+    public void interactionErrorOccurred(final int offset, final int length) {
       _view.getTextPane().getDisplay().asyncExec(new Runnable() {
         public void run() {
           _adapter.highlightRange(offset, length, _colorYellow);
@@ -283,6 +284,27 @@ public class InteractionsController {
    */
   protected void _setupView() {
     _view.getTextPane().addVerifyKeyListener(new KeyUpdateListener());
+    
+    // Set up menu
+    _setupMenu();
+  }
+  
+  /**
+   * Adds actions to the toolbar menu.
+   */
+  protected void _setupMenu() {
+    Action resetInteractionsAction = new Action() {
+      public void run() {
+        String title = "Confirm Reset Interactions";
+        String message = "Are you sure you want to reset the Interactions Pane?";
+        if (_view.showConfirmDialog(title, message)) {
+          _model.resetInterpreter();
+        }
+      }
+    };
+    resetInteractionsAction.setText("Reset Interactions");
+    resetInteractionsAction.setToolTipText("Reset Interactions Pane");
+    _view.addMenuItem(resetInteractionsAction);
   }
   
   /**
@@ -330,8 +352,7 @@ public class InteractionsController {
       }
       // shortcut for clear command?  (ctrl+B is build project)
     }
-  }
-  
+  } 
     
   /**
    * Submits the text in the view to the model, and appends the

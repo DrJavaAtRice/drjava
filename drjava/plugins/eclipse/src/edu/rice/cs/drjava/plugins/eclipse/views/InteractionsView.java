@@ -39,9 +39,14 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.plugins.eclipse.views;
 
+import org.eclipse.ui.IActionBars;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.part.*;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.SWT;
@@ -82,6 +87,17 @@ public class InteractionsView extends ViewPart {
    * A runnable command to sound a beep as an alert.
    */
   protected Runnable _beep;
+  
+  /**
+   * Toolbar menu for this view.
+   */
+  protected IMenuManager _toolbarMenu;
+  
+  /**
+   * Context menu for this view.
+   */
+  protected MenuManager _contextMenu;
+  
   
   /**
    * Constructor.
@@ -132,11 +148,18 @@ public class InteractionsView extends ViewPart {
   public void createPartControl(Composite parent) {
     // NOTE: Do not let anything instantiate the DrJava config framework here...
     setTextPane(new StyledText(parent, SWT.WRAP | SWT.V_SCROLL));
+
+    // Get menus
+    IActionBars bars = getViewSite().getActionBars();
+    _toolbarMenu = bars.getMenuManager();
+    _contextMenu = new MenuManager("#PopupMenu");
+    Menu menu = _contextMenu.createContextMenu(_styledText);
+    _styledText.setMenu(menu);
     
     SWTDocumentAdapter adapter = new SWTDocumentAdapter(_styledText);
     EclipseInteractionsModel model = new EclipseInteractionsModel(adapter);
     setController(new InteractionsController(model, adapter, this));
-    
+
   }
   
   /**
@@ -204,12 +227,21 @@ public class InteractionsView extends ViewPart {
   public void showInfoDialog(final String title, final String msg) {
     _styledText.getDisplay().asyncExec(new Runnable() {
       public void run() {
-        MessageBox box = new MessageBox(_styledText.getShell(), 
-                                        SWT.ICON_INFORMATION | SWT.OK);
-        box.setMessage(msg);
-        box.open();
+        MessageDialog.openInformation(_styledText.getShell(),
+                                      title, msg);
       }
     });
+  }
+  
+  /**
+   * Shows a modal dialog to confirm an operation.
+   * @param title Title of the dialog box
+   * @param msg Message to display
+   * @return Whether the user clicked yes or not
+   */
+  public boolean showConfirmDialog(final String title, final String msg) {
+    return MessageDialog.openQuestion(_styledText.getShell(),
+                                      title, msg);
   }
   
   /**
@@ -218,4 +250,31 @@ public class InteractionsView extends ViewPart {
   public void setFocus() {
     _styledText.setFocus();
   }
+  
+  /**
+   * Add a menu item to both the toolbar menu and context menu.
+   * @param action Menu item to add
+   */
+  public void addMenuItem(Action action) {
+    addToolbarMenuItem(action);
+    addContextMenuItem(action);
+  }
+  
+  /**
+   * Add a menu item to the toolbar.
+   * @param action Menu item to add
+   */
+  public void addToolbarMenuItem(Action action) {
+    _toolbarMenu.add(action);
+  }
+  
+  /**
+   * Add a menu item to the context menu.
+   * @param action Menu item to add
+   */
+  public void addContextMenuItem(Action action) {
+    _contextMenu.add(action);
+  }
+  
+
 }
