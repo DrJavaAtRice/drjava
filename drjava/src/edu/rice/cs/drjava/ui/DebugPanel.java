@@ -62,10 +62,12 @@ import com.bluemarsh.jswat.ui.*;
 import com.bluemarsh.jswat.view.*;
 
 /** 
- * The Debugger Panel
+ * Panel for displaying the debugger input and output in MainFrame.
  * @version $Id$
  */
-public class DebugPanel extends JPanel {
+public class DebugPanel extends JPanel implements OptionConstants {
+  
+  private static final String BANNER_TEXT = "JSwat Debugger Console\n\n";
 
   private final SingleDisplayModel _model;
   private final MainFrame _frame;
@@ -137,8 +139,9 @@ public class DebugPanel extends JPanel {
       
     // Add the fields to the panel
     add(_scrollPane, BorderLayout.CENTER);
-
-    boolean advancedMode = DrJava.CONFIG.getSetting(OptionConstants.DEBUGGER_ADVANCED).booleanValue();
+    // Only add input field in advanced mode
+    boolean advancedMode = 
+      DrJava.CONFIG.getSetting(DEBUGGER_ADVANCED).booleanValue();
     if (advancedMode) {
       add(_inputField, BorderLayout.SOUTH);
     
@@ -150,6 +153,9 @@ public class DebugPanel extends JPanel {
     reset();
   }
   
+  /**
+   * Returns the UIAdapter used by JSwat.
+   */
   public UIAdapter getUIAdapter() {
     return _uiAdapter;
   }
@@ -195,6 +201,9 @@ public class DebugPanel extends JPanel {
     _outputPane.repaint();
   }
   
+  /**
+   * Resets the output document by removing all text and inserting the banner.
+   */
   public void reset() {
     try {
       _outputDoc.remove(0, _outputDoc.getLength());
@@ -203,7 +212,7 @@ public class DebugPanel extends JPanel {
       // Can't happen: 0 and getLength() are always legal
     }
     
-    _appendString("JSwat Debugger Console\n\n");
+    _appendString(BANNER_TEXT);
   }
   
  
@@ -211,9 +220,9 @@ public class DebugPanel extends JPanel {
   /**
    * A Writer which writes to the output pane.
    */
-  private class DebugLogger extends PrintWriter {
+  private class DebugLogger extends BufferedWriter {
     public DebugLogger(OutputStream os) {
-      super(os);
+      super(new PrintWriter(os));
     }
     
     /**
@@ -224,7 +233,9 @@ public class DebugPanel extends JPanel {
     }
   }
   
-  
+  /**
+   * A UIAdapter for JSwat, to be used for displaying JSwat's status.
+   */
   class DebugPanelUIAdapter implements UIAdapter {
     
     /**
@@ -380,25 +391,25 @@ public class DebugPanel extends JPanel {
      */
 
     public boolean showFile(SourceSource src, int line, int count) {
-      DrJava.consoleErr().println("DP: showFile()...");
+      //DrJava.consoleErr().println("DP: showFile()...");
       if (src instanceof FileSource) {
         try {
           File file = ((FileSource)src).getFile();
           if (file.exists()) {
-	      //            DrJava.consoleOut().println("DebugPanel: file: " + file.getName());
+       //            DrJava.consoleOut().println("DebugPanel: file: " + file.getName());
             OpenDefinitionsDocument doc = _model.getDocumentForFile(file);
-            _model.setActiveDocument(doc);	    
-	    //            DrJava.consoleErr().println("Showing line " + line);	    
+            _model.setActiveDocument(doc);     
+     //            DrJava.consoleErr().println("Showing line " + line);     
             if (line > 0) {
-		/*
- 	      if (_curBP>0 && line != _curBP) // remove existing bp
-		_frame.getCurrentDefPane().getHighlighter().removeHighlight(_curBreakpointTag);
+  /*
+        if (_curBP>0 && line != _curBP) // remove existing bp
+  _frame.getCurrentDefPane().getHighlighter().removeHighlight(_curBreakpointTag);
 
-	      _curBreakpointTag = highlightLine(line, _activeBreakpointHighlightPainter);
-	      _curBP = line;
-		*/    
-	      // _frame.getCurrentDefPane().setCaretPosition(doc.getDocument().getCurrentLocation());
-	      
+       _curBreakpointTag = highlightLine(line, _activeBreakpointHighlightPainter);
+       _curBP = line;
+  */    
+       // _frame.getCurrentDefPane().setCaretPosition(doc.getDocument().getCurrentLocation());
+       
             }
             _inputField.grabFocus();
             return true;
@@ -418,28 +429,28 @@ public class DebugPanel extends JPanel {
             }
             file = new File(name);
             if (file.exists()) {
-              DrJava.consoleOut().println("DebugPanel: file: " + file.getName());
-              DrJava.consoleOut().println(" NEEDED HACK.");
+              //DrJava.consoleOut().println("DebugPanel: file: " + file.getName());
+              //DrJava.consoleOut().println(" NEEDED HACK.");
               OpenDefinitionsDocument doc = _model.getDocumentForFile(file);
               _model.setActiveDocument(doc);
-	      //              DrJava.consoleErr().println("Showing line " + line);
+       //              DrJava.consoleErr().println("Showing line " + line);
               if (line > 0) {
-		  /* no highlighting
-		if (_curBP>0 && line != _curBP) // remove existing bp
-		  _frame.getCurrentDefPane().getHighlighter().removeHighlight(_curBreakpointTag);
+    /* no highlighting
+  if (_curBP>0 && line != _curBP) // remove existing bp
+    _frame.getCurrentDefPane().getHighlighter().removeHighlight(_curBreakpointTag);
 
-  	        _curBreakpointTag = highlightLine(line, _activeBreakpointHighlightPainter);
-	        _curBP = line;
-		  */
-	        // _frame.getCurrentDefPane().setCaretPosition(doc.getDocument().getCurrentLocation());
+           _curBreakpointTag = highlightLine(line, _activeBreakpointHighlightPainter);
+         _curBP = line;
+    */
+         // _frame.getCurrentDefPane().setCaretPosition(doc.getDocument().getCurrentLocation());
 
               }
               _inputField.grabFocus();
               return true;
             }
             else {
-              DrJava.consoleOut().println("DebugPanel: file: " + file.getName());
-              DrJava.consoleOut().println("  didn't exist.");
+              //DrJava.consoleOut().println("DebugPanel: file: " + file.getName());
+              //DrJava.consoleOut().println("  didn't exist.");
             }
           }
         }
@@ -481,9 +492,9 @@ public class DebugPanel extends JPanel {
       int endPos = doc.getDocument().getLineEndPos(curPos);
       Object o=null;      
       try {
-  	  o = _frame.getCurrentDefPane().getHighlighter().addHighlight(startPos,
-								       endPos,
-								       brush);
+     o = _frame.getCurrentDefPane().getHighlighter().addHighlight(startPos,
+               endPos,
+               brush);
       } catch (BadLocationException badBadLocation) { System.err.println("DebugPanel.highlightLine() Got a ble."); }
       return o;
   }
@@ -502,13 +513,13 @@ public class DebugPanel extends JPanel {
 
     /*
   public Object highlightRegion(int start, int end, DefaultHighlighter.DefaultHighlightPainter brush) {
-	Object o=null;      
-	try {
-	    o = _frame.getCurrentDefPane().getHighlighter().addHighlight(start,
-									 end,
-									 brush);
+ Object o=null;      
+ try {
+     o = _frame.getCurrentDefPane().getHighlighter().addHighlight(start,
+          end,
+          brush);
       } catch (BadLocationException badBadLocation) { System.err.println("DebugPanel.highlightRegion() Got a ble."); }
-	return o;
-	} */
+ return o;
+ } */
 }
     

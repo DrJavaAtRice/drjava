@@ -115,6 +115,10 @@ public class MainFrame extends JFrame {
   private JMenuItem _abortInteractionMenuItem;
   private JCheckBoxMenuItem _debuggerEnabledMenuItem;
   private JMenuItem _runDebuggerMenuItem;
+  private JMenuItem _resumeDebugMenuItem;
+  private JMenuItem _stepDebugMenuItem;
+  private JMenuItem _nextDebugMenuItem;
+  private JMenuItem _suspendDebugMenuItem;
   private JMenuItem _toggleBreakpointMenuItem;
   private JMenuItem _printBreakpointsMenuItem;
   private JMenuItem _clearAllBreakpointsMenuItem;
@@ -381,6 +385,50 @@ public class MainFrame extends JFrame {
     }
   };
 
+  /** Runs the debugger on the current document */
+  private Action _runDebuggerAction =
+    new AbstractAction("Run Current Document in Debugger")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      _runDebugger();
+    }
+  };
+  
+  /** Resumes debugging */
+  private Action _resumeDebuggerAction =
+    new AbstractAction("Resume Debugging")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      _resumeDebugger();
+    }
+  };
+  
+  /** Steps into the next method call */
+  private Action _stepDebugAction =
+    new AbstractAction("Step Into")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      _debugStep();
+    }
+  };
+  
+  /** Runs the next line, without stepping into methods */
+  private Action _nextDebugAction =
+    new AbstractAction("Next Line")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      _debugNext();
+    }
+  };
+  
+  private Action _suspendDebugAction =
+    new AbstractAction("Suspend Debugging")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      _debugSuspend();
+    }
+  };
+  
   /** Toggles a breakpoint on the current line */
   private Action _toggleBreakpointAction =
     new AbstractAction("Toggle Breakpoint on Current Line")
@@ -389,26 +437,17 @@ public class MainFrame extends JFrame {
       _toggleBreakpoint();
     }
   };
-  
-  /** Runs the debugger on the current document */
-  private Action _runDebuggerAction =
-    new AbstractAction("Run Current Document")
-  {
-    public void actionPerformed(ActionEvent ae) {
-      _runDebugger();
-    }
-  };
 
   /** Prints all breakpoints */
   private Action _printBreakpointsAction =
-    new AbstractAction("Print All Breakpoints")
+    new AbstractAction("Display All Breakpoints")
   {
     public void actionPerformed(ActionEvent ae) {
       _printBreakpoints();
     }
   };
 
-  /** Prints all breakpoints */
+  /** Clears all breakpoints */
   private Action _clearAllBreakpointsAction =
     new AbstractAction("Clear All Breakpoints")
   {
@@ -778,6 +817,52 @@ public class MainFrame extends JFrame {
     }
   }
   
+  /**
+   * Runs the debugger on the currently active document
+   */
+  private void _runDebugger() {
+    OpenDefinitionsDocument doc = _model.getActiveDocument();
+    try{
+      _model.getDebugManager().start(doc);    
+    }
+    catch (ClassNotFoundException cnfe){
+      // catch the "Class Not Found exception"; must be some kind of no-compile
+      // issue
+      _showClassNotFoundError(cnfe);
+    }
+  }
+  
+  /**
+   * Resumes the debugger's current execution
+   */
+  private void _resumeDebugger() {
+    _model.getDebugManager().resume();     
+  }
+  
+  /**
+   * Steps the debugger
+   */
+  private void _debugStep() { 
+    _model.getDebugManager().step();    
+  }
+  
+  /**
+   * Runs the next line through the debugger
+   */
+  private void _debugNext(){
+    _model.getDebugManager().next();
+  }
+  
+  /**
+   * Suspends the current execution of the debugger
+   */
+  private void _debugSuspend(){
+    _model.getDebugManager().suspend();
+  }
+
+  /**
+   * Toggles a breakpoint on the current line
+   */
   private void _toggleBreakpoint() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
     try {
@@ -795,26 +880,21 @@ public class MainFrame extends JFrame {
     }
   }
   
-  private void _runDebugger() {
-    OpenDefinitionsDocument doc = _model.getActiveDocument();
-    try{
-      _model.getDebugManager().start(doc);    
-    }
-    catch (ClassNotFoundException cnfe){
-      // catch the "Class Not Found exception"; must be some kind of no-compile
-      // issue
-      _showClassNotFoundError(cnfe);
-    }
-  }
-
+  /**
+   * Displays all breakpoints currently set in the debugger
+   */
   private void _printBreakpoints() {
     _model.getDebugManager().printBreakpoints();    
   }
 
+  /**
+   * Clears all breakpoints from the debugger
+   */
   private void _clearAllBreakpoints() {
     _model.getDebugManager().clearAllBreakpoints(true);
   }    
-    
+
+  
   private void _showIOError(IOException ioe) {
     _showError(ioe, "Input/output error",
                "An I/O exception occurred during the last operation.");
@@ -1165,26 +1245,25 @@ public class MainFrame extends JFrame {
     JMenuItem tempItem;
     JMenu debugMenu = new JMenu("Debug");
     
-    // Enable debugging
+    // Enable debugging item
     _debuggerEnabledMenuItem = new JCheckBoxMenuItem(_toggleDebuggerAction);
     _debuggerEnabledMenuItem.setState(false);
     debugMenu.add(_debuggerEnabledMenuItem);
     
     debugMenu.addSeparator();
 
+    // TO DO: Add accelerators?
     _runDebuggerMenuItem = debugMenu.add(_runDebuggerAction);
-    // TO DO: add an accelerator
+    _suspendDebugMenuItem = debugMenu.add(_suspendDebugAction);
+    _resumeDebugMenuItem = debugMenu.add(_resumeDebuggerAction);
+    _stepDebugMenuItem = debugMenu.add(_stepDebugAction);
+    _nextDebugMenuItem = debugMenu.add(_nextDebugAction);
 
     debugMenu.addSeparator(); // breakpoints section:    
     
     _toggleBreakpointMenuItem = debugMenu.add(_toggleBreakpointAction);
-    // TO DO: add an accelerator
-    
     _printBreakpointsMenuItem = debugMenu.add(_printBreakpointsAction);
-    // TO DO: add an accelerator (optionally :) )
-
     _clearAllBreakpointsMenuItem = debugMenu.add(_clearAllBreakpointsAction);
-    // TO DO: ?? do we want an acc?
     
     // Start off disabled
     _setDebugMenuItemsEnabled(false);
@@ -1198,8 +1277,12 @@ public class MainFrame extends JFrame {
    */
   private void _setDebugMenuItemsEnabled(boolean enabled) {
     _debuggerEnabledMenuItem.setState(enabled);
-    _toggleBreakpointMenuItem.setEnabled(enabled);
     _runDebuggerMenuItem.setEnabled(enabled);
+    _resumeDebugMenuItem.setEnabled(enabled);
+    _stepDebugMenuItem.setEnabled(enabled);
+    _nextDebugMenuItem.setEnabled(enabled);
+    _suspendDebugMenuItem.setEnabled(enabled);
+    _toggleBreakpointMenuItem.setEnabled(enabled);
     _printBreakpointsMenuItem.setEnabled(enabled);
     _clearAllBreakpointsMenuItem.setEnabled(enabled);
   }
@@ -1678,6 +1761,7 @@ public class MainFrame extends JFrame {
           throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
       }
     }
+    
     public void nonTestCase() {
       
       String message = 

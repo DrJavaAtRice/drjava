@@ -399,6 +399,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       // and if we kill it using killInterpreter, we'll just start
       // another one!
       _interpreterControl.killInterpreter(false);
+      
+      // Clean up debugger if necessary
+      if ((_debugManager != null) && (_debugManager.isReady())) {
+        _debugManager.endSession();
+      }
       DrJava.getSecurityManager().exitVM(0);
     }
   }

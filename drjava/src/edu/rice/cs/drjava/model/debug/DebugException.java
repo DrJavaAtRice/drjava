@@ -39,5 +39,17 @@
 
 package edu.rice.cs.drjava.model.debug;
 
+/**
+ * Thrown when something goes wrong in the integrated debugger.
+ * 
+ * @version $Id$
+ */
 public class DebugException extends Exception {
+  public DebugException() {
+    super();
+  }
+  
+  public DebugException(String desc) {
+    super(desc);
+  }
 }

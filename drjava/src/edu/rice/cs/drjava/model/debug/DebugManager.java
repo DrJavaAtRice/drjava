@@ -62,12 +62,29 @@ import com.sun.jdi.Bootstrap;
  * @version $Id$
  */
 public class DebugManager {
-  private boolean _isReady; // status of debugger
+  /**
+   * Whether the debugger has been initialized and is ready for use.
+   */
+  private boolean _isReady;
 
+  /**
+   * Session object used by JSwat.
+   */
   private Session _session;
+  
+  /**
+   * Instance of JSwat.
+   */
   private JSwat _swat;
   
+  /**
+   * Reference to DrJava's model.
+   */
   private GlobalModel _model;
+  
+  /**
+   * Writer to use for output messages.
+   */
   private Writer _logwriter;
   
   /**
@@ -111,25 +128,25 @@ public class DebugManager {
 
     _session.addListener(new DebugOutputAdapter());
 
+    // Start without any breakpoints
     clearAllBreakpoints(false);
+    
+    // TO DO: start without a file loaded?
     
      _isReady = true;
    }
   
   /**
-   * 
+   * Cleans up JSwat's session object when the debugger is finished.
    */
   public void endSession() {
     Main.endSession(_session);
   }
   
   /**
-   * When the debugger is no longer needed, this method 
-   * removes it from memory.
+   * Cleans up all parts of the debugger after it is finished.
    */
   public void cleanUp() {
-    clearAllBreakpoints(false);
-      
     _session = null;
     _swat = null;
     
@@ -138,7 +155,6 @@ public class DebugManager {
     
   /**
    * Sends a command directly to JSwat.
-   * This method is specific to the JSwat debugger.
    * @param command JSwat command to perform
    */
   public void performCommand(String command) {
@@ -148,7 +164,7 @@ public class DebugManager {
   
   /**
    * Attaches the given Writer directly to JSwat's status Log.
-   * This method is specific to the JSwat debugger.
+   * @param w Writer to which to write log messages
    */
   public void attachLogWriter(Writer w) {
     Log log = _session.getStatusLog();
@@ -158,13 +174,16 @@ public class DebugManager {
   }
   
  
+  /**
+   * Starts executing the currently loaded document.
+   */
   public void start(OpenDefinitionsDocument doc) throws ClassNotFoundException{
 
     if (doc.isModifiedSinceSave()) {
       doc.saveBeforeProceeding(GlobalModelListener.DEBUG_REASON);
     }
 
-    if (doc.isModifiedSinceSave()) return; // they cancelled.
+    if (doc.isModifiedSinceSave()) return; // they cancelled the save.
 
     String className = mapClassName(doc);
     if (className == null) {
@@ -174,21 +193,43 @@ public class DebugManager {
     performCommand( "run " + className );
     
   }
-  /*
-  public void resume();
   
-  public void stop();
+  /**
+   * Resumes execution of the currently loaded document.
+   */
+  public void resume() {
+    performCommand( "resume" );
+  }
+    
+  /** 
+   * Steps forward in the execution of the currently loaded document.
+   * Stepping will walk into method calls.
+   */
+  public void step() {
+    performCommand( "step" );
+  }
   
-  public void removeAllBreakpoints();
+  /** 
+   * Executes the next line of the currently loaded document.
+   * Calling next will not walk into method calls.
+   */
+  public void next() {
+    performCommand( "next" );
+  }
   
-  public void getBreakpoints();
- */
+  /**
+   * Suspends execution of the currently running document.
+   */
+  public void suspend() {
+    performCommand( "suspend" );
+  }
 
 
- /**
-  * Removes all breakpoints
-  */
-  public void clearAllBreakpoints(boolean visible) {
+  /**
+   * Removes all breakpoints from the session.
+   * @param visibleMessage Whether to display a status message after clearing
+   */
+  public void clearAllBreakpoints(boolean visibleMessage) {
     BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
     Iterator i=bpManager.breakpoints(true);
     Breakpoint bp;
@@ -197,23 +238,26 @@ public class DebugManager {
       bpManager.removeBreakpoint(bp);
       i=bpManager.breakpoints(true);
     }
-    if (visible) 
+    if (visibleMessage) 
       writeToLog("All breakpoints removed.\n");      
-  }    
+  }
 
- /**
-  * Sets a breakpoint (or removes it, if it already
-  * exists at given line).
-  */
+  /**
+   * Toggles whether a breakpoint is set at the given line in the given
+   * document.
+   * @param doc Document in which to set or remove the breakpoint
+   * @param lineNumber Line on which to set or remove the breakpoint
+   */
   public void toggleBreakpoint(OpenDefinitionsDocument doc, int lineNumber)
     throws IOException, ClassNotFoundException, DebugException {  
+    
     BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
 
     if (doc.isModifiedSinceSave()) {
       doc.saveBeforeProceeding(GlobalModelListener.DEBUG_REASON);
     }
 
-    if (doc.isModifiedSinceSave()) return; // they cancelled.
+    if (doc.isModifiedSinceSave()) return; // they cancelled the save.
 
     String className = mapClassName(doc);
     if (className == null) {
@@ -228,47 +272,47 @@ public class DebugManager {
     while (i.hasNext()) {
       o = i.next();
       if (o instanceof ResolvableBreakpoint) {
-	  rbp = (ResolvableBreakpoint)o;
-	  rts = rbp.getReferenceTypeSpec();
-	  if (rts.matches(className) &&
-	      rbp instanceof LineBreakpoint &&
-	      ((LineBreakpoint)(rbp)).getLineNumber() == lineNumber) {
-	      // FOUND IT!
-	      removeBreakpoint((LineBreakpoint)rbp, className);
-	      return;
-	  }
+        rbp = (ResolvableBreakpoint)o;
+        rts = rbp.getReferenceTypeSpec();
+        if (rts.matches(className) &&
+            rbp instanceof LineBreakpoint &&
+            ((LineBreakpoint)(rbp)).getLineNumber() == lineNumber) {
+          // FOUND IT!
+          removeBreakpoint((LineBreakpoint)rbp, className);
+          return;
+        }
       }
     }
 
     setBreakpoint(className, lineNumber);
   }
 
- /**
-  * Writes the string to the log, ignoring exceptions.
-  *
-  * @param s the string to write to the stream.
-  */
+  /**
+   * Writes the given string to the log, ignoring exceptions.
+   *
+   * @param s the string to write to the stream.
+   */
   protected void writeToLog(String s) {
     try {
       _logwriter.write(s);
     }
     catch (IOException ioe) {}
   }
-
- /**
-  * Sets a breakpoint.
-  *
-  * @param className the name of the class in which to break
-  * @param lineNumber the line number at which to break
-  */    
+  
+  /**
+   * Sets a breakpoint.
+   *
+   * @param className the name of the class in which to break
+   * @param lineNumber the line number at which to break
+   */    
   protected void setBreakpoint(String className, int lineNumber) throws DebugException {
     BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
     try {
       bpManager.createBreakpoint(className, lineNumber);
     } catch (ResolveException re) {
-      throw new DebugException();
+      throw new DebugException(re.toString());
     } catch (ClassNotFoundException cnfe) {
-      throw new DebugException();
+      throw new DebugException(cnfe.toString());
     }
     writeToLog("Breakpoint added: " + className + ":" + lineNumber + "\n");
   }
@@ -276,7 +320,7 @@ public class DebugManager {
  /**
   * Removes a breakpoint.
   * Called from ToggleBreakpoint -- even with BPs that are not active.
-  * this takes in a LineBreakpoint (only kind DrJava creates) so that we can
+  * This takes in a LineBreakpoint (only kind DrJava creates) so that we can
   * get out the line number and unlighlight it if necessary.
   *
   * @param bp The breakpoint to remove.
@@ -289,7 +333,7 @@ public class DebugManager {
   }
 
   /**
-   * Prints all location breakpoints via writeToLog()
+   * Prints all location breakpoints via writeToLog().
    */    
   public void printBreakpoints() {
     BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
@@ -298,30 +342,31 @@ public class DebugManager {
     LineBreakpoint lbp;
     MethodBreakpoint mbp;
 
-    writeToLog("current breakpoints:  ");
-    if (!i.hasNext())
-	writeToLog("none\n");
-    else
-	writeToLog("\n\n");
+    if (!i.hasNext()) {
+      writeToLog("No Breakpoints Set.\n");
+    }
+    else {
+      writeToLog("Current Breakpoints:\n");
+    }
+    
     while (i.hasNext()) { // remember, ONLY locationbreakpoints
       o = i.next();
       if (o instanceof LineBreakpoint) {
-	lbp = (LineBreakpoint)o;  
-	writeToLog(" " + lbp.getClassName() +
-		   ":" + lbp.getLineNumber() +
-		   "\n");
+        lbp = (LineBreakpoint)o;  
+        writeToLog(" " + lbp.getClassName() +
+                   ":" + lbp.getLineNumber() +
+                   "\n");
       }
       if (o instanceof MethodBreakpoint) {
-	mbp = (MethodBreakpoint)o;
-	writeToLog(" " + mbp.getClassName() +
-		   ":" + mbp.getMethodName() +
-		   ":" + mbp.getLineNumber() +
-		   "\n");			 	
+        mbp = (MethodBreakpoint)o;
+        writeToLog(" " + mbp.getClassName() +
+                   ":" + mbp.getMethodName() +
+                   ":" + mbp.getLineNumber() +
+                   "\n");     
       }
     }
-    writeToLog("\n");
   }
-    
+  
   /*   
   public void addWatch();
   
@@ -382,7 +427,7 @@ public class DebugManager {
     } else {
       return null;
     }    
-  } // mapClassName
+  }
   
   
   /*
@@ -399,13 +444,10 @@ public class DebugManager {
     
     
     /**
-     * Constructs a DebugOutputAdapter to output to the given Log.
-     *
-     * @param  log  Log to output to.
+     * Constructs a DebugOutputAdapter to output to the manager's log.
      */
     public DebugOutputAdapter() {
-
-    } // DebugOutputAdapter
+    }
     
     /**
      * Called when the Session is about to begin an active debugging
@@ -431,7 +473,7 @@ public class DebugManager {
         displayOutput(vm.process().getErrorStream(),false);
         displayOutput(vm.process().getInputStream(),true);
       }
-    } // activate
+    }
     
     /**
      * Called when the Session is about to close down.
@@ -439,7 +481,7 @@ public class DebugManager {
      * @param  session  Session being closed.
      */
     public void close(Session session) {
-    } // close
+    }
     
     /**
      * Called when the Session is about to end an active debugging
@@ -458,7 +500,7 @@ public class DebugManager {
           break;
         }
       }
-    } // deactivate
+    }
     
     /** 
      * Create a thread that will retrieve and display any output
@@ -466,7 +508,6 @@ public class DebugManager {
      *
      * @param  is  InputStream to read from.
      */
-
     protected void displayOutput(final InputStream is, final boolean isOut) {
       Thread thr = new Thread("output reader") { 
         public void run() {
@@ -491,7 +532,7 @@ public class DebugManager {
       };
       thr.setPriority(Thread.MIN_PRIORITY);
       thr.start();
-    } // displayOutput
+    }
     
     /**
      * Called after the Session has added this listener to the
@@ -499,8 +540,8 @@ public class DebugManager {
      *
      * @param  session  Session adding this listener.
      */
-        public void init(Session session) {
-        } // init
+    public void init(Session session) {
+    }
     
     /**
      * Notify any waiters that one of the reader threads has
@@ -510,6 +551,6 @@ public class DebugManager {
     protected synchronized void notifyOutputComplete() {
       outputCompleteCount++;
       notifyAll();
-    } // notifyOutputComplete
-  } // DebugOutputAdapter
+    }
+  }
 }
