@@ -90,7 +90,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
    */
   public KeyStroke parse(String s) {
     if (CodeStatus.DEVELOPMENT) {
-      if (s.equals("null"))
+      if (s.equals("<none>"))
         return NULL_KEYSTROKE;
       KeyStroke ks = KeyStroke.getKeyStroke(s);
       if (ks == null)
@@ -108,7 +108,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
   public String format(KeyStroke k) {
     if (CodeStatus.DEVELOPMENT) {
       if (k == NULL_KEYSTROKE)
-        return "null";
+        return "<none>";
       String s = KeyEvent.getKeyModifiersText(k.getModifiers()).toLowerCase();
       s = s.replace('+', ' ');
       s += " ";
@@ -125,6 +125,9 @@ public class KeyStrokeOption extends Option<KeyStroke> {
         String key = (String) keys.get(new Integer(k.getKeyCode()));
         if (key == null)
           throw new IllegalArgumentException("Invalid keystroke");
+        if (key.equals("CONTROL") || key.equals("ALT") || key.equals("META") ||
+            key.equals("SHIFT"))
+          return s;
         s += key;
         return s; 
         /*String key = new String();

@@ -46,6 +46,8 @@ import java.awt.event.*;
 import java.awt.*;
 import java.util.Enumeration;
 import java.io.IOException;
+import java.util.TreeSet;
+import java.util.Iterator;
 
 import javax.swing.tree.*;
 import gj.util.Hashtable;
@@ -53,6 +55,7 @@ import gj.util.Hashtable;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.*;
+import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
 
 /**
  * The frame for setting Configuration options on the fly
@@ -238,16 +241,18 @@ public class ConfigFrame extends JFrame {
     /*PanelTreeNode fontNode = _createPanel("Fonts");
     _setupFontPanel(fontNode.getPanel());
     */
+    
     PanelTreeNode colorNode = _createPanel("Colors");
     _setupColorPanel(colorNode.getPanel());
 
-    /*PanelTreeNode keystrokesNode = _createPanel("Key Bindings");
-    _setupKeyBindingsPanel(keystrokesNode.getPanel());
-    */
+    PanelTreeNode keystrokesNode = _createPanel(new KeyStrokeConfigPanel("Key Bindings"),
+                                                _rootNode);
+
+    _setupKeyBindingsPanel(keystrokesNode.getPanel());    
 
     PanelTreeNode miscNode = _createPanel("Miscellaneous");
     _setupMiscPanel(miscNode.getPanel());
-
+    
   }
   
   /**
@@ -266,7 +271,19 @@ public class ConfigFrame extends JFrame {
     
     return ptNode;
   }
-
+  /**
+   * Creates an individual panel, adds it to the JTree and the list of panels, and
+   *  returns the tree node.
+   * @param t the title of this panel
+   * @param parent the parent tree node
+   * @return this tree node
+   */
+  private PanelTreeNode _createPanel(ConfigPanel c, PanelTreeNode parent) {
+    PanelTreeNode ptNode = new PanelTreeNode(c);
+    parent.add(ptNode);
+    
+    return ptNode;
+  }
   /**
    * Creates an individual panel, adds it to the JTree and the list of panels, and
    *  returns the tree node. Adds to the root node.
@@ -305,8 +322,33 @@ public class ConfigFrame extends JFrame {
   /**
    * Adds all of the components for the Key Bindings panel of the preferences window.
    */
-  private void _setupKeyBindingsPanel( ConfigPanel panel) {
-     
+  private void _setupKeyBindingsPanel( ConfigPanel panel) {     
+    TreeSet _comps = new TreeSet();
+
+    
+    KeyStrokeData tmpKsd;
+    KeyStrokeOptionComponent tmpKsoc;
+    
+    Enumeration e = KeyBindingManager.Singleton.getKeyStrokeData();
+    while (e.hasMoreElements()) {
+      tmpKsd = (KeyStrokeData) e.nextElement();
+      if (tmpKsd.getOption() != null) {
+        tmpKsoc = new KeyStrokeOptionComponent((KeyStrokeOption)tmpKsd.getOption(),
+                                               tmpKsd.getName(), this);
+        if (tmpKsoc != null) { 
+          _comps.add(tmpKsoc);
+        }
+      }
+    }
+    ((KeyStrokeConfigPanel)panel).setKeyStrokeComponents(_comps);
+
+    
+    Iterator iter = _comps.iterator();
+    while (iter.hasNext()) {
+      KeyStrokeOptionComponent x = (KeyStrokeOptionComponent) iter.next();
+      panel.addComponent(x);
+    }
+
   /*
   public static final KeyStrokeOption KEY_NEW_FILE =
   public static final KeyStrokeOption KEY_OPEN_FILE =
@@ -369,7 +411,11 @@ public class ConfigFrame extends JFrame {
       super(t);
       _panel = new ConfigPanel(t);   
     }
-    
+      
+    public PanelTreeNode(ConfigPanel c) {
+      super(c.getTitle());
+      _panel = c;
+    }
     public ConfigPanel getPanel() {
       return _panel;
     }

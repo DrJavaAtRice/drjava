@@ -149,7 +149,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenuItem _clearAllBreakpointsMenuItem;
   
   private ConfigFrame _configFrame;
-  private KeyBindingManager _keyBindingManager;
   
   /**
    * @return The model providing the logic for this view.
@@ -605,10 +604,6 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** Creates the main window, and shows it. */
   public MainFrame() {
-    
-    if (CodeStatus.DEVELOPMENT) {  // no key bindings in stable
-      _keyBindingManager = new KeyBindingManager(this);
-    }
     // create position listener for line numbers in status bar
     _posListener = new PositionListener();
     _setUpStatusBar();
@@ -645,7 +640,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     // set up key-bindings
     if (CodeStatus.DEVELOPMENT) {
-      _keyBindingManager.setActionMap(_currentDefPane.getActionMap());
+      KeyBindingManager.Singleton.setMainFrame(this);
+      KeyBindingManager.Singleton.setActionMap(_currentDefPane.getActionMap());
       _setUpKeyBindingMaps();
     }
     
@@ -718,6 +714,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       
     // If any errors occurred while parsing config file, show them
     _showConfigException();
+    
+    KeyBindingManager.Singleton.setShouldCheckConflict(false);
   }
 
   /**
@@ -1412,9 +1410,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Checks that "a" is the action associated with the keystroke.
     // Need to check in case two actions were assigned to the same
     // key in the config file
-    _keyBindingManager.put(opt, a, tmpItem, tmpItem.getText());
-    if (_keyBindingManager.get(ks) == a) { 
+    KeyBindingManager.Singleton.put(opt, a, tmpItem, tmpItem.getText());
+    if (KeyBindingManager.Singleton.get(ks) == a) { 
       tmpItem.setAccelerator(ks);
+      //KeyBindingManager.Singleton.addListener(opt, tmpItem);
     }
   }
   
@@ -1974,7 +1973,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     DefinitionsPane pane = new DefinitionsPane(this, _model, doc);
 
     if (CodeStatus.DEVELOPMENT) {
-      pane.setKeyBindingManager(_keyBindingManager);
+      pane.setKeyBindingManager(KeyBindingManager.Singleton);
     }
     
     // Add listeners
@@ -2555,76 +2554,76 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (CodeStatus.DEVELOPMENT) {  // no configurable keystrokes in stable
       ActionMap _actionMap = _currentDefPane.getActionMap();
  
-      _keyBindingManager.put(KEY_BACKWARD, _actionMap.get(DefaultEditorKit.backwardAction),null, "Backward");
-      _keyBindingManager.addShiftAction(KEY_BACKWARD,
+      KeyBindingManager.Singleton.put(KEY_BACKWARD, _actionMap.get(DefaultEditorKit.backwardAction),null, "Backward");
+      KeyBindingManager.Singleton.addShiftAction(KEY_BACKWARD,
                                         DefaultEditorKit.selectionBackwardAction);
       
-      _keyBindingManager.put(KEY_BEGIN_DOCUMENT, _actionMap.get(DefaultEditorKit.beginAction), null, "Begin Document");
-      _keyBindingManager.addShiftAction(KEY_BEGIN_DOCUMENT, 
+      KeyBindingManager.Singleton.put(KEY_BEGIN_DOCUMENT, _actionMap.get(DefaultEditorKit.beginAction), null, "Begin Document");
+      KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_DOCUMENT, 
                                         DefaultEditorKit.selectionBeginAction);
       
-      _keyBindingManager.put(KEY_BEGIN_LINE, _actionMap.get(DefaultEditorKit.beginLineAction), null, "Begin Line");
-      _keyBindingManager.addShiftAction(KEY_BEGIN_LINE, 
+      KeyBindingManager.Singleton.put(KEY_BEGIN_LINE, _actionMap.get(DefaultEditorKit.beginLineAction), null, "Begin Line");
+      KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_LINE, 
                                         DefaultEditorKit.selectionBeginLineAction);
       
-      _keyBindingManager.put(KEY_BEGIN_PARAGRAPH, 
+      KeyBindingManager.Singleton.put(KEY_BEGIN_PARAGRAPH, 
                              _actionMap.get(DefaultEditorKit.beginParagraphAction), null, "Begin Paragraph");
-      _keyBindingManager.addShiftAction(KEY_BEGIN_PARAGRAPH, 
+      KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_PARAGRAPH, 
                                         DefaultEditorKit.selectionBeginParagraphAction); 
       
-      _keyBindingManager.put(KEY_PREVIOUS_WORD, 
+      KeyBindingManager.Singleton.put(KEY_PREVIOUS_WORD, 
                              _actionMap.get(DefaultEditorKit.previousWordAction), null, "Previous Word");
-      _keyBindingManager.addShiftAction(KEY_PREVIOUS_WORD, 
+      KeyBindingManager.Singleton.addShiftAction(KEY_PREVIOUS_WORD, 
                                         DefaultEditorKit.selectionPreviousWordAction);
       
       
-      _keyBindingManager.put(KEY_DOWN, 
+      KeyBindingManager.Singleton.put(KEY_DOWN, 
                              _actionMap.get(DefaultEditorKit.downAction), null, "Down");
-      _keyBindingManager.addShiftAction(KEY_DOWN, 
+      KeyBindingManager.Singleton.addShiftAction(KEY_DOWN, 
                                         DefaultEditorKit.selectionDownAction);
       
-      _keyBindingManager.put(KEY_END_DOCUMENT, 
+      KeyBindingManager.Singleton.put(KEY_END_DOCUMENT, 
                              _actionMap.get(DefaultEditorKit.endAction), null, "End Document");
-      _keyBindingManager.addShiftAction(KEY_END_DOCUMENT, 
+      KeyBindingManager.Singleton.addShiftAction(KEY_END_DOCUMENT, 
                                         DefaultEditorKit.selectionEndAction);
       
-      _keyBindingManager.put(KEY_END_LINE, 
+      KeyBindingManager.Singleton.put(KEY_END_LINE, 
                              _actionMap.get(DefaultEditorKit.endLineAction), null, "End Line");
-      _keyBindingManager.addShiftAction(KEY_END_LINE, 
+      KeyBindingManager.Singleton.addShiftAction(KEY_END_LINE, 
                                         DefaultEditorKit.selectionEndLineAction);
       
-      _keyBindingManager.put(KEY_END_PARAGRAPH, 
+      KeyBindingManager.Singleton.put(KEY_END_PARAGRAPH, 
                              _actionMap.get(DefaultEditorKit.endParagraphAction), null, "End Paragraph");
-      _keyBindingManager.addShiftAction(KEY_END_PARAGRAPH, 
+      KeyBindingManager.Singleton.addShiftAction(KEY_END_PARAGRAPH, 
                                         DefaultEditorKit.selectionEndParagraphAction);
       
-      _keyBindingManager.put(KEY_NEXT_WORD, 
+      KeyBindingManager.Singleton.put(KEY_NEXT_WORD, 
                              _actionMap.get(DefaultEditorKit.nextWordAction), null, "Next Word");
-      _keyBindingManager.addShiftAction(KEY_NEXT_WORD, 
+      KeyBindingManager.Singleton.addShiftAction(KEY_NEXT_WORD, 
                                         DefaultEditorKit.selectionNextWordAction);
       
-      _keyBindingManager.put(KEY_FORWARD, 
+      KeyBindingManager.Singleton.put(KEY_FORWARD, 
                              _actionMap.get(DefaultEditorKit.forwardAction), null, "Forward");
-      _keyBindingManager.addShiftAction(KEY_FORWARD,
+      KeyBindingManager.Singleton.addShiftAction(KEY_FORWARD,
                                         DefaultEditorKit.selectionForwardAction);
       
-      _keyBindingManager.put(KEY_UP, 
+      KeyBindingManager.Singleton.put(KEY_UP, 
                              _actionMap.get(DefaultEditorKit.upAction), null, "Up");
-      _keyBindingManager.addShiftAction(KEY_UP, 
+      KeyBindingManager.Singleton.addShiftAction(KEY_UP, 
                                         DefaultEditorKit.selectionUpAction); 
       
       // These last methods have no default selection methods
-      _keyBindingManager.put(KEY_PAGE_DOWN, 
+      KeyBindingManager.Singleton.put(KEY_PAGE_DOWN, 
                              _actionMap.get(DefaultEditorKit.pageDownAction), null, "Page Down");
-      _keyBindingManager.put(KEY_PAGE_UP, 
+      KeyBindingManager.Singleton.put(KEY_PAGE_UP, 
                              _actionMap.get(DefaultEditorKit.pageUpAction), null, "Page Up");
-      _keyBindingManager.put(KEY_CUT_LINE, 
+      KeyBindingManager.Singleton.put(KEY_CUT_LINE, 
                              _cutLineAction, null, "Cut Line");
-      _keyBindingManager.put(KEY_DELETE_PREVIOUS, 
+      KeyBindingManager.Singleton.put(KEY_DELETE_PREVIOUS, 
                              _actionMap.get(DefaultEditorKit.deletePrevCharAction), null, "Delete Previous");
-      _keyBindingManager.put(KEY_DELETE_NEXT, 
+      KeyBindingManager.Singleton.put(KEY_DELETE_NEXT, 
                              _actionMap.get(DefaultEditorKit.deleteNextCharAction), null, "Delete Next");
-      _keyBindingManager.put(KEY_FIND_NEXT,
+      KeyBindingManager.Singleton.put(KEY_FIND_NEXT,
                              new AbstractAction("FindNext") {
         public void actionPerformed(ActionEvent ae) {
           if(!_findReplace.isDisplayed()) {
