@@ -1708,7 +1708,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     try {
       Value stringValue = object.invokeMethod(thread, method, new LinkedList(),
                                               ObjectReference.INVOKE_SINGLE_THREADED);
-      return stringValue.toString();
+      if (stringValue == null) {
+        return "null";
+      }
+      else {
+        return stringValue.toString();
+      }
     }
     catch (InvalidTypeException ite) {
       // shouldn't happen, not passing any arguments to toString()

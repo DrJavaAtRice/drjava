@@ -623,7 +623,7 @@ public class ConfigFrame extends JFrame {
     panel.addComponent(new StringOptionComponent(OptionConstants.DEBUG_STEP_EXCLUDE,
                                                  "Classes/Packages To Exclude", this,
                                                  "<html>Any classes that the debuggger should not step into.<br>" +
-                                                 "Should be a comma-separated list of fully-qualified class names.<br>" +
+                                                 "Should be a COMMA-separated list of fully-qualified class names.<br>" +
                                                  "To exclude a package, specify <code>packagename.*</code> in the list.</html>"));
 
     panel.displayComponents();

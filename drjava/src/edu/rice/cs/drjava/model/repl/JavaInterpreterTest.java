@@ -56,8 +56,8 @@ public final class JavaInterpreterTest extends TestCase {
   static public boolean testValue;
 
   /**
-   * put your documentation comment here
-   * @param     String name
+   * Constructs a new JavaInterpreterTest.
+   * @param String name
    */
   public JavaInterpreterTest(String name) {
     super(name);
@@ -65,7 +65,7 @@ public final class JavaInterpreterTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * The setup method run before each test.
    */
   protected void setUp() {
     _interpreter = new DynamicJavaAdapter();
@@ -73,16 +73,17 @@ public final class JavaInterpreterTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
-   * @return
+   * Creates a TestSuite of tests to be run.
+   * @return the new TestSuite
    */
   public static Test suite() {
     return  new TestSuite(JavaInterpreterTest.class);
   }
 
   /**
-   * put your documentation comment here
-   * @param cases
+   * Asserts that the results of interpreting the first of each
+   * Pair is equal to the second.
+   * @param cases an array of Pairs
    */
   private void tester(Pair[] cases) throws ExceptionReturnedException {
     for (int i = 0; i < cases.length; i++) {

@@ -110,7 +110,7 @@
       
       <formalpara>
  <title>Commenting / Uncommenting</title>
- <para>To help you easily write multi-line comments, DrJava automatically adds spaces and an asterisk on each new line.  Commands in the Edit menu are also available to comment out or uncomment a block of selected code using winged comments ("//").  Commenting out a block of code will place "//" markers at the start of each line in the block, preserving the indentation of the code.</para>
+ <para>To help you easily write multi-line comments, DrJava automatically adds spaces and an asterisk on each new line.  In addition, there is an option in the "Miscellaneous" section of the Preferences window that will tell DrJava to automatically close multi-line comments for you.  Commands in the Edit menu are also available to comment out or uncomment a block of selected code using winged comments ("//").  The key bindings for these commands default to <keycode>Ctrl+Slash</keycode> and <keycode>Ctrl+Shift+Slash</keycode> respectively.  Commenting out a block of code will place "//" markers at the start of each line in the block, preserving the indentation of the code.</para>
       </formalpara>
 
       <formalpara>
@@ -125,7 +125,7 @@
 
       <formalpara>
  <title>Context Menu</title>
- <para>The Document List also has a context menu, which can be used by right-clicking on any document in the list.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to document-related commands, such as saving, reverting, printing, compiling, testing, and running Javadoc.</para>
+ <para>The Document List also has a context menu, which can be used by right-clicking on any document in the list.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to document-related commands, such as saving, reverting, printing, compiling, testing, running Javadoc, and calling the main method.</para>
       </formalpara>
     </section>
 
@@ -135,7 +135,7 @@
 
       <formalpara>
  <title>Find/Replace</title>
- <para>DrJava has a Find and Replace utility, which is conveniently displayed as one of the tabs at the bottom of the window, rather than as a dialog blocking part of the window.  The tab is first displayed when you Find/Replace from the Edit Menu (or using the keyboard shortcut, <keycode>Ctrl+F</keycode>), and it can be closed by clicking on the "X" button in the upper right corner of the tab (or by hitting the <keycode>Escape</keycode> key).  To search for a term, type it in the Find text field and click "Find Next" (or press <keycode>Enter</keycode>).  To replace the term with another, type the new term in the Replace text field, find an occurrence using "Find Next", and then click "Replace".  The "Replace/Find Next" and "Replace All" buttons help to speed up this process.  There are also two checkboxes to customize each search: "Match Case" and "Search Backwards".  Unchecking the first box will return case-insensitive results, and checking the second box will return the previous match for each search.</para>
+ <para>DrJava has a Find and Replace utility, which is conveniently displayed as one of the tabs at the bottom of the window, rather than as a dialog blocking part of the window.  The tab is first displayed when you Find/Replace from the Edit Menu (or using the keyboard shortcut, <keycode>Ctrl+F</keycode>), and it can be closed by clicking on the "X" button in the upper right corner of the tab (or by hitting the <keycode>Escape</keycode> key).  To search for a term, type it in the Find text field and click "Find Next" (or press <keycode>Enter</keycode>).  To replace the term with another, type the new term in the Replace text field, find an occurrence using "Find Next", and then click "Replace".  The "Replace/Find Next" and "Replace All" buttons help to speed up this process.  There are also three checkboxes to customize each search: "Match Case", "Search Backwards", and "Search All Documents".  Unchecking the first box will return case-insensitive results, checking the second box will reverse the direction of searching, and checking the third box will tell DrJava to search through all of the open documents in sequence.  Note that if "Search All Documents" is enabled, the search will not wrap to the beginning of the current document until all other documents have first been searched.</para>
       </formalpara>
 
       <formalpara>
@@ -148,7 +148,7 @@
  <para>DrJava displays the cursor's current line number and column number on the right side of the status bar at the bottom of the window.  The line number is shown on the left and starts at 1, and the column number is shown on the right and starts at 0.</para>
       </formalpara>
 
-      <para>All line numbers can also be displayed in the left margin of the Definitions Pane, using the "Show All Line Numbers" option in the Display Options section of the Preferences window.  (See <link linkend="configuration">Configuring DrJava</link>.)</para>
+      <para>All line numbers can also be displayed in the left margin of the Definitions Pane, using the "Show All Line Numbers" option in the "Display Options" section of the Preferences window.  The line number font can be changed in the "Fonts" section.  (See <link linkend="configuration">Configuring DrJava</link>.)</para>
 
     </section>
 
@@ -161,7 +161,7 @@
 
     <formalpara>
       <title>How to Use</title>
-      <para>The Interactions Pane supports the execution of any valid Java statements as well as the evaluation of Java expressions.  Simply define variables and call methods as you would in an ordinary method, or even define new classes and methods and call them interactively.  In general, any statement or expression ending without a semicolon will display its result in the Interactions Pane, while those ending with a semicolon will complete without displaying a result.  Result objects are displayed using the object's toString() method.  Any system output will be displayed in the Interactions Pane in green (as well as in the Console tab), while system errors will be displayed in red.</para>
+      <para>The Interactions Pane supports the execution of any valid Java statements as well as the evaluation of Java expressions.  Simply define variables and call methods as you would in an ordinary method, or even define new classes and methods and call them interactively.  In general, any statement or expression ending without a semicolon will display its result in the Interactions Pane, while those ending with a semicolon will complete without displaying a result.  Result objects are displayed using the object's toString() method.  Any system output will be displayed in the Interactions Pane in green (as well as in the Console tab), while system errors will be displayed in red by default.  Any system input will cause a rectangle to be inserted in the Interactions Pane where you can type what you want System.in to read. This text will be colored purple. These colors can be modified in the "Colors" section in the Preferences window.</para>
     </formalpara>
     
     <para>Here is a simple interactions session, to demonstrate how the Interactions Pane can be used to experiment with objects or show GUI components.</para>
@@ -190,7 +190,7 @@ Welcome to DrJava.
     </formalpara>
     <programlisting>java MyClass arg1 arg2</programlisting>
     <para>Note that this feature does not support passing special flags or arguments to the JVM itself, as is supported on the command line.</para>
-    <!--<para>Another shortcut for this feature is the "Run Document's Main Method" command, which can be found in both the Tools menu and the context menu of the document list.  This command will simply insert the appropriate <literal>"java MyClass"</literal> text into the Interactions Pane to run the current class's main method.</para>-->
+    <para>Another shortcut for this feature is the "Run Document's Main Method" command, which can be found in both the Tools menu and the context menu of the document list.  This command will simply insert the appropriate <literal>"java MyClass"</literal> text into the Interactions Pane to run the current class's main method.</para>
 
     <formalpara>
       <title>Keyboard Shortcuts</title>
@@ -214,7 +214,7 @@ Welcome to DrJava.
 
       <formalpara>
  <title>Context Menu</title>
- <para>The Interactions Pane has a context menu, which can be used by right-clicking in the pane.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to useful commands for the Interactions Pane, including cut, copy, and paste, as well as resetting the Interactions Pane, loading and saving history files, viewing the current classpath, and copying the current interaction to the Definitions Pane.</para>
+ <para>The Interactions Pane has a context menu, which can be used by right-clicking in the pane.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to useful commands for the Interactions Pane, including cut, copy, and paste, as well as resetting the Interactions Pane, executing, loading, and saving history files, viewing the current classpath, and copying the current interaction to the Definitions Pane.</para>
       </formalpara>
   </chapter>
 
@@ -227,7 +227,7 @@ Welcome to DrJava.
 
     <section id="compiling-file">
       <title>Compiling Files</title>
-      <para>To compile the documents you have open in DrJava, click on the "Compile All" button on the toolbar, or choose either "Compile All" or "Compile Current Document" from the Tools menu.  Before the compilation can begin, all open files must be saved, even if only the current document is being compiled.  This is necessary because one file can depend on other files, and it is important that no files have been modified when errors are displayed.  (Otherwise, an error could be highlighted on a line which has changed.)  Once a compilation completes successfully, the Interactions Pane is reset so that the new class files can be used.  The output on the Console Tab is also reset to begin the new session, unless the "Clear Console After Interactions Reset" option in the Miscellaneous Section of the Preferences is unchecked.</para>
+      <para>To compile the documents you have open in DrJava, click on the "Compile All" button on the toolbar, or choose either "Compile All" or "Compile Current Document" from the Tools menu.  Before the compilation can begin, all open files must be saved, even if only the current document is being compiled.  This is necessary because one file can depend on other files, and it is important that no files have been modified when errors are displayed.  (Otherwise, an error could be highlighted on a line which has changed.)  Once a compilation completes successfully, the Interactions Pane is reset so that the new class files can be used.  The output on the Console Tab is also reset to begin the new session, unless the "Clear Console After Interactions Reset" option in the "Miscellaneous" section of the Preferences is unchecked.</para>
     </section>
 
     <section id="compiling-errors">
@@ -237,7 +237,7 @@ Welcome to DrJava.
 
     <section id="compiling-selecting">
       <title>Selecting a Compiler</title>
-      <para>DrJava supports the use of different Java compilers, such as the traditional "Javac" compiler supplied with the JDK or Sun's JSR-14 experimental compiler (which supports generic types).  DrJava will attempt to locate the your Java compiler on startup by searching for standard installation directories, but sometimes it is unable to find a compiler.  In this case, it will prompt you to specify the location of a compiler, or allow you to continue using DrJava without any compiler.  Note that the location of the compiler can be specified in the Preferences (see <link linkend="configuration">Configuring DrJava</link>).  If more than one compiler is specified, the active compiler can be selected from a menu on the Compiler Output tab itself.</para>
+      <para>DrJava supports the use of different Java compilers, such as the traditional "Javac" compiler supplied with the JDK or Sun's JSR-14 experimental compiler (which supports generic types).  DrJava will attempt to locate the your Java compiler on startup by searching for standard installation directories, but sometimes it is unable to find a compiler.  In this case, it will prompt you to specify the location of a compiler, or allow you to continue using DrJava without any compiler.  Note that the location of the compiler can be specified in the Preferences (see <link linkend="configuration">Configuring DrJava</link>).  If more than one compiler is specified, the active compiler can be selected from a menu on the Compiler Output tab itself.  You may notice that the same compiler may appear multiple times in the menu.  This happens because DrJava looks for compilers in three different places: on the user classpath, the user specified location in Preferences, and in the usual locations that the compiler can be found (the default installation directory, where java is located, etc.).</para>
     </section>
   </chapter>
 
@@ -463,7 +463,7 @@ public class CalculatorTest extends TestCase {
 
       <formalpara>
  <title>Sourcepath and Step Options</title>
- <para>The sourcepath is the set of directories in which to look for source files when stepping.  It can be set in the Debugger section of the Preferences window (which can be opened from the Edit menu).  This section the Preferences also contains options for controlling which classes will be included as part of stepping.  By default, DrJava will never step into its own source, nor its Java Interpreter (DynamicJava), nor Java itself.  Interested users can enable these options to see how Java or DrJava works.</para>
+ <para>The sourcepath is the set of directories in which to look for source files when stepping.  It can be set in the Debugger section of the Preferences window (which can be opened from the Edit menu).  This section in the Preferences also contains options for controlling which classes will be included as part of stepping.  By default, DrJava will never step into its own source, nor its Java Interpreter (DynamicJava), nor Java itself.  If you are interested, and have downloaded the source files, you can enable these options to see how Java or DrJava works.  You can also specify which classes and packages you want to exclude when stepping.  To exclude specific classes, type in the qualified class name (the package name followed by a period and the class name).  To exclude entire packages (as well as their subpackages), type the package name followed by a period and an asterisk.  Each class or package name must be separated by a comma.</para>
       </formalpara>
     </section>
 
@@ -473,7 +473,7 @@ public class CalculatorTest extends TestCase {
 
       <formalpara>
  <title>Watching Fields and Variables</title>
- <para>You can watch the values of class fields and local variables by entering the field or variable name into a row in the Watches table.  Any time a method is suspended (eg. after a breakpoint or step), the current value of the field or variable (if any) is displayed.  Watches can be removed from the table by deleting the name and pressing Enter.</para>
+ <para>You can watch the values of class fields and local variables by entering the field or variable name into a row in the Watches table.  Any time a method is suspended (eg. after a breakpoint or step), the current value of the field or variable (if any) is displayed.  Watches can be removed from the table by deleting the name and pressing Enter.  You cannot enter expressions that need to be evaluated into the watch table.  For example, "s.length" is not a valid watch entry.  Type expressions like these into the Interactions Pane to see their values.</para>
       </formalpara>
     </section>
   </chapter>
@@ -641,7 +641,7 @@ public class Student {
        <term>JSR14 Location (<varname>jsr14.location = ""</varname>)</term>
        <term>JSR14 Collections Path (<varname>jsr14.collectionspath = ""</varname>)</term>
        <listitem>
-  <para>Specifies the location of the JSR-14 versions of <filename>javac.jar</filename> and <filename>collect.jar</filename>, respectively, for use as an alternative compiler in DrJava.  JSR-14 is an experimental compiler provided by Sun which supports generic types.  The <filename>collect.jar</filename> file contains parameterized collection classes for JSR-14.  (We currently support JSR-14 versions 1.0, 1.2, 1.3, and 2.0.  Note that for version 2.0, <filename>javac.jar</filename> has been renamed <filename>gjc-rt.jar</filename>.)</para>
+  <para>Specifies the location of the JSR-14 versions of <filename>javac.jar</filename> and <filename>collect.jar</filename>, respectively, for use as an alternative compiler in DrJava.  JSR-14 is an experimental compiler provided by Sun which supports generic types.  The <filename>collect.jar</filename> file contains parameterized collection classes for JSR-14.  (We currently support JSR-14 versions 1.0, 1.2, 1.3, 2.0, and 2.2.  Note that for versions 2.0 and later, <filename>javac.jar</filename> has been renamed <filename>gjc-rt.jar</filename>.)</para>
        </listitem>
      </varlistentry>
      
@@ -685,6 +685,13 @@ public class Student {
    </listitem>
  </varlistentry>
  
+ <varlistentry>
+   <term>Save Main Window Postion (<varname>window.store.position = true</varname>)</term>
+   <listitem>
+     <para>Whether to save the position and size of the DrJava window between sessions.</para>
+   </listitem>
+ </varlistentry>
+ 
       </variablelist>
 
 
@@ -705,7 +712,7 @@ public class Student {
  <varlistentry>
    <term>Line Numbers Font (<varname>font.doclist = Monospaced-PLAIN-12</varname>)</term>
    <listitem>
-     <para>This font is used for the line numbers on the left side of the Definitions Pane, if the "Show All Line Numbers" option in the Display Options section is enabled.  The actual font size will be limited by the size of the Main Font.</para>
+     <para>This font is used for the line numbers on the left side of the Definitions Pane, if the "Show All Line Numbers" option in the "Display Options" section is enabled.  The actual font size will be limited by the size of the Main Font.</para>
    </listitem>
  </varlistentry>
 
@@ -846,6 +853,20 @@ public class Student {
    </listitem>
  </varlistentry>
 
+ <varlistentry>
+   <term>Interactions Error Color (<varname>interactions.error.color = #B20000</varname>)</term>
+   <listitem>
+     <para>Used as the color for text that indicates errors in the Interactions Pane.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Debug Message Color (<varname>debug.message.color = #0000B2</varname>)</term>
+   <listitem>
+     <para>Used as the color for text displayed by the debugger.</para>
+   </listitem>
+ </varlistentry>
+
       </variablelist>
 
 
@@ -889,6 +910,13 @@ public class Student {
    <term>Step into DrJava Classes (<varname>debug.step.drjava = false</varname>)</term>
    <listitem>
      <para>Whether to step into DrJava source files when stepping through a suspended method call.  Useful primarily when debugging DrJava itself.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Classes/Packages To Exclude (<varname>debug.step.exclude = ""</varname>)</term>
+   <listitem>
+     <para>Classes and packages that you do not wish DrJava to step into.  These must be fully qualified class names or package names ending in ".*" (e.g. "java.util.*") separated by commas.</para>
    </listitem>
  </varlistentry>
 
@@ -956,7 +984,7 @@ public class Student {
 
       <!-- Notifications -->
       <formalpara>
- <title>Miscellaneous</title>
+ <title>Notifications</title>
  <para>Configures how often DrJava notifies you for certain events.  The notifications in this section can all be suppressed by clicking on a "Do not show this message again" checkbox (or similar) on the notification itself.</para>
       </formalpara>
       <variablelist>
@@ -1059,6 +1087,13 @@ public class Student {
    <term>Recent Files List Size (<varname>recent.files.max.size = 5</varname>)</term>
    <listitem>
      <para>Specifies how many recently used files to display in the File menu.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Automatically Close Block Comments (<varname>auto.close.comments = false</varname>)</term>
+   <listitem>
+     <para>Whether to automatically insert the string designating the end of a multi-line comment after beginning one.</para>
    </listitem>
  </varlistentry>
 

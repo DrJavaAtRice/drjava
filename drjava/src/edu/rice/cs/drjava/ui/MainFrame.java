@@ -1585,10 +1585,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     _debugSplitPane.setTopComponent(_docSplitPane);
     _mainSplit.setTopComponent(_debugSplitPane);
     _debugPanel.updateData();
+    _lastFocusOwner.requestFocus();
   }
 
   private void _hideDebuggerPanel() {
     _mainSplit.setTopComponent(_docSplitPane);
+    _lastFocusOwner.requestFocus();
   }
 
 
@@ -3160,9 +3162,17 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     _findReplace = new FindReplaceDialog(this, _model);
 
-    _consoleScroll = new BorderlessScrollPane(_consolePane);
+    _consoleScroll = new BorderlessScrollPane(_consolePane) {
+      public void requestFocus() {
+        _consolePane.requestFocus();
+      }
+    };
     JScrollPane interactionsScroll = new BorderlessScrollPane(_interactionsPane);
-    _interactionsContainer = new JPanel(new BorderLayout());
+    _interactionsContainer = new JPanel(new BorderLayout()) {
+      public void requestFocus() {
+        _interactionsPane.requestFocus();
+      }
+    };
     _interactionsContainer.add(interactionsScroll, BorderLayout.CENTER);
 
     _junitErrorPanel = new JUnitPanel(_model, this);
@@ -3874,15 +3884,15 @@ public class MainFrame extends JFrame implements OptionConstants {
           // is called, the document won't yet have positive size and we
           // don't want to scroll to a line until it does, so we wait
           // for a call to setSize.
-          //_firstCallFromSetSize = true;
+          _firstCallFromSetSize = true;
           ActionListener setSizeListener = new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-//              if (_firstCallFromSetSize) {
-//                _firstCallFromSetSize = false;
-//              }
-//              else {
+            public synchronized void actionPerformed(ActionEvent ae) { 
+              if (_firstCallFromSetSize) {
+                _firstCallFromSetSize = false;
+              }
+              else {
                 _currentDefPane.centerViewOnLine(lineNumber);
-//              }
+              }
             }
           };
           _currentDefPane.addSetSizeListener(setSizeListener);

@@ -109,4 +109,19 @@ public final class InteractionsProcessorTest extends TestCase {
      // this was what we wanted.
     }
   }
+  
+  /** 
+   * Tests that the preprocessor will accept single-line comments. (Bug #768726)
+   */
+  public void testPreProcessSingleLineComments() {
+    try {
+      String s = _ip.preProcess("// Mary had a little lamb");
+      assertEquals("The preprocessor should have removed the single-line comment.", 
+                   "", 
+                   s);
+    }
+    catch(ParseException e) {
+      fail("preProcess failed, should have accepted the single-line comment.");
+    }
+  }
 }
