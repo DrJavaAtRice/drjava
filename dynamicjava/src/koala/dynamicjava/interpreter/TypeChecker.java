@@ -1754,23 +1754,32 @@ return null;
    * @param node the node to visit
    */
   public Class visit(AndExpression node) {
-    Node  ln = node.getLeftExpression();
-    Node  rn = node.getRightExpression();
-    Class lc = ln.acceptVisitor(this);
-    Class rc = rn.acceptVisitor(this);
+    Expression le = node.getLeftExpression();
+    Expression re = node.getRightExpression();
+    Class lc = le.acceptVisitor(this);
+    Class rc = re.acceptVisitor(this);
 
     // Check the types of the operands
-    if (lc != boolean.class || rc != boolean.class) {
+    if (!(lc == boolean.class || lc == Boolean.class) || 
+        !(rc == boolean.class || rc == Boolean.class) ) {
       throw new ExecutionError("and.type", node);
     }
 
+    // Auto-unbox, if necessary
+    if (lc == Boolean.class) {
+      node.setLeftExpression(_unbox(le, lc));
+    }
+    if (rc == Boolean.class) {
+      node.setRightExpression(_unbox(re, rc));
+    }
+    
     // Compute the expression if it is constant
-    if (ln.hasProperty(NodeProperties.VALUE) &&
-        rn.hasProperty(NodeProperties.VALUE)) {
+    if (le.hasProperty(NodeProperties.VALUE) &&
+        re.hasProperty(NodeProperties.VALUE)) {
       node.setProperty
         (NodeProperties.VALUE,
-         (((Boolean)ln.getProperty(NodeProperties.VALUE)).booleanValue() &&
-          ((Boolean)rn.getProperty(NodeProperties.VALUE)).booleanValue())
+         (((Boolean)le.getProperty(NodeProperties.VALUE)).booleanValue() &&
+          ((Boolean)re.getProperty(NodeProperties.VALUE)).booleanValue())
            ? Boolean.TRUE : Boolean.FALSE);
     }
 
@@ -2245,7 +2254,6 @@ return null;
 //        lc == Double.class   || rc == Double.class   ||
 //        (lc == boolean.class ^ rc == boolean.class)  ||
 //        !lc.isPrimitive()    || !rc.isPrimitive()) {
-    
     if (!(  intLeft &&  intRight ) && 
         !( boolLeft && boolRight ) ){
       throw new ExecutionError("bitwise.expression.type", node);
@@ -2428,10 +2436,10 @@ return null;
    * @return true iff it is a boxing type
    */
   private static boolean _isBoxingType(Class c) {
-    return (c == Integer.class   || c == Long.class  ||
-            c == Character.class || c == Float.class ||
-            c == Double.class    || c == Short.class ||
-            c == Byte.class);
+    return (c == Integer.class   || c == Long.class   ||
+            c == Boolean.class   || c == Double.class ||
+            c == Character.class || c == Short.class  ||
+            c == Byte.class      || c == Float.class );
   }
   
   /**

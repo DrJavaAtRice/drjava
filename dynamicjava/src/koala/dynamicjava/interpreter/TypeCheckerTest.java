@@ -450,6 +450,13 @@ public class TypeCheckerTest extends TestCase {
   }
   
   //////////// Shift Assignments ////////////////////////
+/*
+  There's a problem to resolve here.  These tests right now will pass because
+  the Shift*Assign cases currently use the same type checking as the binary
+  operations.  The binary operations work, but the assigns do not (in the 
+  interpreter at least).  These tests would fail if tied into the drjava 
+  interpreter.
+  */
   
 //  /**
 //   * Tests the <<= operation.
@@ -503,8 +510,8 @@ public class TypeCheckerTest extends TestCase {
   public void testBooleanBitwiseXOr() throws ExceptionReturnedException {
     String text = "new Boolean(true) ^ new Boolean(false);";
       
-    String expectedLeft = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: true true boolean)])";
-    String expectedRight = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: false false boolean)])";
+    String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: true true boolean)]))";
+    String expectedRight = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: false false boolean)]))";
 
     _checkBinaryExpression(text, expectedLeft, expectedRight);
   }
@@ -515,8 +522,8 @@ public class TypeCheckerTest extends TestCase {
   public void testBooleanBitwiseAnd() throws ExceptionReturnedException {
     String text = "new Boolean(true) & new Boolean(false);";
       
-    String expectedLeft = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: true true boolean)])";
-    String expectedRight = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: false false boolean)])";
+    String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: true true boolean)]))";
+    String expectedRight = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: false false boolean)]))";
 
     _checkBinaryExpression(text, expectedLeft, expectedRight);
   }
@@ -527,8 +534,8 @@ public class TypeCheckerTest extends TestCase {
   public void testBooleanBitwiseOr() throws ExceptionReturnedException {
     String text = "new Boolean(true) | new Boolean(false);";
       
-    String expectedLeft = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: true true boolean)])";
-    String expectedRight = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: false false boolean)])";
+    String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: true true boolean)]))";
+    String expectedRight = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: false false boolean)]))";
 
     _checkBinaryExpression(text, expectedLeft, expectedRight);
   }
@@ -620,15 +627,13 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests ANDing two Booleans.
    */
-  public void testAndingTwoBooleans() {
-    Node exp = _parseCode("new Boolean(true) && new Boolean(false);").get(0);
-    
-    try {
-      exp.acceptVisitor(_typeChecker);
-      fail("Should have thrown an excpetion.");
-    }
-    catch (ExecutionError ee) {
-    }
+  public void testAndingTwoBooleans() throws ExceptionReturnedException {
+    String text = "new Boolean(true) && new Boolean(false);";
+      
+    String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: true true boolean)]))";
+    String expectedRight = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: false false boolean)]))";
+
+    _checkBinaryExpression(text, expectedLeft, expectedRight);
   }
   
   /**
