@@ -217,6 +217,18 @@ public class InterpreterUtilities {
     Number leftNum = (Number) l;
     Number rightNum = (Number) r;
     
+    if(c == byte.class) {
+      return new Byte((byte)o.invoke(leftNum.byteValue(), 
+                                  rightNum.byteValue()));
+    }
+    if(c == short.class) {
+      return new Short((short)o.invoke(leftNum.shortValue(), 
+                                  rightNum.shortValue()));
+    }
+    if(c == char.class) {
+      return new Character((char)o.invoke(leftNum.shortValue(), 
+                                  rightNum.shortValue()));
+    }
     if (c == int.class) {
       return new Integer(o.invoke(leftNum.intValue(), 
                                   rightNum.intValue()));

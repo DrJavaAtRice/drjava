@@ -299,4 +299,18 @@ public class EvaluationVisitorTest extends DynamicJavaTestCase {
     assertTrue("X should have been an Integer", res instanceof Integer);
     assertEquals("X should have the Integer value 1", "1", res.toString());
   }
+  
+  public void testUnaryArrayOps() throws InterpreterException {
+    String text =
+      "char [] c = {\'a\', \'b\'};\n"+
+      "c[0]++;\n"+
+      "c[0];";
+    Object res = interpret(text);
+    assertEquals("The first character of the array should be \'b\'","b",res.toString());
+    
+    res = interpret("c[0]--");
+    assertEquals("char value should still be \'b\'","b",res.toString());
+    res = interpret("--c[0]");
+    assertEquals("char value should be \'`\'","`",res.toString());
+  }
 }
