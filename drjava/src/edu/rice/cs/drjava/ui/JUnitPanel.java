@@ -86,7 +86,6 @@ public class JUnitPanel extends TabbedPanel {
 
   /** The total number of errors in the list */
   private int _numErrors;
-
   private final SingleDisplayModel _model;
   private final JUnitErrorListPane _errorListPane;
 
@@ -499,7 +498,7 @@ public class JUnitPanel extends TabbedPanel {
       _removeListHighlight();
 
       int startPos = _errorListPositions[i].getOffset() + 16; //16 ='s for the beginning line
-
+      
       // end pos is either the end of the document (if this is the last error)
       // or the char where the next error starts
       int endPos;
@@ -520,13 +519,15 @@ public class JUnitPanel extends TabbedPanel {
         Rectangle startRect = modelToView(startPos);
         Rectangle endRect = modelToView(endPos - 1);
 
+        //System.err.println("error = " + error + " i = " + i + " startPos = " + startPos + " startRect = " + startRect);
+        
         // Add the end rect onto the start rect to make a rectangle
         // that encompasses the entire error
         startRect.add(endRect);
 
         //System.err.println("scrll vis: " + startRect);
 
-        _mainPanel.scrollRectToVisible(startRect);
+        scrollRectToVisible(startRect);
 
       }
       catch (BadLocationException badBadLocation) {}

@@ -300,6 +300,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Runs JUnit on the document in the definitions pane. */
   private Action _junitAction = new AbstractAction("Test Using JUnit") {
     public void actionPerformed(ActionEvent ae) {
+      if (!_junitPanel.isDisplayed())
+        showTab(_junitPanel);
       _junit();
     }
   };
@@ -1660,6 +1662,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     // Show compiler output pane by default
     showTab(_errorPanel);
+    showTab(_junitPanel);
     
     _tabbedPane.setSelectedIndex(0);
     
@@ -1964,8 +1967,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     public void junitStarted() {
-      if (!_junitPanel.isDisplayed())
-        showTab(_junitPanel);
       //_tabbedPane.setSelectedIndex(JUNIT_TAB);
       _saveAction.setEnabled(false);
       hourglassOn();
@@ -1976,6 +1977,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _updateErrorListeners();
       _errorPanel.reset();
       _junitPanel.reset();
+      _tabbedPane.setSelectedComponent(_junitPanel);
     }
 
     public void interactionsExited(int status) {
@@ -2202,7 +2204,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         _tabbedPane.insertTab(tp.getName(), null, tp, null, numVisible + 2);
         _tabbedPane.setSelectedIndex(numVisible + 2);
         tp.setDisplayed(true);
-        break;
+        return;
       }
       if (tp.isDisplayed())
         numVisible++;
