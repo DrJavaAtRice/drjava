@@ -56,6 +56,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.GlobalModelListener;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
 // JSwat stuff
@@ -790,35 +791,62 @@ public class DebugManager {
    */
   void scrollToSource(LocatableEvent e) {
     Location location = e.location();
-    ReferenceType rt = location.declaringType();
-    String className = rt.name();
-    String ps = System.getProperty("file.separator");
-    // replace periods with the System's file separator
-    className = StringOps.replace(className, ".", ps);
+    OpenDefinitionsDocument doc = null;
     
-    // crop off the $ if there is one and anything after it
-    int indexOfDollar = className.indexOf('$');    
-    if (indexOfDollar > -1) {
-      className = className.substring(0, indexOfDollar);
+    // First see if doc is stored
+    EventRequest request = e.request();
+    Object docProp = request.getProperty("document");
+    if ((docProp != null) && (docProp instanceof OpenDefinitionsDocument)) {
+      doc = (OpenDefinitionsDocument) docProp;
     }
-    
-    File[] roots = _model.getSourceRootSet();
-    File f = null;
-    boolean found = false;
-    for (int i = 0; i < roots.length; i++) {
-      String currRoot = roots[i].getAbsolutePath();
-      DrJava.consoleOut().println("Trying to find " + currRoot + ps + className + 
-                                  ".java");
-      f = new File(currRoot + ps + className + ".java");
-      if (f.exists()) {
-        found = true;
-        break;
+    else {
+      // No stored doc, look on the source root set (later, also the sourcepath)
+      ReferenceType rt = location.declaringType();
+      String className = rt.name();
+      String ps = System.getProperty("file.separator");
+      // replace periods with the System's file separator
+      className = StringOps.replace(className, ".", ps);
+      
+      // crop off the $ if there is one and anything after it
+      int indexOfDollar = className.indexOf('$');    
+      if (indexOfDollar > -1) {
+        className = className.substring(0, indexOfDollar);
+      }
+      
+      File[] roots = _model.getSourceRootSet();
+      File f = null;
+      boolean foundFile = false;
+      for (int i = 0; i < roots.length; i++) {
+        String currRoot = roots[i].getAbsolutePath();
+        DrJava.consoleOut().println("Trying to find " + currRoot + ps + className + 
+                                    ".java");
+        f = new File(currRoot + ps + className + ".java");
+        if (f.exists()) {
+          foundFile = true;
+          break;
+        }
+      }
+      if (foundFile) {
+        // Get a document for this file, forcing it to open
+        DrJava.consoleOut().println("found file: " + f.getAbsolutePath());
+        try {
+          doc = _model.getDocumentForFile(f);
+        }
+        catch (IOException ioe) {
+          // No doc, so don't notify listener
+          DrJava.consoleOut().println("Problem opening file, won't scroll: " + ioe);
+        }
+        catch (OperationCanceledException oce) {
+          // No doc, so don't notify listener
+          DrJava.consoleOut().println("Problem opening file, won't scroll: " + oce);
+        }
       }
     }
-    if (found) {
-      DrJava.consoleOut().println("found file: " + f.getAbsolutePath() + 
-                                  ", will scroll to line: " + location.lineNumber());
-      _listener.scrollToLineInSource(f, 
+    
+    // Open and scroll if doc was found
+    if (doc != null) {
+      DrJava.consoleOut().println("Will scroll to line: " + location.lineNumber());
+      _listener.scrollToLineInSource(doc, 
                                      location.lineNumber());
     }
     else {

@@ -39,9 +39,20 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.debug;
 
-import java.io.File;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
+/**
+ * Any class which wants to listen to events fired by the DebugManager should
+ * implement this interface and use DebugManager's addDebugListener() method.
+ * @version $Id$
+ */
 public interface DebugListener {
   
-  public void scrollToLineInSource(File file, int lineNumber);
+  /**
+   * Called when the given line is reached by the debugger, to request that
+   * the line be displayed.
+   * @param doc Document to display
+   * @param lineNumber Line to display or highlight
+   */
+  public void scrollToLineInSource(OpenDefinitionsDocument doc, int lineNumber);
 }

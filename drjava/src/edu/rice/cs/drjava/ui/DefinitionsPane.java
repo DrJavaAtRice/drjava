@@ -811,6 +811,8 @@ public class DefinitionsPane extends JEditorPane
       this.scrollRectToVisible(startRect);
       //DrJava.consoleOut().println("right after scrollRectToVisible");
       
+      //_mainFrame.invalidate();
+      //_mainFrame.repaint();
     }
     catch (BadLocationException e) {
       throw new UnexpectedException(e);

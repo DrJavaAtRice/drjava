@@ -162,6 +162,10 @@ public abstract class DebugAction<T extends EventRequest> {
     }
     request.setSuspendPolicy(_suspendPolicy);
     request.setEnabled(_enabled);
+    
+    // Add properties
+    request.putProperty("debugAction", this);
+    
     //System.out.println("request.isEnabled(): " + request.isEnabled() +
     //                   "suspendPolicy: " + request.suspendPolicy());
   }

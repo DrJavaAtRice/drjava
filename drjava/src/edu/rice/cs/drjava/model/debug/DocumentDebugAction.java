@@ -150,6 +150,16 @@ public abstract class DocumentDebugAction<T extends EventRequest>
   protected abstract void _createRequest(ReferenceType ref) throws DebugException;
   
   /**
+   * Prepares an EventRequest with the current stored values.
+   * @param request the EventRequest to prepare
+   */
+  protected void _prepareRequest(EventRequest request) {
+    super._prepareRequest(request);
+    request.putProperty("document", _doc);
+  }
+
+  
+  /**
    * Gets the package and class name of the given OpenDefinitionsDocument
    * @param doc OpenDefinitionsDocument whose qualified class name is desired
    * @return the qualified class name

@@ -2476,14 +2476,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   private class UIDebugListener implements DebugListener {
-    public void scrollToLineInSource(File file, int lineNumber) {
-      try {
-        OpenDefinitionsDocument doc = _model.getDocumentForFile(file);
-        _model.setActiveDocument(doc);
-      }
-      catch (IOException ioe) {
-        _showIOError(ioe);
-      }
+    public void scrollToLineInSource(OpenDefinitionsDocument doc, int lineNumber) {
+      _model.setActiveDocument(doc);
       _currentDefPane.centerViewOnLine(lineNumber);
     }
   }
