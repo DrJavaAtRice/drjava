@@ -5,11 +5,12 @@
 # as a part of relicense.
 $start_block="/*BEGIN_COPYRIGHT_BLOCK\n";
 $end_block="END_COPYRIGHT_BLOCK*/\n";
+$end_block2=" END_COPYRIGHT_BLOCK*/\n";
 
 while ($line = <STDIN>) {
   if ($line eq $start_block) {
     while ($line = <STDIN>) {
-      if ($line eq $end_block) {
+      if (($line eq $end_block) || ($line eq $end_block2)) {
         # skip blank lines after end
         while (($line = <STDIN>) eq "\n") {}
         last;
