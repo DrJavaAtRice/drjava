@@ -3,6 +3,9 @@ package edu.rice.cs.drjava;
 import junit.framework.*;
 import java.util.Vector;
 import junit.extensions.*;
+import javax.swing.text.BadLocationException;
+import java.lang.RuntimeException;
+import java.io.File;
 
 class Pair
 {
@@ -30,16 +33,19 @@ class Pair
 
 public class JavaInterpreterTest extends TestCase
 {
-    private JavaInterpreter _interpreter;
-
+	private JavaInterpreter _interpreter;
+	static public boolean testValue;
+	
     public JavaInterpreterTest(String name)
     {
-	super(name);
-    }
+			super(name);
+			testValue = false;
+		}
 
     protected void setUp()
     {
-	_interpreter = new DynamicJavaAdapter();
+			_interpreter = new DynamicJavaAdapter();
+			testValue = false;
     }
 
     public static Test suite()
@@ -54,7 +60,7 @@ public class JavaInterpreterTest extends TestCase
 					Object out = _interpreter.interpret(cases[i].first());
 					assertEquals(cases[i].first() + " interpretation wrong!",
 											 cases[i].second(),
-											 out);					
+											 out);
 				}
     }
 
@@ -220,6 +226,40 @@ public class JavaInterpreterTest extends TestCase
 			};
 			tester(cases);
     }
+	/**
+	public void testRunAsProgram()
+    {
+			MainFrame _m = new MainFrame();
+			DefinitionsView v = _m.getDefView();
+			DefinitionsDocument d = v._doc();
+			_m.show();
+			try {
+			d.insertString(0,"public class C{public static boolean t = false;public static void main(String[] args){ t=true;}}",null);
+			assertTrue(_m.saveToFile("C.java"));
+		
+				_m.compile();
+		
+			InteractionsDocument id = _m._interactionsView.getInteractionsDocument();
+			id.insertString(id.frozenPos,"java C", null);
+			id.eval();
+			id.insertString(id.frozenPos,"C.t", null);
+			int length = id.getLength();
+			id.eval();
+			String text = id.getText(length+1,4);
+			assertEquals("0.0","true",text);
+	   
+			}
+			
+			catch (Exception ex) {
+				ex.printStackTrace();
+				throw new RuntimeException(ex.toString());				
+			}
+			finally{
+				 new File("C.java").delete();
+				 new File("C.class").delete();
+				 }
+			}
+	*/
 }
 
 

@@ -8,14 +8,17 @@ import javax.swing.text.BadLocationException;
 
 import java.awt.Toolkit;
 
+import java.util.LinkedList;
+import java.util.ListIterator;
+import java.util.StringTokenizer;
 // model
 class InteractionsDocument extends PlainDocument {
   /** Index in the document of the first place that is editable. */
-  private int frozenPos = 0;
+  int frozenPos = 0;
   private final String banner = "Welcome to DrJava.\n";
 	private InteractionsView _myView;
 	
-  private JavaInterpreter _interpreter;
+  JavaInterpreter _interpreter;
 
   public InteractionsDocument()
   {
@@ -72,7 +75,10 @@ class InteractionsDocument extends PlainDocument {
   public void eval() {
     try {
       String toEval = getText(frozenPos, getLength()-frozenPos).trim();
-
+			
+			if (toEval.startsWith("java "))
+				toEval = _testClassCall(toEval);
+							
       Object result = _interpreter.interpret(toEval);
 			if(result != JavaInterpreter.NO_RESULT)
 				 super.insertString(getLength(), "\n" + String.valueOf(result)
@@ -81,7 +87,7 @@ class InteractionsDocument extends PlainDocument {
 				super.insertString(getLength(), "\n", null);
 
       prompt();
-    }
+    }		
     catch (BadLocationException e) {
       throw new InternalError("getting repl text failed");
     }
@@ -101,5 +107,50 @@ class InteractionsDocument extends PlainDocument {
     }
 		//System.out.println("\n\neval done!!!!!!\n\n");
 	}
+	/**
+	 *Assumes a trimmed String. Returns a string of the main call that the
+	 *interpretor can use.
+	 */
+	private String _testClassCall(String s)
+		{
+			LinkedList ll = new LinkedList();
+			if(s.endsWith(";"))
+				s = _deleteSemiColon(s);
+			
+			StringTokenizer st = new StringTokenizer(s);
+			st.nextToken(); //don't want to get back java
+						
+			String argument = st.nextToken(); // must have a second Token
+			
+			while(st.hasMoreTokens())
+				ll.add(st.nextToken());
+			
+			argument = argument + ".main(new String[]{";
+			ListIterator li = ll.listIterator(0);
+			while (li.hasNext()){
+				argument = argument + "\""+ (String)(li.next())+"\"";
+				if (li.hasNext())
+					argument = argument + ",";
+			}
+			argument = argument + "});";
+			return argument;
+		}
+
+	private String _deleteSemiColon(String s)
+		{
+			return s.substring(0, s.length()-1);
+		}
+	
+		
+	
 }
+
+
+
+
+
+
+
+
+
 

@@ -490,7 +490,7 @@ public class CompilerErrorPanel extends JPanel {
 
         // Add the end rect onto the start rect to make a rectangle
         // that encompasses the entire error
-        startRect.add(endRect);
+				startRect.add(endRect);
 
         //System.err.println("scrll vis: " + startRect);
 

@@ -40,7 +40,7 @@ public class InteractionsView extends JTextArea
 
   }
 
-  private InteractionsDocument getInteractionsDocument() {
+  InteractionsDocument getInteractionsDocument() {
     return (InteractionsDocument) getDocument();
   }
 

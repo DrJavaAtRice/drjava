@@ -197,8 +197,6 @@ public class BackSlashTest extends TestCase {
 			assertEquals("#1.0", "\\\"", model0.currentToken().getType());
 			assertEquals("#1.1", 1, model0.absOffset());
 			
-			System.out.println(model0.simpleString());
-
 			model0.delete(1);
 			model0.insertGap(2);
 			model0.insertBackSlash();

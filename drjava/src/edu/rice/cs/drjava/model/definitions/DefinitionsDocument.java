@@ -291,7 +291,6 @@ public class DefinitionsDocument extends PlainDocument
       e.printStackTrace();
       throw new IllegalArgumentException(e.getMessage());
     }
-		//System.out.println(tab +"  "+_currentLocation+"   "+distToPrevNewline);
   }
 
   /**

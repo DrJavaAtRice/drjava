@@ -38,12 +38,12 @@ public class DynamicJavaAdapter implements JavaInterpreter {
 		 * adds a semicolon if necessary
 		 */
 		s = s.trim();
-
+		
 		if(!s.endsWith(";")) {
 			s += ";";
 			print = true;
 		}
-		
+			
 		StringReader reader = new StringReader(s);
 
     try {
@@ -226,3 +226,38 @@ class ClassLoadChecker {
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

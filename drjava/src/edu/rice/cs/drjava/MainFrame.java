@@ -46,7 +46,7 @@ public class MainFrame extends JFrame
   private CompilerErrorPanel _errorPanel;
   private DefinitionsView _definitionsView;
   private OutputView _outputView;
-  private InteractionsView _interactionsView;
+  InteractionsView _interactionsView;
   private JTextField _fileNameField;
   private JTabbedPane _tabbedPane;
 

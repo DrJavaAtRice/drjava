@@ -101,6 +101,33 @@
   </target>
 
   <!-- Unit test -->
+  <target name="test-only">
+    <junit printsummary="yes" haltonerror="yes" haltonfailure="yes" fork="no">
+      <!-- propogate the same classpath. not sure why it doesn't
+           happen by default!
+      -->
+      <classpath path="${java.class.path}" />
+
+      <!-- This makes JUnit display info about each test to console -->
+      <formatter type="plain" usefile="no" />
+
+      <!-- This makes JUnit run all test classes. It figures out which ones
+           automatically, without needing AllTests classes.
+      -->
+      <batchtest>
+        <!-- The root of the fileset must be where edu/ is. -->
+        <fileset dir="${srcroot}">
+          <!-- Include only from projpath to only get classes in this project!
+          -->
+          <include name="${projpath}/**/*Test.java" />
+          <exclude name="**/AllTests.java" />
+          <exclude name="**/Test.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <!-- Unit test -->
   <target name="test" depends="compile">
     <junit printsummary="yes" haltonerror="yes" haltonfailure="yes" fork="no">
       <!-- propogate the same classpath. not sure why it doesn't
