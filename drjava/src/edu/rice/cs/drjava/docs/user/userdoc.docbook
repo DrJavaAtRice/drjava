@@ -57,7 +57,7 @@
     <section id="gs-requirements">
       <title>System Requirements</title>
       <para>DrJava requires Java 2, version 1.3 or later.  Note that you will need to have the JDK (not the JRE) installed if you wish to use the compiler or debugger within DrJava.</para>
-      <para>We recommend using <ulink url="http://java.sun.com/j2se/1.4.2/download.html">Sun's JDK 1.4.2</ulink> or later for Solaris, Linux, and Windows.  Other users should use the Java virtual machine that comes with their operating system (including Mac OS X).</para>
+      <para>We recommend using Sun's JDK 1.4.2 or later (from <ulink url="http://java.sun.com">http://java.sun.com</ulink>) for Solaris, Linux, and Windows.  Other users should use the Java virtual machine that comes with their operating system (including Mac OS X).</para>
     </section>
 
     <section id="gs-license">
@@ -239,7 +239,7 @@ Welcome to DrJava.
   <!-- Chapter: JUnit Integration -->
   <chapter id="junit">
     <title>Testing using JUnit</title>
-    <para>Unit testing can be a very effective approach for testing programs of any size, and <ulink url="http://www.junit.org">JUnit</ulink> provides a powerful facility for running unit tests in Java.  In fact, the code for DrJava itself is tested using an extensive suite of JUnit tests which must be run before any change to the code can be committed.  To help users test their own programs, support for running JUnit tests is included in DrJava.  Simply click the Test button (or choose "Test Using JUnit" from the Tools menu) when a valid class file is open, and DrJava will run the tests and display any test failures in the "Test Output" tab at the bottom of the window, similarly to how compiler errors are displayed.</para>
+    <para>Unit testing can be a very effective approach for testing programs of any size, and JUnit (<ulink url="http://www.junit.org">http://www.junit.org</ulink>) provides a powerful facility for running unit tests in Java.  In fact, the code for DrJava itself is tested using an extensive suite of JUnit tests which must be run before any change to the code can be committed.  To help users test their own programs, support for running JUnit tests is included in DrJava.  Simply click the Test button (or choose "Test Using JUnit" from the Tools menu) when a valid class file is open, and DrJava will run the tests and display any test failures in the "Test Output" tab at the bottom of the window, similarly to how compiler errors are displayed.</para>
 
 
     <section id="junit-writing">
@@ -329,7 +329,7 @@ public static Test suite() {
 	</itemizedlist>
 </para>
 
-      <para>There are many other ways of using JUnit.  See the <ulink url="http://junit.sourceforge.net/doc/cookbook/cookbook.htm">JUnit Cookbook</ulink> for more examples and information.</para>
+      <para>There are many other ways of using JUnit.  See the JUnit Cookbook at <ulink url="http://junit.sourceforge.net/doc/cookbook/cookbook.htm">http://junit.sourceforge.net/doc/cookbook/cookbook.htm</ulink> for more examples and information.</para>
     </section>
 
     <section id="junit-failures">
@@ -427,7 +427,7 @@ public static Test suite() {
   <!-- Chapter: Javadoc Integration -->
   <chapter id="javadoc">
     <title>Documentation with Javadoc</title>
-    <para>Javadoc is a tool provided with Java which can generate useful HTML documentation for a set of classes, describing the methods and fields of each class with comments written by the developer.  DrJava allows users to easily generate Javadoc documentation using a "Javadoc" button on the toolbar.</para>
+    <para>Javadoc is a tool provided with Java which can generate useful HTML documentation for a set of classes, describing the methods and fields of each class with comments written by the developer.  DrJava allows users to easily generate Javadoc documentation using a "Javadoc" button on the toolbar.  For documentation and a tutorial on how to write Javadoc comments, see <ulink url="http://java.sun.com/j2se/javadoc/writingdoccomments/">http://java.sun.com/j2se/javadoc/writingdoccomments/</ulink>.</para>
 
     <formalpara>
       <title>How to Use</title>

@@ -306,6 +306,22 @@ public class JUnitPanel extends ErrorPanel{
       _checkSync(doc);
       _updateWithErrors("test", "failed", doc);
     }
+    
+    /**
+     * Returns the string to identify a warning.
+     * In JUnit, warnings (the odd case) indicate errors/exceptions.
+     */
+    protected String _getWarningText() {
+      return "Error: ";
+    }
+    
+    /**
+     * Returns the string to identify an error.
+     * In JUnit, errors (the normal case) indicate TestFailures.
+     */
+    protected String _getErrorText() {
+      return "Failure: ";
+    }
 
     /**
      * Used to show that the last compile was successful.

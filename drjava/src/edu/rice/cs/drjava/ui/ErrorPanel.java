@@ -365,22 +365,36 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
      */
     protected void _insertErrorText(CompilerError error, Document doc)
       throws BadLocationException {
-        // Show file and line number
-        doc.insertString(doc.getLength(), "File: ", BOLD_ATTRIBUTES);
-        String fileAndLineNumber = error.getFileMessage() + "  [line: " + error.getLineMessage() + "]";
-        doc.insertString(doc.getLength(), fileAndLineNumber + "\n", NORMAL_ATTRIBUTES);
-
-
-        if (error.isWarning()) {
-          doc.insertString(doc.getLength(), "Warning: ", BOLD_ATTRIBUTES);
-        }
-        else {
-          doc.insertString(doc.getLength(), "Error: ", BOLD_ATTRIBUTES);
-        }
-
-        doc.insertString(doc.getLength(), error.message(), NORMAL_ATTRIBUTES);
-        doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
+      // Show file and line number
+      doc.insertString(doc.getLength(), "File: ", BOLD_ATTRIBUTES);
+      String fileAndLineNumber = error.getFileMessage() + "  [line: " + error.getLineMessage() + "]";
+      doc.insertString(doc.getLength(), fileAndLineNumber + "\n", NORMAL_ATTRIBUTES);
+      
+      
+      if (error.isWarning()) {
+        doc.insertString(doc.getLength(), _getWarningText(), BOLD_ATTRIBUTES);
       }
+      else {
+        doc.insertString(doc.getLength(), _getErrorText(), BOLD_ATTRIBUTES);
+      }
+      
+      doc.insertString(doc.getLength(), error.message(), NORMAL_ATTRIBUTES);
+      doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
+    }
+    
+    /**
+     * Returns the string to identify a warning.
+     */
+    protected String _getWarningText() {
+      return "Warning: ";
+    }
+    
+    /**
+     * Returns the string to identify an error.
+     */
+    protected String _getErrorText() {
+      return "Error: ";
+    }
 
     /**
      * When the selection of the current error changes, remove

@@ -49,6 +49,7 @@ import java.util.StringTokenizer;
 import gj.util.Vector;
 import java.util.ArrayList;
 
+import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.model.FileOpenSelector;
 import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
@@ -332,6 +333,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         _debugPort = -1;
       }
       _debugPortSet = true;
+      if (CodeStatus.DEVELOPMENT) {
+        System.setProperty("drjava.debug.port", String.valueOf(_debugPort));
+      }
     }
     return _debugPort;
   }

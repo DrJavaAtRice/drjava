@@ -186,13 +186,16 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     _interpreterJVM = null;
     _eventHandlerError = null;
     _log = new Log("DebuggerLog", false);
+    
+    // TO DO: Replace this with an InteractionsListener,
+    //  since we really can't talk about SingleDisplayModel here!
     _watchListener = new DummySingleDisplayModelListener() {
       public void interactionEnded() {
         try {
           _updateWatches();
         }
-        catch (DebugException de) {
-          throw new UnexpectedException(de);
+        catch(DebugException de) {
+          _log("couldn't update watches", de);
         }
       }
     };

@@ -128,6 +128,97 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       }
     }
   }
+  
+  
+  /**
+   * Cleanly starts the debugger with a newly compiled file saved in a
+   * temporary directory.  Assumes that the file will compile successfully.
+   * @param fileName Name of the file to save in a temp directory
+   * @param classText String containing the code for the class to compile
+   * @return OpenDefinitionsDocument containing the compiled source file
+   */
+  protected OpenDefinitionsDocument _startupDebugger(String fileName, String classText)
+    throws Exception
+  {
+    // Create a file in the temporary directory
+    File file = new File(_tempDir, fileName);
+    return _startupDebugger(file, classText);
+  }
+  
+  /**
+   * Cleanly starts the debugger with a newly compiled file saved in a
+   * temporary directory.  Assumes that the file will compile successfully.
+   * @param file File to save the class in
+   * @param classText String containing the code for the class to compile
+   * @return OpenDefinitionsDocument containing the compiled source file
+   */
+  protected OpenDefinitionsDocument _startupDebugger(File file, String classText)
+    throws Exception
+  {
+    // Compile the file
+    OpenDefinitionsDocument doc = doCompile(classText, file);
+    
+    // Start debugger
+    synchronized(_notifierLock) {
+      _debugger.startup();
+      _waitForNotifies(1);  // startup
+      _notifierLock.wait();
+    }
+    return doc;
+  }
+
+  /**
+   * Cleanly shuts down the debugger, without having to wait for
+   * a suspended interaction to complete.
+   */
+  protected void _shutdownWithoutSuspendedInteraction() throws Exception {
+    _debugger.removeAllBreakpoints();
+      
+    // Shutdown the debugger
+    if (printMessages) {
+      System.out.println("Shutting down...");
+    }
+    synchronized(_notifierLock) {
+      _debugger.shutdown();
+      _waitForNotifies(1);  // shutdown
+      _notifierLock.wait();
+    }
+    if (printMessages) {
+      System.out.println("Shut down.");
+    }
+  }
+  
+  /**
+   * Cleanly shuts down the debugger, waiting for a suspended
+   * interaction to complete.
+   */
+  protected void _shutdownAndWaitForInteractionEnded() throws Exception {
+    _debugger.removeAllBreakpoints();
+    
+    // Shutdown the debugger
+    if (printMessages) {
+      System.out.println("Shutting down...");
+    }
+    InterpretListener interpretListener = new InterpretListener() {
+       public void interpreterChanged(boolean inProgress) {
+         // Don't notify: happens in the same thread
+        interpreterChangedCount++;
+       }
+     };
+    _model.addListener(interpretListener);
+    synchronized(_notifierLock) {
+      _debugger.shutdown();
+      _waitForNotifies(2);  // interactionEnded, shutdown
+      _notifierLock.wait();
+    }
+    interpretListener.assertInteractionEndCount(1);
+    interpretListener.assertInterpreterChangedCount(1);  // fires (don't wait)
+    _model.removeListener(interpretListener);
+    
+    if (printMessages) {
+      System.out.println("Shut down.");
+    }
+  }
 
   /**
    * Sets the current debugger thread to th

@@ -166,6 +166,21 @@ public final class DebugTest extends DebugTestCase
     /* 27 */   "  }\n" +
     /* 28 */   "}\n";
   
+  protected static final String INNER_CLASS_WITH_LOCAL_VARS =
+    /*  1 */ "class InnerClassWithLocalVariables {\n" +
+    /*  2 */ "  public static void main(final String[] args) {\n" +
+    /*  3 */ "    final int numArgs = args.length;\n" +
+    /*  4 */ "    final int inlined = 0;\n" +
+    /*  5 */ "    new Runnable() {\n" +
+    /*  6 */ "      public void run() {\n" +
+    /*  7 */ "        System.out.println(\"numArgs: \" + numArgs);\n" +
+    /*  8 */ "        System.out.println(\"inlined: \" + inlined);\n" +
+    /*  9 */ "        System.out.println(\"args.length: \" + args.length);\n" +
+    /* 10 */ "      }\n" +
+    /* 11 */ "    }.run();\n" +
+    /* 12 */ "  }\n" +
+    /* 13 */ "}\n";
+  
   protected static final String CLASS_WITH_STATIC_FIELD =
     /*  1 */    "public class DrJavaDebugStaticField {\n" +
     /*  2 */    "  public static int x = 0;\n" +
@@ -257,74 +272,45 @@ public final class DebugTest extends DebugTestCase
    * Test that when two threads are suspended setCurrentThread can be used
    * to switch between them in the debugger
    */
-  public synchronized void testMultiThreadedSetCurrentThread()
-    throws DebugException, BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
-  {
+  public synchronized void testMultiThreadedSetCurrentThread() throws Exception {
     if (printMessages) System.out.println("----testMultiThreadedSetCurrentThread----");
     BreakpointTestListener debugListener = new BreakpointTestListener();
+    _debugger.addListener(debugListener);
     
-     // Compile the class
-     OpenDefinitionsDocument doc = doCompile(MONKEY_CLASS, tempFile());
-     _debugger.addListener(debugListener);
-     // Start debugger
-     synchronized(_notifierLock) {
-       _debugger.startup();
-       _waitForNotifies(1);  // startup
-       _notifierLock.wait();
-     }
-     
-     // Set two breakpoints
-     int index = MONKEY_CLASS.indexOf("System.out.println(\"I\'m a thread! Yeah!\");");
-     _debugger.toggleBreakpoint(doc,index,11);
-     index = MONKEY_CLASS.indexOf("System.out.println(\"James likes bananas!\");");
-     _debugger.toggleBreakpoint(doc,index,17);
-     
-      // Run the main() method, hitting both breakpoints in different threads
-     synchronized(_notifierLock) {
-       interpretIgnoreResult("java Monkey");
-       _waitForNotifies(6); // (suspended, updated, breakpointReached) * 2
-       _notifierLock.wait();
-     }
-     DebugThreadData threadA = new DebugThreadData(_debugger.getCurrentThread());
-     DebugThreadData threadB = new DebugThreadData(_debugger.getThreadAt(1));
-     synchronized(_notifierLock) {
-       _asyncDoSetCurrentThread(threadB);
-       _waitForNotifies(2);  // updated, suspended
-       _notifierLock.wait();
-     }
-     
-     DebugThreadData thread1 = new DebugThreadData(_debugger.getThreadAt(1));
-     DebugThreadData thread2 = new DebugThreadData(_debugger.getCurrentThread());
-     
-     // make sure threads have switched places
-     assertTrue(thread1.getUniqueID() == threadA.getUniqueID());
-     assertTrue(thread2.getUniqueID() == threadB.getUniqueID());
-     
-       // Close doc and make sure breakpoints are removed
-     _model.closeFile(doc);
-     
-     // Shutdown the debugger
-     if (printMessages) System.out.println("Shutting down...");
-     InterpretListener interpretListener = new InterpretListener() {
-       public void interpreterChanged(boolean inProgress){
-         // Don't notify: happens in the same thread
-        interpreterChangedCount++;
-       }
-     };
-     _model.addListener(interpretListener);
-     synchronized(_notifierLock) {
-       //_asyncResume();
-       //_asyncResume();
-       _debugger.shutdown();
-       _waitForNotifies(2);  // shutdown, interactionEnded
-       _notifierLock.wait();
-     }
-     interpretListener.assertInterpreterChangedCount(1);
-     debugListener.assertDebuggerShutdownCount(1);  //fires
-     if (printMessages) System.out.println("Shut down.");
-     _model.removeListener(interpretListener);
-     _debugger.removeListener(debugListener);
+    // Start up
+    OpenDefinitionsDocument doc = _startupDebugger("Monkey.java",
+                                                   MONKEY_CLASS);
+    
+    // Set two breakpoints
+    int index = MONKEY_CLASS.indexOf("System.out.println(\"I\'m a thread! Yeah!\");");
+    _debugger.toggleBreakpoint(doc,index,11);
+    index = MONKEY_CLASS.indexOf("System.out.println(\"James likes bananas!\");");
+    _debugger.toggleBreakpoint(doc,index,17);
+    
+    // Run the main() method, hitting both breakpoints in different threads
+    synchronized(_notifierLock) {
+      interpretIgnoreResult("java Monkey");
+      _waitForNotifies(6); // (suspended, updated, breakpointReached) * 2
+      _notifierLock.wait();
+    }
+    DebugThreadData threadA = new DebugThreadData(_debugger.getCurrentThread());
+    DebugThreadData threadB = new DebugThreadData(_debugger.getThreadAt(1));
+    synchronized(_notifierLock) {
+      _asyncDoSetCurrentThread(threadB);
+      _waitForNotifies(2);  // updated, suspended
+      _notifierLock.wait();
+    }
+    
+    DebugThreadData thread1 = new DebugThreadData(_debugger.getThreadAt(1));
+    DebugThreadData thread2 = new DebugThreadData(_debugger.getCurrentThread());
+    
+    // make sure threads have switched places
+    assertTrue(thread1.getUniqueID() == threadA.getUniqueID());
+    assertTrue(thread2.getUniqueID() == threadB.getUniqueID());
+    
+    // Shut down
+    _shutdownAndWaitForInteractionEnded();
+    _debugger.removeListener(debugListener);
   }
 
   /**
@@ -334,26 +320,15 @@ public final class DebugTest extends DebugTestCase
 //  /**
 //   * Tests that setCurrentThread works for multiple threads
 //   */
-//   public synchronized void testMultiThreadedSetCurrentThread()
-//     throws DebugException, BadLocationException, DocumentAdapterException,
-//     IOException, InterruptedException
-//   {
+//   public synchronized void testMultiThreadedSetCurrentThread() throws Exception {
 //     if (printMessages) System.out.println("----testMultiThreadedSetCurrentThread----");
 //     BreakpointTestListener debugListener = new BreakpointTestListener();
-//
-//     // Compile the class
-//     OpenDefinitionsDocument doc = doCompile(SUSPEND_CLASS, tempFile());
 //     _debugger.addListener(debugListener);
-//     // Start debugger
-//     synchronized(_notifierLock) {
-//       _debugger.startup();
-//       _waitForNotifies(1);
-//       _notifierLock.wait();
-//     }
-//     debugListener.assertDebuggerStartedCount(1);
-//     debugListener.assertDebuggerShutdownCount(0);
-//     assertTrue("Debug Manager should be ready", _debugger.isReady());
 //
+//     // Start up
+//     OpenDefinitionsDocument doc = _startupDebugger("Suspender.java",
+//                                                    SUSPEND_CLASS);
+//  
 //     int index = SUSPEND_CLASS.indexOf("int a = 1;");
 //     _debugger.toggleBreakpoint(doc,index,5);
 //
@@ -386,19 +361,8 @@ public final class DebugTest extends DebugTestCase
 //     // Ensure thread suspended
 //     debugListener.assertCurrThreadSuspendedCount(2);  //fires
 //
-//       // Close doc and make sure breakpoints are removed
-//     _model.closeFile(doc);
-//
-//     // Shutdown the debugger
-//     if (printMessages) System.out.println("Shutting down...");
-//     synchronized(_notifierLock) {
-//       _debugger.shutdown();
-//       _waitForNotifies(1);  // shutdown
-//       _notifierLock.wait();
-//     }
-//
-//     debugListener.assertDebuggerShutdownCount(1);  //fires
-//     if (printMessages) System.out.println("Shut down.");
+//     // Shut down
+//     _shutdownWithoutSuspendedInteraction();
 //     _debugger.removeListener(debugListener);
 //   }
   
@@ -406,23 +370,14 @@ public final class DebugTest extends DebugTestCase
   /**
    * Tests that breakpoints behave correctly for multiple threads
    */
-  public synchronized void testMultiThreadedBreakpointsAndStep()
-    throws DebugException, BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
-  {
+  public synchronized void testMultiThreadedBreakpointsAndStep() throws Exception {
     if (printMessages) System.out.println("----testMultiThreadedBreakpointsAndStep----");
     BreakpointTestListener debugListener = new BreakpointTestListener();
-    
-    // Compile the class
-    OpenDefinitionsDocument doc = doCompile(MONKEY_CLASS, tempFile());
-    
     _debugger.addListener(debugListener);
-    // Start debugger
-    synchronized(_notifierLock) {
-      _debugger.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
-    }
+    
+    // Start up
+    OpenDefinitionsDocument doc = _startupDebugger("Monkey.java",
+                                                   MONKEY_CLASS);
     
     // Set breakpoints
     int index = MONKEY_CLASS.indexOf("System.out.println(\"I\'m a thread! Yeah!\");");
@@ -431,7 +386,7 @@ public final class DebugTest extends DebugTestCase
     _debugger.toggleBreakpoint(doc,index,16);
     debugListener.assertBreakpointSetCount(2);
     
-    // Run the main() method, hitting breakpoints
+    // Run the main method, hitting breakpoints
     synchronized(_notifierLock) {
       interpretIgnoreResult("java Monkey");
       _waitForNotifies(6);  // (suspended, updated, breakpointReached) x 2
@@ -486,18 +441,9 @@ public final class DebugTest extends DebugTestCase
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
     
-    // Close doc
-    _model.closeFile(doc);
-    
-    // Shutdown the debugger
-    if (printMessages) System.out.println("Shutting down...");
-    synchronized(_notifierLock) {
-      _debugger.shutdown();
-      _waitForNotifies(1);  // shutdown
-      _notifierLock.wait();
-    }
-    
-    if (printMessages) System.out.println("Shut down.");
+    // Shut down
+    _shutdownWithoutSuspendedInteraction();
+    _debugger.removeListener(debugListener);
   }
   
   
@@ -505,22 +451,14 @@ public final class DebugTest extends DebugTestCase
   /**
    * Tests that breakpoints behave correctly.
    */
-  public synchronized void testBreakpoints()
-    throws DebugException, BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
-  {
+  public synchronized void testBreakpoints() throws Exception {
     if (printMessages) System.out.println("----testBreakpoints----");
     BreakpointTestListener debugListener = new BreakpointTestListener();
-    
-    // Compile the class
-    OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS, tempFile());
     _debugger.addListener(debugListener);
-    // Start debugger
-    synchronized(_notifierLock) {
-      _debugger.startup();
-      _waitForNotifies(1);
-      _notifierLock.wait();
-    }
+    
+    // Start up
+    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
+                                                   DEBUG_CLASS);
     
    // Add breakpoint before class is loaded
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
@@ -588,20 +526,8 @@ public final class DebugTest extends DebugTestCase
     debugListener.assertCurrThreadSuspendedCount(2);
     assertInteractionsContains("Foo Line 3");
     
-    // Close doc and make sure breakpoints are removed
-    _model.closeFile(doc);
-    debugListener.assertBreakpointRemovedCount(2);  //fires twice (no waiting)
-      
-    // Shutdown the debugger
-    if (printMessages) System.out.println("Shutting down...");
-    synchronized(_notifierLock) {
-      _debugger.shutdown();
-      _waitForNotifies(1);  // shutdown
-      _notifierLock.wait();
-    }
-    
-    debugListener.assertDebuggerShutdownCount(1);  //fires
-    if (printMessages) System.out.println("Shut down.");
+    // Shut down
+    _shutdownWithoutSuspendedInteraction();
     _model.removeListener(interpretListener);
     _debugger.removeListener(debugListener);
   }
@@ -614,28 +540,20 @@ public final class DebugTest extends DebugTestCase
    * (ie. Class DrJavaDebugTest2 has a method which calls something
    * in class DrJavaDebugTest, which has a breakpoint.)
    */
-  public synchronized void testBreakpointsWithSameNamePrefix()
-    throws DebugException, BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
-  {
+  public synchronized void testBreakpointsWithSameNamePrefix() throws Exception {
     if (printMessages) System.out.println("----testBreakpointsWithSameNamePrefix----");
     BreakpointTestListener debugListener = new BreakpointTestListener();
-    
-    // Compile the class
-    OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS, tempFile());
     _debugger.addListener(debugListener);
-    // Start debugger
-    synchronized(_notifierLock) {
-      _debugger.startup();
-      _waitForNotifies(1);
-      _notifierLock.wait();
-    }
+    
+    // Start up
+    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
+                                                   DEBUG_CLASS);
     
    // Add breakpoint in DrJavaDebugClass before class is loaded
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Bar Line 1"),8);
     debugListener.assertBreakpointSetCount(1);
     
-    // Run the foo() method, hitting breakpoint
+    // Run the baz() method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("new DrJavaDebugClass2().baz()");
       _waitForNotifies(3);  // suspended, updated, breakpointReached
@@ -673,20 +591,8 @@ public final class DebugTest extends DebugTestCase
     debugListener.assertCurrThreadSuspendedCount(1);
     assertInteractionsContains("Bar Line 2");
     
-    // Close doc and make sure breakpoints are removed
-    _model.closeFile(doc);
-    debugListener.assertBreakpointRemovedCount(1);  //fires (no waiting)
-      
-    // Shutdown the debugger
-    if (printMessages) System.out.println("Shutting down...");
-    synchronized(_notifierLock) {
-      _debugger.shutdown();
-      _waitForNotifies(1);  // shutdown
-      _notifierLock.wait();
-    }
-    
-    debugListener.assertDebuggerShutdownCount(1);  //fires
-    if (printMessages) System.out.println("Shut down.");
+    // Shut down
+    _shutdownWithoutSuspendedInteraction();
     _model.removeListener(interpretListener);
     _debugger.removeListener(debugListener);
   }
@@ -694,23 +600,14 @@ public final class DebugTest extends DebugTestCase
   /**
    * Tests that breakpoints and steps behave correctly.
    */
-  public void testStepInto()
-    throws DebugException, BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
-  {
+  public void testStepInto() throws Exception {
     if (printMessages) System.out.println("----testStepInto----");
     StepTestListener debugListener = new StepTestListener();
-    
-    // Compile the class
-    OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS, tempFile());
-   
     _debugger.addListener(debugListener);
-    // Start debugger
-    synchronized(_notifierLock) {
-      _debugger.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
-    }
+
+    // Start up
+    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
+                                                   DEBUG_CLASS);
     
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
@@ -814,40 +711,22 @@ public final class DebugTest extends DebugTestCase
     debugListener.assertStepRequestedCount(6);  // fires (don't wait)
     debugListener.assertCurrThreadDiedCount(1);
 
-    // Shutdown the debugger
-    if (printMessages) System.out.println("Shutting down...");
-    synchronized(_notifierLock) {
-      _debugger.shutdown();
-      _waitForNotifies(1);  // shutdown
-      _notifierLock.wait();
-    }
-  
-    debugListener.assertBreakpointRemovedCount(1);  //fires once (no waiting)
-    debugListener.assertDebuggerShutdownCount(1);  //fires
-    if (printMessages) System.out.println("Shut down.");
+    // Shut down
+    _shutdownWithoutSuspendedInteraction();
     _debugger.removeListener(debugListener);
   }
   
   /**
    * Tests that stepping out of a method behaves correctly.
    */
-  public synchronized void testStepOut()
-    throws DebugException, BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
-  {
+  public synchronized void testStepOut() throws Exception {
     if (printMessages)  System.out.println("----testStepOut----");
     StepTestListener debugListener = new StepTestListener();
-    
-    // Compile the class
-    File file2 = new File(_tempDir, "DrJavaDebugClass.java");
-    OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS, file2);
     _debugger.addListener(debugListener);
-    // Start debugger and add breakpoint
-    synchronized(_notifierLock) {
-      _debugger.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
-    }
+    
+    // Start up
+    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
+                                                   DEBUG_CLASS);
     
     // Set breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
@@ -902,52 +781,26 @@ public final class DebugTest extends DebugTestCase
     assertInteractionsContains("Bar Line 2");
     assertInteractionsDoesNotContain("Foo Line 3");
     
-    // Shutdown the debugger and listen for the interpret call to end
-    if (printMessages) System.out.println("Shutting down...");
-    InterpretListener interpretListener = new InterpretListener() {
-       public void interpreterChanged(boolean inProgress) {
-         // Don't notify: happens in the same thread
-        interpreterChangedCount++;
-       }
-     };
-    _model.addListener(interpretListener);
-    synchronized(_notifierLock) {
-      _debugger.shutdown();
-      _waitForNotifies(2);  // interactionEnded, shutdown
-      _notifierLock.wait();
-    }
-    interpretListener.assertInteractionEndCount(1);
-    _model.removeListener(interpretListener);
-
-    debugListener.assertBreakpointRemovedCount(1);  // fires (don't wait)
-    debugListener.assertDebuggerShutdownCount(1);  // fires
-    if (printMessages) System.out.println("Shut down.");
+    // Shut down
+    _shutdownAndWaitForInteractionEnded();
     _debugger.removeListener(debugListener);
   }
   
   /**
    * Tests that stepping works in a public class with a package
    */
-  public synchronized void testStepOverWithPackage()
-    throws DebugException, BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
-  {
+  public synchronized void testStepOverWithPackage() throws Exception {
     if (printMessages) System.out.println("----testStepOverWithPackage----");
     StepTestListener debugListener = new StepTestListener();
+    _debugger.addListener(debugListener);
     
-    // Compile the class
+    // Create the file in an "a" sub-directory
     File aDir = new File(_tempDir, "a");
     aDir.mkdir();
     File file = new File(aDir, "DrJavaDebugClassWithPackage.java");
-    OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS_WITH_PACKAGE, file);
     
-    _debugger.addListener(debugListener);
-    // Start debugger
-    synchronized(_notifierLock) {
-      _debugger.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
-    }
+    // Start up
+    OpenDefinitionsDocument doc = _startupDebugger(file, DEBUG_CLASS_WITH_PACKAGE);
     
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS_WITH_PACKAGE.indexOf("foo line 1"), 4);
@@ -1020,20 +873,8 @@ public final class DebugTest extends DebugTestCase
     debugListener.assertCurrThreadSuspendedCount(3);
 
    
-    // Close doc and make sure breakpoints are removed
-    _model.closeFile(doc);
-    debugListener.assertBreakpointRemovedCount(1);  //fires (no waiting)
-    
-    // Shutdown the debugger
-    if (printMessages) System.out.println("Shutting down...");
-    synchronized(_notifierLock) {
-      _debugger.shutdown();
-      _waitForNotifies(1);  // shutdown
-      _notifierLock.wait();
-    }
-    
-    debugListener.assertDebuggerShutdownCount(1);  //fires
-    if (printMessages) System.out.println("Shut down.");
+    // Shut down
+    _shutdownWithoutSuspendedInteraction();
     _debugger.removeListener(debugListener);
   }
   
@@ -1041,27 +882,18 @@ public final class DebugTest extends DebugTestCase
    * Tests that the sourcepath config option properly adds files to the
    * search directories.
    */
-  public void testDebugSourcepath()
-    throws DebugException, BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
-  {
+  public void testDebugSourcepath() throws Exception {
     if (printMessages)  System.out.println("----testDebugSourcePath----");
     StepTestListener debugListener = new StepTestListener();
-    
-    // Compile the class
-    File file2 = new File(_tempDir, "DrJavaDebugClass.java");
-    OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS, file2);
-    Vector<File> path = new Vector<File>();
-    path.addElement(_tempDir);
-    
     _debugger.addListener(debugListener);
   
-    // Start debugger and add breakpoint
-    synchronized(_notifierLock) {
-      _debugger.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
-    }
+    // Start up
+    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
+                                                   DEBUG_CLASS);
+    Vector<File> path = new Vector<File>();
+    path.addElement(_tempDir);  // directory where doc's file is saved
+    
+    // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
    
     // Run the foo() method, hitting breakpoint
@@ -1113,26 +945,8 @@ public final class DebugTest extends DebugTestCase
     debugListener.assertStepRequestedCount(3);  // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(3);  // fires
     
-    // Shutdown the debugger and listen for the interpret call to end
-    if (printMessages) System.out.println("Shutting down...");
-    InterpretListener interpretListener = new InterpretListener() {
-       public void interpreterChanged(boolean inProgress) {
-         // Don't notify: happens in the same thread
-        interpreterChangedCount++;
-       }
-     };
-    _model.addListener(interpretListener);
-    synchronized(_notifierLock) {
-      _debugger.shutdown();
-      _waitForNotifies(2);  // interactionEnded, shutdown
-      _notifierLock.wait();
-    }
-    interpretListener.assertInteractionEndCount(1);  // fires
-    interpretListener.assertInterpreterChangedCount(1);  // fires (don't wait)
-    _model.removeListener(interpretListener);
-    
-    debugListener.assertDebuggerShutdownCount(1);  // fires
-    if (printMessages) System.out.println("Shut down.");
+    // Shut down
+    _shutdownAndWaitForInteractionEnded();
     _debugger.removeListener(debugListener);
   }
   
@@ -1140,27 +954,21 @@ public final class DebugTest extends DebugTestCase
    * Tests that breakpoints behave correctly in non-public classes.
    */
   public synchronized void testBreakpointsAndStepsInNonPublicClasses()
-    throws DebugException, BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
+    throws Exception
   {
     if (printMessages) System.out.println("----testBreakpointsAndStepsInNonPublicClasses----");
     StepTestListener debugListener = new StepTestListener();
-    
-    // Compile the class
-    OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS, tempFile());
     _debugger.addListener(debugListener);
-    // Start debugger and add breakpoint (before class is loaded)
-    synchronized(_notifierLock) {
-      _debugger.startup();
-      _waitForNotifies(1);
-      _notifierLock.wait();
-    }
+
+    // Start up
+    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
+                                                   DEBUG_CLASS);
 
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Baz Line 1"),14);
     debugListener.assertBreakpointSetCount(1);
     
-    // Run the foo() method, hitting breakpoint
+    // Run the baz() method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("new DrJavaDebugClass2().baz()");
       _waitForNotifies(3);  // suspended, updated, breakpointReached
@@ -1238,19 +1046,8 @@ public final class DebugTest extends DebugTestCase
     debugListener.assertCurrThreadSuspendedCount(3);
     assertInteractionsContains("Bar Line 2");
     
-    // Close doc and make sure breakpoints are removed
-    _model.closeFile(doc);
-    debugListener.assertBreakpointRemovedCount(2);  //fires twice (no waiting)
-      
-    // Shutdown the debugger
-    if (printMessages) System.out.println("Shutting down...");
-    synchronized(_notifierLock) {
-      _debugger.shutdown();
-      _waitForNotifies(1);  // shutdown
-      _notifierLock.wait();
-    }
-    debugListener.assertDebuggerShutdownCount(1);  //fires
-    if (printMessages) System.out.println("Shut down.");
+    // Shut down
+    _shutdownWithoutSuspendedInteraction();
     _debugger.removeListener(debugListener);
   }
   
@@ -1275,27 +1072,16 @@ public final class DebugTest extends DebugTestCase
   /**
    * Tests that stepping into a breakpoint works.
    */
-  public synchronized void testStepIntoOverBreakpoint()
-    throws DebugException, BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
-  {
+  public synchronized void testStepIntoOverBreakpoint() throws Exception {
     if (printMessages) {
       System.out.println("----testStepIntoOverBreakpoint----");
     }
     StepTestListener debugListener = new StepTestListener();
-    
-    // Compile the class
-    File file = new File(_tempDir, "DrJavaDebugClass.java");
-    OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS, file);
-    
     _debugger.addListener(debugListener);
-    // Start debugger
-    synchronized(_notifierLock) {
-      _debugger.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
-    }
-    debugListener.assertDebuggerStartedCount(1);
+    
+    // Start up
+    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
+                                                   DEBUG_CLASS);
     
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Foo Line 1"), 3);
@@ -1397,33 +1183,22 @@ public final class DebugTest extends DebugTestCase
   /**
    * Tests that static fields are consistent across different interpreter contexts.
    */
-  public void testStaticFieldsConsistent()
-    throws DebugException, BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
-  {
+  public void testStaticFieldsConsistent() throws Exception {
     if (printMessages) {
       System.out.println("----testStaticFieldsConsistent----");
     }
     StepTestListener debugListener = new StepTestListener();
-    
-    // Compile the class
-    File file = new File(_tempDir, "DrJavaDebugStaticField.java");
-    OpenDefinitionsDocument doc = doCompile(CLASS_WITH_STATIC_FIELD, file);
-    
     _debugger.addListener(debugListener);
 
-    // Start debugger
-    synchronized(_notifierLock) {
-      _debugger.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
-    }
-    debugListener.assertDebuggerStartedCount(1);
+    // Start up
+    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugStaticField.java",
+                                                   CLASS_WITH_STATIC_FIELD);
     
+    // Set a breakpoint
     _debugger.toggleBreakpoint(doc,CLASS_WITH_STATIC_FIELD.indexOf("System.out.println"), 4);
     debugListener.assertBreakpointSetCount(1);
 
-    // Run the foo() method, hitting breakpoint
+    // Run the main method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("java DrJavaDebugStaticField");
       _waitForNotifies(6);  // (suspended, updated, breakpointReached) *2
@@ -1491,33 +1266,8 @@ public final class DebugTest extends DebugTestCase
     assertEquals("x has correct value in other thread", "6", interpret("DrJavaDebugStaticField.x"));
     assertEquals("this has correct value for x in other thread", "6", interpret("this.x"));
 
-    // Close doc and make sure breakpoints are removed
-    _model.closeFile(doc);
-    debugListener.assertBreakpointRemovedCount(1);  //fires (no waiting)
-    
-    // Shutdown the debugger
-    if (printMessages) {
-      System.out.println("Shutting down...");
-    }
-    InterpretListener interpretListener = new InterpretListener() {
-       public void interpreterChanged(boolean inProgress) {
-         // Don't notify: happens in the same thread
-        interpreterChangedCount++;
-       }
-     };
-    _model.addListener(interpretListener);
-    synchronized(_notifierLock) {
-      _debugger.shutdown();
-      _waitForNotifies(2);  // interactionEnded, shutdown
-      _notifierLock.wait();
-    }
-    interpretListener.assertInteractionEndCount(1);
-    _model.removeListener(interpretListener);
-    
-    debugListener.assertDebuggerShutdownCount(1);  //fires
-    if (printMessages) {
-      System.out.println("Shut down.");
-    }
+    // Shut down
+    _shutdownAndWaitForInteractionEnded();
     _debugger.removeListener(debugListener);
   }
 
@@ -1526,33 +1276,22 @@ public final class DebugTest extends DebugTestCase
    * variables, fields and fields of outer classes. Also tests
    * that we can watch objects initialized to null (bug #771040).
    */
-  public void testNonStaticWatches()
-    throws DebugException, BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
-  {
+  public void testNonStaticWatches() throws Exception {
     if (printMessages) {
       System.out.println("----testNonStaticWatches----");
     }
     StepTestListener debugListener = new StepTestListener();
-    
-    // Compile the class
-    File file = new File(_tempDir, "Monkey.java");
-    OpenDefinitionsDocument doc = doCompile(MONKEY_WITH_INNER_CLASS, file);
-    
     _debugger.addListener(debugListener);
 
-    // Start debugger
-    synchronized(_notifierLock) {
-      _debugger.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
-    }
-    debugListener.assertDebuggerStartedCount(1);
+    // Start up
+    OpenDefinitionsDocument doc = _startupDebugger("Monkey.java",
+                                                   MONKEY_WITH_INNER_CLASS);
     
+    // Set a breakpoint
     _debugger.toggleBreakpoint(doc,MONKEY_WITH_INNER_CLASS.indexOf("innerMethodFoo = 12;"), 10);
     debugListener.assertBreakpointSetCount(1);
 
-    // Run the foo() method, hitting breakpoint
+    // Run an inner method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("new Monkey().new MonkeyInner().new MonkeyInnerInner().innerMethod()");
       _waitForNotifies(3);  // suspended, updated, breakpointReached
@@ -1568,7 +1307,7 @@ public final class DebugTest extends DebugTestCase
     if (printMessages) {
       System.out.println("first step");
     }
-    // Step to line 10
+    // Step to line 11
     synchronized(_notifierLock){
       _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
@@ -1608,7 +1347,7 @@ public final class DebugTest extends DebugTestCase
     if (printMessages) {
       System.out.println("second step");
     }
-    // Step to line 11
+    // Step to line 12
     synchronized(_notifierLock){
       _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
@@ -1624,7 +1363,7 @@ public final class DebugTest extends DebugTestCase
     if (printMessages) {
       System.out.println("third step");
     }
-    // Step to line 12
+    // Step to line 13
     synchronized(_notifierLock){
       _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
@@ -1640,7 +1379,7 @@ public final class DebugTest extends DebugTestCase
     if (printMessages) {
       System.out.println("fourth step");
     }
-    // Step to line 13
+    // Step to line 14
     synchronized(_notifierLock){
       _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
@@ -1656,7 +1395,7 @@ public final class DebugTest extends DebugTestCase
     if (printMessages) {
       System.out.println("fifth step");
     }
-    // Step to line 14
+    // Step to line 15
     synchronized(_notifierLock){
       _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
@@ -1687,7 +1426,7 @@ public final class DebugTest extends DebugTestCase
     if (printMessages) {
       System.out.println("sixth step");
     }
-    // Step into static method (line 15)
+    // Step into static method
     synchronized(_notifierLock){
       _asyncStep(Debugger.STEP_INTO);
       _waitForNotifies(2);  // suspended, updated
@@ -1716,33 +1455,8 @@ public final class DebugTest extends DebugTestCase
     assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(5).getValue());
     assertEquals("watch type incorrect", DebugWatchData.NO_TYPE, watches.elementAt(5).getType());
     
-    // Close doc and make sure breakpoints are removed
-    _model.closeFile(doc);
-    debugListener.assertBreakpointRemovedCount(1);  //fires (no waiting)
-    
-    // Shutdown the debugger
-    if (printMessages) {
-      System.out.println("Shutting down...");
-    }
-    InterpretListener interpretListener = new InterpretListener() {
-       public void interpreterChanged(boolean inProgress) {
-         // Don't notify: happens in the same thread
-        interpreterChangedCount++;
-       }
-     };
-    _model.addListener(interpretListener);
-    synchronized(_notifierLock) {
-      _debugger.shutdown();
-      _waitForNotifies(2);  // interactionEnded, shutdown
-      _notifierLock.wait();
-    }
-    interpretListener.assertInteractionEndCount(1);
-    _model.removeListener(interpretListener);
-    
-    debugListener.assertDebuggerShutdownCount(1);  //fires
-    if (printMessages) {
-      System.out.println("Shut down.");
-    }
+    // Shut down
+    _shutdownAndWaitForInteractionEnded();
     _debugger.removeListener(debugListener);
   }
   
@@ -1750,36 +1464,25 @@ public final class DebugTest extends DebugTestCase
    * Tests that watches can correctly see the values of local
    * variables, fields and fields of outer classes.
    */
-  public void testStaticWatches()
-    throws DebugException, BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
-  {
+  public void testStaticWatches() throws Exception {
     if (printMessages) {
       System.out.println("----teststaticWatches----");
     }
     StepTestListener debugListener = new StepTestListener();
-    
-    // Compile the class
-    File file = new File(_tempDir, "MonkeyStaticStuff.java");
-    OpenDefinitionsDocument doc = doCompile(MONKEY_STATIC_STUFF, file);
-    
     _debugger.addListener(debugListener);
 
-    // Start debugger
-    synchronized(_notifierLock) {
-      _debugger.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
-    }
-    debugListener.assertDebuggerStartedCount(1);
+    // Start up
+    OpenDefinitionsDocument doc = _startupDebugger("MonkeyStaticStuff.java",
+                                                   MONKEY_STATIC_STUFF);
     
+    // Set a breakpoint
     int index = MONKEY_STATIC_STUFF.indexOf("System.out.println(MonkeyInner.MonkeyTwoDeep.twoDeepFoo);");
     _debugger.toggleBreakpoint(doc,
                                index,
                                14);
     debugListener.assertBreakpointSetCount(1);
 
-    // Run the foo() method, hitting breakpoint
+    // Run an inner method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.MonkeyThreeDeep.threeDeepMethod();");
       _waitForNotifies(3);  // suspended, updated, breakpointReached
@@ -1790,22 +1493,6 @@ public final class DebugTest extends DebugTestCase
     _debugger.addWatch("twoDeepFoo");
     _debugger.addWatch("threeDeepFoo");
     _debugger.addWatch("asdf");
-    
-//    if (printMessages) {
-//      System.out.println("first step");
-//    }
-//    // Step to line 14
-//    synchronized(_notifierLock){
-//      _asyncStep(Debugger.STEP_OVER);
-//      _waitForNotifies(2);  // suspended, updated
-//      _notifierLock.wait();
-//    }
-//    debugListener.assertStepRequestedCount(1);  // fires (don't wait)
-//    debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
-//    debugListener.assertThreadLocationUpdatedCount(2);  // fires
-//    debugListener.assertCurrThreadSuspendedCount(2);  // fires
-//    debugListener.assertBreakpointReachedCount(1);
-//    debugListener.assertCurrThreadDiedCount(0);
     
     Vector<DebugWatchData> watches = _debugger.getWatches();
     assertEquals("watch name incorrect", "foo", watches.elementAt(0).getName());
@@ -1828,33 +1515,58 @@ public final class DebugTest extends DebugTestCase
     assertEquals("watch name incorrect", "innerFoo", watches.elementAt(1).getName());
     assertEquals("watch value incorrect", "8", watches.elementAt(1).getValue());
     
-    // Close doc and make sure breakpoints are removed
-    _model.closeFile(doc);
-    debugListener.assertBreakpointRemovedCount(1);  //fires (no waiting)
-    
-    // Shutdown the debugger
-    if (printMessages) {
-      System.out.println("Shutting down...");
-    }
-    InterpretListener interpretListener = new InterpretListener() {
-       public void interpreterChanged(boolean inProgress) {
-         // Don't notify: happens in the same thread
-        interpreterChangedCount++;
-       }
-     };
-    _model.addListener(interpretListener);
-    synchronized(_notifierLock) {
-      _debugger.shutdown();
-      _waitForNotifies(2);  // interactionEnded, shutdown
-      _notifierLock.wait();
-    }
-    interpretListener.assertInteractionEndCount(1);
-    _model.removeListener(interpretListener);
-    
-    debugListener.assertDebuggerShutdownCount(1);  //fires
-    if (printMessages) {
-      System.out.println("Shut down.");
-    }
+    // Shut down
+    _shutdownAndWaitForInteractionEnded();
     _debugger.removeListener(debugListener);
   }
+  
+  /**
+   * Tests that watches can correctly see the values of final local
+   * variables and method parameters from enclosing classes.
+   * 
+   * Note:  Some final local variables are inlined by the compiler
+   * (even in debug mode), so they are unavailable to the debugger.
+   *
+  public void testWatchLocalVarsFromInnerClass() throws Exception {
+    if (printMessages) {
+      System.out.println("----testWatchLocalVarsFromInnerClass----");
+    }
+    StepTestListener debugListener = new StepTestListener();
+    _debugger.addListener(debugListener);
+    
+    // Start up
+    OpenDefinitionsDocument doc = _startupDebugger("InnerClassWithLocalVariables.java",
+                                                   INNER_CLASS_WITH_LOCAL_VARS);
+
+    // Set a breakpoint
+    int index = INNER_CLASS_WITH_LOCAL_VARS.indexOf("numArgs:");
+    _debugger.toggleBreakpoint(doc, index, 7);
+    debugListener.assertBreakpointSetCount(1);
+
+    // Run the main method, hitting breakpoint
+    synchronized(_notifierLock) {
+      interpretIgnoreResult("java InnerClassWithLocalVariables arg");
+      _waitForNotifies(3);  // suspended, updated, breakpointReached
+      _notifierLock.wait();
+    }
+    _debugger.addWatch("numArgs");
+    _debugger.addWatch("args");
+    _debugger.addWatch("inlined");
+    
+    // Check watch values
+    Vector<DebugWatchData> watches = _debugger.getWatches();
+    assertEquals("numArgs watch value incorrect",
+                 "1", watches.elementAt(0).getValue());
+    String argsWatch = (String)watches.elementAt(1).getValue();
+    assertTrue("args watch value incorrect", 
+               argsWatch.indexOf("java.lang.String") != -1);
+
+    // unfortunately, inlined variable can't be seen
+    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(2).getValue());
+
+    // Shut down
+    _shutdownAndWaitForInteractionEnded();
+    _debugger.removeListener(debugListener);
+  }*/
+  
 }

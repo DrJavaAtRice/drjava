@@ -91,4 +91,11 @@ public class JavadocModelTest extends TestCase {
   public void testParseLine() {
     
   }
+  
+  /**
+   * Be sure to test: -tag require:a:"Require:"
+   */
+  public void testCustomArguments() {
+    
+  }
 }

@@ -701,8 +701,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     try {
       writeLock();
       _modifiedSinceSave = false;
-   if (_file != null)
-     _timestamp = _file.lastModified();
+      if (_file != null)
+        _timestamp = _file.lastModified();
     }
     finally {
       writeUnlock();
