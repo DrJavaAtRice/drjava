@@ -10,6 +10,9 @@
     public_javadoc_dir
  
 -->
+<!-- <taskdef name="javamake" classname="com.sun.tools.javamake.ant.JavaMake"/>  -->
+<taskdef name="tstamp_gmt" classname="edu.rice.cs.util.ant.TstampGMT" />
+
 <property name="build.sysclasspath" value="last" />
 
 <property name="lib_dir" value="${srcroot}/edu/rice/cs/lib" />
@@ -32,7 +35,7 @@
   <available type="file" file="${jsr14_classpath}" property="jsr14_ok" />
   <antcall target="check_for_jsr14" />
 
-  <tstamp /> <!-- Ant requires us to make time stamp -->
+  <tstamp_gmt /> <!-- Ant requires us to make time stamp -->
   <mkdir dir="${built}" /> <!-- Make the built directory -->
 
   <pathconvert refid="classpath"
@@ -51,7 +54,7 @@
 </target>
 
 <target name="make-version-stamp">
-  <tstamp /> <!-- get new time stamp to use for CVS tag -->
+  <tstamp_gmt /> <!-- get new time stamp to use for CVS tag -->
 
   <!-- Create new Version.java, filling in date and time. -->
   <filter token="DATE" value="${DSTAMP}" />
@@ -173,7 +176,7 @@
 
 <!-- generate private javadoc for current uncommitted version -->
 <target name="javadoc" depends="init">
-  <tstamp />
+  <tstamp_gmt />
   <antcall target="generate_javadoc">
     <param name="javadoc_dir" value="${private_javadoc_dir}" />
     <param name="javadoc_title" value="${user.name}-uncommitted-${ant.project.name}-${DSTAMP}-${TSTAMP}" />
