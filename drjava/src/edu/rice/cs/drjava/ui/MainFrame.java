@@ -534,6 +534,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _openChooser.setFileFilter(new JavaSourceFilter());
     _openChooser.setMultiSelectionEnabled(true);
     _saveChooser = new JFileChooser(userdir);
+    _saveChooser.setFileFilter(new JavaSourceFilter());
     //set up the hourglass cursor
     setGlassPane(new GlassPane());
     this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -1032,8 +1033,14 @@ public class MainFrame extends JFrame implements OptionConstants {
         throw new OperationCanceledException();
       case JFileChooser.APPROVE_OPTION:
         File chosen = fc.getSelectedFile();
-        if (chosen != null)
-          return chosen;
+        if (chosen != null) {
+          //append ".java" if not written by user
+          if (fc.getFileFilter() instanceof JavaSourceFilter) {
+            if (chosen.getName().indexOf(".") == -1)
+              return new File (chosen.getAbsolutePath() + ".java");
+          }
+          return chosen; 
+        }
         else
           throw new RuntimeException("filechooser returned null file");
       default:                  // impossible since rc must be one of these
@@ -1357,6 +1364,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     tmpItem = editMenu.add(_switchToNextAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, mask));
 
+    // access to configurations GUI
+    //editMenu.addSeparator();
+    //tmpItem = editMenu.add(_preferencesAction);
+    //tmpItem.setAccelerator(KeyStrong.getKeyStroke(KeyEvent.VK_
+    
     // Add the menus to the menu bar
     return editMenu;
   }
