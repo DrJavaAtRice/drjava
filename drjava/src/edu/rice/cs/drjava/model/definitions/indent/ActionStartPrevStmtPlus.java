@@ -104,3 +104,4 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     doc.setTab(indent, here);
   }
 }
+
