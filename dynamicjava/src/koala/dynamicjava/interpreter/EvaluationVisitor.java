@@ -210,7 +210,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
           for(;;) {
             if (sc.getStatements() != null) {
               Iterator it2 = sc.getStatements().iterator();
-              while (it2.hasNext()) {
+               while (it2.hasNext()) {
                 ((Node)it2.next()).acceptVisitor(this);
               }
             }
@@ -1777,7 +1777,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       ctx.setImportationManager(im);
       ctx.setFunctions((List<MethodDeclaration>)md.getProperty(NodeProperties.FUNCTIONS)); /**/  //Why does this work???
 
-      TypeChecker tc = new TypeChecker(ctx);
+      AbstractTypeChecker tc = AbstractTypeChecker.makeTypeChecker(ctx);
       it = md.getParameters().iterator();
       while (it.hasNext()) {
         it.next().acceptVisitor(tc);

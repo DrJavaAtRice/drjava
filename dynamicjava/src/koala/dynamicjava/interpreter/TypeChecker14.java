@@ -43,48 +43,77 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package koala;
+package koala.dynamicjava.interpreter;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.lang.reflect.*;
+import java.util.*;
+
+import koala.dynamicjava.interpreter.context.*;
+import koala.dynamicjava.interpreter.error.*;
+import koala.dynamicjava.interpreter.modifier.*;
+import koala.dynamicjava.interpreter.throwable.*;
+import koala.dynamicjava.tree.*;
+import koala.dynamicjava.tree.visitor.*;
+import koala.dynamicjava.util.*;
+
+import koala.dynamicjava.tree.tiger.generic.GenericReferenceType;
+
+
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
+ * This tree visitor checks the typing rules and loads
+ * the classes, fields and methods
  *
- * This javadoc corresponds to build drjava-20040513-1601;
- *
- * @version $Id$
+ * @author Stephane Hillion
+ * @version 1.2 - 1999/11/20
  */
-public abstract class Version {
+
+public class TypeChecker14 extends AbstractTypeChecker {
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Creates a new name visitor
+   * @param ctx the context
    */
-  private static final String BUILD_TIME_STRING = "20040513-1601";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public TypeChecker14(Context ctx) {
+    super(ctx);
   }
 
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  /**
+   * Visits a ForEachStatement
+   * @param node the node to visit
+   */
+  public Class visit(ForEachStatement node){
+    throw new WrongVersionException("ForEach Statements are only supported in Java 1.5 or better");
   }
 
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+  /**
+   * Checks if the node  GenericReferenceType is allowed in 1.5
+   * @param node unused
+   */  
+  protected void checkGenericReferenceType(ReferenceType node) {
+   if(node instanceof GenericReferenceType)
+     throw new WrongVersionException("Generics are not supported before Java 1.5");
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
+  
+  
+  /**
+   * Boxing is not allowed prior to version 1.5. Throws an exception.
+   * @param exp the expression to box
+   * @param refType the reference type to box the primitive type to
+   * @return the <code>SimpleAllocation</code> that boxes the expression
+   */
+  protected SimpleAllocation _box(Expression exp, Class refType) {
+    throw new WrongVersionException("Box required to use " + refType + " here. Autoboxing requires minimum Java 1.5");
   }
-} 
+  
+  /**
+   * Unboxes the given expression by returning the correct
+   * <code>ObjectMethodCall</code> corresponding to the given type
+   * @param child The expression to unbox
+   * @param type The type of the evaluated expression
+   * @return The <code>ObjectMethodCall</code> that unboxes the expression
+   */
+  protected ObjectMethodCall _unbox(Expression child, Class type) {
+    throw new WrongVersionException("Unbox required to use " + type + " here. Auto-unboxing requires minimum Java 1.5");
+  }
+}

@@ -184,7 +184,7 @@ public class TreeInterpreter implements Interpreter {
         if (o != null) n = o;
 
         resultingList.add(n);
-        TypeChecker tc = new TypeChecker(checkVisitorContext);
+        AbstractTypeChecker tc = AbstractTypeChecker.makeTypeChecker(checkVisitorContext);
         n.acceptVisitor(tc);
 
         evalVisitorContext.defineVariables
@@ -563,7 +563,7 @@ public class TreeInterpreter implements Interpreter {
         // pass 2: type checking
         ctx = new StaticContext(this, c, md.importationManager);
         ctx.setAdditionalClassLoaderContainer(classLoader);
-        TypeChecker tc = new TypeChecker(ctx);
+        AbstractTypeChecker tc = AbstractTypeChecker.makeTypeChecker(ctx);
 
         it1 = mparams.listIterator();
         while (it1.hasNext()) {
@@ -637,11 +637,11 @@ public class TreeInterpreter implements Interpreter {
         // pass 2: type checking
         ctx1 = new MethodContext(this, c, c, md.importationManager);
         ctx1.setAdditionalClassLoaderContainer(classLoader);
-        TypeChecker tc1 = new TypeChecker(ctx1);
+        AbstractTypeChecker tc1 = AbstractTypeChecker.makeTypeChecker(ctx1);
 
         ctx2 = new MethodContext(this, c, c, md.importationManager);
         ctx2.setAdditionalClassLoaderContainer(classLoader);
-        TypeChecker tc2 = new TypeChecker(ctx2);
+        AbstractTypeChecker tc2 = AbstractTypeChecker.makeTypeChecker(ctx2);
 
         // Initializes the context with outerclass variables
         if (cc != null) {
@@ -775,7 +775,7 @@ public class TreeInterpreter implements Interpreter {
       Context ctx = new StaticContext(this, c, cpd.importationManager);
       ctx.setAdditionalClassLoaderContainer(classLoader);
       NameVisitor nv = new NameVisitor(ctx);
-      TypeChecker tc = new TypeChecker(ctx);
+      AbstractTypeChecker tc = AbstractTypeChecker.makeTypeChecker(ctx);
 
       // Check the parameters
       if (cpd.parameters != null) {
@@ -898,7 +898,7 @@ public class TreeInterpreter implements Interpreter {
     Node o = AST.acceptVisitor(nv);
     if (o != null) AST = o;
 
-    TypeChecker tc = new TypeChecker(checkVisitorContext);
+    AbstractTypeChecker tc = AbstractTypeChecker.makeTypeChecker(checkVisitorContext);
     AST.acceptVisitor(tc);
 
     evalVisitorContext.defineVariables
