@@ -1263,6 +1263,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         }
         else { // Either more/less args given than expected or is of the component type
           it.previous(); // back up since we pulled the expression out a few lines above
+          // Used larg.size()+1 to account for the hidden 1st parameter
           args[i] = buildArrayOfRemainingArgs(typs, larg.size()+1, it);
         }
       }
