@@ -73,7 +73,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   /** The custom keymap for the interactions pane. */
   protected Keymap _keymap;
   
-  private static StyledEditorKit EDITOR_KIT;
+  static StyledEditorKit EDITOR_KIT;
   
   static {
     EDITOR_KIT = new InteractionsEditorKit();    

@@ -61,6 +61,7 @@ import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.repl.*;
 //import edu.rice.cs.drjava.model.repl.InputListener;
 import edu.rice.cs.util.swing.SwingWorker;
+import edu.rice.cs.util.UnexpectedException;
 
 /**
  * This class installs listeners and actions between an InteractionsDocument
@@ -231,6 +232,16 @@ public class InteractionsController extends AbstractConsoleController {
                                 InteractionsDocumentAdapter adapter,
                                 InteractionsPane pane) {
     super(adapter, pane);
+    DefaultEditorKit d = pane.EDITOR_KIT;
+    
+    for(Action a : d.getActions()) {
+      if(a.getValue(Action.NAME).equals(DefaultEditorKit.upAction)) 
+        defaultUpAction = a;
+      
+      if(a.getValue(Action.NAME).equals(DefaultEditorKit.downAction))
+        defaultDownAction = a;
+    }
+    
     _model = model;
     _doc = model.getDocument();
     _errStyle = new SimpleAttributeSet();
@@ -359,12 +370,16 @@ public class InteractionsController extends AbstractConsoleController {
 
     // Up and down need to be bound both for keypad and not
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0),
-                                historyPrevAction);
+                                moveUpAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
+                                moveUpAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_UP, mask),
                                 historyPrevAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, 0),
-                                historyNextAction);
+                                moveDownAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
+                                moveDownAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, mask),
                                 historyNextAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0),
                                 historyReverseSearchAction);
@@ -436,8 +451,10 @@ public class InteractionsController extends AbstractConsoleController {
   AbstractAction historyPrevAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (!_busy()) {
-        _doc.recallPreviousInteractionInHistory();
-        moveToEnd();
+        if(_doc.recallPreviousInteractionInHistory())
+          moveToEnd();
+        if(!_isCursorAfterPrompt())
+          moveToPrompt();
       }
     }
   };
@@ -448,11 +465,76 @@ public class InteractionsController extends AbstractConsoleController {
   AbstractAction historyNextAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (!_busy()) {
-        _doc.recallNextInteractionInHistory();
-        moveToEnd();
+        if(_doc.recallNextInteractionInHistory() || !_isCursorAfterPrompt())
+          moveToPrompt();
       }
     }
   };
+  
+  /**
+   * Added feature for up. If the cursor is on the first line of the current interaction, it goes into the history.
+   * Otherwise, stays within the current interaction
+   */
+  AbstractAction moveUpAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      if (!_busy()) {
+        if(_shouldGoIntoHistory(_doc.getPromptPos(), _pane.getCaretPosition())) {
+          historyPrevAction.actionPerformed(e);
+        }
+        else {
+          defaultUpAction.actionPerformed(e);
+          if(! _isCursorAfterPrompt()) {
+            moveToPrompt();
+          }
+        }
+      }
+    }
+  };
+    
+  /**
+   * Added feature for down. If the cursor is on the last line of the current interaction, it goes into the history.
+   * Otherwise, stays within the current interaction
+   */
+  AbstractAction moveDownAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      if(!_busy()) {
+        if(_shouldGoIntoHistory(_pane.getCaretPosition(), _adapter.getLength())) {
+          historyNextAction.actionPerformed(e);
+        }
+        else {
+          defaultDownAction.actionPerformed(e);
+        }
+      }
+    }
+  };
+  
+  /**
+   * Tests whether or not to move into the history
+   * @return true iff there are no "\n" characters between the start and the end
+   */  
+  private boolean _shouldGoIntoHistory(int start, int end) {
+    if(_isCursorAfterPrompt() && end >= start) {
+      String text = "";
+      try {
+        text = _adapter.getText(start, end - start);
+      }
+      catch(BadLocationException ble) {
+        throw new UnexpectedException(ble); //The conditional should prevent this from ever happening
+      }
+      if(text.indexOf("\n") != -1)
+        return false;
+      //moveIntoHistory = true;
+    }
+    return true;
+  }
+  
+  private boolean _isCursorAfterPrompt() {
+    return _pane.getCaretPosition() >= _doc.getPromptPos();
+  }
+  
+  Action defaultUpAction;
+  Action defaultDownAction;
+  
 
   /**
    * Reverse searches in the history.

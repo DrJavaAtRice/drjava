@@ -302,12 +302,14 @@ public class InteractionsDocument extends ConsoleDocument {
    * replaces whatever is on the current
    * interactions input line with this interaction.
    */
-  public void recallPreviousInteractionInHistory() {
+  public boolean recallPreviousInteractionInHistory() {
     if (hasHistoryPrevious()) {
       moveHistoryPrevious(getCurrentInteraction());
+      return true;
     }
     else {
       _beep.run();
+      return false;
     }
   }
 
@@ -316,12 +318,14 @@ public class InteractionsDocument extends ConsoleDocument {
    * replaces whatever is on the current
    * interactions input line with this interaction.
    */
-  public void recallNextInteractionInHistory() {
+  public boolean recallNextInteractionInHistory() {
     if (hasHistoryNext()) {
       moveHistoryNext(getCurrentInteraction());
+      return true;
     }
     else {
       _beep.run();
+      return false;
     }
   }
 

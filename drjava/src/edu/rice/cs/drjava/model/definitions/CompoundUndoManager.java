@@ -124,28 +124,30 @@ public class CompoundUndoManager extends UndoManager {
    * @param key the key that was returned by startCompoundEdit()
    */
   public void endCompoundEdit(int key) {
-    if(_keys.get(0).intValue() == key) {
-      CompoundEdit compoundEdit = _compoundEdits.remove(0);
-      compoundEdit.end();
-
-      if (compoundEdit.canUndo()) {
-        if (!_compoundEditInProgress()) {
-          super.addEdit(compoundEdit);
+    if(_keys.size() > 0) {
+      if(_keys.get(0).intValue() == key) {
+        CompoundEdit compoundEdit = _compoundEdits.remove(0);
+        compoundEdit.end();
+        
+        if (compoundEdit.canUndo()) {
+          if (!_compoundEditInProgress()) {
+            super.addEdit(compoundEdit);
 //          if(!canUndo()){
 //            throw new RuntimeException("could not add the edit to the undomanager");
 //          }
-          _notifyUndoHappened();
+            _notifyUndoHappened();
+          }
+          else {
+            _compoundEdits.get(0).addEdit(compoundEdit);
+          }
         }
-        else {
-          _compoundEdits.get(0).addEdit(compoundEdit);
-        }
-      }
-      _keys.remove(0);
+        _keys.remove(0);
 
       // signal view to update undo state
-    }
-    else {
-      throw new IllegalStateException("Improperly nested compound edits.");
+      }
+      else {
+        throw new IllegalStateException("Improperly nested compound edits.");
+      }
     }
   }
 
