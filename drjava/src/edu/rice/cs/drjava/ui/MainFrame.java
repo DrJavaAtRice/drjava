@@ -85,6 +85,9 @@ public class MainFrame extends JFrame {
   private Hashtable _defScrollPanes;
   private DefinitionsPane _currentDefPane;
 
+  // Used to determine whether the file title needs to be updated.
+  private String _fileTitle = "";
+
   // These should be final but can't be, as the code is currently organized,
   // because they are not set in the constructor
   private CompilerErrorPanel _errorPanel;
@@ -626,9 +629,12 @@ public class MainFrame extends JFrame {
   public void updateFileTitle() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
     String filename = _model.getDisplayFilename(doc);
-    setTitle(filename + " - DrJava");
-    _fileNameField.setText(_model.getDisplayFullPath(doc));
-    _docList.repaint();
+    if (!filename.equals(_fileTitle)) {
+      _fileTitle = filename;
+      setTitle(filename + " - DrJava");
+      _fileNameField.setText(_model.getDisplayFullPath(doc));
+      _docList.repaint();
+    }
   }
 
   /**
@@ -641,8 +647,8 @@ public class MainFrame extends JFrame {
     File selection = _openChooser.getSelectedFile();
     if (selection != null) {
         _openChooser.setSelectedFile(selection.getParentFile());
-	_openChooser.setSelectedFile(selection);
-	_openChooser.setSelectedFile(null);
+ _openChooser.setSelectedFile(selection);
+ _openChooser.setSelectedFile(null);
     }
     int rc = _openChooser.showOpenDialog(this);
     return getChosenFile(_openChooser, rc);
@@ -656,8 +662,8 @@ public class MainFrame extends JFrame {
     File selection = _saveChooser.getSelectedFile();
     if (selection != null) {
         _saveChooser.setSelectedFile(selection.getParentFile());
-	_saveChooser.setSelectedFile(selection);
-	_saveChooser.setSelectedFile(null);
+ _saveChooser.setSelectedFile(selection);
+ _saveChooser.setSelectedFile(null);
     }
     int rc = _saveChooser.showSaveDialog(this);
     return getChosenFile(_saveChooser, rc);

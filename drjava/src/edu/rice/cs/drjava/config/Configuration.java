@@ -64,4 +64,8 @@ public class Configuration {
     public <T> void removeOptionListener(Option<T> op, OptionListener<T> l) {
 	op.removeListener(this,l);
     }
+
+    public String toString() {
+	return map.toString();
+    }
 }
