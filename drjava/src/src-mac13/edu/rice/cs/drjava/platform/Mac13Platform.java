@@ -109,4 +109,18 @@ class Mac13Platform extends MacPlatform {
     };
     MRJApplicationUtils.registerQuitHandler(quitHandler);
   }
+  
+  /**
+   * Returns whether this is a Mac platform (any JDK version).
+   */
+  public boolean isMacPlatform() {
+    return true;
+  }
+  
+  /**
+   * Returns whether this is a Mac platform with JDK 1.3.1.
+   */
+  public boolean isMac13Platform() {
+    return true;
+  }
 }
