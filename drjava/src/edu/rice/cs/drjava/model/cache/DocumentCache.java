@@ -68,7 +68,7 @@ public class DocumentCache{
    */
   LinkedList<OpenDefinitionsDocument> lru;
   
-  private int CACHE_SIZE = 4;
+  private int CACHE_SIZE = 24;
   
   public DocumentCache(){
     lru = new LinkedList<OpenDefinitionsDocument>();
@@ -99,7 +99,7 @@ public class DocumentCache{
     DefinitionsDocument retdoc;
     Pair<DefinitionsDocument,DDReconstructor> pair = table.get(odd);
     if(pair == null){
-      throw new NoSuchDocumentException("Cannot obtain the needed definitions document");
+      throw new NoSuchDocumentException("Cannot obtain the definitions document for: " + odd);
     }
     retdoc = pair.getFirst();
     updatelru(odd, pair);
@@ -129,6 +129,7 @@ public class DocumentCache{
     Pair<DefinitionsDocument,DDReconstructor> newpair = new Pair<DefinitionsDocument,DDReconstructor>(null, reconstructor);
     if(isDDocInCache(odd)){
       reconstructor.saveDocInfo(oldpair.getFirst());
+      oldpair.getFirst().close();
     }
     oldpair = table.remove(odd);
     table.put(odd, newpair);
@@ -186,6 +187,7 @@ public class DocumentCache{
   public void removeDoc(OpenDefinitionsDocument odd){
     Pair<DefinitionsDocument,DDReconstructor> pair = table.remove(odd);
     if(pair.getFirst() != null){
+//      pair.getSecond().saveDocInfo(pair.getFirst());
       pair.getFirst().close();
     }
     lru.remove(odd);

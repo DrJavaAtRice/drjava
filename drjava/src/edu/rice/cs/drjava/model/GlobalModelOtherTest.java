@@ -81,9 +81,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     final OpenDefinitionsDocument doc = _model.newFile();
 
     // Have to add an undoable edit listener for Undo to work
-    doc.getDocument().addUndoableEditListener(new UndoableEditListener() {
+    doc.addUndoableEditListener(new UndoableEditListener() {
       public void undoableEditHappened(UndoableEditEvent e) {
-        doc.getDocument().getUndoManager().addEdit(e.getEdit());
+        doc.getUndoManager().addEdit(e.getEdit());
       }
     });
 
@@ -756,8 +756,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     OpenDefinitionsDocument doc = doCompile(FOO_CLASS, file);
     doc.runMain();
     assertInteractionsContains("Foo");
-    DefinitionsDocument defDoc = doc.getDocument();
-    defDoc.insertString(defDoc.getLength(), " ", null);
+    doc.insertString(doc.getLength(), " ", null);
     doc.runMain();
     assertInteractionsContains(DefaultGlobalModel.DOCUMENT_OUT_OF_SYNC_MSG);
   }

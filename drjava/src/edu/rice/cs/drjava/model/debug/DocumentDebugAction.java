@@ -84,14 +84,14 @@ public abstract class DocumentDebugAction<T extends EventRequest>
     super(manager);
     try {
       if (offset >= 0) {
-        _className = doc.getDocument().getQualifiedClassName(offset);
+        _className = doc.getQualifiedClassName(offset);
       }
     }
     catch (ClassNameNotFoundException cnnfe) {
       // Couldn't find class name at offset, use the first class name
       // found.
       try {
-        _className = doc.getDocument().getQualifiedClassName();
+        _className = doc.getQualifiedClassName();
       }
       catch (ClassNameNotFoundException cnnfe2) {
         // Still couldn't find a class name, use ""

@@ -177,10 +177,10 @@ public final class CommandLineTest extends TestCase {
     OpenDefinitionsDocument doc = docs.get(0);
     assertEquals("Correct length of file?",
                  f1_contents.length(),
-                 doc.getDocument().getLength());
+                 doc.getLength());
     assertEquals("Do the contents match?",
                  f1_contents,
-                 doc.getDocument().getText(0,f1_contents.length()));
+                 doc.getText(0,f1_contents.length()));
   }
 
   /**
@@ -211,26 +211,26 @@ public final class CommandLineTest extends TestCase {
     OpenDefinitionsDocument doc1 = docs.get(0);
     assertEquals("Correct length of file 1?",
                  f1_contents.length(),
-                 doc1.getDocument().getLength());
+                 doc1.getLength());
     assertEquals("Do the contents of file 1 match?",
                  f1_contents,
-                 doc1.getDocument().getText(0,f1_contents.length()));
+                 doc1.getText(0,f1_contents.length()));
 
     OpenDefinitionsDocument doc2 = docs.get(1);
     assertEquals("Correct length of file 2?",
                  f2_contents.length(),
-                 doc2.getDocument().getLength());
+                 doc2.getLength());
     assertEquals("Do the contents of file 2 match?",
                  f2_contents,
-                 doc2.getDocument().getText(0,f2_contents.length()));
+                 doc2.getText(0,f2_contents.length()));
 
     OpenDefinitionsDocument doc3 = docs.get(2);
     assertEquals("Correct length of file 3?",
                  f3_contents.length(),
-                 doc3.getDocument().getLength());
+                 doc3.getLength());
     assertEquals("Do the contents of file 3 match?",
                  f3_contents,
-                 doc3.getDocument().getText(0,f3_contents.length()));
+                 doc3.getText(0,f3_contents.length()));
 
     assertEquals("Is the last document the active one?",
                  doc3,
@@ -255,26 +255,26 @@ public final class CommandLineTest extends TestCase {
     OpenDefinitionsDocument doc1 = docs.get(0);
     assertEquals("Correct length of file 1?",
                  f2_contents.length(),
-                 doc1.getDocument().getLength());
+                 doc1.getLength());
     assertEquals("Do the contents of file 1 match?",
                  f2_contents,
-                 doc1.getDocument().getText(0,f2_contents.length()));
+                 doc1.getText(0,f2_contents.length()));
 
     OpenDefinitionsDocument doc2 = docs.get(1);
     assertEquals("Correct length of file 2?",
                  f3_contents.length(),
-                 doc2.getDocument().getLength());
+                 doc2.getLength());
     assertEquals("Do the contents of file 2 match?",
                  f3_contents,
-                 doc2.getDocument().getText(0,f3_contents.length()));
+                 doc2.getText(0,f3_contents.length()));
 
     OpenDefinitionsDocument doc3 = docs.get(2);
     assertEquals("Correct length of file 3?",
                  f1_contents.length(),
-                 doc3.getDocument().getLength());
+                 doc3.getLength());
     assertEquals("Do the contents of file 3 match?",
                  f1_contents,
-                 doc3.getDocument().getText(0,f1_contents.length()));
+                 doc3.getText(0,f1_contents.length()));
 
     assertEquals("Is the last document the active one?",
                  doc3,
@@ -299,18 +299,18 @@ public final class CommandLineTest extends TestCase {
     OpenDefinitionsDocument doc1 = docs.get(0);
     assertEquals("Correct length of file 1?",
                  f1_contents.length(),
-                 doc1.getDocument().getLength());
+                 doc1.getLength());
     assertEquals("Do the contents of file 1 match?",
                  f1_contents,
-                 doc1.getDocument().getText(0,f1_contents.length()));
+                 doc1.getText(0,f1_contents.length()));
 
     OpenDefinitionsDocument doc2 = docs.get(1);
     assertEquals("Correct length of file 2?",
                  f2_contents.length(),
-                 doc2.getDocument().getLength());
+                 doc2.getLength());
     assertEquals("Do the contents of file 2 match?",
                  f2_contents,
-                 doc2.getDocument().getText(0,f2_contents.length()));
+                 doc2.getText(0,f2_contents.length()));
 
     assertEquals("Is the last document the active one?",
                  doc2,

@@ -411,7 +411,8 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
 //    if(Runtime.getRuntime().freeMemory() < 200000){
 //      System.out.println("Running Garbage Collector");
 //      System.gc();
-//    }
+//      System.out.println("~ gc ~");
+//  }
     
 //    System.out.println(Runtime.getRuntime().freeMemory());
     

@@ -54,7 +54,6 @@ import java.util.Date;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.*;
 
 /**
@@ -93,7 +92,7 @@ public final class DefinitionsPaneTest extends TestCase {
    */
   public void testShiftBackspace() throws BadLocationException {
     DefinitionsPane definitions = _frame.getCurrentDefPane();
-    DefinitionsDocument doc = definitions.getOpenDocument().getDocument();
+    OpenDefinitionsDocument doc = definitions.getOpenDocument();
     _assertDocumentEmpty(doc, "before testing");
     doc.insertString(0, "test", null);
 
@@ -136,7 +135,7 @@ public final class DefinitionsPaneTest extends TestCase {
    */
   public void testTypeBraceNotInCode() throws BadLocationException {
     DefinitionsPane definitions = _frame.getCurrentDefPane();
-    DefinitionsDocument doc = definitions.getOpenDocument().getDocument();
+    OpenDefinitionsDocument doc = definitions.getOpenDocument();
     _assertDocumentEmpty(doc, "before testing");
     doc.insertString(0, "  \"", null);
 
@@ -162,7 +161,7 @@ public final class DefinitionsPaneTest extends TestCase {
     InterruptedException, java.lang.reflect.InvocationTargetException {
     final DefinitionsPane definitions = _frame.getCurrentDefPane();
     _frame.show();
-    DefinitionsDocument doc = definitions.getOpenDocument().getDocument();
+    OpenDefinitionsDocument doc = definitions.getOpenDocument();
     _assertDocumentEmpty(doc, "before testing");
     doc.insertString(0, "/**", null);
 
@@ -191,7 +190,7 @@ public final class DefinitionsPaneTest extends TestCase {
    */
   public void testMetaKeyPress() throws BadLocationException {
     DefinitionsPane definitions = _frame.getCurrentDefPane();
-    DefinitionsDocument doc = definitions.getOpenDocument().getDocument();
+    OpenDefinitionsDocument doc = definitions.getOpenDocument();
     _assertDocumentEmpty(doc, "point 0");
     // The following is the sequence of key events that happen when the user presses Meta-a
     definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(),
@@ -217,7 +216,7 @@ public final class DefinitionsPaneTest extends TestCase {
    */
   public void testMultilineCommentOrUncommentAfterScroll() throws BadLocationException {
     DefinitionsPane pane = _frame.getCurrentDefPane();
-    DefinitionsDocument doc = pane.getOpenDocument().getDocument();
+    OpenDefinitionsDocument doc = pane.getOpenDocument();
     String text =
       "public class stuff {\n" +
       "  private int _int;\n" +
@@ -266,13 +265,13 @@ public final class DefinitionsPaneTest extends TestCase {
     assertEquals("redoing uncommenting restores caret position", oldPos, pane.getCaretPosition());
   }
 
-  protected void _assertDocumentEmpty(DefinitionsDocument doc, String message)
+  protected void _assertDocumentEmpty(Document doc, String message)
     throws BadLocationException
   {
     _assertDocumentContents(doc, "", message);
   }
 
-  protected void _assertDocumentContents(DefinitionsDocument doc,
+  protected void _assertDocumentContents(Document doc,
                                        String contents,
                                        String message)
     throws BadLocationException
@@ -282,7 +281,7 @@ public final class DefinitionsPaneTest extends TestCase {
 
   public void testGranularUndo() throws BadLocationException {
     DefinitionsPane definitions = _frame.getCurrentDefPane();
-    DefinitionsDocument doc = definitions.getOpenDocument().getDocument();
+    OpenDefinitionsDocument doc = definitions.getOpenDocument();
 //    doc.addUndoableEditListener(doc.getUndoManager());
 
     // 1
@@ -493,15 +492,15 @@ public final class DefinitionsPaneTest extends TestCase {
     currpane = _frame.getCurrentDefPane();
     
     ddoc = currpane.getDocument();
-    assertEquals("the active pane should have a defintions document", DefinitionsDocument.class, ddoc.getClass());
+    assertTrue("the active pane should have an open defintions document", ddoc instanceof OpenDefinitionsDocument);
     
     _model.setActiveNextDocument();
     oldpane = currpane;
     currpane = _frame.getCurrentDefPane();
     olddoc = oldpane.getDocument();
     ddoc = currpane.getDocument();
-    assertNotSame("the old pane should not have a defintions document", DefinitionsDocument.class, olddoc.getClass());
-    assertEquals("the active pane should have a defintions document", DefinitionsDocument.class, ddoc.getClass());
+    assertFalse("the old pane should not have an open defintions document", olddoc instanceof OpenDefinitionsDocument);
+    assertTrue("the active pane should have an open defintions document", ddoc instanceof OpenDefinitionsDocument);
   }
   
 }

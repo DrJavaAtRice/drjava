@@ -132,25 +132,25 @@ public class DocumentCacheTest extends GlobalModelTestCase {
     assertEquals("There should still be 0 documents in the cache", 0, _cache.getNumInCache());
     
     // Activate all documents and make sure that the right ones get kicked out
-    doc1.getDocument();
-    doc2.getDocument();
-    doc3.getDocument();
-    doc4.getDocument();
-    doc5.getDocument();
-    doc6.getDocument();
-    doc1.getDocument();
-    doc2.getDocument();
-    doc3.getDocument();
-    doc4.getDocument();
+    doc1.getLength();
+    doc2.getLength();
+    doc3.getLength();
+    doc4.getLength();
+    doc5.getLength();
+    doc6.getLength();
+    doc1.getLength();
+    doc2.getLength();
+    doc3.getLength();
+    doc4.getLength();
     assertFalse("The document 5 should have been kicked out of the cache", _cache.isDDocInCache(doc5));
     assertFalse("The document 6 should have been kicked out of the cache", _cache.isDDocInCache(doc6));
     
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
     
     // Test the LRU to make sure the documents are kicked out in the right order
-    doc5.getDocument();
+    doc5.getLength();
     assertFalse("doc1 should have been kicked out first", _cache.isDDocInCache(doc1));
-    doc6.getDocument();
+    doc6.getLength();
     assertFalse("doc2 should have been kicked out first", _cache.isDDocInCache(doc2));
   }
   
@@ -185,7 +185,7 @@ public class DocumentCacheTest extends GlobalModelTestCase {
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
   }
   
-  public void testReconstructor(){
+  public void testReconstructor() throws IOException{
     final int i = 0;
     DDReconstructor d = new DDReconstructor(){
       public DefinitionsDocument make(){
@@ -202,7 +202,7 @@ public class DocumentCacheTest extends GlobalModelTestCase {
     _cache.update(doc1, d);
     assertFalse("The document should not be in the cache after an update", _cache.isDDocInCache(doc1));
     
-    doc1.getDocument();
+    _cache.get(doc1); // force the cache to reconstruct the document.
 
     assertEquals("The make in the reconstructor was called 1nce", 1, _doc_made);
     assertEquals("The save in the reconstructor was not called", 0, _doc_saved);
@@ -213,7 +213,7 @@ public class DocumentCacheTest extends GlobalModelTestCase {
    OpenDefinitionsDocument doc1 = _model.newFile();
    assertTrue("The document should now be closed", _model.closeFile(doc1));
    try{
-     doc1.getDocument();
+     doc1.getLength();
      fail("the open defintions document should not be in the cache");
    }catch(NoSuchDocumentException e){     
    }
@@ -227,22 +227,22 @@ public class DocumentCacheTest extends GlobalModelTestCase {
    OpenDefinitionsDocument doc4 = _model.newFile();
    OpenDefinitionsDocument doc5 = _model.newFile();
 
-   int numDocListeners = doc1.getDocument().getDocumentListeners().length;
-   int numUndoListeners = doc1.getDocument().getUndoableEditListeners().length;
+   int numDocListeners = doc1.getDocumentListeners().length;
+   int numUndoListeners = doc1.getUndoableEditListeners().length;
    
-   doc1.getDocument();
-   doc2.getDocument();
-   doc3.getDocument();
-   doc4.getDocument();
+   doc1.getLength();
+   doc2.getLength();
+   doc3.getLength();
+   doc4.getLength();
 
    // this will kick document one out of the cache
-   doc5.getDocument();
+   doc5.getLength();
  
    // this will reconstruct document 1
-   doc1.getDocument();
+   doc1.getLength();
    
-   assertEquals("the number of document listeners is the same after reconstruction", numDocListeners, doc1.getDocument().getDocumentListeners().length);
-   assertEquals("the number of undoableEditListeners is the same after reconstruction", numUndoListeners, doc1.getDocument().getUndoableEditListeners().length);
+   assertEquals("the number of document listeners is the same after reconstruction", numDocListeners, doc1.getDocumentListeners().length);
+   assertEquals("the number of undoableEditListeners is the same after reconstruction", numUndoListeners, doc1.getUndoableEditListeners().length);
 
 
    

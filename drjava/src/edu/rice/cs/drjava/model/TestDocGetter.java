@@ -115,13 +115,14 @@ public class TestDocGetter extends DummyGetDocuments {
     File _file;
     TestOpenDoc(DefinitionsDocument doc) {
       _doc = doc;
+      _plainDocument = doc;
       _file = null;
     }
 
     /**
      * This is the only method that we care about.
      */
-    public DefinitionsDocument getDocument() {
+    protected DefinitionsDocument getDocument() {
       return _doc;
     }
 

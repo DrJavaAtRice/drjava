@@ -59,12 +59,14 @@ import java.io.*;
 
 import java.io.File;
 
+import edu.rice.cs.util.Pair;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
+import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileMovedException;
@@ -99,6 +101,19 @@ import edu.rice.cs.drjava.model.OperationCanceledException;
  */
 public class DefinitionsDocument extends PlainDocument implements OptionConstants {
   
+  List<DocumentClosedListener> _closedListeners = new LinkedList<DocumentClosedListener>();
+  
+  public void addDocumentClosedListener(DocumentClosedListener l){
+    _closedListeners.add(l);
+  }
+  
+  public void removeDocumentClosedListener(DocumentClosedListener l){
+    _closedListeners.remove(l);
+  }
+  
+  
+  
+  
   // begin debug code
   
   private boolean _closed = false;
@@ -109,8 +124,20 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       }
   }
   
+  /**
+   * Called when kicked out of the document cache 
+   * so that the references made to it may be released
+   * to let this be GC'd
+   */
   public void close(){
-    _closed = true;
+    _removeIndenter();
+    
+    for(DocumentClosedListener l: _closedListeners){
+      l.close();
+    }
+    _closedListeners = new LinkedList<DocumentClosedListener>();
+    
+    _closed = false;
   }
   
   // end debug code
@@ -210,6 +237,11 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    */
   private final GlobalEventNotifier _notifier;
 
+  // Saved here to allow the listener to be removed easily
+  // This is needed to allow for garbage collection
+  private OptionListener<Integer> _listener1;
+  private OptionListener<Boolean> _listener2;
+  
   /**
    * Convenience constructor for using a custom indenter.
    * @param indenter custom indenter class
@@ -255,30 +287,39 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     _undoManager = undoManager;
   }
   
+  private void _removeIndenter(){
+    DrJava.getConfig().removeOptionListener(INDENT_LEVEL,
+                                         _listener1);
+    DrJava.getConfig().removeOptionListener(AUTO_CLOSE_COMMENTS,
+                                         _listener2);
+  }
   
   private void _initNewIndenter(){
     // Create the indenter from the config values
 
-    
-    DrJava.getConfig().addOptionListener(INDENT_LEVEL,
-                                         new OptionListener<Integer>() {
+    _listener1 = new OptionListener<Integer>() {
       public void optionChanged(OptionEvent<Integer> oce) {
         _indenter.buildTree(oce.value.intValue());
       }
-    });
-    DrJava.getConfig().addOptionListener(AUTO_CLOSE_COMMENTS,
-                                         new OptionListener<Boolean>() {
+    };
+    
+    _listener2 = new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {
         _indenter.buildTree(DrJava.getConfig().getSetting(INDENT_LEVEL).intValue());
       }
-    });
+    };
+    
+    DrJava.getConfig().addOptionListener(INDENT_LEVEL,
+                                         _listener1);
+    DrJava.getConfig().addOptionListener(AUTO_CLOSE_COMMENTS,
+                                         _listener2);
   }
 
   
-  public void setUndoManager(CompoundUndoManager undoManager){
-    if(undoManager != null)
-      _undoManager = undoManager;
-  }
+//  public void setUndoManager(CompoundUndoManager undoManager){
+//    if(undoManager != null)
+//      _undoManager = undoManager;
+//  }
 
   
   
@@ -3092,7 +3133,25 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * used to help track down memory leaks
    */
 //  protected void finalize() throws Throwable{
-//    System.out.println("done with document for " + _odd);
+//    System.out.println("destroying DefDocument for " + _odd);
 //    super.finalize();
 //  }
+//  
+//  private List<Pair<Option, OptionListener>> _optionListeners = new LinkedList<Option, OptionListener>>();
+//
+//  public void clearOptionListeners(){
+//    for(Pair<Option, OptionListener> l: _optionListeners){
+//      DrJava.getConfig().removeOptionListener( l.getFirst(), l.getSecond());
+//    }
+//    _optionListeners.clear();
+//  }
+//  
+//  public void addOptionListener(Option op, OptionListener l){
+//    DrJava.getConfig().addOptionListener(op, l);
+//    _optionListeners.add(new Pair<Option, OptionListener>(op, l));
+//  }
+  
+  public String toString() {
+    return "ddoc for " + _odd;
+  }
 }

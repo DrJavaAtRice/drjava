@@ -160,10 +160,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   protected void changeDocumentText(String s, OpenDefinitionsDocument doc)
     throws BadLocationException
   {
-    Document document = doc.getDocument();
-    document.remove(0, document.getLength());
+    doc.remove(0, doc.getLength());
     assertLength(0, doc);
-    document.insertString(0, s, null);
+    doc.insertString(0, s, null);
     assertModified(true, doc);
     assertContents(s, doc);
   }
@@ -442,17 +441,17 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   {
     assertEquals("document length",
                  len,
-                 doc.getDocument().getLength());
+                 doc.getLength());
   }
 
   protected void assertContents(String s, OpenDefinitionsDocument doc)
     throws BadLocationException
   {
-    int len = doc.getDocument().getLength();
+    int len = doc.getLength();
 
     assertEquals("document contents",
                  s,
-                 doc.getDocument().getText(0, len));
+                 doc.getText(0, len));
   }
 
   protected void assertCompileErrorsPresent(boolean b) {

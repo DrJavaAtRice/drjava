@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import java.util.Vector;
+import java.util.List;
 import java.io.*;
 import java.awt.print.*;
 import javax.swing.ProgressMonitor;
@@ -59,6 +60,7 @@ import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.junit.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.docnavigation.*;
 
 public class DummyOpenDefDoc implements OpenDefinitionsDocument {  
@@ -112,7 +114,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
    * Gets the definitions document being handled.
    * @return document being handled
    */
-  public DefinitionsDocument getDocument() {
+  protected DefinitionsDocument getDocument() {
     throw new UnsupportedOperationException("Dummy method");
   }
   
@@ -363,7 +365,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   }
   
   /**
-   * A forwarding method to comment out the current line or selection
+   * A forwardidefDocng method to comment out the current line or selection
    * in the definitions.
    */
   public void commentLinesInDefinitions(int selStart, int selEnd) {
@@ -496,75 +498,146 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   /**
    * Implementation of the javax.swing.text.Document interface
    */
+  protected Document _plainDocument = new PlainDocument();
+  
   public void addDocumentListener(DocumentListener listener){
-    throw new UnsupportedOperationException("Dummy method");
+    _plainDocument.addDocumentListener(listener);
   }
   
   public void addUndoableEditListener(UndoableEditListener listener){
-    throw new UnsupportedOperationException("Dummy method");
+    _plainDocument.addUndoableEditListener(listener);
   }
   
   public Position createPosition(int offs) throws BadLocationException{
-    throw new UnsupportedOperationException("Dummy method");
+    return _plainDocument.createPosition(offs);
   }
   
   public Element getDefaultRootElement(){
-    throw new UnsupportedOperationException("Dummy method");
+    return _plainDocument.getDefaultRootElement();
   }
   
   public Position getEndPosition() {
-    throw new UnsupportedOperationException("Dummy method");
+    return _plainDocument.getEndPosition();
   }
   
   public int getLength(){
-    throw new UnsupportedOperationException("Dummy method");
+    return _plainDocument.getLength();
   }
   
   public Object getProperty(Object key){
-    throw new UnsupportedOperationException("Dummy method");
+    return _plainDocument.getProperty(key);
   }
   
   public Element[] getRootElements(){
-    throw new UnsupportedOperationException("Dummy method");
+    return _plainDocument.getRootElements();
   }
   
   public Position getStartPosition(){
-    throw new UnsupportedOperationException("Dummy method");
+    return _plainDocument.getStartPosition();
   }
   
   public String getText(int offset, int length) throws BadLocationException{
-    throw new UnsupportedOperationException("Dummy method");
+    return _plainDocument.getText(offset, length);
   }
   
   public void getText(int offset, int length, Segment txt) throws BadLocationException{
-    throw new UnsupportedOperationException("Dummy method");
+    _plainDocument.getText(offset, length, txt);
   }
   
   public void insertString(int offset, String str, AttributeSet a) throws BadLocationException{
-    throw new UnsupportedOperationException("Dummy method");
+    _plainDocument.insertString(offset, str, a);
   }
   
   public void putProperty(Object key, Object value){
-    throw new UnsupportedOperationException("Dummy method");
+    _plainDocument.putProperty(key, value);
   }
   
   public void remove(int offs, int len) throws BadLocationException{
-    throw new UnsupportedOperationException("Dummy method");
+    _plainDocument.remove(offs, len);
   }
   
   public void removeDocumentListener(DocumentListener listener) {
-    throw new UnsupportedOperationException("Dummy method");
+    _plainDocument.removeDocumentListener(listener);
   }
   
   public void removeUndoableEditListener(UndoableEditListener listener){
-    throw new UnsupportedOperationException("Dummy method");
+    _plainDocument.removeUndoableEditListener(listener);
   }
   
   public void render(Runnable r) {
-    throw new UnsupportedOperationException("Dummy method");
+    _plainDocument.render(r);
   }
   
   /**
-     * end implementation of javax.swing.text.Document interface
-     */
+   * end implementation of javax.swing.text.Document interface
+   */
+  
+  
+  
+  /**
+   * decorater patter for the definitions document
+   */
+  public CompoundUndoManager getUndoManager(){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void commentLines(int selStart, int selEnd){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void uncommentLines(int selStart, int selEnd){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void indentLines(int selStart, int selEnd){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int getCurrentCol() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public boolean getClassFileInSync(){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int getIntelligentBeginLinePos(int currPos) throws BadLocationException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int getOffset(int lineNum) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public String getQualifiedClassName() throws ClassNameNotFoundException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public String getQualifiedClassName(int pos) throws ClassNameNotFoundException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public ReducedModelState getStateAtCurrent(){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void resetUndoManager() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+
+  public File getCachedClassFile() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+
+  public DocumentListener[] getDocumentListeners() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public UndoableEditListener[] getUndoableEditListeners() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int getCurrentLocation() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
 }

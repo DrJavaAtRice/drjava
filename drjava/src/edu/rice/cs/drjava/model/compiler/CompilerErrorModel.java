@@ -263,7 +263,7 @@ public class CompilerErrorModel<T extends CompilerError> {
     if (errorBefore >= start) { // there's an error before the dot
       int errPos = _positions[errorBefore].getOffset();
       try {
-        String betweenDotAndErr = odd.getDocument().getText(errPos, offset - errPos);
+        String betweenDotAndErr = odd.getText(errPos, offset - errPos);
 
         if (betweenDotAndErr.indexOf('\n') == -1) {
           shouldSelect = errorBefore;
@@ -280,7 +280,7 @@ public class CompilerErrorModel<T extends CompilerError> {
       // then it's not on this line
       int errPos = _positions[errorAfter].getOffset();
       try {
-        String betweenDotAndErr = odd.getDocument().getText(offset, errPos - offset);
+        String betweenDotAndErr = odd.getText(offset, errPos - offset);
 
         if (betweenDotAndErr.indexOf('\n') == -1) {
           shouldSelect = errorAfter;
@@ -381,7 +381,7 @@ public class CompilerErrorModel<T extends CompilerError> {
         File file = _errors[curError].file();
         Document document;
         try {
-          document = _model.getDocumentForFile(file).getDocument();
+          document = _model.getDocumentForFile(file);
         }
         catch (Exception e) {
           // This is intended to catch IOException or OperationCanceledException

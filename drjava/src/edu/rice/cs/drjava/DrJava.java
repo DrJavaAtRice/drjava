@@ -639,6 +639,7 @@ public class DrJava implements OptionConstants {
 
     // Run a new copy of DrJava and exit
     try {
+      System.out.println(classpath);
       ExecJVM.runJVM("edu.rice.cs.drjava.DrJava", classArgs,
                      classpath, jvmArgs);
       System.exit(0);

@@ -72,7 +72,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
     assertTrue("Class file should not exist before compile",
-               doc.getDocument().getCachedClassFile() == null);
+               doc.getCachedClassFile() == null);
     assertTrue("should not be in sync before compile",
                !doc.checkIfClassFileInSync());
     doc.startCompile();
@@ -83,7 +83,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
     assertTrue("should be in sync after compile",
                doc.checkIfClassFileInSync());
-    doc.getDocument().insertString(0, "hi", null);
+    doc.insertString(0, "hi", null);
     assertTrue("should not be in sync after modification",
                !doc.checkIfClassFileInSync());
 
@@ -116,7 +116,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
     assertTrue("Class file should not exist before compile",
-               doc.getDocument().getCachedClassFile() == null);
+               doc.getCachedClassFile() == null);
     assertTrue("should not be in sync before compile",
                !doc.checkIfClassFileInSync());
     doc.startCompile();

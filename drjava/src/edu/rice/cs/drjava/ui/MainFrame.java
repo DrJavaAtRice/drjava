@@ -71,6 +71,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.platform.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DocumentUIListener;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
@@ -631,7 +632,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 //      Component c = KeyboardFocusManager.getFocusOwner();
       if (_currentDefPane.hasFocus()) {
         _currentDefPane.endCompoundEdit();
-        CompoundUndoManager undoMan = _model.getActiveDocument().getDocument().getUndoManager();
+        CompoundUndoManager undoMan = _model.getActiveDocument().getUndoManager();
         int key = undoMan.startCompoundEdit();
         super.actionPerformed(e);
         undoMan.endCompoundEdit(key);
@@ -676,9 +677,8 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _putTextIntoDefinitions(String text) {
     int caretPos = _currentDefPane.getCaretPosition();
-    DefinitionsDocument doc = _model.getActiveDocument().getDocument();
     try {
-      doc.insertString(caretPos, text, null);
+      _model.getActiveDocument().insertString(caretPos, text, null);
     }
     catch (BadLocationException ble) {
       throw new UnexpectedException(ble);
@@ -776,13 +776,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent ae) {
       // Delegate everything to the DefinitionsDocument.
       OpenDefinitionsDocument openDoc = _model.getActiveDocument();
-      DefinitionsDocument doc = openDoc.getDocument();
       int caretPos = _currentDefPane.getCaretPosition();
       openDoc.syncCurrentLocationWithDefinitions(caretPos);
       int start = _currentDefPane.getSelectionStart();
       int end = _currentDefPane.getSelectionEnd();
       _currentDefPane.endCompoundEdit();
-      doc.commentLines(start, end);
+      openDoc.commentLines(start, end);
     }
   };
 
@@ -793,13 +792,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent ae) {
       // Delegate everything to the DefinitionsDocument.
       OpenDefinitionsDocument openDoc = _model.getActiveDocument();
-      DefinitionsDocument doc = openDoc.getDocument();
       int caretPos = _currentDefPane.getCaretPosition();
       openDoc.syncCurrentLocationWithDefinitions(caretPos);
       int start = _currentDefPane.getSelectionStart();
       int end = _currentDefPane.getSelectionEnd();
       _currentDefPane.endCompoundEdit();
-      doc.uncommentLines(start, end);
+      openDoc.uncommentLines(start, end);
     }
   };
 
@@ -1090,12 +1088,12 @@ public class MainFrame extends JFrame implements OptionConstants {
   protected Action _cutLineAction = new AbstractAction("Cut Line") {
     public void actionPerformed(ActionEvent ae) {
       ActionMap _actionMap = _currentDefPane.getActionMap();
-      int oldCol = _model.getActiveDocument().getDocument().getCurrentCol();
+      int oldCol = _model.getActiveDocument().getCurrentCol();
       _actionMap.get(DefaultEditorKit.selectionEndLineAction).actionPerformed(ae);
       // if oldCol is equal to the current column, then selectionEndLine did
       // nothing, so we're at the end of the line and should remove the newline
       // character
-      if (oldCol == _model.getActiveDocument().getDocument().getCurrentCol()) {
+      if (oldCol == _model.getActiveDocument().getCurrentCol()) {
         // Puts newline character on the clipboard also, not just content as before.
         _actionMap.get(DefaultEditorKit.selectionForwardAction).actionPerformed(ae);
         cutAction.actionPerformed(ae);
@@ -1149,8 +1147,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       int currPos = _currentDefPane.getCaretPosition();
       OpenDefinitionsDocument openDoc = _model.getActiveDocument();
       openDoc.syncCurrentLocationWithDefinitions(currPos);
-      DefinitionsDocument doc = openDoc.getDocument();
-      return doc.getIntelligentBeginLinePos(currPos);
+      return openDoc.getIntelligentBeginLinePos(currPos);
     }
     catch (BadLocationException ble) {
       // Shouldn't happen: we're using a legal position
@@ -1430,7 +1427,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     // DefinitionsPane
     JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
     _currentDefPane = (DefinitionsPane) defScroll.getViewport().getView();
-
+    _currentDefPane.notifyActive();
+    
     // set up key-bindings
     KeyBindingManager.Singleton.setMainFrame(this);
     KeyBindingManager.Singleton.setActionMap(_currentDefPane.getActionMap());
@@ -1940,7 +1938,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     });
   }
-
+  
+  
   /**
    * Changes the message text toward the right of the status bar
    * @param msg The message to place in the status bar
@@ -2322,7 +2321,9 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   private void _saveAll() {
     try {
-      _saveProject();
+      if(_model.isProjectActive()){
+        _saveProject();
+      }
       _model.saveAllFiles(_saveSelector);
     }
     catch (IOException ioe) {
@@ -3988,7 +3989,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     DefinitionsPane pane = new DefinitionsPane(this, doc);
 
     // Add listeners
-    _installNewDocumentListener(doc.getDocument());
+    _installNewDocumentListener(doc);
     ErrorCaretListener caretListener = new ErrorCaretListener(doc, pane, this);
     pane.addErrorCaretListener(caretListener);
 
@@ -4020,7 +4021,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     return scroll;
   }
-
+  
 
   private void _setUpPanes() {
    
@@ -4125,7 +4126,11 @@ public class MainFrame extends JFrame implements OptionConstants {
       _currentDefPane.notifyActive();
     }
     else {
-      _currentDefPane.setEditable(true);
+      try{
+        _currentDefPane.setEditable(true);
+      }catch(NoSuchDocumentException e){
+        // it's ok.
+      }
       _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
       _currentDefPane.notifyActive();
       _currentDefPane.setEditable(false);
@@ -4268,7 +4273,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     Font f = DrJava.getConfig().getSetting(FONT_MAIN);
 
     Iterator scrollPanes = _defScrollPanes.values().iterator();
+    
+    int i=0;
     while (scrollPanes.hasNext()) {
+      i++;
       JScrollPane scroll = (JScrollPane) scrollPanes.next();
       if (scroll != null) {
         DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
@@ -4414,7 +4422,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // if the document is untitled, don't show that it is out of sync since it
     // can't be debugged anyway
     if (_model.getActiveDocument().isUntitled() ||
-        _model.getActiveDocument().getDocument().getClassFileInSync())
+        _model.getActiveDocument().getClassFileInSync())
     {
       // Hide message
       if (_debugPanel.getStatusText().equals(DEBUGGER_OUT_OF_SYNC)) {
@@ -4574,10 +4582,9 @@ public class MainFrame extends JFrame implements OptionConstants {
 
           if (shouldHighlight) {
             _removeThreadLocationHighlight();
-            DefinitionsDocument defDoc = doc.getDocument();
-            int startOffset = defDoc.getOffset(lineNumber);
+            int startOffset = doc.getOffset(lineNumber);
             if (startOffset > -1) {
-              int endOffset = defDoc.getLineEndPos(startOffset);
+              int endOffset = doc.getLineEndPos(startOffset);
               if (endOffset > -1) {
                 _currentThreadLocationHighlight =
                   _currentDefPane.getHighlightManager().addHighlight(startOffset, endOffset,
@@ -4857,6 +4864,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     /** Does the work of closing a file */
     private void _fileClosed(OpenDefinitionsDocument doc){
       _removeErrorListener(doc);
+      ((DefinitionsPane)_defScrollPanes.get(doc).getViewport().getView()).close();
       _defScrollPanes.remove(doc);
     }
 
@@ -4940,7 +4948,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
         catch(InvocationTargetException e2) {
           /** we don't expect _fileOpened() to throw any exceptions */
-          throw new UnexpectedException(e2);
+          throw new UnexpectedException(e2.getTargetException());
         }
       }
       else {
@@ -5110,7 +5118,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             String className;
             try {
               className =
-                _model.getActiveDocument().getDocument().getQualifiedClassName();
+                _model.getActiveDocument().getQualifiedClassName();
               className = className.replace('.', File.separatorChar);
             }
             catch (ClassNameNotFoundException cnf) {

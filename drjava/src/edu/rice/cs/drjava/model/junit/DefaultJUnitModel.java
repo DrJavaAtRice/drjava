@@ -187,9 +187,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       while (it.hasNext()) {
         try {
           OpenDefinitionsDocument doc = it.next();
-          DefinitionsDocument dd = doc.getDocument();
           if (!doc.isUntitled()) {
-            String cn = dd.getQualifiedClassName();
+            String cn = doc.getQualifiedClassName();
             classNames.add(cn);
             File f;
             try {
@@ -280,7 +279,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           }
           String packageName;
           try {
-            packageName = doc.getDocument().getPackageName();
+            packageName = doc.getPackageName();
           }
           catch (InvalidPackageException e) {
             nonTestCase(false);

@@ -66,6 +66,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.model.print.*;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.repl.*;
@@ -709,10 +710,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     String test = buf.toString();
 
     OpenDefinitionsDocument openDoc = newFile();
-    DefinitionsDocument doc = openDoc.getDocument();
     try {
-      doc.insertString(0, test, null);
-      doc.indentLines(0, test.length());
+      openDoc.insertString(0, test, null);
+      openDoc.indentLines(0, test.length());
     }
     catch (BadLocationException ble) {
       throw new UnexpectedException(ble);
@@ -1705,12 +1705,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         // Start out with empty list for the very first time the document is made
         private DocumentListener[] _list = {};
         
-        private CompoundUndoManager _undo = null;
-        
+//        private CompoundUndoManager _undo = null;
+//        
         private UndoableEditListener[] _undoListeners = {};
         
         public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException{
-          //          System.out.println("making doc" + ConcreteOpenDefDoc.this);
           DefinitionsDocument tempDoc;
             tempDoc = new DefinitionsDocument(_notifier);
             tempDoc.setOpenDefDoc(ConcreteOpenDefDoc.this);
@@ -1720,7 +1719,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             FileReader reader = new FileReader(_file);
             _editorKit.read(reader, tempDoc, 0);
             reader.close(); // win32 needs readers closed explicitly!
-            
+          }
+          
             tempDoc.setCurrentLocation(_loc);
             for(DocumentListener d : _list) {
               if (d instanceof DocumentUIListener) {
@@ -1728,11 +1728,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
               }
             }
             for(UndoableEditListener l: _undoListeners){
-              tempDoc.addUndoableEditListener(l);              
+              tempDoc.addUndoableEditListener(l);
             }
             tempDoc.resetModification();
-          }
-          tempDoc.setUndoManager(_undo);
+//            tempDoc.setUndoManager(_undo);
           try {
             _packageName = tempDoc.getPackageName();
           } catch(InvalidPackageException e) {
@@ -1742,14 +1741,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           return tempDoc;
         }
         public void saveDocInfo(DefinitionsDocument doc) {
-          _undo = doc.getUndoManager();
-          _undoListeners = doc.getUndoableEditListeners();
+//          _undo = doc.getUndoManager();
+//          _undoListeners = doc.getUndoableEditListeners();
           _loc = doc.getCurrentLocation();
           _list = doc.getDocumentListeners();
         }
       };
     }
-    
+
     /**
      * Originally designed to allow undoManager to set the current document to
      * be modified whenever an undo or redo is performed.
@@ -1764,7 +1763,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * Gets the definitions document being handled.
      * @return document being handled
      */
-    public DefinitionsDocument getDocument() {
+    protected DefinitionsDocument getDocument() {
       try{
         return _cache.get(this);
       }catch(FileMovedException e){
@@ -2353,6 +2352,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     
     public void close(){
+//      System.err.println("---------------------------");
+//      new RuntimeException().printStackTrace(System.err);
+//      System.err.println("---------------------------");
       removeFromDebugger();
       _cache.removeDoc(this);      
     }
@@ -2370,12 +2372,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         // file is not cleared before this fact is discovered.
 
         FileReader reader = new FileReader(file);
-        DefinitionsDocument tempDoc = doc.getDocument();
-
-        tempDoc.remove(0,tempDoc.getLength());
+        doc.remove(0,doc.getLength());
 
 
-        _editorKit.read(reader, tempDoc, 0);
+        _editorKit.read(reader, doc, 0);
         reader.close(); // win32 needs readers closed explicitly!
 
         resetModification();
@@ -2752,10 +2752,28 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       getDocument().addDocumentListener(listener);
     }
     
+    
+    List<UndoableEditListener> _undoableEditListeners = new LinkedList<UndoableEditListener>();
     public void addUndoableEditListener(UndoableEditListener listener){
+      _undoableEditListeners.add(listener);
       getDocument().addUndoableEditListener(listener);
     }
+
+    public void removeUndoableEditListener(UndoableEditListener listener){
+      _undoableEditListeners.remove(listener);
+      getDocument().removeUndoableEditListener(listener);
+    }
     
+    public UndoableEditListener[] getUndoableEditListeners() {
+      return getDocument().getUndoableEditListeners();
+    }
+ 
+
+//    public List<UndoableEditListener> getUndoableEditListeners(){
+//      return _undoableEditListeners;
+//    }
+    
+
     public Position createPosition(int offs) throws BadLocationException{
       return getDocument().createPosition(offs);
     }
@@ -2808,10 +2826,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       getDocument().removeDocumentListener(listener);
     }
     
-    public void removeUndoableEditListener(UndoableEditListener listener){
-      getDocument().removeUndoableEditListener(listener);
-    }
-    
     public void render(Runnable r) {
       getDocument().render(r);
     }
@@ -2821,9 +2835,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      */
     
     
+    
     /**
      * decorater patter for the definitions document
      */
+    public CompoundUndoManager getUndoManager(){
+      return getDocument().getUndoManager();
+    }
+
     public int getLineStartPos(int pos) {
       return getDocument().getLineStartPos(pos);
     }
@@ -2832,6 +2851,65 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       return getDocument().getLineEndPos(pos);
     }
 
+    public void commentLines(int selStart, int selEnd){
+      getDocument().commentLines(selStart, selEnd);
+    }
+    
+    public void uncommentLines(int selStart, int selEnd){
+      getDocument().uncommentLines(selStart, selEnd);
+    }
+    
+    public void indentLines(int selStart, int selEnd){
+      getDocument().indentLines(selStart, selEnd);
+    }
+    
+    public int getCurrentCol() {
+      return getDocument().getCurrentCol();
+    }
+
+    public boolean getClassFileInSync(){
+      return getDocument().getClassFileInSync();
+    }
+
+    public int getIntelligentBeginLinePos(int currPos) throws BadLocationException {
+      return getDocument().getIntelligentBeginLinePos(currPos);
+    }
+
+    public int getOffset(int lineNum) {
+      return getDocument().getOffset(lineNum);
+    }
+    
+    public String getQualifiedClassName() throws ClassNameNotFoundException {
+      return getDocument().getQualifiedClassName();
+    }
+
+    public String getQualifiedClassName(int pos) throws ClassNameNotFoundException {
+      return getDocument().getQualifiedClassName(pos);
+    }
+
+    public ReducedModelState getStateAtCurrent(){
+      return getDocument().getStateAtCurrent();
+    }
+
+    public void resetUndoManager() {
+      getDocument().resetUndoManager();
+    }
+
+    public File getCachedClassFile() {
+      return getDocument().getCachedClassFile();
+    }
+    
+    public DocumentListener[] getDocumentListeners() {
+      return getDocument().getDocumentListeners();
+    }
+    
+    public int getCurrentLocation() {
+      return getDocument().getCurrentLocation();
+    }
+    
+//    protected void finalize() throws Throwable{
+//      System.err.println("Destroying ODD: " + this);
+//    }
     
   }
 

@@ -45,14 +45,17 @@
 
 package edu.rice.cs.drjava.ui;
 
-import  javax.swing.*;
-import  javax.swing.undo.*;
-import  javax.swing.event.*;
-import  javax.swing.text.*;
-import  java.awt.*;
-import  java.awt.event.*;
+import javax.swing.*;
+import javax.swing.undo.*;
+import javax.swing.event.*;
+import javax.swing.text.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.List;
+import java.util.LinkedList;
 
 // TODO: Check synchronization.
+import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -66,7 +69,6 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
-
 /**
  * The pane in which work on a given OpenDefinitionsDocument occurs.
  * A DefinitionsPane is tied to a single document, which cannot be
@@ -80,13 +82,6 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    * are created.
    */
   private static DefinitionsEditorKit EDITOR_KIT;
-  
-  /**
-   * A dummy value for the document for when any instance of the pane
-   * is set to inactive
-   */
-  private static PlainDocument NULL_DOCUMENT = new PlainDocument();
-  
     
   /**
    * Our parent window.
@@ -96,7 +91,11 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   private UndoAction _undoAction;
   private RedoAction _redoAction;
   private HighlightManager _highlightManager;
-
+  
+  
+  private final Document NULL_DOCUMENT = new PlainDocument();
+//  private Document _defdoc;
+  
   /**
    * Flag used to determine if the user has already been warned about debugging
    * when the document within this defpane has been modified since its last save.
@@ -157,6 +156,11 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     THREAD_PAINTER =
     new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_THREAD_COLOR));
 
+  /**
+   * The name of the keymap added to the super class (saved so it can be removed)
+   */
+  public static String INDENT_KEYMAP_NAME = "INDENT_KEYMAP";
+  
   /**
    * The OptionListener for DEFINITIONS_MATCH_COLOR
    */
@@ -226,7 +230,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
      */
     public void undoableEditHappened(UndoableEditEvent e) {
       UndoWithPosition undo = new UndoWithPosition(e.getEdit(), getCaretPosition());
-      _doc.getDocument().getUndoManager().addEdit(undo);
+      _doc.getUndoManager().addEdit(undo);
       getRedoAction().setEnabled(false);
     }
   };
@@ -399,7 +403,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
 
       // Only indent if in code
       _doc.syncCurrentLocationWithDefinitions(getCaretPosition());
-      ReducedModelState state = _doc.getDocument().getStateAtCurrent();
+      ReducedModelState state = _doc.getStateAtCurrent();
       if (state.equals(ReducedModelState.FREE) || _indentNonCode) {
         indent(getIndentReason());
       }
@@ -450,7 +454,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    */
   public void endCompoundEdit() {
     if (_inCompoundEdit) {
-      CompoundUndoManager undoMan = _doc.getDocument().getUndoManager();
+      CompoundUndoManager undoMan = _doc.getUndoManager();
       _inCompoundEdit = false;
       undoMan.endCompoundEdit(_compoundEditKey);
     }
@@ -487,7 +491,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
           endCompoundEdit();
         }
 
-        CompoundUndoManager undoMan = _doc.getDocument().getUndoManager();
+        CompoundUndoManager undoMan = _doc.getUndoManager();
         int key = undoMan.startCompoundEdit();
 //        System.out.println("supering 1 " + isAltF4);
         super.processKeyEvent(e);
@@ -543,7 +547,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
         if (((ks.getModifiers() & mask) == 0) && ks.getKeyChar() != '\b') {
           int _keyval = (int) e.getKeyChar();
           if (_keyval >= 32 && _keyval <= 126) {
-            CompoundUndoManager undoMan = _doc.getDocument().getUndoManager();
+            CompoundUndoManager undoMan = _doc.getUndoManager();
             if (!_inCompoundEdit) {
               _inCompoundEdit = true;
               _compoundEditKey = undoMan.startCompoundEdit();
@@ -579,6 +583,8 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     EDITOR_KIT = editorKit;
   }
 
+  
+  Keymap ourMap;
   /**
    * Constructor.  Sets up all the defaults.
    * @param mf the parent window
@@ -587,8 +593,13 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
                          OpenDefinitionsDocument doc)
   {
     _mainFrame = mf;
+    
+    // Start the pane out with the NULL_DOCUMENT so that
+    // it doesn't start out with a reference to the defdoc
     _doc = doc;
-    setDocument(_doc);
+    super.setDocument(NULL_DOCUMENT);
+    _resetUndo();
+    
     setContentType("text/java");
     //setFont(new Font("Courier", 0, 12));
     Font mainFont = DrJava.getConfig().getSetting(FONT_MAIN);
@@ -598,7 +609,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     setEditable(true);
 
     // add actions for indent key
-    Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
+    ourMap = addKeymap(INDENT_KEYMAP_NAME, getKeymap());
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                                  _indentKeyActionLine);
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0),
@@ -621,21 +632,50 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS).booleanValue();
     }
 
+    
+    OptionListener<Color> temp;
+    Pair<Option<Color>, OptionListener<Color>> pair;
+    
+        
     // Setup the color listeners.
-    new ForegroundColorListener(this);
-    new BackgroundColorListener(this);
+    // NOTE: the Foreground/Background listeners add themselves to 
+    //   DrJava.getConfig() in their own constructors.
+    //   Rather than refactor it, we decided to work with that 
+    //   design decision.
+    temp = new ForegroundColorListener(this);
+    pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEFINITIONS_NORMAL_COLOR,temp);
+    _colorOptionListeners.add(pair);
+    
+    temp = new BackgroundColorListener(this);
+    pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEFINITIONS_BACKGROUND_COLOR,temp);
+    _colorOptionListeners.add(pair);
 
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_MATCH_COLOR,
-                                         new MatchColorOptionListener());
-    DrJava.getConfig().addOptionListener( OptionConstants.COMPILER_ERROR_COLOR,
-                                         new ErrorColorOptionListener());
-    DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_BREAKPOINT_COLOR,
-                                         new BreakpointColorOptionListener());
-    DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_THREAD_COLOR,
-                                         new ThreadColorOptionListener());
+    // These listeners do not register themselves in their own constructors.  We do.
+    temp = new MatchColorOptionListener();
+    pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEFINITIONS_MATCH_COLOR, temp);
+    _colorOptionListeners.add(pair);
+    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_MATCH_COLOR, temp);
+    
+    temp = new ErrorColorOptionListener();
+    pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.COMPILER_ERROR_COLOR, temp);
+    _colorOptionListeners.add(pair);
+    DrJava.getConfig().addOptionListener( OptionConstants.COMPILER_ERROR_COLOR, temp);
+    
+    temp = new BreakpointColorOptionListener();
+    pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_COLOR, temp);
+    _colorOptionListeners.add(pair);
+    DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_BREAKPOINT_COLOR, temp);
+    
+    temp = new ThreadColorOptionListener();
+    pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_THREAD_COLOR, temp);
+    _colorOptionListeners.add(pair);
+    DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_THREAD_COLOR, temp);
+
     if (CodeStatus.DEVELOPMENT) {
-      DrJava.getConfig().addOptionListener( OptionConstants.TEXT_ANTIALIAS,
-                                           new AntiAliasOptionListener());
+      OptionListener<Boolean> aaTemp = new AntiAliasOptionListener();
+      Pair<Option<Boolean>, OptionListener<Boolean>> aaPair = new Pair<Option<Boolean>, OptionListener<Boolean>>(OptionConstants.TEXT_ANTIALIAS, aaTemp);
+      _booleanOptionListeners.add(aaPair);
+      DrJava.getConfig().addOptionListener( OptionConstants.TEXT_ANTIALIAS, aaTemp);
     }
 
     createPopupMenu();
@@ -679,9 +719,8 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    */
   public void setCaretPosition(int pos) {
     super.setCaretPosition(pos);
-    System.out.flush();
     _doc.syncCurrentLocationWithDefinitions(pos);
-//    _doc.getDocument().setCurrentLocation(pos);
+//    _doc.setCurrentLocation(pos);
   }
 
   /**
@@ -846,9 +885,9 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    * the Document in our final OpenDefinitionsDocument can
    * be used.
    */
-  public void setDocument(Document doc) {
+  public void setDocument(Document doc){
     if (_doc != null) {
-      if ((doc == null) || (!doc.equals(_doc.getDocument()))) {
+      if ((doc == null) || (!doc.equals(_doc))) {
         throw new IllegalStateException("Cannot set the document of " +
                                         "a DefinitionsPane to a " +
                                         "different document.");
@@ -914,12 +953,12 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   public void removeBreakpointHighlight( Breakpoint bp) {
 
   }
-
+  
   /**
    * Reset undo machinery on setDocument.
    */
   private void setDocument(OpenDefinitionsDocument doc) {
-    super.setDocument(doc.getDocument());
+    super.setDocument(doc);
     _resetUndo();
   }
 
@@ -974,10 +1013,8 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
 
       _saved_vert_pos = _scrollPane.getVerticalScrollBar().getValue();
       _saved_horz_pos = _scrollPane.getHorizontalScrollBar().getValue();
-      
+
       super.setDocument(NULL_DOCUMENT);
-//      _doc.syncCurrentLocationWithDefinitions(loc);
-      
     }
     catch(NoSuchDocumentException e) {
       // This exception was just thrown because the document was just 
@@ -985,7 +1022,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       // We don't need to do any more cleanup.
     }
   }
-  
+    
   /**
    * this function is called when switching a pane to be the active document pane.
    * it allows the pane to do any "startup" it needs to. since setInactive swapped
@@ -993,9 +1030,10 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    * and reset its caret position to the saved location.
    */
   public void notifyActive() {
-//    int loc = _doc.getCurrentDefinitionsLocation();
-    
-    super.setDocument(_doc.getDocument());
+    super.setDocument(_doc);
+    if(_doc.getUndoableEditListeners().length == 0){
+      _resetUndo();
+    }
     setCaretPosition(_position);
     if(_position == _selStart){
       setCaretPosition(_selEnd);
@@ -1004,7 +1042,6 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       setCaretPosition(_selStart);
       moveCaretPosition(_selEnd);
     }
-    
     _doc.syncCurrentLocationWithDefinitions(_position);
     _scrollPane.getVerticalScrollBar().setValue(_saved_vert_pos);
     _scrollPane.getHorizontalScrollBar().setValue(_saved_horz_pos);
@@ -1029,7 +1066,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   }
 
   public int getCurrentCol() {
-    return _doc.getDocument().getCurrentCol();
+    return _doc.getCurrentCol();
   }
   public void setSize(int width, int height) {
     super.setSize(width, height);
@@ -1107,7 +1144,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    * Reset the document Undo list.
    */
   public void resetUndo() {
-    _doc.getDocument().getUndoManager().discardAllEdits();
+    _doc.getUndoManager().discardAllEdits();
 
     _undoAction.updateUndoState();
     _redoAction.updateRedoState();
@@ -1124,7 +1161,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       _redoAction = new RedoAction();
     }
 
-    _doc.getDocument().resetUndoManager();
+    _doc.resetUndoManager();
     
     getDocument().addUndoableEditListener(_undoListener);
     _undoAction.updateUndoState();
@@ -1216,16 +1253,16 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     // Do the indent
     if (doIndent) {
       _mainFrame.hourglassOn();
-      final int key = _doc.getDocument().getUndoManager().startCompoundEdit();
+      final int key = _doc.getUndoManager().startCompoundEdit();
       try {
         _doc.indentLinesInDefinitions(selStart, selEnd, reason, pm);
         //      _indentLines(reason, pm);
-        _doc.getDocument().getUndoManager().endCompoundEdit(key);
+        _doc.getUndoManager().endCompoundEdit(key);
       }
       catch (OperationCanceledException oce) {
         // if canceled, undo the indent; but first, end compound edit
-        _doc.getDocument().getUndoManager().endCompoundEdit(key);
-        _doc.getDocument().getUndoManager().undo(key);
+        _doc.getUndoManager().endCompoundEdit(key);
+        _doc.getUndoManager().undo(key);
         // pm = null, so cancel can't be pressed
         throw new UnexpectedException(oce);
       }
@@ -1235,7 +1272,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
         //the main frame.
         _mainFrame.hourglassOff();
         //pm.close();
-        _doc.getDocument().getUndoManager().endCompoundEdit(key);
+        _doc.getUndoManager().endCompoundEdit(key);
         throw e;
       }
 
@@ -1251,6 +1288,10 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     }
   }
 
+//  protected void finalize() throws Throwable {
+//    System.err.println("finalizing DefinitionsPane: " + _doc);
+//  }
+    
   /**
    * Updates the UI to a new look and feel.
    * Need to update the contained popup menu as well.
@@ -1265,6 +1306,41 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    }
    }*/
 
+  /**
+   * Saved option listeners kept in this field so they can
+   * be removed for garbage collection 
+   */
+  private List<Pair<Option<Color>, OptionListener<Color>>> _colorOptionListeners = 
+    new LinkedList<Pair<Option<Color>, OptionListener<Color>>>();
+    
+  private List<Pair<Option<Boolean>, OptionListener<Boolean>>> _booleanOptionListeners = 
+    new LinkedList<Pair<Option<Boolean>, OptionListener<Boolean>>>();
+  
+  /**
+   * Called when the definitions pane is released from duty.  This
+   * frees up any option listeners that are holding references to
+   * this object so this can be garbage collected.
+   */
+  public void close(){
+    for(Pair<Option<Color>, OptionListener<Color>> p: _colorOptionListeners){
+      DrJava.getConfig().removeOptionListener(p.getFirst(), p.getSecond());
+    }
+    for(Pair<Option<Boolean>, OptionListener<Boolean>> p: _booleanOptionListeners){
+      DrJava.getConfig().removeOptionListener(p.getFirst(), p.getSecond());
+    }
+    _colorOptionListeners.clear();
+    _booleanOptionListeners.clear();
+    
+    ourMap.removeBindings();
+    removeKeymap(ourMap.getName());
+    
+    _popMenu.removeAll();
+  }
+  
+  
+  
+  
+  
   /**
    * The undo action.
    */
@@ -1283,7 +1359,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
      */
     public void actionPerformed(ActionEvent e) {
       try {
-        //        UndoableEdit edit = _doc.getDocument().getNextUndo();
+        //        UndoableEdit edit = _doc.getNextUndo();
         //         int pos = -1;
         //         if (edit != null && edit instanceof UndoWithPosition) {
         //           pos = ((UndoWithPosition)edit).getPosition();
@@ -1293,7 +1369,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
         //           //centerViewOnOffset(pos);
         //           setCaretPosition(pos);
         //         }
-        _doc.getDocument().getUndoManager().undo();
+        _doc.getUndoManager().undo();
         _doc.setModifiedSinceSave();
         _mainFrame.updateFileTitle();
       }
@@ -1309,9 +1385,9 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
      * Updates the undo list, i.e., where we are as regards undo and redo.
      */
     protected void updateUndoState() {
-      if (_doc.getDocument().getUndoManager().canUndo()) {
+      if (_doc.getUndoManager().canUndo()) {
         setEnabled(true);
-        putValue(Action.NAME, _doc.getDocument().getUndoManager().getUndoPresentationName());
+        putValue(Action.NAME, _doc.getUndoManager().getUndoPresentationName());
       }
       else {
         setEnabled(false);
@@ -1339,12 +1415,12 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
      */
     public void actionPerformed(ActionEvent e) {
       try {
-        //        UndoableEdit edit = _doc.getDocument().getNextRedo();
+        //        UndoableEdit edit = _doc.getNextRedo();
         //         int pos = -1;
         //         if (edit instanceof UndoWithPosition) {
         //           pos = ((UndoWithPosition)edit).getPosition();
         //         }
-        _doc.getDocument().getUndoManager().redo();
+        _doc.getUndoManager().redo();
 
         //         if (pos > -1) {
         //           //centerViewOnOffset(pos);
@@ -1363,9 +1439,9 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
      * Updates the redo state, i.e., where we are as regards undo and redo.
      */
     protected void updateRedoState() {
-      if (_doc.getDocument().getUndoManager().canRedo()) {
+      if (_doc.getUndoManager().canRedo()) {
         setEnabled(true);
-        putValue(Action.NAME, _doc.getDocument().getUndoManager().getRedoPresentationName());
+        putValue(Action.NAME, _doc.getUndoManager().getRedoPresentationName());
       }
       else {
         setEnabled(false);

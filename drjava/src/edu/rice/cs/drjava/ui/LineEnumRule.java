@@ -189,5 +189,6 @@ public class LineEnumRule extends JComponent {
 
     return lnf;
   }
+  
 }
 

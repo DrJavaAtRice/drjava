@@ -152,7 +152,7 @@ public class ErrorCaretListener implements CaretListener {
     int errPos = pos.getOffset();
 
     try {
-      String text = _openDoc.getDocument().getText(0, _openDoc.getDocument().getLength());
+      String text = _openDoc.getText(0, _openDoc.getLength());
 
       // Look for the previous newline BEFORE this character. Thus start looking
       // on the character one before this character. If this is not the case,
@@ -165,7 +165,7 @@ public class ErrorCaretListener implements CaretListener {
 
       int nextNewline = text.indexOf('\n', errPos);
       if (nextNewline == -1) {
-        nextNewline = _openDoc.getDocument().getLength();
+        nextNewline = _openDoc.getLength();
       }
 
       removeHighlight();

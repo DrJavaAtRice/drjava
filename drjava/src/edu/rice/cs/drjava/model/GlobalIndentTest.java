@@ -76,14 +76,13 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
   public void testIndentGrowTabAtStart()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
-    Document doc = openDoc.getDocument();
-
-    doc.insertString(0, FOO_EX_1, null);
-    doc.insertString(FOO_EX_1.length(), " " + FOO_EX_2, null);
+    
+    openDoc.insertString(0, FOO_EX_1, null);
+    openDoc.insertString(FOO_EX_1.length(), " " + FOO_EX_2, null);
     openDoc.syncCurrentLocationWithDefinitions(FOO_EX_1.length());
     int loc = openDoc.getCurrentDefinitionsLocation();
     openDoc.indentLinesInDefinitions(loc, loc, Indenter.OTHER, null);
-    _assertContents(FOO_EX_1 + "  " + FOO_EX_2, doc);
+    _assertContents(FOO_EX_1 + "  " + FOO_EX_2, openDoc);
     _assertLocation(FOO_EX_1.length() + 2, openDoc);
   }
 
@@ -96,14 +95,13 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
   public void testIndentGrowTabAtMiddle()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
-    Document doc = openDoc.getDocument();
-
-    doc.insertString(0, FOO_EX_1, null);
-    doc.insertString(FOO_EX_1.length(), " " + FOO_EX_2, null);
+    
+    openDoc.insertString(0, FOO_EX_1, null);
+    openDoc.insertString(FOO_EX_1.length(), " " + FOO_EX_2, null);
     openDoc.syncCurrentLocationWithDefinitions(FOO_EX_1.length() + 5);
     int loc = openDoc.getCurrentDefinitionsLocation();
     openDoc.indentLinesInDefinitions(loc, loc, Indenter.OTHER, null);
-    _assertContents(FOO_EX_1 + "  " + FOO_EX_2, doc);
+    _assertContents(FOO_EX_1 + "  " + FOO_EX_2, openDoc);
     _assertLocation(FOO_EX_1.length() + 6, openDoc);
   }
 
@@ -116,15 +114,14 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
   public void testIndentGrowTabAtEnd()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
-    Document doc = openDoc.getDocument();
-
-    doc.insertString(0, FOO_EX_1, null);
-    doc.insertString(FOO_EX_1.length(), " " + FOO_EX_2, null);
-    openDoc.syncCurrentLocationWithDefinitions(doc.getLength() - 1);
+    
+    openDoc.insertString(0, FOO_EX_1, null);
+    openDoc.insertString(FOO_EX_1.length(), " " + FOO_EX_2, null);
+    openDoc.syncCurrentLocationWithDefinitions(openDoc.getLength() - 1);
     int loc = openDoc.getCurrentDefinitionsLocation();
     openDoc.indentLinesInDefinitions(loc, loc, Indenter.OTHER, null);
-    _assertContents(FOO_EX_1 + "  " + FOO_EX_2, doc);
-    _assertLocation(doc.getLength() - 1, openDoc);
+    _assertContents(FOO_EX_1 + "  " + FOO_EX_2, openDoc);
+    _assertLocation(openDoc.getLength() - 1, openDoc);
   }
 
   /**
@@ -138,14 +135,13 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
   public void testIndentShrinkTabAtStart()
       throws BadLocationException, OperationCanceledException{
     OpenDefinitionsDocument openDoc = _getOpenDoc();
-    Document doc = openDoc.getDocument();
 
-    doc.insertString(0, FOO_EX_1, null);
-    doc.insertString(FOO_EX_1.length(), "   " + FOO_EX_2, null);
+    openDoc.insertString(0, FOO_EX_1, null);
+    openDoc.insertString(FOO_EX_1.length(), "   " + FOO_EX_2, null);
     openDoc.syncCurrentLocationWithDefinitions(FOO_EX_1.length());
     int loc = openDoc.getCurrentDefinitionsLocation();
     openDoc.indentLinesInDefinitions(loc, loc, Indenter.OTHER, null);
-    _assertContents(FOO_EX_1 + "  " + FOO_EX_2, doc);
+    _assertContents(FOO_EX_1 + "  " + FOO_EX_2, openDoc);
     _assertLocation(FOO_EX_1.length() + 2, openDoc);
   }
 
@@ -158,14 +154,13 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
   public void testIndentShrinkTabAtMiddle()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
-    Document doc = openDoc.getDocument();
 
-    doc.insertString(0, FOO_EX_1, null);
-    doc.insertString(FOO_EX_1.length(), "   " + FOO_EX_2, null);
+    openDoc.insertString(0, FOO_EX_1, null);
+    openDoc.insertString(FOO_EX_1.length(), "   " + FOO_EX_2, null);
     openDoc.syncCurrentLocationWithDefinitions(FOO_EX_1.length() + 5);
     int loc = openDoc.getCurrentDefinitionsLocation();
     openDoc.indentLinesInDefinitions(loc, loc, Indenter.OTHER, null);
-    _assertContents(FOO_EX_1 + "  " + FOO_EX_2, doc);
+    _assertContents(FOO_EX_1 + "  " + FOO_EX_2, openDoc);
     _assertLocation(FOO_EX_1.length() + 4, openDoc);
   }
 
@@ -178,15 +173,14 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
   public void testIndentShrinkTabAtEnd()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
-    Document doc = openDoc.getDocument();
 
-    doc.insertString(0, FOO_EX_1, null);
-    doc.insertString(FOO_EX_1.length(), "   " + FOO_EX_2, null);
-    openDoc.syncCurrentLocationWithDefinitions(doc.getLength() - 1);
+    openDoc.insertString(0, FOO_EX_1, null);
+    openDoc.insertString(FOO_EX_1.length(), "   " + FOO_EX_2, null);
+    openDoc.syncCurrentLocationWithDefinitions(openDoc.getLength() - 1);
     int loc = openDoc.getCurrentDefinitionsLocation();
     openDoc.indentLinesInDefinitions(loc, loc, Indenter.OTHER, null);
-    _assertContents(FOO_EX_1 + "  " + FOO_EX_2, doc);
-    _assertLocation(doc.getLength() - 1, openDoc);
+    _assertContents(FOO_EX_1 + "  " + FOO_EX_2, openDoc);
+    _assertLocation(openDoc.getLength() - 1, openDoc);
   }
 
   /**
@@ -197,14 +191,13 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
   public void testIndentSameAsLineAboveAtStart()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
-    Document doc = openDoc.getDocument();
 
-    doc.insertString(0, FOO_EX_2, null);
-    doc.insertString(FOO_EX_2.length(), "   " + FOO_EX_2, null);
+    openDoc.insertString(0, FOO_EX_2, null);
+    openDoc.insertString(FOO_EX_2.length(), "   " + FOO_EX_2, null);
     openDoc.syncCurrentLocationWithDefinitions(FOO_EX_2.length());
     int loc = openDoc.getCurrentDefinitionsLocation();
     openDoc.indentLinesInDefinitions(loc, loc, Indenter.OTHER, null);
-    _assertContents(FOO_EX_2 + FOO_EX_2, doc);
+    _assertContents(FOO_EX_2 + FOO_EX_2, openDoc);
     _assertLocation(FOO_EX_2.length(), openDoc);
   }
 
@@ -216,15 +209,14 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
   public void testIndentSameAsLineAboveAtEnd()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
-    Document doc = openDoc.getDocument();
 
-    doc.insertString(0, FOO_EX_2, null);
-    doc.insertString(FOO_EX_2.length(), "   " + FOO_EX_2, null);
-    openDoc.syncCurrentLocationWithDefinitions(doc.getLength() - 1);
+    openDoc.insertString(0, FOO_EX_2, null);
+    openDoc.insertString(FOO_EX_2.length(), "   " + FOO_EX_2, null);
+    openDoc.syncCurrentLocationWithDefinitions(openDoc.getLength() - 1);
     int loc = openDoc.getCurrentDefinitionsLocation();
     openDoc.indentLinesInDefinitions(loc, loc, Indenter.OTHER, null);
-    _assertContents(FOO_EX_2 + FOO_EX_2, doc);
-    _assertLocation(doc.getLength() - 1, openDoc);
+    _assertContents(FOO_EX_2 + FOO_EX_2, openDoc);
+    _assertLocation(openDoc.getLength() - 1, openDoc);
   }
 
   /**
@@ -235,14 +227,13 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
   public void testIndentInsideParenAtStart()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
-    Document doc = openDoc.getDocument();
 
-    doc.insertString(0, BAR_CALL_1, null);
-    doc.insertString(BAR_CALL_1.length(), BAR_CALL_2, null);
+    openDoc.insertString(0, BAR_CALL_1, null);
+    openDoc.insertString(BAR_CALL_1.length(), BAR_CALL_2, null);
     openDoc.syncCurrentLocationWithDefinitions(BAR_CALL_1.length());
     int loc = openDoc.getCurrentDefinitionsLocation();
     openDoc.indentLinesInDefinitions(loc, loc, Indenter.OTHER, null);
-    _assertContents(BAR_CALL_1 + "    " + BAR_CALL_2, doc);
+    _assertContents(BAR_CALL_1 + "    " + BAR_CALL_2, openDoc);
     _assertLocation(BAR_CALL_1.length() + 4, openDoc);
   }
 
@@ -254,15 +245,14 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
   public void testIndentInsideParenAtEnd()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
-    Document doc = openDoc.getDocument();
 
-    doc.insertString(0, BAR_CALL_1, null);
-    doc.insertString(BAR_CALL_1.length(), BAR_CALL_2, null);
-    openDoc.syncCurrentLocationWithDefinitions(doc.getLength() - 1);
+    openDoc.insertString(0, BAR_CALL_1, null);
+    openDoc.insertString(BAR_CALL_1.length(), BAR_CALL_2, null);
+    openDoc.syncCurrentLocationWithDefinitions(openDoc.getLength() - 1);
     int loc = openDoc.getCurrentDefinitionsLocation();
     openDoc.indentLinesInDefinitions(loc, loc, Indenter.OTHER, null);
-    _assertContents(BAR_CALL_1 + "    " + BAR_CALL_2, doc);
-    _assertLocation(doc.getLength() - 1, openDoc);
+    _assertContents(BAR_CALL_1 + "    " + BAR_CALL_2, openDoc);
+    _assertLocation(openDoc.getLength() - 1, openDoc);
   }
 
   /**
@@ -271,14 +261,13 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
   public void testIndentDoesNothing()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
-    Document doc = openDoc.getDocument();
 
-    doc.insertString(0, FOO_EX_2 + FOO_EX_2, null);
-    openDoc.syncCurrentLocationWithDefinitions(doc.getLength() - 1);
+    openDoc.insertString(0, FOO_EX_2 + FOO_EX_2, null);
+    openDoc.syncCurrentLocationWithDefinitions(openDoc.getLength() - 1);
     int loc = openDoc.getCurrentDefinitionsLocation();
     openDoc.indentLinesInDefinitions(loc, loc, Indenter.OTHER, null);
-    _assertContents(FOO_EX_2 + FOO_EX_2, doc);
-    _assertLocation(doc.getLength() - 1, openDoc);
+    _assertContents(FOO_EX_2 + FOO_EX_2, openDoc);
+    _assertLocation(openDoc.getLength() - 1, openDoc);
   }
 
 
@@ -291,15 +280,14 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
   public void testIndentSquigglyAfterTwoLines()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
-    Document doc = openDoc.getDocument();
 
-    doc.insertString(0, BEAT_1, null);
-    doc.insertString(BEAT_1.length(), BEAT_2, null);
-    doc.insertString(doc.getLength(), "{", null);
+    openDoc.insertString(0, BEAT_1, null);
+    openDoc.insertString(BEAT_1.length(), BEAT_2, null);
+    openDoc.insertString(openDoc.getLength(), "{", null);
     int loc = openDoc.getCurrentDefinitionsLocation();
     openDoc.indentLinesInDefinitions(loc, loc);
-    _assertContents(BEAT_1 + BEAT_2 + "{", doc);
-    _assertLocation(doc.getLength(), openDoc);
+    _assertContents(BEAT_1 + BEAT_2 + "{", openDoc);
+    _assertLocation(openDoc.getLength(), openDoc);
   }
 */
 
@@ -310,12 +298,11 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
 //  public void testIndentBlockCommentStar()
 //      throws BadLocationException, OperationCanceledException {
 //    OpenDefinitionsDocument openDoc = _getOpenDoc();
-//    Document doc = openDoc.getDocument();
-//    doc.insertString(0, "/*\n*\n*/\n " + FOO_EX_2, null);
+//    openDoc.insertString(0, "/*\n*\n*/\n " + FOO_EX_2, null);
 //    int loc = openDoc.getCurrentDefinitionsLocation();
-//    openDoc.indentLinesInDefinitions(0, doc.getLength());
-//    _assertContents("/*\n *\n */\n" + FOO_EX_2, doc);
-//    _assertLocation(doc.getLength(), openDoc);
+//    openDoc.indentLinesInDefinitions(0, openDoc.getLength());
+//    _assertContents("/*\n *\n */\n" + FOO_EX_2, openDoc);
+//    _assertLocation(openDoc.getLength(), openDoc);
 //  }
 
   /**

@@ -305,6 +305,5 @@ public class CompoundUndoManager extends UndoManager {
    */
 //  protected void finalize() throws Throwable{
 //    super.finalize();
-//    System.out.println("Undomanager is finalized");
 //  }
 }

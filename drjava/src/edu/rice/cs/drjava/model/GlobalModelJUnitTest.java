@@ -138,7 +138,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   public static Test suite() {
     return  new TestSuite(GlobalModelJUnitTest.class);
   }
-
+  
   /**
    * Tests that a JUnit file with no errors is reported to have no errors.
    */
@@ -166,7 +166,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
                  _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     _model.removeListener(listener);
   }
-
+  
   /**
    * Tests that a JUnit file with an error is reported to have an error.
    */

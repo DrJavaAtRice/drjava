@@ -47,15 +47,19 @@ package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.util.docnavigation.*;
 import java.util.Vector;
+import java.util.List;
 import java.io.*;
 import java.awt.print.*;
 import javax.swing.ProgressMonitor;
 import javax.swing.text.Document;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.UndoableEditListener;
 import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.definitions.*;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
  * Interface for the GlobalModel's handler of an open
@@ -67,15 +71,29 @@ import edu.rice.cs.drjava.model.definitions.*;
 public interface OpenDefinitionsDocument extends Document {
 
   
+  public int getIntelligentBeginLinePos(int currPos) throws BadLocationException;
+  public void commentLines(int selStart, int selEnd);
+  public void indentLines(int selStart, int selEnd);
+  public void uncommentLines(int selStart, int selEnd);
+  public boolean getClassFileInSync();
+  public int getCurrentCol();
   public int getLineStartPos(int pos);
   public int getLineEndPos(int pos);
-
-    
+  public ReducedModelState getStateAtCurrent();
+  public int getOffset(int lineNum);
+  public String getQualifiedClassName() throws ClassNameNotFoundException;
+  public String getQualifiedClassName(int pos) throws ClassNameNotFoundException;
+  public CompoundUndoManager getUndoManager();
+  public void resetUndoManager();
+  public File getCachedClassFile();
+  public DocumentListener[] getDocumentListeners();
+  public UndoableEditListener[] getUndoableEditListeners();
+  public int getCurrentLocation();
   /**
    * Gets the definitions document being handled.
    * @return document being handled
    */
-  public DefinitionsDocument getDocument();
+//  protected DefinitionsDocument getDocument();
 
   /**
    * Returns the name of the top level class, if any.
@@ -385,4 +403,11 @@ public interface OpenDefinitionsDocument extends Document {
    * @param doc the document to test
    */
   public boolean belongsHuh(Document doc);
+  
+  
+  /**
+   * returns a list of all registered undoable edit listeners
+   */
+//  public List<UndoableEditListener> getUndoableEditListeners();
+
 }

@@ -52,6 +52,7 @@ import javax.swing.event.DocumentEvent;
 import java.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -84,17 +85,56 @@ public class ColoringView extends PlainView implements OptionConstants {
   ColoringView(Element elem) {
     super(elem);
 
-
     // Listen for updates to configurable colors
-    ColorOptionListener col = new ColorOptionListener();
+    final ColorOptionListener col = new ColorOptionListener();
+//
+//    final Document doc = getDocument();
+//    if(doc instanceof DefinitionsDocument){
+//      // delete the old color listeners, because they're hanging onto the wrong coloringview
+//      // add color listeners to highlight keywords etc
+//      ((DefinitionsDocument)doc).clearOptionListeners();
+//      ((DefinitionsDocument)doc).addOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
+//      ((DefinitionsDocument)doc).addOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
+//      ((DefinitionsDocument)doc).addOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
+//      ((DefinitionsDocument)doc).addOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
+//      ((DefinitionsDocument)doc).addOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
+//      ((DefinitionsDocument)doc).addOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
+//      ((DefinitionsDocument)doc).addOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col);
+//
+//      
+//      // remove the listeners when the document closes
+//      ((DefinitionsDocument)doc).addDocumentClosedListener(new DocumentClosedListener(){
+//        public void close(){
+//          ((DefinitionsDocument)doc).clearOptionListeners();
+//        }
+//      });
+    
+    Document doc = getDocument();
+    if(doc instanceof DefinitionsDocument){
+      // delete the old color listeners, because they're hanging onto the wrong coloringview
+      // add color listeners to highlight keywords etc
+      DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
+      DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
+      DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
+      DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
+      DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
+      DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
+      DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col);
 
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col);
+      
+      // remove the listeners when the document closes
+      ((DefinitionsDocument)doc).addDocumentClosedListener(new DocumentClosedListener(){
+        public void close(){
+          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
+          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
+          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
+          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
+          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
+          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
+          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col);
+        }
+      });
+}
  }
 
   /**
