@@ -659,6 +659,10 @@ public class ConfigFrame extends JFrame {
       (new StringOptionComponent(OptionConstants.JAVADOC_1_4_LINK,
                                  "Javadoc 1.4 URL", this,
                                  "The URL to the Java 1.4 API, for generating links to library classes."));
+    panel.addComponent
+      (new StringOptionComponent(OptionConstants.JAVADOC_1_5_LINK,
+                                 "Javadoc 1.5 URL", this,
+                                 "The URL to the Java 1.5 API, for generating links to library classes."));
 
     panel.addComponent
       (new FileOptionComponent(OptionConstants.JAVADOC_DESTINATION,

@@ -922,6 +922,10 @@ public class DefaultJavadocModel implements JavadocModel {
       args.add("-link");
       args.add(config.getSetting(OptionConstants.JAVADOC_1_4_LINK));
     }
+    else if (linkVersion.equals(OptionConstants.JAVADOC_1_5_TEXT)) {
+      args.add("-link");
+      args.add(config.getSetting(OptionConstants.JAVADOC_1_5_LINK));
+    }
   }
 
   /**

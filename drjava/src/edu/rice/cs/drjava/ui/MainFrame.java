@@ -403,9 +403,12 @@ public class MainFrame extends JFrame implements OptionConstants {
                                                     "New JUnit Test Case",
                                                     JOptionPane.QUESTION_MESSAGE);
       if (testName != null) {
-        String ext = ".java";
-        if (testName.endsWith(ext)) {
-          testName = testName.substring(0, testName.length() - ext.length());
+        String ext;
+        for(int i=0; i < DrJava.LANGUAGE_LEVEL_EXTENSIONS.length; i++) {
+          ext = DrJava.LANGUAGE_LEVEL_EXTENSIONS[i];
+          if (testName.endsWith(ext)) {
+            testName = testName.substring(0, testName.length() - ext.length());
+          }
         }
         // For now, don't include setUp and tearDown
         _model.newTestCase(testName, false, false);

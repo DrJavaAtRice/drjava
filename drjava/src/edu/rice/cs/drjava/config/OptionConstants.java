@@ -856,6 +856,7 @@ public interface OptionConstants {
   static final String JAVADOC_NONE_TEXT = "none";
   static final String JAVADOC_1_3_TEXT = "1.3";
   static final String JAVADOC_1_4_TEXT = "1.4";
+  static final String JAVADOC_1_5_TEXT = "1.5";
 
   static final ArrayList<String> linkVersionChoices =
     LinkVersionChoices.evaluate();
@@ -865,6 +866,7 @@ public interface OptionConstants {
       aList.add(JAVADOC_NONE_TEXT);
       aList.add(JAVADOC_1_3_TEXT);
       aList.add(JAVADOC_1_4_TEXT);
+      aList.add(JAVADOC_1_5_TEXT);
       return aList;
     }
   }
@@ -877,6 +879,8 @@ public interface OptionConstants {
     new StringOption("javadoc.1.3.link", "http://java.sun.com/j2se/1.3/docs/api");
   public static final StringOption JAVADOC_1_4_LINK =
     new StringOption("javadoc.1.4.link", "http://java.sun.com/j2se/1.4/docs/api");
+  public static final StringOption JAVADOC_1_5_LINK =
+    new StringOption("javadoc.1.5.link", "http://java.sun.com/j2se/1.5/docs/api");
 
   /**
    * The version of Java to use for links to Javadoc for system classes.
@@ -885,7 +889,9 @@ public interface OptionConstants {
     new ForcedChoiceOption("javadoc.link.version",
                            (System.getProperty("java.specification.version").equals("1.3") ?
                               JAVADOC_1_3_TEXT :
-                              JAVADOC_1_4_TEXT),
+                              (System.getProperty("java.specification.version").equals("1.4") ?
+                                 JAVADOC_1_4_TEXT : 
+                                 JAVADOC_1_5_TEXT)),
                            linkVersionChoices);
 
   /**

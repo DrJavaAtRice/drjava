@@ -753,14 +753,17 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @return the new open test case
    */
   public OpenDefinitionsDocument newTestCase(String name, boolean makeSetUp, boolean makeTearDown) {
+    boolean elementary = (DrJava.getConfig().getSetting(LANGUAGE_LEVEL) == 1);
+    
     StringBuffer buf = new StringBuffer();
-    buf.append("import junit.framework.TestCase;\n\n");
+    if(! elementary) buf.append("import junit.framework.TestCase;\n\n");
     buf.append("/**\n");
     buf.append("* A JUnit test case class.\n");
     buf.append("* Every method starting with the word \"test\" will be called when running\n");
     buf.append("* the test with JUnit.\n");
     buf.append("*/\n");
-    buf.append("public class ");
+    if(! elementary) buf.append("public ");
+    buf.append("class ");
     buf.append(name);
     buf.append(" extends TestCase {\n\n");
     if (makeSetUp) {
@@ -768,14 +771,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       buf.append("* This method is called before each test method, to perform any common\n");
       buf.append("* setup if necessary.\n");
       buf.append("*/\n");
-      buf.append("public void setUp() {\n}\n\n");
+      if(! elementary) buf.append("public ");
+      buf.append("void setUp() {\n}\n\n");
     }
     if (makeTearDown) {
       buf.append("/**\n");
       buf.append("* This method is called after each test method, to perform any common\n");
       buf.append("* clean-up if necessary.\n");
       buf.append("*/\n");
-      buf.append("public void tearDown() {\n}\n\n");
+      if(! elementary) buf.append("public ");
+      buf.append("void tearDown() {\n}\n\n");
     }
     buf.append("/**\n");
     buf.append("* A test method.\n");
@@ -783,7 +788,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     buf.append("* many \"testSomething\" methods in this class as you wish, and each\n");
     buf.append("* one will be called when running JUnit over this class.)\n");
     buf.append("*/\n");
-    buf.append("public void testX() {\n}\n\n");
+    if(! elementary) buf.append("public ");
+    buf.append("void testX() {\n}\n\n");
     buf.append("}\n");
     String test = buf.toString();
 
