@@ -103,7 +103,8 @@ public class TigerUtilities {
   public static void resetVersion() {
     try {
       //Class.forName("java.lang.Enum");
-      Class.forName("com.sun.javadoc.ParameterizedType");
+//      Class.forName("com.sun.javadoc.ParameterizedType");
+      java.lang.reflect.Method.class.getMethod("isVarArgs", new Class[]{});
       _tigerEnabled = true;
     }
     catch (Throwable t) {
