@@ -67,7 +67,7 @@ import edu.rice.cs.drjava.CodeStatus;
  * @version $Id$
  */
 public class DebugTest extends GlobalModelTestCase implements OptionConstants {
-  
+
   final boolean printEvents = false;
   final boolean printMessages = false;
   
@@ -143,6 +143,23 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
 /* 22 */    "  }\n" +
 /* 23 */    "}\n";
   
+  protected static final String CLASS_WITH_STATIC_FIELD =
+/*  1 */    "public class DrJavaDebugStaticField {\n" +
+/*  2 */    "  public static int x = 0;\n" +
+/*  3 */    "  public void bar() {\n" +
+/*  4 */    "    System.out.println(\"x == \" + x);\n" +
+/*  5 */    "    x++;\n" +
+/*  6 */    "  }\n" +
+/*  7 */    "  public static void main(String[] nu) {\n" +
+/*  8 */    "    new Thread(\"stuff\") {\n" +
+/*  9 */    "      public void run() {\n" +
+/* 10 */    "        new DrJavaDebugStaticField().bar();\n" +
+/* 11 */    "      }\n" +
+/* 12 */    "    }.start();\n" +
+/* 13 */    "    new DrJavaDebugStaticField().bar();\n" +
+/* 14 */    "  }\n" +
+/* 15 */    "}";
+
   protected JPDADebugger _debugger;
   
   /**
@@ -154,22 +171,21 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   }
 
   /**
-   * Creates a test suite for JUnit to run.
-   * @return a test suite based on the methods in this class
+   * Sets up the debugger for each test.
    */
-  public static Test suite() {
-    return new TestSuite(DebugTest.class);
-  }
-
   public void setUp() throws IOException {
     super.setUp();
     _debugger = (JPDADebugger) _model.getDebugger();
     assertTrue("Debug Manager should not be null", _debugger != null);
   }
-  
+
+  /**
+   * Cleans up the debugger after each test.
+   */
   public void tearDown() throws IOException {
-    _debugger = (JPDADebugger) _model.getDebugger();
-    assertTrue("Debug Manager should not be null", _debugger != null);
+//     _debugger = (JPDADebugger) _model.getDebugger();
+//     assertTrue("Debug Manager should not be null", _debugger != null);
+    _debugger = null;
     super.tearDown();
   }
 
@@ -185,7 +201,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
         }
         catch(DebugException dbe) {
           dbe.printStackTrace();
-          fail("Debugger couldn't be resumed!");
+            fail("Debugger couldn't be resumed!");
         }
       }
     }.start();
@@ -310,7 +326,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
        interpretIgnoreResult("java Monkey");
        _waitForNotifies(6); // (suspended, updated, breakpointReached) * 2
        _notifierLock.wait();
-     }    
+     }
      DebugThreadData threadA = new DebugThreadData(_debugger.getCurrentThread());
      DebugThreadData threadB = new DebugThreadData(_debugger.getThreadAt(1));
      synchronized(_notifierLock){
@@ -1218,20 +1234,18 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   /**
    * Tests that stepping into a breakpoint works
    */
-  public synchronized void testStepIntoBreakpoint() 
+  public synchronized void testStepIntoOverBreakpoint() 
     throws DebugException, BadLocationException, DocumentAdapterException,
     IOException, InterruptedException
   {
     if (printMessages) {
-      System.out.println("----testStepIntoBreakpoint----");
+      System.out.println("----testStepIntoOverBreakpoint----");
     }
     StepTestListener debugListener = new StepTestListener();
     
     // Compile the class
-    File aDir = new File(_tempDir, "a");
-    aDir.mkdir();
-    File file = new File(aDir, "DrJavaDebugClassWithPackage.java");
-    OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS_WITH_PACKAGE, file);
+    File file = new File(_tempDir, "DrJavaDebugClass.java");
+    OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS, file);
     
     _debugger.addListener(debugListener); 
     // Start debugger
@@ -1243,13 +1257,13 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     debugListener.assertDebuggerStartedCount(1);
     
     // Add a breakpoint
-    _debugger.toggleBreakpoint(doc,DEBUG_CLASS_WITH_PACKAGE.indexOf("foo line 1"), 4);
-    _debugger.toggleBreakpoint(doc,DEBUG_CLASS_WITH_PACKAGE.indexOf("foo line 2"), 5);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Foo Line 1"), 3);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();\n"), 4);
     debugListener.assertBreakpointSetCount(2);
     
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
-      interpretIgnoreResult("new a.DrJavaDebugClassWithPackage().foo()");
+      interpretIgnoreResult("new DrJavaDebugClass().foo()");
       _waitForNotifies(3);  // suspended, updated, breakpointReached
       _notifierLock.wait();
     }
@@ -1264,7 +1278,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     debugListener.assertCurrThreadSuspendedCount(1);  //fires
     debugListener.assertCurrThreadResumedCount(0);
     debugListener.assertCurrThreadDiedCount(0);
-    assertInteractionsDoesNotContain("foo line 1");
+    assertInteractionsDoesNotContain("Foo Line 1");
 
     // Step over once
     synchronized(_notifierLock){
@@ -1278,11 +1292,10 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     debugListener.assertCurrThreadSuspendedCount(2);  // fires
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertCurrThreadDiedCount(0);
-    assertInteractionsContains("foo line 1");
-    assertInteractionsDoesNotContain("foo line 2");
+    assertInteractionsContains("Foo Line 1");
     
     // Step over again
-    synchronized(_notifierLock){
+    synchronized(_notifierLock) {
       _asynchStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
@@ -1297,7 +1310,6 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     debugListener.assertCurrThreadDiedCount(0);
     debugListener.assertCurrThreadSuspendedCount(3);  // fires
     debugListener.assertBreakpointReachedCount(1);
-    assertInteractionsContains("foo line 2");
     
     // Resume until finished, waiting for interpret call to finish
     InterpretListener interpretListener = new InterpretListener();
@@ -1340,7 +1352,124 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     }
     _debugger.removeListener(debugListener);
   }
-  
+
+  /**
+   * Tests that static fields are consistent across different interpreter contexts.
+   */
+  public void testStaticFieldsConsistent()
+    throws DebugException, BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException
+  {
+    if (printMessages) {
+      System.out.println("----testStaticFieldsConsistent----");
+    }
+    StepTestListener debugListener = new StepTestListener();
+    
+    // Compile the class
+    File file = new File(_tempDir, "DrJavaDebugStaticField.java");
+    OpenDefinitionsDocument doc = doCompile(CLASS_WITH_STATIC_FIELD, file);
+    
+    _debugger.addListener(debugListener);
+
+    // Start debugger
+    synchronized(_notifierLock) {
+      _debugger.startup();
+      _waitForNotifies(1);  // startup
+      _notifierLock.wait();
+    }
+    debugListener.assertDebuggerStartedCount(1);
+    
+    _debugger.toggleBreakpoint(doc,CLASS_WITH_STATIC_FIELD.indexOf("System.out.println"), 4);
+    debugListener.assertBreakpointSetCount(1);
+
+    // Run the foo() method, hitting breakpoint
+    synchronized(_notifierLock) {
+      interpretIgnoreResult("java DrJavaDebugStaticField");
+      _waitForNotifies(6);  // (suspended, updated, breakpointReached) *2
+      _notifierLock.wait();
+    }
+
+    DebugThreadData threadA = new DebugThreadData(_debugger.getCurrentThread());
+    DebugThreadData threadB = new DebugThreadData(_debugger.getThreadAt(1));
+
+     if (printMessages) {
+      System.out.println("----After breakpoint:\n" + getInteractionsText());
+    }
+      
+    // Ensure breakpoint is hit
+    debugListener.assertBreakpointReachedCount(2);  //fires
+    debugListener.assertThreadLocationUpdatedCount(2);  //fires
+    debugListener.assertCurrThreadSuspendedCount(2);  //fires
+    debugListener.assertCurrThreadResumedCount(0);
+    debugListener.assertCurrThreadDiedCount(0);
+    assertEquals("x has correct value at start", "0", interpret("DrJavaDebugStaticField.x"));
+    assertEquals("assigning x succeeds", "5", interpret("DrJavaDebugStaticField.x = 5"));
+    assertEquals("assignment reflected in this", "5", interpret("this.x"));
+
+    // Step over once
+    synchronized(_notifierLock){
+      _asynchStep(Debugger.STEP_OVER);
+      _waitForNotifies(2);  // suspended, updated
+      _notifierLock.wait();
+    }
+    debugListener.assertStepRequestedCount(1);  // fires (don't wait)
+    debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
+    debugListener.assertThreadLocationUpdatedCount(3);  // fires
+    debugListener.assertCurrThreadSuspendedCount(3);  // fires
+    debugListener.assertBreakpointReachedCount(2);
+    debugListener.assertCurrThreadDiedCount(0);
+    assertInteractionsContains("x == 5");
+    assertEquals("x retains correct value after step", "5", interpret("DrJavaDebugStaticField.x"));
+    assertEquals("this has correct value for x after step", "5", interpret("this.x"));
+
+    // Step over again
+    synchronized(_notifierLock) {
+      _asynchStep(Debugger.STEP_OVER);
+      _waitForNotifies(2);  // suspended, updated
+      _notifierLock.wait();
+    }
+    
+    if (printMessages) {
+      System.out.println("****"+getInteractionsText());
+    }
+    debugListener.assertStepRequestedCount(2);  // fires (don't wait)
+    debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
+    debugListener.assertThreadLocationUpdatedCount(4);  // fires
+    debugListener.assertCurrThreadDiedCount(0);
+    debugListener.assertCurrThreadSuspendedCount(4);  // fires
+    debugListener.assertBreakpointReachedCount(2);
+    assertEquals("x has correct value after increment", "6", interpret("DrJavaDebugStaticField.x"));
+    assertEquals("this has correct value for x after increment", "6", interpret("this.x"));
+
+    synchronized(_notifierLock){
+      _asynchDoSetCurrentThread(threadB);
+      _waitForNotifies(2);  // updated, suspended
+      _notifierLock.wait();
+    }
+    assertEquals("x has correct value in other thread", "6", interpret("DrJavaDebugStaticField.x"));
+    assertEquals("this has correct value for x in other thread", "6", interpret("this.x"));
+
+    // Close doc and make sure breakpoints are removed
+    _model.closeFile(doc);
+    debugListener.assertBreakpointRemovedCount(1);  //fires (no waiting)
+    
+    // Shutdown the debugger
+    if (printMessages) {
+      System.out.println("Shutting down...");
+    }
+    synchronized(_notifierLock) {
+      _debugger.shutdown();
+      _waitForNotifies(1);  // shutdown
+      _notifierLock.wait();
+    }
+    
+    debugListener.assertDebuggerShutdownCount(1);  //fires
+    if (printMessages) {
+      System.out.println("Shut down.");
+    }
+    _debugger.removeListener(debugListener);
+  }
+
   
   /**
    * Listens to events from the debugger to ensure that they happen at the

@@ -377,7 +377,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     public InterpreterExtension() {
       super(new JavaCCParserFactory());
       
-       classLoader = new ClassLoaderExtension(this);
+      classLoader = new ClassLoaderExtension(this);
       // We have to reinitialize these variables because they automatically
       // fetch pointers to classLoader in their constructors.
       nameVisitorContext = new GlobalContext(this);
@@ -556,7 +556,9 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * A class loader for the interpreter.
    */
   public static class ClassLoaderExtension extends TreeClassLoader {
-    private StickyClassLoader _stickyLoader;
+    private static boolean classLoaderCreated = false;
+    
+    private static StickyClassLoader _stickyLoader;
 
     /**
      * Constructor.
@@ -578,10 +580,14 @@ public class DynamicJavaAdapter implements JavaInterpreter {
         "edu.rice.cs.drjava.model.repl.DynamicJavaAdapter$ClassLoaderExtension"
       };
 
+      if (!classLoaderCreated) {
+        _stickyLoader = new StickyClassLoader(this,
+                                              getClass().getClassLoader(),
+                                              excludes);
+        classLoaderCreated = true;
+      }
+
       // we will use this to getResource classes
-      _stickyLoader = new StickyClassLoader(this,
-                                            getClass().getClassLoader(),
-                                            excludes);
     }
 
     /**

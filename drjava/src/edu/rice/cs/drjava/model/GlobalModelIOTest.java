@@ -1327,7 +1327,12 @@ public class GlobalModelIOTest extends GlobalModelTestCase implements OptionCons
    */
   public void testConsoleInput() throws DocumentAdapterException {
     _model.setInputListener(new InputListener() {
+      int n = 0;
       public String getConsoleInput() {
+        n++;
+        if (n > 1) {
+          throw new IllegalStateException("Input should only be requested once!");
+        }
         return "input\n";
       }
     });

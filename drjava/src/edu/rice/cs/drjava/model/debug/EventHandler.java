@@ -77,10 +77,11 @@ public class EventHandler extends Thread {
       }
       catch (Exception ex) {
         _manager.printMessage("An unexpected exception occurred:\n" + ex);
+        ex.printStackTrace();
         _manager.printMessage("The debugger may have become unstable as a result.");
       }
     }
-    _manager.notifyDebuggerShutdown();    
+    _manager.notifyDebuggerShutdown();
   }
   
   public void handleEvent(Event e) {

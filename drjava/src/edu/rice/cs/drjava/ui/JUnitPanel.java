@@ -155,6 +155,7 @@ public class JUnitPanel extends ErrorPanel{
   /** Called when compilation begins. */
   public void setJUnitInProgress(OpenDefinitionsDocument odd) {
     _odd = odd;
+    _errorListPane.setJUnitInProgress();
   }
 
   protected JUnitErrorModel getErrorModel(){

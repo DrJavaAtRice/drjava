@@ -288,12 +288,20 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * is suspended already.
    */
   synchronized boolean setCurrentThread(ThreadReference thread) {
-    if (_suspendedThreads.isEmpty() || _suspendedThreads.peek() != thread) {
-      _suspendedThreads.push(thread);
-      return true;
+    try {
+      if ((_suspendedThreads.isEmpty() || !_suspendedThreads.contains(thread.uniqueID()))
+            && (thread.isSuspended() && thread.frameCount() > 0)) {
+        _suspendedThreads.push(thread);
+        return true;
+      }
+      else {
+        return false;
+      }
     }
-    else {
-      return false;
+    catch (IncompatibleThreadStateException itse) {
+      // requesting stack frames should be fine, since the thread must be
+      // suspended or frameCount() is not called
+      throw new UnexpectedException(itse);
     }
   }
 
@@ -321,9 +329,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       return;
     }
     
-    /** if we switch to a currently suspended thread, we need to remove 
-     * it from the stack and put it on the top
-     **/
+    // if we switch to a currently suspended thread, we need to remove 
+    // it from the stack and put it on the top
     if( _suspendedThreads.contains(thread_ref.uniqueID()) ) {
       _suspendedThreads.remove(thread_ref.uniqueID());
     }
@@ -1369,11 +1376,17 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * interpreter to that interpreter
    */
   private void dumpVariablesIntoInterpreterAndSwitch() throws DebugException {
+    if (printMessages) {
+      System.out.println("dumpVariablesIntoInterpreterAndSwitch");
+    }
     try {
       ThreadReference suspendedThreadRef = _suspendedThreads.peek();
       String interpreterName = _getUniqueThreadName(suspendedThreadRef);
       ((DefaultGlobalModel)_model).getInteractionsModel().addDebugInterpreter(interpreterName);
       StackFrame frame = suspendedThreadRef.frame(0);
+      if (printMessages) {
+        System.out.println("frame = suspendedThreadRef.frame(0);");
+      }
       
       List vars = frame.visibleVariables();
       Iterator varsIterator = vars.iterator();
@@ -1789,11 +1802,11 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   protected class RandomAccessStack {
     private Vector<ThreadReference> _data = new Vector<ThreadReference>();
 
-    public void push(ThreadReference t){
+    public synchronized void push(ThreadReference t){
       _data.insertElementAt(t, 0);
     }
 
-    public ThreadReference peek() throws NoSuchElementException {
+    public synchronized ThreadReference peek() throws NoSuchElementException {
       try {
         return _data.elementAt(0);
       }
@@ -1802,7 +1815,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       }
     }
 
-    public ThreadReference peekAt(int i) throws NoSuchElementException {
+    public synchronized ThreadReference peekAt(int i) throws NoSuchElementException {
       try {
         return _data.elementAt(i);
       }
@@ -1811,7 +1824,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       }
     }
 
-    public ThreadReference remove(long id) throws NoSuchElementException{
+    public synchronized ThreadReference remove(long id) throws NoSuchElementException{
       int i = 0;
       for(i = 0; i < _data.size(); i++){
         if( _data.elementAt(i).uniqueID() == id ){
@@ -1824,17 +1837,18 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       throw new NoSuchElementException("Thread " + id + " not found in debugger suspended threads stack!");
     }
     
-    public ThreadReference pop() throws NoSuchElementException{
-      try{
+    public synchronized ThreadReference pop() throws NoSuchElementException{
+      try {
         ThreadReference t = _data.elementAt(0);
         _data.removeElementAt(0);
         return t; 
-      }catch(ArrayIndexOutOfBoundsException e){
+      }
+      catch (ArrayIndexOutOfBoundsException e) {
         throw new NoSuchElementException("Cannot pop from an empty RandomAccessStack!");
       }
     }
     
-    public boolean contains(long id){
+    public synchronized boolean contains(long id){
       int i = 0;
       for(i = 0; i < _data.size(); i++){
         if( _data.elementAt(i).uniqueID() == id ){
@@ -1845,8 +1859,13 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       return false;
     }
 
-    public int size() { return _data.size(); }
-    public boolean isEmpty(){ return size() == 0; }
+    public int size() {
+      return _data.size();
+    }
+
+    public boolean isEmpty() {
+      return size() == 0;
+    }
   }
   
    /**

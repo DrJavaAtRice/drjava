@@ -2722,6 +2722,15 @@ public class MainFrame extends JFrame implements OptionConstants {
         interactionsPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
       }
     });
+
+    final JPopupMenu consolePanePopupMenu = new JPopupMenu();
+    consolePanePopupMenu.add(_clearConsoleAction);
+    _consolePane.addMouseListener(new RightClickMouseAdapter() {
+      protected void _popupAction(MouseEvent e) {
+        _consolePane.requestFocus();
+        consolePanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+      }
+    });
   }
 
   /**
