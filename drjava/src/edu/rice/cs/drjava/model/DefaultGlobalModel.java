@@ -97,7 +97,8 @@ public class DefaultGlobalModel implements GlobalModel {
   private final JUnitTestRunner _junitTestRunner = new JUnitTestRunner(this);
   
   // blank final, set differently in the two constructors
-  private final MainJVM _interpreterControl;
+  // package private to allow access from test cases
+  final MainJVM _interpreterControl;
   
   private CompilerError[] _compilerErrorsWithoutFiles;
   private int _numErrors;
@@ -155,6 +156,7 @@ public class DefaultGlobalModel implements GlobalModel {
     
     _interpreterControl = other._interpreterControl;
     _interpreterControl.setModel(this);
+    _interpreterControl.startInterpreterJVM();
     _interpreterControl.reset();
   }
   
@@ -377,7 +379,7 @@ public class DefaultGlobalModel implements GlobalModel {
       // Don't kill the interpreter. It'll die in a minute on its own,
       // and if we kill it using killInterpreter, we'll just start
       // another one!
-      //_interpreterControl.killInterpreter();
+      _interpreterControl.killInterpreter(false);
       DrJava.getSecurityManager().exitVM(0);
     }
   }
@@ -495,7 +497,7 @@ public class DefaultGlobalModel implements GlobalModel {
   }
   
   public void abortCurrentInteraction() {
-    _interpreterControl.killInterpreter();
+    _interpreterControl.killInterpreter(true);
   }
   
   /**

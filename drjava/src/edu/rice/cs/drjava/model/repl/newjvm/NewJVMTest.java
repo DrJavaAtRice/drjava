@@ -72,7 +72,7 @@ public class NewJVMTest extends TestCase {
       }
 
       protected void tearDown() {
-        _jvm.killInterpreter();
+        _jvm.killInterpreter(false);
       }
     };
 

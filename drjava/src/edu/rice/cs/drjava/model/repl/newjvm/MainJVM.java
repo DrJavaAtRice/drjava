@@ -57,15 +57,20 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** The global model. */
   private GlobalModel _model;
 
+  /**
+   * This flag is set to false to inhibit the automatic restart of the JVM.
+   */
+  private boolean _enabled = true;
+
   public MainJVM(final GlobalModel model) throws RemoteException {
     super(InterpreterJVM.class.getName());
 
     _model = model;
-    restartInterpreterJVM();
+    startInterpreterJVM();
   }
 
-  private InterpreterJVMRemoteI _interpreterJVM() {
-    return (InterpreterJVMRemoteI) getSlave();
+  public boolean isInterpreterRunning() {
+    return _interpreterJVM() != null;
   }
 
   /**
@@ -80,6 +85,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
 
   public void interpret(String s) {
+    // silently fail if diabled. see killInterpreter docs for details.
+    if (! _enabled) return;
+
     _ensureInterpreterConnected();
 
     try {
@@ -92,6 +100,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
 
   public void addClassPath(String path) {
+    // silently fail if diabled. see killInterpreter docs for details.
+    if (! _enabled) return;
+
     _ensureInterpreterConnected();
 
     try {
@@ -104,6 +115,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
 
   public void setPackageScope(String packageName) {
+    // silently fail if diabled. see killInterpreter docs for details.
+    if (! _enabled) return;
+
     _ensureInterpreterConnected();
 
     try {
@@ -115,6 +129,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
 
   public void reset() {
+    // silently fail if diabled. see killInterpreter docs for details.
+    if (! _enabled) return;
+
     _ensureInterpreterConnected();
 
     try {
@@ -169,8 +186,20 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _model.replThrewException(exceptionClass, message, stackTrace);
   }
 
-  public void killInterpreter() {
+  /**
+   * Kills the running interpreter JVM, and optionally restarts it
+   *
+   * @param shouldRestart if true, the interpreter will be restarted
+   * automatically.
+   * Note: If the interpreter is not restarted, all of the methods that
+   * delgate to the interpreter will silently fail!
+   * Therefore, killing without restarting should be used with extreme care
+   * and only in carefully controlled test cases or when DrJava is quitting
+   * anyway.
+   */
+  public void killInterpreter(boolean shouldRestart) {
     try {
+      _enabled = shouldRestart;
       quitSlave();
     }
     catch (RemoteException re) {
@@ -179,17 +208,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
 
   /**
-   * Kills current interpreter JVM if any, then starts a new one.
-   * It turns out that before I added the {@link #_startupInProgress} guard,
-   * we were starting up two jvms in quick succession sometimes. This caused
-   * nasty problems (sometimes, it was a timing thing!) if the addClasspath
-   * issued after an abort went to the first JVM but then future
-   * interpretations went to the second JVM! So, we can make
-   * restartInterpreterJVM safe for duplicate calls by just not starting
-   * another if the previous one is in the process of starting up.
+   * Starts the interpreter if it's not running already.
    */
-  public void restartInterpreterJVM() {
-    if (isStartupInProgress()) {
+  public void startInterpreterJVM() {
+    if (isStartupInProgress() || isInterpreterRunning()) {
       return;
     }
 
@@ -205,11 +227,18 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
 
   protected void handleSlaveQuit(int status) {
-    restartInterpreterJVM();
+    if (_enabled) {
+      startInterpreterJVM();
+    }
+
     _model.replCalledSystemExit(status);
   }
 
   protected void handleSlaveConnected() {
+    // we reset the enabled flag since, unless told otherwise via
+    // killInterpreter(false), we want to automatically respawn
+    _enabled = true;
+
     synchronized(this) {
       // notify so that if we were waiting (in ensureConnected)
       // this will wake em up
@@ -233,6 +262,13 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   private void _ensureInterpreterConnected() {
     try {
       synchronized(this) {
+        // Now we silently fail if interpreter is disabled instead of
+        // throwing an exception. This situation occurs only in test cases
+        // and when DrJava is about to quit.
+        //if (! _enabled) {
+          //throw new IllegalStateException("Interpreter is disabled");
+        //}
+
         while (_interpreterJVM() == null) {
           wait();
         }
@@ -241,5 +277,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (InterruptedException ie) {
       throw new edu.rice.cs.util.UnexpectedException(ie);
     }
+  }
+
+  private InterpreterJVMRemoteI _interpreterJVM() {
+    return (InterpreterJVMRemoteI) getSlave();
   }
 }
