@@ -47,6 +47,7 @@ import java.util.jar.JarFile;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.*;
+import java.awt.event.*;
 
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.drjava.ui.SplashScreen;
@@ -707,8 +708,12 @@ public class DrJava implements OptionConstants {
    * @param mf MainFrame to define in the new window
    */
   private static void _showDrJavaDebugConsole(MainFrame mf) {
-    SimpleInteractionsWindow window = 
-      new SimpleInteractionsWindow("DrJava Debug Console");
+    final SimpleInteractionsWindow window = 
+      new SimpleInteractionsWindow("DrJava Debug Console") { 
+      protected void close() {
+        dispose();
+      }
+    };
     window.defineVariable("mainFrame", mf);
     window.defineVariable("model", mf.getModel());
     window.defineVariable("config", DrJava.getConfig());

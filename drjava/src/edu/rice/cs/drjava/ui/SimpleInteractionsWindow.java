@@ -108,10 +108,18 @@ public class SimpleInteractionsWindow extends JFrame {
     // Add listener to quit if window is closed
     this.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent ev) {
-        System.exit(0);
+        close();
       }
     });
     
+  }
+  
+  /**
+   * Terminates this process. This is overridden in DrJava
+   * so that is disposes of itself instead of calling System.exit(0).
+   */
+  protected void close() {
+    System.exit(0);
   }
   
   /**

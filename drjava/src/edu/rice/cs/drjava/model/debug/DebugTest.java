@@ -1634,7 +1634,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
    * 
    * Note:  Some final local variables are inlined by the compiler
    * (even in debug mode), so they are unavailable to the debugger.
-   *
+   */
   public void testWatchLocalVarsFromInnerClass() throws Exception {
     if (printMessages) {
       System.out.println("----testWatchLocalVarsFromInnerClass----");
@@ -1675,6 +1675,6 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Shut down
     _shutdownAndWaitForInteractionEnded();
     _debugger.removeListener(debugListener);
-  }*/
+  }
   
 }
