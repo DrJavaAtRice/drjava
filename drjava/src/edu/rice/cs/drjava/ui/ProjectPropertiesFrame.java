@@ -306,4 +306,11 @@ public class ProjectPropertiesFrame extends JFrame {
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
     return _jarMainClassSelector;
   }
+  
+  
+  public void setVisible(boolean vis){
+    super.setVisible(vis);
+    System.out.println("resetting");
+    reset();
+  }
 }

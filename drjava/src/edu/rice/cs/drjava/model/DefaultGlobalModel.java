@@ -510,6 +510,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       
       public void setBuildDirectory(File f) {
         _builtDir = f;
+        setProjectChanged(true);
       }
       
       public File getJarMainClass(){
@@ -518,6 +519,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       
       public void setJarMainClass(File f) {
         _mainFile = f;
+        setProjectChanged(true);
       }
       
       public boolean isProjectChanged() {
@@ -920,6 +922,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public File[] openProject(File projectFile) throws IOException {
     final ProjectFileIR ir;
     final File[] srcFiles;
+    
+    System.out.println("opening a project");
     
     //File projectRoot = projectFile.getParentFile();
     ir = ProjectFileParser.ONLY.parse(projectFile);
