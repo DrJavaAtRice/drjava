@@ -1506,12 +1506,13 @@ public class MainFrame extends JFrame implements OptionConstants {
   // ------------- File Display Managers for File Icons ------------
   
   private static DJFileDisplayManager _djFileDisplayManager20;
-  private static DJFileDisplayManager _djFileDisplayManagerM20;
   private static DJFileDisplayManager _djFileDisplayManager30;
-  private static DJFileDisplayManager _djFileDisplayManagerM30;
+  private static OddDisplayManager _oddDisplayManager20;
+  private static OddDisplayManager _oddDisplayManager30;
   private static Icon _djProjectIcon;
+  
   static {
-    Icon java, dj0, dj1, dj2, other;
+    Icon java, dj0, dj1, dj2, other, star, jup, juf;
     
     java = MainFrame.getIcon("JavaIcon20.gif");
     dj0 = MainFrame.getIcon("ElementaryIcon20.gif");
@@ -1527,28 +1528,26 @@ public class MainFrame extends JFrame implements OptionConstants {
     other = MainFrame.getIcon("OtherIcon30.gif");
     _djFileDisplayManager30 = new DJFileDisplayManager(java,dj0,dj1,dj2,other);
     
-    java = MainFrame.getIcon("JavaMIcon20.gif");
-    dj0 = MainFrame.getIcon("ElementaryMIcon20.gif");
-    dj1 = MainFrame.getIcon("IntermediateMIcon20.gif");
-    dj2 = MainFrame.getIcon("AdvancedMIcon20.gif");
-    other = MainFrame.getIcon("OtherMIcon20.gif");
-    _djFileDisplayManagerM20 = new DJFileDisplayManager(java,dj0,dj1,dj2,other);
+    star = MainFrame.getIcon("ModStar20.gif");
+    jup = MainFrame.getIcon("JUnitPass20.gif");
+    juf = MainFrame.getIcon("JUnitFail20.gif");
+    _oddDisplayManager20 = new OddDisplayManager(_djFileDisplayManager20,star,jup,juf);
     
-    java = MainFrame.getIcon("JavaMIcon30.gif");
-    dj0 = MainFrame.getIcon("ElementaryMIcon30.gif");
-    dj1 = MainFrame.getIcon("IntermediateMIcon30.gif");
-    dj2 = MainFrame.getIcon("AdvancedMIcon30.gif");
-    other = MainFrame.getIcon("OtherMIcon30.gif");
-    _djFileDisplayManagerM30 = new DJFileDisplayManager(java,dj0,dj1,dj2,other);
+    star = MainFrame.getIcon("ModStar30.gif");
+    jup = MainFrame.getIcon("JUnitPass30.gif");
+    juf = MainFrame.getIcon("JUnitFail30.gif");
+    _oddDisplayManager30 = new OddDisplayManager(_djFileDisplayManager30,star,jup,juf);
     
     _djProjectIcon = MainFrame.getIcon("ProjectIcon.gif");
   }
+     
   
   /**
    * This manager is meant to retrieve the correct icons for the given filename.
    * The only files recognized are the files obviously listed below inthe function
    * (.java, .dj0, .dj1, .dj2). The icons that represent each filetype are given 
-   * into the managers constructor upon instantiation.
+   * into the managers constructor upon instantiation.  This class is static since
+   * it currently does not depend of the main frame for information.
    */
   private static class DJFileDisplayManager extends DefaultFileDisplayManager {
     private Icon _java;
@@ -1564,7 +1563,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       _dj2 = dj2;
       _other = other;
     }
-    
     /**
      * This method chooses the custom icon only for the known filetypes.
      * If these filetypes are not receiving the correct icons, make sure
@@ -1581,28 +1579,70 @@ public class MainFrame extends JFrame implements OptionConstants {
         if (name.endsWith(".dj1")) ret = _dj1;
         if (name.endsWith(".dj2")) ret = _dj2;
       }
-      if (ret == null) 
+      if (ret == null)
         return super.getIcon(f);
       else
         return ret;
     }
   }
   
+  /**
+   * This class wraps the file display managers by superimposing any notification
+   * icons on top of the base file icon.  Currently, only the modified star is 
+   * allowed, but everything is set up to add notification icons for whether a document
+   * has passed the junit test (for display in the tree). This class is static for now.
+   * It may be necessary to make it dynamic when implementing the junit notifications.
+   */
+  private static class OddDisplayManager implements DisplayManager<OpenDefinitionsDocument> {
+    private Icon _star;
+    private Icon _juPass;
+    private Icon _juFail;
+    private FileDisplayManager _default;
+    /**
+     * @param star The star icon will be put flush to the left 1/4 the way down
+     * @param junitPass indicator of junit success, placed at bottom right
+     * @param junitFail indicator of junit failure, placed at bottom right
+     */
+    public OddDisplayManager(FileDisplayManager fdm, Icon star, Icon junitPass, Icon junitFail) {
+      _star = star;
+      _juPass = junitPass;
+      _juFail = junitFail;
+      _default = fdm;
+    }
+    public Icon getIcon(OpenDefinitionsDocument odd) {
+      File f = null;
+      try { f = odd.getFile(); }
+      catch (IllegalStateException ise) { }
+      catch (FileMovedException fme) { }
+      
+      Icon base = _djFileDisplayManager20.getIcon(f);
+      if (odd.isModifiedSinceSave())
+        return makeLayeredIcon(_default.getIcon(f), _star);
+      else 
+        return _default.getIcon(f);
+    }
+    public String getName(OpenDefinitionsDocument name) {
+      return name.getFilename();
+    }
+    private LayeredIcon makeLayeredIcon(Icon base, Icon star) {
+      return new LayeredIcon(new Icon[]{base, star}, new int[]{0, 0}, 
+                             new int[]{0, (base.getIconHeight() / 4)});
+    }
+    private LayeredIcon makeLayeredIcon(Icon base, Icon star, Icon junit) {
+      int[] x = new int[]{0, 0 ,base.getIconWidth() - junit.getIconWidth()};
+      int[] y = new int[]{0, (base.getIconHeight() / 4), base.getIconHeight() - junit.getIconHeight()};
+      return new LayeredIcon(new Icon[]{base, star, junit}, x, y);
+    }
+  };
+  
+  /**
+   * This is what is given to the JTreeSortNavigator.  This simply resolves the INavItem to an OpenDefDoc
+   * using the model and forwards it to the OddDisplayManager for size 20.
+   */
   private DisplayManager<INavigatorItem> _navPaneDisplayManager = new DisplayManager<INavigatorItem>() {
     public Icon getIcon(INavigatorItem item) {
       OpenDefinitionsDocument odd = _model.getODDGivenIDoc(item);
-      File f = null;
-      try {
-        f = odd.getFile();
-      }
-      catch (IllegalStateException ise) {
-      }
-      catch (FileMovedException fme) {
-      }
-      if (odd.isModifiedSinceSave())
-        return _djFileDisplayManagerM20.getIcon(f);
-      else 
-        return _djFileDisplayManager20.getIcon(f);
+      return _oddDisplayManager20.getIcon(odd);
     }
     public String getName(INavigatorItem name) {
       return name.getName();
@@ -1610,17 +1650,17 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   
-  public static DJFileDisplayManager getFileDisplayManager20(boolean modified) {
-    return modified ? _djFileDisplayManagerM20 : _djFileDisplayManager20;
-  }
   public static DJFileDisplayManager getFileDisplayManager20() {
-    return getFileDisplayManager20(false);
-  }
-  public static DJFileDisplayManager getFileDisplayManager30(boolean modified) {
-    return modified ? _djFileDisplayManagerM30 : _djFileDisplayManager30;
+    return _djFileDisplayManager20;
   }
   public static DJFileDisplayManager getFileDisplayManager30() {
-    return getFileDisplayManager30(false);
+    return _djFileDisplayManager30;
+  }
+  public static OddDisplayManager getOddDisplayManager20() {
+    return _oddDisplayManager20;
+  }
+  public static OddDisplayManager getOddDisplayManager30() {
+    return _oddDisplayManager30;
   }
 
   public DisplayManager<INavigatorItem> getNavPaneDisplayManager() {

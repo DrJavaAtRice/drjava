@@ -62,14 +62,14 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 import edu.rice.cs.drjava.model.repl.InteractionsEditorKit;
 import edu.rice.cs.drjava.CodeStatus;
-import edu.rice.cs.util.swing.FileDisplayManager;
+import edu.rice.cs.util.swing.DisplayManager;
 
 public class RecentDocFrame extends JWindow{
   // MainFrame
   MainFrame _frame;
   
   // The manager that gives filenames and icons
-  FileDisplayManager _fdm = _frame.getFileDisplayManager30();
+  DisplayManager<OpenDefinitionsDocument> _displayManager = _frame.getOddDisplayManager30();
     
   // the label that shows the icon and filename
   JLabel _label;
@@ -214,22 +214,11 @@ public class RecentDocFrame extends JWindow{
   
   private void show(int _current){
       OpenDefinitionsDocument doc = _docs.get(_current);
-      File docfile;
-      try {
-        if (doc.isUntitled()) {
-          docfile = new File("(Untitled)");
-        }
-        else {
-          docfile = doc.getFile();
-        }
-      } catch(IOException e) {
-        docfile = null;
-      }
+      
       String text = getTextFor(doc);
       
-      _fdm = _frame.getFileDisplayManager30(doc.isModifiedSinceSave());
-      _label.setText(_fdm.getName(docfile));
-      _label.setIcon(_fdm.getIcon(docfile));
+      _label.setText(_displayManager.getName(doc));
+      _label.setIcon(_displayManager.getIcon(doc));
       
       if(text.length() > 0){
         // as wide as the text area wants, but only 200px high
