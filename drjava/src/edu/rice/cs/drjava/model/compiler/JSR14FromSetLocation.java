@@ -47,7 +47,7 @@ import java.net.MalformedURLException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.FileOption;
-import edu.rice.cs.util.classloader.ToolsJarClassLoader;
+import edu.rice.cs.util.classloader.StrictURLClassLoader;
 
 /**
  * A compiler interface to find jsr14 from the location
@@ -75,16 +75,7 @@ public class JSR14FromSetLocation extends CompilerProxy implements OptionConstan
     try {
       //URL url = new File(loc).toURL();
       URL url = loc.toURL();
-      // Create a URLClassLoader with a null parent so it only looks
-      // in the URL for classes (not in system's class loader).
-      return new URLClassLoader(new URL[] { url }, null) {
-        /**
-         * Override getResource to not look at bootclasspath.
-         */
-        public URL getResource(String name) {
-          return findResource(name);
-        }
-      };
+      return new StrictURLClassLoader(new URL[] { url });
     }
     catch (MalformedURLException e) {
       throw new RuntimeException("malformed url exception");

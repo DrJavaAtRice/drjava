@@ -16,7 +16,7 @@
   <chapter id="intro">
     <title>Introduction</title>
 
-    <para>DrJava is a pedagogic programming environment for Java, intended to help students focus more on program design than on the features of a complicated development environment.  Among its many powerful features, it provides an Interactions Pane based on a "read-eval-print loop" which allows programmers to develop, test, and debug Java programs in an interactive, incremental fashion.</para>
+    <para>DrJava is a pedagogic programming environment for Java, intended to help students focus more on program design than on the features of a complicated development environment.  DrJava also provides many advanced features for experienced developers.  Among its many powerful features, it provides an Interactions Pane based on a "read-eval-print loop" which allows programmers to develop, test, and debug Java programs in an interactive, incremental fashion.</para>
     <simplelist>
       <member>Home Page: <ulink url="http://drjava.org">http://drjava.org</ulink></member>
       <member>Original Paper: <ulink url="http://drjava.org/papers/drjava-paper.shtml">http://drjava.org/papers/drjava-paper.shtml</ulink></member>
@@ -34,36 +34,30 @@
       
       <formalpara>
 	<title>Stable and Development Releases</title>
-	<para>A distinction is made between Stable and Development releases of DrJava.  All releases must pass our rigorous unit-tests and should be safe to use, but we have found that a period of beta-testing can be helpful for finding additional bugs.  Any large new features go through a beta-testing period before being included in Stable releases, ensuring these releases are safe for all users.  Our Development releases contain newer features that are under development.  We believe these releases are also ready to use, but they have not been widely beta-tested, so some users may prefer to use only Stable releases.</para>
+	<para>A distinction is made between Stable and Development releases of DrJava.  All releases must pass our rigorous unit tests and should be safe to use, but we have found that a period of beta-testing can be helpful for finding additional bugs.  Any large new features go through a beta-testing period before being included in Stable releases, ensuring these releases are safe for all users.  Our Development releases contain newer features that are under development.  We believe these releases are also ready to use, but they have not been widely beta-tested, so some users may prefer to use only Stable releases.</para>
       </formalpara>
     </section>
 
     <section id="gs-running">
       <title>Running DrJava</title>
-      <para>DrJava can be started from a command prompt using the <filename>.jar</filename> file you downloaded.  You can optionally give it a list of source files to open at startup.</para>
+      <para>On many platforms, DrJava can be started by simply double-clicking on the <filename>.jar</filename> file you downloaded.  DrJava can also be started from a command prompt.  You can optionally give it a list of source files to open at startup.</para>
       <cmdsynopsis>
 	<command>java -jar drjava-DATE-TIME.jar</command>
 	<arg choice='opt'>-config [CONFIG_FILE]</arg>
 	<arg choice='opt' rep='repeat'>filename.java</arg>
       </cmdsynopsis>
-      <para>Replace DATE-TIME with the appropriate value for your version of DrJava.  The "config" argument is optional and allows you to specify a custom configuration file, rather than <filename>.drjava</filename>.  On many platforms, you can also simply double-click on the <filename>.jar</filename> file and DrJava will start automatically.</para>
-      <para>To use DrJava's debugging features, you must also have Sun's <filename>tools.jar</filename> on your classpath.  The <filename>tools.jar</filename> file is usually located in the <filename>lib</filename> directory of your JDK installation.  You cannot use the "-jar" option in this case, because it overrides anything else that is on your classpath.  Instead, start DrJava using the "-classpath" option, as follows.</para>
-      <cmdsynopsis>
-	<command>java -classpath drjava-DATE-TIME.jar:/PATH/tools.jar edu.rice.cs.drjava.DrJava</command>
-      </cmdsynopsis>
-      <para>(The command should all be on one line, and PATH should be replaced with the correct path to <filename>tools.jar</filename>.  In Windows, replace the colon with a semicolon and forward slashes with backslashes.)</para>
-      <para>Note that <filename>tools.jar</filename> is always on the classpath in Mac OS X, so this additional step is unnecessary.</para>
+      <para>Replace DATE-TIME with the appropriate value for your version of DrJava.  The "config" argument is optional and allows you to specify a custom configuration file, rather than the <filename>.drjava</filename> file stored in your home directory.</para>
 
       <formalpara>
-        <title>Other Command Line Arguments</title>
-        <para>You can specify a custom configuration file (rather than the default <filename>.drjava</filename> file in your home directory) by adding "-config [FILE]" before any documents to be opened on the command line.  Replace "[FILE]" with the full path to the custom configuration file.</para>
+        <title>Running DrJava on Mac OS X</title>
+        <para>If you are using Mac OS X, you can download DrJava as an Application from our website.  Download the <filename>drjava-DATE-TIME-osx.tar.gz</filename> and decompress it.  You can then copy the DrJava icon into your Applications folder or keep it on your Dock.</para>
       </formalpara>
     </section>
 
     <section id="gs-requirements">
       <title>System Requirements</title>
-      <para>DrJava requires Java 2, version 1.3 or later.  Note that you will need to have the JDK (not the JRE) installed if you wish to use the compiler within DrJava.</para>
-      <para>We recommend using <ulink url="http://java.sun.com/j2se/1.4.1/download.html">Sun's JDK 1.4.1</ulink> or later for Solaris, Linux, and Windows.  Other users should use the Java virtual machine that comes with their operating system (including MacOS X).</para>
+      <para>DrJava requires Java 2, version 1.3 or later.  Note that you will need to have the JDK (not the JRE) installed if you wish to use the compiler or debugger within DrJava.</para>
+      <para>We recommend using <ulink url="http://java.sun.com/j2se/1.4.1/download.html">Sun's JDK 1.4.1</ulink> or later for Solaris, Linux, and Windows.  Other users should use the Java virtual machine that comes with their operating system (including Mac OS X).</para>
     </section>
 
     <section id="gs-license">
@@ -85,7 +79,7 @@
   <!-- Chapter: Editing Programs -->
   <chapter id="editing">
     <title>Editing Programs</title>
-    <para>While DrJava contains many useful tools for Java development, its primary role is as a simple editor for Java source code.  Like most text editors, it supports a full range of editing features such as "Find/Replace" and "Goto Line", while also providing more advanced features like syntax coloring, automatic indentation, and brace matching.</para>
+    <para>While DrJava contains many useful tools for Java development, its most fundamental one is an editor for Java source code.  Like most text editors, it supports a full range of editing features such as "Find/Replace" and "Goto Line", while also providing more advanced features like syntax coloring, automatic indentation, and brace matching.</para>
 
     <section id="edit-defpane">
       <title>Definitions Pane</title>
@@ -99,17 +93,22 @@
 
       <formalpara>
 	<title>Automatic Indentation</title>
-	<para>As the user types multiple lines of code, DrJava automatically indents each line using common coding conventions.  By default, two spaces are used for each indentation level, although this can be configured.  When the user hits <keycode>Enter</keycode>, DrJava indents the new line to the appropriate level.  To re-align an existing line, press the <keycode>Tab</keycode> key while the cursor is on the line.  (In DrJava, the <keycode>Tab</keycode> key always indents the line, and never inserts a tab character.)  A block of code can be re-aligned by selecting several lines and then pressing <keycode>Tab</keycode>, or by selecting "Indent Line(s)" from the Edit menu.</para>
+	<para>As the user types multiple lines of code, DrJava automatically indents each line using common coding conventions.  By default, two spaces are used for each indentation level, although this can be configured in the Preferences window.  When the user hits <keycode>Enter</keycode>, DrJava indents the new line to the appropriate level.  To re-align an existing line, press the <keycode>Tab</keycode> key while the cursor is on the line.  (In DrJava, the <keycode>Tab</keycode> key always indents the line, and never inserts a tab character.)  A block of code can be re-aligned by selecting several lines and then pressing <keycode>Tab</keycode>, or by selecting "Indent Line(s)" from the Edit menu.</para>
       </formalpara>
 
       <formalpara>
 	<title>Brace Matching</title>
 	<para>To help the user visualize the structure of the code, DrJava uses highlighting to match braces.  If the cursor is placed immediately after a close brace, parenthesis, or bracket, all text between that character and the corresponding open brace is highlighted in another color.  Like syntax coloring, brace matching is also done in a <emphasis>fully correct</emphasis> fashion, updated with each keystroke.</para>
       </formalpara>
+      
+      <formalpara>
+	<title>Commenting / Uncommenting</title>
+	<para>To help with writing documentation comments, DrJava automatically adds an asterisk on each new line of a Javadoc comment.  Commands in the Edit menu are also available to comment out or uncomment a block of selected code using winged comments ("//").  Commenting out a block of code will place "//" markers at the start of each line in the block, preserving the indentation of the code.</para>
+      </formalpara>
 
       <formalpara>
 	<title>Contextual Menu</title>
-	<para>The Definitions Pane has a contextual menu, which can be used by right-clicking in the pane.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to useful features such as cut, copy, and paste, as well as indenting and setting breakpoints.</para>
+	<para>The Definitions Pane has a contextual menu, which can be used by right-clicking in the pane.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to useful features such as cut, copy, and paste, as well as indenting, commenting, and setting breakpoints.</para>
       </formalpara>
     </section>
 
@@ -153,7 +152,25 @@
       <para>The Interactions Pane allows the execution of any valid Java statements as well as the evaluation of Java expressions.  Simply define variables and call methods as you would in an ordinary method, or even define new classes and methods and call them interactively.  In general, any statement or expression ending without a semicolon will display its result in the Interactions Pane, while those ending with a semicolon will complete without displaying a result.  Result objects are displayed using the object's toString() method, which may be overridden to print more useful information.  Any system output will be displayed in the Interactions Pane in green (as well as in the Console tab), while system errors will be displayed in red.</para>
     </formalpara>
     
-    <para>DrJava provides the ability reset the Interactions Pane if the user wishes to start from scratch or if a method call hangs and does not return.  Simply choose the "Reset Interactions" command from the Tools menu.</para>
+    <para>Here is a simple interactions session, to demonstrate how the Interactions Pane can be used to experiment with objects or show GUI components.</para>
+    
+    <programlisting>
+Welcome to DrJava.
+> String s = "Hello World";
+> s
+"Hello World"
+> s.length()
+11
+> import javax.swing.*;
+> JFrame frame = new JFrame("My JFrame");
+> frame.show();
+> 
+    </programlisting>
+    
+    <formalpara>
+      <title>Resetting the Interactions Pane</title>
+      <para>DrJava provides the ability reset the Interactions Pane if the user wishes to start from scratch or if a method call hangs and does not return.  Simply choose the "Reset Interactions" command from the Tools menu.  This will also reset the Debugger and any JUnit test that is currently running.</para>
+    </formalpara>
 
     <formalpara>
       <title>Running the Main Method</title>
@@ -322,17 +339,15 @@ public static Test suite() {
     <para>DrJava supports basic debugging features on classes used in the Interactions Pane.  Users can set breakpoints in classes in the Definitions Pane, call methods in the Interactions Pane, and see when the breakpoints are reached.  Once a breakpoint is reached, users can resume the call, or step through a line at a time.  The values of local variables and fields can also be watched as the method call progresses.</para>
 
     <section id="debug-setup">
-      <title>Starting the Debugger</title>
-      <para>To use DrJava's debugger, Sun's Java Platform Debugger Architecture (JPDA) classes must be on the classpath when DrJava is started.  These classes are usually found in the <filename>tools.jar</filename> file in the lib directory of the JDK, or can be downloaded in a separate <filename>jpda.jar</filename>.  See <link linkend="gs-running">Running DrJava</link> for the correct method of starting DrJava with the debugger.</para>
-
-      <para>Once DrJava is running with <filename>tools.jar</filename> on the classpath, a Debugger menu will be available.  To begin using the debugging features, select the "Debug Mode" menu item from the Debugger menu.  Once Debug Mode is on, an informational panel will be displayed between the Definitions Pane and the Interactions Pane.</para>
+      <title>Using the Debugger</title>
+      <para>To use DrJava's debugger, select the "Debug Mode" menu item from the Debugger menu.  An informational panel will be displayed between the Definitions Pane and the Interactions Pane, and several menu items in the Debugger menu will become available.</para>
 
       <formalpara>
 	<title>Modifying Files</title>
 	<para>When using the debugger, it is essential to remember that any modifications to source files will not be reflected in the behavior of the Interactions Pane or the debugger until the classes are recompiled.  Changing a source file while the debugger is running is not recommended, since lines which are highlighted by the debugger may no longer correspond to the lines in the class file being run.  To help notify the user of this danger, a warning message is displayed in the Debug Panel if the current document is out of sync with its class file.</para>
       </formalpara>
 
-      <para>Because the debugger depends on the classes used in the Interactions Pane, the debugger is reset each time any files are compiled or the Interactions Pane is reset.</para>
+      <para>Because the debugger depends on the classes used in the Interactions Pane, the debugger is automatically reset each time any files are compiled or the Interactions Pane is reset.</para>
 
     </section>
 
@@ -417,9 +432,9 @@ public static Test suite() {
         <variablelist>
 	    
 	    <varlistentry>
-	      <term>Javac Location (<varname>javac.location = ""</varname>)</term>
+	      <term>Tools.jar Location (<varname>javac.location = ""</varname>)</term>
 	      <listitem>
-		<para>Used to specify the location of the javac classes, for use as a compiler within DrJava.  Usually this is the path to <filename>tools.jar</filename> in the JDK's <filename>lib</filename> directory.</para>
+		<para>Used to specify the location of the JDK's <filename>tools.jar</filename>, which contains the classes necessary for the compiler and the debugger.  This file is usually found in the JDK's <filename>lib</filename> directory.</para>
 	      </listitem>
 	    </varlistentry>
 	    

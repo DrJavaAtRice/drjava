@@ -95,6 +95,9 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
 
   private static final String BAR_MISSING_SEMI_TEXT_MULTIPLE_LINES =
     "class DrJavaTestFoo {\n  int a = 5;\n  int x\n }";
+  
+  private static final String FOO_WITH_GENERICS =
+    "class DrJavaTestFooGenerics<T> {}";
 
   /**
    * Constructor.
@@ -901,9 +904,61 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     Position[] positions2 = doc2.getCompilerErrorModel().getPositions();
 
     assertTrue("location of first error should be between 20 and 29 inclusive (line 2)",
-	       positions[0].getOffset() <= 20 && positions[0].getOffset() <= 29);
+        positions[0].getOffset() <= 20 && positions[0].getOffset() <= 29);
     assertTrue("location of error should be after 34 (line 3 or 4)", positions2[0].getOffset() >= 34);
 
+  }
+  
+  /**
+   * Tests compiling a file with generics works with generic compilers.
+   * (NOTE: this currently tests the GJ compiler, but not JSR-14...
+   *  JSR-14 is only available if the config option is set, and we clear
+   *  the config before running the tests.  We have a guess where the jar
+   *  is -- the lib directory -- but how can we get a URL for that?)
+   */
+  public void testCompileWithGenerics()
+    throws BadLocationException, IOException, InterruptedException
+  {
+    // Only run this test if using a compiler with generics
+    if (_isGenericCompiler()) {
+      _model.setResetAfterCompile(false);
+      
+      OpenDefinitionsDocument doc = setupDocument(FOO_WITH_GENERICS);
+      final File file = new File(_tempDir, "DrJavaTestFooGenerics.java");
+      doc.saveFile(new FileSelector(file));
+      
+      CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
+      _model.addListener(listener);
+      int numErrors = _model.getNumErrors();
+      _model.compileAll();
+      numErrors = _model.getNumErrors();
+      if (_model.getNumErrors() > 0) {
+        fail("compile failed: " + doc.getCompilerErrorModel());
+      }
+      assertCompileErrorsPresent(_name(), false);
+      listener.checkCompileOccurred();
+      
+      // Make sure .class exists
+      File compiled = classForJava(file, "DrJavaTestFooGenerics");
+      assertTrue(_name() + "FooGenerics Class file doesn't exist after compile", compiled.exists());
+      
+      _model.setResetAfterCompile(true);
+    }
+  }
+  
+  /**
+   * Returns whether the currently active compiler supports generics.
+   */
+  protected boolean _isGenericCompiler() {
+    String name = _model.getActiveCompiler().getClass().getName();
+    for (int i=0; i < CompilerRegistry.GENERIC_JAVA_COMPILERS.length; i++) {
+      if (name.equals(CompilerRegistry.GENERIC_JAVA_COMPILERS[i])) {
+        //System.out.println(name + " supports generics");
+        return true;
+      }
+    }
+    //System.out.println(name + " doesn't support generics");
+    return false;
   }
   
 }

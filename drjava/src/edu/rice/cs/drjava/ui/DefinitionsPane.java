@@ -550,7 +550,7 @@ public class DefinitionsPane extends JEditorPane
     });
     _popMenu.add(indentItem);
     
-    JMenuItem commentLinesItem = new JMenuItem("Comment Out Line(s)");
+    JMenuItem commentLinesItem = new JMenuItem("Comment Line(s)");
     commentLinesItem.addActionListener ( new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
         _commentLines();

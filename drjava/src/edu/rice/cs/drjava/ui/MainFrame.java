@@ -500,7 +500,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Action for commenting out a block of text using wing comments.
    */
-  private Action _commentLinesAction = new AbstractAction("Comment Out Line(s)")
+  private Action _commentLinesAction = new AbstractAction("Comment Line(s)")
   {
     public void actionPerformed(ActionEvent ae) {
       // Delegate everything to the DefinitionsDocument.

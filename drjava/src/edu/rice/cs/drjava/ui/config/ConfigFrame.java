@@ -374,7 +374,7 @@ public class ConfigFrame extends JFrame {
   private void _setupResourceLocPanel ( ConfigPanel panel) {
 
     FileOptionComponent javacLoc =
-      new FileOptionComponent( OptionConstants.JAVAC_LOCATION, "Javac Location", this);
+      new FileOptionComponent( OptionConstants.JAVAC_LOCATION, "Tools.jar Location", this);
     javacLoc.setFileFilter(new ClasspathFilter());
     panel.addComponent( javacLoc );
     FileOptionComponent jsr14Loc =

@@ -72,6 +72,15 @@ public class CompilerRegistry {
     "edu.rice.cs.drjava.model.compiler.JavacFromToolsJar",
     "edu.rice.cs.drjava.model.compiler.GJv6FromClasspath",
   };
+
+  /**
+   * A subset of DEFAULT_COMPILERS which support Generic Java.
+   */
+  public static final String[] GENERIC_JAVA_COMPILERS = {
+    "edu.rice.cs.drjava.model.compiler.JSR14v12FromSetLocation",
+    "edu.rice.cs.drjava.model.compiler.JSR14FromSetLocation",
+    "edu.rice.cs.drjava.model.compiler.GJv6FromClasspath"
+  };
   
   /** Singleton instance. */
   public static final CompilerRegistry ONLY = new CompilerRegistry();
