@@ -155,6 +155,12 @@ public interface OptionConstants {
    */
   public static final BooleanOption LINEENUM_ENABLED = 
     new BooleanOption("lineenum.enabled", new Boolean(false));
+    
+  /**
+   * Whether to draw anti-aliased text.  (Slightly slower.)
+   */
+  public static final BooleanOption TEXT_ANTIALIAS =
+    new BooleanOption("text.antialias", new Boolean(false));
   
   /* ---------- Key Binding Options ----------- */
   static int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();

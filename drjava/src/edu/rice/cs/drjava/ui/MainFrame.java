@@ -102,7 +102,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private static final String DEBUGGER_OUT_OF_SYNC =
     " Current document is out of sync with the debugger" +
     " and should be recompiled!";
-  
+
   /**
    * Number of seconds to wait before displaying "Stepping..." message
    * after a step is requested in the debugger.
@@ -1063,7 +1063,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     PlatformFactory.ONLY.afterUISetup(_aboutAction, _editPreferencesAction, _quitAction);
   }
   
-  
   /**
    * @return The model providing the logic for this view.
    */
@@ -1386,23 +1385,30 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
 
-  private void _save() {
+  private boolean _save() {
     try {
-      _model.getActiveDocument().saveFile(_saveSelector);
-      _currentDefPane.hasWarnedAboutModified(false);
+      if (_model.getActiveDocument().saveFile(_saveSelector)) {
+        _currentDefPane.hasWarnedAboutModified(false);
+        return true;
+      }
+      else {
+        return false;
+      }
     }
     catch (IOException ioe) {
       _showIOError(ioe);
+      return false;
     }
   }
 
 
-  private void _saveAs() {
+  private boolean _saveAs() {
     try {
-      _model.getActiveDocument().saveFileAs(_saveSelector);
+      return _model.getActiveDocument().saveFileAs(_saveSelector);
     }
     catch (IOException ioe) {
       _showIOError(ioe);
+      return false;
     }
   }
 
@@ -3444,8 +3450,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
       switch (rc) {
         case JOptionPane.YES_OPTION:
-          _save();
-          return true;
+          return _save();
         case JOptionPane.NO_OPTION:
           return true;
         case JOptionPane.CLOSED_OPTION:

@@ -99,8 +99,9 @@ public interface OpenDefinitionsDocument {
    * is passed in.
    * @param com a selector that picks the file name
    * @exception IOException
+   * @return true if the file was saved, false if the operation was canceled
    */
-  public void saveFile(FileSaveSelector com) throws IOException;
+  public boolean saveFile(FileSaveSelector com) throws IOException;
 
   /**
    * Revert the document to the version saved on disk.
@@ -116,8 +117,9 @@ public interface OpenDefinitionsDocument {
    * reason, the event is not fired.
    * @param com a selector that picks the file name.
    * @exception IOException
+   * @return true if the file was saved, false if the operation was canceled
    */
-  public void saveFileAs(FileSaveSelector com) throws IOException;
+  public boolean saveFileAs(FileSaveSelector com) throws IOException;
 
   /**
    * Starts compiling the source.  Demands that the definitions be

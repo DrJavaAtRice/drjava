@@ -643,7 +643,8 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     // No need to override methods since no events should be fired
     _model.addListener(new TestListener());
     
-    doc.saveFile(new CancelingSelector());
+    boolean saved = doc.saveFile(new CancelingSelector());
+    assertTrue("doc should not have been saved", !saved);
     assertModified(true, doc);
     assertContents(FOO_TEXT, doc);
   }

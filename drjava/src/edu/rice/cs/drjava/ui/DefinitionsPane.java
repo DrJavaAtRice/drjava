@@ -102,6 +102,11 @@ public class DefinitionsPane extends JEditorPane
   private boolean _updatePending = false;
   
   /**
+   * Whether to draw text as antialiased.
+   */
+  private boolean _antiAliasText = false;
+  
+  /**
    * Paren/brace/bracket matching highlight color.
    */
   public static DefaultHighlighter.DefaultHighlightPainter
@@ -220,6 +225,15 @@ public class DefinitionsPane extends JEditorPane
   private class ThreadColorOptionListener implements OptionListener<Color> { 
     public void optionChanged(OptionEvent<Color> oce) {
       THREAD_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
+    }
+  }
+  
+  /**
+   * The OptionListener for TEXT_ANTIALIAS 
+   */
+  private class AntiAliasOptionListener implements OptionListener<Boolean> { 
+    public void optionChanged(OptionEvent<Boolean> oce) {
+      _antiAliasText = oce.value.booleanValue();
     }
   }
   
@@ -443,7 +457,7 @@ public class DefinitionsPane extends JEditorPane
     setBackground(DrJava.getConfig().getSetting(DEFINITIONS_BACKGROUND_COLOR));
     //setFont(new Font("Courier", 0, 12));
     Font mainFont = DrJava.getConfig().getSetting(FONT_MAIN);
-    setFont(mainFont);
+    setFont(mainFont);    
     
     //setSize(new Dimension(1024, 1000));
     setEditable(true);
@@ -468,6 +482,8 @@ public class DefinitionsPane extends JEditorPane
     // If it has changed, check and see if we should be highlighting matching braces.
     this.addCaretListener(_matchListener);
  
+    _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS).booleanValue();
+    
     DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_BACKGROUND_COLOR,
                                     new BackgroundColorOptionListener());
     DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_MATCH_COLOR,
@@ -478,6 +494,8 @@ public class DefinitionsPane extends JEditorPane
                                     new BreakpointColorOptionListener());
     DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_THREAD_COLOR,
                                     new ThreadColorOptionListener());
+    DrJava.getConfig().addOptionListener( OptionConstants.TEXT_ANTIALIAS,
+                                    new AntiAliasOptionListener());
         
     createPopupMenu();
       
@@ -487,6 +505,18 @@ public class DefinitionsPane extends JEditorPane
       
     _highlightManager = new HighlightManager(this);
      
+  }
+  
+  /**
+   * Enable anti-aliased text by overriding paintComponent.
+   */
+  protected void paintComponent(Graphics g) {
+    if (_antiAliasText && g instanceof Graphics2D) {
+      Graphics2D g2d = (Graphics2D)g;
+      g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                           RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    }
+    super.paintComponent(g);
   }
 
   /**

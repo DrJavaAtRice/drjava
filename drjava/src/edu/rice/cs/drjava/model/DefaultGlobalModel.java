@@ -1491,8 +1491,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * is passed in.
      * @param com a selector that picks the file name if the doc is untitled
      * @exception IOException
+     * @return true if the file was saved, false if the operation was canceled
      */
-    public void saveFile(FileSaveSelector com) throws IOException {
+    public boolean saveFile(FileSaveSelector com) throws IOException {
       FileSaveSelector realCommand;
       final File file;
 
@@ -1524,12 +1525,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
             }
             else {
               // User declines to save as a new file, so don't save
-              return;
+              return false;
             }
           }
         }
 
-        saveFileAs(realCommand);
+        return saveFileAs(realCommand);
       }
       catch (IllegalStateException ise) {
         // No file--  this should have been caught by isUntitled()
@@ -1546,8 +1547,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * reason, the event is not fired.
      * @param com a selector that picks the file name.
      * @throws IOException if the save fails due to an IO error
+     * @return true if the file was saved, false if the operation was canceled
      */
-    public void saveFileAs(FileSaveSelector com) throws IOException {
+    public boolean saveFileAs(FileSaveSelector com) throws IOException {
       try {
         final OpenDefinitionsDocument openDoc = this;
         final File file = com.getFile();
@@ -1591,10 +1593,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
           }
         }
         
+        return true;
+        
       }
       catch (OperationCanceledException oce) {
         // Thrown by com.getFile() if the user cancels.
         //   We don't save if this happens.
+        return false;
       }
       catch (BadLocationException docFailed) {
         // We don't expect this to happen
