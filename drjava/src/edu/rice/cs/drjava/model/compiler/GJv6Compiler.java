@@ -210,6 +210,11 @@ public class GJv6Compiler implements CompilerInterface{
     return roots.toString();
   }
 
+  public void setBuildDirectory(File builddir){
+    // !!!
+    // fill in soon
+  }
+  
   /**
    * put your documentation comment here
    */

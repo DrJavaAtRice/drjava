@@ -105,6 +105,9 @@ public class NoCompilerAvailable implements CompilerInterface {
   public void addToBootClassPath( File cp) {
     throw new UnexpectedException( new Exception("Method only implemented in JSR14Compiler"));
   }
+  
+  public void setBuildDirectory(File builddir){
+  }
 }
 
 

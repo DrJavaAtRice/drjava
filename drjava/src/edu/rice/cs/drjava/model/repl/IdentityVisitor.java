@@ -213,8 +213,8 @@ public class IdentityVisitor implements Visitor<Node> {
    */
   public Node visit(TryStatement node) {
     Node tryBlock = node.getTryBlock().acceptVisitor(this);
-    LinkedList<CatchStatement> catchStatements = new LinkedList<CatchStatement>();
-    Iterator<CatchStatement> it = node.getCatchStatements().iterator();
+    LinkedList<Node> catchStatements = new LinkedList<Node>();
+    Iterator<Node> it = node.getCatchStatements().iterator();
     while (it.hasNext()) {
       catchStatements.add((CatchStatement) it.next().acceptVisitor(this));
     }

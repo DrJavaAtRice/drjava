@@ -118,7 +118,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   public void testDocLocationAfterSwitch() throws BadLocationException {
     DefinitionsPane pane = _frame.getCurrentDefPane();
     OpenDefinitionsDocument doc = pane.getOpenDocument();//.getDocument();
-    
+    doc.getDocument();
     /**
      * NOTE: This has been added because MainFrameTest hangs randomly (about every other time) without this line.
      * It is still unknown why this occurs - being that the above method calls are all accessors, this shouldn't be a situation
@@ -133,6 +133,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     }
         
     doc.getDocument().insertString(0, "abcd", null);
+
+    
     pane.setCaretPosition(3);
     assertEquals("Location of old doc before switch", 3, doc.getDocument().getCurrentLocation());
     

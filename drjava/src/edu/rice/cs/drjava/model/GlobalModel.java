@@ -119,10 +119,10 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
   /**
    * Gets the DocumentNavigator, which controls the document view.
    */
-   public IAWTContainerNavigatorActor getDocumentNavigator();
+  public IAWTContainerNavigatorActor getDocumentNavigator();
    
-   public void setDocumentNavigator(IAWTContainerNavigatorActor newnav);
- 
+  public void setDocumentNavigator(IAWTContainerNavigatorActor newnav);
+  
   //---------------------------- File Management ----------------------------//
 
   /**
@@ -167,8 +167,28 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    */
   public void saveAllFiles(FileSaveSelector com) throws IOException;
   
+  
+  /**
+   * Writes the project file to disk
+   * @param filename where to save the project
+   */
   public void saveProject(String filename) throws IOException;
+  
+  /**
+   * Parses out the given project file, sets up the state and other configurations
+   * such as the Navigator and the classpath, and returns an array of files to open.
+   * @param file The project file to parse
+   * @return an array of document's files to open
+   */
+  public File[] openProject(File fine) throws IOException;
 
+  /**
+   * Performs any needed operations on the model before closing the
+   * project and its files.  This is not responsible for actually
+   * closing the files since that is handled in MainFrame._closeProject()
+   */
+  public void closeProject();
+  
   /**
    * Searches for a file with the given name on the current source roots and the
    * augmented classpath.

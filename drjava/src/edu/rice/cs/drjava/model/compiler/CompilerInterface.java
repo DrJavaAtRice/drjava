@@ -110,6 +110,9 @@ public interface CompilerInterface {
    * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
    */ 
   void addToBootClassPath(File s);
+  
+  void setBuildDirectory(File dir);
+  
 }
 
 

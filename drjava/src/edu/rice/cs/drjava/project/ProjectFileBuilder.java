@@ -9,7 +9,7 @@ public class ProjectFileBuilder
   
   private Vector<File> _resourcefiles = new Vector<File>();
   
-  private Vector<File> _miscfiles = new Vector<File>();
+  private Vector<File> _builddirfiles = new Vector<File>();
   
   private Vector<File> _classpathfiles = new Vector<File>();
   
@@ -31,9 +31,10 @@ public class ProjectFileBuilder
   {
     _resourcefiles.add(sf);
   }
-  public void addMiscFile(File sf)
+  public void setBuildDir(File sf)
   {
-    _miscfiles.add(sf);
+    _builddirfiles.clear();
+    _builddirfiles.add(sf);
   }
   public void addClasspathFile(File sf)
   {
@@ -50,18 +51,11 @@ public class ProjectFileBuilder
     StringBuffer tbr = new StringBuffer();
     makeEntries(tbr, _sourcefiles, "Source", true);
     makeEntries(tbr, _resourcefiles, "Resources", true);
-    makeEntries(tbr, _miscfiles, "Misc", true);
+    makeEntries(tbr, _builddirfiles, "BuildDir", true);
     //makeEntries(tbr, _classpathfiles, "Classpath", false);
     tbr.append("(Classpath\n)");
     makeEntries(tbr, _jarfiles, "Jar", true);
     return tbr.toString();
-    
-    
-    
-    
-   
-      
-    
   }
   
   private void makeEntries(StringBuffer buffer, Vector<File> files, String roottag, boolean checkrelpath)

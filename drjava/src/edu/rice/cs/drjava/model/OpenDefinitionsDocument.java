@@ -75,14 +75,21 @@ public interface OpenDefinitionsDocument {
    * @throws ClassNameNotFoundException if no top level class name found.
    */
   public String getFirstTopLevelClassName() throws ClassNameNotFoundException;
-
+  
+  /**
+   * a file is in the project if the source root is the same as the
+   * project root. this means that project files must be saved at the
+   * source root.
+   */
+  public boolean isProjectFile();
+  
   /**
    * Returns whether this document is currently untitled
    * (indicating whether it has a file yet or not).
    * @return true if the document is untitled and has no file
    */
   public boolean isUntitled();
-
+    
   /**
    * Returns the file for this document.  If the document
    * is untitled and has no file, it throws an IllegalStateException.

@@ -58,10 +58,10 @@ public class ProjectFileTest extends TestCase {
   private static final String RESOURCE_FILE_2 = "resource2.gif";    
   private static final String RESOURCES_ENTRY_1 = "(test/" + RESOURCE_FILE_1 + ")\n";
   private static final String RESOURCES_ENTRY_2 = "(test/" + RESOURCE_FILE_2 + ")\n";
-  private static final String MISC_FILE_1 = "misc1.txt";
-  private static final String MISC_FILE_2 = "misc2.txt";    
-  private static final String MISC_ENTRY_1 = "(test/" + MISC_FILE_1  + ")\n";
-  private static final String MISC_ENTRY_2 = "(test/" + MISC_FILE_2  + ")\n";
+  private static final String BUILDDIR_FILE_1 = "builddir1.txt";
+  private static final String BUILDDIR_FILE_2 = "builddir2.txt";    
+  private static final String BUILDDIR_ENTRY_1 = "(test/" + BUILDDIR_FILE_1  + ")\n";
+  private static final String BUILDDIR_ENTRY_2 = "(test/" + BUILDDIR_FILE_2  + ")\n";
   
   /* classpath is not relative to project file location because if you change computers you ought to
    * have to reedit the classpath, it's impossible to guess what it should be */
@@ -86,9 +86,9 @@ public class ProjectFileTest extends TestCase {
     "\t" + RESOURCES_ENTRY_1 +
     "\t\t\t" + RESOURCES_ENTRY_2 +
     ")\n" +
-    "(Misc\n" +
-    "\t" + MISC_ENTRY_1 +
-    "\t" + MISC_ENTRY_2 +
+    "(BuildDir\n" +
+    "\t" + BUILDDIR_ENTRY_1 +
+    "\t" + BUILDDIR_ENTRY_2 +
     ")\n" + 
     "(Classpath\n" +
     "\t" + CLASSPATH_ENTRY_1 +
@@ -140,16 +140,16 @@ public class ProjectFileTest extends TestCase {
     assertTrue(tag.entries()[1].getName().equals(RESOURCE_FILE_2));
   }
   
-  public void testMiscTag() throws Exception {
+  public void testBuildDirTag() throws Exception {
     /* munch the source tag */
     TagFactory.makeSourceTag(testFile, reader);
     /* munch the resource tag */
     TagFactory.makeResourceTag(testFile, reader);
     
-    MiscTag tag = TagFactory.makeMiscTag(testFile, reader);
+    BuildDirTag tag = TagFactory.makeBuildDirTag(testFile, reader);
     assertTrue( tag.entries().length == 2 );
-    assertTrue(tag.entries()[0].getName().equals(MISC_FILE_1));
-    assertTrue(tag.entries()[1].getName().equals(MISC_FILE_2));
+    assertTrue(tag.entries()[0].getName().equals(BUILDDIR_FILE_1));
+    assertTrue(tag.entries()[1].getName().equals(BUILDDIR_FILE_2));
   }
   
   public void testClasspathTag() throws Exception {
@@ -157,8 +157,8 @@ public class ProjectFileTest extends TestCase {
     TagFactory.makeSourceTag(testFile, reader);
     /* munch the resource tag */
     TagFactory.makeResourceTag(testFile, reader);
-    /* munch the misc tag */
-    TagFactory.makeMiscTag(testFile, reader);
+    /* munch the builddir tag */
+    TagFactory.makeBuildDirTag(testFile, reader);
     
     ClasspathTag tag = TagFactory.makeClasspathTag(testFile, reader);
     assertTrue( tag.entries().length == 3 );
@@ -172,8 +172,8 @@ public class ProjectFileTest extends TestCase {
     TagFactory.makeSourceTag(testFile, reader);
     /* munch the resource tag */
     TagFactory.makeResourceTag(testFile, reader);
-    /* munch the misc tag */
-    TagFactory.makeMiscTag(testFile, reader);
+    /* munch the builddir tag */
+    TagFactory.makeBuildDirTag(testFile, reader);
     /* munch the classpath tag */
     TagFactory.makeClasspathTag(testFile, reader);
     
@@ -194,9 +194,9 @@ public class ProjectFileTest extends TestCase {
     assertTrue(ir.getResourceFiles()[0].getName().equals(RESOURCE_FILE_1));
     assertTrue(ir.getResourceFiles()[1].getName().equals(RESOURCE_FILE_2));
     
-    assertTrue( ir.getMiscFiles().length == 2 );
-    assertTrue(ir.getMiscFiles()[0].getName().equals(MISC_FILE_1));
-    assertTrue(ir.getMiscFiles()[1].getName().equals(MISC_FILE_2));
+    assertTrue( ir.getBuildDirectory().length == 2 );
+    assertTrue(ir.getBuildDirectory()[0].getName().equals(BUILDDIR_FILE_1));
+    assertTrue(ir.getBuildDirectory()[1].getName().equals(BUILDDIR_FILE_2));
     
     assertTrue( ir.getClasspath().length == 3 );
     assertTrue(ir.getClasspath()[0].getAbsolutePath().equals(CLASSPATH_1));

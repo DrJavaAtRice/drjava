@@ -66,6 +66,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 import edu.rice.cs.drjava.model.OperationCanceledException;
@@ -140,6 +141,12 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   private boolean _classFileInSync;
   private File _classFile;
 
+  /**
+   * This reference to the OpenDefinitionsDocument is needed so that
+   * the document iterator (the DefaultGlobalModel) can find the next
+   * ODD given a DD.
+   */
+  private OpenDefinitionsDocument _odd;
   
   /**
    * The reduced model of the document that handles most of the
@@ -279,6 +286,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * Private common helper for constructors.
    */
   private void _init() {
+    _odd = null;
     _cachedLocation = 0;
     _cachedLineNum = 1;
     _cachedPrevLineLoc = -1;
@@ -330,6 +338,30 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   BraceReduction getReduced() {
     throwErrorHuh();
     return _reduced;
+  }
+  
+  
+  /**
+   * sets the OpenDefinitionsDocument that holds this DefinitionsDocument
+   * (the odd can only be set once)
+   * @param odd the OpenDefinitionsDocument to set as this DD's holder
+   */
+  public void setOpenDefDoc(OpenDefinitionsDocument odd){
+    if(_odd == null){
+      _odd = odd;
+    }
+  }
+  
+  
+  /**
+   * @return the OpenDefinitonsDocument that is associated with this DefinitionsDocument
+   */
+  public OpenDefinitionsDocument getOpenDefDoc() {
+    if(_odd == null){
+      throw new IllegalStateException("The OpenDefinitionsDocument for this DefinitionsDocument has never been set");
+    }else{
+      return _odd;
+    }
   }
 
   /**
@@ -2547,8 +2579,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    *         the source file is in the empty package).
    *
    * @exception InvalidPackageException if there is some sort of a
-   *                                    <TT>package</TT> statement but it
-   *                                    is invalid.
+   *                                    <TT>package</TT> statement but the
+   *                                    defined package does not match or exist.
    */
   public synchronized String getPackageName() throws InvalidPackageException {
     throwErrorHuh();

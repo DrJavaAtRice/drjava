@@ -123,6 +123,14 @@ public class DefaultCompilerModel implements CompilerModel {
   //-------------------------------- Triggers --------------------------------//
 
   /**
+   * compiles the currently active project
+   */
+  synchronized public void compileProject(){
+  }
+  
+  
+  
+  /**
    * Compiles all open documents, after ensuring that all are saved.
    *
    * This method used to only compile documents which were out of sync

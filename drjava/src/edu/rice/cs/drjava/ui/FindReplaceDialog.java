@@ -104,8 +104,8 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
 
   public void requestFocus() {
     super.requestFocus();
-    _findField.requestFocus();
     _findField.selectAll();
+    _findField.requestFocus();
   }
 
   JTextField getFindField() {

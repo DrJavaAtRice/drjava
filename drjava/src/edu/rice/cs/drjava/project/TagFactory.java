@@ -49,7 +49,7 @@ import java.io.*;
 import java.util.*;
 
 /**
- * A factory which creates SourceTags, MiscTags, ResourcesTags, lasspathTags, and JarTags from the output of a Reader
+ * A factory which creates SourceTags, BuildDirTags, ResourcesTags, lasspathTags, and JarTags from the output of a Reader
  */
 public class TagFactory {
   /* what a source tag looks like */
@@ -57,7 +57,7 @@ public class TagFactory {
   /* what a resource tag looks like */
   public static final String RESOURCE_TAG = "(Resources";
   /* what a misc tag looks like */
-  public static final String MISC_TAG = "(Misc";
+  public static final String BUILDDIR_TAG = "(BuildDir";
   /* what a classpath tag looks like */
   public static final String CLASSPATH_TAG = "(Classpath";
   /* what a jar tag looks like */
@@ -93,12 +93,12 @@ public class TagFactory {
   }
   
   /**
-   * @param r A reader from which a MiscTag is constructed.  It is assumed that the reader
-   * is immedeately before a MiscTag in the ProjectFile
-   * @return An IR object representing the contents of a Misc tag in the Project file the Reader was reading
+   * @param r A reader from which a BuildDirTag is constructed.  It is assumed that the reader
+   * is immedeately before a BuildDirTag in the ProjectFile
+   * @return An IR object representing the contents of a BuildDir tag in the Project file the Reader was reading
    */
-  public static MiscTag makeMiscTag(File projFile, Reader r) throws IOException {
-    return new MiscTagImpl(_readAllEntries(MISC_TAG, projFile, r));
+  public static BuildDirTag makeBuildDirTag(File projFile, Reader r) throws IOException {
+    return new BuildDirTagImpl(_readAllEntries(BUILDDIR_TAG, projFile, r));
   } 
   
   /**

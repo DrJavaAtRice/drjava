@@ -59,9 +59,9 @@ public interface ProjectFileIR {
   public File[] getResourceFiles();
   
   /**
-   * @return an array full of all the miscellaneous files in this project file
+   * @return an array full of all the build directory in this project file
    */
-  public File[] getMiscFiles();
+  public File[] getBuildDirectory();
   
   /**
    * @return an array full of all the classpath path elements in the classpath for this project file

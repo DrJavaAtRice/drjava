@@ -1926,70 +1926,24 @@ public class MainFrame extends JFrame implements OptionConstants {
     open(_openSelector);
   }
   
-  
-  
-  private void _openProjectHelper(File projectFile) {
-    _currentProjFile = projectFile;
-    final ProjectFileIR ir;
-    final File[] srcFiles;
-    IDocumentNavigator new_nav;
-    
-    
-    
-    
-    try
-    {
-      ir = ProjectFileParser.ONLY.parse(projectFile);
-      srcFiles = ir.getSourceFiles();
-      
-      
-      _model.setDocumentNavigator(AWTContainerNavigatorFactory.Singleton.makeTreeNavigator(projectFile.getName(),
-                                                                                             _model.getDocumentNavigator()));
-      new_nav = _model.getDocumentNavigator();
-
-      _setUpContextMenus();
-      
-      
-      File projectfile = projectFile;
-      String projfilepath = projectfile.getCanonicalPath();
-      String tlp = projfilepath.substring(0, projfilepath.lastIndexOf(File.separator));
-      
-      new_nav.setTopLevelPath(tlp);
-    }
-    catch(IOException e)
-    {
-      throw new UnexpectedException(e);
-    }
-    
-    _closeAll();
-
-    
-    List<OpenDefinitionsDocument> old_lod =  _model.getDefinitionsDocuments();
-
-    File[] projectclasspaths = ir.getClasspath();
-    Vector<File> currentclasspaths = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
-    for(int i = 0; i<projectclasspaths.length; i++)
-    {
-      currentclasspaths.add(projectclasspaths[i].getAbsoluteFile());
-    }
-    DrJava.getConfig().setSetting(OptionConstants.EXTRA_CLASSPATH, currentclasspaths);
-
-    
-    
+  /**
+   * Sets the left navigator pane to the correct component
+   * as dictated by the model.
+   */
+  private void _resetNavigatorPane() {
     _docSplitPane.remove(_docSplitPane.getLeftComponent());
     _docSplitPane.setLeftComponent(new JScrollPane(_model.getDocumentNavigator().asContainer()));
     Font doclistFont = DrJava.getConfig().getSetting(FONT_DOCLIST);
     _model.getDocCollectionWidget().setFont(doclistFont);
     _updateNormalColor();
     _updateBackgroundColor();
-    open(new FileOpenSelector(){
-      public File[] getFiles() {
-        return srcFiles; 
-      }
-    });
-    _closeProjectAction.setEnabled(true);    
   }
   
+  /**
+   * Asks the user to select the project file to 
+   * open and starts the process of opening the
+   * project
+   */
   private void _openProject() {
     try {
       hourglassOn();
@@ -2007,24 +1961,69 @@ public class MainFrame extends JFrame implements OptionConstants {
     }    
   }
   
-  private void _closeProject()
-  {
-        
-      _model.setDocumentNavigator(AWTContainerNavigatorFactory.Singleton.makeListNavigator(_model.getDocumentNavigator()));
-      Component renderer = _model.getDocumentNavigator().getRenderer();
-      new ForegroundColorListener(renderer);
-      new BackgroundColorListener(renderer);
-      _closeAll();
-      _docSplitPane.remove(_docSplitPane.getLeftComponent());
-      _docSplitPane.setLeftComponent(new JScrollPane(_model.getDocumentNavigator().asContainer()));
-      _updateNormalColor();
-      _updateBackgroundColor();
-      Font doclistFont = DrJava.getConfig().getSetting(FONT_DOCLIST);
-      _model.getDocCollectionWidget().setFont(doclistFont);
-      _closeProjectAction.setEnabled(false);
+  /**
+   * Oversees the opening of the project by delegating to the model
+   * to parse and initialize the project while resetting the 
+   * navigator pane and opening up the files itself.
+   * @param projectFile the file of the project to open
+   */
+  private void _openProjectHelper(File projectFile) {
+    _currentProjFile = projectFile;
+    File[] srcFiles = null;
+    try{
+      srcFiles = _model.openProject(projectFile);
       _setUpContextMenus();
+    }
+    catch(MalformedProjectFileException e){
+      _showProjectFileParseError(e);
+      return;
+    }
+    catch(FileNotFoundException e) {
+      _showFileNotFoundError(e);
+      return;
+    }
+    catch(IOException e){
+      _showIOError(e);
+      return;
+    }
+    
+    _closeAll();
+    _resetNavigatorPane();
+    
+    final File[] files = srcFiles;
+    // project could be empty
+    if(srcFiles.length > 0){
+      open(new FileOpenSelector(){
+        public File[] getFiles() {
+          return files;
+        }
+      });
+    }
+    _closeProjectAction.setEnabled(true);
   }
   
+  /**
+   * Signals the model to close the project, then
+   * closes all open files.  It also restores the
+   * list view navigator
+   */
+  private void _closeProject(){
+    _model.closeProject();
+    Component renderer = _model.getDocumentNavigator().getRenderer();
+    new ForegroundColorListener(renderer);
+    new BackgroundColorListener(renderer);
+    _closeAll();
+    _resetNavigatorPane();
+    _closeProjectAction.setEnabled(false);
+    _setUpContextMenus();
+  }
+  
+  /**
+   * Opens all the files returned by the FileOpenSelector prompting
+   * the user to handle the cases where files are already open,
+   * files are missing, or the action was canceled by the user
+   * @param openSelector the selector that returns the files to open
+   */
   void open(FileOpenSelector openSelector) {
     try {
       hourglassOn();
@@ -2086,6 +2085,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
+  /**
+   * Delegates directly to the model to close 
+   * the active document
+   */
   private void _close() {
     _model.closeFile(_model.getActiveDocument());
   }
@@ -2600,6 +2603,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
+  void _showProjectFileParseError(MalformedProjectFileException mpfe) {
+    _showError(mpfe, "Invalid Project File",
+               "The specified file is not a valid project file.");
+  }
+  
   void _showFileNotFoundError(FileNotFoundException fnf) {
     _showError(fnf, "File Not Found",
                "The specified file was not found on disk.");

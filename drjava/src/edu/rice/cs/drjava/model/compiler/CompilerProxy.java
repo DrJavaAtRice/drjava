@@ -232,7 +232,14 @@ public class CompilerProxy implements CompilerInterface {
     _realCompiler.addToBootClassPath(cp);
   }
 
-
+  /**
+   * sets the build directory for the compilers
+   */
+  public void setBuildDirectory(File builddir){
+    // !!!
+    // fill in soon
+  }
+  
 }
 
 

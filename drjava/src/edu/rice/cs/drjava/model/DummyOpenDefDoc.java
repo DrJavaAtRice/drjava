@@ -475,4 +475,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     // no body
   }
 
+  public boolean isProjectFile(){
+    return false;
+  }
 }

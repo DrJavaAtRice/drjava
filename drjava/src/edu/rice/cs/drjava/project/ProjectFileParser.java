@@ -1,4 +1,4 @@
-/*BEGIN_COPYRIGHT_BLOCK
+ /*BEGIN_COPYRIGHT_BLOCK
  *
  * This file is part of DrJava.  Download the current version of this project:
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
@@ -61,7 +61,7 @@ public class ProjectFileParser {
     }
     SourceTag st = TagFactory.makeSourceTag(projFile, r);
     ResourceTag rt = TagFactory.makeResourceTag(projFile, r);
-    MiscTag mt = TagFactory.makeMiscTag(projFile, r);
+    BuildDirTag mt = TagFactory.makeBuildDirTag(projFile, r);
     ClasspathTag ct = TagFactory.makeClasspathTag(projFile, r);
     JarTag jt = TagFactory.makeJarTag(projFile, r);
     
@@ -75,14 +75,14 @@ public class ProjectFileParser {
   class ProjectFileIRImpl implements ProjectFileIR {
     private SourceTag    _source = null;
     private ResourceTag  _resource = null;
-    private MiscTag      _misc = null;
+    private BuildDirTag  _builddir = null;
     private ClasspathTag _classpath = null;
     private JarTag       _jar = null;
     
-    public ProjectFileIRImpl(SourceTag st, ResourceTag rt, MiscTag mt, ClasspathTag ct, JarTag jt) {
+    public ProjectFileIRImpl(SourceTag st, ResourceTag rt, BuildDirTag bt, ClasspathTag ct, JarTag jt) {
       _source = st;
       _resource = rt;
-      _misc = mt;
+      _builddir = bt;
       _classpath = ct;
       _jar = jt;
     }
@@ -102,10 +102,10 @@ public class ProjectFileParser {
     }
     
     /**
-     * @return an array full of all the miscellaneous files in this project file
+     * @return an array of the single build directory for this project file
      */
-    public File[] getMiscFiles() {
-      return _misc.entries();
+    public File[] getBuildDirectory() {
+      return _builddir.entries();
     }
     
     /**

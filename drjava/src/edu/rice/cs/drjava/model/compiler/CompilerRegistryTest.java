@@ -293,6 +293,7 @@ public final class CompilerRegistryTest extends TestCase {
      public void setAllowAssertions(boolean allow) {}
      public void setExtraClassPath(String extraClassPath) {}
      public String toString(){ return "Without"; }
+     public void setBuildDirectory(File builddir){}
   }
 
   /**
