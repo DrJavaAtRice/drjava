@@ -2431,7 +2431,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
    * @return The right-hand side of the assignment.  This expression will
    * be the unboxing/boxing of the RHS if necessary.
    */
-  private Expression checkAssignmentStaticRules(Class<?> lc, Class<?> rc,
+  public Expression checkAssignmentStaticRules(Class<?> lc, Class<?> rc,
                                                  Node node, Expression v) {
     if (lc != null) {
       if (lc.isPrimitive()) {
@@ -2516,9 +2516,13 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
       }
       else /* lc is not Primitive */
         if (rc != null) {
-          if (rc.isPrimitive() && lc.isAssignableFrom(rc)) return _box(v,_correspondingRefClass(rc));
-          if (rc.isPrimitive() && TigerUtilities.boxesTo(rc, lc)) return _box(v, lc);
-        if (!lc.isAssignableFrom(rc) && !rc.isAssignableFrom(lc)) {
+          if (rc.isPrimitive()) {
+            Class<?> boxedRc = _correspondingRefClass(rc);
+            if (lc.isAssignableFrom(boxedRc)) return _box(v,boxedRc);
+            if (TigerUtilities.boxesTo(rc, lc)) return _box(v, lc); /* I think this statement is unnecessary.  Corky 6/19/04 */
+            throw new ExecutionError("assignment.types", node);
+          }
+        if (!lc.isAssignableFrom(rc) && !rc.isAssignableFrom(lc)) { /* I don't know why the second clause appears in this test.  Corky 6/19/04 */
           throw new ExecutionError("assignment.types", node);
         }
       }
@@ -2879,7 +2883,6 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
    * @return the corresponding reference class
    */
   protected static Class<?> _correspondingRefClass(Class<?> primClass) {
-    System.out.println(primClass);
     if (primClass == boolean.class) {
       return Boolean.class;
     }
