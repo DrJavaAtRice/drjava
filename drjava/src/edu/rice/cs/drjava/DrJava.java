@@ -12,15 +12,9 @@ import edu.rice.cs.drjava.model.compiler.GJv6Compiler;
  * @version $Id$
  */
 public class DrJava {
-  // Generated automatically when you check out with tag name!
-  public static final String DRJAVA_BUILD = "$Name$";
   // Pre-initialize them in case we use them before calling main
   private static PrintStream _consoleOut = System.out;
   private static PrintStream _consoleErr = System.err;
-
-  /** Compiler to use everywhere. */
-  public static final CompilerInterface compiler = new GJv6Compiler();
-  //public static final CompilerInterface compiler = new JavacGJCompiler();
 
   public static void main(String[] args) {
     // Save pointers to stdout and stderr
