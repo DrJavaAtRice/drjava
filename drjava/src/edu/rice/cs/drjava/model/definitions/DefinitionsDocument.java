@@ -419,12 +419,12 @@ public class DefinitionsDocument extends PlainDocument {
   
   /** 
    * Return the current column of the cursor position.
-   * Uses a 1 based index.
+   * Uses a 0 based index.
    */
   public int getCurrentCol() {
     int here = getCurrentLocation();
     int startOfLine = getLineStartPos(here);
-    return here - startOfLine + 1;
+    return here - startOfLine;
   }
   
   /**
@@ -432,50 +432,35 @@ public class DefinitionsDocument extends PlainDocument {
    * Uses a 1 based index.
    */
   public int getCurrentLine() {
-    // don't know if this does anything.
-    // if (_cachedNextLineLoc == -1 ){ initNextLineNum(); }
     int here = getCurrentLocation();
+    if ( _cachedLocation > getLength() ){ 
+      // we can't know the last line number after the delete.
+      // starting over.
+      _cachedLocation = 0;
+      _cachedLineNum = 1;
+    }
+    if ( _cachedNextLineLoc > getLength() ){
+      _cachedNextLineLoc = -1;
+    }
     // let's see if we get off easy
-    if( _cachedPrevLineLoc < here && here < _cachedNextLineLoc ){ 
-      return _cachedLineNum;
-    }
+    if( ! ( _cachedPrevLineLoc < here && here < _cachedNextLineLoc ) ){ 
     
-    // test to see which is easier: starting from the top
-    // or calculating relatively.
-    if( (_cachedLocation - here > here ) ||
-        ( here <= getFirstNewLine() ) ){ 
-      _cachedLineNum = getLineFromScratch(); 
-    }
-    else {
-      int lineOffset = getRelativeLine(here);
+      // this if improves performance when moving from the
+      // end of the document to the beginnning.
+      // in essence, it calculates the line number from
+      // scratch
+      if( _cachedLocation - here > here ){
+        _cachedLocation = 0;
+        _cachedLineNum = 1;
+      }        
+      int lineOffset = _getRelativeLine();
       _cachedLineNum = _cachedLineNum+lineOffset;      
+      
     }
     _cachedLocation = here;
     _cachedPrevLineLoc = getLineStartPos(here);
-    _cachedNextLineLoc = here + _reduced.getDistToNextNewline();
+    _cachedNextLineLoc = getLineEndPos(here);
     return _cachedLineNum;
-  }
-  
-  public int getLineFromScratch(){
-    int count=1;
-    int _copyLocation = getCurrentLocation();
-    int distPrevNewLine = _reduced.getDistToPreviousNewline( 0 );
-
-    while (distPrevNewLine != -1 && getCurrentLocation()>0) {
-      setCurrentLocation( getCurrentLocation()-distPrevNewLine-1 );
-      count++;
-      distPrevNewLine = _reduced.getDistToPreviousNewline( 0 );
-    }
-    setCurrentLocation( _copyLocation );
-    return count;
-  }
-  
-  public int getFirstNewLine(){
-    int _copyLocation = getCurrentLocation();
-    setCurrentLocation( DOCSTART );
-    int ret = _reduced.getDistToNextNewline();
-    setCurrentLocation( _copyLocation );
-    return ret;
   }
   
 
@@ -483,44 +468,35 @@ public class DefinitionsDocument extends PlainDocument {
    * This method returns the relative offset of line number
    * from the previous location in the document.
    **/
-  private int getRelativeLine( int currLoc ){
-    // we moved backwards
+  private int _getRelativeLine(){
     int count=0;
+    int currLoc = getCurrentLocation();
+    
     setCurrentLocation( _cachedLocation );
+    
     if( _cachedLocation > currLoc ){
-      int distPrevNewLine = _reduced.getDistToPreviousNewline( 0 );
-      while (distPrevNewLine != -1 && getCurrentLocation()>currLoc) {
-        setCurrentLocation( getCurrentLocation()-distPrevNewLine-1 );
+      // we moved backward
+      int prevLineLoc = getLineStartPos( _cachedLocation );
+      while( prevLineLoc > currLoc ){
         count--;
-        distPrevNewLine = _reduced.getDistToPreviousNewline( 0 );
+        prevLineLoc = getLineStartPos( prevLineLoc - 1 );
+        // temporary performance optimization
+        setCurrentLocation(prevLineLoc);
       }
-      // this and the similar test in the other case
-      // account for the fact that our loop condition guarantees
-      // one extraneous loop through the document.
-      if( getCurrentLocation() != currLoc ){ count++; }
-   }
-   // we moved forwards
-   else{
-     int distNextNewLine = _reduced.getDistToNextNewline();
-     while (distNextNewLine != -1 && getCurrentLocation()<currLoc) {
-       try{
-         setCurrentLocation( getCurrentLocation()+distNextNewLine+1 );
-         distNextNewLine = _reduced.getDistToNextNewline();
-       }
-       catch( IllegalArgumentException iae ){
-         setCurrentLocation( currLoc );
-         distNextNewLine = -1;
-       }
-       count++;
-     }
-     if( getCurrentLocation() != currLoc ){ count--; }
-   }
-     setCurrentLocation( currLoc );
-     return count;
-   }
-  
-  private void initNextLineNum(){
-    _cachedNextLineLoc = _reduced.getDistToNextNewline();
+    }
+    
+    else{
+      // we moved forward
+      int nextLineLoc = getLineEndPos( _cachedLocation );
+      while( nextLineLoc < currLoc ){
+        count++;
+        nextLineLoc = getLineEndPos( nextLineLoc + 1 );
+        // temporary performance optimization
+        setCurrentLocation(nextLineLoc);
+      }
+    }
+    setCurrentLocation( currLoc );
+    return count;
   }
   
   
@@ -1292,14 +1268,20 @@ public class DefinitionsDocument extends PlainDocument {
     if (line < 0) {
      return;
     }
+    int actualLine =1;
     setCurrentLocation(0);
     for (int i = 1; (i < line) && (_currentLocation < getLength()); i++) {
       dist = _reduced.getDistToNextNewline();
       if (_currentLocation + dist < getLength()) {
         dist++;
       }
+      actualLine++;
       move(dist);
     }
+    _cachedLineNum = actualLine;
+    _cachedLocation = _currentLocation;
+    _cachedPrevLineLoc = getLineStartPos(_currentLocation);
+    _cachedNextLineLoc = getLineEndPos(_currentLocation);
   }
 
   /**

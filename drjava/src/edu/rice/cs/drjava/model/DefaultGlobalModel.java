@@ -274,6 +274,7 @@ public class DefaultGlobalModel implements GlobalModel {
 
       tempDoc.setFile(file);
       tempDoc.resetModification();
+      tempDoc.setCurrentLocation(0);
 
       final OpenDefinitionsDocument doc =
         new DefinitionsDocumentHandler(tempDoc);

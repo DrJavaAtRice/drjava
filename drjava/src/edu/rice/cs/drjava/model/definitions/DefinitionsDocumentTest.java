@@ -372,11 +372,11 @@ public class DefinitionsDocumentTest extends TestCase
    */
   public void testGetColumn1() throws BadLocationException {
     final String s = "1234567890";
-    assertEquals("#0.0", 1, defModel.getCurrentCol());
+    assertEquals("#0.0", 0, defModel.getCurrentCol());
     defModel.insertString(0, s, null);
-    assertEquals("#0.1", 11, defModel.getCurrentCol());
+    assertEquals("#0.1", 10, defModel.getCurrentCol());
     defModel.gotoLine(0);
-    assertEquals("#0.2", 1, defModel.getCurrentCol());
+    assertEquals("#0.2", 0, defModel.getCurrentCol());
   }
   
   
@@ -386,7 +386,7 @@ public class DefinitionsDocumentTest extends TestCase
   public void testGetColumn2() throws BadLocationException {
     final String s = "1234567890\n1234\n12345";
     defModel.insertString(0, s, null);
-    assertEquals("#0.0", 6, defModel.getCurrentCol() );
+    assertEquals("#0.0", 5, defModel.getCurrentCol() );
   }
   
   /**
@@ -396,7 +396,7 @@ public class DefinitionsDocumentTest extends TestCase
   public void testGetLine1() throws BadLocationException {
     final String s = "a\n";
     defModel.insertString(0, s, null);
-    defModel.gotoLine(2);
+    defModel.setCurrentLocation(2);
     assertEquals("#0.0", 2, defModel.getCurrentLine());
   }
 
@@ -407,8 +407,10 @@ public class DefinitionsDocumentTest extends TestCase
   public void testGetLine2() throws BadLocationException {
     final String s = "abcd\n";
     defModel.insertString(0, s, null);
+    defModel.setCurrentLocation(2);
+    assertEquals("#0.0", 1, defModel.getCurrentLine());
     defModel.gotoLine(2);
-    assertEquals("#0.0", 2, defModel.getCurrentLine());
+    assertEquals("#0.1", 2, defModel.getCurrentLine());
   }
 
   /**
@@ -418,7 +420,7 @@ public class DefinitionsDocumentTest extends TestCase
   public void testGetLine3() throws BadLocationException {
     final String s = "a\nb\nc\n";
     defModel.insertString(0, s, null);
-    defModel.gotoLine(4);
+    defModel.setCurrentLocation(6);
     assertEquals("#0.0", 4, defModel.getCurrentLine());
   }
 
@@ -440,7 +442,7 @@ public class DefinitionsDocumentTest extends TestCase
    * location.
    */
   public void testGetLine5() {
-    defModel.gotoLine(1);
+    defModel.setCurrentLocation(0);
     assertEquals("#0.0", 1, defModel.getCurrentLine());
   }
 
@@ -459,14 +461,24 @@ public class DefinitionsDocumentTest extends TestCase
    * @exception BadLocationException
    */
   public void testGetLine7() throws BadLocationException {
-    final String s = "11111\n2222\n33333\n44444";
+    final String s = "12345\n7890\n2345\n789";
     defModel.insertString(0, s, null);
-    defModel.gotoLine(3);
+    defModel.setCurrentLocation(12);
     assertEquals("#0.0", 3, defModel.getCurrentLine());
-    defModel.gotoLine(2);
-    assertEquals("#0.0", 2, defModel.getCurrentLine());
-    defModel.gotoLine(4);
-    assertEquals("#0.0", 4, defModel.getCurrentLine());
+    defModel.move(-5);
+    assertEquals("#0.1", 2, defModel.getCurrentLine());
+    defModel.setCurrentLocation(19);
+    assertEquals("#0.2", 4, defModel.getCurrentLine());
+  }
+  
+  public void testGetLineDeleteText() throws BadLocationException{
+    final String s = "123456789\n123456789\n123456789\n123456789\n";
+    defModel.insertString(0,s,null);
+    defModel.setCurrentLocation(35);
+    assertEquals("Before delete", 4, defModel.getCurrentLine() );
+    defModel.remove(0,30);
+    defModel.setCurrentLocation(5);
+    assertEquals("After delete", 1, defModel.getCurrentLine() );
   }
   
   /**

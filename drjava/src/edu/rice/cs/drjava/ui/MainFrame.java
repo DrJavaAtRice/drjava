@@ -1187,8 +1187,8 @@ public class MainFrame extends JFrame {
       new CompilerErrorCaretListener(doc, _errorPanel.getErrorListPane(), pane);
     pane.addErrorCaretListener(caretListener);
     // add a listener to update line and column.
-    //pane.addCaretListener( _posListener );
-    //_posListener.updateLocation();
+    pane.addCaretListener( _posListener );
+    _posListener.updateLocation();
 
     // Add to a scroll pane
     JScrollPane scroll = new BorderlessScrollPane(pane,
@@ -1332,7 +1332,7 @@ public class MainFrame extends JFrame {
       _setCurrentDirectory(active);
 
       updateFileTitle();
-      //_posListener.updateLocation();
+      _posListener.updateLocation();
       _currentDefPane.grabFocus();
     }
 
