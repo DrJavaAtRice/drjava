@@ -142,7 +142,7 @@
 
   <!-- Initializes properties used in all Eclipse tasks -->
   <target name="eclipse">
-    <property name="eclipse_plugin_version" value="0.0.2" />
+    <property name="eclipse_plugin_version" value="1.0.0" />
     <property name="eclipse_dir" value="${plugins_dir}/eclipse" />
     <property name="eclipse_srcroot" value="${eclipse_dir}/src" />
     <property name="eclipse_built" value="${eclipse_dir}/bin" />
@@ -550,6 +550,8 @@
       <zipfileset src="${lib_dir}/compilers.jar"
                   excludes="META-INF/MANIFEST.MF" />
       <zipfileset src="${lib_dir}/platform.jar"
+                  excludes="META-INF/MANIFEST.MF" />
+      <zipfileset src="${lib_dir}/javaast.jar"
                   excludes="META-INF/MANIFEST.MF" />
 
       <!-- Include DrJava classes -->
