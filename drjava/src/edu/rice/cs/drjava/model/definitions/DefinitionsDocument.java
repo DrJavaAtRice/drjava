@@ -483,7 +483,7 @@ public class DefinitionsDocument extends PlainDocument {
     _reduced.move(pos - origLocation);
     
     // Walk backwards from specificed position
-    for (i = pos-1; i != DOCSTART-1; i--) {
+    for (i = pos-1; i >= DOCSTART; i--) {
       c = text.charAt(i);
       // Check if character is one of the delimiters
       for (j = 0; j < delims.length; j++) {
@@ -492,22 +492,21 @@ public class DefinitionsDocument extends PlainDocument {
           _reduced.move(i - pos);
           // Check if matching char is in comment or quotes
           ReducedModelState state = _reduced.getStateAtCurrent();
-          if((state.equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
-             (state.equals(ReducedModelState.INSIDE_BLOCK_COMMENT)) ||
-             (state.equals(ReducedModelState.INSIDE_SINGLE_QUOTE)) ||
-             (state.equals(ReducedModelState.INSIDE_DOUBLE_QUOTE))) {
-               // Ignore matching char
-             } else {
-               // Found a matching char, check if we should ignore it
-               if (skipParenPhrases && posInParenPhrase(i)) {
-                 // In a paren phrase, so ignore
-               }
-               else {
-                 // Return position of matching char
-                 _reduced.move(origLocation - i);
-                 return i;
-               }
-             }
+          if (!state.equals(ReducedModelState.FREE)
+                || _isStartOfComment(text, i)
+                || ((i > 0) && _isStartOfComment(text, i - 1))) {
+            // Ignore matching char
+          } else {
+            // Found a matching char, check if we should ignore it
+            if (skipParenPhrases && posInParenPhrase(i)) {
+              // In a paren phrase, so ignore
+            }
+            else {
+              // Return position of matching char
+              _reduced.move(origLocation - i);
+              return i;
+            }
+          }
           _reduced.move(pos - i);
         }
       }
@@ -625,16 +624,13 @@ public class DefinitionsDocument extends PlainDocument {
       this.getReduced().move(i + lineStart - reducedAbsOffset);
       
       // Check if matching char is in comment or quotes
-      if((this.getReduced().getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
-         (this.getReduced().getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT)) ||
-         (this.getReduced().getStateAtCurrent().equals(ReducedModelState.INSIDE_SINGLE_QUOTE)) ||
-         (this.getReduced().getStateAtCurrent().equals(ReducedModelState.INSIDE_DOUBLE_QUOTE))) {
-           // Ignore matching char
-         } else {
-           // Return position of matching char
-           this.getReduced().move(reducedAbsOffset - (i + lineStart));
-           return (i + lineStart);
-         }
+      if (!this.getReduced().getStateAtCurrent().equals(ReducedModelState.FREE)) {
+        // Ignore matching char
+      } else {
+        // Return position of matching char
+        this.getReduced().move(reducedAbsOffset - (i + lineStart));
+        return (i + lineStart);
+      }
       this.getReduced().move(reducedAbsOffset - (i + lineStart));
       i = lineText.indexOf(findChar, i+1);
     }

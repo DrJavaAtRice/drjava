@@ -204,4 +204,38 @@ public class ActionBracePlusTest extends IndentRulesTestCase
     assertEquals("Line aligned to open paren.", _aligned.length(), _doc.getLength());
     assertEquals("Line aligned to open paren.", _aligned, _doc.getText(0, _doc.getLength()));
   }
+  
+  public void testComment() throws BadLocationException
+  {
+    _action = new ActionBracePlus(" " + "  ");
+    
+    // (7) 
+    
+    _text = 
+      "foo(i,\n"+
+      "    j.\n" +
+      "bar().\n" +
+      "// bar();\n" +
+      "baz(),\n" +
+      "    k);";
+
+    _aligned = 
+      "foo(i,\n"+
+      "    j.\n" +
+      "      bar().\n" +
+      "      // bar();\n" +
+      "      baz(),\n" +
+      "    k);";
+ 
+    _setDocText(_text);
+    _action.indentLine(_doc, 14); // line 3
+    _action.indentLine(_doc, 27); // line 4
+    _action.indentLine(_doc, 43); // line 5
+    assertEquals("Lines aligned plus one level.",
+                 _aligned, _doc.getText(0, _doc.getLength()));
+    
+    _action.indentLine(_doc, 54); // after baz()
+    assertEquals("Cursor after baz().",
+                 _aligned, _doc.getText(0, _doc.getLength()));
+  }
 }

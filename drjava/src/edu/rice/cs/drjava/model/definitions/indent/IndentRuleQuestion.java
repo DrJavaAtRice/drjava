@@ -103,10 +103,13 @@ public abstract class IndentRuleQuestion implements IndentRule {
    */
   public void indentLine(DefinitionsDocument doc)
   {
+    //System.err.println("Question: " + this.getClass().getName());
     if (applyRule(doc)) {
+      //System.err.println("  (Yes) Calling: " + _yesRule.getClass().getName());
       _yesRule.indentLine(doc);
     }
     else {
+      //System.err.println("  (No) Calling: " + _noRule.getClass().getName());
       _noRule.indentLine(doc);
     }
   }

@@ -80,8 +80,223 @@ public class IndentTest extends TestCase {
     return  new TestSuite(IndentTest.class);
   }
 
- 
+  /**
+   * Regression test for comment portion of indent tree.
+   */
+  public void testIndentComments() throws BadLocationException {
+    String text =
+      "  foo();\n" +
+      "   // foo\n" +
+      "/**\n" +
+      "\n" +
+      "* Comment\n" +
+      "    * More comment\n" +
+      "code;\n" +
+      "* More comment\n" +
+      "\n" +
+      "*/\n" +
+      "\n";
+    
+    String indented = 
+      "  foo();\n" +     // (skip this line)
+      "  // foo\n" +     // align to start of statement
+      "  /**\n" +     // start of statement
+      "   * \n" +     // add a star after first line
+      "   * Comment\n" +     // align to star
+      "   * More comment\n" +     // align to star
+      "   code;\n" +     // align commented code to stars
+      "   * More comment\n" +     // align star after commented code
+      "   * \n" +     // add a star after line with star
+      "   */\n" +     // align star
+      "  \n";     // align close comment to prev statement
+    
+    doc.insertString(0, text, null);
+    _assertContents(text, doc);
+    doc.indentLines(9, doc.getLength());
+    _assertContents(indented, doc);
+  }
   
+  /**
+   * Regression test for paren phrases.
+   */
+  public void testIndentParenPhrases() throws BadLocationException {
+    String text =
+      "foo(i,\n" +
+      "j.\n" +
+      "bar().\n" +
+      "// foo();\n" +
+      "baz(),\n" +
+      "cond1 ||\n" +
+      "cond2);\n" +
+      "i = myArray[x *\n" +
+      "y.\n" +
+      "foo() +\n" +
+      "z\n" +
+      "];\n";
+      
+    String indented =
+      "foo(i,\n" +
+      "    j.\n" +     // new paren phrase
+      "      bar().\n" +     // not new paren phrase
+      "      // foo();\n" +     // not new
+      "      baz(),\n" +     // not new (after comment)
+      "    cond1 ||\n" +     // new
+      "    cond2);\n" +     // new (after operator)
+      "i = myArray[x *\n" +     // new statement
+      "            y.\n" +     // new phrase
+      "              foo() +\n" +     // not new phrase
+      "            z\n" +     // new phrase
+      "              ];\n";     // not new phrase (debatable)
+    
+    doc.insertString(0, text, null);
+    _assertContents(text, doc);
+    doc.indentLines(0, doc.getLength());
+    _assertContents(indented, doc);
+  }
+  
+  /**
+   * Regression test for braces.
+   */
+//  public void testIndentBraces() throws BadLocationException {
+//    String text =
+//      "{\n" +
+//      "class Foo\n" +
+//      "extends F {\n" +
+//      "int i;   \n" +
+//      "void foo() {\n" +
+//      "if (true) {\n" +
+//      "bar();\n" +
+//      "}\n" +
+//      "}\n" +
+//      "/* comment */ }\n" +
+//      "class Bar {\n" +
+//      "/* comment\n" +
+//      "*/ }\n" + 
+//      "int i;\n" +
+//      "}\n";
+//      
+//    String indented =
+//      "{\n" +
+//      "  class Foo\n" +     // After open brace
+//      "    extends F {\n" +     // Not new statement
+//      "    int i;   \n" +     // After open brace
+//      "    void foo() {\n" +     // After statement
+//      "      if (true) {\n" +     // Nested brace
+//      "        bar();\n" +     // Nested brace
+//      "      }\n" +     // Close nested brace
+//      "    }\n" +     // Close nested brace
+//      "  /* comment */ }\n" +     // Close brace after comment
+//      "  class Bar {\n" +     // After close brace
+//      "    /* comment\n" +     // After open brace
+//      "     */ }\n" +      // In comment
+//      "  int i;\n" +     // After close brace
+//      "}\n";
+//
+//    
+//    doc.insertString(0, text, null);
+//    _assertContents(text, doc);
+//    doc.indentLines(0, doc.getLength());
+//    _assertContents(indented, doc);
+//  }
+  
+  /**
+   * Regression test for common cases.
+   */
+  public void testIndentCommonCases() throws BadLocationException {
+    String text =
+      "int x;\n" +
+      "      int y;\n" +
+      "  class Foo\n" +
+      "     extends F\n" +
+      " {\n" +
+      "   }";
+      
+    String indented =
+      "int x;\n" +
+      "int y;\n" +
+      "class Foo\n" +
+      "  extends F\n" +
+      "{\n" +
+      "}";
+    
+    doc.insertString(0, text, null);
+    _assertContents(text, doc);
+    doc.indentLines(0, doc.getLength());
+    _assertContents(indented, doc);
+  }
+  
+  /**
+   * Regression test for switch statements.
+   */
+  public void testIndentSwitch() throws BadLocationException {
+    String text =
+      "switch (x) {\n" +
+      "case 1:\n" +
+      "foo();\n" +
+      "break;\n" +
+      "case 2: case 3:\n" +
+      "case 4: case 5:\n" +
+      "bar();\n" +
+      "break;\n" +
+      "}\n";
+      
+    String indented =
+      "switch (x) {\n" +
+      "  case 1:\n" +     // Starting new statement after brace
+      "    foo();\n" +     // Not new statement
+      "    break;\n" +     // Indent to prev statement
+      "  case 2: case 3:\n" +     // Case (indent to stmt of brace)
+      "  case 4: case 5:\n" +     // Case (not new stmt)
+      "    bar();\n" +     // Not new stmt
+      "    break;\n" +     // Indent to prev stmt
+      "}\n";     // Close brace
+    
+    
+    doc.insertString(0, text, null);
+    _assertContents(text, doc);
+    doc.indentLines(0, doc.getLength());
+    _assertContents(indented, doc);
+  }
+  
+  /**
+   * Regression test for ternary operators.
+   *
+  public void testIndentTernary() throws BadLocationException {
+    String text =
+      "test1 = x ? y : z;\n" +
+      "test2 = x ? y :\n" +
+      "z;\n" +
+      "foo();\n" +
+      "test3 =\n" +
+      "x ?\n" +
+      "y :\n" +
+      "z;\n" +
+      "bar();\n" +
+      "test4 = (x ?\n" +
+      "y :\n" +
+      "z);\n";
+      
+    String indented =
+      "test1 = x ? y : z;\n" +     // ternary on one line
+      "test2 = x ? y :\n" +     // ? and : on one line
+      "  z;\n" +     // unfinished ternary
+      "foo();\n" +     // new stmt
+      "test3 =\n" +     // new stmt
+      "  x ?\n" +     // not new stmt
+      "  y :\n" +     // : with ? in stmt
+      "  z;\n" +     // in ternary op
+      "bar();\n" +     // new stmt
+      "test4 = (x ?\n" +     // ternary in paren
+      "           y :\n" +     // : with ? in paren stmt
+      "           z);\n";     // in ternary in paren
+    
+    
+    doc.insertString(0, text, null);
+    _assertContents(text, doc);
+    doc.indentLines(0, doc.getLength());
+    _assertContents(indented, doc);
+  }
+  */
   
   /**
    * put your documentation comment here

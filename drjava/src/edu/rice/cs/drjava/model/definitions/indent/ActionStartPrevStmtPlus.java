@@ -54,14 +54,17 @@ import javax.swing.text.BadLocationException;
  */
 public class ActionStartPrevStmtPlus extends IndentRuleAction {
   private String _suffix;
+  private boolean _useColon;
   
   /**
    * Constructs a new rule with the given suffix string.
-   * @param prefix String to append to indent level of brace
+   * @param suffix String to append to indent level of brace
+   * @param colonIsDelim whether to include colons as statement delimiters
    */
-  public ActionStartPrevStmtPlus(String suffix) {
+  public ActionStartPrevStmtPlus(String suffix, boolean colonIsDelim) {
     super();
     _suffix = suffix;
+    _useColon = colonIsDelim;
   }
   
   /**
@@ -95,7 +98,14 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     // Get indent of prev statement
     try {
       // Include colons as end of statement (ie. "case")
-      char[] indentDelims = {';', '{', '}', ':'};
+      char[] indentDelims;
+      char[] indentDelimsWithColon = {';', '{', '}', ':'};
+      char[] indentDelimsWithoutColon = {';', '{', '}'};
+      if (_useColon) {
+        indentDelims = indentDelimsWithColon;
+      } else {
+        indentDelims = indentDelimsWithoutColon;
+      }
       indent = doc.getIndentOfCurrStmt(prevDelimiterPos, indentDelims);
     } catch (BadLocationException e) {
       throw new UnexpectedException(e);

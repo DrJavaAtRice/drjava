@@ -67,7 +67,7 @@ public class QuestionNewParenPhrase extends IndentRuleQuestion {
  
   /**
    * Determines if the previous line ends in a comma, semicolon,
-   * open paren, or open bracket.
+   * open paren, open bracket, operator, or comparator.
    * @param doc DefinitionsDocument containing the line to be indented.
    * @return true if this node's rule holds.
    */
@@ -79,8 +79,11 @@ public class QuestionNewParenPhrase extends IndentRuleQuestion {
       
       if (startLine > DefinitionsDocument.DOCSTART) {
         // Find previous delimiter (looking in paren phrases)
-        char[] delims = {';', ',', '(', '['};
-        int prevDelim = doc.findPrevDelimiter(here, delims, false);
+        char[] delims = {';', ',', '(', '[', 
+          '&', '|', '+', '-', '*', '/', '%', 
+          '=', '<', '>'
+        };
+        int prevDelim = doc.findPrevDelimiter(startLine, delims, false);
         
         if (prevDelim == DefinitionsDocument.ERROR_INDEX) {
           return false;

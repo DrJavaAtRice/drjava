@@ -120,7 +120,7 @@ public class QuestionExistsCharInStmt extends IndentRuleQuestion {
                                  "that exists on the current line."));
     }
     
-    char[] findCharDelims = {_findChar};
+    char[] findCharDelims = {_findChar, ';', '{', '}'};
     int prevFindChar;
     
     // Find the position of the previous occurence findChar from the 
@@ -132,25 +132,25 @@ public class QuestionExistsCharInStmt extends IndentRuleQuestion {
       throw new UnexpectedException(e);
     }
     
-    if(prevFindChar == DefinitionsDocument.ERROR_INDEX) {
+    if ((prevFindChar == DefinitionsDocument.ERROR_INDEX) ||
+        (prevFindChar < 0)) {
       // Couldn't find a previous occurence findChar
       return false;
     }
     
-    char[] endStmtDelims = {';', '{', '}'};
-    int prevEndStmtDelim;
-    
-    // Find the end of the previous statement starting from the endChar
-    //  (not looking in paren phrases)
+    // Determine if prevFindChar was _findChar, rather than end
+    //  of statement delimiter
+    boolean found = false;
     try {
-      prevEndStmtDelim = doc.findPrevDelimiter(endCharPos, endStmtDelims, true);
-    } catch (BadLocationException e) {
+      String foundString = doc.getText(prevFindChar, 1);
+      char foundChar = foundString.charAt(0);
+      found = (foundChar == _findChar);
+    }
+    catch (BadLocationException e) {
       // Should not happen
       throw new UnexpectedException(e);
     }
     
-    // Is the previous occurence of findChar after
-    // the end of the previous statement?
-    return (prevFindChar > prevEndStmtDelim);
+    return found;
   }
 }

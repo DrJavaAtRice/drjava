@@ -65,8 +65,8 @@ public class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
   }
   
   public void testNoPrevStmt() throws BadLocationException {
-    IndentRuleAction rule1 = new ActionStartPrevStmtPlus("");
-    IndentRuleAction rule2 = new ActionStartPrevStmtPlus("  ");
+    IndentRuleAction rule1 = new ActionStartPrevStmtPlus("", true);
+    IndentRuleAction rule2 = new ActionStartPrevStmtPlus("  ", true);
 
     _setDocText("foo();\n");
     rule1.indentLine(_doc, 2);
@@ -82,8 +82,8 @@ public class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
   }
   
   public void testPrevStmtPrevLine() throws BadLocationException {
-    IndentRuleAction rule1 = new ActionStartPrevStmtPlus("");
-    IndentRuleAction rule2 = new ActionStartPrevStmtPlus("  ");
+    IndentRuleAction rule1 = new ActionStartPrevStmtPlus("", true);
+    IndentRuleAction rule2 = new ActionStartPrevStmtPlus("  ", true);
 
     _setDocText("  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\nbiz();\n");
     rule1.indentLine(_doc, 44);
@@ -99,8 +99,8 @@ public class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
   }
 
   public void testPrevStmtSeveralLinesBeforeCurrLocation() throws BadLocationException {
-    IndentRuleAction rule1 = new ActionStartPrevStmtPlus("");
-    IndentRuleAction rule2 = new ActionStartPrevStmtPlus("  ");
+    IndentRuleAction rule1 = new ActionStartPrevStmtPlus("", true);
+    IndentRuleAction rule2 = new ActionStartPrevStmtPlus("  ", true);
     
     _setDocText("  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\nx;\n");
     rule1.indentLine(_doc, 56);
@@ -112,6 +112,20 @@ public class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
     rule2.indentLine(_doc, 56);
     assertEquals("prev stmt serveral lines before, suffix two spaces", 
                  "  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\n    x;\n",
+                 _doc.getText(0, _doc.getLength()));
+  }
+  
+  public void testColonNotDelim() throws BadLocationException {
+    IndentRuleAction rule = new ActionStartPrevStmtPlus("", false);
+    
+    _setDocText("test2 = x ? y :\n" +     // ? and : on one line
+                "  z;\n" +     // unfinished ternary
+                "foo();\n");     // new stmt
+    rule.indentLine(_doc, 21);
+    assertEquals("Colon is not a delimiter",
+                 "test2 = x ? y :\n" +     // ? and : on one line
+                 "  z;\n" +     // unfinished ternary
+                 "foo();\n",
                  _doc.getText(0, _doc.getLength()));
   }
 }

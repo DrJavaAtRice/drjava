@@ -70,6 +70,9 @@ public class IndentHelperTest extends IndentRulesTestCase {
     // Used to test if delimiter right after DOCSTART is found
     char[] delimiters3 = {'f'};
 
+    // Used to test finding delimiters that can be confused with comments
+    char[] delimiters4 = {'/', '*'};
+    
     _setDocText("/*bar;\nfoo();\nx;*/\nreturn foo;\n");
     assertEquals("Check that delimiters in multi-line " +
                  "comments are ignored",
@@ -127,6 +130,21 @@ public class IndentHelperTest extends IndentRulesTestCase {
                  5,
                  _doc.findPrevDelimiter(13, delimiters1));
     
+    _setDocText("foo *\n" +
+                "// comment\n" +
+                "bar\n");
+    assertEquals("Check that findprevDelimiter ignores comments even" +
+                 "when delimiters include * and / (1)",
+                 4,
+                 _doc.findPrevDelimiter(17, delimiters4));
+    _setDocText("foo /\n" +
+                "/* comment */\n" +
+                "bar\n");
+    assertEquals("Check that findprevDelimiter ignores comments even" +
+                 "when delimiters include * and / (2)",
+                 4,
+                 _doc.findPrevDelimiter(17, delimiters4));
+
     _setDocText("abcdefghijk");
     _doc.setCurrentLocation(3);
     int reducedModelPos = _doc.getReduced().absOffset();
@@ -135,6 +153,8 @@ public class IndentHelperTest extends IndentRulesTestCase {
                  "after call to findPrevDelimiter",
                  reducedModelPos,
                  _doc.getReduced().absOffset());
+    
+
   }
 
 

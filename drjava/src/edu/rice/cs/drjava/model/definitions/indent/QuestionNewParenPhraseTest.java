@@ -168,5 +168,28 @@ public class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     assertTrue("line after paren", !rule.applyRule(_doc, 9));
     assertTrue("line after comma", !rule.applyRule(_doc, 13));
   }
+  
+  /**
+   * Tests having an operator as a delimiter.
+   */
+  public void testOperatorDelim() throws BadLocationException {
+    IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
+    
+    // Delim in text, not ending line
+    _setDocText("foo(x +\ny\n)");
+    assertTrue("line after operator", rule.applyRule(_doc, 8));
+    assertTrue("line after comma", !rule.applyRule(_doc, 10));
+  }
+  
+  /**
+   * Tests ignoring delims on line.
+   */
+  public void testIgnoreDelimsOnLine() throws BadLocationException {
+    IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
+    
+    // Delim in text, not ending line
+    _setDocText("foo(x.\ny()\n)");
+    assertTrue("after paren, but not new phrase", !rule.applyRule(_doc, 10));
+  }
 
 }
