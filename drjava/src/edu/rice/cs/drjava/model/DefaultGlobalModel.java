@@ -1171,16 +1171,17 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     setProjectChanged(false);
     
     ArrayList<File> al = new ArrayList<File>();
+    File active = null;
     for(DocFile f: srcFiles){
       File file = f;
       if(f.lastModified() > f.getSavedModDate()){
         file = new File(f.getPath());
       }
-      if (f.isActive()) {
-        al.add(file); // add to end
+      if (f.isActive() && active == null) {
+        active = file;
       }
       else {
-        al.add(0,file); // add to beginning
+        al.add(file);
       }
     }
     for(DocFile f: auxFiles){
@@ -1188,13 +1189,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       if(f.lastModified() > f.getSavedModDate()){
         file = new File(f.getPath());
       }
-      if (f.isActive()) {
-        al.add(file); // add to end
+      if (f.isActive() && active == null) {
+        active = file;
       }
       else {
-        al.add(0,file); // add to beginning
+        al.add(file);
       }
     }
+    
+    
     
     return al.toArray(new File[0]);
   }

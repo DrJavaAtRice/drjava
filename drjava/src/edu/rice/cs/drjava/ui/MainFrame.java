@@ -2472,7 +2472,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       
       File dir = openSelector.getDirectory(opendir);
       ArrayList<File> files;
-      System.err.println("finding files");
       if(dir != null && dir.isDirectory()){
         files = FileOps.getFilesInDir(dir, openSelector.isRecursive(), new FileFilter(){
           public boolean accept(File f){ 
@@ -2482,7 +2481,6 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
         });
         
-      System.err.println("sorting files");
         if(_model.isProjectActive()){
           Collections.sort(files, new Comparator<File>(){
             public int compare(File o1,File o2){
@@ -2505,7 +2503,6 @@ public class MainFrame extends JFrame implements OptionConstants {
         
         final File[] sfiles = files.toArray(new File[0]);
         
-        System.err.println("opening files");
         open(new FileOpenSelector(){
           public File[] getFiles() {
             return sfiles;
