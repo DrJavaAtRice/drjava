@@ -32,10 +32,10 @@ import java.awt.event.ActionEvent;
 
 public class DefinitionsView extends JEditorPane
 {
-  /** Keep track of the name of the file currently associated
+	/** Keep track of the name of the file currently associated
    *  with the document we're editing. If we've never saved this file
    *  then this String is "". */
-  private String _currentFileName = "";
+	private String _currentFileName = "";
   private MainFrame _mainFrame;
 
   private UndoManager _undoManager;
@@ -202,7 +202,7 @@ public class DefinitionsView extends JEditorPane
     switch(rc)
     {
       case JFileChooser.CANCEL_OPTION:
-      case JFileChooser.ERROR_OPTION:
+		  case JFileChooser.ERROR_OPTION:
         return false;
       case JFileChooser.APPROVE_OPTION:
         File chosen = fc.getSelectedFile();
@@ -341,5 +341,31 @@ public class DefinitionsView extends JEditorPane
         putValue(Action.NAME, "Redo");
       }
     }
-  }    
+  }
+
+		public void findReplace () {
+				System.out.println("going to make box");
+				FindReplaceDialog box = new FindReplaceDialog(this);
+				System.out.println("made box");				
+		}
+
+		public int findText (String fWord) {
+				System.out.println("find");
+				return 0;
+		}
+		public int findNextText (String fWord, int currentPosition) {
+				System.out.println("findnext");
+				return 0;
+		}
+
+		public int replaceText(String fWord, String rWord, int currentPosition) {
+				System.out.println("replace");
+				return 0;
+		}
+		
+		public int replaceAllText(String fWord, String rWord, int currentPosition) {
+				System.out.println("replaceall");
+				return 0;
+		}
+
 }

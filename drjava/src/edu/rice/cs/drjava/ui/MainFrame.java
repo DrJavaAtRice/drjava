@@ -148,6 +148,14 @@ public class MainFrame extends JFrame
     }
   };
 
+  private Action _findReplaceAction = new AbstractAction("Find/Replace")
+  {
+    public void actionPerformed(ActionEvent ae)
+    {
+      _definitionsView.findReplace();
+    }
+  };
+
   private void _resetInteractions() {
     // Reset the interactions window, and add the source directory
     // of the file we just compiled to the class path.
@@ -202,6 +210,9 @@ public class MainFrame extends JFrame
     _editMenu.add(cutAction);
     _editMenu.add(copyAction);
     _editMenu.add(pasteAction);
+    _editMenu.addSeparator();
+    _editMenu.add(_findReplaceAction);
+
 
     // Add the menus to the menu bar
     _menuBar.add(_fileMenu);
