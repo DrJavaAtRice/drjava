@@ -41,6 +41,7 @@ package edu.rice.cs.drjava.model;
 
 /**
  * Indicates that an error has occured while attempting to create javadoc.
+ * @deprecated No longer needed.
  * @version $Id$
  */
 public class JavadocException extends Exception {

@@ -1351,13 +1351,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       // Can't happen with a StringReader.
       throw new UnexpectedException(ioe);
     }
-        
+    
     args.addAll(docUnits);
 
-    //TODO: put the following line in a new Thread and tell listeners javadoc has started
-    //Pass the function some way to tell about its output (use the way compilers do it for
-    //a model)
-    //And finally, when we're done notify the listeners along with some sort of failure flag
+    // Start a new Thread to execute Javadoc and tell listeners it has started
+    // And finally, when we're done notify the listeners with a success flag
     boolean result = false;
     try {
       // Notify all listeners that Javadoc is starting.
@@ -1366,6 +1364,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       result = _javadoc_1_3((String[]) args.toArray(new String[0]), classpath);
     }
     catch (Throwable e) {
+      e.printStackTrace();
       throw new UnexpectedException(e);
     }
     finally {
@@ -1377,31 +1376,27 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   /**
    * This function invokes javadoc.  It should work for all versions of Java
    * from 1.3 on, assuming com.sun.tools.javadoc is in the classpath (generally
-   * found in the same tools.jar that is needed for using the debugger) OR
-   * javadoc is in the path.  Note: this should be moved to the platform
-   * specific area of the code base when we develop the 1.4 javadoc process.
-   * Of course, it can be a fallback for if tools.jar isn't found in the 1.4 jdk
+   * found in the same tools.jar that is needed for using the debugger).
+   * [ed. this line is no longer true] - OR javadoc is in the path.
+   * TODO: this should be moved to the platform specific area of the code base
+   * when we develop the 1.4 javadoc process, which doesn't need to start a new
+   * JVM.  (Of course, it can be a fallback for 1.4 also.)
+   * @param args the command-line arguments for Javadoc
+   * @param classpath an array of classpath elements to use in the Javadoc JVM
    * @return true if Javadoc succeeded in building the HTML, otherwise false
    */
   private boolean _javadoc_1_3(String[] args, String[] classpath) 
     throws IOException, ClassNotFoundException, InterruptedException {
     final String JAVADOC_CLASS = "com.sun.tools.javadoc.Main";
     Process javadocProcess;
-    BufferedReader jdOut;
-    BufferedReader jdErr;
     
     // We must use this classpath nonsense to make sure our new Javadoc JVM
     // can see everything the interactions pane can see.
-    Class.forName(JAVADOC_CLASS);
-    
-    
     javadocProcess =  ExecJVM.runJVM(JAVADOC_CLASS, args, classpath, new String[0]);
     
 //    System.err.println("javadoc started with args:\n" + Arrays.asList(args));
     
     // getInputStream actually gives us the stdout from the Process.
-    jdOut = new BufferedReader(new InputStreamReader(javadocProcess.getInputStream()));
-    jdErr = new BufferedReader(new InputStreamReader(javadocProcess.getErrorStream()));
     String sourceName = "ExecJVM";
     int value = -1;
     
@@ -1422,11 +1417,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         done = true;
       }
       catch (IllegalThreadStateException e) {
-//          printProcessOutput(javadocProcess, "debug!", "ExecJVM");
-        ventBuffers(jdOut, jdErr, outLines, errLines);
+        ExecJVM.ventBuffers(javadocProcess, outLines, errLines);
       }
     }
-    ventBuffers(jdOut, jdErr, outLines, errLines);
+    ExecJVM.ventBuffers(javadocProcess, outLines, errLines);
 //    System.err.println("got past first waitFor.");
      
     // Unfortunately, javadoc returns 1 for normal errors and for exceptions.
@@ -1441,102 +1435,37 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
   
   /**
-   * Empties BufferedReaders by copying lines into LinkedLists.
-   * This is intended for use with the output streams from an ExecJVM process.
-   * Source and destination objects are specified for stdout and for stderr.
-   * TODO: Move this to the util package.
-   * @param outBuf the buffer for stdout
-   * @param errBuf the buffer for stderr
-   * @param outLines the LinkedList of Strings to be filled with the lines read from outBuf
-   * @param errLines the LinkedList of Strings to be filled with the lines read from errBuf
-   */
-  static void ventBuffers(BufferedReader outBuf, BufferedReader errBuf,
-                          LinkedList outLines, LinkedList errLines)
-    throws IOException {
-    String output;
-    
-    if (outBuf.ready()) {
-      output = outBuf.readLine();
-      
-      while (outBuf.ready() && (output != null)) {
-//        System.out.println("[stdout]: " + output);
-        outLines.add(output);
-        if (outBuf.ready()) {
-          output = outBuf.readLine();
-        }
-        else {
-          output = null;
-        }
-      }
-    }
-    
-    if (errBuf.ready()) {
-      output = errBuf.readLine();
-      while (errBuf.ready() && (output != null)) {
-//        System.out.println("[stderr] " + output);
-        errLines.add(output);
-        if (errBuf.ready()) {
-          output = errBuf.readLine();
-        }
-        else {
-          output = null;
-        }
-      }
-    }
-  }
-  
-  /**
-   * TODO: Move this to the util package.  Update to use ventBuffers logic.
-   */
-  static void printProcessOutput(Process theProc, String msg, String sourceName)
-    throws IOException {
-    // First, write out our opening message.
-    System.err.println(msg);
-    
-    // Get a handle on the streams that the process produces
-    BufferedReader procOut = new BufferedReader
-      (new InputStreamReader(theProc.getInputStream()));
-    BufferedReader procErr = new BufferedReader
-      (new InputStreamReader(theProc.getErrorStream()));
-    
-    // Write System.out.
-    String output = "";
-    while (procOut.ready() && (output != null)) {
-      output = procOut.readLine();
-      System.err.println("    [" +sourceName + " stdout]: " + output);
-    }
-    
-    // Write System.err.
-    output = "";
-    while (procErr.ready() && (output != null)) {
-      output = procErr.readLine();
-      System.err.println("    [" +sourceName + " stderr]: " + output);
-    }
-  }
-  
-  /**
    * TODO: 
    */
   private ArrayList extractErrors(LinkedList lines) {
     // Javadoc never produces more than 100 errors, so this will never auto-expand.
     ArrayList errors = new ArrayList(100);
     
+    final String ERROR_INDICATOR = "Error: ";
     final String EXCEPTION_INDICATOR = "Exception: ";
     while (lines.size() > 0) {
 //         System.out.println("[javadoc raw error] " + output);
       
       String output = (String) lines.removeFirst();
       
+      // Check for the telltale signs of a thrown exception or error.
       int errStart;
-      // Check for the telltale signs of a thrown exception.
-      errStart = output.indexOf(EXCEPTION_INDICATOR);
+      errStart = output.indexOf(ERROR_INDICATOR);
+      
+      // If we haven't found an error, look for an exception.
+      if (errStart == -1) {
+        errStart = output.indexOf(EXCEPTION_INDICATOR);
+      }
+            
       if (errStart != -1) {
         // If we found one, put the entirety of stderr in one CompilerError.
         StringBuffer buf = new StringBuffer(60 * lines.size());
-        do {
-          buf.append(output);
+        buf.append(output);
+        while (lines.size() > 0) {
           output = (String) lines.removeFirst();
-        } while (lines.size() > 0);
+          buf.append('\n');
+          buf.append(output);
+        }
         errors.add(new CompilerError(buf.toString(), false));
       }
       else {
