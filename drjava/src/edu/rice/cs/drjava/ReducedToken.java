@@ -114,5 +114,8 @@ abstract class ReducedToken
 	public abstract boolean isOpen();
 
 	public abstract boolean isClosed();	
-	
+
+	public abstract boolean isOpenBrace();
+
+	public abstract boolean isClosedBrace();
 }

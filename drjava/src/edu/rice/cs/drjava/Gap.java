@@ -140,4 +140,14 @@ class Gap extends ReducedToken
 		{
 			return false;
 		}
+
+	public boolean isOpenBrace()
+		{
+			return false;
+		}
+
+	public boolean isClosedBrace()
+		{
+			return false;
+		}
 }

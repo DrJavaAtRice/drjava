@@ -4,6 +4,7 @@ package edu.rice.cs.drjava;
 
 import gj.util.Stack;
 import gj.util.Vector;
+import java.util.Calendar;
 
 /**
  * This class provides an implementation of the BraceReduction
@@ -40,14 +41,16 @@ public class ReducedModel implements BraceReduction
 	 * A list of ReducedTokens (braces and gaps).
 	 * @see ModelList
 	 */
-  ModelList<ReducedToken> _braces;
+  private ModelList<ReducedToken> _braces;
+	
   /**
 	 * keeps track of cursor position in document
 	 * @see ModelList.Iterator
 	 */
-  ModelList<ReducedToken>.Iterator _cursor;
+  private ModelList<ReducedToken>.Iterator _cursor;
+	
   /** a relative offset within the current ReducedToken */
-  int _offset;
+  private int _offset;
   
 
   /**
@@ -62,7 +65,23 @@ public class ReducedModel implements BraceReduction
 			_offset = 0;
     }
 
-	/**
+	public ModelList<ReducedToken>.Iterator getCursor() {
+		return this._cursor;
+	}
+
+	public ModelList<ReducedToken> getBraces() {
+		return this._braces;
+	}
+	
+	public int getBlockOffset() {
+		return this._offset;
+	}
+
+	public void setBlockOffset(int n) {
+		this._offset = n;
+	}
+	
+  /**
 	 * Package private absolute offset for tests.
 	 * We don't keep track of absolute offset as it causes too much confusion
 	 * and trouble.
@@ -772,7 +791,7 @@ public class ReducedModel implements BraceReduction
 	 *some iterator. This function passes _cursor to the _getStateAtCurrent
 	 *Helper to return the current state in the cursor iterator.
 	 */
-	int getStateAtCurrent()
+	public int getStateAtCurrent()
 		{
 			return _getStateAtCurrentHelper(_cursor);
 		}
@@ -1388,7 +1407,7 @@ public class ReducedModel implements BraceReduction
    */
 	public void move(int count)
 		{
-			_offset = _move(count, _cursor, _offset);			
+ 			_offset = _move(count, _cursor, _offset);			
 		}
 
 	/**

@@ -6,6 +6,8 @@ import javax.swing.text.StyleContext.SmallAttributeSet;
 import javax.swing.text.*;
 import gj.util.Vector;
 
+import java.util.Calendar;
+
 /**
 	 hasHighlightChanged()
 	 getHighLightInformation()
@@ -18,7 +20,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 {
   private boolean _modifiedSinceSave = false;
 	private boolean _modifiedHighlights = false;
-  ReducedModel _reduced = new ReducedModel();
+  BraceReduction _reduced = new ReducedModel();
 	//keeps track of all lit blocks
 	Vector<StateBlock> litBlocks = new Vector<StateBlock>(); 
 	Vector<StateBlock> changes = new Vector<StateBlock>();
@@ -38,6 +40,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
   public void insertString(int offset, String str, AttributeSet a)
     throws BadLocationException
   {
+
 		//System.out.println("STRING: "+str+"      "+str.length()+" "+
 		//	offset);
 		//variables
@@ -50,7 +53,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 
 		//1)adjust location
     _reduced.move(locationChange);
-		reducedOffset = _reduced._offset;
+		reducedOffset = _reduced.getBlockOffset();
 		//2)set mark to the previous item.
 		mark = _reduced.makeCopyCursor();
 		if (!mark.atStart()) //if not at start then get the previous item.
@@ -158,7 +161,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		int prevSize;
 		_reduced.move(locationChange);
 		
-		reducedOffset = _reduced._offset;
+		reducedOffset = _reduced.getBlockOffset();
 		
 		mark = _reduced.makeCopyCursor();
 		if (!mark.atStart()) //if not at start then get the previous item.

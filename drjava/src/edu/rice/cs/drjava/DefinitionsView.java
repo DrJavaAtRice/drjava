@@ -81,7 +81,7 @@ public class DefinitionsView extends JEditorPane
 				_removePreviousHighlight();
 				_mainFrame.getStatusBar().setText(
 					"Mismatched '" +
-					_doc()._reduced._cursor.prevItem().getType() + "'");
+					_doc()._reduced.getCursor().prevItem().getType() + "'");
 			}
 			else {
 				_removePreviousHighlight();

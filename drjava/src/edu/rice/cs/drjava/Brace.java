@@ -120,10 +120,19 @@ class Brace extends ReducedToken {
    */
   public boolean isOpen()
     {
+			
       return (( ( _type % 2 ) == 0 ) &&
 							( _type < braces.length - 1 ));
     }
-  
+  public boolean isOpenBrace()
+		{
+			return ((_type == 0) || (_type ==2) || (_type ==4));
+		}
+
+	public boolean isClosedBrace()
+		{
+			return ((_type == 1) || (_type ==3) || (_type ==5));
+		}
   /**
    * Indicates whether this is a closing brace.
    * @return true if the brace is a closing brace.

@@ -12,11 +12,47 @@ import gj.util.Vector;
 
 public interface BraceReduction
 {
+
+	
+/**
+	 * Accessor for curson.
+	 */
+	public ModelList<ReducedToken>.Iterator getCursor();
+
+	/**
+	 * Accessor for block offset.
+	 */
+	public int getBlockOffset();
+
+	/**
+	 * Mutator for block offset.
+	 */
+	public void setBlockOffset(int n);
+
+	/**
+	 * Accessor for braces.
+	 */
+	public ModelList<ReducedToken> getBraces();
+
+	/**
+	 * Returns the current state of the cursor iterator.
+	 */
+	public int getStateAtCurrent();
+
+	/**
+	 * Returns a copy of the current curson.
+	 */
+	public ModelList<ReducedToken>.Iterator makeCopyCursor();
 	
   /**
    * Inserts an open brace ({) into the reduced model.
    */
   public void insertOpenSquiggly();
+
+	/**
+   * Inserts a backslash (\) into the reduced model.
+   */
+  public void insertBackSlash();
 
   /**
    * Inserts a closed brace (}) into the reduced model.
@@ -114,7 +150,12 @@ public interface BraceReduction
    * failure, returns -1.
    * @see #previousBrace()
    */
-  public int balanceBackward();    
+  public int balanceBackward();
+
+	/**
+	 * Returns true iff the brace immediately to the left is closed.
+	 */
+	public boolean closedBraceImmediatelyLeft();
 }
 
 

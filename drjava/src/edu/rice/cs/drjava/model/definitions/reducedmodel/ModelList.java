@@ -4,6 +4,7 @@ package edu.rice.cs.drjava;
 import java.util.Set;
 import java.util.HashSet;
 
+import java.util.Calendar;
 /**
  * A list class with some extra features.
  */
@@ -275,7 +276,6 @@ class ModelList<T>
 				//because notifyOfInsert will change the position of this iterator
 				//we must change it back.
 				_pos -= 1;
-				
 			}
 
 		/**
@@ -380,6 +380,7 @@ class ModelList<T>
 								next._pos += 1;
 							}
 					}
+				
 			}
 		
 		/**
@@ -433,7 +434,7 @@ class ModelList<T>
 								next._pos -= (rightPos - leftPos - 1);
 							}
 					}
-								
+												
 			}
 	}
 }

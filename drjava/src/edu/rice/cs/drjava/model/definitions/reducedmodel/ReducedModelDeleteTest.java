@@ -35,48 +35,48 @@ public class ReducedModelDeleteTest extends TestCase {
 			model1.insertSlash();
 			model1.move(-2);
 			
-			assertEquals("#0.0","//",model1._cursor.current().getType());
+			assertEquals("#0.0","//",model1.getCursor().current().getType());
 			model1.delete(1);
 			
-			assertEquals("#1.0","/",model1._cursor.current().getType());
-			assertEquals("#1.1",0,model1._offset);
+			assertEquals("#1.0","/",model1.getCursor().current().getType());
+			assertEquals("#1.1",0,model1.getBlockOffset());
 			//System.out.println(model1.simpleString());
 	 		model1.insertSlash();
 			//System.out.println(model1.simpleString());
 			model1.delete(1);   //This time delete the second slash
 			//System.out.println(model1.simpleString());
-			assertEquals("#2.0","/",model1._cursor.prevItem().getType());
-			assertTrue("#2.1",model1._cursor.atEnd());
-			assertEquals("#2.2",0,model1._offset);
+			assertEquals("#2.0","/",model1.getCursor().prevItem().getType());
+			assertTrue("#2.1",model1.getCursor().atEnd());
+			assertEquals("#2.2",0,model1.getBlockOffset());
 
 			// /#
 			model1.move(-1);
 			model1.delete(1);
-			assertTrue("#3.0",model1._braces.isEmpty());
+			assertTrue("#3.0",model1.getBraces().isEmpty());
 
 			model1.insertGap(8);
 			model1.move(-6);
 			model1.delete(3);
-		 	assertEquals("#4.0",2,model1._offset);
-			assertEquals("#4.1",5,model1._cursor.current().getSize());
+		 	assertEquals("#4.0",2,model1.getBlockOffset());
+			assertEquals("#4.1",5,model1.getCursor().current().getSize());
 
 			model1.move(3);
 			model1.insertSlash();
 			model1.insertStar();
 			model1.insertGap(6);
 			model1.move(-9);
-			assertEquals("#5.0",5,model1._cursor.current().getSize());
-			assertEquals("#5.1",true,model1._cursor.current().isGap());
-			assertEquals("#5.2","/*",model1._cursor.nextItem().getType());
-			assertEquals("#5.3",4,model1._offset);
+			assertEquals("#5.0",5,model1.getCursor().current().getSize());
+			assertEquals("#5.1",true,model1.getCursor().current().isGap());
+			assertEquals("#5.2","/*",model1.getCursor().nextItem().getType());
+			assertEquals("#5.3",4,model1.getBlockOffset());
 
 			//_____#_/*______
 			//System.out.println(model1.simpleString());
 			model1.delete(5);
-			assertEquals("#6.0",8,model1._cursor.current().getSize());
-			assertEquals("#6.1",true,model1._cursor.current().isGap());
-			assertEquals("#6.2",4,model1._offset);
-			assertTrue("#6.3",model1._cursor.atLastItem());
+			assertEquals("#6.0",8,model1.getCursor().current().getSize());
+			assertEquals("#6.1",true,model1.getCursor().current().isGap());
+			assertEquals("#6.2",4,model1.getBlockOffset());
+			assertTrue("#6.3",model1.getCursor().atLastItem());
 		}
 
 		
@@ -93,13 +93,13 @@ public class ReducedModelDeleteTest extends TestCase {
 			model1.delete(4);
 			//  /#/_
 
-			assertEquals("#0.0","//",model1._cursor.current().getType());
-			assertEquals("#0.2",1,model1._offset);
+			assertEquals("#0.0","//",model1.getCursor().current().getType());
+			assertEquals("#0.2",1,model1.getBlockOffset());
 			assertEquals("#0.3",ReducedToken.FREE,
 									 model1.getStateAtCurrent());
-			model1._cursor.next(); //move to tail, leave offset == 1
+			model1.getCursor().next(); //move to tail, leave offset == 1
 			assertEquals("#0.4",ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.current().getState());
+									 model1.getCursor().current().getState());
 		}
 
 	public void testStartDeleteInDoubleBrace3()
@@ -112,15 +112,15 @@ public class ReducedModelDeleteTest extends TestCase {
 			model1.move(-4);
 			model1.delete(2);
 			// /#/*
-			assertEquals("#0.0","//",model1._cursor.current().getType());
-			assertEquals("#0.1","*",model1._cursor.nextItem().getType());
-			assertEquals("#0.2",1,model1._offset);
+			assertEquals("#0.0","//",model1.getCursor().current().getType());
+			assertEquals("#0.1","*",model1.getCursor().nextItem().getType());
+			assertEquals("#0.2",1,model1.getBlockOffset());
 			assertEquals("#0.3",ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 			assertEquals("#0.4",ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.nextItem().getState());
+									 model1.getCursor().nextItem().getState());
 			assertEquals("#0.4",ReducedToken.FREE,
-									 model1._cursor.current().getState());
+									 model1.getCursor().current().getState());
 		}
 	public void testStartDeleteInDoubleBrace4()
 		{
@@ -132,15 +132,15 @@ public class ReducedModelDeleteTest extends TestCase {
 			model1.move(-4);
 			model1.delete(2);
 			// /#/*
-			assertEquals("#0.0","//",model1._cursor.current().getType());
-			assertEquals("#0.1","/",model1._cursor.nextItem().getType());
-			assertEquals("#0.2",1,model1._offset);
+			assertEquals("#0.0","//",model1.getCursor().current().getType());
+			assertEquals("#0.1","/",model1.getCursor().nextItem().getType());
+			assertEquals("#0.2",1,model1.getBlockOffset());
 			assertEquals("#0.3",ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 			assertEquals("#0.4",ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.nextItem().getState());
+									 model1.getCursor().nextItem().getState());
 			assertEquals("#0.5",ReducedToken.FREE,
-									 model1._cursor.current().getState());
+									 model1.getCursor().current().getState());
 
 		}
 
@@ -149,9 +149,9 @@ public class ReducedModelDeleteTest extends TestCase {
 			model1.insertGap(15);
 			model1.move(-6);
 			model1.delete(4);
-		 	assertTrue("#0.0",model1._cursor.current().isGap());
-			assertEquals("#0.1",11, model1._cursor.current().getSize());
-			assertEquals("#0.2",9,model1._offset);
+		 	assertTrue("#0.0",model1.getCursor().current().isGap());
+			assertEquals("#0.1",11, model1.getCursor().current().getSize());
+			assertEquals("#0.2",9,model1.getBlockOffset());
 		}
 
 public void testDeleteThroughToStar()
@@ -164,20 +164,20 @@ public void testDeleteThroughToStar()
 			model1.insertStar();
 			
 			assertEquals("#0.4",ReducedToken.FREE,
-									 model1._cursor.prevItem().getState());
+									 model1.getCursor().prevItem().getState());
 			// //*
 			// /*#
 			model1.move(-3);
 			model1.delete(1);
 			
-			assertEquals("#0.0","/",model1._cursor.current().getType());
-			assertEquals("#0.1","*",model1._cursor.prevItem().getType());
-			assertEquals("#0.2","*",model1._cursor.nextItem().getType());
-			assertEquals("#0.3",0,model1._offset);
+			assertEquals("#0.0","/",model1.getCursor().current().getType());
+			assertEquals("#0.1","*",model1.getCursor().prevItem().getType());
+			assertEquals("#0.2","*",model1.getCursor().nextItem().getType());
+			assertEquals("#0.3",0,model1.getBlockOffset());
 			assertEquals("#0.4",ReducedToken.INSIDE_LINE_COMMENT,
 									 model1.getStateAtCurrent());
 			assertEquals("#0.5",ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.prevItem().getState());
+									 model1.getCursor().prevItem().getState());
 		}
 
 	public void testStartDeleteInDoubleBrace()
@@ -192,20 +192,20 @@ public void testDeleteThroughToStar()
 			model1.move(-5);
 			model1.delete(3);
 			//  /#*/
-			assertEquals("#0.0","/*",model1._cursor.current().getType());
-			assertEquals("#0.1","/",model1._cursor.nextItem().getType());
-			assertEquals("#0.2",1,model1._offset);
+			assertEquals("#0.0","/*",model1.getCursor().current().getType());
+			assertEquals("#0.1","/",model1.getCursor().nextItem().getType());
+			assertEquals("#0.2",1,model1.getBlockOffset());
 			assertEquals("#0.3",ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 			assertEquals("#0.4",ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1._cursor.nextItem().getState());
+									 model1.getCursor().nextItem().getState());
 			assertEquals("#0.4",ReducedToken.FREE,
-									 model1._cursor.current().getState());
+									 model1.getCursor().current().getState());
 
 			model1.delete(2);
 			//  /#
-			assertEquals("#1.0", "/", model1._cursor.prevItem().getType());
-			assertEquals("#1.1", 0, model1._offset);
+			assertEquals("#1.0", "/", model1.getCursor().prevItem().getType());
+			assertEquals("#1.1", 0, model1.getBlockOffset());
 			assertEquals("#1.2", ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 
@@ -219,17 +219,17 @@ public void testDeleteThroughToStar()
 			model1.move(-6);
 			model1.delete(4);
 			// /#//
-			assertEquals("#2.0", "//", model1._cursor.current().getType());
-			assertEquals("#2.1", "/", model1._cursor.nextItem().getType());
-			assertEquals("#2.2", 1, model1._offset);
+			assertEquals("#2.0", "//", model1.getCursor().current().getType());
+			assertEquals("#2.1", "/", model1.getCursor().nextItem().getType());
+			assertEquals("#2.2", 1, model1.getBlockOffset());
 			assertEquals("#2.3", ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.nextItem().getState());
+									 model1.getCursor().nextItem().getState());
 
 			model1.move(-1);
 			model1.delete(3);
 			// <empty>
-			assertTrue("#3.0", model1._braces.isEmpty());
-			assertEquals("#3.1", 0, model1._offset);
+			assertTrue("#3.0", model1.getBraces().isEmpty());
+			assertEquals("#3.1", 0, model1.getBlockOffset());
 
 			model1.insertSlash();
 			model1.insertGap(3);
@@ -245,15 +245,15 @@ public void testDeleteThroughToStar()
 			model1.move(-3);
 			//  /___/*
 			//  __#(*/
-			assertEquals("#4.0", "(", model1._cursor.current().getType());
+			assertEquals("#4.0", "(", model1.getCursor().current().getType());
 			assertEquals("#4.1", ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1._cursor.current().getState());
-			assertTrue("#4.2", model1._cursor.prevItem().isGap());
+									 model1.getCursor().current().getState());
+			assertTrue("#4.2", model1.getCursor().prevItem().isGap());
 			assertEquals("#4.3", ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1._cursor.prevItem().getState());
-			assertEquals("#4.4", "*/", model1._cursor.nextItem().getType());
+									 model1.getCursor().prevItem().getState());
+			assertEquals("#4.4", "*/", model1.getCursor().nextItem().getType());
 			assertEquals("#4.5", ReducedToken.FREE,
-									 model1._cursor.nextItem().getState());
+									 model1.getCursor().nextItem().getState());
 			assertEquals("#4.3", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
 
@@ -262,38 +262,38 @@ public void testDeleteThroughToStar()
 
 			//  /#/*
 			//  __(*/
-			assertEquals("#5.0", "//", model1._cursor.current().getType());
-			assertEquals("#5.1", 1, model1._offset);
-			assertEquals("#5.2", "*", model1._cursor.nextItem().getType());
+			assertEquals("#5.0", "//", model1.getCursor().current().getType());
+			assertEquals("#5.1", 1, model1.getBlockOffset());
+			assertEquals("#5.2", "*", model1.getCursor().nextItem().getType());
 			assertEquals("#5.3", ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.nextItem().getState());
+									 model1.getCursor().nextItem().getState());
 
 			model1.move(6);
 			//  //*
 			//  __(#*/
-			assertEquals("#6.0", "*", model1._cursor.current().getType());
-			assertEquals("#6.1", 0, model1._offset);
-			assertEquals("#6.2", "(", model1._cursor.prevItem().getType());
+			assertEquals("#6.0", "*", model1.getCursor().current().getType());
+			assertEquals("#6.1", 0, model1.getBlockOffset());
+			assertEquals("#6.2", "(", model1.getCursor().prevItem().getType());
 			assertEquals("#6.3", ReducedToken.FREE,
-									 model1._cursor.prevItem().getState());			
+									 model1.getCursor().prevItem().getState());			
 			assertEquals("#6.4", ReducedToken.FREE,
-									 model1._cursor.current().getState());
+									 model1.getCursor().current().getState());
 
 			model1.move(-6);
 			model1.delete(1);
 			//  /#*
 			//  __(*/
-			assertEquals("#7.0", "/*", model1._cursor.current().getType());
-			assertEquals("#7.1", 1, model1._offset);
-			assertEquals("#7.2", "\n", model1._cursor.nextItem().getType());
+			assertEquals("#7.0", "/*", model1.getCursor().current().getType());
+			assertEquals("#7.1", 1, model1.getBlockOffset());
+			assertEquals("#7.2", "\n", model1.getCursor().nextItem().getType());
 			assertEquals("#7.3", ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1._cursor.nextItem().getState());
+									 model1.getCursor().nextItem().getState());
 
 			model1.move(5);
-			assertEquals("#8.1", "(", model1._cursor.prevItem().getType());
+			assertEquals("#8.1", "(", model1.getCursor().prevItem().getType());
 			assertEquals("#8.2", ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1._cursor.prevItem().getState());
-			assertEquals("#8.3", "*/", model1._cursor.current().getType());
+									 model1.getCursor().prevItem().getState());
+			assertEquals("#8.3", "*/", model1.getCursor().current().getType());
 			assertEquals("#8.4", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
 		}
@@ -308,13 +308,13 @@ public void testDeleteThroughToStar()
 			//  /*__*/#
 			model1.move(-4);
 			model1.delete(2);
-			assertEquals("#0.0", "/*", model1._cursor.prevItem().getType());
+			assertEquals("#0.0", "/*", model1.getCursor().prevItem().getType());
 			assertEquals("#0.1", ReducedToken.FREE,
-									 model1._cursor.prevItem().getState());
-			assertEquals("#0.2", "*/", model1._cursor.current().getType());
+									 model1.getCursor().prevItem().getState());
+			assertEquals("#0.2", "*/", model1.getCursor().current().getType());
 			assertEquals("#0.3", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
-			assertEquals("#0.4",0,model1._offset);
+			assertEquals("#0.4",0,model1.getBlockOffset());
 		}
 
 	public void testDeleteToCloseBlock()
@@ -328,17 +328,17 @@ public void testDeleteThroughToStar()
 			model1.move(-6);
 			model1.delete(4);
 		
-			assertEquals("#0.0", "*", model1._cursor.current().getType());
+			assertEquals("#0.0", "*", model1.getCursor().current().getType());
 			assertEquals("#0.1", ReducedToken.FREE,
-									 model1._cursor.current().getState());
-			assertEquals("#0.2", "/", model1._cursor.nextItem().getType());
+									 model1.getCursor().current().getState());
+			assertEquals("#0.2", "/", model1.getCursor().nextItem().getType());
 			assertEquals("#0.3", ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 			assertEquals("#0.4", ReducedToken.FREE,
-									 model1._cursor.current().getState());
+									 model1.getCursor().current().getState());
 			assertEquals("#0.5", ReducedToken.FREE,
-									 model1._cursor.nextItem().getState());
-			assertEquals("#0.6",0,model1._offset);
+									 model1.getCursor().nextItem().getState());
+			assertEquals("#0.6",0,model1.getBlockOffset());
 		}
 
 	public void testDeleteToLine()
@@ -352,14 +352,14 @@ public void testDeleteThroughToStar()
 			model1.move(-6);
 			model1.delete(4);
 
-			assertEquals("#0.0", "//", model1._cursor.current().getType());
+			assertEquals("#0.0", "//", model1.getCursor().current().getType());
 			assertEquals("#0.1", ReducedToken.FREE,
-									 model1._cursor.current().getState());
+									 model1.getCursor().current().getState());
 			assertEquals("#0.3", ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 			assertEquals("#0.4", ReducedToken.FREE,
-									 model1._cursor.current().getState());
-			assertEquals("#0.5",0,model1._offset);
+									 model1.getCursor().current().getState());
+			assertEquals("#0.5",0,model1.getBlockOffset());
 		}
 	
 	public void testCrazyDelete()
@@ -375,17 +375,17 @@ public void testDeleteThroughToStar()
 			model1.move(-6);
 			model1.delete(4);
 			
-			assertEquals("#0.0", "/", model1._cursor.current().getType());
+			assertEquals("#0.0", "/", model1.getCursor().current().getType());
 			assertEquals("#0.1", ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.current().getState());
-			assertEquals("#0.2", "/", model1._cursor.nextItem().getType());
+									 model1.getCursor().current().getState());
+			assertEquals("#0.2", "/", model1.getCursor().nextItem().getType());
 			assertEquals("#0.3", ReducedToken.INSIDE_LINE_COMMENT,
 									 model1.getStateAtCurrent());
 			assertEquals("#0.4", ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.current().getState());
+									 model1.getCursor().current().getState());
 			assertEquals("#0.5", ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.nextItem().getState());
-			assertEquals("#0.6",0,model1._offset);
+									 model1.getCursor().nextItem().getState());
+			assertEquals("#0.6",0,model1.getBlockOffset());
 		}
 
 
@@ -399,20 +399,20 @@ public void testDeleteThroughToStar()
 			model1.insertStar();
 			
 			assertEquals("#0.4",ReducedToken.FREE,
-									 model1._cursor.prevItem().getState());
+									 model1.getCursor().prevItem().getState());
 			// //*
 			// /*#
 			model1.move(-2);
 			model1.delete(-1);
 			
-			assertEquals("#0.0","/",model1._cursor.current().getType());
-			assertEquals("#0.1","*",model1._cursor.prevItem().getType());
-			assertEquals("#0.2","*",model1._cursor.nextItem().getType());
-			assertEquals("#0.3",0,model1._offset);
+			assertEquals("#0.0","/",model1.getCursor().current().getType());
+			assertEquals("#0.1","*",model1.getCursor().prevItem().getType());
+			assertEquals("#0.2","*",model1.getCursor().nextItem().getType());
+			assertEquals("#0.3",0,model1.getBlockOffset());
 			assertEquals("#0.4",ReducedToken.INSIDE_LINE_COMMENT,
 									 model1.getStateAtCurrent());
 			assertEquals("#0.5",ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.prevItem().getState());
+									 model1.getCursor().prevItem().getState());
 		}
 
 	public void testStartDeleteInDoubleBrace5()
@@ -427,20 +427,20 @@ public void testDeleteThroughToStar()
 			model1.move(-2);
 			model1.delete(-3);
 			//  /#*/
-			assertEquals("#0.0","/*",model1._cursor.current().getType());
-			assertEquals("#0.1","/",model1._cursor.nextItem().getType());
-			assertEquals("#0.2",1,model1._offset);
+			assertEquals("#0.0","/*",model1.getCursor().current().getType());
+			assertEquals("#0.1","/",model1.getCursor().nextItem().getType());
+			assertEquals("#0.2",1,model1.getBlockOffset());
 			assertEquals("#0.3",ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 			assertEquals("#0.4",ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1._cursor.nextItem().getState());
+									 model1.getCursor().nextItem().getState());
 			assertEquals("#0.4",ReducedToken.FREE,
-									 model1._cursor.current().getState());
+									 model1.getCursor().current().getState());
 			model1.move(2);
 			model1.delete(-2);
 			//  /#
-			assertEquals("#1.0", "/", model1._cursor.prevItem().getType());
-			assertEquals("#1.1", 0, model1._offset);
+			assertEquals("#1.0", "/", model1.getCursor().prevItem().getType());
+			assertEquals("#1.1", 0, model1.getBlockOffset());
 			assertEquals("#1.2", ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 
@@ -454,17 +454,17 @@ public void testDeleteThroughToStar()
 			model1.move(-2);
 			model1.delete(-4);
 			// /#//
-			assertEquals("#2.0", "//", model1._cursor.current().getType());
-			assertEquals("#2.1", "/", model1._cursor.nextItem().getType());
-			assertEquals("#2.2", 1, model1._offset);
+			assertEquals("#2.0", "//", model1.getCursor().current().getType());
+			assertEquals("#2.1", "/", model1.getCursor().nextItem().getType());
+			assertEquals("#2.2", 1, model1.getBlockOffset());
 			assertEquals("#2.3", ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.nextItem().getState());
+									 model1.getCursor().nextItem().getState());
 
 			model1.move(2);
 			model1.delete(-3);
 			// <empty>
-			assertTrue("#3.0", model1._braces.isEmpty());
-			assertEquals("#3.1", 0, model1._offset);
+			assertTrue("#3.0", model1.getBraces().isEmpty());
+			assertEquals("#3.1", 0, model1.getBlockOffset());
 
 			model1.insertSlash();
 			model1.insertGap(3);
@@ -480,15 +480,15 @@ public void testDeleteThroughToStar()
 			model1.move(-3);
 			//  /___/*
 			//  __#(*/
-			assertEquals("#4.0", "(", model1._cursor.current().getType());
+			assertEquals("#4.0", "(", model1.getCursor().current().getType());
 			assertEquals("#4.1", ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1._cursor.current().getState());
-			assertTrue("#4.2", model1._cursor.prevItem().isGap());
+									 model1.getCursor().current().getState());
+			assertTrue("#4.2", model1.getCursor().prevItem().isGap());
 			assertEquals("#4.3", ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1._cursor.prevItem().getState());
-			assertEquals("#4.4", "*/", model1._cursor.nextItem().getType());
+									 model1.getCursor().prevItem().getState());
+			assertEquals("#4.4", "*/", model1.getCursor().nextItem().getType());
 			assertEquals("#4.5", ReducedToken.FREE,
-									 model1._cursor.nextItem().getState());
+									 model1.getCursor().nextItem().getState());
 			assertEquals("#4.3", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
 
@@ -497,38 +497,38 @@ public void testDeleteThroughToStar()
 
 			//  /#/*
 			//  __(*/
-			assertEquals("#5.0", "//", model1._cursor.current().getType());
-			assertEquals("#5.1", 1, model1._offset);
-			assertEquals("#5.2", "*", model1._cursor.nextItem().getType());
+			assertEquals("#5.0", "//", model1.getCursor().current().getType());
+			assertEquals("#5.1", 1, model1.getBlockOffset());
+			assertEquals("#5.2", "*", model1.getCursor().nextItem().getType());
 			assertEquals("#5.3", ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.nextItem().getState());
+									 model1.getCursor().nextItem().getState());
 
 			model1.move(6);
 			//  //*
 			//  __(#*/
-			assertEquals("#6.0", "*", model1._cursor.current().getType());
-			assertEquals("#6.1", 0, model1._offset);
-			assertEquals("#6.2", "(", model1._cursor.prevItem().getType());
+			assertEquals("#6.0", "*", model1.getCursor().current().getType());
+			assertEquals("#6.1", 0, model1.getBlockOffset());
+			assertEquals("#6.2", "(", model1.getCursor().prevItem().getType());
 			assertEquals("#6.3", ReducedToken.FREE,
-									 model1._cursor.prevItem().getState());			
+									 model1.getCursor().prevItem().getState());			
 			assertEquals("#6.4", ReducedToken.FREE,
-									 model1._cursor.current().getState());
+									 model1.getCursor().current().getState());
 
 			model1.move(-5);
 			model1.delete(-1);
 			//  /#*
 			//  __(*/
-			assertEquals("#7.0", "/*", model1._cursor.current().getType());
-			assertEquals("#7.1", 1, model1._offset);
-			assertEquals("#7.2", "\n", model1._cursor.nextItem().getType());
+			assertEquals("#7.0", "/*", model1.getCursor().current().getType());
+			assertEquals("#7.1", 1, model1.getBlockOffset());
+			assertEquals("#7.2", "\n", model1.getCursor().nextItem().getType());
 			assertEquals("#7.3", ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1._cursor.nextItem().getState());
+									 model1.getCursor().nextItem().getState());
 
 			model1.move(5);
-			assertEquals("#8.1", "(", model1._cursor.prevItem().getType());
+			assertEquals("#8.1", "(", model1.getCursor().prevItem().getType());
 			assertEquals("#8.2", ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1._cursor.prevItem().getState());
-			assertEquals("#8.3", "*/", model1._cursor.current().getType());
+									 model1.getCursor().prevItem().getState());
+			assertEquals("#8.3", "*/", model1.getCursor().current().getType());
 			assertEquals("#8.4", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
 		}
@@ -543,13 +543,13 @@ public void testDeleteThroughToStar()
 			//  /*__*/#
 			model1.move(-2);
 			model1.delete(-2);
-			assertEquals("#0.0", "/*", model1._cursor.prevItem().getType());
+			assertEquals("#0.0", "/*", model1.getCursor().prevItem().getType());
 			assertEquals("#0.1", ReducedToken.FREE,
-									 model1._cursor.prevItem().getState());
-			assertEquals("#0.2", "*/", model1._cursor.current().getType());
+									 model1.getCursor().prevItem().getState());
+			assertEquals("#0.2", "*/", model1.getCursor().current().getType());
 			assertEquals("#0.3", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
-			assertEquals("#0.4",0,model1._offset);
+			assertEquals("#0.4",0,model1.getBlockOffset());
 		}
 
 	public void testDeleteToCloseBlock2()
@@ -563,17 +563,17 @@ public void testDeleteThroughToStar()
 			model1.move(-2);
 			model1.delete(-4);
 		
-			assertEquals("#0.0", "*", model1._cursor.current().getType());
+			assertEquals("#0.0", "*", model1.getCursor().current().getType());
 			assertEquals("#0.1", ReducedToken.FREE,
-									 model1._cursor.current().getState());
-			assertEquals("#0.2", "/", model1._cursor.nextItem().getType());
+									 model1.getCursor().current().getState());
+			assertEquals("#0.2", "/", model1.getCursor().nextItem().getType());
 			assertEquals("#0.3", ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 			assertEquals("#0.4", ReducedToken.FREE,
-									 model1._cursor.current().getState());
+									 model1.getCursor().current().getState());
 			assertEquals("#0.5", ReducedToken.FREE,
-									 model1._cursor.nextItem().getState());
-			assertEquals("#0.6",0,model1._offset);
+									 model1.getCursor().nextItem().getState());
+			assertEquals("#0.6",0,model1.getBlockOffset());
 		}
 public void testDeleteToLine2()
 		{
@@ -586,14 +586,14 @@ public void testDeleteToLine2()
 			model1.move(-2);
 			model1.delete(-4);
 
-			assertEquals("#0.0", "//", model1._cursor.current().getType());
+			assertEquals("#0.0", "//", model1.getCursor().current().getType());
 			assertEquals("#0.1", ReducedToken.FREE,
-									 model1._cursor.current().getState());
+									 model1.getCursor().current().getState());
 			assertEquals("#0.3", ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 			assertEquals("#0.4", ReducedToken.FREE,
-									 model1._cursor.current().getState());
-			assertEquals("#0.5",0,model1._offset);
+									 model1.getCursor().current().getState());
+			assertEquals("#0.5",0,model1.getBlockOffset());
 		}
 	
 	public void testCrazyDelete2()
@@ -609,17 +609,17 @@ public void testDeleteToLine2()
 			model1.move(-2);
 			model1.delete(-4);
 			
-			assertEquals("#0.0", "/", model1._cursor.current().getType());
+			assertEquals("#0.0", "/", model1.getCursor().current().getType());
 			assertEquals("#0.1", ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.current().getState());
-			assertEquals("#0.2", "/", model1._cursor.nextItem().getType());
+									 model1.getCursor().current().getState());
+			assertEquals("#0.2", "/", model1.getCursor().nextItem().getType());
 			assertEquals("#0.3", ReducedToken.INSIDE_LINE_COMMENT,
 									 model1.getStateAtCurrent());
 			assertEquals("#0.4", ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.current().getState());
+									 model1.getCursor().current().getState());
 			assertEquals("#0.5", ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.nextItem().getState());
-			assertEquals("#0.6",0,model1._offset);
+									 model1.getCursor().nextItem().getState());
+			assertEquals("#0.6",0,model1.getBlockOffset());
 		}
 
 
@@ -629,48 +629,48 @@ public void testDeleteToLine2()
 			model1.insertSlash();
 			model1.move(-1);
 			
-			assertEquals("#0.0","//",model1._cursor.current().getType());
+			assertEquals("#0.0","//",model1.getCursor().current().getType());
 			model1.delete(-1);
 			
-			assertEquals("#1.0","/",model1._cursor.current().getType());
-			assertEquals("#1.1",0,model1._offset);
+			assertEquals("#1.0","/",model1.getCursor().current().getType());
+			assertEquals("#1.1",0,model1.getBlockOffset());
 	 		model1.insertSlash();
 
 			model1.move(1);
 			model1.delete(-1);   //This time delete the second slash
 
-			assertEquals("#2.0","/",model1._cursor.prevItem().getType());
-			assertTrue("#2.1",model1._cursor.atEnd());
-			assertEquals("#2.2",0,model1._offset);
+			assertEquals("#2.0","/",model1.getCursor().prevItem().getType());
+			assertTrue("#2.1",model1.getCursor().atEnd());
+			assertEquals("#2.2",0,model1.getBlockOffset());
 
 			// /#
 			model1.delete(-1);
-			assertTrue("#3.0",model1._braces.isEmpty());
+			assertTrue("#3.0",model1.getBraces().isEmpty());
 
 			model1.insertGap(8);
 			model1.move(-3);
 			model1.delete(-3);
-		 	assertEquals("#4.0",2,model1._offset);
-			assertEquals("#4.1",5,model1._cursor.current().getSize());
+		 	assertEquals("#4.0",2,model1.getBlockOffset());
+			assertEquals("#4.1",5,model1.getCursor().current().getSize());
 
 			model1.move(3);
 			model1.insertSlash();
 			model1.insertStar();
 			model1.insertGap(6);
 			model1.move(-9);
-			assertEquals("#5.0",5,model1._cursor.current().getSize());
-			assertEquals("#5.1",true,model1._cursor.current().isGap());
-			assertEquals("#5.2","/*",model1._cursor.nextItem().getType());
-			assertEquals("#5.3",4,model1._offset);
+			assertEquals("#5.0",5,model1.getCursor().current().getSize());
+			assertEquals("#5.1",true,model1.getCursor().current().isGap());
+			assertEquals("#5.2","/*",model1.getCursor().nextItem().getType());
+			assertEquals("#5.3",4,model1.getBlockOffset());
 
 			//_____#_/*______
 			//System.out.println(model1.simpleString());
 			model1.move(5);
 			model1.delete(-5);
-			assertEquals("#6.0",8,model1._cursor.current().getSize());
-			assertEquals("#6.1",true,model1._cursor.current().isGap());
-			assertEquals("#6.2",4,model1._offset);
-			assertTrue("#6.3",model1._cursor.atLastItem());
+			assertEquals("#6.0",8,model1.getCursor().current().getSize());
+			assertEquals("#6.1",true,model1.getCursor().current().isGap());
+			assertEquals("#6.2",4,model1.getBlockOffset());
+			assertTrue("#6.3",model1.getCursor().atLastItem());
 		}
 
 		
@@ -687,13 +687,13 @@ public void testDeleteToLine2()
 			model1.delete(-4);
 			//  /#/_
 
-			assertEquals("#0.0","//",model1._cursor.current().getType());
-			assertEquals("#0.2",1,model1._offset);
+			assertEquals("#0.0","//",model1.getCursor().current().getType());
+			assertEquals("#0.2",1,model1.getBlockOffset());
 			assertEquals("#0.3",ReducedToken.FREE,
 									 model1.getStateAtCurrent());
-			model1._cursor.next(); //move to tail, leave offset == 1
+			model1.getCursor().next(); //move to tail, leave offset == 1
 			assertEquals("#0.4",ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.current().getState());
+									 model1.getCursor().current().getState());
 		}
 
 	public void testStartDeleteInDoubleBrace7()
@@ -706,15 +706,15 @@ public void testDeleteToLine2()
 			model1.move(-2);
 			model1.delete(-2);
 			// /#/*
-			assertEquals("#0.0","//",model1._cursor.current().getType());
-			assertEquals("#0.1","*",model1._cursor.nextItem().getType());
-			assertEquals("#0.2",1,model1._offset);
+			assertEquals("#0.0","//",model1.getCursor().current().getType());
+			assertEquals("#0.1","*",model1.getCursor().nextItem().getType());
+			assertEquals("#0.2",1,model1.getBlockOffset());
 			assertEquals("#0.3",ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 			assertEquals("#0.4",ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.nextItem().getState());
+									 model1.getCursor().nextItem().getState());
 			assertEquals("#0.4",ReducedToken.FREE,
-									 model1._cursor.current().getState());
+									 model1.getCursor().current().getState());
 		}
 	public void testStartDeleteInDoubleBrace8()
 		{
@@ -726,15 +726,15 @@ public void testDeleteToLine2()
 			model1.move(-2);
 			model1.delete(-2);
 			// /#/*
-			assertEquals("#0.0","//",model1._cursor.current().getType());
-			assertEquals("#0.1","/",model1._cursor.nextItem().getType());
-			assertEquals("#0.2",1,model1._offset);
+			assertEquals("#0.0","//",model1.getCursor().current().getType());
+			assertEquals("#0.1","/",model1.getCursor().nextItem().getType());
+			assertEquals("#0.2",1,model1.getBlockOffset());
 			assertEquals("#0.3",ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 			assertEquals("#0.4",ReducedToken.INSIDE_LINE_COMMENT,
-									 model1._cursor.nextItem().getState());
+									 model1.getCursor().nextItem().getState());
 			assertEquals("#0.5",ReducedToken.FREE,
-									 model1._cursor.current().getState());
+									 model1.getCursor().current().getState());
 
 		}
 
@@ -743,9 +743,9 @@ public void testDeleteToLine2()
 			model1.insertGap(15);
 			model1.move(-2);
 			model1.delete(-4);
-		 	assertTrue("#0.0",model1._cursor.current().isGap());
-			assertEquals("#0.1",11, model1._cursor.current().getSize());
-			assertEquals("#0.2",9,model1._offset);
+		 	assertTrue("#0.0",model1.getCursor().current().isGap());
+			assertEquals("#0.1",11, model1.getCursor().current().getSize());
+			assertEquals("#0.2",9,model1.getBlockOffset());
 		}
 
 	public void testDeleteMakeBlockCommentStart()
@@ -756,8 +756,8 @@ public void testDeleteToLine2()
 			model1.move(-1);
 			model1.delete(-3);
 
-			assertEquals("#0.0", "/*", model1._cursor.current().getType());
-			assertEquals("#0.1", 1, model1._offset);
+			assertEquals("#0.0", "/*", model1.getCursor().current().getType());
+			assertEquals("#0.1", 1, model1.getBlockOffset());
 		}
 
 	public void testDeleteCloseOpenBlockComment()
@@ -771,8 +771,8 @@ public void testDeleteToLine2()
 			model1.move(-1);
 			model1.delete(-2);
 
-			assertEquals("#0.0", "*/", model1._cursor.current().getType());
-			assertEquals("#0.1", 1, model1._offset);
+			assertEquals("#0.0", "*/", model1.getCursor().current().getType());
+			assertEquals("#0.1", 1, model1.getBlockOffset());
 			model1.move(1);
 			assertEquals("#0.2", ReducedToken.FREE,
 									 model1.getStateAtCurrent());
@@ -786,8 +786,8 @@ public void testDeleteToLine2()
 			model1.move(-1);
 			model1.delete(-3);
 
-			assertEquals("#0.0", "//", model1._cursor.current().getType());
-			assertEquals("#0.1", 1, model1._offset);
+			assertEquals("#0.0", "//", model1.getCursor().current().getType());
+			assertEquals("#0.1", 1, model1.getBlockOffset());
 		}
 	/** tests delete function in places where it formerly wasn't allowed. */
 	
