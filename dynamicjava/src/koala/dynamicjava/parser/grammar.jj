@@ -90,6 +90,35 @@ public class Parser {
                           token.endColumn);
   }
   
+  
+   private void _throwParseException(String message) throws ParseException {
+    // The error typically occurs on the next token.
+    Token t = token;
+    if (token.next != null) {
+      t = token.next;
+    }
+    // If a certain token or sequence of tokens is expected, display it.
+    ParseException pe = generateParseException();
+//    if (pe.expectedTokenSequences.length == 1) {
+//      message += " Expected";
+//      for (int i = 0; i < pe.expectedTokenSequences.length; i++) {
+//        message += " " + pe.tokenImage[pe.expectedTokenSequences[0][i]];
+//      }
+//      message += ".";
+//    }
+    throw new ParseException(message, t, pe.expectedTokenSequences, tokenImage);    
+//    _errors.add(new ParseException(_currentFile, message, t, null, tokenImage);
+  }
+   
+   private void _throwParseException(ParseException pe, String message) throws ParseException {
+     // Use the embedded error message if thrown from our code
+     if (pe.customConstructor) {
+       message = pe.getMessage();
+     }
+     _throwParseException(message);
+   }
+  
+  
   /**
    * Creates a primary expression from a refix and a list of suffixes
    * @param prefix   the prefix expression
@@ -689,6 +718,7 @@ PARSER_END(Parser)
     | < DO: "do" >
     | < DOUBLE: "double" >
     | < ELSE: "else" >
+    | < ENUM: "enum" >
     | < EXTENDS: "extends" >
     | < FALSE: "false" >
     | < FINAL: "final" >
@@ -975,19 +1005,20 @@ PARSER_END(Parser)
   List/*<Node>*/ parseStream() :
   {
     List/*<Node>*/ list = new LinkedList/*<Node>*/();
-    List/*<Node>*/ l;
+    List/*<Node>*/ l = null;
     Node root = null;
   }
   {
     (
-       LOOKAHEAD(StreamItem())
+     LOOKAHEAD(StreamItem())
        l = StreamItem() { list.addAll(l); }
     )*
-    [ root = expression() [";"] { list.add(root); } ]
-    <EOF>
-    {
-      return list;
-    }
+      
+      [ root = expression() [";"] { list.add(root); } ]
+        <EOF>
+      {
+        return list;
+      }
   }
   
 //  List/*<Node>*/ parseStream() :
@@ -1035,21 +1066,26 @@ PARSER_END(Parser)
     List/*<Node>*/ l = new LinkedList/*<Node>*/();
   }
   {
-    (    root=packageDeclaration()
-       | root=importDeclaration()
-       | LOOKAHEAD( methodDeclarationLookahead() )
+    try {
+      (    root=packageDeclaration()
+         | root=importDeclaration()
+         | LOOKAHEAD( methodDeclarationLookahead() )
          root=methodDeclaration()
-       | LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
+         | LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
          l=localVariableDeclaration() (";" | <EOF>)
-       | LOOKAHEAD(topLevelStatement())
+         | LOOKAHEAD(topLevelStatement())
          root=topLevelStatement()
-       | root=typeDeclaration()
-    )
-    {
-       if (root != null) {
+         | root=typeDeclaration()
+         )
+      {
+        if (root != null) {
           l.add(root);
-       }
-       return l;
+        }
+        return l;
+      }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe, "Invalid Stream Item");
     }
   }
 
@@ -1066,25 +1102,30 @@ PARSER_END(Parser)
     Node node;
   }
   {
-    (    LOOKAHEAD(2)
+    try {
+      (    LOOKAHEAD(2)
          node=labeledStatement()
-       | node=block()
-       | node=emptyStatement()
-       | node=expression() ";"
-       | node=ifStatement()
-       | node=whileStatement()
-       | node=doStatement()
-       | node=switchStatement()
-       | node=forStatement()
-       | node=breakStatement()
-       | node=continueStatement()
-       | node=returnStatement()
-       | node=throwStatement()
-       | node=synchronizedStatement()
-       | node=tryStatement()
-       )
-    {
-      return node;
+         | node=block()
+         | node=emptyStatement()
+         | node=expression() ";"
+         | node=ifStatement()
+         | node=whileStatement()
+         | node=doStatement()
+         | node=switchStatement()
+         | node=forStatement()
+         | node=breakStatement()
+         | node=continueStatement()
+         | node=returnStatement()
+         | node=throwStatement()
+         | node=synchronizedStatement()
+         | node=tryStatement()
+         )
+      {
+        return node;
+      }
+    }
+    catch (ParseException pe) {
+      _throwParseException(pe, "Invalid top level statement");
     }
   }
   
@@ -1133,15 +1174,23 @@ PARSER_END(Parser)
     Token t1, t2;
   }
   {
-    t1="package" [ name=ReferenceTypeName() ] (t2=";" | t2=<EOF>)
-    {
-      if(name instanceof GenericReferenceType){
-        throw new ParseException("Package names cannot be parameterized.");
+    try {
+      t1="package" [ name=ReferenceTypeName() ] (t2=";" | t2=<EOF>)
+      {
+        if(name instanceof GenericReferenceType){
+          _throwParseException("Package names cannot be parameterized.");
+        }
+        if(name == null) {
+          _throwParseException("Empty Package name");
+        }
+        return new PackageDeclaration(name.getRepresentation(),
+                                      filename,
+                                      t1.beginLine, t1.beginColumn,
+                                      t2.endLine,   t2.endColumn);
       }
-      return new PackageDeclaration(name.getRepresentation(),
-                                    filename,
-                                    t1.beginLine, t1.beginColumn,
-                                    t2.endLine,   t2.endColumn);
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe,"Invalid Package Declaration");
     }
   }
   
@@ -1157,18 +1206,30 @@ PARSER_END(Parser)
     Token sttic = null;
   }
   {
-    t1="import" [sttic=<STATIC>] name=ReferenceTypeName() [ "." star="*" ] (t2=";" | t2=<EOF>)
-    {
-      if(name instanceof GenericReferenceType){
-        throw new ParseException("Import names cannot be parameterized.");
+    try {
+      t1="import" [sttic=<STATIC>] [name=ReferenceTypeName()] ["." star="*"] (t2=";" | t2=<EOF>)
+      {
+        if(name instanceof GenericReferenceType){
+          _throwParseException("Import names cannot be parameterized.");
+        }
+        if(name == null) {
+            _throwParseException("missing name; cannot import");
+        }
+        
+//        if((dot == null) != (star==null))
+//          _throwParseException("Invalid Import Declaration");
+//        
+        return new ImportDeclaration(name.getRepresentation(), star != null, sttic != null,
+                                     filename,
+                                     t1.beginLine, t1.beginColumn,
+                                     t2.endLine,   t2.endColumn);
       }
-      return new ImportDeclaration(name.getRepresentation(), star != null, sttic != null,
-                                   filename,
-                                   t1.beginLine, t1.beginColumn,
-                                   t2.endLine,   t2.endColumn);
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe,"Invalid Import Declaration");
     }
   }
-  
+    
   /**
    * Parses a type declaration
    * @see koala.dynamicjava.tree.TypeDeclaration
@@ -1178,13 +1239,18 @@ PARSER_END(Parser)
     TypeDeclaration node;
   }
   {
-    (    LOOKAHEAD( ( "abstract" | "final" | "public" )* "class" )
+    try {
+      (    LOOKAHEAD( ( "abstract" | "final" | "public" )* "class" )
          node=classDeclaration()
-       | LOOKAHEAD( ( <STATIC> | <ABSTRACT> | <FINAL> | <PUBLIC> | <PROTECTED> | <PRIVATE> )* <INTERFACE> )
+         | LOOKAHEAD( ( <STATIC> | <ABSTRACT> | <FINAL> | <PUBLIC> | <PROTECTED> | <PRIVATE> )* <INTERFACE> )
          node=interfaceDeclaration()
-    )
-    {
-      return node;
+         )
+      {
+        return node;
+      }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe,"invalid declaration");
     }
   }
   
@@ -1267,58 +1333,62 @@ PARSER_END(Parser)
 //  
   ReferenceType ReferenceTypeName() :
   {
-    Token id;
+    Token id = null;
     List/*<IdentifierToken>*/ list = new LinkedList/*<IdentifierToken>*/();
     List/*<Type>*/ typeArgs = new LinkedList/*<Type>*/();
     List/*<List<? extends Type>>*/ allTypeArgs = new LinkedList/*<List<? extends Type>>*/();
   }
   {
-    id=<IDENTIFIER> [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments() ]
-    {
-      list.add(new TreeToken(id));
-      allTypeArgs.add( typeArgs );
-      typeArgs = new LinkedList/*<Type>*/();
-    }
-    ( LOOKAHEAD("." <IDENTIFIER>) "." id=<IDENTIFIER>  [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments() ]
-     {
-      list.add(new TreeToken(id));
-      allTypeArgs.add( typeArgs );
-      typeArgs = new LinkedList/*<Type>*/();
-     }
-    )*
-      
-    {
-      IdentifierToken f  = list.get(0);
-      IdentifierToken l  = list.get(list.size()-1);
-      boolean Parameterized = false;
-      for( int i = 0; i < allTypeArgs.size(); i++ ){
-        List/*<? extends Type>*/ targs = allTypeArgs.get(i);
-        if(targs.size() > 0) { 
-          Parameterized = true;
-          break;
-        }
+    try{ 
+      id=<IDENTIFIER> [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments() ]
+      {
+        list.add(new TreeToken(id));
+        allTypeArgs.add( typeArgs );
+        typeArgs = new LinkedList/*<Type>*/();
       }
-      if(!Parameterized){
-        if(TypeParamsMap.containsKey(TreeUtilities.listToName(list))){
-          return TypeParamsMap.get(TreeUtilities.listToName(list));
-        } else if(GenericTypesEnv.contains(TreeUtilities.listToName(list))){
-          return GenericTypesEnv.lookup(TreeUtilities.listToName(list));
+      ( LOOKAHEAD("." <IDENTIFIER>) "." id=<IDENTIFIER>  [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments() ]
+         {
+        list.add(new TreeToken(id));
+        allTypeArgs.add( typeArgs );
+        typeArgs = new LinkedList/*<Type>*/();
+      }
+      )*
+        
+      {
+        IdentifierToken f  = list.get(0);
+        IdentifierToken l  = list.get(list.size()-1);
+        boolean Parameterized = false;
+        for( int i = 0; i < allTypeArgs.size(); i++ ){
+          List/*<? extends Type>*/ targs = allTypeArgs.get(i);
+          if(targs.size() > 0) { 
+            Parameterized = true;
+            break;
+          }
+        }
+        if(!Parameterized){
+          if(TypeParamsMap.containsKey(TreeUtilities.listToName(list))){
+            return TypeParamsMap.get(TreeUtilities.listToName(list));
+          } else if(GenericTypesEnv.contains(TreeUtilities.listToName(list))){
+            return GenericTypesEnv.lookup(TreeUtilities.listToName(list));
+          } else {
+            return new ReferenceType(list,
+                                     filename,
+                                     f.beginLine(), f.beginColumn(),
+                                     l.endLine(),   l.endColumn());
+          }
         } else {
-          return new ReferenceType(list,
-                                   filename,
-                                   f.beginLine(), f.beginColumn(),
-                                   l.endLine(),   l.endColumn());
+          return new GenericReferenceType(list,
+                                          filename,
+                                          f.beginLine(), f.beginColumn(),
+                                          l.endLine(), l.endColumn(),
+                                          allTypeArgs);
         }
-      } else {
-        return new GenericReferenceType(list,
-                                        filename,
-                                        f.beginLine(), f.beginColumn(),
-                                        l.endLine(), l.endColumn(),
-                                        allTypeArgs);
       }
+    }
+    catch(ParseException pe) { 
+      _throwParseException(pe,"Invalid Reference name");
     }
   }
-  
   
   /**
    * Parses a comma separated list of ReferenceType names
@@ -1589,6 +1659,7 @@ PARSER_END(Parser)
     List/*<Node>*/ decl;
   }
   {
+    try {
     "{"
       (
        decl=classBodyDeclaration()
@@ -1599,6 +1670,10 @@ PARSER_END(Parser)
       t="}"
     {
       return new ClassBody(list, t.endLine, t.endColumn);
+    }
+    }
+    catch (ParseException pe) {
+      _throwParseException(pe,"Invalid class body");
     }
   }
   
@@ -1614,32 +1689,38 @@ PARSER_END(Parser)
     List/*<Node>*/ list = new LinkedList/*<Node>*/();
   }
   {
-    ( LOOKAHEAD(2)
-       node=initializer()
-       |
-     LOOKAHEAD( classDeclarationLookahead())
-       node=classDeclaration()
-       |
-     LOOKAHEAD( interfaceDeclarationLookahead() )
-       node=interfaceDeclaration()
-       |
-     LOOKAHEAD( constructorDeclarationLookahead() )
-       node=constructorDeclaration()
-       |
-     LOOKAHEAD( methodDeclarationLookahead() )
-       node=methodDeclaration()
-       |
-     list=fieldDeclaration()
-       |
-     ";"
-       )
-    {
-      if (node != null) {
-        list.add(node);
+    try {      
+      ( LOOKAHEAD(2)
+         node=initializer()
+         |
+       LOOKAHEAD( classDeclarationLookahead())
+         node=classDeclaration()
+         |
+       LOOKAHEAD( interfaceDeclarationLookahead() )
+         node=interfaceDeclaration()
+         |
+       LOOKAHEAD( constructorDeclarationLookahead() )
+         node=constructorDeclaration()
+         |
+       LOOKAHEAD( methodDeclarationLookahead() )
+         node=methodDeclaration()
+         |
+       list=fieldDeclaration()
+         |
+       ";"
+         )
+      {
+        if (node != null) {
+          list.add(node);
+        }
+        return list;
       }
-      return list;
+    }
+    catch (ParseException pe) {
+      _throwParseException(pe,"Invalid Member Declaration");
     }
   }
+  
   
   // Productions for Field Declaration ============================================
   
@@ -1659,6 +1740,8 @@ PARSER_END(Parser)
     List/*<Node>*/    list = new LinkedList/*<Node>*/();
   }
   {
+    try
+    {
     mf=modifiers()
       typ=type() id=<IDENTIFIER>
       ( "[" "]" { dim++; } )*
@@ -1677,6 +1760,11 @@ PARSER_END(Parser)
        {
          return list;
        }
+    }
+    catch (ParseException pe){
+      _throwParseException(pe, "Invalid Field Declaration");
+    }
+         
   }
   
   // Productions for Method Declaration ===========================================
@@ -1701,32 +1789,33 @@ PARSER_END(Parser)
     Node              body = null;
   }
   {
-    mf=modifiers()
-      [ typeParameters = TypeParameters() ]
-      typ=resultType()
-      id=<IDENTIFIER>
-      params=formalParameters()
-      ( "[" "]" { dim++; } )*
-        [ "throws" exceptions=ReferenceTypeNameList() ]
-        ( body=block() | body=emptyStatement() )
-      {
-        if (mf != null) {
-          bl    = mf.beginLine;
-          bc    = mf.beginColumn;
-          flags = mf.accessFlags;
-        } else {
-          bl = typ.getBeginLine();
-          bc = typ.getBeginColumn();
-        }
-        if (dim > 0) {
-          typ = new ArrayType(typ, dim,
-                              filename,
-                              typ.getBeginLine(), typ.getBeginColumn(),
-                              typ.getEndLine(),   typ.getEndColumn());
-        }
-        if(lastFormalParameterIsVarArgs) flags |= 0x00000080; // Modifier.VARARGS == 0x00000080 /**/
-        
-        if (typeParameters == null){
+    try {
+      mf=modifiers()
+        [ typeParameters = TypeParameters() ]
+        typ=resultType()
+        id=<IDENTIFIER>
+        params=formalParameters()
+        ( "[" "]" { dim++; } )*
+          [ "throws" exceptions=ReferenceTypeNameList() ]
+          ( body=block() | body=emptyStatement() )
+        {
+          if (mf != null) {
+            bl    = mf.beginLine;
+            bc    = mf.beginColumn;
+            flags = mf.accessFlags;
+          } else {
+            bl = typ.getBeginLine();
+            bc = typ.getBeginColumn();
+          }
+          if (dim > 0) {
+            typ = new ArrayType(typ, dim,
+                                filename,
+                                typ.getBeginLine(), typ.getBeginColumn(),
+                                typ.getEndLine(),   typ.getEndColumn());
+          }
+          if(lastFormalParameterIsVarArgs) flags |= 0x00000080; // Modifier.VARARGS == 0x00000080 /**/
+          
+          if (typeParameters == null){
           return new MethodDeclaration(flags, typ, id.image, params,
                                        exceptions,
                                        (body instanceof BlockStatement) ?
@@ -1744,6 +1833,10 @@ PARSER_END(Parser)
                                                   typeParameters);
         }
       }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe, "Invalid method declaration");
+    }
   }
   
   /**
@@ -1757,6 +1850,8 @@ PARSER_END(Parser)
     FormalParameter lastVarArgsParam = null;
   }
   {
+    try
+    {
     "(" 
       [ LOOKAHEAD(formalParameterLookahead()) 
        node=formalParameter()
@@ -1775,6 +1870,10 @@ PARSER_END(Parser)
            }
            return list;
          }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe, "Invalid formal parameters");
+    }
   }
   
   /**
@@ -1789,6 +1888,8 @@ PARSER_END(Parser)
     int   dim = 0;
   }
   {
+    try
+    {
     [ f="final" ] typ=type() id=<IDENTIFIER> ( "[" "]" { dim++; } )*
     {
       if (dim > 0) {
@@ -1803,6 +1904,10 @@ PARSER_END(Parser)
                                  (f != null) ? f.beginColumn : typ.getBeginColumn(),
                                  id.endLine, id.endColumn);
     }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe, "Invalid formal parameter");
+    }
   }
   
   /**
@@ -1816,6 +1921,8 @@ PARSER_END(Parser)
     Token f   = null;
   }
   {
+    try
+    {
     [ f="final" ] typ=type() <VAR_ARGS> id=<IDENTIFIER>
     {
       // convert the type of the formal to be an array
@@ -1828,6 +1935,10 @@ PARSER_END(Parser)
                                  (f != null) ? f.beginLine   : typ.getBeginLine(),
                                  (f != null) ? f.beginColumn : typ.getBeginColumn(),
                                  id.endLine, id.endColumn);
+    }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe, "Invalid variable arguments formal parameter");
     }
   }
   
@@ -1911,6 +2022,8 @@ PARSER_END(Parser)
     Token                 e;
   }
   {
+    try
+    {
     [ t="public"
        {
       flag = Modifier.PUBLIC;
@@ -1956,6 +2069,10 @@ PARSER_END(Parser)
                                                       filename, bl, bc, e.endLine, e.endColumn, typeParameters);
        }
      }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe, "Invalid constructor declaration");
+    }
   }
   
   /**
@@ -1969,6 +2086,8 @@ PARSER_END(Parser)
     Expression      exp = null;
   }
   {
+    try
+    {
     ( LOOKAHEAD("this" arguments() ";")
        b="this" args=arguments() e=";"
        |
@@ -1980,6 +2099,10 @@ PARSER_END(Parser)
                                        filename,
                                        b.beginLine, b.beginColumn,
                                        e.endLine,   e.endColumn);
+    }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe, "Invalid constructor invocation");
     }
   }
   
@@ -2017,6 +2140,8 @@ PARSER_END(Parser)
     int   m = 0;
   }
   {
+    try
+    {
     t="interface" id=<IDENTIFIER>
       [ typeParameters = TypeParameters() ]
       [ "extends" impl=ReferenceTypeNameList() ]
@@ -2046,6 +2171,10 @@ PARSER_END(Parser)
                                                typeParameters);
       }
     }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe, "Invalid interface declaration");
+    }
   }
   
   /**
@@ -2060,6 +2189,8 @@ PARSER_END(Parser)
     List/*<Node>*/ list = new LinkedList/*<Node>*/();
   }
   {
+    try
+    {
     ( LOOKAHEAD( classDeclarationLookahead() )
        node=classDeclaration()
        |
@@ -2076,6 +2207,10 @@ PARSER_END(Parser)
         list.add(node);
       }
       return list;
+    }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe, "Invalid interface member declaration");
     }
   }
   
@@ -3513,78 +3648,82 @@ ForSlashEachStatement forStatement() :
     Token t;
   }
   {
-    t=<INTEGER_LITERAL>
-    {
-      return new IntegerLiteral(t.image,
-                                filename,
-                                t.beginLine, t.beginColumn,
-                                t.endLine,   t.endColumn);
-    }
-    |
-      t=<LONG_LITERAL>
-    {
-      return new LongLiteral(t.image,
-                             filename,
-                             t.beginLine, t.beginColumn,
-                             t.endLine,   t.endColumn);
-    }
-    |
-      t=<FLOAT_LITERAL>
-    {
-      return new FloatLiteral(t.image,
-                              filename,
-                              t.beginLine, t.beginColumn,
-                              t.endLine,   t.endColumn);
-    }
-    |
-      t=<DOUBLE_LITERAL>
-    {
-      return new DoubleLiteral(t.image,
-                               filename,
-                               t.beginLine, t.beginColumn,
-                               t.endLine,   t.endColumn);
-    }
-    |
-      t=<CHARACTER_LITERAL>
-    {
-      return new CharacterLiteral(t.image,
+    try { 
+      t=<INTEGER_LITERAL>
+      {
+        return new IntegerLiteral(t.image,
                                   filename,
                                   t.beginLine, t.beginColumn,
                                   t.endLine,   t.endColumn);
-    }
-    |
-      t=<STRING_LITERAL>
-    {
-      return new StringLiteral(t.image,
+      }
+      |
+        t=<LONG_LITERAL>
+      {
+        return new LongLiteral(t.image,
                                filename,
                                t.beginLine, t.beginColumn,
                                t.endLine,   t.endColumn);
-    }
-    |
-      t="true"
-    {
-      return new BooleanLiteral(true,
+      }
+      |
+        t=<FLOAT_LITERAL>
+      {
+        return new FloatLiteral(t.image,
                                 filename,
                                 t.beginLine, t.beginColumn,
                                 t.endLine,   t.endColumn);
+      }
+      |
+        t=<DOUBLE_LITERAL>
+      {
+        return new DoubleLiteral(t.image,
+                                 filename,
+                                 t.beginLine, t.beginColumn,
+                                 t.endLine,   t.endColumn);
+      }
+      |
+        t=<CHARACTER_LITERAL>
+      {
+        return new CharacterLiteral(t.image,
+                                    filename,
+                                    t.beginLine, t.beginColumn,
+                                    t.endLine,   t.endColumn);
+      }
+      |
+        t=<STRING_LITERAL>
+      {
+        return new StringLiteral(t.image,
+                                 filename,
+                                 t.beginLine, t.beginColumn,
+                                 t.endLine,   t.endColumn);
+      }
+      |
+        t="true"
+      {
+        return new BooleanLiteral(true,
+                                  filename,
+                                  t.beginLine, t.beginColumn,
+                                  t.endLine,   t.endColumn);
+      }
+      |
+        t="false"
+      {
+        return new BooleanLiteral(false,
+                                  filename,
+                                  t.beginLine, t.beginColumn,
+                                  t.endLine,   t.endColumn);
+      }
+      |
+        t="null"
+      {
+        return new NullLiteral(filename,
+                               t.beginLine, t.beginColumn,
+                               t.endLine,   t.endColumn);
+      }
     }
-    |
-      t="false"
-    {
-      return new BooleanLiteral(false,
-                                filename,
-                                t.beginLine, t.beginColumn,
-                                t.endLine,   t.endColumn);
-    }
-    |
-      t="null"
-    {
-      return new NullLiteral(filename,
-                             t.beginLine, t.beginColumn,
-                             t.endLine,   t.endColumn);
+    catch (ParseException pe) {
+      _throwParseException(pe, "This is an illegal literal!");
     }
   }
-  
   /**
    * Used internally to parse an expression
    */
@@ -3856,7 +3995,39 @@ ForSlashEachStatement forStatement() :
     }
   }
   
+  
+  
+  Token consumeReservedWord() :
+  {
+    Token t; 
+  }
+  {
+   ( t = "abstract" | t = "assert" | t = "boolean" | t = "break" | t = "byte" | t = "case" | t = "catch" | t = "char" | t = "class" 
+      | t = "const" | t = "continue" | t = "default" | t = "do" | t = "double" | t = "else" | t = "enum" | t = "extends" | t = "false" 
+      | t = "final" | t = "finally" | t = "float" | t = "for" | t = "goto" | t = "if" | t = "implements" | t = "import" | t = "instanceof" 
+      | t = "int" | t = "interface" | t = "long" | t = "native" | t = "new" | t = "null" | t = "package" | t = "private" | t = "protected"
+      | t = "public" | t = "return" | t = "short" | t = "static" | t = "super" | t = "switch" | t = "synchronized" | t = "this" 
+      | t = "throw" | t = "throws" | t = "transient" | t = "true" | t = "try" | t = "void" | t = "volatile" | t = "while" )
+   { return t; }
+  }
+  
   // Lookahead productions ////////////////////////////////////////////////////////
+  
+  
+  /**
+   * Used internally for reserved word lookahead
+   * Added to improve error diagnostics
+   */
+  void reservedWordLookahead() :
+  {}
+  {
+    "abstract" | "assert" | "boolean" | "break" | "byte" | "case" | "catch" | "char" | "class" | "const" | "continue" 
+      | "default" | "do" | "double" | "else" | "enum" | "extends" | "false" | "final" | "finally" | "float" | "for" 
+      | "goto" | "if" | "implements" | "import" | "instanceof" | "int" | "interface" | "long" | "native" | "new" | "null" 
+      | "package" | "private" | "protected" | "public" | "return" | "short" | "static" | "super" | "switch" | "synchronized" 
+      | "this" | "throw" | "throws" | "transient" | "true" | "try" | "void" | "volatile" | "while" 
+  }
+    
   
   /**
    * Used internally for lookahead
@@ -4300,7 +4471,7 @@ ForSlashEachStatement forStatement() :
   {
     modifiersLookahead()
       [ TypeParametersLookahead() ]
-      resultTypeLookahead() <IDENTIFIER> "("
+      resultTypeLookahead()  <IDENTIFIER>  "("
   }
   
   /**
@@ -4488,6 +4659,7 @@ ForSlashEachStatement forStatement() :
     "if" "(" expressionLookahead() ")"
       statementLookahead() [ LOOKAHEAD(1) "else" statementLookahead() ]
   }
+ 
   
   /**
    * Used internally for lookahead

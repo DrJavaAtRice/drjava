@@ -776,7 +776,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    *                     AT THE FIRST ACTUAL PARAMETER TO BE PUT IN THE VARARGS ARRAY
    */
   private Object buildArrayOfRemainingArgs(Class[] typs, int larg_size, Iterator<Expression> it) {
-    assert(typs[typs.length-1].isArray());
+    if(! typs[typs.length-1].isArray())
+      throw new RuntimeException("Last argument is not variable arguments");
     Class componentType = typs[typs.length-1].getComponentType();
     Object argArray = Array.newInstance(componentType,new int[]{(larg_size-typs.length+1)});
     for(int j = 0; j < larg_size-typs.length+1; j++){
