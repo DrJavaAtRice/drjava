@@ -159,4 +159,52 @@ public class TigerUtilities {
             c == Character.class || c == Short.class  ||
             c == Byte.class      || c == Float.class );
   }
+  
+    /**
+   * Returns true iff the given class is an integral type
+   * This includes both primitive and boxing integral types.<br><br>
+   * Allowed primitives: byte, char, short, int, long
+   * Allowed Refrence: Byte, Character, Short, Integer, Long
+   * @param c The class to check
+   * @return true iff the given class is an integral type
+   */
+  public static boolean isIntegralType(Class c) {
+    return (c == int.class   || c == Integer.class   ||
+            c == long.class  || c == Long.class      ||
+            c == byte.class  || c == Byte.class      ||
+            c == char.class  || c == Character.class ||
+            c == short.class || c == Short.class);
+  }
+  
+ 
+  public static boolean boxesTo(Class prim, Class ref) {
+    return 
+      (prim == int.class     && (ref == Integer.class   || 
+                                 ref == Long.class      || 
+                                 ref == Double.class    || 
+                                 ref == Float.class))   ||
+      (prim == long.class    && (ref == Long.class      || 
+                                 ref == Double.class    || 
+                                 ref == Float.class))   ||
+      (prim == byte.class    && (ref == Byte.class      || 
+                                 ref == Short.class     || 
+                                 ref == Integer.class   || 
+                                 ref == Long.class      || 
+                                 ref == Double.class    || 
+                                 ref == Float.class))   ||
+      (prim == char.class    && (ref == Character.class || 
+                                 ref == Integer.class   || 
+                                 ref == Long.class      || 
+                                 ref == Double.class    || 
+                                 ref == Float.class))   ||
+      (prim == short.class   && (ref == Short.class     || 
+                                 ref == Integer.class   || 
+                                 ref == Long.class      || 
+                                 ref == Double.class    || 
+                                 ref == Float.class))   ||
+      (prim == boolean.class && ref == Boolean.class)   ||
+      (prim == float.class   && (ref == Float.class     || 
+                                 ref == Double.class))  ||
+      (prim == double.class  && ref == Double.class);
+  }
 }

@@ -112,7 +112,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
    * 
    */
   public static AbstractTypeChecker makeTypeChecker(Context ctx) {
-    if(Float.valueOf(System.getProperty("java.specification.version")) < 1.5) {
+    if(!TigerUtilities.isTigerEnabled()) {
       return new TypeChecker14(ctx);
     }
     else {
@@ -992,7 +992,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
       }
       
       // un-box the size of the array, if necessary
-      if (_isBoxingType(c)) {
+      if (TigerUtilities.isBoxingType(c)) {
         it.set(_unbox(exp, c));
       }
     }
@@ -1053,7 +1053,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     }
     
     // un-box the index into the array, if necessary
-    if (_isBoxingType(c)) {
+    if (TigerUtilities.isBoxingType(c)) {
       node.setCellNumber(_unbox(node.getCellNumber(), c));
     }
     
@@ -1137,7 +1137,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     node.setProperty(NodeProperties.TYPE, boolean.class);
 
     // Auto-unbox, if necessary
-    if (_isBoxingType(c)) {
+    if (TigerUtilities.isBoxingType(c)) {
       node.setExpression(_unbox(exp, c));
     }
 
@@ -1182,7 +1182,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     }
 
     // Auto-unbox, if necessary
-    if (_isBoxingType(c)) {
+    if (TigerUtilities.isBoxingType(c)) {
       node.setExpression(_unbox(e, c));
     }
     
@@ -1282,8 +1282,8 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
           lc == void.class    || rc == void.class    ||
           lc == boolean.class || rc == boolean.class || 
           lc == Boolean.class || rc == Boolean.class ||
-          !(lc.isPrimitive()  || _isBoxingType(lc))  || 
-          !(rc.isPrimitive()  || _isBoxingType(rc)) ) {
+          !(lc.isPrimitive()  || TigerUtilities.isBoxingType(lc))  || 
+          !(rc.isPrimitive()  || TigerUtilities.isBoxingType(rc)) ) {
         throw new ExecutionError("addition.type", node);
       }
     }
@@ -1337,8 +1337,8 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
         lc == void.class    || rc == void.class    ||
         lc == boolean.class || rc == boolean.class ||
         lc == Boolean.class || rc == Boolean.class ||
-        !(lc.isPrimitive()  || _isBoxingType(lc))  || 
-        !(rc.isPrimitive()  || _isBoxingType(rc)) ) {
+        !(lc.isPrimitive()  || TigerUtilities.isBoxingType(lc))  || 
+        !(rc.isPrimitive()  || TigerUtilities.isBoxingType(rc)) ) {
       throw new ExecutionError("subtraction.type", node);
     }
 
@@ -1390,8 +1390,8 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
         lc == void.class    || rc == void.class    ||
         lc == boolean.class || rc == boolean.class ||
         lc == Boolean.class || rc == Boolean.class ||
-        !(lc.isPrimitive()  || _isBoxingType(lc))  || 
-        !(rc.isPrimitive()  || _isBoxingType(rc)) ) {
+        !(lc.isPrimitive()  || TigerUtilities.isBoxingType(lc))  || 
+        !(rc.isPrimitive()  || TigerUtilities.isBoxingType(rc)) ) {
       throw new ExecutionError("multiplication.type", node);
     }
 
@@ -1470,8 +1470,8 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
         lc == void.class    || rc == void.class    ||
         lc == boolean.class || rc == boolean.class ||
         lc == Boolean.class || rc == Boolean.class ||
-        !(lc.isPrimitive()  || _isBoxingType(lc))  || 
-        !(rc.isPrimitive()  || _isBoxingType(rc)) ) {
+        !(lc.isPrimitive()  || TigerUtilities.isBoxingType(lc))  || 
+        !(rc.isPrimitive()  || TigerUtilities.isBoxingType(rc)) ) {
       throw new ExecutionError("division.type", node);
     }
 
@@ -1523,8 +1523,8 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
         lc == void.class    || rc == void.class    ||
         lc == boolean.class || rc == boolean.class ||
         lc == Boolean.class || rc == Boolean.class ||
-        !(lc.isPrimitive()  || _isBoxingType(lc))  || 
-        !(rc.isPrimitive()  || _isBoxingType(rc)) ) {
+        !(lc.isPrimitive()  || TigerUtilities.isBoxingType(lc))  || 
+        !(rc.isPrimitive()  || TigerUtilities.isBoxingType(rc)) ) {
       throw new ExecutionError("remainder.type", node);
     }
 
@@ -2029,14 +2029,14 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
 
     // unbox a boxing type, except when the boxing type is 
     // Boolean and the other is not boolean
-    if (_isBoxingType(c1) && c2.isPrimitive()) {
+    if (TigerUtilities.isBoxingType(c1) && c2.isPrimitive()) {
       if (!(c1 == Boolean.class && c2 != boolean.class)) {
         exp1 = _unbox(exp1, c1);
         c1 = _correspondingPrimType(c1).getValue();
         node.setIfTrueExpression(exp1);
       }
     }
-    else if (_isBoxingType(c2) && c1.isPrimitive()) {
+    else if (TigerUtilities.isBoxingType(c2) && c1.isPrimitive()) {
       if (!(c2 == Boolean.class && c1 != boolean.class)) {
         exp2 = _unbox(exp2, c2);
         c2 = _correspondingPrimType(c2).getValue();
@@ -2075,26 +2075,26 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
       if ((c1 == boolean.class && c2.isPrimitive()) || 
           (c2 == boolean.class && c1.isPrimitive())) {
         // box both
-        node.setIfTrueExpression (_box(exp1, _correspondingRefType(c1)));
-        node.setIfFalseExpression(_box(exp2, _correspondingRefType(c2)));
+        node.setIfTrueExpression (_box(exp1, TigerUtilities.correspondingBoxingType(c1)));
+        node.setIfFalseExpression(_box(exp2, TigerUtilities.correspondingBoxingType(c2)));
         ec = Object.class;
       }
       else if (c1 == Boolean.class && c2.isPrimitive()) {
         // box c2
-        node.setIfFalseExpression(_box(exp2, _correspondingRefType(c2)));
+        node.setIfFalseExpression(_box(exp2, TigerUtilities.correspondingBoxingType(c2)));
         ec = Object.class;
       }
       else if (c2 == Boolean.class && c1.isPrimitive()) {
         // box c1
-        node.setIfTrueExpression(_box(exp1, _correspondingRefType(c1)));
+        node.setIfTrueExpression(_box(exp1, TigerUtilities.correspondingBoxingType(c1)));
         ec = Object.class;
       }
-      else if (c1 == boolean.class && _isBoxingType(c2)) {
+      else if (c1 == boolean.class && TigerUtilities.isBoxingType(c2)) {
         // box c1
         node.setIfTrueExpression(_box(exp1, Boolean.class));
         ec = Object.class;
       }
-      else if (c2 == boolean.class && _isBoxingType(c1)) {
+      else if (c2 == boolean.class && TigerUtilities.isBoxingType(c1)) {
         // box c2
         node.setIfFalseExpression(_box(exp2, Boolean.class));
         ec = Object.class;
@@ -2187,7 +2187,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     Node exp = node.getExpression();
     Class c  = exp.acceptVisitor(this);
     // The type of the subexpression must be numeric
-    if (!(c.isPrimitive() || _isBoxingType(c)) ||
+    if (!(c.isPrimitive() || TigerUtilities.isBoxingType(c)) ||
         c == void.class     ||
         c == boolean.class  ||
         c == Boolean.class) {
@@ -2212,7 +2212,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     Class c  = exp.acceptVisitor(this);
 
     // The type of the subexpression must be numeric
-    if (!(c.isPrimitive() || _isBoxingType(c)) ||
+    if (!(c.isPrimitive() || TigerUtilities.isBoxingType(c)) ||
         c == void.class     ||
         c == boolean.class  ||
         c == Boolean.class) {
@@ -2237,7 +2237,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     Class c  = exp.acceptVisitor(this);
 
     // The type of the subexpression must be numeric
-    if (!(c.isPrimitive() || _isBoxingType(c)) ||
+    if (!(c.isPrimitive() || TigerUtilities.isBoxingType(c)) ||
         c == void.class     ||
         c == boolean.class  ||
         c == Boolean.class) {
@@ -2262,7 +2262,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     Class c  = exp.acceptVisitor(this);
 
     // The type of the subexpression must be numeric
-    if (!(c.isPrimitive() || _isBoxingType(c)) ||
+    if (!(c.isPrimitive() || TigerUtilities.isBoxingType(c)) ||
         c == void.class     ||
         c == boolean.class  ||
         c == Boolean.class) {
@@ -2320,7 +2320,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     }
     
     // Auto-unbox, if necessary
-    if (_isBoxingType(c)) {
+    if (TigerUtilities.isBoxingType(c)) {
       node.setExpression(_unbox(exp, c));
     }
     
@@ -2349,17 +2349,17 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     // Check to make sure the left and right types are valid
     if (lc == null           || rc == null          ||
         lc == boolean.class  || rc == boolean.class ||
-        !(lc.isPrimitive()   || _isBoxingType(lc))  || 
-        !(rc.isPrimitive()   || _isBoxingType(rc))  ||
+        !(lc.isPrimitive()   || TigerUtilities.isBoxingType(lc))  || 
+        !(rc.isPrimitive()   || TigerUtilities.isBoxingType(rc))  ||
         lc == void.class     || rc == void.class) {
       throw new ExecutionError(s, node);
     } 
 
     // Auto-unbox, if necessary
-    if (_isBoxingType(lc)) {
+    if (TigerUtilities.isBoxingType(lc)) {
       node.setLeftExpression(_unbox(leftExp, lc));
     }
-    if (_isBoxingType(rc)) {
+    if (TigerUtilities.isBoxingType(rc)) {
       node.setRightExpression(_unbox(rightExp, rc));
     }
     
@@ -2454,7 +2454,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
                   rc == boolean.class ||
                   rc == float.class   ||
                   rc == double.class)) {
-          if (_isBoxingType(rc) && _isIntegralType(rc)) {
+          if (TigerUtilities.isBoxingType(rc) && TigerUtilities.isIntegralType(rc)) {
             return _unbox(v, rc);
           }
           throw new ExecutionError("assignment.types", node);
@@ -2465,7 +2465,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
                   rc == void.class    ||
                   rc == boolean.class ||
                   rc == double.class)) {
-          if (_isBoxingType(rc) && rc != Boolean.class && rc != Double.class) {
+          if (TigerUtilities.isBoxingType(rc) && rc != Boolean.class && rc != Double.class) {
             return _unbox(v, rc);
           }
           throw new ExecutionError("assignment.types", node);
@@ -2475,14 +2475,14 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
                   !rc.isPrimitive() ||
                   rc == void.class  ||
                   rc == boolean.class)) {
-          if (_isBoxingType(rc) && rc != Boolean.class) {
+          if (TigerUtilities.isBoxingType(rc) && rc != Boolean.class) {
             return _unbox(v, rc);
           }
           throw new ExecutionError("assignment.types", node);
         }
       }
       else if (rc != null) {
-        if (_boxesTo(rc, lc)) { 
+        if (TigerUtilities.boxesTo(rc, lc)) { 
           return _box(v, lc);
         }
         if (!lc.isAssignableFrom(rc) && !rc.isAssignableFrom(lc)) {
@@ -2510,12 +2510,12 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
      * for the == operator is for boxed/primitive types
      */
     if (lc != null && rc != null) {
-      if (_isBoxingType(lc) && rc.isPrimitive()) {
+      if (TigerUtilities.isBoxingType(lc) && rc.isPrimitive()) {
         ObjectMethodCall methodCall = _unbox(leftExp, lc);
         n.setLeftExpression(methodCall);
         lc = (Class) methodCall.getProperty(NodeProperties.TYPE);
       }
-      if (_isBoxingType(rc) && lc.isPrimitive()) {
+      if (TigerUtilities.isBoxingType(rc) && lc.isPrimitive()) {
         ObjectMethodCall methodCall = _unbox(rightExp, rc);
         n.setRightExpression(methodCall);
         rc = (Class) methodCall.getProperty(NodeProperties.TYPE);
@@ -2562,16 +2562,16 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     if (lc == null          || rc == null           ||
         lc == void.class    || rc == void.class     ||
         lc == boolean.class || rc == boolean.class  ||
-        !(lc.isPrimitive()  || _isBoxingType(lc))   || 
-        !(rc.isPrimitive()  || _isBoxingType(rc))) {
+        !(lc.isPrimitive()  || TigerUtilities.isBoxingType(lc))   || 
+        !(rc.isPrimitive()  || TigerUtilities.isBoxingType(rc))) {
       throw new ExecutionError("relational.expression.type", node);
     }
 
     // Auto-unbox, if necessary
-    if (_isBoxingType(lc)) {
+    if (TigerUtilities.isBoxingType(lc)) {
       node.setLeftExpression(_unbox(leftExp, lc));
     }
-    if (_isBoxingType(rc)) {
+    if (TigerUtilities.isBoxingType(rc)) {
       node.setRightExpression(_unbox(rightExp, rc));
     }
     
@@ -2598,8 +2598,8 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     Class rc = rightExp.acceptVisitor(this);
     Class c = null;
     
-    boolean intLeft   = _isIntegralType(lc);
-    boolean intRight  = _isIntegralType(rc);
+    boolean intLeft   = TigerUtilities.isIntegralType(lc);
+    boolean intRight  = TigerUtilities.isIntegralType(rc);
     boolean boolLeft  = (lc == boolean.class  || lc == Boolean.class);
     boolean boolRight = (rc == boolean.class  || rc == Boolean.class);
     
@@ -2618,10 +2618,10 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     
     
     // Auto-unbox, if necessary
-    if (_isBoxingType(lc)) {
+    if (TigerUtilities.isBoxingType(lc)) {
       node.setLeftExpression(_unbox(leftExp, lc));
     }
-    if (_isBoxingType(rc)) {
+    if (TigerUtilities.isBoxingType(rc)) {
       node.setRightExpression(_unbox(rightExp, rc));
     }
     
@@ -2653,8 +2653,8 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
         lc == double.class   || rc == double.class     ||
         ((lc == boolean.class || lc == Boolean.class) ^ 
          (rc == boolean.class || rc == Boolean.class)) ||
-        !(lc.isPrimitive() || _isBoxingType(lc))       || 
-        !(rc.isPrimitive() || _isBoxingType(rc))) {
+        !(lc.isPrimitive() || TigerUtilities.isBoxingType(lc))       || 
+        !(rc.isPrimitive() || TigerUtilities.isBoxingType(rc))) {
       throw new ExecutionError("bitwise.expression.type", node);
     }
 
@@ -2693,16 +2693,16 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
         lc == Float.class   || rc == Float.class   ||
         lc == double.class  || rc == double.class  ||
         lc == Double.class  || rc == Double.class  ||
-        !(lc.isPrimitive()  || _isBoxingType(lc))  || 
-        !(rc.isPrimitive()  || _isBoxingType(rc)) ) {
+        !(lc.isPrimitive()  || TigerUtilities.isBoxingType(lc))  || 
+        !(rc.isPrimitive()  || TigerUtilities.isBoxingType(rc)) ) {
       throw new ExecutionError("shift.expression.type", node);
     } 
     
     // Auto-unbox, if necessary
-    if (_isBoxingType(lc) && !leftExp.hasProperty(NodeProperties.MODIFIER)) {
+    if (TigerUtilities.isBoxingType(lc) && !leftExp.hasProperty(NodeProperties.MODIFIER)) {
       node.setLeftExpression(_unbox(leftExp, lc));
     }
-    if (_isBoxingType(rc)) {
+    if (TigerUtilities.isBoxingType(rc)) {
       node.setRightExpression(_unbox(rightExp, rc));
     }
     
@@ -2724,7 +2724,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
   private void checkCastStaticRules(Class tc, Class ec, CastExpression castExp) {
     if (tc != ec) {
       if (tc.isPrimitive()) {
-        boolean isBoxingType = _isBoxingType(ec);
+        boolean isBoxingType = TigerUtilities.isBoxingType(ec);
         if (ec == null          || 
             ec == boolean.class || 
             (tc == boolean.class && ec != Boolean.class) ||
@@ -2780,7 +2780,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
             }
           }
         }
-        else if (ec.isPrimitive() && _isBoxingType(tc) && ec != boolean.class) {
+        else if (ec.isPrimitive() && TigerUtilities.isBoxingType(tc) && ec != boolean.class) {
           castExp.setExpression(_box(castExp.getExpression(), tc));
         }
         else if (!ec.isAssignableFrom(tc) && !tc.isAssignableFrom(ec)) {
@@ -2803,100 +2803,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     }
   }
 
-  /**
-   * Returns true iff the given class is an integral type
-   * This includes both primitive and boxing integral types.<br><br>
-   * Allowed primitives: byte, char, short, int, long
-   * Allowed Refrence: Byte, Character, Short, Integer, Long
-   * @param c The class to check
-   * @return true iff the given class is an integral type
-   */
-  private static boolean _isIntegralType(Class c) {
-    return (c == int.class   || c == Integer.class   ||
-            c == long.class  || c == Long.class      ||
-            c == byte.class  || c == Byte.class      ||
-            c == char.class  || c == Character.class ||
-            c == short.class || c == Short.class);
-  }
   
-  /**
-   * Returns true iff the given class is a boxing (reference) type.
-   * @param c the <code>Class</code> to check
-   * @return true iff it is a boxing type
-   */
-  private static boolean _isBoxingType(Class c) {
-    return (c == Integer.class   || c == Long.class   ||
-            c == Boolean.class   || c == Double.class ||
-            c == Character.class || c == Short.class  ||
-            c == Byte.class      || c == Float.class );
-  }
-  
-  private static boolean _boxesTo(Class prim, Class ref) {
-    return 
-      (prim == int.class     && (ref == Integer.class   || 
-                                 ref == Long.class      || 
-                                 ref == Double.class    || 
-                                 ref == Float.class))   ||
-      (prim == long.class    && (ref == Long.class      || 
-                                 ref == Double.class    || 
-                                 ref == Float.class))   ||
-      (prim == byte.class    && (ref == Byte.class      || 
-                                 ref == Short.class     || 
-                                 ref == Integer.class   || 
-                                 ref == Long.class      || 
-                                 ref == Double.class    || 
-                                 ref == Float.class))   ||
-      (prim == char.class    && (ref == Character.class || 
-                                 ref == Integer.class   || 
-                                 ref == Long.class      || 
-                                 ref == Double.class    || 
-                                 ref == Float.class))   ||
-      (prim == short.class   && (ref == Short.class     || 
-                                 ref == Integer.class   || 
-                                 ref == Long.class      || 
-                                 ref == Double.class    || 
-                                 ref == Float.class))   ||
-      (prim == boolean.class && ref == Boolean.class)   ||
-      (prim == float.class   && (ref == Float.class     || 
-                                 ref == Double.class))  ||
-      (prim == double.class  && ref == Double.class);
-  }
-    
-  /**
-   * Returns the reference type that corresponds to the given primitive type.
-   * @param primType the primitive type
-   * @return the corresponding reference type
-   */
-  protected static Class _correspondingRefType(Class primType) {
-    if (primType == boolean.class) {
-      return Boolean.class;
-    }
-    else if (primType == byte.class) {
-      return Byte.class;
-    }
-    else if (primType == char.class) {
-      return Character.class;
-    }
-    else if (primType == short.class) {
-      return Short.class;
-    }
-    else if (primType == int.class) {
-      return Integer.class;
-    }
-    else if (primType == long.class) {
-      return Long.class;
-    }
-    else if (primType == float.class) {
-      return Float.class;
-    }
-    else if (primType == double.class) {
-      return Double.class;
-    }
-    else {
-      throw new RuntimeException("No corresponding reference type for primitive type " + 
-                                 primType + ".");
-    }
-  }
   /**
    * Returns the primitive type that corresponds to the given reference type.
    * @param refType the reference type

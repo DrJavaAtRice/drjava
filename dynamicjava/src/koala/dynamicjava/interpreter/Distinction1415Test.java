@@ -52,6 +52,7 @@ import junit.framework.*;
 import koala.dynamicjava.tree.*;
 //import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.SourceInfo;
+import koala.dynamicjava.util.*;
 
 import java.io.StringReader;
 import java.util.List;
@@ -80,6 +81,7 @@ public class Distinction1415Test extends TestCase {
     parserFactory = new JavaCCParserFactory();
     astInterpreter = new TreeInterpreter(null); // No ParserFactory needed to interpret an AST
     strInterpreter = new TreeInterpreter(parserFactory); // ParserFactory is needed to interpret a string
+    TigerUtilities.resetVersion();
   }
     
   public Object interpret(String testString) throws InterpreterException {
@@ -90,8 +92,7 @@ public class Distinction1415Test extends TestCase {
    * Test that the use of generic reference types fails when the runtime environment version is set to 1.4
    */
   public void testGenericReferenceTypes14(){
-    String currentversion = System.getProperty("java.specification.version");
-    System.setProperty("java.specification.version","1.4");
+    TigerUtilities.setTigerEnabled(false);
     
     try{
       testString =
@@ -107,15 +108,14 @@ public class Distinction1415Test extends TestCase {
     }
     
     //Set the java runtime version back to the correct version
-    System.setProperty("java.specification.version",currentversion); 
+    TigerUtilities.resetVersion();
   }
   
   /**
    * Test that the use of generic reference types does not fail when the runtime environment version is set to 1.5
    */
   public void testGenericReferenceTypes15(){
-    String currentversion = System.getProperty("java.specification.version");
-    System.setProperty("java.specification.version","1.5");
+    TigerUtilities.setTigerEnabled(true);
     try{
       testString =
         "import java.util.LinkedList;\n"+
@@ -129,15 +129,14 @@ public class Distinction1415Test extends TestCase {
     }
     
     //Set the java runtime version back to the correct version
-    System.setProperty("java.specification.version",currentversion); 
+    TigerUtilities.resetVersion();
   }
   
   /**
    * Test that the use of autoboxing and auto-unboxing fails when the runtime environment version is set to 1.4
    */
   public void testAutoboxing14() {
-    String currentversion = System.getProperty("java.specification.version");
-    System.setProperty("java.specification.version","1.4");
+    TigerUtilities.setTigerEnabled(false);
     
     //Auto box
     try{
@@ -188,15 +187,14 @@ public class Distinction1415Test extends TestCase {
     }
     
     //Set the java runtime version back to the correct version
-    System.setProperty("java.specification.version",currentversion);    
+    TigerUtilities.resetVersion();
   }
   
   /**
    * Test that the use of autoboxing and auto-unboxing does not fail when the runtime environment version is set to 1.5
    */
   public void testAutoboxing15() {
-    String currentversion = System.getProperty("java.specification.version");
-    System.setProperty("java.specification.version","1.5");
+    TigerUtilities.setTigerEnabled(true);
     try{
       testString =
         "Character c = new Character('c');" +
@@ -213,7 +211,7 @@ public class Distinction1415Test extends TestCase {
     }
     
     //Set the java runtime version back to the correct version
-    System.setProperty("java.specification.version",currentversion); 
+    TigerUtilities.resetVersion();
   }
   
  
