@@ -2271,7 +2271,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           }
           
           /* update the navigator */
-          _documentNavigator.refreshDocument(getIDocGivenODD(this), file.getCanonicalFile().getParent());
+          _documentNavigator.refreshDocument(getIDocGivenODD(this), fixPathForNavigator(file.getCanonicalPath()));
         }
 
         return true;
@@ -3474,6 +3474,25 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return projectDocs;
   }
     
+  private String fixPathForNavigator(String path) throws IOException{
+      path = path.substring(0, path.lastIndexOf(File.separator));
+      String _topLevelPath;
+      if(getProjectFile() != null){
+        _topLevelPath = getProjectFile().getCanonicalPath();
+        _topLevelPath = _topLevelPath.substring(0, _topLevelPath.lastIndexOf(File.separator));;
+      }else{
+        _topLevelPath = "";
+      }
+     
+      if (!path.equals(_topLevelPath) && !path.startsWith(_topLevelPath + File.separator) ){
+        /** it's in external files, so don't give it a path */
+        return "";
+      }else{
+        path = path.substring(_topLevelPath.length());
+        return path;
+      }
+  }
+  
   /**
    * Creates a document from a file.
    * @param file File to read document from
@@ -3498,22 +3517,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       _documentsRepos.put(idoc, doc);
       
       String path = doc.getFile().getCanonicalPath();
-      path = path.substring(0, path.lastIndexOf(File.separator));
-      String _topLevelPath;
-      if(getProjectFile() != null){
-        _topLevelPath = getProjectFile().getCanonicalPath();
-        _topLevelPath = _topLevelPath.substring(0, _topLevelPath.lastIndexOf(File.separator));;
-      }else{
-        _topLevelPath = "";
-      }
      
-      if (!path.equals(_topLevelPath) && !path.startsWith(_topLevelPath + File.separator) ){
-        /** it's in external files, so don't give it a path */
-        _documentNavigator.addDocument(idoc, "");
-      }else{
-        path = path.substring(_topLevelPath.length());
-        _documentNavigator.addDocument(idoc, path);
-      }
+      _documentNavigator.addDocument(idoc, fixPathForNavigator(path));
       
       
       //doc.checkIfClassFileInSync();
