@@ -230,6 +230,31 @@ public class Parser {
                                    filename, bl, bc, el, ec);
   }
   
+  private void checkModifiers(int flags, int notAllowed) throws ParseException {
+    if(Modifier.isPublic(flags) && Modifier.isPublic(notAllowed))
+      _throwParseException("Modifier public is not allowed here");
+    if(Modifier.isPrivate(flags) && Modifier.isPrivate(notAllowed))
+      _throwParseException("Modifier private is not allowed here");
+    if(Modifier.isProtected(flags) && Modifier.isProtected(notAllowed))
+      _throwParseException("Modifier protected is not allowed here");
+    if(Modifier.isAbstract(flags) && Modifier.isAbstract(notAllowed))
+      _throwParseException("Modifier abstract is not allowed here");
+    if(Modifier.isFinal(flags) && Modifier.isFinal(notAllowed))
+      _throwParseException("Modifier final is not allowed here");
+    if(Modifier.isStatic(flags) && Modifier.isStatic(notAllowed))
+      _throwParseException("Modifier static is not allowed here");
+    if(Modifier.isNative(flags) && Modifier.isNative(notAllowed))
+      _throwParseException("Modifier native is not allowed here");
+    if(Modifier.isSynchronized(flags) && Modifier.isSynchronized(notAllowed))
+      _throwParseException("Modifier synchronized is not allowed here");
+    if(Modifier.isTransient(flags) && Modifier.isTransient(notAllowed))
+      _throwParseException("Modifier transient is not allowed here");
+    if(Modifier.isVolatile(flags) && Modifier.isVolatile(notAllowed))
+      _throwParseException("Modifier volatile is not allowed here");
+  }
+  
+  
+  
   /*
    * The classes derived from this one are used for parsing only
    */
@@ -1283,12 +1308,13 @@ PARSER_END(Parser)
   }
     
   /**
-   * Parses a type declaration
+   * Parses a top level type declaration
    * @see koala.dynamicjava.tree.TypeDeclaration
    */
   TypeDeclaration typeDeclaration() :
   {
     TypeDeclaration node;
+    int modifiers;
   }
   {
     try {
@@ -1300,7 +1326,9 @@ PARSER_END(Parser)
          node=interfaceDeclaration()
          )
       {
-        return node;
+      //Handles modifiers not allowed at the top level
+      checkModifiers(node.getAccessFlags(), Modifier.STATIC | Modifier.PRIVATE | Modifier.PROTECTED);
+      return node;
       }
     }
     catch(ParseException pe) {
@@ -1499,6 +1527,8 @@ PARSER_END(Parser)
   {
     md=modifiers() cd=unmodifiedClassDeclaration(md)
     {
+      if(md != null)
+        checkModifiers(md.accessFlags, Modifier.NATIVE | Modifier.SYNCHRONIZED | Modifier.TRANSIENT | Modifier.VOLATILE);
       return cd;
     }
   }
@@ -1818,6 +1848,8 @@ PARSER_END(Parser)
       ( "[" "]" { dim++; } )*
         [ "=" exp=variableInitializer() ]
       {
+        if(mf != null)
+          checkModifiers(mf.accessFlags,Modifier.ABSTRACT | Modifier.NATIVE | Modifier.SYNCHRONIZED);
         list.add(createFieldDeclaration(mf, typ, id, exp, dim));
       }
       ( "," { dim = 0; exp = null; }
@@ -1871,6 +1903,7 @@ PARSER_END(Parser)
           ( body=block() | body=emptyStatement() )
         {
           if (mf != null) {
+            checkModifiers(mf.accessFlags, Modifier.TRANSIENT | Modifier.VOLATILE);
             bl    = mf.beginLine;
             bc    = mf.beginColumn;
             flags = mf.accessFlags;
@@ -2100,6 +2133,7 @@ PARSER_END(Parser)
   ConstructorDeclaration constructorDeclaration() :
   {
     Token                 t = null;
+    ModifierFlags         mf;
     int                   flag = 0;
     Token                 id;
     TypeParameter[]   typeParameters = null;
@@ -2114,19 +2148,20 @@ PARSER_END(Parser)
   {
     try
     {
-    [ t="public"
-       {
-      flag = Modifier.PUBLIC;
-    }
-     | t="protected"
-       {
-       flag = Modifier.PROTECTED;
-     }
-     | t="private"
-       {
-       flag = Modifier.PRIVATE;
-     }
-     ]
+//    [ t="public"
+//       {
+//      flag = Modifier.PUBLIC;
+//    }
+//     | t="protected"
+//       {
+//       flag = Modifier.PROTECTED;
+//     }
+//     | t="private"
+//       {
+//       flag = Modifier.PRIVATE;
+//     }
+//     ]
+      mf = modifiers()
       [ typeParameters = TypeParameters() ]
        id=<IDENTIFIER>
        params=formalParameters()
@@ -2141,6 +2176,9 @@ PARSER_END(Parser)
      )*
        e="}"
      {
+       if(mf !=null) //Modifiers not allowed in a constructor declaration
+         checkModifiers(mf.accessFlags, Modifier.STATIC | Modifier.FINAL | Modifier.NATIVE | Modifier.ABSTRACT 
+                          | Modifier.SYNCHRONIZED | Modifier.TRANSIENT | Modifier.VOLATILE);
        if (t == null) {
          bl = id.beginLine;
          bc = id.beginColumn;
@@ -2219,6 +2257,9 @@ PARSER_END(Parser)
   {
     md=modifiers() id=unmodifiedInterfaceDeclaration(md)
     {
+      if(md != null) {
+        checkModifiers(md.accessFlags, Modifier.FINAL | Modifier.NATIVE | Modifier.SYNCHRONIZED | Modifier.TRANSIENT | Modifier.VOLATILE);
+      }
       return id;
     }
   }
@@ -2332,6 +2373,9 @@ PARSER_END(Parser)
   {
     md=modifiers() ed = unmodifiedEnumDeclaration(md)
     {
+      if(md != null) {
+        checkModifiers(md.accessFlags, Modifier.FINAL | Modifier.ABSTRACT | Modifier.NATIVE | Modifier.SYNCHRONIZED | Modifier.TRANSIENT | Modifier.VOLATILE);
+      }
       return ed;
     }
   }

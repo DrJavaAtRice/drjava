@@ -100,7 +100,7 @@ public abstract class TypeDeclaration extends Node {
     if (name == null) throw new IllegalArgumentException("name == null");
     if (body == null) throw new IllegalArgumentException("body == null");
 
-    accessFlags = flags;
+    accessFlags = flags;    
     this.name = name;
     if (impl != null) {
       interfaces = new LinkedList<String>();
