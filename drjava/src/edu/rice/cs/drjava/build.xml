@@ -302,7 +302,7 @@
   </target>
 
   <!-- Create documentation html -->
-  <target name="docs" depends="userdocs" unless="docbook.present">
+  <target name="docs" depends="userdocs,devdocs" unless="docbook.present">
     <echo message="Could not find docbook2html.  Not generating docs." />
   </target>
 
@@ -316,6 +316,20 @@
       <arg value="${doc_dir}/user/"/>
       <fileset dir="${srcroot}/${projpath}/docs/user">
         <include name="userdoc.docbook" />
+      </fileset>
+    </apply>
+  </target>
+
+  <!-- Create the developer documentation -->
+  <target name="devdocs" depends="docbook-present" if="docbook.present">
+    <delete dir="${doc_dir}/developer/" />
+    <mkdir dir="${doc_dir}/developer/" />
+    <echo message="Creating documentation HTML..." />
+    <apply executable="docbook2html" failonerror="yes" type="file">
+      <arg value="-o"/>
+      <arg value="${doc_dir}/developer/"/>
+      <fileset dir="${srcroot}/${projpath}/docs/developer">
+        <include name="devdoc.docbook" />
       </fileset>
     </apply>
   </target>
