@@ -141,6 +141,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], getter, false);
   }
 
+  
   //-------------------------- Listener Management --------------------------//
 
   /**
@@ -260,12 +261,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   protected void junitOpenDefDocs(List<OpenDefinitionsDocument> lod, boolean allTests){
     synchronized (_compilerModel) {
-      
-      // if a test is running, don't start another one
-      if (_isTestInProgress) {
-        return;
+      // if a test is running, don't start another one, but make sure someone's not
+      // trying to notify that the previous test had finished.
+      synchronized(_notifier) {
+        if (_isTestInProgress) return;
       }
-      
+        
 
       //reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
       _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
@@ -281,6 +282,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       File builtDir = _model.getBuildDirectory();
       LinkedList<File> classDirs = new LinkedList<File>();
       LinkedList<File> sourceFiles = new LinkedList<File>();
+      
       while (it.hasNext()) {
         try {
           OpenDefinitionsDocument doc = it.next();
@@ -310,14 +312,16 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           // don't add it, b/c it's package is bogus
         }
       }
-
       
       for(File dir: classDirs){
+        
         // foreach built directory
         File[] listing = dir.listFiles();
+        
         if(listing != null) for(File entry : listing){
+                  
           // for each class file in the built directory
-          if(entry.isFile()){
+          if(entry.isFile() && entry.getPath().endsWith(".class")){
             try{
               JavaClass clazz = new ClassParser(entry.getCanonicalPath()).parse();
               String classname = clazz.getClassName();// get classname
@@ -340,6 +344,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
                 doc = it.next();
                 try{
                   f = doc.getFile();
+                  
                   String filename = doc.getSourceRoot().getCanonicalPath() + File.separator + filenameFromClassfile;
                   int index = f.getCanonicalPath().lastIndexOf('.');
                   String filenameFromDoc = f.getCanonicalPath().substring(0, index);
@@ -354,6 +359,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //                    }
                     classNames.add(classname);
                     files.add(f);
+                    
                     classNamesToODDs.put(classname, doc);
                   }
                 }catch(InvalidPackageException e){
@@ -365,23 +371,29 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
             }catch(IOException e){
               // can't read class file
             }catch(ClassFormatException e){
-              // class file is bad
+              // class file is bads
             }
             // match source file to odd (if possible)
             // if match, add clasname to test suite
           }
+      
         }
       }
-      
       _isTestInProgress = true;
-      List<String> tests = _jvm.runTestSuite(classNames, files, allTests);
-      ArrayList<OpenDefinitionsDocument> odds =
-        new ArrayList<OpenDefinitionsDocument>();
-      Iterator<String> it2 = tests.iterator();
-      while (it2.hasNext()) {
-        odds.add(classNamesToODDs.get(it2.next()));
+      // synchronized over _notifier so that junitStarted is ensured to be 
+      // called before the testing thread (JUnitTestManager) makes any notifications
+      // to the notifier.  This can happen if the test fails quickly or if the test
+      // class is not found.
+      synchronized(_notifier) {
+        List<String> tests = _jvm.runTestSuite(classNames, files, allTests);
+        ArrayList<OpenDefinitionsDocument> odds =
+          new ArrayList<OpenDefinitionsDocument>();
+        Iterator<String> it2 = tests.iterator();
+        while (it2.hasNext()) {
+          odds.add(classNamesToODDs.get(it2.next()));
+        }
+        _notifier.junitStarted(odds);
       }
-      _notifier.junitStarted(odds);
     }
   }
   
@@ -411,14 +423,26 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    * @param isTestAll whether or not it was a use of the test all button
    */
   public void nonTestCase(final boolean isTestAll) {
-    _isTestInProgress = false;
-    _notifier.nonTestCase(isTestAll);
-    _notifier.junitEnded();
+    // NOTE: junitStarted is called in a different thread from the testing thread,
+    //       so it is possible that this is called before the other thread calls 
+    //       the junitStarted.  We want the test to terminate AFTER it starts. Otherwise
+    //       any thread that starts waiting for the test to end after the firing of
+    //       junitStarted will never be notified. (same with all terminal events)
+    //       The synchronization over _notifier takes care of this problem.
+    synchronized(_notifier) { 
+      _notifier.nonTestCase(isTestAll);
+      _isTestInProgress = false;
+      _notifier.junitEnded();
+    } 
   }
 
   /**
    * Called to indicate that a suite of tests has started running.
    * TODO: Why is this sync'ed?
+   * Answer?: This might be to make sure that a test doesn't start while the file is
+   *          being compiled. Only thing is that junitOpenDefDocs is synchronized to
+   *          _compilerModel as well. This might not be needed.
+   * 
    * @param numTests The number of tests in the suite to be run.
    */
   public void testSuiteStarted(final int numTests) {
@@ -433,7 +457,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    * @param testName The name of the test being started.
    */
   public void testStarted(final String testName) {
-    synchronized(_compilerModel) {
+    synchronized(_compilerModel) { 
       _notifier.junitTestStarted(testName);
     }
   }
@@ -448,7 +472,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   public void testEnded(final String testName, final boolean wasSuccessful,
                         final boolean causedError)
   {
-    _notifier.junitTestEnded(testName, wasSuccessful, causedError);
+    synchronized(_notifier) { // so that it's not called until junitStarted is fired
+      _notifier.junitTestEnded(testName, wasSuccessful, causedError);
+    }
   }
 
   /**
@@ -458,9 +484,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   public void testSuiteEnded(JUnitError[] errors) {
     if (_isTestInProgress) {
       _junitErrorModel = new JUnitErrorModel(errors, _getter, true);
-      
-      _isTestInProgress = false;
-      _notifier.junitEnded();
+      synchronized(_notifier) { // so that it's not called until junitStarted is fired
+        _isTestInProgress = false;
+        _notifier.junitEnded();
+      }
     }
   }
 
@@ -493,8 +520,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       errors[0] = new JUnitError("Previous test was interrupted", true, "");
       _junitErrorModel = new JUnitErrorModel(errors, _getter, true);
 
-      _isTestInProgress = false;
-      _notifier.junitEnded();
+      synchronized(_notifier) { // make sure junitStarted isn't being called
+        _isTestInProgress = false;
+        _notifier.junitEnded();
+      }
     }
   }
 }

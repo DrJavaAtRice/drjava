@@ -71,8 +71,10 @@ import edu.rice.cs.util.UnexpectedException;
 /**
  * This class installs listeners and actions between an InteractionsDocument
  * in the model and an InteractionsPane in the view.
- *
+ * <p>
  * We may want to refactor this class into a different package.
+ * <p>
+ * (The PopupConsole was introduced in version 1.29 of this file)
  *
  * @version $Id$
  */
@@ -96,47 +98,6 @@ public class InteractionsController extends AbstractConsoleController {
    * Style to use for debug messages.
    */
   protected final SimpleAttributeSet _debugStyle;
-  protected static final String INPUT_ENTERED_NAME = "Input Entered";
-  protected static final String INSERT_NEWLINE_NAME = "Insert Newline";
-
-  /**
-   * Invoked when input is completed in an input box.
-   */
-  @Deprecated
-  protected Action _inputEnteredAction = new AbstractAction() {
-    public synchronized void actionPerformed(ActionEvent e) {
-      _box.setEditable(false);
-      _box.getCaret().setVisible(false);
-      setEnabled(false);
-//      _insertNewlineAction.setEnabled(false);
-      _inputText = _box.getText();
-      notify();
-      _pane.setCaretPosition(_doc.getDocLength());
-      _pane.requestFocus();
-    }
-  };
-
-  /**
-   * Shift-Enter action in a System.in box.  Inserts a newline.
-   */
-  @Deprecated
-  protected Action _insertNewlineAction = new AbstractAction() {
-    public void actionPerformed(ActionEvent e) {
-      _box.insert("\n", _box.getCaretPosition());
-    }
-  };
-
-  /**
-   * Current contents of the most recent InputBox.
-   */
-  @Deprecated
-  private String _inputText;
-
-  /**
-   * The most recent graphical box used to request input for
-   * System.in.
-   */
-  private InputBox _box;
 
   PopupConsole _popupConsole = new PopupConsole(_pane, new InputBox(), "Standard Input (System.in)");
   
@@ -146,69 +107,6 @@ public class InteractionsController extends AbstractConsoleController {
   protected InputListener _inputListener = new InputListener() {
     public String getConsoleInput() {
       return _popupConsole.getConsoleInput();
-      
-//      return "input\n";
-      
-//      synchronized(_inputEnteredAction) {
-//
-//        SwingUtilities.invokeLater(new Runnable() {
-//          public void run() {
-//            _box = new InputBox();
-//            _pane.setEditable(true);
-//             int pos = _doc.getPositionBeforePrompt();
-//             _pane.setCaretPosition(pos);
-//             _pane.insertComponent(_box);
-//            moveToEnd();
-//            _pane.setEditable(false);
-//            _pane.setVisible(true);
-///*
-//                    if (_busy()) {
-//             _pane.setEditable(true);
-//             moveToEnd();
-//             _pane.insertComponent(_box);
-//             _pane.setEditable(false);
-//             }
-//             else {
-////             DocumentEditCondition ec = _doc.getEditCondition();
-////             _doc.setEditCondition(new DocumentEditCondition());
-//             int pos = _doc.getPositionBeforePrompt();
-//             _pane.setCaretPosition(pos);
-//             _pane.insertComponent(_box);
-//             _doc.setPromptPos(_doc.getPromptPos() + 1);
-//             //            _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
-////             _doc.setEditCondition(ec);
-//             }
-//             */
-//            
-//            _doc.insertBeforeLastPrompt(" ", _doc.DEFAULT_STYLE);
-//            SimpleAttributeSet att = new SimpleAttributeSet();
-//            StyleConstants.setComponent(att, _box);
-//            _adapter.setCharacterAttributes(pos, 1, att, false);
-//            _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
-////            try {
-////              int len = _doc.getDocLength();
-////              _doc.forceInsertText(len, " ", _doc.DEFAULT_STYLE);
-////              _doc.forceRemoveText(len, 1);
-////            }
-////            catch (DocumentAdapterException dae) {
-////            }
-//
-//            _inputEnteredAction.setEnabled(true);
-//            //          _insertNewlineAction.setEnabled(true);
-//            
-//            _box.requestFocus();
-//            
-//          }
-//        });
-//
-//        try {
-//          _inputEnteredAction.wait();
-//        }
-//        catch (InterruptedException ie) {
-//        }
-//      }
-//
-//      return _inputText + "\n";
     }
   };
   
@@ -291,10 +189,20 @@ public class InteractionsController extends AbstractConsoleController {
    * that this lock is released.
    */
   public void notifyInputEnteredAction() {
-//    synchronized(_inputEnteredAction) {
-//      _inputEnteredAction.notify();
-//    }
     _popupConsole.interruptConsole();
+  }
+  
+  /**
+   * Inserts text into the console.  This waits for the console to be 
+   * ready, so it should not be called unless a call to getConsoleInput
+   * has been made or will be made shortly.
+   */
+  public void insertConsoleText(String input) {
+    try { 
+      _popupConsole.waitForConsoleReady(); 
+    } catch (InterruptedException ie) { }
+    
+    _popupConsole.insertConsoleText(input);
   }
 
   /**

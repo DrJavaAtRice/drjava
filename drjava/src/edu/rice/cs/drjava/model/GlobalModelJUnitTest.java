@@ -87,6 +87,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   
   private static final String MONKEYTEST_PASS_TEXT =
     "import junit.framework.*; \n" +
+    "import java.io.*; \n" +
     "public class MonkeyTestPass extends TestCase { \n" +
     "  public MonkeyTestPass(String name) { super(name); } \n" +
     "  public void testShouldPass() { \n" +
@@ -186,31 +187,30 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
    */
   public void testNoJUnitErrors() throws Exception {
     if (printMessages) System.out.println("----testNoJUnitErrors-----");
-
+    
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     doc.saveFile(new FileSelector(file));
-    
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
-    if (printMessages) System.out.println("before compile");
+    
     doc.startCompile();
-    if (printMessages) System.out.println("after compile");
     listener.checkCompileOccurred();
+    
     synchronized(listener) {
       doc.startJUnit();
       listener.assertJUnitStartCount(1);
-      if (printMessages) System.out.println("waiting for test");
       listener.wait();
     }
-    if (printMessages) {
-      System.out.println("after test");
-      System.out.println("erros: "+_model.getJUnitModel().getJUnitErrorModel());
-    }
-    assertEquals("test case should have no errors reported",
-                 0,
+    
+    if (printMessages) System.out.println("erros: "+_model.getJUnitModel().getJUnitErrorModel());
+    
+    listener.assertNonTestCaseCount(0);
+    assertEquals("test case should have no errors reported",  0,
                  _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
+                 
     _model.removeListener(listener);
+    
   }
   
   /**
@@ -422,7 +422,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //   * Tests that an infinite loop in a test case can be aborted by clicking
 //   * the Reset button.
 //   */
-//  public void xtestInfiniteLoop() throws Exception {
+//  public void testInfiniteLoop() throws Exception {
 //    if (printMessages) System.out.println("----testInfiniteLoop-----");
 //
 //    final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_INFINITE_TEXT);
@@ -503,6 +503,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     doc.startCompile();
     if (printMessages) System.out.println("after compile");
     changeDocumentText(MONKEYTEST_FAIL_TEXT, doc);
+    
     synchronized(listener) {
       doc.startJUnit();
       if (printMessages) System.out.println("waiting for test");
@@ -514,6 +515,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertEquals("test case should have no errors reported after modifying",
                  0,
                  _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
+    
     doc.saveFile(new FileSelector(file));
 
     listener = new JUnitTestListener();
@@ -742,39 +744,51 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
       _shouldBeTestAll = shouldBeTestAll;
     }
     public void nonTestCase(boolean isTestAll) {
+      nonTestCaseCount++;
       assertEquals("Non test case heard the wrong value for test current/test all",
                    _shouldBeTestAll, isTestAll);
-      nonTestCaseCount++;
     }
   }
 
   public static class JUnitTestListener extends CompileShouldSucceedListener {
+    // handle System.out's separately but default to outter class's printMessage value
+    protected boolean printMessages = GlobalModelJUnitTest.printMessages; 
     public JUnitTestListener() {
-      super(false);  // don't reset interactions after compile by default
+      this(false,false);  // don't reset interactions after compile by default
     }
-    public JUnitTestListener(boolean shouldResetAfterCompile) {
+    public JUnitTestListener(boolean shouldResetAfterCompile) { 
+      this(shouldResetAfterCompile,false); 
+    }
+    public JUnitTestListener(boolean shouldResetAfterCompile, boolean printListenerMessages) {
       super(shouldResetAfterCompile);
+      this.printMessages = printListenerMessages;
     }
     public void junitStarted(List<OpenDefinitionsDocument> odds) {
+      if (printMessages) System.out.println("listener.junitStarted");
       junitStartCount++;
     }
     public void junitSuiteStarted(int numTests) {
+      if (printMessages) System.out.println("listener.junitSuiteStarted, numTests="+numTests);
       assertJUnitStartCount(1);
       junitSuiteStartedCount++;
     }
     public void junitTestStarted(String name) {
+      if (printMessages) System.out.println("  listener.junitTestStarted, "+name);
       junitTestStartedCount++;
     }
     public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
+      if (printMessages) System.out.println("  listener.junitTestEnded, name="+name+" succ="+wasSuccessful+" err="+causedError);
       junitTestEndedCount++;
       assertEquals("junitTestEndedCount should be same as junitTestStartedCount",
                    junitTestEndedCount, junitTestStartedCount);
     }
+    public void nonTestCase(boolean isTestAll) {
+      if (printMessages) System.out.println("listener.nonTestCase, isTestAll="+isTestAll);
+      nonTestCaseCount++;
+    }
     public synchronized void junitEnded() {
       //assertJUnitSuiteStartedCount(1);
-      if (printMessages) {
-        System.out.println("junitEnded event!");
-      }
+      if (printMessages) System.out.println("junitEnded event!");
       junitEndCount++;
       notify();
     }

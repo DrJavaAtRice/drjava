@@ -1063,35 +1063,12 @@ public class InterpreterJVM extends AbstractSlaveJVM
    */
   public String getClasspathString() {
     StringBuffer cp = new StringBuffer();
-    List<ClasspathEntry> locpe = classpathManager.getProjectCP();
-    for (ClasspathEntry e: locpe) {
-      cp.append(e.getEntry().toString());
-      cp.append(System.getProperty("path.separator"));
-    }
-
-    locpe = classpathManager.getBuildDirectoryCP();
-    for (ClasspathEntry e: locpe) {
-      cp.append(e.getEntry().toString());
-      cp.append(System.getProperty("path.separator"));
-    }
-
-    locpe = classpathManager.getProjectFilesCP();
-    for (ClasspathEntry e: locpe) {
-      cp.append(e.getEntry().toString());
-      cp.append(System.getProperty("path.separator"));
-    }
-
-    locpe = classpathManager.getExternalFilesCP();
-    for (ClasspathEntry e: locpe) {
-      cp.append(e.getEntry().toString());
-      cp.append(System.getProperty("path.separator"));
-    }
-
-    locpe = classpathManager.getExtraCP();
-    for (ClasspathEntry e: locpe) {
-      cp.append(e.getEntry().toString());
-      cp.append(System.getProperty("path.separator"));
-    }
+    
+    appendAllClasspaths(classpathManager.getProjectCP(),        cp);
+    appendAllClasspaths(classpathManager.getBuildDirectoryCP(), cp);
+    appendAllClasspaths(classpathManager.getProjectFilesCP(),   cp);
+    appendAllClasspaths(classpathManager.getExternalFilesCP(),  cp);
+    appendAllClasspaths(classpathManager.getExtraCP(),          cp);
     
     // append system path last
     cp.append(System.getProperty("java.class.path"));
@@ -1099,7 +1076,21 @@ public class InterpreterJVM extends AbstractSlaveJVM
     return cp.toString();
   }
   
+  private void appendAllClasspaths(List<ClasspathEntry> locpe, StringBuffer cp) {
+    for (ClasspathEntry e: locpe) {
+      cp.append(formatURL(e.getEntry()));
+      cp.append(System.getProperty("path.separator"));
+    }
+  }
   
+  /**
+   * Takes the toString of the URL from file:/c:/.../temp or 
+   * file://home/.../temp to c:/.../temp or /home/.../temp
+   * @return fileName of the URL without the protocol infront of it.
+   */
+  private String formatURL(URL url) {
+    return url.getFile().substring(1);
+  }
 }
 
 

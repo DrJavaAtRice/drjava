@@ -145,6 +145,13 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "  }\n" +
     "}";
 
+  private static final String LANGUAGE_LEVEL_TEST =
+    "class MyTest extends junit.framework.TestCase {\n"+
+    "  void testMyMethod() {\n"+
+    "    assertEquals(\"OneString\", \"TwoStrings\");\n"+
+    "  }\n"+
+    "}\n";
+
   /**
    * Tests that the errors array contains all encountered failures and errors
    * in the right order.
@@ -241,13 +248,6 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     _model.removeListener(listener2);
   }
 
-  private static final String LANGUAGE_LEVEL_TEST =
-    "class MyTest extends junit.framework.TestCase {\n"+
-    "  void testMyMethod() {\n"+
-    "    assertEquals(\"OneString\", \"TwoStrings\");\n"+
-    "  }\n"+
-    "}\n";
-
 
   /**
    * Tests that an elementary level file has the previous line of the actual error reported as the line of its error.
@@ -257,7 +257,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
   public void testLanguageLevelJUnitErrorLine() throws Exception {
     
     // ADAM LOOK HERE
-    /*
+    
     _m = new JUnitErrorModel(new JUnitError[0], _model, false);
     OpenDefinitionsDocument doc = setupDocument(LANGUAGE_LEVEL_TEST);
     final File file = new File(_tempDir, "MyTest.dj0");
@@ -270,13 +270,11 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
       fail("compile failed: " + getCompilerErrorString());
     }
     listener.checkCompileOccurred();
-    if(true) throw new RuntimeException("asdf");
     synchronized(listener) {
       doc.startJUnit();
       listener.assertJUnitStartCount(1);
       listener.wait();
     }
-    if(true) throw new RuntimeException("asdf");
 
     // Clear document so we can make sure it's written to after startJUnit
     _model.getJUnitModel().getJUnitDocument().remove
@@ -289,7 +287,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
                  _m.getNumErrors());
 
     assertEquals("the error line should be line number 2", 2, _m.getError(0).lineNumber());
-    */
+    
   }
 
 
@@ -310,11 +308,12 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //        doc2.startCompile();
     synchronized(listener) {
       doc1.startJUnit();
+      listener.assertJUnitStartCount(1);
       listener.wait();
     }
-
+    
     _m = _model.getJUnitModel().getJUnitErrorModel();
-
+    
     assertEquals("test case has one error reported", 3, _m.getNumErrors());
     assertTrue("first error should be an error not a warning", !_m.getError(0).isWarning());
 
@@ -323,19 +322,21 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     assertEquals("The first error is on line 5", 3, _m.getError(0).lineNumber());
     assertEquals("The first error is on line 5", 19, _m.getError(1).lineNumber());
     assertEquals("The first error is on line 5", 22, _m.getError(2).lineNumber());
-
+    
     synchronized(listener) {
       doc2.startJUnit();
+      listener.assertJUnitStartCount(2);
       listener.wait();
     }
+    
     assertEquals("test case has one error reported", 3, _m.getNumErrors());
     assertTrue("first error should be an error not a warning", !_m.getError(0).isWarning());
     assertEquals("The first error is on line 5", 3, _m.getError(0).lineNumber());
     assertEquals("The first error is on line 5", 19, _m.getError(1).lineNumber());
     assertEquals("The first error is on line 5", 22, _m.getError(2).lineNumber());
 
-
     _model.removeListener(listener);
+    
   }
 }
 

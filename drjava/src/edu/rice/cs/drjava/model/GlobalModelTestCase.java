@@ -135,12 +135,13 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   public void tearDown() throws IOException {
     boolean ret = FileOps.deleteDirectory(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);
-    super.tearDown();
-    _model.dispose();
 
+    _model.dispose();
     _tempDir = null;
     _model = null;
     System.gc();
+    
+    super.tearDown();
   }
 
   /**

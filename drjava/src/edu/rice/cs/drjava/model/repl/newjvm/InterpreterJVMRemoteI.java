@@ -59,15 +59,10 @@ import edu.rice.cs.util.newjvm.*;
  * @version $Id$
  */
 public interface InterpreterJVMRemoteI extends SlaveRemote {
-  public void interpret(String s) throws RemoteException;
-  public void addProjectClassPath(URL s) throws RemoteException;
-  public void addBuildDirectoryClassPath(URL s) throws RemoteException;
-  public void addProjectFilesClassPath(URL s) throws RemoteException;
-  public void addExternalFilesClassPath(URL s) throws RemoteException;
-  public void addExtraClassPath(URL s) throws RemoteException;
   
-    public List<String> runTestSuite(List<String> classNames, List<File> files, boolean isTestAll)
+  public List<String> runTestSuite(List<String> classNames, List<File> files, boolean isTestAll)
     throws RemoteException;
+  
   public void setPackageScope(String s) throws RemoteException;
   //public void reset() throws RemoteException;
 
@@ -149,4 +144,58 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    * updates the security manager in DrJava
    */
   public void disableSecurityManager() throws RemoteException;
+  
+  /**
+   * Interprets the given string of source code in the active interpreter.
+   * The result is returned to MainJVMRemoteI via the interpretResult method.
+   * @param s Source code to interpret.
+   */
+  public void interpret(String s) throws RemoteException;
+  
+  /**
+   * Adds the given path to the classpath shared by ALL Java interpreters.
+   * This method <b>cannot</b> take multiple paths separated by
+   * a path separator; it must be called separately for each path.
+   * Only unique paths are added.
+   * @param s Entry to add to the accumulated classpath
+   */
+  public void addProjectClassPath(URL s) throws RemoteException;
+  
+  /**
+   * Adds the given path to the classpath shared by ALL Java interpreters.
+   * This method <b>cannot</b> take multiple paths separated by
+   * a path separator; it must be called separately for each path.
+   * Only unique paths are added.
+   * @param s Entry to add to the accumulated classpath
+   */
+  public void addBuildDirectoryClassPath(URL s) throws RemoteException;
+  
+  /**
+   * Adds the given path to the classpath shared by ALL Java interpreters.
+   * This method <b>cannot</b> take multiple paths separated by
+   * a path separator; it must be called separately for each path.
+   * Only unique paths are added.
+   * @param s Entry to add to the accumulated classpath
+   */
+  public void addProjectFilesClassPath(URL s) throws RemoteException;
+  
+  /**
+   * Adds the given path to the classpath shared by ALL Java interpreters.
+   * This method <b>cannot</b> take multiple paths separated by
+   * a path separator; it must be called separately for each path.
+   * Only unique paths are added.
+   * @param s Entry to add to the accumulated classpath
+   */
+  public void addExternalFilesClassPath(URL s) throws RemoteException;
+  
+  /**
+   * Adds the given path to the classpath shared by ALL Java interpreters.
+   * This method <b>cannot</b> take multiple paths separated by
+   * a path separator; it must be called separately for each path.
+   * Only unique paths are added.
+   * @param s Entry to add to the accumulated classpath
+   */
+  public void addExtraClassPath(URL s) throws RemoteException;
+  
+  
 }
