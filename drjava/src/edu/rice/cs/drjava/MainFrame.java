@@ -241,15 +241,14 @@ public class MainFrame extends JFrame
                                        new JScrollPane(_interactionsView));
 
     setBounds(25, 25, 300, 500);
-    setSize(300, 500);
+
 
     getContentPane().add(_errorPanel, BorderLayout.SOUTH);
     getContentPane().add(split2, BorderLayout.CENTER);
-
+    setSize(300, 500);
 
     //getContentPane().setLayout(new BoxLayout(getContentPane(),BoxLayout.Y_AXIS));
 //    show();
-    setSize(300, 500);
 
     // This is annoyingly order-dependent. Since split2 contains split1,
     // we need to get split2's divider set up first to give split1 an overall

@@ -53,7 +53,7 @@ public class StyleUpdateTest extends TestCase {
 				this.defModel.insertString(4, "r", null);
 				this.defModel.insertString(5, "e", null);
 				this.defModel.insertString(6, "*", null);
-				this.defModel.insertString(7, "/",null);
+				this.defModel.insertString(7, "/", null);
 			}
 			catch (BadLocationException ex) {
 				throw new RuntimeException(ex.toString());

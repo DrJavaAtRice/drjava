@@ -89,13 +89,10 @@ public class DefinitionsDocument extends DefaultStyledDocument
 			SimpleAttributeSet attributes = new SimpleAttributeSet();
 			Vector<StateBlock> changedStates = getHighLightInformation();
 			for (int i = 0; i < changedStates.size(); i++){
-				StateBlock currentSB = changedStates.elementAt(i);
-				//	System.out.println("start: "+currentSB.location+", "+
-				//									 currentSB.size);
-				StyleConstants.setForeground(attributes, currentSB.state);
-				setCharacterAttributes(currentSB.location,
-															 currentSB.location+currentSB.size,
-															 attributes, false);
+			    StateBlock currentSB = changedStates.elementAt(i);
+			    StyleConstants.setForeground(attributes, currentSB.state);
+			    setCharacterAttributes(currentSB.location, currentSB.size, attributes,false);
+				//setCharacterAttributes(currentSB.location, currentSB.location+currentSB.size,attributes, false);
 			}
 
 		}

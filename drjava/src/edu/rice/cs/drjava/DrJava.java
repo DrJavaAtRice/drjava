@@ -20,8 +20,16 @@ public class DrJava {
     _consoleOut = System.out;
     _consoleErr = System.err;
 
-    MainFrame mf = new MainFrame();
-		mf.show();
+    try {
+	MainFrame mf = new MainFrame();
+	mf.show();
+    }
+    catch (Exception ex) {
+	_consoleErr.println(ex.getClass().getName() + ": " + ex.getMessage());
+	ex.printStackTrace(_consoleErr);
+	// System.exit();
+    }
+
   }
 
   public static PrintStream consoleErr() { return _consoleErr; }
