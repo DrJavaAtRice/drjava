@@ -318,6 +318,12 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * Gets the augmented classpath of the interpreter jvm as a string.
    */
   public String getClasspathString() {
+    // silently fail if disabled. see killInterpreter docs for details.
+    if (!_enabled) {
+      return null;
+    }
+
+    ensureInterpreterConnected();
     try {
       return _interpreterJVM().getClasspathString();
     }
@@ -835,6 +841,24 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _interactionsModel.replThrewException(t.getClass().getName(),
                                           t.getMessage(),
                                           StringOps.getStackTrace(t));
+  }
+  
+  /**
+   * Sets the interpreter to allow access to private members.
+   */
+  public void setPrivateAccessible(boolean allow) {
+    // silently fail if disabled. see killInterpreter docs for details.
+    if (!_enabled) {
+      return;
+    }
+
+    ensureInterpreterConnected();
+    try {
+      _interpreterJVM().setPrivateAccessible(allow);
+    }
+    catch (RemoteException re) {
+      _threwException(re);
+    }
   }
 
   /**

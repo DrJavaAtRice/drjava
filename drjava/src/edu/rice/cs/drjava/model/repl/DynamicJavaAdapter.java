@@ -80,11 +80,6 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     if (DrJava.getConfig().getSetting(OptionConstants.ALLOW_PRIVATE_ACCESS).booleanValue()) {
       _djInterpreter.setAccessible(true);
     }
-    DrJava.getConfig().addOptionListener(OptionConstants.ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {
-      public void optionChanged(OptionEvent<Boolean> oce) {
-        _djInterpreter.setAccessible(oce.value.booleanValue());
-      }
-    });
   }
 
   /**

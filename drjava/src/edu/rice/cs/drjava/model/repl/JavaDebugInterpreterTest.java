@@ -240,7 +240,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
   public void testConvertToName() {
     ThisExpression thisExp = _debugInterpreter.buildUnqualifiedThis();
     Node n = _debugInterpreter.visitThis(thisExp);        
-    LinkedList<Identifier> thisList = new LinkedList<Identifier>();
+    LinkedList thisList = new LinkedList(); // Add parameterization <Identifier>.
     thisList.add(new Identifier("this"));
     QualifiedName expected = new QualifiedName(thisList);
     assertEqualsNodes("convertThisToName did not return the correct QualifiedName",
@@ -254,7 +254,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
    */
   public void testConvertToObjectFieldAccess() {
     _debugInterpreter.setClassName("bar.baz.Foo$FooInner$FooInnerInner");
-    LinkedList<Identifier> ids = new LinkedList<Identifier>();
+    LinkedList ids = new LinkedList(); // Add parameterization <Identifier>.
     ids.add(new Identifier("Foo"));
     ThisExpression thisExp = new ThisExpression(ids, "", 0, 0, 0, 0);
     Node n = _debugInterpreter.visitThis(thisExp);

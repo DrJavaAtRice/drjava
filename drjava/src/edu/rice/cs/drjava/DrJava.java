@@ -354,28 +354,21 @@ public class DrJava implements OptionConstants {
       }
     }
   }
-
+  
   /**
-   * Try to determine if the preferences specify jsr14 v2.0, so that we can
-   * restart with the proper boot classpath.
+   * Helper method called by checkForJSR14v2 and checkForJSR14v24.
    */
-  public static boolean checkForJSR14v20() {
+  private static boolean checkJSR14JarForClass(String checkClass, String msg, String title) {
     File jsr14 = _config.getSetting(JSR14_LOCATION);
     
     if (jsr14 != FileOption.NULL_FILE) {
       try {
         JarFile jsr14jar = new JarFile(jsr14);
-        String fs = "/"; // In jar files, the file separator is always '/'
-        String checkClass = "com" + fs + "sun" + fs + "tools" + fs + "javac" + fs + "comp" + fs + "Check.class";
         if (jsr14jar.getJarEntry(checkClass) != null) {
-          
-          // If we're using Java 1.3, don't allow JSR14v20
+          // If we're using Java 1.3, don't allow JSR14v2.x
           if (System.getProperty("java.specification.version").equals("1.3")) {
             // Show a warning message, but only if we haven't restarted
             if (!_attemptingAugmentedClasspath) {
-              String msg = "The JSR-14 v2.0 compiler is not compatible with JDK 1.3.\n" +
-                "It will not be available in your list of compilers.";
-              String title = "Cannot Load JSR-14 v2.0";
               JOptionPane.showMessageDialog(null, msg, title,
                                             JOptionPane.WARNING_MESSAGE);
             }
@@ -391,8 +384,35 @@ public class DrJava implements OptionConstants {
 
     }
     // either caught an exception thrown by the classloader or had no jsr14 specified.
-    // Therefore, not using jsr14 v2.0.
+    // Therefore, not using jsr14 v2.x.
     return false;
+  }
+  
+  /**
+   * Try to determine if the preferences specify jsr14 v2.4, so that we can
+   * restart with the proper boot classpath.
+   */
+  public static boolean checkForJSR14v24() {
+    String fs = "/"; // In jar files, the file separator is always '/'
+    String checkClass = "com" + fs + "sun" + fs + "javadoc" + fs + "ParameterizedType.class";
+    String msg = "The JSR-14 v2.4 compiler is only compatible with JDK 1.4.2.\n" +
+      "It will not be available in your list of compilers.";
+    String title = "Cannot Load JSR-14 v2.4";
+    return checkJSR14JarForClass(checkClass, msg, title);
+  }
+  
+
+  /**
+   * Try to determine if the preferences specify jsr14 v2.0, so that we can
+   * restart with the proper boot classpath.
+   */
+  public static boolean checkForJSR14v20() {
+    String fs = "/"; // In jar files, the file separator is always '/'
+    String checkClass = "com" + fs + "sun" + fs + "tools" + fs + "javac" + fs + "comp" + fs + "Check.class";
+    String msg = "The JSR-14 v2.x compiler is not compatible with JDK 1.3.\n" +
+      "It will not be available in your list of compilers.";
+    String title = "Cannot Load JSR-14 v2.x";
+    return checkJSR14JarForClass(checkClass, msg, title);
   }
 
   /**
@@ -515,6 +535,16 @@ public class DrJava implements OptionConstants {
       return false;
     }
     catch (UnsupportedClassVersionError ucve) {
+      return false;
+    }
+  }
+  
+  public static boolean bootClasspathHasJSR14v24() {
+    try {
+      Class.forName("com.sun.javadoc.ParameterizedType");
+      return true;
+    }
+    catch (Throwable t) {
       return false;
     }
   }

@@ -66,7 +66,7 @@ public class InteractionsProcessor implements InteractionsProcessorI {
   public String preProcess(String s) throws ParseException
   {
     InteractionsInput tree = new GJParser(new StringReader(s)) . InteractionsInput();
-    JavaASTVisitor<JavaAST> typeEraser = new TypeEraser();
+    JavaASTVisitor typeEraser = new TypeEraser(); // Add parameterization <JavaAST> on typeEraser.
     JavaAST typeErasedTree = tree.accept(typeEraser);
     String source =  InteractionsPrinter.generateSource(typeErasedTree);
     // System.out.println("Interpreting: " + source);

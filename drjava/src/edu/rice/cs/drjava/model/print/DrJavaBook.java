@@ -103,7 +103,7 @@ public class DrJavaBook implements Pageable {
     float lineHeight = textl.getLeading() + textl.getAscent();
     int linesPerPage = (int) (_format.getImageableHeight() / lineHeight) - 1;
 
-    HashMap<TextAttribute, Object> map = new HashMap<TextAttribute, Object>();
+    HashMap map = new HashMap(); // Add parameterization <TextAttribute, Object>. 
 //    HashMap map = new HashMap();
     map.put(TextAttribute.FONT, PRINT_FONT);
 

@@ -293,7 +293,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
             //                           getStackTrace(t));
             _mainJVM.interpretResult(new ExceptionResult(t.getClass().getName(),
                                                          t.getMessage(),
-                                                         getStackTrace(t)));
+                                                         InterpreterJVM.this.getStackTrace(t)));
           }
           catch (ParseException pe) {
             // A ParseException indicates a syntax error in the input window
@@ -311,7 +311,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
             //                           getStackTrace(t));
             _mainJVM.interpretResult(new ExceptionResult(t.getClass().getName(),
                                                          t.getMessage(),
-                                                         getStackTrace(t)));
+                                                         InterpreterJVM.this.getStackTrace(t)));
           }
         }
         catch (RemoteException re) {
@@ -718,6 +718,16 @@ public class InterpreterJVM extends AbstractSlaveJVM
     catch (RemoteException re) {
       // nothing to do
       _log.logTime("quitFailed: " + re.toString());
+    }
+  }
+  
+  /**
+   * Sets the interpreter to allow access to private members.
+   */
+  public void setPrivateAccessible(boolean allow) {
+    Interpreter active = _activeInterpreter.getInterpreter();
+    if (active instanceof JavaInterpreter) {
+      ((JavaInterpreter)active).setPrivateAccessible(allow);
     }
   }
 

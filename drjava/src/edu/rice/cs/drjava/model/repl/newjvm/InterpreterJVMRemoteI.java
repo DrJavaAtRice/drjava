@@ -129,4 +129,9 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    * Gets the classpath as a string.
    */
   public String getClasspathString() throws RemoteException;
+  
+  /**
+   * Sets whether to allow private access.
+   */
+  public void setPrivateAccessible(boolean allow) throws RemoteException;
 }

@@ -195,4 +195,11 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    * with an interaction (ie. whether an interactionEnded event will be fired)
    */
   protected abstract void _notifyInterpreterChanged(boolean inProgress);
+  
+  /**
+   * Sets whether or not the interpreter should allow access to private members.
+   */
+  public void setPrivateAccessible(boolean allow) {
+    _interpreterControl.setPrivateAccessible(allow);
+  }
 }

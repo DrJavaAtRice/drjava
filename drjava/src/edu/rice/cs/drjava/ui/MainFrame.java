@@ -1433,11 +1433,18 @@ public class MainFrame extends JFrame implements OptionConstants {
       (JSR14_LOCATION, new OptionListener<File>() {
       public void optionChanged(OptionEvent<File> oe) {
         boolean bootClasspathHasv2 = DrJava.bootClasspathHasJSR14v20();
+        boolean bootClasspathHasv24 = DrJava.bootClasspathHasJSR14v24();        
         if (oe.value != FileOption.NULL_FILE) {
           boolean checkForV20 = DrJava.checkForJSR14v20();
-          if (checkForV20 && !bootClasspathHasv2) {
+          boolean checkForV24 = DrJava.checkForJSR14v24();
+          if (checkForV24 && !bootClasspathHasv24) {
             JOptionPane.showMessageDialog(_configFrame,
-                                          "You must restart DrJava to use the JSR-14 v2.x compiler.",
+                                          "You must restart DrJava to use the JSR-14 v2.4 compiler.",
+                                          "JSR14 Warning", JOptionPane.WARNING_MESSAGE);
+          }
+          else if ((checkForV20 && !checkForV24) && (!bootClasspathHasv2 || bootClasspathHasv24)) {
+            JOptionPane.showMessageDialog(_configFrame,
+                                          "You must restart DrJava to use the JSR-14 v2.0/2.2 compiler.",
                                           "JSR14 Warning", JOptionPane.WARNING_MESSAGE);
           }
           else if (!checkForV20 && bootClasspathHasv2) {
@@ -1494,7 +1501,13 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
     });
-
+    
+    config.addOptionListener(OptionConstants.ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {
+      public void optionChanged(OptionEvent<Boolean> oce) {
+        _model.getInteractionsModel().setPrivateAccessible(oce.value.booleanValue());
+      }
+    });
+    
     // Initialize breakpoint highlights hashtable, for easy removal of highlights
     _breakpointHighlights = new gj.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
 

@@ -130,7 +130,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
   public void testCompileAllDifferentSourceRoots()
     throws BadLocationException, IOException, InterruptedException
   {
-    System.out.println("testCompileAllDifferentSourceRoots()");
+//    System.out.println("testCompileAllDifferentSourceRoots()");
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
     aDir.mkdir();
@@ -173,7 +173,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
   public void testCompileClasspathOKDefaultPackage()
     throws BadLocationException, IOException, InterruptedException
   {
-    System.out.println("testCompileClasspathOKDefaultPackage()");
+//    System.out.println("testCompileClasspathOKDefaultPackage()");
     // Create/compile foo, assuming it works
     OpenDefinitionsDocument doc1 = setupDocument(FOO_PACKAGE_AS_PART_OF_FIELD);
     final File fooFile = new File(_tempDir, "DrJavaTestFoo.java");
@@ -218,7 +218,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
   public void testCompileClasspathOKDifferentPackages()
     throws BadLocationException, IOException, InterruptedException
   {
-    System.out.println("testCompileClasspathOKDifferentPackages()");
+//    System.out.println("testCompileClasspathOKDifferentPackages()");
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
     aDir.mkdir();
@@ -269,7 +269,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
   public void testCompileReferenceToNonPublicClass() 
     throws BadLocationException, IOException, InterruptedException
   {
-    System.out.println("testCompileReferenceToNonPublicClass()");
+//    System.out.println("testCompileReferenceToNonPublicClass()");
     OpenDefinitionsDocument doc = setupDocument(FOO_NON_PUBLIC_CLASS_TEXT);
     OpenDefinitionsDocument doc2 = setupDocument(FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT);
     final File file = tempFile();
@@ -310,7 +310,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
   public void testCompileWithJavaAssert()
     throws BadLocationException, IOException, InterruptedException
   {
-    System.out.println("testCompileWithJavaAssert()");
+//    System.out.println("testCompileWithJavaAssert()");
     // No assert support by default (or in 1.3)
     OpenDefinitionsDocument doc = setupDocument(FOO_WITH_ASSERT);
     final File file = tempFile();
@@ -363,7 +363,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
   public void testCompileWithGenerics()
     throws BadLocationException, IOException, InterruptedException
   {
-    System.out.println("testCompileWithGenerics()");
+//    System.out.println("testCompileWithGenerics()");
     // Only run this test if using a compiler with generics
     if (_isGenericCompiler()) {
       

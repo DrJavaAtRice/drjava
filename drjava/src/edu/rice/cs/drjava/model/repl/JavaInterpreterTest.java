@@ -47,6 +47,8 @@ package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.OptionListener;
+import edu.rice.cs.drjava.config.OptionEvent;
 
 import  junit.framework.*;
 import  java.util.Vector;
@@ -519,6 +521,12 @@ public final class JavaInterpreterTest extends TestCase {
    * given the value of the ALLOW_PRIVATE_ACCESS configuration option.
    */
   public void testAllowPrivateAccess() throws ExceptionReturnedException {
+    // The real option listener is on MainFrame, add one here.
+    DrJava.getConfig().addOptionListener(OptionConstants.ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {
+      public void optionChanged(OptionEvent<Boolean> oce) {
+        _interpreter.setPrivateAccessible(oce.value.booleanValue());
+      }
+    });
     DrJava.getConfig().setSetting(OptionConstants.ALLOW_PRIVATE_ACCESS, new Boolean(false));
     try {
       _interpreter.interpret("class A { private int i = 0; }");
