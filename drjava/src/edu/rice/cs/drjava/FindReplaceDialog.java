@@ -20,6 +20,8 @@ import  javax.swing.event.DocumentListener;
 import  javax.swing.event.DocumentEvent;
 import  javax.swing.event.CaretListener;
 import  javax.swing.event.CaretEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
 import  java.beans.PropertyChangeListener;
 import  java.beans.PropertyChangeEvent;
 import javax.swing.text.BadLocationException;
@@ -134,8 +136,7 @@ class FindReplaceDialog extends JDialog {
 
   private Action _closeAction = new AbstractAction("Close") {
     public void actionPerformed(ActionEvent e) {
-      _defPane.getHighlighter().removeAllHighlights();
-      setVisible(false);
+      _close();
     }
   };
   
@@ -148,6 +149,18 @@ class FindReplaceDialog extends JDialog {
   public FindReplaceDialog(Frame frame, DefinitionsPane defPane) {
     super(frame);
     _defPane = defPane;
+    
+    addKeyListener(new KeyListener() {
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+          _close();
+        }
+      }
+      public void keyReleased(KeyEvent e) {
+      }
+      public void keyTyped(KeyEvent e) {
+      }      
+    });
     setTitle("Find/Replace");
     final String msgString1 = "Find:";
     final String msgString2 = "Replace:";
@@ -224,6 +237,7 @@ class FindReplaceDialog extends JDialog {
     // given Swing's tendency to muck things up.
     setBounds(100, 200, 520, 300);
     setSize(520, 200);
+    _findField.grabFocus();
   }
   
   public void setMachine(FindReplaceMachine machine) {
@@ -274,6 +288,20 @@ class FindReplaceDialog extends JDialog {
     }
   }
 
+ 
+  private void _close() {
+    if (_machine.isOnMatch()) {
+      _defPane.select(_machine.getCurrentOffset() - 
+                      _machine.getFindWord().length(),
+                      _machine.getCurrentOffset());
+    }
+    else {
+      _defPane.setCaretPosition(_machine.getCurrentOffset());
+    }
+    _defPane.grabFocus();
+    _defPane.getHighlighter().removeAllHighlights();
+    setVisible(false);
+  }  
   
   private ContinueCommand CONFIRM_CONTINUE = new ContinueCommand() {
     public boolean shouldContinue() {
