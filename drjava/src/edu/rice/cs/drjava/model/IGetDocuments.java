@@ -61,8 +61,8 @@ public interface IGetDocuments {
    * @return OpenDefinitionsDocument containing file
    */
   public OpenDefinitionsDocument getDocumentForFile(File file)
-    throws IOException, OperationCanceledException;
-  
+    throws IOException; //, OperationCanceledException;
+
   /**
    * Determines whether the named file is already open, or if it must be loaded.
    * Clients which want to avoid visual side-effects should check this before
@@ -71,15 +71,16 @@ public interface IGetDocuments {
    * @return true if the document is already open in this IGetDocument
    */
   public boolean isAlreadyOpen(File file);
-  
+
   /**
    * Returns a collection of all documents currently open for editing.
    * This is equivalent to the results of getDocumentForFile for the set
-   * of all files for which isAlreadyOpen returns true.
+   * of all files for which isAlreadyOpen returns true.  The order of
+   * documents is the same as in the display of documents in the view.
    * @return a random-access List of the open definitions documents.
    */
   public List<OpenDefinitionsDocument> getDefinitionsDocuments();
-  
+
   /**
    * Checks if any open definitions documents have been modified
    * since last being saved.

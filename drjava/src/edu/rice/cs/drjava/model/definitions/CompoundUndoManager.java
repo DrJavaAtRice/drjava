@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -45,7 +45,7 @@ import java.util.LinkedList;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
 /**
- * Extended UndoManager with increased functionality.  Can handle aggregating 
+ * Extended UndoManager with increased functionality.  Can handle aggregating
  * multiple edits into one for the purposes of undoing and redoing.
  * Is used to be able to call editToBeUndone and editToBeRedone since they
  * are protected methods in UndoManager.
@@ -56,12 +56,12 @@ public class CompoundUndoManager extends UndoManager {
    * The compound edits we are storing.
    */
   private LinkedList<CompoundEdit> _compoundEdits;
-  
+
   /**
    * The keys for the CompoundEdits we are storing.
    */
   private LinkedList<Integer> _keys;
-    
+
   /**
    * The next key to use for nested CompoundEdits.
    */
@@ -76,7 +76,7 @@ public class CompoundUndoManager extends UndoManager {
    * keeps track of the listeners to this undo manager
    */
   private final GlobalEventNotifier _notifier;
-  
+
   /**
    * Default constructor.
    */
@@ -104,7 +104,7 @@ public class CompoundUndoManager extends UndoManager {
     }
     return _keys.get(0).intValue();
   }
-  
+
   /**
    * Ends a compound edit.
    * @param key the key that was returned by startCompoundEdit()
@@ -132,7 +132,7 @@ public class CompoundUndoManager extends UndoManager {
       throw new IllegalStateException("Improperly nested compound edits.");
     }
   }
-  
+
   /**
    * Gets the next undo.
    * @return the next undo
@@ -140,7 +140,7 @@ public class CompoundUndoManager extends UndoManager {
   public UndoableEdit getNextUndo() {
     return editToBeUndone();
   }
-  
+
   /**
    * Gets the next redo.
    * @return the next redo
@@ -148,7 +148,7 @@ public class CompoundUndoManager extends UndoManager {
   public UndoableEdit getNextRedo() {
     return editToBeRedone();
   }
-  
+
   /**
    * Adds an edit.  Checks whether or not the current edit is a compound edit.
    * @param e the edit to be added
@@ -164,7 +164,7 @@ public class CompoundUndoManager extends UndoManager {
       return result;
     }
   }
-  
+
   /**
    * Returns whether or not a compound edit is in progress.
    * @return true iff in progress
@@ -172,7 +172,7 @@ public class CompoundUndoManager extends UndoManager {
   private boolean _compoundEditInProgress() {
     return !_compoundEdits.isEmpty();
   }
-  
+
   /**
    * returns true when a compound edit is in progress,
    * or when there are valid stored undoable edits
@@ -181,7 +181,7 @@ public class CompoundUndoManager extends UndoManager {
   public boolean canUndo() {
     return _compoundEditInProgress() || super.canUndo();
   }
-  
+
   /**
    * returns the presentation name for this undo,
    * or delegates to super if none is available
@@ -195,7 +195,7 @@ public class CompoundUndoManager extends UndoManager {
       return super.getUndoPresentationName();
     }
   }
-  
+
   /**
    * overrides the inherited undo method so that an exception will
    * be thrown if undo is attempted while in the compound undo state
@@ -208,9 +208,10 @@ public class CompoundUndoManager extends UndoManager {
       super.undo();
     }
   }
-  
+
   /**
    * Overload for undo which allows the initiator of a CompoundEdit to abondon it.
+   * XXX: This has not been properly tested and very possibly may not work.
    * @param key the key returned by the last call to startCompoundEdit
    */
   public void undo(int key) {
@@ -218,13 +219,13 @@ public class CompoundUndoManager extends UndoManager {
       CompoundEdit compoundEdit = _compoundEdits.get(0);
       _compoundEdits.remove(0);
       _keys.remove(0);
-      
+
       compoundEdit.end();
       compoundEdit.undo();
       compoundEdit.die();
     }
   }
-  
+
   /**
    * overrides the inherited redo method so that an exception will
    * be thrown if redo is attempted while in the compound undo state
@@ -237,7 +238,7 @@ public class CompoundUndoManager extends UndoManager {
       super.redo();
     }
   }
-  
+
   /**
    * helper method to notify the view that an undoable edit has occured
    */

@@ -73,12 +73,12 @@ public class PreviewFrame extends JFrame {
     };
 
   private final PageChangerUpdater _pageChanger;
-  
+
   private static abstract class PageChangerUpdater {
     abstract void update(int pageNumber) throws Exception;
     abstract JComponent getComponent();
   }
-  
+
   private class JTextFieldChanger extends PageChangerUpdater {
     private final JTextField textfield;
     private JTextFieldChanger(JTextField tf) {
@@ -89,12 +89,12 @@ public class PreviewFrame extends JFrame {
     }
     JComponent getComponent() { return textfield; }
   }
-  
+
   private class JSpinnerChanger extends PageChangerUpdater {
     private final JComponent spinner;
     private final Method setValueMethod;
     private final Object[] args = new Object[1];
-    private JSpinnerChanger(Class spinnerClass, JComponent spinnerObj) 
+    private JSpinnerChanger(Class spinnerClass, JComponent spinnerObj)
       throws Exception {
       spinner = spinnerObj;
       setValueMethod = spinnerClass.getMethod("setValue", new Class[] {
@@ -107,7 +107,7 @@ public class PreviewFrame extends JFrame {
     }
     JComponent getComponent() { return spinner; }
   }
-  
+
   // Print Preview Dimensions
   private int PREVIEW_WIDTH;
   private int PREVIEW_HEIGHT;
@@ -174,7 +174,7 @@ public class PreviewFrame extends JFrame {
 
     _print = _document.getPageable();
     _pageChanger = createPageChanger();
-    
+
     _setUpActions();
     _setUpToolBar();
     _setUpConstants();
@@ -182,7 +182,7 @@ public class PreviewFrame extends JFrame {
     _pagePreview = new PagePreview(PREVIEW_PAGE_WIDTH, PREVIEW_PAGE_HEIGHT);
     _pageNumber = 0;
 
-    
+
     PagePreviewContainer ppc = new PagePreviewContainer();
     ppc.add(_pagePreview);
     JPanel tbCont = new JPanel(new BorderLayout());
@@ -194,7 +194,7 @@ public class PreviewFrame extends JFrame {
     cp.setBorder(new EmptyBorder(5,5,5,5));
     cp.add(tbCont, BorderLayout.NORTH);
     cp.add(ppc, BorderLayout.SOUTH);
-    
+
     addWindowListener(_windowCloseListener);
 
     showPage();
@@ -291,7 +291,7 @@ public class PreviewFrame extends JFrame {
     _prevPageAction.putValue(Action.SMALL_ICON, _getIcon("Back16.gif"));
     _prevPageAction.putValue(Action.SHORT_DESCRIPTION, "Previous Page");
   }
-  
+
   private PageChangerUpdater createPageChanger() {
     //_pageTextField.setAction(_goToPageAction);
     // _goToPageAction.putValue(Action.SHORT_DESCRIPTION, "Goto Page");
@@ -331,7 +331,7 @@ public class PreviewFrame extends JFrame {
         public void actionPerformed(ActionEvent ae) {
           try {
             int pageToGoTo = Integer.parseInt(tf.getText()) - 1;
-            
+
             if ((pageToGoTo < 0) || (pageToGoTo >= _print.getNumberOfPages())) {
               _updateActions();
             } else {
@@ -345,14 +345,14 @@ public class PreviewFrame extends JFrame {
       return new JTextFieldChanger(tf);
     }
   }
-  
+
   private static Object callMethod(Object rec, Class c, String name,
                                    Class[] ca,
                                    Object[] args) throws Exception {
     Method m = c.getMethod(name,ca);
     return m.invoke(rec,args);
   }
-  
+
   /**
    * Mirrored from MainFrame, will later use the same
    * Icon access code.
@@ -379,17 +379,17 @@ public class PreviewFrame extends JFrame {
     _toolBar.add(printButton);
     _toolBar.addSeparator();
     _toolBar.add(_closeAction);
-    
+
     // Horizontal Gap
     _toolBar.add(Box.createHorizontalGlue());
-  
+
     // Navigation components
     _toolBar.add(_prevPageAction);
     _toolBar.add(_nextPageAction);
     _toolBar.addSeparator();
 
     JLabel gotop = new JLabel("Page");
-    
+
     JLabel of = new JLabel(" of " + _print.getNumberOfPages());
 
     _toolBar.add(gotop);
@@ -402,7 +402,7 @@ public class PreviewFrame extends JFrame {
     c.setMinimumSize(d);
     c.setToolTipText("Goto Page");
     _toolBar.add(c);
-    _toolBar.add(of);   
+    _toolBar.add(of);
   }
 
   /**

@@ -52,8 +52,10 @@ import java.io.File;
 
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.OptionListener;
+import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.DefaultGlobalModel;
 import edu.rice.cs.drjava.model.FileMovedException;
@@ -124,7 +126,12 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   private File _file;
   private long _timestamp;
 
+  /**
+   * The instance of the indent decision tree used by Definitions documents.
+   * TODO: should this be static?  It was before - with a static initializer.
+   */
   private final Indenter _indenter;
+
   private CompoundUndoManager _undoManager;
 
   /**
@@ -132,7 +139,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * Must be cleared every time document is changed.  Use by calling
    * _checkCache and _storeInCache.
    */
-  private final Hashtable<String, Object> _helperCache;
+  private final Hashtable<String, Object> _helperCache =
+    new Hashtable<String, Object>();
 
   /**
    * Keeps track of the order of elements added to the helper method cache,
@@ -141,7 +149,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * what the exact pattern of helper method reuse is-- this should be
    * sufficient without significantly decreasing the effectiveness of the cache.
    */
-  private final Vector<String> _helperCacheHistory;
+  private final Vector<String> _helperCacheHistory = new Vector<String>();
 
   /**
    * Whether anything is stored in the cache.  (Prevents clearing the table
@@ -172,15 +180,51 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   private final GlobalEventNotifier _notifier;
 
   /**
-   * Constructor.
+   * Convenience constructor for using a custom indenter.
+   * @param indenter custom indenter class
+   * @param notifier used by CompoundUndoManager to announce undoable edits
    */
-  public DefinitionsDocument(GlobalEventNotifier notifier) {
-    this(DefaultGlobalModel.INDENTER, notifier);
+  public DefinitionsDocument(Indenter indenter, GlobalEventNotifier notifier) {
+    super();
+    _notifier = notifier;
+    _indenter = indenter;
+    _init();
   }
 
-  public DefinitionsDocument(Indenter i, GlobalEventNotifier notifier) {
+  /**
+   * Main constructor.  This has an obnoxious dependency on
+   * GlobalEventNotifier, which is passed through here only for a single
+   * usage in CompoundUndoManager.  TODO: find a better way.
+   * @param notifier used by CompoundUndoManager to announce undoable edits
+   */
+  public DefinitionsDocument(GlobalEventNotifier notifier) {
     super();
-    _indenter = i;
+
+    _notifier = notifier;
+
+    // Create the indenter from the config values
+    int ind = DrJava.getConfig().getSetting(INDENT_LEVEL).intValue();
+    _indenter = new Indenter(ind);
+    DrJava.getConfig().addOptionListener(INDENT_LEVEL,
+                                         new OptionListener<Integer>() {
+      public void optionChanged(OptionEvent<Integer> oce) {
+        _indenter.buildTree(oce.value.intValue());
+      }
+    });
+    DrJava.getConfig().addOptionListener(AUTO_CLOSE_COMMENTS,
+                                         new OptionListener<Boolean>() {
+      public void optionChanged(OptionEvent<Boolean> oce) {
+        _indenter.buildTree(DrJava.getConfig().getSetting(INDENT_LEVEL).intValue());
+      }
+    });
+
+    _init();
+  }
+
+  /**
+   * Private common helper for constructors.
+   */
+  private void _init() {
     _file = null;
     _cachedLocation = 0;
     _cachedLineNum = 1;
@@ -188,10 +232,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     _cachedNextLineLoc = -1;
     _classFileInSync = false;
     _classFile = null;
-    _helperCache = new Hashtable<String, Object>();
-    _helperCacheHistory = new Vector<String>();
     _cacheInUse = false;
-    _notifier = notifier;
     resetUndoManager();
   }
 

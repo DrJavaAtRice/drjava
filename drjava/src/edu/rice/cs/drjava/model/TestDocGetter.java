@@ -90,7 +90,7 @@ public class TestDocGetter extends DummyGetDocuments {
   }
 
   public OpenDefinitionsDocument getDocumentForFile(File file)
-    throws IOException, OperationCanceledException {
+    throws IOException {
     // Try to find the key in docs.
     if (docs.containsKey(file)) {
       return docs.get(file);

@@ -157,7 +157,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JavadocErrorPanel _javadocErrorPanel;
   private FindReplaceDialog _findReplace;
   private LinkedList<TabbedPanel> _tabs;
-  
+
   private Component _lastFocusOwner;
 
   /**
@@ -775,14 +775,14 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Switches to next document. */
   private Action _switchToNextAction = new AbstractAction("Next Document") {
     public void actionPerformed(ActionEvent ae) {
-      _model.setNextActiveDocument();
+      _model.setActiveNextDocument();
     }
   };
 
   /** Switches to previous document. */
   private Action _switchToPrevAction = new AbstractAction("Previous Document") {
     public void actionPerformed(ActionEvent ae) {
-      _model.setPreviousActiveDocument();
+      _model.setActivePreviousDocument();
     }
   };
 
@@ -817,7 +817,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     showTab(newC);
     // need this when defPane is switched to
-    newC.requestFocus();  
+    newC.requestFocus();
   }
 
   /**
@@ -1206,7 +1206,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpStatusBar();
 
     // create our model
-    _model = new SingleDisplayModel();
+    _model = new DefaultSingleDisplayModel();
 
     // Ensure that DefinitionsPane uses the correct EditorKit!
     //   This has to be stored as a static field on DefinitionsPane because
@@ -1477,9 +1477,12 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Releases any resources this frame is using to prepare it to
    * be garbage collected.  Should only be called from tests.
+   * This is implementation specific and may not be needed.
    */
   public void dispose() {
-    _model.dispose();
+    // centgraf: I justify casting here because it is implementation-specific
+    //           and doc'ed as such.
+    ((DefaultSingleDisplayModel) _model).dispose();
     super.dispose();
   }
 
@@ -3198,7 +3201,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _tabs.addLast(_junitErrorPanel);
     _tabs.addLast(_javadocErrorPanel);
     _tabs.addLast(_findReplace);
-    
+
     _interactionsPane.addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) {
         _lastFocusOwner = _interactionsContainer;
@@ -3243,9 +3246,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Configures the component used for selecting active documents.
    * TODO: Does the ListModel here need to write through to the model?
+   *       Answer: no! The cast here is a hack until we refactor DGM.
    */
   private void _setUpDocumentSelector() {
-    _docList = new JList(_model.getDefinitionsDocs());
+    _docList = new JList
+      (((DefaultSingleDisplayModel) _model).getDefinitionsDocs());
     _docList.setSelectionModel(_model.getDocumentSelectionModel());
     _docList.setCellRenderer(new DocCellRenderer());
 
@@ -3329,7 +3334,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // add a listener to update line and column.
     pane.addCaretListener(_posListener);
-    
+
     // add a focus listener to the pane.
     pane.addFocusListener(new LastFocusListener());
 
@@ -3817,7 +3822,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Listens to events from the debugger.
    */
   private class UIDebugListener implements DebugListener {
-    
+
     // This field is used by threadLocationUpdated. We want to
     // call centerViewOnLine the second time setSize is called
     // on _currentDefPane if it is a new definitions pane. This
@@ -3871,7 +3876,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           // for a call to setSize.
           //_firstCallFromSetSize = true;
           ActionListener setSizeListener = new ActionListener() {
-            public void actionPerformed(ActionEvent ae) { 
+            public void actionPerformed(ActionEvent ae) {
 //              if (_firstCallFromSetSize) {
 //                _firstCallFromSetSize = false;
 //              }
@@ -3881,11 +3886,11 @@ public class MainFrame extends JFrame implements OptionConstants {
             }
           };
           _currentDefPane.addSetSizeListener(setSizeListener);
-          
+
           if (!_model.getActiveDocument().equals(doc)) {
             _model.setActiveDocument(doc);
           }
-          
+
           // this block occurs if the documents is already open and as such
           // has a positive size
           if (_currentDefPane.getSize().getWidth() > 0 &&
@@ -4156,7 +4161,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _currentDefPane.getUndoAction().updateUndoState();
       _currentDefPane.getRedoAction().updateRedoState();
     }
-    
+
     // NOTE: Not necessarily called from event-dispatching thread...
     //  Should figure out how to deal with invokeLater here.
     public void activeDocumentChanged(final OpenDefinitionsDocument active) {
@@ -4166,26 +4171,26 @@ public class MainFrame extends JFrame implements OptionConstants {
       // public void run() {
       Runnable command = new Runnable() {
         public void run(){
-          
+
           _switchDefScrollPane();
-          
+
           boolean isModified = active.isModifiedSinceSave();
           boolean canCompile = (!isModified && !active.isUntitled());
           _saveAction.setEnabled(!canCompile);
           _revertAction.setEnabled(!active.isUntitled());
-          
+
           // Update error highlights
           int pos = _currentDefPane.getCaretPosition();
           _currentDefPane.getErrorCaretListener().updateHighlight(pos);
-          
+
           // Update FileChoosers' directory
           _setCurrentDirectory(active);
-          
+
           // Update title and position
           updateFileTitle();
           _currentDefPane.requestFocus();
           _posListener.updateLocation();
-          
+
           // Check if modified (but only if we're not closing all files)
           if (!_model.isClosingAllFiles()) {
             try {
@@ -4198,7 +4203,7 @@ public class MainFrame extends JFrame implements OptionConstants {
               _showIOError(e);
             }
           }
-          
+
           // Change Find/Replace to the new defpane
           if (_findReplace.isDisplayed()) {
             _findReplace.stopListening();
@@ -4230,7 +4235,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         command.run();
       }
     }
-    
+
     public void interactionStarted() {
       _disableInteractionsPane();
       _runAction.setEnabled(false);
@@ -5036,7 +5041,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _recentFileManager.numberItems();
     }
   }
-  
+
   private class LastFocusListener extends FocusAdapter {
     public void focusGained(FocusEvent e) {
       _lastFocusOwner = e.getComponent();

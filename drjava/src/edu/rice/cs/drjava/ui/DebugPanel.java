@@ -70,12 +70,12 @@ import edu.rice.cs.drjava.config.*;
  * @version $Id$
  */
 public class DebugPanel extends JPanel implements OptionConstants {
-  
+
   private JSplitPane _tabsPane;
   private JTabbedPane _leftPane;
   private JTabbedPane _rightPane;
   private JPanel _tabsAndStatusPane;
-  
+
   private JTable _watchTable;
   private DefaultMutableTreeNode _breakpointRootNode;
   private DefaultTreeModel _bpTreeModel;
@@ -83,18 +83,18 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private JTable _stackTable;
   private JTable _threadTable;
   private long _currentThreadID;
-  
+
   // private JPopupMenu _threadRunningPopupMenu;
   private JPopupMenu _threadSuspendedPopupMenu;
   private JPopupMenu _stackPopupMenu;
   private JPopupMenu _breakpointPopupMenu;
   private JPopupMenu _watchPopupMenu;
   private DebugThreadData _threadInPopup;
-  
+
   private final SingleDisplayModel _model;
   private final MainFrame _frame;
   private final Debugger _debugger;
-  
+
   private JPanel _buttonPanel;
   private JButton _closeButton;
   private JButton _resumeButton;
@@ -102,23 +102,23 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private JButton _stepOverButton;
   private JButton _stepOutButton;
   private JLabel _statusBar;
-  
+
   private Vector<DebugWatchData> _watches;
   private Vector<DebugThreadData> _threads;
   private Vector<DebugStackData> _stackFrames;
-  
+
   /**
    * Constructs a new panel to display debugging information when the
    * Debugger is active.
    */
   public DebugPanel(MainFrame frame) throws DebugException {
-    
+
     this.setLayout(new BorderLayout());
-    
+
     _frame = frame;
     _model = frame.getModel();
     _debugger = _model.getDebugger();
-    
+
     _watches = new Vector<DebugWatchData>();
     _threads = new Vector<DebugThreadData>();
     _stackFrames = new Vector<DebugStackData>();
@@ -126,34 +126,34 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _rightPane = new JTabbedPane();
 
     _setupTabPanes();
-    
+
     _tabsPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, _leftPane, _rightPane);
     _tabsPane.setOneTouchExpandable(true);
     _tabsPane.setDividerLocation((int)(_frame.getWidth()/2.5));
-    
+
     _tabsAndStatusPane = new JPanel(new BorderLayout());
     _tabsAndStatusPane.add(_tabsPane, BorderLayout.CENTER);
-    
+
     _statusBar = new JLabel("");
-    _statusBar.setForeground(Color.blue.darker());    
-    
+    _statusBar.setForeground(Color.blue.darker());
+
     _tabsAndStatusPane.add(_statusBar, BorderLayout.SOUTH);
-    
+
     this.add(_tabsAndStatusPane, BorderLayout.CENTER);
-    
+
     _buttonPanel = new JPanel(new BorderLayout());
     _setupButtonPanel();
     this.add(_buttonPanel, BorderLayout.EAST);
-    
+
     _debugger.addListener(new DebugPanelListener());
-    
+
     // Setup the color listeners.
     _setColors(_watchTable);
     _setColors(_bpTree);
     _setColors(_stackTable);
     _setColors(_threadTable);
   }
-  
+
   /**
    * Quick helper for setting up color listeners.
    */
@@ -161,7 +161,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     new ForegroundColorListener(c);
     new BackgroundColorListener(c);
   }
-  
+
   /**
    * Causes all display tables to update their information from the debug manager.
    */
@@ -194,16 +194,16 @@ public class DebugPanel extends JPanel implements OptionConstants {
     ((AbstractTableModel)_stackTable.getModel()).fireTableDataChanged();
     ((AbstractTableModel)_threadTable.getModel()).fireTableDataChanged();
   }
-  
-  
+
+
   /**
    * Creates the tabbed panes in the debug panel.
    */
   public void _setupTabPanes() {
-    
+
     // Watches table
     _initWatchTable();
-    
+
     // Breakpoint tree
     _breakpointRootNode = new DefaultMutableTreeNode("Breakpoints");
     _bpTreeModel = new DefaultTreeModel(_breakpointRootNode);
@@ -217,15 +217,15 @@ public class DebugPanel extends JPanel implements OptionConstants {
     // Breakpoint tree cell renderer
     DefaultTreeCellRenderer dtcr = new BreakPointRenderer();
     _bpTree.setCellRenderer(dtcr);
-    
+
     _leftPane.addTab("Breakpoints", new JScrollPane(_bpTree));
-    
+
     // Stack table
     _stackTable = new JTable( new StackTableModel());
     _stackTable.addMouseListener(new StackMouseAdapter());
 
     _rightPane.addTab("Stack", new JScrollPane(_stackTable));
-    
+
     // Thread table
     _initThreadTable();
 
@@ -238,7 +238,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
     _initPopup();
   }
-  
+
   private void _initWatchTable() {
     _watchTable = new JTable( new WatchTableModel());
     _watchTable.setDefaultEditor(_watchTable.getColumnClass(0),
@@ -248,7 +248,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
     _leftPane.addTab("Watches", new JScrollPane(_watchTable));
   }
-  
+
   private void _initThreadTable() {
     _threadTable = new JTable(new ThreadTableModel());
     _threadTable.addMouseListener(new ThreadMouseAdapter());
@@ -259,7 +259,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     nameColumn = _threadTable.getColumnModel().getColumn(0);
     statusColumn = _threadTable.getColumnModel().getColumn(1);
     nameColumn.setPreferredWidth(2*statusColumn.getPreferredWidth());
-    
+
     // Adds a cell renderer to the threads table
     _currentThreadID = 0;
     TableCellRenderer threadTableRenderer = new DefaultTableCellRenderer() {
@@ -267,12 +267,12 @@ public class DebugPanel extends JPanel implements OptionConstants {
                                                      boolean hasFocus, int row, int column) {
         Component renderer =
           super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        
+
         _setThreadCellFont(row);
-        
+
         return renderer;
       }
-      
+
       /**
        * Sets the font for a cell in the thread table.
        * @param row the current row
@@ -288,18 +288,18 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _threadTable.getColumnModel().getColumn(0).setCellRenderer(threadTableRenderer);
     _threadTable.getColumnModel().getColumn(1).setCellRenderer(threadTableRenderer);
   }
-  
+
   /**
    * Adds config color support to DefaultTreeCellEditor.
    */
   static class BreakPointRenderer extends DefaultTreeCellRenderer {
-    
+
     private BreakPointRenderer() {
       setLeafIcon(null);
       setOpenIcon(null);
       setClosedIcon(null);
     }
-    
+
     /**
      * Overrides the default renderer component to use proper coloring.
      */
@@ -308,25 +308,25 @@ public class DebugPanel extends JPanel implements OptionConstants {
          boolean leaf, int row, boolean hasFocus) {
       Component renderer = super.getTreeCellRendererComponent
         (tree, value, selected, expanded, leaf, row, hasFocus);
-      
+
       if (renderer instanceof JComponent) {
         ((JComponent) renderer).setOpaque(true);
       }
-      
+
       _setColors(renderer);
       return renderer;
     }
   }
-  
+
   /**
    * Adds config color support to DefaultCellEditor.
    */
   class WatchEditor extends DefaultCellEditor {
-    
+
     WatchEditor() {
       super(new JTextField());
     }
-    
+
     /**
      * Overrides the default editor component to use proper coloring.
      */
@@ -338,12 +338,12 @@ public class DebugPanel extends JPanel implements OptionConstants {
       return editor;
     }
   }
-  
+
   /**
    * Adds config color support to DefaultTableCellRenderer.
    */
   class WatchRenderer extends DefaultTableCellRenderer {
-    
+
     /**
      * Overrides the default rederer component to use proper coloring.
      */
@@ -356,7 +356,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       _setWatchCellFont(row);
       return renderer;
     }
-  
+
     /**
      * Sets the font for a cell in the watch table.
      * @param row the current row
@@ -371,14 +371,14 @@ public class DebugPanel extends JPanel implements OptionConstants {
       }
     }
   }
-  
+
   /**
    * A table for displaying the watched variables and fields.
    */
   public class WatchTableModel extends AbstractTableModel {
-    
+
     private String[] _columnNames = {"Name", "Value", "Type"};
-    
+
     public String getColumnName(int col) {
       return _columnNames[col];
     }
@@ -430,14 +430,14 @@ public class DebugPanel extends JPanel implements OptionConstants {
       }
     }
   }
-  
+
   /**
    * A table for displaying the current stack trace.
    */
   public class StackTableModel extends AbstractTableModel {
-    
+
     private String[] _columnNames = {"Method", "Line"};  // Do we need #?
-    
+
     public String getColumnName(int col) {
       return _columnNames[col];
     }
@@ -448,7 +448,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       return _stackFrames.size();
     }
     public int getColumnCount() { return _columnNames.length; }
-    
+
     public Object getValueAt(int row, int col) {
       DebugStackData frame = _stackFrames.get(row);
       switch(col) {
@@ -461,29 +461,29 @@ public class DebugPanel extends JPanel implements OptionConstants {
       return false;
     }
   }
-  
+
   /**
    * A table for displaying all current threads.
    */
   public class ThreadTableModel extends AbstractTableModel {
-    
+
     private String[] _columnNames = {"Name", "Status"};
-    
+
     public String getColumnName(int col) {
       return _columnNames[col];
     }
-    
+
     public int getRowCount() {
       if (_threads == null) {
         return 0;
       }
       return _threads.size();
     }
-    
+
     public int getColumnCount() {
       return _columnNames.length;
     }
-    
+
     public Object getValueAt(int row, int col) {
       DebugThreadData threadData  = _threads.get(row);
       switch(col) {
@@ -491,14 +491,14 @@ public class DebugPanel extends JPanel implements OptionConstants {
         case 1: return threadData.getStatus();
         default: return null;
       }
-      
+
     }
 
     public boolean isCellEditable(int row, int col) {
       return false;
     }
   }
-  
+
   /**
    * Creates the buttons for controlling the debugger.
    */
@@ -506,7 +506,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     JPanel mainButtons = new JPanel();
     JPanel closeButtonPanel = new JPanel(new BorderLayout());
     mainButtons.setLayout( new GridLayout(0,1));
-    
+
     Action resumeAction = new AbstractAction("Resume") {
       public void actionPerformed(ActionEvent ae) {
         try {
@@ -518,37 +518,37 @@ public class DebugPanel extends JPanel implements OptionConstants {
       }
     };
     _resumeButton = new JButton(resumeAction);
-    
+
     Action stepIntoAction = new AbstractAction("Step Into") {
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerStep(Debugger.STEP_INTO);
       }
     };
     _stepIntoButton = new JButton(stepIntoAction);
-    
+
     Action stepOverAction = new AbstractAction("Step Over") {
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerStep(Debugger.STEP_OVER);
       }
     };
     _stepOverButton = new JButton(stepOverAction);
-    
+
     Action stepOutAction = new AbstractAction( "Step Out" ) {
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerStep(Debugger.STEP_OUT);
       }
     };
     _stepOutButton = new JButton(stepOutAction);
-    
+
     ActionListener closeListener =
       new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerToggle();
       }
     };
-    
+
     _closeButton = new CommonCloseButton(closeListener);
-    
+
     closeButtonPanel.add(_closeButton, BorderLayout.NORTH);
     mainButtons.add(_resumeButton);
     mainButtons.add(_stepIntoButton);
@@ -558,7 +558,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _buttonPanel.add(mainButtons, BorderLayout.CENTER);
     _buttonPanel.add(closeButtonPanel, BorderLayout.EAST);
   }
-  
+
   /**
    * Initializes the pop-up menu that is revealed when the user
    * right-clicks on a row in the thread table or stack table.
@@ -602,7 +602,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
         }
       }
     });
-    
+
     _stackPopupMenu = new JPopupMenu("Stack Selection");
     _stackPopupMenu.add(new AbstractAction("Scroll to Source") {
       public void actionPerformed(ActionEvent e) {
@@ -742,12 +742,12 @@ public class DebugPanel extends JPanel implements OptionConstants {
      * Called when debugger mode has been enabled.
      */
     public void debuggerStarted() {}
-    
+
     /**
      * Called when debugger mode has been disabled.
      */
     public void debuggerShutdown() {}
-    
+
     /**
      * Called when the given line is reached by the current thread in the
      * debugger, to request that the line be displayed.
@@ -756,7 +756,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
      * @param shouldHighlight true iff the line should be highlighted.
      */
     public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) {}
-    
+
     /**
      * Called when a breakpoint is set in a document.
      * Adds the breakpoint to the tree of breakpoints.
@@ -767,29 +767,29 @@ public class DebugPanel extends JPanel implements OptionConstants {
       Runnable doCommand = new Runnable() {
         public void run() {
           DefaultMutableTreeNode bpDocNode = new DefaultMutableTreeNode(bp.getClassName());
-          
+
           // Look for matching document node
           Enumeration documents = _breakpointRootNode.children();
           while (documents.hasMoreElements()) {
             DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
             if (doc.getUserObject().equals(bpDocNode.getUserObject())) {
-              
+
               // Create a new breakpoint in this node
               //Sort breakpoints by line number.
               Enumeration lineNumbers = doc.children();
               while (lineNumbers.hasMoreElements()) {
                 DefaultMutableTreeNode lineNumber = (DefaultMutableTreeNode)lineNumbers.nextElement();
-                
+
                 //if line number of indexed breakpoint is less than new breakpoint, continue
                 if (((Integer)lineNumber.getUserObject()).intValue() > bp.getLineNumber()) {
-                  
+
                   //else, add to the list
                   DefaultMutableTreeNode newBreakpoint =
                     new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
                   _bpTreeModel.insertNodeInto(newBreakpoint,
                                               doc,
                                               doc.getIndex(lineNumber));
-                  
+
                   // Make sure this node is visible
                   _bpTree.scrollPathToVisible(new TreePath(newBreakpoint.getPath()));
                   return;
@@ -801,7 +801,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
               _bpTreeModel.insertNodeInto(newBreakpoint,
                                           doc,
                                           doc.getChildCount());
-              
+
               // Make sure this node is visible
               _bpTree.scrollPathToVisible(new TreePath(newBreakpoint.getPath()));
               return;
@@ -816,7 +816,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
           _bpTreeModel.insertNodeInto(newBreakpoint,
                                       bpDocNode,
                                       bpDocNode.getChildCount());
-          
+
           // Make visible
           TreePath pathToNewBreakpoint = new TreePath(newBreakpoint.getPath());
           _bpTree.scrollPathToVisible(pathToNewBreakpoint);
@@ -824,7 +824,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       };
       SwingUtilities.invokeLater(doCommand);
     }
-    
+
     /**
      * Called when a breakpoint is reached during execution.
      * @param bp the breakpoint
@@ -834,7 +834,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       Runnable doCommand = new Runnable() {
         public void run() {
           DefaultMutableTreeNode bpDoc = new DefaultMutableTreeNode(bp.getClassName());
-          
+
           // Find the document node for this breakpoint
           Enumeration documents = _breakpointRootNode.children();
           while (documents.hasMoreElements()) {
@@ -846,7 +846,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
                 DefaultMutableTreeNode lineNumber =
                   (DefaultMutableTreeNode)lineNumbers.nextElement();
                 if (lineNumber.getUserObject().equals(new Integer(bp.getLineNumber()))) {
-                  
+
                   // Select the node which has been hit
                   TreePath pathToNewBreakpoint = new TreePath(lineNumber.getPath());
                   _bpTree.scrollPathToVisible(pathToNewBreakpoint);
@@ -859,7 +859,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       };
       SwingUtilities.invokeLater(doCommand);
     }
-    
+
     /**
      * Called when a breakpoint is removed from a document.
      * Removes the breakpoint from the tree of breakpoints.
@@ -870,7 +870,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       Runnable doCommand = new Runnable() {
         public void run() {
           DefaultMutableTreeNode bpDocNode = new DefaultMutableTreeNode(bp.getClassName());
-          
+
           // Find the document node for this breakpoint
           Enumeration documents = _breakpointRootNode.children();
           while (documents.hasMoreElements()) {
@@ -896,12 +896,12 @@ public class DebugPanel extends JPanel implements OptionConstants {
       };
       SwingUtilities.invokeLater(doCommand);
     }
-    
+
     /**
      * Called when a step is requested on the current thread.
      */
     public void stepRequested() {}
-    
+
     /**
      * Called when the current thread is suspended
      */
@@ -914,7 +914,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       };
       SwingUtilities.invokeLater(doCommand);
     }
-    
+
     /**
      * Called when the current thread is resumed
      */
@@ -927,7 +927,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       };
       SwingUtilities.invokeLater(doCommand);
     }
-    
+
     /**
      * Called when a thread starts
      */
@@ -940,7 +940,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       };
       SwingUtilities.invokeLater(doCommand);
     }
-    
+
     /**
      * Called when the current thread dies
      */
@@ -953,7 +953,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       };
       SwingUtilities.invokeLater(doCommand);
     }
-    
+
     /**
      * Called when any thread other than the current thread dies
      */
@@ -966,7 +966,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       };
       SwingUtilities.invokeLater(doCommand);
     }
-    
+
     /**
      * Called when the current (selected) thread is set in the debugger.
      * @param thread the thread that was set as current
@@ -999,11 +999,11 @@ public class DebugPanel extends JPanel implements OptionConstants {
   public void disableButtons() {
     setThreadDependentButtons(false);
   }
-  
+
   public void setStatusText(String text) {
     _statusBar.setText(text);
   }
-  
+
   public String getStatusText() {
     return _statusBar.getText();
   }
@@ -1011,7 +1011,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   /**
    * Updates the UI to a new look and feel.
    * Need to update the contained popup menus as well.
-   * 
+   *
    * Currently, we don't support changing the look and feel
    * on the fly, so this is disabled.
    *
@@ -1098,7 +1098,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       }
     }
   }
-  
+
   /**
    * A mouse adapter that allows for double-clicking and
    * bringing up a right-click menu.

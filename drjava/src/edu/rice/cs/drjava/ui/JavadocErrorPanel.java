@@ -89,23 +89,23 @@ public class JavadocErrorPanel extends ErrorPanel {
 
 
     _mainPanel.add(scroller, BorderLayout.CENTER);
-    
+
     JPanel sidePanel = new JPanel(new BorderLayout());
     sidePanel.setBorder(new EmptyBorder(0,5,0,5)); // 5 pix padding on sides
     JPanel innerPanel = new JPanel(new BorderLayout());  // bar and checkbox
     innerPanel.setBorder(new EmptyBorder(5,0,0,0)); // 5 pix padding on top
 //     sidePanel.add(new JLabel("Test Progress", SwingConstants.LEFT),
 //                       BorderLayout.NORTH);
-       
+
     sidePanel.add(innerPanel,BorderLayout.CENTER);
-    
+
     innerPanel.add(new JPanel(),BorderLayout.CENTER);
-    
+
     innerPanel.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
     _mainPanel.add(sidePanel, BorderLayout.EAST);
 
   }
-  
+
   /**
    * Returns the JavadocErrorListPane that this panel manages.
    */
@@ -203,5 +203,5 @@ public class JavadocErrorPanel extends ErrorPanel {
 //     }
 
   }
-  
+
 }

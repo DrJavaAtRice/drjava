@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -48,6 +48,7 @@ import javax.swing.border.EmptyBorder;
 import java.beans.*;
 
 import edu.rice.cs.drjava.model.SingleDisplayModel;
+import edu.rice.cs.drjava.model.DefaultSingleDisplayModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
@@ -95,17 +96,17 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       _caretChanged = true;
     }
   };
-  
+
   public void requestFocus() {
     super.requestFocus();
     _findField.requestFocus();
     _findField.selectAll();
   }
-  
+
   JTextField getFindField() {
     return _findField;
   }
-  
+
   /**
    * Called when the user presses the key assigned to find next
    */
@@ -114,7 +115,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       _doFind();
     }
   }
-  
+
   /**
    * Called from MainFrame upon opening this Dialog or
    * changes in the active document
@@ -128,7 +129,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       _updateMachine();
       _machine.setFindWord(_findField.getText());
       _machine.setReplaceWord(_replaceField.getText());
-      _message.setText("");      
+      _message.setText("");
       if (!_machine.isOnMatch() || _findField.getText().equals("")) {
         _replaceAction.setEnabled(false);
         _replaceFindAction.setEnabled(false);
@@ -138,7 +139,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         _replaceFindAction.setEnabled(true);
         _machine.setLastFindWord();
       }
-      
+
       if (_findField.getText().equals("")) {
         _replaceAllAction.setEnabled(false);
       }
@@ -148,9 +149,9 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       _message.setText("");
     } else {
       throw new UnexpectedException(new RuntimeException("FindReplaceDialog should not be listening to anything"));
-    }    
+    }
   }
-  
+
   /**
    * Called from MainFrame upon closing this Dialog or
    * changes in the active document
@@ -164,16 +165,16 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       // Probably a double-click on close...
       //throw new UnexpectedException(new RuntimeException("FindReplaceDialog should be listening to something"));
     }
-    
+
   }
-  
+
   private Action _findNextAction = new AbstractAction("Find Next") {
-    public void actionPerformed(ActionEvent e) {        
+    public void actionPerformed(ActionEvent e) {
       _doFind();
       _findField.requestFocus();
     }
   };
-  
+
   /**
    * Abstracted out since this is called from find and replace/find
    */
@@ -182,22 +183,24 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _machine.setFindWord(_findField.getText());
     _machine.setReplaceWord(_replaceField.getText());
     _message.setText("");
-    
+
     // FindResult contains the document that the result was found in,
-    // offset to the next occurence of the string, and a flag indicating 
-    // whether the end of the document was wrapped around while searching 
+    // offset to the next occurence of the string, and a flag indicating
+    // whether the end of the document was wrapped around while searching
     // for the string
     FindResult fr = _machine.findNext();
     OpenDefinitionsDocument openDoc = _defPane.getOpenDocument();
     Document doc = fr.getDocument();
     int pos = fr.getFoundOffset();
     if (doc != openDoc.getDocument()) {
-      _model.setActiveDocument(_model.getODDForDocument(doc));        
+      // XXX: this is fundamentally ugly - we should support direct, ordered
+      //      iteration through all OpenDefinitionsDocuments.
+      _model.setActiveDocument(((DefaultSingleDisplayModel) _model).getODDForDocument(doc));
       _defPane.setCaretPosition(pos);
       _caretChanged = true;
       _updateMachine();
     }
-      
+
     if (fr.getWrapped()) {
       Toolkit.getDefaultToolkit().beep();
       if (!_machine.getSearchBackwards()) {
@@ -211,7 +214,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       _replaceAction.setEnabled(true);
       _replaceFindAction.setEnabled(true);
       _machine.setLastFindWord();
-    } 
+    }
     // else the entire document was searched and no instance of the string
     // was found
     else if (pos == -1) {
@@ -220,15 +223,15 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
                        "\" not found.");
     }
   }
-  
-  private Action _replaceAction = new AbstractAction("Replace") {  
+
+  private Action _replaceAction = new AbstractAction("Replace") {
     public void actionPerformed(ActionEvent e) {
       _updateMachine();
       _machine.setFindWord(_findField.getText());
       String replaceWord = _replaceField.getText();
       _machine.setReplaceWord(replaceWord);
       _message.setText("");
-      
+
       // replaces the occurance at the current position
       boolean replaced = _machine.replaceCurrent();
       if (replaced) {
@@ -263,7 +266,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       }
     }
   };
-  
+
   // Replaces all occurences of the findfield text with that
   // of the replacefield text both before and after the cursor
   // without prompting for wrapping around the end of the
@@ -282,15 +285,15 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       _replaceFindAction.setEnabled(false);
     }
   };
-  
-  
+
+
   /*private Action _closeAction = new AbstractAction("X") {
-   public void actionPerformed(ActionEvent e) {      
+   public void actionPerformed(ActionEvent e) {
    // removeTab automatically calls show()
    _close();
    }
    };*/
-  
+
   protected void _close() {
     _defPane.requestFocus();
     if (_displayed)
@@ -298,7 +301,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     super._close();
     //_frame.uninstallFindReplaceDialog(this);
   }
-  
+
   /**
    * Constructor.
    * @param   Frame frame the overall enclosing window
@@ -308,7 +311,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   public FindReplaceDialog(MainFrame frame, SingleDisplayModel model) {
     super(frame, "Find/Replace");
     _model = model;
-    
+
     int i = this.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT;
     //i = this.WHEN_FOCUSED;
     //i = this.WHEN_IN_FOCUSED_WINDOW;
@@ -325,26 +328,26 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         _close();
       }
     });
-    
+
     // Setup color listeners.
     new ForegroundColorListener(_findField);
     new BackgroundColorListener(_findField);
     new ForegroundColorListener(_replaceField);
     new BackgroundColorListener(_replaceField);
-  
+
     _findNextButton = new JButton(_findNextAction);
     _replaceButton = new JButton(_replaceAction);
     _replaceFindButton = new JButton(_replaceFindAction);
     _replaceAllButton = new JButton(_replaceAllAction);
     //_closeButton = new JButton(_closeAction);
     _message = new JLabel("");
-    
+
     _replaceAction.setEnabled(false);
     _replaceFindAction.setEnabled(false);
-    
+
     Font font = DrJava.getConfig().getSetting(FONT_MAIN);
     setFieldFont(font);
-        
+
     // set up the layout
     JPanel buttons = new JPanel();
     buttons.setLayout(new GridLayout(1,0,5,0));
@@ -353,51 +356,51 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     buttons.add(_replaceFindButton);
     buttons.add(_replaceAllButton);
     //buttons.add(_closeButton);
-    
-    
+
+
     JLabel findLabel = new JLabel("Find", SwingConstants.LEFT);
     //findLabel.setLabelFor(_findField);
     findLabel.setHorizontalAlignment(SwingConstants.LEFT);
-    
+
     JLabel replaceLabel = new JLabel("Replace", SwingConstants.LEFT);
     // replaceLabel.setLabelFor(_replaceField);
     replaceLabel.setHorizontalAlignment(SwingConstants.LEFT);
-    
+
     // need separate label and field panels so that the find and
     // replace textfields line up
-    
+
     _labelPanel = new JPanel(new GridLayout(0,1));
     // _labelPanel.setLayout(new BoxLayout(_labelPanel, BoxLayout.Y_AXIS));
-    
+
     //_labelPanel.add(Box.createGlue());
     _labelPanel.add(findLabel);
     _labelPanel.add(replaceLabel);
     _labelPanel.setBorder(new EmptyBorder(0,5,0,5)); // 5 pix on sides
-    
+
     MatchCaseListener mcl = new MatchCaseListener();
     _matchCase = new JCheckBox("Match Case", true);
     _matchCase.addItemListener(mcl);
-       
+
     SearchBackwardsListener bsl = new SearchBackwardsListener();
     _searchBackwards = new JCheckBox("Search Backwards", false);
     _searchBackwards.addItemListener(bsl);
-    
+
     SearchAllDocumentsListener sadl= new SearchAllDocumentsListener();
     _searchAllDocuments = new JCheckBox("Search All Documents", false);
     _searchAllDocuments.addItemListener(sadl);
 
     this.removeAll(); // actually, override the behavior of TabbedPanel
-    
+
     // remake closePanel
     _closePanel = new JPanel(new BorderLayout());
     _closePanel.add(_closeButton, BorderLayout.NORTH);
-    
+
     _matchCaseAndClosePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
     _matchCaseAndClosePanel.add(_matchCase);
     _matchCaseAndClosePanel.add(_searchBackwards);
-    _matchCaseAndClosePanel.add(_searchAllDocuments); 
+    _matchCaseAndClosePanel.add(_searchAllDocuments);
     _matchCaseAndClosePanel.add(_closePanel);
-    
+
 //    _rightPanel = new JPanel(new GridLayout(1,2,5,0));
     JPanel midPanel = new JPanel(new GridLayout(2,1));
     JPanel farRightPanel = new JPanel(new GridLayout(2,1));
@@ -407,22 +410,14 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     farRightPanel.add(_message);
     _rightPanel = new JPanel(new BorderLayout(5, 0));
     _rightPanel.add(midPanel, BorderLayout.CENTER);
-    _rightPanel.add(farRightPanel, BorderLayout.EAST);    
-    
-    hookComponents(this,_rightPanel,_labelPanel,buttons);   
-    
-    _machine = new FindReplaceMachine(new DocumentIterator() {
-      public Document getNextDocument(Document doc) {
-        return _model.getNextDocument(doc);
-      }
-      
-      public Document getPrevDocument(Document doc) {
-        return _model.getPrevDocument(doc);
-      }
-    });
-    
+    _rightPanel.add(farRightPanel, BorderLayout.EAST);
+
+    hookComponents(this,_rightPanel,_labelPanel,buttons);
+
+    _machine = new FindReplaceMachine(_model.getDocumentIterator());
+
     _findField.addActionListener(_findNextAction);
-    
+
     _findField.setNextFocusableComponent(_replaceField);
     _replaceField.setNextFocusableComponent(_matchCase);
     _matchCase.setNextFocusableComponent(_searchBackwards);
@@ -430,10 +425,10 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _searchAllDocuments.setNextFocusableComponent(_findNextButton);
     _replaceAllButton.setNextFocusableComponent(_closeButton);
     _closeButton.setNextFocusableComponent(_findField);
-    
+
     // DocumentListener that keeps track of changes in the find field.
     _findField.getDocument().addDocumentListener(new DocumentListener() {
-      
+
       /**
        * If attributes in the find field have changed, gray out
        * "Replace" and "Replace and Find Next" buttons.
@@ -449,7 +444,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         else
           _replaceAllAction.setEnabled(true);
       }
-      
+
       /**
        * If text has been inserted into the find field, gray out
        * "Replace" and "Replace and Find Next" buttons.
@@ -465,7 +460,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         else
           _replaceAllAction.setEnabled(true);
       }
-      
+
       /**
        * If text has been deleted from the find field, gray out
        * "Replace" and "Replace and Find Next" buttons.
@@ -483,7 +478,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       }
     });
   }
-  
+
   /**
    * Sets the font of the find and replace fields to f.
    */
@@ -491,20 +486,20 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _findField.setFont(f);
     _replaceField.setFont(f);
   }
-  
+
   private static Container wrap(JComponent comp) {
     Container stretcher = Box.createHorizontalBox();
     stretcher.add(comp);
     stretcher.add(Box.createHorizontalGlue());
     return stretcher;
   }
-  
-  /** 
+
+  /**
    * consider a parent container.  Change its layout to GridBagLayout
    * with 2 columns, 2 rows.  Consider them quadrants in a coordinate plain.
    * put the arguments in their corresponding quadrants, ignoring q3.
    */
-  private static void hookComponents(Container parent, JComponent q1, 
+  private static void hookComponents(Container parent, JComponent q1,
                                      JComponent q2, JComponent q4) {
     GridBagLayout gbl = new GridBagLayout();
     GridBagConstraints c = new GridBagConstraints();
@@ -516,10 +511,10 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     addComp(parent, new JPanel(), c, gbl, 2, 0, 0f, 0f, 1, 0);
     addComp(parent, q4, c, gbl, 2, 1, 1f, 0f, 1, 0);
   }
-  
+
   private static void addComp(Container p, JComponent child,
                               GridBagConstraints c, GridBagLayout gbl,
-                              int row, int col, 
+                              int row, int col,
                               float weightx, float weighty, int gridw,
                               int ipady) {
     c.gridx = col; c.gridy = row;
@@ -529,8 +524,8 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     gbl.setConstraints(child,c);
     p.add(child);
   }
-  
-  // sets appropriate variables in the FindReplaceMachine if the 
+
+  // sets appropriate variables in the FindReplaceMachine if the
   // caret has been changed
   private void _updateMachine() {
     if (_caretChanged) {
@@ -541,7 +536,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       _caretChanged = false;
     }
   }
-  
+
   /**
    * Shows the dialog and sets the focus appropriately.
    */
@@ -564,7 +559,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     to = _machine.getCurrentOffset();
     if(_machine.getSearchBackwards()){
       from = to + length;
-    } 
+    }
     else {
       from = to - length;
     }
@@ -581,7 +576,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     to = position;
     if(_machine.getSearchBackwards()){
       from = position + _machine.getFindWord().length();
-    } 
+    }
     else {
       from = position - _machine.getFindWord().length();
     }
@@ -608,7 +603,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       // next
     _defPane.getCaret().setSelectionVisible(true);
     /*
-    try {    
+    try {
       JViewport v = _frame.getDefViewport();
       int viewHeight = (int)v.getSize().getHeight();
       // Scroll to make sure this item is visible
@@ -617,36 +612,36 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       int startRectY = (int)startRect.getY();
       startRect.setLocation(0, startRectY-viewHeight/2);
       Point endPoint = new Point(0, startRectY+viewHeight/2-1);
-      
+
       // Add the end rect onto the start rect to make a rectangle
       // that encompasses the entire selection
-      startRect.add(endPoint);     
-      
+      startRect.add(endPoint);
+
       _defPane.scrollRectToVisible(startRect);
       _defPane.select(from, to);
-      
+
       // Found this little statement that will show the selected text
       // in _defPane without giving _defPane focus, previously allowing the
       // user to hit enter repeatedly and change the document while finding
       // next
       _defPane.getCaret().setSelectionVisible(true);
       //_findField.requestFocus();
-    } 
+    }
     catch (BadLocationException badBadLocation) {}
     */
   }
-  
+
   /*private void _close() {
    hide();
    }*/
-  
+
   /*public void hide() {
    System.err.println("*** Called hide ***");
    if (_open)
    _frame.uninstallFindReplaceDialog(this);
    //super.hide();
    }*/
-  
+
   /*private ContinueCommand CONFIRM_CONTINUE = new ContinueCommand() {
    public boolean shouldContinue() {
    String text = "The search has reached the end of the document.\n" +
@@ -655,7 +650,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
    text,
    "Continue search?",
    JOptionPane.YES_NO_OPTION);
-   
+
    switch (rc) {
    case JOptionPane.YES_OPTION:
    return true;
@@ -664,10 +659,10 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
    default:
    throw new RuntimeException("Invalid rc: " + rc);
    }
-   
+
    }
    };*/
-  
+
   class MatchCaseListener implements ItemListener {
     public void itemStateChanged(ItemEvent e) {
       if (e.getStateChange() == ItemEvent.DESELECTED) {
@@ -676,7 +671,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       else if (e.getStateChange() == ItemEvent.SELECTED) {
         _machine.setMatchCase(true);
       }
-      _findField.requestFocus();      
+      _findField.requestFocus();
     }
   }
 
@@ -688,7 +683,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       else if (e.getStateChange() == ItemEvent.SELECTED) {
         _machine.setSearchBackwards(true);
       }
-      _findField.requestFocus();  
+      _findField.requestFocus();
     }
   }
 
@@ -700,7 +695,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       else if (e.getStateChange() == ItemEvent.SELECTED) {
         _machine.setSearchAllDocuments(true);
       }
-      _findField.requestFocus();  
+      _findField.requestFocus();
     }
   }
 }

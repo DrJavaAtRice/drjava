@@ -66,6 +66,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.newjvm.*;
+import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.drjava.DrJava;
@@ -97,7 +98,8 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
  *
  * @version $Id$
  */
-public class DefaultGlobalModel implements GlobalModel, OptionConstants {
+public class DefaultGlobalModel implements GlobalModel, OptionConstants,
+    DocumentIterator {
 
   static final String DOCUMENT_OUT_OF_SYNC_MSG =
     "Current document is out of sync with the Interactions Pane and should be recompiled!\n";
@@ -108,9 +110,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * Keeps track of all listeners to the model, and has the ability
    * to notify them of some event.  Originally used a Command Pattern style,
    * but this has been replaced by having EN directly implement all listener
-   * interfaces it supports.
+   * interfaces it supports.  Set in constructor so that subclasses can install
+   * their own notifier with additional methods.
    */
-  protected final GlobalEventNotifier _notifier = new GlobalEventNotifier();
+  final GlobalEventNotifier _notifier = new GlobalEventNotifier();
 
   // ---- Definitions fields ----
 
@@ -123,28 +126,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * ListModel for storing all OpenDefinitionsDocuments.
    */
   private final DefaultListModel _definitionsDocs = new DefaultListModel();
-
-  /**
-   * The instance of the indent decision tree used by Definitions documents.
-   */
-  public static final Indenter INDENTER;
-  static {
-    // Statically create the indenter from the config values
-    int ind = DrJava.getConfig().getSetting(INDENT_LEVEL).intValue();
-    INDENTER = new Indenter(ind);
-    DrJava.getConfig().addOptionListener(INDENT_LEVEL,
-                                         new OptionListener<Integer>() {
-      public void optionChanged(OptionEvent<Integer> oce) {
-        INDENTER.buildTree(oce.value.intValue());
-      }
-    });
-    DrJava.getConfig().addOptionListener(AUTO_CLOSE_COMMENTS,
-                                         new OptionListener<Boolean>() {
-      public void optionChanged(OptionEvent<Boolean> oce) {
-        INDENTER.buildTree(DrJava.getConfig().getSetting(INDENT_LEVEL).intValue());
-      }
-    });
-  }
 
 
   // ---- Interpreter fields ----
@@ -201,12 +182,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   private final DefaultJUnitModel _junitModel =
     new DefaultJUnitModel(this, _interpreterControl, _compilerModel, this);
 
-  /**
-   * If a JUnit test is currently running, this is the OpenDefinitionsDocument
-   * being tested.  Otherwise this is null.
-   */
-//  private OpenDefinitionsDocument _docBeingTested = null;
-
 
   // ---- Javadoc Fields ----
 
@@ -254,6 +229,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   /**
    * Number of milliseconds to wait after each println, to prevent
    * the JVM from being flooded with print calls.
+   * TODO: why is this here, and why is it public?
    */
   public static final int WRITE_DELAY = 50;
 
@@ -380,11 +356,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
 
   // getter methods for the private fields
-
-  // TODO: remove this!
-  public GlobalEventNotifier getNotifier() {
-    return _notifier;
-  }
 
   public DefinitionsEditorKit getEditorKit() {
     return _editorKit;
@@ -745,7 +716,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   public ListModel getDefinitionsDocs() {
     return _definitionsDocs;
   }
-  
+
   /**
    * Returns the OpenDefinitionsDocument corresponding to the document
    * passed in.
@@ -761,9 +732,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       return (OpenDefinitionsDocument) _definitionsDocs.elementAt(index);
     }
   }
-  
+
   /**
-   * Given a Document, returns the Document corresponding to the next 
+   * Gets a DocumentIterator to allow navigating through open Swing Documents.
+   */
+  public DocumentIterator getDocumentIterator() {
+    return this;
+  }
+
+  /**
+   * Given a Document, returns the Document corresponding to the next
    * OpenDefinitionsDocument in the document list.
    * @param doc the current Document
    * @return the next Document
@@ -780,9 +758,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       return ((OpenDefinitionsDocument)_definitionsDocs.elementAt(index+1)).getDocument();
     }
   }
-  
+
   /**
-   * Given a Document, returns the Document corresponding to the previous 
+   * Given a Document, returns the Document corresponding to the previous
    * OpenDefinitionsDocument in the document list.
    * @param doc the current Document
    * @return the previous Document
@@ -799,7 +777,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       return ((OpenDefinitionsDocument)_definitionsDocs.elementAt(index-1)).getDocument();
     }
   }
-  
+
   private int _getIndexOfDocument(Document doc) {
     int index = 0;
     Enumeration en = _definitionsDocs.elements();
@@ -1092,6 +1070,73 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 //    roots.add(workDir);
 
     return roots.toArray(new File[0]);
+  }
+
+  /**
+   * Return the name of the file, or "(untitled)" if no file exists.
+   * Does not include the ".java" if it is present.
+   * TODO: move to a static utility class?
+   */
+  public String getDisplayFilename(OpenDefinitionsDocument doc) {
+
+    String filename = doc.getFilename();
+
+    // Remove ".java" if at the end of name
+    if (filename.endsWith(".java")) {
+      int extIndex = filename.lastIndexOf(".java");
+      if (extIndex > 0) {
+        filename = filename.substring(0, extIndex);
+      }
+    }
+
+    // Mark if modified
+    if (doc.isModifiedSinceSave()) {
+      filename = filename + " *";
+    }
+
+    return filename;
+  }
+
+  /**
+   * Return the absolute path of the file, or "(untitled)" if no file exists.
+   * TODO: move to a static utility class?
+   */
+  public String getDisplayFullPath(OpenDefinitionsDocument doc) {
+
+    String path = "(untitled)";
+    try {
+      File file = doc.getFile();
+      path = file.getAbsolutePath();
+    }
+    catch (IllegalStateException ise) {
+      // No file, filename stays "Untitled"
+    }
+    catch (FileMovedException fme) {
+      // Recover, even though file was deleted
+      File file = fme.getFile();
+      path = file.getAbsolutePath();
+    }
+
+    // Mark if modified
+    if (doc.isModifiedSinceSave()) {
+      path = path + " *";
+    }
+
+    return path;
+  }
+
+  /**
+   * Return the absolute path of the file with the given index,
+   * or "(untitled)" if no file exists.
+   */
+  public String getDisplayFullPath(int index) {
+    OpenDefinitionsDocument doc =
+      getDefinitionsDocuments().get(index);
+    if (doc == null) {
+      throw new RuntimeException(
+        "Document not found with index " + index);
+    }
+    return getDisplayFullPath(doc);
   }
 
   /**
@@ -1856,7 +1901,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
     /**
      * Create a find and replace mechanism starting at the current
-     * character offset in the definitions. 
+     * character offset in the definitions.
      * NOT USED.
      */
 //    public FindReplaceMachine createFindReplaceMachine() {
@@ -2319,3 +2364,4 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
   }
 }
+

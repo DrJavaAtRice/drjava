@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -98,7 +98,7 @@ public class CompilerErrorPanel extends ErrorPanel {
     // Also: The UI will go out of sync with reality if the active compiler
     // is later changed somewhere else. This is because there is no way
     // to listen on the active compiler.
-    _compilerChoiceBox = 
+    _compilerChoiceBox =
       new JComboBox(getModel().getCompilerModel().getAvailableCompilers());
     _compilerChoiceBox.setEditable(false);
     _compilerChoiceBox.setSelectedItem
@@ -136,11 +136,11 @@ public class CompilerErrorPanel extends ErrorPanel {
     uiBox.setBorder(new EmptyBorder(5,0,0,0)); // 5 pix padding on top
     compilerPanel.add(new JLabel("Compiler", SwingConstants.LEFT),
                       BorderLayout.NORTH);
-       
+
     compilerPanel.add(uiBox,BorderLayout.CENTER);
     uiBox.add(_compilerChoiceBox,BorderLayout.NORTH);
     uiBox.add(new JPanel(),BorderLayout.CENTER);
-    
+
     _mainPanel.add(scroller, BorderLayout.CENTER);
     _mainPanel.add(compilerPanel, BorderLayout.EAST);
     DrJava.getConfig().addOptionListener(OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener<File>());
@@ -148,30 +148,30 @@ public class CompilerErrorPanel extends ErrorPanel {
     DrJava.getConfig().addOptionListener(OptionConstants.EXTRA_COMPILERS, new CompilerLocationOptionListener<Vector<String>>());
     uiBox.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
   }
-  
-  
+
+
   /**
-   * The OptionListener for compiler LOCATIONs 
+   * The OptionListener for compiler LOCATIONs
    */
   private class CompilerLocationOptionListener<T> implements OptionListener<T> {
-    
+
     public void optionChanged(OptionEvent<T> oce) {
       _compilerChoiceBox.removeAllItems();
-      CompilerInterface[] availCompilers = 
+      CompilerInterface[] availCompilers =
         getModel().getCompilerModel().getAvailableCompilers();
       for (int i=0; i<availCompilers.length; i++) {
         _compilerChoiceBox.addItem(availCompilers[i]);
       }
     }
   }
-  
+
   /**
    * Returns the CompilerErrorListPane that this panel manages.
    */
   public CompilerErrorListPane getErrorListPane() {
     return _errorListPane;
   }
-  
+
   /** Called when compilation begins. */
   public void setCompilationInProgress() {
     _errorListPane.setCompilationInProgress();

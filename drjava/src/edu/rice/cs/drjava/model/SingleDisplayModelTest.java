@@ -85,14 +85,14 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
    */
   protected void createModel() {
     //_model = new SingleDisplayModel(_originalModel);
-    _model = new SingleDisplayModel();
+    _model = new DefaultSingleDisplayModel();
   }
   
   /**
    * Get the instance of the SingleDisplayModel.
    */
-  protected SingleDisplayModel getSDModel() {
-    return (SingleDisplayModel) _model;
+  protected DefaultSingleDisplayModel getSDModel() {
+    return (DefaultSingleDisplayModel) _model;
   }
 
   protected void assertNotEmpty()
@@ -225,26 +225,26 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     assertActiveDocument(doc3);
     
     // Make sure setNext doesn't move (at end of list)
-    getSDModel().setNextActiveDocument();
+    getSDModel().setActiveNextDocument();
     listener.assertSwitchCount(2);
     assertActiveDocument(doc3);
     
     // Test setPrevious
-    getSDModel().setPreviousActiveDocument();
+    getSDModel().setActivePreviousDocument();
     listener.assertSwitchCount(3);
     assertActiveDocument(doc2);
     
-    getSDModel().setPreviousActiveDocument();
+    getSDModel().setActivePreviousDocument();
     listener.assertSwitchCount(4);
     assertActiveDocument(doc1);
     
     // Make sure setPrevious doesn't move (at start of list)
-    getSDModel().setPreviousActiveDocument();
+    getSDModel().setActivePreviousDocument();
     listener.assertSwitchCount(4);
     assertActiveDocument(doc1);
     
     // Test setNext
-    getSDModel().setNextActiveDocument();
+    getSDModel().setActiveNextDocument();
     listener.assertSwitchCount(5);
     assertActiveDocument(doc2);
     
@@ -392,7 +392,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     throws BadLocationException, IOException,
       OperationCanceledException, AlreadyOpenException
   {
-    SingleDisplayModel sdm = getSDModel();
+    DefaultSingleDisplayModel sdm = getSDModel();
     
     // Untitled
     OpenDefinitionsDocument doc = sdm.getActiveDocument();

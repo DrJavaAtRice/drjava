@@ -54,21 +54,21 @@ public class DummyGetDocuments implements IGetDocuments {
    * @throws UnexpectedException
    */
   public OpenDefinitionsDocument getDocumentForFile(File file)
-    throws IOException, OperationCanceledException {
+    throws IOException {
     throw new UnsupportedOperationException
       ("Tried to getDocumentForFile on a Dummy with file: " + file);
   }
-  
+
   public boolean isAlreadyOpen(File file) {
     throw new UnsupportedOperationException
       ("Tried to call isAlreadyOpen on a Dummy with file: " + file);
   }
-  
+
   public List<OpenDefinitionsDocument> getDefinitionsDocuments() {
     throw new UnsupportedOperationException
       ("Tried to getDefinitionsDocuments on a Dummy!");
   }
-  
+
   public boolean hasModifiedDocuments() {
     throw new UnsupportedOperationException
       ("Tried to call hasModifiedDocuments on a Dummy!");

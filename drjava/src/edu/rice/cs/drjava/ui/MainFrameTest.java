@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -65,9 +65,9 @@ import edu.rice.cs.util.text.*;
  * @version $Id$
  */
 public final class MainFrameTest extends MultiThreadedTestCase {
-  
+
   private MainFrame _frame;
-  
+
   /**
    * A temporary directory
    */
@@ -84,7 +84,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   public MainFrameTest(String name) {
     super(name);
   }
-  
+
   /**
    * Setup method for each JUnit test case.
    */
@@ -93,14 +93,14 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _frame.pack();
     super.setUp();
   }
-  
+
   public void tearDown() throws IOException{
     super.tearDown();
     _frame.dispose();
     _frame = null;
     System.gc();
-  }  
-  
+  }
+
   /**
    * Tests that the returned JButton of <code>createManualToolbarButton</code>:
    *  1. Is disabled upon return.
@@ -113,16 +113,16 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     };
     a.putValue(Action.SHORT_DESCRIPTION, "test tooltip");
     JButton b = _frame._createManualToolbarButton(a);
-    
+
     assertTrue("Returned JButton is enabled.", ! b.isEnabled());
     assertEquals("Tooltip text not set.", "test tooltip", b.getToolTipText());
   }
-  
+
   /**
    * Tests that the current location of a document is equal to the
    * caret location after documents are switched.
    */
-  public void testDocLocationAfterSwitch() 
+  public void testDocLocationAfterSwitch()
     throws BadLocationException, InterruptedException
   {
     DefinitionsPane pane = _frame.getCurrentDefPane();
@@ -130,25 +130,25 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     doc.insertString(0, "abcd", null);
     pane.setCaretPosition(3);
     assertEquals("Location of old doc before switch", 3, doc.getCurrentLocation());
-    
+
     // Create a new file
     SingleDisplayModel model = _frame.getModel();
     model.newFile();
-    
+
     // Current pane should be new doc, pos 0
     pane = _frame.getCurrentDefPane();
     doc = pane.getOpenDocument().getDocument();
     assertEquals("Location of new document", 0, doc.getCurrentLocation());
-    
+
     // Switch back
-    model.setPreviousActiveDocument();
-    
+    model.setActivePreviousDocument();
+
     // Current pane should be old doc, pos 3
     pane = _frame.getCurrentDefPane();
     doc = pane.getOpenDocument().getDocument();
     assertEquals("Location of old document", 3, doc.getCurrentLocation());
   }
-  
+
   /**
    * Tests that the clipboard is unmodified after a "clear line" action.
    * NOTE: Commented out for commit because of failures, despite proper behavior in GUI.
@@ -161,34 +161,34 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     DefinitionsDocument doc = pane.getOpenDocument().getDocument();
     doc.insertString(0, "abcdefg", null);
     pane.setCaretPosition(5);
-    
+
     ActionMap actionMap = pane.getActionMap();
     actionMap.get(DefaultEditorKit.selectionEndLineAction).actionPerformed
       (new ActionEvent(this, 0, "SelectionEndLine"));
     _frame.cutAction.actionPerformed(new ActionEvent(this, 0, "Cut"));
-    
+
     // Get a copy of the current clipboard.
     Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
     Transferable contents = clip.getContents(null);
     String data = (String) contents.getTransferData(DataFlavor.stringFlavor);
-    
+
     // Trigger the Clear Line action from a new position.
     pane.setCaretPosition(2);
     _frame._clearLineAction.actionPerformed
       (new ActionEvent(this, 0, "Clear Line"));
-    
+
     // Verify that the clipboard contents are still the same.
     contents = clip.getContents(null);
     String newData = (String) contents.getTransferData(DataFlavor.stringFlavor);
     assertEquals("Clipboard contents should be unchanged after Clear Line.",
                  data, newData);
-    
+
     // Verify that the document text is what we expect.
     assertEquals("Current line of text should be truncated by Clear Line.",
                  "ab", doc.getText(0, doc.getLength()));
   }
   */
-  
+
   /**
    * Tests that the clipboard is modified after a "cut line" action.
    * NOTE: Commented out for commit because of failures, despite proper behavior in GUI.
@@ -201,26 +201,26 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     DefinitionsDocument doc = pane.getOpenDocument().getDocument();
     doc.insertString(0, "abcdefg", null);
     pane.setCaretPosition(5);
-    
+
     ActionMap actionMap = pane.getActionMap();
     actionMap.get(DefaultEditorKit.selectionEndLineAction).actionPerformed
       (new ActionEvent(this, 0, "SelectionEndLine"));
     _frame.cutAction.actionPerformed(new ActionEvent(this, 0, "Cut"));
-    
+
     // Get a copy of the current clipboard.
-    
+
     // Trigger the Cut Line action from a new position.
     pane.setCaretPosition(2);
     _frame._cutLineAction.actionPerformed
       (new ActionEvent(this, 0, "Cut Line"));
-    
+
     // Verify that the clipboard contents are what we expect.
     Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
     Transferable contents = clip.getContents(null);
     String data = (String) contents.getTransferData(DataFlavor.stringFlavor);
     assertEquals("Clipboard contents should be changed after Cut Line.",
                  "cdefg", data);
-    
+
     // Verify that the document text is what we expect.
     assertEquals("Current line of text should be truncated by Cut Line.",
                  "ab", doc.getText(0, doc.getLength()));
@@ -236,15 +236,15 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     InteractionsPane pane = _frame.getInteractionsPane();
     SingleDisplayModel model = _frame.getModel();
     SwingDocumentAdapter doc = model.getSwingInteractionsDocument();
-    
+
     // Make the test silent
     model.getInteractionsModel().getDocument().setBeep(new TestBeep());
 
     // Test for strict == equality
     assertTrue("UI's int. doc. should equals Model's int. doc.",
                pane.getDocument() == doc);
-    
-    
+
+
     int origLength = doc.getDocLength();
     doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("Document should not have changed.",
@@ -253,7 +253,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   }
 
   /**
-   * Tests that undoing/redoing a multi-line indent will restore 
+   * Tests that undoing/redoing a multi-line indent will restore
    * the caret position.
    */
   public void testMultilineIndentAfterScroll() throws BadLocationException, InterruptedException
@@ -261,17 +261,17 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     DefinitionsPane pane = _frame.getCurrentDefPane();
     DefinitionsDocument doc = pane.getOpenDocument().getDocument();
     String text =
-      "public class stuff {\n" + 
-      "private int _int;\n" + 
+      "public class stuff {\n" +
+      "private int _int;\n" +
       "private Bar _bar;\n" +
       "public void foo() {\n" +
       "_bar.baz(_int);\n" +
       "}\n" +
       "}\n";
-    
+
     String indented =
-      "public class stuff {\n" + 
-      "  private int _int;\n" + 
+      "public class stuff {\n" +
+      "  private int _int;\n" +
       "  private Bar _bar;\n" +
       "  public void foo() {\n" +
       "    _bar.baz(_int);\n" +
@@ -286,14 +286,14 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     pane.setCaretPosition(0);
     doc.indentLines(0, doc.getLength());
     assertEquals("Should have indented.", indented, doc.getText(0, doc.getLength()));
-    
+
     oldPos = pane.getCaretPosition();
     pane.setCaretPosition(newPos);
     doc.getUndoManager().undo();
     assertEquals("Should have undone.", text, doc.getText(0, doc.getLength()));
     assertEquals("Undo should have restored caret position.", oldPos, pane.getCaretPosition());
 
-    pane.setCaretPosition(newPos);    
+    pane.setCaretPosition(newPos);
     doc.getUndoManager().redo();
     assertEquals("redo",indented, doc.getText(0,doc.getLength()));
     assertEquals("redo restores caret position", oldPos, pane.getCaretPosition());
@@ -306,18 +306,18 @@ public final class MainFrameTest extends MultiThreadedTestCase {
    */
   public void testGlassPaneEditableState() {
     SingleDisplayModel model = _frame.getModel();
-    
+
     OpenDefinitionsDocument doc1 = model.newFile();
     OpenDefinitionsDocument doc2 = model.newFile();
-    
+
     // doc2 is now active
-    
+
     JScrollPane pane1 = _frame._createDefScrollPane(doc1);
     JScrollPane pane2 = _frame._createDefScrollPane(doc2);
-    
+
     DefinitionsPane defPane1 = (DefinitionsPane) pane1.getViewport().getView();
     DefinitionsPane defPane2 = (DefinitionsPane) pane2.getViewport().getView();
-    
+
     _frame._switchDefScrollPane();
     assertTrue("Start: defPane1",defPane1.isEditable());
     assertTrue("Start: defPane2",defPane2.isEditable());
@@ -331,7 +331,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _frame.hourglassOff();
     assertTrue("End: defPane1",defPane1.isEditable());
     assertTrue("End: defPane2",defPane2.isEditable());
-    
+
   }
 
   /**
@@ -341,9 +341,9 @@ public final class MainFrameTest extends MultiThreadedTestCase {
    * another class.
    */
   public void testDancingUIFileOpened() throws IOException {
-      /** 
+      /**
      * Maybe this sequence of calls should be incorporated into one function
-     * createTestDir(), which would get the username and create the temporary 
+     * createTestDir(), which would get the username and create the temporary
      * directory
      * Only sticky part is deciding where to put it, in FileOps maybe?
      */
@@ -353,32 +353,32 @@ public final class MainFrameTest extends MultiThreadedTestCase {
      String forceOpenClass1_string =
        "public class ForceOpenClass1 {\n" +
        "  ForceOpenClass2 class2;\n" +
-       "  ForceOpenClass3 class3;\n\n" +   
+       "  ForceOpenClass3 class3;\n\n" +
        "  public ForceOpenClass1() {\n" +
-       "    class2 = new ForceOpenClass2();\n" + 
-       "    class3 = new ForceOpenClass3();\n" + 
-       "  }\n" + 
+       "    class2 = new ForceOpenClass2();\n" +
+       "    class3 = new ForceOpenClass3();\n" +
+       "  }\n" +
        "}";
-     
+
      File forceOpenClass2_file = new File(_tempDir, "ForceOpenClass2.java");
      String forceOpenClass2_string =
        "public class ForceOpenClass2 {\n" +
        "  inx x = 4;\n" +
        "}";
-     
+
      File forceOpenClass3_file = new File(_tempDir, "ForceOpenClass3.java");
-     String forceOpenClass3_string = 
+     String forceOpenClass3_string =
        "public class ForceOpenClass3 {\n" +
        "  String s = \"asf\";\n" +
        "}";
-     
+
      FileOps.writeStringToFile(forceOpenClass1_file, forceOpenClass1_string);
      FileOps.writeStringToFile(forceOpenClass2_file, forceOpenClass2_string);
      FileOps.writeStringToFile(forceOpenClass3_file, forceOpenClass3_string);
      forceOpenClass1_file.deleteOnExit();
      forceOpenClass2_file.deleteOnExit();
      forceOpenClass3_file.deleteOnExit();
-     
+
      //_frame.setVisible(true);
      _frame.pack();
      _frame.open(new FileOpenSelector(){
@@ -395,17 +395,17 @@ public final class MainFrameTest extends MultiThreadedTestCase {
        }
      };
      _frame.addComponentListenerToOpenDocumentsList(listener);
-     SingleDisplayModelCompileListener compileListener = 
+     SingleDisplayModelCompileListener compileListener =
        new SingleDisplayModelCompileListener();
      _frame.getModel().addListener(compileListener);
-     
+
      synchronized(compileListener){
        SwingUtilities.invokeLater(new Runnable(){
          public void run(){
            _frame.getCompileAllButton().doClick();
          }
        });
-      
+
        try{
          compileListener.wait();
        }
@@ -413,7 +413,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
          fail(exception.toString());
        }
      }
-     
+
      if( !FileOps.deleteDirectory(_tempDir) ){
        System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
                           "\nDo it by hand.\n");
@@ -423,13 +423,13 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     /**
    * A Test to guarantee that the Dancing UI bug will not rear its ugly head again.
    * Basically, add a component listener to the leftComponent of _docSplitPane and
-   * make certain its size does not change while closing an OpenDefinitionsDocument 
+   * make certain its size does not change while closing an OpenDefinitionsDocument
    * outside the event thread
    */
   public void testDancingUIFileClosed() throws IOException {
-    /** 
+    /**
      * Maybe this sequence of calls should be incorporated into one function
-     * createTestDir(), which would get the username and create the temporary 
+     * createTestDir(), which would get the username and create the temporary
      * directory
      * Only sticky part is deciding where to put it, in FileOps maybe?
      */
@@ -439,16 +439,16 @@ public final class MainFrameTest extends MultiThreadedTestCase {
      String forceOpenClass1_string =
        "public class ForceOpenClass1 {\n" +
        "  ForceOpenClass2 class2;\n" +
-       "  ForceOpenClass3 class3;\n\n" +   
+       "  ForceOpenClass3 class3;\n\n" +
        "  public ForceOpenClass1() {\n" +
-       "    class2 = new ForceOpenClass2();\n" + 
-       "    class3 = new ForceOpenClass3();\n" + 
-       "  }\n" + 
+       "    class2 = new ForceOpenClass2();\n" +
+       "    class3 = new ForceOpenClass3();\n" +
+       "  }\n" +
        "}";
-     
+
      FileOps.writeStringToFile(forceOpenClass1_file, forceOpenClass1_string);
      forceOpenClass1_file.deleteOnExit();
-     
+
      //_frame.setVisible(true);
      _frame.pack();
      ComponentAdapter listener = new ComponentAdapter(){
@@ -458,9 +458,9 @@ public final class MainFrameTest extends MultiThreadedTestCase {
        }
      };
      _frame.addComponentListenerToOpenDocumentsList(listener);
-     SingleDisplayModelFileClosedListener closeListener = 
+     SingleDisplayModelFileClosedListener closeListener =
        new SingleDisplayModelFileClosedListener();
-     
+
      _frame.open(new FileOpenSelector(){
          public File[] getFiles(){
            File[] return_me = new File[1];
@@ -470,15 +470,15 @@ public final class MainFrameTest extends MultiThreadedTestCase {
        });
 
      _frame.getModel().addListener(closeListener);
-       
-     synchronized(closeListener){       
+
+     synchronized(closeListener){
        Thread thread = new Thread(new Runnable(){
          public void run(){
            _frame.getCloseButton().doClick();
          }
        });
        SwingUtilities.invokeLater(thread);
-       
+
        try{
          closeListener.wait();
        }
@@ -486,13 +486,13 @@ public final class MainFrameTest extends MultiThreadedTestCase {
          fail(exception.toString());
        }
      }
-     
+
      if( !FileOps.deleteDirectory(_tempDir) ){
        System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
                           "\nDo it by hand.\n");
      }
   }
-  
+
   /**
    * A CompileListener for SingleDisplayModel (instead of
    * GlobalModel)
@@ -500,10 +500,10 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   class SingleDisplayModelCompileListener
     extends GlobalModelTestCase.TestListener
     implements SingleDisplayModelListener{
-    
+
     public void compileStarted(){
     }
-    
+
     /**
      * Just notify when the compile has ended
      */
@@ -512,10 +512,10 @@ public final class MainFrameTest extends MultiThreadedTestCase {
         notify();
       }
     }
-    
+
     public void fileOpened(OpenDefinitionsDocument doc) {}
-    
-    
+
+
     public void activeDocumentChanged(OpenDefinitionsDocument active){
     }
   }
@@ -527,19 +527,19 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   class SingleDisplayModelFileClosedListener
     extends GlobalModelTestCase.TestListener
     implements SingleDisplayModelListener{
-    
+
     public void fileClosed(OpenDefinitionsDocument doc) {
       synchronized(this){
         notify();
       }
     }
-    
+
     public void fileOpened(OpenDefinitionsDocument doc){
     }
-    
+
     public void newFileCreated(OpenDefinitionsDocument doc){
     }
-    
+
     public void activeDocumentChanged(OpenDefinitionsDocument active){
     }
   }
