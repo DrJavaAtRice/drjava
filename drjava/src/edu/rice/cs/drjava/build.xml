@@ -2,22 +2,17 @@
   $Header$
 -->
 <project name="drjava" default="test">
-  <!-- This makes the javac task use the GJ compiler. -->
-  <property name="build.compiler"
-            value="edu.rice.cs.anttools.GJv6CompilerAdapter" />
-
-  <property name="jsr14_path" value="/home/javaplt/packages/jsr14_adding_generics-1_0-ea" />
+  <property name="jsr14_classpath" value="/home/javaplt/packages/jsr14_adding_generics-1_0-ea/javac.jar" />
 
   <!-- srcroot is the base directory of the source, 4 packages back -->
   <property name="srcroot" value="../../../.." />
+
   <!-- built is where the compiled classes go -->
   <property name="built" value="${srcroot}/../built/" />
+
   <!-- projpath is the path from srcroot to the root directory of this project
   -->
   <property name="projpath" value="edu/rice/cs/${ant.project.name}" />
-
-  <!-- What file will have $Name$ expanded in it properly? -->
-  <property name="file_with_build_name" value="DrJava.java" />
 
   <!-- put a jar in this directory after each commit -->
   <property name="jars_dir" value="/home/javaplt/public_html/drjava/builds" />
@@ -28,7 +23,7 @@
   <!-- put javadoc in this directory if generating private javadoc -->
   <property name="private_javadoc_dir" value="${srcroot}/../javadoc" />
 
-  <property name="jarfile" value="${srcroot}/../drjava2.jar" />
+  <property name="jarfile" value="${srcroot}/../drjava.jar" />
   <property name="manifest" value="manifest" />
   <property name="cvsroot" value="/home/javaplt/.cvsroot" />
 
@@ -43,7 +38,7 @@
     <cvs command="update -d" cvsRoot="${cvsroot}" />
   </target>
 
-  <target name="temp-make-version">
+  <target name="make-version-stamp">
     <tstamp /> <!-- get new time stamp to use for CVS tag -->
 
     <!-- Create new Version.java, filling in date and time. -->
@@ -65,15 +60,7 @@
        projectname-date-time.
   -->
   <target name="commit" depends="clean, update, test">
-    <tstamp /> <!-- get new time stamp to use for CVS tag -->
-
-    <!-- Create new Version.java, filling in date and time. -->
-    <filter token="DATE" value="${DSTAMP}" />
-    <filter token="TIME" value="${TSTAMP}" />
-    <copy file="Version.orig"
-          tofile="Version.java" 
-          overwrite="yes"
-          filtering="yes" />
+    <antcall target="make-version-stamp" />
 
     <!-- recompile to make new version number get into code. -->
     <antcall target="compile" />
@@ -82,17 +69,8 @@
 
     <property name="version-tag"
               value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
+
     <cvs command="tag -c ${version-tag}" cvsRoot="${cvsroot}" quiet="true" />
-
-    <!-- Delete MainFrame.java and re-update to set $Name$ tags. -->
-    <delete file="${file_with_build_name}" />
-    <cvs command="update -r${version-tag} ${file_with_build_name}"
-         cvsRoot="${cvsroot}" quiet="true" />
-
-    <!-- we need to "unstick" the tag we checked it out with. otherwise
-         we can't check this file back in! -->
-    <cvs command="update -A ${file_with_build_name}"
-         cvsRoot="${cvsroot}" quiet="true" />
 
     <!-- Create distribution jar.
          We modify property jarfile for this call to put the jar in
@@ -121,39 +99,13 @@
        just this project in order for it to realize what files have already
        been compiled (preventing needless recompilation)
   -->
-  <target name="compile-gj" depends="init">
+  <target name="compile" depends="init">
     <javac srcdir="${srcroot}"
            includes="${projpath}/**/*java"
            destdir="${built}" 
+           bootclasspath="${jsr14_classpath}:${java.home}/lib/rt.jar"
            debug="on"
            optimize="off" />
-  </target>
-
-  <!-- Compile using JSR14 compiler. Hack. Bad. -->
-  <target name="compile" depends="init">
-    <echo message="Compiling with JSR14 compiler ..." />
-    <execon executable="javac"
-            failonerror="yes"
-            parallel="yes"
-            type="file">
-      <arg value="-sourcepath" />
-      <arg value="${srcroot}" />
-
-      <!-- Tell the compiler to generate bytecode with version number
-           that will run on JDK 1.2!
-           In particular this makes the classfile version 45.3 not 46.0.
-      -->
-      <arg value="-target" />
-      <arg value="1.1" />
-
-      <arg value="-g" />
-      <arg value="-d" />
-      <arg value="${built}" />
-      <arg value="-J-Xbootclasspath/p:${jsr14_path}/javac.jar" />
-      <fileset dir="${srcroot}">
-        <include name="${projpath}/**/*.java" />
-      </fileset>
-    </execon>
   </target>
 
   <!-- Unit test -->
@@ -184,30 +136,7 @@
   </target>
 
   <!-- Unit test -->
-  <target name="test" depends="compile">
-    <junit printsummary="yes" haltonerror="yes" haltonfailure="yes" fork="no">
-      <!-- propogate the same classpath. not sure why it doesn't
-           happen by default!
-      -->
-      <classpath path="${java.class.path}" />
-
-      <!-- This makes JUnit display info about each test to console -->
-      <formatter type="plain" usefile="no" />
-
-      <!-- This makes JUnit run all test classes. It figures out which ones
-           automatically, without needing AllTests classes.
-      -->
-      <batchtest>
-        <!-- The root of the fileset must be where edu/ is. -->
-        <fileset dir="${srcroot}">
-          <!-- Include only from projpath to only get classes in this project!
-          -->
-          <include name="${projpath}/**/*Test.java" />
-          <exclude name="**/AllTests.java" />
-          <exclude name="**/Test.java" />
-        </fileset>
-      </batchtest>
-    </junit>
+  <target name="test" depends="compile, test-only">
   </target>
 
   <!-- Makes a jar with dependencies. No tests are included. -->
@@ -257,7 +186,7 @@
 
       <arg value="-d" />
       <arg value="${javadoc_dir}/src" />
-      <arg value="-J-Xbootclasspath/p:${jsr14_path}/javac.jar" />
+      <arg value="-J-Xbootclasspath/p:${jsr14_classpath}/javac.jar" />
       <fileset dir="${srcroot}">
         <include name="${projpath}/**/*.java" />
       </fileset>
