@@ -357,8 +357,8 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
       stmt.acceptVisitor(_typeChecker);
     }
   }
-  /*
-  public void testVisitForEachStatementStringVectorError() throws ExceptionReturnedException {
+ 
+    /*  public void testVisitForEachStatementStringVectorError() throws ExceptionReturnedException {
     String text = "java.util.Vector<String> ss = new java.util.Vector<String>();for(Integer s: ss);";
     List<Node> stmts = _parseCode(text);
     Node stmt;
@@ -371,8 +371,8 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
     }
     catch(ExecutionError e){
     }
-  }
-  */
+  }*/
+
   
   
   
@@ -419,7 +419,7 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
       fail("shouldn't be able to switch Strings");
     }
     catch (ExecutionError e) {
-	// DO NOTHING
+ // DO NOTHING
     }
     //System.out.println(_parseCode(text).get(0));
     
@@ -451,11 +451,103 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
       fail("shouldn't be able to switch booleans");
     } 
     catch (ExecutionError e) {
-	//DO NOTHING
+ //DO NOTHING
     }
   }
   
 
+  /**
+   * Test for try-catch-finally clauses
+   */
+  public void testTryCatchStatement() {
+    String text = "try { } catch (Exception e) { }";
+    TryStatement stmt = (TryStatement)_parseCode(text).get(0);
+    
+    // Test 1
+    String expected = "(koala.dynamicjava.tree.BlockStatement: [])";
+    String actual = stmt.getTryBlock().toString();
+    assertEquals("should note empty block statement", expected, actual);
+    expected = "(koala.dynamicjava.tree.CatchStatement: (koala.dynamicjava.tree.FormalParameter: false (koala.dynamicjava.tree.ReferenceType: Exception) e) (koala.dynamicjava.tree.BlockStatement: []))";
+    assertEquals("should contain 1 catch statement", 1, stmt.getCatchStatements().size());
+    assertEquals("first catch block should accept Exception and be empty", expected, stmt.getCatchStatements().get(0).toString());
+    stmt.acceptVisitor(_typeChecker);
+    _interpretText(text);
+
+    // Test 2
+    text = "try { } catch (String s) { }";
+    stmt = (TryStatement)_parseCode(text).get(0);
+    expected = "(koala.dynamicjava.tree.BlockStatement: [])";
+    actual = stmt.getTryBlock().toString();
+    assertEquals("should note empty block statement", expected, actual);
+
+    expected = "(koala.dynamicjava.tree.CatchStatement: (koala.dynamicjava.tree.FormalParameter: false (koala.dynamicjava.tree.ReferenceType: String) s) (koala.dynamicjava.tree.BlockStatement: []))";
+    assertEquals("first catch block should accept Exception and be empty", expected, stmt.getCatchStatements().get(0).toString());
+    try {
+      stmt.acceptVisitor(_typeChecker);
+      fail("should have thrown error with exception of type String");
+    }
+    catch (ExecutionError e) {
+      // Test Passed
+    }
+    
+    // Test 3
+    text = "try { } finally { }";
+    stmt = (TryStatement)_parseCode(text).get(0);
+    expected = "(koala.dynamicjava.tree.BlockStatement: [])";
+    actual = stmt.getTryBlock().toString();
+    assertEquals("should note empty block statement", expected, actual);
+    assertEquals("should contain no catch blocks", 0, stmt.getCatchStatements().size());
+    expected = "(koala.dynamicjava.tree.BlockStatement: [])";
+    actual = stmt.getFinallyBlock().toString();
+    assertEquals("should contain empty finally block", expected, actual);
+    stmt.acceptVisitor(_typeChecker);
+    _interpretText(text);
+
+    // Test 4
+    text = "try { throw new java.io.FileNotFoundException(\"error\"); } catch (IllegalArgumentException e) { }";
+    stmt = (TryStatement)_parseCode(text).get(0);
+    expected = "(koala.dynamicjava.tree.BlockStatement: [(koala.dynamicjava.tree.ThrowStatement: (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: java.io.FileNotFoundException) [(koala.dynamicjava.tree.StringLiteral: \"error\" error class java.lang.String)]))])";
+    actual = stmt.getTryBlock().toString();
+    assertEquals("should get thrown exception", expected, actual);
+    // This expression generates a compile error in javac
+    //try {
+      stmt.acceptVisitor(_typeChecker);
+    //  fail("must catch exception that is thrown");
+    //}
+    //catch (ExecutionError e) {
+    //}
+   
+    // Test 5
+    text = "try { } catch (Exception e) { } catch (RuntimeException e) { } finally { }";
+    stmt = (TryStatement)_parseCode(text).get(0);
+    expected = "(koala.dynamicjava.tree.BlockStatement: [])";
+    actual = stmt.getTryBlock().toString();
+    assertEquals("should note empty try statement", expected, actual);
+    actual = stmt.getCatchStatements().get(0).toString();
+    expected = "(koala.dynamicjava.tree.CatchStatement: (koala.dynamicjava.tree.FormalParameter: false (koala.dynamicjava.tree.ReferenceType: Exception) e) (koala.dynamicjava.tree.BlockStatement: []))";
+    assertEquals("should note empty block statement", expected, actual);
+    actual = stmt.getCatchStatements().get(1).toString();
+    expected = "(koala.dynamicjava.tree.CatchStatement: (koala.dynamicjava.tree.FormalParameter: false (koala.dynamicjava.tree.ReferenceType: RuntimeException) e) (koala.dynamicjava.tree.BlockStatement: []))";
+    assertEquals("should note empty block statement", expected, actual);
+    assertEquals("should note two catch statements", 2, stmt.getCatchStatements().size());
+    actual = stmt.getFinallyBlock().toString();
+    expected = "(koala.dynamicjava.tree.BlockStatement: [])";
+    assertEquals("should note empty finally statement", expected, actual);
+    stmt.acceptVisitor(_typeChecker);
+    _interpretText(text);
+  }
+/*
+  public void testLabeledStatement() {
+    String text = "lbl:\n int cc = 1+5;"; // This generates an error...
+    LabeledStatement stmt = (LabeledStatement)_parseCode(text).get(0);
+    
+    // Test 1
+    String expected = "(koala.dynamicjava.tree.LabeledStatement: lbl (koala.dynamicjava.tree.ObjectMethodCall: println [(koala.dynamicjava.tree.StringLiteral: \"testing\" testing class java.lang.String)] (koala.dynamicjava.tree.QualifiedName: System.out)))";
+    String actual = stmt.toString();
+    assertEquals("should yield label statement", expected, actual);
+    stmt.acceptVisitor(_typeChecker);
+  }
+*/  
   public void testIfThenStatement() throws InterpreterException {
     String text = "if (B) { }";
     IfThenStatement stmt = (IfThenStatement) _parseCode(text).get(0);
