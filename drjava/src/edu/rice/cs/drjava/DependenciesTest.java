@@ -49,7 +49,7 @@ import java.text.SimpleDateFormat;
  * @version $Id$
  */
 public class DependenciesTest extends TestCase {
-  public static final String REQUIRED_UTIL_VERSION = "20030115-1747";
+  public static final String REQUIRED_UTIL_VERSION = "20030129-0723";
 
   /**
    * Constructor.
