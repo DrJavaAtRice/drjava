@@ -35,50 +35,38 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
+package edu.rice.cs.util.swing;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
-
-/**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20020802-2332;
- *
+import javax.swing.*;
+import javax.swing.text.*;
+import javax.swing.tree.*;
+import javax.swing.event.*;
+import javax.swing.table.*;
+import java.awt.*;
+import java.util.Vector;
+/** 
+ * Common TableModel for Uneditable tables
  * @version $Id$
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20020802-2332";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+public class UneditableTableModel extends DefaultTableModel {
+  public UneditableTableModel() {
+    super();
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  public UneditableTableModel(int rowCount, int columnCount) {
+    super(rowCount,columnCount);
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+  public UneditableTableModel(Object[][] data, Object[] columnNames) {
+    super(data, columnNames);
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
+  public UneditableTableModel(Vector columnNames, int rowCount) {
+    super(columnNames, rowCount);
   }
-} 
+  public UneditableTableModel(Vector data, Vector columnNames) {
+    super(data,columnNames);
+  }
+  public boolean isCellEditable(int row, int col) { 
+    return false; 
+  }
+}
