@@ -289,10 +289,10 @@ public class MainFrame extends JFrame {
   /** Creates the main window, and shows it. */
   public MainFrame() {
     _model = new SingleDisplayModel();
-
-    _openChooser = new JFileChooser(System.getProperty("user.dir"));
+    String userdir = System.getProperty("user.dir");
+    _openChooser = new JFileChooser(userdir);
     _openChooser.setFileFilter(new JavaSourceFilter());
-    _saveChooser = new JFileChooser(System.getProperty("user.dir"));
+    _saveChooser = new JFileChooser(userdir);
     //set up the hourglass cursor
     setGlassPane(new GlassPane());
     this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -733,9 +733,9 @@ public class MainFrame extends JFrame {
     _errorPanel = new CompilerErrorPanel(_model, this);
     _interactionsPane = new InteractionsPane(_model);
     _tabbedPane = new JTabbedPane();
-    _tabbedPane.add("Interactions", new JScrollPane(_interactionsPane));
+    _tabbedPane.add("Interactions", new BorderlessScrollPane(_interactionsPane));
     _tabbedPane.add("Compiler output", _errorPanel);
-    _tabbedPane.add("Console", new JScrollPane(_outputPane));
+    _tabbedPane.add("Console", new BorderlessScrollPane(_outputPane));
     
     // Select interactions pane when interactions tab is selected
     _tabbedPane.addChangeListener(new ChangeListener() {
@@ -778,7 +778,7 @@ public class MainFrame extends JFrame {
    */
   private JScrollPane _createDefScrollPane(OpenDefinitionsDocument doc) {
     DefinitionsPane pane = new DefinitionsPane(this, _model, doc);
-
+    
     // Add listeners
     _installNewDocumentListener(doc.getDocument());
     CompilerErrorCaretListener caretListener =
@@ -786,9 +786,10 @@ public class MainFrame extends JFrame {
     pane.addErrorCaretListener(caretListener);
 
     // Add to a scroll pane
-    JScrollPane scroll = new JScrollPane(pane,
-                                         JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                                         JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    JScrollPane scroll = new BorderlessScrollPane(pane,
+						  JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+						  JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    scroll.setBorder(null); // removes all default borders (MacOS X installs default borders)
     _defScrollPanes.put(doc, scroll);
     return scroll;
   }
@@ -797,10 +798,10 @@ public class MainFrame extends JFrame {
   private void _setUpPanes() {
     // Document list pane
     JScrollPane listScroll =
-      new JScrollPane(_docList,
-                      JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                      JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-
+      new BorderlessScrollPane(_docList,
+			       JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+			       JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    
     // DefinitionsPane
     JScrollPane defScroll = (JScrollPane)
       _defScrollPanes.get(_model.getActiveDocument());

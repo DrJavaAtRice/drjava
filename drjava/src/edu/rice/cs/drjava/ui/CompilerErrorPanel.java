@@ -159,7 +159,7 @@ public class CompilerErrorPanel extends JPanel {
     // If we don't, when it pops up it cuts away the right edge of the
     // text. Very bad.
     JScrollPane scroller =
-      new JScrollPane(_errorListPane,
+      new BorderlessScrollPane(_errorListPane,
                       JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                       JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 

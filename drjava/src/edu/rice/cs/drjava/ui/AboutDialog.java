@@ -62,7 +62,8 @@ public class AboutDialog extends JDialog {
     textArea.setEditable(false);
     textArea.setLineWrap(true);
     textArea.setWrapStyleWord(true);
-    getContentPane().add(new JScrollPane(textArea), BorderLayout.CENTER);
+    Container cp = getContentPane();
+    cp.add(new BorderlessScrollPane(textArea),BorderLayout.CENTER);
 
     JButton button = new JButton("OK");
     button.addActionListener(new ActionListener() {
@@ -77,7 +78,7 @@ public class AboutDialog extends JDialog {
     bottom.add(button);
     bottom.add(Box.createHorizontalGlue());
 
-    getContentPane().add(bottom, BorderLayout.SOUTH);
+    cp.add(bottom, BorderLayout.SOUTH);
 
     //pack();
     setSize((int) (owner.getWidth() * (4f/5f)),
