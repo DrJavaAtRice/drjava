@@ -52,57 +52,57 @@ public class ClassInfoCompiler {
    * The class info to compile
    */
   protected TreeClassInfo classInfo;
-
+  
   /**
    * The tree of the class to compile
    */
   protected TypeDeclaration typeDeclaration;
-
+  
   /**
    * The class factory
    */
   protected ClassFactory classFactory;
-
+  
   /**
    * The class finder
    */
   protected TreeClassFinder classFinder;
-
+  
   /**
    * The interpreter
    */
   protected TreeInterpreter interpreter;
-
+  
   /**
    * Is the class info represents an interface ?
    */
   protected boolean isInterface;
-
+  
   /**
    * Is the underlying class contain an abstract method?
    */
   protected boolean hasAbstractMethod;
-
+  
   /**
    * The class initializer expressions
    */
   protected List<Node> classInitializer = new LinkedList<Node>();
-
+  
   /**
    * The instance initializer expressions
    */
   protected List<Node> instanceInitializer = new LinkedList<Node>();
-
+  
   /**
    * The members visitor
    */
   protected MembersVisitor membersVisitor = new MembersVisitor();
-
+  
   /**
    * The importation manager
    */
   protected ImportationManager importationManager;
-
+  
   /**
    * Creates a new compiler
    * @param ci the class info to compile
@@ -117,7 +117,7 @@ public class ClassInfoCompiler {
     interpreter = (TreeInterpreter)classFinder.getInterpreter();
     isInterface = classInfo.isInterface();
   }
-
+  
   /**
    * Creates a Class object from the classInfo attribute
    * @return the created class
@@ -128,46 +128,46 @@ public class ClassInfoCompiler {
     String outer = (dc != null) ? dc.getName() : null;
     int       af = typeDeclaration.getAccessFlags();
     String  name = classInfo.getName();
-
+    
     if (isInterface) {
       af |= Modifier.INTERFACE;
     }
-
+    
     classFactory = new ClassFactory(af,
                                     name,
                                     classInfo.getSuperclass().getName(),
                                     interpreter.getClass(),
                                     interpreter.getExceptionClass(),
                                     interpreter.getClassLoader().toString());
-
+    
     // Add the innerclass attributes
     if (dc != null) {
       addInnerClassesAttribute(classInfo);
     }
-
+    
     ClassInfo[] inners = classInfo.getDeclaredClasses();
     for (int i = 0; i < inners.length; i++) {
       String ciname = inners[i].getName();
-
+      
       InnerClassesEntry ice = classFactory.addInnerClassesEntry();
       ice.setInnerClassInfo(ciname);
       ice.setOuterClassInfo(name);
       ice.setInnerName(ciname.substring(name.length() + 1, ciname.length()));
       ice.setInnerClassAccessFlags((short)inners[i].getModifiers());
     }
-
+    
     // Add the interfaces
     ClassInfo[] ci = classInfo.getInterfaces();
     for (int i = 0; i < ci.length; i++) {
       classFactory.addInterface(ci[i].getName());
     }
-
+    
     // Check and create the members
     Iterator it = typeDeclaration.getMembers().iterator();
     while (it.hasNext()) {
       ((Node)it.next()).acceptVisitor(membersVisitor);
     }
-
+    
     if (!isInterface &&
         hasAbstractMethod &&
         !Modifier.isAbstract(af)) {
@@ -175,7 +175,7 @@ public class ClassInfoCompiler {
                                   new String[] { name });
       throw new ExecutionError("misplaced.abstract", typeDeclaration );
     }
-
+    
     // Create the constructor(s)
     if (!isInterface) {
       ConstructorInfo[] cons = classInfo.getConstructors();
@@ -183,7 +183,7 @@ public class ClassInfoCompiler {
         addConstructor((TreeConstructorInfo)cons[i]);
       }
     }
-
+    
     // Create the class initializer
     if (classInitializer.size() > 0) {
       interpreter.registerMethod
@@ -196,12 +196,12 @@ public class ClassInfoCompiler {
                                new BlockStatement(classInitializer)),
          importationManager);
     }
-
+    
     // Define the class
     TreeClassLoader classLoader = (TreeClassLoader)interpreter.getClassLoader();
     return classLoader.defineClass(name, classFactory.getByteCode());
   }
-
+  
   /**
    * Adds a constructor to the current class
    * @param ci the constructor info
@@ -213,39 +213,39 @@ public class ClassInfoCompiler {
     for (int i = 0; i < cinf.length; i++) {
       params[i] = cinf[i].getName();
     }
-
+    
     // Get the exceptions
     cinf = ci.getExceptionTypes();
     String[] ex = new String[cinf.length];
     for (int i = 0; i < cinf.length; i++) {
       ex[i] = cinf[i].getName();
     }
-
+    
     String sig = ClassFactory.getMethodIdentifier
       (classInfo.getName(),
        "<init>",
        params,
        interpreter.getClassLoader().toString());
     ConstructorDeclaration cd = ci.getConstructorDeclaration();
-
+    
     // Check the constructor's name
     if (!cd.getName().equals(typeDeclaration.getName())) {
       cd.setProperty(NodeProperties.ERROR_STRINGS,
                      new String[] { cd.getName() });
       throw new ExecutionError("constructor.name", cd);
     }
-
+    
     // Register the constructor
     ConstructorInvocation civ = cd.getConstructorInvocation();
     ConstructorVisitor    cv = new ConstructorVisitor();
-
+    
     if (civ != null) {
       Iterator it = cd.getParameters().iterator();
       while (it.hasNext()) {
         ((Node)it.next()).acceptVisitor(cv);
       }
       civ.acceptVisitor(cv);
-
+      
       interpreter.registerConstructorArguments
         (sig,
          cd.getParameters(),
@@ -258,7 +258,7 @@ public class ClassInfoCompiler {
          new LinkedList<Expression>(),
          importationManager);
     }
-
+    
     MethodDeclaration md =
       new MethodDeclaration(cd.getAccessFlags(),
                             new VoidType(),
@@ -267,7 +267,7 @@ public class ClassInfoCompiler {
                             new LinkedList<ReferenceType>(),
                             new BlockStatement(cd.getStatements()));
     interpreter.registerMethod(sig, md, importationManager);
-
+    
     // Add the instance initialization statement to the constructor statement
     if (!cv.superConstructor.equals(classInfo.getName())) {
       ListIterator<Node> lit = cd.getStatements().listIterator();
@@ -276,34 +276,34 @@ public class ClassInfoCompiler {
         lit.add(it.next());
       }
     }
-
+    
     // Create the constructor
     classFactory.addConstructor(cd.getAccessFlags(), params, ex,
                                 cv.superConstructor,
                                 cv.constructorParameters);
   }
-
+  
   /**
    * Adds an inner class attribute to the given class
    */
   protected void addInnerClassesAttribute(ClassInfo ci) {
     ClassInfo dc = ci.getDeclaringClass();
-
+    
     while (dc != null) {
       String ciname = ci.getName();
       String dcname = dc.getName();
-
+      
       InnerClassesEntry ice = classFactory.addInnerClassesEntry();
       ice.setInnerClassInfo(ciname);
       ice.setOuterClassInfo(dcname);
       ice.setInnerName(ciname.substring(dcname.length() + 1, ciname.length()));
       ice.setInnerClassAccessFlags((short)ci.getModifiers());
-
+      
       ci = dc;
       dc = dc.getDeclaringClass();
     }
   }
-
+  
   /**
    * Adds a statement to the class initializer
    * @param n the statement to add
@@ -311,7 +311,7 @@ public class ClassInfoCompiler {
   protected void addToClassInitializer(Node n) {
     classInitializer.add(n);
   }
-
+  
   /**
    * Adds a statement to the instance initializer
    * @param n the statement to add
@@ -319,7 +319,7 @@ public class ClassInfoCompiler {
   protected void addToInstanceInitializer(Node n) {
     instanceInitializer.add(n);
   }
-
+  
   /**
    * To build the constructors
    */
@@ -327,7 +327,7 @@ public class ClassInfoCompiler {
     String          superConstructor;
     String[]        constructorParameters = new String[0];
     VariableContext context               = new VariableContext(importationManager);
-
+    
     /**
      * Visits a ConstructorInvocation
      * @param node the node to visit
@@ -338,7 +338,7 @@ public class ClassInfoCompiler {
         ClassInfo sc  = classInfo.getSuperclass();
         ClassInfo sdc = sc.getDeclaringClass();
         ClassInfo dc  = classInfo.getDeclaringClass();
-
+        
         if (dc != null && dc.equals(sdc) &&
             !Modifier.isStatic(sc.getModifiers())) {
           List<IdentifierToken> l = new LinkedList<IdentifierToken>();
@@ -354,7 +354,7 @@ public class ClassInfoCompiler {
           node.setExpression(exp);
         }
       }
-
+      
       List<Expression> args = node.getArguments();
       if (exp != null) {
         if (args == null) {
@@ -363,7 +363,7 @@ public class ClassInfoCompiler {
         }
         args.add(0, exp);
       }
-
+      
       if (args != null) {
         ListIterator<Expression> it = args.listIterator();
         while (it.hasNext()) {
@@ -376,15 +376,15 @@ public class ClassInfoCompiler {
             }
           }
         }
-
+        
         ConstructorInfo cons = null;
         try {
           ClassInfo[] params = null;
           it = args.listIterator();
-
+          
           int i = 0;
           params = new ClassInfo[args.size()];
-
+          
           while (it.hasNext()) {
             params[i++] = NodeProperties.getClassInfo(it.next());
           }
@@ -399,21 +399,21 @@ public class ClassInfoCompiler {
         } catch (NoSuchMethodException e) {
           throw new CatchedExceptionError(e, node);
         }
-
+        
         ClassInfo[] pt = cons.getParameterTypes();
         constructorParameters = new String[pt.length];
         for (int i = 0; i < pt.length; i++) {
           constructorParameters[i] = pt[i].getName();
         }
       }
-
+      
       if (superConstructor == null) {
         ClassInfo sc = classInfo.getSuperclass();
         superConstructor = sc.getName();
       }
       return null;
     }
-
+    
     /**
      * Visits a PrimitiveType
      * @param node the node to visit
@@ -424,7 +424,7 @@ public class ClassInfoCompiler {
       node.setProperty(NodeProperties.TYPE, result);
       return result;
     }
-
+    
     /**
      * Visits a ReferenceType
      * @param node the node to visit
@@ -439,12 +439,12 @@ public class ClassInfoCompiler {
       } catch (ClassNotFoundException e) {
         throw new CatchedExceptionError(e, node);
       }
-
+      
       // Set the type property of this node
       node.setProperty(NodeProperties.TYPE, c);
       return c;
     }
-
+    
     /**
      * Visits a ArrayType
      * @param node the node to visit
@@ -460,12 +460,12 @@ public class ClassInfoCompiler {
       } else {
         ac = new TreeClassInfo((TreeClassInfo)c);
       }
-
+      
       // Set the type property of this node
       node.setProperty(NodeProperties.TYPE, ac);
       return ac;
     }
-
+    
     /**
      * Visits a FormalParameter
      * @param node the node to visit
@@ -480,7 +480,7 @@ public class ClassInfoCompiler {
       }
       return null;
     }
-
+    
     /**
      * Visits a Literal
      * @param node the node to visit
@@ -492,14 +492,14 @@ public class ClassInfoCompiler {
                        (c == null) ? null : new JavaClassInfo(c));
       return null;
     }
-
+    
     /**
      * Visits a SimpleAssignExpression
      * @param node the node to visit
      */
     public Object visit(SimpleAssignExpression node) {
       Expression left  = node.getLeftExpression();
-
+      
       // Visit the left expression
       Object o = left.acceptVisitor(this);
       if (o != null) {
@@ -511,12 +511,12 @@ public class ClassInfoCompiler {
           throw new ExecutionError("left.expression", node);
         }
       }
-
+      
       // Sets the type property of this node
       node.setProperty(NodeProperties.TYPE, NodeProperties.getClassInfo(left));
       return null;
     }
-
+    
     /**
      * Visits an ObjectFieldAccess
      * @param node the node to visit
@@ -534,12 +534,12 @@ public class ClassInfoCompiler {
           return result;
         }
       }
-
+      
       // Load the field object
       ClassInfo c = NodeProperties.getClassInfo(node.getExpression());
       if (!c.isArray()) {
         FieldInfo f = null;
-
+        
         try {
           f = ClassInfoUtilities.getField(c, node.getFieldName());
         } catch (Exception e) {
@@ -558,7 +558,7 @@ public class ClassInfoCompiler {
       }
       return null;
     }
-
+    
     /**
      * Visits a StaticFieldAccess
      * @param node the node to visit
@@ -566,7 +566,7 @@ public class ClassInfoCompiler {
     public Object visit(StaticFieldAccess node) {
       // Visit the field type
       ClassInfo c = (ClassInfo)node.getFieldType().acceptVisitor(this);
-
+      
       // Load the field object
       FieldInfo f = null;
       try {
@@ -578,12 +578,12 @@ public class ClassInfoCompiler {
           throw new CatchedExceptionError(e, node);
         }
       }
-
+      
       node.setProperty(NodeProperties.TYPE, f.getType());
       return null;
     }
-
-
+    
+    
     /**
      * Visits a SuperFieldAccess
      * @param node the node to visit
@@ -599,7 +599,7 @@ public class ClassInfoCompiler {
       node.setProperty(NodeProperties.TYPE, f.getType());
       return null;
     }
-
+    
     /**
      * Visits an ObjectMethodCall
      * @param node the node to visit
@@ -620,8 +620,8 @@ public class ClassInfoCompiler {
                                                 node.getBeginColumn(),
                                                 node.getEndLine(),
                                                 node.getEndColumn()
-          );
-
+                                                  );
+            
             result.acceptVisitor(this);
             return result;
           }
@@ -640,20 +640,20 @@ public class ClassInfoCompiler {
                                             node.getBeginColumn(),
                                             node.getEndLine(),
                                             node.getEndColumn()
-        );
+                                              );
         result.acceptVisitor(this);
         return result;
       }
-
+      
       ClassInfo c = NodeProperties.getClassInfo(node.getExpression());
-
+      
       if (!c.isArray() || (c.isArray() && !node.getMethodName().equals("clone"))) {
         // Do the type checking of the arguments
         ClassInfo[] cargs = new ClassInfo[0];
         List<Expression> args = node.getArguments();
         if (args != null) {
           checkList(args, "malformed.argument", node);
-
+          
           cargs = new ClassInfo[args.size()];
           ListIterator<Expression> it = args.listIterator();
           int i  = 0;
@@ -667,7 +667,7 @@ public class ClassInfoCompiler {
         } catch (NoSuchMethodException e) {
           throw new CatchedExceptionError(e, node);
         }
-
+        
         // Set the node properties
         node.setProperty(NodeProperties.TYPE, m.getReturnType());
       } else {
@@ -683,7 +683,7 @@ public class ClassInfoCompiler {
       }
       return null;
     }
-
+    
     /**
      * Visits a StaticMethodCall
      * @param node the node to visit
@@ -694,7 +694,7 @@ public class ClassInfoCompiler {
       ClassInfo[] cargs = new ClassInfo[0];
       if (args != null) {
         checkList(args, "malformed.argument", node);
-
+        
         cargs = new ClassInfo[args.size()];
         ListIterator<Expression> it = args.listIterator();
         int      i  = 0;
@@ -724,24 +724,24 @@ public class ClassInfoCompiler {
         }
         throw new CatchedExceptionError(e, node);
       }
-
+      
       // Set the node properties
       node.setProperty(NodeProperties.TYPE, m.getReturnType());
       return null;
     }
-
+    
     /**
      * Visits a SuperMethodCall
      * @param node the node to visit
      */
     public Object visit(SuperMethodCall node) {
       ClassInfo c = classInfo.getSuperclass();
-
+      
       List<Expression> args = node.getArguments();
       ClassInfo[] pt = new ClassInfo[0];
       if (args != null) {
         checkList(args, "malformed.argument", node);
-
+        
         pt = new ClassInfo[args.size()];
         ListIterator<Expression> it = args.listIterator();
         int i = 0;
@@ -755,12 +755,12 @@ public class ClassInfoCompiler {
       } catch (Exception e) {
         throw new CatchedExceptionError(e, node);
       }
-
+      
       // Set the node type property
       node.setProperty(NodeProperties.TYPE, m.getReturnType());
       return null;
     }
-
+    
     /**
      * Visits a QualifiedName
      * @param node the node to visit
@@ -770,7 +770,7 @@ public class ClassInfoCompiler {
     public Object visit(QualifiedName node) {
       List<IdentifierToken> ids = node.getIdentifiers();
       IdentifierToken t = ids.get(0);
-
+      
       if (context.isDefinedVariable(t.image()) ||
           fieldExists(classInfo, t.image())) {
         // The name starts with a reference to a local variable,
@@ -790,10 +790,10 @@ public class ClassInfoCompiler {
             (new ReferenceType(classInfo.getName()),
              t.image());
         }
-
+        
         Iterator<IdentifierToken> it = ids.iterator();
         it.next();
-
+        
         IdentifierToken t2;
         while (it.hasNext()) {
           result = new ObjectFieldAccess
@@ -806,11 +806,11 @@ public class ClassInfoCompiler {
         result.acceptVisitor(this);
         return result;
       }
-
+      
       // The name must be, or starts with, a class name
       List<IdentifierToken> l = ListUtilities.listCopy(ids);
       boolean   b = false;
-
+      
       while (l.size() > 0) {
         String s = TreeUtilities.listToName(l);
         try {
@@ -827,14 +827,14 @@ public class ClassInfoCompiler {
                          new String[] { t.image() });
         throw new ExecutionError("undefined.class", node);
       }
-
+      
       // Creates a ReferenceType node
       IdentifierToken t2 = l.get(l.size()-1);
       ReferenceType rt = new ReferenceType(l,
                                            node.getFilename(),
                                            t.beginLine(), t.beginColumn(),
                                            t2.endLine(),  t2.endColumn());
-
+      
       if (l.size() != ids.size()) {
         // The end of the name is a sequence of field access
         ListIterator it = ids.listIterator(l.size());
@@ -859,7 +859,7 @@ public class ClassInfoCompiler {
         return rt;
       }
     }
-
+    
     /**
      * Visits a ThisExpression
      * @param node the node to visit
@@ -867,18 +867,18 @@ public class ClassInfoCompiler {
     public Object visit(ThisExpression node) {
       throw new ExecutionError("this.undefined", node);
     }
-
+    
     /**
      * Visits a SimpleAllocation
      * @param node the node to visit
      */
     public Object visit(SimpleAllocation node) {
       Node type = node.getCreationType();
-
+      
       node.setProperty(NodeProperties.TYPE, type.acceptVisitor(this));
       return null;
     }
-
+    
     /**
      * Visits an ArrayAllocation
      * @param node the node to visit
@@ -886,7 +886,7 @@ public class ClassInfoCompiler {
     public Object visit(ArrayAllocation node) {
       Node type = node.getCreationType();
       ClassInfo c = (ClassInfo)type.acceptVisitor(this);
-
+      
       for (int i = 0; i < node.getDimension(); i++) {
         if (c instanceof JavaClassInfo) {
           c = new JavaClassInfo((JavaClassInfo)c);
@@ -894,11 +894,11 @@ public class ClassInfoCompiler {
           c = new TreeClassInfo((TreeClassInfo)c);
         }
       }
-
+      
       node.setProperty(NodeProperties.TYPE, c);
       return null;
     }
-
+    
     /**
      * Visits an ArrayAccess
      * @param node the node to visit
@@ -919,12 +919,12 @@ public class ClassInfoCompiler {
                          new String[] { c.getName() });
         throw new ExecutionError("array.required", node);
       }
-
+      
       // Sets the properties of this node
       node.setProperty(NodeProperties.TYPE, c.getComponentType());
       return null;
     }
-
+    
     /**
      * Visits a TypeExpression
      * @param node the node to visit
@@ -933,7 +933,7 @@ public class ClassInfoCompiler {
       node.setProperty(NodeProperties.TYPE, JavaClassInfo.CLASS);
       return null;
     }
-
+    
     /**
      * Visits a NotExpression
      * @param node the node to visit
@@ -942,18 +942,18 @@ public class ClassInfoCompiler {
       node.setProperty(NodeProperties.TYPE, JavaClassInfo.BOOLEAN);
       return null;
     }
-
+    
     /**
      * Visits a ComplementExpression
      * @param node the node to visit
      */
     public Object visit(ComplementExpression node) {
       visitUnaryExpression(node);
-
+      
       // Check the type
       Node      n  = node.getExpression();
       ClassInfo ci = NodeProperties.getClassInfo(n);
-
+      
       if (ci instanceof JavaClassInfo) {
         Class c = ((JavaClassInfo)ci).getJavaClass();
         if (c == char.class || c == byte.class || c == short.class) {
@@ -968,7 +968,7 @@ public class ClassInfoCompiler {
       }
       return null;
     }
-
+    
     /**
      * Visits a PlusExpression
      * @param node the node to visit
@@ -978,7 +978,7 @@ public class ClassInfoCompiler {
       visitUnaryOperation(node, "malformed.expression");
       return null;
     }
-
+    
     /**
      * Visits a MinusExpression
      * @param node the node to visit
@@ -988,14 +988,14 @@ public class ClassInfoCompiler {
       visitUnaryOperation(node, "malformed.expression");
       return null;
     }
-
+    
     /**
      * Visits an AddExpression
      * @param node the node to visit
      */
     public Object visit(AddExpression node) {
       visitBinaryExpression(node);
-
+      
       // Check the types
       Node      ln  = node.getLeftExpression();
       Node      rn  = node.getRightExpression();
@@ -1003,7 +1003,7 @@ public class ClassInfoCompiler {
       ClassInfo rci = NodeProperties.getClassInfo(rn);
       Class     lc  = null;
       Class     rc  = null;
-
+      
       if ((lci instanceof JavaClassInfo) &&
           (rci instanceof JavaClassInfo)) {
         lc = lci.getJavaClass();
@@ -1011,7 +1011,7 @@ public class ClassInfoCompiler {
       } else {
         throw new ExecutionError("addition.type", node);
       }
-
+      
       if (lc == String.class || rc == String.class) {
         node.setProperty(NodeProperties.TYPE, JavaClassInfo.STRING);
       } else {
@@ -1019,22 +1019,22 @@ public class ClassInfoCompiler {
       }
       return null;
     }
-
+    
     /**
      * Visits an AddAssignExpression
      * @param node the node to visit
      */
     public Object visit(AddAssignExpression node) {
       visitBinaryExpression(node);
-
+      
       Node      ln  = node.getLeftExpression();
       ClassInfo lci = NodeProperties.getClassInfo(ln);
-
+      
       // Sets the type property of this node
       node.setProperty(NodeProperties.TYPE, lci);
       return null;
     }
-
+    
     /**
      * Visits a SubtractExpression
      * @param node the node to visit
@@ -1044,22 +1044,22 @@ public class ClassInfoCompiler {
       visitNumericExpression(node, "subtraction.type");
       return null;
     }
-
+    
     /**
      * Visits an SubtractAssignExpression
      * @param node the node to visit
      */
     public Object visit(SubtractAssignExpression node) {
       visitBinaryExpression(node);
-
+      
       Node      ln  = node.getLeftExpression();
       ClassInfo lci = NodeProperties.getClassInfo(ln);
-
+      
       // Sets the type property of this node
       node.setProperty(NodeProperties.TYPE, lci);
       return null;
     }
-
+    
     /**
      * Visits a MultiplyExpression
      * @param node the node to visit
@@ -1069,23 +1069,23 @@ public class ClassInfoCompiler {
       visitNumericExpression(node, "multiplication.type");
       return null;
     }
-
+    
     /**
      * Visits an MultiplyAssignExpression
      * @param node the node to visit
      */
     public Object visit(MultiplyAssignExpression node) {
       visitBinaryExpression(node);
-
+      
       // Check the types
       Node      ln  = node.getLeftExpression();
       ClassInfo lci = NodeProperties.getClassInfo(ln);
-
+      
       // Sets the type property of this node
       node.setProperty(NodeProperties.TYPE, lci);
       return null;
     }
-
+    
     /**
      * Visits a DivideExpression
      * @param node the node to visit
@@ -1095,23 +1095,23 @@ public class ClassInfoCompiler {
       visitNumericExpression(node, "division.type");
       return null;
     }
-
+    
     /**
      * Visits an DivideAssignExpression
      * @param node the node to visit
      */
     public Object visit(DivideAssignExpression node) {
       visitBinaryExpression(node);
-
+      
       // Check the types
       Node      ln  = node.getLeftExpression();
       ClassInfo lci = NodeProperties.getClassInfo(ln);
-
+      
       // Sets the type property of this node
       node.setProperty(NodeProperties.TYPE, lci);
       return null;
     }
-
+    
     /**
      * Visits a RemainderExpression
      * @param node the node to visit
@@ -1121,23 +1121,23 @@ public class ClassInfoCompiler {
       visitNumericExpression(node, "remainder.type");
       return null;
     }
-
+    
     /**
      * Visits an RemainderAssignExpression
      * @param node the node to visit
      */
     public Object visit(RemainderAssignExpression node) {
       visitBinaryExpression(node);
-
+      
       // Check the types
       Node      ln  = node.getLeftExpression();
       ClassInfo lci = NodeProperties.getClassInfo(ln);
-
+      
       // Sets the type property of this node
       node.setProperty(NodeProperties.TYPE, lci);
       return null;
     }
-
+    
     /**
      * Visits an EqualExpression
      * @param node the node to visit
@@ -1146,7 +1146,7 @@ public class ClassInfoCompiler {
       node.setProperty(NodeProperties.TYPE, JavaClassInfo.BOOLEAN);
       return null;
     }
-
+    
     /**
      * Visits a NotEqualExpression
      * @param node the node to visit
@@ -1155,7 +1155,7 @@ public class ClassInfoCompiler {
       node.setProperty(NodeProperties.TYPE, JavaClassInfo.BOOLEAN);
       return null;
     }
-
+    
     /**
      * Visits a LessExpression
      * @param node the node to visit
@@ -1164,7 +1164,7 @@ public class ClassInfoCompiler {
       node.setProperty(NodeProperties.TYPE, JavaClassInfo.BOOLEAN);
       return null;
     }
-
+    
     /**
      * Visits a LessOrEqualExpression
      * @param node the node to visit
@@ -1173,7 +1173,7 @@ public class ClassInfoCompiler {
       node.setProperty(NodeProperties.TYPE, JavaClassInfo.BOOLEAN);
       return null;
     }
-
+    
     /**
      * Visits a GreaterExpression
      * @param node the node to visit
@@ -1182,7 +1182,7 @@ public class ClassInfoCompiler {
       node.setProperty(NodeProperties.TYPE, JavaClassInfo.BOOLEAN);
       return null;
     }
-
+    
     /**
      * Visits a GreaterOrEqualExpression
      * @param node the node to visit
@@ -1191,7 +1191,7 @@ public class ClassInfoCompiler {
       node.setProperty(NodeProperties.TYPE, JavaClassInfo.BOOLEAN);
       return null;
     }
-
+    
     /**
      * Visits a BitAndExpression
      * @param node the node to visit
@@ -1201,20 +1201,20 @@ public class ClassInfoCompiler {
       visitBitwiseExpression(node, "bit.and.type");
       return null;
     }
-
+    
     /**
      * Visits a BitAndAssignExpression
      * @param node the node to visit
      */
     public Object visit(BitAndAssignExpression node) {
       visitBinaryExpression(node);
-
+      
       // Sets the type property of this node
       node.setProperty(NodeProperties.TYPE,
                        NodeProperties.getClassInfo(node.getLeftExpression()));
       return null;
     }
-
+    
     /**
      * Visits a ExclusiveOrExpression
      * @param node the node to visit
@@ -1224,20 +1224,20 @@ public class ClassInfoCompiler {
       visitBitwiseExpression(node, "xor.type");
       return null;
     }
-
+    
     /**
      * Visits a ExclusiveOrAssignExpression
      * @param node the node to visit
      */
     public Object visit(ExclusiveOrAssignExpression node) {
       visitBinaryExpression(node);
-
+      
       // Sets the type property of this node
       node.setProperty(NodeProperties.TYPE,
                        NodeProperties.getClassInfo(node.getLeftExpression()));
       return null;
     }
-
+    
     /**
      * Visits a BitOrExpression
      * @param node the node to visit
@@ -1247,20 +1247,20 @@ public class ClassInfoCompiler {
       visitBitwiseExpression(node, "bit.or.type");
       return null;
     }
-
+    
     /**
      * Visits a BitOrAssignExpression
      * @param node the node to visit
      */
     public Object visit(BitOrAssignExpression node) {
       visitBinaryExpression(node);
-
+      
       // Sets the type property of this node
       node.setProperty(NodeProperties.TYPE,
                        NodeProperties.getClassInfo(node.getLeftExpression()));
       return null;
     }
-
+    
     /**
      * Visits a ShiftLeftExpression
      * @param node the node to visit
@@ -1270,7 +1270,7 @@ public class ClassInfoCompiler {
       visitShiftExpression(node, "shift.left.type");
       return null;
     }
-
+    
     /**
      * Visits a ShiftLeftAssignExpression
      * @param node the node to visit
@@ -1280,7 +1280,7 @@ public class ClassInfoCompiler {
       visitShiftExpression(node, "shift.left.type");
       return null;
     }
-
+    
     /**
      * Visits a ShiftRightExpression
      * @param node the node to visit
@@ -1290,7 +1290,7 @@ public class ClassInfoCompiler {
       visitShiftExpression(node, "shift.right.type");
       return null;
     }
-
+    
     /**
      * Visits a ShiftRightAssignExpression
      * @param node the node to visit
@@ -1300,7 +1300,7 @@ public class ClassInfoCompiler {
       visitShiftExpression(node, "shift.right.type");
       return null;
     }
-
+    
     /**
      * Visits a UnsignedShiftRightExpression
      * @param node the node to visit
@@ -1310,7 +1310,7 @@ public class ClassInfoCompiler {
       visitShiftExpression(node, "unsigned.shift.right.type");
       return null;
     }
-
+    
     /**
      * Visits a UnsignedShiftRightAssignExpression
      * @param node the node to visit
@@ -1320,7 +1320,7 @@ public class ClassInfoCompiler {
       visitShiftExpression(node, "unsigned.shift.right.type");
       return null;
     }
-
+    
     /**
      * Visits an AndExpression
      * @param node the node to visit
@@ -1329,7 +1329,7 @@ public class ClassInfoCompiler {
       node.setProperty(NodeProperties.TYPE, JavaClassInfo.BOOLEAN);
       return null;
     }
-
+    
     /**
      * Visits an OrExpression
      * @param node the node to visit
@@ -1338,7 +1338,7 @@ public class ClassInfoCompiler {
       node.setProperty(NodeProperties.TYPE, JavaClassInfo.BOOLEAN);
       return null;
     }
-
+    
     /**
      * Visits a InstanceOfExpression
      * @param node the node to visit
@@ -1347,7 +1347,7 @@ public class ClassInfoCompiler {
       node.setProperty(NodeProperties.TYPE, JavaClassInfo.BOOLEAN);
       return null;
     }
-
+    
     /**
      * Visits a ConditionalExpression
      * @param node the node to visit
@@ -1369,14 +1369,14 @@ public class ClassInfoCompiler {
         }
         node.setIfFalseExpression((Expression)o);
       }
-
+      
       // Determine the type of the expression
       Node  n1 = node.getIfTrueExpression();
       Node  n2 = node.getIfFalseExpression();
       ClassInfo c1 = NodeProperties.getClassInfo(n1);
       ClassInfo c2 = NodeProperties.getClassInfo(n2);
       ClassInfo ec = null;
-
+      
       if (c1 == null) {
         ec = c2;
       } else if (c2 == null) {
@@ -1390,79 +1390,79 @@ public class ClassInfoCompiler {
       } else {
         throw new ExecutionError("conditional.type", node);
       }
-
+      
       node.setProperty(NodeProperties.TYPE, ec);
       return null;
     }
-
+    
     /**
      * Visits a PostIncrement
      * @param node the node to visit
      */
     public Object visit(PostIncrement node) {
       visitUnaryExpression(node);
-
+      
       Node exp = node.getExpression();
       ClassInfo ci = NodeProperties.getClassInfo(exp);
-
+      
       if (!(ci instanceof JavaClassInfo)) {
         throw new ExecutionError("post.increment.type", node);
       }
       node.setProperty(NodeProperties.TYPE, ci);
       return null;
     }
-
+    
     /**
      * Visits a PreIncrement
      * @param node the node to visit
      */
     public Object visit(PreIncrement node) {
       visitUnaryExpression(node);
-
+      
       Node exp = node.getExpression();
       ClassInfo ci = NodeProperties.getClassInfo(exp);
-
+      
       if (!(ci instanceof JavaClassInfo)) {
         throw new ExecutionError("pre.increment.type", node);
       }
       node.setProperty(NodeProperties.TYPE, ci);
       return null;
     }
-
+    
     /**
      * Visits a PostDecrement
      * @param node the node to visit
      */
     public Object visit(PostDecrement node) {
       visitUnaryExpression(node);
-
+      
       Node exp = node.getExpression();
       ClassInfo ci = NodeProperties.getClassInfo(exp);
-
+      
       if (!(ci instanceof JavaClassInfo)) {
         throw new ExecutionError("post.decrement.type", node);
       }
       node.setProperty(NodeProperties.TYPE, ci);
       return null;
     }
-
+    
     /**
      * Visits a PreDecrement
      * @param node the node to visit
      */
     public Object visit(PreDecrement node) {
       visitUnaryExpression(node);
-
+      
       Node exp = node.getExpression();
       ClassInfo ci = NodeProperties.getClassInfo(exp);
-
+      
       if (!(ci instanceof JavaClassInfo)) {
         throw new ExecutionError("pre.decrement.type", node);
       }
       node.setProperty(NodeProperties.TYPE, ci);
       return null;
     }
-
+    
     /**
      * Visits a CastExpression
      * @param node the node to visit
@@ -1472,7 +1472,7 @@ public class ClassInfoCompiler {
       node.setProperty(NodeProperties.TYPE, n.acceptVisitor(this));
       return null;
     }
-
+    
     /**
      * Visits the subexpression of an UnaryExpression
      */
@@ -1486,14 +1486,14 @@ public class ClassInfoCompiler {
         node.setExpression((Expression)o);
       }
     }
-
+    
     /**
      * Visits an unary operation
      */
     protected void visitUnaryOperation(UnaryExpression node, String s) {
       Node      n  = node.getExpression();
       ClassInfo ci = NodeProperties.getClassInfo(n);
-
+      
       if (ci.isPrimitive()) {
         Class c = ci.getJavaClass();
         if (c == char.class  ||
@@ -1510,7 +1510,7 @@ public class ClassInfoCompiler {
         throw new ExecutionError(s, node);
       }
     }
-
+    
     /**
      * Visits the subexpressions of a BinaryExpression
      */
@@ -1523,7 +1523,7 @@ public class ClassInfoCompiler {
         }
         node.setLeftExpression((Expression)o);
       }
-
+      
       // Visit the right expression
       o = node.getRightExpression().acceptVisitor(this);
       if (o != null) {
@@ -1533,7 +1533,7 @@ public class ClassInfoCompiler {
         node.setRightExpression((Expression)o);
       }
     }
-
+    
     /**
      * Visits a numeric expression
      */
@@ -1543,7 +1543,7 @@ public class ClassInfoCompiler {
       ClassInfo rci = NodeProperties.getClassInfo(node.getRightExpression());
       Class lc = lci.getJavaClass();
       Class rc = rci.getJavaClass();
-
+      
       if (lc == null           || rc == null          ||
           lc == boolean.class  || rc == boolean.class ||
           !lc.isPrimitive()    || !rc.isPrimitive()   ||
@@ -1559,7 +1559,7 @@ public class ClassInfoCompiler {
         node.setProperty(NodeProperties.TYPE, JavaClassInfo.INT);
       }
     }
-
+    
     /**
      * Visits a bitwise expression
      */
@@ -1571,7 +1571,7 @@ public class ClassInfoCompiler {
       ClassInfo rci = NodeProperties.getClassInfo(rn);
       Class     lc  = null;
       Class     rc  = null;
-
+      
       if ((lci instanceof JavaClassInfo) &&
           (rci instanceof JavaClassInfo)) {
         lc = lci.getJavaClass();
@@ -1579,7 +1579,7 @@ public class ClassInfoCompiler {
       } else {
         throw new ExecutionError(s, node);
       }
-
+      
       if (lc == null           || rc == null           ||
           lc == void.class     || rc == void.class     ||
           lc == float.class    || rc == float.class    ||
@@ -1595,7 +1595,7 @@ public class ClassInfoCompiler {
         node.setProperty(NodeProperties.TYPE, JavaClassInfo.INT);
       }
     }
-
+    
     /**
      * Visits a shift expression
      */
@@ -1607,7 +1607,7 @@ public class ClassInfoCompiler {
       ClassInfo rci = NodeProperties.getClassInfo(rn);
       Class     lc  = null;
       Class     rc  = null;
-
+      
       if ((lci instanceof JavaClassInfo) &&
           (rci instanceof JavaClassInfo)) {
         lc = lci.getJavaClass();
@@ -1615,7 +1615,7 @@ public class ClassInfoCompiler {
       } else {
         throw new ExecutionError(s, node);
       }
-
+      
       if (lc == null          || rc == null          ||
           lc == boolean.class || rc == boolean.class ||
           lc == void.class    || rc == void.class    ||
@@ -1629,7 +1629,7 @@ public class ClassInfoCompiler {
         node.setProperty(NodeProperties.TYPE, JavaClassInfo.INT);
       }
     }
-
+    
     /**
      * Check a list of node
      */
@@ -1645,7 +1645,7 @@ public class ClassInfoCompiler {
         }
       }
     }
-
+    
     /**
      * Whether the given name represents a field in this context
      * @param dc the declaring class
@@ -1670,7 +1670,7 @@ public class ClassInfoCompiler {
       return result;
     }
   }
-
+  
   /**
    * To visit the members of a type declaration
    */
@@ -1686,7 +1686,7 @@ public class ClassInfoCompiler {
       }
       return null;
     }
-
+    
     /**
      * Visits a InstanceInitializer
      * @param node the node to visit
@@ -1698,7 +1698,7 @@ public class ClassInfoCompiler {
       }
       return null;
     }
-
+    
     /**
      * Visits a FieldDeclaration
      * @param node the node to visit
@@ -1708,7 +1708,7 @@ public class ClassInfoCompiler {
       int       af = node.getAccessFlags();
       String    rt = fi.getType().getName();
       String    fn = node.getName();
-
+      
       if (isInterface) {
         if (Modifier.isPrivate(af) || Modifier.isProtected(af)) {
           node.setProperty(NodeProperties.ERROR_STRINGS,
@@ -1717,7 +1717,7 @@ public class ClassInfoCompiler {
         }
         af |= Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
       }
-
+      
       Expression init = node.getInitializer();
       if (init != null) {
         if ((init instanceof Literal) &&
@@ -1785,7 +1785,7 @@ public class ClassInfoCompiler {
             } else {
               throw new ExecutionError("invalid.constant", node);
             }
-
+            
           } else if (init instanceof BooleanLiteral) {
             Boolean val = (Boolean)((Literal)init).getValue();
             if (rt.equals("boolean")) {
@@ -1800,7 +1800,7 @@ public class ClassInfoCompiler {
           }
         } else {
           classFactory.addField(af & ~Modifier.FINAL, rt, fn);
-
+          
           Expression var = null;
           if (Modifier.isStatic(af)) {
             ReferenceType typ = new ReferenceType(classInfo.getName());
@@ -1825,7 +1825,7 @@ public class ClassInfoCompiler {
       }
       return null;
     }
-
+    
     /**
      * Visits a MethodDeclaration
      * @param node the node to visit
@@ -1838,7 +1838,7 @@ public class ClassInfoCompiler {
       String     mn         = node.getName();
       String     rt         = mi.getReturnType().getName();
       boolean    isAbstract;
-
+      
       // Check the modifiers
       if (isInterface) {
         if (Modifier.isPrivate(af)   ||
@@ -1855,31 +1855,31 @@ public class ClassInfoCompiler {
         isAbstract = Modifier.isAbstract(af);
       }
       hasAbstractMethod |= isAbstract;
-
+      
       // Create the parameter array
       ClassInfo[] cia = mi.getParameterTypes();
       String[] params = new String[cia.length];
       for (int i = 0; i < cia.length; i++) {
         params[i] = cia[i].getName();
       }
-
+      
       // Create the exception array
       cia = mi.getExceptionTypes();
       String[] except = new String[cia.length];
       for (int i = 0; i < cia.length; i++) {
         except[i] = cia[i].getName();
       }
-
+      
       // Create the method
       classFactory.addMethod(af, rt, mn, params, except);
-
+      
       // Create the super method accessor
       if (!isInterface &&
           !isAbstract &&
           isRedefinedMethod(mi)) {
         classFactory.addSuperMethodAccessor(af, rt, mn, params, except);
       }
-
+      
       // Check the method
       Node body = node.getBody();
       if ((isAbstract && body != null) ||
@@ -1888,13 +1888,13 @@ public class ClassInfoCompiler {
                          new String[] { node.getName() });
         throw new ExecutionError("abstract.method.body", node);
       }
-
+      
       if (!isAbstract && body == null) {
         node.setProperty(NodeProperties.ERROR_STRINGS,
                          new String[] { node.getName() });
         throw new ExecutionError("missing.method.body", node);
       }
-
+      
       // Register the body
       if (body != null) {
         // Register the method
@@ -1907,7 +1907,7 @@ public class ClassInfoCompiler {
       }
       return null;
     }
-
+    
     /**
      * Whether the given method is a redefinition
      */

@@ -36,71 +36,104 @@ package koala.dynamicjava.tree;
  */
 
 public class LongLiteral extends Literal {
-    /**
-     * Initializes a literal
-     * @param rep the representation of the literal
-     */
-    public LongLiteral(String rep) {
- this(rep, null, 0, 0, 0, 0);
+  /**
+   * Initializes a literal
+   * @param rep the representation of the literal
+   */
+  public LongLiteral(String rep) {
+    this(rep, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Initializes a literal
+   * @param rep the representation of the literal
+   * @param fn  the filename
+   * @param bl  the begin line
+   * @param bc  the begin column
+   * @param el  the end line
+   * @param ec  the end column
+   */
+  public LongLiteral(String rep, String fn, int bl, int bc, int el, int ec) {
+    super(rep,
+          parse(rep.substring(0, rep.length()-1)),
+          long.class,
+          fn, bl, bc, el, ec);
+  }
+  
+  /**
+   * Parse the representation of an integer
+   */
+  private static Long parse(String s) {
+    if (s.startsWith("0x")) {
+      return parseHexadecimal(s.substring(2, s.length()));
+    } else if (s.startsWith("0")) {
+      return parseOctal(s);
+    } else {
+      return Long.valueOf(s);
     }
-
-    /**
-     * Initializes a literal
-     * @param rep the representation of the literal
-     * @param fn  the filename
-     * @param bl  the begin line
-     * @param bc  the begin column
-     * @param el  the end line
-     * @param ec  the end column
-     */
-    public LongLiteral(String rep, String fn, int bl, int bc, int el, int ec) {
- super(rep,
-       parse(rep.substring(0, rep.length()-1)),
-       long.class,
-       fn, bl, bc, el, ec);
+  }
+  
+  /**
+   * Parses an hexadecimal number
+   */
+  private static Long parseHexadecimal(String s) {
+    long value = 0;
+    for (int i = 0; i < s.length(); i++) {
+      char c = Character.toLowerCase(s.charAt(i));
+      if ((value >>> 60) != 0) {
+        throw new NumberFormatException(s);
+      }
+      value = (value << 4) + c + ((c >= 'a' && c <= 'f') ? 10 - 'a' : - '0');
     }
-
-    /**
-     * Parse the representation of an integer
-     */
-    private static Long parse(String s) {
- if (s.startsWith("0x")) {
-     return parseHexadecimal(s.substring(2, s.length()));
- } else if (s.startsWith("0")) {
-     return parseOctal(s);
- } else {
-     return Long.valueOf(s);
- }
+    return new Long(value);
+  }
+  
+  /**
+   * Parses an octal number
+   */
+  private static Long parseOctal(String s) {
+    long value = 0;
+    for (int i = 0; i < s.length(); i++) {
+      char c = s.charAt(i);
+      if ((value >>> 61) != 0) {
+        throw new NumberFormatException(s);
+      }
+      value = (value << 3) + c - '0';
     }
-
-    /**
-     * Parses an hexadecimal number
-     */
-    private static Long parseHexadecimal(String s) {
- long value = 0;
- for (int i = 0; i < s.length(); i++) {
-     char c = Character.toLowerCase(s.charAt(i));
-     if ((value >>> 60) != 0) {
-  throw new NumberFormatException(s);
-     }
-     value = (value << 4) + c + ((c >= 'a' && c <= 'f') ? 10 - 'a' : - '0');
- }
- return new Long(value);
-    }
-
-    /**
-     * Parses an octal number
-     */
-    private static Long parseOctal(String s) {
- int value = 0;
- for (int i = 0; i < s.length(); i++) {
-     char c = s.charAt(i);
-     if ((value >>> 61) != 0) {
-  throw new NumberFormatException(s);
-     }
-     value = (value << 3) + c - '0';
- }
- return new Long(value);
-    }
- 
+    return new Long(value);
+  }
+  
+  /*Begin Static Test Methods*/
+  public static boolean testParse() {
+    if(((new Long("312").compareTo(parse("0x138"))) == 0) &&
+       ((new Long("312").compareTo(parse("0470"))) == 0) &&
+       ((new Long("312").compareTo(parse("312"))) == 0))
+      return true;
+    else
+      return false;
+  }
+  
+  /*Test for correct conversion at zero, max(int), max(int)+1*/
+  /*TODO: add in test for negative numbers*/
+  public static boolean testParseHexadecimal(){
+    if(((new Long("0").compareTo(parseHexadecimal("0"))) == 0) &&
+       ((new Long("2147483647").compareTo(parseHexadecimal("7fffffff"))) == 0) &&
+       ((new Long("2147483648").compareTo(parseHexadecimal("80000000"))) == 0))
+      return true;
+    else
+      return false;
+  }
+  
+  /*Test for correct conversion at zero, max(int), max(int)+1*/
+  /*TODO: add in test for negative numbers*/
+  public static boolean testParseOctal(){
+    if(((new Long("0").compareTo(parseOctal("0"))) == 0) &&
+       ((new Long("2147483647").compareTo(parseOctal("17777777777"))) == 0) &&
+         ((new Long("2147483648").compareTo(parseOctal("20000000000"))) == 0)
+         )
+      return true;
+    else
+      return false;
+  }
+  /*End Static Test Methods*/
 }
