@@ -221,7 +221,7 @@ public class MainFrame extends JFrame {
    * Asks the user for a file name and saves the document
    * currently in the definitions pane to that file.
    */
-  private Action _saveAsAction = new AbstractAction("Save as") {
+  private Action _saveAsAction = new AbstractAction("Save As") {
     public void actionPerformed(ActionEvent ae) {
       _saveAs();
     }
@@ -230,7 +230,7 @@ public class MainFrame extends JFrame {
   /**
    * Saves all documents, prompting for file names as necessary
    */
-  private Action _saveAllAction = new AbstractAction("Save all") {
+  private Action _saveAllAction = new AbstractAction("Save All") {
     public void actionPerformed(ActionEvent ae) {
       _saveAll();
     }
@@ -261,7 +261,7 @@ public class MainFrame extends JFrame {
 
   /** Aborts current interaction. */
   private Action _abortInteractionAction
-    = new AbstractAction("Abort interaction")
+    = new AbstractAction("Abort")
   {
     public void actionPerformed(ActionEvent ae) {
       String title = "Confirm abort interaction";
@@ -295,7 +295,7 @@ public class MainFrame extends JFrame {
   };
 
   /** Asks the user for a line number and goes there. */
-  private Action _gotoLineAction = new AbstractAction("Goto line") {
+  private Action _gotoLineAction = new AbstractAction("Goto Line") {
     public void actionPerformed(ActionEvent ae) {
       _gotoLine();
     }
@@ -310,7 +310,7 @@ public class MainFrame extends JFrame {
 
   /** Clears the interactions console. */
   private Action _resetInteractionsAction =
-    new AbstractAction("Reset interactions")
+    new AbstractAction("Reset")
   {
     public void actionPerformed(ActionEvent ae) {
       _model.resetInteractions();
@@ -727,8 +727,8 @@ public class MainFrame extends JFrame {
    * constructor of each action, which will subclass AbstractAction.
    */
   private void _setUpActions() {
-    _setUpAction(_newAction, "New", "New");
-    _setUpAction(_openAction, "Open", "Open");
+    _setUpAction(_newAction, "New", "Creat a new document");
+    _setUpAction(_openAction, "Open", "Open an existing file");
     _setUpAction(_saveAction, "Save", "Save the current document");
     _setUpAction(_saveAsAction, "SaveAs", "Save the current document with a new name");
     _setUpAction(_closeAction, "Close", "Close");
@@ -761,7 +761,10 @@ public class MainFrame extends JFrame {
   }
 
   private void _setUpAction(Action a, String icon, String desc) {
-    a.putValue(Action.SMALL_ICON, _getIcon(icon + "16.gif"));
+    // Commented out so that the toolbar buttons use text instead of icons.
+    // createManualToolbarButton needed to be modified as well.
+    // a.putValue(Action.SMALL_ICON, _getIcon(icon + "16.gif"));
+    
     a.putValue(Action.SHORT_DESCRIPTION, desc);
   }
 
@@ -945,7 +948,12 @@ public class MainFrame extends JFrame {
 
   JButton _createManualToolbarButton(Action a) {
     final JButton ret;
-    final Icon icon = (Icon) a.getValue(Action.SMALL_ICON);
+    
+    // icon is set to null so that toolbar buttons use text instead
+    // icons. To change back to icons, simply replace "null" with the
+    // commented out text that follows.
+    // _setUpAction had to be modified as well.
+    final Icon icon = null; //(Icon) a.getValue(Action.SMALL_ICON);
     if (icon == null) {
       ret = new JButton( (String) a.getValue(Action.NAME));
     }
@@ -987,10 +995,18 @@ public class MainFrame extends JFrame {
     _saveButton = _toolBar.add(_saveAction);
     _toolBar.add(_closeAction);
     
-    // Print preview, print
+    // Compile, reset, abort
     _toolBar.addSeparator();
-    _toolBar.add(_printPreviewAction);
-    _toolBar.add(_printAction);
+    _compileButton = _toolBar.add(_compileAction);
+    _toolBar.add(_resetInteractionsAction);
+    _toolBar.add(_abortInteractionAction);
+
+    // Commented out to make room on the toolbar;
+    // print actions don't need buttons.
+    // Print preview, print
+    //_toolBar.addSeparator();
+    //_toolBar.add(_printPreviewAction);
+    //_toolBar.add(_printAction);
     
     // Cut, copy, paste
     _toolBar.addSeparator();
@@ -1013,12 +1029,6 @@ public class MainFrame extends JFrame {
     // Find
     _toolBar.addSeparator();
     _toolBar.add(_findReplaceAction);
-
-    // Compile, reset, abort
-    _toolBar.addSeparator();
-    _compileButton = _toolBar.add(_compileAction);
-    _toolBar.add(_resetInteractionsAction);
-    _toolBar.add(_abortInteractionAction);
 
     getContentPane().add(_toolBar, BorderLayout.NORTH);
   }
