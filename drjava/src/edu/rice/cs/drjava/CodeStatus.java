@@ -49,5 +49,5 @@ package edu.rice.cs.drjava;
  * @version $Idx$
  */
 public class CodeStatus {
-  public static final boolean DEVELOPMENT = true;
+  public static final boolean DEVELOPMENT = false;
 }
