@@ -1,13 +1,9 @@
 package edu.rice.cs.drjava.ui;
 
-import javax.swing.JTextPane;
-import javax.swing.Action;
-import javax.swing.AbstractAction;
-import javax.swing.KeyStroke;
-import javax.swing.text.Keymap;
+import javax.swing.*;
+import javax.swing.text.*;
 import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
-import java.awt.event.ActionEvent;
+import java.awt.event.*;
 
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.repl.*;
@@ -18,7 +14,10 @@ import edu.rice.cs.drjava.model.repl.*;
  * @version $Id$
  */
 public class InteractionsPane extends JTextPane {
-  private GlobalModel _model;
+  private static final EditorKit EDITOR_KIT = new InteractionsEditorKit();
+
+  private final GlobalModel _model;
+
   private AbstractAction _evalAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       _model.interpretCurrentInteraction();
@@ -43,6 +42,14 @@ public class InteractionsPane extends JTextPane {
     }
   };
 
+  /**
+   * Overriding this method ensures that all new documents created in this
+   * editor pane use our editor kit (and thus our model).
+   */
+  protected EditorKit createDefaultEditorKit() {
+    return EDITOR_KIT;
+  }
+
   public InteractionsPane(GlobalModel model) {
     super(model.getInteractionsDocument());
     _model = model;
@@ -61,6 +68,7 @@ public class InteractionsPane extends JTextPane {
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), 
                                  _historyNextAction);
     setKeymap(ourMap);
+
   }
 
 }

@@ -221,8 +221,10 @@ public abstract class GlobalModelTestCase extends TestCase {
     listener.assertInteractionStartCount(1);
     listener.assertInteractionEndCount(1);
 
-    final int resultsEndLocation = interactionsDoc.getLength() -
+    // skip 1 for newline
+    final int resultsEndLocation = interactionsDoc.getLength() - 1 -
                                    InteractionsDocument.PROMPT.length();
+
     final int resultsLen = resultsEndLocation - resultsStartLocation;
 
     return interactionsDoc.getText(resultsStartLocation, resultsLen);

@@ -22,6 +22,12 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
   private GlobalModel _model;
 
   /**
+   * Is there a JVM in the process of starting up?
+   * This variable is protected by synchronized(this).
+   */
+  private boolean _startupInProgress = false;
+
+  /**
    * This is the pointer to the interpreter JVM remote object, used to call
    * back to it. It has the value null when the interpeter JVM is not running
    * or is not connected yet. It gets set to a value by
@@ -70,6 +76,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     _ensureInterpreterConnected();
 
     try {
+      //System.err.println("interpret to " + _interpreterJVM + ": " + s);
       _interpreterJVM.interpret(s);
     }
     catch (RemoteException re) {
@@ -81,6 +88,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     _ensureInterpreterConnected();
 
     try {
+      //System.err.println("addclasspath to " + _interpreterJVM + ": " + path);
       _interpreterJVM.addClassPath(path);
     }
     catch (RemoteException re) {
@@ -131,7 +139,9 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     throws RemoteException
   {
     synchronized(this) {
+      //System.err.println("interpreter jvm registered: " + remote);
       _interpreterJVM = remote;
+      _startupInProgress = false;
       // wake up anyone waiting for an interpreter!
       notify();
     }
@@ -192,14 +202,28 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
 
   /**
    * Kills current interpreter JVM if any, then starts a new one.
+   * It turns out that before I added the {@link #_startupInProgress} guard,
+   * we were starting up two jvms in quick succession sometimes. This caused
+   * nasty problems (sometimes, it was a timing thing!) if the addClasspath
+   * issued after an abort went to the first JVM but then future
+   * interpretations went to the second JVM! So, we can make
+   * restartInterpreterJVM safe for duplicate calls by just not starting
+   * another if the previous one is in the process of starting up.
    */
   public void restartInterpreterJVM() {
     synchronized(this) {
+     if (_startupInProgress) {
+        return;
+      }
+
+      _startupInProgress = true;
+
       killInterpreter();
 
       String className = InterpreterJVM.class.getName();
       String[] args = new String[] { getIdentifier() };
       try {
+        //System.err.println("started interpreter jvm");
         _interpreterProcess = ExecJVM.runJVMPropogateClassPath(className, args);
         
         // Start a thread to wait for the interpreter to die and to fire

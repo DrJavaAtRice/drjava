@@ -44,10 +44,18 @@ public class DefaultGlobalModel implements GlobalModel {
     = SimpleAttributeSet.EMPTY;
 
   public static final AttributeSet SYSTEM_ERR_STYLE = _getErrStyle();
-  
   private static AttributeSet _getErrStyle() {
     SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_STYLE);
     s.addAttribute(StyleConstants.Foreground, Color.red.darker());
+    return s;
+  }
+
+  public static final AttributeSet SYSTEM_OUT_INTERACTIONS_STYLE
+    = _getOutInsideInteractionsStyle();
+  
+  private static AttributeSet _getOutInsideInteractionsStyle() {
+    SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_STYLE);
+    s.addAttribute(StyleConstants.Foreground, Color.green.darker().darker());
     return s;
   }
 
@@ -381,7 +389,12 @@ public class DefaultGlobalModel implements GlobalModel {
     });
 
     String text = _interactionsDoc.getCurrentInteraction();
+    _interactionsDoc.setInProgress(true);
     _interactionsDoc.addToHistory(text);
+
+    // there is no return at the end of the last line
+    // better to put it on now and not later.
+    _docAppend(_interactionsDoc, "\n", null);
 
     String toEval = text.trim();
     if (toEval.startsWith("java ")) {
@@ -390,87 +403,6 @@ public class DefaultGlobalModel implements GlobalModel {
 
     _interpreterControl.interpret(toEval);
   }
-
-  /*
-  public void interpretCurrentInteraction() {
-    try {
-      String text = _interactionsDoc.getCurrentInteraction();
-      _interactionsDoc.addToHistory(text);
-      String toEval = text.trim();
-      // Result of interpretation, or JavaInterpreter.NO_RESULT if none.
-      Object result;
-      // Do nothing but prompt if there's nothing to evaluate!
-      if (toEval.length() == 0) {
-        result = JavaInterpreter.NO_RESULT;
-      }
-      else {
-        if (toEval.startsWith("java ")) {
-          toEval = _testClassCall(toEval);
-        }
-        result = _interpreter.interpret(toEval);
-        String resultStr;
-        try {
-          resultStr = String.valueOf(result);
-        } catch (Throwable t) {
-          // Very weird. toString() on result must have thrown this exception!
-          // Let's act like DynamicJava would have if this exception were thrown
-          // and rethrow as RuntimeException
-          throw new RuntimeException(t.toString());
-        }
-      }
-
-      if (result != JavaInterpreter.NO_RESULT) {
-       _interactionsDoc.insertString(_interactionsDoc.getLength(),
-                                     "\n" + String.valueOf(result), null);
-      }
-
-      _interactionsDoc.prompt();
-    }
-    catch (ExitingNotAllowedException e) {
-      try {
-        _interactionsDoc.insertString(_interactionsDoc.getLength(),
-                                      "\n" + EXIT_CALLED_MESSAGE,
-                                      null);
-      }
-      catch (BadLocationException ble) {
-        throw new UnexpectedException(ble);
-      }
-
-      _interactionsDoc.prompt();
-    }
-    catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
-    catch (Throwable e) {
-      String message = e.getMessage();
-      // Don't let message be null. Java sadly makes getMessage() return
-      // null if you construct an exception without a message.
-      if (message == null) {
-        message = e.toString();
-        e.printStackTrace();
-      }
-      // Hack to prevent long syntax error messages
-      try {
-        if (message.startsWith("koala.dynamicjava.interpreter.InterpreterException: Encountered")) {
-          _interactionsDoc.insertString(_interactionsDoc.getLength(),
-                                        "\nError in evaluation: " +
-                                        "Invalid syntax",
-                                        null);
-        }
-        else {
-          _interactionsDoc.insertString(_interactionsDoc.getLength(),
-                                        "\nError in evaluation: " + message,
-                                        null);
-        }
-
-        _interactionsDoc.prompt();
-      }
-      catch (BadLocationException ble) {
-        throw new UnexpectedException(ble);
-      }
-    }
-  }
-  */
 
   private void _docAppend(Document doc, String s, AttributeSet set) {
     try {
@@ -484,6 +416,7 @@ public class DefaultGlobalModel implements GlobalModel {
   /** Called when the repl prints to System.out. */
   public void replSystemOutPrint(String s) {
     _docAppend(_consoleDoc, s, SYSTEM_OUT_STYLE);
+    _interactionsDoc.insertBeforeLastPrompt(s, SYSTEM_OUT_INTERACTIONS_STYLE);
   }
 
   /** Called when the repl prints to System.err. */
@@ -492,6 +425,7 @@ public class DefaultGlobalModel implements GlobalModel {
   }
 
   private void _interactionIsOver() {
+    _interactionsDoc.setInProgress(false);
     _interactionsDoc.prompt();
 
     notifyListeners(new EventNotifier() {
@@ -519,7 +453,7 @@ public class DefaultGlobalModel implements GlobalModel {
    *               data type to be serializable.
    */
   public void replReturnedResult(String result) {
-    _docAppend(_interactionsDoc, "\n" + result, null);
+    _docAppend(_interactionsDoc, result + "\n", null);
     _interactionIsOver();
   }
 
@@ -535,16 +469,22 @@ public class DefaultGlobalModel implements GlobalModel {
                                  String message,
                                  String stackTrace)
   {
+    _interactionsDoc.appendExceptionResult(exceptionClass,
+                                           message,
+                                           stackTrace,
+                                           SYSTEM_ERR_STYLE);
+    /*
     if (null == message || "null".equals(message)) {
       message = "";
     }
 
-    String txt = "\n" + exceptionClass + ": " + message;
+    String txt = exceptionClass + ": " + message;
     if (! stackTrace.trim().equals("")) {
       txt += "\n" + stackTrace;
     }
 
-    _docAppend(_interactionsDoc, txt, SYSTEM_ERR_STYLE);
+    _docAppend(_interactionsDoc, txt + "\n", SYSTEM_ERR_STYLE);
+    */
 
     _interactionIsOver();
   }

@@ -253,6 +253,7 @@ public class InterpreterJVM extends UnicastRemoteObject
   }
 
   public void addClassPath(String s) throws RemoteException {
+    //_dialog("add classpath: " + s);
     _interpreter.addClassPath(s);
   }
 

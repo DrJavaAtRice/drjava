@@ -1,12 +1,11 @@
 package edu.rice.cs.drjava.model.repl;
 
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
 import java.awt.Toolkit;
-import java.util.LinkedList;
-import java.util.ListIterator;
-import java.util.StringTokenizer;
+import java.awt.event.*;
+import javax.swing.text.*;
+import javax.swing.*;
+import java.util.*;
+import java.io.*;
 
 import edu.rice.cs.util.UnexpectedException;
 
@@ -16,8 +15,10 @@ import edu.rice.cs.util.UnexpectedException;
  * @version $Id$
  */
 public class InteractionsDocument extends DefaultStyledDocument {
-  public static final String BANNER = "Welcome to DrJava.";
-  public static final String PROMPT = "\n> ";
+  public static final String BANNER = "Welcome to DrJava.\n";
+  public static final String PROMPT = "> ";
+
+  private boolean _inProgress = false;
 
   /** Index in the document of the first place that is editable. */
   int frozenPos = 0;
@@ -32,6 +33,28 @@ public class InteractionsDocument extends DefaultStyledDocument {
    */
   public InteractionsDocument() {
     reset();
+
+    /*
+    ActionListener l = new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        JOptionPane.showMessageDialog(null, "clicked");
+      }
+    };
+
+    JButton b = new JButton("clicky");
+    b.setAlignmentY(.8f);
+    b.addActionListener(l);
+
+    SimpleAttributeSet buttonSet = new SimpleAttributeSet();
+    StyleConstants.setComponent(buttonSet, b);
+    try {
+      insertString(getLength(), " ", buttonSet);
+      insertString(getLength(), " ", null);
+    }
+    catch (BadLocationException ble) {}
+
+    frozenPos = getLength();
+    */
   }
 
   /**
@@ -49,6 +72,28 @@ public class InteractionsDocument extends DefaultStyledDocument {
     }
   }
 
+  public void setInProgress(boolean b) {
+    _inProgress = b;
+  }
+
+  public void insertBeforeLastPrompt(String s, AttributeSet a) {
+    try {
+      int pos;
+      if (_inProgress) {
+        pos = getLength();
+      }
+      else {
+        pos = frozenPos - PROMPT.length();
+      }
+
+      super.insertString(pos, s, a);
+      frozenPos += s.length();
+    }
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
+    }
+  }
+
   /**
    * Override superclass deletion to prevent deletion past frozen point. 
    * @exception BadLocationException
@@ -62,7 +107,7 @@ public class InteractionsDocument extends DefaultStyledDocument {
     }
   }
 
-  /** Clear the UI, and restart the interpreter. */
+  /** Clear the UI. */
   public void reset() {
     try {
       super.remove(0, getLength());
@@ -74,9 +119,6 @@ public class InteractionsDocument extends DefaultStyledDocument {
     }
   }
 
-  /**
-   * put your documentation comment here
-   */
   public void prompt() {
     try {
       super.insertString(getLength(), PROMPT, null);
@@ -145,4 +187,150 @@ public class InteractionsDocument extends DefaultStyledDocument {
   public void addToHistory(String text) {
     _history.add(text);
   }
+
+  public void appendExceptionResult(String exceptionClass,
+                                    String message,
+                                    String stackTrace,
+                                    AttributeSet set)
+  {
+    //writeLock();
+    try {
+
+      if (null != message || "null".equals(message)) {
+        message = "";
+      }
+
+      insertString(getLength(), exceptionClass + ": " + message + "\n", set);
+
+      // An example stack trace:
+      //
+      // java.lang.IllegalMonitorStateException: 
+      // at java.lang.Object.wait(Native Method)
+      // at java.lang.Object.wait(Object.java:425)
+      if (! stackTrace.trim().equals("")) {
+        BufferedReader reader=new BufferedReader(new StringReader(stackTrace));
+        
+        String line;
+        // a line is parsable if it has ( then : then ), with some
+        // text between each of those
+        while ((line = reader.readLine()) != null) {
+          String fileName = null;
+          int lineNumber = -1;
+
+          int openLoc = line.indexOf('(');
+
+          if (openLoc != -1) {
+            int closeLoc = line.indexOf(')', openLoc + 1);
+
+            if (closeLoc != -1) {
+              int colonLoc = line.indexOf(':', openLoc + 1);
+              if ((colonLoc > openLoc) && (colonLoc < closeLoc)) {
+                // ok this line is parsable!
+                String lineNumStr = line.substring(colonLoc + 1, closeLoc);
+                try {
+                  lineNumber = Integer.parseInt(lineNumStr);
+                  fileName = line.substring(openLoc + 1, colonLoc);
+                }
+                catch (NumberFormatException nfe) {
+                  // do nothing; we failed at parsing
+                }
+              }
+            }
+          }
+
+          insertString(getLength(), line, set);
+
+          // OK, now if fileName != null we did parse out fileName
+          // and lineNumber.
+          // Here's where we'd add the button, etc.
+          if (fileName != null) {
+            /*
+            JButton button = new JButton("go");
+            button.addActionListener(new ExceptionButtonListener(fileName,
+                                                                 lineNumber));
+
+            SimpleAttributeSet buttonSet = new SimpleAttributeSet(set);
+            StyleConstants.setComponent(buttonSet, button);
+            insertString(getLength(), "  ", null);
+            insertString(getLength() - 1, " ", buttonSet);
+            */
+            //JOptionPane.showMessageDialog(null, "button in");
+            //insertString(getLength(), " ", null);
+            //JOptionPane.showMessageDialog(null, "extra space");
+          }
+
+          //JOptionPane.showMessageDialog(null, "\\n");
+          insertString(getLength(), "\n", set);
+
+        } // end the while
+      }
+    }
+    catch (IOException ioe) {
+      // won't happen; we're readLine'ing from a String!
+      throw new UnexpectedException(ioe);
+    }
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
+    }
+    finally {
+      //writeUnlock();
+    }
+  }
+
+  private class ExceptionButtonListener implements ActionListener {
+    private final String _fileName;
+    private final int _lineNumber;
+
+    public ExceptionButtonListener(final String fileName, final int lineNumber)
+    {
+      _fileName = fileName;
+      _lineNumber = lineNumber;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      javax.swing.JOptionPane.showMessageDialog(null, "exception at line " + 
+                                                      _lineNumber +
+                                                      " in file " +
+                                                      _fileName);
+    }
+  }
 }
+
+/*
+class LinkInfo implements Comparable {
+  private final String _text;
+  private final Position _start;
+  private final Position _end;
+
+  public LinkInfo(final Position start, final Position end, final String text) {
+    _start = start;
+    _end = end;
+    _text = text;
+  }
+
+  public int compareTo(Object o) {
+    LinkInfo other = (LinkInfo) o;
+
+    if (_start.getOffset() == other._start.getOffset()) {
+      return _end.getOffset() < other._end.getOffset();
+    }
+    else {
+      if (_end.getOffset() == other._end.getOffset()) {
+        return 0;
+      }
+      else {
+        return _start.getOffset() < o._start.getOffset();
+      }
+    }
+  }
+
+  public boolean containsOffset(int offset) {
+    return (offset >= _start.getOffset()) &&
+           (offset < _end.getOffset());
+  }
+
+  public String getText() {
+    return _text;
+  }
+}
+*/

@@ -14,6 +14,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.DelegatingAction;
 
 /**
  * DrJava's main window.
@@ -135,6 +136,12 @@ public class MainFrame extends JFrame {
     }
   };
 
+  /** Undoes the last change to the active definitions document. */
+  private DelegatingAction _undoAction = new DelegatingAction();
+
+  /** Redoes the last undo to the active definitions document. */
+  private DelegatingAction _redoAction = new DelegatingAction();
+
   /** Aborts current interaction. */
   private Action _abortInteractionAction
     = new AbstractAction("Abort current interaction")
@@ -202,7 +209,6 @@ public class MainFrame extends JFrame {
     }
   };
 
-
   /** Switches to next document. */
   private Action _switchToNextAction =
     new AbstractAction("Next Document")
@@ -220,7 +226,6 @@ public class MainFrame extends JFrame {
       _model.setPreviousActiveDocument();
     }
   };
-
 
   /** How DrJava responds to window events. */
   private WindowListener _windowCloseListener = new WindowListener() {
@@ -255,6 +260,12 @@ public class MainFrame extends JFrame {
     _defScrollPanes = new Hashtable();
     JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
     _currentDefPane = (DefinitionsPane) defScroll.getViewport().getView();
+
+    // Need to set undo/redo actions to point to the initial def pane
+    // on switching documents later these pointers will also switch
+    _undoAction.setDelegatee(_currentDefPane.getUndoAction());
+    _redoAction.setDelegatee(_currentDefPane.getRedoAction());
+
     _errorPanel.getErrorListPane().setLastDefPane(_currentDefPane);
     _errorPanel.reset();
 
@@ -582,7 +593,7 @@ public class MainFrame extends JFrame {
 
     _abortInteractionAction.setEnabled(false);
     _abortInteractionMenuItem = fileMenu.add(_abortInteractionAction);
-    _abortInteractionMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PAUSE, ActionEvent.CTRL_MASK));
+    _abortInteractionMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
 
     fileMenu.addSeparator();
     tmpItem = fileMenu.add(_quitAction);
@@ -597,15 +608,14 @@ public class MainFrame extends JFrame {
   private JMenu _setUpEditMenu() {
     JMenuItem tmpItem;
     JMenu editMenu = new JMenu("Edit");
-    /*The undo/redo menus and key action
-     //tmpItem = editMenu.add(_currentDefPane.getUndoAction());
-     //tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
-     //                                             ActionEvent.CTRL_MASK));
-     //tmpItem = editMenu.add(_currentDefPane.getRedoAction());
-     //tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
-     //                                             ActionEvent.CTRL_MASK));
-     editMenu.addSeparator();
-     */
+
+    tmpItem = editMenu.add(_undoAction);
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
+                                                  ActionEvent.CTRL_MASK));
+    tmpItem = editMenu.add(_redoAction);
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
+                                                  ActionEvent.CTRL_MASK));
+    editMenu.addSeparator();
 
     // set up the actions for cut/copy/paste with regards to menu
     // items and keystrokers.
@@ -777,14 +787,20 @@ public class MainFrame extends JFrame {
   private void _switchDefScrollPane() {
     JScrollPane scroll = (JScrollPane)
       _defScrollPanes.get(_model.getActiveDocument());
+
     if (scroll == null) {
       throw new UnexpectedException(new Exception(
         "Current definitions scroll pane not found."));
     }
+
     int oldLocation = _docSplitPane.getDividerLocation();
     _docSplitPane.setRightComponent(scroll);
     _docSplitPane.setDividerLocation(oldLocation);
     _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
+
+    // reset the undo/redo menu items
+    _undoAction.setDelegatee(_currentDefPane.getUndoAction());
+    _redoAction.setDelegatee(_currentDefPane.getRedoAction());
   }
 
   /**
@@ -878,9 +894,10 @@ public class MainFrame extends JFrame {
 
     public void interactionEnded() {
       _abortInteractionMenuItem.setEnabled(false);
-      _interactionsPane.setEditable(true);
-      _interactionsPane.setCaretPosition(_interactionsPane.getDocument().getLength());
       _interactionsPane.setCursor(null);
+      _interactionsPane.setEditable(true);
+      int pos = _interactionsPane.getDocument().getLength();
+      _interactionsPane.setCaretPosition(pos);
     }
 
     public void compileStarted() {

@@ -127,6 +127,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
       interpretIgnoreResult("System.exit(23);");
       listener.wait();
     }
+    _model.removeListener(listener);
 
     listener.assertInteractionStartCount(1);
     listener.assertInteractionsResetCount(1);
@@ -137,10 +138,23 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   /**
    * Checks that the interpreter can be aborted and then work
    * correctly later.
+   * Part of what we check here is that the interactions classpath
+   * is correctly reset after aborting interactions. That is, we ensure
+   * that the compiled class is still visible after aborting. This was
+   * broken in drjava-20020108-0958 -- or so I thought. I can't consistently
+   * reproduce the problem in the UI (seems to show up using IBM's JDK only),
+   * and I can never reproduce it in the test case. Grr.
+   *
+   * OK, now I found the explanation: We were in some cases running two new JVMs
+   * on an abort. I fixed the problem in {@link MainJVM#restartInterpreterJVM}.
    */
   public void testInteractionAbort()
-    throws BadLocationException, InterruptedException
+    throws BadLocationException, InterruptedException, IOException
   {
+    _doCompile(setupDocument(FOO_TEXT), tempFile());
+    final String beforeAbort = interpret("Foo.class.getName()");
+    assertEquals("Foo", beforeAbort);
+    
     TestListener listener = new TestListener() {
       public void interactionStarted() {
         //System.err.println("start notice");
@@ -183,13 +197,16 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     //System.err.println("waiting done");
     listener.assertInteractionsResetCount(1);
     listener.assertInteractionsExitedCount(1);
+    _model.removeListener(listener);
 
     // now make sure it still works!
-    //System.err.println("about to interp 5");
-    //System.err.println("done interp 5");
     assertEquals("5", interpret("5"));
-    listener.assertInteractionStartCount(2);
-    listener.assertInteractionEndCount(1);
+
+    // make sure we can still see class foo
+    //System.err.println("about to check Foo");
+    final String afterAbort = interpret("Foo.class.getName()");
+    assertEquals("Foo", afterAbort);
+    //System.err.println("done check Foo: " + afterAbort);
   }
 
   /**
@@ -245,14 +262,13 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   }
 
   /**
-   * Creates a new class, compiles it and then checks that the REPL
-   * can see it.
+   * Saves to the given file, and then compiles the given document.
+   * The compile is expected to succeed and it is checked to make sure it worked
+   * reasonably.
    */
-  public void testInteractionsCanSeeCompile()
-    throws BadLocationException, IOException
+  private void _doCompile(OpenDefinitionsDocument doc, File file)
+    throws IOException
   {
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
-    final File file = tempFile();
     doc.saveFile(new FileSelector(file));
 
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
@@ -261,6 +277,17 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
     assertCompileErrorsPresent(false);
     _model.removeListener(listener);
+  }
+
+  /**
+   * Creates a new class, compiles it and then checks that the REPL
+   * can see it.
+   */
+  public void testInteractionsCanSeeCompile()
+    throws BadLocationException, IOException
+  {
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    _doCompile(doc, tempFile());
 
     String result = interpret("new Foo().getClass().getName()");
 
@@ -285,15 +312,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
 
     for (int i = 0; i < num_iterations; i++) {
       doc = setupDocument(text_before + i + text_after);
-      doc.saveFile(new FileSelector(file));
-
-      CompileShouldSucceedListener listener =new CompileShouldSucceedListener();
-      _model.addListener(listener);
-
-      doc.startCompile();
-      listener.checkCompileOccurred();
-      assertCompileErrorsPresent(false);
-      _model.removeListener(listener);
+      _doCompile(doc, file);
 
       assertEquals("interactions result, i=" + i,
           String.valueOf(i),
@@ -313,14 +332,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc;
 
     doc = setupDocument(interface_text);
-    doc.saveFile(new FileSelector(file));
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
-    _model.addListener(listener);
-
-    doc.startCompile();
-    listener.checkCompileOccurred();
-    assertCompileErrorsPresent(false);
-    _model.removeListener(listener);
+    _doCompile(doc, file);
 
     for (int i = 0; i < 5; i++) {
       String s = "new I() { public int getValue() { return " + i + "; } }.getValue()";

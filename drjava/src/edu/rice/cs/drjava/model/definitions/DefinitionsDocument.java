@@ -1,11 +1,11 @@
 package edu.rice.cs.drjava.model.definitions;
 
-import  javax.swing.text.StyleContext.SmallAttributeSet;
-import  javax.swing.text.*;
-import  javax.swing.event.DocumentEvent;
-import  gj.util.Vector;
-import  java.util.HashSet;
-import  java.util.StringTokenizer;
+import javax.swing.text.*;
+import javax.swing.undo.*;
+import javax.swing.event.DocumentEvent;
+import gj.util.Vector;
+import java.util.HashSet;
+import java.util.StringTokenizer;
 
 import java.io.File;
 
@@ -70,10 +70,10 @@ public class DefinitionsDocument extends PlainDocument {
       "super", "new", "instanceof", "boolean", "char", "byte",
       "short", "int", "long", "float", "double", "void", "return",
       "static", "synchronized", "transient", "volatile", "final",
-      "strictfp", "throw", "try", "catch", "finally", "synchronized",
+      "strictfp", "throw", "try", "catch", "finally",
       "throws", "extends", "implements", "interface", "class",
       "break", "continue", "public", "protected", "private", "abstract",
-      "case", "default"
+      "case", "default", "assert"
     };
     HashSet keywords = new HashSet();
     for (int i = 0; i < words.length; i++) {
@@ -111,46 +111,101 @@ public class DefinitionsDocument extends PlainDocument {
 
   /**
    * Inserts a string of text into the document.
-   * <ol>
-   *  <li>update the current location to the insertion point
-   *  <li>insert the string into the reduced model
-   *  <li>update the current location to be after the insertion
-   *  <li>update modification state of the document
-   *  <li>fire a document change event so the DefinitionsPane
-   *      painter redraws the visible text
-   * </ol>
-   * @param offset insertion point, a character offset
-   * @param str the text to be inserted
-   * @a the attributes for the inserted text, usually null
-   *   since the view does the attribute updates for us
-   * @exception BadLocationException
+   * It turns out that this is not where we should do custom processing
+   * of the insert; that is done in {@link #insertUpdate}.
    */
   public void insertString(int offset, String str, AttributeSet a)
-    throws BadLocationException {
-      // If _removeTabs is set to true, remove all tabs from str.
-      // It is a current invariant of the tabification`functionality that
-      // the document contains no tabs, but we want to allow the user
-      // to override this functionality.
-      if (_tabsRemoved) {
-        str = _removeTabs(str);
-      }
-
-      int locationChange = offset - _currentLocation;
-      int strLength = str.length();
-      int prevSize;     //stores the size of the item prev when insert begins.
-      int reducedOffset;
-      // adjust location
-      _reduced.move(locationChange);
-      // loop over string, inserting characters into reduced model
-      for (int i = 0; i < str.length(); i++) {
-        char curChar = str.charAt(i);
-        _addCharToReducedModel(curChar);
-      }
-      _currentLocation = offset + strLength;
-      super.insertString(offset, str, a);
-      _modifiedSinceSave = true;
-      _styleChanged();
+    throws BadLocationException
+  {
+    // If _removeTabs is set to true, remove all tabs from str.
+    // It is a current invariant of the tabification functionality that
+    // the document contains no tabs, but we want to allow the user
+    // to override this functionality.
+    if (_tabsRemoved) {
+      str = _removeTabs(str);
     }
+
+    _modifiedSinceSave = true;
+
+    super.insertString(offset, str, a);
+  }
+
+  /**
+   * Updates document structure as a result of text insertion.
+   * This happens after the text has actually been inserted.
+   * Here we update the reduced model (via an {@link InsertCommand})
+   * and store information for how to undo/redo the reduced model changes
+   * inside the {@link DefaultDocumentEvent}.
+   *
+   * @see InsertCommand
+   * @see DefaultDocumentEvent
+   * @see CommandUndoableEdit
+   */
+  protected void insertUpdate(AbstractDocument.DefaultDocumentEvent chng,
+                              AttributeSet attr)
+  {
+    super.insertUpdate(chng, attr);
+
+    try {
+      final int offset = chng.getOffset();
+      final int length = chng.getLength();
+      final String str = getText(offset, length);
+
+      InsertCommand doCommand = new InsertCommand(offset, str);
+      RemoveCommand undoCommand = new RemoveCommand(offset, length);
+
+      // add the undo/redo
+      chng.addEdit(new CommandUndoableEdit(undoCommand, doCommand));
+
+      // actually do the insert
+      doCommand.run();
+    }
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
+    }
+  }
+
+  /**
+   * Removes a block of text from the specified location.
+   * We don't update the reduced model here; that happens
+   * in {@link #removeUpdate}.
+   */
+  public void remove(int offset, int len) throws BadLocationException {
+    _modifiedSinceSave = true;
+    super.remove(offset, len);
+  }
+
+  /**
+   * Updates document structure as a result of text removal.
+   * This happens before the text has actually been removed.
+   * Here we update the reduced model (via an {@link RemoveCommand})
+   * and store information for how to undo/redo the reduced model changes
+   * inside the {@link DefaultDocumentEvent}.
+   *
+   * @see RemoveCommand
+   * @see DefaultDocumentEvent
+   * @see CommandUndoableEdit
+   */
+  protected void removeUpdate(AbstractDocument.DefaultDocumentEvent chng) {
+    try {
+      final int offset = chng.getOffset();
+      final int length = chng.getLength();
+      final String removedText = getText(offset, length);
+      super.removeUpdate(chng);
+
+      Runnable doCommand = new RemoveCommand(offset, length);
+      Runnable undoCommand = new InsertCommand(offset, removedText);
+
+      // add the undo/redo info
+      chng.addEdit(new CommandUndoableEdit(undoCommand, doCommand));
+
+      // actually do the removal from the reduced model
+      doCommand.run();
+    }
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
+    }
+  }
 
   /**
    * Given a String, return a new String will all tabs converted to spaces.
@@ -186,44 +241,19 @@ public class DefinitionsDocument extends PlainDocument {
   }
 
   /**
-   * Removes a block of text from the specified location.
-   * <ol>
-   *  <li>update the current location to the deletion point
-   *  <li>remove the number of characters specified
-   *      after the deletion point
-   *  <li>update modification state of the document
-   *  <li>fire a document change event so the DefinitionsPane
-   *      painter redraws the visible text
-   * </ol>
-   * @param offset the start of the block for removal
-   * @param len the size of the block for removal
-   * @exception BadLocationException
-   */
-  public void remove(int offset, int len) throws BadLocationException {
-    int locationChange = offset - _currentLocation;
-    // update current location
-    _reduced.move(locationChange);
-    _currentLocation = offset;
-    // remove text
-    _reduced.delete(len);
-    super.remove(offset, len);
-    _modifiedSinceSave = true;
-    _styleChanged();
-  }
-
-  /**
    * Fire event that styles changed from current location to the end.
    * Right now we do this every time there is an insertion or removal.
    * Two possible future optimizations:
    * <ol>
    * <li>Only fire changed event if text other than that which was inserted
-   *    or removed *actually* changed status. If we didn't changed the status
-   *    of other text (by inserting or deleting unmatched pair of quote or
-   *    comment chars), no change need be fired.
+   *     or removed *actually* changed status. If we didn't changed the status
+   *     of other text (by inserting or deleting unmatched pair of quote or
+   *     comment chars), no change need be fired.
    * <li>If a change must be fired, we could figure out the exact end
-   *    of what has been changed. Right now we fire the event saying that
-   *    everything changed to the end of the document.
+   *     of what has been changed. Right now we fire the event saying that
+   *     everything changed to the end of the document.
    * </ol>
+   *
    * I don't think we'll need to do either one since it's still fast now.
    * I think this is because the UI only actually paints the things on the
    * screen anyway.
@@ -231,26 +261,24 @@ public class DefinitionsDocument extends PlainDocument {
   private void _styleChanged() {
     int length = getLength() - _currentLocation;
     //DrJava.consoleErr().println("Changed: " + _currentLocation + ", " + length);
-    DocumentEvent evt = new DefaultDocumentEvent(_currentLocation, length, DocumentEvent.EventType.CHANGE);
+    DocumentEvent evt = new DefaultDocumentEvent(_currentLocation,
+                                                 length,
+                                                 DocumentEvent.EventType.CHANGE);
     fireChangedUpdate(evt);
   }
-
-  /*
-   08/09/2001, Mike Y.: What is this?
-   protected void insertUpdate(AbstractDocument.DefaultDocumentEvent chng,
-   AttributeSet attr)
-   {
-   // OK we need to add an UndoableEdit to chng to make it undo
-   // reduced model changes
-   }
-   */
 
   /**
    * Whenever this document has been saved, this method should be called
    * so that it knows it's no longer in a modified state.
    */
   public void resetModification() {
-    _modifiedSinceSave = false;
+    try {
+      writeLock();
+      _modifiedSinceSave = false;
+    }
+    finally {
+      writeUnlock();
+    }
   }
 
   /**
@@ -258,7 +286,13 @@ public class DefinitionsDocument extends PlainDocument {
    * @return true if the document has been modified
    */
   public boolean isModifiedSinceSave() {
-    return  _modifiedSinceSave;
+    try {
+      readLock();
+      return  _modifiedSinceSave;
+    }
+    finally {
+      readUnlock();
+    }
   }
 
   /**
@@ -374,7 +408,6 @@ public class DefinitionsDocument extends PlainDocument {
       throw  new RuntimeException("Impossible bad loc except: " + e);
     }
   }
-
 
   /**
    * Indents a line in accordance with the rules that DrJava has set up.
@@ -516,9 +549,9 @@ public class DefinitionsDocument extends PlainDocument {
   }
 
   /**
-   * The function that handles what happens when a tab key is pressed.  It is given the
-   * size of the leading whitespace and based on the current indent information, either
-   * shrinks or expands that whitespace.
+   * The function that handles what happens when a tab key is pressed.
+   * It is given the size of the leading whitespace and based on the
+   * current indent information, either shrinks or expands that whitespace.
    * @param tab number of indents, i.e., level of nesting
    * @param distToPrevNewline distance to end of previous line
    * @exception BadLocationException
@@ -533,8 +566,11 @@ public class DefinitionsDocument extends PlainDocument {
     }
     if (tab > currentTab) {
       String spaces = "";
-      for (int i = 0; i < tab - currentTab; i++)
+
+      for (int i = 0; i < tab - currentTab; i++) {
         spaces = spaces + " ";
+      }
+
       insertString(_currentLocation - distToPrevNewline, spaces, null);
     }
     else {
@@ -804,4 +840,67 @@ public class DefinitionsDocument extends PlainDocument {
     }
   }
 
+  private class CommandUndoableEdit extends AbstractUndoableEdit {
+    private final Runnable _undoCommand;
+    private final Runnable _redoCommand;
+
+    public CommandUndoableEdit(final Runnable undoCommand,
+                               final Runnable redoCommand)
+    {
+      _undoCommand = undoCommand;
+      _redoCommand = redoCommand;
+    }
+
+    public void undo() throws CannotUndoException {
+      super.undo();
+      _undoCommand.run();
+    }
+
+    public void redo() throws CannotRedoException {
+      super.redo();
+      _redoCommand.run();
+    }
+
+    public boolean isSignificant() { return false; }
+  }
+
+  private class InsertCommand implements Runnable {
+    private final int _offset;
+    private final String _text;
+
+    public InsertCommand(final int offset, final String text) {
+      _offset = offset;
+      _text = text;
+    }
+
+    public void run() {
+      // adjust location to the start of the text to input
+      _reduced.move(_offset - _currentLocation);
+
+      // loop over string, inserting characters into reduced model
+      for (int i = 0; i < _text.length(); i++) {
+        char curChar = _text.charAt(i);
+        _addCharToReducedModel(curChar);
+      }
+
+      _currentLocation = _offset + _text.length();
+      _styleChanged();
+    }
+  }
+
+  private class RemoveCommand implements Runnable {
+    private final int _offset;
+    private final int _length;
+
+    public RemoveCommand(final int offset, final int length) {
+      _offset = offset;
+      _length = length;
+    }
+
+    public void run() {
+      setCurrentLocation(_offset);
+      _reduced.delete(_length);
+      _styleChanged();
+    }
+  }
 }

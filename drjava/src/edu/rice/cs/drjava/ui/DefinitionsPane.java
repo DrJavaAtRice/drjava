@@ -21,6 +21,8 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
  * @version $Id$
  */
 public class DefinitionsPane extends JEditorPane {
+  private static final EditorKit EDITOR_KIT = new DefinitionsEditorKit();
+
   /**
    * Our parent window.
    */
@@ -150,18 +152,18 @@ public class DefinitionsPane extends JEditorPane {
      * instance. Not used currently, but there for readability and possible
      * future use, e.g., debugging add-ons or the rewrite of the indention code.
      */
-    private String _key;
+    private final String _key;
+
     /**
      * The default action to take when the specified key is pressed.
      */
-    private Action _defaultAction;
-    /**
-     * Constructor.
-     */
+    private final Action _defaultAction;
+
     IndentKeyAction(String key, Action defaultAction) {
       _key = key;
       _defaultAction = defaultAction;
     }
+
     /**
      * Handle the "key typed" event from the text field.
      * Calls the default action to make sure the right things happen, then makes
@@ -178,9 +180,10 @@ public class DefinitionsPane extends JEditorPane {
    */
   private Action _indentKeyActionTab = new IndentKeyActionTab();
   /**
-   * Because the "default" action for the enter key is special, it must be grabbed
-   * from the Keymap using getAction(KeyStroke), which returns the "default" action
-   * for all keys which have behavior extending beyond regular text keys.
+   * Because the "default" action for the enter key is special, it must be
+   * grabbed from the Keymap using getAction(KeyStroke), which returns the
+   * "default" action for all keys which have behavior extending beyond
+   * regular text keys.
    */
   private Action _indentKeyActionLine =
     new IndentKeyAction("\n",
@@ -188,7 +191,7 @@ public class DefinitionsPane extends JEditorPane {
 
   /**
    * Likewise, regular text keys like '{' and '}' do not have special actions
-   * that are returned by getAction(KeyStroke).  To make sure these behave right,
+   * that are returned by getAction(KeyStroke). To make sure these behave right,
    * we use getDefaultAction() instead.
    */
   private Action _indentKeyActionSquiggly =
@@ -357,7 +360,7 @@ public class DefinitionsPane extends JEditorPane {
    * editor pane use our editor kit (and thus our model).
    */
   protected EditorKit createDefaultEditorKit() {
-    return new DefinitionsEditorKit();
+    return EDITOR_KIT;
   }
 
 
