@@ -45,6 +45,24 @@ import edu.rice.cs.drjava.DrJava;
 public interface OptionConstants extends ConfigurationTool {
   
   // STATIC VARIABLES    
+  public static final StringOption FONT_MAIN_NAME = 
+    new StringOption("font.main.name", "Monospaced");
+
+  public static final IntegerOption FONT_MAIN_STYLE = 
+    new IntegerOption("font.main.style", new Integer(0));
+  
+  public static final IntegerOption FONT_MAIN_SIZE = 
+    new IntegerOption("font.main.size", new Integer(12));
+  
+  public static final StringOption FONT_DOCLIST_NAME = 
+    new StringOption("font.doclist.name", "Monospaced");
+
+  public static final IntegerOption FONT_DOCLIST_STYLE = 
+    new IntegerOption("font.doclist.style", new Integer(0));
+  
+  public static final IntegerOption FONT_DOCLIST_SIZE = 
+    new IntegerOption("font.doclist.size", new Integer(10));
+  
   public static final IntegerOption INDENT_LEVEL =
     new IntegerOption("indent.level",new Integer(2));
 

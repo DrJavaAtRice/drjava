@@ -270,7 +270,12 @@ public class DefinitionsPane extends JEditorPane
     setDocument(_doc);
     setContentType("text/java");
     setBackground(Color.white);
-    setFont(new Font("Courier", 0, 12));
+    //setFont(new Font("Courier", 0, 12));
+    Font mainFont = new Font (DrJava.CONFIG.getSetting(FONT_MAIN_NAME).toString(),
+                              DrJava.CONFIG.getSetting(FONT_MAIN_STYLE).intValue(),
+                              DrJava.CONFIG.getSetting(FONT_MAIN_SIZE).intValue());
+    setFont(mainFont);
+    
     setEditable(true);
 
     //add actions for indent key

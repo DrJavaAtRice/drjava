@@ -52,9 +52,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.net.URL;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.DebugManager;
@@ -67,7 +69,7 @@ import edu.rice.cs.util.swing.DelegatingAction;
  * DrJava's main window.
  * @version $Id$
  */
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements OptionConstants {
   private static final int INTERACTIONS_TAB = 0;
   private static final int COMPILE_TAB = 1;
   private static final int OUTPUT_TAB = 2;
@@ -589,8 +591,17 @@ public class MainFrame extends JFrame {
 
     _setUpPanes();
     updateFileTitle();
-    _setAllFonts(new Font("Monospaced", 0, 12));
-    _docList.setFont(new Font("Monospaced", 0, 10));
+
+    Font mainFont = new Font (DrJava.CONFIG.getSetting(FONT_MAIN_NAME).toString(),
+                              DrJava.CONFIG.getSetting(FONT_MAIN_STYLE).intValue(),
+                              DrJava.CONFIG.getSetting(FONT_MAIN_SIZE).intValue());
+    
+    Font doclistFont = new Font (DrJava.CONFIG.getSetting(FONT_DOCLIST_NAME).toString(),
+                                 DrJava.CONFIG.getSetting(FONT_DOCLIST_STYLE).intValue(),
+                                 DrJava.CONFIG.getSetting(FONT_DOCLIST_SIZE).intValue());
+    
+    _setAllFonts(mainFont);
+    _docList.setFont(doclistFont);
     _findReplace = new FindReplaceDialog(this, _model);
 
     //     frameSize = this.getSize();
@@ -1739,15 +1750,24 @@ public class MainFrame extends JFrame {
   }
 
   /**
-   * put your documentation comment here
-   * @param f
+   * Sets the font of all panes and panels
+   * @param f is a Font object
    */
   private void _setAllFonts(Font f) {
-    _currentDefPane.setFont(f);
+        
+    Iterator scrollPanes = _defScrollPanes.values().iterator();
+    while (scrollPanes.hasNext()) {  
+      JScrollPane scroll = (JScrollPane) scrollPanes.next();
+      if (scroll != null) {
+        DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
+        pane.setFont(f);
+      }
+    }
     _interactionsPane.setFont(f);
     _outputPane.setFont(f);
     if (_debugPanel != null) _debugPanel.setFonts(f);
     _errorPanel.setListFont(f);
+    _junitPanel.setListFont(f);
   }
   /**
    * put your documentation comment here
