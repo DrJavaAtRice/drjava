@@ -15,9 +15,6 @@
   <!-- Chapter: Intro -->
   <chapter id="intro">
     <title>Introduction</title>
-    <note>
-      <para>This document is still in progress!  We're just getting started with documentation for DrJava...</para>
-    </note>
     <para>DrJava is a pedagogic programming environment for Java, intended to help students focus more on program design than on the features of a complicated development environment.  It provides an Interactions window based on a "read-eval-print loop", which allows programmers to develop, test, and debug Java programs in an interactive, incremental fashion.</para>
     <simplelist>
       <member>Home Page: <ulink url="http://drjava.sourceforge.net">http://drjava.sourceforge.net</ulink></member>
@@ -109,7 +106,7 @@
 
       <formalpara>
 	<title>Find/Replace</title>
-	<para>DrJava has a powerful Find and Replace utility, which is displayed as one of the tabs at the bottom of the window.  The tab is first displayed by selecting Find/Replace from the Edit Menu (or using the keyboard shortcut, CTRL+F), and can be closed by clicking on the "X" button in the upper right corner or by hitting the Escape key.  To search for a term, simply enter it in the Find text field and click "Find Next" (or press Enter).  To replace the term with another, type the new term in the Replace text field, find an occurance using "Find Next", and then click "Replace".  The "Replace/Find Next" and "Replace All" buttons can help to speed up this process.</para>
+	<para>DrJava has a powerful Find and Replace utility, which is displayed as one of the tabs at the bottom of the window.  The tab is first displayed by selecting Find/Replace from the Edit Menu (or using the keyboard shortcut, CTRL+F), and can be closed by clicking on the "X" button in the upper right corner or by hitting the Escape key.  To search for a term, simply enter it in the Find text field and click "Find Next" (or press Enter).  To replace the term with another, type the new term in the Replace text field, find an occurrence using "Find Next", and then click "Replace".  The "Replace/Find Next" and "Replace All" buttons can help to speed up this process.</para>
       </formalpara>
 
       <formalpara>
@@ -153,18 +150,122 @@
 
 
 
-  <!-- Chapter: Integrated Compiler
-    - Compiling an open file
-    - Viewing compiler errors
-    - Selecting a compiler
-  -->
+  <!-- Chapter: Integrated Compiler -->
+  <chapter id="compiling">
+    <title>Compiling Programs</title>
+    <para>DrJava uses an integrated compiler to speed up the development process and help locate errors.  Rather than switching out to a command line and running "javac", the user can simply click on the Compile button and DrJava will compile the file and display any errors it finds.</para>
 
-  <!-- Chapter: JUnit Integration
-    - Overview of unit-testing
-    - How to write a JUnit test (from Chris Haynes' page)
-    - Viewing test failures
-  -->
+    <section id="compiling-file">
+      <title>Compiling a File</title>
+      <para>To compile any file, simply click on the Compile button in the toolbar, or choose Compile from the Tools menu.  Before the process can begin, all open files must be saved.  This is because files can depend on other files, and it is important that no copies are out of date when the errors are displayed.</para>
+    </section>
 
+    <section id="compiling-errors">
+      <title>Viewing Compiler Errors</title>
+      <para>If any errors are found by the compiler, they are displayed in the Compiler Output tab at the bottom of the window.  A summary of each error is displayed in the list, and clicking on any error will highlight the corresponding line in the appropriate file.  (Note that a file will be opened automatically by DrJava if it contains errors.)  Similarly, if the cursor is moved to a line in a file that contains an error, that line and the corresponding error message are highlighted.</para>
+    </section>
+
+    <section id="compiling-selecting">
+      <title>Selecting a Compiler</title>
+      <para>DrJava supports the use of different Java compilers, such as the traditional Javac supplied with the JDK and the experimental JSR-14 compiler which supports generics.  DrJava will attempt to locate the user's Java compiler on startup by searching for standard installation directories, but sometimes it is unable to find a compiler.  In this case, it will prompt the user to specify the location of a compiler, or allow the user to continue using DrJava without any compiler.  Note that the location of compilers is configurable (see <link linkend="configuration">Configuring DrJava</link>).  If more than one compiler is specified, the active compiler can be selected from the menu on the Compiler Output tab itself.</para>
+    </section>
+  </chapter>
+
+
+
+  <!-- Chapter: JUnit Integration -->
+  <chapter id="junit">
+    <title>Testing using JUnit</title>
+    <para>Unit testing can be a very effective approach for testing programs of any size, and <ulink url="http://www.junit.org">JUnit</ulink> has provided a powerful facility for running unit tests in Java.  In fact, the code for DrJava itself is tested using a massive suite of JUnit tests which must be run before any change to the code can be committed.  To help users test their own programs, support for running JUnit tests is included in DrJava.  Simply click the Test button (or choose "Test Using JUnit" from the Tools menu) when a valid test file is open, and DrJava will run the tests and display any test failures in the "Test Output" tab at the bottom of the window, much the same as compiler errors are displayed.</para>
+
+
+    <section id="junit-writing">
+      <title>Writing JUnit Tests</title>
+      <comment>(Contributed by Chris Haynes, chaynes@indiana.edu.)</comment>
+      <para>To use the Test button on a file, the following programming conventions must be used:
+<itemizedlist>
+	  <listitem>
+	    <para>At the top of the file, include:</para>
+	    <programlisting>import.junit.framework.TestCase;</programlisting>
+	  </listitem>
+	  <listitem>
+	    <para>The main class of the file must:</para>
+	    <itemizedlist>
+	      <listitem>
+		<para>be <literal>public</literal></para>
+	      </listitem>
+	      <listitem>
+		<para><literal>extend TestCase</literal></para>
+	      </listitem>
+	      <listitem>
+		<para>have a constructor of the form:</para>
+		<programlisting>public &lt;classname&gt;(String name) { super(name); }</programlisting>
+		<para>Note: If you forget this, you will get an error message that begins "TestCase() is not public..."</para>
+	      </listitem>
+	    </itemizedlist>
+	  </listitem>
+	  <listitem>
+	    <para>Methods of this class to be run automatically when the Test command is invoked must:</para>
+	    <itemizedlist>
+	      <listitem>
+		<para>be <literal>public</literal> and <emphasis>not</emphasis> <literal>static</literal></para>
+	      </listitem>
+	      <listitem>
+		<para>return <literal>void</literal></para>
+	      </listitem>
+	      <listitem>
+		<para>take no arguments</para>
+	      </listitem>
+	      <listitem>
+		<para>have a name beginning with <literal>test</literal></para>
+	      </listitem>
+	    </itemizedlist>
+	  </listitem>
+
+	  <listitem>
+	    <para>Test methods in this class can call any of the following methods:</para>
+	    <itemizedlist>
+	      <listitem>
+		<programlisting>void assertTrue(String, boolean)</programlisting>
+		<para>which issues an error report with the given string if the boolean is false.</para>
+	      </listitem>
+	      <listitem>
+		<programlisting>void assertEquals(String, int, int)</programlisting>
+		<para>which issues an error report with the given string if the two integers are not equal.  The first int is the expected value, and the second int is the actual (tested) value.  Note that this method can also be called using any Objects, using the <literal>equals()</literal> method for comparison.</para>
+	      </listitem>
+	    </itemizedlist>
+	  </listitem>
+	  
+	  <listitem>
+	    <para>If there is any setup work to be done before running the tests (such as initializing instance variables), do it in the body of a method with the following contract:</para>
+	    <programlisting>protected void setup()</programlisting>
+	    <para>This method is automatically run before any tests in the class.</para>
+	  </listitem>
+
+	  <listitem>
+	    <para>Alternatively, a test suite can be constructed to invoke a series of test methods under programmer control with a method of the form:</para>
+	    <programlisting>
+public static Test suite() {
+  TestSuite suite = new TestSuite();
+  suite.addTest(new &lt;classname&gt;("&lt;methodname&gt;");
+  ...
+  return suite;
+}
+</programlisting>
+	    <para>It is then also necessary to import <literal>TestSuite</literal> and <literal>Test</literal> from <literal>junit.framework</literal>.  There is also a version of the <literal>addTest</literal> method that takes a <literal>Test</literal>, so test suites can be composed.</para>
+	  </listitem>
+	</itemizedlist>
+</para>
+
+      <para>There are many other ways of using JUnit.  See the <ulink url="http://junit.sourceforge.net/doc/cookbook/cookbook.htm">JUnit Cookbook</ulink> for more examples and information.</para>
+    </section>
+
+    <section id="junit-failures">
+      <title>Viewing Test Failures</title>
+      <para>After a JUnit test is run, any failures are displayed in the Test Output tab at the bottom of the window.  This list of failures behaves quite similarly to <link linkend="compiling-errors">compiler errors</link>, in that a summary of the error is given in the tab, and clicking on it highlights the corresponding line in the file.</para>
+    </section>
+
+  </chapter>
 
 
 
@@ -213,7 +314,7 @@
     <!-- Colors -->
     <formalpara>
       <title>Color Options</title>
-      <para>Colors are defined similarly to HTML colors: as six hexadecimal digits preceeded by a pound sign.  The first two digits specify a red value, the next two specify a green value, the next two specify a blue value.  For example, <constant>#00FF00</constant> would be a bright green.
+      <para>Colors are defined similarly to HTML colors: as six hexadecimal digits preceded by a pound sign.  The first two digits specify a red value, the next two specify a green value, the next two specify a blue value.  For example, <constant>#00FF00</constant> would be a bright green.
 
         <!-- Definitions Colors -->
         <variablelist>
