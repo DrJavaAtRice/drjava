@@ -8,6 +8,10 @@
     srcroot
     projpath
     public_javadoc_dir
+
+  Assumes these targets exist:
+    stable
+    development
  
 -->
 <!-- <taskdef name="javamake" classname="com.sun.tools.javamake.ant.JavaMake"/>  -->
@@ -22,6 +26,9 @@
 
 <!-- put javadoc in this directory if generating private javadoc -->
 <property name="private_javadoc_dir" value="${srcroot}/../javadoc/${ant.project.name}" />
+
+<!-- put documentation output in this directory -->
+<property name="doc_dir" value="${srcroot}/../docs" />
 
 <!-- classpath to use everywhere. -->
 <path id="classpath">
@@ -75,27 +82,7 @@
         filtering="yes" />
 </target>
 
-<!-- Sets a flag indicating that code dealing with new features since the last
-  stable release should be enabled and testable.
-  Takes effect only after a clean compile -->
-<target name="development">
-  <filter token="DEVELOPMENT" value = "true" />
-  <copy file="CodeStatus.orig"
-        tofile="CodeStatus.java"
-        overwrite="yes"
-        filtering="yes" />
-</target>
 
-<!-- Sets a flag indicating that code dealing with new features since the last
-  stable release should not be enabled or testable.
-  Takes effect only after a clean compile -->
-<target name="stable">
-  <filter token="DEVELOPMENT" value = "false" />
-  <copy file="CodeStatus.orig"
-        tofile="CodeStatus.java"
-        overwrite="yes"
-        filtering="yes" />
-</target>
 
 <!-- Commit source to CVS archive
      Before doing do, we update our copy with the CVS copy. This ensures that
@@ -141,7 +128,6 @@
   -->
 </target>
 
-
 <!-- Compile. We have to start at srcroot and then selectively include
      just this project in order for it to realize what files have already
      been compiled (preventing needless recompilation)
@@ -158,6 +144,7 @@
     <!--
     <echo message="Recompiling all classes ..." />
     <apply executable="java" failonerror="yes" parallel="yes" type="file">
+
       <arg value="-classpath" />
       <arg value="${classpath_text}" />
       <arg value="com.sun.tools.javac.Main" />
@@ -293,5 +280,6 @@
   <delete dir="${private_javadoc_dir}" />
   <delete dir="${built}/${projpath}" />
   <delete file="${jarfile}" />
+  <delete dir="${doc_dir}" />
 </target>
 
