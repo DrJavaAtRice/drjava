@@ -1043,17 +1043,27 @@ public class DefinitionsDocument extends PlainDocument {
     try {
       int startPos = getLineStartPos(pos);
       int firstNonWSPos = getLineFirstCharPos(pos);
+      int len = firstNonWSPos - startPos;
       
       // Removes old prefix, then adds new one
       // FIXME: If tab only contains spaces, then just adjust as necessary
       //   for efficiency, rather than replacing the whole thing
-      remove(startPos, firstNonWSPos - startPos);
-      insertString(startPos, tab, null);
+      if (!_hasOnlySpaces(tab) || (len != tab.length())) {
+        remove(startPos, len);
+        insertString(startPos, tab, null);
+      }
     }
     catch (BadLocationException e) {
       // Should never see a bad location
       throw new UnexpectedException(e);
     }
+  }
+  
+  /**
+   * Returns whether the given text only has spaces.
+   */
+  private boolean _hasOnlySpaces(String text) {
+    return (text.trim().length() == 0);
   }
 
   /**
