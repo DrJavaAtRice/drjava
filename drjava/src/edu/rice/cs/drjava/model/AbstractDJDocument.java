@@ -82,6 +82,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * access or modify this virtual object should be synchronized on _reduced.
    */
   protected BraceReduction _reduced = new ReducedModelControl();
+  
   /** The absolute character offset in the document. */
   protected int _currentLocation = 0;
   
@@ -119,21 +120,13 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    */
   private static final int MAX_CACHE_SIZE = 10000;
   
-  /**
-   * Constant for starting position of document.
-   */
+  /** Constant for starting position of document. */
   public static final int DOCSTART = 0;
   
-  /**
-   * Constant used by helper methods to indicate an error
-   */
+  /** Constant used by helper methods to indicate an error. */
   public static final int ERROR_INDEX = -1;
   
-  
-  /**
-   * The instance of the indent decision tree used by Definitions documents.
-   * TODO: should this be static?  It was before - with a static initializer.
-   */
+  /** The instance of the indent decision tree used by Definitions documents. */
   private final Indenter _indenter;
   
   // Saved here to allow the listener to be removed easily
@@ -141,7 +134,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   private OptionListener<Integer> _listener1;
   private OptionListener<Boolean> _listener2;
   
-  
+
   //-------- CONSTRUCTORS --------
   
   protected AbstractDJDocument() {
@@ -150,16 +143,12 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     _initNewIndenter();
   }
   
-  protected AbstractDJDocument(Indenter indent) {
-    _indenter = indent;
-  }
+  protected AbstractDJDocument(Indenter indent) { _indenter = indent; }
   
   
   //-------- METHODS ---------
   
-  /**
-   * Returns a new indenter.
-   */
+  /** Returns a new indenter. */
   protected abstract Indenter makeNewIndenter(int indentLevel);
   
   /**
@@ -715,11 +704,10 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   public boolean findCharInStmtBeforePos(char findChar, int position){
     // throwErrorHuh();
     if (position == DefinitionsDocument.ERROR_INDEX) {
+      String mesg = "Argument endChar to QuestionExistsCharInStmt must be a char " +
+        "that exists on the current line.";
       // Should not happen
-      throw new UnexpectedException(new
-                                      IllegalArgumentException("Argument endChar to " +
-                                                               "QuestionExistsCharInStmt must be a char " +
-                                                               "that exists on the current line."));
+      throw new UnexpectedException(new IllegalArgumentException(mesg));
     }
     
     char[] findCharDelims = {findChar, ';', '{', '}'};

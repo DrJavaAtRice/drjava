@@ -55,9 +55,7 @@ import java.awt.event.*;
  */
 public class HistorySaveDialog extends DrJavaScrollableDialog {
 
-  /**
-   * Reference to the history text being edited.
-   */
+  /** Reference to the history text being edited. */
   private String _history;
 
   /**

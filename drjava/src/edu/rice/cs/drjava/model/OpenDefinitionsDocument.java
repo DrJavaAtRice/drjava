@@ -70,11 +70,12 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  *
  * @version $Id$
  */
-public interface OpenDefinitionsDocument extends DJDocument, Finalizable<DefinitionsDocument> {
+public interface OpenDefinitionsDocument extends DJDocument, Finalizable<DefinitionsDocument>,
+  Comparable<OpenDefinitionsDocument> {
 
   // The following methods are forwarding methods required by the rest of the
-  // program in order for the OpenDefinitionsDocument to truely handle the
-  // DefinitionsDocument
+  // program in order for the OpenDefinitionsDocument to handle DefinitionsDocuments
+  public int id();
   public void commentLines(int selStart, int selEnd);
   public void uncommentLines(int selStart, int selEnd);
   public boolean getClassFileInSync();

@@ -218,18 +218,14 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * This does not indicate whether it is ready to be used, which is
    * indicated by isReady().
    */
-  public boolean isAvailable() {
-    return true;
-  }
+  public boolean isAvailable() { return true; }
 
   /**
    * Returns whether the debugger is currently in an active debugging
    * session.  This method will return false if the debugger has not
    * been initialized through startup().
    */
-  public synchronized boolean isReady() {
-    return _vm != null;
-  }
+  public synchronized boolean isReady() { return _vm != null; }
 
   /**
    * Ensures that the debugger is active.  Should be called by every
@@ -238,9 +234,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * @throws DebugException if an exception was detected in the EventHandlerThread
    */
   protected synchronized void _ensureReady() throws DebugException {
-    if (!isReady()) {
-      throw new IllegalStateException("Debugger is not active.");
-    }
+    if (!isReady()) throw new IllegalStateException("Debugger is not active.");
+    
     if (_eventHandlerError != null) {
       Throwable t = _eventHandlerError;
       _eventHandlerError = null;
@@ -265,10 +260,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   public synchronized void startup() throws DebugException {
     if (!isReady()) {
       // check if all open documents are in sync
-      List<OpenDefinitionsDocument> list = _model.getDefinitionsDocuments();
-      for (int i = 0; i < list.size(); i++) {
-        OpenDefinitionsDocument currDoc = list.get(i);
-        currDoc.checkIfClassFileInSync();
+      for (OpenDefinitionsDocument doc: _model.getDefinitionsDocuments()) {
+        doc.checkIfClassFileInSync();
       }
 
       _attachToVM();
@@ -284,10 +277,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       _model.addListener(_watchListener);
     }
 
-    else {
+    else
       // Already started
       throw new IllegalStateException("Debugger has already been started.");
-    }
   }
 
   /**
@@ -301,7 +293,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     AttachingConnector connector = _getAttachingConnector();
 
     // Try to connect on our debug port
-    Map<String, Connector.Argument> args = connector.defaultArguments();
+    Map<String, Connector.Argument> args = connector.defaultArguments();  /* Warning expected; Connector has not yet been generified */
     Connector.Argument port = args.get("port");
     Connector.Argument host = args.get("hostname");
     try {
@@ -326,21 +318,14 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * interpreter JVM.
    */
   protected AttachingConnector _getAttachingConnector()
-    throws DebugException
-  {
+    throws DebugException {
     VirtualMachineManager vmm = Bootstrap.virtualMachineManager();
-    List<AttachingConnector> connectors = vmm.attachingConnectors();  // Added parameterization <AttachingConnector>. JDK 1.5 will eliminate this check
+    List<AttachingConnector> connectors = vmm.attachingConnectors();  // Warning expected; Connector not yet generified.
     AttachingConnector connector = null;
-    java.util.Iterator<AttachingConnector> iter = connectors.iterator();
-    while (iter.hasNext()) {
-      AttachingConnector conn = iter.next();
-      if (conn.name().equals("com.sun.jdi.SocketAttach")) {
-        connector = conn;
-      }
+    for (AttachingConnector conn: connectors) {
+      if (conn.name().equals("com.sun.jdi.SocketAttach"))  connector = conn;
     }
-    if (connector == null) {
-      throw new DebugException("Could not find an AttachingConnector!");
-    }
+    if (connector == null) throw new DebugException("Could not find an AttachingConnector!");
     return connector;
   }
 
@@ -350,23 +335,16 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * This is used to mainupulate interpreters at breakpoints.
    */
   protected ObjectReference _getInterpreterJVMRef()
-    throws DebugException
-  {
+    throws DebugException {
     String className = "edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM";
     List<ReferenceType> referenceTypes = _vm.classesByName(className);  // Added parameterization <ReferenceType>. JDK 1.5 will eliminate this warning
     if (referenceTypes.size() > 0) {
       ReferenceType rt = referenceTypes.get(0);
       Field field = rt.fieldByName("ONLY");
-      if (field == null) {
-        throw new DebugException("Unable to get ONLY field");
-      }
-      else {
-        return (ObjectReference) rt.getValue(field);
-      }
+      if (field == null) throw new DebugException("Unable to get ONLY field");
+      return (ObjectReference) rt.getValue(field);
     }
-    else {
-      throw new DebugException("Could not get a reference to interpreterJVM");
-    }
+    else throw new DebugException("Could not get a reference to interpreterJVM");
   }
 
   /**
@@ -375,9 +353,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * @throws IllegalStateException if debugger is not ready
    */
   public synchronized void shutdown() {
-    if (!isReady()) {
-      throw new IllegalStateException("Cannot shut down if debugger is not active.");
-    }
+    if (!isReady()) throw new IllegalStateException("Cannot shut down if debugger is not active.");
 
     _model.removeListener(_watchListener);
 
@@ -411,16 +387,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Returns the current EventRequestManager from JDI, or null if
    * startup() has not been called.
    */
-  synchronized EventRequestManager getEventRequestManager() {
-    return _eventManager;
-  }
+  synchronized EventRequestManager getEventRequestManager() { return _eventManager; }
 
   /**
    * Returns the pending request manager used by the debugger.
    */
-  synchronized PendingRequestManager getPendingRequestManager() {
-    return _pendingRequestManager;
-  }
+  synchronized PendingRequestManager getPendingRequestManager() { return _pendingRequestManager; }
 
   /**
    * Sets the debugger's currently active thread.
@@ -441,16 +413,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
 
     try {
-      if ((_suspendedThreads.isEmpty() ||
-           !_suspendedThreads.contains(thread.uniqueID()))
-            && (thread.frameCount() > 0)) {
+      if ((_suspendedThreads.isEmpty() || 
+           !_suspendedThreads.contains(thread.uniqueID())) && (thread.frameCount() > 0)) {
         _suspendedThreads.push(thread);
-
         return true;
       }
-      else {
-        return false;
-      }
+      else return false;
     }
     catch (IncompatibleThreadStateException itse) {
       // requesting stack frames should be fine, since the thread must be

@@ -76,8 +76,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
    * Doesn't reset interactions because no interpretations are performed.
    */
   public void testCompileReferenceToNonPublicClass() 
-    throws BadLocationException, IOException, InterruptedException
-  {
+    throws BadLocationException, IOException, InterruptedException {
 //    System.out.println("testCompileReferenceToNonPublicClass()");
     OpenDefinitionsDocument doc = setupDocument(FOO_NON_PUBLIC_CLASS_TEXT);
     OpenDefinitionsDocument doc2 = setupDocument(FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT);
@@ -117,8 +116,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
    * Doesn't reset interactions because no interpretations are performed.
    */
   public void testCompileWithJavaAssert()
-    throws BadLocationException, IOException, InterruptedException
-  {
+    throws BadLocationException, IOException, InterruptedException {
 //    System.out.println("testCompileWithJavaAssert()");
     // No assert support by default (or in 1.3)
     if(Float.valueOf(System.getProperty("java.specification.version")) < 1.5) {

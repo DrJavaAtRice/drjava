@@ -155,7 +155,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     while (index != -1) {
       try{
         _startupClasspathVector.add(new File(_startupClasspath.substring(lastIndex, index)).toURL());
-      }catch(MalformedURLException murle){
+      }
+      catch(MalformedURLException murle){
         // just don't add bad classpath entry
       }
       lastIndex = index + separator.length();
@@ -165,7 +166,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     index = _startupClasspath.length();
     try{
       _startupClasspathVector.add(new File(_startupClasspath.substring(lastIndex, index)).toURL());
-    }catch(MalformedURLException murle){
+    }
+    catch(MalformedURLException murle){
       // fail silently if the classpath entry is bad
     }
   }

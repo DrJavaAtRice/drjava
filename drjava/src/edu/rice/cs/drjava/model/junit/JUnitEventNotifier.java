@@ -82,8 +82,7 @@ import java.io.IOException;
  *
  * @version $Id$
  */
-class JUnitEventNotifier extends EventNotifier<JUnitListener>
-    implements JUnitListener {
+class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitListener {
 
   /**
    * Called when trying to test a non-TestCase class.
@@ -91,15 +90,8 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener>
    */
   public void nonTestCase(boolean isTestAll) {
     _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).nonTestCase(isTestAll);
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
+    try { for (JUnitListener jul : _listeners) { jul.nonTestCase(isTestAll); } }
+    finally { _lock.endRead(); }
   }
 
   /**
@@ -107,15 +99,8 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener>
    */
   public void junitStarted(List<OpenDefinitionsDocument> docs) {
     _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).junitStarted(docs);
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
+    try { for (JUnitListener jul : _listeners) { jul.junitStarted(docs); } }
+    finally { _lock.endRead(); }
   }
 
   /**
@@ -123,15 +108,8 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener>
    */
   public void junitAllStarted() {
     _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).junitAllStarted();
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
+    try { for (JUnitListener jul : _listeners) { jul.junitAllStarted(); } }
+    finally { _lock.endRead(); }
   }
 
   /**
@@ -140,15 +118,8 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener>
    */
   public void junitSuiteStarted(int numTests) {
     _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).junitSuiteStarted(numTests);
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
+    try { for (JUnitListener jul : _listeners) { jul.junitSuiteStarted(numTests); } }
+    finally { _lock.endRead(); }
   }
 
   /**
@@ -157,15 +128,8 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener>
    */
   public void junitTestStarted(String name) {
     _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).junitTestStarted(name);
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
+    try { for (JUnitListener jul : _listeners) { jul.junitTestStarted(name); } }
+    finally { _lock.endRead(); }
   }
 
   /**
@@ -177,15 +141,8 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener>
    */
   public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
     _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).junitTestEnded(name, wasSuccessful, causedError);
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
+    try { for (JUnitListener jul : _listeners) { jul.junitTestEnded(name, wasSuccessful, causedError); } }
+    finally { _lock.endRead(); }
   }
 
   /**
@@ -193,15 +150,8 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener>
    */
   public void junitEnded() {
     _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).junitEnded();
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
+    try { for(JUnitListener jul : _listeners) { jul.junitEnded(); } }
+    finally { _lock.endRead(); }
   }
 }
 

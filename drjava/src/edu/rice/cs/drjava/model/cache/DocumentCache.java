@@ -95,9 +95,8 @@ public class DocumentCache{
     CACHE_SIZE = size;
     _lru = new LinkedList<DocManager>();
   }
-  public DocumentCache() {
-    this(24);
-  }
+  
+  public DocumentCache() { this(24); }
 
   /**
    * Returns a cache adapter corresponding to the owner of the
@@ -121,10 +120,8 @@ public class DocumentCache{
    * Note: modified documents are not managed in the cache.
    */
   public synchronized void setCacheSize(int size) {
-    if(size <= 0)
-    {
-      throw new IllegalArgumentException("Cannot set the cache size to zero or less.");
-    }
+    if (size <= 0) throw new IllegalArgumentException("Cannot set the cache size to zero or less.");
+    
     CACHE_SIZE = size;
     DocManager current;
     if (_lru.size() > CACHE_SIZE) {
@@ -141,13 +138,9 @@ public class DocumentCache{
     }
   }
   
-  public synchronized int getCacheSize() {
-    return CACHE_SIZE;
-  }
+  public synchronized int getCacheSize() { return CACHE_SIZE; }
   
-  public int getNumInCache(){
-    return _lru.size();
-  }
+  public int getNumInCache() { return _lru.size(); }
     
   /**
    * Called by a manager when it is used by the model.
@@ -173,9 +166,7 @@ public class DocumentCache{
    */
   private synchronized void remove(DocManager toRemove) {
     _lru.remove(toRemove);
-    if (toRemove.isFirst()) {
-      toRemove.kickOut();
-    }
+    if (toRemove.isFirst()) toRemove.kickOut();
     if (_lru.size() > 0 )
       _lru.getFirst().setFirst(); // just in case the one removed was first
   }
@@ -218,9 +209,7 @@ public class DocumentCache{
       close();
     }
     
-    public synchronized DDReconstructor getReconstructor() {
-      return _rec;
-    }
+    public synchronized DDReconstructor getReconstructor() { return _rec; }
   
     /**
      * Retrieves the document for the corresponding ODD.  If the document
@@ -234,29 +223,17 @@ public class DocumentCache{
     public synchronized DefinitionsDocument getDocument() 
       throws IOException, FileMovedException {
         
-      if (_stat != FIRST_IN_LRU && 
-          _stat != UNMANAGED) {
-        makeMeFirst();
-      }
-      else if (_stat == UNMANAGED && _doc !=null && 
-               !_doc.isModifiedSinceSave()) {
-        _stat = NOT_IN_LRU;
-      }
+      if (_stat != FIRST_IN_LRU && _stat != UNMANAGED) makeMeFirst();
+      else if (_stat == UNMANAGED && _doc !=null && !_doc.isModifiedSinceSave()) _stat = NOT_IN_LRU;
 
-      if (_doc != null) {
-        return _doc;
+      if (_doc != null) return _doc;
+  
+      try {
+        _doc = _rec.make();
+        if (_doc == null) throw new IllegalStateException("the reconstructor made a null document");
       }
-      else {
-        try {
-          _doc = _rec.make();
-          if (_doc == null) 
-            throw new IllegalStateException("the reconstructor made a null document");
-        }
-        catch(BadLocationException e) {
-          throw new UnexpectedException(e);
-        }
-        return _doc;
-      }
+      catch(BadLocationException e) { throw new UnexpectedException(e); }
+      return _doc;
     }
     
     /**
@@ -264,9 +241,7 @@ public class DocumentCache{
      * the document would have to be loaded from disk.
      * @return if the document is already loaded
      */
-    public boolean isReady() {
-      return _doc != null;
-    }
+    public boolean isReady() { return _doc != null; }
   
     /**
      * Closes the corresponding document for this adapter
@@ -279,9 +254,7 @@ public class DocumentCache{
     /**
      * Should be called by the cache
      */
-    void kickOut() {
-      kickOut(true);
-    }
+    void kickOut() { kickOut(true); }
     
     private void kickOut(boolean save) {
       if (_doc != null) {
@@ -296,9 +269,7 @@ public class DocumentCache{
      * Tells the cache that this document should be first
      * document in the LRU.
      */
-    private void makeMeFirst() {
-      DocumentCache.this.newFirst(this);
-    }
+    private void makeMeFirst() { DocumentCache.this.newFirst(this); }
     
     // The following methods used by the cache to speed up algos
     // These enable the managers to decide when to bypass the 
@@ -321,9 +292,7 @@ public class DocumentCache{
     boolean isNotFirst() { return _stat == OTHER_IN_LRU; }
     boolean isOut()      { return _stat == NOT_IN_LRU; }
     
-    public String toString() {
-      return "Manager for: " + _doc;
-    } 
+    public String toString() { return "Manager for: " + _doc; } 
   }
   
   ////////////////////////////////////////
@@ -337,12 +306,9 @@ public class DocumentCache{
     public void registered(OpenDefinitionsDocument odd, DCacheAdapter man);
   }
   
-  private LinkedList<RegistrationListener> _regListeners = 
-    new LinkedList<RegistrationListener>();
+  private LinkedList<RegistrationListener> _regListeners =   new LinkedList<RegistrationListener>();
   
-  public void addRegistrationListener(RegistrationListener list) {
-    _regListeners.add(list);
-  }
+  public void addRegistrationListener(RegistrationListener list) { _regListeners.add(list); }
   public void removeRegistrationListener(RegistrationListener list) {
     _regListeners.remove(list);
   }

@@ -150,31 +150,21 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    * Add a JUnitListener to the model.
    * @param listener a listener that reacts to JUnit events
    */
-  public void addListener(JUnitListener listener) {
-    _notifier.addListener(listener);
-  }
+  public void addListener(JUnitListener listener) { _notifier.addListener(listener); }
   
   /**
    * Remove a JUnitListener from the model.  If the listener is not currently
    * listening to this model, this method has no effect.
    * @param listener a listener that reacts to JUnit events
    */
-  public void removeListener(JUnitListener listener) {
-    _notifier.removeListener(listener);
-  }
+  public void removeListener(JUnitListener listener) { _notifier.removeListener(listener); }
   
-  /**
-   * Removes all JUnitListeners from this model.
-   */
-  public void removeAllListeners() {
-    _notifier.removeAllListeners();
-  }
+  /** Removes all JUnitListeners from this model. */
+  public void removeAllListeners() { _notifier.removeAllListeners(); }
   
   //-------------------------------- Triggers --------------------------------//
   
-  public StyledDocument getJUnitDocument() {
-    return _junitDoc;
-  }
+  public StyledDocument getJUnitDocument() { return _junitDoc; }
   
   /**
    * Creates a JUnit test suite over all currently open documents and runs it.
@@ -182,9 +172,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    * ignored.  Synchronized against the compiler model to prevent testing and
    * compiling at the same time, which would create invalid results.
    */
-  public void junitAll() {
-    junitDocs(_getter.getDefinitionsDocuments());
-  }
+  public void junitAll() { junitDocs(_getter.getDefinitionsDocuments()); }
   
   /**
    * Creates a JUnit test suite over all currently open documents and runs it.
@@ -195,15 +183,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   public void junitProject() {
     LinkedList<OpenDefinitionsDocument> lod = new LinkedList<OpenDefinitionsDocument>();
     
-    Iterator<OpenDefinitionsDocument> it =
-      _getter.getDefinitionsDocuments().iterator();
-    while (it.hasNext()) {
-      OpenDefinitionsDocument doc = it.next();
-      if (doc.isInProjectPath() || doc.isAuxiliaryFile()) {
-        lod.add(doc);
-      }
+    for (OpenDefinitionsDocument doc : _getter.getDefinitionsDocuments() ) { 
+      if (doc.isInProjectPath() || doc.isAuxiliaryFile())  lod.add(doc);
     }
-    junitDocs(lod);
   }
   
   /**
@@ -219,9 +201,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   }
   
   
-  public void junitDocs(List<OpenDefinitionsDocument> lod){
-    junitOpenDefDocs(lod, true);
-  }
+  public void junitDocs(List<OpenDefinitionsDocument> lod){ junitOpenDefDocs(lod, true); }
   
   
   /**
@@ -230,8 +210,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    * debugging of test cases. If the classes being tested are out of
    * sync, a message is displayed.
    */
-  public void junit(OpenDefinitionsDocument doc)
-    throws ClassNotFoundException, IOException {
+  public void junit(OpenDefinitionsDocument doc) throws ClassNotFoundException, IOException {
     try {
       // try to get the file, to make sure it's not untitled. if it is, it'll throw an IllegalStateException
       File testFile = doc.getFile();
@@ -258,118 +237,94 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     }
   }
   
-  
-  protected void junitOpenDefDocs(List<OpenDefinitionsDocument> lod, boolean allTests){
-    synchronized (_compilerModel) {
-      // if a test is running, don't start another one, but make sure someone's not
-      // trying to notify that the previous test had finished.
-      synchronized(_notifier) {
-        if (_isTestInProgress) return;
+  private void junitOpenDefDocs(List<OpenDefinitionsDocument> lod, boolean allTests) {
+    // if a test is running, don't start another one, but make sure someone's not
+    // trying to notify that the previous test had finished.
+    
+    synchronized(this) { if (_isTestInProgress) return; }
+    
+    //reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
+    _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
+    
+    HashMap<String,OpenDefinitionsDocument> classNamesToODDs =
+      new HashMap<String,OpenDefinitionsDocument>();
+    ArrayList<String> classNames = new ArrayList<String>();
+    ArrayList<File> files = new ArrayList<File>();
+    
+    // start here.
+    File builtDir = _model.getBuildDirectory();
+    LinkedList<File> classDirs = new LinkedList<File>();
+    LinkedList<File> sourceFiles = new LinkedList<File>();
+    
+    //Gets system classpaths from the main JVM so that junit tests can find every class file.
+    //Given as one long String, this separates the paths into a list of strings. 3/12/05
+    LinkedList<String> classpaths = new LinkedList<String>();
+    String cpString = getClasspath().toString();
+    int cpLength = cpString.length();
+    if (cpString.indexOf(File.pathSeparatorChar) == -1 && cpLength > 0) classpaths.add(cpString);
+    else {
+      int cpIndex;
+      while ((cpIndex = cpString.indexOf(File.pathSeparatorChar)) != -1 && cpLength != 1) {
+        if (cpIndex == 0) cpString = cpString.substring(1, cpLength);
+        else {
+          classpaths.add(cpString.substring(0, cpIndex));
+          cpString = cpString.substring(cpIndex, cpLength-1);
+          cpLength = cpString.length();
+        }
+      }
+    }
+      
+    //First adds the default document build directory to the class directories.
+    for (OpenDefinitionsDocument doc: lod) {
+      try {
+        String packageName;
+        try { packageName = doc.getPackageName(); }
+        catch(InvalidPackageException e) { packageName = ""; }
+        packageName = packageName.replace('.', File.separatorChar);
+        
+        // Keep a record of unique built directories
+        if (builtDir == null) builtDir = doc.getSourceRoot();
+        File temp = new File(builtDir.getCanonicalPath() + File.separator + packageName);
+        if (!classDirs.contains(temp)) classDirs.add(temp);
       }
       
-      //reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
-      _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
-      
-      //        _getter.getDefinitionsDocuments().iterator();
-      HashMap<String,OpenDefinitionsDocument> classNamesToODDs =
-        new HashMap<String,OpenDefinitionsDocument>();
-      ArrayList<String> classNames = new ArrayList<String>();
-      ArrayList<File> files = new ArrayList<File>();
-      
-      // start here.
-      Iterator<OpenDefinitionsDocument> it = lod.iterator();
-      File builtDir = _model.getBuildDirectory();
-      LinkedList<File> classDirs = new LinkedList<File>();
-      LinkedList<File> sourceFiles = new LinkedList<File>();
-      
-      //Gets system classpaths from the main JVM so that junit tests can find every class file.
-      //Given as one long String, this separates the paths into a list of strings. 3/12/05
-      LinkedList<String> classpaths = new LinkedList<String>();
-      String cpString = _jvm.getClasspath().toString();
-      int cpLength = cpString.length();
-      if (cpString.indexOf(File.pathSeparatorChar) == -1 && cpLength > 0) {
-        classpaths.add(cpString);
-      }
-      else {
-        int cpIndex;
-        while ((cpIndex = cpString.indexOf(File.pathSeparatorChar)) != -1 && cpLength != 1) {
-          if (cpIndex == 0) cpString = cpString.substring(1, cpLength);
-          else {
-            classpaths.add(cpString.substring(0, cpIndex));
-            cpString = cpString.substring(cpIndex, cpLength-1);
-            cpLength = cpString.length();
+      catch(IOException e) { /* do nothing b/c the directory doesn't exist */ }
+      catch(InvalidPackageException e) { /* do nothing, b/c it's package is bogus */ }
+    }
+    
+    // Next, add the JVM class paths to the class directories.
+    // Junit will look here if the default build directories don't have the desired classes.
+    // TODO: fuse this loop with the preceding one
+   for (OpenDefinitionsDocument doc: lod) {
+      try {
+        String packageName;
+        try { packageName = doc.getPackageName(); }
+        catch(InvalidPackageException e) { packageName = "";}
+        packageName = packageName.replace('.', File.separatorChar);
+        
+        //Add unique classpaths to the list of class directories that junit tests look through. 3/12/05
+        for (String classpath: classpaths) {
+          File temp = new File (new File(classpath).getCanonicalPath());
+          if (temp.isDirectory()) {
+            temp = new File(temp.getCanonicalPath() + File.separator + packageName);
+            if (!classDirs.contains(temp)) classDirs.addLast(temp);
           }
         }
       }
+      catch(IOException e) { /* do nothing b/c the directory doesn't exist */ }
+    }
+    
+    for (File dir: classDirs){
+      // foreach built directory
+      File[] listing = dir.listFiles();
       
-      //First adds the default document build directory to the class directories.
-      while (it.hasNext()) {
-        try {
-          OpenDefinitionsDocument doc = it.next();
-          String packageName;
-          try{
-            packageName = doc.getPackageName();
-          }catch(InvalidPackageException e){
-            packageName = "";
-          }
-          packageName = packageName.replace('.', File.separatorChar);
-          
-          // keep a record of unique built directories
-          if(builtDir == null){
-            builtDir = doc.getSourceRoot();
-          }
-          File temp = new File(builtDir.getCanonicalPath() + File.separator + packageName);
-          if(!classDirs.contains(temp)){
-            classDirs.add(temp);
-          }
-        }
-        catch(IOException e){
-          // don't add it to the test suite b/c the directory doesn't exist
-        }catch(InvalidPackageException e){
-          // don't add it, b/c it's package is bogus
-        }
-      }
-      
-      //Next adds the JVM class paths to the class directories.
-      //Junit will look here if the default build directories don't have the desired classes.
-      it = lod.iterator();
-      while (it.hasNext()) {
-        try {
-          OpenDefinitionsDocument doc = it.next();
-          String packageName;
-          try{
-            packageName = doc.getPackageName();
-          }catch(InvalidPackageException e){
-            packageName = "";
-          }
-          packageName = packageName.replace('.', File.separatorChar);
-          
-          //Adds unique classpaths to the list of class directories that junit tests look through. 3/12/05
-          for (String classpath: classpaths) {
-            File temp = new File (new File(classpath).getCanonicalPath());
-            if (temp.isDirectory()) {
-              temp = new File(temp.getCanonicalPath() + File.separator + packageName);
-              if (!classDirs.contains(temp)) {
-                classDirs.addLast(temp);
-              }
-            }
-          }
-        }
-        catch(IOException e){
-          // don't add it to the test suite b/c the directory doesn't exist
-        }
-      }
-         
-      for(File dir: classDirs){
-        // foreach built directory
-        File[] listing = dir.listFiles();
-
-        if(listing != null) for(File entry : listing){
+      if (listing != null) {
+        for (File entry : listing) {
           // for each class file in the built directory
-          if(entry.isFile() && entry.getPath().endsWith(".class")){
-            try{
+          if (entry.isFile() && entry.getPath().endsWith(".class")) {
+            try {
               JavaClass clazz = new ClassParser(entry.getCanonicalPath()).parse();
-              String classname = clazz.getClassName();// get classname
+              String classname = clazz.getClassName(); // get classname
               //              System.out.println("looking for file for: " + classname);
               int index_of_dot = classname.lastIndexOf('.');
               String filenameFromClassfile = classname.substring(0, index_of_dot+1);
@@ -381,22 +336,18 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               filenameFromClassfile = filenameFromClassfile.substring(0, index_of_dot);
               // now the filenameFromClassfile contains the package/filename without the extension.
               
-              it = lod.iterator();
-              File f;
-              OpenDefinitionsDocument doc;
-              while (it.hasNext()) {
-                // for each open ODD
-                doc = it.next();
+              for (OpenDefinitionsDocument doc: lod) {
                 try{
-                  f = doc.getFile();
+                  File f = doc.getFile();
                   
                   String filename = doc.getSourceRoot().getCanonicalPath() + File.separator + filenameFromClassfile;
                   int index = f.getCanonicalPath().lastIndexOf('.');
                   String filenameFromDoc = f.getCanonicalPath().substring(0, index);
                   String ext = f.getCanonicalPath().substring(index, f.getCanonicalPath().length());
-                  // filenameFromDoc now contains the filename minus the extention
-                  //                  System.out.println(f.getCanonicalPath() + " == " + filename);
-                  if(filenameFromDoc.equals(filename) && (ext.equals(".java") || ext.equals(".dj0") || ext.equals(".dj1") || ext.equals(".dj2"))){
+                  // filenameFromDoc now contains the filename minus the extension
+                  
+                  if (filenameFromDoc.equals(filename) && 
+                      (ext.equals(".java") || ext.equals(".dj0") || ext.equals(".dj1")  || ext.equals(".dj2"))) {
                     //                    System.out.println("testing: " + classname + " from " + f.getCanonicalPath());
                     //                    Method methods[] = clazz.getMethods();
                     //                    for(Method d : methods){
@@ -407,37 +358,34 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
                     classNamesToODDs.put(classname, doc);
                     break;
                   }
-                }catch(InvalidPackageException e){
-                }catch(IOException e){
-                }catch(IllegalStateException e){
-                  // doc is untitled
                 }
+                catch(InvalidPackageException e) { /* do nothing */ }
+                catch(IOException e) { /* do nothing */ }
+                catch(IllegalStateException e) { /* do nothing; doc is untitled */ }
               }
-            }catch(IOException e){
-              // can't read class file
-            }catch(ClassFormatException e){
-              // class file is bads
             }
+            catch(IOException e) { /* can't read class file */ }
+            catch(ClassFormatException e) { /* class file is bad */ }
             // match source file to odd (if possible)
             // if match, add clasname to test suite
           }
-          
         }
       }
-
-      _isTestInProgress = true;
-      // synchronized over _notifier so that junitStarted is ensured to be 
-      // called before the testing thread (JUnitTestManager) makes any notifications
-      // to the notifier.  This can happen if the test fails quickly or if the test
-      // class is not found.
-      synchronized(_notifier) {
+    }
+    
+    _isTestInProgress = true;
+    
+    // synchronized over _compilerModel to ensure that compilation and junit testing
+    // are mutually exclusive.
+    // synchronized over this so that junitStarted is ensured to be 
+    // called before the testing thread (JUnitTestManager) makes any notifications
+    // to the notifier.  This can happen if the test fails quickly or if the test
+    // class is not found.
+    synchronized (_compilerModel) {
+      synchronized (this) {
         List<String> tests = _jvm.runTestSuite(classNames, files, allTests);
-        ArrayList<OpenDefinitionsDocument> odds =
-          new ArrayList<OpenDefinitionsDocument>();
-        Iterator<String> it2 = tests.iterator();
-        while (it2.hasNext()) {
-          odds.add(classNamesToODDs.get(it2.next()));
-        }
+        ArrayList<OpenDefinitionsDocument> odds = new ArrayList<OpenDefinitionsDocument>();
+        for (String name: tests) { odds.add(classNamesToODDs.get(name)); }
         _notifier.junitStarted(odds);
       }
     }
@@ -448,16 +396,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   //----------------------------- Error Results -----------------------------//
   
-  /**
-   * Gets the JUnitErrorModel, which contains error info for the last test run.
-   */
-  public JUnitErrorModel getJUnitErrorModel() {
-    return _junitErrorModel;
-  }
+  /** Gets the JUnitErrorModel, which contains error info for the last test run. */
+  public JUnitErrorModel getJUnitErrorModel() { return _junitErrorModel; }
   
-  /**
-   * Resets the junit error state to have no errors.
-   */
+  /** Resets the junit error state to have no errors. */
   public void resetJUnitErrors() {
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], _getter, false);
   }
@@ -475,7 +417,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     //       any thread that starts waiting for the test to end after the firing of
     //       junitStarted will never be notified. (same with all terminal events)
     //       The synchronization over _notifier takes care of this problem.
-    synchronized(_notifier) { 
+    synchronized(this) { 
       _notifier.nonTestCase(isTestAll);
       _isTestInProgress = false;
       _notifier.junitEnded();
@@ -484,29 +426,21 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /**
    * Called to indicate that a suite of tests has started running.
-   * TODO: Why is this sync'ed?
+   * TODO: Why is this sync'ed?  It no longer is.
    * Answer?: This might be to make sure that a test doesn't start while the file is
    *          being compiled. Only thing is that junitOpenDefDocs is synchronized to
    *          _compilerModel as well. This might not be needed.
    * 
    * @param numTests The number of tests in the suite to be run.
    */
-  public void testSuiteStarted(final int numTests) {
-    synchronized(_compilerModel) {
-      _notifier.junitSuiteStarted(numTests);
-    }
-  }
+  public void testSuiteStarted(final int numTests) { _notifier.junitSuiteStarted(numTests); }
   
   /**
    * Called when a particular test is started.
    * TODO: Why is this sync'ed?
    * @param testName The name of the test being started.
    */
-  public void testStarted(final String testName) {
-    synchronized(_compilerModel) { 
-      _notifier.junitTestStarted(testName);
-    }
-  }
+  public void testStarted(final String testName) { _notifier.junitTestStarted(testName); }
   
   /**
    * Called when a particular test has ended.
@@ -516,9 +450,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    *  or simply failed.
    */
   public void testEnded(final String testName, final boolean wasSuccessful,
-                        final boolean causedError)
-  {
-    synchronized(_notifier) { // so that it's not called until junitStarted is fired
+                        final boolean causedError) {
+    synchronized(this) { // so that it's not called until junitStarted is fired
       _notifier.junitTestEnded(testName, wasSuccessful, causedError);
     }
   }
@@ -530,7 +463,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   public void testSuiteEnded(JUnitError[] errors) {
     if (_isTestInProgress) {
       _junitErrorModel = new JUnitErrorModel(errors, _getter, true);
-      synchronized(_notifier) { // so that it's not called until junitStarted is fired
+      synchronized(this) { // so that it's not called until junitStarted is fired
         _isTestInProgress = false;
         _notifier.junitEnded();
       }
@@ -553,9 +486,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    * Returns the current classpath in use by the JUnit JVM,
    * in the form of a path-separator delimited string.
    */
-  public ClasspathVector getClasspath() {
-    return _jvm.getClasspath();
-  }
+  public ClasspathVector getClasspath() {  return _jvm.getClasspath(); }
   
   /**
    * Called when the JVM used for unit tests has registered.
@@ -566,7 +497,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       errors[0] = new JUnitError("Previous test was interrupted", true, "");
       _junitErrorModel = new JUnitErrorModel(errors, _getter, true);
       
-      synchronized(_notifier) { // make sure junitStarted isn't being called
+      synchronized(this) { // make sure junitStarted isn't being called
         _isTestInProgress = false;
         _notifier.junitEnded();
       }

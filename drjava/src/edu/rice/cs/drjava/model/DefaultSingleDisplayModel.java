@@ -93,12 +93,11 @@ import edu.rice.cs.util.docnavigation.*;
  *
  * @version $Id$
  */
-public class DefaultSingleDisplayModel extends DefaultGlobalModel
-    implements SingleDisplayModel{
+public class DefaultSingleDisplayModel extends DefaultGlobalModel implements SingleDisplayModel {
 
   /**
-   * The active document pointer, which will never be null once
-   * the constructor is done.
+   * The active document pointer, which will never be null once the constructor is done.
+   * Maintained by the _gainVisitor with a navigation listener.
    */
   private OpenDefinitionsDocument _activeDocument;
   /**
@@ -129,16 +128,16 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     
     final NodeDataVisitor<Boolean> _gainVisitor = new NodeDataVisitor<Boolean>() {
       public Boolean itemCase(INavigatorItem docu){
-        _setActiveDoc(docu);
+        _setActiveDoc(docu);  // sets _activeDocument
         File dir = _activeDocument.getParentDirectory();
         
-        if(dir != null) {  //If the file is in External or Auxiliary Files then then we do not want to change our project directory to something outside the project
+        if (dir != null) {  //If the file is in External or Auxiliary Files then then we do not want to change our project directory to something outside the project
           _activeDirectory = dir;
           _notifier.currentDirectoryChanged(_activeDirectory);
         }
         return true; 
       }
-      public Boolean fileCase(File f){
+      public Boolean fileCase(File f) {
         if (!f.isAbsolute()) {
           File root = _state.getProjectFile().getParentFile().getAbsoluteFile();
           f = new File(root, f.getPath());
@@ -147,15 +146,11 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
         _notifier.currentDirectoryChanged(f);
         return true;
       }
-      public Boolean stringCase(String s){ 
-        return false; 
-      }
+      public Boolean stringCase(String s) { return false; }
     };
     
     _documentNavigator.addNavigationListener(new INavigationListener() {
-      public void gainedSelection(NodeData dat) {
-        dat.execute(_gainVisitor);
-      }
+      public void gainedSelection(NodeData dat) { dat.execute(_gainVisitor); }
       public void lostSelection(NodeData dat) {
         // not important, only one document selected at a time
       }
@@ -173,9 +168,8 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * synchronized using EventNotifier readers/writers protocol
    */
   public void addListener(GlobalModelListener listener) {
-    if (! (listener instanceof SingleDisplayModelListener)) {
+    if (! (listener instanceof SingleDisplayModelListener))
       throw new IllegalArgumentException("Must use SingleDisplayModelListener");
-    }
 
     super.addListener(listener);
   }
@@ -191,41 +185,29 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * Sets the currently active document by updating the selection model.
    * @param doc Document to set as active
    */
-  public synchronized void setActiveDocument(OpenDefinitionsDocument doc) {
-    try {
-      _documentNavigator.setActiveDoc(getIDocGivenODD(doc));
-      //    _setActiveDoc(getIDocGivenODD(doc));
-    } catch(DocumentClosedException dce) {
-      //noop
-    }
+  public void setActiveDocument(OpenDefinitionsDocument doc) {
+    try { _documentNavigator.setActiveDoc(getIDocGivenODD(doc)); } 
+    catch(DocumentClosedException dce) { /* do nothing */ }
   }
   
-  public Container getDocCollectionWidget() {
-    return _documentNavigator.asContainer();
-  }
+  public Container getDocCollectionWidget() { return _documentNavigator.asContainer(); }
   
-  /**
-   * Sets the active document to be the next one in the collection
-   */
-  public synchronized void setActiveNextDocument() {
+  /** Sets the active document to be the next one in the collection. */
+  public void setActiveNextDocument() {
     INavigatorItem key = getIDocGivenODD(_activeDocument);
     INavigatorItem nextKey =_documentNavigator.getNext(key);
-      if( key != nextKey ) {
+      if (key != nextKey) _documentNavigator.setActiveDoc(nextKey);
         /* this will select the active document in the navigator, which
-         * will signal a listener to call _setActiveDoc(...)
-         */
-          _documentNavigator.setActiveDoc(nextKey);
-//   _setActiveDoc(nextKey);
-      }
+         * will signal a listener to call _setActiveDoc(...) */
   }
 
   /**
    * Sets the active document to be the previous one in the collection
    */
-  public synchronized void setActivePreviousDocument() {
+  public void setActivePreviousDocument() {
     INavigatorItem key = getIDocGivenODD(_activeDocument);
     INavigatorItem prevKey =_documentNavigator.getPrevious(key);
-    if( key != prevKey ) {
+    if (key != prevKey) {
       /* this will select the active document in the navigator, which
        * will signal a listener to call _setActiveDoc(...)
        */
@@ -282,9 +264,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     OpenDefinitionsDocument oldDoc = _activeDocument;
 
     OpenDefinitionsDocument openedDoc = super.openFile(com);
-    if (closeUntitled) {
-      super.closeFile(oldDoc);
-    }
+    if (closeUntitled) super.closeFile(oldDoc);
 
     setActiveDocument(openedDoc);
     return openedDoc;
@@ -312,9 +292,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     OpenDefinitionsDocument oldDoc = _activeDocument;
 
     OpenDefinitionsDocument openedDoc = super.openFiles(com);
-    if (closeUntitled) {
-      super.closeFile(oldDoc);
-    }
+    if (closeUntitled) super.closeFile(oldDoc);
     setActiveDocument(openedDoc);
     return openedDoc;
   }
@@ -327,7 +305,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * @param com a FileSaveSelector
    * @exception IOException
    */
-   public synchronized void saveAllFiles(FileSaveSelector com) throws IOException {
+   public void saveAllFiles(FileSaveSelector com) throws IOException {
      OpenDefinitionsDocument curdoc = getActiveDocument();
      super.saveAllFiles(com);
      setActiveDocument(curdoc); // Return focus to previously active doc
@@ -349,7 +327,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * one open document holds by creating a new file if necessary.
    * @return true if the document was closed
    */
-   public synchronized boolean closeFile(OpenDefinitionsDocument doc) {
+   public boolean closeFile(OpenDefinitionsDocument doc) {
      List<OpenDefinitionsDocument> list = new LinkedList<OpenDefinitionsDocument>();
      list.add(doc);
      return closeFiles(list, false);
@@ -364,13 +342,10 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     //Fix: close the currently active document last
     * @return true if all documents were closed
     */
-   public synchronized boolean closeAllFiles() {
+   public boolean closeAllFiles() {
      List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
      return closeFiles(docs, false);
    }
-  
-  
-  
   
   /**
    * This function closes a group of files assuming that there is some sort of 
@@ -388,13 +363,11 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * @param together if true then no files will be closed if not all can be abandoned
    * @return whether all files were closed
    */
-  public synchronized boolean closeFiles(List<OpenDefinitionsDocument> docList, boolean together) {
+  public boolean closeFiles(List<OpenDefinitionsDocument> docList, boolean together) {
     if (docList.size() == 0) return true;
 
     if (together) { // if together then do all prompting at once
-      for (OpenDefinitionsDocument doc : docList) {
-        if (!doc.canAbandonFile()) return false;
-      }
+      for (OpenDefinitionsDocument doc : docList) { if (!doc.canAbandonFile()) return false; }
     }
     
     // create new file before you start closing in order to have 
@@ -409,16 +382,13 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     // Close all files. If together, then don't let it prompt a 2nd time;
     // but, if not together, then call closeFile which may prompt the user.
     for (OpenDefinitionsDocument doc : docList) {
-      if (together) {
-        super.closeFileWithoutPrompt(doc);
-      }
+      if (together) super.closeFileWithoutPrompt(doc);
       else if (!super.closeFile(doc)) {
         setActiveDocument(doc);
         if (newDoc != null) super.closeFile(newDoc); // undo previous newFile() 
         return false;
       }
-    }
-        
+    }  
     return true;
   }
   
@@ -427,8 +397,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * which is untitled and unchanged.
    */
   private boolean _hasOneEmptyDocument() {
-    return ((getDefinitionsDocumentsSize() == 1) &&
-            (_activeDocument.isUntitled()) &&
+    return ((getDefinitionsDocumentsSize() == 1) && (_activeDocument.isUntitled()) &&
             (!_activeDocument.isModifiedSinceSave()));
   }
 
@@ -436,10 +405,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * Creates a new document if there are currently no documents open.
    */
   private void _ensureNotEmpty() {
-    if ((!_isClosingAllDocs) &&
-        (getDefinitionsDocumentsSize() == 0)) {
-      super.newFile();
-    }
+    if ((!_isClosingAllDocs) && (getDefinitionsDocumentsSize() == 0)) super.newFile();
   }
   
   /**
@@ -471,7 +437,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
   /**
    * some duplicated work, but avoids duplicated code, which is our nemesis
    */
-  public synchronized void setActiveFirstDocument() {
+  public void setActiveFirstDocument() {
     List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
     /* this will select the active document in the navigator, which
      * will signal a listener to call _setActiveDoc(...)
@@ -486,25 +452,19 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     
     _activeDocument = super.getODDGivenIDoc(idoc);
     try {
-    _activeDocument.checkIfClassFileInSync();
-    
-//    _documentNavigator.setActiveDoc(idoc);
-    
-    // notify single display model listeners   // notify single display model listeners
-    _notifier.notifyListeners(new GlobalEventNotifier.Notifier() {
-      public void notifyListener(GlobalModelListener l) {
-        // If it is a SingleDisplayModelListener, let it know that the
-        //  active doc changed
-        if (l instanceof SingleDisplayModelListener) {
-          SingleDisplayModelListener sl = (SingleDisplayModelListener) l;
-          sl.activeDocumentChanged(_activeDocument);
+      _activeDocument.checkIfClassFileInSync();
+     
+      // notify single display model listeners   // notify single display model listeners
+      _notifier.notifyListeners(new GlobalEventNotifier.Notifier() {
+        public void notifyListener(GlobalModelListener l) {
+          // If it is a SingleDisplayModelListener, let it know that the
+          //  active doc changed
+          if (l instanceof SingleDisplayModelListener) {
+            SingleDisplayModelListener sl = (SingleDisplayModelListener) l;
+            sl.activeDocumentChanged(_activeDocument);
+          }
         }
-      }
-    });
-    } catch(DocumentClosedException dce) {
-      //noop
-    }
+      });
+    } catch(DocumentClosedException dce) { /* do nothing */ }
   }
-  
-
 }

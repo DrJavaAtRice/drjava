@@ -41,7 +41,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
  * OTHER DEALINGS WITH THE SOFTWARE.
  * 
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 
@@ -53,8 +53,7 @@ import java.util.ArrayList;
  * the proper functionality of the class ForcedChoiceOption.
  * @version $Id$
  */
-public final class ForcedChoiceOptionTest extends TestCase
-{
+public final class ForcedChoiceOptionTest extends TestCase {
   /**
    * @param name The name of this test case.
    */
@@ -62,8 +61,7 @@ public final class ForcedChoiceOptionTest extends TestCase
   
   public void setUp() {}
   
-  public void testGetName()
-  {
+  public void testGetName() {
     ForcedChoiceOption fco = new ForcedChoiceOption("javadoc_access",
                                                     "protected",
                                                     null);
@@ -71,8 +69,7 @@ public final class ForcedChoiceOptionTest extends TestCase
     assertEquals("javadoc_access", fco.getName());
   }
   
-  public void testParse()
-  {
+  public void testParse() {
     ArrayList<String> aList = new ArrayList<String>(4);
     
     aList.add("public");
@@ -80,8 +77,8 @@ public final class ForcedChoiceOptionTest extends TestCase
     aList.add("package");
     aList.add("private");
     ForcedChoiceOption fco = new ForcedChoiceOption("javadoc_access",
-                                                   "protected",
-                                                   aList);
+                                                    "protected",
+                                                    aList);
     
     assertEquals(new String("private"), fco.parse("private"));
     try { fco.parse("Private"); fail(); }
@@ -94,8 +91,7 @@ public final class ForcedChoiceOptionTest extends TestCase
     catch (OptionParseException e) {}
   }
   
-  public void testFormat()
-  {
+  public void testFormat() {
     ForcedChoiceOption fco = new ForcedChoiceOption("javadoc_access",
                                                     "protected",
                                                     null);

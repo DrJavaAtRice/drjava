@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.compiler;
 
 import edu.rice.cs.drjava.model.EventNotifier;
+import edu.rice.cs.util.swing.*;
 
 /**
  * Keeps track of all listeners to a CompilerModel, and has the ability
@@ -79,56 +80,31 @@ import edu.rice.cs.drjava.model.EventNotifier;
  *
  * @version $Id$
  */
-class CompilerEventNotifier extends EventNotifier<CompilerListener>
-    implements CompilerListener {
+class CompilerEventNotifier extends EventNotifier<CompilerListener> implements CompilerListener {
 
-  /**
-   * Called after a compile is started by the GlobalModel.
-   */
+  /** Called after a compile is started by the GlobalModel. */
   public void compileStarted() {
     _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).compileStarted();
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
+    try { for (CompilerListener cl : _listeners) { cl.compileStarted(); } }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when a compile has finished running.
-   */
+  /** Called when a compile has finished running. */
   public void compileEnded() {
     _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).compileEnded();
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
+    try { for (CompilerListener cl : _listeners) { cl.compileEnded(); } }
+    finally { _lock.endRead(); }
   }
 
   /**
-   * Called to demand that all files be saved before compiling.
+   * Called when files are saved before compiling.
    * It is up to the caller of this method to check if the documents have been
    * saved, using IGetDocuments.hasModifiedDocuments().
    */
   public void saveBeforeCompile() {
     _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).saveBeforeCompile();
-      }
-    }
-    finally {
-      _lock.endRead();
+    try { for (CompilerListener cl : _listeners) { cl.saveBeforeCompile(); } }
+    finally { _lock.endRead();
     }
   }
 }

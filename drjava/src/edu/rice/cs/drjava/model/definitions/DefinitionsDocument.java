@@ -102,25 +102,20 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   List<DocumentClosedListener> _closedListeners = new LinkedList<DocumentClosedListener>();
   
-  public void addDocumentClosedListener(DocumentClosedListener l){
-    _closedListeners.add(l);
+  public void addDocumentClosedListener(DocumentClosedListener l) { 
+    synchronized (_closedListeners) { _closedListeners.add(l); }
   }
   
-  public void removeDocumentClosedListener(DocumentClosedListener l){
-    _closedListeners.remove(l);
+  public synchronized void removeDocumentClosedListener(DocumentClosedListener l) { 
+    synchronized (_closedListeners) { _closedListeners.remove(l); }
   }
-  
-  
-  
   
   // begin debug code
   
   private boolean _closed = false;
   
   protected void throwErrorHuh(){
-      if(_closed){
-        throw new RuntimeException("Definitions Document is closed, yet is being used");
-      }
+    if (_closed) throw new RuntimeException("Definitions Document is closed, yet is being used");
   }
   
   /**
@@ -131,10 +126,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public void close(){
     _removeIndenter();
     
-    for(DocumentClosedListener l: _closedListeners){
-      l.close();
+    synchronized (_closedListeners) {
+      for (DocumentClosedListener l: _closedListeners) { l.close(); }
+      _closedListeners = new LinkedList<DocumentClosedListener>();
     }
-    _closedListeners = new LinkedList<DocumentClosedListener>();
     
     _closed = false;
   }
@@ -168,9 +163,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   private CompoundUndoManager _undoManager;
   
-  /**
-   * keeps track of the listeners to this model
-   */
+  /** Keeps track of the listeners to this model. */
   private final GlobalEventNotifier _notifier;
   
   /**
@@ -217,16 +210,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //      _undoManager = undoManager;
 //  }
 
-  /**
-   * Returns a new indenter.
-   */
-  protected Indenter makeNewIndenter(int indentLevel) {
-    return new Indenter(indentLevel);
-  }
+  /** Returns a new indenter. */
+  protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }
   
-  /**
-   * Private common helper for constructors.
-   */
+  /** Private common helper for constructors. */
   private void _init() {
     _odd = null;
     _cachedLocation = 0;
@@ -239,9 +226,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
 
-  /**
-   * this function is for use by the OpenDefinitionsDocument. This will lock the Document.
-   */
+  /** This function is for use by the OpenDefinitionsDocument. This will lock the Document. */
   public void aquireWriteLock(){
     // throwErrorHuh();
     writeLock();
@@ -250,26 +235,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /**
    * this function is for use by the OpenDefinitionsDocument. This will release the lock to the Document.
    */
-  public void releaseWriteLock(){
-    // throwErrorHuh();
-    writeUnlock();
-  }
+  public void releaseWriteLock(){ writeUnlock(); }
   
-  /**
-   * this function is for use by the OpenDefinitionsDocument. This will lock the Document.
-   */
-  public void aquireReadLock(){
-    // throwErrorHuh();
-    readLock();
-  }
+  /** This function is for use by the OpenDefinitionsDocument. This will lock the Document.  */
+  public void aquireReadLock() { readLock(); }
   
-  /**
-   * this function is for use by the OpenDefinitionsDocument. This will release the lock to the Document.
-   */
-  public void releaseReadLock(){
-    // throwErrorHuh();
-    readUnlock();
-  }
+  /** This function is for use by the OpenDefinitionsDocument. This will release the lock to the Document. */
+  public void releaseReadLock() { readUnlock(); }
    
   
   /**
@@ -277,27 +249,18 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * (the odd can only be set once)
    * @param odd the OpenDefinitionsDocument to set as this DD's holder
    */
-  public void setOpenDefDoc(OpenDefinitionsDocument odd){
-    if(_odd == null){
-      _odd = odd;
-    }
-  }
-  
+  public void setOpenDefDoc(OpenDefinitionsDocument odd) { if(_odd == null) _odd = odd; }
   
   /**
    * @return the OpenDefinitonsDocument that is associated with this DefinitionsDocument
    */
   public OpenDefinitionsDocument getOpenDefDoc() {
-    if(_odd == null){
+    if(_odd == null)
       throw new IllegalStateException("The OpenDefinitionsDocument for this DefinitionsDocument has never been set");
-    }else{
-      return _odd;
-    }
+    else return _odd;
   }
   
-  
-  protected void _styleChanged() 
-  {
+  protected void _styleChanged() {
     // throwErrorHuh();
     int length = getLength() - _currentLocation;
     //DrJava.consoleErr().println("Changed: " + _currentLocation + ", " + length);
@@ -380,7 +343,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @return the qualified class name
    */
   public String getQualifiedClassName() throws ClassNameNotFoundException {
-    // throwErrorHuh();
     return _getPackageQualifier() + getFirstTopLevelClassName();
   }
 
@@ -389,7 +351,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * the given position.
    */
   public String getQualifiedClassName(int pos) throws ClassNameNotFoundException {
-    // throwErrorHuh();
     return _getPackageQualifier() + getEnclosingTopLevelClassName(pos);
   }
 
@@ -399,63 +360,44 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * string if no package name is found.
    */
   protected String _getPackageQualifier() {
-    // throwErrorHuh();
     String packageName = "";
-    try {
-      packageName = this.getPackageName();
-    }
-    catch (InvalidPackageException e) {
-      // Couldn't find package, pretend there's none
-    }
-    if ((packageName != null) && (!packageName.equals(""))) {
-      packageName = packageName + ".";
-    }
+    try { packageName = this.getPackageName(); }
+    catch (InvalidPackageException e) { /* Couldn't find package, pretend there's none */ }
+    if ((packageName != null) && (!packageName.equals(""))) { packageName = packageName + "."; }
     return packageName;
   }
 
-  public void setClassFileInSync(boolean inSync) {
-    // throwErrorHuh();
-    _classFileInSync = inSync;
-  }
+  public void setClassFileInSync(boolean inSync) { _classFileInSync = inSync; }
 
-  public boolean getClassFileInSync() {
-    // throwErrorHuh();
-    return _classFileInSync;
-  }
+  public boolean getClassFileInSync() { return _classFileInSync; }
 
-  public void setCachedClassFile(File classFile) {
-    // throwErrorHuh();
-    _classFile = classFile;
-  }
+  public void setCachedClassFile(File classFile) { _classFile = classFile; }
 
-  public File getCachedClassFile() {
-    // throwErrorHuh();
-    return _classFile;
-  }
+  public File getCachedClassFile() { return _classFile; }
 
   /**
    * Inserts a string of text into the document.
    * It turns out that this is not where we should do custom processing
    * of the insert; that is done in {@link #insertUpdate}.
    */
-  public void insertString(int offset, String str, AttributeSet a)
-    throws BadLocationException
-  {
-    // throwErrorHuh();
+  public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
     
     // If _removeTabs is set to true, remove all tabs from str.
     // It is a current invariant of the tabification functionality that
     // the document contains no tabs, but we want to allow the user
     // to override this functionality.
-    if (_tabsRemoved) {
-      str = _removeTabs(str);
+    
+    writeLock();
+    try {
+      if (_tabsRemoved) str = _removeTabs(str);
+      
+      if (!_modifiedSinceSave) {
+        _modifiedSinceSave = true;
+        _classFileInSync = false;
+      }
+      super.insertString(offset, str, a);
     }
-
-    if (!_modifiedSinceSave) {
-      _modifiedSinceSave = true;
-      _classFileInSync = false;
-    }
-    super.insertString(offset, str, a);
+    finally { writeUnlock(); }
   }
   
   
@@ -465,13 +407,17 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * in {@link #removeUpdate}.
    */
   public void remove(int offset, int len) throws BadLocationException {
-    // throwErrorHuh();
-
-    if (!_modifiedSinceSave) {
-      _modifiedSinceSave = true;
-      _classFileInSync = false;
+    
+    writeLock();
+    try {
+      
+      if (!_modifiedSinceSave) {
+        _modifiedSinceSave = true;
+        _classFileInSync = false;
+      }
+      super.remove(offset, len);
     }
-    super.remove(offset, len);
+    finally { writeUnlock(); }
   }
 
   /**
@@ -482,7 +428,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @return a String will all the tabs converted to spaces
    */
   String _removeTabs(final String source) {
-    // throwErrorHuh();
     // Clear the helper method cache
     clearCache();
 
@@ -516,9 +461,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * Now it actually does this.
    */
   public void setModifiedSinceSave() {
-    // throwErrorHuh();
+    writeLock();
+    try {
     _modifiedSinceSave = _undoManager.isModified();
 //    System.out.println("DefinitionsDocument: set modified? " + _modifiedSinceSave);
+    }
+    finally { writeUnlock(); }
   }
   
   /**
@@ -526,15 +474,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * so that it knows it's no longer in a modified state.
    */
   public void resetModification() {
-    // throwErrorHuh();
+    writeLock();
     try {
-      writeLock();
       _modifiedSinceSave = false;
       _undoManager.documentSaved();
     }
-    finally {
-      writeUnlock();
-    }
+    finally { writeUnlock(); }
   }
   
   /**
@@ -542,16 +487,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @return true if the document has been modified
    */
   public boolean isModifiedSinceSave() {
-    // throwErrorHuh();
-    try {
-      readLock();
-      return  _modifiedSinceSave;
-    }
-    finally {
-      readUnlock();
-    }
+    readLock();
+    try { return  _modifiedSinceSave; }
+    finally { readUnlock(); }
   }
-  
   
   /**
    * Return the current column of the cursor position.
@@ -577,17 +516,15 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       _cachedLocation = 0;
       _cachedLineNum = 1;
     }
-    if ( _cachedNextLineLoc > getLength() ){
-      _cachedNextLineLoc = -1;
-    }
+    if ( _cachedNextLineLoc > getLength() ) _cachedNextLineLoc = -1;
     // let's see if we get off easy
-    if( ! ( _cachedPrevLineLoc < here && here < _cachedNextLineLoc ) ){
+    if( ! (_cachedPrevLineLoc < here && here < _cachedNextLineLoc )) {
 
       // this if improves performance when moving from the
       // end of the document to the beginnning.
       // in essence, it calculates the line number from
       // scratch
-      if( _cachedLocation - here > here ){
+      if (_cachedLocation - here > here) {
         _cachedLocation = 0;
         _cachedLineNum = 1;
       }
@@ -607,16 +544,15 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * from the previous location in the document.
    **/
   private int _getRelativeLine(){
-    // throwErrorHuh();
     int count=0;
     int currLoc = getCurrentLocation();
 
-    setCurrentLocation( _cachedLocation );
+    setCurrentLocation(_cachedLocation);
 
-    if( _cachedLocation > currLoc ){
+    if (_cachedLocation > currLoc) {
       // we moved backward
       int prevLineLoc = getLineStartPos( _cachedLocation );
-      while( prevLineLoc > currLoc ){
+      while (prevLineLoc > currLoc) {
         count--;
         prevLineLoc = getLineStartPos( prevLineLoc - 1 );
         // temporary performance optimization
@@ -624,17 +560,17 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       }
     }
 
-    else{
+    else {
       // we moved forward
       int nextLineLoc = getLineEndPos( _cachedLocation );
-      while( nextLineLoc < currLoc ){
+      while (nextLineLoc < currLoc) {
         count++;
         nextLineLoc = getLineEndPos( nextLineLoc + 1 );
         // temporary performance optimization
         setCurrentLocation(nextLineLoc);
       }
     }
-    setCurrentLocation( currLoc );
+    setCurrentLocation(currLoc);
     return count;
   }
 
@@ -645,54 +581,35 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @return the offset of the first character in the given line number
    */
   public int getOffset(int lineNum) {
-    // throwErrorHuh();
-
+    
     try {
-      if (lineNum < 0) {
-        return -1;
-      }
+      if (lineNum < 0) return -1;
+      
       String defsText = getText(0, getLength());
-
       int curLine = 1;
       int offset = 0; // offset is number of chars from beginning of file
-
+      
       // offset is always pointing to the first character in a line
       // at the top of the loop
       while (offset < defsText.length()) {
-
-        if (curLine==lineNum) {
-
-          return offset;
-        }
-
+        
+        if (curLine==lineNum) return offset;
+        
         int nextNewline = defsText.indexOf('\n', offset);
-        if (nextNewline == -1) {
-
-          // end of the document, and couldn't find the supplied lineNum
-          return -1;
-        }
-        else {
-          curLine++;
-          offset = nextNewline + 1;
-        }
+        if (nextNewline == -1) return -1; // end of the document, and couldn't find the supplied lineNum
+          
+        curLine++;
+        offset = nextNewline + 1;
       }
-
       return -1;
     }
-    catch (BadLocationException ble) {
-      throw new UnexpectedException(ble);
-    }
+    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
   }
 
   
 
-  /**
-   * Returns true iff tabs are to removed on text insertion.
-   */
-  public boolean tabsRemoved() {
-    // throwErrorHuh();
-    return _tabsRemoved;
-  }
+  /** Returns true iff tabs are to removed on text insertion. */
+  public boolean tabsRemoved() { return _tabsRemoved; }
 
  
   /**
@@ -717,9 +634,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       }
       _undoManager.endLastCompoundEdit();  //Changed from endCompoundEdit(key) for FrenchKeyBoardFix
     }
-    catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
 
   /**
@@ -784,7 +699,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @param selEnd the document offset for the end of the selection
    */
   public void uncommentLines(int selStart, int selEnd) {
-    // throwErrorHuh();
     synchronized (_reduced) {
       try {
         //int key = _undoManager.startCompoundEdit(); //commented out for FrenchKeyBoardFix
@@ -795,9 +709,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           //_doc().setCurrentLocation(caretPos);
           setCurrentLocation(oldCurrentPosition.getOffset());
         }
-        else {
-          _uncommentBlock(selStart, selEnd);
-        }
+        else _uncommentBlock(selStart, selEnd);
         //_undoManager.endCompoundEdit(key); //Commented out for FrenchKeyBoardFix, Replaced with endLastCompoundEdit();
         _undoManager.endLastCompoundEdit();
       }
@@ -871,9 +783,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         char c = text.charAt(i);
         // If a previous char is not whitespace, we're not looking at a wing comment.
         // TODO: why the following???
-        if (!((c == ' ') || (c == ' ') || (c == ' '))) {
-          goodWing = false;
-        }
+        if (!((c == ' ') || (c == ' ') || (c == ' '))) goodWing = false;
       }
 
       // If a wing comment wasn't found, or if the wings aren't the first
@@ -883,10 +793,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         remove(lineStart + pos, 2);
         _indentLine(Indenter.OTHER);
       }
-    } catch (BadLocationException e) {
-      // Should not happen
-      throw new UnexpectedException(e);
-    }
+    } catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
 
   /**
@@ -1038,7 +945,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * Goes to a particular line in the document.
    */
   public void gotoLine(int line) {
-    // throwErrorHuh();
+
     int dist;
     if (line < 0) return;
     int actualLine =1;
@@ -1132,14 +1039,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           
           if (semicolonLocation == -1) {
             throw new InvalidPackageException(firstNormalLocation,
-                                              "No semicolon found to terminate " +
-                                              "package statement!");
+                                              "No semicolon found to terminate package statement!");
           }
-          
           setCurrentLocation(semicolonLocation);
         }
-        while (_reduced.currentToken().getHighlightState() !=
-               HighlightStatus.NORMAL);
+        while (_reduced.currentToken().getHighlightState() != HighlightStatus.NORMAL);
         
         // Now we have semicolon location. We'll gather text in between one
         // character at a time for simplicity. It's inefficient (I think?)
@@ -1148,29 +1052,20 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         for (int walk = afterPackage + 1; walk < semicolonLocation; walk++) {
           setCurrentLocation(walk);
           
-          if (_reduced.currentToken().getHighlightState() ==
-              HighlightStatus.NORMAL)
-          {
+          if (_reduced.currentToken().getHighlightState() == HighlightStatus.NORMAL) {
             char curChar = text.charAt(walk);
-            
-            if (! Character.isWhitespace(curChar)) {
-              buf.append(curChar);
-            }
+            if (! Character.isWhitespace(curChar)) buf.append(curChar);
           }
         }
         
         String toReturn = buf.toString();
         if (toReturn.equals("")) {
           throw new InvalidPackageException(firstNormalLocation,
-                                            "Package name was not specified " +
-                                            "after the package keyword!");
+                                            "Package name was not specified after the package keyword!");
         }
-        
         return toReturn;
       }
-      catch (BadLocationException ble) {
-        throw new UnexpectedException(ble);
-      }
+      catch (BadLocationException ble) { throw new UnexpectedException(ble); }
       finally {
         setCurrentLocation(0);
         setCurrentLocation(oldLocation);
@@ -1184,9 +1079,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @return Name of enclosing class or interface
    * @throws ClassNameNotFoundException if no enclosing class found
    */
-  public String getEnclosingTopLevelClassName(int pos) throws
-    ClassNameNotFoundException {
-    // throwErrorHuh();
+  public String getEnclosingTopLevelClassName(int pos) throws ClassNameNotFoundException {
     
     synchronized (_reduced) {
       int oldLocation = getCurrentLocation();
@@ -1268,17 +1161,17 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         
       //If class exists at top level AND either there is no interface at top level or the index of class precedes the index of the top
       //level interface, AND the same for top level enum, then the class is the first top level declaration
-      if(indexOfClass > -1 
+      if( (indexOfClass > -1) 
            && (indexOfInterface <= -1 || indexOfClass < indexOfInterface) 
            && (indexOfEnum <= -1 || indexOfClass < indexOfEnum) ) {
         index = indexOfClass + "class".length();
       }
-      else if(indexOfInterface > -1 
+      else if( (indexOfInterface > -1) 
                 && (indexOfClass <= -1 || indexOfInterface < indexOfClass) 
                 && (indexOfEnum <= -1 || indexOfInterface < indexOfEnum) ) {
         index = indexOfInterface + "interface".length();
       }
-      else if(indexOfEnum > -1
+      else if( (indexOfEnum > -1)
                 && (indexOfClass <= -1 || indexOfEnum < indexOfClass)   
                 && (indexOfInterface <= -1 || indexOfEnum < indexOfInterface)) {
         index = indexOfEnum + "enum".length();
@@ -1316,62 +1209,47 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 
       //first find index of first non whitespace (from the index in document)
       index = getFirstNonWSCharPos(startPos + index) - startPos;
-      if (index == -1) {
-        throw new ClassNameNotFoundException("No top level class name found");
-      }
+      if (index == -1) throw new ClassNameNotFoundException("No top level class name found");
 
       int endIndex = textLength; //just in case no whitespace at end of file
 
       //find index of next delimiter or whitespace
       char c;
-      done = false;
-      for (int i=index; i < textLength && !done; i++) {
+      for (int i = index; i < textLength; i++) {
         c = text.charAt(i);
         if (!Character.isJavaIdentifierPart(c)) {
           endIndex = i;
-          done = true;
+          break;
         }
       }
 
       setCurrentLocation(oldLocation);
       return text.substring(index,endIndex);
     }
-    catch (BadLocationException ble) {
-      throw new UnexpectedException(ble);
-    }
-    finally {
-      setCurrentLocation(oldLocation);
-    }
+    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+    finally { setCurrentLocation(oldLocation); }
   }
 
-  /**
-   * Finds the first occurrence of the keyword within the text that is not
+  /** Finds the first occurrence of the keyword within the text that is not
    *  enclosed within a brace or comment and is followed by whitespace.
-   * @param keyword the keyword for which to search
-   * @param text in which to search
-   * @param textOffset Offset at which the text occurs in the document
-   * @return index of the keyword, or -1 if the keyword is not found or
-   * not followed by whitespace
+   *  @param keyword the keyword for which to search
+   *  @param text in which to search
+   *  @param textOffset Offset at which the text occurs in the document
+   *  @return index of the keyword, or -1 if the keyword is not found or
+   *  not followed by whitespace
    */
-  private int _findKeywordAtToplevel(String keyword,
-                                                  String text,
-                                                  int textOffset) {
-    // throwErrorHuh();
+  private int _findKeywordAtToplevel(String keyword, String text, int textOffset) {
     
     synchronized (_reduced) {
       int oldLocation = getCurrentLocation();
       
       int index = 0;
-      boolean done = false;
       
-      while (!done) {
+      while (true) {
         index = text.indexOf(keyword, index);
-        if (index == -1) {  //not found
-          done = true;
-          break;
-        }
+        if (index == -1) break; // not found
         else {
-          //found a match, check quality
+          // found a match, check quality
           setCurrentLocation(textOffset + index);
           
           // check that the keyword is not in a comment and is followed by whitespace
@@ -1380,20 +1258,15 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           if (indexPastKeyword < text.length()) {
             if (rt.getState() == ReducedModelStates.FREE &&
                 Character.isWhitespace(text.charAt(indexPastKeyword))) {
-              //if (!_isCommentedOrSpace(index,text)) {
-              done = true;
-              if (!posNotInBlock(index)) { //in a paren phrase, gone too far
-                index = -1;
-              }
+              // found a match but may not be at top level
+              if (!posNotInBlock(index)) index = -1; //in a paren phrase, gone too far
+              break;
             }
-            else {
-              index++;  //move past so we can search again
-            }
+            else index++;  //move past so we can search again
           }
-          else {
-            // No space found past the keyword
+          else { // No space found past the keyword
             index = -1;
-            done = true;
+            break;
           }
         }
       }
@@ -1408,9 +1281,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     private final Runnable _undoCommand;
     private final Runnable _redoCommand;
 
-    public CommandUndoableEdit(final Runnable undoCommand,
-                               final Runnable redoCommand)
-    {
+    public CommandUndoableEdit(final Runnable undoCommand, final Runnable redoCommand) {
       _undoCommand = undoCommand;
       _redoCommand = redoCommand;
     }
@@ -1432,56 +1303,32 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * Getter method for CompoundUndoManager
    * @return _undoManager
    */
-  public CompoundUndoManager getUndoManager() {
-    // throwErrorHuh();
-    return _undoManager;
-  }
+  public CompoundUndoManager getUndoManager() { return _undoManager; }
 
-  /**
-   * resets the undo manager
-   */
+  /** Resets the undo manager. */
   public void resetUndoManager() {
     // throwErrorHuh();
     _undoManager = new CompoundUndoManager(_notifier);
     _undoManager.setLimit(UNDO_LIMIT);
   }
 
-  /**
-   * public accessor for the next undo action
-   */
-  public UndoableEdit getNextUndo() {
-    // throwErrorHuh();
-    return _undoManager.getNextUndo();
-  }
+  /** Public accessor for the next undo action. */
+  public UndoableEdit getNextUndo() { return _undoManager.getNextUndo(); }
 
-  /**
-   * public accessor for the next undo action
-   */
-  public UndoableEdit getNextRedo() {
-    // throwErrorHuh();
-    return _undoManager.getNextRedo();
-  }
+  /** Public accessor for the next undo action. */
+  public UndoableEdit getNextRedo() { return _undoManager.getNextRedo(); }
 
+  /** Informs this document's undo manager that the document has been saved. */
+  public void documentSaved() { _undoManager.documentSaved(); }
   
-   /**
-   * Informs this document's undo manager that the document has been saved.
-   */
-  public void documentSaved(){
-    // throwErrorHuh();
-    _undoManager.documentSaved();
-  }
-  
-  protected int startCompoundEdit() {
-    return _undoManager.startCompoundEdit();
-  }
+  protected int startCompoundEdit() { return _undoManager.startCompoundEdit(); }
   
   protected void endCompoundEdit(int key) {
     _undoManager.endCompoundEdit(key);
   }
+  
   //This method added for FrenchKeyBoardFix
-   protected void endLastCompoundEdit() {
-     _undoManager.endLastCompoundEdit();
-   }
+  protected void endLastCompoundEdit() { _undoManager.endLastCompoundEdit(); }
    
   protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) {
     chng.addEdit(new CommandUndoableEdit(undoCommand, doCommand));    
@@ -1580,7 +1427,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @param fl the listener to register
    */
   public void addFinalizationListener(FinalizationListener<DefinitionsDocument> fl) {
-    _finalizationListeners.add(fl);
+    synchronized (_finalizationListeners) { _finalizationListeners.add(fl); }
   }
   
   public List<FinalizationListener<DefinitionsDocument>> getFinalizationListeners(){
@@ -1593,12 +1440,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    */
   protected void finalize() {
     FinalizationEvent<DefinitionsDocument> fe = new FinalizationEvent<DefinitionsDocument>(this);
-    for(FinalizationListener<DefinitionsDocument> fl: _finalizationListeners) {
-      fl.finalized(fe);
+    synchronized (_finalizationListeners) {
+      for(FinalizationListener<DefinitionsDocument> fl: _finalizationListeners) {
+        fl.finalized(fe);
+      }
     }
   }
   
-  public String toString() {
-    return "ddoc for " + _odd;
-  }
+  public String toString() { return "ddoc for " + _odd; }
 }

@@ -85,54 +85,28 @@ public class ProjectFileBuilder {
   
   ////////////// Constructors /////////////////
   
-  public ProjectFileBuilder(String filename) {
-    _projectFile = new File(filename);
-  }
-  public ProjectFileBuilder(File f) {
-    _projectFile = f;
-  }
+  public ProjectFileBuilder(String filename) { _projectFile = new File(filename); }
+  public ProjectFileBuilder(File f) { _projectFile = f; }
   
   ////////////// Public methods ///////////////
   
   public void addSourceFile(DocumentInfoGetter getter) {
     if (!getter.isUntitled()) {
-      try {
-        _sourceFiles.add(docFileFromGetter(getter));
-      }
-      catch(IOException e) {
-        throw new UnexpectedException(e);
-      }
+      try { _sourceFiles.add(docFileFromGetter(getter)); }
+      catch(IOException e) { throw new UnexpectedException(e); }
     }
   }
   public void addAuxiliaryFile(DocumentInfoGetter getter) {
     if (!getter.isUntitled()) {
-      try {
-        _auxFiles.add(docFileFromGetter(getter));
-      }
-      catch(IOException e) {
-        throw new UnexpectedException(e);
-      }
+      try { _auxFiles.add(docFileFromGetter(getter)); }
+      catch(IOException e) { throw new UnexpectedException(e); }
     }
   }
-  public void addClasspathFile(File cp) {
-    if (cp != null) {
-      _classpathFiles.add(cp);
-    }
-  }
-  public void addCollapsedPath(String cp) {
-    if (cp != null) {
-      _collapsedPaths.add(cp);
-    }
-  }
-  public void setBuildDirectory(File dir) {
-    _buildDir = dir;
-  }
-  public void setMainClass(File main) {
-    _mainClass = main;
-  }
-  public void setProjectRoot(File root) {
-    _projRoot = root;
-  }
+  public void addClasspathFile(File cp) { if (cp != null) _classpathFiles.add(cp); }
+  public void addCollapsedPath(String cp) { if (cp != null) _collapsedPaths.add(cp); }
+  public void setBuildDirectory(File dir) { _buildDir = dir; }
+  public void setMainClass(File main) { _mainClass = main;  }
+  public void setProjectRoot(File root) { _projRoot = root; }
   /**
    * This method writes what information has been passed
    * to this builder so far to disk in s-expression format

@@ -68,13 +68,9 @@ public class JUnitTestManager {
   private final JUnitModelCallback _jmc;
   private JUnitTestRunner _testRunner;
 
-  public JUnitTestManager(JUnitModelCallback jmc) {
-    _jmc = jmc;
-  }
+  public JUnitTestManager(JUnitModelCallback jmc) { _jmc = jmc; }
 
-  public JUnitTestRunner getTestRunner() {
-    return _testRunner;
-  }
+  public JUnitTestRunner getTestRunner() { return _testRunner; }
 
   /**
    * @param classNames the class names to run in a test
@@ -84,29 +80,27 @@ public class JUnitTestManager {
    */
   public List<String> runTest(final List<String> classNames, final List<File> files,
                               final boolean isTestAll) {
-    final ArrayList<String> stuff = new ArrayList<String>();
-    synchronized (stuff) {
+    final ArrayList<String> testClassNames = new ArrayList<String>();
+    synchronized (testClassNames) {
       _testRunner = new JUnitTestRunner(_jmc);
       new Thread("JUnit Test Thread") {
         public void run() {
           try {
             boolean noJUnitTests = true;
             TestSuite suite = new TestSuite();
-            synchronized (stuff) {
+            synchronized (testClassNames) {
               try {
                 for (int i = 0; i < classNames.size(); i++) {
                   String className = classNames.get(i);
                   if (_isTestCase(className)) {
                     Test test = _testRunner.getTest(className);
                     suite.addTest(test);
-                    stuff.add(className);
+                    testClassNames.add(className);
                     noJUnitTests = false;
                   }
                 }
               }
-              finally {
-                stuff.notify();
-              }
+              finally { testClassNames.notify(); }
             }
             if (noJUnitTests) {
               _jmc.nonTestCase(isTestAll);
@@ -141,12 +135,12 @@ public class JUnitTestManager {
         }
       }.start();
       try {
-        stuff.wait();
+        testClassNames.wait();
       }
       catch (InterruptedException ex) {
       }
     }
-    return stuff;
+    return testClassNames;
   }
 
   private void _failedWithError(Throwable t) {
@@ -162,7 +156,6 @@ public class JUnitTestManager {
    * @return true iff the given class is an instance of junit.framework.Test
    */
   private boolean _isJUnitTest(Class c) {
-
     return Test.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers()) && !Modifier.isInterface(c.getModifiers());
   }
 
@@ -171,12 +164,8 @@ public class JUnitTestManager {
    * a valid JUnit Test.
    */
   private boolean _isTestCase(String className) {
-    try {
-      return _isJUnitTest(_testRunner.getLoader().load(className));
-    }
-    catch (ClassNotFoundException cnfe) {
-      return false;
-    }
+    try { return _isJUnitTest(_testRunner.getLoader().load(className)); }
+    catch (ClassNotFoundException cnfe) { return false; }
   }
 
   
@@ -193,12 +182,8 @@ public class JUnitTestManager {
 
     Test failedTest = failure.failedTest();
     String testName;
-    if (failedTest instanceof TestCase) {
-      testName = ((TestCase)failedTest).getName();
-    }
-    else{
-      testName = failedTest.getClass().getName();
-    }
+    if (failedTest instanceof TestCase) testName = ((TestCase)failedTest).getName();
+    else testName = failedTest.getClass().getName();
     
     String testString = failure.toString();
     int firstIndex = testString.indexOf('(') + 1;
@@ -212,11 +197,9 @@ public class JUnitTestManager {
     String className;
     String className1 = testString.substring(firstIndex, secondIndex);
     String className2 = testString.substring(0, firstIndex-1);
-    if(firstIndex == secondIndex){
-      className = className2;
-    }else{
-      className = className1;
-    }
+    if(firstIndex == secondIndex) className = className2;
+    else className = className1;
+    
 //    String ps = System.getProperty("file.separator");
 //    // replace periods with the System's file separator
 //    className = StringOps.replace(className, ".", ps);
@@ -236,7 +219,7 @@ public class JUnitTestManager {
      * if the classname is not in the stacktrace, then the test that
      * failed was inherited by a superclass. let's look for that classname
      */
-    if(stackTrace.indexOf(className) == -1){
+    if (stackTrace.indexOf(className) == -1){
       /* get the stack trace of the junit error */
       String trace = failure.trace();
       /* knock off the first line of the stack trace.
@@ -246,15 +229,15 @@ public class JUnitTestManager {
        * etc...
        */
       trace = trace.substring(trace.indexOf('\n')+1);
-      while(trace.indexOf("junit.framework.Assert") != -1 &&
-            trace.indexOf("junit.framework.Assert") < trace.indexOf("(")){
+      while (trace.indexOf("junit.framework.Assert") != -1 &&
+            trace.indexOf("junit.framework.Assert") < trace.indexOf("(")) {
         /* the format of the trace will have "at junit.framework.Assert..."
          * on each line until the line of the actual source file.
          * if the exception was thrown from the test case (so the test failed
          * without going through assert), then the source file will be on
          * the first line of the stack trace
          */
-        trace = trace.substring(trace.indexOf('\n')+1);
+        trace = trace.substring(trace.indexOf('\n') + 1);
       }
       trace = trace.substring(trace.indexOf('(')+1);
       trace = trace.substring(0, trace.indexOf(')'));
@@ -269,9 +252,8 @@ public class JUnitTestManager {
     
 //    if (lineNum > -1) _errorsWithPos++;
 
-    String exception =  (isError) ?
-      failure.thrownException().toString():
-      failure.thrownException().getMessage();
+    String exception =  (isError) ? failure.thrownException().toString(): 
+                                    failure.thrownException().getMessage();
     boolean isFailure = (failure.thrownException() instanceof AssertionFailedError) &&
       !classNameAndTest.equals("junit.framework.TestSuite$1.warning");
 
@@ -290,21 +272,17 @@ public class JUnitTestManager {
 //      writer.write("className: " + className + "\n");
 //      writer.write("stackTrace: " + stackTrace + "\n");
 //      writer.close();
-//    }catch(IOException e){
+//    } catch(IOException e){
 //      
 //    }
 
     int indexOfClass = classNames.indexOf(className);
     File file;
-    if (indexOfClass != -1) {
-      file = files.get(indexOfClass);
-    }
-    else {
-      file = _jmc.getFileForClassName(className);
-    }
+    if (indexOfClass != -1) file = files.get(indexOfClass);
+    else file = _jmc.getFileForClassName(className);
     
     // a test didn't fail, we couldn't even open the test.
-    if(file == null){
+    if (file == null) {
       return new JUnitError(new File("nofile"), 0,  //lineNum, 
                           0, exception, !isFailure, testName, className, stackTrace);
     }
@@ -321,12 +299,8 @@ public class JUnitTestManager {
    */
   private int _lineNumber(String sw, String classname) {
     int lineNum;
-
-    
     int idxClassname = sw.indexOf(classname);
-    if (idxClassname == -1) {
-      return -1;
-    }
+    if (idxClassname == -1) return -1;
 
     String theLine = sw.substring(idxClassname, sw.length());
     
@@ -338,9 +312,7 @@ public class JUnitTestManager {
       int i = theLine.indexOf(":") + 1;
       lineNum = Integer.parseInt(theLine.substring(i, theLine.length())) - 1;
     }
-    catch (NumberFormatException e) {
-      throw new UnexpectedException(e);
-    }
+    catch (NumberFormatException e) { throw new UnexpectedException(e); }
     
     return lineNum;
   }

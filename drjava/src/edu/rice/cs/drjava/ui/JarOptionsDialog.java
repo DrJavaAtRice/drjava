@@ -568,9 +568,7 @@ public class JarOptionsDialog extends JDialog {
     super.show();
   }
   public void setVisible(boolean vis) {
-    if (vis)
-      show();
-    else
-      hide();
+    if (vis) show();
+    else hide();
   }
 }

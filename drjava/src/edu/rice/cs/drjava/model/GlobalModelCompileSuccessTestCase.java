@@ -101,12 +101,8 @@ public class GlobalModelCompileSuccessTestCase extends GlobalModelTestCase {
       setUp();
       _model.getCompilerModel().setActiveCompiler(compilers[i]);
 
-      try {
-        runTest();
-      }
-      finally {
-        tearDown();
-      }
+      try { runTest(); }
+      finally { tearDown(); }
     }
   }
 

@@ -68,7 +68,15 @@ import edu.rice.cs.drjava.model.FinalizationListener;
 import edu.rice.cs.drjava.model.FinalizationEvent;
 import edu.rice.cs.util.docnavigation.*;
 
-public class DummyOpenDefDoc implements OpenDefinitionsDocument {  
+public class DummyOpenDefDoc implements OpenDefinitionsDocument { 
+  
+   public int id() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+   
+   public int compareTo(OpenDefinitionsDocument d) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
   /**
    * Determines if this definitions document has changed since the
    * last save.

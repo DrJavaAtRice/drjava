@@ -85,9 +85,7 @@ public class CompilerError implements Comparable, Serializable {
     _startColumn = startColumn;
     _message = message;
     _isWarning = isWarning;
-    if (lineNumber < 0){
-      _noLocation = true;
-    }
+    if (lineNumber < 0) _noLocation = true;
   }
 
   /**
@@ -126,9 +124,7 @@ public class CompilerError implements Comparable, Serializable {
    * Gets the file.
    * @return the file with errors.
    */
-  public File file() {
-    return _file;
-  }
+  public File file() { return _file; }
 
   /**
    * Gets the full name of the file.
@@ -136,7 +132,7 @@ public class CompilerError implements Comparable, Serializable {
    */
   public String fileName() {
     if (_file == null) return "";
-    else return _file.getAbsolutePath();
+    return _file.getAbsolutePath();
   }
 
   /**
@@ -145,37 +141,28 @@ public class CompilerError implements Comparable, Serializable {
    * prints one-based line numbers to the command line.
    * @return the zero-based line number
    */
-  public int lineNumber() {
-    return  _lineNumber;
-  }
+  public int lineNumber() { return  _lineNumber; }
 
   /**
    * Gets the column where the error begins.
    * @return the starting column
    */
-  public int startColumn() {
-    return  _startColumn;
-  }
+  public int startColumn() { return  _startColumn; }
 
   /**
    * Gets the error message.
    * @return the error message.
    */
-  public String message() {
-    return  _message;
-  }
+  public String message() { return  _message; }
 
   /**
    * This function returns a message telling the file this error is from
    * appropriate to display to a user, indicating if there is no file
    * associated with this error
    */
-  public String getFileMessage(){
-    if (_file == null){
-      return "(no associated file)";
-    } else {
-      return fileName();
-    }
+  public String getFileMessage() {
+    if (_file == null) return "(no associated file)";
+    return fileName();
   }
 
   /**
@@ -184,21 +171,16 @@ public class CompilerError implements Comparable, Serializable {
    * associated with this error.  This is adjusted to show one-based numbers,
    * since internally we store a zero-based index.
    */
-  public String getLineMessage(){
-    if (_file == null || this._lineNumber < 0){
-      return "(no source location)";
-    } else {
-      return "" + (_lineNumber + 1);
-    }
+  public String getLineMessage() {
+    if (_file == null || this._lineNumber < 0) return "(no source location)";
+    return "" + (_lineNumber + 1);
   }
 
   /**
    * Determines if the error is a warning.
    * @return true if the error is a warning.
    */
-  public boolean isWarning() {
-    return  _isWarning;
-  }
+  public boolean isWarning() { return  _isWarning; }
 
   /**
    * Compares by file, then by line, then by column.
@@ -207,37 +189,27 @@ public class CompilerError implements Comparable, Serializable {
    */
   public int compareTo(Object o) {
     CompilerError other = (CompilerError)o;
-
+    
     // Determine if I have a file
     if (_file != null) {
-      if (other.file() == null) {
+      if (other.file() == null)
         // Errors with files are bigger
         return 1;
-      }
       else {
         // Compare by file
         int fileComp = _file.compareTo(other.file());
-        if (fileComp != 0) {
-          return fileComp;
-        }
-        else {
-          // Compare by position
-          return compareByPosition(other);
-        }
+        if (fileComp != 0) return fileComp;
+        // Compare by position
+        return compareByPosition(other);
       }
     }
-    else {
-      // My file is null
-      if (other.file() == null) {
-        // All else equal.
-        //                        I'm a warning.           I'm not a warning.
-        return (this._isWarning? (other._isWarning? 0:1):(other._isWarning? -1:0));
-      }
-      else {
-        // Errors without files are smaller
-        return -1;
-      }
+    // My file is null
+    if (other.file() == null) {
+      // All else equal.
+      //                        I'm a warning.           I'm not a warning.
+      return (this._isWarning? (other._isWarning? 0:1):(other._isWarning? -1:0));
     }
+    else return -1; // Errors without files are smaller
   }
 
   /**
@@ -251,9 +223,7 @@ public class CompilerError implements Comparable, Serializable {
       //                        I'm a warning.               I'm not a warning.
       return (this._isWarning? (other._isWarning? byCol:1):(other._isWarning? -1:byCol));
     }
-    else {
-      return  _lineNumber - other._lineNumber;
-    }
+    else return  _lineNumber - other._lineNumber;
   }
 
 }

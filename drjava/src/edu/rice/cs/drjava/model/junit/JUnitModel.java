@@ -79,7 +79,6 @@ public interface JUnitModel {
 
   /**
    * This is used by test cases and perhaps other things.  We should kill it.
-   * TODO: remove this gratuitous swing dependency!
    */
   public StyledDocument getJUnitDocument();
 
