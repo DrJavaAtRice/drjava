@@ -268,6 +268,68 @@ public final class JavaInterpreterTest extends TestCase {
   }
   
   /**
+   * Tests that variable declarations with errors will not allow the interpreter
+   * to not define the variable. This will get rid of annoying "Error: Redefinition 
+   * of 'variable'" messages after fixing the error. Note that if the error occurs
+   * during the evaluation of the right hand side then the variable is defined. This
+   * is for two reasons: The compiler would have accepted this variable declaration
+   * so that no more variables could have been defined with the same name afterwards,
+   * and we don't know how to make sure the evaluation doesn't return errors without
+   * actually evaluating which may have side-effects.
+   */
+  public void testVariableRedefinition() {
+    // test error in NameVisitor
+    try {
+      _interpreter.interpret("String s = abc;");
+      fail("variable definition should have failed");
+    }
+    catch (ExceptionReturnedException e) {
+      // Correct; it should fail
+    }
+    // test error in TypeChecker
+    try {
+      _interpreter.interpret("Vector v = new Vector();");
+      fail("variable definition should have failed");
+    }
+    catch (ExceptionReturnedException e) {
+      // Correct; it should fail
+    }
+    try {
+      _interpreter.interpret("File f;");
+      fail("variable definition should have failed");
+    }
+    catch (ExceptionReturnedException e) {
+      // Correct; it should fail
+    }
+    try {
+      // make sure we can redefine
+      _interpreter.interpret("import java.util.Vector;");
+      _interpreter.interpret("Vector v = new Vector();");
+      _interpreter.interpret("String s = \"abc\";");
+      _interpreter.interpret("import java.io.File;");
+      _interpreter.interpret("File f = new File(\"\");");
+    }
+    catch (ExceptionReturnedException e) {
+      fail("These interpret statements shouldn't cause errors");
+    }
+    // test error in EvaluationVisitor
+    
+    // Integer.getInteger("somebadproperty") should be null
+    try {
+      _interpreter.interpret("String z = new String(Integer.getInteger(\"somebadproperty\").toString());");
+      fail("variable definition should have failed");
+    }
+    catch (ExceptionReturnedException e) {
+    }
+    try {
+      _interpreter.interpret("String z = \"z\";");
+      fail("variable redefinition should have failed");      
+    }
+    catch (ExceptionReturnedException e) {
+    }
+  }
+  
+  /**
    * Ensure that the interpreter rejects assignments where the right type
    * is not a subclass of the left type.
    */

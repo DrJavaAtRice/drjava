@@ -495,10 +495,13 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     
     // Special case to avoid overhead of scrollToSource() if we
     // are selecting the thread we have already selected currently
-    if ( _suspendedThreads.size() > 0 &&
-       _suspendedThreads.peek().uniqueID() == threadRef.uniqueID() ) {
-      return;
-    }
+    
+    // Disabled because we want to scrollToSource even if this thread is the
+    // current thread.
+//    if ( _suspendedThreads.size() > 0 &&
+//       _suspendedThreads.peek().uniqueID() == threadRef.uniqueID() ) {
+//      return;
+//    }
     
     // if we switch to a currently suspended thread, we need to remove
     // it from the stack and put it on the top
@@ -1067,18 +1070,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       // A breakpoint we didn't set??
       _log("Reached a breakpoint without a debugAction property: " + request);
     }
-  }
-
-  /**
-   * Called when a step is reached. Just moves the cursor to
-   * the interactions pane in MainFrame.
-   */
-  synchronized void finishedStep() {
-    notifyListeners(new EventNotifier() {
-      public void notifyListener(DebugListener l) {
-        l.stepFinished();
-      }
-    });    
   }
   
   /**

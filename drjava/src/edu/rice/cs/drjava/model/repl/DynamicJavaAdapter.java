@@ -351,7 +351,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @return visitor the visitor
    */
   public NameVisitor makeNameVisitor(Context context) {
-    return new NameVisitor(context);
+    return new NameVisitorExtension(context);
   }
   
   /**

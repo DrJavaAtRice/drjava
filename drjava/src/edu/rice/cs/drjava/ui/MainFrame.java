@@ -3430,11 +3430,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void currThreadSet(DebugThreadData dtd) {
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          _interactionsPane.requestFocus();
-        }
-      });
     }
     
     public void threadLocationUpdated(final OpenDefinitionsDocument doc,
@@ -3489,6 +3484,8 @@ public class MainFrame extends JFrame implements OptionConstants {
             //no need to update flag, because previous method call will do it
             //_hasWarnedAboutModified = true;
           }
+          // Give the interactions pane focus so we can debug
+          _interactionsPane.requestFocus();
           _updateDebugStatus();
           
         }
@@ -3517,11 +3514,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void breakpointReached(Breakpoint bp) {
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          _interactionsPane.requestFocus();
-        }
-      });
     }
     
     public void breakpointRemoved(final Breakpoint bp) {
@@ -3551,17 +3543,6 @@ public class MainFrame extends JFrame implements OptionConstants {
           _debugStepTimer.start();
         }
       }
-    }
-    
-    /**
-     * Called when a step is finished.
-     */
-    public void stepFinished() {
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          _interactionsPane.requestFocus();
-        }
-      });
     }
     
     public void currThreadSuspended() {
@@ -3601,7 +3582,7 @@ public class MainFrame extends JFrame implements OptionConstants {
               if (!_model.getDebugger().hasSuspendedThreads()) {
                 // no more suspended threads, resume default debugger state
                 // all thread dependent debug menu items are disabled
-                _setDebugMenuItemsEnabled(true);
+                _setThreadDependentDebugMenuItems(false);
                 _removeThreadLocationHighlight();
                 // Make sure we're at the prompt
                 // (This should really be fixed in InteractionsController, not here.)

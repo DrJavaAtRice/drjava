@@ -141,6 +141,19 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     return false;
   }
   
+  private Class _loadClassForThis(Context context) {
+    try {
+      String cName = _thisClassName;
+      if (!_thisPackageName.equals("")) {
+        cName = _thisPackageName + "." + cName;
+      }
+      return context.lookupClass(cName);
+    }
+    catch(ClassNotFoundException e) {
+      throw new UnexpectedException(e);
+    }
+  }
+  
   /**
    * Given a field, looks at enclosing classes until it finds
    * one that contains the field. It returns the ObjectFieldAccess
@@ -162,13 +175,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     // Check if this has an anonymous inner class
     if (hasAnonymous(_thisClassName)) { 
       // Get the class
-      Class c;
-      try {
-        c = context.lookupClass(_thisClassName);
-      }
-      catch (ClassNotFoundException e) {
-        throw new UnexpectedException (e);
-      }
+      Class c = _loadClassForThis(context);
       Field[] fields = c.getDeclaredFields();    
       int numToWalk;
       String outerClassName = null;
@@ -222,6 +229,24 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     String methodName = method.getMethodName();
     List args = method.getArguments();
     Expression expr = null;
+    
+    // Check if this has an anonymous inner class
+    if (hasAnonymous(_thisClassName)) { 
+      // Get the class
+      Class c = _loadClassForThis(context);
+      Field[] fields = c.getDeclaredFields();    
+      int numToWalk;
+      String outerClassName = null;
+      // Check for a field that begins with this$
+      for (int i = 0; i < fields.length; i++) {
+        if (fields[i].getName().startsWith("this$")) {
+          String fieldName = fields[i].getName();
+          int lastIndex = fieldName.lastIndexOf("$");
+          numDollars = Integer.valueOf(fieldName.substring(lastIndex+1, fieldName.length())).intValue() + 1;
+          break;
+        }
+      }
+    }
     for (int i = 0; i <= numDollars; i++) {          
       expr = _buildObjectFieldAccess(i, numDollars);
       expr = new ObjectMethodCall(expr, methodName, args, null, 0, 0, 0, 0);
@@ -572,40 +597,8 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * @param context the context
    * @return visitor the visitor
    */
-  public NameVisitor makeNameVisitor(final Context context) {
-    return new NameVisitor(context) {
-      // An attempt at fixing the redefinition issue in DynamicJava
-//      public Object visit(VariableDeclaration node) {  
-//        // NameVisitor
-//        Node n = node.getInitializer();
-//        if (n != null) {
-//          Object o = n.acceptVisitor(this);
-//          if (o != null) {
-//            if (o instanceof ReferenceType) {
-//              throw new ExecutionError("malformed.expression", n);
-//            }
-//            node.setInitializer((Expression)o);
-//          }
-//        }
-//        
-//        // TypeChecker
-//        TypeChecker tc = makeTypeChecker(context);
-//        Class lc = (Class)node.getType().acceptVisitor(tc);
-//        Node init = node.getInitializer();
-//        if (init != null) {
-//          Class rc = (Class)init.acceptVisitor(tc);
-//          _checkAssignmentStaticRules(lc, rc, node, init);
-//        }
-//        
-//        // EvaluationVisitor
-//        EvaluationVisitorExtension eve = new EvaluationVisitorExtension(context);
-//        Class c = NodeProperties.getType(node.getType());
-//        
-//        if (node.getInitializer() != null) {
-//          Object o = eve.performCast(c, node.getInitializer().acceptVisitor(eve));
-//        }
-//        return super.visit(node);
-//      }    
+  public NameVisitorExtension makeNameVisitor(final Context context) {
+    return new NameVisitorExtension(context) {
       //        try {
       //          return super.visit(node);
       //        }
@@ -723,82 +716,19 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       public Object visit(QualifiedName node) {
         String var = node.getRepresentation();
         if ("this".equals(var)) {
-          try {
-            String cName = _thisClassName.replace('$', '.');
-            if (!_thisPackageName.equals("")) {
-              cName = _thisPackageName + "." + cName;
-            }
-            Class c = context.lookupClass(cName);
-            node.setProperty(NodeProperties.TYPE, c);
-            node.setProperty(NodeProperties.MODIFIER, context.getModifier(node));
-            return c;
-          }
-          catch (ClassNotFoundException cnfe) {
-            throw new ExecutionError("undefined.class", node);
-          }
+          //            String cName = _thisClassName.replace('$', '.');
+          //            if (!_thisPackageName.equals("")) {
+          //              cName = _thisPackageName + "." + cName;
+          //            }
+          //            Class c = context.lookupClass(cName);
+          Class c = _loadClassForThis(context);
+          node.setProperty(NodeProperties.TYPE, c);
+          node.setProperty(NodeProperties.MODIFIER, context.getModifier(node));
+          return c;
         }
         else return super.visit(node);
       }
 
     };
   }
-  
-//  private static void _checkAssignmentStaticRules(Class lc, Class rc,
-//                                                   Node node, Node v) {
-//      if (lc != null) {
-//        if (lc.isPrimitive()) {
-//          if (lc == boolean.class && rc != boolean.class) {
-//            throw new ExecutionError("assignment.types", node);
-//          } else if (lc == byte.class && rc != byte.class) {
-//            if (rc == int.class && v.hasProperty(NodeProperties.VALUE)) {
-//              Number n = (Number)v.getProperty(NodeProperties.VALUE);
-//              if (n.intValue() == n.byteValue()) {
-//                return;
-//              }
-//            }
-//            throw new ExecutionError("assignment.types", node);
-//          } else if ((lc == short.class || rc == char.class) &&
-//                     (rc != byte.class && rc != short.class && rc != char.class)) {
-//            if (rc == int.class && v.hasProperty(NodeProperties.VALUE)) {
-//              Number n = (Number)v.getProperty(NodeProperties.VALUE);
-//              if (n.intValue() == n.shortValue()) {
-//                return;
-//              }
-//            }
-//            throw new ExecutionError("assignment.types", node);
-//          } else if (lc == int.class    &&
-//                     (rc != byte.class  &&
-//                      rc != short.class &&
-//                      rc != char.class  &&
-//                      rc != int.class)) {
-//            throw new ExecutionError("assignment.types", node);
-//          } else if (lc == long.class   &&
-//                     (rc == null          ||
-//                      !rc.isPrimitive()   ||
-//                      rc == void.class    ||
-//                      rc == boolean.class ||
-//                      rc == float.class   ||
-//                      rc == double.class)) {
-//            throw new ExecutionError("assignment.types", node);
-//          } else if (lc == float.class  && 
-//                     (rc == null          ||
-//                      !rc.isPrimitive()   ||
-//                      rc == void.class    ||
-//                      rc == boolean.class ||
-//                      rc == double.class)) {
-//            throw new ExecutionError("assignment.types", node);
-//          } else if (lc == double.class && 
-//                     (rc == null        ||
-//                      !rc.isPrimitive() ||
-//                      rc == void.class  ||
-//                      rc == boolean.class)) {
-//            throw new ExecutionError("assignment.types", node);
-//          }
-//        } else if (rc != null) {
-//          if (!lc.isAssignableFrom(rc)) {
-//            throw new ExecutionError("assignment.types", node);
-//          }
-//        }
-//      }
-//    }
 }
