@@ -49,6 +49,8 @@ import java.rmi.*;
  * @version $Id$
  */
 public class IntegratedMasterSlaveTest extends TestCase {
+  private MasterImpl _testMaster = new MasterImpl();
+
   /**
    * Constructor.
    * @param  String name
@@ -66,25 +68,57 @@ public class IntegratedMasterSlaveTest extends TestCase {
   }
   
   public void testItAll() throws Exception {
-    MasterImpl impl = new MasterImpl();
-    
     // run a couple of times. each one forks its own jvm so not
     // too many! we run multiple times to prove that the master
     // can invoke multiple slaves (only one active at a time though)
     for (int i = 0; i < 2; i++) {
-      impl.runTestSequence();
+      _testMaster.runTestSequence();
     }
+  }
+  
+  public void testImmediateQuit() throws Exception {
+    _testMaster.runImmediateQuitTest();
   }
   
   private class MasterImpl extends AbstractMasterJVM implements MasterI
   {
     private char _letter;
+    private boolean _justQuit;
    
     public MasterImpl() {
       super(IntegratedMasterSlaveTest.class.getName() + "$CounterSlave");
     }
+
+    /**
+     * In util-20020414-0647, if quitSlave were called between the time the
+     * slave was invoked and the time it registered, an IllegalStateException
+     * was thrown. The correct behavior, which we test for here, is for the
+     * slave to quit as soon as it is started up.
+     */
+    public synchronized void runImmediateQuitTest() throws Exception {
+      _justQuit = false;
+
+      // this needs to be reset because the slave is going to check it!
+      _letter = 'a';
+
+      invokeSlave();
+      
+      // we don't wait for it to start before calling quit.
+      // This should not throw an exception! It should quickly return,
+      // queueing up a quit to be processes ASAP.
+      quitSlave();
+
+      // now we just wait for the quit to process
+      while (! _justQuit) {
+        wait();
+      }
+
+      // If we get here, it worked as expected.
+      // (All of the post-quit invariants are checked in handleSlaveQuit.
+    }
     
     public synchronized void runTestSequence() throws Exception {
+      _justQuit = false;
       _letter = 'a';
       
       long start, end;
@@ -148,6 +182,7 @@ public class IntegratedMasterSlaveTest extends TestCase {
 
       // alert test method that quit occurred.
       notify();
+      _justQuit = true;
     }
   }
 

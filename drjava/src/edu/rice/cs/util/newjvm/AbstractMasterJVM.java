@@ -63,6 +63,13 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   private boolean _startupInProgress = false;
 
   /**
+   * This flag is set when a quit request is issued before the slave has even
+   * finished starting up. In that case, immediately after starting up, we
+   * quit it.
+   */
+  private boolean _quitOnStartup = false;
+
+  /**
    * The current remote stub for this main JVM object.
    * This field is null except between the time the slave
    * JVM is first invoked and the time the slave registers itself.
@@ -171,7 +178,8 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
    */
   public void checkStillAlive() {}
 
-  public synchronized void registerSlave(SlaveRemote slave) 
+  public synchronized void registerSlave(SlaveRemote slave)
+    throws RemoteException
   {
     _slave = slave;
     _startupInProgress = false;
@@ -179,6 +187,13 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
     _stub = null;
     
     handleSlaveConnected();
+
+    if (_quitOnStartup) {
+      // quitSlave was called before the slave registered, so we now act on
+      // the deferred quit request.
+      _quitOnStartup = false;
+      quitSlave();
+    }
   }
 
   /**
@@ -186,11 +201,19 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
    * @throws IllegalStateException if no slave JVM is connected
    */
   protected synchronized final void quitSlave() throws RemoteException {
-    if (_slave == null) {
-      throw new IllegalStateException("tried to quit when no slave running");
+    if (isStartupInProgress()) {
+      // There is a slave to be quit, but we don't have a handle to it yet.
+      // Instead we set this flag, which makes it quit immediately after it
+      // registers in registerSlave.
+      _quitOnStartup = true;
     }
-    
-    _slave.quit();
+    else if (_slave == null) {
+      throw new IllegalStateException("tried to quit when no slave running" +
+                                      " and startup not in progress");
+    }
+    else {
+      _slave.quit();
+    }
   }
   
   /** Returns slave remote instance, or null if not connected. */
