@@ -101,7 +101,6 @@ import edu.rice.cs.drjava.model.OperationCanceledException;
  * @see ReducedModelComment
  * @see ReducedModelBrace
  *
- * @version $Id$
  */
 public class DefinitionsDocument extends PlainDocument implements OptionConstants, Finalizable<DefinitionsDocument> {
   
@@ -436,7 +435,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       "strictfp", "throw", "try", "catch", "finally",
       "throws", "extends", "implements", "interface", "class",
       "break", "continue", "public", "protected", "private", "abstract",
-      "case", "default", "assert"
+      "case", "default", "assert", "enum"
     };
     HashSet<String> keywords = new HashSet<String>();
     for (int i = 0; i < words.length; i++) {
@@ -2852,29 +2851,53 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
 
       int indexOfClass = _findKeywordAtToplevel("class", text, startPos);
       int indexOfInterface = _findKeywordAtToplevel("interface", text, startPos);
-
-      if (indexOfClass > -1) {
-
-        if (indexOfInterface > -1) {
-          // compare indices to find the lesser
-          index = (indexOfClass < indexOfInterface) ?
-            indexOfClass + "class".length() :
-            indexOfInterface + "interface".length();
-        }
-        else {
-          //top level class declaration found
-          index = indexOfClass + "class".length();
-        }
+      int indexOfEnum = _findKeywordAtToplevel("enum",text,startPos);
+        
+      //If class exists at top level AND either there is no interface at top level or the index of class precedes the index of the top
+      //level interface, AND the same for top level enum, then the class is the first top level declaration
+      if(indexOfClass > -1 
+           && (indexOfInterface <= -1 || indexOfClass < indexOfInterface) 
+           && (indexOfEnum <= -1 || indexOfClass < indexOfEnum) ) {
+        index = indexOfClass + "class".length();
+      }
+      else if(indexOfInterface > -1 
+                && (indexOfClass <= -1 || indexOfInterface < indexOfClass) 
+                && (indexOfEnum <= -1 || indexOfInterface < indexOfEnum) ) {
+        index = indexOfInterface + "interface".length();
+      }
+      else if(indexOfEnum > -1
+                && (indexOfClass <= -1 || indexOfEnum < indexOfClass)   
+                && (indexOfInterface <= -1 || indexOfEnum < indexOfInterface)) {
+        index = indexOfEnum + "enum".length();
       }
       else {
-        if (indexOfInterface > -1) {
-          index = indexOfInterface + "interface".length();
-        }
-        else {
-          // neither index was valid
-          throw new ClassNameNotFoundException("No top level class name found");
-        }
+        // no index was valid
+        throw new ClassNameNotFoundException("No top level class name found");
       }
+        
+      
+//      if (indexOfClass > -1) {
+//
+//        if (indexOfInterface > -1) {
+//          // compare indices to find the lesser
+//          index = (indexOfClass < indexOfInterface) ?
+//            indexOfClass + "class".length() :
+//            indexOfInterface + "interface".length();
+//        }
+//        else {
+//          //top level class declaration found
+//          index = indexOfClass + "class".length();
+//        }
+//      }
+//      else {
+//        if (indexOfInterface > -1) {
+//          index = indexOfInterface + "interface".length();
+//        }
+//        else {
+//          // neither index was valid
+//          throw new ClassNameNotFoundException("No top level class name found");
+//        }
+//      }
 
       //if we make it here we have a valid index
 

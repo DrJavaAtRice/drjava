@@ -87,7 +87,7 @@ public class JavaSourceFilter extends FileFilter {
   public String getDescription() {
     switch (DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL)) {
         case (DrJava.FULL_JAVA) :
-          return "Java and GJ source files";
+          return "Java source files";
         case (DrJava.ELEMENTARY_LEVEL) :
           return "Elementary source files (.dj0)";
         case (DrJava.INTERMEDIATE_LEVEL) :
@@ -95,7 +95,7 @@ public class JavaSourceFilter extends FileFilter {
         case (DrJava.ADVANCED_LEVEL) :
           return "Advanced source files (.dj2)";
       }
-    return "Java and GJ source files";
+    return "Java source files";
   }
 
   /*
