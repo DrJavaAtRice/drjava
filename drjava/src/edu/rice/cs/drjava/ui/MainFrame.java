@@ -55,6 +55,7 @@ import java.net.URL;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.DelegatingAction;
@@ -367,6 +368,11 @@ public class MainFrame extends JFrame {
 
   /** Creates the main window, and shows it. */
   public MainFrame() {
+    // Set up the status bar
+    // This line is here so that each DefinitionsPane
+    // can understand the notion of the Location area.
+    _setUpStatusBar();
+
     _model = new SingleDisplayModel();
     String userdir = System.getProperty("user.dir");
     _openChooser = new JFileChooser(userdir);
@@ -384,6 +390,8 @@ public class MainFrame extends JFrame {
     JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
     _currentDefPane = (DefinitionsPane) defScroll.getViewport().getView();
 
+    
+
     // Need to set undo/redo actions to point to the initial def pane
     // on switching documents later these pointers will also switch
     _undoAction.setDelegatee(_currentDefPane.getUndoAction());
@@ -392,11 +400,10 @@ public class MainFrame extends JFrame {
     _errorPanel.getErrorListPane().setLastDefPane(_currentDefPane);
     _errorPanel.reset();
 
-    // Set up the menu bar and tool bar
+    // set up menu bar and actions
     _setUpActions();
     _setUpMenuBar();
     _setUpToolBar();
-    _setUpStatusBar();
     _setUpDocumentSelector();
 
     setBounds(0, 0, GUI_WIDTH, GUI_HEIGHT);
@@ -1058,21 +1065,61 @@ public class MainFrame extends JFrame {
   private void _setUpStatusBar() {
     _fileNameField = new JLabel();
     _fileNameField.setFont(_fileNameField.getFont().deriveFont(Font.PLAIN));
-    _fileNameField.setBorder(new 
- CompoundBorder(new EmptyBorder(2,2,2,2),
-         new CompoundBorder(new BevelBorder(BevelBorder.LOWERED),
-       new EmptyBorder(2,2,2,2))));
-    /*
+    
+    
     _currLocationField = new JLabel();
-    _currLocationField.setFont(_fileNameField.getFont().deriveFont(Font.PLAIN));
-    _currLocationField.setBorder(new 
- CompoundBorder(new EmptyBorder(2,2,2,2),
-         new CompoundBorder(new BevelBorder(BevelBorder.LOWERED),
-       new EmptyBorder(2,2,2,2))));
-    // _fileNameField.setBorder(new javax.swing.border.EmptyBorder(2,2,2,2));
-    // _fileNameField.setBorder(new javax.swing.border.BevelBorder(BevelBorder.LOWERED));*/
-   // _statusBar = new JPanel();
-    getContentPane().add(_fileNameField, BorderLayout.SOUTH);
+    _currLocationField.setFont(_currLocationField.getFont().deriveFont(Font.PLAIN));
+    
+    _statusBar = new JPanel( new BorderLayout() );
+    _statusBar.add( _fileNameField, BorderLayout.WEST );
+    _statusBar.add( _currLocationField, BorderLayout.EAST );
+    _statusBar.setBorder(new 
+               CompoundBorder(new EmptyBorder(2,2,2,2),
+                              new CompoundBorder(new BevelBorder(BevelBorder.LOWERED),
+                                                 new EmptyBorder(2,2,2,2))));
+    getContentPane().add(_statusBar, BorderLayout.SOUTH);
+  }
+  
+  /**
+   * Inner class to handle the updating of current position within the
+   * document.  Registered with the definitionspane.
+   **/
+  private class PositionField implements MouseListener, KeyListener {
+   
+    JLabel currLoc;
+    DefinitionsDocument doc;
+    
+    PositionField( JLabel cl, OpenDefinitionsDocument odoc ){
+      currLoc = cl;
+      doc = odoc.getDocument();
+      updateLocation();
+    }
+    
+    public void keyPressed( KeyEvent ke ){
+      updateLocation();
+    }
+    public void keyTyped( KeyEvent ke ){
+      updateLocation();
+    }
+    public void keyReleased( KeyEvent ke ){}
+    
+    public void mouseClicked( MouseEvent me ){
+      updateLocation();
+    }
+    public void mousePressed( MouseEvent me ){}
+    public void mouseReleased( MouseEvent me ){}
+    public void mouseEntered( MouseEvent me ){}
+    public void mouseExited( MouseEvent me ){}
+    
+    public void updateLocation() {
+      currLoc.setText(doc.getCurrentLine() + ":" + doc.getCurrentCol());
+    }
+    
+    public void setDocument(OpenDefinitionsDocument odoc) {
+      doc = odoc.getDocument();
+      updateLocation();
+    }
+    
   }
 
   private void _setUpTabs() {
@@ -1131,7 +1178,11 @@ public class MainFrame extends JFrame {
     CompilerErrorCaretListener caretListener =
       new CompilerErrorCaretListener(doc, _errorPanel.getErrorListPane(), pane);
     pane.addErrorCaretListener(caretListener);
-
+    // this code adds the updating capability of the position field
+    // in the status bar.
+    PositionField pf = new PositionField( _currLocationField, doc );
+    pane.addKeyListener( pf );
+    pane.addMouseListener( pf );
     // Add to a scroll pane
     JScrollPane scroll = new BorderlessScrollPane(pane,
         JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,

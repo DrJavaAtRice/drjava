@@ -397,6 +397,7 @@ public class DefinitionsDocument extends PlainDocument {
   public void move(int dist) {
     int oldLoc = _currentLocation;
     _currentLocation += dist;
+    
     if (_currentLocation < 0) {
       throw  new RuntimeException("location < 0?! oldLoc=" + oldLoc + " dist=" +
           dist);
@@ -411,7 +412,6 @@ public class DefinitionsDocument extends PlainDocument {
   }
   
   /** return the current line of the cursor position */
-  /** untested, uncalled */
   public int getCurrentLine() {
     int count=1;
     int _copyLocation = getCurrentLocation();
