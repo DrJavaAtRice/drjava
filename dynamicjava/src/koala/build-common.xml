@@ -41,7 +41,7 @@
 <!-- classpath to use everywhere. -->
 <path id="classpath">
   <pathelement location="${jsr14_classpath}" />
-  <pathelement path="${java.class.path}" />
+<!--  <pathelement path="${java.class.path}" /> -->
   <fileset dir="${lib_dir}">
     <include name="*.jar" />
   </fileset>
@@ -58,14 +58,14 @@ target="jsr14"
          fork="on"
          debug="on"
          optimize="off">
-    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
+    <!--compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/-->
   </javac>
 </target>
 
 <!-- Init target. All others depend on it. Initialize the directory. -->
 <target name="init">
-<!--  <available type="file" file="${jsr14_classpath}" property="jsr14_ok" />
-  <antcall target="check_for_jsr14" /-->
+ <!-- <available type="file" file="${jsr14_classpath}" property="jsr14_ok" />
+  <antcall target="check_for_jsr14" /> -->
   <antcall target="compile-tstamp-gmt"/>
   <taskdef name="tstamp_gmt" classname="edu.rice.cs.util.ant.TstampGMT" classpath="${built}"/>
   <tstamp_gmt /> <!-- Ant requires us to make time stamp -->
@@ -108,27 +108,26 @@ target="jsr14"
      After committing, we tag the build we just made with the tag
      projectname-date-time.
 -->
-<target name="do-commit" depends="clean, update, test, jar, make-version-stamp">
+<target name="do-commit" depends="clean, update, test, make-version-stamp">
   <property name="version-tag"
-            value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />   
+            value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
 
   <!-- recompile to make new version number get into code. -->
   <echo message="All tests passed. Rebuilding to put version tag (${version-tag}) into the code." />
   <antcall target="compile" />
-  
+
   <!-- Copy the dynamicjava.jar to the lib directory and commit it. -->
   <copy file="${jarfile}"
           tofile="${lib_dir}/dynamicjava.jar"
           overwrite="yes"/>
   <echo message="Copied current dynamicjava.jar to the lib directory. Please commit it to keep DrJava in sync with the koala code base." />
-
+  
   <tempfile property="commit-comments-filename" 
             destdir="${java.io.tmpdir}"
             prefix="commit-comments" />
   <antcall target="create-commit-comments">
     <param name="commit-comments-filename" value="${commit-comments-filename}"/>
   </antcall>
-  
   <cvs>
     <commandline>
       <argument value="commit" />
@@ -209,106 +208,11 @@ target="jsr14"
 <target name="commit-and-release" depends="commit, release">
 </target>
 
-
 <!-- Compile. We have to start at srcroot and then selectively include
      just this project in order for it to realize what files have already
      been compiled (preventing needless recompilation).
 
-     This version works with JDK 1.3 and JSR-14 v1.0.
-     (Necessary for releases.)
-<target name=3 depends="init">
-  <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
-         includes="${projpath}/**/*java"
-         destdir="${built}"
-         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}"
-  classpath="${classpath_text}"
-         target="1.1"
-         debug="on"
-         optimize="off">
-    <compilerarg value="-gj" />
-  </javac>
-</target>
--->
-       
-
-<!-- Compile. We have to start at srcroot and then selectively include
-     just this project in order for it to realize what files have already
-     been compiled (preventing needless recompilation).
-
-     This version works with JDK 1.4.1 and JSR-14 v1.3.
-     (Be sure to have the right version of tools.jar on your classpath.)
-
-<target name="do-compile" depends="init">
-  <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
-         includes="${projpath}/**/*java"
-         destdir="${built}"
-         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}" 
-  classpath="${classpath_text}"
-         source="1.5"
-         target="1.5"
-         debug="on"
-         optimize="off">
-  </javac>
-</target>
--->
-
-
-<!-- Compile. We have to start at srcroot and then selectively include
-     just this project in order for it to realize what files have already
-     been compiled (preventing needless recompilation).
-
-     This version works with JDK 1.4.1 and JSR-14 v2.0.
-     (Be sure to have the right version of tools.jar on your classpath.)
-
-<target name="do-compile" depends="init">
-  <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
-         includes="${projpath}/**/*java"
-         destdir="${built}"
-         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}" 
-  classpath="${classpath_text}"
-         source="1.5"
-         target="1.5"
-         debug="on"
-         fork="on"
-         optimize="off">
-    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
-    <compilerarg value="-novariance"/>
-  </javac>
-</target>
--->
-
-
-<!-- Compile. We have to start at srcroot and then selectively include
-     just this project in order for it to realize what files have already
-     been compiled (preventing needless recompilation).
-
-     This version works with JDK 1.4.1 and JSR-14 v2.2.
-     (Be sure to have the right version of tools.jar on your classpath.)
-<target name="do-compile" depends="init">
-  <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
-         includes="${projpath}/**/*java"
-         destdir="${built}"
-         bootclasspath="${jsr14_collect_classpath}:${sun.boot.class.path}" 
-  classpath="${classpath_text}"
-         source="1.5"
-         debug="on"
-         fork="on"
-         optimize="off">
-    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
-  </javac>
-</target>
--->
-
-<!-- Compile. We have to start at srcroot and then selectively include
-     just this project in order for it to realize what files have already
-     been compiled (preventing needless recompilation).
-
-     This version works with JDK 1.4.2 and JSR-14 v2.3, v2.4, and v2.5; it
-     also works with JDK 1.5.0.
+     This version works with JDK 1.4.2 and JSR-14 v2.3+ as well as JDK 1.5.0.
      (Be sure to have the right version of tools.jar on your classpath.)
 -->
 <target name="do-compile" depends="init">
@@ -324,14 +228,12 @@ target="jsr14"
          fork="on"
          optimize="off">
     <compilerarg value="-warnunchecked"/>
-    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
+    <!--compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/-->
   </javac>
 </target>
 
-<!-- Checked Compile. Identical to Compile with Generic Warning Checking
-     enabled.
-
-     This version works with JDK 1.4.2 and JSR-14 v2.2.
+<!-- Raw Compile. Identical to Compile with Generic Warning Checking
+     disabled.
 -->
 <target name="checked-compile" depends="init">
   <mkdir dir="${built}"/>
@@ -341,10 +243,10 @@ target="jsr14"
          bootclasspath="${jsr14_collect_classpath}:${sun.boot.class.path}" 
   classpath="${classpath_text}"
          source="1.5"
+         target="jsr14"
          debug="on"
          fork="on"
          optimize="off">
-    <compilerarg value="-warnunchecked"/>
     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
   </javac>
 </target>

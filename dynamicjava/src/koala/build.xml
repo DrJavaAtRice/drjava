@@ -136,25 +136,6 @@
 
   </target>
 
-  <target name="ccompile" depends="checked-compile">
-    <copy todir="${built}">
-      <fileset dir="${srcroot}">
-        <!-- include the GPL -->
-        <include name="edu/rice/cs/LICENSE" />
-
-        <!-- include graphics -->
-        <include name="${projpath}/**/LICENSE" />
-        <include name="${projpath}/**/README" />
-        <include name="${projpath}/**/*.gif" />
-        <include name="${projpath}/**/*.png" />
-
-	<!-- include files used for testing -->
-	<include name="${projpath}/**/testFiles/*" />
-      </fileset>
-    </copy>
-
-  </target>
-
   <!-- Compiles only the JSR-14 v1.0 specific classes, and adds
        them to compilers.jar in the lib directory.
        Deletes the compiled classes when finished.

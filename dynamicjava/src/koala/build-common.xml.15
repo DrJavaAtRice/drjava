@@ -58,7 +58,7 @@ target="jsr14"
          fork="on"
          debug="on"
          optimize="off">
-    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
+    <!--compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/-->
   </javac>
 </target>
 
@@ -208,105 +208,11 @@ target="jsr14"
 <target name="commit-and-release" depends="commit, release">
 </target>
 
-
 <!-- Compile. We have to start at srcroot and then selectively include
      just this project in order for it to realize what files have already
      been compiled (preventing needless recompilation).
 
-     This version works with JDK 1.3 and JSR-14 v1.0.
-     (Necessary for releases.)
-<target name="do-compile" depends="init">
-  <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
-         includes="${projpath}/**/*java"
-         destdir="${built}"
-         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}"
-  classpath="${classpath_text}"
-         target="1.1"
-         debug="on"
-         optimize="off">
-    <compilerarg value="-gj" />
-  </javac>
-</target>
--->
-       
-
-<!-- Compile. We have to start at srcroot and then selectively include
-     just this project in order for it to realize what files have already
-     been compiled (preventing needless recompilation).
-
-     This version works with JDK 1.4.1 and JSR-14 v1.3.
-     (Be sure to have the right version of tools.jar on your classpath.)
-
-<target name="do-compile" depends="init">
-  <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
-         includes="${projpath}/**/*java"
-         destdir="${built}"
-         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}" 
-  classpath="${classpath_text}"
-         source="1.5"
-         target="1.5"
-         debug="on"
-         optimize="off">
-  </javac>
-</target>
--->
-
-
-<!-- Compile. We have to start at srcroot and then selectively include
-     just this project in order for it to realize what files have already
-     been compiled (preventing needless recompilation).
-
-     This version works with JDK 1.4.1 and JSR-14 v2.0.
-     (Be sure to have the right version of tools.jar on your classpath.)
-
-<target name="do-compile" depends="init">
-  <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
-         includes="${projpath}/**/*java"
-         destdir="${built}"
-         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}" 
-  classpath="${classpath_text}"
-         source="1.5"
-         target="1.5"
-         debug="on"
-         fork="on"
-         optimize="off">
-    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
-    <compilerarg value="-novariance"/>
-  </javac>
-</target>
--->
-
-
-<!-- Compile. We have to start at srcroot and then selectively include
-     just this project in order for it to realize what files have already
-     been compiled (preventing needless recompilation).
-
-     This version works with JDK 1.4.1 and JSR-14 v2.2.
-     (Be sure to have the right version of tools.jar on your classpath.)
-<target name="do-compile" depends="init">
-  <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
-         includes="${projpath}/**/*java"
-         destdir="${built}"
-         bootclasspath="${jsr14_collect_classpath}:${sun.boot.class.path}" 
-  classpath="${classpath_text}"
-         source="1.5"
-         debug="on"
-         fork="on"
-         optimize="off">
-    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
-  </javac>
-</target>
--->
-
-<!-- Compile. We have to start at srcroot and then selectively include
-     just this project in order for it to realize what files have already
-     been compiled (preventing needless recompilation).
-
-     This version works with JDK 1.4.2 and JSR-14 v2.3 and JSR-14 v2.4.
+     This version works with JDK 1.4.2 and JSR-14 v2.3+ as well as JDK 1.5.0.
      (Be sure to have the right version of tools.jar on your classpath.)
 -->
 <target name="do-compile" depends="init">
@@ -321,14 +227,13 @@ target="jsr14"
          debug="on"
          fork="on"
          optimize="off">
-    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
+    <compilerarg value="-warnunchecked"/>
+    <!--compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/-->
   </javac>
 </target>
 
-<!-- Checked Compile. Identical to Compile with Generic Warning Checking
-     enabled.
-
-     This version works with JDK 1.4.2 and JSR-14 v2.2.
+<!-- Raw Compile. Identical to Compile with Generic Warning Checking
+     disabled.
 -->
 <target name="checked-compile" depends="init">
   <mkdir dir="${built}"/>
@@ -338,10 +243,10 @@ target="jsr14"
          bootclasspath="${jsr14_collect_classpath}:${sun.boot.class.path}" 
   classpath="${classpath_text}"
          source="1.5"
+         target="jsr14"
          debug="on"
          fork="on"
          optimize="off">
-    <compilerarg value="-warnunchecked"/>
     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
   </javac>
 </target>
