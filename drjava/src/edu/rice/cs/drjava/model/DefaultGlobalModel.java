@@ -872,6 +872,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
           while ((currLine = br.readLine()) != null) {
             strings.addElement(currLine);
           }
+          br.close(); // win32 needs readers closed explicitly!
         }
         catch (IOException ioe) {
           throw new IOException("File name returned from FileSelector is null");
