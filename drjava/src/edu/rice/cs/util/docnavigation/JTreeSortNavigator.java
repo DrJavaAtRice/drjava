@@ -311,6 +311,7 @@ public class JTreeSortNavigator extends JTree implements IDocumentNavigator, Tre
    * @param parent the folder to add under
    */
   private void insertFolderSortedInto(InnerNode child, InnerNode parent){
+    System.out.println("inserting " + child + " into " + parent);
     int numChildren = parent.getChildCount();
     int i=0;
     String newName = child.toString();
@@ -327,8 +328,10 @@ public class JTreeSortNavigator extends JTree implements IDocumentNavigator, Tre
       parentsKid = ((DefaultMutableTreeNode)parent.getChildAt(i));
       if(parentsKid instanceof InnerNode){
         countFolders++;
-        oldName = ((InnerNode)parentsKid).getData().toString();
+        oldName = ((InnerNode)parentsKid).toString();
+        System.out.println("comparing " + newName + " with " + oldName + " = " + (newName.toUpperCase().compareTo(oldName.toUpperCase())));
         if((newName.toUpperCase().compareTo(oldName.toUpperCase()) < 0)){
+          System.out.println(" found! at " + i);
           break;
         }
       }else if(parentsKid instanceof LeafNode){
@@ -339,7 +342,7 @@ public class JTreeSortNavigator extends JTree implements IDocumentNavigator, Tre
       }
       i++;
     }
-    
+    System.out.println(" at " + i);
     _model.insertNodeInto(child, parent, i);
   }
   
@@ -638,6 +641,7 @@ public class JTreeSortNavigator extends JTree implements IDocumentNavigator, Tre
     private ImageIcon _otherIcon;
     private ImageIcon _javaMIcon;
     private ImageIcon _otherMIcon;
+    private ImageIcon _projectIcon;
     
     /**
      * simple constructor
@@ -653,6 +657,7 @@ public class JTreeSortNavigator extends JTree implements IDocumentNavigator, Tre
       _advancedMIcon  = _getIconResource("AdvancedMIcon.gif");
       _otherIcon  = _getIconResource("OtherIcon.gif");
       _otherMIcon = _getIconResource("OtherMIcon.gif");
+      _projectIcon = _getIconResource("ProjectIcon.gif");
     }
     
     private ImageIcon _getIconResource(String name) {
@@ -681,6 +686,9 @@ public class JTreeSortNavigator extends JTree implements IDocumentNavigator, Tre
                             expanded, leaf, row,
                             hasFocus);
             DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
+            if (node instanceof RootNode) {
+              setIcon(_projectIcon);
+            }else
             if(node.getUserObject() instanceof INavigatorItem){
               INavigatorItem doc = (INavigatorItem)(node.getUserObject());
               _filename = doc.toString();
