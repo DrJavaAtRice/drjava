@@ -20,6 +20,9 @@ import java.awt.event.ActionEvent;
  *    Definitions, Output and Interactions. */
 public class MainFrame extends JFrame
 {
+  // Generated automatically when you check out with tag name!
+  public static final String DRJAVA_BUILD = "$Name$";
+
   private DefinitionsView _definitionsView;
   private OutputView _outputView;
   private InteractionsView _interactionsView;

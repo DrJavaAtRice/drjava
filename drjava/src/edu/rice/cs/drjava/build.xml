@@ -46,9 +46,13 @@
     <echo message="New version ${version-tag} committed to CVS." />
   </target>
 
-  <!-- Compile -->
+  <!-- Compile. We have to start at srcroot and then selectively include
+       just this project in order for it to realize what files have already
+       been compiled (preventing needless recompilation)
+  -->
   <target name="compile" depends="init">
-    <javac srcdir="."
+    <javac srcdir="${srcroot}"
+           includes="${projpath}/*java"
            destdir="${built}" 
            debug="on"
            optimize="off" />
@@ -96,9 +100,9 @@
           classname="edu.rice.cs.drjava.MainFrame" />
   </target>
 
-  <!-- Delete all generated files -->
+  <!-- Delete all generated files (only for this project!) -->
   <target name="clean">
-    <delete dir="${built}" />
+    <delete dir="${built}/${projpath}" />
     <delete file="${jarfile}" />
   </target>
 </project>
