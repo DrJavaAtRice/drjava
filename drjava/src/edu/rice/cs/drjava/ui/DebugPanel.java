@@ -131,11 +131,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
     this.add(_buttonPanel, BorderLayout.EAST);
     
     _statusBar = new JLabel("");
-    /*_statusBar.setBorder(
-      new CompoundBorder(new EmptyBorder(2,2,2,2),
-                         new CompoundBorder(new BevelBorder(BevelBorder.LOWERED),
-                                            new EmptyBorder(2,2,2,2))));
-                                            */
     _statusBar.setForeground(Color.blue.darker());
     this.add(_statusBar, BorderLayout.SOUTH);
     

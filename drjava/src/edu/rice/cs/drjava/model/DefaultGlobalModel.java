@@ -783,7 +783,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         toEval = _testClassCall(toEval);
       }
       
-      //System.out.println("Interpreting "+toEval);
       _interpreterControl.interpret(toEval);
       
       // Might need this if trying to implement line-by-line interpretation
@@ -1123,19 +1122,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       = CompilerRegistry.ONLY.getActiveCompiler();
       
     if (files.length > 0) {
-      /*DrJava.consoleOut().println("-- SourceRoots:");
-      for (int i = 0 ; i < sourceRoots.length; i ++) {
-        DrJava.consoleOut().println(sourceRoots[i]);
-      }*/
       errors = compiler.compile(sourceRoots, files);
     }
     _distributeErrors(errors);
-    // check if all open documents are in sync
-    /*ListModel list = _definitionsDocs;
-    for (int i = 0; i < list.getSize(); i++) {
-      OpenDefinitionsDocument currDoc = (OpenDefinitionsDocument)list.getElementAt(i);
-      currDoc.checkIfClassFileInSync();
-    }*/
   }
 
   /**
@@ -1707,10 +1696,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * class file to that of the source file.
    */
     public boolean checkIfClassFileInSync() {
-      //DrJava.consoleOut().println("Beginning checkIfClassFileInSync()");
       if(isModifiedSinceSave()) {
         _doc.setClassFileInSync(false);
-        //DrJava.consoleOut().println("Ending checkIfClassFileInSync()");
         return false;
       }
       File classFile = _doc.getCachedClassFile();
@@ -1757,7 +1744,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         _doc.setCachedClassFile(classFile);
         if (classFile == null) {
           // couldn't find the class file
-          //DrJava.consoleOut().println("Ending checkIfClassFileInSync()");
           return false;
         }
       }
@@ -1771,17 +1757,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       }
       catch (FileMovedException fme) {
         _doc.setClassFileInSync(false);
-        //DrJava.consoleOut().println("Ending checkIfClassFileInSync()");
         return false;
       }
       if (sourceFile.lastModified() > classFile.lastModified()) {
         _doc.setClassFileInSync(false);
-        //DrJava.consoleOut().println("Ending checkIfClassFileInSync()");
         return false;
       }
       else {
         _doc.setClassFileInSync(true);
-        //DrJava.consoleOut().println("Ending checkIfClassFileInSync()");
         return true;
       }
     }
@@ -2256,7 +2239,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     try {
       OpenDefinitionsDocument openDoc = _getOpenDocument(file);
       if (openDoc != null) {
-        //System.err.println("This file is already open!");
         throw new AlreadyOpenException(openDoc);
       }
       

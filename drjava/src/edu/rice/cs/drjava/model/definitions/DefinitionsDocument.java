@@ -1872,9 +1872,12 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       } else {
         //found a match, check quality
         setCurrentLocation(index);
+          
+        // check that the keyword is not in a comment and is followed by whitespace
         ReducedToken rt = _reduced.currentToken();
-        if (rt.getState() == ReducedModelStates.FREE) {
-        //if (!_isCommentedOrSpace(index,text)) {
+        if (rt.getState() == ReducedModelStates.FREE && 
+            Character.isWhitespace(text.charAt(index + keyword.length()))) {
+          //if (!_isCommentedOrSpace(index,text)) {
           done = true;
           if (!posNotInBlock(index)) { //in a paren phrase, gone too far
             index = -1;

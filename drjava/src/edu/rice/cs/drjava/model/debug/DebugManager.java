@@ -179,7 +179,6 @@ public class DebugManager {
     Connector.Argument port = (Connector.Argument) args.get("port");
     try {
       int debugPort = _model.getDebugPort();
-      //DrJava.consoleOut().println("using port: " + debugPort);
       port.setValue("" + debugPort);
       _vm = connector.attach(args);
       _eventManager = _vm.eventRequestManager();
@@ -308,18 +307,17 @@ public class DebugManager {
       }
     }
     return ref;
-    //else throw new DebugException ("Couldn't find the class corresponding to '" + className +"'.");
   }
   
   
   /**
    * Suspends execution of the currently running document.
    */
-  public synchronized void suspend() throws DebugException {
+  public synchronized void suspend() {
     if (!isReady()) return;
     
     if (_thread == null)
-      throw new DebugException("Suspend called while _thread was null");
+      return;
     _thread.suspend();
     currThreadSuspended();
   }
@@ -327,11 +325,11 @@ public class DebugManager {
   /**
    * Resumes execution of the currently loaded document.
    */
-  public synchronized void resume() throws DebugException {
+  public synchronized void resume() {
     if (!isReady()) return;
     
     if (_thread == null)
-      DrJava.consoleOut().println("Resume called while _thread was null");
+      return;
     
     int suspendCount = _thread.suspendCount();
     for (int i=suspendCount; i>0; i--) {
@@ -710,7 +708,6 @@ public class DebugManager {
       frames = _thread.frames();
     }
     catch (IncompatibleThreadStateException itse) {
-      DrJava.consoleOut().println("Thread has not been suspended");
       return;
     }
     currFrame = (StackFrame) frames.get(stackIndex);
@@ -742,14 +739,14 @@ public class DebugManager {
       catch (AbsentInformationException aie) {
       }
       
+      ReferenceType outerRt = rt;
       // if the variable being watched is not a local variable, check if it's a field
       if (localVar == null) {
-        Field field = rt.fieldByName(currName);
+        Field field = outerRt.fieldByName(currName);
         
         // if the variable is not a field either, it's not defined in this 
         // ReferenceType's scope, keep going further out in scope.
-        String className = rt.name();
-        //ReferenceType outerRt;
+        String className = outerRt.name();
         while (field == null) {
           
           // crop off the $ if there is one and anything after it
@@ -760,28 +757,22 @@ public class DebugManager {
           else {
             // There is no $ in the className, we're at the outermost class and the
             // field still was not found
-            
-            //currWatch.setValue(WatchUndefinedValue.Singleton);
-            //currWatch.setType(null);
             break;
           }
-          rt = (ReferenceType)_vm.classesByName(className).get(0);
-          if (rt == null) {
-            //currWatch.setValue(WatchUndefinedValue.Singleton);
-            //currWatch.setType(null);
+          outerRt = (ReferenceType)_vm.classesByName(className).get(0);
+          if (outerRt == null) {
             break;
           }
-          field = rt.fieldByName(currName);
+          field = outerRt.fieldByName(currName);
         }
         if (field != null) {
           // check if the field is static
           if (field.isStatic()) {
-            currWatch.setValue(rt.getValue(field));
+            currWatch.setValue(outerRt.getValue(field));
             try {
               currWatch.setType(field.type());
             }
             catch (ClassNotLoadedException cnle) {
-              DrJava.consoleOut().println("Class not loaded");
               currWatch.setType(null);
             }
           }
@@ -795,7 +786,7 @@ public class DebugManager {
             // at the loss of ever being able to watch outer instance
             // fields. If unremoved, this will work sometimes, but not always.
             while (outerFrame.thisObject() != null && 
-                   !outerFrame.thisObject().referenceType().equals(rt) &&
+                   !outerFrame.thisObject().referenceType().equals(outerRt) &&
                    stackIndex < frames.size()) {
               outerFrame = (StackFrame) frames.get(stackIndex);
               stackIndex++;
@@ -807,7 +798,6 @@ public class DebugManager {
                 currWatch.setType(field.type());
               }
               catch (ClassNotLoadedException cnle) {
-                DrJava.consoleOut().println("Class not loaded");
                 currWatch.setType(null);
               }
             }
@@ -817,6 +807,10 @@ public class DebugManager {
             }
           }
         }
+        else {
+          currWatch.setValue(WatchUndefinedValue.Singleton);
+          currWatch.setType(null);
+        }
       }
       else {
         currWatch.setValue(currFrame.getValue(localVar));
@@ -824,7 +818,6 @@ public class DebugManager {
           currWatch.setType(localVar.type());
         }
         catch (ClassNotLoadedException cnle) {
-          DrJava.consoleOut().println("Class not loaded");
           currWatch.setType(null);
         }
       }

@@ -2304,11 +2304,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     public void updateLocation() {
-      DefinitionsDocument doc = _model.getActiveDocument().getDocument();
-      /*
-      _currLocationField.setText(doc.getCurrentLine() +
-                                 ":" + doc.getCurrentCol() + "\t");
-      */
       DefinitionsPane p = _currentDefPane;
       _currLocationField.setText(p.getCurrentLine() +
                                  ":" + p.getCurrentCol() + "\t");
@@ -2334,13 +2329,13 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     });
     
-    _interactionsWithSyncPanel = new JPanel(new BorderLayout());
-    _syncStatus = new JLabel("Testing");
-    _interactionsWithSyncPanel.add(new BorderlessScrollPane(_interactionsPane),
-                                   BorderLayout.CENTER);
+    //_interactionsWithSyncPanel = new JPanel(new BorderLayout());
+    //_syncStatus = new JLabel("Testing");
+    //_interactionsWithSyncPanel.add(new BorderlessScrollPane(_interactionsPane),
+    //                               BorderLayout.CENTER);
     //_interactionsWithSyncPanel.add(_syncStatus, BorderLayout.SOUTH);
                                     
-    _tabbedPane.add("Interactions", _interactionsWithSyncPanel);
+    _tabbedPane.add("Interactions", new BorderlessScrollPane(_interactionsPane));
     _tabbedPane.add("Console", outputScroll);
     
     _tabs = new LinkedList();
@@ -2431,8 +2426,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     JScrollPane defScroll = (JScrollPane)
       _defScrollPanes.get(_model.getActiveDocument());
 
-    //_debugPanel = new JPanel();
-
     // Try to create debug panel (see if JSwat is around)
     if (_model.getDebugManager() != null) {
       try {
@@ -2467,7 +2460,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Also, according to the Swing docs, we need to set these dividers AFTER
     // we have shown the window. How annoying.
     _mainSplit.setDividerLocation(2*getHeight()/3);
-    //_mainSplit.setDividerSize(getHeight()/60);
     _mainSplit.setOneTouchExpandable(true);
     _debugSplitPane.setOneTouchExpandable(true);
     _docSplitPane.setDividerLocation(DOC_LIST_WIDTH);
@@ -3028,7 +3020,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void compileErrorDuringJUnit() {
-      //System.err.println("Called");
       removeTab(_junitPanel);
       _tabbedPane.setSelectedComponent(_errorPanel);
     }
@@ -3358,13 +3349,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     KeyBindingManager.Singleton.put(KEY_BEGIN_LINE, _actionMap.get(DefaultEditorKit.beginLineAction), null, "Begin Line");
     KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_LINE, 
-                                               DefaultEditorKit.selectionBeginLineAction);
-    
-    // Wasn't a useful action
-    //KeyBindingManager.Singleton.put(KEY_BEGIN_PARAGRAPH, 
-    //                       _actionMap.get(DefaultEditorKit.beginParagraphAction), null, "Begin Paragraph");
-    //KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_PARAGRAPH, 
-    //                                  DefaultEditorKit.selectionBeginParagraphAction); 
+                                               DefaultEditorKit.selectionBeginLineAction); 
     
     KeyBindingManager.Singleton.put(KEY_PREVIOUS_WORD, 
                                     _actionMap.get(DefaultEditorKit.previousWordAction), null, "Previous Word");
@@ -3386,12 +3371,6 @@ public class MainFrame extends JFrame implements OptionConstants {
                                     _actionMap.get(DefaultEditorKit.endLineAction), null, "End Line");
     KeyBindingManager.Singleton.addShiftAction(KEY_END_LINE, 
                                                DefaultEditorKit.selectionEndLineAction);
-    
-    // Wasn't a useful action
-    //KeyBindingManager.Singleton.put(KEY_END_PARAGRAPH, 
-    //                       _actionMap.get(DefaultEditorKit.endParagraphAction), null, "End Paragraph");
-    //KeyBindingManager.Singleton.addShiftAction(KEY_END_PARAGRAPH, 
-    //                                  DefaultEditorKit.selectionEndParagraphAction);
     
     KeyBindingManager.Singleton.put(KEY_NEXT_WORD, 
                                     _actionMap.get(DefaultEditorKit.nextWordAction), null, "Next Word");

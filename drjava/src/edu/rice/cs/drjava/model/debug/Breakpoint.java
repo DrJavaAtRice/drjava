@@ -60,10 +60,6 @@ import com.sun.jdi.request.*;
  */
 public class Breakpoint extends DocumentDebugAction<BreakpointRequest> { 
   
-  //private String _className;
-  //private int _lineNumber;
-  //private ReferenceType _ref;
-  //private BreakpointRequest _breakpointReq;
    private Position _startPos;
    private Position _endPos;
    

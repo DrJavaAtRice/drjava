@@ -43,7 +43,6 @@ import edu.rice.cs.drjava.DrJava;
 
 import com.sun.jdi.*;
 import com.sun.jdi.event.*;
-//import com.sun.jdi.connect.*;
 import com.sun.jdi.request.*;
 
 public class EventHandler extends Thread {
@@ -63,19 +62,10 @@ public class EventHandler extends Thread {
     while (_connected) {
       try {
         EventSet eventSet = queue.remove();
-        //boolean resumeStoppedApp = false;
         EventIterator it = eventSet.eventIterator();
         while (it.hasNext()) {
-          //resumeStoppedApp |= !handleEvent(it.nextEvent());
           handleEvent(it.nextEvent());
         }
-        
-        /*if (resumeStoppedApp) {
-          eventSet.resume();
-        } else if (eventSet.suspendPolicy() == EventRequest.SUSPEND_ALL) {
-          setCurrentThread(eventSet);
-          notifier.vmInterrupted();
-        }*/
       } catch (InterruptedException exc) {
         // Do nothing. Any changes will be seen at top of loop.
       } catch (VMDisconnectedException discExc) {
@@ -87,7 +77,6 @@ public class EventHandler extends Thread {
   }
   
   public void handleEvent(Event e) {
-    //DrJava.consoleOut().println("handleEvent: "+e);
     if (e instanceof BreakpointEvent) {
       _handleBreakpointEvent((BreakpointEvent) e);
     }
@@ -139,14 +128,16 @@ public class EventHandler extends Thread {
   }
   
   private void _handleClassPrepareEvent(ClassPrepareEvent e) {
-    try {
-      _manager.getPendingRequestManager().classPrepared(e);
+    synchronized(_manager) {
+      try {
+        _manager.getPendingRequestManager().classPrepared(e);
+      }
+      catch(DebugException de) {
+      }
+      // resumes this thread which was suspended because its 
+      // suspend policy was SUSPEND_EVENT_THREAD
+      e.thread().resume();
     }
-    catch(DebugException de) {
-    }
-    // resumes this thread which was suspended because its 
-    // suspend policy was SUSPEND_EVENT_THREAD
-    e.thread().resume();
   }
   
   private void _handleThreadDeathEvent(ThreadDeathEvent e) {

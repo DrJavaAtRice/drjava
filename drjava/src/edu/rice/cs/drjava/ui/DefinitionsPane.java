@@ -706,7 +706,6 @@ public class DefinitionsPane extends JEditorPane
    * Reset undo machinery on setDocument.
    */
   private void setDocument(OpenDefinitionsDocument doc) {
-    //DrJava.consoleErr().println("Reset doc: " + doc);
     super.setDocument(doc.getDocument());
 
     _resetUndo();
@@ -717,11 +716,9 @@ public class DefinitionsPane extends JEditorPane
       int pos = getCaretPosition();
       FontMetrics metrics = getFontMetrics(getFont());
       Rectangle startRect = modelToView(pos);
-      //System.out.println("Startrect: " + startRect);
       if (startRect == null) { 
         return 1;
       }
-      //System.out.println("metrics: " + metrics);
       //top left position is (3,3), so font size<=6 will be off
       return (new Double (startRect.getY() / metrics.getHeight()).intValue() + 1);
     } catch (BadLocationException e) {
@@ -741,11 +738,6 @@ public class DefinitionsPane extends JEditorPane
     }
   }
   
-  /*public void setSize(Dimension d) {
-    DrJava.consoleOut().println("setSize(Dimension)");
-    super.setSize(d);
-  }*/
-  
   public void addSetSizeListener(ActionListener listener) {
     _setSizeListener = listener;
   } 
@@ -754,7 +746,6 @@ public class DefinitionsPane extends JEditorPane
   }
   
   public void centerViewOnOffset(int offset) {
-    //DrJava.consoleOut().println("beginning of centerViewOnOffset");
 
     try {
       FontMetrics metrics = getFontMetrics(getFont());
@@ -763,29 +754,7 @@ public class DefinitionsPane extends JEditorPane
       double viewHeight = _mainFrame.getDefViewport().getHeight();
       // Scroll to make sure this item is visible
       // Centers the selection in the viewport
-      /*setCaretPosition(offset);
-       JScrollPane parent = (JScrollPane)this.getParent().getParent();
-       JScrollBar scrollBar = parent.getVerticalScrollBar();
-       scrollBar.setValue(scrollBar.getValue() + (int)viewHeight/2);
-       */
-      // modelToView will return null if this doesn't yet have positive size
-      Rectangle startRect;// = this.modelToView(offset);
-      /*if (startRect == null) {
-       this.update(this.getGraphics());
-       startRect = this.modelToView(offset);
-       }*/
-      //if (startRect == null) {
-      //_forceRepaint();
-      //repaint();
-      /*this.invalidate();
-       java.awt.Toolkit.getDefaultToolkit().sync();
-       this.paint(this.getGraphics());
-       this.validate();*/
-      //if (!_mainFrame.isValid())
-      //startRect = this.modelToView(offset);
-      //if (startRect == null)
-      //  _forceRepaint();
-      //DrJava.consoleOut().println("calling model to view");
+      Rectangle startRect;
       startRect = this.modelToView(offset);
       
       int startRectX = (int)startRect.getX();
@@ -796,32 +765,11 @@ public class DefinitionsPane extends JEditorPane
                                  startRectY+(int)(viewHeight/2 + 
                                                   metrics.getHeight()/2));
       
-      
-      // trying to scroll this way, instead of using scrollRectToVisible
-      /*int caretPosAtBottom = this.viewToModel(endPoint);
-       if (caretPosAtBottom >= length)
-       caretPosAtBottom = length - 1;
-       //this.setCaretPosition(caretPosAtBottom);
-       //this.paintImmediately(_mainFrame.getDefViewport().getViewRect());
-       //_forceRepaint();
-       //this.setCaretPosition(offset);*/
-      /*System.out.println("bottom: " + caretPosAtBottom + " offset: " + offset + 
-       " length: " + length + " metrics: " + metrics.getHeight() +
-       " viewheight: " + viewHeight + " startRectY: "+startRectY +
-       " endPoint: " + endPoint.getY());
-       */
       // Add the end rect onto the start rect to make a rectangle
       // that encompasses the entire selection
       startRect.add(endPoint);     
       
-      //DrJava.consoleOut().println("right before scrollRectToVisible");
-      this.scrollRectToVisible(startRect);      
-      //DrJava.consoleOut().println("right after scrollRectToVisible");
-      
-      //_mainFrame.invalidate();
-      //_mainFrame.repaint();
-      ///this.revalidate();
-      ///this.repaint();
+      this.scrollRectToVisible(startRect);
       removeSetSizeListener();
     }
     
@@ -829,14 +777,11 @@ public class DefinitionsPane extends JEditorPane
       throw new UnexpectedException(e);
     }
 
-    //DrJava.consoleOut().println("done with centerViewOnOffset");
   }   
   
   public void centerViewOnLine(int lineNumber) {
-    //DrJava.consoleOut().println("beginning of centerViewOnLine");
     FontMetrics metrics = getFontMetrics(getFont());
     Point p = new Point(0, metrics.getHeight() * (lineNumber));
-    //_forceRepaint();
     int offset = this.viewToModel(p);
     this.centerViewOnOffset(offset);   
   }
