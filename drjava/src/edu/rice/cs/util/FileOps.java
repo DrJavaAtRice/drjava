@@ -39,6 +39,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
 
+import gj.util.Vector;
+
 import java.io.*;
 import java.util.*;
 
@@ -187,6 +189,94 @@ public abstract class FileOps {
   }
 
   /**
+   * This function starts from the given directory and finds all
+   * packages within that directory
+   * @param prefix the package name of files in the given root
+   * @param root the directory to start exploring from
+   * @return a list of valid packages, excluding the root ("") package
+   */
+  public static Vector<String> packageExplore(String prefix, File root) {
+    class prefixAndFile {
+      public String prefix;
+      public File root;
+      public prefixAndFile(String prefix, File root) {
+        this.root = root;
+        this.prefix = prefix;
+      }
+    }
+    //This set makes sure we don't get caught in a loop if the filesystem has symbolic links
+    //that form a circle by tracking the directories we have already explored
+    final Set exploredDirectories = new HashSet();
+
+    Vector<String> output = new Vector<String>();
+    gj.util.Stack<prefixAndFile> working = new gj.util.Stack<prefixAndFile>();
+    working.push(new prefixAndFile(prefix, root));
+    exploredDirectories.add(root);
+
+    //This filter checks for files that end in .java
+    FileFilter javaFileFilter = new FileFilter(){
+      public boolean accept(File f){
+        //Do this runaround for filesystems that are case preserving
+        //but case insensitive
+        //Remove the last 5 letters from the file name, append ".java"
+        //to the end, create a new file and see if its equivalent to the
+        //original
+        StringBuffer name = new StringBuffer(f.getAbsolutePath());
+        String shortName = f.getName();
+        if (shortName.length() < 6){
+          return false;
+        }
+        name.delete(name.length() - 5, name.length());
+        name.append(".java");
+        File test = new File(new String(name));
+        if (test.equals(f)){
+          return true;
+        } else {
+          return false;
+        }
+      }
+    };
+
+    //This filter allows only directories, and accepts each directory
+    //only once
+    FileFilter directoryFilter = new FileFilter(){
+      public boolean accept(File f){
+        boolean toReturn = f.isDirectory() && !exploredDirectories.contains(f);
+        exploredDirectories.add(f);
+        return toReturn;
+      }
+    };
+
+    //Explore each directory, adding (unique) subdirectories to the
+    //working list.  If a directory has .java files, add the associated
+    //package to the list of packages
+    while (!working.empty()){
+      prefixAndFile current = working.pop();
+      File [] subDirectories = current.root.listFiles(directoryFilter);
+      for(int a = 0; a < subDirectories.length; a++){
+        File dir = subDirectories[a];
+        prefixAndFile paf;
+        System.out.println("exploring " + dir);
+        if (current.prefix == ""){
+          paf = new prefixAndFile(dir.getName(), dir);
+        } else {
+          paf = new prefixAndFile(current.prefix + "." + dir.getName(), dir);
+        }
+        working.push(paf);
+      }
+      File [] javaFiles = current.root.listFiles(javaFileFilter);
+
+      //Only add package names if they have java files and are not the root package
+      if (javaFiles.length != 0 && current.prefix != ""){
+        output.addElement(current.prefix);
+        System.out.println("adding " + current.prefix);
+      }
+    }
+
+  return output;
+  }
+
+  /**
    * This method writes files correctly; it takes care of catching errors and
    * making backups and keeping an unsuccessful file save from destroying the old
    * file (unless a backup is made).  Note: if saving fails and a backup was being
@@ -194,7 +284,7 @@ public abstract class FileOps {
    * written before saving begins, and then moved back over the original file when
    * saving fails).  As the old backup would have been destroyed anyways if saving
    * had succeeded, I do not think that this is incorrect or unreasonable behavior.
-   * @param fileWriter keeps track of the name of the file to write, whether to back
+   * @param fileSaver keeps track of the name of the file to write, whether to back
    * up the file, and has a method that actually performs the writing of the file
    * @throws IOException if the saving or backing up of the file fails for any reason
    */

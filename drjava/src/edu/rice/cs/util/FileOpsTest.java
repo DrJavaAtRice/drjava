@@ -42,6 +42,8 @@ package edu.rice.cs.util;
 import junit.framework.*;
 import java.io.*;
 
+import gj.util.Vector;
+
 /**
  * Test cases for {@link FileOps}.
  *
@@ -201,4 +203,42 @@ public class FileOpsTest extends TestCase {
       backup.delete();
     }
   }
+
+  /**
+   * This tests that packageExplore correctly runs through and returns
+   * non-empty packages
+   */
+  public void testPackageExplore() throws IOException {
+    File rootDir = FileOps.createTempDirectory("fileOpsTest");
+    File subDir0 = new File(rootDir, "sub0");
+    subDir0.mkdir();
+    File subDir1 = new File(rootDir, "sub1");
+    subDir1.mkdir();
+    File subsubDir0 = new File(subDir0, "subsub0");
+    subsubDir0.mkdir();
+    File javasubsub = new File(subsubDir0, "aclass.java");
+    FileOps.writeStringToFile(javasubsub, "contents of this file are unimportant");
+    File javasub1 = new File(subDir1, "myclass.java");
+    FileOps.writeStringToFile(javasub1, "this file is pretty much empty");
+    File javaroot = new File(rootDir, "someclass.java");
+    FileOps.writeStringToFile(javaroot, "i can write anything i want here");
+
+    Vector packages = FileOps.packageExplore("hello", rootDir);
+    assertEquals("package count a", 3, packages.size());
+    assertTrue("packages contents a0", packages.contains("hello.sub0.subsub0"));
+    assertTrue("packages contents a1", packages.contains("hello.sub1"));
+    assertTrue("packages contents a2", packages.contains("hello"));
+
+    //Now add a .java file to the root directory and check that the default directory
+    //is not added
+    packages = FileOps.packageExplore("", rootDir);
+    assertEquals("package count b", 2, packages.size());
+    assertTrue("packages contents b0", packages.contains("sub0.subsub0"));
+    assertTrue("packages contents b1", packages.contains("sub1"));
+
+
+    assertTrue("deleting temp directory", FileOps.deleteDirectory(rootDir));
+  }
+
+
 }
