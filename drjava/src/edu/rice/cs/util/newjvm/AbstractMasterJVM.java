@@ -131,12 +131,25 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   }
   
   /**
-   * Invokes slave JVM.
+   * Invokes slave JVM, using the system classpath.
    * @param jvmArgs Array of arguments to pass to the JVM on startup
    * @throws IllegalStateException if slave JVM already connected or
    * startup is in progress.
    */
   protected synchronized final void invokeSlave(String[] jvmArgs)
+    throws IOException, RemoteException
+  {
+    invokeSlave(jvmArgs, System.getProperty("java.class.path"));
+  }
+  
+  /**
+   * Invokes slave JVM.
+   * @param jvmArgs Array of arguments to pass to the JVM on startup
+   * @param cp Classpath to use when starting the JVM
+   * @throws IllegalStateException if slave JVM already connected or
+   * startup is in progress.
+   */
+  protected synchronized final void invokeSlave(String[] jvmArgs, String cp)
     throws IOException, RemoteException
   {
     if (_startupInProgress) { 
@@ -189,8 +202,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       _slaveClassName
     };
     
-    final Process process = 
-      ExecJVM.runJVMPropogateClassPath(RUNNER, args, jvmArgs);
+    final Process process = ExecJVM.runJVM(RUNNER, args, cp, jvmArgs);
     
     // Start a thread to wait for the slave to die
     // When it dies,
