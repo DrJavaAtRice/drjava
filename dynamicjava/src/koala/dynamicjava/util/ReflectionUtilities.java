@@ -1,3 +1,4 @@
+
 /*
  * DynamicJava - Copyright (C) 1999-2001
  *
@@ -683,7 +684,7 @@ public class ReflectionUtilities {
       }
     }
     else { // if equal lengths, then check the last one for compatibility
-      if (!isBoxCompatible(lastElt1, a2[lastIdx1], tu) || (a1.length != a2.length) ) {
+      if ((a1.length != a2.length) || !isBoxCompatible(lastElt1, a2[lastIdx1], tu)) {
         return false;
       }
     }

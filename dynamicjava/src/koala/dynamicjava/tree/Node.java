@@ -440,6 +440,8 @@ public abstract class Node {
   }
   
   public boolean equals(Object n){
+    if(this.getClass() != n.getClass())
+      return false;
     return this.toString().equals(n.toString());
   }
 }
