@@ -37,48 +37,50 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.definitions.indent;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import junit.framework.*;
+import junit.extensions.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020311-2248;
- *
+ * Test the action rules for code in the indentation decision tree.
+ * Assumes cursor is within a brace.
  * @version $Id$
  */
-public abstract class Version {
+public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
+
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Tests the indentation decision tree.
+   * @param     String name
    */
-  private static final String BUILD_TIME_STRING = "20020311-2248";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public ActionStartStmtOfBracePlusTest(String name) {
+    super(name);
   }
 
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
 
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
+  /**
+   * Tests indenting with just braces present
+   */
+  public void testSimpleBraces() throws BadLocationException {
+    /**
+    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
+    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus("   ");
 
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
+    // {
+    //  { } 
+    String text = "{\n { }\n";
+    _setDocText(text);
+    rule1.indentLine(_doc, 7);  // does nothing
+    _assertContents(text);
+    rule2.indentLine(_doc, 7);  // Indents one level
+    _assertContents(text + "   ");
+    */
   }
-} 
+  
+  /** more tests coming... */
+
+}

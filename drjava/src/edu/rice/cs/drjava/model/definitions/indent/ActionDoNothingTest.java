@@ -37,48 +37,74 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.definitions.indent;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import junit.framework.*;
+import junit.extensions.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020311-2248;
- *
+ * Tests the action rule which does nothing to the given text.
  * @version $Id$
  */
-public abstract class Version {
+public class ActionDoNothingTest extends IndentRulesTestCase {
+
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Tests the indentation decision tree.
+   * @param     String name
    */
-  private static final String BUILD_TIME_STRING = "20020311-2248";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public ActionDoNothingTest(String name) {
+    super(name);
   }
 
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
 
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+  /**
+   * Tests empty string
+   */
+  public void testEmptyString() throws BadLocationException {
+    /**IndentRuleAction rule = new ActionDoNothing();
+    String text = "";
+    
+    _setDocText(text);
+    rule.indentLine(_doc, 0);
+    _assertContents(text);*/
   }
+  
+  /**
+   * Tests no leading spaces
+   *
+  public void testNoLeadingSpaces() throws BadLocationException {
+    IndentRuleAction rule = new ActionDoNothing();
+    String text = "foo();\nbar();";
+    
+    // First line
+    _setDocText(text);
+    rule.indentLine(_doc, 0);
+    _assertContents(text);
+    
+    // Second line
+    rule.indentLine(_doc, 9);
+    _assertContents(text);
+  }*/
 
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+  /**
+   * Tests leading spaces
+   *
+  public void testLeadingSpaces() throws BadLocationException {
+    IndentRuleAction rule = new ActionDoNothing();
+    String text = "  foo();\n     bar();";
+    
+    // First line
+    _setDocText(text);
+    rule.indentLine(_doc, 0);
+    _assertContents(text);
+    
+    // Second line
+    rule.indentLine(_doc, 10);
+    _assertContents(text);
+  }*/
+
+}

@@ -37,48 +37,34 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.definitions.indent;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020311-2248;
- *
+ * A leaf node in the decision tree for the indentation system.
+ * Performs the update to the document, based on the context provided
+ * by its position in the decision tree.
  * @version $Id$
  */
-public abstract class Version {
+public abstract class IndentRuleAction implements IndentRule {
+
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Properly indents the line that the caret is currently on.
+   * Replaces all whitespace characters at the beginning of the
+   * line with the appropriate spacing or characters.
+   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param pos Position within line to be indented.
    */
-  private static final String BUILD_TIME_STRING = "20020311-2248";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public abstract void indentLine(DefinitionsDocument doc, int pos);
+  
+   /**
+   * Properly indents the line that the current position is on.
+   * Replaces all whitespace characters at the beginning of the
+   * line with the appropriate spacing or characters.
+   * @param doc DefinitionsDocument containing the line to be indented.
+   */
+  public void indentLine(DefinitionsDocument doc) {
+    indentLine(doc, doc.getCurrentLocation());
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}
