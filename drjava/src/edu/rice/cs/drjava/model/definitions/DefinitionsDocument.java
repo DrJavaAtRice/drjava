@@ -47,6 +47,18 @@ import edu.rice.cs.util.UnexpectedException;
 
 /**
  * The model for the definitions pane.
+ *
+ * This implementation of <code>Document</code> contains a 
+ * "reduced model". The reduced model is automatically kept in sync
+ * when this document is updated. Also, that synchronization is maintained
+ * even across undo/redo -- this is done by making the undo/redo commands know
+ * how to restore the reduced model state.
+ *
+ * @see BraceReduction
+ * @see ReducedModelControl
+ * @see ReducedModelComment
+ * @see ReducedModelBrace
+ *
  * @version $Id$
  */
 public class DefinitionsDocument extends PlainDocument {
