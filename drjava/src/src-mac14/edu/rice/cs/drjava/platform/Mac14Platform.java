@@ -108,4 +108,19 @@ class Mac14Platform extends MacPlatform {
     appl.setEnabledPreferencesMenu(true);
     appl.addApplicationListener(appListener);
   }
+  
+  /**
+   * Returns whether this is a Mac platform (any JDK version).
+   */
+  public boolean isMacPlatform() {
+    return true;
+  }
+  
+  /**
+   * Returns whether this is a Mac platform with JDK 1.4.1.
+   */
+  public boolean isMac14Platform() {
+    return true;
+  }
+  
 }
