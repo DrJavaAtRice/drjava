@@ -129,9 +129,24 @@ public class ReflectionUtilities {
     if (mm.isEmpty()) {
       // It is here that we have to take care of boxing/unboxing and varargs
       
+      
       // Do second pass for finding a varargs method that matches given method call
       
-      throw new NoSuchMethodException(name);
+      ms = getVarArgsMethods(cl, name, ac.length);
+      
+      // Search for the methods with good parameter types and
+      // put them in 'mm'
+      it = ms.iterator();
+      while (it.hasNext()) {
+        Method m = it.next();
+        if (hasVarArgsCompatibleSignatures(m.getParameterTypes(), ac)) {
+          mm.add(m);
+        }
+      }
+      
+      if(mm.isEmpty()){
+        throw new NoSuchMethodException(name);
+      }
     }
     
     // Select the most specific method
@@ -139,7 +154,7 @@ public class ReflectionUtilities {
     Method result = it.next();
     
     while (it.hasNext()) {
-      result = selectTheMostSpecificMethod(result, it.next());
+      result = selectTheMostSpecificMethod(result, it.next()); /**/// may be confused by mm having varargs and need to be changed
     }
     
     return result;
@@ -181,6 +196,53 @@ public class ReflectionUtilities {
         for (int i = 0; i < ms.length; i++) {
           if (ms[i].getName().equals(name) &&
               ms[i].getParameterTypes().length == params) {
+            result.add(ms[i]);
+          }
+        }
+        c = c.getSuperclass();
+      }
+    }
+    return result;
+  }
+  
+  /**
+   * Gets all the varargs methods with the given name in the given class or super classes.
+   * Even the redefined methods are returned.
+   * @param cl     the class where the method was declared
+   * @param name   the name of the method
+   * @param params the number of parameters
+   * @return a list that contains the found methods, an empty list if no
+   *         matching method was found.
+   */
+  public static List<Method> getVarArgsMethods(Class cl, String name, int params) {
+    List<Method>  result = new LinkedList<Method>();
+    
+    if (cl.isInterface()) {
+      Method[] ms = cl.getDeclaredMethods();
+      for (int i = 0; i < ms.length; i++) {
+        if (ms[i].getName().equals(name) &&
+            ms[i].isVarArgs() &&  // Use new 1.5 API
+            ms[i].getParameterTypes().length <= params) {
+          result.add(ms[i]);
+        }
+      }
+      Class[] cs = cl.getInterfaces();
+      for (int i = 0; i < cs.length; i++) {
+        result.addAll(getVarArgsMethods(cs[i], name, params));
+      }
+      if (cs.length == 0) {
+        result.addAll(getVarArgsMethods(Object.class, name, params));
+      }
+    } 
+    else {
+      Class c = cl;
+      while (c != null) {
+        Method[] ms = c.getDeclaredMethods();
+        
+        for (int i = 0; i < ms.length; i++) {
+          if (ms[i].getName().equals(name) &&
+              ms[i].isVarArgs() &&  // Use new 1.5 API
+              ms[i].getParameterTypes().length <= params) {
             result.add(ms[i]);
           }
         }
@@ -321,6 +383,31 @@ public class ReflectionUtilities {
   public static boolean hasCompatibleSignatures(Class[] a1, Class[] a2) {
     for (int i = 0; i < a1.length; i++) {
       if (!isCompatible(a1[i], a2[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  /**
+   * For each element (class) of the given arrays, tests if the first array
+   * element is assignable from the second array element. The two arrays are
+   * assumed to have the same length.
+   */
+  public static boolean hasVarArgsCompatibleSignatures(Class[] a1, Class[] a2) {
+    for (int i = 0; i < a1.length-1; i++) { //  a2 can have length larger than or equal to a1
+      if (!isCompatible(a1[i], a2[i])) {
+        return false;
+      }
+    }
+    if(!a1[a1.length-1].isArray()){
+      return false; 
+      // in fact it indicates a more serious error that should be reported to DynamicJava 
+      // developers. That's, for the time being, US!
+    }
+    Class VarArgsType = a1[a1.length-1].getComponentType(); // Get the element type of the array
+    for( int i = a1.length-1; i < a2.length; i++ ){
+      if(!isCompatible(VarArgsType, a2[i])){
         return false;
       }
     }
