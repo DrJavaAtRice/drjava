@@ -148,9 +148,22 @@ public class DebugManager {
     log.start();
   }
   
+ 
+  public void start(OpenDefinitionsDocument doc) throws ClassNotFoundException{
+
+    if (doc.isModifiedSinceSave()) {
+      doc.saveBeforeProceeding(GlobalModelListener.DEBUG_REASON);
+    }
+
+    String className = mapClassName(doc);
+    if (className == null) {
+      throw new ClassNotFoundException();
+    }
+
+    performCommand( "run " + className );
+    
+  }
   /*
-  public void start();
-  
   public void resume();
   
   public void stop();

@@ -534,7 +534,7 @@ public class MainFrame extends JFrame {
                  "Unable to find the JPDA package for the debugger.\n" +
                  "Please make sure either tools.jar or jpda.jar is\n" +
                  "in your classpath when you start DrJava.");
-      _debuggerEnabledMenuItem.setState(false);
+      _setDebugMenuItemsEnabled(false);
     }
   }
   
@@ -776,6 +776,15 @@ public class MainFrame extends JFrame {
   }
   
   private void _runDebugger() {
+    OpenDefinitionsDocument doc = _model.getActiveDocument();
+    try{
+      _model.getDebugManager().start(doc);    
+    }
+    catch (ClassNotFoundException cnfe){
+      // catch the "Class Not Found exception"; must be some kind of no-compile
+      // issue
+      _showClassNotFoundError(cnfe);
+    }
   }
   
   private void _showIOError(IOException ioe) {
