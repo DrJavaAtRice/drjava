@@ -265,7 +265,7 @@
          source="1.5"
          target="1.5"
          debug="on"
-         fork="on"
+-        fork="on"
          optimize="off">
     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
     <compilerarg value="-novariance"/>
@@ -295,6 +295,29 @@
     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
   </javac>
 </target>
+
+<!-- Checked Compile. Identical to Compile with Generic Warning Checking
+     enabled.
+
+     This version works with JDK 1.4.2 and JSR-14 v2.2.
+-->
+<target name="checked-compile" depends="init">
+  <mkdir dir="${built}"/>
+  <javac srcdir="${srcroot}"
+         includes="${projpath}/**/*java"
+         destdir="${built}"
+         bootclasspath="${jsr14_collect_classpath}:${sun.boot.class.path}" 
+	 classpath="${classpath_text}"
+         source="1.5"
+         debug="on"
+         fork="on"
+         optimize="off">
+    <compilerarg value="-warnunchecked"/>
+    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
+  </javac>
+</target>
+
+
 
 
 
