@@ -214,6 +214,11 @@ public class DefinitionsDocument extends PlainDocument {
    * @param source the String to be converted.
    * @return a String will all the tabs converted to spaces
    */
+  String _removeTabs(final String source) {
+    return source.replace('\t', ' ');
+  }
+
+  /*
   String _removeTabs(String source) {
     StringBuffer target = new StringBuffer();
     for (int i = 0; i < source.length(); i++) {
@@ -231,11 +236,6 @@ public class DefinitionsDocument extends PlainDocument {
       }
     }
     return target.toString();
-  }
-
-  /*
-  String _removeTabs(final String source) {
-    return source.replace('\t', ' ');
   }
   */
 

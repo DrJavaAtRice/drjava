@@ -344,17 +344,15 @@ public class DefinitionsDocumentTest extends TestCase
    * This test aims to replicate the problem.
    */
   public void testRemoveTabs2() {
-    defModel.setIndent(2);
-
 	  String input =
     "\ttoken = nextToken(); // read trailing parenthesis\n" +
     "\tif (token != ')')\n" +
     "\t  throw new ParseException(\"wrong number of arguments to |\");\n";
 
 	  String expected =
-    "  token = nextToken(); // read trailing parenthesis\n" +
-    "  if (token != ')')\n" +
-    "    throw new ParseException(\"wrong number of arguments to |\");\n";
+    " token = nextToken(); // read trailing parenthesis\n" +
+    " if (token != ')')\n" +
+    "   throw new ParseException(\"wrong number of arguments to |\");\n";
 
     int count = 5000;
     StringBuffer bigIn = new StringBuffer(input.length() * count);
