@@ -1654,13 +1654,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public void runMain()
       throws ClassNameNotFoundException, IOException {
       try {
-        /*
-         * First, get the class name to use.  This relies on Java's convention of
-         * one top-level class per file.
-         */
+        // First, get the class name to use.  This relies on Java's convention of
+        // one top-level class per file.
         DefinitionsDocument doc = getDocument();
         String className = doc.getFirstTopLevelClassName();
-        
+        /*  Do not compile in any case.
         // Prompt to save and compile if any document is modified.
         if (hasModifiedDocuments()) {
           _notifier.saveBeforeRun();
@@ -1675,7 +1673,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         if (!checkIfClassFileInSync()) {
           startCompile();
         }
-        
+        */
         // Make sure that the compiler is done before continuing.
         synchronized(_compilerLock) {
           // If the compile had errors, abort the run.

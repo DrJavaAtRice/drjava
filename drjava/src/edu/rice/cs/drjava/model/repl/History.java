@@ -249,7 +249,15 @@ public class History implements OptionConstants {
             BufferedWriter bw = new BufferedWriter(osw);
             String file = HISTORY_FORMAT_VERSION_2 + editedVersion;
             if (PlatformFactory.ONLY.isWindowsPlatform()) {
-              file = file.replaceAll("\n", System.getProperty("line.separator"));
+              StringBuffer buf = new StringBuffer();
+              String lineSep = System.getProperty("line.separator");
+              int last = 0;
+              for (int i = file.indexOf('\n'); i != -1; i = file.indexOf('\n', last)) {
+                buf.append(file.substring(last, i));
+                buf.append(lineSep);
+                last = i+1;
+              }
+              file = buf.toString();
             }
             bw.write(file, 0, file.length());
             bw.close();

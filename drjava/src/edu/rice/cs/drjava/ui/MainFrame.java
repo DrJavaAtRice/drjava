@@ -3684,10 +3684,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     public void interactionStarted() {
       _disableInteractionsPane();
+      _runAction.setEnabled(false);
     }
 
     public void interactionEnded() {
       _enableInteractionsPane();
+      _runAction.setEnabled(true);
     }
     
     public void interactionErrorOccurred(int offset, int length){
@@ -3700,6 +3702,7 @@ public class MainFrame extends JFrame implements OptionConstants {
      * with an interaction (ie. whether an interactionEnded event will be fired)
      */
     public void interpreterChanged(boolean inProgress) {
+      _runAction.setEnabled(!inProgress);
       if (inProgress) {
         _disableInteractionsPane();
       }
@@ -3898,6 +3901,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
           _resetInteractionsAction.setEnabled(false);
           _junitAction.setEnabled(false);
+          _runAction.setEnabled(false);
           _interactionsPane.setEditable(false);
           _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
           if (_model.getDebugger().isAvailable()) {
@@ -3913,6 +3917,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       Runnable doCommand = new Runnable() {
         public void run() {
           interactionEnded();
+          _runAction.setEnabled(true);
           _junitAction.setEnabled(true);
           _resetInteractionsAction.setEnabled(true);
           if (_model.getDebugger().isAvailable()) {
