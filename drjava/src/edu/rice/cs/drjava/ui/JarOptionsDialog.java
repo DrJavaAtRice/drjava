@@ -111,7 +111,6 @@ public class JarOptionsDialog extends JDialog {
       _makeExecutable.setSelected(false);
     }
     _jarSources.setSelected(false);
-    //_mainClassField.setFileField(); // TODO: I should be able to figure this stuff out
   }
 
   /**
@@ -429,7 +428,7 @@ public class JarOptionsDialog extends JDialog {
        * @return the String which is should be the directory that it should be contained within
        */
       private String packageNameToPath(String packageName) {
-        return packageName.replaceAll("\\.", "/");
+        return packageName.replaceAll("\\.", System.getProperty("file.separator").replaceAll("\\\\", "\\\\\\\\"));
       }
       /**
        * The method to perform the work
