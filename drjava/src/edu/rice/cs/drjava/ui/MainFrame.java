@@ -1772,8 +1772,8 @@ public class MainFrame extends JFrame implements OptionConstants {
    * for the current active document.
    */
   private void _switchDefScrollPane() {
-    // Fix OS X scrollbar bug before switching
-    _reenableScrollBar();
+    // Fix OS X scrollbar bug before switching  (DISABLED UNTIL FIXED)
+    //_reenableScrollBar();
     
     // Sync caret with location before swtiching
     _currentDefPane.getOpenDocument().
@@ -1808,20 +1808,19 @@ public class MainFrame extends JFrame implements OptionConstants {
                                                   "Current definitions scroll pane not found."));
     }
     
-    JScrollBar bar = scroll.getVerticalScrollBar();
-    scroll.setVerticalScrollBar(new JScrollBar(bar.getOrientation(),
-                                               bar.getValue(),
-                                               bar.getVisibleAmount(),
-                                               bar.getMinimum(),
-                                               bar.getMaximum()));
-    /* When we add a horizontal scrollbar, uncomment this!
-    bar = scroll.getHorizontalScrollBar();
-    scroll.setHorizontalScrollBar(new JScrollBar(bar.getOrientation(),
-                                               bar.getValue(),
-                                               bar.getVisibleAmount(),
-                                               bar.getMinimum(),
-                                               bar.getMaximum()));
-     */
+    JScrollBar oldbar = scroll.getVerticalScrollBar();
+    JScrollBar newbar = scroll.createVerticalScrollBar();
+    newbar.setValue(oldbar.getValue());
+    newbar.setVisibleAmount(oldbar.getVisibleAmount());
+    newbar.setMinimum(oldbar.getMinimum());
+    newbar.setMaximum(oldbar.getMaximum());
+    newbar.setEnabled(true);
+    newbar.revalidate();
+    scroll.setVerticalScrollBar(newbar);
+    scroll.revalidate();
+    
+    
+    // This will need to be repeated for a horizontal scrollbar!
   }
   
   /**
