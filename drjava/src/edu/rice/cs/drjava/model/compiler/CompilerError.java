@@ -17,12 +17,12 @@ public class CompilerError
   private boolean _isWarning;
 
   /**
-   * put your documentation comment here
-   * @param     String fileName
-   * @param     int lineNumber
-   * @param     int startColumn
-   * @param     String message
-   * @param     boolean isWarning
+   * Constructor.
+   * @param     String fileName the name of the file where the error occurred
+   * @param     int lineNumber the line number of the error
+   * @param     int startColumn the starting column of the error
+   * @param     String message  the error message
+   * @param     boolean isWarning true if the error is a warning
    */
   public CompilerError(String fileName, int lineNumber, int startColumn, String message, 
       boolean isWarning) {
@@ -34,49 +34,49 @@ public class CompilerError
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Gets a String representation of the error.
+   * @return the error as a String
    */
   public String toString() {
     return  "CompilerError(file=" + _fileName + ", line=" + _lineNumber + ", col="
-        + _startColumn + ", msg=" + _message + ")";
+      + _startColumn + ", msg=" + _message + ")";
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Gets the name of the file.
+   * @return the file name.
    */
   public String fileName() {
     return  _fileName;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Gets the line number of the error.
+   * @return the line number
    */
   public int lineNumber() {
     return  _lineNumber;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Gets the column where the error begins.
+   * @return the starting column
    */
   public int startColumn() {
     return  _startColumn;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Gets the error message.
+   * @return the error message.
    */
   public String message() {
     return  _message;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines if the error is a warning.
+   * @return true if the error is a warning.
    */
   public boolean isWarning() {
     return  _isWarning;

@@ -25,16 +25,16 @@ public class DefinitionsEditorKit extends DefaultEditorKit {
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Creates a new DefinitionsDocument.
+   * @return a new DefinitionsDocument.
    */
   private static DefinitionsDocument _createDefaultTypedDocument() {
     return  new DefinitionsDocument();
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Get the MIME content type of the document.
+   * @return "text/java"
    */
   public String getContentType() {
     return  "text/java";
@@ -48,9 +48,9 @@ public class DefinitionsEditorKit extends DefaultEditorKit {
     return  new ViewFactory() {
 
       /**
-       * put your documentation comment here
-       * @param elem
-       * @return 
+       * Creates a ColoringView for a given element.
+       * @param elem the given element
+       * @return a new ColoringView
        */
       public View create(Element elem) {
         return  new ColoringView(elem);
@@ -71,7 +71,7 @@ class ColoringView extends WrappedPlainView {
   private DefinitionsDocument _doc;
 
   /**
-   * put your documentation comment here
+   * Constructor.
    * @param   Element elem
    */
   ColoringView(Element elem) {
@@ -153,9 +153,9 @@ class ColoringView extends WrappedPlainView {
   }
 
   /**
-   * put your documentation comment here
-   * @param g
-   * @param state
+   * Given a particular state, assign it a color.
+   * @param g Graphics object
+   * @param state a given state
    */
   private void setFormattingForState(Graphics g, int state) {
     final Color COMMENTED_COLOR = Color.green.darker().darker();
@@ -181,10 +181,10 @@ class ColoringView extends WrappedPlainView {
   }
 
   /**
-   * put your documentation comment here
-   * @param changes
-   * @param a
-   * @param f
+   * Called when a change occurs.
+   * @param changes document changes
+   * @param a a Shape
+   * @param f a ViewFactory
    */
   public void changedUpdate(DocumentEvent changes, Shape a, ViewFactory f) {
     super.changedUpdate(changes, a, f);

@@ -7,43 +7,35 @@ import gj.util.Vector;
  * The interface BraceReduction serves as the template for our reduced
  * view of a java document, which stores only the information necessary
  * for parenthesis matching.
- * @author Corky Cartwright, Paul Graunke, Mike Yantosca
+ * @author JavaPLT
  */
 
 public interface BraceReduction
 {
 
-	
-/**
- * Accessor for curson.
- */
-//	public ModelList<ReducedToken>.Iterator getCursor();
+  /**
+   * Get the absolute character offset of the document represented by BraceReduction.
+   */
+  public int absOffset();
 
-	/**
-	 * Mutator for block offset.
-	 */
-	//public void setBlockOffset(int n);
-
-	/**
-	 * Accessor for braces.
-	 */
-	//public ModelList<ReducedToken> getBraces();
-
-	public int absOffset();
-
-	/**
-	 *returns the current
-	 */
-	ReducedToken currentToken();
+  /**
+   * Get the current token in the BraceReduction.
+   * @return the current token
+   */
+  ReducedToken currentToken();
 		
-	/**
-	 * Returns the current state of the cursor iterator.
-	 */	
-	int getStateAtCurrent();
+  /**
+   * Get the state of the token at the current cursor position.
+   * @return the current state
+   */
+  int getStateAtCurrent();
 
+  /**
+   * Insert a character into the BraceReduction.
+   * @param ch the character to be inserted
+   */
+  public void insertChar(char ch);
 
-	public void insertChar(char ch);
-	
   /**
    * <P>Updates the BraceReduction to reflect cursor movement.
    * Negative values move left from the cursor, positive values move
@@ -79,19 +71,25 @@ public interface BraceReduction
    */
   public int balanceBackward();
 
-	/**
-	 *Gets the distance to the enclosing brace.
-	 */
-	public IndentInfo getIndentInformation();
+  /**
+   *Gets the distance to the enclosing brace.
+   */
+  public IndentInfo getIndentInformation();
 
-	/**
-	 *Gets distance to enclosing new line
-	 */
-	public int getDistToPreviousNewline(int relativeLoc);
+  /**
+   * Gets distance to enclosing new line
+   */
+  public int getDistToPreviousNewline(int relativeLoc);
 
-	public int getDistToNextNewline();
+  /**
+   * Gets distance to next new line.
+   */
+  public int getDistToNextNewline();
 
-	public String simpleString();
+  /**
+   * A simplified toString() method.
+   */
+  public String simpleString();
 
   /**
    * Return all highlight status info for text between the current
@@ -105,16 +103,3 @@ public interface BraceReduction
    */
   public Vector<HighlightStatus> getHighlightStatus(int start, int length);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

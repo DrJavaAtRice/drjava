@@ -61,11 +61,18 @@ public class DefinitionsPane extends JEditorPane {
   private Object _matchHighlight = null;
   private static DefaultHighlighter.DefaultHighlightPainter _highlightPainter = 
       new DefaultHighlighter.DefaultHighlightPainter(Color.lightGray);
+  
+  /**
+   * Looks for changes in the caret position to see if a paren/brace/bracket highlight
+   * is needed.
+  */
   private CaretListener _matchListener = new CaretListener() {
 
     /**
-     * put your documentation comment here
-     * @param e
+     * Checks caret position to see if it needs to set or remove a highlight from the
+     * document.  When the cursor is immediately right of ')', '}', or ']', it highlights
+     * up to the matching open paren/brace/bracket.
+     * @param e the event fired by the caret position change
      */
     public void caretUpdate(CaretEvent e) {
       _doc().setCurrentLocation(getCaretPosition());
@@ -77,7 +84,7 @@ public class DefinitionsPane extends JEditorPane {
   };
 
   /**
-   * put your documentation comment here
+   * Updates the highlight if there is any.
    * @exception BadLocationException
    */
   private void _updateMatchHighlight() throws BadLocationException {
@@ -92,9 +99,9 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * put your documentation comment here
-   * @param from
-   * @param to
+   * Adds a highlight to the document.  Called by _updateMatchHighlight().
+   * @param from start of highlight
+   * @param to end of highlight
    * @exception BadLocationException
    */
   private void _addHighlight(int from, int to) throws BadLocationException {
@@ -102,7 +109,7 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * put your documentation comment here
+   * Removes the previous highlight so document is cleared when caret position changes.
    */
   private void _removePreviousHighlight() {
     if (_matchHighlight != null) {
@@ -113,7 +120,7 @@ public class DefinitionsPane extends JEditorPane {
   private UndoableEditListener _undoListener = new UndoableEditListener() {
 
     /**
-     * put your documentation comment here
+     * The function to handle what happens when an UndoableEditEvent occurs.
      * @param e
      */
     public void undoableEditHappened(UndoableEditEvent e) {
@@ -125,7 +132,7 @@ public class DefinitionsPane extends JEditorPane {
   };
 
   /**
-   * put your documentation comment here
+   * An action to handle indentation spawned by pressing the tab key.
    */
   private class IndentKeyActionTab extends AbstractAction {
 
@@ -149,7 +156,7 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * put your documentation comment here
+   * Indent action spawned by closed squiggly brace.
    */
   private class IndentKeyActionSquiggly extends AbstractAction {
 
@@ -167,7 +174,7 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * put your documentation comment here
+   * Indent spawned by open squiggly brace.
    */
   private class IndentKeyActionOpenSquiggly extends AbstractAction {
 
@@ -185,7 +192,7 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * put your documentation comment here
+   * Indent action spawned by pressing the enter key.
    */
   private class IndentKeyActionLine extends AbstractAction {
 
@@ -222,26 +229,28 @@ public class DefinitionsPane extends JEditorPane {
     _saveChooser = new JFileChooser(System.getProperty("user.dir"));
     //add actions for indent keay
     Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), (Action)_indentKeyActionLine);
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), (Action)_indentKeyActionTab);
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('}'), (Action)_indentKeyActionSquiggly);
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('{'), (Action)_indentKeyActionOpenSquiggly);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), 
+                                 (Action)_indentKeyActionLine);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), 
+                                 (Action)_indentKeyActionTab);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('}'), 
+      (Action)_indentKeyActionSquiggly);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('{'), 
+      (Action)_indentKeyActionOpenSquiggly);
     setKeymap(ourMap);
     this.addCaretListener(_matchListener);
     _mainFrame.installNewDocumentListener(_doc());
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * @return the undo action
    */
   public Action getUndoAction() {
     return  _undoAction;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * @return the redo action
    */
   public Action getRedoAction() {
     return  _redoAction;
@@ -260,7 +269,7 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * put your documentation comment here
+   * Reset the document Undo list.
    */
   private void _resetUndo() {
     _undoManager = new UndoManager();
@@ -317,8 +326,7 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * @return true if the document was modified since the last save
    */
   public boolean modifiedSinceSave() {
     return  _doc().modifiedSinceSave();
@@ -344,8 +352,9 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * put your documentation comment here
-   * @param path
+   * Reset the document.
+   * Change the title of the file in the mainframe and the menu bar, open up a file.
+   * @param path the path of the file being opened.
    */
   private void _resetDocument(String path) {
     String titlebarName;
@@ -365,7 +374,7 @@ public class DefinitionsPane extends JEditorPane {
     SwingUtilities.invokeLater(new Runnable() {
 
       /**
-       * put your documentation comment here
+       * Reset the focus to the DefinitionsPane.
        */
       public void run() {
         DefinitionsPane.this.requestFocus();
@@ -477,20 +486,20 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Gets the pane's document with a stronger return type.
+   * @return a DefinitionsDocument
    */
   DefinitionsDocument _doc() {
     return  (DefinitionsDocument)getDocument();
   }
 
   /**
-   * put your documentation comment here
+   * The undo action.
    */
   private class UndoAction extends AbstractAction {
 
     /**
-     * put your documentation comment here
+     * Constructor.
      */
     private UndoAction() {
       super("Undo");
@@ -498,7 +507,7 @@ public class DefinitionsPane extends JEditorPane {
     }
 
     /**
-     * put your documentation comment here
+     * What to do when user chooses to undo.
      * @param e
      */
     public void actionPerformed(ActionEvent e) {
@@ -513,7 +522,7 @@ public class DefinitionsPane extends JEditorPane {
     }
 
     /**
-     * put your documentation comment here
+     * Updates the undo list, i.e., where we are as regards undo and redo.
      */
     protected void updateUndoState() {
       if (_undoManager.canUndo()) {
@@ -528,12 +537,12 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * put your documentation comment here
+   * Redo action.
    */
   private class RedoAction extends AbstractAction {
 
     /**
-     * put your documentation comment here
+     * Constructor.
      */
     private RedoAction() {
       super("Redo");
@@ -541,7 +550,7 @@ public class DefinitionsPane extends JEditorPane {
     }
 
     /**
-     * put your documentation comment here
+     * In the event that the user chooses to redo something, this is what's called.
      * @param e
      */
     public void actionPerformed(ActionEvent e) {
@@ -556,7 +565,7 @@ public class DefinitionsPane extends JEditorPane {
     }
 
     /**
-     * put your documentation comment here
+     * Updates the redo state, i.e., where we are as regards undo and redo.
      */
     protected void updateRedoState() {
       if (_undoManager.canRedo()) {
@@ -571,36 +580,37 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * put your documentation comment here
+   * Opens up the find/replace dialog.
    */
   public void findReplace() {
     _findReplace.show();
   }
 
   /**
-   * put your documentation comment here
-   * @param fWord
-   * @return 
+   * Finds some text.
+   * @param fWord the word to find
+   * @return true if fWord was found
    */
   public boolean findText(String fWord) {
     return  findNextText(fWord);
   }
 
   /**
-   * put your documentation comment here
-   * @param fWord
-   * @return 
+   * Finds the next instance of said text.
+   * @param fWord the word to find
+   * @return true if fWord was found
    */
   public boolean findNextText(String fWord) {
     return  findNextTextHelper(fWord, true, false);
   }
 
   /**
-   * put your documentation comment here
-   * @param fWord
-   * @param interactive
-   * @param confirm
-   * @return 
+   * A helper function for findNextText so testing didn't have to open dialog boxes.
+   * @param fWord word to find
+   * @param interactive is this an interactive run?  false for testing
+   * @param confirm whether or not the user confirms to start over from the top of the file.
+   * Relevant only in testing.
+   * @return true if fWord was found
    */
   boolean findNextTextHelper(String fWord, boolean interactive, boolean confirm) {
     int currentPosition = getCaretPosition();
@@ -616,11 +626,11 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * put your documentation comment here
-   * @param fWord
-   * @param start
-   * @param end
-   * @return 
+   * Looks for some text in a particular bound of the document.
+   * @param fWord the word to find
+   * @param start the starting position
+   * @param end the ending position
+   * @return true if fWord was found between start and end
    */
   private boolean _findNextText(String fWord, int start, int end) {
     String text = "";
@@ -656,9 +666,10 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * put your documentation comment here
-   * @param fWord
-   * @param rWord
+   * Replaces the current selected word with rWord as long as it matches fWord and finds the
+   * next instance of fWord.
+   * @param fWord word to find and be replaced
+   * @param rWord word to replace with
    * @return 
    */
   public boolean replaceFindText(String fWord, String rWord) {
@@ -666,12 +677,13 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * put your documentation comment here
-   * @param fWord
-   * @param rWord
-   * @param interactive
-   * @param confirm
-   * @return 
+   * Helper function to aid testing.
+   * @param fWord word to find
+   * @param rWord word to replace
+   * @param interactive false for testing, true for users
+   * @param confirm only relevant if interactive is false, true if test wants to start from
+   * the top when the end has been reached and no text found
+   * @return true if the replace AND the find next worked
    */
   boolean replaceFindTextHelper(String fWord, String rWord, boolean interactive, 
       boolean confirm) {
@@ -682,22 +694,23 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * put your documentation comment here
-   * @param fWord
-   * @param rWord
-   * @return 
+   * Replace all instances of fWord with rWord
+   * @param fWord word to be replaced
+   * @param rWord new word to replace with
+   * @return the number of times fWord was replaced with rWord
    */
   public int replaceAllText(String fWord, String rWord) {
     return  replaceAllTextHelper(fWord, rWord, true, false);
   }
 
   /**
-   * put your documentation comment here
-   * @param fWord
-   * @param rWord
-   * @param interactive
-   * @param confirm
-   * @return 
+   * Helper function to assist testing.
+   * @param fWord word to find
+   * @param rWord word to replace
+   * @param interactive true if user, false if testing
+   * @param confirm valid only if interactive is false; true means start searching from the
+   * top if the end has been reached
+   * @return number of replaces that occurred
    */
   int replaceAllTextHelper(String fWord, String rWord, boolean interactive, boolean confirm) {
     int currentPosition = getCaretPosition();
@@ -719,11 +732,11 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * put your documentation comment here
-   * @param fWord
-   * @param rWord
-   * @param end
-   * @return 
+   * Replace all text within a certain block.
+   * @param fWord word to find
+   * @param rWord word to replace
+   * @param end stopping point of replacements; starting point is cursor position
+   * @return number of replacements made within the given block
    */
   private int _replaceAllText(String fWord, String rWord, int end) {
     int position = getCaretPosition();
@@ -738,9 +751,9 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * put your documentation comment here
-   * @param place
-   * @param wordLength
+   * Selects a word given a starting place and length.
+   * @param place start of selection
+   * @param wordLength distance from start to end of selection
    */
   private void _selectWord(int place, int wordLength) {
     setCaretPosition(place);

@@ -324,8 +324,8 @@ public class ReducedModelComment
 					move(-2);
 					_updateBasedOnCurrentState();
 					//if (!_cursor.current().isMultipleCharBrace())
-					    //_cursor.next();
-					    //_cursor.next();
+					//_cursor.next();
+					//_cursor.next();
 					move(2);
 				}
 
@@ -638,7 +638,7 @@ public class ReducedModelComment
 					_updateBasedOnCurrentState();
 					return;
 				}
-					// if we're after a star, 
+				// if we're after a star, 
 			}
 			//here we know the / unites with nothing behind it.
 			_insertNewBrace("\\",copyCursor); //leaving us after the brace.
@@ -825,7 +825,7 @@ public class ReducedModelComment
 		}
 
 
-		/**
+	/**
 	 * Helper function for top level brace insert functions.
 	 *
 	 * <OL>
@@ -1034,53 +1034,53 @@ public class ReducedModelComment
 			_combineCurrentAndNextIfFind("/","//",copyCursor);
 			
 			_combineCurrentAndNextIfFind("\\","\\",copyCursor);  // \-\
-			_combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
-			_combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
-			_combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
+				_combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
+				_combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
+				_combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
 			
 						
-			String type = copyCursor.current().getType();
-			if (type.equals("*/"))
-				{
-					_splitCurrentIfCommentBlock(true,false,copyCursor);
-					copyCursor.prev();
-					return -1;
-					//_updateBasedOnCurrentStateHelper(copyCursor);
-				}
-			else if (type.equals("//"))
-				{
-					// open comment blocks are not set commented, they're set free
-					copyCursor.current().setState(Brace.FREE);
-					copyCursor.next();
-					return Brace.INSIDE_LINE_COMMENT;
-					//_updateInsideLineComment(copyCursor);
-				}
-			else if (type.equals("/*"))
-				{
-					// open comment blocks are not set commented, they're set free
-					copyCursor.current().setState(Brace.FREE);
-					copyCursor.next();
-					return Brace.INSIDE_BLOCK_COMMENT;
-					//_updateInsideBlockComment(copyCursor);
-				}
-			else if (type.equals("\""))
-				{
-					// make sure this is a OPEN quote
-					if (copyCursor.current().isClosed())
-						copyCursor.current().flip();
+				String type = copyCursor.current().getType();
+				if (type.equals("*/"))
+					{
+						_splitCurrentIfCommentBlock(true,false,copyCursor);
+						copyCursor.prev();
+						return -1;
+						//_updateBasedOnCurrentStateHelper(copyCursor);
+					}
+				else if (type.equals("//"))
+					{
+						// open comment blocks are not set commented, they're set free
+						copyCursor.current().setState(Brace.FREE);
+						copyCursor.next();
+						return Brace.INSIDE_LINE_COMMENT;
+						//_updateInsideLineComment(copyCursor);
+					}
+				else if (type.equals("/*"))
+					{
+						// open comment blocks are not set commented, they're set free
+						copyCursor.current().setState(Brace.FREE);
+						copyCursor.next();
+						return Brace.INSIDE_BLOCK_COMMENT;
+						//_updateInsideBlockComment(copyCursor);
+					}
+				else if (type.equals("\""))
+					{
+						// make sure this is a OPEN quote
+						if (copyCursor.current().isClosed())
+							copyCursor.current().flip();
 
-					copyCursor.current().setState(Brace.FREE);
-					copyCursor.next();
-					return Brace.INSIDE_QUOTE;
-					//_updateInsideQuote(copyCursor);
-				}
-			else
-				{
-					copyCursor.current().setState(Brace.FREE);
-					copyCursor.next();
-					return Brace.FREE;
-					//_updateFree(copyCursor);
-				}
+						copyCursor.current().setState(Brace.FREE);
+						copyCursor.next();
+						return Brace.INSIDE_QUOTE;
+						//_updateInsideQuote(copyCursor);
+					}
+				else
+					{
+						copyCursor.current().setState(Brace.FREE);
+						copyCursor.next();
+						return Brace.FREE;
+						//_updateFree(copyCursor);
+					}
 		}
 
   /**
@@ -1103,36 +1103,36 @@ public class ReducedModelComment
 			_splitCurrentIfCommentBlock(true,false, copyCursor);
 			_combineCurrentAndNextIfFind("","", copyCursor);
 			_combineCurrentAndNextIfFind("\\","\\",copyCursor);  // \-\
-			_combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
-			_combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
-			_combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
-			String type = copyCursor.current().getType();
+				_combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
+				_combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
+				_combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
+				String type = copyCursor.current().getType();
 
-			if (type.equals("\n"))
-				{
-					copyCursor.current().setState(Brace.FREE);
-					copyCursor.next();
-					return Brace.FREE;
-					//_updateFree(copyCursor);
-				}
-			else if (type.equals("\""))
-				{
-					// make sure this is a CLOSE quote
-					if (copyCursor.current().isOpen())
-						copyCursor.current().flip();
+				if (type.equals("\n"))
+					{
+						copyCursor.current().setState(Brace.FREE);
+						copyCursor.next();
+						return Brace.FREE;
+						//_updateFree(copyCursor);
+					}
+				else if (type.equals("\""))
+					{
+						// make sure this is a CLOSE quote
+						if (copyCursor.current().isOpen())
+							copyCursor.current().flip();
 
-					copyCursor.current().setState(Brace.FREE);
-					copyCursor.next();
-					return Brace.FREE;
-					//_updateFree(copyCursor);
-				}
-			else
-				{
-					copyCursor.current().setState(Brace.INSIDE_QUOTE);
-					copyCursor.next();
-					return Brace.INSIDE_QUOTE;
-					//_updateInsideQuote(copyCursor);
-				}
+						copyCursor.current().setState(Brace.FREE);
+						copyCursor.next();
+						return Brace.FREE;
+						//_updateFree(copyCursor);
+					}
+				else
+					{
+						copyCursor.current().setState(Brace.INSIDE_QUOTE);
+						copyCursor.next();
+						return Brace.INSIDE_QUOTE;
+						//_updateInsideQuote(copyCursor);
+					}
 		}
 
   /**
@@ -1156,26 +1156,26 @@ public class ReducedModelComment
 			_splitCurrentIfCommentBlock(true, false,copyCursor);
 			_combineCurrentAndNextIfFind("","", copyCursor);
 			_combineCurrentAndNextIfFind("\\","\\",copyCursor);  // \-\
-			_combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
-			_combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
-			_combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
+				_combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
+				_combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
+				_combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
 
-			String type = copyCursor.current().getType();
+				String type = copyCursor.current().getType();
 
-			if (type.equals("\n"))
-				{
-					copyCursor.current().setState(Brace.FREE);
-					copyCursor.next();
-					return Brace.FREE;
-					//_updateFree(copyCursor);
-				}
-			else
-				{
-					copyCursor.current().setState(Brace.INSIDE_LINE_COMMENT);
-					copyCursor.next();
-					return Brace.INSIDE_LINE_COMMENT;
-          //_updateInsideLineComment(copyCursor);
-				}
+				if (type.equals("\n"))
+					{
+						copyCursor.current().setState(Brace.FREE);
+						copyCursor.next();
+						return Brace.FREE;
+						//_updateFree(copyCursor);
+					}
+				else
+					{
+						copyCursor.current().setState(Brace.INSIDE_LINE_COMMENT);
+						copyCursor.next();
+						return Brace.INSIDE_LINE_COMMENT;
+						//_updateInsideLineComment(copyCursor);
+					}
 		}
 
   /**
@@ -1204,28 +1204,28 @@ public class ReducedModelComment
 			_combineCurrentAndNextIfFind("*","/*", copyCursor);
 			_combineCurrentAndNextIfFind("","", copyCursor);
 			_combineCurrentAndNextIfFind("\\","\\",copyCursor);  // \-\
-			_combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
-			_combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
-			_combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
+				_combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
+				_combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
+				_combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
 			
-			_splitCurrentIfCommentBlock(false, false,copyCursor);
+				_splitCurrentIfCommentBlock(false, false,copyCursor);
 
-			String type = copyCursor.current().getType();
-			if (type.equals("*/"))
-				{
-					copyCursor.current().setState(Brace.FREE);
-					copyCursor.next();
-					return Brace.FREE;
-          //_updateFree(copyCursor);
-				}
+				String type = copyCursor.current().getType();
+				if (type.equals("*/"))
+					{
+						copyCursor.current().setState(Brace.FREE);
+						copyCursor.next();
+						return Brace.FREE;
+						//_updateFree(copyCursor);
+					}
 		
-			else
-				{
-					copyCursor.current().setState(Brace.INSIDE_BLOCK_COMMENT);
-					copyCursor.next();
-					return Brace.INSIDE_BLOCK_COMMENT;
-					//_updateInsideBlockComment(copyCursor);
-				}
+				else
+					{
+						copyCursor.current().setState(Brace.INSIDE_BLOCK_COMMENT);
+						copyCursor.next();
+						return Brace.INSIDE_BLOCK_COMMENT;
+						//_updateInsideBlockComment(copyCursor);
+					}
 		}
 
   /**
@@ -1238,7 +1238,7 @@ public class ReducedModelComment
    * @return true if we combined two braces or false if not
    */
   private boolean	_combineCurrentAndNextIfFind(String first, String second,
-															 ModelList<ReducedToken>.Iterator copyCursor)
+																							 ModelList<ReducedToken>.Iterator copyCursor)
 		{
 
 			if (copyCursor.atStart() ||
@@ -1356,17 +1356,17 @@ public class ReducedModelComment
 					(splitEscape && type.equals("\\\\")) ||
 					(splitEscape && type.equals("\\\"")))
 				{
-				    String first = type.substring(0, 1);
-				    String second = type.substring(1, 2);
-				    // change current Brace to only be first character
-				    copyCursor.current().setType(first);
-				    int oldState = copyCursor.current().getState();
+					String first = type.substring(0, 1);
+					String second = type.substring(1, 2);
+					// change current Brace to only be first character
+					copyCursor.current().setType(first);
+					int oldState = copyCursor.current().getState();
 
-				    // then put a new brace after the current one
-				    copyCursor.next();
-				    copyCursor.insert( Brace.MakeBrace(second, oldState) );
-				    // Move back to make the first brace we inserted current
-				    copyCursor.prev();
+					// then put a new brace after the current one
+					copyCursor.next();
+					copyCursor.insert( Brace.MakeBrace(second, oldState) );
+					// Move back to make the first brace we inserted current
+					copyCursor.prev();
 				}
 		}
     
@@ -1826,12 +1826,12 @@ public class ReducedModelComment
 	 *@param relLocation distance from walker to get state at.
 	 */
 	int stateAtRelLocation(int relLocation)
-	{
+		{
 
 
-		_walkerOffset = _move(relLocation,_walker,_walkerOffset);
-		return _getStateAtCurrentHelper(_walker);
-	}
+			_walkerOffset = _move(relLocation,_walker,_walkerOffset);
+			return _getStateAtCurrentHelper(_walker);
+		}
 
 	/**
 	 *Resets the walker to the current position in document
@@ -1862,7 +1862,7 @@ public class ReducedModelComment
 	void getDistToPreviousNewline(IndentInfo braceInfo)
 		{
 			braceInfo.distToPrevNewline = _getDistToPreviousNewline(_cursor.copy(),
-																															 _offset);
+																															_offset);
 			braceInfo.distToNewline = braceInfo.distToPrevNewline;
 			return;
 		}
@@ -1871,7 +1871,7 @@ public class ReducedModelComment
 	 *returns distance to after newline
 	 */
 	private int _getDistToPreviousNewline(ModelList<ReducedToken>.Iterator
-																			 copyCursor, int offset)
+																				copyCursor, int offset)
 		{
 			int walkcount = offset;
 			if (!copyCursor.atStart())
@@ -1879,7 +1879,7 @@ public class ReducedModelComment
 			
 			while ((!copyCursor.atStart()) &&
 						 (!(copyCursor.current().getType().equals("\n")))){
-								//	copyCursor.current().getState() == ReducedToken.FREE))){
+				//	copyCursor.current().getState() == ReducedToken.FREE))){
 				walkcount += copyCursor.current().getSize();
 				copyCursor.prev();
 			}
@@ -1946,19 +1946,13 @@ public class ReducedModelComment
 			
 			while ((!copyCursor.atEnd()) &&
 						 (!(copyCursor.current().getType().equals("\n")))){
-								//copyCursor.current().getState() == ReducedToken.FREE))){
+				//copyCursor.current().getState() == ReducedToken.FREE))){
 				walkcount += copyCursor.current().getSize();
 				copyCursor.next();
 			}
 			return walkcount;
 		}
 }
-
-
-
-
-
-
 
 
 

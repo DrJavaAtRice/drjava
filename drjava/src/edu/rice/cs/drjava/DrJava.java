@@ -33,16 +33,16 @@ public class DrJava {
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Get the actual System.err stream.
+   * @return System.err
    */
   public static PrintStream consoleErr() {
     return  _consoleErr;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Get the actual System.out stream.
+   * @return System.out
    */
   public static PrintStream consoleOut() {
     return  _consoleOut;

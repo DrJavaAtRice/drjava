@@ -15,7 +15,7 @@ public class DocumentOutputStream extends OutputStream {
   private AttributeSet _attributes;
 
   /**
-   * put your documentation comment here
+   * Constructor.
    * @param     Document doc
    */
   public DocumentOutputStream(Document doc) {
@@ -23,7 +23,7 @@ public class DocumentOutputStream extends OutputStream {
   }
 
   /**
-   * put your documentation comment here
+   * Constructor.
    * @param     Document doc
    * @param     AttributeSet attributes
    */
@@ -33,8 +33,8 @@ public class DocumentOutputStream extends OutputStream {
   }
 
   /**
-   * put your documentation comment here
-   * @param c
+   * Write a character to the stream.
+   * @param c the ASCII value of the character to write.
    */
   public void write(int c) {
     try {
@@ -45,10 +45,10 @@ public class DocumentOutputStream extends OutputStream {
   }
 
   /**
-   * put your documentation comment here
-   * @param b
-   * @param off
-   * @param len
+   * Write an array of characters (bytes) to the stream at a particular offset.
+   * @param b characters to write to stream
+   * @param off start of writing
+   * @param len number of characters to write from b
    */
   public void write(byte[] b, int off, int len) {
     try {
@@ -58,6 +58,3 @@ public class DocumentOutputStream extends OutputStream {
     }
   }
 }
-
-
-

@@ -16,15 +16,15 @@ public class BackSlashTest extends TestCase {
   protected ReducedModelControl model2;
 
   /**
-   * put your documentation comment here
-   * @param     String name
+   * Constructor.
+   * @param name a name for the test.
    */
   public BackSlashTest(String name) {
     super(name);
   }
 
   /**
-   * put your documentation comment here
+   * Initializes the reduced models used in the tests.
    */
   protected void setUp() {
     model0 = new ReducedModelControl();
@@ -33,15 +33,17 @@ public class BackSlashTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Creates a test suite for JUnit to use.
+   * @return a test suite for JUnit
    */
   public static Test suite() {
     return  new TestSuite(BackSlashTest.class);
   }
 
   /**
-   * put your documentation comment here
+   * Convenience function to insert a number of non-special characters into a reduced model.
+   * @param model the model being modified
+   * @param size the number of characters being inserted
    */
   protected void insertGap(BraceReduction model, int size) {
     for (int i = 0; i < size; i++) {
@@ -50,18 +52,21 @@ public class BackSlashTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Tests the relationship between backslash characters and quote characters.
+   * It focuses on the case where the backslash is inserted first before the quote.
    */
   public void testInsideQuotePrevious() {
     model1.insertChar('\"');
     model1.insertChar('\\');
     model1.insertChar('\"');
     model1.move(-2);
+    // "#\"
     assertEquals("#0.0", "\\\"", model1.currentToken().getType());
     assertEquals("#0.1", INSIDE_QUOTE, stateOfCurrentToken(model1));
     model1.move(2);
     model1.insertChar('\"');
     model1.move(-1);
+    // "\"#"
     assertEquals("#1.0", "\"", model1.currentToken().getType());
     assertEquals("#1.1", FREE, stateOfCurrentToken(model1));
     assertTrue("#1.2", model1.currentToken().isClosed());
@@ -70,22 +75,27 @@ public class BackSlashTest extends TestCase {
     model1.insertChar('\\');
     model1.insertChar('\\');
     model1.move(-2);
+    // "\"""#\\
     assertEquals("#2.0", "\\\\", model1.currentToken().getType());
     assertEquals("#2.1", INSIDE_QUOTE, stateOfCurrentToken(model1));
     model1.move(2);
     model1.insertChar('\\');
     model1.move(-1);
+    // "\"""\\#\
     assertEquals("#3.0", "\\", model1.currentToken().getType());
     assertEquals("#3.1", INSIDE_QUOTE, stateOfCurrentToken(model1));
     model1.move(1);
     model1.insertChar('\"');
     model1.move(-1);
+    // "\"""\\\#"
     assertEquals("#4.0", "\\\"", model1.currentToken().getType());
     assertEquals("#4.1", INSIDE_QUOTE, stateOfCurrentToken(model1));
   }
 
   /**
-   * put your documentation comment here
+   * Tests the relationship between backslashes and quotes.
+   * Focuses on the case where a backslash is inserted and turns a regular quote
+   * into an escaped quote.
    */
   public void testInsideQuoteNext() {
     model1.insertChar('\"');
@@ -128,7 +138,9 @@ public class BackSlashTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Tests the case when a backslash is inserted before two backslashes.
+   * The existing double escape is broken and the first two backslashes become
+   * a double escape with the third backslash ending up alone.
    */
   public void testBackSlashBeforeDoubleEscape() {
     model1.insertChar('\\');
@@ -150,7 +162,9 @@ public class BackSlashTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Tests the case where a backslash breaks up two backslashes together.
+   * The newly inserted backslash and the first backslash form a new double escape
+   * and the second backslash in the previous double escape becomes free.
    */
   public void testInsertBetweenDoubleEscape() {
     model1.insertChar('\\');
@@ -194,7 +208,9 @@ public class BackSlashTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Tests the case where deletion combines a backslash and a quote or two backslashes.
+   * The deletion of characters in between the two special characters brings them together
+   * and unites them into a 2-character special token.
    */
   public void testDeleteAndCombine() {
     model0.insertChar('\\');
@@ -216,7 +232,7 @@ public class BackSlashTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Tests more of the same sort of cases as found in testDeleteAndCombine().
    */
   public void testDeleteAndCombine2() {
     model0.insertChar('\\');
@@ -238,7 +254,7 @@ public class BackSlashTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * More of the same sort of cases as found in testDeleteAndCombine().
    */
   public void testDeleteAndCombine3() {
     model0.insertChar('\\');
@@ -260,7 +276,8 @@ public class BackSlashTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Tests cases where a long chain of backslashes and quotes can be all altered with a simple
+   * insertion or deletion of a special character.
    */
   public void testChainEffect() {
     model0.insertChar('\"');
@@ -368,9 +385,9 @@ public class BackSlashTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
-   * @param rmc
-   * @return 
+   * Convenience function to get state of the current token.
+   * @param rmc the reduced model in question
+   * @return the state of the current token
    */
   private int stateOfCurrentToken(ReducedModelControl rmc) {
     return  rmc.currentToken().getState();

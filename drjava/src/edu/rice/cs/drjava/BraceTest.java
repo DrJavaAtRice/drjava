@@ -13,15 +13,15 @@ public class BraceTest extends TestCase {
   protected Brace lparen;
 
   /**
-   * put your documentation comment here
-   * @param     String name
+   * Constructor.
+   * @param     String name name of test
    */
   public BraceTest(String name) {
     super(name);
   }
 
   /**
-   * put your documentation comment here
+   * Set up Braces for testing.
    */
   public void setUp() {
     lparen = Brace.MakeBrace("(", ReducedToken.FREE);
@@ -29,15 +29,15 @@ public class BraceTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Create the test suite.
+   * @return BraceTest test suite
    */
   public static Test suite() {
     return  new TestSuite(BraceTest.class);
   }
 
   /**
-   * put your documentation comment here
+   * Tests the successful construction of a Brace using the MakeBrace method.
    */
   public void testMakeBraceSuccess() {
     Brace brace = Brace.MakeBrace("{", ReducedToken.FREE);
@@ -46,7 +46,7 @@ public class BraceTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Tests the failure to make a Brace with a non-special character.
    */
   public void testMakeBraceFailure() {
     Brace brace;
@@ -58,7 +58,7 @@ public class BraceTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Test the getType function for Braces.
    */
   public void testGetType() {
     assertEquals("(", lparen.getType());
@@ -66,7 +66,7 @@ public class BraceTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Test the isShadowed() function.
    */
   public void testIsShadowed() {
     assertTrue("#0.0", !lparen.isShadowed());
@@ -80,7 +80,7 @@ public class BraceTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Test the isQuoted() function.
    */
   public void testIsQuoted() {
     assertTrue("#0.0", !lparen.isQuoted());
@@ -91,7 +91,7 @@ public class BraceTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Test the isCommented() function.
    */
   public void testIsCommented() {
     assertTrue("#0.0", !lparen.isCommented());
@@ -102,7 +102,7 @@ public class BraceTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Test the toString method.
    */
   public void testToString() {
     assertEquals(" (", lparen.toString());
@@ -110,7 +110,7 @@ public class BraceTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Test the flip() method.
    */
   public void testFlip() {
     lparen.flip();
@@ -120,7 +120,7 @@ public class BraceTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Test isOpen() and isClosed().
    */
   public void testOpenClosed() {
     assertTrue(lparen.isOpen());
@@ -128,7 +128,7 @@ public class BraceTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Test isMatch(Brace) method.
    */
   public void testIsMatch() {
     Brace bracket = Brace.MakeBrace("]", ReducedToken.FREE);

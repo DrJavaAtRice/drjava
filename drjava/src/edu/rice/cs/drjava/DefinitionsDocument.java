@@ -23,15 +23,16 @@ public class DefinitionsDocument extends PlainDocument {
   int _currentLocation = 0;
 
   /**
-   * put your documentation comment here
+   * Constructor.
    */
   public DefinitionsDocument() {
     super();
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Create a set of normal endings, i.e., semi-colons and braces for the purposes
+   * of indenting.
+   * @return the set of normal endings
    */
   private static HashSet _makeNormEndings() {
     HashSet normEndings = new HashSet();
@@ -43,8 +44,8 @@ public class DefinitionsDocument extends PlainDocument {
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Create a set of Java/GJ keywords for special coloring.
+   * @return the set of keywords
    */
   private static HashSet _makeKeywords() {
     final String[] words =  {
@@ -69,37 +70,40 @@ public class DefinitionsDocument extends PlainDocument {
    *2)insert string
    *3)update from marked point.
    */
-  public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
-    //System.err.println("insert@" + offset + ": |" + str + "|");
-    int locationChange = offset - _currentLocation;
-    int strLength = str.length();
-    int prevSize;               //stores the size of the item prev when insert begins.
-    int reducedOffset;
-    //1)adjust location
-    _reduced.move(locationChange);
-    //3)loop through string inserting characters
-    for (int i = 0; i < str.length(); i++) {
-      char curChar = str.charAt(i);
-      _addCharToReducedModel(curChar);
+  public void insertString(int offset, String str, AttributeSet a) 
+    throws BadLocationException {
+      //System.err.println("insert@" + offset + ": |" + str + "|");
+      int locationChange = offset - _currentLocation;
+      int strLength = str.length();
+      int prevSize;               //stores the size of the item prev when insert begins.
+      int reducedOffset;
+      //1)adjust location
+      _reduced.move(locationChange);
+      //3)loop through string inserting characters
+      for (int i = 0; i < str.length(); i++) {
+        char curChar = str.charAt(i);
+        _addCharToReducedModel(curChar);
+      }
+      //DrJava.consoleErr().print("Insert: loc before=" + _currentLocation);
+      _currentLocation = offset + strLength;
+      //DrJava.consoleErr().println(" loc after=" + _currentLocation);
+      super.insertString(offset, str, a);
+      _modifiedSinceSave = true;
+      _styleChanged();
     }
-    //DrJava.consoleErr().print("Insert: loc before=" + _currentLocation);
-    _currentLocation = offset + strLength;
-    //DrJava.consoleErr().println(" loc after=" + _currentLocation);
-    super.insertString(offset, str, a);
-    _modifiedSinceSave = true;
-    _styleChanged();
-  }
 
   /**
-   * put your documentation comment here
-   * @param curChar
+   * Add a character to the underlying reduced model.
+   * @param curChar the character to be added.
    */
   private void _addCharToReducedModel(char curChar) {
     _reduced.insertChar(curChar);
   }
 
   /**
-   *len must be positive.
+   * Removes a block of text from the specified location.
+   * @param offset the start of the block for removal
+   * @param len the size of the block for removal
    */
   public void remove(int offset, int len) throws BadLocationException {
     //System.err.println("remove: " + offset + ", " + len);
@@ -136,6 +140,7 @@ public class DefinitionsDocument extends PlainDocument {
   }
 
   /*
+   08/09/2001, Mike Y.: What is this?
    protected void insertUpdate(AbstractDocument.DefaultDocumentEvent chng,
    AttributeSet attr)
    {
@@ -143,6 +148,7 @@ public class DefinitionsDocument extends PlainDocument {
    // reduced model changes
    }
    */
+  
   /** Whenever this document has been saved, this method should be called
    *  so that it knows it's no longer in a modified state.
    */
@@ -151,32 +157,34 @@ public class DefinitionsDocument extends PlainDocument {
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines if the document has been modified since the last save.
+   * @return true if the document has been modified
    */
   public boolean modifiedSinceSave() {
     return  _modifiedSinceSave;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Get the current location of the cursor in the document.
+   * Unlike the usual swing document model, which is stateless, because of our implementation
+   * of the underlying reduced model, we need to keep track fo the current location.
+   * @return where the cursor is as the number of characters into the document
    */
   public int getCurrentLocation() {
     return  _currentLocation;
   }
 
   /**
-   * put your documentation comment here
-   * @param loc
+   * Change the current location of the document
+   * @param loc the new absolute location
    */
   public void setCurrentLocation(int loc) {
     move(loc - _currentLocation);
   }
 
   /**
-   * put your documentation comment here
-   * @param dist
+   * The actual cursor movement logic.  Helper for setCurrentLocation(int).
+   * @param dist the distance from the current location to the new location.
    */
   public void move(int dist) {
     int oldLoc = _currentLocation;
@@ -189,8 +197,8 @@ public class DefinitionsDocument extends PlainDocument {
   }
 
   /**
-   * put your documentation comment here
-   * @param indent
+   * Set the indent to a particular number of spaces.
+   * @param indent the size of indent that you want for the document
    */
   public void setIndent(int indent) {
     this._indent = indent;
@@ -232,7 +240,7 @@ public class DefinitionsDocument extends PlainDocument {
   }
 
   /**
-   * put your documentation comment here
+   * Indents a line in accordance with the rules that DrJava has set up.
    */
   public void indentLine() {
     // moves us to the end of the line
@@ -326,10 +334,11 @@ public class DefinitionsDocument extends PlainDocument {
   }
 
   /**
-   * put your documentation comment here
-   * @param i
-   * @param text
-   * @return 
+   * Determines if the current token is part of a comment or if the i'th character
+   * in the given text argument is a space.
+   * @param i the index to look at for the space in text
+   * @param text a block of text
+   * @return true if the conditions are met
    */
   private boolean _isCommentedOrSpace(int i, String text) {
     ReducedToken rt = _reduced.currentToken();
@@ -339,8 +348,9 @@ public class DefinitionsDocument extends PlainDocument {
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Gets the number of whitespace characters between the current location and the rest of
+   * the document or the first non-whitespace character, whichever comes first.
+   * @return the number of whitespace characters
    */
   public int getWhiteSpace() {
     try {
@@ -368,9 +378,11 @@ public class DefinitionsDocument extends PlainDocument {
   }
 
   /**
-   * put your documentation comment here
-   * @param tab
-   * @param distToPrevNewline
+   * The function that handles what happens when a tab key is pressed.  It is given the
+   * size of the leading whitespace and based on the current indent information, either
+   * shrinks or expands that whitespace.
+   * @param tab number of indents, i.e., level of nesting
+   * @param distToPrevNewline distance to end of previous line
    * @exception BadLocationException
    */
   void tab(int tab, int distToPrevNewline) throws BadLocationException {
@@ -503,6 +515,9 @@ public class DefinitionsDocument extends PlainDocument {
     return index - 1;
   }
 
+  /**
+   * Goes to a particular line in the document.
+   */
   public void gotoLine(int line) {
     int dist;
     if (line < 0) {
