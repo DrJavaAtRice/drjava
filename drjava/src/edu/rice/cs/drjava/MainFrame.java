@@ -262,7 +262,10 @@ public class MainFrame extends JFrame
 		public void windowDeactivated(WindowEvent ev) {}
 		public void windowDeiconified(WindowEvent ev) {}
 		public void windowIconified(WindowEvent ev) {}
-		public void windowOpened(WindowEvent ev) {}
+
+		public void windowOpened(WindowEvent ev) {
+      _definitionsView.requestFocus();
+    }
 	};
 
 
@@ -369,7 +372,7 @@ public class MainFrame extends JFrame
     setJMenuBar(_menuBar);
    
     // Make the output view the active one
-    _outputView.makeActive();
+    //_outputView.makeActive();
     
     _interactionsView = new InteractionsView();
     // Split2 has output view and the interactions view
@@ -384,21 +387,20 @@ public class MainFrame extends JFrame
                                        new JScrollPane(_definitionsView),
                                        split2);
 
+    /*
 		JSplitPane split3 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 																			 true,
 																			 _errorPanel,
 																			 _status);
+    */
 
 
     setBounds(25, 25, 300, 500);
 
 
-    getContentPane().add(split3, BorderLayout.SOUTH);
+    getContentPane().add(_errorPanel, BorderLayout.SOUTH);
     getContentPane().add(split1, BorderLayout.CENTER);
     setSize(640, 480);
-
-    //getContentPane().setLayout(new BoxLayout(getContentPane(),BoxLayout.Y_AXIS));
-//    show();
 
     // This is annoyingly order-dependent. Since split2 contains split1,
     // we need to get split2's divider set up first to give split1 an overall

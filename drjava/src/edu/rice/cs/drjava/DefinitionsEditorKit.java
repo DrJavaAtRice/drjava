@@ -87,8 +87,10 @@ class ColoringView extends WrappedPlainView {
                                    int p0,
                                    int p1) throws BadLocationException
   {
-    //DrJava.consoleErr().println("drawUnselected: " + p0 + "-" + p1 + 
-                                //" doclen=" + _doc.getLength() +" x="+x+" y="+y);
+    /*
+    DrJava.consoleErr().println("drawUnselected: " + p0 + "-" + p1 + 
+                                " doclen=" + _doc.getLength() +" x="+x+" y="+y);
+    */
 
     // If there's nothing to show, don't do anything!
     // For some reason I don't understand we tend to get called sometimes
@@ -115,9 +117,11 @@ class ColoringView extends WrappedPlainView {
 
       Segment text = getLineBuffer();
 
-      //DrJava.consoleErr().println("Highlight: loc=" + location + " len=" +
-                                  //length + " state=" + stat.getState() +
-                                  //" text=" + text);
+      /*
+      DrJava.consoleErr().println("Highlight: loc=" + location + " len=" +
+                                  length + " state=" + stat.getState() +
+                                  " text=" + text);
+      */
 
       _doc.getText(location, length, text);
       x = Utilities.drawTabbedText(text, x, y, g, this, location);

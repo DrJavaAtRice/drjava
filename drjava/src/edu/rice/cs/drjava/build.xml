@@ -47,7 +47,7 @@
     <tstamp /> <!-- get new time stamp to use for CVS tag -->
     <property name="version-tag"
               value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
-    <cvs command="tag ${version-tag}" cvsRoot="${cvsroot}" quiet="true" />
+    <cvs command="tag -c ${version-tag}" cvsRoot="${cvsroot}" quiet="true" />
 
     <!-- Delete MainFrame.java and re-update to set $Name$ tags. -->
     <delete file="${file_with_build_name}" />

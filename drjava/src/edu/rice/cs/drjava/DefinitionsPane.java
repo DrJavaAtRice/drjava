@@ -9,6 +9,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JEditorPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -307,6 +308,14 @@ public class DefinitionsView extends JEditorPane
     _currentFileName = path;
     _doc().resetModification();
     _mainFrame.updateFileTitle(titlebarName);
+
+    // On all open/new operations reset focus to this
+    // But do it in the Swing thread to be safe.
+    SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          DefinitionsView.this.requestFocus();
+        }
+    });
   }
 
   /** Save the current document to the given path.

@@ -9,6 +9,7 @@ import javax.swing.event.DocumentEvent;
 import gj.util.Vector;
 
 import java.util.HashSet;
+import java.util.StringTokenizer;
 
 
 /** The model for the definitions window. */
@@ -18,6 +19,7 @@ public class DefinitionsDocument extends PlainDocument
   BraceReduction _reduced = new ReducedModelControl();
 
   private static HashSet _normEndings = _makeNormEndings();
+  private static HashSet _keywords = _makeKeywords();
   
   int _currentLocation = 0;
 
@@ -34,6 +36,25 @@ public class DefinitionsDocument extends PlainDocument
     normEndings.add("}");
     normEndings.add("(");
     return normEndings;
+  }
+
+  private static HashSet _makeKeywords() {
+    final String[] words = {
+      "import", "native", "package", "goto", "const", "if", "else", "switch",
+      "while", "for", "do", "true", "false", "null", "this", "super", "new",
+      "instanceof", "boolean", "char", "byte", "short", "int", "long", "float",
+      "double", "void", "return", "static", "synchronized", "transient",
+      "volatile", "final", "strictfp", "throw", "try", "catch", "finally",
+      "synchronized", "throws", "extends", "implements", "interface", "class",
+      "break", "continue", "public", "protected", "private", "abstract"
+    };
+
+    HashSet keywords = new HashSet();
+    for (int i = 0; i < words.length; i++) {
+      keywords.add(words[i]);
+    }
+
+    return keywords;
   }
 
   private static int _indent = 2;
@@ -388,8 +409,115 @@ public class DefinitionsDocument extends PlainDocument
     // Now ask reduced model for highlight status for chars till end
     Vector<HighlightStatus> v = _reduced.getHighlightStatus(start, end - start);
 
+    // Go through and find any NORMAL blocks
+    // Within them check for keywords
+    for (int i = 0; i < v.size(); i++) {
+      HighlightStatus stat = v.elementAt(i);
+
+      if (stat.getState() == HighlightStatus.NORMAL) {
+        i = _highlightKeywords(v, i);
+      }
+    }
+
     // Return to previous location
     setCurrentLocation(oldLocation);
     return v;
+  }
+
+  /**
+   * Separates out keywords from normal text for the given
+   * HighlightStatus element.
+   *
+   * What this does is it looks to see if the given part of the text
+   * contains a keyword. If it does, it splits the HighlightStatus into
+   * separate blocks so that each keyword is in its own block.
+   * This will find all keywords in a given block.
+   *
+   * Note that the given block must have state NORMAL.
+   *
+   * @param v Vector with highlight info
+   * @param i Index of the single HighlightStatus to check for keywords in
+   * @return the index into the vector of the last processed element
+   */
+  private int _highlightKeywords(Vector<HighlightStatus> v, int i) {
+    // Basically all non-alphanumeric chars are delimiters
+    final String delimiters = " \t\n\r{}()[].+-/*;:=!~<>";
+    final HighlightStatus original = v.elementAt(i);
+
+    final String text;
+    try {
+      text = getText(original.getLocation(), original.getLength());
+    }
+    catch (BadLocationException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
+
+    // Because this text is not quoted or commented, we can use the simpler
+    // tokenizer StringTokenizer.
+    // We have to return delimiters as tokens so we can keep track of positions
+    // in the original string.
+    StringTokenizer tokenizer = new StringTokenizer(text, delimiters, true);
+
+    // start and length of the text that has not yet been put back into the
+    // vector.
+    int start = original.getLocation();
+    int length = 0;
+
+    // Remove the old element frm the vector.
+    v.removeElementAt(i);
+
+    // Index where we are in the vector. It's the location we would insert
+    // new things into.
+    int index = i;
+
+    while (tokenizer.hasMoreTokens()) {
+      String token = tokenizer.nextToken();
+
+      if (_keywords.contains(token)) {
+        // first check if we had any text before the token
+        if (length != 0) {
+          HighlightStatus newStat =
+            new HighlightStatus(start,
+                                length,
+                                original.getState());
+
+          v.insertElementAt(newStat, index);
+          index++;
+          start += length;
+          length = 0;
+        }
+
+        // Now pull off the keyword
+        int keywordLength = token.length();
+        v.insertElementAt(new HighlightStatus(start,
+                                              keywordLength,
+                                              HighlightStatus.KEYWORD),
+                          index);
+        index++;
+
+        // Move start to the end of the keyword
+        start += keywordLength;
+      }
+      else {
+        // This is not a keyword, so just keep accumulating length
+        length += token.length();
+      }
+    }
+
+    // Now check if there was any text left after the keywords.
+    if (length != 0) {
+      HighlightStatus newStat =
+        new HighlightStatus(start,
+                            length,
+                            original.getState());
+
+      v.insertElementAt(newStat, index);
+      index++;
+      length = 0;
+    }
+
+    // return one before because we need to point to the last one we inserted
+    return index - 1;
   }
 }
