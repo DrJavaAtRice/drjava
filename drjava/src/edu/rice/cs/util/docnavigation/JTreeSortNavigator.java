@@ -62,6 +62,7 @@ import java.net.MalformedURLException;
 import java.util.*;
 import java.io.IOException;
 import edu.rice.cs.util.*;
+import edu.rice.cs.util.swing.*;
 
 public class JTreeSortNavigator extends JTree 
   implements IDocumentNavigator, TreeSelectionListener, TreeExpansionListener {
@@ -107,6 +108,8 @@ public class JTreeSortNavigator extends JTree
    */
   protected CustomTreeCellRenderer _renderer;
 
+  protected DisplayManager<INavigatorItem> _displayManager;
+  
   private java.util.List<GroupNode> _roots = new LinkedList<GroupNode>();
   
   /**
@@ -151,6 +154,20 @@ public class JTreeSortNavigator extends JTree
     this.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     
     //this.setShowsRootHandles(true);
+  }
+  
+  /**
+   * Creates a navigator that uses the icons from the given manager
+   * @param regular the icon manager used to display non-modified files
+   * @param modified the icon manager used to display modified files
+   */
+  public JTreeSortNavigator(String projfilepath, DisplayManager<INavigatorItem> dm) {
+    this(projfilepath);
+    _displayManager = dm;
+  }
+  
+  public void setDisplayManager(DisplayManager<INavigatorItem> manager) {
+    _displayManager = manager;
   }
   
   /**
@@ -657,33 +674,33 @@ public class JTreeSortNavigator extends JTree
    * the cell renderer for this tree
    */
   private class CustomTreeCellRenderer extends DefaultTreeCellRenderer{
-    private String    _filename;
-    private ImageIcon _javaIcon;
-    private ImageIcon _advancedMIcon;
-    private ImageIcon _advancedIcon;
-    private ImageIcon _intermediateMIcon;
-    private ImageIcon _intermediateIcon;
-    private ImageIcon _elementaryMIcon;
-    private ImageIcon _elementaryIcon;
-    private ImageIcon _otherIcon;
-    private ImageIcon _javaMIcon;
-    private ImageIcon _otherMIcon;
+//    private String    _filename;
+//    private ImageIcon _javaIcon;
+//    private ImageIcon _advancedMIcon;
+//    private ImageIcon _advancedIcon;
+//    private ImageIcon _intermediateMIcon;
+//    private ImageIcon _intermediateIcon;
+//    private ImageIcon _elementaryMIcon;
+//    private ImageIcon _elementaryIcon;
+//    private ImageIcon _otherIcon;
+//    private ImageIcon _javaMIcon;
+//    private ImageIcon _otherMIcon;
     private ImageIcon _projectIcon;
     
     /**
      * simple constructor
      */
     public CustomTreeCellRenderer(){
-      _javaIcon   = _getIconResource("JavaIcon.gif");
-      _javaMIcon  = _getIconResource("JavaMIcon.gif");
-      _elementaryIcon   = _getIconResource("ElementaryIcon.gif");
-      _elementaryMIcon  = _getIconResource("ElementaryMIcon.gif");
-      _intermediateIcon   = _getIconResource("IntermediateIcon.gif");
-      _intermediateMIcon  = _getIconResource("IntermediateMIcon.gif");
-      _advancedIcon   = _getIconResource("AdvancedIcon.gif");
-      _advancedMIcon  = _getIconResource("AdvancedMIcon.gif");
-      _otherIcon  = _getIconResource("OtherIcon.gif");
-      _otherMIcon = _getIconResource("OtherMIcon.gif");
+//      _javaIcon   = _getIconResource("JavaIcon.gif");
+//      _javaMIcon  = _getIconResource("JavaMIcon.gif");
+//      _elementaryIcon   = _getIconResource("ElementaryIcon.gif");
+//      _elementaryMIcon  = _getIconResource("ElementaryMIcon.gif");
+//      _intermediateIcon   = _getIconResource("IntermediateIcon.gif");
+//      _intermediateMIcon  = _getIconResource("IntermediateMIcon.gif");
+//      _advancedIcon   = _getIconResource("AdvancedIcon.gif");
+//      _advancedMIcon  = _getIconResource("AdvancedMIcon.gif");
+//      _otherIcon  = _getIconResource("OtherIcon.gif");
+//      _otherMIcon = _getIconResource("OtherMIcon.gif");
       _projectIcon = _getIconResource("ProjectIcon.gif");
     }
     
@@ -707,55 +724,25 @@ public class JTreeSortNavigator extends JTree
                             boolean leaf,
                             int row,
                             boolean hasFocus) {
-
-            super.getTreeCellRendererComponent(
-                            tree, value, sel,
-                            expanded, leaf, row,
-                            hasFocus);
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
-            if (node instanceof RootNode) {
-              setIcon(_projectIcon);
-            }else
-            if(node.getUserObject() instanceof INavigatorItem){
-              INavigatorItem doc = (INavigatorItem)(node.getUserObject());
-              _filename = doc.toString();
-              if (leaf) {
-                if (_javaIcon != null && _filename.endsWith(".java  ")) {
-                  setIcon(_javaIcon);
-                }
-                else if (_javaMIcon != null && _filename.endsWith(".java *")) {
-                  setIcon(_javaMIcon);
-                }
-                else if (_elementaryIcon != null && _filename.endsWith(".dj0  ")) {
-                  setIcon(_elementaryIcon);
-                }
-                else if (_elementaryMIcon != null && _filename.endsWith(".dj0 *")) {
-                  setIcon(_elementaryMIcon);
-                }
-                else if (_intermediateIcon != null && _filename.endsWith(".dj1  ")) {
-                  setIcon(_intermediateIcon);
-                }
-                else if (_intermediateMIcon != null && _filename.endsWith(".dj1 *")) {
-                  setIcon(_intermediateMIcon);
-                }
-                else if (_intermediateIcon != null && _filename.endsWith(".dj2  ")) {
-                  setIcon(_advancedIcon);
-                }
-                else if (_advancedMIcon != null && _filename.endsWith(".dj2 *")) {
-                  setIcon(_advancedMIcon);
-                }
-                else if (_otherMIcon != null && _filename.endsWith(" *")) {
-                  setIcon(_otherMIcon);
-                }
-                else if (_otherIcon != null) {
-                  setIcon(_otherIcon);
-                }
-              }
-            }else if(value instanceof String){
-              // a directory
-            }
-            
-            return this;
+      
+      super.getTreeCellRendererComponent(
+                                         tree, value, sel,
+                                         expanded, leaf, row,
+                                         hasFocus);
+      DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
+      if (node instanceof RootNode) {
+        setIcon(_projectIcon);
+      }else if(node.getUserObject() instanceof INavigatorItem){
+        INavigatorItem doc = (INavigatorItem)(node.getUserObject());
+        if (leaf) {
+          if (_displayManager != null) {
+            setIcon(_displayManager.getIcon(doc));
+          }
+        }
+      }else if(value instanceof String){
+        // a directory
+      }
+      return this;
     }
   }
 
