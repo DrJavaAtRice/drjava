@@ -130,6 +130,22 @@ public class StickyClassLoaderTest extends TestCase {
                  b.getClass().getClassLoader());
   }
 
+  /**
+   * Makes sure that a class that was loaded once before (implicitly) is not
+   * loaded a second time. This test corresponds to bug #520519. As of
+   * util-20020219-2255, this test case causes a LinkageError to be thrown, since
+   * One is loaded twice. This problem was caused by the StickyClassLoader
+   * not checking whether the class was already loaded before loading it!
+   */
+  public void testDoesntLoadSameClassTwice() throws Throwable {
+    StickyClassLoader loader = new StickyClassLoader(myLoader, myLoader);
+    Class two = loader.loadClass(myName + "$Two");
+    Class one = loader.loadClass(myName + "$One");
+  }
+
+  public static class One {}
+  public static class Two extends One {}
+
   public interface BMaker {
     public Object makeB();
   }

@@ -176,7 +176,12 @@ public class StickyClassLoader extends ClassLoader {
   protected Class loadClass(String name, boolean resolve) 
   throws ClassNotFoundException
   {
+    // check if it's already loaded!
     Class clazz;
+    clazz = findLoadedClass(name);
+    if (clazz != null) {
+      return clazz;
+    }
     
     if (name.startsWith("java.") ||
         name.startsWith("javax.") ||
@@ -200,7 +205,17 @@ public class StickyClassLoader extends ClassLoader {
         }
 
         byte[] data = FileOps.readStreamAsBytes(resource.openStream());
-        clazz = defineClass(name, data, 0, data.length);
+        try {
+          clazz = defineClass(name, data, 0, data.length);
+        }
+        catch (Error t) {
+          /*
+          System.err.println("Sticky " + this + " error when loading " + name +
+                             " with resolve=" + resolve + ":");
+          */
+          //t.printStackTrace();
+          throw t;
+        }
       }
       catch (IOException ioe) {
         throw new ClassNotFoundException(ioe.toString());
@@ -211,6 +226,10 @@ public class StickyClassLoader extends ClassLoader {
       resolveClass(clazz);
     }
 
+    /*
+    System.out.println("Sticky loaded OK: " + name + " " + clazz + " loader=" +
+                       clazz.getClassLoader());
+    */
     return clazz;
   }
 }
