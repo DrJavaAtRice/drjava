@@ -673,32 +673,43 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     throws IOException, OperationCanceledException, AlreadyOpenException
   {
     final File[] files = com.getFiles();
-    OpenDefinitionsDocument retDoc = null;
-
     if (files == null) {
       throw new IOException("No Files returned from FileSelector");
     }
+    return _openFiles(files);
+    
+  }
 
+  
+  /**
+   * Refactored code to allow for recursive call if project file is being opened
+   */
+  private OpenDefinitionsDocument _openFiles(File[] files) 
+  throws IOException, OperationCanceledException, AlreadyOpenException {
     AlreadyOpenException storedAOE = null;
-
+    OpenDefinitionsDocument retDoc = null;
+    
     for (int i=0; i < files.length; i++) {
       if (files[i] == null) {
         throw new IOException("File name returned from FileSelector is null");
       }
-
-      try {
-        //always return last opened Doc
-        retDoc = _openFile(files[i].getAbsoluteFile());
+      if(files[i].getName().endsWith(".pjt")) {
+        retDoc = _openFiles(openProject(files[i]));
       }
-      catch (AlreadyOpenException aoe) {
-        retDoc = aoe.getOpenDocument();
-        //Remember the first AOE
-        if (storedAOE == null) {
-          storedAOE = aoe;
+      else {
+        try {
+          //always return last opened Doc
+          retDoc = _openFile(files[i].getAbsoluteFile());
+        }
+        catch (AlreadyOpenException aoe) {
+          retDoc = aoe.getOpenDocument();
+          //Remember the first AOE
+          if (storedAOE == null) {
+            storedAOE = aoe;
+          }
         }
       }
     }
-
     if (storedAOE != null) {
       throw storedAOE;
     }
@@ -712,7 +723,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       throw new IOException("No Files returned from FileChooser");
     }
   }
-
+  
+  
   //----------------------- End ILoadDocuments Methods -----------------------//
 
   /**
@@ -758,7 +770,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     
     // add build directory
     File f = getBuildDirectory();
-    System.out.println(f);
+    //System.out.println(f);
     if(f != null)
       builder.setBuildDir(f);
     

@@ -90,13 +90,23 @@ public class ProjectPropertiesFrame extends JFrame {
     _mainFrame = mf;
 
     _mainPanel= new JPanel();
-    _mainPanel.setLayout(new BorderLayout());
-    _mainPanel.add(_builtDirectoryPanel());
+    _setupPanel(_mainPanel);
+       
+//    JScrollPane scroll = new JScrollPane(_mainPanel,
+//                                         JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+//                                         JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+//    
+//    // Fix increment on scrollbar
+//    JScrollBar bar = scroll.getVerticalScrollBar();
+//    bar.setUnitIncrement(25);
+//    bar.setBlockIncrement(400);
+//    
+    
     
     Container cp = getContentPane();
     cp.setLayout(new BorderLayout());
     
-    cp.add(_mainPanel, BorderLayout.CENTER);
+    cp.add(_mainPanel, BorderLayout.NORTH);
    
     Action okAction = new AbstractAction("OK") {
       public void actionPerformed(ActionEvent e) {
@@ -207,10 +217,36 @@ public class ProjectPropertiesFrame extends JFrame {
     return workDir;
   }
   
-  public JPanel _builtDirectoryPanel() {
-    JPanel toReturn = new JPanel();
-    toReturn.add(new JLabel("Build Directory"));
+  private void _setupPanel(JPanel panel) {
+    GridBagLayout gridbag = new GridBagLayout();
+    GridBagConstraints c = new GridBagConstraints();
+    panel.setLayout(gridbag);
+    c.fill = GridBagConstraints.HORIZONTAL;
+    Insets labelInsets = new Insets(0, 10, 0, 10);
+    Insets compInsets  = new Insets(0, 0, 0, 0);
+    c.weightx = 0.0;
+    c.gridwidth = 1;
+    c.insets = labelInsets;
     
+    JLabel label = new JLabel("Build Directory");
+    gridbag.setConstraints(label, c);
+    panel.add(label);
+    c.weightx = 1.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.insets = compInsets;
+     
+     JPanel dirPanel = _builtDirectoryPanel();
+     gridbag.setConstraints(dirPanel, c);
+     panel.add(dirPanel);
+    
+  }
+  
+  public JPanel _builtDirectoryPanel() {
+//    JPanel toReturn = new JPanel();
+//    toReturn.setLayout(new BorderLayout());
+//   
+//    toReturn.add(new JLabel("Build Directory"),BorderLayout.WEST);
+//    
     JFileChooser dirChooser = new JFileChooser(_getWorkDir());
     dirChooser.setDialogTitle("Select");
     dirChooser.setApproveButtonText("Select");
@@ -218,7 +254,7 @@ public class ProjectPropertiesFrame extends JFrame {
     dirChooser.setMultiSelectionEnabled(false);
     _builtDirSelector = new FileSelectorComponent(this,dirChooser,20,12f);
     _builtDirSelector.setFileFilter(new DirectoryFilter());
-    toReturn.add(_builtDirSelector);
-    return toReturn;
+    //toReturn.add(_builtDirSelector, BorderLayout.EAST);
+    return _builtDirSelector;
   }
 }

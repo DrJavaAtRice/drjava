@@ -296,7 +296,10 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private FileOpenSelector _openSelector = new FileOpenSelector() {
     public File[] getFiles() throws OperationCanceledException {
-      _openChooser.removeChoosableFileFilter(_projectFilter);
+      //_openChooser.removeChoosableFileFilter(_projectFilter);
+      _openChooser.resetChoosableFileFilters();
+      
+      _openChooser.addChoosableFileFilter(_projectFilter);
       _openChooser.setFileFilter(_javaSourceFilter);
       return getOpenFiles(_openChooser);
     }
@@ -307,12 +310,14 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private FileOpenSelector _openProjectSelector = new FileOpenSelector() {
     public File[] getFiles() throws OperationCanceledException {
-      _openChooser.removeChoosableFileFilter(_javaSourceFilter);
+      //_openChooser.removeChoosableFileFilter(_javaSourceFilter);
+      _openChooser.resetChoosableFileFilters();
       _openChooser.setFileFilter(_projectFilter);
       File[] retFiles = getOpenFiles(_openChooser);
       _openChooser.removeChoosableFileFilter(_projectFilter);
-      _openChooser.setFileFilter(_javaSourceFilter);
       
+      _openChooser.addChoosableFileFilter(_projectFilter);
+      _openChooser.setFileFilter(_javaSourceFilter);
       return retFiles;
     }
   };
@@ -2065,12 +2070,18 @@ public class MainFrame extends JFrame implements OptionConstants {
       });
     }
     
-    
-    _closeProjectAction.setEnabled(true);
-    _saveProjectAction.setEnabled(true);
-    _projectPropertiesAction.setEnabled(true);
-    
-    _resetNavigatorPane();
+    _openProjectUpdate();
+  }
+  
+  
+  private void _openProjectUpdate() {
+    if(_model.isProjectActive()) {
+      _closeProjectAction.setEnabled(true);
+      _saveProjectAction.setEnabled(true);
+      _projectPropertiesAction.setEnabled(true);
+      
+      _resetNavigatorPane(); 
+    }
   }
   
   /**
@@ -2149,7 +2160,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
       try {
-        _recentFileManager.updateOpenFiles(openDoc.getFile());
+          _recentFileManager.updateOpenFiles(openDoc.getFile());
       }
       catch (IllegalStateException ise) {
         // Impossible: saved => has a file
@@ -2171,6 +2182,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     finally {
       hourglassOff();
+      _openProjectUpdate();
     }
   }
 
