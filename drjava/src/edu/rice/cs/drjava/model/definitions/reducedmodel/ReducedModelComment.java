@@ -1589,7 +1589,6 @@ public class ReducedModelComment
 			// to = _cursor.copy()
 			_offset = _delete(count, _offset, _cursor, copyCursor);
 			copyCursor.dispose();
-			_highlightChanged = true;
 			return;
 		}
 
@@ -1645,7 +1644,9 @@ public class ReducedModelComment
 	private int _deleteRight(int offset,int endOffset,
 													 ModelList<ReducedToken>.Iterator delFrom,
 													 ModelList<ReducedToken>.Iterator delTo)
-		{					
+		{
+			_highlightChanged = false;
+
 			delFrom.collapse(delTo);
 						
 			// if both pointing to same item, and it's a gap
@@ -1672,6 +1673,7 @@ public class ReducedModelComment
 			if (delTo.atEnd()){
 				_updateBasedOnCurrentState();
 				delFrom.setTo(delTo);
+				_highlightChanged = true;
 				return 0;
 			}
 			else{
@@ -1688,6 +1690,7 @@ public class ReducedModelComment
 				delTo.next();
 				_updateBasedOnCurrentStateHelper(delFrom);
 				delFrom.setTo(delTo);
+				_highlightChanged = true;
 				return 0;
 			}
 			else{
@@ -1704,6 +1707,7 @@ public class ReducedModelComment
 												 delToSizeCurr, delToTypeCurr,
 												 delTo);
 			delFrom.setTo(delTo);
+			_highlightChanged = true;
 			return temp;
 		}
 	
