@@ -200,7 +200,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * Port used by the debugger to connect to the Interactions JVM.
    * Uniquely created in getDebugPort().
    */
-  private int _debugPort = -1;
+//  private int _debugPort = -1;
 
   
   // ---- Input/Output Document Fields ----
@@ -398,6 +398,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return _numErrors;
   }
 
+  /**
+   * Static inner class for newFile method.
+   */
+  private static class NewFileNotifier extends EventNotifier.Notifier {
+    private OpenDefinitionsDocument _doc;
+    public NewFileNotifier(OpenDefinitionsDocument doc) {
+      super();
+      _doc = doc;
+    }
+    public void notifyListener(GlobalModelListener l) {
+      l.newFileCreated(_doc);
+    }
+  }
 
   /**
    * Creates a new definitions document and adds it to the list.
@@ -407,11 +420,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     final OpenDefinitionsDocument doc = _createOpenDefinitionsDocument();
     doc.getDocument().setFile(null);
     _definitionsDocs.addElement(doc);
-    _notifier.notifyListeners(new EventNotifier.Notifier() {
-      public void notifyListener(GlobalModelListener l) {
-        l.newFileCreated(doc);
-      }
-    });
+    _notifier.notifyListeners(new NewFileNotifier(doc));
     return doc;
   }
 
@@ -1620,6 +1629,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   
   private void javadocStarted() {
     synchronized(_compilerLock) {
+      // TODO: Too many damn inner classes!
       _notifier.notifyListeners(new EventNotifier.Notifier() {
         public void notifyListener(GlobalModelListener l) {
           l.javadocStarted();
@@ -1654,8 +1664,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   private class DefinitionsDocumentHandler implements OpenDefinitionsDocument {
     private final DefinitionsDocument _doc;
-    private CompilerErrorModel _errorModel;
-    private JUnitErrorModel _junitErrorModel;
+    // TODO: Should these be document-specific?  They aren't used as such now.
+//    private CompilerErrorModel _errorModel;
+//    private JUnitErrorModel _junitErrorModel;
     private DrJavaBook _book;
     private Vector<Breakpoint> _breakpoints;
     
@@ -1665,8 +1676,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      */
     DefinitionsDocumentHandler(DefinitionsDocument doc) {
       _doc = doc;
-      _errorModel = new CompilerErrorModel<CompilerError> (new CompilerError[0], null);
-      _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
+//      _errorModel = new CompilerErrorModel<CompilerError> (new CompilerError[0], null);
+//      _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
       _breakpoints = new Vector<Breakpoint>();
     }
 
@@ -1983,6 +1994,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         ListModel docs = getDefinitionsDocuments();
 
         //reset the JUnitErrorModel
+        // TODO: does this need to be done here?
         _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
 
         // Compile and save before proceeding.
@@ -2604,10 +2616,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   public void resetCompilerErrors() {
     // Reset CompilerErrorModel (and JUnitErrorModel)
-    //TODO: see if we can get by without this function
-    _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], this);
-    _junitErrorModel = new JUnitErrorModel(new JUnitError[0], this, false);
-    _javadocErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], this);
+    // TODO: see if we can get by without this function
+//    _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], this);
+//    _junitErrorModel = new JUnitErrorModel(new JUnitError[0], this, false);
+//    _javadocErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], this);
     _numErrors = 0;
   }
   
@@ -2799,6 +2811,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       }
       errors[0] = new JUnitError(new File(fileName), -1, -1, "Previous test was interrupted", true,
                                  "", "No associated stack trace");
+      // TODO: Should this happen here?  The modified field is on the outer class.
       _junitErrorModel = new JUnitErrorModel(errors, this, true);
       _docBeingTested = null;
       _notifier.notifyListeners(new EventNotifier.Notifier() {
@@ -2878,7 +2891,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }    
   }
 
-  private class BackUpFileOptionListener implements OptionListener<Boolean> {
+  private static class BackUpFileOptionListener implements OptionListener<Boolean> {
 
     public void optionChanged (OptionEvent<Boolean> oe){
       Boolean value = oe.value;
