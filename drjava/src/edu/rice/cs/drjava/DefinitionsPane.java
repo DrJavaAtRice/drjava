@@ -203,6 +203,7 @@ public class DefinitionsPane extends JEditorPane {
     setBackground(Color.white);
     setFont(new Font("Courier", 0, 12));
     setEditable(true);
+    setDocument(_model.getDefinitionsDocument());
 
     //add actions for indent key
     Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
@@ -240,6 +241,8 @@ public class DefinitionsPane extends JEditorPane {
    * Reset undo machinery on setDocument. 
    */
   public void setDocument(Document doc) {
+    //DrJava.consoleErr().println("Reset doc: " + doc);
+
     if (_undoAction == null) {
       _undoAction = new UndoAction();
     }

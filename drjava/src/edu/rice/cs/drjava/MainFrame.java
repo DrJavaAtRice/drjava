@@ -463,6 +463,7 @@ public class MainFrame extends JFrame {
     public void fileSaved(File file) { 
       _saveButton.setEnabled(false);
       _compileButton.setEnabled(true);
+      _fileNameField.setText(file.getName());
     }
     
     public void fileOpened(File file) {    

@@ -125,8 +125,11 @@ public class GlobalModel {
    */
   public void saveFileAs(FileSaveSelector com) throws IOException {
     try {
+      DrJava.consoleErr().println("Write doc: " + _definitionsDoc);
       final File file = com.getFile();
-      _editorKit.write(new FileWriter(file), _definitionsDoc, 0, _definitionsDoc.getLength());
+      FileWriter writer = new FileWriter(file);
+      _editorKit.write(writer, _definitionsDoc, 0, _definitionsDoc.getLength());
+      writer.close();
       _definitionsDoc.resetModification();
       _definitionsDoc.setFile(file);
       _notifyListeners(new EventNotifier() {
@@ -137,6 +140,7 @@ public class GlobalModel {
     }
     catch (OperationCanceledException oce) {
       // OK, do nothing as the user wishes.
+      DrJava.consoleErr().println("You canceled!");
     }
     catch (BadLocationException docFailed) {
       throw new UnexpectedException(docFailed);
