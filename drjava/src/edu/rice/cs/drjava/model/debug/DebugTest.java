@@ -363,15 +363,15 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Step into bar() method
     synchronized(_notifierLock){
       _debugManager.step(DebugManager.STEP_INTO);
-      _waitForNotifies(1);  // suspended
+      _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
     //NOTE: LocationUpdatedCount is still 1 because the manager could not find the
     //file on the sourcepath so the count was not updated.
-    debugListener.assertThreadLocationUpdatedCount(1);
-    debugListener.assertCurrThreadSuspendedCount(2);  //fires
+    debugListener.assertThreadLocationUpdatedCount(2);  // fires
+    debugListener.assertCurrThreadSuspendedCount(2);  // fires
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertCurrThreadDiedCount(0);
     assertInteractionsDoesNotContain("Bar Line 1");
@@ -379,16 +379,16 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Step to next line
     synchronized(_notifierLock){
       _debugManager.step(DebugManager.STEP_OVER);
-      _waitForNotifies(1);  // suspended
+      _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
     
     if (printMessages) System.out.println("****"+getInteractionsText());
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
-    debugListener.assertThreadLocationUpdatedCount(1);  
+    debugListener.assertThreadLocationUpdatedCount(3);  // fires
     debugListener.assertCurrThreadDiedCount(0);
-    debugListener.assertCurrThreadSuspendedCount(3);  //fires
+    debugListener.assertCurrThreadSuspendedCount(3);  // fires
     debugListener.assertBreakpointReachedCount(1);
     assertInteractionsContains("Bar Line 1");
     assertInteractionsDoesNotContain("Bar Line 2");
@@ -396,14 +396,14 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Step to next line
     synchronized(_notifierLock){
       _debugManager.step(DebugManager.STEP_OVER);
-      _waitForNotifies(1);  // suspended
+      _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(3);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(3); // fires (don't wait)
-    debugListener.assertThreadLocationUpdatedCount(1);
+    debugListener.assertThreadLocationUpdatedCount(4);  // fires
     debugListener.assertCurrThreadDiedCount(0);
-    debugListener.assertCurrThreadSuspendedCount(4);  //fires
+    debugListener.assertCurrThreadSuspendedCount(4);  // fires
     debugListener.assertBreakpointReachedCount(1);        
     assertInteractionsContains("Bar Line 2");
     assertInteractionsDoesNotContain("Foo Line 3");
@@ -411,17 +411,17 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Step twice to print last line in Foo
     synchronized(_notifierLock){
       _debugManager.step(DebugManager.STEP_OVER);
-      _waitForNotifies(1);  // suspended
+      _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
     synchronized(_notifierLock){
       _debugManager.step(DebugManager.STEP_OVER);
-      _waitForNotifies(1);  // suspended
+      _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(5);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(5); // fires (don't wait)
-    debugListener.assertThreadLocationUpdatedCount(1);
+    debugListener.assertThreadLocationUpdatedCount(6);  // fires
     debugListener.assertCurrThreadDiedCount(0);
     debugListener.assertCurrThreadSuspendedCount(6);  //fires
     debugListener.assertBreakpointReachedCount(1);      
@@ -630,11 +630,11 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   /**
    * Tests that breakpoints behave correctly.
    */
-  public synchronized void testBreakpointsNonPublicClasses() 
+  public synchronized void testBreakpointsAndStepsInNonPublicClasses() 
     throws DebugException, BadLocationException, IOException, InterruptedException
   {
     if (printMessages) System.out.println("----testBreakpointsNonPublicClasses----");
-    BreakpointTestListener debugListener = new BreakpointTestListener();
+    StepTestListener debugListener = new StepTestListener();
     
     // Compile the class
     OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS, tempFile());
@@ -657,7 +657,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     }
     
     if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
-      
+    
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(1);  //fires
     debugListener.assertThreadLocationUpdatedCount(1);  //fires
@@ -673,6 +673,22 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
        DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), 9);
     debugListener.assertBreakpointSetCount(2);
     
+    // Step to next line
+    synchronized(_notifierLock){
+      _debugManager.step(DebugManager.STEP_OVER);
+      _waitForNotifies(2);  // suspended, updated
+      _notifierLock.wait();
+    }
+    
+    if (printMessages) System.out.println("****"+getInteractionsText());
+    debugListener.assertStepRequestedCount(1);  // fires (don't wait)
+    debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
+    debugListener.assertThreadLocationUpdatedCount(2); // fires
+    debugListener.assertCurrThreadDiedCount(0);
+    debugListener.assertCurrThreadSuspendedCount(2);  //fires
+    debugListener.assertBreakpointReachedCount(1);
+    assertInteractionsContains("Baz Line 1");
+    assertInteractionsDoesNotContain("Bar Line 1");
     
     // Resume until next breakpoint
     synchronized(_notifierLock) {
@@ -682,12 +698,11 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _notifierLock.wait();
     }
     if (printMessages) System.out.println("----After one resume:\n" + getInteractionsText());
-    debugListener.assertCurrThreadResumedCount(1);  //fires (no waiting)
+    debugListener.assertCurrThreadResumedCount(2);  //fires (no waiting)
     debugListener.assertBreakpointReachedCount(2);  //fires
-    debugListener.assertThreadLocationUpdatedCount(2);  //fires
-    debugListener.assertCurrThreadSuspendedCount(2);  //fires
+    debugListener.assertThreadLocationUpdatedCount(3);  //fires
+    debugListener.assertCurrThreadSuspendedCount(3);  //fires
     debugListener.assertCurrThreadDiedCount(0);
-    assertInteractionsContains("Baz Line 1");
     assertInteractionsContains("Bar Line 1");
     assertInteractionsDoesNotContain("Bar Line 2");
     
@@ -698,11 +713,11 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _notifierLock.wait();
     }
     if (printMessages) System.out.println("----After second resume:\n" + getInteractionsText());
-    debugListener.assertCurrThreadResumedCount(2);  //fires (no waiting)
+    debugListener.assertCurrThreadResumedCount(3);  //fires (no waiting)
     debugListener.assertCurrThreadDiedCount(1);  //fires
     debugListener.assertBreakpointReachedCount(2);
-    debugListener.assertThreadLocationUpdatedCount(2);
-    debugListener.assertCurrThreadSuspendedCount(2);
+    debugListener.assertThreadLocationUpdatedCount(3);
+    debugListener.assertCurrThreadSuspendedCount(3);
     assertInteractionsContains("Bar Line 2");
     
     // Close doc and make sure breakpoints are removed

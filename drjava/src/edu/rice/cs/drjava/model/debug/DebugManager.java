@@ -660,19 +660,28 @@ public class DebugManager {
     else {
       // No stored doc, look on the source root set (later, also the sourcepath)
       ReferenceType rt = location.declaringType();
-      String className = rt.name();
-      String ps = System.getProperty("file.separator");
-      // replace periods with the System's file separator
-      className = StringOps.replace(className, ".", ps);
-      
-      // crop off the $ if there is one and anything after it
-      int indexOfDollar = className.indexOf('$');    
-      if (indexOfDollar > -1) {
-        className = className.substring(0, indexOfDollar);
+      String filename = "";
+      try {
+        filename = rt.sourceName();
       }
+      catch (AbsentInformationException aie) {
+        // Don't know real source name:
+        //   assume source name is same as file name
+        String className = rt.name();
+        String ps = System.getProperty("file.separator");
+        // replace periods with the System's file separator
+        className = StringOps.replace(className, ".", ps);
+        
+        // crop off the $ if there is one and anything after it
+        int indexOfDollar = className.indexOf('$');    
+        if (indexOfDollar > -1) {
+          className = className.substring(0, indexOfDollar);
+        }
       
-      String filename = className + ".java";
-      // If not on sourcepath, check source root set (open files)
+        filename = className + ".java";
+      }
+        
+      // Check source root set (open files)
       File[] sourceRoots = _model.getSourceRootSet();
       Vector<File> roots = new Vector<File>();
       for (int i=0; i < sourceRoots.length; i++) {
