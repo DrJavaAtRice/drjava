@@ -20,8 +20,8 @@
 
 <property name="lib_dir" value="${srcroot}/edu/rice/cs/lib" />
 
-<!--property name="jsr14_classpath" value="${lib_dir}/jsr14.jar" />
-<property name="jsr14_collect_classpath" value="${lib_dir}/collect.jar" /-->
+<property name="jsr14_classpath" value="${lib_dir}/jsr14.jar" />
+<property name="jsr14_collect_classpath" value="${lib_dir}/collect.jar" />
 
 <property name="jars_dir" value="/home/javaplt/public_html/drjava/builds" />
 
