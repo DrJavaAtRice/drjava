@@ -63,31 +63,32 @@ import koala.dynamicjava.interpreter.error.ExecutionError;
  * DynamicJava, so this class is no longer used.
  *
  * $Id$
+ * NOTE: TypeChecker no longer exists; it is being replaced with AbstractTypeChecker and its child classes
  */
-public class TypeCheckerExtension extends TypeChecker {
-
-  public TypeCheckerExtension(Context c) {
-    super(c);
-  }
-
-  /**
-   * Overrides TypeChecker's default behavior on an InstanceOfExpression,
-   * since it caused a NullPointerException on "null instanceof Object"
-   * @param node the node to visit
-   */
-  public Class visit(InstanceOfExpression node) {
-    node.getReferenceType().acceptVisitor(this);
-
-    // The expression must not have a primitive type
-    Class c = node.getExpression().acceptVisitor(this);
-    if ((c != null) && c.isPrimitive()) {
-      throw new ExecutionError("left.expression", node);
-    }
-
-    // Set the type property
-    node.setProperty(NodeProperties.TYPE, boolean.class);
-    return boolean.class;
-  }
+public class TypeCheckerExtension /*extends TypeChecker */ { 
+//
+//  public TypeCheckerExtension(Context c) {
+//    super(c);
+//  }
+//
+//  /**
+//   * Overrides TypeChecker's default behavior on an InstanceOfExpression,
+//   * since it caused a NullPointerException on "null instanceof Object"
+//   * @param node the node to visit
+//   */
+//  public Class visit(InstanceOfExpression node) {
+//    node.getReferenceType().acceptVisitor(this);
+//
+//    // The expression must not have a primitive type
+//    Class c = node.getExpression().acceptVisitor(this);
+//    if ((c != null) && c.isPrimitive()) {
+//      throw new ExecutionError("left.expression", node);
+//    }
+//
+//    // Set the type property
+//    node.setProperty(NodeProperties.TYPE, boolean.class);
+//    return boolean.class;
+//  }
 //<<<<<<< TypeCheckerExtension.java
 //
 //  public Class visit(MethodDeclaration node) {
@@ -203,43 +204,43 @@ public class TypeCheckerExtension extends TypeChecker {
 //    return null;
 //  }
 //>>>>>>> 1.6
-
-
-  /**
-   * Visits a DivideExpression
-   * @param node the node to visit
-   */
-  public Class visit(DivideExpression node) {
-    Node  ln = node.getLeftExpression();
-    Node  rn = node.getRightExpression();
-    ln.acceptVisitor(this);
-    rn.acceptVisitor(this);
-    Class c = visitNumericExpression(node, "division.type");
-    return c;
-  }
-
-  /**
-   * Visits a RemainderExpression
-   * @param node the node to visit
-   */
-  public Class visit(RemainderExpression node) {
-    Node  ln = node.getLeftExpression();
-    Node  rn = node.getRightExpression();
-    ln.acceptVisitor(this);
-    rn.acceptVisitor(this);
-    Class c = visitNumericExpression(node, "remainder.type");
-    return c;
-  }
-  
-/** 
- * visitNumericExpression:
- * Commented out because of the changes made in the original
- * TypeChecker.java to allow for auto unboxing.  We made the
- * original method protected instead of private so that this
- * code could work, but we seriously think this should be 
- * reworked.
- */
-  
+//
+//
+//  /**
+//   * Visits a DivideExpression
+//   * @param node the node to visit
+//   */
+//  public Class visit(DivideExpression node) {
+//    Node  ln = node.getLeftExpression();
+//    Node  rn = node.getRightExpression();
+//    ln.acceptVisitor(this);
+//    rn.acceptVisitor(this);
+//    Class c = visitNumericExpression(node, "division.type");
+//    return c;
+//  }
+//
+//  /**
+//   * Visits a RemainderExpression
+//   * @param node the node to visit
+//   */
+//  public Class visit(RemainderExpression node) {
+//    Node  ln = node.getLeftExpression();
+//    Node  rn = node.getRightExpression();
+//    ln.acceptVisitor(this);
+//    rn.acceptVisitor(this);
+//    Class c = visitNumericExpression(node, "remainder.type");
+//    return c;
+//  }
+//  
+///** 
+// * visitNumericExpression:
+// * Commented out because of the changes made in the original
+// * TypeChecker.java to allow for auto unboxing.  We made the
+// * original method protected instead of private so that this
+// * code could work, but we seriously think this should be 
+// * reworked.
+// */
+//  
 //  /**
 //   * Visits a numeric expression
 //   */

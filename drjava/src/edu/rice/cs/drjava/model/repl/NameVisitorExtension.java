@@ -41,7 +41,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
@@ -63,8 +63,8 @@ import koala.dynamicjava.tree.*;
 
 public class NameVisitorExtension extends NameVisitor {
   private Context _context;
-  private TypeChecker _tc;
-
+  private AbstractTypeChecker _tc;
+  
   /**
    * Creates a new NameVisitorExtension.
    * @param nameContext Context for the NameVisitor
@@ -75,9 +75,9 @@ public class NameVisitorExtension extends NameVisitor {
   public NameVisitorExtension(Context nameContext, Context typeContext) {
     super(nameContext);
     _context = nameContext;
-    _tc = new TypeChecker(typeContext);
+    _tc = AbstractTypeChecker.makeTypeChecker(typeContext);
   }
-
+  
   // Fixes the redefinition issue in DynamicJava
   public Node visit(VariableDeclaration node) {
     // NameVisitor
@@ -90,14 +90,20 @@ public class NameVisitorExtension extends NameVisitor {
       }
     }
 
-    // TypeChecker
-    Class lc = node.getType().acceptVisitor(_tc);
-    Node init = node.getInitializer();
-    if (init != null) {
-      Class rc = init.acceptVisitor(_tc);
-      _checkAssignmentStaticRules(lc, rc, node, init);
-    }
-
+    /** 
+     * The following commented code was moved into the actual 
+     * AbstractTypeChecker to reduce duplication of code and
+     * to fix some bugs
+     */
+//    // TypeChecker
+//    Class lc = node.getType().acceptVisitor(_tc);
+//    Node init = node.getInitializer();
+//    if (init != null) {
+//      Class rc = init.acceptVisitor(_tc);
+//      _checkAssignmentStaticRules(lc, rc, node, init);
+//    }
+    _tc.preCheckVariableDeclaration(node);
+    
     //        // EvaluationVisitor
     //        EvaluationVisitorExtension eve = new EvaluationVisitorExtension(context);
     //        Class c = NodeProperties.getType(node.getType());
@@ -108,13 +114,15 @@ public class NameVisitorExtension extends NameVisitor {
     return super.visit(node);
   }
 
+  
   private static void _checkAssignmentStaticRules(Class lc, Class rc,
                                                   Node node, Node v) {
     if (lc != null) {
       if (lc.isPrimitive()) {
         if (lc == boolean.class && rc != boolean.class) {
           throw new ExecutionError("assignment.types", node);
-        } else if (lc == byte.class && rc != byte.class) {
+        } 
+        else if (lc == byte.class && rc != byte.class) {
           if (rc == int.class && v.hasProperty(NodeProperties.VALUE)) {
             Number n = (Number)v.getProperty(NodeProperties.VALUE);
             if (n.intValue() == n.byteValue()) {
@@ -122,8 +130,9 @@ public class NameVisitorExtension extends NameVisitor {
             }
           }
           throw new ExecutionError("assignment.types", node);
-        } else if ((lc == short.class || rc == char.class) &&
-                   (rc != byte.class && rc != short.class && rc != char.class)) {
+        } 
+        else if ((lc == short.class || rc == char.class) &&
+                 (rc != byte.class && rc != short.class && rc != char.class)) {
           if (rc == int.class && v.hasProperty(NodeProperties.VALUE)) {
             Number n = (Number)v.getProperty(NodeProperties.VALUE);
             if (n.intValue() == n.shortValue()) {
@@ -131,35 +140,40 @@ public class NameVisitorExtension extends NameVisitor {
             }
           }
           throw new ExecutionError("assignment.types", node);
-        } else if (lc == int.class    &&
-                   (rc != byte.class  &&
-                    rc != short.class &&
-                    rc != char.class  &&
-                    rc != int.class)) {
+        } 
+        else if (lc == int.class    &&
+                 (rc != byte.class  &&
+                  rc != short.class &&
+                  rc != char.class  &&
+                  rc != int.class)) {
           throw new ExecutionError("assignment.types", node);
-        } else if (lc == long.class   &&
-                   (rc == null          ||
-                    !rc.isPrimitive()   ||
-                    rc == void.class    ||
-                    rc == boolean.class ||
-                    rc == float.class   ||
-                    rc == double.class)) {
+        } 
+        else if (lc == long.class   &&
+                 (rc == null          ||
+                  !rc.isPrimitive()   ||
+                  rc == void.class    ||
+                  rc == boolean.class ||
+                  rc == float.class   ||
+                  rc == double.class)) {
           throw new ExecutionError("assignment.types", node);
-        } else if (lc == float.class  &&
-                   (rc == null          ||
-                    !rc.isPrimitive()   ||
-                    rc == void.class    ||
-                    rc == boolean.class ||
-                    rc == double.class)) {
+        } 
+        else if (lc == float.class  &&
+                 (rc == null          ||
+                  !rc.isPrimitive()   ||
+                  rc == void.class    ||
+                  rc == boolean.class ||
+                  rc == double.class)) {
           throw new ExecutionError("assignment.types", node);
-        } else if (lc == double.class &&
-                   (rc == null        ||
-                    !rc.isPrimitive() ||
-                    rc == void.class  ||
-                    rc == boolean.class)) {
+        } 
+        else if (lc == double.class &&
+                 (rc == null        ||
+                  !rc.isPrimitive() ||
+                  rc == void.class  ||
+                  rc == boolean.class)) {
           throw new ExecutionError("assignment.types", node);
         }
-      } else if (rc != null) {
+      } 
+      else if (rc != null) {
         if (!lc.isAssignableFrom(rc)) {
           throw new ExecutionError("assignment.types", node);
         }

@@ -384,10 +384,11 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * right hand side of a VariableDeclaration.
    * @return visitor the visitor
    */
-  public TypeChecker makeTypeChecker(Context context) {
-    // TO DO: move this into its own class if more methods need to be added
-    return new TypeCheckerExtension(context);      
-  }
+//  public AbstractTypeChecker makeTypeChecker(Context context) {
+//    // TO DO: move this into its own class if more methods need to be added
+//    return AbstractTypeChecker.makeTypeChecker(context);      
+//  }
+// Removed because AbstractTypeChecker contains a makeTypeChecker method  
   
   /**
    * Factory method to make a new EvaluationVisitor.
@@ -474,7 +475,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
           Node o = n.acceptVisitor(nv);
           if (o != null) n = o;
 
-          TypeChecker tc = makeTypeChecker(checkVisitorContext);
+          AbstractTypeChecker tc = AbstractTypeChecker.makeTypeChecker(checkVisitorContext);
           n.acceptVisitor(tc);
 
           evalVisitorContext.defineVariables

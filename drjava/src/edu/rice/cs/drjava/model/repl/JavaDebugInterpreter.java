@@ -177,7 +177,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * if it cannot find the field in any enclosing class.
    */
   protected ObjectFieldAccess _getObjectFieldAccessForField(String field, Context context) {
-    TypeChecker tc = makeTypeChecker(context);
+    AbstractTypeChecker tc = makeTypeChecker(context);
     int numDollars = _getNumDollars(_thisClassName);
 
     // Check if this has an anonymous inner class
@@ -231,7 +231,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * if it cannot find the method in any enclosing class.
    */
   protected ObjectMethodCall _getObjectMethodCallForFunction(MethodCall method, Context context) {
-    TypeChecker tc = makeTypeChecker(context);
+    AbstractTypeChecker tc = makeTypeChecker(context);
     int numDollars = _getNumDollars(_thisClassName);
     String methodName = method.getMethodName();
     List<Expression> args = method.getArguments();
@@ -277,7 +277,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * if it cannot find the field in any enclosing class.
    */
   protected StaticFieldAccess _getStaticFieldAccessForField(String field, Context context) {
-    TypeChecker tc = makeTypeChecker(context);
+    AbstractTypeChecker tc = makeTypeChecker(context);
     int numDollars = _getNumDollars(_thisClassName);
     String currClass = _getFullyQualifiedClassNameForThis();
     int index = currClass.length();
@@ -309,7 +309,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * if it cannot find the method in any enclosing class.
    */
   protected StaticMethodCall _getStaticMethodCallForFunction(MethodCall method, Context context) {
-    TypeChecker tc = makeTypeChecker(context);
+    AbstractTypeChecker tc = makeTypeChecker(context);
     int numDollars = _getNumDollars(_thisClassName);
     String methodName = method.getMethodName();
     List<Expression> args = method.getArguments();
@@ -344,7 +344,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * class loader.
    */
   protected ReferenceType _getReferenceTypeForField(String field, Context context) {
-    TypeChecker tc = makeTypeChecker(context);
+    AbstractTypeChecker tc = makeTypeChecker(context);
     int index = _indexOfWithinBoundaries(_getFullyQualifiedClassNameForThis(), field);
     if (index != -1) {
       // field may be of form outerClass$innerClass or
@@ -722,8 +722,9 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * @param context the context
    * @return visitor the visitor
    */
-  public TypeChecker makeTypeChecker(final Context context) {
-    return new TypeChecker(context) {
+  public AbstractTypeChecker makeTypeChecker(final Context context) {
+    if (Float.valueOf(System.getProperty("java.specification.version")) < 1.5) { 
+      return new TypeChecker14(context) {
       /**
        * Visits a QualifiedName, returning our class if it is "this"
        * @param node the node to visit
@@ -744,6 +745,32 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
         else return super.visit(node);
       }
 
-    };
+      };
+    }
+    else {
+      return new TypeChecker15(context) {
+        /**
+       * Visits a QualifiedName, returning our class if it is "this"
+       * @param node the node to visit
+       */
+      public Class visit(QualifiedName node) {
+        String var = node.getRepresentation();
+        if ("this".equals(var)) {
+          //            String cName = _thisClassName.replace('$', '.');
+          //            if (!_thisPackageName.equals("")) {
+          //              cName = _thisPackageName + "." + cName;
+          //            }
+          //            Class c = context.lookupClass(cName);
+          Class c = _loadClassForThis(context);
+          node.setProperty(NodeProperties.TYPE, c);
+          node.setProperty(NodeProperties.MODIFIER, context.getModifier(node));
+          return c;
+        }
+        else return super.visit(node);
+      }
+
+      };
+    }
   }
+      
 }
