@@ -182,7 +182,9 @@
 
     <!-- Make a jar in the lib directory. No tests are included. -->
     <jar jarfile="${lib_dir}/compilers.jar" update="yes">
-      <fileset dir="${built_jsr14v1_0}" excludes="**/*Test.class">
+      <fileset dir="${built_jsr14v1_0}">
+        <exclude name="**/*Test.class" />
+        <exclude name="**/*Test$*.class" />
         <include name="${projpath}/**" />
 
         <!-- include the GPL -->
@@ -213,7 +215,9 @@
 
     <!-- Make a jar in the lib directory. No tests are included. -->
     <jar jarfile="${lib_dir}/compilers.jar" update="yes">
-      <fileset dir="${built_jsr14v1_2}" excludes="**/*Test.class">
+      <fileset dir="${built_jsr14v1_2}">
+        <exclude name="**/*Test.class" />
+        <exclude name="**/*Test$*.class" />
         <include name="${projpath}/**" />
 
         <!-- include the GPL -->
@@ -244,7 +248,9 @@
 
     <!-- Make a jar in the lib directory. No tests are included. -->
     <jar jarfile="${lib_dir}/platform.jar" update="yes">
-      <fileset dir="${built_mac13}" excludes="**/*Test.class">
+      <fileset dir="${built_mac13}">
+        <exclude name="**/*Test.class" />
+        <exclude name="**/*Test$*.class" />
         <include name="${projpath}/**" />
 
         <!-- include the GPL -->
@@ -321,7 +327,9 @@
 
     <!-- Make a jar in the lib directory. No tests are included. -->
     <jar jarfile="${lib_dir}/platform.jar" update="yes">
-      <fileset dir="${built_mac14}" excludes="**/*Test.class">
+      <fileset dir="${built_mac14}">
+        <exclude name="**/*Test.class" />
+        <exclude name="**/*Test$*.class" />
         <include name="${projpath}/**" />
 
         <!-- include the GPL -->
@@ -398,7 +406,9 @@
 
     <!-- Make a jar in the lib directory. No tests are included. -->
     <jar jarfile="${lib_dir}/platform.jar" update="yes">
-      <fileset dir="${built_windows}" excludes="**/*Test.class">
+      <fileset dir="${built_windows}">
+        <exclude name="**/*Test.class" />
+        <exclude name="**/*Test$*.class" />
         <include name="${projpath}/**" />
 
         <!-- include the GPL -->
@@ -503,8 +513,10 @@
                   excludes="META-INF/MANIFEST.MF" />
 
       <!-- Include DrJava classes -->
-      <fileset dir="${built}" excludes="**/*Test.class">
+      <fileset dir="${built}">
         <include name="${projpath}/**" />
+        <exclude name="**/*Test.class" />
+        <exclude name="**/*Test$*.class" />
         <exclude name="${projpath}/docs/developer/**" />
         <include name="edu/rice/cs/util/**" />
 

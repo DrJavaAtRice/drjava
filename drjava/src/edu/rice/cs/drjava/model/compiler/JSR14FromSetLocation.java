@@ -75,7 +75,9 @@ public class JSR14FromSetLocation extends CompilerProxy implements OptionConstan
     try {
       //URL url = new File(loc).toURL();
       URL url = loc.toURL();
-      return new URLClassLoader(new URL[] { url });
+      // Create a URLClassLoader with a null parent so it only looks
+      // in the URL for classes.
+      return new URLClassLoader(new URL[] { url }, null);
     }
     catch (MalformedURLException e) {
       throw new RuntimeException("malformed url exception");
