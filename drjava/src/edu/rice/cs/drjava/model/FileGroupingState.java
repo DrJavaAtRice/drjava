@@ -48,6 +48,7 @@ package edu.rice.cs.drjava.model;
 import java.io.File;
 import java.io.IOException;
 import edu.rice.cs.drjava.model.FileMovedException;
+import edu.rice.cs.util.ClasspathVector;
 
 /**
  * This state pattern is used by the global model to store any information 
@@ -145,4 +146,21 @@ public interface FileGroupingState {
    * Jars all the open documents or the current project
    */
   public void jarAll();
+  
+  /**
+   * Returns a collection of classpath entries specific to the current project.
+   * @return the project's extra classpath
+   */
+  public ClasspathVector getExtraClasspath();
+  
+  /**
+   * Sets the list of project-specific classpath entries.
+   */
+  public void setExtraClasspath(ClasspathVector cp);
+  
+  
+  
+  
+  
+  
 }

@@ -648,6 +648,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       
       HashSet<String> _projFilePaths = new HashSet<String>();
       
+      private ClasspathVector _projExtraClasspath = new ClasspathVector();
+      
       /** Initialization Block */
       { 
         try {
@@ -893,6 +895,14 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       public void jarAll() {
         //********************************
       }
+      
+      public ClasspathVector getExtraClasspath() {
+        return _projExtraClasspath;
+      }
+      
+      public void setExtraClasspath(ClasspathVector cp) {
+        _projExtraClasspath = cp;
+      }
     };
   }
   
@@ -926,6 +936,13 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       }
       /** Jars all the open files. */
       public void jarAll() {  }
+      
+      /* Flat grouping states have no extra entries */
+      public ClasspathVector getExtraClasspath() { return new ClasspathVector(); }
+      
+      public void setExtraClasspath(ClasspathVector cp) {
+        throw new UnsupportedOperationException("Flat grouping states do not have extra classpath entries.");
+      }
     };
   }
   
@@ -1266,8 +1283,18 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     }
     
     // add classpath info
-    Vector<File> currentclasspaths = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
-    for (File f: currentclasspaths) { builder.addClasspathFile(f); }
+//    Vector<File> currentclasspaths = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
+//    for (File f: currentclasspaths) { builder.addClasspathFile(f); }
+    // New behavior: only save project-specific classpaths.
+    ClasspathVector exCp = getProjectExtraClasspath();
+    if(exCp != null) {
+      Vector<File> exCpF = exCp.asFileVector();
+      for(File f : exCpF) {
+        builder.addClasspathFile(f);
+      }
+    } else {
+      System.err.println("Project ClasspathVector is null!");
+    }
     
     // add build directory
     File d = getBuildDirectory();
@@ -1348,12 +1375,18 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     setBuildDirectory(buildDir);
     
     File[] projectclasspaths = ir.getClasspaths();
-    Vector<File> currentclasspaths = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
-    for(int i = 0; i<projectclasspaths.length; i++){
-      currentclasspaths.remove(projectclasspaths[i].getAbsoluteFile());
-      currentclasspaths.add(projectclasspaths[i].getAbsoluteFile());
+    ClasspathVector extraClasspaths = new ClasspathVector();
+    for(File f : projectclasspaths) {
+      extraClasspaths.add(f);
     }
-    DrJava.getConfig().setSetting(OptionConstants.EXTRA_CLASSPATH, currentclasspaths);
+    setProjectExtraClasspath(extraClasspaths);
+    
+//    Vector<File> currentclasspaths = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
+//    for(int i = 0; i<projectclasspaths.length; i++){
+//      currentclasspaths.remove(projectclasspaths[i].getAbsoluteFile());
+//      currentclasspaths.add(projectclasspaths[i].getAbsoluteFile());
+//    }
+//    DrJava.getConfig().setSetting(OptionConstants.EXTRA_CLASSPATH, currentclasspaths);
     
     setProjectChanged(false);
     
@@ -1886,7 +1919,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    * @return The classpath entries loaded along with the project
    */
   public ClasspathVector getProjectExtraClasspath() {
-    return new ClasspathVector(); // TODO: Alex, fill this in
+    return _state.getExtraClasspath();
   }
   
   /**
@@ -1895,8 +1928,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    * project preferences..
    */
   public void setProjectExtraClasspath(ClasspathVector cp) {
-    // TODO: Alex, fill this in
-    System.out.println("Setting project classpath to: " + cp);
+    _state.setExtraClasspath(cp);
+    //System.out.println("Setting project classpath to: " + cp);
   }
 
   /**
@@ -3718,22 +3751,28 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   
   /**
    * Adds the source roots for all open documents and the paths on the
-   * "extra classpath" config option to the interpreter's classpath.
+   * "extra classpath" config option, as well as any project-specific 
+   * classpaths to the interpreter's classpath.
    * 
    * this is called when the interpreter becomes ready
    */
   public void resetInteractionsClasspath() {
+    ClasspathVector projectExtras = getProjectExtraClasspath();
+    //System.out.println("Adding project classpath vector to interactions classpath: " + projectExtras);
+    if(projectExtras != null) {
+      for(URL cpE : projectExtras) {
+        _interactionsModel.addProjectClassPath(cpE);
+      }
+    }
     
     Vector<File> cp = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
     if (cp != null) {
-      Enumeration<File> en = cp.elements();
-      while(en.hasMoreElements()) {
-        // this forwards directly to InterpreterJVM.addClassPath(String)
+      for(File f : cp) {
         try {
-          _interactionsModel.addExtraClassPath(en.nextElement().toURL());
+          _interactionsModel.addExtraClassPath(f.toURL());
         }
-        catch(MalformedURLException murle){
-          // fail silently
+        catch(MalformedURLException murle) {
+          System.err.println("File " + f + " in your extra classpath could not be parsed to a URL, maybe it contains un-URL-encodable characters?");
         }
       }
     }
