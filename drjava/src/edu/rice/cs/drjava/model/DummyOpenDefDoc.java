@@ -49,7 +49,9 @@ import java.util.Vector;
 import java.util.List;
 import java.io.*;
 import java.awt.print.*;
-import javax.swing.ProgressMonitor;
+import java.awt.*;
+//import javax.swing.ProgressMonitor;
+import javax.swing.*;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.*;
@@ -676,5 +678,55 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   public boolean undoManagerCanRedo() {
     throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  // Styled Document Methods 
+  public Font getFont(AttributeSet attr) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public Color getBackground(AttributeSet attr) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public Color getForeground(AttributeSet attr) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public Element getCharacterElement(int pos) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public Element getParagraphElement(int pos) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  
+  public Style getLogicalStyle(int p) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+   
+  public void setLogicalStyle(int pos, Style s) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void setCharacterAttributes(int offset, int length, AttributeSet s, boolean replace) {
+    throw new UnsupportedOperationException("Dummy method");
+  }    
+  
+  public void setParagraphAttributes(int offset, int length, AttributeSet s, boolean replace) {
+    throw new UnsupportedOperationException("Dummy method");
+  }    
+  
+  public Style getStyle(String nm) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void removeStyle(String nm) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public Style addStyle(String nm, Style parent) {
+     throw new UnsupportedOperationException("Dummy method");
   }
 }

@@ -55,7 +55,7 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
  * has a factory for Views (the things that render the document).
  * @version $Id$
  */
-public class DefinitionsEditorKit extends DefaultEditorKit {
+public class DefinitionsEditorKit extends StyledEditorKit {
 
   private GlobalEventNotifier _notifier;
 

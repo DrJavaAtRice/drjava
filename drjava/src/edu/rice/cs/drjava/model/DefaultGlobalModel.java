@@ -46,6 +46,8 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import java.awt.print.*;
+import java.awt.Font;
+import java.awt.Color;
 import javax.swing.text.*;
 import javax.swing.event.DocumentListener;
 import javax.swing.ListModel;
@@ -3221,6 +3223,54 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 //      System.err.println("Destroying ODD: " + this);
 //    }
     
+    // Styled Document Methods 
+    public Font getFont(AttributeSet attr) {
+      return getDocument().getFont(attr);
+    }
+    
+    public Color getBackground(AttributeSet attr) {
+      return getDocument().getBackground(attr);
+    }
+    
+    public Color getForeground(AttributeSet attr) {
+      return getDocument().getForeground(attr);
+    }
+    
+    public Element getCharacterElement(int pos) {
+      return getDocument().getCharacterElement(pos);
+    }
+    
+    public Element getParagraphElement(int pos) {
+      return getDocument().getParagraphElement(pos);
+    }
+    
+    public Style getLogicalStyle(int p) {
+      return getDocument().getLogicalStyle(p);
+    }
+    
+    public void setLogicalStyle(int pos, Style s) {
+      getDocument().setLogicalStyle(pos, s); 
+    }
+    
+    public void setCharacterAttributes(int offset, int length, AttributeSet s, boolean replace) {
+      getDocument().setCharacterAttributes(offset, length, s, replace); 
+    }
+    
+    public void setParagraphAttributes(int offset, int length, AttributeSet s, boolean replace) {
+      getDocument().setParagraphAttributes(offset, length, s, replace); 
+    }
+    
+    public Style getStyle(String nm) {
+      return getDocument().getStyle(nm); 
+    }
+    
+    public void removeStyle(String nm) {
+      getDocument().removeStyle(nm); 
+    }
+    
+    public Style addStyle(String nm, Style parent) {
+      return getDocument().addStyle(nm, parent); 
+    }
   }
 
   /**

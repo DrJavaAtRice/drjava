@@ -102,7 +102,7 @@ import edu.rice.cs.drjava.model.OperationCanceledException;
  * @see ReducedModelBrace
  *
  */
-public class DefinitionsDocument extends PlainDocument implements OptionConstants, Finalizable<DefinitionsDocument> {
+public class DefinitionsDocument extends DefaultStyledDocument implements OptionConstants, Finalizable<DefinitionsDocument> {
   
   List<DocumentClosedListener> _closedListeners = new LinkedList<DocumentClosedListener>();
   

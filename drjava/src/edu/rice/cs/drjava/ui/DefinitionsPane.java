@@ -79,7 +79,7 @@ import edu.rice.cs.drjava.model.debug.Breakpoint;
  * changed.
  * @version $Id$
  */
-public class DefinitionsPane extends JEditorPane implements OptionConstants, Finalizable<DefinitionsPane> {
+public class DefinitionsPane extends JTextPane implements OptionConstants, Finalizable<DefinitionsPane> {
 
   /**
    * This field NEEDS to be set by setEditorKit() BEFORE any DefinitonsPanes
@@ -97,7 +97,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants, Fin
   private HighlightManager _highlightManager;
   
   
-  private final Document NULL_DOCUMENT = new PlainDocument();
+  private final StyledDocument NULL_DOCUMENT = new DefaultStyledDocument();
 //  private Document _defdoc;
   
   /**
@@ -596,12 +596,13 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants, Fin
   public DefinitionsPane(MainFrame mf,
                          OpenDefinitionsDocument doc)
   {
+    super(new DefaultStyledDocument());
     _mainFrame = mf;
     
     // Start the pane out with the NULL_DOCUMENT so that
     // it doesn't start out with a reference to the defdoc
     _doc = doc;
-    super.setDocument(NULL_DOCUMENT);
+    //super.setDocument(NULL_DOCUMENT);
     _resetUndo();
     
     setContentType("text/java");
