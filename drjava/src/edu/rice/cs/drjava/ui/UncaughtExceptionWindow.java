@@ -35,7 +35,7 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
- END_COPYRIGHT_BLOCK*/
+END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
@@ -58,19 +58,21 @@ import java.io.*;
 // wanted to make this a JWindow, but it looked funny with no border
 public class UncaughtExceptionWindow extends JDialog {
   
-  // information about the exception
+  /** information about the exception */
   private JComponent _exceptionInfo;
-  // contains the stack trace
+  /** contains the stack trace */
   private JTextArea _stackTrace;
-  // scroll pane for _stackTrace
+  /** scroll pane for _stackTrace */
   private JScrollPane _stackTraceScroll;
-  // contains the exception info and the ok panel
-  // private JPanel _topPanel;
-  // contains the ok button in the north 
+  /** compresses the buttonPanel into the east */
   private JPanel _okPanel;
-  // the button that closes this window
+  /** contains the copy and ok butons */
+  private JPanel _buttonPanel;
+  /** the button that copies the stack trace to the clipboard */
+  private JButton _copyButton;
+  /** the button that closes this window */
   private JButton _okButton;
-  // the exception that was passed to this window
+  /** the exception that was passed to this window */
   private Throwable _exception;
   
   /**
@@ -82,39 +84,26 @@ public class UncaughtExceptionWindow extends JDialog {
     _exception = exception;
     
     this.setSize(600,400);
-    
-    //this.setLocation(200,200);
     setLocationRelativeTo(frame);
-    
-    //Insets ins = new Insets(20,20,20,20);
-    
+
     // If we set this pane to be of type text/rtf, it wraps based on words
     // as opposed to based on characters.
     _stackTrace = new JTextArea(_getStackTraceString());
-    //_stackTrace.setBackground(new Color(204,204,204));
-    // _stackTrace.setMargin(ins);
     msg[1] = exception.toString();
     _exceptionInfo = new JOptionPane(msg,JOptionPane.ERROR_MESSAGE,
                                      JOptionPane.DEFAULT_OPTION,null,
                                      new Object[0]);
-      //new JTextArea(_getExceptionString());
-    //_exceptionInfo.setBackground(new Color(204,204,204));
-    //_exceptionInfo.setMargin(ins);
-    //_exceptionInfo.setEditable(false);
-    //_exceptionInfo.setLineWrap(true);
-    //_exceptionInfo.setWrapStyleWord(true);
     
     _stackTrace.setEditable(false);
     
+    _copyButton = new JButton(_copyAction);
     _okButton = new JButton(_okAction);
     
     _okPanel = new JPanel(new BorderLayout());
-    _okPanel.add(_okButton, BorderLayout.EAST);
-    //_okPanel.setBackground(new Color(204,204,204));
-    
-    //_topPanel = new JPanel();//new BorderLayout());
-    //_topPanel.add(_exceptionInfo);//, BorderLayout.CENTER);
-    //_topPanel.add(_okPanel, BorderLayout.EAST);
+    _buttonPanel = new JPanel();
+    _buttonPanel.add(_copyButton);
+    _buttonPanel.add(_okButton);
+    _okPanel.add(_buttonPanel, BorderLayout.EAST);
     
     _stackTraceScroll = new 
       BorderlessScrollPane(_stackTrace, 
@@ -126,16 +115,22 @@ public class UncaughtExceptionWindow extends JDialog {
     cp.add(_exceptionInfo, BorderLayout.NORTH);
     cp.add(_stackTraceScroll, BorderLayout.CENTER);
     cp.add(_okPanel, BorderLayout.SOUTH);
-    // this.setTitle("Uncaught Exception");
-    
-    //this.setVisible(true);
     show();
-    //Toolkit.getDefaultToolkit().beep();
   }
   
   private Action _okAction = new AbstractAction("OK") {
     public void actionPerformed(ActionEvent e) {        
       UncaughtExceptionWindow.this.dispose();
+    }
+  };
+  
+  private Action _copyAction = new AbstractAction("Copy Stack Trace") {
+    public void actionPerformed(ActionEvent e) {
+      _stackTrace.grabFocus();
+      _stackTrace.getActionMap().get(DefaultEditorKit.selectAllAction).
+        actionPerformed(e);
+      _stackTrace.getActionMap().get(DefaultEditorKit.copyAction).
+        actionPerformed(e);
     }
   };
   

@@ -721,18 +721,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       ActionMap _actionMap = _currentDefPane.getActionMap();
       int oldCol = _model.getActiveDocument().getDocument().getCurrentCol();
       _actionMap.get(DefaultEditorKit.selectionEndLineAction).actionPerformed(ae);
-      // if oldCol is equal to the current column, then selectionEndLine did
-      // nothing, so we're at the end of the line and should remove the newline
-      // character
-      if (oldCol == _model.getActiveDocument().getDocument().getCurrentCol()) {
-        _actionMap.get(DefaultEditorKit.deleteNextCharAction).actionPerformed(ae);
-      }
-      else {
-        java.awt.datatransfer.Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
-        java.awt.datatransfer.Transferable contents = clip.getContents(null);
-        cutAction.actionPerformed(ae);
-        clip.setContents(contents, null);
-      }
+      _actionMap.get(DefaultEditorKit.deleteNextCharAction).actionPerformed(ae);
     }
   };
   
@@ -3156,23 +3145,27 @@ public class MainFrame extends JFrame implements OptionConstants {
     // NOTE: Not necessarily called from event-dispatching thread...
     //  Should figure out how to deal with invokeLater here.
     public void fileOpened(final OpenDefinitionsDocument doc) {
-       if( !SwingUtilities.isEventDispatchThread() ){
-        try{
-          SwingUtilities.invokeAndWait(new Runnable(){
+      if ( !SwingUtilities.isEventDispatchThread() && !inDebugMode() ) {
+        // Can't invokeAndWait while in debug mode:
+        //  UI thread might not respond, so DrJava locks up
+        try {
+          Runnable command = new Runnable() {
             public void run(){
               _fileOpened(doc);
-            }});
+            }
+          };
+          SwingUtilities.invokeAndWait(command);
         }
-        catch(InterruptedException ex){
+        catch(InterruptedException ex) {
           /** we don't expect to be interrupted */
           throw new UnexpectedException(ex);
         }
-        catch(InvocationTargetException ex2){
+        catch(InvocationTargetException ex2) {
           /** we don't expect _fileOpened() to throw any exceptions */
           throw new UnexpectedException(ex2);
         }
       }
-      else{
+      else {
         _fileOpened(doc);
       }
     }
@@ -3193,28 +3186,32 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     } 
 
-     /**
+    /**
      * NOTE: Makes certain that this action occurs in the event dispatching
      * thread
      */
     public void fileClosed(final OpenDefinitionsDocument doc) {
-      if( !SwingUtilities.isEventDispatchThread() ){
-        try{
-          SwingUtilities.invokeAndWait(new Runnable(){
+      if ( !SwingUtilities.isEventDispatchThread() && !inDebugMode() ) {
+        // Can't invokeAndWait while in debug mode:
+        //  UI thread might not respond, so DrJava locks up
+        try {
+          Runnable command = new Runnable() {
             public void run(){
               _fileClosed(doc);
-            }});
+            }
+          };
+          SwingUtilities.invokeAndWait(command);
         }
-        catch(InterruptedException ex){
+        catch(InterruptedException ex) {
           /** we don't expect to be interrupted */
           throw new UnexpectedException(ex);
         }
-        catch(InvocationTargetException ex2){
+        catch(InvocationTargetException ex2) {
           /** we don't expect _fileOpened() to throw any exceptions */
           throw new UnexpectedException(ex2);
         }
       }
-      else{
+      else {
         _fileClosed(doc);
       }
     }

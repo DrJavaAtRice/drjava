@@ -760,10 +760,14 @@ public class JUnitPanel extends TabbedPanel
       throws BadLocationException
       {
         JUnitError error = array[i];
+        String errorName = error.testName();
+        if (errorName == null) {
+          errorName = "null";
+        }
         
-        if (!error.testName().equals("")) {
+        if (!"".equals(errorName)) {
           doc.insertString(doc.getLength(), "Test: ", BOLD_ATTRIBUTES);
-          doc.insertString(doc.getLength(), error.testName(), NORMAL_ATTRIBUTES);
+          doc.insertString(doc.getLength(), errorName, NORMAL_ATTRIBUTES);
           doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
         }
 
