@@ -688,6 +688,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     return null;
   }
 
+  
   /**
    * Visits a FunctionCall
    * @param node the node to visit
@@ -1381,7 +1382,30 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     return lc;
   }
 
-  /**
+//  /**
+//   * Visits a DivideExpression
+//   * @param node the node to visit
+//   */
+//  public Class visit(DivideExpression node) {
+//    Node  ln = node.getLeftExpression();
+//    Node  rn = node.getRightExpression();
+//    ln.acceptVisitor(this);
+//    rn.acceptVisitor(this);
+//    Class c = visitNumericExpression(node, "division.type");
+//
+//    // Compute the expression if it is constant
+//    if (ln.hasProperty(NodeProperties.VALUE) &&
+//        rn.hasProperty(NodeProperties.VALUE)) {
+//      node.setProperty
+//        (NodeProperties.VALUE,
+//         InterpreterUtilities.divide(c,
+//                                     ln.getProperty(NodeProperties.VALUE),
+//                                     rn.getProperty(NodeProperties.VALUE)));
+//    }
+//    return c;
+//  }
+  
+    /**
    * Visits a DivideExpression
    * @param node the node to visit
    */
@@ -1391,18 +1415,22 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     ln.acceptVisitor(this);
     rn.acceptVisitor(this);
     Class c = visitNumericExpression(node, "division.type");
-
-    // Compute the expression if it is constant
-    if (ln.hasProperty(NodeProperties.VALUE) &&
-        rn.hasProperty(NodeProperties.VALUE)) {
-      node.setProperty
-        (NodeProperties.VALUE,
-         InterpreterUtilities.divide(c,
-                                     ln.getProperty(NodeProperties.VALUE),
-                                     rn.getProperty(NodeProperties.VALUE)));
-    }
     return c;
   }
+
+  /**
+   * Visits a RemainderExpression
+   * @param node the node to visit
+   */
+  public Class visit(RemainderExpression node) {
+    Node  ln = node.getLeftExpression();
+    Node  rn = node.getRightExpression();
+    ln.acceptVisitor(this);
+    rn.acceptVisitor(this);
+    Class c = visitNumericExpression(node, "remainder.type");
+    return c;
+  }
+  
 
   /**
    * Visits an DivideAssignExpression
@@ -1434,28 +1462,28 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     return lc;
   }
 
-  /**
-   * Visits a RemainderExpression
-   * @param node the node to visit
-   */
-  public Class visit(RemainderExpression node) {
-    Node  ln = node.getLeftExpression();
-    Node  rn = node.getRightExpression();
-    ln.acceptVisitor(this);
-    rn.acceptVisitor(this);
-    Class c = visitNumericExpression(node, "remainder.type");
-
-    // Compute the expression if it is constant
-    if (ln.hasProperty(NodeProperties.VALUE) &&
-        rn.hasProperty(NodeProperties.VALUE)) {
-      node.setProperty
-        (NodeProperties.VALUE,
-         InterpreterUtilities.remainder(c,
-                                        ln.getProperty(NodeProperties.VALUE),
-                                        rn.getProperty(NodeProperties.VALUE)));
-    }
-    return c;
-  }
+//  /**
+//   * Visits a RemainderExpression
+//   * @param node the node to visit
+//   */
+//  public Class visit(RemainderExpression node) {
+//    Node  ln = node.getLeftExpression();
+//    Node  rn = node.getRightExpression();
+//    ln.acceptVisitor(this);
+//    rn.acceptVisitor(this);
+//    Class c = visitNumericExpression(node, "remainder.type");
+//
+//    // Compute the expression if it is constant
+//    if (ln.hasProperty(NodeProperties.VALUE) &&
+//        rn.hasProperty(NodeProperties.VALUE)) {
+//      node.setProperty
+//        (NodeProperties.VALUE,
+//         InterpreterUtilities.remainder(c,
+//                                        ln.getProperty(NodeProperties.VALUE),
+//                                        rn.getProperty(NodeProperties.VALUE)));
+//    }
+//    return c;
+//  }
 
   /**
    * Visits an RemainderAssignExpression
@@ -1914,6 +1942,24 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     return boolean.class;
   }
 
+//  /**
+//   * Visits a InstanceOfExpression
+//   * @param node the node to visit
+//   */
+//  public Class visit(InstanceOfExpression node) {
+//    node.getReferenceType().acceptVisitor(this);
+//
+//    // The expression must not have a primitive type
+//    if ((node.getExpression().acceptVisitor(this)).isPrimitive()) {
+//      throw new ExecutionError("left.expression", node);
+//    }
+//
+//    // Set the type property
+//    node.setProperty(NodeProperties.TYPE, boolean.class);
+//    return boolean.class;
+//  }
+  
+  
   /**
    * Visits a InstanceOfExpression
    * @param node the node to visit
@@ -1922,7 +1968,8 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     node.getReferenceType().acceptVisitor(this);
 
     // The expression must not have a primitive type
-    if ((node.getExpression().acceptVisitor(this)).isPrimitive()) {
+    Class c = node.getExpression().acceptVisitor(this);
+    if ((c != null) && c.isPrimitive()) {
       throw new ExecutionError("left.expression", node);
     }
 
