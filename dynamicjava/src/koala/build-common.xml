@@ -108,9 +108,16 @@ target="jsr14"
      After committing, we tag the build we just made with the tag
      projectname-date-time.
 -->
-<target name="do-commit" depends="clean, update, test, make-version-stamp">
+<target name="do-commit" depends="clean, update, test, jar, make-version-stamp">
   <property name="version-tag"
-            value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
+            value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />   
+  
+  <!-- Copy the dynamicjava.jar to the lib directory and commit it. -->
+  <copy todir="${lib-dir}">
+    <fileset dir="${srcroot}">
+      <include name="../dynamicjava.jar" />
+    </fileset>
+  </copy>
 
   <!-- recompile to make new version number get into code. -->
   <echo message="All tests passed. Rebuilding to put version tag (${version-tag}) into the code." />
@@ -122,6 +129,15 @@ target="jsr14"
   <antcall target="create-commit-comments">
     <param name="commit-comments-filename" value="${commit-comments-filename}"/>
   </antcall>
+  
+  <cvs>
+    <commandline>
+      <argument value="commit" />
+      <argument value="-F" />
+      <argument value="${commit-comments-filename}" />
+      <argument value="${lib-dir}/dynamicjava.jar" />
+    </commandline>
+  </cvs>
   <cvs>
     <commandline>
       <argument value="commit" />
