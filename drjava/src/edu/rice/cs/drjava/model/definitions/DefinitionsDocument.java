@@ -128,7 +128,7 @@ public class DefinitionsDocument extends PlainDocument {
     normEndings.add("(");
     return  normEndings;
   }
-
+  
   /**
    * Create a set of Java/GJ keywords for special coloring.
    * @return the set of keywords
@@ -136,14 +136,14 @@ public class DefinitionsDocument extends PlainDocument {
   private static HashSet _makeKeywords() {
     final String[] words =  {
       "import", "native", "package", "goto", "const", "if", "else",
-      "switch", "while", "for", "do", "true", "false", "null", "this",
-      "super", "new", "instanceof", "boolean", "char", "byte",
-      "short", "int", "long", "float", "double", "void", "return",
-      "static", "synchronized", "transient", "volatile", "final",
-      "strictfp", "throw", "try", "catch", "finally",
-      "throws", "extends", "implements", "interface", "class",
-      "break", "continue", "public", "protected", "private", "abstract",
-      "case", "default", "assert"
+        "switch", "while", "for", "do", "true", "false", "null", "this",
+        "super", "new", "instanceof", "boolean", "char", "byte",
+        "short", "int", "long", "float", "double", "void", "return",
+        "static", "synchronized", "transient", "volatile", "final",
+        "strictfp", "throw", "try", "catch", "finally",
+        "throws", "extends", "implements", "interface", "class",
+        "break", "continue", "public", "protected", "private", "abstract",
+        "case", "default", "assert"
     };
     HashSet keywords = new HashSet();
     for (int i = 0; i < words.length; i++) {
@@ -151,7 +151,7 @@ public class DefinitionsDocument extends PlainDocument {
     }
     return  keywords;
   }
-
+  
   /**
    * Returns whether this document is currently untitled
    * (indicating whether it has a file yet or not).
@@ -1277,40 +1277,40 @@ public class DefinitionsDocument extends PlainDocument {
       // OK, we must have found a package statement.
       // Now let's find the semicolon. Again, the semicolon must be free.
       int afterPackage = firstNormalLocation + "package".length();
-
+      
       int semicolonLocation = afterPackage;
       do {
         semicolonLocation = text.indexOf(";", semicolonLocation + 1);
-
+        
         if (semicolonLocation == -1) {
           throw new InvalidPackageException(firstNormalLocation,
                                             "No semicolon found to terminate " +
                                             "package statement!");
         }
-
+        
         setCurrentLocation(semicolonLocation);
       }
       while (_reduced.currentToken().getHighlightState() !=
              HighlightStatus.NORMAL);
-
+      
       // Now we have semicolon location. We'll gather text in between one
       // character at a time for simplicity. It's inefficient (I think?)
       // but it's easy, and there shouldn't be much text between
       // "package" and ";" anyhow.
       for (int walk = afterPackage + 1; walk < semicolonLocation; walk++) {
         setCurrentLocation(walk);
-
+        
         if (_reduced.currentToken().getHighlightState() ==
             HighlightStatus.NORMAL)
         {
           char curChar = text.charAt(walk);
-
+          
           if (! Character.isWhitespace(curChar)) {
             buf.append(curChar);
           }
         }
       }
-
+      
       String toReturn = buf.toString();
       if (toReturn.equals("")) {
         throw new InvalidPackageException(firstNormalLocation,
@@ -1355,36 +1355,36 @@ public class DefinitionsDocument extends PlainDocument {
   private class InsertCommand implements Runnable {
     private final int _offset;
     private final String _text;
-
+    
     public InsertCommand(final int offset, final String text) {
       _offset = offset;
       _text = text;
     }
-
+    
     public void run() {
       // adjust location to the start of the text to input
       _reduced.move(_offset - _currentLocation);
-
+      
       // loop over string, inserting characters into reduced model
       for (int i = 0; i < _text.length(); i++) {
         char curChar = _text.charAt(i);
         _addCharToReducedModel(curChar);
       }
-
+      
       _currentLocation = _offset + _text.length();
       _styleChanged();
     }
   }
-
+  
   private class RemoveCommand implements Runnable {
     private final int _offset;
     private final int _length;
-
+    
     public RemoveCommand(final int offset, final int length) {
       _offset = offset;
       _length = length;
     }
-
+    
     public void run() {
       setCurrentLocation(_offset);
       _reduced.delete(_length);

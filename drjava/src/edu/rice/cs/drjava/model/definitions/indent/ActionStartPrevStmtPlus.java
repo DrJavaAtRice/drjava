@@ -75,6 +75,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
    * @param doc DefinitionsDocument containing the line to be indented.
    */
   public void indentLine(DefinitionsDocument doc) {
+    
     String indent = "";
     int here = doc.getCurrentLocation();
     
@@ -94,7 +95,23 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
       doc.setTab(_suffix, here);
       return;
     }
+    try {
+      // Jump over {-} region if delimiter was a close brace.
+      char delim = doc.getText(prevDelimiterPos, 1).charAt(0);
+      if (delim == '}') {
+        BraceReduction reduced = doc.getReduced();
+        reduced.resetLocation();
         
+        int dist = prevDelimiterPos - here + 1;
+        reduced.move(dist);
+        prevDelimiterPos -= reduced.balanceBackward() - 1;
+        reduced.move(-dist);
+      }
+    }
+    catch (BadLocationException e) {
+      throw new UnexpectedException(e);
+    }
+    
     // Get indent of prev statement
     try {
       // Include colons as end of statement (ie. "case")

@@ -73,6 +73,7 @@ class QuestionPrevLineStartsComment extends IndentRuleQuestion {
    * @return true if this node's rule holds.
    */
   boolean applyRule(DefinitionsDocument doc) {
+
       int cursor;
 
     // Move back to start of current line

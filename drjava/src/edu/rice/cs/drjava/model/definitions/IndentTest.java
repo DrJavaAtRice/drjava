@@ -157,47 +157,47 @@ public class IndentTest extends TestCase {
   /**
    * Regression test for braces.
    */
-//  public void testIndentBraces() throws BadLocationException {
-//    String text =
-//      "{\n" +
-//      "class Foo\n" +
-//      "extends F {\n" +
-//      "int i;   \n" +
-//      "void foo() {\n" +
-//      "if (true) {\n" +
-//      "bar();\n" +
-//      "}\n" +
-//      "}\n" +
-//      "/* comment */ }\n" +
-//      "class Bar {\n" +
-//      "/* comment\n" +
-//      "*/ }\n" + 
-//      "int i;\n" +
-//      "}\n";
-//      
-//    String indented =
-//      "{\n" +
-//      "  class Foo\n" +     // After open brace
-//      "    extends F {\n" +     // Not new statement
-//      "    int i;   \n" +     // After open brace
-//      "    void foo() {\n" +     // After statement
-//      "      if (true) {\n" +     // Nested brace
-//      "        bar();\n" +     // Nested brace
-//      "      }\n" +     // Close nested brace
-//      "    }\n" +     // Close nested brace
-//      "  /* comment */ }\n" +     // Close brace after comment
-//      "  class Bar {\n" +     // After close brace
-//      "    /* comment\n" +     // After open brace
-//      "     */ }\n" +      // In comment
-//      "  int i;\n" +     // After close brace
-//      "}\n";
-//
-//    
-//    doc.insertString(0, text, null);
-//    _assertContents(text, doc);
-//    doc.indentLines(0, doc.getLength());
-//    _assertContents(indented, doc);
-//  }
+ public void testIndentBraces() throws BadLocationException {
+   String text =
+     "{\n" +
+     "class Foo\n" +
+     "extends F {\n" +
+     "int i;   \n" +
+     "void foo() {\n" +
+     "if (true) {\n" +
+     "bar();\n" +
+     "}\n" +
+     "}\n" +
+     "/* comment */ }\n" +
+     "class Bar {\n" +
+     "/* comment\n" +
+     "*/ }\n" + 
+     "int i;\n" +
+     "}\n";
+     
+   String indented =
+     "{\n" +
+     "  class Foo\n" +     // After open brace
+     "    extends F {\n" +     // Not new statement
+     "    int i;   \n" +     // After open brace
+     "    void foo() {\n" +     // After statement
+     "      if (true) {\n" +     // Nested brace
+     "        bar();\n" +     // Nested brace
+     "      }\n" +     // Close nested brace
+     "    }\n" +     // Close nested brace
+     "  /* comment */ }\n" +     // Close brace after comment
+     "  class Bar {\n" +     // After close brace
+     "    /* comment\n" +     // After open brace
+     "     */ }\n" +      // In comment
+     "  int i;\n" +     // After close brace
+     "}\n";
+
+   
+   doc.insertString(0, text, null);
+   _assertContents(text, doc);
+   doc.indentLines(0, doc.getLength());
+   _assertContents(indented, doc);
+ }
   
   /**
    * Regression test for common cases.

@@ -72,6 +72,7 @@ public class QuestionNewParenPhrase extends IndentRuleQuestion {
    * @return true if this node's rule holds.
    */
   boolean applyRule(DefinitionsDocument doc) {
+
     try {
       // Find start of line
       int here = doc.getCurrentLocation();

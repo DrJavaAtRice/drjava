@@ -72,6 +72,7 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion
    */
   boolean applyRule(DefinitionsDocument doc)
   {
+
     int here = doc.getCurrentLocation();
     int origin = doc.getReduced().absOffset();
     int lineStart = doc.getLineStartPos(doc.getCurrentLocation());
