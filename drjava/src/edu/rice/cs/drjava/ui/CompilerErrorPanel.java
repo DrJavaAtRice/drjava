@@ -173,14 +173,16 @@ public class CompilerErrorPanel extends JPanel {
     // buttonPanel.add(_showAllButton);
     add(buttonPanel, BorderLayout.EAST);
     */
-
-    Box uiBox = Box.createVerticalBox();
-    uiBox.add(new JLabel("Compiler", SwingConstants.CENTER));
-    uiBox.add(_compilerChoiceBox);
-    uiBox.add(Box.createVerticalGlue());
-
+    
+    JPanel compilerPanel = new JPanel(new BorderLayout());
+    JPanel uiBox = new JPanel(new BorderLayout());
+    compilerPanel.add(new JLabel("Compiler", SwingConstants.RIGHT),
+                      BorderLayout.NORTH);
+    compilerPanel.add(uiBox,BorderLayout.CENTER);
+    uiBox.add(_compilerChoiceBox,BorderLayout.NORTH);
+    uiBox.add(new JPanel(),BorderLayout.CENTER);
     add(scroller, BorderLayout.CENTER);
-    add(uiBox, BorderLayout.EAST);
+    add(compilerPanel, BorderLayout.EAST);
   }
 
   /**
