@@ -171,7 +171,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
 
   /**
-   * Adds the given path to the Interpreter's class path.
+   * Adds a single path to the Interpreter's class path.
+   * This method <b>cannot</b> take multiple paths separated by
+   * a path separator; it must be called separately for each path.
    * @param path Path to be added to classpath
    */
   public void addClassPath(String path) {

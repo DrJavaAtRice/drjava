@@ -41,6 +41,7 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
+import gj.util.Vector;
 import gj.util.Hashtable;
 import gj.util.Enumeration;
 import java.io.*;
@@ -92,7 +93,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
   private InterpreterData _activeInterpreter;
 
   /** The currently accumulated classpath for all Java interpreters. */
-  private String _classpath;
+  private Vector<String> _classpath;
   
   /** Responsible for running JUnit tests in this JVM. */
   private JUnitTestManager _junitTestManager;
@@ -113,7 +114,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     _activeInterpreter = _defaultInterpreter;
     _interpreters = new Hashtable<String,InterpreterData>();
     _junitTestManager = new JUnitTestManager(this);
-    _classpath = "";
+    _classpath = new Vector<String>();
     
     // do an interpretation to get the interpreter loaded fully
     try {
@@ -275,7 +276,10 @@ public class InterpreterJVM extends AbstractSlaveJVM
    */
   public void addJavaInterpreter(String name) {
     JavaInterpreter interpreter = new DynamicJavaAdapter();
-    interpreter.addClassPath(_classpath);
+    // Add each entry on the accumulated classpath
+    for (int i=0; i < _classpath.size(); i++) {
+      interpreter.addClassPath(_classpath.elementAt(i));
+    }
     addInterpreter(name, interpreter);
   }
   
@@ -454,7 +458,9 @@ public class InterpreterJVM extends AbstractSlaveJVM
   // ---------- Java-specific methods ----------
 
   /**
-   * Adds the given string to the classpath shared by ALL Java interpreters.
+   * Adds the given path to the classpath shared by ALL Java interpreters.
+   * This method <b>cannot</b> take multiple paths separated by
+   * a path separator; it must be called separately for each path.
    * @param s Entry to add to the accumulated classpath
    */
   public void addClassPath(String s) {
@@ -475,15 +481,19 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
     
     // Keep this entry on the accumulated classpath
-    _classpath += s;
-    _classpath += System.getProperty("path.separator");
+    _classpath.addElement(s);
   }
   
   /**
    * Returns the accumulated classpath in use by all Java interpreters.
    */
   public String getClasspath() {
-    return _classpath;
+    StringBuffer cp = new StringBuffer();
+    for (int i=0; i < _classpath.size(); i++) {
+      cp.append(_classpath.elementAt(i));
+      cp.append(System.getProperty("path.separator"));
+    }
+    return cp.toString();
   }
 
   /**
