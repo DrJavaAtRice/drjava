@@ -492,7 +492,8 @@ public final class InteractionsModelTest extends TestCase {
     //Simulate result
     _model.replReturnedSyntaxError("Encountered Unexpected \"<EOF>\"", "public class A {\n", -1, -1, -1, -1);
     
-    assertEquals("Current interaction should still be there - should not have interpreted", "public class A {\n\n", doc.getCurrentInteraction());
+    assertEquals("Current interaction should still be there - should not have interpreted", "public class A {\n" + System.getProperty("line.separator"),
+                 doc.getCurrentInteraction());
     
     History h = doc.getHistory();
     assertEquals("History should be empty", 0, h.size());

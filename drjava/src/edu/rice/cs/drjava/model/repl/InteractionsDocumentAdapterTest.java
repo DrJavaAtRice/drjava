@@ -105,10 +105,11 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
       _model.interpreterResetting();
     }
     synchronized(_model){
+      int returnNum = System.getProperty("line.separator").length();
       assertEquals("StylesList after reset should contain 1 pair",1, _adapter.getStylesList().size());
       //Resetting Interactions piece
       assertEquals("The only element of the StylesList after reset should be",
-                   "((48, 74), error)", _adapter.getStylesList().get(0).toString());
+                   "(("+(47+returnNum)+", "+(72+returnNum*2)+"), error)", _adapter.getStylesList().get(0).toString());
     }
   }
   
