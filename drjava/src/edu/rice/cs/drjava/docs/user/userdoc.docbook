@@ -231,24 +231,43 @@ OTHER DEALINGS WITH THE SOFTWARE.
   <title>Tree View</title>
   <para>When using the project facility, the navigator pane on the left hand side of the DrJava window displays the files in a tree view, giving you a graphical representation of where the project files are located in the project directories.</para>
   </formalpara>
-  <para>Note that when using the project facility, all project files must be in the directory where the project file is saved or in subdirectories of this directory.</para>
-  <formalpara>
-  <title>New Projects</title>
-  <para>To create a new project, either select "New" in the Project menu for a project with no files, or select "Save As" in the project menu when you have one or more files already open.</para>
-  </formalpara>
+  <para>Note that when using the project facility, in order for an open file to be considered a project file, it must be at or below the directory in which the project file is saved.</para>
+  <para>Files located outside the project directory will be placed into the "[External Files]" branch when the project is open.</para>
   <para>Only one project may be open at a time.</para>
   <formalpara>
-  <title>Saving Project</title>
+  <title>New Projects</title>
+  <para>To create a new project, either select "New" in the Project menu for a project that is initially empty, or select "Save As" in the project menu when you have one or more files already open.</para>
+  </formalpara>
+  <para>Selecting "Save As" in the Project Menu will create a new project out of the files currently open.</para>
+  <formalpara>
+  <title>Saving a Project</title>
   <para>To save a project, either select "Save" in the Project menu, or select "Save All" in the File Menu (or Ctrl+Alt+S). Note that when you save the project, it only saves the list of files that are in the project, not the files themselves. Saving the project does not save the individual files that are members of the project. Use "Save All" if you wish to save all files as well as the project file to which they belong.</para>
   </formalpara>
   <formalpara>
-  <title>Opening A Project</title>
+  <title>Opening a Project</title>
   <para>To open a project, select "Open" under the Project menu, then select a previously saved project file.</para>
   </formalpara>
   <formalpara>
-  <title>Setting the built directory</title>
-  <para>The project facility allows the user to set a built directory where class files will be compiled. This give the user the freedom to have separate source file and built file directories. To set the project built directory, open the project, then select "Project Properties" in the project menu.</para>
+  <title>Compiling a Project</title>
+  <para>To compile a project, select "Compile Project" under the Project menu. This will compile all files in the project view. All files in the external branch (Under the "External Files" folder) will not be compiled.</para>
   </formalpara>
+  <para>When not in project view, the "Compile All" button compiles all open files, whereas in project view, "Compile All" only compiles the open project.</para>
+  <formalpara>
+  <title>Running a Project</title>
+  <para>To run the main method of a project, select "Run Main Document" under the Project menu. This option is only available if you have specified a file containing the project's main method in the "Project Properties" dialog in the Project menu.</para>
+  </formalpara>
+  
+  <section id="project-properties">
+  <title>Project Properties</title>
+  <formalpara>
+  <title>Build directory</title>
+  <para>The project facility allows the user to set a build directory where class files will be compiled. This gives the user the freedom to have separate source file and built file directories. To set a project's build directory, open a project, then select "Project Properties" in the project menu.</para>
+  </formalpara>
+  <formalpara>
+  <title>Main document</title>
+  <para>Additionally, the project facility allows the user to specify a "Main Document" file for your project. When "Run Main Document" is then selected in the Project menu, the main method of the "Main Document" file specified will be executed.</para>
+  </formalpara>
+  </section>
   </chapter>
   
   <!-- Chapter: Interactions Pane -->
