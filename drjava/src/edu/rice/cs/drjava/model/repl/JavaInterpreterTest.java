@@ -204,7 +204,7 @@ public class JavaInterpreterTest extends TestCase {
     Pair[] cases = new Pair[] {
       Pair.make("'c' == 'c'", new Boolean('c' == 'c')), 
       Pair.make("'c' == 'c';", JavaInterpreter.NO_RESULT), 
-      Pair.make("String s = \"hello\"", null), 
+      Pair.make("String s = \"hello\"", JavaInterpreter.NO_RESULT), 
       Pair.make("String x = \"hello\";", JavaInterpreter.NO_RESULT), 
       Pair.make("s", "hello"), Pair.make("s;", JavaInterpreter.NO_RESULT), 
       Pair.make("x", "hello"), Pair.make("x;", JavaInterpreter.NO_RESULT)

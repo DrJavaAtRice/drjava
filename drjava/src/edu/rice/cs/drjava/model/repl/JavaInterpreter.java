@@ -5,6 +5,7 @@ package  edu.rice.cs.drjava;
  * @version $Id$
  */
 public interface JavaInterpreter {
+  /** Value returned to indicate no result. */
   public static final Object NO_RESULT = new Object();
 
   /**
@@ -27,6 +28,3 @@ public interface JavaInterpreter {
    */
   public void setPackageScope(String packageName);
 }
-
-
-

@@ -1,17 +1,16 @@
 package  edu.rice.cs.drjava;
 
-import  java.util.HashMap;
-import  java.util.Date;
-import  java.io.StringReader;
-import  java.io.IOException;
-import  java.io.InputStream;
-import  koala.dynamicjava.interpreter.Interpreter;
-import  koala.dynamicjava.interpreter.InterpreterException;
-import  koala.dynamicjava.interpreter.TreeInterpreter;
-import  koala.dynamicjava.interpreter.TreeClassLoader;
-import  koala.dynamicjava.interpreter.context.GlobalContext;
-import  koala.dynamicjava.parser.wrapper.JavaCCParserFactory;
+import  java.util.*;
+import  java.io.*;
 
+import koala.dynamicjava.interpreter.*;
+import koala.dynamicjava.interpreter.context.*;
+import koala.dynamicjava.interpreter.error.*;
+import koala.dynamicjava.interpreter.throwable.*;
+import koala.dynamicjava.parser.wrapper.*;
+import koala.dynamicjava.tree.*;
+import koala.dynamicjava.tree.visitor.*;
+import koala.dynamicjava.util.*;
 
 /**
  * An implementation of the interpreter for the repl pane.
@@ -54,6 +53,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
         return  result; 
       else 
         return  JavaInterpreter.NO_RESULT;
+    } catch (InterpreterInterruptedException iie) {
+      throw iie;
     } catch (Throwable ie) {
       System.err.print(new Date() + ": ");
       System.err.println(ie);
@@ -85,8 +86,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * An extension of DynamicJava's interpreter that makes sure classes are
    * not loaded by the system class loader (when possible) so that future
    * interpreters will be able to reload the classes.
-   * This is somewhat a hack (it might be better to just modify TreeInterpreter)
-   * but we don't want to modify DynamicJava right now.
+   * We also override the evaluation visitor to allow the interpreter to be
+   * interrupted and to return NO_RESULT if there was no result.
    */
   public class InterpreterExtension extends TreeInterpreter {
 
@@ -105,6 +106,49 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       evalVisitorContext = new GlobalContext(this);
       evalVisitorContext.setAdditionalClassLoaderContainer(classLoader);
       //System.err.println("set loader: " + classLoader);
+    }
+
+    /**
+     * Extends the interpret method to deal with possible interrupted
+     * exceptions.
+     * Unfortunately we have to copy all of this method to override it.
+     * @param is    the reader from which the statements are read
+     * @param fname the name of the parsed stream
+     * @return the result of the evaluation of the last statement
+     */
+    public Object interpret(Reader r, String fname) throws InterpreterException
+    {
+      try {
+        SourceCodeParser p = parserFactory.createParser(r, fname);
+        List    statements = p.parseStream();
+        ListIterator    it = statements.listIterator();
+        Object result = JavaInterpreter.NO_RESULT;
+
+        while (it.hasNext()) {
+          Node n = (Node)it.next();
+
+          Visitor v = new NameVisitor(nameVisitorContext);
+          Object o = n.acceptVisitor(v);
+          if (o != null) {
+            n = (Node)o;
+          }
+
+          v = new TypeChecker(checkVisitorContext);
+          n.acceptVisitor(v);
+
+          evalVisitorContext.defineVariables
+            (checkVisitorContext.getCurrentScopeVariables());
+
+          v = new EvaluationVisitorExtension(evalVisitorContext);
+          result = n.acceptVisitor(v);
+        }
+
+        return result;
+      } catch (ExecutionError e) {
+        throw new InterpreterException(e);
+      } catch (ParseError e) {
+        throw new InterpreterException(e);
+      }
     }
   }
 
@@ -249,6 +293,5 @@ class ClassLoadChecker {
     }
   }
 }
-
 
 
