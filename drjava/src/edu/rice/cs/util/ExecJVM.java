@@ -91,10 +91,11 @@ public final class ExecJVM {
    *
    * @return {@link Process} object corresponding to the executed JVM
    */
-  public static Process runJVM(String mainClass, String[] classParams)
+  public static Process runJVMPropogateClassPath(String mainClass,
+                                                 String[] classParams)
     throws IOException
   {
-    return runJVM(mainClass, classParams, new String[0]);
+    return runJVMPropogateClassPath(mainClass, classParams, new String[0]);
   }
   
   /**
@@ -117,6 +118,11 @@ public final class ExecJVM {
     _addArray(args, classParams);
 
     String[] argArray = (String[]) args.toArray(new String[0]);
+
+    //for (int i = 0; i < argArray.length; i++) {
+      //System.err.println("arg #" + i + ": " + argArray[i]);
+    //}
+
     return Runtime.getRuntime().exec(argArray);
   }
     

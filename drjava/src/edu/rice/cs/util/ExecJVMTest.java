@@ -34,14 +34,21 @@ public class ExecJVMTest extends TestCase {
     // Run new JVM to create the file
     String className = getClass().getName() + "$FileCreator";
     String tempName = tempFile.getAbsolutePath();
-    Process jvm = ExecJVM.runJVM(className, new String[] { tempName });
+    Process jvm = ExecJVM.runJVMPropogateClassPath(className,
+                                                   new String[] { tempName });
+
     int result = jvm.waitFor();
 
     // Check jvm executed OK
-    assertTrue("jvm System.out empty", jvm.getInputStream().read() == -1);
-    assertTrue("jvm System.err empty", jvm.getErrorStream().read() == -1);
-    assertTrue("jvm created file", tempFile.exists());
-    assertEquals("jvm exit code", 0, result);
+    try {
+      assertTrue("jvm did not create file", tempFile.exists());
+      assertEquals("jvm exit code", 0, result);
+      assertTrue("jvm System.out not empty", jvm.getInputStream().read() == -1);
+      assertTrue("jvm System.err not empty", jvm.getErrorStream().read() == -1);
+    }
+    finally {
+    }
+
 
     // clean up file
     ret = tempFile.delete();
