@@ -443,6 +443,53 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return doc;
   }
 
+  /**
+   * Creates a new junit test case.
+   * @param name the name of the new test case
+   * @param makeSetUp true iff an empty setUp() method should be included
+   * @param makeTearDown true iff an empty tearDown() method should be included
+   * @return the new open test case
+   */
+  public OpenDefinitionsDocument newTestCase(String name, boolean makeSetUp, boolean makeTearDown) {
+    StringBuffer buf = new StringBuffer();
+    buf.append("import junit.framework.TestCase;\n\n");
+    buf.append("/**\n* ");
+    buf.append("JUnit test class.");
+    buf.append("\n*/\n");
+    buf.append("public class ");
+    buf.append(name);
+    buf.append(" extends TestCase {\n\n");
+    if (makeSetUp) {
+      buf.append("/**\n* ");
+      buf.append("Sets up each test.");
+      buf.append("\n*/\n");
+      buf.append("public void setUp() {\n}\n\n");
+    }
+    if (makeTearDown) {
+      buf.append("/**\n* ");
+      buf.append("Cleans up after each test.");
+      buf.append("\n*/\n");
+      buf.append("public void tearDown() {\n}\n\n");
+    }
+    buf.append("/**\n* ");
+    buf.append("Test method.");
+    buf.append("\n*/\n");
+    buf.append("public void test() {\n}\n");
+    buf.append("}\n");
+    String test = buf.toString();
+
+    OpenDefinitionsDocument openDoc = newFile();
+    DefinitionsDocument doc = openDoc.getDocument();
+    try {
+      doc.insertString(0, test, null);
+      doc.indentLines(0, test.length());
+    }
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
+    }
+    return openDoc;
+  }
+
   //---------------------- Specified by ILoadDocuments ----------------------//
 
   /**

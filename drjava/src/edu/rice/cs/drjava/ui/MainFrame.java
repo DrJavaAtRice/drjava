@@ -311,6 +311,25 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /**
+   * Sets the document in the definitions pane to a new templated junit test class.
+   */
+  private Action _newJUnitTestAction = new AbstractAction("New JUnit Test Case...") {
+    public void actionPerformed(ActionEvent ae) {
+      String testName = JOptionPane.showInputDialog(MainFrame.this,
+                                                    "Please enter the test name:",
+                                                    "New Test Case",
+                                                    JOptionPane.QUESTION_MESSAGE);
+      if (testName != null) {
+        String ext = ".java";
+        if (testName.endsWith(ext)) {
+          testName = testName.substring(0, testName.length() - ext.length());
+        }
+        _model.newTestCase(testName, true, true);
+      }
+    }
+  };
+
+  /**
    * Asks user for file name and and reads that file into
    * the definitions pane.
    */
@@ -2090,6 +2109,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _setUpActions() {
     _setUpAction(_newAction, "New", "Create a new document");
+    _setUpAction(_newJUnitTestAction, "New", "Create a new JUnit test case");
     _setUpAction(_openAction, "Open", "Open an existing file");
     _setUpAction(_saveAction, "Save", "Save the current document");
     _setUpAction(_saveAsAction, "Save As", "SaveAs",
@@ -2231,31 +2251,33 @@ public class MainFrame extends JFrame implements OptionConstants {
    * _saveMenuItem.
    */
   private JMenu _setUpFileMenu(int mask) {
-    JMenuItem tmpItem;
     JMenu fileMenu = new JMenu("File");
     fileMenu.setMnemonic(KeyEvent.VK_F);
     // New, open
     _addMenuItem(fileMenu, _newAction, KEY_NEW_FILE);
+    if (CodeStatus.DEVELOPMENT) {
+      fileMenu.add(_newJUnitTestAction);
+    }
     _addMenuItem(fileMenu, _openAction, KEY_OPEN_FILE);
     fileMenu.addSeparator();
 
     _addMenuItem(fileMenu, _saveAction, KEY_SAVE_FILE);
     _saveAction.setEnabled(false);
     _addMenuItem(fileMenu, _saveAsAction, KEY_SAVE_FILE_AS);
-    tmpItem = fileMenu.add(_saveAllAction);
+    fileMenu.add(_saveAllAction);
 
-    tmpItem = fileMenu.add(_revertAction);
+    fileMenu.add(_revertAction);
     _revertAction.setEnabled(false);
     //tmpItem = fileMenu.add(_revertAllAction);
 
     // Close, Close all
     fileMenu.addSeparator();
     _addMenuItem(fileMenu, _closeAction, KEY_CLOSE_FILE);
-    tmpItem = fileMenu.add(_closeAllAction);
+    fileMenu.add(_closeAllAction);
 
     // Page setup, print preview, print
     fileMenu.addSeparator();
-    tmpItem = fileMenu.add(_pageSetupAction);
+    fileMenu.add(_pageSetupAction);
     _addMenuItem(fileMenu, _printPreviewAction, KEY_PRINT_PREVIEW);
     _addMenuItem(fileMenu, _printAction, KEY_PRINT);
     

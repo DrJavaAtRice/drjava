@@ -108,7 +108,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
    * Constructs a new panel to display debugging information when the
    * Debugger is active.
    */
-  public DebugPanel( MainFrame frame ) throws DebugException {
+  public DebugPanel(MainFrame frame) throws DebugException {
     
     this.setLayout(new BorderLayout());
     

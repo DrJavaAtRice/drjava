@@ -96,5 +96,4 @@ public class HistorySaveDialog extends ScrollableDialog {
       return _history;
     }
   }
-  
 }
