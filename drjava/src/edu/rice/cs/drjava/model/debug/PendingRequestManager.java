@@ -81,6 +81,7 @@ public class PendingRequestManager {
       // only create a ClassPrepareRequest once per class
       ClassPrepareRequest request =
         _manager.getEventRequestManager().createClassPrepareRequest();
+      // Listen for events from the class, and also its inner classes
       request.addClassFilter(className + "*");
       request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
       request.enable();
@@ -141,6 +142,11 @@ public class PendingRequestManager {
       new Vector<DocumentDebugAction>();
     //DrJava.consoleOut().println("pending actions: " + actions);
     if (actions == null) {
+      // Must have been a different class with a matching prefix, ignore it
+      // since we're not interested in this class.
+      return;
+    }
+    else if (actions.isEmpty()) { 
       // any actions that were waiting for this class to be prepared have been
       // removed
       _manager.getEventRequestManager().deleteEventRequest(event.request());

@@ -605,6 +605,91 @@ public final class DebugTest extends DebugTestCase
     _debugger.removeListener(debugListener);
   }
   
+  
+  /**
+   * Tests that the debugger will stop at a breakpoint in one class
+   * when the invoking method resides in a class with the same
+   * prefix in its name.  (bug 769764)
+   * (ie. Class DrJavaDebugTest2 has a method which calls something
+   * in class DrJavaDebugTest, which has a breakpoint.)
+   */
+  public synchronized void testBreakpointsWithSameNamePrefix()
+    throws DebugException, BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException
+  {
+    if (printMessages) System.out.println("----testBreakpointsWithSameNamePrefix----");
+    BreakpointTestListener debugListener = new BreakpointTestListener();
+    
+    // Compile the class
+    OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS, tempFile());
+    _debugger.addListener(debugListener);
+    // Start debugger
+    synchronized(_notifierLock) {
+      _debugger.startup();
+      _waitForNotifies(1);
+      _notifierLock.wait();
+    }
+    
+   // Add breakpoint in DrJavaDebugClass before class is loaded
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Bar Line 1"),8);
+    debugListener.assertBreakpointSetCount(1);
+    
+    // Run the foo() method, hitting breakpoint
+    synchronized(_notifierLock) {
+      interpretIgnoreResult("new DrJavaDebugClass2().baz()");
+      _waitForNotifies(3);  // suspended, updated, breakpointReached
+      _notifierLock.wait();
+    }
+    
+    if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
+      
+    // Ensure breakpoint is hit
+    debugListener.assertBreakpointReachedCount(1);  //fires
+    debugListener.assertThreadLocationUpdatedCount(1);  //fires
+    debugListener.assertCurrThreadSuspendedCount(1);  //fires
+    debugListener.assertCurrThreadResumedCount(0);
+    debugListener.assertCurrThreadDiedCount(0);
+    assertInteractionsContains("Baz Line 1");
+    assertInteractionsDoesNotContain("Bar Line 1");
+    
+    // Resume until finished, waiting for interpret call to end
+    InterpretListener interpretListener = new InterpretListener();
+    _model.addListener(interpretListener);
+    synchronized(_notifierLock) {
+      if( printMessages ) System.err.println("-------- Resuming --------");
+      _asyncResume();
+      _waitForNotifies(3);  // interactionEnded, currThreadDied, interpreterChanged
+      _notifierLock.wait();
+    }
+    interpretListener.assertInteractionEndCount(1);
+    _model.removeListener(interpretListener);
+    
+    if (printMessages) System.out.println("----After second resume:\n" + getInteractionsText());
+    debugListener.assertCurrThreadResumedCount(1);  //fires (no waiting)
+    debugListener.assertCurrThreadDiedCount(1);  //fires
+    debugListener.assertBreakpointReachedCount(1);
+    debugListener.assertThreadLocationUpdatedCount(1);
+    debugListener.assertCurrThreadSuspendedCount(1);
+    assertInteractionsContains("Bar Line 2");
+    
+    // Close doc and make sure breakpoints are removed
+    _model.closeFile(doc);
+    debugListener.assertBreakpointRemovedCount(1);  //fires (no waiting)
+      
+    // Shutdown the debugger
+    if (printMessages) System.out.println("Shutting down...");
+    synchronized(_notifierLock) {
+      _debugger.shutdown();
+      _waitForNotifies(1);  // shutdown
+      _notifierLock.wait();
+    }
+    
+    debugListener.assertDebuggerShutdownCount(1);  //fires
+    if (printMessages) System.out.println("Shut down.");
+    _model.removeListener(interpretListener);
+    _debugger.removeListener(debugListener);
+  }
+  
   /**
    * Tests that breakpoints and steps behave correctly.
    */

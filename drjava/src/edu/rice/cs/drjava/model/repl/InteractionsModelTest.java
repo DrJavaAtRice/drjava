@@ -126,11 +126,11 @@ public final class InteractionsModelTest extends TestCase {
     _assertProcessedContents("java Foo \"a b c\"",
                              "Foo.main(new String[]{\"a b c\"});");
     // java Foo "a b"c d
-    // Foo.main(new String[]{"a b", "c", "d"});
+    // Foo.main(new String[]{"a bc", "d"});
     //  This is different behavior than Unix or DOS, but it's more
     //  intuitive to the user (and easier to implement).
     _assertProcessedContents("java Foo \"a b\"c d",
-                             "Foo.main(new String[]{\"a b\",\"c\",\"d\"});");
+                             "Foo.main(new String[]{\"a bc\",\"d\"});");
 
     // java Foo c:\\file.txt
     // Foo.main("c:\\file.txt");

@@ -260,17 +260,18 @@ public class InterpreterJVM extends AbstractSlaveJVM
             
             String s1 = _interactionsProcessor.preProcess(s);
             Object result = interpreter.getInterpreter().interpret(s1);
+            String resultString = String.valueOf(result);
             
             if (result == Interpreter.NO_RESULT) {
               //return new VoidResult();
-              _dialog("void interp ret: " + result);
+              //_dialog("void interp ret: " + resultString);
               _mainJVM.interpretResult(new VoidResult());
             }
             else {
               // we use String.valueOf because it deals with result = null!
-              _dialog("about to tell main result was " + result);
-              //return new ValueResult(String.valueOf(result));
-              _mainJVM.interpretResult(new ValueResult(String.valueOf(result)));
+              //_dialog("about to tell main result was " + resultString);
+              //return new ValueResult(resultString);
+              _mainJVM.interpretResult(new ValueResult(resultString));
 
             }
           }

@@ -84,6 +84,7 @@ public class EventHandlerThread extends Thread {
    * @param vm JPDA reference to the VirtualMachine generating the events
    */
   EventHandlerThread(JPDADebugger debugger, VirtualMachine vm) {
+    super("DrJava Debug Event Handler");
     _debugger = debugger;
     _vm = vm;
     _connected = true;
