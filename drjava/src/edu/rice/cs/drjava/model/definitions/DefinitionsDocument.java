@@ -80,6 +80,14 @@ public class DefinitionsDocument extends PlainDocument {
   private static boolean _tabsRemoved = true;
   /** Determines if the document has been modified since the last save. */
   private boolean _modifiedSinceSave = false;
+  /** Cached location, aides in determining line number. */
+  private int _cachedLocation;
+  /** Cached current line number. */
+  private int _cachedLineNum;
+  /** Cached location of previous line. */
+  private int _cachedPrevLineLoc;
+  /** Cached location of next line. */
+  private int _cachedNextLineLoc;
   /**
    * The reduced model of the document that handles most of the
    * document logic and keeps track of state.
@@ -106,6 +114,10 @@ public class DefinitionsDocument extends PlainDocument {
   public DefinitionsDocument() {
     super();
     _file = null;
+    _cachedLocation = 0;
+    _cachedLineNum = 1;
+    _cachedPrevLineLoc = -1;
+    _cachedNextLineLoc = -1;
   }
 
   /**
@@ -128,7 +140,7 @@ public class DefinitionsDocument extends PlainDocument {
     normEndings.add("(");
     return  normEndings;
   }
-  
+
   /**
    * Create a set of Java/GJ keywords for special coloring.
    * @return the set of keywords
@@ -136,14 +148,14 @@ public class DefinitionsDocument extends PlainDocument {
   private static HashSet _makeKeywords() {
     final String[] words =  {
       "import", "native", "package", "goto", "const", "if", "else",
-        "switch", "while", "for", "do", "true", "false", "null", "this",
-        "super", "new", "instanceof", "boolean", "char", "byte",
-        "short", "int", "long", "float", "double", "void", "return",
-        "static", "synchronized", "transient", "volatile", "final",
-        "strictfp", "throw", "try", "catch", "finally",
-        "throws", "extends", "implements", "interface", "class",
-        "break", "continue", "public", "protected", "private", "abstract",
-        "case", "default", "assert"
+      "switch", "while", "for", "do", "true", "false", "null", "this",
+      "super", "new", "instanceof", "boolean", "char", "byte",
+      "short", "int", "long", "float", "double", "void", "return",
+      "static", "synchronized", "transient", "volatile", "final",
+      "strictfp", "throw", "try", "catch", "finally",
+      "throws", "extends", "implements", "interface", "class",
+      "break", "continue", "public", "protected", "private", "abstract",
+      "case", "default", "assert"
     };
     HashSet keywords = new HashSet();
     for (int i = 0; i < words.length; i++) {
@@ -151,7 +163,7 @@ public class DefinitionsDocument extends PlainDocument {
     }
     return  keywords;
   }
-  
+
   /**
    * Returns whether this document is currently untitled
    * (indicating whether it has a file yet or not).
@@ -420,6 +432,30 @@ public class DefinitionsDocument extends PlainDocument {
    * Uses a 1 based index.
    */
   public int getCurrentLine() {
+    // don't know if this does anything.
+    if (_cachedNextLineLoc == -1 ){ initNextLineNum(); }
+    int here = getCurrentLocation();
+    // let's see if we get off easy
+    if( _cachedPrevLineLoc < here && here < _cachedNextLineLoc ){ 
+      return _cachedLineNum;
+    }
+    
+    // test to see which is easier: starting from the top
+    // or calculating relatively.
+    if( _cachedLocation - here > here ){ 
+      _cachedLineNum = getLineFromScratch(); 
+    }
+    else {
+      int lineOffset = getRelativeLine(here);
+      _cachedLineNum = _cachedLineNum+lineOffset;      
+    }
+    _cachedLocation = here;
+    _cachedPrevLineLoc = getLineStartPos(here);
+    _cachedNextLineLoc = here + _reduced.getDistToNextNewline();
+    return _cachedLineNum;
+  }
+  
+  public int getLineFromScratch(){
     int count=1;
     int _copyLocation = getCurrentLocation();
     int distPrevNewLine = _reduced.getDistToPreviousNewline( 0 );
@@ -432,6 +468,47 @@ public class DefinitionsDocument extends PlainDocument {
     setCurrentLocation( _copyLocation );
     return count;
   }
+  
+  
+
+  /**
+   * This method returns the relative offset of line number
+   * from the previous location in the document.
+   **/
+  private int getRelativeLine( int currLoc ){
+    // we moved backwards
+    int count=0;
+    setCurrentLocation( _cachedLocation );
+    if( _cachedLocation > currLoc ){
+      int distPrevNewLine = _reduced.getDistToPreviousNewline( 0 );
+      while (distPrevNewLine != -1 && getCurrentLocation()>currLoc) {
+        setCurrentLocation( getCurrentLocation()-distPrevNewLine-1 );
+        count--;
+        distPrevNewLine = _reduced.getDistToPreviousNewline( 0 );
+      }
+      // this and the similar test in the other case
+      // account for the fact that our loop condition guarantees
+      // one extraneous loop through the document.
+      if( getCurrentLocation() != currLoc ){ count++; }
+   }
+   // we moved forwards
+   else{
+     int distNextNewLine = _reduced.getDistToNextNewline();
+     while (distNextNewLine != -1 && getCurrentLocation()<currLoc) {
+       setCurrentLocation( getCurrentLocation()+distNextNewLine+1 );
+       count++;
+       distNextNewLine = _reduced.getDistToNextNewline();
+     }
+     if( getCurrentLocation() != currLoc ){ count--; }
+   }
+     setCurrentLocation( currLoc );
+     return count;
+   }
+  
+  private void initNextLineNum(){
+    _cachedNextLineLoc = _reduced.getDistToNextNewline();
+  }
+  
   
   /**
    * Get the indent level.
@@ -1277,40 +1354,40 @@ public class DefinitionsDocument extends PlainDocument {
       // OK, we must have found a package statement.
       // Now let's find the semicolon. Again, the semicolon must be free.
       int afterPackage = firstNormalLocation + "package".length();
-      
+
       int semicolonLocation = afterPackage;
       do {
         semicolonLocation = text.indexOf(";", semicolonLocation + 1);
-        
+
         if (semicolonLocation == -1) {
           throw new InvalidPackageException(firstNormalLocation,
                                             "No semicolon found to terminate " +
                                             "package statement!");
         }
-        
+
         setCurrentLocation(semicolonLocation);
       }
       while (_reduced.currentToken().getHighlightState() !=
              HighlightStatus.NORMAL);
-      
+
       // Now we have semicolon location. We'll gather text in between one
       // character at a time for simplicity. It's inefficient (I think?)
       // but it's easy, and there shouldn't be much text between
       // "package" and ";" anyhow.
       for (int walk = afterPackage + 1; walk < semicolonLocation; walk++) {
         setCurrentLocation(walk);
-        
+
         if (_reduced.currentToken().getHighlightState() ==
             HighlightStatus.NORMAL)
         {
           char curChar = text.charAt(walk);
-          
+
           if (! Character.isWhitespace(curChar)) {
             buf.append(curChar);
           }
         }
       }
-      
+
       String toReturn = buf.toString();
       if (toReturn.equals("")) {
         throw new InvalidPackageException(firstNormalLocation,
@@ -1355,36 +1432,36 @@ public class DefinitionsDocument extends PlainDocument {
   private class InsertCommand implements Runnable {
     private final int _offset;
     private final String _text;
-    
+
     public InsertCommand(final int offset, final String text) {
       _offset = offset;
       _text = text;
     }
-    
+
     public void run() {
       // adjust location to the start of the text to input
       _reduced.move(_offset - _currentLocation);
-      
+
       // loop over string, inserting characters into reduced model
       for (int i = 0; i < _text.length(); i++) {
         char curChar = _text.charAt(i);
         _addCharToReducedModel(curChar);
       }
-      
+
       _currentLocation = _offset + _text.length();
       _styleChanged();
     }
   }
-  
+
   private class RemoveCommand implements Runnable {
     private final int _offset;
     private final int _length;
-    
+
     public RemoveCommand(final int offset, final int length) {
       _offset = offset;
       _length = length;
     }
-    
+
     public void run() {
       setCurrentLocation(_offset);
       _reduced.delete(_length);

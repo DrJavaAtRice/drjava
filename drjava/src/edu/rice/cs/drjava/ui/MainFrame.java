@@ -372,6 +372,7 @@ public class MainFrame extends JFrame {
     // Set up the status bar
     // This line is here so that each DefinitionsPane
     // can understand the notion of the Location area.
+    _posListener = new PositionListener();
     _setUpStatusBar();
 
     _model = new SingleDisplayModel();
@@ -1100,7 +1101,7 @@ public class MainFrame extends JFrame {
     public void updateLocation() {
       DefinitionsDocument doc = _model.getActiveDocument().getDocument();
       _currLocationField.setText(doc.getCurrentLine() + 
-                                 ":" + doc.getCurrentCol());
+                                 ":" + doc.getCurrentCol() + "\t");
     }
   }
 
@@ -1161,9 +1162,8 @@ public class MainFrame extends JFrame {
       new CompilerErrorCaretListener(doc, _errorPanel.getErrorListPane(), pane);
     pane.addErrorCaretListener(caretListener);
     // add a listener to update line and column.
-    // COMMENTED UNTIL COMPLETE
-    //pane.addCaretListener( _posListener );
-    //_posListener.updateLocation();
+    pane.addCaretListener( _posListener );
+    _posListener.updateLocation();
 
     // Add to a scroll pane
     JScrollPane scroll = new BorderlessScrollPane(pane,
@@ -1228,6 +1228,11 @@ public class MainFrame extends JFrame {
     // reset the undo/redo menu items
     _undoAction.setDelegatee(_currentDefPane.getUndoAction());
     _redoAction.setDelegatee(_currentDefPane.getRedoAction());
+    
+    // this causes a nasty bug when first starting DrJava
+    // i'm leaving it out for now.
+    // _posListener.updateLocation();
+
   }
 
   /**

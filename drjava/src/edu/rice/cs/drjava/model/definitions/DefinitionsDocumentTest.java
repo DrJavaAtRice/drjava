@@ -463,6 +463,10 @@ public class DefinitionsDocumentTest extends TestCase
     defModel.insertString(0, s, null);
     defModel.gotoLine(3);
     assertEquals("#0.0", 3, defModel.getCurrentLine());
+    defModel.gotoLine(2);
+    assertEquals("#0.0", 2, defModel.getCurrentLine());
+    defModel.gotoLine(4);
+    assertEquals("#0.0", 4, defModel.getCurrentLine());
   }
   
   /**
