@@ -381,7 +381,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     // Get source roots
     roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 2, roots.length);
-    assertEquals("source root", subdir, roots[1]);
+    assertEquals("source root", subdir, roots[0]);
   }
 
   public void testGetSourceRootPackageThreeDeepValid()
@@ -409,7 +409,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     // (also contains currDir)
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 2, roots.length);
-    assertEquals("source root", baseTempDir, roots[1]);
+    assertEquals("source root", baseTempDir, roots[0]);
 
   }
 
@@ -473,7 +473,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     //  (also currDir)
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 2, roots.length);
-    assertEquals("source root", baseTempDir, roots[1]);
+    assertEquals("source root", baseTempDir, roots[0]);
 
   }
 
@@ -511,8 +511,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     // Get source roots (should be 3: no duplicates, but also currDir)
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 3, roots.length);
-    File root1 = roots[1];
-    File root2 = roots[2];
+    File root1 = roots[0];
+    File root2 = roots[1];
 
     // Make sure both source roots are in set
     // But we don't care about the order

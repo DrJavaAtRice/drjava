@@ -1002,20 +1002,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * Gets an array of all sourceRoots for the open definitions
    * documents, without duplicates. Note that if any of the open
    * documents has an invalid package statement, it won't be added
-   * to the source root set.
-   * This set includes the user's current directory, as well.
+   * to the source root set. On 8.7.02 changed the sourceRootSet such that 
+   * the directory DrJava was executed from is now after the sourceRoots
+   * of the currently open documents in order that whatever version the user
+   * is looking at corresponds to the class file the interactions window
+   * uses.
    */
   public File[] getSourceRootSet() {
     LinkedList roots = new LinkedList();
-    File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
-        
-    if (workDir == FileOption.NULL_FILE) {
-      workDir = new File( System.getProperty("user.dir"));
-    }
-    if (workDir.isFile() && workDir.getParent() != null) {
-      workDir = workDir.getParentFile();
-    }
-    roots.add(workDir);
 
     for (int i = 0; i < _definitionsDocs.size(); i++) {
       OpenDefinitionsDocument doc
@@ -1034,6 +1028,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         // can't add it to roots
       }
     }
+    
+    File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+        
+    if (workDir == FileOption.NULL_FILE) {
+      workDir = new File( System.getProperty("user.dir"));
+    }
+    if (workDir.isFile() && workDir.getParent() != null) {
+      workDir = workDir.getParentFile();
+    }
+    roots.add(workDir);
 
     return (File[]) roots.toArray(new File[0]);
   }
@@ -1122,8 +1126,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     CompilerInterface compiler
       = CompilerRegistry.ONLY.getActiveCompiler();
       
-    if (files.length > 0)
+    if (files.length > 0) {
+      /*DrJava.consoleOut().println("-- SourceRoots:");
+      for (int i = 0 ; i < sourceRoots.length; i ++) {
+        DrJava.consoleOut().println(sourceRoots[i]);
+      }*/
       errors = compiler.compile(sourceRoots, files);
+    }
     _distributeErrors(errors);
     // check if all open documents are in sync
     /*ListModel list = _definitionsDocs;
@@ -1484,7 +1493,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
 
     /**
-     * Runs JUnit on the current document.
+     * Runs JUnit on the current document. Compiles ALL documents in case the
+     * test class references a non-public class in another file, whose name does 
+     * not match the file name, since otherwise the compile will not know it 
+     * depends on the file the non-public class is in and won't compile it.
+     * Compiling all also saves time if the test class is already compiled since
+     * it won't try to compile it again.
      *
      * @return The results of running the tests specified in the
      * given definitions document.
@@ -1697,8 +1711,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * class file to that of the source file.
    */
     public boolean checkIfClassFileInSync() {
+      //DrJava.consoleOut().println("Beginning checkIfClassFileInSync()");
       if(isModifiedSinceSave()) {
         _doc.setClassFileInSync(false);
+        //DrJava.consoleOut().println("Ending checkIfClassFileInSync()");
         return false;
       }
       File classFile = _doc.getCachedClassFile();
@@ -1745,6 +1761,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         _doc.setCachedClassFile(classFile);
         if (classFile == null) {
           // couldn't find the class file
+          //DrJava.consoleOut().println("Ending checkIfClassFileInSync()");
           return false;
         }
       }
@@ -1758,14 +1775,17 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       }
       catch (FileMovedException fme) {
         _doc.setClassFileInSync(false);
+        //DrJava.consoleOut().println("Ending checkIfClassFileInSync()");
         return false;
       }
       if (sourceFile.lastModified() > classFile.lastModified()) {
         _doc.setClassFileInSync(false);
+        //DrJava.consoleOut().println("Ending checkIfClassFileInSync()");
         return false;
       }
       else {
         _doc.setClassFileInSync(true);
+        //DrJava.consoleOut().println("Ending checkIfClassFileInSync()");
         return true;
       }
     }

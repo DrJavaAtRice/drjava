@@ -304,10 +304,14 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
       }
       
       //System.out.println("starting interpreter... " + jvmargs[1]);
+      /*String classpath = _model.getClasspath() +
+        System.getProperty("path.separator") +
+        System.getProperty("java.class.path");
+      */
       try {
         //DrJava.consoleOut().println("In MainJVM: starting interpreter jvm");
         _interpreterProcess = ExecJVM.
-            runJVMPropogateClassPath(className, args, jvmargs);
+            runJVMPropogateClassPath(className, args, jvmargs);//classpath, jvmargs);
         //DrJava.consoleOut().println("In MainJVM: started interpreter jvm");
         
         // Start a thread to wait for the interpreter to die and to fire

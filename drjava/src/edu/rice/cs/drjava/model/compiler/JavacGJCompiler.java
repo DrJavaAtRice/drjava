@@ -200,6 +200,10 @@ public class JavacGJCompiler implements CompilerInterface {
   public CompilerError[] compile(File[] sourceRoots, File[] files) {
     // We must re-initialize the compiler on each compile. Otherwise
     // it gets very confused.
+    //DrJava.consoleOut().println("-- In JavacGJCompiler: SourceRoots:");
+    for (int i = 0 ; i < sourceRoots.length; i ++) {
+      DrJava.consoleOut().println(sourceRoots[i]);
+    }
     initCompiler(sourceRoots);
     List<String> filesToCompile = new List<String>();
 
@@ -212,8 +216,8 @@ public class JavacGJCompiler implements CompilerInterface {
     }
     catch (Throwable t) {
       // GJ defines the compile method to throw Throwable?!
-      System.err.println("Compile error: " + t);
-      t.printStackTrace();
+      //System.err.println("Compile error: " + t);
+      //t.printStackTrace();
       return new CompilerError[] {
         new CompilerError("Compile exception: " + t, false)
       };
@@ -289,6 +293,7 @@ public class JavacGJCompiler implements CompilerInterface {
     String cp = System.getProperty("java.class.path");
     // Adds extra.classpath to the classpath.
     cp += _extraClassPath;
+    cp += File.pathSeparator + sourceRootString;
     
     options.put("-classpath", cp);
 

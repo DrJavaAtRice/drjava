@@ -140,6 +140,7 @@ public class CompilerProxy implements CompilerInterface {
    */
   public CompilerError[] compile(File sourceRoot, File[] files) {
     _recreateCompiler();
+    //DrJava.consoleOut().println("realCompiler is " + _realCompiler.getClass());
     CompilerError[] ret =  _realCompiler.compile(sourceRoot, files);
     
     return ret;
@@ -156,8 +157,14 @@ public class CompilerProxy implements CompilerInterface {
    */
   public CompilerError[] compile(File[] sourceRoots, File[] files) {
     //DrJava.consoleErr().println("proxy to compile: " + files[0]);
+    
+    /*DrJava.consoleOut().println("-- In CompilerProxy: SourceRoots:");
+    for (int i = 0 ; i < sourceRoots.length; i ++) {
+      DrJava.consoleOut().println(sourceRoots[i]);
+    }*/
      
     _recreateCompiler();
+    //DrJava.consoleOut().println("realCompiler is " + _realCompiler.getClass());
     CompilerError[] ret =  _realCompiler.compile(sourceRoots, files);
     
     return ret;

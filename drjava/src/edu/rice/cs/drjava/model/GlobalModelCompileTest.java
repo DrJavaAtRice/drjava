@@ -80,6 +80,12 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
 
   private static final String FOO2_EXTENDS_FOO_TEXT =
     "class DrJavaTestFoo2 extends DrJavaTestFoo {}";
+  
+  private static final String FOO_NON_PUBLIC_CLASS_TEXT = 
+    "class DrJavaTestFoo {} class Foo{}";
+  
+  private static final String FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT =
+    "class DrJavaTestFoo2 extends Foo{}";
 
   /**
    * Constructor.
@@ -761,5 +767,31 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     // Make sure .class exists
     File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue(_name() + "Class file shouldn't exist after compile", !compiled.exists());
+  }
+  
+   /**
+   * Tests a compile on a file that references a non-public class defined in another 
+   * class with a name different than the non-public class
+   */
+  public void testCompileReferenceToNonPublicClass() throws BadLocationException, IOException {
+    OpenDefinitionsDocument doc = setupDocument(FOO_NON_PUBLIC_CLASS_TEXT);
+    OpenDefinitionsDocument doc2 = setupDocument(FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT);
+    final File file = tempFile();
+    final File file2 = tempFile(1);
+    doc.saveFile(new FileSelector(file));
+    doc2.saveFile(new FileSelector(file2));
+    doc.startCompile();
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
+    _model.addListener(listener);
+    doc2.startCompile();
+    
+    listener.checkCompileOccurred();
+    assertCompileErrorsPresent(_name(), false);
+    
+    // Make sure .class exists
+    File compiled = classForJava(file, "DrJavaTestFoo");
+    File compiled2 = classForJava(file, "DrJavaTestFoo2");
+    assertTrue(_name() + "Class file should exist after compile", compiled.exists());
+    assertTrue(_name() + "Class file should exist after compile", compiled2.exists());
   }
 }
