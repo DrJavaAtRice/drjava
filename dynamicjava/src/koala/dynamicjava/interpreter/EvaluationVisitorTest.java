@@ -44,6 +44,7 @@
 END_COPYRIGHT_BLOCK*/
 package koala.dynamicjava.interpreter;
 
+import java.io.StringReader;
 import junit.framework.TestCase;
 
 import koala.dynamicjava.interpreter.context.*;
@@ -54,8 +55,6 @@ import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.util.*;
 import koala.dynamicjava.parser.wrapper.*;
-
-import edu.rice.cs.drjava.model.repl.*;
 
 /**
  * So far this test case tests the auto boxing/unboxing capabilities
@@ -69,44 +68,57 @@ import edu.rice.cs.drjava.model.repl.*;
  */
 public class EvaluationVisitorTest extends TestCase {
   
-  private JavaInterpreter _interpreter;
+  private TreeInterpreter astInterpreter;
+  private TreeInterpreter strInterpreter;
+  
+  private ParserFactory parserFactory;
+  private String testString;
   
   public void setUp() throws java.io.IOException {
-    _interpreter = new DynamicJavaAdapter();
+    parserFactory = new JavaCCParserFactory();
+    astInterpreter = new TreeInterpreter(null); // No ParserFactory needed to interpret an AST
+    strInterpreter = new TreeInterpreter(parserFactory); // ParserFactory is needed to interpret a string
     
     try {
-      _interpreter.interpret("int x = 0;");
-      _interpreter.interpret("Integer X = new Integer(0);");
-      _interpreter.interpret("Boolean B = Boolean.FALSE;");
-      _interpreter.interpret("boolean b = false;");
-      _interpreter.interpret("int[] i = {1, 2, 3};");
-      _interpreter.interpret("Integer[] I = {1, 2, 3};");
+      interpret("int x = 0;");
+      interpret("Integer X = new Integer(0);");
+      interpret("Boolean B = Boolean.FALSE;");
+      interpret("boolean b = false;");
+      interpret("int[] i = {1, 2, 3};");
+      interpret("Integer[] I = {1, 2, 3};");
     }
-    catch (ExceptionReturnedException ere) {
+    catch (InterpreterException ie) {
       fail("Should have been able to declare variables for interpreter.");
     } 
   }
-  private AssignExpression _parseAssignExpression(String text) {
-    JavaCCParserFactory parserFactory = new JavaCCParserFactory();
-    SourceCodeParser parser = parserFactory.createParser(new java.io.StringReader(text), "");
-    try {
-      return (AssignExpression) parser.parseStream().get(0);
-    }
-    catch (ClassCastException e) {
-      throw new ClassCastException("The parsed expression was not an AssignExpression: "+
-                                   "\"" + text + "\"");
-    }
+  
+  public Object interpret(String testString) throws InterpreterException {
+    return strInterpreter.interpret(new StringReader(testString), "Unit Test");
   }
+  
+  
+//  why is this here??
+//  private AssignExpression _parseAssignExpression(String text) {
+//    JavaCCParserFactory parserFactory = new JavaCCParserFactory();
+//    SourceCodeParser parser = parserFactory.createParser(new java.io.StringReader(text), "");
+//    try {
+//      return (AssignExpression) parser.parseStream().get(0);
+//    }
+//    catch (ClassCastException e) {
+//      throw new ClassCastException("The parsed expression was not an AssignExpression: "+
+//                                   "\"" + text + "\"");
+//    }
+//  }
   
   /**
    * Tests the += operator
    */
-  public void testAddAssign() throws ExceptionReturnedException {
+  public void testAddAssign() throws InterpreterException {
     String text = "X+=5";
-    Object res  = _interpreter.interpret(text);
+    Object res  = interpret(text);
     assertEquals("X should have the Integer value 5", "5", res.toString());
     
-    res = _interpreter.interpret("X");
+    res = interpret("X");
     assertTrue("X should have been an Integer", res instanceof Integer);
     assertEquals("X should have the Integer value 5", "5", res.toString());
   }
@@ -114,20 +126,20 @@ public class EvaluationVisitorTest extends TestCase {
   /**
    * Tests the ++ operator
    */
-  public void testIncrement() throws ExceptionReturnedException {
+  public void testIncrement() throws InterpreterException {
     String text = "X++";
-    Object res  = _interpreter.interpret(text);
+    Object res  = interpret(text);
     assertEquals("X should have the Integer value 0", "0", res.toString());
     
-    res = _interpreter.interpret("X");
+    res = interpret("X");
     assertTrue("X should have been an Integer", res instanceof Integer);
     assertEquals("X should have the Integer value 1", "1", res.toString());
 
     text = "++X";
-    res  = _interpreter.interpret(text);
+    res  = interpret(text);
     assertEquals("X should have the Integer value 2", "2", res.toString());
     
-    res = _interpreter.interpret("X");
+    res = interpret("X");
     assertTrue("X should have been an Integer", res instanceof Integer);
     assertEquals("X should have the Integer value 2", "2", res.toString());
   }
@@ -135,12 +147,12 @@ public class EvaluationVisitorTest extends TestCase {
   /**
    * Tests the -= operator
    */
-  public void testSubAssign() throws ExceptionReturnedException {
+  public void testSubAssign() throws InterpreterException {
     String text = "X-=5";
-    Object res  = _interpreter.interpret(text);
+    Object res  = interpret(text);
     assertEquals("X should have the Integer value -5", "-5", res.toString());
     
-    res = _interpreter.interpret("X");
+    res = interpret("X");
     assertTrue("X should have been an Integer", res instanceof Integer);
     assertEquals("X should have the Integer value -5", "-5", res.toString());
   }
@@ -148,20 +160,20 @@ public class EvaluationVisitorTest extends TestCase {
   /**
    * Tests the -- operator
    */
-  public void testDecrement() throws ExceptionReturnedException {
+  public void testDecrement() throws InterpreterException {
     String text = "X--";
-    Object res  = _interpreter.interpret(text);
+    Object res  = interpret(text);
     assertEquals("X should have the Integer value 0", "0", res.toString());
     
-    res = _interpreter.interpret("X");
+    res = interpret("X");
     assertTrue("X should have been an Integer", res instanceof Integer);
     assertEquals("X should have the Integer value -1", "-1", res.toString());
 
     text = "--X";
-    res  = _interpreter.interpret(text);
+    res  = interpret(text);
     assertEquals("X should have the Integer value -2", "-2", res.toString());
     
-    res = _interpreter.interpret("X");
+    res = interpret("X");
     assertTrue("X should have been an Integer", res instanceof Integer);
     assertEquals("X should have the Integer value -2", "-2", res.toString());
   }
@@ -169,12 +181,12 @@ public class EvaluationVisitorTest extends TestCase {
   /**
    * Tests the *= operator
    */
-  public void testMultAssign() throws ExceptionReturnedException {
+  public void testMultAssign() throws InterpreterException {
     String text = "X=1; X*=5";
-    Object res  = _interpreter.interpret(text);
+    Object res  = interpret(text);
     assertEquals("X should have the Integer value 5", "5", res.toString());
     
-    res = _interpreter.interpret("X");
+    res = interpret("X");
     assertTrue("X should have been an Integer", res instanceof Integer);
     assertEquals("X should have the Integer value 5", "5", res.toString());
   }
@@ -182,12 +194,12 @@ public class EvaluationVisitorTest extends TestCase {
   /**
    * Tests the /= operator
    */
-  public void testDivAssign() throws ExceptionReturnedException {
+  public void testDivAssign() throws InterpreterException {
     String text = "X=5; X/=5";
-    Object res  = _interpreter.interpret(text);
+    Object res  = interpret(text);
     assertEquals("X should have the Integer value 1", "1", res.toString());
     
-    res = _interpreter.interpret("X");
+    res = interpret("X");
     assertTrue("X should have been an Integer", res instanceof Integer);
     assertEquals("X should have the Integer value 1", "1", res.toString());
   }
@@ -195,12 +207,12 @@ public class EvaluationVisitorTest extends TestCase {
   /**
    * Tests the %= operator
    */
-  public void testRemainderAssign() throws ExceptionReturnedException {
+  public void testRemainderAssign() throws InterpreterException {
     String text = "X=7; X %= 5";
-    Object res  = _interpreter.interpret(text);
+    Object res  = interpret(text);
     assertEquals("X should have the Integer value 2", "2", res.toString());
     
-    res = _interpreter.interpret("X");
+    res = interpret("X");
     assertTrue("X should have been an Integer", res instanceof Integer);
     assertEquals("X should have the Integer value 2", "2", res.toString());
   }
@@ -208,12 +220,12 @@ public class EvaluationVisitorTest extends TestCase {
   /**
    * Tests the <<= operator
    */
-  public void testLeftShiftAssign() throws ExceptionReturnedException {
+  public void testLeftShiftAssign() throws InterpreterException {
     String text = "X=1; X <<= 3";
-    Object res  = _interpreter.interpret(text);
+    Object res  = interpret(text);
     assertEquals("X should have the Integer value 8", "8", res.toString());
     
-    res = _interpreter.interpret("X");
+    res = interpret("X");
     assertTrue("X should have been an Integer", res instanceof Integer);
     assertEquals("X should have the Integer value 8", "8", res.toString());
   }
@@ -221,12 +233,12 @@ public class EvaluationVisitorTest extends TestCase {
   /**
    * Tests the >>= operator
    */
-  public void testRightShiftAssign() throws ExceptionReturnedException {
+  public void testRightShiftAssign() throws InterpreterException {
     String text = "X=8; X >>= 3";
-    Object res  = _interpreter.interpret(text);
+    Object res  = interpret(text);
     assertEquals("X should have the Integer value 1", "1", res.toString());
     
-    res = _interpreter.interpret("X");
+    res = interpret("X");
     assertTrue("X should have been an Integer", res instanceof Integer);
     assertEquals("X should have the Integer value 1", "1", res.toString());
   }
@@ -234,12 +246,12 @@ public class EvaluationVisitorTest extends TestCase {
   /**
    * Tests the >>>= operator
    */
-  public void testUnsignedRightShiftAssign() throws ExceptionReturnedException {
+  public void testUnsignedRightShiftAssign() throws InterpreterException {
     String text = "X=-1; X >>>= 1";
-    Object res  = _interpreter.interpret(text);
+    Object res  = interpret(text);
     assertEquals("X should have the Integer value 2147483647", "2147483647", res.toString());
     
-    res = _interpreter.interpret("X");
+    res = interpret("X");
     assertTrue("X should have been an Integer", res instanceof Integer);
     assertEquals("X should have the Integer value 2147483647", "2147483647", res.toString());
   }
@@ -247,12 +259,12 @@ public class EvaluationVisitorTest extends TestCase {
   /**
    * Tests the &= operator
    */
-  public void testBitAndAssign() throws ExceptionReturnedException {
+  public void testBitAndAssign() throws InterpreterException {
     String text = "X=0; X &= 1";
-    Object res  = _interpreter.interpret(text);
+    Object res  = interpret(text);
     assertEquals("X should have the Integer value 0", "0", res.toString());
     
-    res = _interpreter.interpret("X");
+    res = interpret("X");
     assertTrue("X should have been an Integer", res instanceof Integer);
     assertEquals("X should have the Integer value 0", "0", res.toString());
   }
@@ -260,12 +272,12 @@ public class EvaluationVisitorTest extends TestCase {
   /**
    * Tests the |= operator
    */
-  public void testBitOrAssign() throws ExceptionReturnedException {
+  public void testBitOrAssign() throws InterpreterException {
     String text = "X=0; X |= 1";
-    Object res  = _interpreter.interpret(text);
+    Object res  = interpret(text);
     assertEquals("X should have the Integer value 1", "1", res.toString());
     
-    res = _interpreter.interpret("X");
+    res = interpret("X");
     assertTrue("X should have been an Integer", res instanceof Integer);
     assertEquals("X should have the Integer value 1", "1", res.toString());
   }
@@ -273,12 +285,12 @@ public class EvaluationVisitorTest extends TestCase {
   /**
    * Tests the ^= operator
    */
-  public void testBitXOrAssign() throws ExceptionReturnedException {
+  public void testBitXOrAssign() throws InterpreterException {
     String text = "X=0; X ^= 1";
-    Object res  = _interpreter.interpret(text);
+    Object res  = interpret(text);
     assertEquals("X should have the Integer value 1", "1", res.toString());
     
-    res = _interpreter.interpret("X");
+    res = interpret("X");
     assertTrue("X should have been an Integer", res instanceof Integer);
     assertEquals("X should have the Integer value 1", "1", res.toString());
   }

@@ -20,8 +20,6 @@ import koala.dynamicjava.parser.wrapper.*;
 
 import junit.framework.TestCase;
 
-import edu.rice.cs.drjava.model.repl.*;
-
 /**
  * A JUnit test case class.
  * Every method starting with the word "test" will be called when running
