@@ -44,6 +44,7 @@
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
+import edu.rice.cs.util.Pair;
 import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -61,7 +62,7 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory
    * creates a new List Navigator
    * @return a list navigator
    */
-    public IAWTContainerNavigatorActor makeListNavigator() {
+    public IDocumentNavigator makeListNavigator() {
         return new JListSortNavigator();
     }
 
@@ -70,7 +71,7 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory
    * @param name the name of the root node
    * @return a tree navigator
    */
-    public IAWTContainerNavigatorActor makeTreeNavigator(String name) {
+    public IDocumentNavigator makeTreeNavigator(String name) {
         return new JTreeSortNavigator(name);
     }
     
@@ -79,9 +80,9 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory
    * @param parent the navigator to migrate from
    * @return the new list navigator
    */
-    public IAWTContainerNavigatorActor makeListNavigator(IDocumentNavigator parent)
+    public IDocumentNavigator makeListNavigator(IDocumentNavigator parent)
     {
-      IAWTContainerNavigatorActor tbr = makeListNavigator();
+      IDocumentNavigator tbr = makeListNavigator();
       migrateNavigatorItems(tbr, parent);
       migrateListeners(tbr, parent);
       return tbr;
@@ -93,9 +94,14 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory
    * @param parent the navigator to migrate from
    * @return the new tree navigator
    */
-    public IAWTContainerNavigatorActor makeTreeNavigator(String name, IDocumentNavigator parent)
+    public IDocumentNavigator makeTreeNavigator(String name, IDocumentNavigator parent, java.util.List<Pair<String, INavigatorItemFilter>> l)
     {
-      IAWTContainerNavigatorActor tbr = makeTreeNavigator(name);
+      IDocumentNavigator tbr = makeTreeNavigator(name);
+      for(Pair<String, INavigatorItemFilter> p:l){
+        tbr.addTopLevelGroup(p.getFirst(), p.getSecond());
+      }
+
+      
       migrateNavigatorItems(tbr, parent);
       migrateListeners(tbr, parent);
       return tbr;

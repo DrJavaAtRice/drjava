@@ -52,7 +52,7 @@ import java.awt.Container;
  * <code>IDocumentNavigator</code> provides a framework through which
  * individual <code>IDocuments</code> can be navigated.
  */ 
-public interface IDocumentNavigator {
+public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
     /** @return an AWT component which interacts with this document navigator */
     public Container asContainer();
 
@@ -72,12 +72,6 @@ public interface IDocumentNavigator {
      */
     public void addDocument(INavigatorItem doc, String path);
     
-    /**
-     * Sets the top level path that all INavigatorItems should have in common.
-     *
-     * @param path the top most path that all INavigatorItems will have in common
-     */
-    public void setTopLevelPath(String path);
 
     /**
      * Removes a given <code>INavigatorItem<code> from this navigator. Removes all
@@ -212,5 +206,6 @@ public interface IDocumentNavigator {
      */
     public boolean isSelectedInGroup(INavigatorItem i);
       
+    public void addTopLevelGroup(String name, INavigatorItemFilter f);
      
 }

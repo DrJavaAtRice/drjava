@@ -44,7 +44,8 @@
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
-
+import edu.rice.cs.util.Pair;
+import java.util.List;
 /**
  * Factory which produces IDocumentNavigators (i.e. returns implementing class instances represented as IDocumentNavigators)
  */
@@ -78,5 +79,5 @@ public interface IDocumentNavigatorFactory
    * @param parent the navigator to migrate from
    * @return the new tree navigator
    */
-  public IDocumentNavigator makeTreeNavigator(String name, IDocumentNavigator parent);
+  public IDocumentNavigator makeTreeNavigator(String name, IDocumentNavigator parent, java.util.List<Pair<String, INavigatorItemFilter>> l);
 }

@@ -53,7 +53,7 @@ import java.awt.event.*;
 //import edu.rice.cs.drjava.model.*;
 //import edu.rice.cs.drjava.ui.RightClickMouseAdapter;
 
-class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListSelectionListener {
+class JListNavigator extends JList implements IDocumentNavigator, ListSelectionListener {
   /**
    * the documents in this navigator
    */
@@ -209,12 +209,6 @@ class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListS
   }
   
 
-  /**
-   * noop since a list has no use for a top level path
-   */
-  public void setTopLevelPath(String path)
-  {
-  }
   
   /**
    * returns whether or not the navigator contains the document
@@ -369,4 +363,8 @@ class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListS
     return false;
   }
   
+  public void addTopLevelGroup(String name, INavigatorItemFilter f){
+    // noop
+  }
+
 }

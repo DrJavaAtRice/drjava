@@ -43,48 +43,42 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
+package edu.rice.cs.util.docnavigation;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import javax.swing.*;
+import javax.swing.event.TreeModelListener;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.tree.*;
+import java.awt.*;
+import java.net.URL;
+import java.net.MalformedURLException;
+import java.util.*;
+import java.io.*;
+import edu.rice.cs.util.*;
 
-/**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20040716-2146;
- *
- * @version $Id$
- */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20040716-2146";
 
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+public class FileNode extends InnerNode<File>{
+  public FileNode(File f){
+    super(f);
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  public void setData(File f){
+    super.setUserObject(f);
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
+  
+  public File getData(){
+    return (File) super.getUserObject();
+  }
+  
+  public String toString(){
+    try{
+      String path = getData().getCanonicalPath();
+      int index = path.lastIndexOf(File.separator);
+      path = path.substring(index+1);
+      return path;
+    }catch(IOException e){
+      return getData().toString();
     }
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+}
