@@ -58,7 +58,8 @@ public class DefinitionsDocument extends PlainDocument {
       "static", "synchronized", "transient", "volatile", "final",
       "strictfp", "throw", "try", "catch", "finally", "synchronized",
       "throws", "extends", "implements", "interface", "class",
-      "break", "continue", "public", "protected", "private", "abstract"
+      "break", "continue", "public", "protected", "private", "abstract",
+      "case"
     };
     HashSet keywords = new HashSet();
     for (int i = 0; i < words.length; i++) {
@@ -502,6 +503,7 @@ public class DefinitionsDocument extends PlainDocument {
     final String delimiters = " \t\n\r{}()[].+-/*;:=!@#$%^&*~<>?,\"`'<>|";
     final HighlightStatus original = v.elementAt(i);
     final String text;
+
     try {
       text = getText(original.getLocation(), original.getLength());
     }
@@ -509,20 +511,25 @@ public class DefinitionsDocument extends PlainDocument {
       e.printStackTrace();
       throw new RuntimeException(e);
     }
+
     // Because this text is not quoted or commented, we can use the simpler
     // tokenizer StringTokenizer.
     // We have to return delimiters as tokens so we can keep track of positions
     // in the original string.
     StringTokenizer tokenizer = new StringTokenizer(text, delimiters, true);
+    
     // start and length of the text that has not yet been put back into the
     // vector.
     int start = original.getLocation();
     int length = 0;
+
     // Remove the old element from the vector.
     v.removeElementAt(i);
+
     // Index where we are in the vector. It's the location we would insert
     // new things into.
     int index = i;
+
     while (tokenizer.hasMoreTokens()) {
       String token = tokenizer.nextToken();
       if (_keywords.contains(token)) {
@@ -537,6 +544,7 @@ public class DefinitionsDocument extends PlainDocument {
           start += length;
           length = 0;
         }
+
         // Now pull off the keyword
         int keywordLength = token.length();
         v.insertElementAt(new HighlightStatus(start,
