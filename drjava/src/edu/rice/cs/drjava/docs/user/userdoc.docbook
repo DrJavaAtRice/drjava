@@ -15,6 +15,8 @@
   <!-- Chapter: Intro -->
   <chapter id="intro">
     <title>Introduction</title>
+    <para>Note: This documentation is being updated to reflect new features, and is not completely consistent yet.  This draft contains useful notes for using the Debugger, which will be refined before the next stable release.</para>
+
     <para>DrJava is a pedagogic programming environment for Java, intended to help students focus more on program design than on the features of a complicated development environment.  It provides an Interactions window based on a "read-eval-print loop", which allows programmers to develop, test, and debug Java programs in an interactive, incremental fashion.</para>
     <simplelist>
       <member>Home Page: <ulink url="http://drjava.sourceforge.net">http://drjava.sourceforge.net</ulink></member>
@@ -45,6 +47,11 @@
 	<arg choice='opt' rep='repeat'>filename.java</arg>
       </cmdsynopsis>
       <para>(Replace DATE-TIME with the appropriate value for your file.)  On many platforms, you can also simply double-click on the <filename>.jar</filename> file and DrJava will start automatically.</para>
+      <para>To use DrJava's debugger, you must also have Sun's tools.jar on your classpath, which is usually located in the JDK's lib directory.  You cannot use the "-jar" option in this case, because it overrides anything else that is on your classpath.  Instead, start DrJava using the "-classpath" option, as follows.</para>
+      <cmdsynopsis>
+	<command>java -classpath drjava-DATE-TIME.jar:/PATH/tools.jar edu.rice.cs.drjava.DrJava</command>
+      </cmdsynopsis>
+      <para>(The command should all be on one line, and PATH should be replaced with the correct path to tools.jar.  In Windows, replace the colon with a semicolon and forward slashes with backslashes.)</para>
     </section>
 
     <section id="gs-requirements">
@@ -93,6 +100,11 @@
 	<title>Brace Matching</title>
 	<para>To help the user visualize the structure of the code, DrJava uses highlighting to match braces.  If the cursor is placed immediately after a close brace, parenthesis, or bracket, all text between that character and the corresponding open brace is highlighted in another color.  Like syntax coloring, brace matching is also done in a <emphasis>fully correct</emphasis> fashion, updated with each keystroke.</para>
       </formalpara>
+
+      <formalpara>
+	<title>Contextual Menu</title>
+	<para>The Definitions Pane also has a contextual menu, which can be viewed by right-clicking in the pane.  (Mac users should use Option+Click.)  This menu provides shortcuts to useful features such as cut, copy, and paste, as well as indenting and setting breakpoints.</para>
+      </formalpara>
     </section>
 
     <section id="edit-multiple">
@@ -139,8 +151,11 @@
 
     <formalpara>
       <title>Running the Main Method</title>
-      <para>For convenience, DrJava supports calling the main method in the Interactions Pane by simply entering "java" followed by the class name and any arguments.  For example, to run MyClass with args "arg1" and "arg2", type the following into the Interactions Pane: "java MyClass arg1 arg2".</para>
+      <para>For convenience, DrJava supports calling the main method in the Interactions Pane by simply entering "java" followed by the class name and any arguments.  For example, to run MyClass with args "arg1" and "arg2", type the following into the Interactions Pane:</para>
     </formalpara>
+    <cmdsynopsis>
+      <command> java MyClass arg1 arg2</command>
+    </cmdsynopsis>
 
     <formalpara>
       <title>Useful Shortcuts</title>
@@ -272,12 +287,62 @@ public static Test suite() {
 
   </chapter>
 
+  <!-- ---- Chapter: Debugger ---- -->
+  <chapter id="debug">
+    <title>Debugger</title>
+    <para>DrJava supports simple debugging functionality on methods called from the Interactions Pane.  Currently, users can set breakpoints in the Definitions Pane, call methods in the Interactions Pane, and see when the breakpoint is reached.  Once a breakpoint is reached, users can resume the call, or step through a line at a time.</para>
+
+    <section id="debug-setup">
+      <title>Starting the Debugger</title>
+      <para>To use DrJava's debugger, Sun's Java Platform Debugger Architecture (JPDA) classes must be on the classpath when DrJava is started.  These classes are usually found in the tools.jar file in the lib directory of the JDK, or can be downloaded in a separate jpda.jar.  See <link linkend="gs-running">Running DrJava</link> for the correct method of starting DrJava.</para>
+
+      <para>Once DrJava is running with tools.jar on the classpath, a Debugger menu will be available.  To begin using the debugging features, select the "Debug Mode" menu item from the Debugger menu.</para>
+
+      <formalpara>
+	<title>Modifying Files</title>
+	<para>When using the debugger, it is essential to remember that any modifications to source files will not be reflected in the behavior of the Interactions Pane or the debugger until the classes are recompiled.  Changing a source file while the debugger is running is not recommended, since lines which are highlighted by the debugger may no longer correspond to the lines in the class file being run.</para>
+      </formalpara>
+
+    </section>
+
+    <section id="debug-breakpoints">
+      <title>Breakpoints</title>
+      <para>Once DrJava is in Debug Mode, you can set a breakpoint on any line of code in a source file in the Definitions Pane, using either the Toggle Breakpoing on Current Line command in the Debugger menu or the Toggle Breakpoint command on the contextual (right-click) menu in the Definitions Pane.  When a breakpoint is set, the line will be highlighted in red.  When a breakpoint is reached, the line becomes highlighted in bright blue and a message is printed to the Interactions Pane.  The Interactions Pane will then be suspended until the Resume command is selected from the Debugger menu.</para>
+
+      <para>When setting breakpoints, it is important to remember that only lines with actual code can be used.  Blank lines and comments will never trigger a breakpoint, even if the line is highlighted in red.  (Note that we do not yet support breakpoints on method contracts either, although this will be supported in a later version.)</para>
+    </section>
+
+    <section id="debug-step">
+      <title>Stepping and Resuming</title>
+      <para>After a breakpoint has been reached, the Interactions Pane will be suspended.  Choosing Resume from the Debug menu will allow the current method to finish and will return the prompt in the Interactions Pane.  An alternative to resuming is using the Step commands in the Debug menu, which allow the user to step through the execution of the method, one line at a time.  Each time a Step command is selected, the debugger will highlight the next line of code to be executed.  If the code is in another file, the debugger will look for the file on the Sourcepath and attempt to open it.</para>
+
+      <formalpara>
+	<title>Step Into</title>
+	<para>The Step Into command will walk into any method calls that occur in the code, possibly opening additional files.</para>
+      </formalpara>
+
+      <formalpara>
+	<title>Step Over</title>
+	<para>The Step Over command will not enter any new method calls, but will treat them as a single operation.</para>
+      </formalpara>
+
+      <formalpara>
+	<title>Step Out</title>
+	<para>The Step Out command will finish running the current method and stop at the next line of code.</para>
+      </formalpara>
+
+      <formalpara>
+	<title>Sourcepath and Step Options</title>
+	<para>The sourcepath is the set of directories in which to look for source files when stepping.  It can be set using the Preferences command in the Edit menu, on the Debugger panel.  This panel also contains options for controlling which classes will be included as part of stepping.  By default, DrJava will never step into its own source, nor the Java Interpreter (Dynamic Java), nor Java itself.  Interested users can enable these options to see how Java or DrJava functions.</para>
+      </formalpara>
+    </section>
+  </chapter>
 
 
   <!-- ---- Appendix: Configuring DrJava ---- -->
   <appendix id="configuration">
     <title>Configuring DrJava</title>
-    <para>DrJava currently has several configurable options which can be defined in a <filename>.drjava</filename> file in your home directory.  (The path to this file is displayed in DrJava's "About" window, accessible from the help menu.)  This file is a standard Java properties file, with one option on each line and with names and values separated by an equals sign.  Any options which are not defined in your <filename>.drjava</filename> file will have their default value, which is shown below after each option.  The options which are currently available are described below.</para>
+    <para>DrJava has many configurable options which can be set using the Preferences command in the Edit menu.  These values are stored in a <filename>.drjava</filename> file in your home directory.  (The path to this file is displayed in DrJava's "About" window, accessible from the help menu.)  We recommend that most users use the Preferences window to edit values, but advanced users may choose to edit the config file itself.  This file is a standard Java properties file, with one option on each line and with names and values separated by an equals sign.  Any options which are not defined in your <filename>.drjava</filename> file will have their default value, which is shown below after each option.  The options which are currently available are described below.</para>
     
     <para>Note: All parameters are parsed as standard Java strings, so escape characters must be considered.  Notably, to include a Windows-style path in a parameter value, all backslashes must be escaped.  For example:</para>
 
@@ -393,7 +458,7 @@ public static Test suite() {
     <!-- Fonts -->
     <formalpara>
       <title>Font Options</title>
-      <para>All configurable fonts have three options: the name, the size, and the style.  The font name can be set to anything available from GraphicsEnvironment.getAllFonts(), and the size is any positive integer.  The style option corresponds directly to the style constants in java.awt.Font.  (Use 0 for plain, 1 for bold, 2 for italic, and 3 for bold italic.)</para>
+      <para>(Note: this is out of date.  Each font now has a single option; use the Preferences window for now.)  All configurable fonts have three options: the name, the size, and the style.  The font name can be set to anything available from GraphicsEnvironment.getAllFonts(), and the size is any positive integer.  The style option corresponds directly to the style constants in java.awt.Font.  (Use 0 for plain, 1 for bold, 2 for italic, and 3 for bold italic.)</para>
     </formalpara>
     <variablelist>
 	
@@ -445,6 +510,13 @@ public static Test suite() {
 	<term><varname>toolbar.text.enabled = true</varname></term>
 	<listitem>
 	  <para>Whether to display text on the toolbar buttons.  It is only relevant if the <varname>toolbar.icons.enabled</varname> option is set to true, since text will always be displayed if the icons are disabled.</para>
+	</listitem>
+      </varlistentry>
+
+      <varlistentry>
+	<term><varname>linenum.enabled = false</varname></term>
+	<listitem>
+	  <para>Whether to display all line numbers along the left margin of the Definitions Pane.</para>
 	</listitem>
       </varlistentry>
       
