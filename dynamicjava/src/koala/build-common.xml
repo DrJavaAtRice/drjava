@@ -64,8 +64,8 @@ target="jsr14"
 
 <!-- Init target. All others depend on it. Initialize the directory. -->
 <target name="init">
-  <!-- available type="file" file="${jsr14_classpath}" property="jsr14_ok" />
-  <antcall target="check_for_jsr14" /-->
+ <!-- <available type="file" file="${jsr14_classpath}" property="jsr14_ok" />
+  <antcall target="check_for_jsr14" /> -->
   <antcall target="compile-tstamp-gmt"/>
   <taskdef name="tstamp_gmt" classname="edu.rice.cs.util.ant.TstampGMT" classpath="${built}"/>
   <tstamp_gmt /> <!-- Ant requires us to make time stamp -->

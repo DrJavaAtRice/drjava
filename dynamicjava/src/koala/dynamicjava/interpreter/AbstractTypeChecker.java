@@ -512,6 +512,28 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
   }
 
   /**
+   * This method visits a variable declaration without actually defining
+   * anything in the context.  This method was added to allow other objects
+   * to type check a variable declaration without actually creating a new
+   * binding in the context.  This behavior was added so that when a
+   * variable declaration has some error in it, the declaration would not
+   * make it into the context. (this method should be run on an individual 
+   * variable declaration before the type checker visitor is formally 
+   * executed on the entire AST)
+   * @param node the variable declaration to check
+   */
+  public void preCheckVariableDeclaration(VariableDeclaration node) {
+    Class lc = node.getType().acceptVisitor(this);
+    Expression init = node.getInitializer();
+    if (init != null) {
+      Class rc = init.acceptVisitor(this);
+      // this call to checkAssignmentStaticRules is not
+      // intended to mutate the AST for autoboxing/unboxing
+      checkAssignmentStaticRules(lc, rc, node, init);
+    }
+  }
+  
+  /**
    * Visits a BlockStatement
    * @param node the node to visit
    */
@@ -634,7 +656,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
       Method m = null;
       try {
         m = context.lookupMethod(exp, mn, cargs);
-      } 
+      }
       catch (NoSuchMethodException e) {
         String s = c.getName();
         String sargs = "";
@@ -658,7 +680,8 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
       node.setProperty(NodeProperties.METHOD, m);
       node.setProperty(NodeProperties.TYPE,   c = m.getReturnType());
       return c;
-    } else {
+    } 
+    else {
       if (!mn.equals("clone") || node.getArguments() != null) {
         String s0 = "clone";
         String s1 = c.getComponentType().getName() + " array";
@@ -2767,6 +2790,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     }
   }
 
+  
   /**
    * Check a list of node by running this type checker
    * on each node in the list.

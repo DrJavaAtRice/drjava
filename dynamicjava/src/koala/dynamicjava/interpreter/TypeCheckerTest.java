@@ -910,7 +910,7 @@ public class TypeCheckerTest extends TestCase {
     _checkBinaryExpression(text, leftExpected, rightExpected);
   }
    
-  public void xtestVariableDeclaration()  throws ExceptionReturnedException {
+  public void testVariableDeclaration()  throws ExceptionReturnedException {
     String text = "Integer i = 1;";
     String initExpected = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: java.lang.Integer) [(koala.dynamicjava.tree.CastExpression: (koala.dynamicjava.tree.IntegerLiteral: 1 1 int) (koala.dynamicjava.tree.IntType: int))])";
     VariableDeclaration exp = (VariableDeclaration)_parseCode(text).get(0);

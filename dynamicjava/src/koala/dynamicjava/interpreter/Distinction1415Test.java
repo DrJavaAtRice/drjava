@@ -137,7 +137,91 @@ public class Distinction1415Test extends TestCase {
     System.setProperty("java.specification.version",currentversion); 
   }
   
+  /**
+   * Test that the use of autoboxing and auto-unboxing fails when the runtime environment version is set to 1.4
+   */
+  public void testAutoboxing14() {
+    String currentversion = System.getProperty("java.specification.version");
+    System.setProperty("java.specification.version","1.4");
+    
+    //Auto box
+    try{
+      testString =
+        "int i = 5;" +
+        "Integer j;" +
+        "j = i;";
+      interpret(testString);
+      fail("Should have thrown WrongVersionException");
+    }
+    catch(WrongVersionException wve) {
+      //Expected to throw a WrongVersionException
+    }
+    
+    //Auto unbox
+    try{
+      testString =
+        "Character c = new Character('c');" +
+        "char d;" +
+        "d = c;";
+      interpret(testString);
+      fail("Should have thrown WrongVersionException");
+    }
+    catch(WrongVersionException wve) {
+      //Expected to throw a WrongVersionException
+    }
+    
+    //Auto box in declaration
+    try{
+      testString =
+        "Integer k = 5;";
+      interpret(testString);
+      fail("Should have thrown WrongVersionException");
+    }
+    catch(WrongVersionException wve) {
+      //Expected to throw a WrongVersionException
+    }
+    
+    //Auto unbox in declaration
+    try{
+      testString =
+        "int l = new Integer(5);";
+      interpret(testString);
+      fail("Should have thrown WrongVersionException");
+    }
+    catch(WrongVersionException wve) {
+      //Expected to throw a WrongVersionException
+    }
+    
+    //Set the java runtime version back to the correct version
+    System.setProperty("java.specification.version",currentversion);    
+  }
   
+  /**
+   * Test that the use of autoboxing and auto-unboxing does not fail when the runtime environment version is set to 1.5
+   */
+  public void testAutoboxing15() {
+    String currentversion = System.getProperty("java.specification.version");
+    System.setProperty("java.specification.version","1.5");
+    try{
+      testString =
+        "Character c = new Character('c');" +
+        "char d;" +
+        "d = c;" +
+        "Integer i = 5;" +
+        "int j = new Integer(6);"+
+        "i = j;"+
+        "j = i;";
+      interpret(testString);
+    }
+    catch(WrongVersionException wve) {
+      fail("Should not have thrown WrongVersionException");
+    }
+    
+    //Set the java runtime version back to the correct version
+    System.setProperty("java.specification.version",currentversion); 
+  }
+  
+ 
   
   
 }
