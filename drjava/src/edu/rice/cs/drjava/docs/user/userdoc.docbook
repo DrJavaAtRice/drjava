@@ -212,7 +212,7 @@
 <itemizedlist>
 	  <listitem>
 	    <para>At the top of the file, include:</para>
-	    <programlisting>import.junit.framework.TestCase;</programlisting>
+	    <programlisting>import junit.framework.TestCase;</programlisting>
 	  </listitem>
 	  <listitem>
 	    <para>The main class of the file must:</para>
