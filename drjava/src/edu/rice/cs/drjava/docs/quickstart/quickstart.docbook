@@ -68,7 +68,7 @@
 	Select which build of DrJava is right for you, and click on the appropriate button.  We recommend that Windows users download the .exe file, that Mac OS X users use the osx.tar.gz version, and that all other users download the stable jar file.  Experienced users may want to download the most recent Development Build jar instead. To do so, click on the "more download options" link
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="CurrentStableRelease.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="CurrentStableRelease.png" format="jpg" scale=50 scalefit="1">
        		</imageobject>
      	</mediaobject>
 
@@ -77,7 +77,7 @@
 	Click on one of the Download buttons to go to the download server.  Choose a site to download the file from, and then click on the corresponding icon in the "Download" column on the far right to start the download.
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="DownloadServer.jpg" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="DownloadServer.png" format="jpg" scale=50 scalefit="1">
        		</imageobject>
      	</mediaobject>
 	</para></listitem>
@@ -434,10 +434,13 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
    <title>The Project Facility</title>
     <section id="project-overview">
      <title>Overview</title>
-     <para>The project facility is intended to provide a lightweight approach to managing a large number of files.</para>
+     <para>The project facility is intended to provide a lightweight approach to managing a large number of files spread between different subfolders and packages.</para>
 
-	<para>The project facility makes it easy to work with larger projects, and allows you to save open java files into a project file and then reopen the project at a later time. This means that you don't have to waste time reopening files in multiple folders.
-	</para>
+	<para>The project facility makes it easy to work with larger projects, and allows you to save open java files into a project file and then reopen the project at a later time. This means that you don't have to waste time reopening files in multiple folders.  The project facility was designed with two goals in mind:</para>
+<para>1. To allow sets of related files to be opened together.</para>
+<para>2. To allow DrJava's tools and options to manage a set of related files as a single entity.</para>
+
+	<para>The fundamental difference between the DrJava project facility and the project facilities of most professional development environments is that DrJava does not distinguish between "Open" files and "Project" files--if a file is open and in the project source directory, it is part of the project.</para>
 
 	</section>
 
@@ -445,7 +448,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	<section id="project-treeview">
 	<title>Tree View</title>
 
-	<para>This project facility introduces a new view in DrJava called <emphasis>Tree View</emphasis>.  When you are working with a project, the left hand pane displays the files in a tree view rather than the traditional list view.  This means that you can see where your files are in relationship to each other.</para>
+	<para>This project facility introduces a new view in DrJava called <emphasis>Tree View</emphasis>.  When you are working with a project, the left hand pane displays the files in a tree view rather than the traditional list view.  This means that you can see where your files are in relationship to each other.  If you select a folder in the tree view, when you select "Open" or "Save", the default directory DrJava looks in will correspond to that folder.</para>
 
 		<mediaobject>
        		<imageobject>
@@ -507,8 +510,10 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
      	</mediaobject>
 
 	<para> To add new files to your project, just open them.  They will automatically be sorted into the correct folder.  When you save the project, they will be saved with it.</para>
-
-	<para>Once you have created a project, you will want to save it so you can use it again.  To save a project, select "Project, Save".  Note that saving a project only saves the list of what files are in the project; it does not save the files themselves.  Use "File, Save All" to save all the files in the project.</para>
+</section>
+<section id="project-save">
+<title>Saving Your Project</title>
+	<para>If you make any changes to the structure or state of your project (for instance, collapsing a folder tree or opening or closing files), you will want to save it so your preferences are maintained.  To save a project, select "Project, Save".  Note that saving a project only saves the list of what files are in the project; it does not save the files themselves.  Use "File, Save All" to save all the files in the project.</para>
 
 	<para>Saving a project will also save which document you are currently viewing so that it will be re-displayed the next time you open the project.  It also saves the cursor location in each file as well as whether a folder in the project tree is collapsed or expanded.</para>
 
