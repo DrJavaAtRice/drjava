@@ -54,6 +54,32 @@ import java.util.*;
 public abstract class FileOps {
 
   /**
+   * This filter checks for files that end in .java
+   */
+  public static FileFilter JAVA_FILE_FILTER = new FileFilter(){
+    public boolean accept(File f){
+      //Do this runaround for filesystems that are case preserving
+      //but case insensitive
+      //Remove the last 5 letters from the file name, append ".java"
+      //to the end, create a new file and see if its equivalent to the
+      //original
+      StringBuffer name = new StringBuffer(f.getAbsolutePath());
+      String shortName = f.getName();
+      if (shortName.length() < 6){
+        return false;
+      }
+      name.delete(name.length() - 5, name.length());
+      name.append(".java");
+      File test = new File(new String(name));
+      if (test.equals(f)){
+        return true;
+      } else {
+        return false;
+      }
+    }
+  };
+  
+  /**
    * Reads the stream until it reaches EOF, and then returns the read
    * contents as a byte array. This call may block, since it will not
    * return until EOF has been reached.
@@ -195,7 +221,8 @@ public abstract class FileOps {
    * @param root the directory to start exploring from
    * @return a list of valid packages, excluding the root ("") package
    */
-  public static Vector<String> packageExplore(String prefix, File root) {
+  public static LinkedList packageExplore(String prefix, File root) {
+    /* Inner holder class. */
     class prefixAndFile {
       public String prefix;
       public File root;
@@ -204,38 +231,15 @@ public abstract class FileOps {
         this.prefix = prefix;
       }
     }
+    
     //This set makes sure we don't get caught in a loop if the filesystem has symbolic links
     //that form a circle by tracking the directories we have already explored
     final Set exploredDirectories = new HashSet();
 
-    Vector<String> output = new Vector<String>();
+    LinkedList output = new LinkedList();
     gj.util.Stack<prefixAndFile> working = new gj.util.Stack<prefixAndFile>();
     working.push(new prefixAndFile(prefix, root));
     exploredDirectories.add(root);
-
-    //This filter checks for files that end in .java
-    FileFilter javaFileFilter = new FileFilter(){
-      public boolean accept(File f){
-        //Do this runaround for filesystems that are case preserving
-        //but case insensitive
-        //Remove the last 5 letters from the file name, append ".java"
-        //to the end, create a new file and see if its equivalent to the
-        //original
-        StringBuffer name = new StringBuffer(f.getAbsolutePath());
-        String shortName = f.getName();
-        if (shortName.length() < 6){
-          return false;
-        }
-        name.delete(name.length() - 5, name.length());
-        name.append(".java");
-        File test = new File(new String(name));
-        if (test.equals(f)){
-          return true;
-        } else {
-          return false;
-        }
-      }
-    };
 
     //This filter allows only directories, and accepts each directory
     //only once
@@ -256,7 +260,7 @@ public abstract class FileOps {
       for(int a = 0; a < subDirectories.length; a++){
         File dir = subDirectories[a];
         prefixAndFile paf;
-        System.out.println("exploring " + dir);
+//         System.out.println("exploring " + dir);
         if (current.prefix == ""){
           paf = new prefixAndFile(dir.getName(), dir);
         } else {
@@ -264,16 +268,16 @@ public abstract class FileOps {
         }
         working.push(paf);
       }
-      File [] javaFiles = current.root.listFiles(javaFileFilter);
+      File [] javaFiles = current.root.listFiles(JAVA_FILE_FILTER);
 
       //Only add package names if they have java files and are not the root package
       if (javaFiles.length != 0 && current.prefix != ""){
-        output.addElement(current.prefix);
-        System.out.println("adding " + current.prefix);
+        output.add(current.prefix);
+//         System.out.println("adding " + current.prefix);
       }
     }
 
-  return output;
+    return output;
   }
 
   /**
@@ -297,8 +301,8 @@ public abstract class FileOps {
     if (makeBackup){
       backup = fileSaver.getBackupFile();
       if (!file.renameTo(backup)){
-	throw new IOException("Save failed: Could not create backup file "
-			      + backup.getAbsolutePath());
+        throw new IOException("Save failed: Could not create backup file "
+                                + backup.getAbsolutePath());
       }
       fileSaver.backupDone();
     }
@@ -308,23 +312,23 @@ public abstract class FileOps {
     File tempFile = File.createTempFile("drjava", ".temp", parent);
     try {
       /* Now, write your output to the temp file, then rename it to the correct
-	 name.  This way, if writing fails in the middle, the old file is not
-	 lost. */
+  name.  This way, if writing fails in the middle, the old file is not
+  lost. */
       fileSaver.saveTo(tempFile);
       if (!tempFile.renameTo(fileSaver.getTargetFile())){
-	throw new IOException("Save failed: Could not rename temp file " +
-			      tempFile + " to " + file);
+ throw new IOException("Save failed: Could not rename temp file " +
+         tempFile + " to " + file);
       }
       success = true;
     } finally{
       if (makeBackup){
-	/* On failure, attempt to move the backup back to its original location if we
-	   made one.  On success, register that a backup was successfully made */
-	if (success){
-	  fileSaver.backupDone();
-	} else {
-	  backup.renameTo(file);
-	}
+ /* On failure, attempt to move the backup back to its original location if we
+    made one.  On success, register that a backup was successfully made */
+ if (success){
+   fileSaver.backupDone();
+ } else {
+   backup.renameTo(file);
+ }
       }
       /* Delete the temp file */
       tempFile.delete();
@@ -388,13 +392,13 @@ public abstract class FileOps {
 
     public boolean shouldBackup(){
       if (!backupsEnabled){
-	return false;
+ return false;
       }
       if (!outputFile.exists()){
-	return false;
+ return false;
       }
       if(filesNotNeedingBackup.contains(outputFile)){
-	return false;
+ return false;
       }
       return true;
     }

@@ -42,6 +42,7 @@ package edu.rice.cs.util;
 import junit.framework.*;
 import java.io.*;
 
+import java.util.LinkedList;
 import gj.util.Vector;
 
 /**
@@ -137,66 +138,66 @@ public class FileOpsTest extends TestCase {
 
     try {
       FileOps.saveFile(new FileOps.DefaultFileSaver(writeTo) {
-	  public void saveTo(File file) throws IOException {
-	    FileOps.writeStringToFile(file, "version 1");
-	  }
-	  public boolean shouldBackup() {
-	    return false;
-	  }
-	});
+   public void saveTo(File file) throws IOException {
+     FileOps.writeStringToFile(file, "version 1");
+   }
+   public boolean shouldBackup() {
+     return false;
+   }
+ });
       assertEquals("save w/o backup", "version 1", FileOps.readFileAsString(writeTo));
       assertEquals("save w/o backup did not backup", false, backup.exists());
     
       FileOps.saveFile(new FileOps.DefaultFileSaver(writeTo) {
-	  public void saveTo(File file) throws IOException {
-	    FileOps.writeStringToFile(file, "version 2");
-	  }
-	});
+   public void saveTo(File file) throws IOException {
+     FileOps.writeStringToFile(file, "version 2");
+   }
+ });
       assertEquals("save2 w backup", "version 2", FileOps.readFileAsString(writeTo));
       assertEquals("save2 w backup did backup", "version 1",
-		   FileOps.readFileAsString(backup));
+     FileOps.readFileAsString(backup));
     
       FileOps.saveFile(new FileOps.DefaultFileSaver(writeTo) {
-	  public void saveTo(File file) throws IOException {
-	    FileOps.writeStringToFile(file, "version 3");
-	  }
-	});
+   public void saveTo(File file) throws IOException {
+     FileOps.writeStringToFile(file, "version 3");
+   }
+ });
       assertEquals("save3 w backup on", "version 3", FileOps.readFileAsString(writeTo));
       assertEquals("save3 w backup on did not backup", "version 1",
-		   FileOps.readFileAsString(backup));
+     FileOps.readFileAsString(backup));
 
     
       /* Now see what happens when saving fails and we were not making a backup
-	 Nothing should change. */
+  Nothing should change. */
       try {
-	FileOps.saveFile(new FileOps.DefaultFileSaver(writeTo) {
-	    public void saveTo(File file) throws IOException {
-	      FileOps.writeStringToFile(file, "version 4");
-	      throw new IOException();
-	    }
-	  });
-	fail("IOException not propagated");
+ FileOps.saveFile(new FileOps.DefaultFileSaver(writeTo) {
+     public void saveTo(File file) throws IOException {
+       FileOps.writeStringToFile(file, "version 4");
+       throw new IOException();
+     }
+   });
+ fail("IOException not propagated");
       } catch (IOException ioe){}//do nothing, this is expected
       assertEquals("failed save4 w/o backup", "version 3",
-		   FileOps.readFileAsString(writeTo));
+     FileOps.readFileAsString(writeTo));
       assertEquals("failed save4 w/o backup check original backup", "version 1",
-		   FileOps.readFileAsString(backup));
+     FileOps.readFileAsString(backup));
 
       /* Now see what happens when saving fails and we were making a backup */
       try {
-	FileOps.saveFile(new FileOps.DefaultFileSaver(writeTo) {
-	    public boolean shouldBackup () {
-	      return true;
-	    }
-	    public void saveTo(File file) throws IOException {
-	      FileOps.writeStringToFile(file, "version 5");
-	      throw new IOException();
-	    }
-	  });
-	fail("IOException not propagated spot 2");
+ FileOps.saveFile(new FileOps.DefaultFileSaver(writeTo) {
+     public boolean shouldBackup () {
+       return true;
+     }
+     public void saveTo(File file) throws IOException {
+       FileOps.writeStringToFile(file, "version 5");
+       throw new IOException();
+     }
+   });
+ fail("IOException not propagated spot 2");
       } catch(IOException ioe){} //do nothing, we expected this
       assertEquals("failed save5 w backup", "version 3",
-		   FileOps.readFileAsString(writeTo));
+     FileOps.readFileAsString(writeTo));
     } finally {
       /* This finally makes sure our test files are deleted */
       writeTo.delete();
@@ -223,7 +224,7 @@ public class FileOpsTest extends TestCase {
     File javaroot = new File(rootDir, "someclass.java");
     FileOps.writeStringToFile(javaroot, "i can write anything i want here");
 
-    Vector packages = FileOps.packageExplore("hello", rootDir);
+    LinkedList packages = FileOps.packageExplore("hello", rootDir);
     assertEquals("package count a", 3, packages.size());
     assertTrue("packages contents a0", packages.contains("hello.sub0.subsub0"));
     assertTrue("packages contents a1", packages.contains("hello.sub1"));
