@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 
 import java.util.LinkedList;
+import java.util.Arrays;
 
 // Uses Java 1.4.1+ / JSR-14 v1.2 compiler classes
 import com.sun.tools.javac.v8.JavaCompiler;
@@ -90,6 +91,8 @@ public class Javac141Compiler implements CompilerInterface {
   
   protected Context context = null;
 
+  private String _builtPath = "";
+  
   /** A writer that discards its input. */
   private static final Writer NULL_WRITER = new Writer() {
     public void write(char cbuf[], int off, int len) throws IOException {}
@@ -178,7 +181,7 @@ public class Javac141Compiler implements CompilerInterface {
     //  DrJava.consoleOut().println(sourceRoots[i]);
     //}
     initCompiler(sourceRoots);
-    List<String> filesToCompile = new List<String>();
+    List filesToCompile = new List();
 
     for (int i = 0; i < files.length; i++) {
       filesToCompile = filesToCompile.prepend(files[i].getAbsolutePath());
@@ -191,9 +194,23 @@ public class Javac141Compiler implements CompilerInterface {
       // GJ defines the compile method to throw Throwable?!
       //System.err.println("Compile error: " + t);
       //t.printStackTrace();
-      return new CompilerError[] {
-        new CompilerError("Compile exception: " + t, false)
-      };
+      
+      
+      //Added to account for error in javac whereby a variable that was not declared will
+      //cause an out of memory error. This change allows us to output both errors and not
+      //just the out of memory error
+      
+      CompilerError[] errorArray = new CompilerError[compilerLog.getErrors().length + 1];
+      for(int i = 0; i < compilerLog.getErrors().length; i++) {
+        errorArray[i+1] = compilerLog.getErrors()[i];
+      }
+      errorArray[0] = new CompilerError("Compile exception: " + t, false);
+      return errorArray; 
+      
+//      return compilerLog.getErrors();
+//      return new CompilerError[] {
+//        new CompilerError("Compile exception: " + t, false)
+//      };
     }
 
     CompilerError[] errors = compilerLog.getErrors();
@@ -294,6 +311,8 @@ public class Javac141Compiler implements CompilerInterface {
         ("1.4.0".compareTo(version) <= 0)) {
       options.put("-source", "1.4");
     }
+    if(! _builtPath.equals(""))
+      options.put("-d",_builtPath);
   }
   
   /**
@@ -318,6 +337,11 @@ public class Javac141Compiler implements CompilerInterface {
     compiler = JavaCompiler.make(context);
   }
 
+   
+  public void setBuildDirectory(File dir){
+    _builtPath=dir.getAbsolutePath();    
+  }
+  
   /**
    * Replaces the standard compiler "log" so we can track the error
    * messages ourselves. This version will work for JDK 1.4.1+
