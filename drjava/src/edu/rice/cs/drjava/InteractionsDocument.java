@@ -56,6 +56,7 @@ class InteractionsDocument extends PlainDocument {
   }
 
   public void addClassPath(String path) {
+		System.out.println(path);
     _interpreter.addClassPath(path);
   }
 

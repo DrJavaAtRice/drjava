@@ -222,7 +222,7 @@ public class DefinitionsView extends JEditorPane
 
 
 		setKeymap(ourMap);
-					
+		
 		this.addCaretListener(_matchListener);
 		_mainFrame.installNewDocumentListener(_doc());
   }
@@ -291,7 +291,9 @@ public class DefinitionsView extends JEditorPane
         return false;
       case JFileChooser.APPROVE_OPTION:
         File chosen = fc.getSelectedFile();
-        return saveToFile(chosen.getAbsolutePath());
+				if (chosen != null)
+					return saveToFile(chosen.getAbsolutePath());
+				else return false;
       default: // impossible since rc must be one of these
         throw new RuntimeException("filechooser returned bad rc " + rc);
     }
@@ -314,6 +316,7 @@ public class DefinitionsView extends JEditorPane
     _currentFileName = path;
     _doc().resetModification();
     _mainFrame.updateFileTitle(titlebarName);
+		_mainFrame.installNewDocumentListener(_doc());
 
     // On all open/new operations reset focus to this
     // But do it in the Swing thread to be safe.
@@ -383,14 +386,17 @@ public class DefinitionsView extends JEditorPane
 		  case JFileChooser.ERROR_OPTION:
         return false;
       case JFileChooser.APPROVE_OPTION:
+				_mainFrame.hourglassOn();
         File chosen = fc.getSelectedFile();
-
+				if (chosen == null)
+					return false;
         try
         {
           FileReader reader = new FileReader(chosen);
           read(reader, null);
           // Update file name if the read succeeds.
           _resetDocument(chosen.getAbsolutePath());
+					_mainFrame.hourglassOff();
           return true;
         }
         catch (IOException ioe)
@@ -403,6 +409,7 @@ public class DefinitionsView extends JEditorPane
                                         "Error opening file",
                                         msg,
                                         JOptionPane.ERROR_MESSAGE);
+					_mainFrame.hourglassOff();
           return false;
         }
       default: // impossible since rc must be one of these

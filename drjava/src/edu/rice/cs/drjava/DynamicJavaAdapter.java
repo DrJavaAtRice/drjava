@@ -49,6 +49,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
 
   public void addClassPath(String path) {
     _djInterpreter.addClassPath(path);
+		System.out.println(_djInterpreter.getClassNames());
   }
 
 }

@@ -16,6 +16,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.JMenuItem;
+import javax.swing.JComponent;
 
 import javax.swing.text.DefaultEditorKit;
 
@@ -26,8 +27,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowListener;
 import java.awt.event.WindowEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.KeyAdapter;
+
 import java.awt.BorderLayout;
 import java.awt.Label;
+import java.awt.Cursor;
+
 
 import java.io.File;
 
@@ -73,8 +79,8 @@ public class MainFrame extends JFrame
       boolean opened = _definitionsView.open();
       if (opened) {
         _resetInteractions();
-	_saveButton.setEnabled(false);
-	_compileButton.setEnabled(true);
+				_saveButton.setEnabled(false);
+				_compileButton.setEnabled(true);
       }
     }
   };
@@ -86,8 +92,8 @@ public class MainFrame extends JFrame
       boolean createdNew = _definitionsView.newFile();
       if (createdNew) {
         _resetInteractions();
-	_saveButton.setEnabled(false);
-	_compileButton.setEnabled(true);
+				_saveButton.setEnabled(false);
+				_compileButton.setEnabled(true);
       }
     }
   };
@@ -136,10 +142,10 @@ public class MainFrame extends JFrame
 
     public void actionPerformed(ActionEvent ae)
     {
-	if (_definitionsView.getCurrentFileName() == "")
-	saveAs();
-	else
-	saveToFile(_definitionsView.getCurrentFileName());
+			if (_definitionsView.getCurrentFileName() == "")
+			saveAs();
+			else
+			saveToFile(_definitionsView.getCurrentFileName());
     }
   };
 
@@ -147,17 +153,17 @@ public class MainFrame extends JFrame
   {
     public void actionPerformed(ActionEvent ae)
     {
-	saveAs();
+			saveAs();
     }
   };
 
-    void compile() 
+	void compile() 
     {
-	_compileButton.setEnabled(false);
-
+			_compileButton.setEnabled(false);
+			
 
       String filename = _definitionsView.getCurrentFileName();
-
+			
       if (filename.length() == 0) {
         // the file has never been saved. we can only get here
         // if the file was never changed and never saved.
@@ -211,7 +217,9 @@ public class MainFrame extends JFrame
           return; // user wants to do nothing
         }
       }
+			hourglassOn();
       compile();
+			hourglassOff();
     }
   };
 
@@ -269,27 +277,50 @@ public class MainFrame extends JFrame
 	};
 
 
-    void installNewDocumentListener(DefinitionsDocument d) {
-	d.addDocumentListener(new DocumentListener() {
+	void installNewDocumentListener(DefinitionsDocument d) {
+		d.addDocumentListener(new DocumentListener() {
 	    public void changedUpdate(DocumentEvent e) {
-		_saveButton.setEnabled(true);
-		_compileButton.setEnabled(false);
+				_saveButton.setEnabled(true);
+				_compileButton.setEnabled(false);
 	    }
 	    public void insertUpdate(DocumentEvent e) {
-		_saveButton.setEnabled(true);
-		_compileButton.setEnabled(false);
+ 				_saveButton.setEnabled(true);
+				_compileButton.setEnabled(false);
 	    }
 	    public void removeUpdate(DocumentEvent e) {
-		_saveButton.setEnabled(true);
-		_compileButton.setEnabled(false);
+				_saveButton.setEnabled(true);
+				_compileButton.setEnabled(false);
 	    }
-	});
-    }
+		});
+	}
+	
+	private class GlassPane extends JComponent 
+	{
+		public GlassPane() 
+			{
+				addKeyListener(new KeyAdapter() { });
+				addMouseListener(new MouseAdapter() { });
+				super.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			}
+	}
+
+	public void hourglassOn ()
+		{
+			getGlassPane().setVisible(true);
+		}
+
+	public void hourglassOff ()
+		{
+			getGlassPane().setVisible(false);
+		}
 	
   /** Creates the main window, and shows it. */
   public MainFrame()
   {
-    _fileNameField = new JTextField();
+		//set up the hourglass cursor
+		setGlassPane(new GlassPane());
+
+		_fileNameField = new JTextField();
     _fileNameField.setEditable(false);
 
     _definitionsView = new DefinitionsView(this);
