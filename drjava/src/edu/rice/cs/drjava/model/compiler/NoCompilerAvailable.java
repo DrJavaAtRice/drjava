@@ -29,6 +29,10 @@ public class NoCompilerAvailable implements CompilerInterface {
   public String getName() {
     return "(no compiler available)";
   }
+
+  public String toString() {
+    return getName();
+  }
 }
 
 

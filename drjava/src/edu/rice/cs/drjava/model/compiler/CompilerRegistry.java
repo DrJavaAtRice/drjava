@@ -3,7 +3,12 @@ package edu.rice.cs.drjava.model.compiler;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
+import java.net.*;
+import java.io.*;
+
 import java.lang.reflect.Field;
+
+import edu.rice.cs.drjava.DrJava;
 
 /**
  * Registry for all CompilerInterface implementations.
@@ -19,6 +24,7 @@ public class CompilerRegistry {
    */
   public static final String[] DEFAULT_COMPILERS = {
     "edu.rice.cs.drjava.model.compiler.JavacGJCompiler",
+    "edu.rice.cs.drjava.model.compiler.JavacFromToolsJar",
     "edu.rice.cs.drjava.model.compiler.GJv6Compiler"
   };
 
@@ -126,6 +132,8 @@ public class CompilerRegistry {
       _setFirstAvailableCompilerActive();
     }
 
+    //DrJava.consoleErr().println("active compiler: " + _activeCompiler);
+
     if (_activeCompiler.isAvailable()) {
       return _activeCompiler;
     }
@@ -179,14 +187,36 @@ public class CompilerRegistry {
    */
   private CompilerInterface _instantiateCompiler(String name) throws Throwable {
     Class clazz = _baseClassLoader.loadClass(name);
+    return createCompiler(clazz);
+  }
+
+  public static CompilerInterface createCompiler(Class clazz) throws Throwable {
     try {
       Field field = clazz.getField("ONLY");
       // null is passed to get since it's a static field
-      return (CompilerInterface) field.get(null);
+      Object val = field.get(null);
+
+      return (CompilerInterface) val;
     }
     catch (Throwable t) {
       return (CompilerInterface) clazz.newInstance();
     }
   }
 
+  /** Returns reasonable location guesses for tools jar file. */
+  private static URL[] _getToolsJarURLs() {
+    File home = new File(System.getProperty("java.home"));
+    File libDir = new File(home, "lib");
+    File libDir2 = new File(home.getParentFile(), "lib");
+
+    try {
+      return new URL[] {
+        new File(libDir, "tools.jar").toURL(),
+        new File(libDir2, "tools.jar").toURL()
+      };
+    }
+    catch (MalformedURLException e) {
+      return new URL[0];
+    }
+  }
 }

@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.util.UnexpectedException;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.Version;
 
 /**

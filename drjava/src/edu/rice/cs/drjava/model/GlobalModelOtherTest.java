@@ -67,7 +67,12 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     final File file = tempFile();
     doc.saveFile(new FileSelector(file));
 
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
+    _model.addListener(listener);
     doc.startCompile();
+    listener.checkCompileOccurred();
+    assertCompileErrorsPresent(false);
+    _model.removeListener(listener);
 
     String result = interpret("new Foo().getClass().getName()");
 
@@ -89,10 +94,19 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     final int num_iterations = 5;
     OpenDefinitionsDocument doc;
 
+
     for (int i = 0; i < num_iterations; i++) {
       doc = setupDocument(text_before + i + text_after);
       doc.saveFile(new FileSelector(file));
+
+      CompileShouldSucceedListener listener =new CompileShouldSucceedListener();
+      _model.addListener(listener);
+
       doc.startCompile();
+      listener.checkCompileOccurred();
+      assertCompileErrorsPresent(false);
+      _model.removeListener(listener);
+
       assertEquals("interactions result, i=" + i,
           String.valueOf(i),
           interpret("new Foo().m()"));

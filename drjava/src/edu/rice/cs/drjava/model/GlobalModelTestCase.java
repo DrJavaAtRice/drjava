@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
 
-import edu.rice.cs.drjava.util.FileOps;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
@@ -111,7 +111,7 @@ public abstract class GlobalModelTestCase extends TestCase {
    */
   protected File writeToNewTempFile(String text) throws IOException {
     File temp = tempFile();
-    FileOps.writeToFile(temp, text);
+    FileOps.writeStringToFile(temp, text);
     return temp;
   }
 
@@ -204,14 +204,22 @@ public abstract class GlobalModelTestCase extends TestCase {
   }
 
   protected void assertCompileErrorsPresent(boolean b) {
+    assertCompileErrorsPresent("", b);
+  }
+
+  protected void assertCompileErrorsPresent(String name, boolean b) {
     CompilerError[] errors = _model.getCompileErrors();
+
+    if (name.length() > 0) {
+      name += ": ";
+    }
 
     StringBuffer buf = new StringBuffer();
     for (int i = 0; i < errors.length; i++) {
       buf.append("\nerror #" + i + ": " + errors[i]);
     }
 
-    assertEquals("compile errors > 0? errors=" + buf,
+    assertEquals(name + "compile errors > 0? errors=" + buf,
                  b,
                  errors.length > 0);
   }
@@ -374,6 +382,69 @@ public abstract class GlobalModelTestCase extends TestCase {
 
       // this is actually unreachable but the compiler won't believe me. sigh.
       throw new RuntimeException();
+    }
+  }
+
+  protected static class CompileShouldSucceedListener extends TestListener {
+    public void compileStarted() {
+      assertCompileStartCount(0);
+      assertCompileEndCount(0);
+      assertInteractionsResetCount(0);
+      assertConsoleResetCount(0);
+      compileStartCount++;
+    }
+
+    public void compileEnded() {
+      assertCompileEndCount(0);
+      assertCompileStartCount(1);
+      assertInteractionsResetCount(0);
+      assertConsoleResetCount(0);
+      compileEndCount++;
+    }
+
+    public void interactionsReset() {
+      assertInteractionsResetCount(0);
+      assertCompileStartCount(1);
+      assertCompileEndCount(1);
+      // don't care whether interactions or console are reset first
+      interactionsResetCount++;
+    }
+
+    public void consoleReset() {
+      assertConsoleResetCount(0);
+      assertCompileStartCount(1);
+      assertCompileEndCount(1);
+      // don't care whether interactions or console are reset first
+      consoleResetCount++;
+    }
+
+    public void checkCompileOccurred() {
+      assertCompileEndCount(1);
+      assertCompileStartCount(1);
+      assertInteractionsResetCount(1);
+      assertConsoleResetCount(1);
+    }
+  }
+
+  /**
+   * A model listener for situations expecting a compilation to fail.
+   */
+  protected static class CompileShouldFailListener extends TestListener {
+    public void compileStarted() {
+      assertCompileStartCount(0);
+      assertCompileEndCount(0);
+      compileStartCount++;
+    }
+
+    public void compileEnded() {
+      assertCompileEndCount(0);
+      assertCompileStartCount(1);
+      compileEndCount++;
+    }
+
+    public void checkCompileOccurred() {
+      assertCompileEndCount(1);
+      assertCompileStartCount(1);
     }
   }
 }

@@ -11,7 +11,7 @@ import  java.awt.Color;
 import  java.awt.Rectangle;
 import  java.io.PrintStream;
 
-import edu.rice.cs.drjava.util.swing.DocumentOutputStream;
+import edu.rice.cs.util.swing.DocumentOutputStream;
 
 /**
  * The view component to which System.out and System.err is redirected

@@ -8,7 +8,8 @@ import javax.swing.event.*;
 import java.awt.event.*;
 import java.awt.*;
 
-import edu.rice.cs.drjava.util.UnexpectedException;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.model.GlobalModel;
 
@@ -214,6 +215,20 @@ public class CompilerErrorPanel extends JPanel {
     _createPositionsArray();
     _resetEnabledStatus();
 
+    for (int i = 0; i < _errors.length; i++) {
+      DrJava.consoleErr().println("error #" + i + ": " + _errors[i]);
+    }
+
+    DrJava.consoleErr().println();
+    for (int i = 0; i < _errorPositions.length; i++) {
+      DrJava.consoleErr().println("POS #" + i + ": " + _errorPositions[i]);
+    }
+
+    DrJava.consoleErr().println();
+    for (int i = 0; i < _errorsWithoutPositions.length; i++) {
+      DrJava.consoleErr().println("errorNOP #" + i + ": " + _errorsWithoutPositions[i]);
+    }
+
     _errorListPane.updateListPane();
   }
 
@@ -223,7 +238,7 @@ public class CompilerErrorPanel extends JPanel {
    */
   private void _addHighlight(int from, int to) throws BadLocationException {
     _previousHighlightTag =
-      _definitionsPane.getHighlighter().addHighlight(from,
+      _definitionsPane.getHighlighter().addHighlight(from, 
                                                      to,
                                                      _documentHighlightPainter);
   }
@@ -337,6 +352,7 @@ public class CompilerErrorPanel extends JPanel {
    */
   private void _createPositionsArray() {
     _errorPositions = new Position[_errors.length];
+    DrJava.consoleErr().println("created pos arr: " + _errorPositions.length);
 
     // don't bother with anything else if there are no errors
     if (_errorPositions.length == 0) 
@@ -345,6 +361,7 @@ public class CompilerErrorPanel extends JPanel {
     Document defsDoc = _definitionsPane.getDocument();
     try {
       String defsText = defsDoc.getText(0, defsDoc.getLength());
+      DrJava.consoleErr().println("got defs text, len=" + defsText.length());
 
       int curLine = 0;
       int offset = 0; // offset is number of chars from beginning of file
@@ -355,6 +372,8 @@ public class CompilerErrorPanel extends JPanel {
       while ((numProcessed < _errors.length) &&
              (offset < defsText.length()))
       {
+        DrJava.consoleErr().println("num processed: " + numProcessed);
+
         // first figure out if we need to create any new positions on this line
         for (int i = numProcessed;
              (i < _errors.length) && (_errors[i].lineNumber() == curLine);
@@ -375,7 +394,8 @@ public class CompilerErrorPanel extends JPanel {
         }
       }
     }
-    catch (BadLocationException willNeverEverEverHappen) {
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
     }
   }
 

@@ -21,7 +21,7 @@
   <property name="public_javadoc_dir" value="/home/javaplt/public_html/javadoc/${ant.project.name}" />
 
   <!-- put javadoc in this directory if generating private javadoc -->
-  <property name="private_javadoc_dir" value="${srcroot}/../javadoc" />
+  <property name="private_javadoc_dir" value="${srcroot}/../javadoc/${ant.project.name}" />
 
   <property name="jarfile" value="${srcroot}/../drjava.jar" />
   <property name="manifest" value="manifest" />
@@ -84,7 +84,7 @@
 
        Note: Release must be run on CS net
   -->
-  <target name="release" if="version-tag">
+  <target name="release" if="version-tag" depends="update">
     <antcall target="jar">
       <param name="jarfile" value="${jars_dir}/${version-tag}.jar" />
     </antcall>
@@ -99,7 +99,14 @@
     <chmod perm="g+w,a+rX" dir="${public_javadoc_dir}" type="both" includes="**" />
   </target>
 
-  <target name="commit-and-release" depends="commit, release" />
+  <!-- commit this version and then release it. only will work on cs net. -->
+  <target name="commit-and-release">
+    <antcall target="commit" />
+    <antcall target="release">
+      <param name="version-tag"
+             value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
+    </antcall>
+  </target>
 
 
   <!-- Compile. We have to start at srcroot and then selectively include
@@ -155,6 +162,10 @@
                excludes="**/*Test.class" />
 
       <!-- dependencies -->
+      <fileset dir="${built}"
+               includes="edu/rice/cs/util/**"
+               excludes="**/*Test.class" />
+
       <fileset dir="/home/javaplt/classes"
                includes="gj/**,gjc/**,koala/**" />
     </jar>
@@ -210,11 +221,13 @@
 
     <javadoc sourcepath="${javadoc_dir}/src"
              destdir="${javadoc_dir}"
-             packagenames="edu.rice.cs.drjava.*"
+             packagenames="edu.rice.cs.${ant.project.name}.*"
              Private="yes"
              Use="yes"
              Version="yes"
              Windowtitle="${javadoc_title}">
+
+      <link href="http://www.cs.rice.edu/~javaplt/javadoc/util" />
       <link href="http://www.cs.rice.edu/~javaplt/javadoc/java-api" />
       <link href="http://www.cs.rice.edu/~javaplt/javadoc/junit" />
       <link href="http://www.cs.rice.edu/~javaplt/javadoc/dynamicjava" />

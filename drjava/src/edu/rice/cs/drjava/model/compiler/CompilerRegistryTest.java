@@ -1,7 +1,7 @@
 package edu.rice.cs.drjava.model.compiler;
 
 import junit.framework.*;
-import edu.rice.cs.drjava.util.classloader.LimitingClassLoader;
+import edu.rice.cs.util.classloader.LimitingClassLoader;
 
 /**
  * Test cases for {@link CompilerRegistry}.
@@ -119,10 +119,13 @@ public class CompilerRegistryTest extends TestCase {
                  _registry.getActiveCompiler());
     
     for (int i = 0; i < compilers.length; i++) {
-      _registry.setActiveCompiler(compilers[i]);
-      assertEquals("active compiler after setActive",
-                   compilers[i],
-                   _registry.getActiveCompiler());
+      // TODO: deal with the problem that sometimes not all compilers avail!
+      //if (compilers[i].isAvailable()) {
+        _registry.setActiveCompiler(compilers[i]);
+        assertEquals("active compiler after setActive",
+                     compilers[i],
+                     _registry.getActiveCompiler());
+      //}
     }
   }
 

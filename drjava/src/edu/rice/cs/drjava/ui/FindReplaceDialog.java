@@ -10,8 +10,8 @@ import java.beans.*;
 import javax.swing.text.*;
 
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.util.swing.FindReplaceMachine;
-import edu.rice.cs.drjava.util.swing.ContinueCommand;
+import edu.rice.cs.util.swing.FindReplaceMachine;
+import edu.rice.cs.util.swing.ContinueCommand;
 
 /**
  * The dialog box that handles requests for finding and replacing text.

@@ -9,7 +9,7 @@ import  java.awt.event.*;
 import  java.io.*;
 import  java.util.*;
 
-import edu.rice.cs.drjava.util.UnexpectedException;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;

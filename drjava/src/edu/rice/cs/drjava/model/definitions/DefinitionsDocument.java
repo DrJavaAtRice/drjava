@@ -10,7 +10,7 @@ import  java.util.StringTokenizer;
 import java.io.File;
 
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
-import edu.rice.cs.drjava.util.UnexpectedException;
+import edu.rice.cs.util.UnexpectedException;
 
 /**
  * The model for the definitions pane.

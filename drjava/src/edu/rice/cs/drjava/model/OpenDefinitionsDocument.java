@@ -2,7 +2,7 @@ package edu.rice.cs.drjava.model;
 
 import java.io.*;
 
-import edu.rice.cs.drjava.util.swing.FindReplaceMachine;
+import edu.rice.cs.util.swing.FindReplaceMachine;
 import edu.rice.cs.drjava.model.definitions.*;
 
 /**

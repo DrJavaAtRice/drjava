@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
 
-import edu.rice.cs.drjava.util.FileOps;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
@@ -373,7 +373,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
 
     assertEquals("contents of saved file",
                  FOO_TEXT,
-                 FileOps.readFile(file));
+                 FileOps.readFileAsString(file));
   }
 
   /**
@@ -390,7 +390,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     assertContents(FOO_TEXT, doc);
     assertEquals("contents of saved file",
                  FOO_TEXT,
-                 FileOps.readFile(file));
+                 FileOps.readFileAsString(file));
 
     // Listener to use on future save
     TestListener listener = new TestListener() {
@@ -419,7 +419,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
 
     assertEquals("contents of saved file",
                  BAR_TEXT,
-                 FileOps.readFile(file));
+                 FileOps.readFileAsString(file));
   }
 
   /**
@@ -440,7 +440,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     assertContents(FOO_TEXT, doc);
     assertEquals("contents of saved file",
                  FOO_TEXT,
-                 FileOps.readFile(file));
+                 FileOps.readFileAsString(file));
 
     TestListener listener = new TestListener() {
       public void fileSaved(OpenDefinitionsDocument doc) {
@@ -472,7 +472,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
 
     assertEquals("contents of saved file",
                  BAR_TEXT,
-                 FileOps.readFile(file));
+                 FileOps.readFileAsString(file));
   }
 
   /**
@@ -490,7 +490,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     assertContents(FOO_TEXT, doc);
     assertEquals("contents of saved file",
                  FOO_TEXT,
-                 FileOps.readFile(file));
+                 FileOps.readFileAsString(file));
 
     // No events better be fired!
     _model.addListener(new TestListener());
@@ -502,7 +502,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
 
     assertEquals("contents of saved file",
                  FOO_TEXT,
-                 FileOps.readFile(file));
+                 FileOps.readFileAsString(file));
   }
 
   /**
@@ -521,7 +521,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     assertContents(FOO_TEXT, doc);
     assertEquals("contents of saved file",
                  FOO_TEXT,
-                 FileOps.readFile(file1));
+                 FileOps.readFileAsString(file1));
 
     // Make sure we save now to the new file name
     TestListener listener = new TestListener() {
@@ -548,10 +548,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
 
     assertEquals("contents of saved file1",
                  FOO_TEXT,
-                 FileOps.readFile(file1));
+                 FileOps.readFileAsString(file1));
 
     assertEquals("contents of saved file2",
                  BAR_TEXT,
-                 FileOps.readFile(file2));
+                 FileOps.readFileAsString(file2));
   }
 }

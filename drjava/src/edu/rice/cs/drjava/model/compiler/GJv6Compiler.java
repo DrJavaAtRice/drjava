@@ -81,6 +81,7 @@ public class GJv6Compiler implements CompilerInterface {
     } catch (Throwable t) {
       // GJ defines the compile method to throw Throwable?!
       System.err.println("Compile error: " + t);
+      t.printStackTrace();
       return  new CompilerError[] {
         new CompilerError("", -1, -1, "Compile exception: " + t, false)
       };

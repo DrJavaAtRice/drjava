@@ -4,10 +4,10 @@ import javax.swing.text.*;
 import java.io.*;
 import java.util.*;
 
-import edu.rice.cs.drjava.util.swing.FindReplaceMachine;
+import edu.rice.cs.util.swing.FindReplaceMachine;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.util.UnexpectedException;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;

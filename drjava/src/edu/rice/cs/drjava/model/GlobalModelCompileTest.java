@@ -10,7 +10,7 @@ import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
 
 import edu.rice.cs.drjava.model.compiler.*;
-import edu.rice.cs.drjava.util.UnexpectedException;
+import edu.rice.cs.util.UnexpectedException;
 
 /**
  * A test on the GlobalModel for compilation.
@@ -60,9 +60,6 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
    * test case for each compiler.
    * This method is called once per test method, and it magically
    * invokes the method.
-   *
-   * This is like {@link edu.rice.cs.drjava.util.MultipleStateTestCase},
-   * but I can't use it because I must subclass GlobalModelTestCase.
    */
   public void runBare() throws Throwable {
     CompilerInterface[] compilers = CompilerRegistry.ONLY.getAvailableCompilers();
@@ -92,14 +89,11 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
 
     // No listener for save -- assume it works
     doc.saveFile(new FileSelector(file));
-    TestListener listener = new CompileShouldSucceedListener();
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
     doc.startCompile();
-    assertCompileErrorsPresent(false);
-    listener.assertCompileStartCount(1);
-    listener.assertCompileEndCount(1);
-    listener.assertInteractionsResetCount(1);
-    listener.assertConsoleResetCount(1);
+    assertCompileErrorsPresent(_name(), false);
+    listener.checkCompileOccurred();
 
     // Make sure .class exists
     File compiled = classForJava(file, "Foo");
@@ -124,14 +118,11 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     final File foo2File = new File(_tempDir, "Foo2.java");
     doc2.saveFile(new FileSelector(foo2File));
 
-    TestListener listener = new CompileShouldSucceedListener();
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
     doc2.startCompile();
-    assertCompileErrorsPresent(false);
-    listener.assertCompileStartCount(1);
-    listener.assertCompileEndCount(1);
-    listener.assertInteractionsResetCount(1);
-    listener.assertConsoleResetCount(1);
+    assertCompileErrorsPresent(_name(), false);
+    listener.checkCompileOccurred();
 
     // Make sure .class exists
     File compiled = classForJava(foo2File, "Foo2");
@@ -165,14 +156,11 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     final File foo2File = new File(bDir, "Foo2.java");
     doc2.saveFile(new FileSelector(foo2File));
 
-    TestListener listener = new CompileShouldSucceedListener();
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
     doc2.startCompile();
-    assertCompileErrorsPresent(false);
-    listener.assertCompileStartCount(1);
-    listener.assertCompileEndCount(1);
-    listener.assertInteractionsResetCount(1);
-    listener.assertConsoleResetCount(1);
+    assertCompileErrorsPresent(_name(), false);
+    listener.checkCompileOccurred();
 
     // Make sure .class exists
     File compiled = classForJava(foo2File, "Foo2");
@@ -192,14 +180,11 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
 
     // No listener for save -- assume it works
     doc.saveFile(new FileSelector(file));
-    TestListener listener = new CompileShouldSucceedListener();
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
     doc.startCompile();
-    assertCompileErrorsPresent(false);
-    listener.assertCompileStartCount(1);
-    listener.assertCompileEndCount(1);
-    listener.assertInteractionsResetCount(1);
-    listener.assertConsoleResetCount(1);
+    assertCompileErrorsPresent(_name(), false);
+    listener.checkCompileOccurred();
 
     // Make sure .class exists
     File compiled = classForJava(file, "Foo");
@@ -221,11 +206,10 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
 
     _model.addListener(listener);
     doc.startCompile();
-    listener.assertCompileStartCount(1);
-    listener.assertCompileEndCount(1);
+    listener.checkCompileOccurred();
 
     // There better be an error since "package" can not be an identifier!
-    assertCompileErrorsPresent(true);
+    assertCompileErrorsPresent(_name(), true);
 
     File compiled = classForJava(file, "Foo");
     assertEquals(_name() + "Class file exists after failing compile",
@@ -249,11 +233,10 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
     doc.startCompile();
-    listener.assertCompileStartCount(1);
-    listener.assertCompileEndCount(1);
+    listener.checkCompileOccurred();
 
     // There better be an error since "package" can not be an identifier!
-    assertCompileErrorsPresent(true);
+    assertCompileErrorsPresent(_name(), true);
 
     File compiled = classForJava(file, "Foo");
     assertEquals(_name() + "Class file exists after failing compile",
@@ -271,12 +254,12 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc = setupDocument(FOO_MISSING_CLOSE_TEXT);
     final File file = tempFile();
     doc.saveFile(new FileSelector(file));
-    TestListener listener = new CompileShouldFailListener();
+    CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
     doc.startCompile();
-    assertCompileErrorsPresent(true);
-    listener.assertCompileStartCount(1);
-    listener.assertCompileEndCount(1);
+    assertCompileErrorsPresent(_name(), true);
+    listener.checkCompileOccurred();
+
     File compiled = classForJava(file, "Foo");
     assertTrue(_name() + "Class file exists after compile?!", !compiled.exists());
   }
@@ -306,9 +289,8 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     _model.addListener(listener);
     doc.startCompile();
 
-    listener.assertCompileStartCount(1);
-    listener.assertCompileEndCount(1);
-    assertCompileErrorsPresent(true);
+    listener.checkCompileOccurred();
+    assertCompileErrorsPresent(_name(), true);
     assertTrue(_name() + "Class file exists after failed compile",
                !compiled.exists());
   }
@@ -370,11 +352,8 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     // Check events fired
     listener.assertSaveBeforeProceedingCount(1);
     listener.assertSaveCount(1);
-    assertCompileErrorsPresent(false);
-    listener.assertCompileStartCount(1);
-    listener.assertCompileEndCount(1);
-    listener.assertInteractionsResetCount(1);
-    listener.assertConsoleResetCount(1);
+    assertCompileErrorsPresent(_name(), false);
+    listener.checkCompileOccurred();
 
     // Make sure .class exists
     File compiled = classForJava(file, "Foo");
@@ -405,54 +384,4 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     assertContents(FOO_TEXT, doc);
   }
 
-  protected static class CompileShouldSucceedListener extends TestListener {
-    public void compileStarted() {
-      assertCompileStartCount(0);
-      assertCompileEndCount(0);
-      assertInteractionsResetCount(0);
-      assertConsoleResetCount(0);
-      compileStartCount++;
-    }
-
-    public void compileEnded() {
-      assertCompileEndCount(0);
-      assertCompileStartCount(1);
-      assertInteractionsResetCount(0);
-      assertConsoleResetCount(0);
-      compileEndCount++;
-    }
-
-    public void interactionsReset() {
-      assertInteractionsResetCount(0);
-      assertCompileStartCount(1);
-      assertCompileEndCount(1);
-      // don't care whether interactions or console are reset first
-      interactionsResetCount++;
-    }
-
-    public void consoleReset() {
-      assertConsoleResetCount(0);
-      assertCompileStartCount(1);
-      assertCompileEndCount(1);
-      // don't care whether interactions or console are reset first
-      consoleResetCount++;
-    }
-  }
-
-  /**
-   * A model listener for situations expecting a compilation to fail.
-   */
-  protected static class CompileShouldFailListener extends TestListener {
-    public void compileStarted() {
-      assertCompileStartCount(0);
-      assertCompileEndCount(0);
-      compileStartCount++;
-    }
-
-    public void compileEnded() {
-      assertCompileEndCount(0);
-      assertCompileStartCount(1);
-      compileEndCount++;
-    }
-  }
 }

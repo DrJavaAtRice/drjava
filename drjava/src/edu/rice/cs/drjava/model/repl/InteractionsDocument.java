@@ -8,7 +8,7 @@ import  java.util.LinkedList;
 import  java.util.ListIterator;
 import  java.util.StringTokenizer;
 
-import edu.rice.cs.drjava.util.UnexpectedException;
+import edu.rice.cs.util.UnexpectedException;
 
 /**
  * The document that handles input to the repl and the interpretation
