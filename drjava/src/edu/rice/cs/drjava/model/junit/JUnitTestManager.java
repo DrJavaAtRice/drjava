@@ -128,42 +128,38 @@ public class JUnitTestManager {
   
   /**
    * Constructs a new JUnitError from a TestFailure
-   * @param tF A given TestFailure
-   * @param theclass The class that contains the TestFailure
+   * @param failure A given TestFailure
+   * @param className The class that contains the TestFailure
    * @param isError The passed TestFailure may signify either an error or a failure
+   * @param fileName File where the error occurred
    * @return JUnitError 
    */
-  private JUnitError _makeJUnitError ( TestFailure tF, String theclass, boolean isError, String fileName) {
+  private JUnitError _makeJUnitError(TestFailure failure, String className, boolean isError, String fileName) {
    
-    TestFailure tFail = tF;
-    TestCase tcFail = (TestCase) tFail.failedTest();
+    Test failedTest = failure.failedTest();
+    String testName = failedTest.getClass().getName();
+    if (failedTest instanceof TestCase) {
+      testName = ((TestCase)failedTest).getName();
+    }
     
-    StringWriter swFail = new StringWriter();
-    PrintWriter pwFail  = new PrintWriter(swFail);
+    StringWriter sWriter = new StringWriter();
+    PrintWriter pWriter  = new PrintWriter(sWriter);
     
-    tFail.thrownException().printStackTrace(pwFail);
+    failure.thrownException().printStackTrace(pWriter);
         
-    String classnameFail = theclass + "." + tcFail.getName();
+    String classNameAndTest = className + "." + testName;
     
-    int lineNum = _lineNumber( swFail.toString(), classnameFail);
+    int lineNum = _lineNumber( sWriter.toString(), classNameAndTest);
 //    if (lineNum > -1) _errorsWithPos++;
     
-  /*  try {
-      _file = _document.getFile();
-    }
-    catch (FileMovedException fme) {
-      // Recover, even though file was deleted
-      _file = fme.getFile();
-    }*/
-    
     String exception =  (isError) ? 
-      tFail.thrownException().toString(): 
-      tFail.thrownException().getMessage();
+      failure.thrownException().toString(): 
+      failure.thrownException().getMessage();
       
       return new JUnitError(fileName, lineNum, 0, exception,
-                            ! (tFail.thrownException() instanceof AssertionFailedError),
-                            tcFail.getName(),
-                            swFail.toString());
+                            ! (failure.thrownException() instanceof AssertionFailedError),
+                            testName,
+                            sWriter.toString());
   }
 
   /**

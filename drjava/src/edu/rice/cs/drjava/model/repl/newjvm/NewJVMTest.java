@@ -54,7 +54,6 @@ import edu.rice.cs.drjava.model.*;
 public class NewJVMTest extends TestCase {
   final boolean printMessages = false;
   
-  //private static GlobalModel _model;
   private static TestJVMExtension _jvm;
 
   public NewJVMTest(String name) {
@@ -69,7 +68,6 @@ public class NewJVMTest extends TestCase {
     TestSuite suite = new TestSuite(NewJVMTest.class);
     TestSetup setup = new TestSetup(suite) {
       protected void setUp() throws RemoteException {
-        //_model = new DefaultGlobalModel();  // why a new one on every test case?
         _jvm = new TestJVMExtension();
       }
 
@@ -120,27 +118,30 @@ public class NewJVMTest extends TestCase {
     }
   }
 
-  /**
-   * temporarily disabled...
-   * (This was originally disabled, but it seemed to pass, so I put
-   *  it back in.  Then it inconsistently failed/hung on other platforms.
-   *  I'm investigating why at the moment...  creis)  
   public void testWorksAfterRestartConstant() throws Throwable {
     if (printMessages) System.out.println("----testWorksAfterRestartConstant-----");
+    
+    // Check that a constant is returned
     synchronized(_jvm) {
       _jvm.interpret("5");
       _jvm.wait();
       assertEquals("result", "5", _jvm.returnBuf);
-      
-      _jvm.killInterpreter(true);
+    }
+    
+    // Now restart interpreter
+    synchronized(_jvm) {
+      _jvm.killInterpreter(true);  // true: start back up
       _jvm.wait();
-      
+    }
+    
+    // Now evaluate another constant
+    synchronized(_jvm) {
       _jvm.interpret("4");
       _jvm.wait();
       assertEquals("result", "4", _jvm.returnBuf);
     }
   }
-  */
+  
   
   public void testThrowRuntimeException() throws Throwable {
     if (printMessages) System.out.println("----testThrowRuntimeException-----");
@@ -212,6 +213,7 @@ public class NewJVMTest extends TestCase {
     public TestJVMExtension() throws RemoteException { 
       super(null);
       _testHandler = new TestResultHandler();
+      ensureInterpreterConnected();
     }
     
     protected InterpretResultVisitor<Object> getResultHandler() {
@@ -237,16 +239,16 @@ public class NewJVMTest extends TestCase {
 
     public void systemErrPrint(String s) throws RemoteException {
       synchronized(this) {
-        errBuf = s;
         //System.out.println("notify err: " + s);
+        errBuf = s;
         this.notify();
       }
     }
 
     public void systemOutPrint(String s) throws RemoteException {
       synchronized(this) {
-        outBuf = s;
         //System.out.println("notify out: " + s);
+        outBuf = s;
         this.notify();
       }
     }

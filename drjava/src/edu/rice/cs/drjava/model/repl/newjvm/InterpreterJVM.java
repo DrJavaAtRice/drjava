@@ -83,12 +83,14 @@ public class InterpreterJVM extends AbstractSlaveJVM
 
   protected void handleStart(MasterRemote mainJVM) 
   {
+    //_log.log("handleStart...");
     _mainJVM = (MainJVMRemoteI) mainJVM;
 
     // redirect stdout
     System.setOut(new PrintStream(new OutputStreamRedirector() {
       public void print(String s) {
         try {
+          //_log.log("out.print: " + s);
           _mainJVM.systemOutPrint(s);
         }
         catch (RemoteException re) {
@@ -102,6 +104,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     System.setErr(new PrintStream(new OutputStreamRedirector() {
       public void print(String s) {
         try {
+          //_log.log("err.print: " + s);
           _mainJVM.systemErrPrint(s);
         }
         catch (RemoteException re) {
@@ -146,10 +149,10 @@ public class InterpreterJVM extends AbstractSlaveJVM
           try {
             _dialog("to interp: " + s);
             Object result = _interpreter.interpret(s);
-            _dialog("interp ret: " + result);
             
             if (result == JavaInterpreter.NO_RESULT) {
               //return new VoidResult();
+              _dialog("void interp ret: " + result);
               _mainJVM.interpretResult(new VoidResult());
             }
             else {
@@ -161,6 +164,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
           }
           catch (ExceptionReturnedException e) {
             Throwable t = e.getContainedException();
+            _dialog("interp exception: " + t);
             
             //_dialog("before call to threwException");
             //return new ExceptionResult(t.getClass().getName(),
