@@ -49,6 +49,7 @@ import edu.rice.cs.drjava.model.EventNotifier;
  * multiple edits into one for the purposes of undoing and redoing.
  * Is used to be able to call editToBeUndone and editToBeRedone since they
  * are protected methods in UndoManager.
+ * @version $Id$
  */
 public class CompoundUndoManager extends UndoManager {
   /**

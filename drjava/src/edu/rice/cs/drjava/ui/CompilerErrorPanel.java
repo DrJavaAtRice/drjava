@@ -60,6 +60,7 @@ import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.util.Vector;
 
 /**
  * The panel which houses the list of errors after an unsuccessful compilation.
@@ -139,9 +140,9 @@ public class CompilerErrorPanel extends ErrorPanel {
     
     _mainPanel.add(scroller, BorderLayout.CENTER);
     _mainPanel.add(compilerPanel, BorderLayout.EAST);
-    DrJava.getConfig().addOptionListener( OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener());
-    DrJava.getConfig().addOptionListener( OptionConstants.JSR14_LOCATION, new CompilerLocationOptionListener());
-    
+    DrJava.getConfig().addOptionListener(OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener<File>());
+    DrJava.getConfig().addOptionListener(OptionConstants.JSR14_LOCATION, new CompilerLocationOptionListener<File>());
+    DrJava.getConfig().addOptionListener(OptionConstants.EXTRA_COMPILERS, new CompilerLocationOptionListener<Vector<String>>());
     uiBox.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
   }
   
@@ -149,9 +150,9 @@ public class CompilerErrorPanel extends ErrorPanel {
   /**
    * The OptionListener for compiler LOCATIONs 
    */
-  private class CompilerLocationOptionListener implements OptionListener<File> {
+  private class CompilerLocationOptionListener<T> implements OptionListener<T> {
     
-    public void optionChanged(OptionEvent<File> oce) {
+    public void optionChanged(OptionEvent<T> oce) {
       _compilerChoiceBox.removeAllItems();
       CompilerInterface[] availCompilers = getModel().getAvailableCompilers();
       for (int i=0; i<availCompilers.length; i++) {

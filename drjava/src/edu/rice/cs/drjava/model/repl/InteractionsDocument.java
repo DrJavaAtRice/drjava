@@ -300,11 +300,8 @@ public class InteractionsDocument extends ConsoleDocument {
    * @param stackTrace String representation of the stack trace
    * @param styleName name of the style for formatting the exception
    */
-  public void appendExceptionResult(String exceptionClass,
-                                    String message,
-                                    String stackTrace,
-                                    String styleName)
-  {
+  public void appendExceptionResult(String exceptionClass, String message,
+                                    String stackTrace, String styleName) {
     //writeLock();
     try {
 
@@ -362,21 +359,18 @@ public class InteractionsDocument extends ConsoleDocument {
           // OK, now if fileName != null we did parse out fileName
           // and lineNumber.
           // Here's where we'd add the button, etc.
+          /*
           if (fileName != null) {
-            /*
             JButton button = new JButton("go");
-            button.addActionListener(new ExceptionButtonListener(fileName,
-                                                                 lineNumber));
-
+            button.addActionListener(new ExceptionButtonListener(fileName, lineNumber));
             SimpleAttributeSet buttonSet = new SimpleAttributeSet(set);
             StyleConstants.setComponent(buttonSet, button);
             insertString(getDocLength(), "  ", null);
             insertString(getDocLength() - 1, " ", buttonSet);
-            */
-            //JOptionPane.showMessageDialog(null, "button in");
-            //insertString(getDocLength(), " ", null);
-            //JOptionPane.showMessageDialog(null, "extra space");
-          }
+            JOptionPane.showMessageDialog(null, "button in");
+            insertString(getDocLength(), " ", null);
+            JOptionPane.showMessageDialog(null, "extra space");
+          }*/
 
           //JOptionPane.showMessageDialog(null, "\\n");
           insertText(getDocLength(), "\n", styleName);
@@ -391,36 +385,26 @@ public class InteractionsDocument extends ConsoleDocument {
     catch (DocumentAdapterException ble) {
       throw new UnexpectedException(ble);
     }
-    finally {
-      //writeUnlock();
-    }
+//    finally {
+//      writeUnlock();
+//    }
   }
 
-  public void appendSyntaxErrorResult(String message,
-                                      int startRow,
-                                      int startCol,
-                                      int endRow,
-                                      int endCol,
-                                      String styleName )
-  {
+  public void appendSyntaxErrorResult(String message, int startRow, int startCol,
+                                      int endRow, int endCol, String styleName) {
     //writeLock();
     try {
-
       if (null == message || "null".equals(message)) {
         message = "";
       }
-
-
-
-     insertText( getDocLength(), message + "\n" , styleName );
+      insertText(getDocLength(), message + "\n" , styleName );
     }
-
     catch (DocumentAdapterException ble) {
       throw new UnexpectedException(ble);
     }
-    finally {
-      //writeUnlock();
-    }
+//    finally {
+//      writeUnlock();
+//    }
   }
 
   /**

@@ -444,15 +444,19 @@ public class ConfigFrame extends JFrame {
     FileOptionComponent jsr14Col =
       new FileOptionComponent(OptionConstants.JSR14_COLLECTIONSPATH,
                               "JSR-14 Collections Path", this,
-                               "Optional location of the JSR-14 collect.jar file, which contains the collection classes.",
-                             _fileOptionChooser);
+                              "Optional location of the JSR-14 collect.jar file, which contains the collection classes.",
+                              _fileOptionChooser);
     jsr14Col.setFileFilter(ClasspathFilter.ONLY);
     panel.addComponent(jsr14Col);
-    panel.addComponent(new VectorOptionComponent(OptionConstants.EXTRA_CLASSPATH,
+//    VectorClassnameOptionComponent extraCompilers =
+//      new VectorClassnameOptionComponent(OptionConstants.EXTRA_COMPILERS, "Custom Compilers", this,
+//                                         "<html>Class names for custom compilers.  These compilers should<br>" +
+//                                         "implement edu.rice.cs.drjava.model.compiler.CompilerInterface.</html>");
+//    panel.addComponent(extraCompilers);
+    panel.addComponent(new VectorFileOptionComponent(OptionConstants.EXTRA_CLASSPATH,
                                                  "Extra Classpath", this,
                                                  "<html>Any directories or jar files to add to the classpath<br>"+
                                                  "of the Compiler and Interactions Pane.</html>"));
-
 
     panel.displayComponents();
   }
@@ -530,6 +534,11 @@ public class ConfigFrame extends JFrame {
                                                 "The color for System.err in the Interactions and Console Panes."));
     panel.addComponent(new ColorOptionComponent(OptionConstants.SYSTEM_IN_COLOR, "System.in Color", this,
                                                 "The color for System.in in the Interactions Pane."));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.INTERACTIONS_ERROR_COLOR, "Interactions Error Color", this,
+                                                "The color for interactions errors in the Interactions Pane.", false, true));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEBUG_MESSAGE_COLOR, "Debug Message Color", this,
+                                                "The color for debugger messages in the Interactions Pane.", false, true));
+
     panel.displayComponents();
   }
 
@@ -590,11 +599,10 @@ public class ConfigFrame extends JFrame {
         panel.addComponent(new LabelComponent(howto, this));
     }
 
-    VectorOptionComponent sourcePath =
-      new VectorOptionComponent(OptionConstants.DEBUG_SOURCEPATH,
-                                "Sourcepath", this,
-                                "<html>Any directories in which to search for source<br>" +
-                                "files when stepping in the Debugger.</html>");
+    VectorFileOptionComponent sourcePath =
+      new VectorFileOptionComponent(OptionConstants.DEBUG_SOURCEPATH, "Sourcepath", this,
+                                    "<html>Any directories in which to search for source<br>" +
+                                    "files when stepping in the Debugger.</html>");
     // Source path can only include directories
     sourcePath.setFileFilter(new DirectoryFilter("Source Directories"));
     panel.addComponent(sourcePath);
@@ -692,13 +700,10 @@ public class ConfigFrame extends JFrame {
                                                   "<html>Whether DrJava should automatically save before<br>" +
                                                   "recompiling or ask the user each time.</html>"));
 
-    // TODO: this is dev-only until the sync issues with interactions are worked out
-//    if (CodeStatus.DEVELOPMENT) {
-//      panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_RUN, "Automatically Save and Compile Before Running Main Method", this,
+    // These are very problematic features, and so are disabled for the forseeable future.
+//    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_RUN, "Automatically Save and Compile Before Running Main Method", this,
 //                                                    "<html>Whether DrJava should automatically save and compile before running<br>" +
 //                                                    "a document's main method, or instead should ask the user each time.</html>"));
-//    }
-//    // These are not currently used.
 //    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_JUNIT, "Automatically Save and Compile Before Testing", this,
 //                                                  "<html>Whether DrJava should automatically save and compile before<br>" +
 //                                                  "testing with JUnit or ask the user each time.</html>"));

@@ -257,15 +257,27 @@ public class InteractionsController extends AbstractConsoleController {
 
     // Error
     _errStyle.addAttributes(_defaultStyle);
-    _errStyle.addAttribute(StyleConstants.Foreground, Color.red.darker());
+    _errStyle.addAttribute(StyleConstants.Foreground, DrJava.getConfig().getSetting(OptionConstants.INTERACTIONS_ERROR_COLOR));
     _errStyle.addAttribute(StyleConstants.Bold, Boolean.TRUE);
     _adapter.setDocStyle(InteractionsDocument.ERROR_STYLE, _errStyle);
+    DrJava.getConfig().addOptionListener(OptionConstants.INTERACTIONS_ERROR_COLOR,
+                                         new OptionListener<Color>() {
+      public void optionChanged(OptionEvent<Color> oe) {
+        _errStyle.addAttribute(StyleConstants.Foreground, oe.value);
+      }
+    });
     
     // Debug
     _debugStyle.addAttributes(_defaultStyle);
-    _debugStyle.addAttribute(StyleConstants.Foreground, Color.blue.darker());
+    _debugStyle.addAttribute(StyleConstants.Foreground, DrJava.getConfig().getSetting(OptionConstants.DEBUG_MESSAGE_COLOR));
     _debugStyle.addAttribute(StyleConstants.Bold, Boolean.TRUE);
     _adapter.setDocStyle(InteractionsDocument.DEBUGGER_STYLE, _debugStyle);
+    DrJava.getConfig().addOptionListener(OptionConstants.DEBUG_MESSAGE_COLOR,
+                                         new OptionListener<Color>() {
+      public void optionChanged(OptionEvent<Color> oe) {
+        _debugStyle.addAttribute(StyleConstants.Foreground, oe.value);
+      }
+    });
   }
   
   /**

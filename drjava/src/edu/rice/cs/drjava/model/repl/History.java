@@ -56,9 +56,11 @@ import javax.swing.*;
  * @version $Id$
  */
 public class History implements OptionConstants {
+
+  public static final String INTERACTION_SEPARATOR = "//EOI//";
   
   // Not final because it may be updated by config
-  private static int MAX_SIZE;
+  private int MAX_SIZE;
   
   /**
    * Version flag at the beginning of saved history file format
@@ -182,19 +184,21 @@ public class History implements OptionConstants {
    * end with one.
    */
   public String getHistoryAsStringWithSemicolons() {
-    String s = "";
-    String delimiter = System.getProperty("line.separator");
+    StringBuffer s = new StringBuffer();
+    String delimiter = INTERACTION_SEPARATOR + System.getProperty("line.separator");
     for (int i = 0; i < _vector.size(); i++) {
       String nextLine = _vector.get(i);
-      int nextLength = nextLine.length();
-      if ((nextLength > 0) && (nextLine.charAt(nextLength-1) != ';')) {
-        nextLine += ";";
-      }
-      s += nextLine + delimiter;
+//      int nextLength = nextLine.length();
+//      if ((nextLength > 0) && (nextLine.charAt(nextLength-1) != ';')) {
+//        nextLine += ";";
+//      }
+//      s += nextLine + delimiter;
+      s.append(nextLine);
+      s.append(delimiter);
     }
-    return s;
+    return s.toString();
   }
-  
+
   /**
    * Returns the history as a string by concatenating each string in the vector
    * separated by the delimiting character

@@ -1232,8 +1232,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     assertEquals("History and getHistoryAsString should be the same.",
                  s1 + newLine + s2 + newLine + s3 + newLine,
                  _model.getHistoryAsString());
+    String delim = History.INTERACTION_SEPARATOR + newLine;
     assertEquals("History and getHistoryAsStringWithSemicolons don't match up correctly.",
-                 s1 + newLine + s2 + ";" + newLine + s3 + newLine,
+                 s1 + delim + s2 + delim + s3 + delim,
                  _model.getHistoryAsStringWithSemicolons());
     listener.assertInteractionEndCount(3);
     listener.assertInteractionStartCount(3);
@@ -1242,7 +1243,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     // check that the file contains the correct value
     assertEquals("contents of saved file",
                  History.HISTORY_FORMAT_VERSION_2 +
-                 s1 + newLine + s2 + ";" + newLine + s3 + newLine,
+                 s1 + delim + s2 + delim + s3 + delim,
                  FileOps.readFileAsString(f));
 
     _model.clearHistory();

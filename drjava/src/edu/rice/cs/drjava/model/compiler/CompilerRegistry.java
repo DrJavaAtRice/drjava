@@ -40,6 +40,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.compiler;
 
 import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.ListIterator;
 
 import java.net.*;
@@ -48,6 +49,7 @@ import java.io.*;
 import java.lang.reflect.Field;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 
 /**
  * Registry for all CompilerInterface implementations.
@@ -125,7 +127,7 @@ public class CompilerRegistry {
    * @param name Name of the {@link CompilerInterface} implementation class.
    */
   public void registerCompiler(String name) {
-    if (! _registeredCompilers.contains(name) ) {
+    if (!_registeredCompilers.contains(name)) {
       _registeredCompilers.add(name);
     }
   }
@@ -143,29 +145,14 @@ public class CompilerRegistry {
   public CompilerInterface[] getAvailableCompilers() {
     LinkedList<CompilerInterface> availableCompilers =
       new LinkedList<CompilerInterface>();
-    ListIterator itor = _registeredCompilers.listIterator();
+    Iterator<String> itor = _registeredCompilers.listIterator();
 
     while (itor.hasNext()) {
-      String name = (String) itor.next();
+      String name = itor.next();
       //DrJava.consoleOut().print("REGISTRY:  Checking compiler: " + name + ": ");
 
       try {
-        CompilerInterface compiler = _instantiateCompiler(name);
-        if (compiler.isAvailable()) {
-          //DrJava.consoleOut().println("ok.");
-
-          // can't use getActiveCompiler() because it will call back to
-          // getAvailableCompilers, forming an infinite recursion!!
-          if (_activeCompiler == NoCompilerAvailable.ONLY) {
-            //System.err.println("\tset to active.");
-            _activeCompiler = compiler;
-          }
-
-          availableCompilers.add(compiler);
-        }
-        else {
-          //DrJava.consoleOut().println("not available.");
-        }
+        _createCompiler(name, availableCompilers);
       }
       catch (Throwable t) {
         // This compiler didn't load. Keep on going.
@@ -175,11 +162,43 @@ public class CompilerRegistry {
       }
     }
 
+    itor = DrJava.getConfig().getSetting(OptionConstants.EXTRA_COMPILERS).iterator();
+
+    while (itor.hasNext()) {
+      String name = itor.next();
+      try {
+        _createCompiler(name, availableCompilers);
+      }
+      catch (Throwable t) {
+        // Custom compiler failed to load.  Signal the user?
+//        System.err.println("Unable to load " + name);
+      }
+    }
+
     if (availableCompilers.size() == 0) {
       availableCompilers.add(NoCompilerAvailable.ONLY);
     }
 
     return availableCompilers.toArray(new CompilerInterface[0]);
+  }
+
+  private void _createCompiler(String name, LinkedList<CompilerInterface> availableCompilers) throws Throwable {
+    CompilerInterface compiler = _instantiateCompiler(name);
+    if (compiler.isAvailable()) {
+      //DrJava.consoleOut().println("ok.");
+      
+      // can't use getActiveCompiler() because it will call back to
+      // getAvailableCompilers, forming an infinite recursion!!
+      if (_activeCompiler == NoCompilerAvailable.ONLY) {
+        //System.err.println("\tset to active.");
+        _activeCompiler = compiler;
+      }
+      
+      availableCompilers.add(compiler);
+    }
+    else {
+      //DrJava.consoleOut().println("not available.");
+    }
   }
 
   public boolean isNoCompilerAvailable() {

@@ -35,11 +35,11 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
- END_COPYRIGHT_BLOCK*/
+END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import java.util.Vector;
+import java.util.LinkedList;
 import java.util.List;
 import java.io.File;
 
@@ -67,8 +67,8 @@ public class EventNotifier implements GlobalModelListener {
    * The collection must be synchronized, since multiple readers could
    * access it at once.
    */
-  private final Vector<GlobalModelListener> _listeners;
-
+  private final LinkedList<GlobalModelListener> _listeners;
+  
   /**
    * Provides synchronization primitives for solving the readers/writers
    * problem.  In EventNotifier, adding and removing listeners are considered
@@ -83,7 +83,7 @@ public class EventNotifier implements GlobalModelListener {
    * Creates a new EventNotifier with an empty list of listeners.
    */
   public EventNotifier() {
-    _listeners = new Vector<GlobalModelListener>();
+    _listeners = new LinkedList<GlobalModelListener>();
     _lock = new ReaderWriterLock();
   }
 

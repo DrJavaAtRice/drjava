@@ -41,9 +41,15 @@ package edu.rice.cs.drjava.model.repl;
 
 import junit.framework.*;
 
+import java.io.File;
 import java.io.IOException;
 
+import edu.rice.cs.drjava.model.FileSaveSelector;
+import edu.rice.cs.drjava.model.FileOpenSelector;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.text.*;
 
 /**
@@ -63,14 +69,6 @@ public final class InteractionsModelTest extends TestCase {
     _model = null;
     _adapter = null;
     System.gc();
-  }
-  
-  /**
-   * Return a new TestSuite for this class.
-   * @return Test
-   */
-  public static Test suite() {
-    return new TestSuite(InteractionsModelTest.class);
   }
   
   /**
@@ -253,7 +251,70 @@ public final class InteractionsModelTest extends TestCase {
     _model.setDebugPort(-1);
     assertEquals("debug port should be -1", -1, _model.getDebugPort());
   }
-  
+
+  /**
+   * Tests that an interactions history can be loaded in as a script.
+   */
+  public void testScriptLoading() throws IOException, OperationCanceledException {
+    String line1 = "System.out.println(\"hi\")";
+    String line2 = "System.out.println(\"bye\")";
+    String delim = History.INTERACTION_SEPARATOR + System.getProperty("line.separator");
+    final File temp = File.createTempFile("drjava-test", ".hist");
+    temp.deleteOnExit();
+    History history = new History(5);
+    history.add(line1);
+    history.add(line2);
+    history.writeToFile(new FileSaveSelector() {
+      public File getFile() { return temp; }
+      public void warnFileOpen() {}
+      public boolean verifyOverwrite() { return true; }
+      public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {
+        return true;
+      }
+    });
+    InteractionsScriptModel ism = _model.loadHistoryAsScript(new FileOpenSelector() {
+      public File[] getFiles() {
+        return new File[] {temp};
+      }
+    });
+    InteractionsDocument doc = _model.getDocument();
+    ism.nextInteraction();
+    assertEquals("Should have put the first interaction into the interactions document.",
+                 line1, doc.getCurrentInteraction());
+    ism.nextInteraction();
+    assertEquals("Should have put the second interaction into the interactions document.",
+                 line2, doc.getCurrentInteraction());
+    ism.executeInteraction();
+    assertEquals("Should have \"executed\" the second interaction.", line2, _model.toEval);
+    // pretend the call completed
+    _model.replReturnedVoid();
+    try {
+      ism.nextInteraction();
+      fail("Should not have been able to get next interaction!");
+    }
+    catch (IllegalStateException ise) {
+      // good, continue
+    }
+    
+    ism.prevInteraction();
+    assertEquals("Should have put the second interaction into the interactions document.",
+                 line2, doc.getCurrentInteraction());
+    ism.prevInteraction();
+    assertEquals("Should have put the first interaction into the interactions document.",
+                 line1, doc.getCurrentInteraction());
+    ism.executeInteraction();
+    assertEquals("Should have \"executed\" the first interaction.", line1, _model.toEval);
+    // pretend the call completed
+    _model.replReturnedVoid();
+    try {
+      ism.prevInteraction();
+      fail("Should not have been able to get previous interaction!");
+    }
+    catch (IllegalStateException ise) {
+      // good, continue
+    }
+  }
+
   /**
    * A generic InteractionsModel.
    */

@@ -75,6 +75,8 @@ public interface OptionConstants {
   public static final VectorOption<File> EXTRA_CLASSPATH =
     new ClasspathOption().evaluate("extra.classpath");
   
+  public static final VectorOption<String> EXTRA_COMPILERS =
+    new VectorOption<String>("extra.compilers", new StringOption("",""), new Vector<String>());
   
   /* ---------- Color Options ---------- */
   
@@ -98,6 +100,10 @@ public interface OptionConstants {
     new ColorOption("system.err.color", Color.red);
   public static final ColorOption SYSTEM_IN_COLOR =
     new ColorOption("system.in.color", Color.magenta.darker().darker());
+  public static final ColorOption INTERACTIONS_ERROR_COLOR =
+    new ColorOption("interactions.error.color", Color.red.darker());
+  public static final ColorOption DEBUG_MESSAGE_COLOR =
+    new ColorOption("debug.message.color", Color.blue.darker());
     
   
   /**

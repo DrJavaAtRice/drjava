@@ -241,24 +241,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * @param length the length of the error.
    */
   protected abstract void _notifySyntaxErrorOccurred(int offset, int length);
-  
-  /**
-   * Interprets the files selected in the FileOpenSelector. Assumes all strings
-   * have no trailing whitespace.  Interprets the array all at once so if there
-   * are any errors, none of the statements after the first erroneous one are
-   * processed.
-   */
-  public void loadHistory(FileOpenSelector selector) throws IOException {
-    
+
+  protected ArrayList<String> _getHistoryText(FileOpenSelector selector)
+    throws IOException, OperationCanceledException
+  {
     File[] files = null;
-    try {
-      files = selector.getFiles();
-    }
-    catch (OperationCanceledException oce) {
-      return;
-      // don't need to do anything
-    }
-    Vector<String> strings = new Vector<String>();
+    files = selector.getFiles();
+    ArrayList<String> histories = new ArrayList<String>();
+    ArrayList<String> strings = new ArrayList<String>();
     if (files == null) {
       throw new IOException("No Files returned from FileSelector");
     }
@@ -283,7 +273,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
           throw new IOException("File name returned from FileSelector is null");
           //_showIOError(ioe);
         }
-        
       }
       
       String text = "";
@@ -303,7 +292,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
               // When reading this format, we need to make sure each line ends in a semicolon.
               // This behavior can be buggy; that's why the format was changed.
               if (currString.charAt(currString.length() - 1) == ';') {
-                text += currString + _newLine;
+              text += currString + _newLine;
               }
               else {
                 text += currString + ";" + _newLine;
@@ -311,24 +300,82 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
               break;
             case(2):
               if (!firstLine) { // don't include format version string in output
-                text += currString + _newLine;
+              text += currString + _newLine;
               }
               break;
           }
           firstLine = false;
         }
       }
-      _document.clearCurrentInteraction();
 
-      // Crop off the last newline
-      text.trim();
-
-      // Insert into the document and interpret
-      _docAppend(text, InteractionsDocument.DEFAULT_STYLE);
-      interpretCurrentInteraction();
+      histories.add(text);
     }
+    return histories;
   }
-  
+
+  protected ArrayList<String> _removeSeparators(String text) {
+    String sep = History.INTERACTION_SEPARATOR;
+    int len = sep.length();
+    ArrayList<String> interactions = new ArrayList<String>();
+    int index = text.indexOf(sep);
+    int lastIndex = 0;
+    while (index != -1) {
+      interactions.add(text.substring(lastIndex, index).trim());
+      lastIndex = index + len;
+      index = text.indexOf(sep, lastIndex);
+    }
+    // get last interaction
+    String last = text.substring(lastIndex, text.length()).trim();
+    if (!"".equals(last)) {
+      interactions.add(last);
+    }
+    return interactions;
+  }
+
+  /**
+   * Interprets the files selected in the FileOpenSelector. Assumes all strings
+   * have no trailing whitespace.  Interprets the array all at once so if there
+   * are any errors, none of the statements after the first erroneous one are
+   * processed.
+   */
+  public void loadHistory(FileOpenSelector selector) throws IOException {
+    ArrayList<String> histories;
+    try {
+      histories = _getHistoryText(selector);
+    }
+    catch (OperationCanceledException oce) {
+      return;
+    }
+    _document.clearCurrentInteraction();
+
+    // Insert into the document and interpret
+    StringBuffer buf = new StringBuffer();
+    for (int i = 0; i < histories.size(); i++) {
+      ArrayList<String> interactions = _removeSeparators(histories.get(i));
+      for (int j = 0; j < interactions.size(); j++) {
+        String curr = interactions.get(j);
+        int len = curr.length();
+        buf.append(curr);
+        if (len > 0 && curr.charAt(len - 1) != ';') {
+          buf.append(';');
+        }
+        buf.append(_newLine);
+      }
+    }
+    _docAppend(buf.toString().trim(), InteractionsDocument.DEFAULT_STYLE);
+    interpretCurrentInteraction();
+  }
+
+  public InteractionsScriptModel loadHistoryAsScript(FileOpenSelector selector)
+    throws IOException, OperationCanceledException
+  {
+    ArrayList<String> histories = _getHistoryText(selector);
+    ArrayList<String> interactions = new ArrayList<String>();
+    for (int i = 0; i < histories.size(); i++) {
+      interactions.addAll(_removeSeparators(histories.get(i)));
+    }
+    return new InteractionsScriptModel(this, interactions);
+  }
   
   /**
    * Returns the port number to use for debugging the interactions JVM.

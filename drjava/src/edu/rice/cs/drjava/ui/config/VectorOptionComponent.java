@@ -56,21 +56,26 @@ import java.util.Vector;
  * Uses a file chooser for each String element.
  * @version $Id$
  */
-public class VectorOptionComponent extends OptionComponent<Vector<File>>
+public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>>
   implements OptionConstants
 {
-  private JScrollPane _listScrollPane;
-  private JPanel _panel;
-  private JList _list;
-  private JButton _addButton;
-  private JButton _removeButton;
-  private JButton _moveUpButton;
-  private JButton _moveDownButton;
-  private DefaultListModel _listModel;
-  private FileFilter _fileFilter;
-  private JFileChooser _jfc;
+  protected JScrollPane _listScrollPane;
+  protected JPanel _panel;
+  protected JList _list;
+  protected JPanel _buttonPanel;
+  protected JButton _addButton;
+  protected JButton _removeButton;
+  protected DefaultListModel _listModel;
+  protected static final int NUM_ROWS = 5;
+  protected static final int PIXELS_PER_ROW = 18;
 
-  public VectorOptionComponent (VectorOption<File> opt, String text, Frame parent) {
+  /**
+   * Builds a new VectorOptionComponent.
+   * @param opt the option
+   * @param text the label to display
+   * @param parent the parent frame
+   */
+  public VectorOptionComponent(VectorOption<T> opt, String text, Frame parent) {
     super(opt, text, parent);
 
     //set up list
@@ -79,7 +84,6 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
     _list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
     resetToCurrent();
-    _fileFilter = ClasspathFilter.ONLY;
 
     /*
     Vector v = DrJava.getConfig().getSetting(_option);
@@ -91,30 +95,8 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
     }
     */
 
-    // set up JFileChooser
-    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
-    if (workDir == FileOption.NULL_FILE) {
-      workDir = new File( System.getProperty("user.dir"));
-    }
-    if (workDir.isFile() && workDir.getParent() != null) {
-      workDir = workDir.getParentFile();
-    }
-    _jfc = new JFileChooser(workDir);
-    _jfc.setDialogTitle("Select");
-    _jfc.setApproveButtonText("Select");
-    _jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-    _jfc.setMultiSelectionEnabled(true);
-
-    _addButton = new JButton("Add");
-    _addButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent ae) {
-        chooseFile();
-        _list.setSelectedIndex(_listModel.getSize() - 1);
-      }
-    });
-
-    _removeButton = new JButton("Remove");
-    _removeButton.addActionListener(new ActionListener() {
+    _addButton = new JButton(_getAddAction());
+    _removeButton = new JButton(new AbstractAction("Remove") {
       public void actionPerformed(ActionEvent ae) {
         if (!_list.isSelectionEmpty()) {
           int index = _list.getSelectedIndex();
@@ -123,50 +105,19 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
             if (index > 0) // and there's more than one element in the list
             _list.setSelectedIndex(index - 1);
           }
-          else
+          else {
             _list.setSelectedIndex(index);
-        }
-      }
-    });
-
-    _moveUpButton = new JButton("Move Up");
-    _moveUpButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent ae) {
-        if (!_list.isSelectionEmpty()) {
-          int index = _list.getSelectedIndex();
-          if (index > 0) {
-            Object o = _listModel.getElementAt(index);
-            _listModel.remove(index);
-            _listModel.add(index - 1, o);
-            _list.setSelectedIndex(index - 1);
           }
         }
       }
     });
 
-    _moveDownButton = new JButton("Move Down");
-    _moveDownButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent ae) {
-        if (!_list.isSelectionEmpty()) {
-          int index = _list.getSelectedIndex();
-          if (index < _listModel.getSize() - 1) {
-            Object o = _listModel.getElementAt(index);
-            _listModel.remove(index);
-            _listModel.add(index + 1, o);
-            _list.setSelectedIndex(index + 1);
-          }
-        }
-      }
-    });
-
-    JPanel buttons = new JPanel();
+    _buttonPanel = new JPanel();
+    _buttonPanel.add(_addButton);
+    _buttonPanel.add(_removeButton);
     //buttons.setLayout(new BoxLayout(buttons, BoxLayout.X_AXIS));
     //buttons.add(Box.createGlue());
-    buttons.add(_addButton);
-    buttons.add(_removeButton);
     //buttons.add(Box.createGlue());
-    buttons.add(_moveUpButton);
-    buttons.add(_moveDownButton);
     //buttons.add(Box.createGlue());
 
     _listScrollPane = new JScrollPane(_list,
@@ -175,14 +126,16 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
 
     _panel = new JPanel(new BorderLayout());
     _panel.add(_listScrollPane, BorderLayout.CENTER);
-    _panel.add(buttons, BorderLayout.SOUTH);
+    _panel.add(_buttonPanel, BorderLayout.SOUTH);
+
+    _listScrollPane.setPreferredSize(new Dimension(0, NUM_ROWS * PIXELS_PER_ROW));
   }
 
   /**
    * Constructor that allows for a tooltip description.
    */
-  public VectorOptionComponent (VectorOption<File> opt, String text,
-                                Frame parent, String description) {
+  public VectorOptionComponent(VectorOption<T> opt, String text,
+                               Frame parent, String description) {
     this(opt, text, parent);
     setDescription(description);
   }
@@ -202,9 +155,9 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
-    Vector<File> current = new Vector<File>();
+    Vector<T> current = new Vector<T>();
     for (int i = 0; i < _listModel.getSize(); i++) {
-      current.add((File)_listModel.getElementAt(i));
+      current.add((T)_listModel.getElementAt(i));
     }
     DrJava.getConfig().setSetting(_option, current);
     resetToCurrent();
@@ -215,12 +168,10 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
   /**
    * Displays the given value.
    */
-  public void setValue(Vector<File> value) {
-    File[] array = new File[value.size()];
-    value.copyInto(array);
+  public void setValue(Vector<T> value) {
     _listModel.clear();
-    for (int i = 0; i < array.length; i++) {
-      _listModel.addElement(array[i]);
+    for (int i = 0; i < value.size(); i++) {
+      _listModel.addElement(value.elementAt(i));
     }
   }
 
@@ -232,35 +183,7 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
   }
 
   /**
-   * Set the file filter for this vector option component
+   * Gets an action that adds a component to the set of options.
    */
-  public void setFileFilter(FileFilter fileFilter) {
-    _fileFilter = fileFilter;
-  }
-
-  /**
-   * Shows a file chooser for adding a file to the element.
-   */
-  public void chooseFile() {
-    File selection = (File) _list.getSelectedValue();
-    if (selection != null) {
-      File parent = selection.getParentFile();
-      if (parent != null) {
-        _jfc.setCurrentDirectory(parent);
-      }
-    }
-
-    _jfc.setFileFilter(_fileFilter);
-
-    File[] c = null;
-    int returnValue = _jfc.showDialog(_parent, null);
-    if (returnValue == JFileChooser.APPROVE_OPTION) {
-      c = _jfc.getSelectedFiles();
-    }
-    if (c != null) {
-      for(int i = 0; i < c.length; i++) {
-        _listModel.addElement(c[i]);
-      }
-    }
-  }
+  protected abstract Action _getAddAction();
 }

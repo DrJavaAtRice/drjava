@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -37,48 +37,30 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.awt.*;
+import javax.swing.*;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030807-2207;
- *
+ * Pane for an interactions script.
  * @version $Id$
  */
-public abstract class Version {
+public class InteractionsScriptPane extends JPanel {
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Constructs a new pane with the given rows and cols.
+   * @param rows the number of rows
+   * @param cols the number of columns
    */
-  private static final String BUILD_TIME_STRING = "20030807-2207";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public InteractionsScriptPane(int rows, int cols) {
+    setLayout(new GridLayout(rows, cols));
   }
 
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  /**
+   * Adds the given action to this pane as a button.
+   * @param a the action the button should perform.
+   */
+  public void addButton(Action a) {
+    add(new JButton(a));
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

@@ -161,19 +161,19 @@ public class DrJava implements OptionConstants {
         final MainFrame mf = new MainFrame();
         
         // Make sure all uncaught exceptions are shown in an AWTExceptionHandler
-        edu.rice.cs.drjava.ui.AWTExceptionHandler.setFrame(mf);
+        AWTExceptionHandler.setFrame(mf);
         System.setProperty("sun.awt.exception.handler", 
                            "edu.rice.cs.drjava.ui.AWTExceptionHandler");
         
         // This enabling of the security manager must happen *after* the mainframe
         // is constructed. See bug #518509.
         enableSecurityManager();
-        
+
         openCommandLineFiles(mf, _filesToOpen);
         splash.dispose();
         mf.show();
-        
-        
+
+
         // redirect stdout to DrJava's console
         System.setOut(new PrintStream(new OutputStreamRedirector() {
           public void print(String s) {
@@ -640,11 +640,14 @@ public class DrJava implements OptionConstants {
       JFileChooser chooser = new JFileChooser();
       chooser.setFileFilter(new ClasspathFilter() {
         public boolean accept(File f) {
+          if (f.isDirectory()) {
+            return true;
+          }
           String ext = getExtension(f);
           return ext != null && ext.equals("jar");
         }
-        public String getName() {
-          return "Jar files";
+        public String getDescription() {
+          return "Jar Files";
         }
       });
       

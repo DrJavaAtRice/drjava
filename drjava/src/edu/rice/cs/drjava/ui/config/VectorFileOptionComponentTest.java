@@ -52,38 +52,36 @@ import junit.extensions.*;
 /**
  * Tests functionality of this OptionComponent
  */
-public final class VectorOptionComponentTest extends TestCase {
+public final class VectorFileOptionComponentTest extends TestCase {
   
-  private static VectorOptionComponent _option;
+  private static VectorFileOptionComponent _option;
  
-  public VectorOptionComponentTest(String name) {
+  public VectorFileOptionComponentTest(String name) {
     super(name);
   }
     
   protected void setUp() {
-    _option = new VectorOptionComponent( OptionConstants.EXTRA_CLASSPATH, "Extra Classpath", new Frame());
+    _option = new VectorFileOptionComponent( OptionConstants.EXTRA_CLASSPATH, "Extra Classpath", new Frame());
     DrJava.getConfig().resetToDefaults();
     
   }
   
   public void testCancelDoesNotChangeConfig() {
-
     Vector<File> testVector = new Vector<File>();
-    testVector.add(new File("test"));
+    testVector.addElement(new File("test"));
     
     _option.setValue(testVector);
     _option.resetToCurrent(); // should reset to the original.
     _option.updateConfig(); // should update with original values therefore no change.
   
     assertTrue("Cancel (resetToCurrent) should not change the config",
-               vectorEquals( OptionConstants.EXTRA_CLASSPATH.getDefault(),
+               vectorEquals(OptionConstants.EXTRA_CLASSPATH.getDefault(),
                             DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
-    
   }
   
   public void testApplyDoesChangeConfig() {
     Vector<File> testVector = new Vector<File>();
-    testVector.add(new File("blah"));
+    testVector.addElement(new File("blah"));
     
     _option.setValue(testVector);
     _option.updateConfig();
@@ -95,7 +93,7 @@ public final class VectorOptionComponentTest extends TestCase {
   
   public void testApplyThenResetDefault() {
     Vector<File> testVector = new Vector<File>();
-    testVector.add(new File("blah"));
+    testVector.addElement(new File("blah"));
     
     _option.setValue(testVector);
     _option.updateConfig();
@@ -107,7 +105,7 @@ public final class VectorOptionComponentTest extends TestCase {
                               DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
   }
     
-    /**
+  /**
    * The equals method for a parameterized Vector
    * @param o the compared Vector<T>
    * @return boolean
@@ -117,7 +115,7 @@ public final class VectorOptionComponentTest extends TestCase {
     if (v1.size() == v2.size()) {
       
       for (int i=0; i<v1.size(); i++) {
-        if (!v1.get(i).equals( v2.get(i))) return false;
+        if (!v1.elementAt(i).equals( v2.elementAt(i))) return false;
       }
       return true;
     }

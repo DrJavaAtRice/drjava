@@ -68,10 +68,12 @@ import edu.rice.cs.drjava.platform.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
+import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
 import edu.rice.cs.drjava.ui.config.*;
 import edu.rice.cs.drjava.ui.CompilerErrorPanel.CompilerErrorListPane;
 import edu.rice.cs.drjava.ui.JUnitPanel.JUnitErrorListPane;
@@ -96,6 +98,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   //private static final int COMPILE_TAB = 1;
   //private static final int OUTPUT_TAB = 2;
   //private static final int JUNIT_TAB = 3;
+  //private static final int JAVADOC_TAB = 4;
 
   // GUI Dimensions
 //  private static final int GUI_WIDTH = 800;
@@ -104,8 +107,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
   private static final String DEBUGGER_OUT_OF_SYNC =
-    " Current document is out of sync with the debugger" +
-    " and should be recompiled!";
+    " Current document is out of sync with the debugger and should be recompiled!";
 
   /**
    * Number of milliseconds to wait before displaying "Stepping..." message
@@ -146,7 +148,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   private ConsoleController _consoleController;  // move to controller
   private InteractionsPane _interactionsPane;
   private JScrollPane _interactionsScroll;
+  private JPanel _interactionsContainer;
   private InteractionsController _interactionsController;  // move to controller
+  private InteractionsScriptController _interactionsScriptController;
+  private InteractionsScriptPane _interactionsScriptPane;
+
   private DebugPanel _debugPanel;
   private JUnitPanel _junitErrorPanel;
   private JavadocErrorPanel _javadocErrorPanel;
@@ -523,7 +529,15 @@ public class MainFrame extends JFrame implements OptionConstants {
   Action pasteAction = new DefaultEditorKit.PasteAction() {
     public void actionPerformed(ActionEvent e) {
       Component c = SwingUtilities.findFocusOwner(MainFrame.this);
-      super.actionPerformed(e);
+      if (_currentDefPane.hasFocus()) {
+        CompoundUndoManager undoMan = _model.getActiveDocument().getDocument().getUndoManager();
+        int key = undoMan.startCompoundEdit();
+        super.actionPerformed(e);
+        undoMan.endCompoundEdit(key);
+      }
+      else {
+        super.actionPerformed(e);
+      }
       if (c != null) c.requestFocus();
     }
   };
@@ -994,22 +1008,23 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
+  private FileOpenSelector _interactionsHistoryFileSelector = new FileOpenSelector() {
+    public File[] getFiles() throws OperationCanceledException {
+      return getOpenFiles(_interactionsHistoryChooser);
+    }
+  };
+
   /**
    * Interprets the commands in a file in the interactions window
    */
-  private Action _loadHistoryAction = new AbstractAction("Load Interactions History...") {
+  private Action _loadHistoryAction = new AbstractAction("Execute Interactions History...") {
     public void actionPerformed(ActionEvent ae) {
       // Show interactions tab
       _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
 
       _interactionsHistoryChooser.setDialogTitle("Load Interactions History");
-      FileOpenSelector selector = new FileOpenSelector() {
-        public File[] getFiles() throws OperationCanceledException {
-          return getOpenFiles(_interactionsHistoryChooser);
-        }
-      };
       try {
-        _model.loadHistory(selector);
+        _model.loadHistory(_interactionsHistoryFileSelector);
       }
       catch (FileNotFoundException fnf) {
         _showFileNotFoundError(fnf);
@@ -1018,6 +1033,49 @@ public class MainFrame extends JFrame implements OptionConstants {
         _showIOError(ioe);
       }
       _interactionsPane.requestFocus();
+    }
+  };
+
+  /**
+   * Closes the currently executing interactions script, if there is one.
+   */
+  private void _closeInteractionsScript() {
+    if (_interactionsController != null) {
+      _interactionsContainer.remove(_interactionsScriptPane);
+      _interactionsScriptController = null;
+      _interactionsScriptPane = null;
+      _tabbedPane.invalidate();
+      _tabbedPane.repaint();
+    }
+  }
+
+  /**
+   * Action to load an interactions history as a replayable script.
+   */
+  private Action _loadHistoryScriptAction =new AbstractAction("Load Interactions History as Script...") {
+    public void actionPerformed(ActionEvent e) {
+      try {
+        _interactionsHistoryChooser.setDialogTitle("Load Interactions History");
+        InteractionsScriptModel ism = _model.loadHistoryAsScript(_interactionsHistoryFileSelector);
+        _interactionsScriptController = new InteractionsScriptController(ism, new AbstractAction("Close") {
+          public void actionPerformed(ActionEvent e) {
+            _closeInteractionsScript();
+            _interactionsPane.requestFocus();
+          }
+        }, _interactionsPane);
+        _interactionsScriptPane = _interactionsScriptController.getPane();
+        _interactionsContainer.add(_interactionsScriptPane, BorderLayout.EAST);
+        _tabbedPane.invalidate();
+        _tabbedPane.repaint();
+      }
+      catch (FileNotFoundException fnf) {
+        _showFileNotFoundError(fnf);
+      }
+      catch (IOException ioe) {
+        _showIOError(ioe);
+      }
+      catch (OperationCanceledException oce) {
+      }
     }
   };
 
@@ -1178,6 +1236,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _interactionsHistoryChooser = new JFileChooser();
     _interactionsHistoryChooser.setCurrentDirectory(workDir);
     _interactionsHistoryChooser.setFileFilter(new InteractionsHistoryFilter());
+    _interactionsHistoryChooser.setMultiSelectionEnabled(true);
 
 
     //set up the hourglass cursor
@@ -1857,7 +1916,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     config.setSetting(WINDOW_WIDTH, new Integer(size.width));
 
     // Panel heights.
-    config.setSetting(DEBUG_PANEL_HEIGHT, new Integer(_debugPanel.getHeight()));
+    if (_debugPanel != null) {
+      config.setSetting(DEBUG_PANEL_HEIGHT, new Integer(_debugPanel.getHeight()));
+    }
 //    config.setSetting(TABS_HEIGHT,
 //       new Integer(_mainSplit.getHeight() - _mainSplit.getDividerLocation()));
 
@@ -2416,7 +2477,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_javadocCurrentAction, "Preview Javadoc Current", "Preview the Javadoc for the current document");
     _setUpAction(_runAction, "Run Document", "Run the main method of the current document");
 
-    _setUpAction(_loadHistoryAction, "Load History", "Load a history of interactions from a file");
+    _setUpAction(_loadHistoryAction, "Execute History", "Load and execute a history of interactions from a file");
+    _setUpAction(_loadHistoryScriptAction, "Load History as Script", "Load a history from a file as a series of interactions");
     _setUpAction(_saveHistoryAction, "Save History", "Save the history of interactions to a file");
     _setUpAction(_clearHistoryAction, "Clear History", "Clear the current history of interactions");
 
@@ -3046,6 +3108,8 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     _consoleScroll = new BorderlessScrollPane(_consolePane);
     _interactionsScroll = new BorderlessScrollPane(_interactionsPane);
+    _interactionsContainer = new JPanel(new BorderLayout());
+    _interactionsContainer.add(_interactionsScroll, BorderLayout.CENTER);
 
     _junitErrorPanel = new JUnitPanel(_model, this);
     _javadocErrorPanel = new JavadocErrorPanel(_model, this);
@@ -3074,7 +3138,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     //                               BorderLayout.CENTER);
     //_interactionsWithSyncPanel.add(_syncStatus, BorderLayout.SOUTH);
 
-    _tabbedPane.add("Interactions", _interactionsScroll);
+    _tabbedPane.add("Interactions", _interactionsContainer);
     _tabbedPane.add("Console", _consoleScroll);
 
     _tabs = new LinkedList<TabbedPanel>();
@@ -3134,6 +3198,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _interactionsPanePopupMenu.add(pasteAction);
     _interactionsPanePopupMenu.addSeparator();
     _interactionsPanePopupMenu.add(_loadHistoryAction);
+    _interactionsPanePopupMenu.add(_loadHistoryScriptAction);
     _interactionsPanePopupMenu.add(_saveHistoryAction);
     _interactionsPanePopupMenu.add(_clearHistoryAction);
     _interactionsPanePopupMenu.addSeparator();
@@ -3608,6 +3673,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       public void run() {
         _interactionsPane.setEditable(false);
         _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        if (_interactionsScriptController != null) {
+          _interactionsScriptController.setActionsDisabled();
+        }
       }
     };
     SwingUtilities.invokeLater(doCommand);
@@ -3634,6 +3702,9 @@ public class MainFrame extends JFrame implements OptionConstants {
         _interactionsController.moveToEnd();
         if (_interactionsPane.hasFocus()) {
           _interactionsPane.getCaret().setVisible(true);
+        }
+        if (_interactionsScriptController != null) {
+          _interactionsScriptController.setActionsEnabled();
         }
       }
     };
@@ -4281,6 +4352,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           _junitAction.setEnabled(false);
           _junitAllAction.setEnabled(false);
           _runAction.setEnabled(false);
+          _closeInteractionsScript();
           _interactionsPane.setEditable(false);
           _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
           if (_model.getDebugger().isAvailable()) {

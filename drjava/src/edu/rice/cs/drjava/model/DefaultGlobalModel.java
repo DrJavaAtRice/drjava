@@ -845,6 +845,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
 
   /**
+   * Loads the history/histories from the given selector.
+   */
+  public InteractionsScriptModel loadHistoryAsScript(FileOpenSelector selector)
+    throws IOException, OperationCanceledException
+  {
+    return _interactionsModel.loadHistoryAsScript(selector);
+  }
+
+  /**
    * Clears the interactions history
    */
   public void clearHistory() {
