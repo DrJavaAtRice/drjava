@@ -86,7 +86,34 @@ import java.io.File;
 public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     implements GlobalModelListener {
 
-
+  /* -------------- project state ------------------*/
+  
+  public void projectModified(){
+    _lock.startRead();
+    try {
+      int size = _listeners.size();
+      for(int i = 0; i < size; i++) {
+        _listeners.get(i).projectModified();
+      }
+    }
+    finally {
+      _lock.endRead();
+    }
+  }
+  
+  public void projectBuildDirChanged(){
+    _lock.startRead();
+    try {
+      int size = _listeners.size();
+      for(int i = 0; i < size; i++) {
+        _listeners.get(i).projectBuildDirChanged();
+      }
+    }
+    finally {
+      _lock.endRead();
+    }
+  }
+  
   public void projectRunnableChanged(){
     _lock.startRead();
     try {

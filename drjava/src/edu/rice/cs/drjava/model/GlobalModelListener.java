@@ -140,6 +140,19 @@ public interface GlobalModelListener extends InteractionsListener,
    */
   public void filePathContainsPound();
   
+  /**
+   * called when the builddirectory is modified in the model
+   */
+  public void projectBuildDirChanged();
+  
+  /**
+   * called if the project's modified state has changed
+   */
+  public void projectModified();
+  
+  /**
+   * called when the project runnability changed (ie, when the main file is set/unset)
+   */
   public void projectRunnableChanged();
 }
 

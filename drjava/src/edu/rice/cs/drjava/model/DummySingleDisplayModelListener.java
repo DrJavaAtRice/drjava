@@ -56,6 +56,16 @@ import java.util.List;
 public class DummySingleDisplayModelListener implements SingleDisplayModelListener {
   
   /**
+   * called when the project's build directory has changed
+   */
+  public void projectBuildDirChanged(){  }
+  
+  /**
+   * called when the projects modified state has changed
+   */
+  public void projectModified(){  }
+
+  /**
    * called when a project's main class has been set/unset
    */
   public void projectRunnableChanged(){  }

@@ -48,6 +48,7 @@ package edu.rice.cs.drjava.project;
 import junit.framework.*;
 import java.io.*;
 import java.util.*;
+import edu.rice.cs.util.*;
 
 public class ProjectFileTest extends TestCase {
   private static final String SOURCE_FILE_1 =  "Test1.java";
@@ -106,9 +107,19 @@ public class ProjectFileTest extends TestCase {
     super(s);
   }
   
+  File _tempDir;
+  
+  /** Create a new temporary file in _tempDir. */
+  protected File tempFile() throws IOException {
+    return File.createTempFile("DrJava-test", ".pjt", _tempDir);
+  }
+
   /* creates the temporary project file and creates a reader for it */
   public void setUp() throws Exception {
-    testFile = File.createTempFile("_test", "pjt");
+    String user = System.getProperty("user.name");
+    _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+
+    testFile =tempFile();
     reader = new BufferedReader(new FileReader(testFile));
     BufferedWriter w = new BufferedWriter(new FileWriter(testFile));
     w.write(TEST_FILE_TEXT);
@@ -117,9 +128,8 @@ public class ProjectFileTest extends TestCase {
   
   /* removes the temporary project file and sets the reader to null */
   public void tearDown() throws Exception {
-    if( !testFile.delete() ) {
-      fail("Couldn't delete temporary file " + testFile.toString());
-    }
+    boolean ret = FileOps.deleteDirectory(_tempDir);
+    
     reader = null;    
   }
   

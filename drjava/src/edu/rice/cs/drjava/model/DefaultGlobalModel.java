@@ -96,10 +96,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   private DocumentCache _cache;
   
-
-  
   static final String DOCUMENT_OUT_OF_SYNC_MSG =
     "Current document is out of sync with the Interactions Pane and should be recompiled!\n";
+
+  static final String CLASSPATH_OUT_OF_SYNC_MSG =
+    "Current classpath is out of sync with the Interactions Pane and should be reset!\n";
 
   // ----- FIELDS -----
 
@@ -139,6 +140,31 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * which runs in a separate JVM.
    */
   protected DefaultInteractionsModel _interactionsModel;
+  
+  protected InteractionsListener _interactionsListener = new InteractionsListener(){
+    public void interactionStarted(){    }
+    
+    public void interactionEnded(){    }
+    
+    public void interactionErrorOccurred(int offset, int length){    }
+    
+    public void interpreterResetting(){    }
+    
+    public void interpreterReady(){  
+      if(_state.getBuildDirectory() != null){
+//        System.out.println("adding for reset: " + _state.getBuildDirectory().getAbsolutePath());
+        _interpreterControl.addClassPath(_state.getBuildDirectory().getAbsolutePath());
+      }
+    }
+    
+    public void interpreterResetFailed(Throwable t){    }
+    
+    public void interpreterExited(int status){    }
+    
+    public void interpreterChanged(boolean inProgress){    }
+    
+    public void interactionIncomplete(){    }
+  };
 
   private CompilerListener _clearInteractionsListener =
     new CompilerListener() {
@@ -267,6 +293,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     _interactionsModel =
       new DefaultInteractionsModel(this, _interpreterControl,
                                    _interactionsDocAdapter);
+    _interactionsModel.addListener(_interactionsListener);
 
     _interpreterControl.setInteractionsModel(_interactionsModel);
     _interpreterControl.setJUnitModel(_junitModel);
@@ -359,6 +386,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public void setFileGroupingState(FileGroupingState state){
     _state = state;
     _notifier.projectRunnableChanged();
+    _notifier.projectBuildDirChanged();
+    _notifier.projectModified();
   }
   
   public FileGroupingState getFileGroupingState(){
@@ -370,6 +399,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   public void setProjectChanged(boolean changed) {
     _state.setProjectChanged(changed);
+    _notifier.projectModified();
   }
   
   /**
@@ -423,6 +453,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public void setJarMainClass(File f) {
     _state.setJarMainClass(f);
     _notifier.projectRunnableChanged();
+    setProjectChanged(true);
   }
   
   /**
@@ -435,8 +466,21 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    /**
    * Sets the class with the project's main method
    */
-  public void setBuildDirectory(File f) {
+  public void setBuildDirectory(File f){
     _state.setBuildDirectory(f);
+    if(f != null){
+//      System.out.println("adding: " + f.getAbsolutePath());
+      _interpreterControl.addClassPath(f.getAbsolutePath());
+    }
+    
+//        InteractionsDocument iDoc = _interactionsModel.getDocument();
+//        synchronized (_interpreterControl) {
+//          iDoc.clearCurrentInput();
+//          iDoc.insertBeforeLastPrompt(CLASSPATH_OUT_OF_SYNC_MSG, InteractionsDocument.ERROR_STYLE);
+//        }
+        
+    _notifier.projectBuildDirChanged();
+    setProjectChanged(true);
   }
   
   /**
@@ -510,7 +554,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       
       public void setBuildDirectory(File f) {
         _builtDir = f;
-        setProjectChanged(true);
       }
       
       public File getJarMainClass(){
@@ -519,7 +562,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       
       public void setJarMainClass(File f) {
         _mainFile = f;
-        setProjectChanged(true);
       }
       
       public boolean isProjectChanged() {
@@ -943,7 +985,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     
     setFileGroupingState(_makeProjectFileGroupingState(mainClass, buildDir, projectFile, srcFiles));
-    
+    setBuildDirectory(buildDir);
     
     String projfilepath = projectFile.getCanonicalPath();
     String tlp = projfilepath.substring(0, projfilepath.lastIndexOf(File.separator));
@@ -956,6 +998,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     DrJava.getConfig().setSetting(OptionConstants.EXTRA_CLASSPATH, currentclasspaths);
     
+    
+    setProjectChanged(false);
+    
     return srcFiles;
   }
   
@@ -965,8 +1010,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * closing the files since that is handled in MainFrame._closeProject()
    */
   public void closeProject() {
+    
     setDocumentNavigator(AWTContainerNavigatorFactory.Singleton.makeListNavigator(getDocumentNavigator()));
     setFileGroupingState(_makeFlatFileGroupingState());
+    
+    _interactionsModel.getDocument().insertBeforeLastPrompt(CLASSPATH_OUT_OF_SYNC_MSG, InteractionsDocument.SYSTEM_ERR_STYLE);
   }
   
   /**
@@ -2211,6 +2259,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 //            return;
 //          }
 //        }
+        
         synchronized (_interpreterControl) {
           iDoc.clearCurrentInput();
           if (!checkIfClassFileInSync()) {
@@ -2352,6 +2401,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 //        sourceRoots = getSourceRootSet();
         Vector<File> roots = new Vector<File>();
         // Add the current document to the beginning of the roots Vector
+        
+        
+        if(getBuildDirectory() != null){
+          roots.add(getBuildDirectory());
+        }
+        
+        
         try {
           roots.add(getSourceRoot());
         }
@@ -2377,6 +2433,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         for (int i=0; i < sourceRoots.length; i++) {
           roots.add(sourceRoots[i]);
         }
+        
         File classFile = getSourceFileFromPaths(filename, roots);
 
         if (classFile == null) {

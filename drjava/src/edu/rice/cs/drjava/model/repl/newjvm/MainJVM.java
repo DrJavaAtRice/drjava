@@ -276,7 +276,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     ensureInterpreterConnected();
 
     try {
-      //System.err.println("addclasspath to " + _interpreterJVM + ": " + path);
+//      System.err.println("addclasspath to " + _interpreterJVM() + ": " + path);
+//      System.err.println("full classpath: " + getClasspath());
       _interpreterJVM().addClassPath(path);
     }
     catch (RemoteException re) {
@@ -708,6 +709,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 
     // Invoke the Interpreter JVM
     try {
+      //_startupClasspath is sent in as the interactions classpath
       invokeSlave(jvmArgsArray, _startupClasspath);
     }
     catch (RemoteException re) {

@@ -653,6 +653,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
 
     
+    public void projectModified(){ }
+    public void projectBuildDirChanged(){ }
     public void projectRunnableChanged(){ }
     
     /**

@@ -2173,7 +2173,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _openProjectUpdate() {
     if(_model.isProjectActive()) {
       _closeProjectAction.setEnabled(true);
-      _saveProjectAction.setEnabled(false);
+//      _saveProjectAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(true);
       _model.setProjectChanged(false);
       _resetNavigatorPane(); 
@@ -2201,7 +2201,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       if(_model.getDocumentCount() == 1)
         _model.setActiveFirstDocument();
       _closeProjectAction.setEnabled(false);
-      _saveProjectAction.setEnabled(false);
+//      _saveProjectAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(false);
       _setUpContextMenus();
       _currentProjFile = null;
@@ -2494,7 +2494,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _showIOError(ioe);
     }
     _recentProjectManager.updateOpenFiles(file);
-    _saveProjectAction.setEnabled(false);
+//    _saveProjectAction.setEnabled(false);
     _model.setProjectChanged(false);
   }
   
@@ -4956,7 +4956,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       try {
         File f = doc.getFile();
         if(! _model.isProjectFile(f) && _model.isInProjectPath(doc)) {
-          _saveProjectAction.setEnabled(true);
+//          _saveProjectAction.setEnabled(true);
           _model.setProjectChanged(true);
         }
       }
@@ -5019,7 +5019,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         try {
           File f = doc.getFile();
           if(_model.isProjectFile(f)) {
-            _saveProjectAction.setEnabled(true);
+//            _saveProjectAction.setEnabled(true);
             _model.setProjectChanged(true);
           }
         }
@@ -5656,7 +5656,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     /* changes to the state */
     
-    // ADAM
+    public void projectBuildDirChanged(){
+    }
+    
+    public void projectModified(){
+      _saveProjectAction.setEnabled(_model.isProjectChanged());
+    }
     
     public void projectRunnableChanged(){
       if(_model.getJarMainClass() != null && _model.getJarMainClass().exists()){
@@ -5664,7 +5669,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       }else{
         _runProjectAction.setEnabled(false);
       }
-      _saveProjectAction.setEnabled(_model.isProjectChanged());
     }
   }
 
