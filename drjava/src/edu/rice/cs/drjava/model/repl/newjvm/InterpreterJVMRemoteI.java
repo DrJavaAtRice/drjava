@@ -63,7 +63,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   public List<String> runTestSuite(List<String> classNames, List<File> files, boolean isTestAll)
     throws RemoteException;
   public void setPackageScope(String s) throws RemoteException;
-  public void reset() throws RemoteException;
+  //public void reset() throws RemoteException;
 
   /**
    * @param show Whether to show a message if a reset operation fails.

@@ -143,7 +143,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
   /**
    * Resets this InterpreterJVM to its default state.
    */
-  public void reset() {
+  private void reset() {
     _defaultInterpreter = new InterpreterData(new DynamicJavaAdapter());
     _activeInterpreter = _defaultInterpreter;
     _interpreters = new Hashtable<String,InterpreterData>();

@@ -637,7 +637,9 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       // it adds on an auxilary classloader and chains the old classLoader
       // onto the end.
       // Here we initialize classLoader to be the system class loader.
-      classLoader = getClass().getClassLoader();
+      classLoader = getClass().getClassLoader(); // classLoader is only used in getResource()
+      // NOTE that the superclass of ClassLoaderExtension (TreeClassLoader) adds (appends)
+      // URLs to the classpath of this classloader
 
       // don't load the dynamic java stuff using the sticky loader!
       // without this, interpreter-defined classes don't work.
@@ -647,8 +649,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       };
 
       if (!classLoaderCreated) {
-        _stickyLoader = new StickyClassLoader(this,
-                                              getClass().getClassLoader(),
+        _stickyLoader = new StickyClassLoader(this, // Sticky's newLoader, indirectly points to the (dynamic) classLoader
+                                              getClass().getClassLoader(), // Sticky's oldLoader
                                               excludes);
         classLoaderCreated = true;
       }

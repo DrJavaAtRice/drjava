@@ -202,46 +202,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         toEval = _testClassCall(toEval);
       }
 
-//      try {
-//        _checkInteraction(text);
-//        toEval = _interactionsProcessor.preProcess(toEval);
-
-      
-////      boolean parserpassed = true;
-////      JavaInterpreter interpreter = new DynamicJavaAdapter();
-////      try {
-////        interpreter.parse(toEval);
-////      } catch(Throwable t){
-////        parserpassed = false;
-////      }
-////
-////      if(parserpassed) {
       _prepareToInterpret(text);
       interpret(toEval);
-////      }
-      
-//      }
-//      catch (ParseException pe) {
-//        // A ParseException indicates a syntax error in the input window
-//        String errMsg = pe.getInteractionsMessage();
-//        //javax.swing.JOptionPane.showMessageDialog(null, "ParseException:\n" + errMsg);
-//        if (errMsg.endsWith("<EOF>\"")) {
-//          _notifyInteractionIncomplete();
-//        }
-//        else {
-//          _prepareToInterpret(text);
-//          replReturnedSyntaxError(errMsg, text, pe.getBeginLine(),
-//                                  pe.getBeginColumn(), pe.getEndLine(), pe.getEndColumn());
-//        }
-//      }
-//      catch (TokenMgrError tme) {
-//        // A TokenMgrError indicates some lexical difficulty with input.
-//        //  javax.swing.JOptionPane.showMessageDialog(null, "TokenMgrError:\n" + tme.getMessage());
-//        _prepareToInterpret(text);
-//        int row = tme.getErrorRow();
-//        int col = tme.getErrorColumn() - 1;
-//        replReturnedSyntaxError(tme.getMessage(), text, row, col, row, col);
-//      }
     }
   }
 

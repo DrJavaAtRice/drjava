@@ -351,24 +351,24 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
   }
 
-  /**
-   * "Soft" resets the interpreter, without killing the JVM.  This method
-   * is not really used anymore, since this doesn't reset any threads that
-   * have been spawned.
-   */
-  public void reset() {
-    // silently fail if disabled. see killInterpreter docs for details.
-    if (! _enabled) return;
-
-    ensureInterpreterConnected();
-
-    try {
-      _interpreterJVM().reset();
-    }
-    catch (RemoteException re) {
-      _threwException(re);
-    }
-  }
+//  /**
+//   * "Soft" resets the interpreter, without killing the JVM.  This method
+//   * is not really used anymore, since this doesn't reset any threads that
+//   * have been spawned.
+//   */
+//  public void reset() {
+//    // silently fail if disabled. see killInterpreter docs for details.
+//    if (! _enabled) return;
+//
+//    ensureInterpreterConnected();
+//
+//    try {
+//      _interpreterJVM().reset();
+//    }
+//    catch (RemoteException re) {
+//      _threwException(re);
+//    }
+//  }
 
   /**
    * @param show Whether to show a message if a reset operation fails.
