@@ -146,16 +146,16 @@
     <property name="eclipse_dir" value="${plugins_dir}/eclipse" />
     <property name="eclipse_srcroot" value="${eclipse_dir}/src" />
     <property name="eclipse_built" value="${eclipse_dir}/bin" />
-    <property name="eclipse_package" value="${eclipse_dir}/package/edu.rice.cs.drjava_${eclipse_plugin_version}" />
+    <property name="eclipse_package" value="edu.rice.cs.drjava_${eclipse_plugin_version}" />
+    <property name="eclipse_package_dir" value="${eclipse_dir}/package/${eclipse_package}" />
   </target>
 
   <target name="clean-eclipse" depends="eclipse">
     <delete dir="${eclipse_built}" />
-    <delete dir="${eclipse_package}" />
+    <delete dir="${eclipse_package_dir}" />
   </target>
 
-  <!-- Compiles the Eclipse specific classes.
-    -->
+  <!-- Compiles the Eclipse specific classes. -->
   <target name="compile-eclipse" depends="eclipse">
     <!-- Build the classes -->
     <mkdir dir="${eclipse_built}" />
@@ -166,15 +166,16 @@
     </antcall>
   </target>
 
+  <!-- Creates a distributable package for the Eclipse plugin -->
   <target name="package-eclipse" depends="compile-eclipse">
 
-    <mkdir dir="${eclipse_package}" />
+    <mkdir dir="${eclipse_package_dir}" />
     <!-- Make a jar to include DrJava classes -->
     <antcall target="jar">
-      <param name="jarfile" value="${eclipse_package}/drjava-eclipse.jar"/>
+      <param name="jarfile" value="${eclipse_package_dir}/drjava-eclipse.jar"/>
     </antcall>
     <!-- Add the plugin classes -->
-    <jar jarfile="${eclipse_package}/drjava-eclipse.jar" update="yes">
+    <jar jarfile="${eclipse_package_dir}/drjava-eclipse.jar" update="yes">
       <fileset dir="${eclipse_built}">
         <exclude name="**/*Test.class" />
         <exclude name="**/*Test$*.class" />
@@ -182,13 +183,23 @@
       </fileset>
     </jar>
     <!-- Copy the plugin.xml -->
-    <copy file="${eclipse_dir}/plugin.xml" todir="${eclipse_package}" />
+    <copy file="${eclipse_dir}/plugin.xml" todir="${eclipse_package_dir}" />
     <!-- Copy the icons -->
-    <copy todir="${eclipse_package}">
+    <copy todir="${eclipse_package_dir}">
       <fileset dir="${eclipse_dir}">
+        <include name="plugin.xml" />
         <include name="icons/**" />
+        <include name="README" />
+        <include name="LICENSE" />
       </fileset>
     </copy>
+    <!-- Zip the files for a release -->
+    <zip zipfile="${eclipse_dir}/package/drjava-eclipse-${eclipse_plugin_version}.zip">
+      <fileset dir="${eclipse_dir}/package">
+        <exclude name="drjava-eclipse-${eclipse_plugin_version}.zip" />
+        <include name="${eclipse_package}/**" />
+      </fileset>
+    </zip>
   </target>
 
 
