@@ -850,4 +850,26 @@ public class GenericTreeTest extends TestCase {
     
       assertEquals("Str1Str2Str3", interpret(testString));
     }
+
+    //Testing Polymorph Constructors with varargs
+    public void testInterpretInnerPolyConstructorsVarArgs(){
+      testString =
+        "public class B<A extends Number> {\n"+
+        "  public class C<D extends Integer> {\n"+
+        "    String str = \"\";\n"+
+        "    public <T extends String> C(T ... s){\n"+
+        "      for(int i=0;i<s.length;i++) {\n"+
+        "        str = str+s[i];\n"+
+        "      }\n"+
+        "    }\n"+
+        "    public String getStr(){\n"+
+        "      return str;\n"+
+        "    }\n"+
+        "  }\n"+
+        "}\n"+
+        "B<Double> b = new B<Double>();\n"+
+        "b.new C<Integer>(\"Str1\",\"Str2\",\"Str3\").getStr();\n";
+    
+      assertEquals("Str1Str2Str3", interpret(testString));
+    }
 }
