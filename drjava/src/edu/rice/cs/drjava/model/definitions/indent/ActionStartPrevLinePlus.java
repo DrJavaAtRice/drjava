@@ -66,8 +66,8 @@ class ActionStartPrevLinePlus extends IndentRuleAction {
    * If on the first line, indent is set to 0.
    * @param doc DefinitionsDocument containing the line to be indented.
    */
-  public void indentLine(DefinitionsDocument doc)
-  {
+  public void indentLine(DefinitionsDocument doc){
+    super.indentLine(doc);
     try {
       // Find start of line
       int here = doc.getCurrentLocation();

@@ -75,6 +75,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
    * @param doc DefinitionsDocument containing the line to be indented.
    */
   public void indentLine(DefinitionsDocument doc) {
+    super.indentLine(doc);
     String indent = "";
     int here = doc.getCurrentLocation();
     

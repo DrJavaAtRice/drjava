@@ -50,7 +50,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
  * by IndentRuleAction objects.
  * @version $Id$
  */
-public abstract class IndentRuleQuestion implements IndentRule {
+public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
   /**
    * Node in decision tree to use if the rule holds in this context.
    */
@@ -102,32 +102,16 @@ public abstract class IndentRuleQuestion implements IndentRule {
    */
   public void indentLine(DefinitionsDocument doc)
   {
-    //System.err.println("Question: " + this.getClass().getName());
     if (applyRule(doc)) {
-      //System.err.println("  (Yes) Calling: " + _yesRule.getClass().getName());
+      _addToIndentTrace(getRuleName(), YES, false);
       _yesRule.indentLine(doc);
     }
     else {
-      //System.err.println("  (No) Calling: " + _noRule.getClass().getName());
+      _addToIndentTrace(getRuleName(), NO, false);
       _noRule.indentLine(doc);
     }
   }
-  
-  /**
-   * Properly indents the line that the current position is on.
-   * Replaces all whitespace characters at the beginning of the
-   * line with the appropriate spacing or characters.
-   * @param doc DefinitionsDocument containing the line to be indented.
-   */
-  public void indentLine(DefinitionsDocument doc, int pos) {
-    int oldPos = doc.getCurrentLocation();
-    doc.setCurrentLocation(pos);
-    indentLine(doc);
-    if (oldPos > doc.getLength()) {
-      oldPos = doc.getLength();
-    }
-    doc.setCurrentLocation(oldPos);
-  }
+
 }
 
 

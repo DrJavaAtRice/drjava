@@ -72,7 +72,8 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
    * @param doc DefinitionsDocument containing the line to be indented.
    */
   public void indentLine(DefinitionsDocument doc) {
-
+    super.indentLine(doc);
+    
     /**
      * This method is simply a call to getIndentOfCurrStmt, which is
      * fully tested in IndentHelperTest, so no additional tests are

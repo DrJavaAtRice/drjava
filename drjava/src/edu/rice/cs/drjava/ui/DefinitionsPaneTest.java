@@ -89,7 +89,7 @@ import edu.rice.cs.util.swing.SwingWorker;
 
 /**
  * Tests the Definitions Pane
- * @version $Id:
+ * @version $Id$
  */
 public class DefinitionsPaneTest extends TestCase {
 

@@ -48,30 +48,6 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
  * by its position in the decision tree.
  * @version $Id$
  */
-public abstract class IndentRuleAction implements IndentRule {
+public abstract class IndentRuleAction extends IndentRuleWithTrace {
 
-  /**
-   * Properly indents the line that the caret is currently on.
-   * Replaces all whitespace characters at the beginning of the
-   * line with the appropriate spacing or characters.
-   * @param doc DefinitionsDocument containing the line to be indented.
-   * @param pos Position within line to be indented.
-   */
-  public void indentLine(DefinitionsDocument doc, int pos) {
-    int oldPos = doc.getCurrentLocation();
-    doc.setCurrentLocation(pos);
-    indentLine(doc);
-    if (oldPos > doc.getLength()) {
-      oldPos = doc.getLength();
-    }
-    doc.setCurrentLocation(oldPos);
-  }
-  
-   /**
-    * Properly indents the line that the current position is on.
-    * Replaces all whitespace characters at the beginning of the
-    * line with the appropriate spacing or characters.
-    * @param doc DefinitionsDocument containing the line to be indented.
-    */
-  public abstract void indentLine(DefinitionsDocument doc);
 }

@@ -1,0 +1,62 @@
+/* Note: a few of the indentations represented here are
+ * not agreed on (like anonymous inner classes being
+ * aligned to the far right), but drjava does something
+ * unacceptable on all these examples */
+for()
+  for()
+    System.out.println(4);
+
+for()
+  for(){
+    System.out.println(5);
+}
+
+
+int[] intArray = new foo[] {new foo() {
+                              public dummmy(){
+                              }
+                            },
+                            new foo2() {
+                              public dummy(){
+                              }
+                            }};
+
+
+method(new int[] {1,
+                  2,
+                  3,
+                  });
+
+
+
+method(int arg1,
+       int arg2,
+       );
+
+method(new Object() {
+         public int foo();
+       }
+       );
+
+method (int arg1,
+        new Object() {
+          public int foo();
+        }
+        );
+
+method(new WindowAdapter(){
+         public void x(){
+         }
+       },
+       new WindowAdapter() {
+         public void x(){
+         }
+       },
+       new WindowAdapter() {
+         public void x(){
+         }
+       }
+       );
+       
+method(int arg1
+       );

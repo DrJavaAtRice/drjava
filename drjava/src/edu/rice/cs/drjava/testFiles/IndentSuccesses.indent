@@ -1,0 +1,9 @@
+public class IndentSuccesses {
+  
+public void method1(int arg1, int arg2) {
+for(int x = 0; x < 5; x++){
+System.out.println("Hello");
+}
+}
+  
+}

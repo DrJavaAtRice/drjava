@@ -41,18 +41,57 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
+
 import gj.util.Vector;
+import java.io.PrintStream;
+import junit.framework.*;
+import javax.swing.text.BadLocationException;
 
 /**
- * A node in the decision tree used for the indentation system.
+ * This class does almost all the work for keeping an indent tree trace.  IndentRuleQuestion
+ * also does some of the work, and any subclass may substitute its own version of getRuleName()
  * @version $Id$
  */
-public interface IndentRule {
+public class IndentRuleWithTraceTest extends IndentRulesTestCase{
+
   /**
-   * Properly indents the line that the given position is on.
-   * Replaces all whitespace characters at the beginning of the
-   * line with the appropriate spacing or characters.
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * put your documentation comment here
+   * @param     String name
    */
-  public void indentLine(DefinitionsDocument doc);
+  public IndentRuleWithTraceTest(String name) {
+    super(name);
+  }
+
+  public void testTrace() throws BadLocationException{
+    IndentRuleWithTrace.setRuleTraceEnabled(true);
+    IndentRule
+      rule4 = new ActionBracePlus("  "),
+      rule3 = new QuestionBraceIsCurly(rule4, rule4),
+      rule2 = new QuestionBraceIsParenOrBracket(rule3, rule3);
+    IndentRuleQuestion
+      rule1 = new QuestionInsideComment(rule2, rule2);
+    String text =
+      "public class foo {\n" +
+      "/**\n" +
+      " * This method does nothing\n" + 
+      " */\n" +
+      "public void method1(){\n" +
+      "}\n" +
+      "}\n";
+
+    _setDocText(text);
+    rule1.indentLine(_doc, 23);
+    rule1.indentLine(_doc, 75);
+
+    String[] expected = {"edu.rice.cs.drjava.model.definitions.indent.QuestionInsideComment No",
+			 "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsParenOrBracket No",
+			 "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsCurly Yes",
+			 "edu.rice.cs.drjava.model.definitions.indent.ActionBracePlus "};
+
+    Vector<String> actual = IndentRuleWithTrace.getTrace();
+    assertEquals("steps in trace", 4, actual.size());
+    for(int x = 0; x < actual.size(); x++){
+      assertEquals("check trace step " + x, expected[x], actual.elementAt(x));
+    }
+  }
 }

@@ -43,12 +43,15 @@ import  junit.framework.*;
 import  junit.extensions.*;
 import  javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import java.io.*;
 
+import edu.rice.cs.drjava.IndentFiles;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.indent.*;
 import edu.rice.cs.drjava.CodeStatus;
+import edu.rice.cs.util.*;
 
 /**
  * Test the tab/enter/squiggly indenting functionality.
@@ -1081,21 +1084,84 @@ public class IndentTest extends TestCase {
    * This method tests that multiple unbraced nested lines are indented
    * correctly.  This is currently incorrect.  Bug #627753.  Uncomment when
    * it has been fixed
-  public void testNestedUnbraced() throws BadLocationException {
+  public void testNestedUnbracedFor() throws BadLocationException {
     String text =
       "for (int a =0; a < 5; a++)\n" +
-      "for(int b = 0; b < 5; b++){\n" +
+      "for (int b = 0; b < 5; b++){\n" +
       "System.out.println(a + b);";
     String indented =
       "for (int a =0; a < 5; a++)\n" +
-      "  for(int b = 0; b < 5; b++){\n" +
+      "  for (int b = 0; b < 5; b++){\n" +
       "    System.out.println(a + b);";
     doc.insertString(0, text, null);
     _assertContents(text, doc);
     doc.indentLines(0, doc.getLength());
     _assertContents(indented, doc);
+    doc.remove(0,doc.getLength() - 1);
 
-  } */
+    text =
+      "if (true)\n" +
+      "if (true)\n" +
+      "System.out.println(\"Hello\");";
+    indented =
+      "if (true)\n" +
+      "  if (true)\n" +
+      "    System.out.println(\"Hello\");";
+    doc.insertString(0, text, null);
+    _assertContents(text, doc);
+    doc.indentLines(0, doc.getLength());
+    _assertContents(indented, doc);
+    doc.remove(0,doc.getLength() - 1);
+    
+    text =
+      "{\n" +
+      "while (a < 5)\n" +
+      "while (b < 5){\n" +
+      "System.out.println(a + b);";
+    indented =
+      "{\n" + 
+      "  while (a < 5)\n" +
+      "    while (b < 5){\n" +
+      "      System.out.println(a + b);";
+    doc.insertString(0, text, null);
+    _assertContents(text, doc);
+    doc.indentLines(0, doc.getLength());
+    _assertContents(indented, doc);
+    doc.remove(0,doc.getLength() - 1);
+    
+    text =
+      "while (a < 5)\n" +
+      "while (b < 5);\n" +
+      "System.out.println(a + b);";
+    indented =
+      "while (a < 5)\n" +
+      "  while (b < 5);\n" +
+      "System.out.println(a + b);";
+    doc.insertString(0, text, null);
+    _assertContents(text, doc);
+    doc.indentLines(0, doc.getLength());
+    _assertContents(indented, doc);
+    doc.remove(0,doc.getLength() - 1);
+    
+    text = 
+      "do\n" +
+      "do\n" + 
+      "x=5;\n" + 
+      "while(false);\n" +
+      "while(false);\n";
+    indented = 
+      "do\n" +
+      "  do\n" + 
+      "    x=5;\n" + 
+      "  while(false);\n" +
+      "while(false);\n";
+    doc.insertString(0, text, null);
+    _assertContents(text, doc);
+    doc.indentLines(0, doc.getLength());
+    _assertContents(indented, doc);
+    doc.remove(0,doc.getLength() - 1);
+  }
+ */
   
   public void testLiveUpdateOfIndentLevel() throws BadLocationException {
     
@@ -1173,6 +1239,36 @@ public class IndentTest extends TestCase {
     doc.indentLines(0, doc.getLength());
     _assertContents(indented, doc);
   }
+  
+  /**
+   * Tests a list of files when indented match their correct indentations
+   */
+  public void testIndentationFromFile() throws IOException{
+    File directory = new File("testFiles");
+    
+    File[] unindentedFiles = {new File(directory, "IndentSuccesses.indent")
+			      /*, new File(directory, "IndentProblems.indent")*/};
+    File[] correctFiles = {new File(directory, "IndentSuccessesCorrect.indent")
+			   /*, new File(directory, "IndentProblemsCorrect.indent")*/};
+
+    for(int x = 0; x < correctFiles.length; x++){
+      _indentAndCompare(unindentedFiles[x], correctFiles[x]);
+    }
+
+    //We know the following test file should (currently) fail, so we assert that it will fail to check
+    //our _indentAndCompare(...) function
+    boolean threwAFE = false;
+    try {
+      _indentAndCompare(new File(directory, "IndentProblems.indent"),
+			new File(directory, "IndentProblemsCorrect.indent"));
+    } catch(AssertionFailedError afe){
+      threwAFE = true;
+    }
+    if (!threwAFE){
+      fail("_indentAndCompare should have failed for IndentProblems.indent");
+    }
+  }
+  
 
   /**
    * tests that an if statment nested in a switch will be indented properly
@@ -1231,7 +1327,65 @@ public class IndentTest extends TestCase {
     assertEquals("indent info: dist to prev new line", 
                  distToPrevNewline, ii.distToPrevNewline);
   }
+  
+  /*
+   * copies fromFile to toFile, assuming both files exist
+   */
+  private void _copyFile(File fromFile, File toFile) throws IOException{
+    String text = FileOps.readFileAsString(fromFile);
+    FileOps.writeStringToFile(toFile, text);
+    String newText = FileOps.readFileAsString(toFile);
+    assertEquals("File copy verify", text, newText);
+  }
+  
+  /*
+   * indents one file, compares it to the other, reindents and recompares
+   * to make sure indent(x) = indent(indent(x))
+   */
+  private void _indentAndCompare(File unindented, File correct) throws IOException{
+    File test = null;
+    try {
+      test = File.createTempFile("test", ".java");
+      _copyFile(unindented, test);
+      IndentFiles.main(new String[] {test.toString()});
+      _fileCompare(test, correct);
+      IndentFiles.main(new String[] {test.toString()});
+      _fileCompare(test, correct);
+    } finally {
+      if (test != null){
+        test.delete();
+      }
+    }
+    
+  }
 
+  /*
+   * @throws AssertionFailedError if the files are not identical 
+   */
+  private void _fileCompare(File test, File correct) throws IOException {
+    FileReader fr = new FileReader(correct);
+    FileReader fr2 = new FileReader(test);
+    BufferedReader correctBufferedReader = new BufferedReader(fr);
+    BufferedReader testBufferedReader = new BufferedReader(fr2);
+    
+    String correctString = correctBufferedReader.readLine();
+    String testString = testBufferedReader.readLine();
+    int lineNo = 1;
+    while(correctString != null && testString != null){
+      assertEquals("File: " + correct + " line: " + lineNo, correctString, testString);
+      correctString = correctBufferedReader.readLine();
+      testString = testBufferedReader.readLine();
+      lineNo++;
+    }
+    assertTrue("Indented file longer than expected", correctString == null);
+    assertTrue("Indented file shorter than expected", testString == null);
+    
+    testBufferedReader.close();
+    correctBufferedReader.close();
+    fr.close();
+    fr2.close();
+  }
+ 
 /*
   public void testNoParameters() throws BadLocationException
   {

@@ -70,8 +70,8 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
    * line with the appropriate spacing or characters.
    * @param doc DefinitionsDocument containing the line to be indented.
    */
-  public void indentLine(DefinitionsDocument doc)
-  {
+  public void indentLine(DefinitionsDocument doc){
+    super.indentLine(doc);
     int pos = doc.getCurrentLocation();
 
     // Get distance to brace
