@@ -552,7 +552,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** Resumes debugging */
-  private Action _resumeDebuggerAction =
+  private Action _resumeDebugAction =
     new AbstractAction("Resume Debugger")
   {
     public void actionPerformed(ActionEvent ae) {
@@ -1887,15 +1887,21 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // TO DO: Add accelerators?
     //_runDebuggerMenuItem = debugMenu.add(_runDebuggerAction);
-    _suspendDebugMenuItem = debugMenu.add(_suspendDebugAction);
-    _resumeDebugMenuItem = debugMenu.add(_resumeDebuggerAction);
-    _stepIntoDebugMenuItem = debugMenu.add(_stepIntoDebugAction);
-    _stepOverDebugMenuItem = debugMenu.add(_stepOverDebugAction);
-    _stepOutDebugMenuItem = debugMenu.add(_stepOutDebugAction);
+    _addMenuItem(debugMenu, _suspendDebugAction, KEY_DEBUG_SUSPEND);
+    _addMenuItem(debugMenu, _resumeDebugAction, KEY_DEBUG_RESUME);
+    _addMenuItem(debugMenu, _stepIntoDebugAction, KEY_DEBUG_STEP_INTO);
+    _addMenuItem(debugMenu, _stepOverDebugAction, KEY_DEBUG_STEP_OVER);
+    _addMenuItem(debugMenu, _stepOutDebugAction, KEY_DEBUG_STEP_OUT);
+    //_suspendDebugMenuItem = debugMenu.add(_suspendDebugAction);
+    //_resumeDebugMenuItem = debugMenu.add(_resumeDebuggerAction);
+    //_stepIntoDebugMenuItem = debugMenu.add(_stepIntoDebugAction);
+    //_stepOverDebugMenuItem = debugMenu.add(_stepOverDebugAction);
+    //_stepOutDebugMenuItem = debugMenu.add(_stepOutDebugAction);
 
     debugMenu.addSeparator(); // breakpoints section:
 
-    _toggleBreakpointMenuItem = debugMenu.add(_toggleBreakpointAction);
+    _addMenuItem(debugMenu, _toggleBreakpointAction, KEY_DEBUG_BREAKPOINT_TOGGLE);
+    //_toggleBreakpointMenuItem = debugMenu.add(_toggleBreakpointAction);
     _printBreakpointsMenuItem = debugMenu.add(_printBreakpointsAction);
     _clearAllBreakpointsMenuItem = debugMenu.add(_clearAllBreakpointsAction);
 
@@ -1911,15 +1917,15 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _setDebugMenuItemsEnabled(boolean enabled) {
     _debuggerEnabledMenuItem.setSelected(enabled);
-    //_runDebuggerMenuItem.setEnabled(enabled);
-    _suspendDebugMenuItem.setEnabled(enabled);
-    _resumeDebugMenuItem.setEnabled(enabled);
-    _stepIntoDebugMenuItem.setEnabled(enabled);
-    _stepOverDebugMenuItem.setEnabled(enabled);
-    _stepOutDebugMenuItem.setEnabled(enabled);
-    _toggleBreakpointMenuItem.setEnabled(enabled);
-    _printBreakpointsMenuItem.setEnabled(enabled);
-    _clearAllBreakpointsMenuItem.setEnabled(enabled);
+    //_runDebuggerAction.setEnabled(enabled);
+    _suspendDebugAction.setEnabled(enabled);
+    _resumeDebugAction.setEnabled(enabled);
+    _stepIntoDebugAction.setEnabled(enabled);
+    _stepOverDebugAction.setEnabled(enabled);
+    _stepOutDebugAction.setEnabled(enabled);
+    _toggleBreakpointAction.setEnabled(enabled);
+    _printBreakpointsAction.setEnabled(enabled);
+    _clearAllBreakpointsAction.setEnabled(enabled);
   }
 
   /**

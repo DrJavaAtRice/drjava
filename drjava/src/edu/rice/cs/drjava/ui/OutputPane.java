@@ -63,7 +63,7 @@ import edu.rice.cs.drjava.DrJava;
 public class OutputPane extends JTextPane {
   private class ScrollToEndDocumentListener implements DocumentListener {
     public void insertUpdate(DocumentEvent e) {
-      setCaretPosition(getText().length());
+      setCaretPosition(e.getDocument().getLength());
     }
 
     public void removeUpdate(DocumentEvent e) {}

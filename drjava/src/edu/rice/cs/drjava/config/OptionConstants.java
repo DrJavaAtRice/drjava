@@ -439,6 +439,55 @@ public interface OptionConstants extends ConfigurationTool {
     null:
     new KeyStrokeOption("key.cut.line", 
                         KeyStroke.getKeyStroke(KeyEvent.VK_K, mask));
+  /**
+   * The key binding for suspending the debugger
+   */
+  public static final KeyStrokeOption KEY_DEBUG_SUSPEND =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.debug.suspend", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0));
+  /**
+   * The key binding for resuming the debugger
+   */
+  public static final KeyStrokeOption KEY_DEBUG_RESUME =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.debug.resume", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0));
+  /**
+   * The key binding for stepping into in the debugger
+   */
+  public static final KeyStrokeOption KEY_DEBUG_STEP_INTO =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.debug.step.into", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0));
+  /**
+   * The key binding for stepping over in the debugger
+   */
+  public static final KeyStrokeOption KEY_DEBUG_STEP_OVER =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.debug.step.over", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F10, 0));
+  /**
+   * The key binding for stepping out in the debugger
+   */
+  public static final KeyStrokeOption KEY_DEBUG_STEP_OUT =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.debug.step.out", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F11, 
+                                               InputEvent.SHIFT_MASK));
+  /**
+   * The key binding for toggling a breakpoint
+   */
+  public static final KeyStrokeOption KEY_DEBUG_BREAKPOINT_TOGGLE =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.debug.breakpoint.toggle", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_B, mask));
   
   /* ---------- Misc Options ---------- */
   

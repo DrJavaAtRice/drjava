@@ -69,12 +69,19 @@ public class InteractionsPane extends JTextPane {
       int caretPos = getCaretPosition();
       int frozenPos = _model.getInteractionsFrozenPos();
       int length = _model.getInteractionsDocument().getLength();
-      
-      // Only update caret if it has fallen behind the prompt.
-      // (And be careful not to move it during a reset, when the
-      //  frozen pos is temporarily far greater than the length.)
-      if ((caretPos < frozenPos) && (frozenPos < length)) {
-        setCaretPosition(frozenPos);
+
+      if (((InteractionsDocument)_model.getInteractionsDocument()).inProgress()) {
+        // Scroll to the end of the document, since output has been
+        // inserted after the prompt.
+        setCaretPosition(e.getDocument().getLength());
+      }
+      else {
+        // Only update caret if it has fallen behind the prompt.
+        // (And be careful not to move it during a reset, when the
+        //  frozen pos is temporarily far greater than the length.)
+        if ((caretPos < frozenPos) && (frozenPos < length)) {
+          setCaretPosition(frozenPos);
+        }
       }
     }
 

@@ -123,6 +123,10 @@ public class InteractionsDocument extends DefaultStyledDocument {
     _inProgress = b;
   }
 
+  public boolean inProgress() {
+    return _inProgress;
+  }
+
   public void insertBeforeLastPrompt(String s, AttributeSet a) {
     try {
       int pos;
