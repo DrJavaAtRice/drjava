@@ -396,9 +396,28 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
    *  that is equal to the passed document.
    */
   public void refreshDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
-    DefaultMutableTreeNode node = getNodeForDoc(doc);
-    addDocument(doc, path);
-    _model.removeNodeFromParent(node);
+    /**
+     * since we are modifying the model of this tree, and in the middle of this modification,
+     * we have an unstable model, we need to synchronize around it.
+     * Note: this solved the bug where compile all with modified documents would throw an array
+     * index out of bounds exception when painting.
+     */
+    synchronized(this){
+      DefaultMutableTreeNode node = getNodeForDoc(doc);
+      addDocument(doc, path);
+      _model.removeNodeFromParent(node);
+    }
+  }
+  
+  public void paint(Graphics g){
+    /**
+     * we don't want to paint if we're in the middle of some other
+     * synchronized code, so we'll wait until we can aquire the lock
+     * around ourself
+     */
+    synchronized(this){
+      super.paint(g);
+    }
   }
   
   /** sets the input document to be active */
