@@ -261,7 +261,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 
   
   /**
-   * Runs JUnit on the current document. Used to compile all open documents
+   * Runs JUnit on the current document. It formerly compiled all open documents
    * before testing but have removed that requirement in order to allow the
    * debugging of test cases. If the classes being tested are out of
    * sync, a message is displayed.
@@ -389,15 +389,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 
   /**
    * Called from the JUnitTestManager if its given className is not a test case.
-   * TODO: Why is this sync'ed?
    * @param isTestAll whether or not it was a use of the test all button
    */
   public void nonTestCase(final boolean isTestAll) {
-    synchronized(_compilerModel) {
-      _isTestInProgress = false;
-      _notifier.nonTestCase(isTestAll);
-      _notifier.junitEnded();
-    }
+    _isTestInProgress = false;
+    _notifier.nonTestCase(isTestAll);
+    _notifier.junitEnded();
   }
 
   /**
@@ -424,7 +421,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 
   /**
    * Called when a particular test has ended.
-   * TODO: Why is this sync'ed?
    * @param testName The name of the test that has ended.
    * @param wasSuccessful Whether the test passed or not.
    * @param causedError If not successful, whether the test caused an error
@@ -433,24 +429,19 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   public void testEnded(final String testName, final boolean wasSuccessful,
                         final boolean causedError)
   {
-    synchronized(_compilerModel) {
-      _notifier.junitTestEnded(testName, wasSuccessful, causedError);
-    }
+    _notifier.junitTestEnded(testName, wasSuccessful, causedError);
   }
 
   /**
    * Called when a full suite of tests has finished running.
-   * TODO: Why is this sync'ed?
    * @param errors The array of errors from all failed tests in the suite.
    */
   public void testSuiteEnded(JUnitError[] errors) {
-    synchronized(_compilerModel) {
-      if (_isTestInProgress) {
-        _junitErrorModel = new JUnitErrorModel(errors, _getter, true);
-
-        _isTestInProgress = false;
-        _notifier.junitEnded();
-      }
+    if (_isTestInProgress) {
+      _junitErrorModel = new JUnitErrorModel(errors, _getter, true);
+      
+      _isTestInProgress = false;
+      _notifier.junitEnded();
     }
   }
 

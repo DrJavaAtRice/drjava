@@ -63,7 +63,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
   /**
    * TODO: should this be synchronized?
    */
-  public static Hashtable<KeyStroke, KeyStrokeOptionComponent> _keyToKSOC =
+  public static final Hashtable<KeyStroke, KeyStrokeOptionComponent> _keyToKSOC =
     new Hashtable<KeyStroke, KeyStrokeOptionComponent>();
   private JButton _button;
   private JTextField _keyField;

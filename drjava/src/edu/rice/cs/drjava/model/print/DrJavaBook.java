@@ -65,9 +65,9 @@ public class DrJavaBook implements Pageable {
   private PageFormat _format;
   private String _filename;
 
-  public static Font PRINT_FONT = new Font("Monospaced", Font.PLAIN, 9);
-  public static Font FOOTER_FONT = new Font("Monospaced", Font.PLAIN, 8);
-  public static Font LINE_FONT = new Font("Monospaced", Font.ITALIC, 8);
+  public static final Font PRINT_FONT = new Font("Monospaced", Font.PLAIN, 9);
+  public static final Font FOOTER_FONT = new Font("Monospaced", Font.PLAIN, 8);
+  public static final Font LINE_FONT = new Font("Monospaced", Font.ITALIC, 8);
   public float LINE_NUM_WIDTH;
 
   private static FontRenderContext DEFAULT_FRC = new FontRenderContext(null, false, true);

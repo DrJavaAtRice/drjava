@@ -64,21 +64,18 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   /**
    * Paren/brace/bracket matching highlight color.
    */
-  public static DefaultHighlighter.DefaultHighlightPainter
-    MATCH_PAINTER;
+  static DefaultHighlighter.DefaultHighlightPainter MATCH_PAINTER;
 
   static {
     Color highColor = DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR);
 
-    MATCH_PAINTER =
-      new DefaultHighlighter.DefaultHighlightPainter(highColor);
+    MATCH_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(highColor);
   }
   
   /**
    * Highlight painter for selected errors in the defs doc.
    */
-  public static DefaultHighlighter.DefaultHighlightPainter
-    ERROR_PAINTER =
+  static DefaultHighlighter.DefaultHighlightPainter ERROR_PAINTER =
     new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
   
   

@@ -110,7 +110,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   private JButton _prevErrorButton;
   
   /** Highlight painter for selected list items. */
-  protected static DefaultHighlighter.DefaultHighlightPainter _listHighlightPainter =
+  static DefaultHighlighter.DefaultHighlightPainter _listHighlightPainter =
     new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
   
   protected static final SimpleAttributeSet _getBoldAttributes() {

@@ -67,11 +67,11 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   //-------- FIELDS ----------
   
   /** A set of normal endings for lines. */
-  protected static HashSet<String> _normEndings = _makeNormEndings();
+  protected static final HashSet<String> _normEndings = _makeNormEndings();
   /** A set of Java keywords. */
-  protected static HashSet<String> _keywords = _makeKeywords();
+  protected static final HashSet<String> _keywords = _makeKeywords();
   /** A set of Java keywords. */
-  protected static HashSet<String> _primTypes = _makePrimTypes();
+  protected static final HashSet<String> _primTypes = _makePrimTypes();
   /** The default indent setting. */
   protected int _indent = 2;
   

@@ -118,7 +118,7 @@ public class DefaultCompilerModel implements CompilerModel {
    * Add a CompilerListener to the model.
    * @param listener a listener that reacts to compiler events
    */
-  public void addListener(CompilerListener listener) {
+  public synchronized void addListener(CompilerListener listener) {
     _notifier.addListener(listener);
   }
 
@@ -127,14 +127,14 @@ public class DefaultCompilerModel implements CompilerModel {
    * listening to this model, this method has no effect.
    * @param listener a listener that reacts to compiler events
    */
-  public void removeListener(CompilerListener listener) {
+  public synchronized void removeListener(CompilerListener listener) {
     _notifier.removeListener(listener);
   }
 
   /**
    * Removes all CompilerListeners from this model.
    */
-  public void removeAllListeners() {
+  public synchronized void removeAllListeners() {
     _notifier.removeAllListeners();
   }
 
@@ -302,7 +302,7 @@ public class DefaultCompilerModel implements CompilerModel {
   }  
   
   /**
-   * Starts compiling the source.  Demands that the definitions be
+   * Starts compiling the specified source document.  Demands that the definitions be
    * saved before proceeding with the compile. If the compile can
    * proceed, a compileStarted event is fired which guarantees that
    * a compileEnded event will be fired when the compile finishes or
@@ -410,8 +410,10 @@ public class DefaultCompilerModel implements CompilerModel {
    * @param files An array of all files to be compiled
    * @param buildDir the output directory for all the .class files.
    *        null means output to the same directory as the source file
+   * 
+   * synchronized should be redundant here
    */
-  protected void _compileFiles(File[] sourceRoots, File[] files, File buildDir) throws IOException {
+  synchronized protected void _compileFiles(File[] sourceRoots, File[] files, File buildDir) throws IOException {
 
 //    CompilerError[] errors = new CompilerError[0];
     Pair<LinkedList<ParseException>, LinkedList<Pair<String, JExpressionIF>>> errors;
@@ -454,6 +456,7 @@ public class DefaultCompilerModel implements CompilerModel {
 //      }
 //      System.out.println("Got back " + errors.length + " errors");
       CompilerError[] compilerErrorsArray = (CompilerError[]) compilerErrors.toArray(new CompilerError[0]);
+      /** Compile the files in specified sourceRoots and files */
       if (compilerErrorsArray.length == 0) {
         compilerErrorsArray = compiler.compile(sourceRoots, files);
       }
@@ -497,7 +500,7 @@ public class DefaultCompilerModel implements CompilerModel {
    * documents has an invalid package statement, it won't be added
    * to the source root set.
    */
-  public File[] getSourceRootSet() {
+  synchronized public File[] getSourceRootSet() {
     List<OpenDefinitionsDocument> defDocs =
       _getter.getDefinitionsDocuments();
     return getSourceRootSet(defDocs);
@@ -511,7 +514,7 @@ public class DefaultCompilerModel implements CompilerModel {
    * @param defDocs the list of OpenDefinitionsDocuments to find
    * the source roots of
    */
-  public File[] getSourceRootSet(List<OpenDefinitionsDocument> defDocs){
+  synchronized public File[] getSourceRootSet(List<OpenDefinitionsDocument> defDocs){
     LinkedList<File> roots = new LinkedList<File>();
 
     for (int i = 0; i < defDocs.size(); i++) {

@@ -81,7 +81,7 @@ import edu.rice.cs.util.sexp.*;
  */
 public class ProjectFileParser {
   /* singleton instance of ProjectFileParser */
-  public static ProjectFileParser ONLY = new ProjectFileParser();
+  public static final ProjectFileParser ONLY = new ProjectFileParser();
   
   private ProjectFileParser(){}
   

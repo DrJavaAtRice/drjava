@@ -2484,7 +2484,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * A stack from which you can remove any element, not just the top of the stack
    * TODO: make a generic Collection extending/replacing Stack.
    */
-  protected class RandomAccessStack {
+  protected static class RandomAccessStack {
     private Vector<ThreadReference> _data = new Vector<ThreadReference>();
 
     public synchronized void push(ThreadReference t){

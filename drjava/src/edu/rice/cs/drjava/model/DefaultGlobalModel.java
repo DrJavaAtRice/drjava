@@ -117,7 +117,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   /**
    * adds a document to the list of auxiliary files
    */
-  public void addAuxiliaryFile(OpenDefinitionsDocument doc){
+  public synchronized void addAuxiliaryFile(OpenDefinitionsDocument doc){
     if(!doc.isUntitled() && !doc.isProjectFile()){
       File f;
       try{
@@ -133,7 +133,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   /**
    * removes a document from the list of auxiliary files
    */
-  public void removeAuxiliaryFile(OpenDefinitionsDocument doc){
+  public synchronized void removeAuxiliaryFile(OpenDefinitionsDocument doc){
     File file;
     try{
       file = doc.getFile();
@@ -206,13 +206,14 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     
     public void interpreterResetting(){    }
     
-    public void interpreterReady(){  
-      if(_state.getBuildDirectory() != null){
-//        System.out.println("adding for reset: " + _state.getBuildDirectory().getAbsolutePath());
-        _interpreterControl.addClassPath(_state.getBuildDirectory().getAbsolutePath());
+    public void interpreterReady(){ 
+      synchronized(DefaultGlobalModel.this) {
+        if(_state.getBuildDirectory() != null) {
+          //        System.out.println("adding for reset: " + _state.getBuildDirectory().getAbsolutePath());
+          _interpreterControl.addClassPath(_state.getBuildDirectory().getAbsolutePath());
+        }
       }
     }
-    
     public void interpreterResetFailed(Throwable t){    }
     
     public void interpreterExited(int status){    }
@@ -227,16 +228,17 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       public void compileStarted() {}
 
       public void compileEnded() {
-        // Only clear interactions if there were no errors
-        if (((_compilerModel.getNumErrors() == 0) ||
-             (_compilerModel.getCompilerErrorModel().hasOnlyWarnings()))
-              // reset even when the interpreter is not used.
-              //&& _interactionsModel.interpreterUsed()
-              && _resetAfterCompile) {
-          resetInteractions();
+        synchronized(DefaultGlobalModel.this) {
+          // Only clear interactions if there were no errors
+          if (((_compilerModel.getNumErrors() == 0) ||
+               (_compilerModel.getCompilerErrorModel().hasOnlyWarnings()))
+                // reset even when the interpreter is not used.
+                //&& _interactionsModel.interpreterUsed()
+                && _resetAfterCompile) {
+            resetInteractions();
+          }
         }
       }
-
       public void saveBeforeCompile() {}
     };
 
@@ -496,7 +498,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   }
   
   // ----- INTERACTIONS -----
-  public void enableSecurityManager(){
+  public synchronized void enableSecurityManager(){
     edu.rice.cs.drjava.DrJava.enableSecurityManager();
     try{
       _interpreterControl.enableSecurityManager();
@@ -505,7 +507,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     }
   }
   
-  public void disableSecurityManager(){
+  public synchronized void disableSecurityManager(){
     edu.rice.cs.drjava.DrJava.disableSecurityManager();
     try{
       _interpreterControl.disableSecurityManager();
@@ -519,6 +521,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   protected FileGroupingState _state;
   /**
    * Delegates the compileAll command to the _state, a FileGroupingState
+   * Synchronization is handled by the compilerModel that is eventually invoked
    */
   public void compileAll() throws IOException{
     _state.compileAll();
@@ -528,21 +531,21 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    * @param state the new file grouping state that will handle
    * project specific properties such as the build directory.
    */
-  public void setFileGroupingState(FileGroupingState state){
+  public synchronized void setFileGroupingState(FileGroupingState state){
     _state = state;
     _notifier.projectRunnableChanged();
     _notifier.projectBuildDirChanged();
     _notifier.projectModified();
   }
   
-  public FileGroupingState getFileGroupingState(){
+  public synchronized FileGroupingState getFileGroupingState(){
     return _state;
   }
   
   /**
    * Notifies the project state that the project has been changed
    */
-  public void setProjectChanged(boolean changed) {
+  public synchronized void setProjectChanged(boolean changed) {
     _state.setProjectChanged(changed);
     _notifier.projectModified();
   }
@@ -550,21 +553,21 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   /**
    * Returns true if the project state has been changed
    */
-  public boolean isProjectChanged() {
+  public synchronized boolean isProjectChanged() {
     return _state.isProjectChanged();
   }
     
   /**
    * @return true if the model has a project open, false otherwise.
    */
-  public boolean isProjectActive(){
+  public synchronized boolean isProjectActive(){
     return _state.isProjectActive();
   }
   
   /**
    * @return the file that points to the current project file. Null if not currently in project view
    */
-  public File getProjectFile() {
+  public synchronized File getProjectFile() {
     return _state.getProjectFile();
   }
   
@@ -572,14 +575,14 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    * Return all files currently saved as source files in the project file
    * If not in project mode, returns null
    */
-  public File[] getProjectFiles() {
+  public synchronized File[] getProjectFiles() {
     return _state.getProjectFiles();
   }
   
   /**
    * Returns true the given file is in the current project file.
    */
-  public boolean isProjectFile(File f) {
+  public synchronized boolean isProjectFile(File f) {
     return _state.isProjectFile(f);
   }
    
@@ -588,14 +591,14 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    * project root. this means that project files must be saved at the
    * source root. (we query the model through the model's state)
    */
-  public boolean isInProjectPath(OpenDefinitionsDocument doc) {
+  public synchronized boolean isInProjectPath(OpenDefinitionsDocument doc) {
     return _state.isInProjectPath(doc);
   }
   
    /**
    * Sets the class with the project's main method
    */
-  public void setJarMainClass(File f) {
+  public synchronized void setJarMainClass(File f) {
     _state.setJarMainClass(f);
     _notifier.projectRunnableChanged();
     setProjectChanged(true);
@@ -604,18 +607,18 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   /**
    * @return the class with the project's main method
    */
-  public File getMainClass(){
+  public synchronized File getMainClass(){
     return _state.getMainClass();
   }
   
-  public void junitAll(){
+  public synchronized void junitAll(){
     _state.junitAll();
   }
 
    /**
    * Sets the class with the project's main method
    */
-  public void setBuildDirectory(File f){
+  public synchronized void setBuildDirectory(File f){
     _state.setBuildDirectory(f);
     if(f != null){
 //      System.out.println("adding: " + f.getAbsolutePath());
@@ -635,15 +638,18 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   /**
    * @return the class with the project's main method
    */
-  public File getBuildDirectory(){
+  public synchronized File getBuildDirectory(){
     return _state.getBuildDirectory();
   }
   
-  public void cleanBuildDirectory() throws FileMovedException, IOException{
+  public synchronized void cleanBuildDirectory() throws FileMovedException, IOException{
     _state.cleanBuildDirectory();
   }
 
-  public FileGroupingState _makeProjectFileGroupingState(final File jarMainClass, final File buildDir, final File projectFile, final File[] projectFiles) {
+  public synchronized FileGroupingState _makeProjectFileGroupingState(final File jarMainClass, 
+                                                                      final File buildDir, 
+                                                                      final File projectFile, 
+                                                                      final File[] projectFiles) {
     return new FileGroupingState(){
       
       private File _builtDir = buildDir;
@@ -656,18 +662,15 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
 
 
       HashSet<String> _projFilePaths = new HashSet<String>();
-      {
+      
+      { 
         try {
-          for(File file : projectFiles) {
-            _projFilePaths.add(file.getCanonicalPath());
-          }
+          for(File file : projectFiles) { _projFilePaths.add(file.getCanonicalPath()); }
         }
         catch(IOException e) {}
       }
 
-      public boolean isProjectActive(){
-        return true;
-      }
+      public boolean isProjectActive() { return true; }
       
       public boolean isInProjectPath(OpenDefinitionsDocument doc){
         try {
@@ -694,7 +697,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
 
         if (f == null) return false;
         
-        try{
+        try { 
           path = f.getCanonicalPath();
           return _projFilePaths.contains(path);
         }
@@ -775,22 +778,20 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         }
       }
 
-        private void cleanHelper(File f){
+      private void cleanHelper(File f){
         if(f.isDirectory()){
+          
           File fs[] = f.listFiles(new FilenameFilter(){
             public boolean accept(File parent, String name){
               return new File(parent, name).isDirectory() || name.endsWith(".class");
             }
           });
-          for(File kid: fs){
-            cleanHelper(kid);
-          }
-          if(f.listFiles().length == 0){
-            f.delete();
-          }
-        }else if(f.getName().endsWith(".class")){
-          f.delete();
-        }
+          
+          for(File kid: fs) { cleanHelper(kid); }
+          
+          if(f.listFiles().length == 0)  f.delete();
+          
+        } else if(f.getName().endsWith(".class")) f.delete();
       }
       
       
@@ -918,7 +919,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         }
         getJUnitModel().junitAll(los, lof);
       }
-    
+
     };
   }
   
@@ -1302,7 +1303,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    * @param com a selector that picks the file name, used for each
    * @exception IOException
    */
-  public void saveAllFiles(FileSaveSelector com) throws IOException {
+  public synchronized void saveAllFiles(FileSaveSelector com) throws IOException {
     
     Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
     while(odds.hasNext())
@@ -1317,7 +1318,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    * Writes the project file to disk
    * @param filename where to save the project
    */
-  public void saveProject(String filename, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> info) 
+  public synchronized void saveProject(String filename, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> info) 
     throws IOException {
     
 //    String base = filename.substring(0, filename.lastIndexOf(File.separator) + 1);

@@ -346,7 +346,7 @@ public class ColoringView extends PlainView implements OptionConstants {
     }
   }
   
-  private class FontOptionListener implements OptionListener<Font> {
+  private static class FontOptionListener implements OptionListener<Font> {
     
     public void optionChanged(OptionEvent<Font> oce) {
       MAIN_FONT = DrJava.getConfig().getSetting(FONT_MAIN);

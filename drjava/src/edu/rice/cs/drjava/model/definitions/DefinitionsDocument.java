@@ -1396,7 +1396,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /**
    * Appending any information for the reduced model from each undo command
    */
-  private class CommandUndoableEdit extends AbstractUndoableEdit {
+  private static class CommandUndoableEdit extends AbstractUndoableEdit {
     private final Runnable _undoCommand;
     private final Runnable _redoCommand;
 

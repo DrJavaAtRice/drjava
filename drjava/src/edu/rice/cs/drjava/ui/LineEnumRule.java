@@ -60,7 +60,7 @@ public class LineEnumRule extends JComponent {
   private static final int BORDER_PADDING = 3;
 
   /** Width of the rule */
-  public static int SIZE = 35;
+  static int SIZE = 35;
 
   /** Vertical increment between line numbers */
   private int _increment;

@@ -45,6 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
+import javax.swing.JFileChooser;
 import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.event.*;
@@ -700,12 +701,12 @@ public class MainFrame extends JFrame implements OptionConstants {
         public void run() {
           try{
             hourglassOn();
-            if(_model.isProjectActive()){
+            if (_model.isProjectActive()) {
               _model.getJUnitModel().junitProject();
-            }else{
+            } else {
               _model.getJUnitModel().junitAll();
             }
-          }finally{
+          } finally {
             hourglassOff();
           }
         }
@@ -2083,8 +2084,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     return answer;
   }
-  
-  
   
   /**
    * holds/shows the history of documents for ctrl-tab
@@ -3990,6 +3989,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (url != null) {
       return new ImageIcon(url);
     }
+    // System.err.println("url is null!");
     return null;
   }
 
@@ -5471,7 +5471,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Disable any step timer
    */
   private void _disableStepTimer() {
-    synchronized (_debugStepTimer) {
+    synchronized (_debugStepTimer) {  // Why is this synchronized?
       if (_debugStepTimer.isRunning()) {
         _debugStepTimer.stop();
       }
@@ -5721,7 +5721,7 @@ public class MainFrame extends JFrame implements OptionConstants {
      */
     public void stepRequested() {
       // Print a message if step takes a long time
-      synchronized (_debugStepTimer) {
+      synchronized (_debugStepTimer) {  // Why is this synchronized
         if (!_debugStepTimer.isRunning()) {
           _debugStepTimer.start();
         }

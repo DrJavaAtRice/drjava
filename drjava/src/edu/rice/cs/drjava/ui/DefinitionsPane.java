@@ -117,21 +117,19 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /**
    *  Highlight painter for breakpoints
    */
-  public static DefaultHighlighter.DefaultHighlightPainter
-    BREAKPOINT_PAINTER =
+  static DefaultHighlighter.DefaultHighlightPainter BREAKPOINT_PAINTER =
     new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
 
   /**
    * Highlight painter for thread's current location
    */
-  public static DefaultHighlighter.DefaultHighlightPainter
-    THREAD_PAINTER =
+  static DefaultHighlighter.DefaultHighlightPainter THREAD_PAINTER =
     new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_THREAD_COLOR));
 
   /**
    * The name of the keymap added to the super class (saved so it can be removed)
    */
-  public static String INDENT_KEYMAP_NAME = "INDENT_KEYMAP";
+  public static final String INDENT_KEYMAP_NAME = "INDENT_KEYMAP";
 //  
 //  /**
 //   * Looks for changes in the caret position to see if a paren/brace/bracket

@@ -50,6 +50,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.MalformedURLException;
 import java.util.jar.JarFile;
+import javax.swing.UIManager;
 import javax.swing.*;
 
 import edu.rice.cs.drjava.ui.MainFrame;
@@ -64,6 +65,7 @@ import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.compiler.*;
+import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.*;
 
 /**
@@ -138,7 +140,25 @@ public class DrJava implements OptionConstants {
    */
   //public static void beginProgram(final String[] args) {
   public static void main(final String[] args) {
+    
+    
+    // TODO: figure out how to move this code to createAndShowGUI; simply moving it
+    //   fails because the splash icon is not found (different class loader?)
+    // Show splash screen
+    final SplashScreen splash = new SplashScreen();
+    splash.setVisible(true);
+        
+    // Schedule a job for the event-dispatching thread:
+    // creating and showing this application's GUI.
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() { createAndShowGUI(args, splash); }
+    });
+  }  
+      
+  private static void createAndShowGUI(final String[] args, SplashScreen splash) {
+       
     try {
+      
       // handleCommandLineArgs will return true if the program should load
       if (handleCommandLineArgs(args)) {
 
@@ -156,6 +176,7 @@ public class DrJava implements OptionConstants {
           UIManager.setLookAndFeel(configLAFName);
         }
         
+      
         // This line uses the winlaf-0.4.1.jar in the lib directory to
         // install L&F upgrades for windows XP.
         // For more information see: https://winlaf.dev.java.net/release_0.4.html
@@ -167,10 +188,7 @@ public class DrJava implements OptionConstants {
 
         checkForCompilersAndDebugger(args);
 
-        // Show splash screen
-        SplashScreen splash = new SplashScreen();
-        splash.setVisible(true);
-
+ 
         // The MainFrame *must* be constructed after the compiler setup process has
         // occurred; otherwise, the list of compilers in the UI will be wrong.
         // At some point this should be fixed, which would involve making the
@@ -187,8 +205,9 @@ public class DrJava implements OptionConstants {
         // is constructed. See bug #518509.
         enableSecurityManager();
         openCommandLineFiles(mf, _filesToOpen);
-        splash.dispose();
+
         mf.setVisible(true);
+        splash.dispose();
 
         // redirect stdout to DrJava's console
         System.setOut(new PrintStream(new OutputStreamRedirector() {
