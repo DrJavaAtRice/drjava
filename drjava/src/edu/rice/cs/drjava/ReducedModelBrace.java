@@ -4,128 +4,17 @@ import gj.util.Stack;
 import gj.util.Vector;
 
 /**
- * This class provides an implementation of the BraceReduction
- * interface for brace matching.  In order to correctly match, this class
- * keeps track of what is commented (line and block) and what is inside
- * double quotes and keeps this in mind when matching.
- * To avoid unnecessary complication, this class maintains a few
- * invariants for its consistent states, i.e., between top-level
- * function calls.
- * <ol>
- * <li> The cursor offset is never at the end of a brace.  If movement
- * or insertion puts it there, the cursor is updated to point to the 0
- * offset of the next brace.
- * <li> Quoting information is invalid inside valid comments.  When part
- * of the document becomes uncommented, the reduced model must update the
- * quoting information linearly in the newly revealed code.
- * <li> Quote shadowing and comment shadowing are mutually exclusive.
- * <li> There is no nesting of comment open characters. If // is encountered
- *      in the middle of a comment, it is treated as two separate slashes.
- *      Similar for /*.
- * </ol>
  * @version $Id$
  * @author JavaPLT
  */
-public class ReducedModelBrace implements ReducedModelStates {
+public class ReducedModelBrace extends AbstractReducedModel {
+
+  private ReducedModelControl _parent;
   
-  /**
-   * The character that represents the cursor in toString().
-   * @see #toString()
-   */
-  public static final char PTR_CHAR = '#';
-  
-  /**
-   * A list of ReducedTokens (braces and gaps).
-   * @see ModelList
-   */
-  TokenList _braces;
-  /**
-   * keeps track of cursor position in document
-   * @see ModelList.Iterator
-   */
-  TokenList.Iterator _cursor;
-  ReducedModelControl parent;
-  
-  /**
-   * Constructor.  Creates a new reduced model with the cursor
-   * at the start of a blank "page."
-   */
   public ReducedModelBrace(ReducedModelControl parent) {
-    _braces = new TokenList();
-    _cursor = _braces.getIterator();
-    // we should be pointing to the head of the list
-    _cursor.setBlockOffset(0);
-    this.parent = parent;
+    super();
+    _parent = parent;
   }
- 
-  int getBlockOffset() {
-    return _cursor.getBlockOffset();
-  }
-  
-  void setBlockOffset(int offset) {
-    _cursor.setBlockOffset(offset);
-  }
-  
-  /**
-   * Package private absolute offset for tests.
-   * We don't keep track of absolute offset as it causes too much confusion
-   * and trouble.
-   */
-  int absOffset() {
-    int off = _cursor.getBlockOffset();
-    TokenList.Iterator it = _cursor.copy();
-    if (!it.atStart())
-      it.prev();
-    
-    while (!it.atStart()) {
-      off += it.current().getSize();
-      it.prev();
-    }
-    it.dispose();
-    return off;
-  }
-  
-  /**
-   * A toString replacement for testing - easier to read.
-   */
-  public String simpleString() {
-    String val = "";
-    ReducedToken tmp;
-    
-    TokenList.Iterator it = _braces.getIterator();
-    it.next(); // since we start at the head, which has no current item
-    
-    
-    if (_cursor.atStart()) {
-      val += PTR_CHAR;
-      val += _cursor.getBlockOffset();
-    }
-    
-    while(!it.atEnd()) {
-      tmp = it.current();
-      
-      if (!_cursor.atStart() && !_cursor.atEnd() && (tmp == _cursor.current())) {
-        val += PTR_CHAR;
-        val += _cursor.getBlockOffset();
-      }
-      
-      val += "|";
-      val += tmp;
-      val += "|\t";
-      
-      it.next();
-    }
-    
-    if (_cursor.atEnd()) {
-      val += PTR_CHAR;
-      val += _cursor.getBlockOffset();
-    }
-    
-    val += "|end|";
-    it.dispose();
-    return val;
-  }
-  
   
   public void insertChar(char ch) {
     switch(ch) {
@@ -207,7 +96,7 @@ public class ReducedModelBrace implements ReducedModelStates {
   
   private boolean _gapToRight() {
     // Before using, make sure not at last, or tail.
-    return (!_braces.isEmpty() && !_cursor.atEnd() &&
+    return (!_tokens.isEmpty() && !_cursor.atEnd() &&
             !_cursor.atLastItem() && _cursor.nextItem().isGap());
   }
   
@@ -216,7 +105,7 @@ public class ReducedModelBrace implements ReducedModelStates {
    */
   private boolean _gapToLeft() {
     // Before using, make sure not at first or head.
-    return (!_braces.isEmpty() && !_cursor.atStart() &&
+    return (!_tokens.isEmpty() && !_cursor.atStart() &&
             !_cursor.atFirstItem() &&_cursor.prevItem().isGap());
   }
   
@@ -616,11 +505,11 @@ public class ReducedModelBrace implements ReducedModelStates {
   }
   
   ReducedModelState stateAtRelLocation(int relDistance) {
-    return parent.stateAtRelLocation(relDistance);
+    return _parent.stateAtRelLocation(relDistance);
   }
   
   void resetLocation() {
-    parent.resetLocation();
+    _parent.resetLocation();
   }
   
   ReducedToken current() {
