@@ -14,8 +14,7 @@ import  gjc.v6.util.Log;
  * The GJ compiler used by DrJava.
  * @version $Id$
  */
-public class GJv6Compiler
-    implements CompilerInterface {
+public class GJv6Compiler implements CompilerInterface {
   private JavaCompiler _compiler;
   /**
    * We need to explicitly make the compiler's log and pass it
@@ -26,32 +25,44 @@ public class GJv6Compiler
   private OurLog _compilerLog;
 
   /**
-   * put your documentation comment here
+   * Create the compiler.
    */
   public GJv6Compiler () {
   }
 
   /**
-   * put your documentation comment here
+   * Set up new instance of the GJ compiler.
    */
-  private void _initCompiler () {
+  private void _initCompiler (File sourceRoot) {
     _compilerLog = new OurLog();
     // To use the GJ compiler, we build up the GJ options hashtable.
     Hashtable<String, String> options = Hashtable.make();
     // Turn on debug -- maybe this should be setable some day?
     options.put("-g", "");
     _compiler = JavaCompiler.make(_compilerLog, options);
+
+    // Build up classpath attribute
+    String classpath = System.getProperty("java.class.path");
+    if (! classpath.equals("")) {
+      classpath += File.pathSeparator;
+    }
+
+    classpath += sourceRoot.getAbsolutePath();
+    options.put("-classpath", classpath);
   }
 
   /**
-   * put your documentation comment here
-   * @param files
-   * @return 
+   * Compile the given files.
+   * @param files Source files to compile.
+   * @param sourceRoot Source root directory, the base of the package structure.
+   *
+   * @return Array of errors that occurred. If no errors, should be zero
+   * length array (not null).
    */
-  public CompilerError[] compile(File[] files) {
+  public CompilerError[] compile(File sourceRoot, File[] files) {
     // We must re-initialize the compiler on each compile. Otherwise
     // it gets very confused.
-    _initCompiler();
+    _initCompiler(sourceRoot);
     List<String> filesToCompile = new List<String>();
     for (int i = 0; i < files.length; i++) {
       filesToCompile = filesToCompile.prepend(files[i].getAbsolutePath());

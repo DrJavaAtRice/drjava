@@ -620,4 +620,93 @@ public class DefinitionsDocument extends PlainDocument {
       move(dist);
     }
   }
+
+  /**
+   * Gets the name of the package this source file claims it's in (with the
+   * package keyword). It does this by minimally parsing the source file
+   * to find the package statement.
+   *
+   * @return The name of package this source file declares itself to be in,
+   *         or the empty string if there is no package statement (and thus
+   *         the source file is in the empty package).
+   */
+  public String getPackageName() {
+    // The idea: Look for the first usage of the keyword "package" that is
+    // inside a FREE block. Then, gather together all text after "package"
+    // but before ";", and strip out the whitespace. This is the package.
+    StringBuffer buf = new StringBuffer();
+
+    int oldLocation = getCurrentLocation();
+
+    try {
+      String text = getText(0, getLength());
+    
+      int packageLocation = -1;
+      do {
+        packageLocation = text.indexOf("package", packageLocation + 1);
+
+        if (packageLocation == -1) {
+          // We never found a package statement. Thus it's the empty package.
+          return "";
+        }
+        
+        setCurrentLocation(packageLocation);
+      }
+      while (_reduced.currentToken().getHighlightState() !=
+             HighlightStatus.NORMAL);
+
+      // OK, we must have found a package statement.
+      // Now let's find the semicolon. Again, the semicolon must be free.
+      int afterPackage = packageLocation + "package".length();
+
+      int semicolonLocation = afterPackage;
+      do {
+        semicolonLocation = text.indexOf(";", semicolonLocation + 1);
+
+        if (semicolonLocation == -1) {
+          throw new InvalidPackageException(packageLocation,
+                                            "No semicolon found to terminate " +
+                                            "package statement!");
+        }
+        
+        setCurrentLocation(semicolonLocation);
+      }
+      while (_reduced.currentToken().getHighlightState() !=
+             HighlightStatus.NORMAL);
+
+      // Now we have semicolon location. We'll gather text in between one
+      // character at a time for simplicity. It's inefficient (I think?) but it's
+      // easy, and there shouldn't be much text between "package" and ";" anyhow.
+      for (int walk = afterPackage + 1; walk < semicolonLocation; walk++) {
+        setCurrentLocation(walk);
+
+        if (_reduced.currentToken().getHighlightState() == 
+            HighlightStatus.NORMAL)
+        {
+          char curChar = text.charAt(walk);
+
+          if (! Character.isWhitespace(curChar)) {
+            buf.append(curChar);
+          }
+        }
+      }
+
+      String toReturn = buf.toString();
+      if (toReturn.equals("")) {
+        throw new InvalidPackageException(packageLocation,
+                                          "Package name was not specified " +
+                                          "after the package keyword!");
+      }
+
+      return toReturn;
+    }
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
+    }
+    finally {
+      setCurrentLocation(oldLocation);
+    }
+  }
+
+
 }

@@ -68,8 +68,17 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @param path the path to add
    */
   public void addClassPath(String path) {
-    //System.err.println("Added class path: " + path);
+    //DrJava.consoleErr().println("Added class path: " + path);
     _djInterpreter.addClassPath(path);
+  }
+
+  /**
+   * Set the scope for unqualified names to the given package.
+   * @param packageName Package to assume scope of.
+   */
+  public void setPackageScope(String packageName) {
+    StringReader reader = new StringReader("package " + packageName + ";");
+    _djInterpreter.interpret(reader, "DrJava");
   }
 
   /**

@@ -92,6 +92,10 @@ public class InteractionsPane extends JTextArea {
     getInteractionsDocument().addClassPath(path);
   }
 
+  public void setPackageScope(String pack) {
+    getInteractionsDocument().setPackageScope(pack);
+  }
+
   /**
    * put your documentation comment here
    */

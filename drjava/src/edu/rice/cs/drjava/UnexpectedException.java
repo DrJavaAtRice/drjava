@@ -12,13 +12,13 @@ package edu.rice.cs.drjava;
  */
 public class UnexpectedException extends RuntimeException {
 
-  private Exception _value;
+  private Throwable _value;
 
    /**
    * Constructs an unexpected exception with
    * <code>value.toString()</code> as it's message.
    */
-  public UnexpectedException(Exception value) {
+  public UnexpectedException(Throwable value) {
     super(value.toString());
     _value = value;
   }
@@ -26,7 +26,7 @@ public class UnexpectedException extends RuntimeException {
   /**
    * Returns the contained exception.
    */
-  public Exception getValue() {
+  public Throwable getContainedThrowable() {
     return _value;
   }
 }

@@ -78,6 +78,10 @@ class InteractionsDocument extends PlainDocument {
     _interpreter.addClassPath(path);
   }
 
+  public void setPackageScope(String pack) {
+    _interpreter.setPackageScope(pack);
+  }
+
   /**
    * put your documentation comment here
    */

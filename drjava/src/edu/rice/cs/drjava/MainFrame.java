@@ -213,16 +213,28 @@ public class MainFrame extends JFrame {
       // if the file was never changed and never saved.
       return;
     }
-    // Clear the output window before compilation
-    _outputPane.clear();
-    _tabbedPane.setSelectedIndex(COMPILE_TAB);
-    File file = new File(filename);
-    CompilerError[] errors = DrJava.compiler.compile(new File[] {
-      file
-    });
-    _errorPanel.resetErrors(errors);
-    _resetInteractions();
+
+    try {
+      _outputPane.clear();
+      repaint();
+
+      File sourceRoot = _definitionsPane.getSourceRoot();
+      _resetInteractions(sourceRoot);
+      
+      File[] files = new File[] { new File(filename) };
+      CompilerError[] errors = DrJava.compiler.compile(sourceRoot, files);
+      _errorPanel.resetErrors(errors);
+    }
+    catch (InvalidPackageException e) {
+      CompilerError err = new CompilerError(filename,
+                                            -1,
+                                            -1,
+                                            e.getMessage(),
+                                            false);
+      _errorPanel.resetErrors(new CompilerError[] { err });
+    }
   }
+
   private Action _compileAction = new AbstractAction("Compile") {
 
     // This doesn't seem to ever re-enable once disabled!
@@ -249,6 +261,10 @@ public class MainFrame extends JFrame {
           return;               // user wants to do nothing
         }
       }
+
+      _tabbedPane.setSelectedIndex(COMPILE_TAB);
+      _errorPanel.setCompilationInProgress();
+
       hourglassOn();
       compile();
       hourglassOff();
@@ -286,22 +302,34 @@ public class MainFrame extends JFrame {
   };
 
   /**
-   * put your documentation comment here
+   * Reset the interactions window, and add the source directory
+   * of the file we just compiled to the class path.
    */
-  private void _resetInteractions() {
-    // Also reset the compiler error panel
-    //_errorPanel.resetErrors(new CompilerError[0]);
-    // Reset the interactions window, and add the source directory
-    // of the file we just compiled to the class path.
+  private void _resetInteractions(File sourceRoot) {
     _interactionsPane.reset();
-    String filename = _definitionsPane.getCurrentFileName();
-    if (filename == "") {
-      return;                   // no file, so no source path to add to classpath.
+    _interactionsPane.addClassPath(sourceRoot.getAbsolutePath());
+
+    try {
+      _interactionsPane.setPackageScope(_definitionsPane.getPackageName());
     }
-    File file = new File(filename);
-    String sourceDir = file.getAbsoluteFile().getParent();
-    _interactionsPane.addClassPath(sourceDir);
+    catch (InvalidPackageException ipe) {
+      // oh well, can't set package scope.
+    }
   }
+
+  private void _resetInteractions() {
+    _interactionsPane.reset();
+
+    try {
+      String path = _definitionsPane.getSourceRoot().getAbsolutePath();
+      _interactionsPane.addClassPath(path);
+      _interactionsPane.setPackageScope(_definitionsPane.getPackageName());
+    }
+    catch (InvalidPackageException ipe) {
+      // oh well, we can't add to the class path.
+    }
+  }
+
   private WindowListener _windowCloseListener = new WindowListener() {
 
     /**

@@ -358,4 +358,68 @@ public class DefinitionsDocumentTest extends TestCase
       assertEquals(" \t yet \t\tanother\ttest\t", result);
     }
   }
+
+  /** Test package-finding on empty document. */
+  public void testPackageNameEmpty() throws BadLocationException {
+    assertEquals("Package name for empty document",
+                 "",
+                 defModel.getPackageName());
+  }
+
+  /** Test package-finding on simple document, with no funny comments. */
+  public void testPackageNameSimple() throws BadLocationException {
+    final String[] comments = {
+      "/* package very.bad; */",
+      "// package terribly.wrong;"
+    };
+
+    final String[] packages = {"edu", "edu.rice", "edu.rice.cs.drjava" };
+
+    for (int i = 0; i < packages.length; i++) {
+      String curPack = packages[i];
+
+      for (int j = 0; j < comments.length; j++) {
+        String curComment = comments[j];
+
+        setUp();
+        defModel.insertString(0,
+                              curComment + "\n\n" + 
+                                "package " + curPack +
+                                ";\nclass Foo { int x; }\n",
+                              null);
+
+        assertEquals("Package name for document with comment " + curComment,
+                     curPack,
+                     defModel.getPackageName());
+      }
+    }
+  }
+
+  /**
+   * Test package-finding on document with a block comment
+   * between parts of package.
+   */
+  public void testPackageNameWeird1() throws BadLocationException {
+    String weird = "package edu . rice\n./*comment!*/cs.drjava;";
+    String normal = "edu.rice.cs.drjava";
+    defModel.insertString(0, weird, null);
+
+    assertEquals("Package name for weird: '" + weird + "'",
+                 normal,
+                 defModel.getPackageName());
+  }
+
+  /**
+   * Test package-finding on document with a line comment between
+   * parts of package.
+   */
+  public void testPackageNameWeird2() throws BadLocationException {
+    String weird = "package edu . rice //comment!\n.cs.drjava;";
+    String normal = "edu.rice.cs.drjava";
+    defModel.insertString(0, weird, null);
+
+    assertEquals("Package name for weird: '" + weird + "'",
+                 normal,
+                 defModel.getPackageName());
+  }
 }

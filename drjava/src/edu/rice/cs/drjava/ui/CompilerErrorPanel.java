@@ -347,6 +347,11 @@ public class CompilerErrorPanel extends JPanel {
     _showAllButton.setEnabled(numErrors != 0);
   }
 
+  /** Called when compilation begins. */
+  public void setCompilationInProgress() {
+    _errorListPane.setCompilationInProgress();
+  }
+
   /**
    * Reset the errors to the current error information.
    * @param errors the current error information
@@ -535,10 +540,32 @@ public class CompilerErrorPanel extends JPanel {
           _updateWithErrors();
         }
       }
-      catch (BadLocationException impossible) {}
+      catch (BadLocationException e) {
+        throw new UnexpectedException(e);
+      }
 
       // Force UI to redraw
       revalidate();
+    }
+
+    /** Puts the error pane into "compilation in progress" state. */
+    public void setCompilationInProgress() {
+      _errorListPositions = new Position[0];
+
+      DefaultStyledDocument doc = new DefaultStyledDocument();
+
+      try {
+        doc.insertString(0,
+                       "Compilation in progress, please wait ...",
+                       NORMAL_ATTRIBUTES);
+      }
+      catch (BadLocationException ble) {
+        throw new UnexpectedException(ble);
+      }
+
+      setDocument(doc);
+
+      selectNothing();
     }
 
     /**

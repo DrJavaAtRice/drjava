@@ -10,10 +10,14 @@ import  java.io.File;
 public interface CompilerInterface {
 
   /**
-   * Returns array of errors that occurred. If no errors, should be zero
+   * Compile the given files.
+   * @param files Source files to compile.
+   * @param sourceRoot Source root directory, the base of the package structure.
+   *
+   * @return Array of errors that occurred. If no errors, should be zero
    * length array (not null).
    */
-  CompilerError[] compile(File[] files);
+  CompilerError[] compile(File sourceRoot, File[] files);
 }
 
 

@@ -1,50 +1,13 @@
 package  edu.rice.cs.drjava;
 
-import  javax.swing.Action;
-import  javax.swing.AbstractAction;
-import  javax.swing.JFileChooser;
-import  javax.swing.JOptionPane;
-import  javax.swing.JTextArea;
-import  javax.swing.JEditorPane;
-import  javax.swing.KeyStroke;
-import  javax.swing.SwingUtilities;
-
-import  javax.swing.undo.CannotRedoException;
-import  javax.swing.undo.CannotUndoException;
-import  javax.swing.undo.UndoManager;
-
-import  javax.swing.event.UndoableEditListener;
-import  javax.swing.event.UndoableEditEvent;
-import  javax.swing.event.DocumentListener;
-import  javax.swing.event.DocumentEvent;
-import  javax.swing.event.CaretListener;
-import  javax.swing.event.CaretEvent;
-
-import  javax.swing.text.Document;
-import  javax.swing.text.Keymap;
-import  javax.swing.text.StyledEditorKit;
-import  javax.swing.text.DefaultEditorKit;
-import  javax.swing.text.EditorKit;
-import  javax.swing.text.BadLocationException;
-import  javax.swing.text.Highlighter;
-import  javax.swing.text.DefaultHighlighter;
-
-import  java.io.File;
-import  java.io.IOException;
-import  java.io.FileReader;
-import  java.io.FileWriter;
-
-import  java.awt.Rectangle;
-import  java.awt.Color;
-import  java.awt.Font;
-import  java.awt.Toolkit;
-import  java.awt.event.ActionEvent;
-import  java.awt.event.MouseListener;
-import  java.awt.event.MouseEvent;
-import  java.awt.event.KeyListener;
-import  java.awt.event.KeyEvent;
-import  java.awt.event.ActionListener;
+import  javax.swing.*;
+import  javax.swing.undo.*;
+import  javax.swing.event.*;
+import  javax.swing.text.*;
+import  java.awt.*;
 import  java.awt.event.*;
+import  java.io.*;
+import  java.util.*;
 
 
 /**
@@ -274,6 +237,74 @@ public class DefinitionsPane extends JEditorPane {
     // If it has changed, check and see if we should be highlighting matching braces.
     this.addCaretListener(_matchListener);
     _mainFrame.installNewDocumentListener(_doc());
+  }
+
+  public String getPackageName() throws InvalidPackageException {
+    return _doc().getPackageName();
+  }
+
+  /**
+   * Finds the root directory of the source files.
+   * @return The root directory of the source files,
+   *         based on the package statement.
+   * @throws InvalidPackageException If the package statement is invalid,
+   *                                 or if it does not match up with the
+   *                                 location of the source file.
+   */
+  public File getSourceRoot() throws InvalidPackageException {
+    if (_currentFileName.equals("")) {
+      throw new InvalidPackageException(-1, "Can not get source root for " +
+                                            "unsaved file. Please save.");
+    }
+                                        
+    String packageName = _doc().getPackageName();
+    File sourceFile = new File(_currentFileName).getAbsoluteFile();
+
+    if (packageName.equals("")) {
+      return sourceFile.getParentFile();
+    }
+
+    Stack packageStack = new Stack();
+    int dotIndex = packageName.indexOf('.');
+    int curPartBegins = 0;
+
+    while (dotIndex != -1)
+    {
+      packageStack.push(packageName.substring(curPartBegins, dotIndex));
+      dotIndex = packageName.indexOf('.', dotIndex + 1);
+    }
+
+    // Now add the last package component
+    packageStack.push(packageName.substring(curPartBegins));
+
+    File parentDir = sourceFile;
+    while (!packageStack.empty()) {
+      String part = (String) packageStack.pop();
+      parentDir = parentDir.getParentFile();
+
+      if (parentDir == null) {
+        throw new RuntimeException("parent dir is null?!");
+      }
+
+      // Make sure the package piece matches the directory name
+      if (! part.equals(parentDir.getName())) {
+        String msg = "The source file " + _currentFileName +
+                     " is in the wrong directory or in the wrong package. " +
+                     "The directory name " + parentDir.getName() +
+                     " does not match the package name " + part + ".";
+
+        throw new InvalidPackageException(-1, msg);
+      }
+    }
+
+    // OK, now parentDir points to the directory of the first component of the
+    // package name. The parent of that is the root.
+    parentDir = parentDir.getParentFile();
+    if (parentDir == null) {
+      throw new RuntimeException("parent dir of first component is null?!");
+    }
+
+    return parentDir;
   }
 
   /** Gets current file name, or "" if it was never saved. */
@@ -807,6 +838,3 @@ public class DefinitionsPane extends JEditorPane {
     return;
   }
 }
-
-
-
