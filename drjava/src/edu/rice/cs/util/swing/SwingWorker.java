@@ -54,6 +54,8 @@ import javax.swing.SwingUtilities;
  * Note that the API changed slightly in the 3rd version:
  * You must now invoke start() on the SwingWorker after
  * creating it.
+ * 
+ * @version $Id$
  */
 public abstract class SwingWorker {
   private Object _value;  // see getValue(), setValue()
@@ -133,8 +135,7 @@ public abstract class SwingWorker {
       }
     }
   }
-  
-  
+    
   /**
    * Start a thread that will call the <code>construct</code> method
    * and then exit.
@@ -148,6 +149,24 @@ public abstract class SwingWorker {
       public void run() {
         try {
           setValue(construct());
+        }
+        catch (final RuntimeException e) {
+          // Throw the exception in the event dispatching thread.
+          SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              throw e;
+            }
+          });
+          throw e;
+        }
+        catch (final Error e) {
+          // Throw the error in the event dispatching thread.
+          SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              throw e;
+            }
+          });
+          throw e;
         }
         finally {
           _threadVar.clear();
