@@ -80,32 +80,21 @@ public abstract class SwingWorker {
 
   private ThreadVar _threadVar;
 
-  /**
-   * Get the value produced by the worker thread, or null if it
-   * hasn't been constructed yet.
+  /** Gets the value produced by the worker thread, or null if it
+   *  hasn't been constructed yet.
    */
-  protected synchronized Object getValue() {
-    return _value;
-  }
+  protected synchronized Object getValue() { return _value; }
 
-  /**
-   * Set the value produced by worker thread
-   */
-  private synchronized void setValue(Object x) {
-    _value = x;
-  }
+  /** Sets the value produced by worker thread. */
+  private synchronized void setValue(Object x) { _value = x; }
 
-  /**
-   * Compute the value to be returned by the <code>get</code> method.
-   */
+  /** Compute the value to be returned by the <code>get</code> method. */
   public abstract Object construct();
 
-  /**
-   * Called on the event dispatching thread (not on the worker thread)
-   * after the <code>construct</code> method has returned.
+  /** Called on the event dispatching thread (not on the worker thread)
+   *  after the <code>construct</code> method has returned.
    */
-  public void finished() {
-  }
+  public void finished() { }
 
   /**
    * A new method that interrupts the worker thread.  Call this method
@@ -113,9 +102,7 @@ public abstract class SwingWorker {
    */
   public void interrupt() {
     Thread t = _threadVar.get();
-    if (t != null) {
-      t.interrupt();
-    }
+    if (t != null) t.interrupt();
     _threadVar.clear();
   }
 
@@ -129,12 +116,8 @@ public abstract class SwingWorker {
   public Object get() {
     while (true) {
       Thread t = _threadVar.get();
-      if (t == null) {
-        return getValue();
-      }
-      try {
-        t.join();
-      }
+      if (t == null) return getValue();
+      try { t.join(); }
       catch (InterruptedException e) {
         Thread.currentThread().interrupt(); // propagate
         return null;
@@ -153,30 +136,22 @@ public abstract class SwingWorker {
 
     Runnable doConstruct = new Runnable() {
       public void run() {
-        try {
-          setValue(construct());
-        }
+        try { setValue(construct()); }
         catch (final RuntimeException e) {
           // Throw the exception in the event dispatching thread.
           SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-              throw e;
-            }
+            public void run() { throw e; }
           });
           throw e;
         }
         catch (final Error e) {
           // Throw the error in the event dispatching thread.
           SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-              throw e;
-            }
+            public void run() { throw e; }
           });
           throw e;
         }
-        finally {
-          _threadVar.clear();
-        }
+        finally { _threadVar.clear(); }
 
         SwingUtilities.invokeLater(doFinished);
       }

@@ -8,39 +8,65 @@ import java.util.*;
  * the test with JUnit.
  */
 public class BidirectionalHashMapTest extends TestCase {
+  
   public void testSearch() {
     Double dbl1 = new Double(.1);
     Double dbl2 = new Double(.2);
     Double dbl3 = new Double(.3);
+    
+    Double[] dbls = new Double[]{dbl1, dbl2, dbl3};
 
     Integer int1 = new Integer(1);
     Integer int2 = new Integer(2);
     Integer int3 = new Integer(3);
+    
+    Integer[] ints = new Integer[]{int1, int2, int3};
+     
     BidirectionalHashMap<Integer, Double> iTod = new BidirectionalHashMap<Integer, Double>();
+    
+    assertTrue("Empty BHM is empty", iTod.isEmpty());
+    assertTrue("Empty BHM has no values", iTod.values().isEmpty());
 
     assertEquals("Initial size of 0", iTod.size(), 0);
 
-    assertFalse("Should not find non-existant key", iTod.containsKey(int1));
-    assertFalse("Should not find non-existant key", iTod.containsKey(int2));
-    assertFalse("Should not find non-existant key", iTod.containsKey(int3));
+    assertFalse("Should not find non-existent key", iTod.containsKey(int1));
+    assertFalse("Should not find non-existent key", iTod.containsKey(int2));
+    assertFalse("Should not find non-existent key", iTod.containsKey(int3));
 
-    assertFalse("Should not find non-existant value", iTod.containsValue(dbl1));
-    assertFalse("Should not find non-existant value", iTod.containsValue(dbl2));
-    assertFalse("Should not find non-existant value", iTod.containsValue(dbl3));
+    assertFalse("Should not find non-existent value", iTod.containsValue(dbl1));
+    assertFalse("Should not find non-existent value", iTod.containsValue(dbl2));
+    assertFalse("Should not find non-existent value", iTod.containsValue(dbl3));
 
     iTod.put(int1, dbl1);
-
+    
+    assertFalse("NonEmpty BHM is not empty", iTod.isEmpty());
+    assertFalse("NonEmpty BHM has some values", iTod.values().isEmpty());
+    
     assertTrue("Should find key", iTod.containsKey(int1));
-    assertFalse("Should not find non-existant key", iTod.containsKey(int2));
-    assertFalse("Should not find non-existant key", iTod.containsKey(int3));
+    assertFalse("Should not find non-existent key", iTod.containsKey(int2));
+    assertFalse("Should not find non-existent key", iTod.containsKey(int3));
 
     assertTrue("Should find value", iTod.containsValue(dbl1));
-    assertFalse("Should not find non-existant value", iTod.containsValue(dbl2));
-    assertFalse("Should not find non-existant value", iTod.containsValue(dbl3));
+    assertFalse("Should not find non-existent value", iTod.containsValue(dbl2));
+    assertFalse("Should not find non-existent value", iTod.containsValue(dbl3));
 
     iTod.put(int2, dbl2);
     iTod.put(int3, dbl3);
-
+    
+    Collection<Double> valsCol = iTod.values();
+    
+    Object[] vals = iTod.valuesArray();
+    Object[] colVals = valsCol.toArray();
+    
+    // These collections are enumerated in any order
+    
+    Arrays.sort(vals);
+    Arrays.sort(colVals);
+    
+    assertTrue("values() test", Arrays.equals(vals, colVals));
+    
+    assertTrue("values test", Arrays.equals(dbls, vals));
+               
     Iterator<Double> it = iTod.valuesIterator();
     try {
       it.remove();
@@ -59,7 +85,7 @@ public class BidirectionalHashMapTest extends TestCase {
     it = iTod.valuesIterator();
     val = it.next();
     key = iTod.getKey(val);
-    iTod.removeValue(key);
+    it.remove();
     assertEquals("Size should be 1", 1, iTod.size());
     assertTrue("Iterator should be non empty", it.hasNext());
 
@@ -69,6 +95,7 @@ public class BidirectionalHashMapTest extends TestCase {
 
     iTod.clear();
   }
+  
   public void testRemove() {
     Double dbl1 = new Double(.1);
     Double dbl2 = new Double(.2);

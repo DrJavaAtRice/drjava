@@ -67,9 +67,10 @@ public class ClasspathVectorTest extends TestCase {
     addElement(v, "file:///jsr14.jar");
     assertEquals("One element classpath", File.separator+"jsr14.jar"+File.pathSeparator,v.toString());
     addElement(v, "file:///wherever/supercool.jar");
-    assertEquals("Multiple element classpath", File.separator+"jsr14.jar" + File.pathSeparator + "/wherever/supercool.jar" + File.pathSeparator, v.toString());
+    String fileName = File.separator + "wherever" + File.separator + "supercool.jar";
+    assertEquals("Multiple element classpath", File.separator+"jsr14.jar" + File.pathSeparator + fileName + File.pathSeparator, v.toString());
     addElement(v, "http://www.drjava.org/hosted.jar");
-    assertEquals("Multiple element classpath", File.separator+"jsr14.jar" + File.pathSeparator + "/wherever/supercool.jar" + File.pathSeparator + "/hosted.jar" + File.pathSeparator, v.toString());
+    assertEquals("Multiple element classpath", File.separator+"jsr14.jar" + File.pathSeparator + fileName + File.pathSeparator + File.separator + "hosted.jar" + File.pathSeparator, v.toString());
   }
   
   /**

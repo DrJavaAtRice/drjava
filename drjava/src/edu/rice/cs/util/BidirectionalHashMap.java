@@ -50,52 +50,57 @@ public class BidirectionalHashMap<Type1, Type2> {
   HashMap<Type1, Type2> forward = new HashMap<Type1, Type2>();
   HashMap<Type2, Type1> backward = new HashMap<Type2, Type1>();
   
-  public /* synchronized */ void put(Type1 key, Type2 value) {
-    if(forward.containsKey(key))
-    {
+  public void put(Type1 key, Type2 value) {
+    if (forward.containsKey(key)) {
       throw new IllegalArgumentException("Key "  + key + " exists in hash already.");
     }
-    if(forward.containsValue(value))
-    {
+    if (forward.containsValue(value)) {
       throw new IllegalArgumentException("Double hashes must be one to one. " + value + " exists already in hash.");
     }      
     forward.put(key, value);
-    backward.put(value,key);
+    backward.put(value, key);
   }
   
-  public /* synchronized */ Type2 getValue(Type1 key) { return forward.get(key); }
+  public Type2 getValue(Type1 key) { return forward.get(key); }
 
-  public /* synchronized */ Type1 getKey(Type2 value) { return backward.get(value); }
+  public Type1 getKey(Type2 value) { return backward.get(value); }
   
-  public /* synchronized */ boolean containsKey(Type1 key) { return forward.containsKey(key); }
+  public boolean containsKey(Type1 key) { return forward.containsKey(key); }
   
-  public /* synchronized */ boolean containsValue(Type2 value) { return backward.containsKey(value); }
+  public boolean containsValue(Type2 value) { return backward.containsKey(value); }
   
-  public /* synchronized */ Iterator<Type2> valuesIterator() { return new BHMIterator(); }
+  public Iterator<Type2> valuesIterator() { return new BHMIterator(); }
   
-  public /* synchronized */ Type2 removeValue(Type1 key) {
+  public boolean isEmpty() { return forward.isEmpty(); }
+  
+  /** Returns a Collection<Type2> in some order. */
+  public Collection<Type2> values() { return forward.values(); }  
+  
+  public Object[] valuesArray() { return values().toArray(); }  // Return type should be Type2[];  type erasure bites!
+  
+  public Type2 removeValue(Type1 key) {
     Type2 tmp = forward.remove(key);
     backward.remove(tmp);
     return tmp;
   }
   
-  public /* synchronized */ Type1 removeKey(Type2 value) {
+  public Type1 removeKey(Type2 value) {
     Type1 tmp = backward.remove(value);
     forward.remove(tmp);
     return tmp;
   }
   
-  public /* synchronized */ int size() { return forward.size(); }
+  public int size() { return forward.size(); }
  
   
-  public /* synchronized */ void clear() {
+  public void clear() {
     forward = new HashMap<Type1, Type2>();
     backward = new HashMap<Type2, Type1>();
   }
   
-  public /* synchronized */ String toString() {
+  public String toString() {
     String ret = new String();
-    ret = "forward = \n" + forward.values() + "\n backward = \n" + backward.values();
+    ret = "forward = " + forward.values() + "\nbackward = " + backward.values();
     return ret;
   }
   
@@ -108,25 +113,19 @@ public class BidirectionalHashMap<Type1, Type2> {
     Type2 lastValue = null;
     
     public boolean hasNext() { 
-//      synchronized(BidirectionalHashMap.this) {
-        return forwardIt.hasNext(); 
-//      }
+      return forwardIt.hasNext(); 
     }
     
     public Type2 next() { 
-//      synchronized(BidirectionalHashMap.this) {
-        lastValue = forwardIt.next(); 
-        return lastValue;
-//      }
+      lastValue = forwardIt.next(); 
+      return lastValue;
     }
     
     /** Removes last element returned by next(); throws IllegalStateException if no such element */
     public void remove() {
-//      synchronized(BidirectionalHashMap.this) {
-        forwardIt.remove();          /* throws exception if lastValue is null */
-        backward.remove(lastValue);  /* cannot fail because lastValue is not null */
-        lastValue = null;
-//      }
+      forwardIt.remove();          /* throws exception if lastValue is null */
+      backward.remove(lastValue);  /* cannot fail because lastValue is not null */
+      lastValue = null;
     }
   }
 }

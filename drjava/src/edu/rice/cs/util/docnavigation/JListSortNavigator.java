@@ -53,7 +53,7 @@ import java.awt.event.*;
 //import edu.rice.cs.drjava.model.*;
 //import edu.rice.cs.drjava.ui.RightClickMouseAdapter;
 
-class JListSortNavigator extends JListNavigator{
+class JListSortNavigator extends JListNavigator {
   
   /**
    * the collection of documents in this navigator
@@ -74,12 +74,8 @@ class JListSortNavigator extends JListNavigator{
   /**
    * the standard constructor for this list navigator
    */
-  public JListSortNavigator()
-  {
+  public JListSortNavigator() {
     super();
-    _renderer = new DefaultListCellRenderer();
-    _renderer.setOpaque(true);
-    this.setCellRenderer(_renderer);
   }
   
   /**
@@ -88,7 +84,6 @@ class JListSortNavigator extends JListNavigator{
    */
   public void addDocument(INavigatorItem doc) {
     insertDoc(doc);
-     this.setListData(_docs);
   }
 
   /**
@@ -98,207 +93,23 @@ class JListSortNavigator extends JListNavigator{
    */
   public void addDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
     insertDoc(doc);
-    this.setListData(_docs);
   }
   
   /**
    * inserts the document into its sorted position
    * @param doc the document to add
    */
-  private int insertDoc(INavigatorItem doc){
-    int i=0;
-    while(i<_docs.size() && (_docs.get(i).getName().toUpperCase().compareTo(doc.getName().toUpperCase())) < 0){
-      i++;
+  private int insertDoc(INavigatorItem doc) {
+    int i = 0;
+    synchronized (_model) {
+      while (i<_model.size() && ((INavigatorItem)(_model.get(i))).getName().toUpperCase().compareTo(doc.getName().toUpperCase()) < 0) {
+        i++;
+      }
+      _model.add(i, doc);
     }
-    _docs.add(i, doc);
     return i;
   }
   
-  /**
-   * gets the next document in the series
-   * @param doc the document to reference from
-   * @return the document which comes after doc in the list
-   */
-  public INavigatorItem getNext(INavigatorItem doc) {
-    int i = _docs.indexOf(doc);
-    //System.out.println("Current size is " + _docs.size() + " and passed index is " + i);
-    if( i == -1 ) {
-      throw new IllegalArgumentException("No such document " + doc.toString() + " found in collection of open documents");
-    }
-    else if ((i + 1) < _docs.size()){
-      return (INavigatorItem)_docs.get(i + 1);
-    }
-    else {
-      return doc;
-    }
-  }
-  
-  /**
-   * gets the previous document in the series
-   * @param doc the document to reference from
-   * @return the document which comes after doc in the list
-   */
-  public INavigatorItem getPrevious(INavigatorItem doc) {
-    int i = _docs.indexOf(doc);
-    
-    if( i == -1 ) {
-      throw new IllegalArgumentException("No such document " + doc.toString() + " found in collection of open documents");
-    }
-    else if ((i - 1) >= 0){
-      return (INavigatorItem)_docs.get(i - 1);
-    }
-    else {
-      return doc;
-    }
-  }
-  
-  /**
-   * removes the document from the navigator
-   * @doc the document to remove
-   */
-  public INavigatorItem removeDocument(INavigatorItem doc) throws IllegalArgumentException {
-    int i = _docs.indexOf(doc);
-    if( i == -1 ) {
-      throw new IllegalArgumentException("Document " + doc + " not found in Document Navigator");
-    }
-    else {
-      INavigatorItem next = null;
-      if(currentselected == doc)
-      {
-        next = getNext(doc);
-        if(next == doc)
-        {
-          next = null;
-        }
-      } 
-      INavigatorItem tbr = _docs.remove(i);
-      this.setListData(_docs);
-      if(next != null)
-      {
-        this.setSelectedValue(next, true);
-      }
-      return tbr;
-    }
-  }
-  
-  /**
-   * Resets a given <code>INavigatorItem<code> in the tree.  This may affect the
-   * placement of the item or its display to reflect any changes made in the model.
-   * @param doc the docment to be refreshed
-   * @throws IllegalArgumentException if this navigator contains no document
-   *  that is equal to the passed document.
-   */
-  public void refreshDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
-    int i = _docs.indexOf(doc);
-    if( i == -1 ) {
-      throw new IllegalArgumentException("Document " + doc + " not found in Document Navigator");
-    }
-    else {
-      int j = insertDoc(doc);
-      
-      /**
-       * if i just inserted before where i was going to remove, then
-       * i just bumped that document down the list one space.
-       */
-      if(j<=i){
-        INavigatorItem tbr = _docs.remove(i+1);
-      }else{
-        INavigatorItem tbr = _docs.remove(i);
-      }
-      this.setListData(_docs);
-    }
-  }
-
-  
-  /**
-   * set's the INavigatorItem as active (selected)
-   */
-  public void setActiveDoc(INavigatorItem doc){
-    if(this.contains(doc)){
-        this.setSelectedValue(doc, true);
-    }
-  }
-  
-  /**
-   * noop since a list has no concept of a top level path
-   */
-  public void setTopLevelPath(String path)
-  {
-  }
-  
-  /**
-   * returns whether the navigator contains the document or not
-   * @param doc in question
-   * @return true if this list contains doc (using identity as equality
-   * measure), false if not.
-   */
-  public boolean contains(INavigatorItem doc) {
-    return (_docs.indexOf(doc) != -1 );
-  }
-  
-  /**
-   * @return an Enumeration of the documents in this list (ordering is
-   * consistent with getNext() and getPrev()).
-   */
-  public Enumeration<INavigatorItem> getDocuments() {
-    return _docs.elements();
-  }
-  
-  /**
-   * @return the number of documents in this navigator
-   */
-  public int getDocumentCount()
-  {
-    return _docs.size();
-  }
-  
-  /**
-   * @return whether or not the navigator is empty
-   */
-  public boolean isEmpty()
-  {
-    return _docs.isEmpty();
-  }
-  
-  /**
-   * removes all documents from the navigator
-   */
-  public void clear()
-  {
-//    System.out.println("clearing list data");
-    _docs.clear();
-    this.setListData(_docs);
-  }
-  
-  
-  /**
-   * executes the list case on a visitor
-   * @param the visitor to execute
-   * @input the input to the visitor
-   */
-  public <InType, ReturnType> ReturnType execute(IDocumentNavigatorAlgo<InType, ReturnType> algo, InType input) {
-    return algo.forList(this, input);
-  }
-  
-  
-  /**
-   * @return a Container representation of this navigator
-   */
-  public Container asContainer()
-  {
-    return this;
-  }
-  
-
-  public void paint(Graphics g){
-    super.paint(g);
-  }
-
-  
-  /**
-   * returns a renderer for this object
-   */
-  public Component getRenderer(){
-    return _renderer;
-  }
+   public String toString() { return "JListSortNavigator" + _model.toString(); }
+ 
 }

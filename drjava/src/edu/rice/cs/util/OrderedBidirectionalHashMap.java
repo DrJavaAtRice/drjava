@@ -47,30 +47,32 @@ package edu.rice.cs.util;
 import java.util.*;
 
 public class OrderedBidirectionalHashMap<Type1, Type2> extends BidirectionalHashMap<Type1, Type2> {
-  private Vector<Type2> order = new Vector<Type2>();
+  private ArrayList<Type2> order = new ArrayList<Type2>();
   
   public OrderedBidirectionalHashMap() { super(); }
   
-  public /* synchronized */ void put(Type1 key, Type2 value) {
+  public void put(Type1 key, Type2 value) {
     super.put(key, value);
     order.add(value);
   }
    
-  public /* synchronized */ Type2 removeValue(Type1 key) {
+  public Type2 removeValue(Type1 key) {
     Type2 value = super.removeValue(key);
     order.remove(value);
     return value;
   }
   
-  public /* synchronized */ Type1 removeKey(Type2 value) {
+  public Type1 removeKey(Type2 value) {
     Type1 key = super.removeKey(value);
     order.remove(value);
     return key;
   }
   
-  public /* synchronized */ Iterator<Type2> valuesIterator() { return new OBHMIterator(); }
+  public Iterator<Type2> valuesIterator() { return new OBHMIterator(); }
   
-  public /* synchronized */ void clear() {
+  public Collection<Type2> values() { return order; }
+  
+  public void clear() {
     super.clear();
     order.clear();
   }
@@ -85,29 +87,20 @@ public class OrderedBidirectionalHashMap<Type1, Type2> extends BidirectionalHash
     Type1 lastKey = null;
     Type2 lastValue = null;
 
-    
-    public boolean hasNext() { 
-//      synchronized(OBHMthis) {
-        return it.hasNext(); 
-//      }
-    }
+    public boolean hasNext() { return it.hasNext(); }
     
     public Type2 next() {
-//      synchronized(OBHMthis) {
-        lastValue = it.next(); 
-        return lastValue;
-//      }
+      lastValue = it.next();
+      return lastValue;
     }
     
     /** Removes last element returned by next(); throws IllegalStateException if no such element */
     public void remove() {
-//     synchronized(OBHMthis) {
-        it.remove();                 /* throws exception if lastValue is null */
-        lastKey = OBHMthis.getKey(lastValue);
-        forward.remove(lastKey);     /* cannot fail because lastKey is not null */
-        backward.remove(lastValue);  /* cannot fail because lastValue is not null */
-        lastValue = null;
-//      }
+      it.remove();                 /* throws exception if lastValue is null */
+      lastKey = backward.get(lastValue);
+      forward.remove(lastKey);     /* cannot fail because lastKey is not null */
+      backward.remove(lastValue);  /* cannot fail because lastValue is not null */
+      lastValue = null;
     }
   }
 }
