@@ -359,6 +359,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         _findReplace.beginListeningTo(_currentDefPane);
       }
       _tabbedPane.setSelectedComponent(_findReplace);  
+      _findReplace.requestFocus();
       int divLocation = _mainSplit.getHeight() - 
         _mainSplit.getDividerSize() - 
         (int)_tabbedPane.getMinimumSize().getHeight();

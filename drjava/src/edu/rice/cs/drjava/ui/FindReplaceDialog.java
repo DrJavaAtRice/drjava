@@ -98,6 +98,11 @@ import edu.rice.cs.util.UnexpectedException;
     }
   };
   
+   public void requestFocus() {
+     super.requestFocus();
+     _findField.requestFocus();
+   }
+
    /**
     * Called from MainFrame upon opening this Dialog or
     * changes in the active document
@@ -150,7 +155,7 @@ import edu.rice.cs.util.UnexpectedException;
   private Action _findNextAction = new AbstractAction("Find Next") {
       public void actionPerformed(ActionEvent e) {
         _doFind();
-        _findNextButton.requestFocus();
+        _findField.requestFocus();
       }
     };
    
@@ -309,9 +314,6 @@ import edu.rice.cs.util.UnexpectedException;
     _findField.setFont(font);
     _replaceField.setFont(font);
 
-    _findField.setNextFocusableComponent(_replaceField);
-    _replaceField.setNextFocusableComponent(_matchCase);
-
     // set up the layout
     JPanel buttons = new JPanel();
     buttons.setLayout(new GridLayout(1,0));
@@ -363,6 +365,12 @@ import edu.rice.cs.util.UnexpectedException;
     _machine = new FindReplaceMachine();
     
     _findField.addActionListener(_findNextAction);
+
+    _findField.setNextFocusableComponent(_replaceField);
+    _replaceField.setNextFocusableComponent(_matchCase);
+    _matchCase.setNextFocusableComponent(_findNextButton);
+    _replaceAllButton.setNextFocusableComponent(_closeButton);
+    _closeButton.setNextFocusableComponent(_findField);
     
     // DocumentListener that keeps track of changes in the find field.
     _findField.getDocument().addDocumentListener(new DocumentListener() {
