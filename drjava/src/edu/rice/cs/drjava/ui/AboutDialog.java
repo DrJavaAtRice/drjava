@@ -92,6 +92,10 @@ public class AboutDialog extends JDialog implements ActionListener {
   }
 
   public void setVisible(boolean vis) {
+    if(vis)
+      show();
+    else
+      hide();
   }
 
   public void buildGUI(Container cp) {
