@@ -140,6 +140,18 @@ public class HistoryTest extends TestCase implements OptionConstants{
       assertEquals("History size should still be 10",
                    10,
                    _history.size());
+      
+      CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(0));
+      
+      assertEquals("History size should be 0",
+                   0,
+                   _history.size());
+      
+      CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(-1));
+      
+      assertEquals("History size should still be 0",
+                   0,
+                   _history.size());
     }
   }
   

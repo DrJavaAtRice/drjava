@@ -604,11 +604,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpStatusBar();
 
     _model = new SingleDisplayModel();
-    String userdir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString();
-    _openChooser = new JFileChooser(userdir);
+    String workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString();
+    if ((workDir == null) || (workDir.equals(""))) {
+      workDir = System.getProperty("user.dir");
+    }
+    _openChooser = new JFileChooser(workDir);
     _openChooser.setFileFilter(new JavaSourceFilter());
     _openChooser.setMultiSelectionEnabled(true);
-    _saveChooser = new JFileChooser(userdir);
+    _saveChooser = new JFileChooser(workDir);
     _saveChooser.setFileFilter(new JavaSourceFilter());
     //set up the hourglass cursor
     setGlassPane(new GlassPane());
@@ -1743,7 +1746,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   public JButton _createToolbarButton(Action a) {
     boolean useText = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
-    
+    boolean useIcons = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
     Font buttonFont;
     if (CodeStatus.DEVELOPMENT) {
       buttonFont = DrJava.CONFIG.getSetting(FONT_TOOLBAR);
@@ -1757,6 +1760,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     final JButton result = new JButton(a);
     result.setText((String) a.getValue(Action.DEFAULT));
     result.setFont(buttonFont);
+    if (!useIcons) result.setIcon(null);
     if (!useText && (result.getIcon() != null)) {
       result.setText("");
     }

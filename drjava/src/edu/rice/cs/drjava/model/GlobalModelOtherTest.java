@@ -344,11 +344,17 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
   public void testGetSourceRootDefaultPackage()
     throws BadLocationException, IOException, InvalidPackageException
   {
+    // Get current working directory
+    String workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+    if ((workDir == null) || (workDir.equals(""))) {
+      workDir = System.getProperty("user.dir");
+    }
+    
     // Get source root (current directory only)
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, roots.length);
     assertEquals("source root (current directory)", 
-                 new File(DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString()),
+                 new File(workDir),
                  roots[0]);
 
     // Create temp directory
@@ -408,6 +414,12 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
   {
     // Create temp directory
     File baseTempDir = tempDirectory();
+    
+    // Get current working directory
+    String workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+    if ((workDir == null) || (workDir.equals(""))) {
+      workDir = System.getProperty("user.dir");
+    }
 
     // Now make subdirectory a/b/d
     File subdir = new File(baseTempDir, "a");
@@ -428,7 +440,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, roots.length);
     assertEquals("source root (current directory)", 
-                 new File(DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString()),
+                 new File(workDir),
                  roots[0]);
   }
 

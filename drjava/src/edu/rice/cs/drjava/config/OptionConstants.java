@@ -70,21 +70,20 @@ public interface OptionConstants extends ConfigurationTool {
   
   /* ---------- Color Options ---------- */
   
+  public static final ColorOption DEFINITIONS_NORMAL_COLOR = 
+    new ColorOption("definitions.normal.color", Color.black);
+  public static final ColorOption DEFINITIONS_KEYWORD_COLOR = 
+    new ColorOption("definitions.keyword.color", Color.blue);
+  public static final ColorOption DEFINITIONS_TYPE_COLOR = 
+    new ColorOption("definitions.type.color", Color.blue.darker().darker());
   public static final ColorOption DEFINITIONS_COMMENT_COLOR = 
     new ColorOption("definitions.comment.color", Color.green.darker().darker());
   public static final ColorOption DEFINITIONS_DOUBLE_QUOTED_COLOR = 
     new ColorOption("definitions.double.quoted.color", Color.red.darker());
   public static final ColorOption DEFINITIONS_SINGLE_QUOTED_COLOR = 
     new ColorOption("definitions.single.quoted.color", Color.magenta);
-  public static final ColorOption DEFINITIONS_NORMAL_COLOR = 
-    new ColorOption("definitions.normal.color", Color.black);
-  public static final ColorOption DEFINITIONS_KEYWORD_COLOR = 
-    new ColorOption("definitions.keyword.color", Color.blue);
   public static final ColorOption DEFINITIONS_NUMBER_COLOR = 
-    new ColorOption("definitions.number.color", Color.black);
-  public static final ColorOption DEFINITIONS_TYPE_COLOR = 
-    new ColorOption("definitions.type.color", Color.blue.darker().darker());
-  
+    new ColorOption("definitions.number.color", Color.cyan.darker().darker());
   
   /**
    * Color for highlighting brace-matching.
@@ -481,7 +480,7 @@ public interface OptionConstants extends ConfigurationTool {
    * Directory to start looking for files in when DrJava starts up.
    */
   public static final StringOption WORKING_DIRECTORY = 
-    new StringOption("working.directory", System.getProperty("user.dir"));
+    new StringOption("working.directory", "");
   
   /**
    * How many spaces to use for indenting.

@@ -240,7 +240,7 @@
 	  </varlistentry>
 	  
 	  <varlistentry>
-	    <term><varname>definitions.number.color = #000000</varname></term>
+	    <term><varname>definitions.number.color = #007C7C</varname></term>
 	    <listitem>
 	      <para>Used as the color for all numbers.</para>
 	    </listitem>

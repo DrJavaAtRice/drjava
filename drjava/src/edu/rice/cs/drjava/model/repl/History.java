@@ -64,6 +64,9 @@ public class History implements OptionConstants {
     if (CodeStatus.DEVELOPMENT) {
       DrJava.CONFIG.addOptionListener(HISTORY_MAX_SIZE, new HistorySizeOptionListener());
     }
+    
+    // Sanity check on MAX_SIZE
+    if (MAX_SIZE < 0) MAX_SIZE = 0;
   }
   
   /**
@@ -150,19 +153,23 @@ public class History implements OptionConstants {
   private class HistorySizeOptionListener implements OptionListener<Integer> {
    
     public void optionChanged (OptionEvent<Integer> oce) {
-      int historySize = oce.value.intValue();
+      int newSize = oce.value.intValue();
       
-      if (size() > historySize) {
+      // Sanity check
+      if (newSize < 0) newSize = 0;
+      
+      // Remove old elements if the new size is less than current size
+      if (size() > newSize) {
         
-        int numberOfElements = size() - historySize;
+        int numToDelete = size() - newSize;
         
-        for (int i=0; i< numberOfElements; i++) {
+        for (int i=0; i< numToDelete; i++) {
           _vector.removeElementAt(0);
         }
         
         moveEnd();
       }
-      MAX_SIZE = historySize;
+      MAX_SIZE = newSize;
     }
   }
 }

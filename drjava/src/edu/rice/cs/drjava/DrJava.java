@@ -122,6 +122,7 @@ public class DrJava implements ConfigurationTool, OptionConstants {
       }));
       
       
+      
     } catch (Exception ex) {
       _consoleErr.println(ex.getClass().getName() + ": " + ex.getMessage());
       ex.printStackTrace(_consoleErr);

@@ -820,7 +820,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    */
   public File[] getSourceRootSet() {
     LinkedList roots = new LinkedList();
-    File currDir = new File(DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString());
+    String workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+    if ((workDir == null) || (workDir.equals(""))) {
+      workDir = System.getProperty("user.dir");
+    }
+    File currDir = new File(workDir);
     roots.add(currDir);
 
     for (int i = 0; i < _definitionsDocs.size(); i++) {
