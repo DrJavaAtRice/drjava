@@ -76,8 +76,8 @@ public class TstampGMT extends Task {
   public void execute() throws BuildException {
     try {
       Date d = new Date();
-      project.setProperty("DSTAMP", DATE_FORMAT.format(d));
-      project.setProperty("TSTAMP", TIME_FORMAT.format(d));
+      getProject().setProperty("DSTAMP", DATE_FORMAT.format(d));
+      getProject().setProperty("TSTAMP", TIME_FORMAT.format(d));
     }
     catch (Exception e) {
       throw new BuildException(e);
