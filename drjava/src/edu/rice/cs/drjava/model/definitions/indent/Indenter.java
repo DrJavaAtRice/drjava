@@ -141,8 +141,8 @@ public class Indenter {
       rule05 = new ActionStartPrevLinePlus(" "),
       rule04 = new ActionStartPrevLinePlus(" * "),
         
-      rule41 = new ActionStartPrevLinePlusMultiline
-        (new String[] { " * \n", " */" }, 0, 3),
+      rule41 = new ActionStartPrevLinePlusMultilinePreserve
+        (new String[] { " * \n", " */" }, 0, 3, 0, 3),
       rule42 = new QuestionFollowedByStar(rule04, rule41),
       rule03 = new QuestionCurrLineEmptyOrEnterPress
           ((autoCloseComments? rule42 : rule04), rule05),
