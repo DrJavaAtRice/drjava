@@ -52,38 +52,58 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.plugins.jedit.repl.*;
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.util.text.*;
+import edu.rice.cs.util.swing.BorderlessScrollPane;
+import edu.rice.cs.util.swing.ScrollableDialog;
 
 public class JEditPlugin extends EBPlugin {
   /**
    * The interactions controller.
    * Glues the InteractionsModel to a swing InteractionsPane.
    */
-  private static InteractionsController _controller;
+  private InteractionsController _controller;
 
   /**
    * The pane that the user interacts in.
    */
-  private static InteractionsPane _pane;
+  private InteractionsPane _pane;
 
   /**
    * The interactions model.
    */
-  private static JEditInteractionsModel _model;
+  private JEditInteractionsModel _model;
 
   /**
    * The document adapter.
    */
-  private static SwingDocumentAdapter _doc;
+  private SwingDocumentAdapter _doc;
 
   /**
    * Popup menu to show in the interactions pane.
    */
-  private static JPopupMenu _popup;
+  private JPopupMenu _popup;
 
   /**
    * The jEdit View.
    */
-  private static View _view;
+  private View _view;
+
+  /**
+   * Action that resets the interactions pane.
+   */
+  private Action _resetInteractionsAction = new AbstractAction("Reset Interactions Pane") {
+    public void actionPerformed(ActionEvent e) {
+      resetInteractions();
+    }
+  };
+
+  /**
+   * Action that shows the current interpreter classpath.
+   */
+  private Action _showClasspathAction = new AbstractAction("Show Interpreter Classpath") {
+    public void actionPerformed(ActionEvent e) {
+      showClasspath();
+    }
+  };
 
   /**
    * Unfortunate hack to allow instance method calls from static context.
@@ -109,18 +129,9 @@ public class JEditPlugin extends EBPlugin {
    * Sets up this plugin for use.
    */
   public void start() {
-    _model = null;
     _popup = new JPopupMenu();
-    _popup.add(new AbstractAction("Reset Interactions Pane") {
-      public void actionPerformed(ActionEvent e) {
-        resetInteractions();
-      }
-    });
-    _popup.add(new AbstractAction("Show Interpreter Classpath") {
-      public void actionPerformed(ActionEvent e) {
-        showClasspath();
-      }
-    });
+    _popup.add(_resetInteractionsAction);
+    _popup.add(_showClasspathAction);
   }
 
   /**
@@ -132,14 +143,17 @@ public class JEditPlugin extends EBPlugin {
     }
   }
 
-  public static String getConsoleInput() {
+  /**
+   * Gets console input for System.in.
+   */
+  public String getConsoleInput() {
     return _controller.getInputListener().getConsoleInput();
   }
 
   /**
    * @return a new InteractionsPane for the plugin
    */
-  public static JComponent newPane(View view) {
+  public JComponent newPane(View view) {
     _doc = new SwingDocumentAdapter();
     if (_model != null) {
       _model.dispose();
@@ -160,7 +174,7 @@ public class JEditPlugin extends EBPlugin {
   /**
    * Resets the interactions pane.
    */
-  public static void resetInteractions() {
+  public void resetInteractions() {
     if (!_model.getDocument().inProgress()) {
       String msg = "Are you sure you want to reset the Interactions Pane?";
       String title = "Confirm Reset Interactions";
@@ -174,7 +188,7 @@ public class JEditPlugin extends EBPlugin {
   /**
    * Shows the classpath of the interpreter.
    */
-  public static void showClasspath() {
+  public void showClasspath() {
     String classpath = "";
     Vector<String> classpathElements = _model.getClasspath();
     for(int i = 0; i < classpathElements.size(); i++) {
@@ -205,7 +219,7 @@ public class JEditPlugin extends EBPlugin {
   /**
    * Ensures that the interactions pane is not editable during an interaction.
    */
-  protected static void _disableInteractionsPane() {
+  protected void _disableInteractionsPane() {
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         _pane.setEditable(false);
@@ -217,7 +231,7 @@ public class JEditPlugin extends EBPlugin {
   /**
    * Ensures that the interactions pane is editable after an interaction completes.
    */
-  protected static void _enableInteractionsPane() {
+  protected void _enableInteractionsPane() {
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         _pane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
@@ -233,7 +247,7 @@ public class JEditPlugin extends EBPlugin {
   /**
    * Listens and reacts to interactions-related events.
    */
-  static class JEditInteractionsListener implements InteractionsListener {
+  class JEditInteractionsListener implements InteractionsListener {
     public void interactionStarted() {
       _disableInteractionsPane();
     }
@@ -282,8 +296,17 @@ public class JEditPlugin extends EBPlugin {
     public void interpreterResetFailed(Throwable t) {
       String title = "Interactions Could Not Reset";
       String msg = "The interactions window could not be reset:\n" + t;
-      JOptionPane.showMessageDialog(_view, title, msg, JOptionPane.INFORMATION_MESSAGE);
+      JOptionPane.showMessageDialog(_view, msg, title, JOptionPane.INFORMATION_MESSAGE);
       interpreterReady();
+    }
+
+    public void interactionIncomplete() {
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          int caretPos = _pane.getCaretPosition();
+          _controller.getConsoleDoc().insertNewLine(caretPos);
+        }
+      });
     }
   }
 }

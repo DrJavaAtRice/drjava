@@ -160,7 +160,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
                                      InteractionsDocument.ERROR_STYLE);
     return "\n";
   }
-  
+
   /**
    * Any extra action to perform (beyond notifying listeners) when
    * the interpreter fails to reset.
@@ -187,7 +187,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
     super._resetInterpreter();
     _warnedToReset = false;
   }
-  
+
   /**
    * Notifies listeners that an interaction has started.
    */
@@ -263,7 +263,16 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
       ((InteractionsListener)_listeners.get(i)).interpreterChanged(inProgress);
     }
   }
-  
+
+  /**
+   * Notifies the view that the current interaction is incomplete.
+   */
+  protected void _notifyInteractionIncomplete() {
+    for (int i=0; i < _listeners.size(); i++) {
+      ((InteractionsListener)_listeners.get(i)).interactionIncomplete();
+    }
+  }
+
   /**
    * Adds each project's classpath to the Interactions pane.
    */
@@ -539,7 +548,11 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
     }
     catch (IOException ioe) {}
   }
-  
+
+  /**
+   * Sets whether to allow access to private members in the interactions pane.
+   * @param allow true iff access should be allowed
+   */
   public void setPrivateAccessible(boolean allow) {
     _interpreterControl.setPrivateAccessible(allow);
   }

@@ -20,6 +20,8 @@
 
 <property name="jsr14_classpath" value="${lib_dir}/jsr14.jar" />
 
+<property name="jsr14_collect_classpath" value="${lib_dir}/collect.jar" />
+
 
 <!-- classpath to use everywhere. -->
 <path id="classpath">
@@ -216,7 +218,6 @@ optimize="off"/>
 
      This version works with JDK 1.4.2 and JSR-14 v2.2.
      (Be sure to have the right version of tools.jar on your classpath.)
--->
 <target name="do-compile" depends="init">
   <mkdir dir="${built}"/>
   <javac srcdir="${srcroot}"
@@ -225,6 +226,24 @@ optimize="off"/>
          bootclasspath="${jsr14_collect_classpath}:${sun.boot.class.path}" 
   classpath="${classpath_text}"
          source="1.5"
+         target="jsr14"
+         debug="on"
+         fork="on"
+         optimize="off">
+    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
+  </javac>
+</target>
+-->
+
+<target name="do-compile" depends="init">
+  <mkdir dir="${built}"/>
+  <javac sourcepath="" srcdir="${srcroot}"
+         includes="${projpath}/**/*java"
+         destdir="${built}"
+         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}"
+         classpath="${classpath_text}"
+         source="1.5"
+         target="jsr14"
          debug="on"
          fork="on"
          optimize="off">

@@ -51,6 +51,10 @@ import java.util.LinkedList;
 import org.gjt.sp.jedit.*;
 
 import edu.rice.cs.drjava.plugins.jedit.JEditPlugin;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.OptionListener;
+import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.repl.RMIInteractionsModel;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
@@ -68,7 +72,16 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
   /**
    * Number of lines to remember in the history
    */
-  protected static final int HISTORY_SIZE = 1000;
+  protected static int HISTORY_SIZE =
+    DrJava.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue();
+  static {
+    DrJava.getConfig().addOptionListener(OptionConstants.HISTORY_MAX_SIZE,
+                                         new OptionListener<Integer>() {
+      public void optionChanged(OptionEvent<Integer> oe) {
+        HISTORY_SIZE = oe.value.intValue();
+      }
+    });
+  }
 
   /**
    * Milliseconds to wait after each println.
@@ -119,19 +132,14 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
     _log = new Log("JEditInteractionsModelLog", DEBUG);
     
     _interpreterControl.setInteractionsModel(this);
-    String classpath = "";
+    String classpath = System.getProperty("java.class.path");
     String pathSep = System.getProperty("path.separator");
+    classpath += pathSep;
+    classpath += JEditPlugin.getDefault().getPluginJAR().getPath();
     Vector<File> cp = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
-    if (cp.size() > 0) {
-      classpath += cp.elementAt(0).getAbsolutePath();
-      for (int i = 1; i < cp.size(); i++) {
-        cp += pathSep;
-        classpath += cp.elementAt(i).getAbsolutePath();
-      }
-    }
-    JEditPlugin plugin = JEditPlugin.getDefault();
-    if (plugin != null) {
-      classpath += plugin.getPluginJAR().getPath();
+    for (int i = 0; i < cp.size(); i++) {
+      classpath += pathSep;
+      classpath += cp.elementAt(i).getAbsolutePath();
     }
     _interpreterControl.setStartupClasspath(classpath);
     _interpreterControl.startInterpreterJVM();
@@ -164,7 +172,7 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
     _document.setInProgress(true);
     _document.insertBeforeLastPrompt(warning, InteractionsDocument.ERROR_STYLE);
   }
-  
+
   /**
    * Adds a listener to this model.
    */
@@ -191,7 +199,7 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
    * @return the input
    */
   public String getConsoleInput() {
-    return JEditPlugin.getConsoleInput();
+    return JEditPlugin.getDefault().getConsoleInput();
   }
 
   /**
@@ -211,7 +219,7 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
       _listeners.get(i).interactionStarted();
     }
   }
-  
+
   /**
    * Notifies listeners that an interaction has ended.
    */
@@ -220,7 +228,7 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
       _listeners.get(i).interactionEnded();
     }
   }
-  
+
   /**
    * Notifies listeners that an error was present in the interaction.
    */
@@ -229,7 +237,7 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
       _listeners.get(i).interactionErrorOccurred(offset, length);
     }
   }
-  
+
   /**
    * Notifies listeners that the interpreter is resetting.
    */
@@ -238,7 +246,7 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
       _listeners.get(i).interpreterResetting();
     }
   }
-  
+
   /**
    * Notifies listeners that the interpreter is ready.
    */
@@ -278,6 +286,15 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
     }
   }
 
+  /**
+   * Notifies listeners that an interaction was incomplete.
+   */
+  protected void _notifyInteractionIncomplete() {
+    for (int i=0; i < _listeners.size(); i++) {
+      _listeners.get(i).interactionIncomplete();
+    }
+  }
+
   protected void _interpreterResetFailed(Throwable t) {
   }
 
@@ -298,13 +315,19 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
   public void addToClassPath(Buffer b) {
     try {
       if (_isJavaFile(b)) {
-        _interpreterControl.addClassPath(_getSourceRoot(b));
+        String srcRoot = _getSourceRoot(b);
+        if (srcRoot != null) {
+          _interpreterControl.addClassPath(srcRoot);
+        }
+        else {
+          replSystemOutPrint(b.getPath());
+        }
       }
     }
     catch (InvalidPackageException ipe) {
       // maybe print a console message saying error parsing source file?
+      // replSystemErrPrint(ipe.getMessage());
       _log("Error adding to classpath", ipe);
-      replSystemErrPrint(ipe.getMessage());
     }
   }
 
@@ -314,7 +337,7 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
    * @return true iff the given buffer is a java file
    */
   private boolean _isJavaFile(Buffer b) {
-    return !b.isNewFile() && !b.isUntitled() && b.getName().endsWith(".java");
+    return b.isLoaded() && !b.isNewFile() && !b.isUntitled() && b.getName().endsWith(".java");
   }
 
   /**
@@ -378,7 +401,8 @@ public class JEditInteractionsModel extends RMIInteractionsModel {
    * Parses the package name out of the given buffer.
    * @param b the buffer
    * @return the package the buffer is in
-   * @throws InvalidPackageException if the package statement is invalid
+   * @throws InvalidPackageException if the package statement is invalid,
+   *                                 or if the buffer is uninitialized.
    */
   private String _getPackageName(Buffer b) throws InvalidPackageException {
     String text = b.getText(0, b.getLength());

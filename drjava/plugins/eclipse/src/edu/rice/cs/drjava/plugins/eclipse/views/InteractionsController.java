@@ -192,14 +192,14 @@ public class InteractionsController {
   public DocumentAdapter getDocumentAdapter() {
     return _adapter;
   }
-  
+
   /**
    * Accessor method for the InteractionsDocument.
    */
   public InteractionsDocument getDocument() {
     return _doc;
   }
-  
+
   /**
    * Accessor method for the InteractionsPane.
    */
@@ -281,6 +281,7 @@ public class InteractionsController {
     _view.setBusyCursorShown(false);
     _view.setEditable(true);
   }
+
   /** Disables the Interactions Pane. */
   protected void _disableInteractionsPane() {
     _enabled = false;
@@ -345,6 +346,13 @@ public class InteractionsController {
       interpreterReady();
     }
     
+    public void interactionIncomplete() {
+//      newLineAction();
+      StyledText pane = _view.getTextPane();
+      int offs = pane.getCaretOffset();
+      pane.replaceTextRange(offs, 0, "\n");
+      pane.setCaretOffset(offs + 1);
+    }
   }
   
   /**
@@ -430,18 +438,18 @@ public class InteractionsController {
    * result to the view.
    */
   boolean evalAction() {
-    _disableInteractionsPane();
+//    _disableInteractionsPane();
     _model.interpretCurrentInteraction();
     return false;
   }
-  
+
   /** Inserts a new line at the caret position. */
   boolean newLineAction() {
     StyledText pane = _view.getTextPane();
     pane.replaceTextRange(pane.getCaretOffset(), 0, "\n");
     return false;
   }
-  
+
   /** Recalls the previous command from the history. */
   boolean historyPrevAction() {
     _doc.recallPreviousInteractionInHistory();
