@@ -48,6 +48,7 @@ package edu.rice.cs.drjava.model.junit;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -175,47 +176,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    * compiling at the same time, which would create invalid results.
    */
   public void junitAll() {
-    synchronized (_compilerModel) {
-      //reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
-      _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
-      Iterator<OpenDefinitionsDocument> it =
-        _getter.getDefinitionsDocuments().iterator();
-      HashMap<String,OpenDefinitionsDocument> classNamesToODDs =
-        new HashMap<String,OpenDefinitionsDocument>();
-      ArrayList<String> classNames = new ArrayList<String>();
-      ArrayList<File> files = new ArrayList<File>();
-      while (it.hasNext()) {
-        try {
-          OpenDefinitionsDocument doc = it.next();
-          if (!doc.isUntitled()) {
-            String cn = doc.getQualifiedClassName();
-            classNames.add(cn);
-            File f;
-            try {
-              f = doc.getFile();
-            }
-            catch (FileMovedException fme) {
-              f = fme.getFile();
-            }
-            files.add(f);
-            classNamesToODDs.put(cn, doc);
-          }
-        }
-        
-        catch (ClassNameNotFoundException cnnfe) {
-          // don't add it to the test suite
-        }
-      }
-      List<String> tests = _jvm.runTestSuite(classNames, files, true);
-      ArrayList<OpenDefinitionsDocument> odds =
-        new ArrayList<OpenDefinitionsDocument>();
-      Iterator<String> it2 = tests.iterator();
-      while (it2.hasNext()) {
-        odds.add(classNamesToODDs.get(it2.next()));
-      }
-      _notifier.junitStarted(odds);
-      _isTestInProgress = true;
-    }
+        junitDocs(_getter.getDefinitionsDocuments());
   }
 
   /**
@@ -225,11 +186,25 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    * compiling at the same time, which would create invalid results.
    */
   public void junitProject() {
+    LinkedList<OpenDefinitionsDocument> lod = new LinkedList<OpenDefinitionsDocument>();
+    
+    Iterator<OpenDefinitionsDocument> it =
+      _getter.getDefinitionsDocuments().iterator();
+    while (it.hasNext()) {
+      OpenDefinitionsDocument doc = it.next();
+      if (doc.isProjectFile()) {
+        lod.add(doc);
+      }
+    }
+    junitDocs(lod);
+  }
+  
+  public void junitDocs(List<OpenDefinitionsDocument> lod){
     synchronized (_compilerModel) {
       //reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
       _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
-      Iterator<OpenDefinitionsDocument> it =
-        _getter.getDefinitionsDocuments().iterator();
+      Iterator<OpenDefinitionsDocument> it = lod.iterator();
+//        _getter.getDefinitionsDocuments().iterator();
       HashMap<String,OpenDefinitionsDocument> classNamesToODDs =
         new HashMap<String,OpenDefinitionsDocument>();
       ArrayList<String> classNames = new ArrayList<String>();
@@ -237,26 +212,20 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       while (it.hasNext()) {
         try {
           OpenDefinitionsDocument doc = it.next();
-          if (doc.isProjectFile()) {
-            String cn = doc.getQualifiedClassName();
-            classNames.add(cn);
-            File f;
-            try {
-              f = doc.getFile();
-            }
-            catch (FileMovedException fme) {
-              f = fme.getFile();
-            }
-            if(f.getCanonicalPath().startsWith(_model.getProjectFile().getParentFile().getCanonicalPath())){
-              files.add(f);
-            }
-            classNamesToODDs.put(cn, doc);
+          String cn = doc.getQualifiedClassName();
+          classNames.add(cn);
+          File f;
+          try {
+            f = doc.getFile();
           }
+          catch (FileMovedException fme) {
+            f = fme.getFile();
+          }
+          files.add(f);
+          classNamesToODDs.put(cn, doc);
         }
         catch (ClassNameNotFoundException cnnfe) {
           // don't add it to the test suite
-        }catch(IOException e){
-          // don't add it to the test
         }
       }
       List<String> tests = _jvm.runTestSuite(classNames, files, true);

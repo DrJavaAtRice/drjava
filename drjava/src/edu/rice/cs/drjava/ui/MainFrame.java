@@ -498,6 +498,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       _closeFolder();
     }
   };
+  
+  private Action _junitFolderAction = new AbstractAction("Test Folder") {
+    public void actionPerformed(ActionEvent ae){
+      _junitFolder();
+    }
+  };
 
 
   /** Saves the current document. */
@@ -2463,6 +2469,20 @@ public class MainFrame extends JFrame implements OptionConstants {
     //_model.closeFile(_model.getActiveDocument());
   }
   
+  private void _junitFolder(){
+    INavigatorItem n;
+    Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
+    final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
+    if(_model.getDocumentNavigator().isGroupSelected()){
+      while (e.hasMoreElements()){
+        n = e.nextElement();
+        if(_model.getDocumentNavigator().isSelectedInGroup(n)){
+          l.add(_model.getODDGivenIDoc(n));
+        }
+      }
+      _model.getJUnitModel().junitDocs(l);
+    }
+  }
   
   private void _closeFolder(){
     INavigatorItem n;
@@ -4363,6 +4383,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _navPaneFolderPopupMenu = new JPopupMenu();
     _navPaneFolderPopupMenu.add(_closeFolderAction);
     _navPaneFolderPopupMenu.add(_compileFolderAction);
+    _navPaneFolderPopupMenu.add(_junitFolderAction);
     
     
     // NavPane menu

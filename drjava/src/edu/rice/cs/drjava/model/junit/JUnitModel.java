@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.junit;
 
 import java.io.IOException;
+import java.util.List;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
 // TODO: remove this gratuitous swing dependency!
@@ -97,6 +98,15 @@ public interface JUnitModel {
    */
   public void junitProject();
 
+  
+  /**
+   * Runs JUnit over a list of documents.  Synchronized against the compiler model
+   * to prevent testing and compiling at the same time, which would create
+   * invalid results.
+   * @param doc the document to be run under JUnit
+   */
+  public void junitDocs(List<OpenDefinitionsDocument> lod);
+  
   /**
    * Runs JUnit over a single document.  Synchronized against the compiler model
    * to prevent testing and compiling at the same time, which would create
