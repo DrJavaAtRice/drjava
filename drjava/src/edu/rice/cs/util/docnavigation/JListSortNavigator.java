@@ -183,6 +183,25 @@ class JListSortNavigator extends JListNavigator{
     }
   }
   
+  /**
+   * Resets a given <code>INavigatorItem<code> in the tree.  This may affect the
+   * placement of the item or its display to reflect any changes made in the model.
+   * @param doc the docment to be refreshed
+   * @throws IllegalArgumentException if this navigator contains no document
+   *  that is equal to the passed document.
+   */
+  public void refreshDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
+    int i = _docs.indexOf(doc);
+    if( i == -1 ) {
+      throw new IllegalArgumentException("Document " + doc + " not found in Document Navigator");
+    }
+    else {
+      INavigatorItem tbr = _docs.remove(i);
+      insertDoc(doc);
+      this.setListData(_docs);
+    }
+  }
+
   
   /**
    * set's the INavigatorItem as active (selected)

@@ -177,6 +177,26 @@ class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListS
     }
   }
   
+  
+  /**
+   * Resets a given <code>INavigatorItem<code> in the tree.  This may affect the
+   * placement of the item or its display to reflect any changes made in the model.
+   * @param doc the docment to be refreshed
+   * @throws IllegalArgumentException if this navigator contains no document
+   *  that is equal to the passed document.
+   */
+  public void refreshDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
+    int i = _docs.indexOf(doc);
+    if( i == -1 ) {
+      throw new IllegalArgumentException("Document " + doc + " not found in Document Navigator");
+    }
+    else {
+      INavigatorItem tbr = _docs.remove(i);
+      _docs.add(doc);
+      this.setListData(_docs);
+    }
+  }
+  
   /**
    * sets the document as selected
    * @param doc the document to select

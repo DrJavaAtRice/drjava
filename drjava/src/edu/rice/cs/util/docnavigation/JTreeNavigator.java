@@ -246,6 +246,18 @@ public class JTreeNavigator extends JTree implements IAWTContainerNavigatorActor
     return doc;
   }
   
+  /**
+   * Resets a given <code>INavigatorItem<code> in the tree.  This may affect the
+   * placement of the item or its display to reflect any changes made in the model.
+   * @param doc the docment to be refreshed
+   * @throws IllegalArgumentException if this navigator contains no document
+   *  that is equal to the passed document.
+   */
+  public void refreshDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
+    removeDocument(doc);
+    addDocument(doc, path);
+  }
+  
   /* sets the input document to be active */
   public void setActiveDoc(INavigatorItem doc){
     DefaultMutableTreeNode node = _doc2node.get(doc);
