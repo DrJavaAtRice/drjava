@@ -300,18 +300,36 @@ public class Parser {
       }
       if (expression instanceof SimpleAllocation) {
         SimpleAllocation sa = (SimpleAllocation)expression;
-        return new InnerAllocation
-          (exp, sa.getCreationType(), sa.getArguments(),
-           filename,
-           exp.getBeginLine(), exp.getBeginColumn(),
-           sa.getEndLine(),    sa.getEndColumn());
+        if(sa instanceof PolymorphicSimpleAllocation){
+          return new PolymorphicInnerAllocation
+            (exp, sa.getCreationType(), sa.getArguments(), ((PolymorphicSimpleAllocation)sa).getTypeArguments(),
+             filename,
+             exp.getBeginLine(), exp.getBeginColumn(),
+             sa.getEndLine(),    sa.getEndColumn());
+        }
+        else {
+          return new InnerAllocation
+            (exp, sa.getCreationType(), sa.getArguments(),
+             filename,
+             exp.getBeginLine(), exp.getBeginColumn(),
+             sa.getEndLine(),    sa.getEndColumn());
+        }
       } else {
         ClassAllocation ca = (ClassAllocation)expression;
-        return new InnerClassAllocation
+        if(ca instanceof PolymorphicClassAllocation){
+          return new PolymorphicInnerClassAllocation
+            (exp, ca.getCreationType(), ca.getArguments(), ca.getMembers(), ((PolymorphicClassAllocation)ca).getTypeArguments(),
+             filename,
+             exp.getBeginLine(), exp.getBeginColumn(),
+             ca.getEndLine(),    ca.getEndColumn());
+        }
+        else {
+          return new InnerClassAllocation
           (exp, ca.getCreationType(), ca.getArguments(), ca.getMembers(),
            filename,
            exp.getBeginLine(), exp.getBeginColumn(),
            ca.getEndLine(),    ca.getEndColumn());
+        }
       }
     }
   }
@@ -3719,12 +3737,27 @@ ForSlashEachStatement forStatement() :
     rt=ReferenceTypeName() as=arguments(typeArgs) [ cb=classBody() ]
     {
       if (cb == null) {
+        if(typeArgs.size() > 0)
+          return new PolymorphicSimpleAllocation(rt,
+                                                 as.arguments,
+                                                 typeArgs,
+                                                 filename,
+                                                 t.beginLine, t.beginColumn,
+                                                 as.endLine, as.endColumn);
         return new SimpleAllocation(rt,
                                     as.arguments,
                                     filename,
                                     t.beginLine, t.beginColumn,
                                     as.endLine,  as.endColumn);
       } else {
+        if(typeArgs.size() > 0)
+          return new PolymorphicClassAllocation(rt,
+                                                as.arguments,
+                                                cb.list,
+                                                typeArgs,
+                                                filename,
+                                                t.beginLine, t.beginColumn,
+                                                as.endLine, as.endColumn);
         return new ClassAllocation(rt,
                                    as.arguments,
                                    cb.list,

@@ -1132,7 +1132,17 @@ public class TigerTest extends DynamicJavaTestCase {
     assertEquals("Parsing and interpreting a new CC() should throw no exceptions", "CC", interpret(testString).getClass().getName());
   }
   
-  public void testEnumConstructorsInvocationsDoNotAcceptTypeInfoMethodsDo(){
+  public void testExplicitPolymorhicConstructorCall(){
+    testString =   
+      "class CC {\n"+
+      "  <T> CC(){\n"+
+      "  }\n"+
+      "}\n"+
+      "new <Integer>CC();\n";
+    assertEquals("Parsing and interpreting a new <Integer>CC() should throw no exceptions", "CC", interpret(testString).getClass().getName());
+  }
+  
+  public void testEnumConstructorsInvocationsDoNotAcceptTypeInfo_MethodsDo(){
     testString =   
       "enum Suit {\n"+
       "  CLUBS(new Integer(5), new Integer(7)),\n"+
