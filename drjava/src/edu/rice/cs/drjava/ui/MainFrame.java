@@ -339,6 +339,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
+
+  
   /**
    * Returns the project file to open.
    */
@@ -529,6 +531,41 @@ public class MainFrame extends JFrame implements OptionConstants {
       _closeFolder();
     }
   };
+  
+  /*
+   * Phil Repicky -smallproj
+   * 2/14/2005
+   * New actions for the navigation pane when clicking on a folder
+   * FINISH THESE
+   */
+  
+  private Action _openAllFolderAction = new AbstractAction("Open All Files") {
+    public void actionPerformed(ActionEvent ae) {
+      //open all the files in the current folder
+      
+      // Get the Folder that was clicked on by the user.
+      // When the user clicks on a directory component in the navigation pane, the current directory is
+      // updated in the openChooser JFileChooser component.  So the clicked on directory is obtained in this
+      // way
+      File dir = _openChooser.getCurrentDirectory();
+      openFilesInFolder(dir, false);     
+    }
+  };
+  
+  private Action _openOneFolderAction = new AbstractAction("Open File in Folder") {
+    public void actionPerformed(ActionEvent ae)  {
+      _open();
+    }
+  };
+  
+  public Action _newFileFolderAction = new AbstractAction("Create New File in Folder") {
+    public void actionPerformed(ActionEvent ae)  {
+      //create a new untitled, empty file in the current folder
+      //make this new document the document in the document pane
+      _new();
+    }
+  };
+    
   
   private Action _junitFolderAction = new AbstractAction("Test Folder") {
     public void actionPerformed(ActionEvent ae){
@@ -1761,6 +1798,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     
     
+    
     _openRecursiveCheckBox = new JCheckBox("Open folders recursively");
     _openRecursiveCheckBox.setSelected(DrJava.getConfig().getSetting(OptionConstants.OPEN_FOLDER_RECURSIVE).booleanValue());
     
@@ -2790,9 +2828,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     if(dir == null) return; // just in case
     
+    openFilesInFolder(dir, _openRecursiveCheckBox.isSelected());
+    
+  }
+  
+  private void openFilesInFolder(File dir, boolean recursive)
+  {
     ArrayList<File> files;
     if(dir != null && dir.isDirectory()){
-      files = FileOps.getFilesInDir(dir, _openRecursiveCheckBox.isSelected(), new FileFilter(){
+      files = FileOps.getFilesInDir(dir, recursive, new FileFilter(){
         public boolean accept(File f){ 
           return f.isDirectory() ||
             f.isFile() && 
@@ -4907,9 +4951,21 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _setUpContextMenus() {
     // pop-up menu for a folder in tree view
     _navPaneFolderPopupMenu = new JPopupMenu();
+    /*
+     * Phil Repicky -smallproj
+     * 2/14/2005
+     * Make these do something:
+     * _navPaneFolderPopupMenu.add("Open a File in this Folder Action");
+     * _navPaneFolderPopupMenu.add("Make a New File in this Folder Action");
+     */
+    _navPaneFolderPopupMenu.add(_newFileFolderAction);
+    _navPaneFolderPopupMenu.add(_openOneFolderAction);
+    _navPaneFolderPopupMenu.add(_openAllFolderAction);
     _navPaneFolderPopupMenu.add(_closeFolderAction);
     _navPaneFolderPopupMenu.add(_compileFolderAction);
     _navPaneFolderPopupMenu.add(_junitFolderAction);
+    
+    
     
     _navPanePopupMenuForRoot = new JPopupMenu();
     _navPanePopupMenuForRoot.add(_saveProjectAction);

@@ -1146,14 +1146,29 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    * Creates a new definitions document and adds it to the list.
    * @return The new open document
    */
-  public synchronized OpenDefinitionsDocument newFile() {
+  public synchronized OpenDefinitionsDocument newFile(File parentDir) {
     final OpenDefinitionsDocument oddoc = _createOpenDefinitionsDocument();
+    ((ConcreteOpenDefDoc)oddoc).setParentDirectory(parentDir);
     INavigatorItem idoc = makeIDocFromODD(oddoc);
     oddoc.setFile(null);
     _documentsRepos.put(idoc, oddoc);
-    _documentNavigator.addDocument(idoc);
+    if(parentDir != null) {
+      try {
+        _documentNavigator.addDocument(idoc, fixPathForNavigator(parentDir.getCanonicalPath() + "/"));
+      }
+      catch(IOException ioe) {
+        _documentNavigator.addDocument(idoc);
+      }
+    }
+    else
+      _documentNavigator.addDocument(idoc);
     _notifier.newFileCreated(oddoc);
     return oddoc;
+  }
+  
+  public synchronized OpenDefinitionsDocument newFile()
+  {
+    return newFile(null);
   }
 
   /**
@@ -2346,6 +2361,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     
     private File _file;
     private long _timestamp;
+    
+    private File _parentDir;  //What folder is this document in?  This is done so that you can have an active directory for a new document.
 
     private String _packageName = null;
     
@@ -2378,6 +2395,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     ConcreteOpenDefDoc(File f) throws IOException {
       if(f.exists()){
         _file = f;
+        _parentDir = f.getParentFile();
         _timestamp = f.lastModified();
         init();
       }else{
@@ -2387,6 +2405,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     
     ConcreteOpenDefDoc(){
       _file = null;
+      _parentDir = null;
       init();
     }
 //    
@@ -2415,6 +2434,27 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
 //      _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
       _breakpoints = new Vector<Breakpoint>();
       _modifiedSinceSave = false;
+    }
+    
+    /**
+     * Sets the parent directory of the document only if it is "Untitled"
+     * @param pd The parent directory
+     */
+    public void setParentDirectory(File pd)
+    {
+      if(_file == null)
+        _parentDir = pd;
+      else
+        throw new IllegalArgumentException("The parent directory can only be set for untitled documents");
+    }
+    
+    /**
+     * Get the parent directory of this document
+     * @return The parent directory
+     */
+    public File getParentDirectory()
+    {
+      return _parentDir;
     }
     
     
@@ -2840,6 +2880,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
           }
           
           /* update the navigator */
+          System.out.println(fixPathForNavigator(file.getCanonicalPath()));
           _documentNavigator.refreshDocument(getIDocGivenODD(this), fixPathForNavigator(file.getCanonicalPath()));
           
         }

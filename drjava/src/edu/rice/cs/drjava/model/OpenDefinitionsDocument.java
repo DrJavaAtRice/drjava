@@ -152,6 +152,11 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    * Returns the name of this file, or "(untitled)" if no file.
    */
   public String getFilename();
+  
+  /**
+   * Returns the parent directory of this file, null if it has none
+   */
+  public File getParentDirectory();
 
   /**
    * Saves the document with a FileWriter.  If the file name is already

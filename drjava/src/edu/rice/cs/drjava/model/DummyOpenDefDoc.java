@@ -154,6 +154,14 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   }
   
   /**
+   * Returns the parent directory for this document.  If the document
+   * is untitled and has no parent directory, it returns null.
+   * @return the parent directory for this document
+   */
+  public File getParentDirectory() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  /**
    * Returns true if the file exists on disk. Returns false if the file has been moved or deleted
    */
   public boolean fileExists() {

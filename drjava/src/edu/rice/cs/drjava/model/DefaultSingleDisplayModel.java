@@ -101,6 +101,12 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * the constructor is done.
    */
   private OpenDefinitionsDocument _activeDocument;
+  /**
+   * A pointer to the active directory, which is not necessarily the parent of the active document
+   * The user may click on a folder component in the navigation pane and that will set this field without
+   * setting the active document.  It is used by the newFile method to place new files into the active directory.
+   */
+  private File _activeDirectory;
 
   /**
    * Creates a SingleDisplayModel.
@@ -124,6 +130,12 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     final NodeDataVisitor<Boolean> _gainVisitor = new NodeDataVisitor<Boolean>() {
       public Boolean itemCase(INavigatorItem docu){
         _setActiveDoc(docu);
+        File dir = _activeDocument.getParentDirectory();
+        
+        if(dir != null) {  //If the file is in External or Auxiliary Files then then we do not want to change our project directory to something outside the project
+          _activeDirectory = dir;
+          _notifier.currentDirectoryChanged(_activeDirectory);
+        }
         return true; 
       }
       public Boolean fileCase(File f){
@@ -131,6 +143,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
           File root = _state.getProjectFile().getParentFile().getAbsoluteFile();
           f = new File(root, f.getPath());
         }
+        _activeDirectory = f;
         _notifier.currentDirectoryChanged(f);
         return true;
       }
@@ -239,7 +252,8 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * @return The new open document
    */
   public OpenDefinitionsDocument newFile() {
-    OpenDefinitionsDocument doc = super.newFile();
+    OpenDefinitionsDocument doc = super.newFile(_activeDirectory);
+    
     setActiveDocument(doc);
     return doc;
   }
@@ -475,7 +489,6 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     _activeDocument.checkIfClassFileInSync();
     
 //    _documentNavigator.setActiveDoc(idoc);
-
     
     // notify single display model listeners   // notify single display model listeners
     _notifier.notifyListeners(new GlobalEventNotifier.Notifier() {
