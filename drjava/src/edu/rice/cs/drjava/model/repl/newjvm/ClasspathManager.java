@@ -54,6 +54,7 @@ import edu.rice.cs.drjava.model.DeadClassLoader;
 import edu.rice.cs.drjava.model.BrainClassLoader;
 
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.ClasspathVector;
 import java.io.File;
 
 
@@ -174,8 +175,38 @@ public class ClasspathManager{
     }
     return c;
   }
+
+  /**
+   * Returns a copy of the list of unique entries on the classpath.
+   */
+  public ClasspathVector getAugmentedClasspath() {
+    ClasspathVector ret = new ClasspathVector();
+    List<ClasspathEntry> locpe = getProjectCP();
+    for (ClasspathEntry e: locpe) {
+      ret.add(e.getEntry());
+    }
+
+    locpe = getBuildDirectoryCP();
+    for (ClasspathEntry e: locpe) {
+      ret.add(e.getEntry());
+    }
+
+    locpe = getProjectFilesCP();
+    for (ClasspathEntry e: locpe) {
+      ret.add(e.getEntry());
+    }
+
+    locpe = getExternalFilesCP();
+    for (ClasspathEntry e: locpe) {
+      ret.add(e.getEntry());
+    }
+
+    locpe = getExtraCP();
+    for (ClasspathEntry e: locpe) {
+      ret.add(e.getEntry());
+    }
+    return ret;
+  }
+
 }
-
-
-
 
