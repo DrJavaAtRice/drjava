@@ -155,6 +155,6 @@ public class UncaughtExceptionWindow extends JDialog {
     PrintWriter pwFail  = new PrintWriter(swFail);
     
     _exception.printStackTrace(pwFail);
-    return new String(swFail.toString());
+    return swFail.toString();
   }   
 }

@@ -176,54 +176,17 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   public void setUp() throws IOException {
     super.setUp();
     _debugger = (JPDADebugger) _model.getDebugger();
-    assertTrue("Debug Manager should not be null", _debugger != null);
+    assertNotNull("Debug Manager should not be null", _debugger);
   }
 
   /**
    * Cleans up the debugger after each test.
    */
   public void tearDown() throws IOException {
-//     _debugger = (JPDADebugger) _model.getDebugger();
-//     assertTrue("Debug Manager should not be null", _debugger != null);
     _debugger = null;
     super.tearDown();
   }
 
-  /**
-   * Resumes the debugger asynchronously so as to aovid 
-   * getting notified before we start waiting for notifies
-   */
-  private void _asynchStep(final int whatKind) {
-    new Thread() {
-      public void run() {
-        try {
-          _debugger.step(whatKind);
-        }
-        catch(DebugException dbe) {
-          dbe.printStackTrace();
-            fail("Debugger couldn't be resumed!");
-        }
-      }
-    }.start();
-  }
-  
-  /**
-   * Resumes the debugger asynchronously so as to aovid 
-   * getting notified before we start waiting for notifies
-   */
-  private void _asynchResume() {
-    new Thread() {
-      public void run() {
-        try {
-          _debugger.resume();
-        }
-        catch(DebugException dbe) {
-          dbe.printStackTrace();
-          fail("Debugger couldn't be resumed!");
-        }
-      }
-    }.start();
-  }
   
   /**
    * Ensures that the given object will wait for n notifications.
@@ -275,21 +238,97 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   }
 
   /**
+   * Resumes the debugger asynchronously so as to aovid 
+   * getting notified before we start waiting for notifies
+   */
+  private void _asyncStep(final int whatKind){
+    new Thread("asyncStep Thread") {
+      public void run(){
+        try{
+          _debugger.step(whatKind);
+        }
+        catch(DebugException dbe) {
+          dbe.printStackTrace();
+          listenerFail("Debugger couldn't be resumed!\n" + dbe);
+        }
+      }
+    }.start();
+  }
+  
+  /**
+   * Resumes the debugger asynchronously so as to aovid 
+   * getting notified before we start waiting for notifies
+   */
+  private void _asyncResume(){
+    new Thread("asyncResume Thread") {
+      public void run(){
+        try{
+          _debugger.resume();
+        }
+        catch(DebugException dbe) {
+          dbe.printStackTrace();
+          listenerFail("Debugger couldn't be resumed!\n" + dbe);
+        }
+      }
+    }.start();
+  }
+  
+  /**
    * Sets the current thread in a new thread to avoid
    * being notified of events before we start waiting for them
    */
-  private void _asynchDoSetCurrentThread(final DebugThreadData th){
-    new Thread() {
+  private void _asyncDoSetCurrentThread(final DebugThreadData th) {
+    new Thread("asyncDoSetCurrentThread Thread") {
       public void run(){
         try {
           doSetCurrentThread(th);
         }
-        catch(DebugException dbe){
+        catch (DebugException dbe) {
           dbe.printStackTrace();
-          fail("Couldn't set current thread in DebugTest::_asynchDoSetCurrentThread(...)");
+          listenerFail("Couldn't set current thread in _asyncDoSetCurrentThread\n" +
+                       dbe);
         }
       }
     }.start();
+  }
+  
+  
+  
+  /**
+   * Tests startup and shutdown, ensuring that all appropriate fields are
+   * initialized.
+   */
+  public void testStartupAndShutdown()
+    throws DebugException, InterruptedException
+  {
+    if (printMessages) System.out.println("----testStartupAndShutdown----");
+    DebugTestListener debugListener = new DebugStartAndStopListener();
+    _debugger.addListener(debugListener);
+    
+    // Start debugger
+    synchronized(_notifierLock) {
+      _debugger.startup();
+      _waitForNotifies(1);  // startup
+      _notifierLock.wait();
+    }
+    debugListener.assertDebuggerStartedCount(1);
+    debugListener.assertDebuggerShutdownCount(0);
+
+    // Check fields and status
+    assertTrue("Debug Manager should be ready", _debugger.isReady());
+    assertNotNull("EventRequestManager should not be null after startup",
+                  _debugger.getEventRequestManager());
+    assertNotNull("PendingRequestManager should not be null after startup",
+                  _debugger.getPendingRequestManager());
+    
+    // Shutdown the debugger
+    synchronized(_notifierLock) {
+      _debugger.shutdown();
+      _waitForNotifies(1);  // shutdown
+      _notifierLock.wait();
+    }
+    debugListener.assertDebuggerShutdownCount(1);
+    _debugger.removeListener(debugListener);
   }
   
   /** 
@@ -301,7 +340,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     IOException, InterruptedException
   {
     if (printMessages) System.out.println("----testMultiThreadedSetCurrentThread----");
-     BreakpointTestListener debugListener = new BreakpointTestListener();
+    BreakpointTestListener debugListener = new BreakpointTestListener();
     
      // Compile the class
      OpenDefinitionsDocument doc = doCompile(MONKEY_CLASS, tempFile());
@@ -309,19 +348,17 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
      // Start debugger
      synchronized(_notifierLock) {
        _debugger.startup();
-       _waitForNotifies(1);
+       _waitForNotifies(1);  // startup
        _notifierLock.wait();
      }
-     debugListener.assertDebuggerStartedCount(1);
-     debugListener.assertDebuggerShutdownCount(0);
-     assertTrue("Debug Manager should be ready", _debugger.isReady());
      
+     // Set two breakpoints
      int index = MONKEY_CLASS.indexOf("System.out.println(\"I\'m a thread! Yeah!\");");
      _debugger.toggleBreakpoint(doc,index,11);
      index = MONKEY_CLASS.indexOf("System.out.println(\"James likes bananas!\");");
      _debugger.toggleBreakpoint(doc,index,17);
      
-      // Run the main() method, hitting breakpoints
+      // Run the main() method, hitting both breakpoints in different threads
      synchronized(_notifierLock) {
        interpretIgnoreResult("java Monkey");
        _waitForNotifies(6); // (suspended, updated, breakpointReached) * 2
@@ -329,8 +366,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
      }
      DebugThreadData threadA = new DebugThreadData(_debugger.getCurrentThread());
      DebugThreadData threadB = new DebugThreadData(_debugger.getThreadAt(1));
-     synchronized(_notifierLock){
-       _asynchDoSetCurrentThread(threadB);
+     synchronized(_notifierLock) {
+       _asyncDoSetCurrentThread(threadB);
        _waitForNotifies(2);  // updated, suspended
        _notifierLock.wait();
      }
@@ -338,7 +375,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
      DebugThreadData thread1 = new DebugThreadData(_debugger.getThreadAt(1));
      DebugThreadData thread2 = new DebugThreadData(_debugger.getCurrentThread());
      
-     /** make sure threads have switched places */
+     // make sure threads have switched places
      assertTrue(thread1.getUniqueID() == threadA.getUniqueID());
      assertTrue(thread2.getUniqueID() == threadB.getUniqueID());
      
@@ -355,8 +392,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
      };
      _model.addListener(interpretListener);
      synchronized(_notifierLock) {
-       //_asynchResume();
-       //_asynchResume();
+       //_asyncResume();
+       //_asyncResume();
        _debugger.shutdown();
        _waitForNotifies(2);  // shutdown, interactionEnded
        _notifierLock.wait();
@@ -453,45 +490,44 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   {
     if (printMessages) System.out.println("----testMultiThreadedBreakpointsAndStep----");
     BreakpointTestListener debugListener = new BreakpointTestListener();
-     
+    
     // Compile the class
     OpenDefinitionsDocument doc = doCompile(MONKEY_CLASS, tempFile());   
- 
+    
     _debugger.addListener(debugListener);
     // Start debugger
     synchronized(_notifierLock) {
       _debugger.startup();
-      _waitForNotifies(1);
+      _waitForNotifies(1);  // startup
       _notifierLock.wait();
     }
-    debugListener.assertDebuggerStartedCount(1);
-    debugListener.assertDebuggerShutdownCount(0);
-    assertTrue("Debug Manager should be ready", _debugger.isReady());
-        
+    
+    // Set breakpoints
     int index = MONKEY_CLASS.indexOf("System.out.println(\"I\'m a thread! Yeah!\");");
     _debugger.toggleBreakpoint(doc,index,11);
     index = MONKEY_CLASS.indexOf("System.out.println(\"I just woke up.  I\'m a big boy now.\");");
     _debugger.toggleBreakpoint(doc,index,16);
     debugListener.assertBreakpointSetCount(2);
-        
-     // Run the main() method, hitting breakpoints
+    
+    // Run the main() method, hitting breakpoints
     synchronized(_notifierLock) {
       interpretIgnoreResult("java Monkey");
-      _waitForNotifies(6);  // suspended, updated, breakpointReached
+      _waitForNotifies(6);  // (suspended, updated, breakpointReached) x 2
       _notifierLock.wait();
     }
     
     DebugThreadData thread = new DebugThreadData(_debugger.getCurrentThread());    
-     // Resumes the thread finishing it and hitting the next break point
+    // Resumes one thread, finishing it and switching to the next break point
     synchronized(_notifierLock) {
-      _asynchResume();
-      _waitForNotifies(3);  // suspended, updated, currThreadDied
+      _asyncResume();
+      _waitForNotifies(3);  // currThreadDied, suspended, updated
       _notifierLock.wait();
     }
-        
+    
     DebugThreadData thread2 = new DebugThreadData(_debugger.getCurrentThread());
-    assertTrue("testMultiThreadedBreakPoint thread references were equal ", !thread.getName().equals(thread2.getName()));
-  
+    assertTrue("testMultiThreadedBreakPoint thread references should not be equal",
+               !thread.getName().equals(thread2.getName()));
+    
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(2);  //fires
     debugListener.assertThreadLocationUpdatedCount(3);  //fires
@@ -505,7 +541,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     StepTestListener stepTestListener = new StepTestListener();
     _debugger.addListener(stepTestListener);
     synchronized(_notifierLock) {
-     _asynchStep(Debugger.STEP_INTO);
+      _asyncStep(Debugger.STEP_INTO);
       _waitForNotifies(2); // suspended, updated
       _notifierLock.wait();
     }
@@ -513,22 +549,24 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     _debugger.removeListener(stepTestListener);
     
     DebugThreadData thread3 = new DebugThreadData(_debugger.getCurrentThread());
-    assertTrue("testMultiThreadedBreakPoint thread references were not equal ", thread2.getName().equals(thread3.getName()));
-     _debugger.addListener(debugListener);
+    assertEquals("testMultiThreadedBreakPoint thread references should be equal",
+                 thread2.getName(), thread3.getName());
+    
     // Resume until finished, waiting for interpret call to end
-     InterpretListener interpretListener = new InterpretListener();
-     _model.addListener(interpretListener);
-     synchronized(_notifierLock) {
-       _asynchResume();
-       _waitForNotifies(3);  // interactionEnded, currThreadDied, interpreterChanged
-       _notifierLock.wait();
-     }
-     interpretListener.assertInteractionEndCount(1);
-     _model.removeListener(interpretListener);
-     
-    // Close doc and make sure breakpoints are removed
+    _debugger.addListener(debugListener);
+    InterpretListener interpretListener = new InterpretListener();
+    _model.addListener(interpretListener);
+    synchronized(_notifierLock) {
+      _asyncResume();
+      _waitForNotifies(3);  // interactionEnded, currThreadDied, interpreterChanged
+      _notifierLock.wait();
+    }
+    interpretListener.assertInteractionEndCount(1);
+    _model.removeListener(interpretListener);
+    
+    // Close doc
     _model.closeFile(doc);
-
+    
     // Shutdown the debugger
     if (printMessages) System.out.println("Shutting down...");
     synchronized(_notifierLock) {
@@ -536,7 +574,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _waitForNotifies(1);  // shutdown
       _notifierLock.wait();
     }
-
+    
     if (printMessages) System.out.println("Shut down.");
   }
   
@@ -561,9 +599,6 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _waitForNotifies(1);
       _notifierLock.wait();
     }
-    debugListener.assertDebuggerStartedCount(1);
-    debugListener.assertDebuggerShutdownCount(0);
-    assertTrue("Debug Manager should be ready", _debugger.isReady());
     
    // Add breakpoint before class is loaded
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
@@ -598,7 +633,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Resume until next breakpoint
     synchronized(_notifierLock) {
       if (printMessages) System.out.println("resuming");
-      _asynchResume();
+      _asyncResume();
       _waitForNotifies(3);  // suspended, updated, breakpointReached
       _notifierLock.wait();
     }
@@ -615,8 +650,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
-      if( printMessages ) System.err.println(">>>>>>>>>> Resuming <<<<<<<<<<");
-      _asynchResume();
+      if( printMessages ) System.err.println("-------- Resuming --------");
+      _asyncResume();
       _waitForNotifies(3);  // interactionEnded, currThreadDied, interpreterChanged
       _notifierLock.wait();
     }
@@ -669,7 +704,6 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _waitForNotifies(1);  // startup
       _notifierLock.wait();
     }
-    debugListener.assertDebuggerStartedCount(1);
     
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
@@ -695,7 +729,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
 
     // Step into bar() method
     synchronized(_notifierLock){
-      _asynchStep(Debugger.STEP_INTO);
+      _asyncStep(Debugger.STEP_INTO);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -708,8 +742,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     assertInteractionsDoesNotContain("Bar Line 1");
     
     // Step to next line
-    synchronized(_notifierLock){
-      _asynchStep(Debugger.STEP_OVER);
+    synchronized(_notifierLock) {
+      _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -725,8 +759,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     assertInteractionsDoesNotContain("Bar Line 2");
     
     // Step to next line
-    synchronized(_notifierLock){
-      _asynchStep(Debugger.STEP_OVER);
+    synchronized(_notifierLock) {
+      _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -740,13 +774,13 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     assertInteractionsDoesNotContain("Foo Line 3");
     
     // Step twice to print last line in Foo
-    synchronized(_notifierLock){
-      _asynchStep(Debugger.STEP_OVER);
+    synchronized(_notifierLock) {
+      _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
-    synchronized(_notifierLock){
-      _asynchStep(Debugger.STEP_OVER);
+    synchronized(_notifierLock) {
+      _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -762,8 +796,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Step again to finish, waiting for interpret call to end
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
-    synchronized(_notifierLock){
-      _asynchStep(Debugger.STEP_OVER);
+    synchronized(_notifierLock) {
+      _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(3);  // interactionEnded, currThreadDied, interpreterChanged
       _notifierLock.wait();
     }
@@ -808,8 +842,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _notifierLock.wait();
     }
     
-    debugListener.assertDebuggerStartedCount(1);
-    
+    // Set breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
     debugListener.assertBreakpointSetCount(1);
     
@@ -832,8 +865,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     assertInteractionsDoesNotContain("Bar Line 1");
 
     // Step into bar() method
-    synchronized(_notifierLock){
-      _asynchStep(Debugger.STEP_INTO);
+    synchronized(_notifierLock) {
+      _asyncStep(Debugger.STEP_INTO);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -846,8 +879,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     assertInteractionsDoesNotContain("Bar Line 1");
     
     // Step out of method
-    synchronized(_notifierLock){
-      _asynchStep(Debugger.STEP_OUT);
+    synchronized(_notifierLock) {
+      _asyncStep(Debugger.STEP_OUT);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -865,7 +898,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Shutdown the debugger and listen for the interpret call to end
     if (printMessages) System.out.println("Shutting down...");
     InterpretListener interpretListener = new InterpretListener() {
-       public void interpreterChanged(boolean inProgress){
+       public void interpreterChanged(boolean inProgress) {
          // Don't notify: happens in the same thread
         interpreterChangedCount++;
        }
@@ -908,7 +941,6 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _waitForNotifies(1);  // startup
       _notifierLock.wait();
     }
-    debugListener.assertDebuggerStartedCount(1);
     
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS_WITH_PACKAGE.indexOf("foo line 1"), 4);
@@ -932,8 +964,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     assertInteractionsDoesNotContain("foo line 1");
 
     // Step over once
-    synchronized(_notifierLock){
-      _asynchStep(Debugger.STEP_OVER);
+    synchronized(_notifierLock) {
+      _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -947,8 +979,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     assertInteractionsDoesNotContain("foo line 2");
     
     // Step over again
-    synchronized(_notifierLock){
-      _asynchStep(Debugger.STEP_OVER);
+    synchronized(_notifierLock) {
+      _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -966,7 +998,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
-      _asynchResume();
+      _asyncResume();
       _waitForNotifies(3);  // interactionEnded, currThreadDied, interpreterChanged
       _notifierLock.wait();
     }
@@ -1036,7 +1068,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Step into bar() method
     synchronized(_notifierLock){
-      _asynchStep(Debugger.STEP_INTO);
+      _asyncStep(Debugger.STEP_INTO);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -1050,8 +1082,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     debugListener.assertBreakpointRemovedCount(1);
     
     // Step to next line
-    synchronized(_notifierLock){
-      _asynchStep(Debugger.STEP_OVER);
+    synchronized(_notifierLock) {
+      _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(1);  // suspended
       _notifierLock.wait();
     }
@@ -1059,14 +1091,14 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(2);  // doesn't fire
    
-    synchronized(_debugger){
+    synchronized(_debugger) {
       // Add _tempDir to our sourcepath
       DrJava.getConfig().setSetting(OptionConstants.DEBUG_SOURCEPATH, path);
     }
     
     // Step to next line
-    synchronized(_notifierLock){
-      _asynchStep(Debugger.STEP_OVER);
+    synchronized(_notifierLock) {
+      _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -1077,7 +1109,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Shutdown the debugger and listen for the interpret call to end
     if (printMessages) System.out.println("Shutting down...");
     InterpretListener interpretListener = new InterpretListener() {
-       public void interpreterChanged(boolean inProgress){
+       public void interpreterChanged(boolean inProgress) {
          // Don't notify: happens in the same thread
         interpreterChangedCount++;
        }
@@ -1088,7 +1120,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _waitForNotifies(2);  // interactionEnded, shutdown
       _notifierLock.wait();
     }
-    interpretListener.assertInteractionEndCount(1);
+    interpretListener.assertInteractionEndCount(1);  // fires
+    interpretListener.assertInterpreterChangedCount(1);  // fires (don't wait)
     _model.removeListener(interpretListener);
     
     debugListener.assertDebuggerShutdownCount(1);  // fires
@@ -1115,7 +1148,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _waitForNotifies(1);
       _notifierLock.wait();
     }
-   
+
+    // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Baz Line 1"),14);
     debugListener.assertBreakpointSetCount(1);
     
@@ -1144,8 +1178,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     debugListener.assertBreakpointSetCount(2);
     
     // Step to next line
-    synchronized(_notifierLock){
-      _asynchStep(Debugger.STEP_OVER);
+    synchronized(_notifierLock) {
+      _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -1163,7 +1197,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Resume until next breakpoint
     synchronized(_notifierLock) {
       if (printMessages) System.out.println("resuming");
-      _asynchResume();
+      _asyncResume();
       _waitForNotifies(3);  // suspended, updated, breakpointReached
       _notifierLock.wait();
     }
@@ -1176,13 +1210,13 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     assertInteractionsContains("Bar Line 1");
     assertInteractionsDoesNotContain("Bar Line 2");
 
-    if( printMessages ) System.err.println(">>>>>> Adding interpret listener <<<<<<<");
+    if( printMessages ) System.err.println("-------- Adding interpret listener --------");
     // Resume until finished, waiting for call to interpret to end
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
-      if( printMessages ) System.err.println(">>>>>> resuming <<<<<<<");
-      _asynchResume();
+      if( printMessages ) System.err.println("-------- resuming --------");
+      _asyncResume();
       _waitForNotifies(3);  // currThreadDied, interactionEnded, interpreterChanged
       _notifierLock.wait();
     }
@@ -1232,7 +1266,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   }
   
   /**
-   * Tests that stepping into a breakpoint works
+   * Tests that stepping into a breakpoint works.
    */
   public synchronized void testStepIntoOverBreakpoint() 
     throws DebugException, BadLocationException, DocumentAdapterException,
@@ -1282,7 +1316,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
 
     // Step over once
     synchronized(_notifierLock){
-      _asynchStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -1296,7 +1330,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Step over again
     synchronized(_notifierLock) {
-      _asynchStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -1315,7 +1349,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
-      _asynchResume();
+      _asyncResume();
       _waitForNotifies(3);  // interactionEnded, currThreadDied, interpreterChanged
       _notifierLock.wait();
     }
@@ -1408,7 +1442,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
 
     // Step over once
     synchronized(_notifierLock){
-      _asynchStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -1424,7 +1458,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
 
     // Step over again
     synchronized(_notifierLock) {
-      _asynchStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -1442,7 +1476,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     assertEquals("this has correct value for x after increment", "6", interpret("this.x"));
 
     synchronized(_notifierLock){
-      _asynchDoSetCurrentThread(threadB);
+      _asyncDoSetCurrentThread(threadB);
       _waitForNotifies(2);  // updated, suspended
       _notifierLock.wait();
     }

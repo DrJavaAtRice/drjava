@@ -107,7 +107,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
    * Constructs a new panel to display debugging information when the
    * Debugger is active.
    */
-  public DebugPanel( MainFrame frame ) {
+  public DebugPanel( MainFrame frame ) throws DebugException {
     
     this.setLayout(new BorderLayout());
     
@@ -115,9 +115,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _model = frame.getModel();
     _debugger = _model.getDebugger();
     
-    _watches = _debugger.getWatches();
-    _threads = _debugger.getCurrentThreadData();
-    _stackFrames = _debugger.getCurrentStackFrameData();
+    _watches = new Vector<DebugWatchData>();
+    _threads = new Vector<DebugThreadData>();
+    _stackFrames = new Vector<DebugStackData>();
     _leftPane = new JTabbedPane();
     _rightPane = new JTabbedPane();
 
@@ -148,11 +148,21 @@ public class DebugPanel extends JPanel implements OptionConstants {
    */
   public void updateData() {
     if (_debugger.isReady()) {
-      _watches = _debugger.getWatches();
-      // Get threads and stack (thread suspended); the debugger will pass empty
-      // vectors if there are no threads or stack frames
-      _threads = _debugger.getCurrentThreadData();
-      _stackFrames = _debugger.getCurrentStackFrameData();
+      try {
+        if (_debugger.isCurrentThreadSuspended()) {
+          _watches = _debugger.getWatches();
+          _stackFrames = _debugger.getCurrentStackFrameData();
+        }
+        else {
+          _watches = new Vector<DebugWatchData>();
+          _stackFrames = new Vector<DebugStackData>();
+        }
+        _threads = _debugger.getCurrentThreadData();
+      }
+      catch (DebugException de) {
+        // Thrown if
+        _frame._showDebugError(de);
+      }
     }
     else {
       // Clean up if debugger dies
@@ -299,17 +309,22 @@ public class DebugPanel extends JPanel implements OptionConstants {
       }
     }
     public void setValueAt(Object value, int row, int col) {
-      if ((value == null) || (value.equals(""))) {
-        // Remove value
-        _debugger.removeWatch(row);
-      }
-      else {
-        if (row < _watches.size())
+      try {
+        if ((value == null) || (value.equals(""))) {
+          // Remove value
           _debugger.removeWatch(row);
-        // Add value
-        _debugger.addWatch(String.valueOf(value));
+        }
+        else {
+          if (row < _watches.size())
+            _debugger.removeWatch(row);
+          // Add value
+          _debugger.addWatch(String.valueOf(value));
+        }
+        fireTableCellUpdated(row, col);
       }
-      fireTableCellUpdated(row, col);
+      catch (DebugException de) {
+        _frame._showDebugError(de);
+      }
     }
   }
   
@@ -397,7 +412,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
         catch (DebugException de) {
           _frame._showDebugError(de);
         }
-        _closeButton.requestFocus();
       }
     };
     _resumeButton = new JButton(resumeAction);
@@ -405,7 +419,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
     Action stepIntoAction = new AbstractAction( "Step Into" ) {
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerStep(Debugger.STEP_INTO);
-        _stepIntoButton.requestFocus();
       }
     };
     _stepIntoButton = new JButton(stepIntoAction);
@@ -413,7 +426,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
     Action stepOverAction = new AbstractAction( "Step Over" ) {
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerStep(Debugger.STEP_OVER);
-        _stepOverButton.requestFocus();
       }
     };
     _stepOverButton = new JButton(stepOverAction);
@@ -421,7 +433,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
     Action stepOutAction = new AbstractAction( "Step Out" ) {
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerStep(Debugger.STEP_OUT);
-        _stepOutButton.requestFocus();
       }
     };
     _stepOutButton = new JButton(stepOutAction);
@@ -450,31 +461,46 @@ public class DebugPanel extends JPanel implements OptionConstants {
    * right-clicks on a row in the thread table or stack table.
    */
   private void _initPopup() {
-    _threadRunningPopupMenu = new JPopupMenu("Thread Selection");
-    JMenuItem threadRunningSuspend = new JMenuItem();
-    Action suspendAction = new AbstractAction("Select Thread") {
+
+//     _threadRunningPopupMenu = new JPopupMenu("Thread Selection");
+//     JMenuItem threadRunningSuspend = new JMenuItem();
+//     Action suspendAction = new AbstractAction("Suspend Thread") {
+//       public void actionPerformed(ActionEvent e) {
+//         try{
+//           _debugger.suspend(getSelectedThread());
+//         }
+//         catch(DebugException exception) {
+//           JOptionPane.showMessageDialog(_frame, "Cannot suspend the thread.", "Debugger Error", JOptionPane.ERROR_MESSAGE);
+//         }
+//       }
+//     };
+//     threadRunningSuspend.setAction(suspendAction);
+//     _threadRunningPopupMenu.add(threadRunningSuspend);
+//     threadRunningSuspend.setText("Suspend and Select Thread");
+    
+    Action selectAction = new AbstractAction("Select Thread") {
       public void actionPerformed(ActionEvent e) {
         try {
-          _debugger.suspend(getSelectedThread());
+          _debugger.setCurrentThread(getSelectedThread());
         }
         catch(DebugException exception) {
-          JOptionPane.showMessageDialog(_frame, "Cannot suspend the thread.", "Debugger Error", JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(_frame, "Cannot select thread.", 
+                                        "Debugger Error", JOptionPane.ERROR_MESSAGE);
         }
       }
     };
-    threadRunningSuspend.setAction(suspendAction);
-    _threadRunningPopupMenu.add(threadRunningSuspend);
-    threadRunningSuspend.setText("Suspend and Select Thread");
 
     _threadSuspendedPopupMenu = new JPopupMenu("Thread Selection");
-    JMenuItem threadSuspendedSelect = new JMenuItem(suspendAction);
-    JMenuItem threadSuspendedResume = new JMenuItem(new AbstractAction() {
+    JMenuItem threadSuspendedSelect = new JMenuItem();
+    threadSuspendedSelect.setAction(selectAction);
+    JMenuItem threadSuspendedResume = new JMenuItem();
+    threadSuspendedResume.setAction(new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
         try {
-        _debugger.resume(getSelectedThread());
+          _debugger.resume(getSelectedThread());
         }
-        catch(DebugException dbe) {
-          JOptionPane.showMessageDialog(_frame, "Cannot resume the thread.", "Debugger Error", JOptionPane.ERROR_MESSAGE);
+        catch (DebugException dbe) {
+          _frame._showDebugError(dbe);
         }
       }
     });
@@ -487,7 +513,12 @@ public class DebugPanel extends JPanel implements OptionConstants {
     JMenuItem stackMenuItem = new JMenuItem();
     stackMenuItem.setAction(new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
-        _debugger.scrollToSource(getSelectedStackItem());
+        try {
+          _debugger.scrollToSource(getSelectedStackItem());
+        }
+        catch (DebugException de) {
+          _frame._showDebugError(de);
+        }
       }
     });
     _stackPopupMenu.add(stackMenuItem);
@@ -816,14 +847,14 @@ public class DebugPanel extends JPanel implements OptionConstants {
 //       }
     }
 
-    public void _action() {
+    protected void _action() {
       DebugThreadData thread = _threads.elementAt(_lastRow);
       if (thread.isSuspended()) {
         try {
-          _debugger.suspend(thread);
+          _debugger.setCurrentThread(thread);
         }
         catch(DebugException exception){
-          JOptionPane.showMessageDialog(_frame, "Cannot suspend the thread.", 
+          JOptionPane.showMessageDialog(_frame, "Cannot select the thread.", 
                                         "Debugger Error", JOptionPane.ERROR_MESSAGE);
         }
       }
@@ -843,7 +874,12 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
 
     protected void _action() {
-      _debugger.scrollToSource(_stackFrames.elementAt(_lastRow));
+      try {
+        _debugger.scrollToSource(_stackFrames.elementAt(_lastRow));
+      }
+      catch (DebugException de) {
+        _frame._showDebugError(de);
+      }
     }
   }
   

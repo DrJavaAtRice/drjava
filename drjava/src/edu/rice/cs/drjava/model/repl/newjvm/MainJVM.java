@@ -53,6 +53,7 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.debug.DebugModelCallback;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.newjvm.*;
 
 /**
@@ -65,7 +66,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   private static final String SLAVE_CLASS_NAME = 
     "edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM";
   
-  private Log _log = new Log("MainJVM");
+  private Log _log = new Log("MainJVMLog", false);
   
   /** Listens to interactions-related events. */
   private InteractionsModelCallback _interactionsModel;
@@ -154,13 +155,13 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     // Spawn thread on InterpreterJVM side
     //  (will receive result in the interpretResult(...) method)
     try {
-      _log.log("main.interp: " + s);
+      _log.logTime("main.interp: " + s);
       _interpreterJVM().interpret(s);
     }
     catch (java.rmi.UnmarshalException ume) {
       // Could not receive result from interpret; system probably exited.
       // We will silently fail and let the interpreter restart.
-      _log.log("main.interp: UnmarshalException, so interpreter is dead:\n"
+      _log.logTime("main.interp: UnmarshalException, so interpreter is dead:\n"
                  + ume);
     }
     catch (RemoteException re) {
@@ -174,11 +175,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public void interpretResult(InterpretResult result) throws RemoteException {
 //     try {
-      _log.log("main.interp result: " + result);
+      _log.logTime("main.interp result: " + result);
       result.apply(getResultHandler());
 //      }
 //      catch (Throwable t) {
-//        _log.log("EXCEPTION in interpretResult: " + t.toString());
+//        _log.logTime("EXCEPTION in interpretResult: " + t.toString());
 //      }
   }
   
@@ -330,10 +331,14 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * Notifies the main jvm that an assignment has been made in the given debug 
    * interpreter.
    * Does not notify on declarations.
+   * 
+   * This method is not currently necessary, since we don't copy back
+   * values in a debug interpreter until the thread has resumed.
+   * 
    * @param name the name of the debug interpreter
-   */
+   *
   public void notifyDebugInterpreterAssignment(String name) {
-  }
+  }*/
 
   /**
    * Accessor for the remote interface to the Interpreter JVM.
@@ -490,7 +495,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       jvmArgs.addElement("-ea");
     }
     int debugPort = getDebugPort();
-    _log.log("starting with debug port: " + debugPort);
+    _log.logTime("starting with debug port: " + debugPort);
     if (debugPort > -1) {
       jvmArgs.addElement("-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=" + 
                          debugPort);
@@ -553,7 +558,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _interactionsModel.interpreterReady();
     _junitModel.junitJVMReady();
 
-    _log.log("thread in connected: " + Thread.currentThread());
+    _log.logTime("thread in connected: " + Thread.currentThread());
 
     synchronized(this) {
       // notify so that if we were waiting (in ensureConnected)
@@ -622,10 +627,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
         //}
 
         while (_interpreterJVM() == null) {
-          //_log.log("interpreter is null, waiting for it to register");
+          //_log.logTime("interpreter is null, waiting for it to register");
           wait();
         }
-        //_log.log("interpreter registered; moving on");
+        //_log.logTime("interpreter registered; moving on");
       }
     }
     catch (InterruptedException ie) {

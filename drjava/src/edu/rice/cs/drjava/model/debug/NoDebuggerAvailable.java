@@ -278,6 +278,20 @@ public class NoDebuggerAvailable implements Debugger {
   public boolean hasSuspendedThreads(){
     throw new IllegalStateException("No debugger is available");
   }
+  
+  /**
+   * Returns whether the thread the debugger is tracking is now running.
+   */
+  public boolean hasRunningThread() {
+    throw new IllegalStateException("No Debugger is available");
+  }
+  
+  /**
+   * Returns whether the debugger's current thread is suspended.
+   */
+  public boolean isCurrentThreadSuspended() {
+    throw new IllegalStateException("No debugger is available");
+  }
 
   /**
    * scrolls to the source indicated by the given DebugStackData

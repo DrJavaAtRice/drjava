@@ -47,7 +47,11 @@ import gj.util.Enumeration;
 import java.io.*;
 import java.rmi.*;
 
+// NOTE: Do NOT import/use the config framework in this class!
+//  (This class runs in a different JVM, and will not share the config object)
+
 import edu.rice.cs.util.newjvm.*;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.InputStreamRedirector;
 import edu.rice.cs.drjava.platform.PlatformFactory;
@@ -130,10 +134,10 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
   }
 
-  private static final Log _log = new Log("IntJVM");
+  private static final Log _log = new Log("IntJVMLog", false);
   private static void _dialog(String s) {
     //javax.swing.JOptionPane.showMessageDialog(null, s);
-    _log.log(s);
+    _log.logTime(s);
   }
   
   /**
@@ -153,27 +157,27 @@ public class InterpreterJVM extends AbstractSlaveJVM
           }
           catch (RemoteException re) {
             // blow up if no MainJVM found
-            _log.log(re.toString());
-            throw new IllegalStateException("Main JVM can't be reached.\n" + re);
+            _log.logTime("System.in: " + re.toString());
+            throw new IllegalStateException("Main JVM can't be reached for input.\n" + re);
           }
         }
       });
     }
     catch (IOException ioe) {
       // leaves System.in alone
-      _log.log(ioe.toString());
+      _log.logTime("Creating InputStreamRedirector: " + ioe.toString());
     }
 
     // redirect stdout
     System.setOut(new PrintStream(new OutputStreamRedirector() {
       public void print(String s) {
         try {
-          //_log.log("out.print: " + s);
+          //_log.logTime("out.print: " + s);
           _mainJVM.systemOutPrint(s);
         }
         catch (RemoteException re) {
           // nothing to do
-          _log.log(re.toString());
+          _log.logTime("System.out: " + re.toString());
         }
       }
     }));
@@ -182,12 +186,12 @@ public class InterpreterJVM extends AbstractSlaveJVM
     System.setErr(new PrintStream(new OutputStreamRedirector() {
       public void print(String s) {
         try {
-          //_log.log("err.print: " + s);
+          //_log.logTime("err.print: " + s);
           _mainJVM.systemErrPrint(s);
         }
         catch (RemoteException re) {
           // nothing to do
-          _log.log(re.toString());
+          _log.logTime("System.err: " + re.toString());
         }
       }
     }));
@@ -272,14 +276,12 @@ public class InterpreterJVM extends AbstractSlaveJVM
                                                          t.getMessage(),
                                                          getStackTrace(t)));
           }
-          catch (ParseException pe){
+          catch (ParseException pe) {
             // A ParseException indicates a syntax error in the input window
-            
             _mainJVM.interpretResult( new SyntaxErrorResult( pe, s ) );
           }
-          catch (TokenMgrError tme){
+          catch (TokenMgrError tme) {
             // A TokenMgrError indicates some lexical difficulty with input.
-            
             _mainJVM.interpretResult( new SyntaxErrorResult( tme, s ) );
           }
           catch (Throwable t) {
@@ -295,7 +297,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
         }
         catch (RemoteException re) {
           // Can't communicate with MainJVM?  Nothing to do...
-          _log.log(re.toString());
+          _log.logTime("interpret: " + re.toString());
         }
         finally {
           interpreter.setInProgress(false);
@@ -310,17 +312,21 @@ public class InterpreterJVM extends AbstractSlaveJVM
   /**
    * Notifies that an assignment has been made in the given interpreter.
    * Does not notify on declarations.
+   * 
+   * This method is not currently necessary, since we don't copy back
+   * values in a debug interpreter until the thread has resumed.
+   * 
    * @param name the name of the interpreter
-   */
+   *
   public void notifyInterpreterAssignment(String name) {
     try {
       _mainJVM.notifyDebugInterpreterAssignment(name);
     }
     catch (RemoteException re) {
       // nothing to do
-      _log.log(re.toString());
+      _log.logTime("notifyAssignment: " + re.toString());
     }
-  }
+  }*/
   
   /**
    * Adds a classpath to the given interpreter.
@@ -607,7 +613,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
     catch (RemoteException re) {
       // nothing to do
-      _log.log(re.toString());
+      _log.logTime("nonTestCase: " + re.toString());
     }
   }
   
@@ -621,7 +627,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
     catch (RemoteException re) {
       // nothing to do
-      _log.log(re.toString());
+      _log.logTime("testSuiteStarted: " + re.toString());
     }
   }
   
@@ -635,7 +641,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
     catch (RemoteException re) {
       // nothing to do
-      _log.log(re.toString());
+      _log.logTime("testStarted" + re.toString());
     }
   }
   
@@ -652,7 +658,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
     catch (RemoteException re) {
       // nothing to do
-      _log.log(re.toString());
+      _log.logTime("testEnded: " + re.toString());
     }
   }
   
@@ -666,7 +672,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
     catch (RemoteException re) {
       // nothing to do
-      _log.log(re.toString());
+      _log.logTime("testSuiteFinished: " + re.toString());
     }
   }
 

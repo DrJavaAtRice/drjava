@@ -704,7 +704,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * which fires the interactionsReset() event.)
    */
   public void resetInteractions() {
-    if ((_debugger.isAvailable()) && (_debugger.isReady())){
+    if ((_debugger.isAvailable()) && (_debugger.isReady())) {
       _debugger.shutdown();
     }
     
@@ -2227,8 +2227,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      */
     public void removeFromDebugger() {
       if (_debugger.isAvailable() && (_debugger.isReady())) {
-        while (_breakpoints.size() > 0) {
-          _debugger.removeBreakpoint(_breakpoints.elementAt(0));
+        try {
+          while (_breakpoints.size() > 0) {
+            _debugger.removeBreakpoint(_breakpoints.elementAt(0));
+          }
+        }
+        catch (DebugException de) {
+          // Shouldn't happen if debugger is active
+          throw new UnexpectedException(de);
         }
       }
       else {

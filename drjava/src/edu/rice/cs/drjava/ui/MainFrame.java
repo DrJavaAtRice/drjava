@@ -196,7 +196,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private HelpFrame _helpFrame;
   private JavadocFrame _javadocFrame;
   private AboutDialog _aboutDialog;
-
+  
   /**
    * Keeps track of the recent files list in the File menu.
    */
@@ -1184,15 +1184,13 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       else {
         // Turn on debugger
-        try {
-          debugger.startup();
-          _updateDebugStatus();
-        }
-        catch (DebugException de) {
-          _showError(de, "Debugger Error",
-                     "Could not start the debugger.");
-        }
+        debugger.startup();
+        _updateDebugStatus();
       }
+    }
+    catch (DebugException de) {
+      _showError(de, "Debugger Error",
+                 "Could not start the debugger.");
     }
     catch (NoClassDefFoundError err) {
       _showError(err, "Debugger Error",
@@ -1813,7 +1811,13 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Clears all breakpoints from the debugger
    */
   void debuggerClearAllBreakpoints() {
-    _model.getDebugger().removeAllBreakpoints();
+    try {
+      _model.getDebugger().removeAllBreakpoints();
+    }
+    catch (DebugException de) {
+      _showError(de, "Debugger Error",
+                 "Could not remove all breakpoints.");
+    }
   }
 
 
@@ -1857,7 +1861,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   void _showDebugError(DebugException de) {
     _showError(de, "Debug Error",
-               "A JSwat error occurred in the last operation.\n\n");
+               "A Debugger error occurred in the last operation.\n\n");
   }
 
   private void _showError(Throwable e, String title, String message) {
@@ -2804,6 +2808,11 @@ public class MainFrame extends JFrame implements OptionConstants {
         // Don't use the debugger
         _debugPanel = null;
       }
+      catch (DebugException de) {
+        // Show the error
+        _showDebugError(de);
+        _debugPanel = null;
+      }
     } else {
       _debugPanel = null;
     }
@@ -3302,14 +3311,20 @@ public class MainFrame extends JFrame implements OptionConstants {
       Runnable doCommand = new Runnable() {
         public void run() {
           if (inDebugMode()) {
-            if (!_model.getDebugger().hasSuspendedThreads()) { 
-              // no more suspended threads, resume default debugger state
-              // all thread dependent debug menu items are disabled
-              _setDebugMenuItemsEnabled(true);
-              _removeThreadLocationHighlight();
-              // Make sure we're at the prompt
-              // (This should really be fixed in InteractionsController, not here.)
-              _interactionsController.moveToPrompt(); // there are no suspended threads, bring back prompt
+            try {
+              if (!_model.getDebugger().hasSuspendedThreads()) {
+                // no more suspended threads, resume default debugger state
+                // all thread dependent debug menu items are disabled
+                _setDebugMenuItemsEnabled(true);
+                _removeThreadLocationHighlight();
+                // Make sure we're at the prompt
+                // (This should really be fixed in InteractionsController, not here.)
+                _interactionsController.moveToPrompt(); // there are no suspended threads, bring back prompt
+              }
+            }
+            catch (DebugException de) {
+              _showError(de, "Debugger Error",
+                         "Error with a thread in the debugger.");
             }
           }
         }
@@ -3636,7 +3651,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       Runnable doCommand = new Runnable() {
         public void run() {
           Debugger dm = _model.getDebugger();
-          if (dm.isAvailable()) {
+          if (dm.isAvailable() && dm.isReady()) {
             dm.shutdown();
           }
           _resetInteractionsAction.setEnabled(false);

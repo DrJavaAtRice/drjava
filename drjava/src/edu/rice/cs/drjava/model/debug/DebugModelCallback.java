@@ -49,7 +49,11 @@ public interface DebugModelCallback {
    * Notifies the debugger that an assignment has been made in 
    * the given debug interpreter.
    * Does not notify on declarations.
+   * 
+   * Not currently used.
+   * 
    * @param name the name of the interpreter
-   */
+   *
   public void notifyDebugInterpreterAssignment(String name);
+  */
 }

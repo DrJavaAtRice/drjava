@@ -55,8 +55,9 @@ public interface Debugger {
   public static final int STEP_OUT = StepRequest.STEP_OUT; 
   
   /**
-   * Returns whether the debugger is currently available in this JVM.
-   * This does not indicate whether it is ready to be used.
+   * Returns whether the debugger can be used in this copy of DrJava.
+   * This does not indicate whether it is ready to be used, which is
+   * indicated by isReady().
    */
   public boolean isAvailable();
   
@@ -78,11 +79,13 @@ public interface Debugger {
   
   /**
    * Suspends execution of the thread referenced by d
-   */
+   *
   public void suspend(DebugThreadData d) throws DebugException;
+  */
   
-  /** Suspends all the threads in the VM the debugger is attached to */
+  /** Suspends all the threads in the VM the debugger is attached to
   public void suspendAll();
+  */
   
   /** 
    * Sets the current thread we are debugging to the thread referenced by d
@@ -122,24 +125,24 @@ public interface Debugger {
    * Adds a watch on the given field or variable.
    * @param field the name of the field we will watch
    */
-  public void addWatch(String field);
+  public void addWatch(String field) throws DebugException;
   
   /**
    * Removes any watches on the given field or variable.
    * @param field the name of the field we will watch
    */
-  public void removeWatch(String field);
+  public void removeWatch(String field) throws DebugException;
   
   /**
    * Removes the watch at the given index.
    * @param index Index of the watch to remove
    */
-  public void removeWatch(int index);
+  public void removeWatch(int index) throws DebugException;
   
   /**
    * Removes all watches on existing fields and variables.
    */
-  public void removeAllWatches();
+  public void removeAllWatches() throws DebugException;
   
 
   /**
@@ -158,7 +161,7 @@ public interface Debugger {
    *
    * @param breakpoint The new breakpoint to set
    */
-  public void setBreakpoint(final Breakpoint breakpoint);
+  public void setBreakpoint(final Breakpoint breakpoint) throws DebugException;
   
  /**
   * Removes a breakpoint.
@@ -167,40 +170,39 @@ public interface Debugger {
   * @param breakpoint The breakpoint to remove.
   * @param className the name of the class the BP is being removed from.
   */
-  public void removeBreakpoint(final Breakpoint breakpoint);
+  public void removeBreakpoint(final Breakpoint breakpoint) throws DebugException;
 
   /**
    * Removes all the breakpoints from the manager's vector of breakpoints.
    */
-  public void removeAllBreakpoints();
+  public void removeAllBreakpoints() throws DebugException;
 
   /**
    * Returns a Vector<Breakpoint> that contains all of the Breakpoint objects that
    * all open documents contain.
    */
-  public Vector<Breakpoint> getBreakpoints();
+  public Vector<Breakpoint> getBreakpoints() throws DebugException;
   
   /**
    * Prints the list of breakpoints in the current session of DrJava, both pending
    * resolved Breakpoints are listed
    */
-  public void printBreakpoints();
+  public void printBreakpoints() throws DebugException;
   
   /**
    * Returns all currently watched fields and variables.
    */
-  public Vector<DebugWatchData> getWatches();
+  public Vector<DebugWatchData> getWatches() throws DebugException;
   
   /**
-   * Returns a Vector of ThreadData or null if the vm is null
+   * Returns a Vector of ThreadData.
    */
-  public Vector<DebugThreadData> getCurrentThreadData();
+  public Vector<DebugThreadData> getCurrentThreadData() throws DebugException;
   
   /**
-   * Returns a Vector of StackData for the current thread or null if the 
-   * current thread is null.
+   * Returns a Vector of StackData for the current thread.
    */
-  public Vector<DebugStackData> getCurrentStackFrameData();
+  public Vector<DebugStackData> getCurrentStackFrameData() throws DebugException;
   
   /**
    * Adds a listener to this JPDADebugger.
@@ -218,11 +220,21 @@ public interface Debugger {
    * @return true if there are any threads in the program currently being 
    * debugged which have been suspended (by the user or by hitting a breakpoint).
    */
-  public boolean hasSuspendedThreads();
+  public boolean hasSuspendedThreads() throws DebugException;
+  
+  /**
+   * Returns whether the thread the debugger is tracking is now running.
+   */
+  public boolean hasRunningThread() throws DebugException;
+  
+  /**
+   * Returns whether the debugger's current thread is suspended.
+   */
+  public boolean isCurrentThreadSuspended() throws DebugException;
 
   /**
    * scrolls to the source indicated by the given DebugStackData
    * @param data the DebugStackData representing the source location
    */
-  public void scrollToSource(DebugStackData data);
+  public void scrollToSource(DebugStackData data) throws DebugException;
 }

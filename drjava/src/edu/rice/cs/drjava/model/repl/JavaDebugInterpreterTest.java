@@ -45,6 +45,15 @@ import koala.dynamicjava.tree.*;
 import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.interpreter.context.*;
 
+/**
+ * Class to test JavaDebugInterpreters by ensuring that appropriate
+ * events are generated on each assignment.
+ * 
+ * NOTE: These tests are disabled for now, since nothing needs to be done
+ * on an assignment.  (We just copy back when the thread is resumed.)
+ * 
+ * @version $Id$
+ */
 public class JavaDebugInterpreterTest extends TestCase {
   private JavaDebugInterpreter _debugInterpreter;
   
@@ -68,8 +77,12 @@ public class JavaDebugInterpreterTest extends TestCase {
   public void notifyInterpreterAssignment(String name) {
     _assignedInterpreterName = name;
   }
-  
+
+  /**
+   * Disabled...
+   */
   public void testNoAssignment() throws ExceptionReturnedException {
+    /*
     // 1
     _debugInterpreter.interpret("1 + 1");
     assertEquals("Should not have made an assignment.", "", _assignedInterpreterName);
@@ -81,8 +94,12 @@ public class JavaDebugInterpreterTest extends TestCase {
     // 3
     _debugInterpreter.interpret("int x");
     assertEquals("Should not have made an assignment.", "", _assignedInterpreterName);
+    */
   }
   
+  /**
+   * Disabled...
+   * 
   public void testWithAssignment() throws ExceptionReturnedException {
     // 1
     _debugInterpreter.interpret("x = 0");
@@ -98,5 +115,5 @@ public class JavaDebugInterpreterTest extends TestCase {
     _debugInterpreter.interpret("int z; z = 2");
     assertEquals("Should have made an assignment.", "test", _assignedInterpreterName);
     _assignedInterpreterName = "";
-  }
+  } */
 }
