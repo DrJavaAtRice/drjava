@@ -353,7 +353,7 @@ ant clean compile
         <listitem>
           <formalpara>
             <title>Compiling: "<literal>clean compile</literal>"</title>
-            <para>This will compile all the classes in the current package.  The <literal>clean</literal> task first deletes all existing class files from the <filename>built</filename> directory, and can be run on its own.  Unfortunately, it is required to use <literal>clean</literal> every time you compile DrJava, because the use of generics prevents the compiler from knowing which specific class files need to be recompiled.  Thus, if you run the <literal>compile</literal> target on its own, you will probably get compile errors.</para>
+            <para>This will compile all the classes in the current package.  The <literal>clean</literal> task first deletes all existing class files from the <filename>built</filename> directory, and can be run on its own.  Unfortunately, if you are using a version of JSR-14 prior to 2.2, it is required to use <literal>clean</literal> every time you compile DrJava, because the use of generics prevents the compiler from knowing which specific class files need to be recompiled.  Thus, if you run the <literal>compile</literal> target on its own, you will probably get compile errors.</para>
           </formalpara>
         </listitem>
 

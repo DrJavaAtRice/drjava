@@ -40,8 +40,8 @@
       <para>You can download the newest releases of DrJava as a <filename>.jar</filename> file from our home page, <ulink url="http://drjava.org">http://drjava.org</ulink>, or directly from our <ulink url="http://sourceforge.net/project/showfiles.php?group_id=44253">Project Filelist</ulink> page on SourceForge.</para>
       
       <formalpara>
-	<title>Stable and Development Releases</title>
-	<para>We make a distinction between Stable and Development releases of DrJava.  All releases must pass our rigorous suite of unit tests and should be safe to use, but we have found that a period of beta-testing can be helpful for finding additional bugs.  Any large new features go through a beta-testing period before being included in Stable releases, ensuring these releases are safe for all users.  Our Development releases contain newer features that are under development.  We believe these releases are also ready to use, but they have not been widely beta-tested, so some users may prefer to use only Stable releases.</para>
+ <title>Stable and Development Releases</title>
+ <para>We make a distinction between Stable and Development releases of DrJava.  All releases must pass our rigorous suite of unit tests and should be safe to use, but we have found that a period of beta-testing can be helpful for finding additional bugs.  Any large new features go through a beta-testing period before being included in Stable releases, ensuring these releases are safe for all users.  Our Development releases contain newer features that are under development.  We believe these releases are also ready to use, but they have not been widely beta-tested, so some users may prefer to use only Stable releases.</para>
       </formalpara>
     </section>
 
@@ -49,9 +49,9 @@
       <title>Running DrJava</title>
       <para>On many platforms, DrJava can be started by simply double-clicking on the <filename>.jar</filename> file you downloaded.  DrJava can also be started from a command prompt, where you can optionally give it a list of source files to open at startup:</para>
       <cmdsynopsis>
-	<command>java -jar drjava-DATE-TIME.jar</command>
-	<arg choice='opt'>-config [CONFIG_FILE]</arg>
-	<arg choice='opt' rep='repeat'>filename.java</arg>
+ <command>java -jar drjava-DATE-TIME.jar</command>
+ <arg choice='opt'>-config [CONFIG_FILE]</arg>
+ <arg choice='opt' rep='repeat'>filename.java</arg>
       </cmdsynopsis>
       <para>Replace DATE-TIME with the appropriate value for your version of DrJava.  The "config" argument is optional and allows you to specify a custom configuration file, rather than the <filename>.drjava</filename> file stored in your home directory.</para>
 
@@ -93,29 +93,29 @@
       <para>The Definitions Pane is the main window of DrJava, displaying the currently active source file.  As you edit files in this window, DrJava helps out with several useful features.</para>
 
       <formalpara>
-	<title>Syntax Coloring</title>
-	<para>DrJava colors special types of text differently to help make the structure of the program more apparent.  Comments appear in green, while Java keywords and types appear in blue.  Strings are colored red and characters are colored magenta, with all other text colored black.  These colors are all configurable (see <link linkend="configuration">Configuring DrJava</link>).</para>
+ <title>Syntax Coloring</title>
+ <para>DrJava colors special types of text differently to help make the structure of the program more apparent.  Comments appear in green, while Java keywords and types appear in blue.  Strings are colored red and characters are colored magenta, with all other text colored black.  These colors are all configurable (see <link linkend="configuration">Configuring DrJava</link>).</para>
       </formalpara>
       <para>One notable difference between syntax coloring in DrJava and other common editors (such as Emacs) is that DrJava uses <emphasis>fully correct</emphasis> coloring as the document is edited.  For example, simply typing the beginning of a block comment ("/*") will immediately update the coloring of the entire document, unlike some other editors which will only update the color of a line when that line is edited.  Having an accurate view of the program is an important aspect of understanding its structure.</para>
 
       <formalpara>
-	<title>Automatic Indentation</title>
-	<para>The key to indenting code in DrJava is the <keycode>Tab</keycode> key.  Rather than simply inserting a tab or spaces, pressing <keycode>Tab</keycode> properly indents the current line (or selected text) using common coding conventions.  As you type multiple lines of code into the Definitions Pane, DrJava automatically indents each line using the same technique.  By default, two spaces are used for each indentation level, although this can be configured in the Preferences window.  (In DrJava, code is always indented with spaces, and never with actual tab characters.)</para>
+ <title>Automatic Indentation</title>
+ <para>The key to indenting code in DrJava is the <keycode>Tab</keycode> key.  Rather than simply inserting a tab or spaces, pressing <keycode>Tab</keycode> properly indents the current line (or selected text) using common coding conventions.  As you type multiple lines of code into the Definitions Pane, DrJava automatically indents each line using the same technique.  By default, two spaces are used for each indentation level, although this can be configured in the Preferences window.  (In DrJava, code is always indented with spaces, and never with actual tab characters.)</para>
       </formalpara>
 
       <formalpara>
-	<title>Brace Matching</title>
-	<para>To help you match open and close braces, DrJava highlights the region enclosed by a pair of braces.  If you place the cursor immediately after a close brace, parenthesis, or bracket, all text between that character and the corresponding open brace is highlighted in another color.  Like syntax coloring, brace matching is also done in a <emphasis>fully correct</emphasis> manner, updated with each keystroke.</para>
+ <title>Brace Matching</title>
+ <para>To help you match open and close braces, DrJava highlights the region enclosed by a pair of braces.  If you place the cursor immediately after a close brace, parenthesis, or bracket, all text between that character and the corresponding open brace is highlighted in another color.  Like syntax coloring, brace matching is also done in a <emphasis>fully correct</emphasis> manner, updated with each keystroke.</para>
       </formalpara>
       
       <formalpara>
-	<title>Commenting / Uncommenting</title>
-	<para>To help you easily write multi-line comments, DrJava automatically adds spaces and an asterisk on each new line.  Commands in the Edit menu are also available to comment out or uncomment a block of selected code using winged comments ("//").  Commenting out a block of code will place "//" markers at the start of each line in the block, preserving the indentation of the code.</para>
+ <title>Commenting / Uncommenting</title>
+ <para>To help you easily write multi-line comments, DrJava automatically adds spaces and an asterisk on each new line.  Commands in the Edit menu are also available to comment out or uncomment a block of selected code using winged comments ("//").  Commenting out a block of code will place "//" markers at the start of each line in the block, preserving the indentation of the code.</para>
       </formalpara>
 
       <formalpara>
-	<title>Context Menu</title>
-	<para>The Definitions Pane has a context menu, which can be used by right-clicking in the pane.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to useful features such as cut, copy, and paste, as well as indenting, commenting, and setting breakpoints in the debugger.</para>
+ <title>Context Menu</title>
+ <para>The Definitions Pane has a context menu, which can be used by right-clicking in the pane.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to useful features such as cut, copy, and paste, as well as indenting, commenting, and setting breakpoints in the debugger.</para>
       </formalpara>
     </section>
 
@@ -124,8 +124,8 @@
       <para>Most Java programs have several closely related source files, so DrJava supports having multiple documents open at the same time.  A list of all of the names of the open documents appears in a pane to the left of the Definitions Pane, listing files in the order in which they were opened.  You can view and edit a particular document by selecting it in the list, or by using the Previous and Next Document commands in the Edit Menu.  (These commands have keyboard shortcuts as well: <keycode>Ctrl+Comma</keycode> and <keycode>Ctrl+Period</keycode>.)  Only the class name of a source file is shown in the list and in the title bar, but the full file name of the current document is always displayed in the status bar at the bottom of the window.</para>
 
       <formalpara>
-	<title>Context Menu</title>
-	<para>The Document List also has a context menu, which can be used by right-clicking on any document in the list.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to document-related commands, such as saving, reverting, printing, compiling, testing, and running Javadoc.</para>
+ <title>Context Menu</title>
+ <para>The Document List also has a context menu, which can be used by right-clicking on any document in the list.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to document-related commands, such as saving, reverting, printing, compiling, testing, and running Javadoc.</para>
       </formalpara>
     </section>
 
@@ -134,18 +134,18 @@
       <para>DrJava has many simple features to help you edit and navigate source files.</para>
 
       <formalpara>
-	<title>Find/Replace</title>
-	<para>DrJava has a Find and Replace utility, which is conveniently displayed as one of the tabs at the bottom of the window, rather than as a dialog blocking part of the window.  The tab is first displayed when you Find/Replace from the Edit Menu (or using the keyboard shortcut, <keycode>Ctrl+F</keycode>), and it can be closed by clicking on the "X" button in the upper right corner of the tab (or by hitting the <keycode>Escape</keycode> key).  To search for a term, type it in the Find text field and click "Find Next" (or press <keycode>Enter</keycode>).  To replace the term with another, type the new term in the Replace text field, find an occurrence using "Find Next", and then click "Replace".  The "Replace/Find Next" and "Replace All" buttons help to speed up this process.  There are also two checkboxes to customize each search: "Match Case" and "Search Backwards".  Unchecking the first box will return case-insensitive results, and checking the second box will return the previous match for each search.</para>
+ <title>Find/Replace</title>
+ <para>DrJava has a Find and Replace utility, which is conveniently displayed as one of the tabs at the bottom of the window, rather than as a dialog blocking part of the window.  The tab is first displayed when you Find/Replace from the Edit Menu (or using the keyboard shortcut, <keycode>Ctrl+F</keycode>), and it can be closed by clicking on the "X" button in the upper right corner of the tab (or by hitting the <keycode>Escape</keycode> key).  To search for a term, type it in the Find text field and click "Find Next" (or press <keycode>Enter</keycode>).  To replace the term with another, type the new term in the Replace text field, find an occurrence using "Find Next", and then click "Replace".  The "Replace/Find Next" and "Replace All" buttons help to speed up this process.  There are also two checkboxes to customize each search: "Match Case" and "Search Backwards".  Unchecking the first box will return case-insensitive results, and checking the second box will return the previous match for each search.</para>
       </formalpara>
 
       <formalpara>
-	<title>Goto Line</title>
-	<para>Selecting "Goto Line" from the Edit Menu (or hitting <keycode>Ctrl+G</keycode>) will display a dialog allowing you to scroll to a particular line number.</para>
+ <title>Goto Line</title>
+ <para>Selecting "Goto Line" from the Edit Menu (or hitting <keycode>Ctrl+G</keycode>) will display a dialog allowing you to scroll to a particular line number.</para>
       </formalpara>
 
       <formalpara>
-	<title>Line Numbering</title>
-	<para>DrJava displays the cursor's current line number and column number on the right side of the status bar at the bottom of the window.  The line number is shown on the left and starts at 1, and the column number is shown on the right and starts at 0.</para>
+ <title>Line Numbering</title>
+ <para>DrJava displays the cursor's current line number and column number on the right side of the status bar at the bottom of the window.  The line number is shown on the left and starts at 1, and the column number is shown on the right and starts at 0.</para>
       </formalpara>
 
       <para>All line numbers can also be displayed in the left margin of the Definitions Pane, using the "Show All Line Numbers" option in the Display Options section of the Preferences window.  (See <link linkend="configuration">Configuring DrJava</link>.)</para>
@@ -213,8 +213,8 @@ Welcome to DrJava.
     </formalpara>
 
       <formalpara>
-	<title>Context Menu</title>
-	<para>The Interactions Pane has a context menu, which can be used by right-clicking in the pane.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to useful commands for the Interactions Pane, including cut, copy, and paste, as well as resetting the Interactions Pane, loading and saving history files, viewing the current classpath, and copying the current interaction to the Definitions Pane.</para>
+ <title>Context Menu</title>
+ <para>The Interactions Pane has a context menu, which can be used by right-clicking in the pane.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to useful commands for the Interactions Pane, including cut, copy, and paste, as well as resetting the Interactions Pane, loading and saving history files, viewing the current classpath, and copying the current interaction to the Definitions Pane.</para>
       </formalpara>
   </chapter>
 
@@ -250,7 +250,9 @@ Welcome to DrJava.
 
     <para>Thankfully, a technique known as unit testing makes this quite easy.  You write many small tests that create your objects and assert that they behave the way you expect in different situations.  A unit test framework known as JUnit (<ulink url="http://www.junit.org">http://www.junit.org</ulink>) automates the process of running these tests, letting you quickly see whether your program returns the results you expect.</para>
 
-    <para>DrJava makes the process of running unit tests very simple by providing support for JUnit.  Once you have written a JUnit test class (as described in the next section), you can simply choose the "Test Using JUnit" command from the Tools menu to run the tests and view the results.  A progress bar will display the status of the tests as they run, and any failures will be displayed in a tab like the <link linkend="compiling-errors">compiler errors</link>.</para>
+    <para>DrJava makes the process of running unit tests very simple by providing support for JUnit.  Once you have written a JUnit test class (as described in the next section), you can simply choose the "Test Current Document" command from the Tools menu to run the tests and view the results.  The name of the tests being run will shown in the "Test Output" tab, with each test method turning green if it completes successfully and red if it fails.  Any failures will be displayed after the list of methods in the same way as the <link linkend="compiling-errors">compiler errors</link>.  A progress bar will keep you updated on how many tests have been run.</para>
+
+    <para>Also, clicking the "Test" button on the toolbar or choosing "Test All Documents" from the Tools menu will run JUnit on any open testcases, making running multiple test files very simple.
 
 
     <section id="junit-writing">
@@ -264,76 +266,76 @@ Welcome to DrJava.
         <title>Writing a Test Case</title>
         <para>To use DrJava's Test command on a document, you must use the programming conventions outlined below.  You can also choose the "New JUnit Test Case" command from the File menu to automatically generate a template with these conventions.
          <itemizedlist>
-	  <listitem>
-	    <para>At the top of the file, include:</para>
-	    <programlisting>import junit.framework.TestCase;</programlisting>
-	  </listitem>
-	  <listitem>
-	    <para>The main class of the file must:</para>
-	    <itemizedlist>
-	      <listitem>
-		<para>be <literal>public</literal></para>
-	      </listitem>
-	      <listitem>
-		<para><literal>extend TestCase</literal></para>
-	      </listitem>
-	      <!-- No longer necessary as of JUnit 3.8 
-	      <listitem>
-		<para>have a constructor of the form:</para>
-		<programlisting>public &lt;classname&gt;(String name) { super(name); }</programlisting>
-		<para>Note: If you forget this, you will get an error message that begins "TestCase() is not public..."</para>
-	      </listitem>
+   <listitem>
+     <para>At the top of the file, include:</para>
+     <programlisting>import junit.framework.TestCase;</programlisting>
+   </listitem>
+   <listitem>
+     <para>The main class of the file must:</para>
+     <itemizedlist>
+       <listitem>
+  <para>be <literal>public</literal></para>
+       </listitem>
+       <listitem>
+  <para><literal>extend TestCase</literal></para>
+       </listitem>
+       <!-- No longer necessary as of JUnit 3.8 
+       <listitem>
+  <para>have a constructor of the form:</para>
+  <programlisting>public &lt;classname&gt;(String name) { super(name); }</programlisting>
+  <para>Note: If you forget this, you will get an error message that begins "TestCase() is not public..."</para>
+       </listitem>
               -->
-	    </itemizedlist>
-	  </listitem>
-	  <listitem>
-	    <para>Methods of this class to be run automatically when the Test command is invoked must:</para>
-	    <itemizedlist>
-	      <listitem>
-		<para>be <literal>public</literal> and <emphasis>not</emphasis> <literal>static</literal></para>
-	      </listitem>
-	      <listitem>
-		<para>return <literal>void</literal></para>
-	      </listitem>
-	      <listitem>
-		<para>take no arguments</para>
-	      </listitem>
-	      <listitem>
-		<para>have a name beginning with "<literal>test</literal>"</para>
-	      </listitem>
-	    </itemizedlist>
-	  </listitem>
+     </itemizedlist>
+   </listitem>
+   <listitem>
+     <para>Methods of this class to be run automatically when the Test command is invoked must:</para>
+     <itemizedlist>
+       <listitem>
+  <para>be <literal>public</literal> and <emphasis>not</emphasis> <literal>static</literal></para>
+       </listitem>
+       <listitem>
+  <para>return <literal>void</literal></para>
+       </listitem>
+       <listitem>
+  <para>take no arguments</para>
+       </listitem>
+       <listitem>
+  <para>have a name beginning with "<literal>test</literal>"</para>
+       </listitem>
+     </itemizedlist>
+   </listitem>
 
-	  <listitem>
-	    <para>Test methods in this class can call any of the following methods (among others):</para>
-	    <itemizedlist>
-	      <listitem>
-		<programlisting>void assertTrue(String, boolean)</programlisting>
-		<para>which issues an error report with the given string if the boolean is false.</para>
-	      </listitem>
-	      <listitem>
-		<programlisting>void assertEquals(String, int, int)</programlisting>
-		<para>which issues an error report with the given string if the two integers are not equal.  The first int is the expected value, and the second int is the actual (tested) value.  Note that this method can also be called using any primitives or with Objects, using their <literal>equals()</literal> methods for comparison.</para>
-	      </listitem>
-	      <listitem>
-		<programlisting>void fail(String)</programlisting>
+   <listitem>
+     <para>Test methods in this class can call any of the following methods (among others):</para>
+     <itemizedlist>
+       <listitem>
+  <programlisting>void assertTrue(String, boolean)</programlisting>
+  <para>which issues an error report with the given string if the boolean is false.</para>
+       </listitem>
+       <listitem>
+  <programlisting>void assertEquals(String, int, int)</programlisting>
+  <para>which issues an error report with the given string if the two integers are not equal.  The first int is the expected value, and the second int is the actual (tested) value.  Note that this method can also be called using any primitives or with Objects, using their <literal>equals()</literal> methods for comparison.</para>
+       </listitem>
+       <listitem>
+  <programlisting>void fail(String)</programlisting>
 
-		<para>which immediately causes the test to fail, issuing an error report with the given string.</para>
-	      </listitem>
-	    </itemizedlist>
+  <para>which immediately causes the test to fail, issuing an error report with the given string.</para>
+       </listitem>
+     </itemizedlist>
 
-	    <para>Test methods are permitted to throw any type of exception, as long as it is declared in the "<literal>throws</literal>" clause of the method contract.  If an exception is thrown, the test fails immediately.</para>
-	  </listitem>
-	  
-	  <listitem>
-	    <para>If there is any common setup work to be done before running each test (such as initializing instance variables), do it in the body of a method with the following contract:</para>
-	    <programlisting>protected void setUp()</programlisting>
-	    <para>This method is automatically run before any tests in the class.  (Similarly, you can write a <literal>protected void tearDown()</literal> method to be called after each test.)</para>
-	  </listitem>
+     <para>Test methods are permitted to throw any type of exception, as long as it is declared in the "<literal>throws</literal>" clause of the method contract.  If an exception is thrown, the test fails immediately.</para>
+   </listitem>
+   
+   <listitem>
+     <para>If there is any common setup work to be done before running each test (such as initializing instance variables), do it in the body of a method with the following contract:</para>
+     <programlisting>protected void setUp()</programlisting>
+     <para>This method is automatically run before any tests in the class.  (Similarly, you can write a <literal>protected void tearDown()</literal> method to be called after each test.)</para>
+   </listitem>
 
-	  <listitem>
-	    <para>If you would rather control which methods are called when running the tests (rather than using all methods starting with "<literal>test</literal>"), you can write a method to create a test suite.  This method should be of the form:</para>
-	    <programlisting>
+   <listitem>
+     <para>If you would rather control which methods are called when running the tests (rather than using all methods starting with "<literal>test</literal>"), you can write a method to create a test suite.  This method should be of the form:</para>
+     <programlisting>
 public static Test suite() {
   TestSuite suite = new TestSuite();
   suite.addTest(new &lt;classname&gt;("&lt;methodname&gt;"));
@@ -341,9 +343,9 @@ public static Test suite() {
   return suite;
 }
 </programlisting>
-	    <para>It is then also necessary to import <literal>TestSuite</literal> and <literal>Test</literal> from <literal>junit.framework</literal>.  There is also a version of the <literal>addTest</literal> method that takes a <literal>Test</literal>, so test suites can be composed.</para>
-	  </listitem>
-	</itemizedlist>
+     <para>It is then also necessary to import <literal>TestSuite</literal> and <literal>Test</literal> from <literal>junit.framework</literal>.  There is also a version of the <literal>addTest</literal> method that takes a <literal>Test</literal>, so test suites can be composed.</para>
+   </listitem>
+ </itemizedlist>
 </para>
 </formalpara>
 
@@ -390,13 +392,13 @@ public class CalculatorTest extends TestCase {
       <para>If one or more test methods in a JUnit test class fails, each one is displayed in the Test Output tab at the bottom of the window.  This list of failures is similar to the list of <link linkend="compiling-errors">compiler errors</link>, in that a summary of the error is given in the tab, and clicking on it highlights the corresponding line in the file (as long as the "Highlight Source" checkbox is checked).  Note that DrJava displays a warning message if the test class has been modified since the last time it was compiled, since the changes will not be reflected in the behavior of the test.  Closing the Test Output tab resets the current set of JUnit failures.</para>
 
       <formalpara>
-	<title>Aborting Tests</title>
-	<para>If a suite of tests takes a long time or goes into an infinite loop, you can abort the tests by choosing the "Reset Interactions" command from the Tools menu.  An error will be displayed in the Test Output tab showing that the tests were aborted.</para>
+ <title>Aborting Tests</title>
+ <para>If a suite of tests takes a long time or goes into an infinite loop, you can abort the tests by choosing the "Reset Interactions" command from the Tools menu.  An error will be displayed in the Test Output tab showing that the tests were aborted.</para>
       </formalpara>
 
       <formalpara>
-	<title>Viewing the Stack Trace</title>
-	<para>When a JUnit test fails or throws an exception, it is sometimes helpful to view the entire stack trace when diagnosing the problem.  To view the stack trace for any test failure, right click on the failure in the Test Output tab and select "Show Stack Trace."</para>
+ <title>Viewing the Stack Trace</title>
+ <para>When a JUnit test fails or throws an exception, it is sometimes helpful to view the entire stack trace when diagnosing the problem.  To view the stack trace for any test failure, right click on the failure in the Test Output tab and select "Show Stack Trace."</para>
       </formalpara>
     </section>
 
@@ -412,8 +414,8 @@ public class CalculatorTest extends TestCase {
       <para>To use DrJava's debugger, select the "Debug Mode" command from the Debugger menu.  An informational panel will be displayed between the Definitions Pane and the Interactions Pane, and several menu items in the Debugger menu will become enabled.</para>
 
       <formalpara>
-	<title>A Note on Modifying Files</title>
-	<para>When using the debugger, it is essential to remember that any modifications to source files will not be reflected in the behavior of the Interactions Pane or the debugger until the classes are recompiled.  Changing a source file while the debugger is running is not recommended, since lines which are highlighted by the debugger may no longer correspond to the lines in the running class file.  To help notify you of this danger, DrJava displays a warning message in the Debug Panel if the current document is out of sync with its class file.</para>
+ <title>A Note on Modifying Files</title>
+ <para>When using the debugger, it is essential to remember that any modifications to source files will not be reflected in the behavior of the Interactions Pane or the debugger until the classes are recompiled.  Changing a source file while the debugger is running is not recommended, since lines which are highlighted by the debugger may no longer correspond to the lines in the running class file.  To help notify you of this danger, DrJava displays a warning message in the Debug Panel if the current document is out of sync with its class file.</para>
       </formalpara>
 
       <para>Because the debugger depends on the classes used in the Interactions Pane, the debugger is automatically reset each time any files are compiled, or when the Interactions Pane is reset.</para>
@@ -427,8 +429,8 @@ public class CalculatorTest extends TestCase {
       <para>When setting breakpoints, it is important to remember that only lines with actual executable code can be used.  Blank lines and comments will never trigger a breakpoint, even if the line is highlighted in red.  (Note that we do not yet support breakpoints on method contracts either, although this will be supported in a later version of DrJava.)</para>
 
       <formalpara>
-	<title>Debugging JUnit Tests</title>
-	<para>DrJava will also stop at breakpoints during JUnit tests.  Simply set a breakpoint on a line of a test method or in a method called by a test, and then choose the "Test Using JUnit" command from the Tools menu.  When control flow reaches the breakpoint, the test will be suspended.</para>
+ <title>Debugging JUnit Tests</title>
+ <para>DrJava will also stop at breakpoints during JUnit tests.  Simply set a breakpoint on a line of a test method or in a method called by a test, and then choose the "Test Using JUnit" command from the Tools menu.  When control flow reaches the breakpoint, the test will be suspended.</para>
       </formalpara>
     </section>
 
@@ -445,23 +447,23 @@ public class CalculatorTest extends TestCase {
       <para>After DrJava reaches a breakpoint, the method being called is suspended, and several commands in the Debug Menu and Debug Panel become available.  Choosing "Resume" allows the current method to finish execution, at least until another breakpoint is reached.  If any other threads are suspended when you resume, the Interactions Pane will switch to the most recently suspended thread.  Otherwise, the original ("top level") prompt is restored.  Alternatively, you can use the Step commands in the Debug menu to step through the execution of the method, one line at a time.  Each time a step completes, the debugger highlights the next line of code to be executed.  If the code is in another file, the debugger will look for the file on the Sourcepath and attempt to open it.</para>
 
       <formalpara>
-	<title>Step Into</title>
-	<para>The Step Into command will walk into any method calls that occur in the code, possibly opening additional files.</para>
+ <title>Step Into</title>
+ <para>The Step Into command will walk into any method calls that occur in the code, possibly opening additional files.</para>
       </formalpara>
 
       <formalpara>
-	<title>Step Over</title>
-	<para>The Step Over command will not enter any new method calls, treating them instead as a single operation to be stepped over.</para>
+ <title>Step Over</title>
+ <para>The Step Over command will not enter any new method calls, treating them instead as a single operation to be stepped over.</para>
       </formalpara>
 
       <formalpara>
-	<title>Step Out</title>
-	<para>The Step Out command will finish running the current method and stop at the next line of code from where the method was called.</para>
+ <title>Step Out</title>
+ <para>The Step Out command will finish running the current method and stop at the next line of code from where the method was called.</para>
       </formalpara>
 
       <formalpara>
-	<title>Sourcepath and Step Options</title>
-	<para>The sourcepath is the set of directories in which to look for source files when stepping.  It can be set in the Debugger section of the Preferences window (which can be opened from the Edit menu).  This section the Preferences also contains options for controlling which classes will be included as part of stepping.  By default, DrJava will never step into its own source, nor its Java Interpreter (DynamicJava), nor Java itself.  Interested users can enable these options to see how Java or DrJava works.</para>
+ <title>Sourcepath and Step Options</title>
+ <para>The sourcepath is the set of directories in which to look for source files when stepping.  It can be set in the Debugger section of the Preferences window (which can be opened from the Edit menu).  This section the Preferences also contains options for controlling which classes will be included as part of stepping.  By default, DrJava will never step into its own source, nor its Java Interpreter (DynamicJava), nor Java itself.  Interested users can enable these options to see how Java or DrJava works.</para>
       </formalpara>
     </section>
 
@@ -470,8 +472,8 @@ public class CalculatorTest extends TestCase {
       <para>The Debug Panel appears when Debug Mode is on, with several informational tabs and buttons.  DrJava displays all current breakpoints in a tree organized by document in the Breakpoints tab, and it displays currently watched fields and variables with their values in a table in the Watches tab.  The Stack tab displays the current stack trace any time a method has been suspended, and the Threads tab shows all current threads along with their status at that point in time.  Most of these tabs provide context (right-click) menus for easy access to related commands, such as scrolling to a breakpoint or a line in a stack frame, or resuming a suspended thread.</para>
 
       <formalpara>
-	<title>Watching Fields and Variables</title>
-	<para>You can watch the values of class fields and local variables by entering the field or variable name into a row in the Watches table.  Any time a method is suspended (eg. after a breakpoint or step), the current value of the field or variable (if any) is displayed.  Watches can be removed from the table by deleting the name and pressing Enter.</para>
+ <title>Watching Fields and Variables</title>
+ <para>You can watch the values of class fields and local variables by entering the field or variable name into a row in the Watches table.  Any time a method is suspended (eg. after a breakpoint or step), the current value of the field or variable (if any) is displayed.  Watches can be removed from the table by deleting the name and pressing Enter.</para>
       </formalpara>
     </section>
   </chapter>
@@ -594,22 +596,22 @@ public class Student {
       
       <!-- Resource Location -->
       <formalpara>
-	<title>Resource Locations</title>
-	<para>These options specify where to find Java resources on your computer, such as compilers or classpath directories.
+ <title>Resource Locations</title>
+ <para>These options specify where to find Java resources on your computer, such as compilers or classpath directories.
 
         <variablelist>
 
-	    <varlistentry>
-	      <term>Web Browser (<varname>browser.file = ""</varname>)</term>
-	      <listitem>
-		<para>Optional filename of your computer's web browser, to be used to view Javadoc and links from the Help.  If blank, the platform's default browser (on Windows or Mac OS X) will be used unless you specify a Web Browser Command (explained below).</para>
-	      </listitem>
-	    </varlistentry>
+     <varlistentry>
+       <term>Web Browser (<varname>browser.file = ""</varname>)</term>
+       <listitem>
+  <para>Optional filename of your computer's web browser, to be used to view Javadoc and links from the Help.  If blank, the platform's default browser (on Windows or Mac OS X) will be used unless you specify a Web Browser Command (explained below).</para>
+       </listitem>
+     </varlistentry>
 
-	    <varlistentry>
-	      <term>Web Browser Command (<varname>browser.string = ""</varname>)</term>
-	      <listitem>
-		<para>Any command or arguments you need to start your web browser.  If both this option and the Web Browser option are blank, the platform's default browser will be used.  In this option, any occurrence of "<literal>&lt;URL&gt;</literal>" will be replaced with the URL to open.  (If "<literal>&lt;URL&gt;</literal>" is not specified, the URL will be appended to the end of the command.)</para>
+     <varlistentry>
+       <term>Web Browser Command (<varname>browser.string = ""</varname>)</term>
+       <listitem>
+  <para>Any command or arguments you need to start your web browser.  If both this option and the Web Browser option are blank, the platform's default browser will be used.  In this option, any occurrence of "<literal>&lt;URL&gt;</literal>" will be replaced with the URL to open.  (If "<literal>&lt;URL&gt;</literal>" is not specified, the URL will be appended to the end of the command.)</para>
                 <para>On Windows and Mac OS X, you can just leave this option blank and your default web browser will be used.  For other platforms (eg. Linux), here are commands to open common browsers:</para>
                 <itemizedlist>
                   <listitem>
@@ -625,442 +627,463 @@ public class Student {
                     <programlisting>konqueror &lt;URL&gt;</programlisting>
                   </listitem>
                 </itemizedlist>
-	      </listitem>
-	    </varlistentry>
-	    
-	    <varlistentry>
-	      <term>Tools.jar Location (<varname>javac.location = ""</varname>)</term>
-	      <listitem>
-		<para>Specifies the location of the JDK's <filename>tools.jar</filename>, which contains the classes necessary for the compiler and the debugger.  This file is usually found in the JDK's <filename>lib</filename> directory.</para>
-	      </listitem>
-	    </varlistentry>
-	    
-	    <varlistentry>
-	      <term>JSR14 Location (<varname>jsr14.location = ""</varname>)</term>
-	      <term>JSR14 Collections Path (<varname>jsr14.collectionspath = ""</varname>)</term>
-	      <listitem>
-		<para>Specifies the location of the JSR-14 versions of <filename>javac.jar</filename> and <filename>collect.jar</filename>, respectively, for use as an alternative compiler in DrJava.  JSR-14 is an experimental compiler provided by Sun which supports generic types.  The <filename>collect.jar</filename> file contains parameterized collection classes for JSR-14.  (We currently support JSR-14 versions 1.0, 1.2, 1.3, and 2.0.  Note that for version 2.0, <filename>javac.jar</filename> has been renamed <filename>gjc-rt.jar</filename>.)</para>
-	      </listitem>
-	    </varlistentry>
-	    
-	    <varlistentry>
-	      <term>Extra Classpath (<varname>extra.classpath = ""</varname>)</term>
-	      <listitem>
-		<para>Used to specify any directories or <filename>jar</filename> files to append to the classpath of the Interactions window and the compiler.  Separate the directories using the system-specific path separator (eg. colon on Unix, semicolon on Windows).</para>
-	      </listitem>
-	    </varlistentry>
-	    
-	  </variablelist>
+       </listitem>
+     </varlistentry>
+     
+     <varlistentry>
+       <term>Tools.jar Location (<varname>javac.location = ""</varname>)</term>
+       <listitem>
+  <para>Specifies the location of the JDK's <filename>tools.jar</filename>, which contains the classes necessary for the compiler and the debugger.  This file is usually found in the JDK's <filename>lib</filename> directory.</para>
+       </listitem>
+     </varlistentry>
+     
+     <varlistentry>
+       <term>JSR14 Location (<varname>jsr14.location = ""</varname>)</term>
+       <term>JSR14 Collections Path (<varname>jsr14.collectionspath = ""</varname>)</term>
+       <listitem>
+  <para>Specifies the location of the JSR-14 versions of <filename>javac.jar</filename> and <filename>collect.jar</filename>, respectively, for use as an alternative compiler in DrJava.  JSR-14 is an experimental compiler provided by Sun which supports generic types.  The <filename>collect.jar</filename> file contains parameterized collection classes for JSR-14.  (We currently support JSR-14 versions 1.0, 1.2, 1.3, and 2.0.  Note that for version 2.0, <filename>javac.jar</filename> has been renamed <filename>gjc-rt.jar</filename>.)</para>
+       </listitem>
+     </varlistentry>
+     
+     <varlistentry>
+       <term>Extra Classpath (<varname>extra.classpath = ""</varname>)</term>
+       <listitem>
+  <para>Used to specify any directories or <filename>jar</filename> files to append to the classpath of the Interactions window and the compiler.  Separate the directories using the system-specific path separator (eg. colon on Unix, semicolon on Windows).</para>
+       </listitem>
+     </varlistentry>
+     
+   </variablelist>
       </para>
       </formalpara>
 
 
       <!-- Display -->
       <formalpara>
-	<title>Display Options</title>
-	<para>These configurable options affect how DrJava's user interface is displayed.</para>
+ <title>Display Options</title>
+ <para>These configurable options affect how DrJava's user interface is displayed.</para>
       </formalpara>
       <variablelist>
 
         <varlistentry>
-	  <term>Look and Feel (<varname>look.and.feel = ""</varname>)</term>
-	  <listitem>
-	    <para>Name of the Swing LookAndFeel class which determines the general appearance of DrJava.  If this option is changed while DrJava is running, the changes will not apply until you restart.</para>
-	  </listitem>
-	</varlistentry>
-	
-	<varlistentry>
-	  <term>Toolbar Buttons (<varname>toolbar.icons.enabled = true, toolbar.text.enabled = true</varname>)</term>
-	  <listitem>
-	    <para>These radio buttons control whether the toolbar buttons contain text, icons, or both.  When set manually in the config file, each of the two options can be set to true or false, though icons will be displayed if both are set to false.</para>
-	  </listitem>
-	</varlistentry>
-	
-	<varlistentry>
-	  <term>Show All Line Numbers (<varname>linenum.enabled = false</varname>)</term>
-	  <listitem>
-	    <para>Whether to display all line numbers along the left margin of the Definitions Pane.</para>
-	  </listitem>
-	</varlistentry>
-	
+   <term>Look and Feel (<varname>look.and.feel = ""</varname>)</term>
+   <listitem>
+     <para>Name of the Swing LookAndFeel class which determines the general appearance of DrJava.  If this option is changed while DrJava is running, the changes will not apply until you restart.</para>
+   </listitem>
+ </varlistentry>
+ 
+ <varlistentry>
+   <term>Toolbar Buttons (<varname>toolbar.icons.enabled = true, toolbar.text.enabled = true</varname>)</term>
+   <listitem>
+     <para>These radio buttons control whether the toolbar buttons contain text, icons, or both.  When set manually in the config file, each of the two options can be set to true or false, though icons will be displayed if both are set to false.</para>
+   </listitem>
+ </varlistentry>
+ 
+ <varlistentry>
+   <term>Show All Line Numbers (<varname>linenum.enabled = false</varname>)</term>
+   <listitem>
+     <para>Whether to display all line numbers along the left margin of the Definitions Pane.</para>
+   </listitem>
+ </varlistentry>
+ 
       </variablelist>
 
 
       <!-- Fonts -->
       <formalpara>
-	<title>Font Options</title>
-	<para>Each font option is specified as a string containing the font name, style, and size, separated by dashes.  The style should be in upper-case (ie. PLAIN, BOLD, ITALIC, or BOLDITALIC), while the font name must be a valid font on the system.  (In most cases, using the font chooser in the Preferences window is the simplest approach.)</para>
+ <title>Font Options</title>
+ <para>Each font option is specified as a string containing the font name, style, and size, separated by dashes.  The style should be in upper-case (ie. PLAIN, BOLD, ITALIC, or BOLDITALIC), while the font name must be a valid font on the system.  (In most cases, using the font chooser in the Preferences window is the simplest approach.)</para>
       </formalpara>
       <variablelist>
-	
-	<varlistentry>
-	  <term>Main Font (<varname>font.main = Monospaced-PLAIN-12</varname>)</term>
-	  <listitem>
-	    <para>This font is used for the definitions pane and the tabs at the bottom of the window.</para>
-	  </listitem>
-	</varlistentry>
-	
-	<varlistentry>
-	  <term>Line Numbers Font (<varname>font.doclist = Monospaced-PLAIN-12</varname>)</term>
-	  <listitem>
-	    <para>This font is used for the line numbers on the left side of the Definitions Pane, if the "Show All Line Numbers" option in the Display Options section is enabled.  The actual font size will be limited by the size of the Main Font.</para>
-	  </listitem>
-	</varlistentry>
+ 
+ <varlistentry>
+   <term>Main Font (<varname>font.main = Monospaced-PLAIN-12</varname>)</term>
+   <listitem>
+     <para>This font is used for the definitions pane and the tabs at the bottom of the window.</para>
+   </listitem>
+ </varlistentry>
+ 
+ <varlistentry>
+   <term>Line Numbers Font (<varname>font.doclist = Monospaced-PLAIN-12</varname>)</term>
+   <listitem>
+     <para>This font is used for the line numbers on the left side of the Definitions Pane, if the "Show All Line Numbers" option in the Display Options section is enabled.  The actual font size will be limited by the size of the Main Font.</para>
+   </listitem>
+ </varlistentry>
 
-	<varlistentry>
-	  <term>Document List Font (<varname>font.doclist = Monospaced-PLAIN-10</varname>)</term>
-	  <listitem>
-	    <para>This font is used in the list of all open documents on the left side of the window.</para>
-	  </listitem>
-	</varlistentry>
-	
-	<varlistentry>
-	  <term>Toolbar Font (<varname>font.toolbar = dialog-PLAIN-10</varname>)</term>
-	  <listitem>
-	    <para>This font is used on the toolbar buttons, if the button names are configured to be displayed.</para>
-	  </listitem>
-	</varlistentry>
-	
+ <varlistentry>
+   <term>Document List Font (<varname>font.doclist = Monospaced-PLAIN-10</varname>)</term>
+   <listitem>
+     <para>This font is used in the list of all open documents on the left side of the window.</para>
+   </listitem>
+ </varlistentry>
+ 
+ <varlistentry>
+   <term>Toolbar Font (<varname>font.toolbar = dialog-PLAIN-10</varname>)</term>
+   <listitem>
+     <para>This font is used on the toolbar buttons, if the button names are configured to be displayed.</para>
+   </listitem>
+ </varlistentry>
+ 
       </variablelist>
 
       
       <!-- Colors -->
       <formalpara>
-	<title>Color Options</title>
-	<para>Colors are defined similarly to HTML colors: as six hexadecimal digits preceded by a pound sign.  The first two digits specify a red value, the next two specify a green value, and the next two specify a blue value.  For example, <constant>#00FF00</constant> would be a bright green.  (In most cases, using the color chooser in the Preferences window is the simplest approach.)</para>
+ <title>Color Options</title>
+ <para>Colors are defined similarly to HTML colors: as six hexadecimal digits preceded by a pound sign.  The first two digits specify a red value, the next two specify a green value, and the next two specify a blue value.  For example, <constant>#00FF00</constant> would be a bright green.  (In most cases, using the color chooser in the Preferences window is the simplest approach.)</para>
       </formalpara>
       
       <!-- Definitions Colors -->
       <variablelist>
-	<title>Syntax Colors for Definitions</title>
-	
-	<varlistentry>
-	  <term>Normal Color (<varname>definitions.normal.color = #000000</varname>)</term>
-	  <listitem>
-	    <para>Used as the default color for program text.</para>
-	  </listitem>
-	</varlistentry>
-	
-	<varlistentry>
-	  <term>Keyword Color (<varname>definitions.keyword.color = #0000FF</varname>)</term>
-	  <listitem>
-	    <para>Used as the color for known keywords (eg. "public", "for").</para>
-	  </listitem>
-	</varlistentry>
-	
-	<varlistentry>
-	  <term>Type Color (<varname>definitions.type.color = #00007C</varname>)</term>
-	  <listitem>
-	    <para>Used for known primitive types (eg. "int") and capitalized words, which usually correspond to class names.</para>
-	  </listitem>
-	</varlistentry>
-	
-	<varlistentry>
-	  <term>Comment Color (<varname>definitions.comment.color = #007C00</varname>)</term>
-	  <listitem>
-	    <para>Used as the color for all comments.</para>
-	  </listitem>
-	</varlistentry>
-	
-	<varlistentry>
-	  <term>Double-quoted Color (<varname>definitions.double.quoted.color = #B20000</varname>)</term>
-	  <listitem>
-	    <para>Used as the color for strings, which use double quotation marks.</para>
-	  </listitem>
-	</varlistentry>
-	
-	<varlistentry>
-	  <term>Single-quoted Color (<varname>definitions.single.quoted.color = #FF00FF</varname>)</term>
-	  <listitem>
-	    <para>Used as the color for characters, which use single quotation marks.</para>
-	  </listitem>
-	</varlistentry>
-	
-	<varlistentry>
-	  <term>Number Color (<varname>definitions.number.color = #00B2B2</varname>)</term>
-	  <listitem>
-	    <para>Used as the color for all numbers.</para>
-	  </listitem>
-	</varlistentry>
-	
+ <title>Syntax Colors for Definitions</title>
+ 
+ <varlistentry>
+   <term>Normal Color (<varname>definitions.normal.color = #000000</varname>)</term>
+   <listitem>
+     <para>Used as the default color for program text.</para>
+   </listitem>
+ </varlistentry>
+ 
+ <varlistentry>
+   <term>Keyword Color (<varname>definitions.keyword.color = #0000FF</varname>)</term>
+   <listitem>
+     <para>Used as the color for known keywords (eg. "public", "for").</para>
+   </listitem>
+ </varlistentry>
+ 
+ <varlistentry>
+   <term>Type Color (<varname>definitions.type.color = #00007C</varname>)</term>
+   <listitem>
+     <para>Used for known primitive types (eg. "int") and capitalized words, which usually correspond to class names.</para>
+   </listitem>
+ </varlistentry>
+ 
+ <varlistentry>
+   <term>Comment Color (<varname>definitions.comment.color = #007C00</varname>)</term>
+   <listitem>
+     <para>Used as the color for all comments.</para>
+   </listitem>
+ </varlistentry>
+ 
+ <varlistentry>
+   <term>Double-quoted Color (<varname>definitions.double.quoted.color = #B20000</varname>)</term>
+   <listitem>
+     <para>Used as the color for strings, which use double quotation marks.</para>
+   </listitem>
+ </varlistentry>
+ 
+ <varlistentry>
+   <term>Single-quoted Color (<varname>definitions.single.quoted.color = #FF00FF</varname>)</term>
+   <listitem>
+     <para>Used as the color for characters, which use single quotation marks.</para>
+   </listitem>
+ </varlistentry>
+ 
+ <varlistentry>
+   <term>Number Color (<varname>definitions.number.color = #00B2B2</varname>)</term>
+   <listitem>
+     <para>Used as the color for all numbers.</para>
+   </listitem>
+ </varlistentry>
+ 
       </variablelist>
       
       <!-- Other colors -->
       <variablelist>
-	<title>Other Colors</title>
-	<varlistentry>
-	  <term>Background Color (<varname>definitions.background.color = #FFFFFF</varname>)</term>
-	  <listitem>
-	    <para>Used as the background color for the Definitions Pane.</para>
-	  </listitem>
-	</varlistentry>
+ <title>Other Colors</title>
+ <varlistentry>
+   <term>Background Color (<varname>definitions.background.color = #FFFFFF</varname>)</term>
+   <listitem>
+     <para>Used as the background color for the Definitions Pane.</para>
+   </listitem>
+ </varlistentry>
 
-	<varlistentry>
-	  <term>Brace-matching Color (<varname>definitions.match.color = #BEFFE6</varname>)</term>
-	  <listitem>
-	    <para>Used as the highlight color when matching braces.</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Brace-matching Color (<varname>definitions.match.color = #BEFFE6</varname>)</term>
+   <listitem>
+     <para>Used as the highlight color when matching braces.</para>
+   </listitem>
+ </varlistentry>
 
-	<varlistentry>
-	  <term>Compiler Error Color (<varname>compiler.error.color = #FFFF00</varname>)</term>
-	  <listitem>
-	    <para>Used as the highlight color for compiler errors and JUnit test failures.</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Compiler Error Color (<varname>compiler.error.color = #FFFF00</varname>)</term>
+   <listitem>
+     <para>Used as the highlight color for compiler errors and JUnit test failures.</para>
+   </listitem>
+ </varlistentry>
 
-	<varlistentry>
-	  <term>Debugger Breakpoint Color (<varname>debug.breakpoint.color = #FF0000</varname>)</term>
-	  <listitem>
-	    <para>Used as the highlight color for breakpoints set from the debugger.</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Debugger Breakpoint Color (<varname>debug.breakpoint.color = #FF0000</varname>)</term>
+   <listitem>
+     <para>Used as the highlight color for breakpoints set from the debugger.</para>
+   </listitem>
+ </varlistentry>
 
-	<varlistentry>
-	  <term>Debugger Location Color (<varname>debug.thread.color = #64FFFF</varname>)</term>
-	  <listitem>
-	    <para>Used as the highlight color for the location of the current thread in the debugger, shown after a breakpoint is hit or a step has occurred.</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Debugger Location Color (<varname>debug.thread.color = #64FFFF</varname>)</term>
+   <listitem>
+     <para>Used as the highlight color for the location of the current thread in the debugger, shown after a breakpoint is hit or a step has occurred.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>System.out Color (<varname>system.out.color = #007C00</varname>)</term>
+   <listitem>
+     <para>Used as the color for text from System.out.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>System.err Color (<varname>system.err.color = #FF0000</varname>)</term>
+   <listitem>
+     <para>Used as the color for text from System.err.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>System.in Color (<varname>system.in.color = #7C007C</varname>)</term>
+   <listitem>
+     <para>Used as the color for text to be read by System.in.</para>
+   </listitem>
+ </varlistentry>
 
       </variablelist>
 
 
       <!-- Key Bindings -->
       <formalpara>
-	<title>Key Bindings</title>
-	<para>Most menu items in DrJava have configurable keyboard shortcuts, along with several other navigational commands (such as moving to the beginning or end of a line).  All such options are displayed on the Key Bindings panel in the Preferences window, along with their current value.  Clicking on the value displays a window which allows the user to type a new key, showing any conflict with an existing key if there is one.  (We recommend editing these options in the Preferences window.)</para>
+ <title>Key Bindings</title>
+ <para>Most menu items in DrJava have configurable keyboard shortcuts, along with several other navigational commands (such as moving to the beginning or end of a line).  All such options are displayed on the Key Bindings panel in the Preferences window, along with their current value.  Clicking on the value displays a window which allows the user to type a new key, showing any conflict with an existing key if there is one.  (We recommend editing these options in the Preferences window.)</para>
       </formalpara>
       
       
 
       <!-- Debugger -->
       <formalpara>
-	<title>Debugger</title>
-	<para>All configurable options relating to the debugger.</para>
+ <title>Debugger</title>
+ <para>All configurable options relating to the debugger.</para>
       </formalpara>
       <variablelist>
 
-	<varlistentry>
-	  <term>Sourcepath (<varname>debug.sourcepath = ""</varname>)</term>
-	  <listitem>
-	    <para>A list of directories on which to search for source files when stepping through code.  The debugger will attempt to open files from these directories automatically when stepping.</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Sourcepath (<varname>debug.sourcepath = ""</varname>)</term>
+   <listitem>
+     <para>A list of directories on which to search for source files when stepping through code.  The debugger will attempt to open files from these directories automatically when stepping.</para>
+   </listitem>
+ </varlistentry>
 
-	<varlistentry>
-	  <term>Step Into Java Classes (<varname>debug.step.java = false</varname>)</term>
-	  <listitem>
-	    <para>Whether to step into Java source files when stepping through a suspended method call.  It is recommended to put the Java source (usually distributed with the JDK) on the Sourcepath if this option is selected.</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Step Into Java Classes (<varname>debug.step.java = false</varname>)</term>
+   <listitem>
+     <para>Whether to step into Java source files when stepping through a suspended method call.  It is recommended to put the Java source (usually distributed with the JDK) on the Sourcepath if this option is selected.</para>
+   </listitem>
+ </varlistentry>
 
-	<varlistentry>
-	  <term>Step into Interpreter Classes (<varname>debug.step.djava = false</varname>)</term>
-	  <listitem>
-	    <para>Whether to step into DynamicJava source files when stepping through a suspended method call.  DynamicJava is the Java interpreter used in the Interactions pane, and the source can be obtained from <ulink url="http://koala.ilog.fr/djava">http://koala.ilog.fr/djava</ulink>.  Useful primarily when debugging DrJava itself.</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Step into Interpreter Classes (<varname>debug.step.djava = false</varname>)</term>
+   <listitem>
+     <para>Whether to step into DynamicJava source files when stepping through a suspended method call.  DynamicJava is the Java interpreter used in the Interactions pane, and the source can be obtained from <ulink url="http://koala.ilog.fr/djava">http://koala.ilog.fr/djava</ulink>.  Useful primarily when debugging DrJava itself.</para>
+   </listitem>
+ </varlistentry>
 
-	<varlistentry>
-	  <term>Step into DrJava Classes (<varname>debug.step.drjava = false</varname>)</term>
-	  <listitem>
-	    <para>Whether to step into DrJava source files when stepping through a suspended method call.  Useful primarily when debugging DrJava itself.</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Step into DrJava Classes (<varname>debug.step.drjava = false</varname>)</term>
+   <listitem>
+     <para>Whether to step into DrJava source files when stepping through a suspended method call.  Useful primarily when debugging DrJava itself.</para>
+   </listitem>
+ </varlistentry>
 
       </variablelist>
 
 
       <!-- Javadoc -->
       <formalpara>
-	<title>Javadoc</title>
-	<para>All configurable options relating to generating Javadoc.</para>
+ <title>Javadoc</title>
+ <para>All configurable options relating to generating Javadoc.</para>
       </formalpara>
       <variablelist>
 
-	<varlistentry>
-	  <term>Access Level (<varname>javadoc.access.level = "package"</varname>)</term>
-	  <listitem>
-	    <para>Specifies the lowest access level for fields and methods to include in the generated documentation.  Legal values are "public", "protected", "package", and "private".</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Access Level (<varname>javadoc.access.level = "package"</varname>)</term>
+   <listitem>
+     <para>Specifies the lowest access level for fields and methods to include in the generated documentation.  Legal values are "public", "protected", "package", and "private".</para>
+   </listitem>
+ </varlistentry>
 
-	<varlistentry>
-	  <term>Java Version for Javadoc Links (<varname>javadoc.link.version = (JDK Version)</varname>)</term>
-	  <listitem>
-	    <para>Specifies which URL to use when generating links to Java library classes.  Legal values are "1.3", "1.4", and "none" if no links to Java library classes are desired.  (This option defaults to the version of the user's JDK.)</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Java Version for Javadoc Links (<varname>javadoc.link.version = (JDK Version)</varname>)</term>
+   <listitem>
+     <para>Specifies which URL to use when generating links to Java library classes.  Legal values are "1.3", "1.4", and "none" if no links to Java library classes are desired.  (This option defaults to the version of the user's JDK.)</para>
+   </listitem>
+ </varlistentry>
 
-	<varlistentry>
-	  <term>Javadoc 1.3 URL (<varname>javadoc.1.3.link = "http://java.sun.com/j2se/1.3/docs/api"</varname>)</term>
-	  <listitem>
-	    <para>The URL to use when generating links to JDK 1.3 library classes.</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Javadoc 1.3 URL (<varname>javadoc.1.3.link = "http://java.sun.com/j2se/1.3/docs/api"</varname>)</term>
+   <listitem>
+     <para>The URL to use when generating links to JDK 1.3 library classes.</para>
+   </listitem>
+ </varlistentry>
 
         <varlistentry>
-	  <term>Javadoc 1.4 URL (<varname>javadoc.1.4.link = "http://java.sun.com/j2se/1.4/docs/api"</varname>)</term>
-	  <listitem>
-	    <para>The URL to use when generating links to JDK 1.4 library classes.</para>
-	  </listitem>
-	</varlistentry>
+   <term>Javadoc 1.4 URL (<varname>javadoc.1.4.link = "http://java.sun.com/j2se/1.4/docs/api"</varname>)</term>
+   <listitem>
+     <para>The URL to use when generating links to JDK 1.4 library classes.</para>
+   </listitem>
+ </varlistentry>
 
-	<varlistentry>
-	  <term>Default Destination Directory (<varname>javadoc.destination = ""</varname>)</term>
-	  <listitem>
-	    <para>If a directory is specified, it will be used as the default when generating new documentation.</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Default Destination Directory (<varname>javadoc.destination = ""</varname>)</term>
+   <listitem>
+     <para>If a directory is specified, it will be used as the default when generating new documentation.</para>
+   </listitem>
+ </varlistentry>
 
-	<varlistentry>
-	  <term>Custom Javadoc Parameters (<varname>javadoc.custom.params = ""</varname>)</term>
-	  <listitem>
-	    <para>Any custom parameters to pass to the Javadoc tool, separated by spaces.  Use "javadoc -help" at a command line to view the available parameters.</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Custom Javadoc Parameters (<varname>javadoc.custom.params = ""</varname>)</term>
+   <listitem>
+     <para>Any custom parameters to pass to the Javadoc tool, separated by spaces.  Use "javadoc -help" at a command line to view the available parameters.</para>
+   </listitem>
+ </varlistentry>
 
-	<varlistentry>
-	  <term>Generate Javadoc From Source Roots (<varname>javadoc.from.roots = false</varname>)</term>
-	  <listitem>
-	    <para>If this option is enabled, then Javadoc will not only search the current package and all subpackages for files, it will also search all "enclosing" packages (those at a higher level).</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Generate Javadoc From Source Roots (<varname>javadoc.from.roots = false</varname>)</term>
+   <listitem>
+     <para>If this option is enabled, then Javadoc will not only search the current package and all subpackages for files, it will also search all "enclosing" packages (those at a higher level).</para>
+   </listitem>
+ </varlistentry>
 
       </variablelist>
 
 
       <!-- Notifications -->
       <formalpara>
-	<title>Miscellaneous</title>
-	<para>Configures how often DrJava notifies you for certain events.  The notifications in this section can all be suppressed by clicking on a "Do not show this message again" checkbox (or similar) on the notification itself.</para>
+ <title>Miscellaneous</title>
+ <para>Configures how often DrJava notifies you for certain events.  The notifications in this section can all be suppressed by clicking on a "Do not show this message again" checkbox (or similar) on the notification itself.</para>
       </formalpara>
       <variablelist>
 
-	<varlistentry>
-	  <term>Prompt Before Quit (<varname>quit.prompt = true</varname>)</term>
-	  <listitem>
-	    <para>Whether to display a confirmation message before DrJava quits.</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Prompt Before Quit (<varname>quit.prompt = true</varname>)</term>
+   <listitem>
+     <para>Whether to display a confirmation message before DrJava quits.</para>
+   </listitem>
+ </varlistentry>
 
         <varlistentry>
-	  <term>Prompt Before Resetting Interactions Pane (<varname>interactions.reset.prompt = true</varname>)</term>
-	  <listitem>
-	    <para>Whether to display a confirmation message before resetting the Interactions Pane.</para>
-	  </listitem>
-	</varlistentry>
+   <term>Prompt Before Resetting Interactions Pane (<varname>interactions.reset.prompt = true</varname>)</term>
+   <listitem>
+     <para>Whether to display a confirmation message before resetting the Interactions Pane.</para>
+   </listitem>
+ </varlistentry>
 
-	<varlistentry>
-	  <term>Prompt if Interactions Pane Exits Unexpectedly (<varname>interactions.exit.prompt = true</varname>)</term>
-	  <listitem>
-	    <para>Whether to display a message if the Interactions Pane is exited without the Reset button being clicked.</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Prompt if Interactions Pane Exits Unexpectedly (<varname>interactions.exit.prompt = true</varname>)</term>
+   <listitem>
+     <para>Whether to display a message if the Interactions Pane is exited without the Reset button being clicked.</para>
+   </listitem>
+ </varlistentry>
 
-	<varlistentry>
-	  <term>Prompt for Javadoc Destination (<varname>javadoc.prompt.for.destination = true</varname>)</term>
-	  <listitem>
-	    <para>Whether to always display the destination selection dialog when starting Javadoc.</para>
-	  </listitem>
-	</varlistentry>
-
-        <varlistentry>
-	  <term>Automatically Save Before Compiling (<varname>save.before.compile = false</varname>)</term>
-	  <listitem>
-	    <para>Whether to automatically save all files each time a Compile command is chosen.</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Prompt for Javadoc Destination (<varname>javadoc.prompt.for.destination = true</varname>)</term>
+   <listitem>
+     <para>Whether to always display the destination selection dialog when starting Javadoc.</para>
+   </listitem>
+ </varlistentry>
 
         <varlistentry>
-	  <term>Automatically Save Before Generating Javadoc (<varname>save.before.javadoc = false</varname>)</term>
-	  <listitem>
-	    <para>Whether to automatically save all files each time a Javadoc command is chosen.</para>
-	  </listitem>
-	</varlistentry>
+   <term>Automatically Save Before Compiling (<varname>save.before.compile = false</varname>)</term>
+   <listitem>
+     <para>Whether to automatically save all files each time a Compile command is chosen.</para>
+   </listitem>
+ </varlistentry>
 
         <varlistentry>
-	  <term>Warn on Breakpoint Out of Sync (<varname>warn.breakpoint.out.of.sync = true</varname>)</term>
-	  <listitem>
-	    <para>Whether to warn if setting a breakpoint in a source file that is not in sync with its class file.</para>
-	  </listitem>
-	</varlistentry>
+   <term>Automatically Save Before Generating Javadoc (<varname>save.before.javadoc = false</varname>)</term>
+   <listitem>
+     <para>Whether to automatically save all files each time a Javadoc command is chosen.</para>
+   </listitem>
+ </varlistentry>
 
         <varlistentry>
-	  <term>Warn if Debugging Modified File (<varname>warn.debug.modified.file = true</varname>)</term>
-	  <listitem>
-	    <para>Whether to warn if using the debugger on a file which has been modified since its last save.</para>
-	  </listitem>
-	</varlistentry>
+   <term>Warn on Breakpoint Out of Sync (<varname>warn.breakpoint.out.of.sync = true</varname>)</term>
+   <listitem>
+     <para>Whether to warn if setting a breakpoint in a source file that is not in sync with its class file.</para>
+   </listitem>
+ </varlistentry>
 
         <varlistentry>
-	  <term>Warn to Restart to Change Look and Feel (<varname>warn.change.laf = true</varname>)</term>
-	  <listitem>
-	    <para>Whether to warn that changes to the Look and Feel do not take effect until after a restart.</para>
-	  </listitem>
-	</varlistentry>
+   <term>Warn if Debugging Modified File (<varname>warn.debug.modified.file = true</varname>)</term>
+   <listitem>
+     <para>Whether to warn if using the debugger on a file which has been modified since its last save.</para>
+   </listitem>
+ </varlistentry>
+
+        <varlistentry>
+   <term>Warn to Restart to Change Look and Feel (<varname>warn.change.laf = true</varname>)</term>
+   <listitem>
+     <para>Whether to warn that changes to the Look and Feel do not take effect until after a restart.</para>
+   </listitem>
+ </varlistentry>
 
       </variablelist>
 
       
       <!-- Miscellaneous -->
       <formalpara>
-	<title>Miscellaneous</title>
-	<para>These are the remaining configurable options in DrJava.</para>
+ <title>Miscellaneous</title>
+ <para>These are the remaining configurable options in DrJava.</para>
       </formalpara>
       <variablelist>
-	
-	<varlistentry>
-	  <term>Indent Level (<varname>indent.level = 2</varname>)</term>
-	  <listitem>
-	    <para>Sets how many spaces to use for each level of indenting.  Note that tab characters are not allowed in DrJava.</para>
-	  </listitem>
-	</varlistentry>
-	
-	<varlistentry>
-	  <term>Working Directory (<varname>working.directory = ""</varname>)</term>
-	  <listitem>
-	    <para>Specifies the default directory for DrJava to use when starting up.  The open and save dialogs will start here, rather than in the user's current directory, if this option is set.  The Interactions classpath will also include this directory.</para>
-	  </listitem>
-	</varlistentry>
-	
-	<varlistentry>
-	  <term>Size of Interactions History (<varname>history.max.size = 500</varname>)</term>
-	  <listitem>
-	    <para>Specifies how many commands will be remembered in the history of the Interactions window.  Previous commands can be recalled using the up and down arrow keys.</para>
-	  </listitem>
-	</varlistentry>
+ 
+ <varlistentry>
+   <term>Indent Level (<varname>indent.level = 2</varname>)</term>
+   <listitem>
+     <para>Sets how many spaces to use for each level of indenting.  Note that tab characters are not allowed in DrJava.</para>
+   </listitem>
+ </varlistentry>
+ 
+ <varlistentry>
+   <term>Working Directory (<varname>working.directory = ""</varname>)</term>
+   <listitem>
+     <para>Specifies the default directory for DrJava to use when starting up.  The open and save dialogs will start here, rather than in the user's current directory, if this option is set.  The Interactions classpath will also include this directory.</para>
+   </listitem>
+ </varlistentry>
+ 
+ <varlistentry>
+   <term>Size of Interactions History (<varname>history.max.size = 500</varname>)</term>
+   <listitem>
+     <para>Specifies how many commands will be remembered in the history of the Interactions window.  Previous commands can be recalled using the up and down arrow keys.</para>
+   </listitem>
+ </varlistentry>
 
-	<varlistentry>
-	  <term>Recent Files List Size (<varname>recent.files.max.size = 5</varname>)</term>
-	  <listitem>
-	    <para>Specifies how many recently used files to display in the File menu.</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Recent Files List Size (<varname>recent.files.max.size = 5</varname>)</term>
+   <listitem>
+     <para>Specifies how many recently used files to display in the File menu.</para>
+   </listitem>
+ </varlistentry>
 
-	<varlistentry>
-	  <term>Allow Assert Keyword in Java 1.4 (<varname>javac.allow.assert = false</varname>)</term>
-	  <listitem>
-	    <para>Whether to support the <literal>assert</literal> keyword when compiling with a JDK 1.4 or later compiler.</para>
-	  </listitem>
-	</varlistentry>
+ <varlistentry>
+   <term>Allow Assert Keyword in Java 1.4 (<varname>javac.allow.assert = false</varname>)</term>
+   <listitem>
+     <para>Whether to support the <literal>assert</literal> keyword when compiling with a JDK 1.4 or later compiler.</para>
+   </listitem>
+ </varlistentry>
 
-
-        <varlistentry>
-	  <term>Keep Emacs-style Backup Files (<varname>files.backup = true</varname>)</term>
-	  <listitem>
-	    <para>Whether DrJava should keep a backup copy of each file that the user modifies, saved with a "~" at the end of the filename.</para>
-	  </listitem>
-	</varlistentry>
 
         <varlistentry>
-	  <term>Clear Console After Interactions Reset (<varname>reset.clear.console = true</varname>)</term>
-	  <listitem>
-	    <para>Whether DrJava should clear the contents of the Console Tab each time the Interactions Pane is reset.</para>
-	  </listitem>
-	</varlistentry>
-	
+   <term>Keep Emacs-style Backup Files (<varname>files.backup = true</varname>)</term>
+   <listitem>
+     <para>Whether DrJava should keep a backup copy of each file that the user modifies, saved with a "~" at the end of the filename.</para>
+   </listitem>
+ </varlistentry>
+
+        <varlistentry>
+   <term>Clear Console After Interactions Reset (<varname>reset.clear.console = true</varname>)</term>
+   <listitem>
+     <para>Whether DrJava should clear the contents of the Console Tab each time the Interactions Pane is reset.</para>
+   </listitem>
+ </varlistentry>
+ 
       </variablelist>
       
     </section>      
@@ -1078,19 +1101,19 @@ public class Student {
 
       <orderedlist>
         <listitem>
-	  <para>The complete path to your Java executable, likely in <filename>C:\Program Files</filename>.  We recommend using <filename>javaw.exe</filename>, since it launches programs without displaying a command prompt window.</para>
+   <para>The complete path to your Java executable, likely in <filename>C:\Program Files</filename>.  We recommend using <filename>javaw.exe</filename>, since it launches programs without displaying a command prompt window.</para>
         </listitem>
           
         <listitem>
-	   <para>The complete path to your DrJava Jar file.  To simplify upgrading, we recommend renaming the Jar file to <filename>drjava.jar</filename> each time you download it, and always keeping it in the same folder.</para>
-	</listitem>
+    <para>The complete path to your DrJava Jar file.  To simplify upgrading, we recommend renaming the Jar file to <filename>drjava.jar</filename> each time you download it, and always keeping it in the same folder.</para>
+ </listitem>
       </orderedlist>
 
       <para>Using the above information, you can change the file associations for <filename>.java</filename> files:</para>
 
       <orderedlist>
         <listitem>
-	  <para>Find the Folder Settings dialog.  Depending on your version of Windows, it might be in one of several locations:</para>
+   <para>Find the Folder Settings dialog.  Depending on your version of Windows, it might be in one of several locations:</para>
 
           <itemizedlist>
             <listitem><para>The "Settings" group of the Start Menu</para></listitem>
@@ -1101,56 +1124,56 @@ public class Student {
         </listitem>
 
         <listitem>
-	  <para>Within the Folder Settings dialog, click on the File Types tab.</para>
-	</listitem>
+   <para>Within the Folder Settings dialog, click on the File Types tab.</para>
+ </listitem>
 
         <listitem>
-	  <para>Search the list of file types for the <filename>.java</filename> extension.  If it is not already in the list:</para>
+   <para>Search the list of file types for the <filename>.java</filename> extension.  If it is not already in the list:</para>
           <orderedlist>
             <listitem>
-	      <para>Click the "New" button to create a new file type.</para>
-	    </listitem>
+       <para>Click the "New" button to create a new file type.</para>
+     </listitem>
             <listitem>
-	      <para>Type in "java" as the extension and click OK.</para>
-	    </listitem>
+       <para>Type in "java" as the extension and click OK.</para>
+     </listitem>
           </orderedlist>
         </listitem>
 
         <listitem>
-	  <para>Select the <filename>.java</filename> extension from the list and click on the "Advanced" button.  The "Edit File Type" dialog will be displayed.</para>
-	</listitem>
+   <para>Select the <filename>.java</filename> extension from the list and click on the "Advanced" button.  The "Edit File Type" dialog will be displayed.</para>
+ </listitem>
 
-	<listitem>
+ <listitem>
           <para>If the File Type does not have a name in the top text field, type in "Java Source File".</para>
         </listitem>
 
         <listitem>
-	  <para>Click the "New" button next to the list of Actions to display the "New Action" dialog.</para>
-	</listitem>
+   <para>Click the "New" button next to the list of Actions to display the "New Action" dialog.</para>
+ </listitem>
 
         <listitem>
-	  <para>Type "open" as the action.</para>
-	</listitem>
+   <para>Type "open" as the action.</para>
+ </listitem>
 
         <listitem>
-	  <para>For the application to perform the action, type:</para>
-	  <cmdsynopsis>
-	    <command>"C:\PATH\javaw.exe" -jar "C:\PATH\drjava.jar" "%1"</command>
-	  </cmdsynopsis>
-	  <para>(Replace C:\PATH\javaw.exe with the full path to your Java executable, and C:\PATH\drjava.jar with the full path to your DrJava Jar file, as found in the first few steps.)</para>
+   <para>For the application to perform the action, type:</para>
+   <cmdsynopsis>
+     <command>"C:\PATH\javaw.exe" -jar "C:\PATH\drjava.jar" "%1"</command>
+   </cmdsynopsis>
+   <para>(Replace C:\PATH\javaw.exe with the full path to your Java executable, and C:\PATH\drjava.jar with the full path to your DrJava Jar file, as found in the first few steps.)</para>
         </listitem>
 
         <listitem>
-	  <para>Optionally select an icon for all <filename>.java</filename> files, then click OK.</para>
-	</listitem>
+   <para>Optionally select an icon for all <filename>.java</filename> files, then click OK.</para>
+ </listitem>
 
         <listitem>
           <para>Click the "Close" button.</para>
         </listitem>
 
         <listitem>
-	  <para>All <filename>.java</filename> files should now be associated with DrJava, so double-clicking on one will open it in a new copy of DrJava.</para>
-	</listitem>
+   <para>All <filename>.java</filename> files should now be associated with DrJava, so double-clicking on one will open it in a new copy of DrJava.</para>
+ </listitem>
 
       </orderedlist>
     </section>
@@ -1165,9 +1188,9 @@ public class Student {
       <para>Use the following command at a command prompt to run the indenter on a series of files.</para>
 
       <cmdsynopsis>
-	<command>java -classpath drjava-DATE-TIME.jar edu.rice.cs.drjava.IndentFiles</command>
-	<arg choice='opt'>-indent N</arg>
-	<arg choice='opt' rep='repeat'>filename.java</arg>
+ <command>java -classpath drjava-DATE-TIME.jar edu.rice.cs.drjava.IndentFiles</command>
+ <arg choice='opt'>-indent N</arg>
+ <arg choice='opt' rep='repeat'>filename.java</arg>
       </cmdsynopsis>
       <para>Replace DATE-TIME with the appropriate value for your DrJava file.  The "-indent" argument is optional, where N is the number of spaces to use for an indentation level.</para>
 
