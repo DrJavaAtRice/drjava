@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<!--
+  HTML file providing an overview of the contents of this package.
+
+  $Id$
+-->
+</head>
+<body bgcolor="white">
+
+  Provides a decision tree used to correctly indent the current line.
+  <p>
+
+  The tree is composed of {@link IndentRule}s, and asks a series of yes or no
+  questions about the current position before determining the appropriate
+  action.  All nodes use helper methods from {@link DefinitionsDocument} and
+  the Reduced Model package for context.
+  <p>
+
+  The tree itself is built in the {@link Indenter} class, where a singleton
+  instance is made available to DefinitionsDocument for using on a single line.
+  An outline of the tree is given below.
+  <p>
+
+
+<!-- Indent Rule Decision Tree -->
+<code>
+<ul>
+    <li>1. <b>QuestionInsideComment</b><br>
+    <ul>
+        <!-- Comment Tree -->
+        <li>2. Yes: <b>QuestionPrevLineStartsComment</b><br>
+        <ul>
+            <li>3. Yes: <b>QuestionCurrLineEmpty</b><br>
+            <ul>
+                <li>4. Yes: ActionStartPrevLinePlus(" * ")
+                <li>5. No: ActionStartPrevLinePlus(" ")
+            </ul>
+            <li>6. No: <b>QuestionPrevLineStartsWith("*")</b><br>
+            <ul>
+                <li>7. Yes: <b>QuestionCurrLineStartsWith("*")</b><br>
+                <ul>
+                    <li>8. Yes: ActionStartPrevLinePlus("") (Goto 12)
+                    <li>9. No: <b>QuestionCurrLineEmpty</b><br>
+                    <ul>
+                        <li>10. Yes: ActionStartPrevLinePlus("* ")
+                        <li>11. No: ActionStartPrevLinePlus("") (Goto 12)
+                    </ul>
+                </ul>
+                <li>12. No: ActionStartPrevLinePlus("")
+            </ul>
+        </ul>
+
+        <!-- Main Tree -->
+        <li>13. No: <b>QuestionBraceIsParenOrBracket</b></br>
+        <ul>
+            <li>14. Yes: <b>QuestionNewParenPhrase</b><br>
+            <ul>
+                <li>15. Yes: ActionBracePlus(" ")
+                <li>16. No: ActionBracePlus(" " + 1 level)
+            </ul>
+            <li>17. No: <b>QuestionBraceIsCurly</b><br>
+            <ul>
+                <li>18. Yes: <b>QuestionCurrLineStartsWithSkipComments("}")</b><br>
+                <ul>
+                    <li>19. Yes: ActionStartStmtOfBracePlus("")
+
+                    <li>20. No: <b>QuestionStartAfterOpenBrace</b><br>
+                    <ul>
+                        <li>21. Yes: ActionStartStmtOfBracePlus(1 level) (Goto 34)
+                        <li>22. No: Goto 23.
+                    </ul>
+                </ul>
+                <li>23. No: <b>QuestionStartingNewStmt</b><br>
+                <ul>
+                    <li>24. Yes: <b>QuestionLineContains(":")</b><br>
+                    <ul>
+                        <li>25. Yes: <b>QuestionExistsCharInStmt("?", ":")</b><br>
+                        <ul>
+                            <li>26. Yes: ActionStartPrevStmtPlus("") (Goto 28)
+                            <li>27. No: ActionStartStmtOfBracePlus(1 level) (Goto 34)
+                        </ul>
+                        <li>28. No: ActionStartPrevStmtPlus("")
+                    </ul>
+                    <li>29. No: <b>QuestionCurrLineStartsWithSkipComments("{")</b><br>
+                    <ul>
+                        <li>30. Yes: ActionStartCurrStmtPlus("")
+                        <li>31. No: <b>QuestionLineContains(":")</b><br>
+                        <ul>
+                            <li>32. Yes: <b>QuestionExistsCharInStmt("?", ":")</b><br>
+                            <ul>
+                                <li>33. Yes: ActionStartCurrStmtPlus(1 level) (Goto 35)
+                                <li>34. No: ActionStartStmtOfBracePlus(1 level)
+                            </ul>
+                            <li>35. No: ActionStartCurrStmtPlus(1 level)
+                        </ul>
+                    </ul>
+                </ul>
+            </ul>
+        </ul>
+    </ul>
+</ul>
+<p>
+
+  @see edu.rice.cs.drjava.model.definitions
+  @see edu.rice.cs.drjava.model.definitions.reducedmodel
+</body>
+</html>
+
