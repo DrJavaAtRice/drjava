@@ -289,16 +289,15 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       ensureInterpreterConnected();
       
       try {
-        Vector<String> classpath = new Vector<String>();
-//        classpath.addAll(_startupClasspathVector);
-//        classpath.addAll(_interpreterJVM().getAugmentedClasspath());
-        for(int i = 0; i < _startupClasspathVector.size(); i++) {
-          classpath.addElement(_startupClasspathVector.elementAt(i));
-        }
-        Vector<String> augmentedClasspath = _interpreterJVM().getAugmentedClasspath();
-        for(int i = 0; i < augmentedClasspath.size(); i++) {
-          classpath.addElement(augmentedClasspath.elementAt(i));
-        }
+        Vector<String> classpath = new Vector<String>(_startupClasspathVector);
+        classpath.addAll(_interpreterJVM().getAugmentedClasspath());
+//        for(int i = 0; i < _startupClasspathVector.size(); i++) {
+//          classpath.addElement(_startupClasspathVector.elementAt(i));
+//        }
+//        Vector<String> augmentedClasspath = _interpreterJVM().getAugmentedClasspath();
+//        for(int i = 0; i < augmentedClasspath.size(); i++) {
+//          classpath.addElement(augmentedClasspath.elementAt(i));
+//        }
         return classpath;
       }
       catch (RemoteException re) {
@@ -652,6 +651,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public void setStartupClasspath(String classpath) {
     _startupClasspath = classpath;
+    _parseStartupClasspath();
   }
 
   /**

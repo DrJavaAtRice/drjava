@@ -55,7 +55,7 @@ import koala.dynamicjava.util.*;
 
 import edu.rice.cs.util.classloader.StickyClassLoader;
 import edu.rice.cs.util.*;
-import edu.rice.cs.drjava.DrJava;
+//import edu.rice.cs.drjava.DrJava;
 
 /**
  * An implementation of the interpreter for the repl pane.

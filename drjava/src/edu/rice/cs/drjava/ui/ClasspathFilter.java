@@ -51,7 +51,7 @@ import javax.swing.filechooser.FileFilter;
 public class ClasspathFilter extends FileFilter {
   public static final ClasspathFilter ONLY = new ClasspathFilter();
 
-  private ClasspathFilter() { }
+  protected ClasspathFilter() { }
 
   /**
    * Returns true if the file's extension matches JAR or ZIP.

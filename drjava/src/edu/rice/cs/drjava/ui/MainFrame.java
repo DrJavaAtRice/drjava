@@ -108,7 +108,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     " and should be recompiled!";
 
   /**
-   * Number of seconds to wait before displaying "Stepping..." message
+   * Number of milliseconds to wait before displaying "Stepping..." message
    * after a step is requested in the debugger.
    */
   private static final int DEBUG_STEP_TIMER_VALUE = 2000;
@@ -175,7 +175,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JSplitPane _mainSplit;
   
   private JList _docList;
-  private JButton _saveButton;
   private JButton _compileButton;
   private JButton _closeButton;
   private JButton _undoButton;
@@ -353,6 +352,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Saves the current document. */
   private Action _saveAction = new AbstractAction("Save") {
     public void actionPerformed(ActionEvent ae) {
+      JOptionPane.showMessageDialog(MainFrame.this, "saving");
       _save();
     }
   };
@@ -575,7 +575,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       super.actionPerformed(e);
       _currentDefPane.requestFocus();
       OpenDefinitionsDocument doc = _model.getActiveDocument();
-      _saveButton.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
+      _saveAction.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
     }
   };
 
@@ -585,7 +585,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       super.actionPerformed(e);
       _currentDefPane.requestFocus();
       OpenDefinitionsDocument doc = _model.getActiveDocument();
-      _saveButton.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
+      _saveAction.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
     }
   };
 
@@ -1408,6 +1408,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   /**
+   * For testing purposes.
    * @return The frame's compileAll button (Package private accessor)
    */
   JButton getCompileAllButton() {
@@ -1607,23 +1608,23 @@ public class MainFrame extends JFrame implements OptionConstants {
     d.addDocumentListener(new DocumentListener() {
       public void changedUpdate(DocumentEvent e) {
         _saveAction.setEnabled(true);
-        if (inDebugMode() && _debugPanel.getStatusText().equals(""))
+        if (inDebugMode() && _debugPanel.getStatusText().equals("")) {
           _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
-        //_compileAction.setEnabled(false);
+        }
         updateFileTitle();
       }
       public void insertUpdate(DocumentEvent e) {
         _saveAction.setEnabled(true);
-        if (inDebugMode() && _debugPanel.getStatusText().equals(""))
+        if (inDebugMode() && _debugPanel.getStatusText().equals("")) {
           _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
-        //_compileAction.setEnabled(false);
+        }
         updateFileTitle();
       }
       public void removeUpdate(DocumentEvent e) {
         _saveAction.setEnabled(true);
-        if (inDebugMode() && _debugPanel.getStatusText().equals(""))
+        if (inDebugMode() && _debugPanel.getStatusText().equals("")) {
           _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
-        //_compileAction.setEnabled(false);
+        }
         updateFileTitle();
       }
     });
@@ -2826,8 +2827,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // New, open, save, close
     _toolBar.add(_createToolbarButton(_newAction));
     _toolBar.add(_createToolbarButton(_openAction));
-    _saveButton = _createToolbarButton(_saveAction);
-    _toolBar.add(_saveButton);
+    _toolBar.add(_createToolbarButton(_saveAction));
     _closeButton = _createToolbarButton(_closeAction);
     _toolBar.add(_closeButton);
     
@@ -2854,7 +2854,6 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // Compile, reset, abort
     _toolBar.addSeparator();
-    //_compileButton = _createToolbarButton(_compileAction);
     _compileButton = _createToolbarButton(_compileAllAction);
     _toolBar.add(_compileButton);
     _toolBar.add(_createToolbarButton(_resetInteractionsAction));
@@ -2879,16 +2878,18 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _updateToolbarButtons() {
     
     Component[] buttons = _toolBar.getComponents();
-    
+    Font toolbarFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);    
+    boolean iconsEnabled = DrJava.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
+    boolean textEnabled = DrJava.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
+
     for (int i = 0; i< buttons.length; i++) {
-      
       if (buttons[i] instanceof JButton) {
-        
         JButton b = (JButton) buttons[i];
         Action a = b.getAction();
 
         // Work-around for strange configuration of undo/redo buttons
-        /**if (a == null) {
+        /*
+        if (a == null) {
           ActionListener[] al = b.getActionListeners(); // 1.4 only
             
           for (int j=0; j<al.length; j++) {
@@ -2898,12 +2899,11 @@ public class MainFrame extends JFrame implements OptionConstants {
             }
           }
         }
-          */
-          
-        Font toolbarFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
+        */
+
         b.setFont(toolbarFont);
                    
-        if (a==null) {
+        if (a == null) {
           if (b == _undoButton) {
             a = _undoAction;
           }
@@ -2914,9 +2914,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             continue;
           }
         }
-          
-        boolean iconsEnabled = DrJava.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
-          
+
         if (b.getIcon() == null) {
           if (iconsEnabled) {
             b.setIcon( (Icon) a.getValue(Action.SMALL_ICON));
@@ -2928,8 +2926,6 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
         }
           
-        boolean textEnabled = DrJava.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
-          
         if (b.getText() == "") {
           if (textEnabled) {
             b.setText( (String) a.getValue(Action.DEFAULT));
@@ -2940,7 +2936,6 @@ public class MainFrame extends JFrame implements OptionConstants {
             b.setText("");
           }
         }
-          
       }
     }
         
@@ -3882,7 +3877,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   private class ModelListener implements SingleDisplayModelListener {
     public void newFileCreated(OpenDefinitionsDocument doc) {
       _createDefScrollPane(doc);
-      
     }
 
     public void fileSaved(OpenDefinitionsDocument doc) {
@@ -4011,7 +4005,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       
       boolean isModified = active.isModifiedSinceSave();
       boolean canCompile = (!isModified && !active.isUntitled());
-      _saveAction.setEnabled(isModified || active.isUntitled());
+      _saveAction.setEnabled(!canCompile);
       _revertAction.setEnabled(!active.isUntitled());
       
       // Update error highlights          

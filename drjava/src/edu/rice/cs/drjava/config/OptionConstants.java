@@ -504,7 +504,15 @@ public interface OptionConstants {
    */
   public static final KeyStrokeOption KEY_LIFT_CURRENT_INTERACTION =
     new KeyStrokeOption("key.lift.current.interaction", KeyStrokeOption.NULL_KEYSTROKE);
-  
+
+  /**
+   * The key binding to enter or leave multiline input mode.
+   *
+  public static final KeyStrokeOption KEY_TOGGLE_MULTILINE_INTERACTION =
+    new KeyStrokeOption("key.toggle.multiline.interaction",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_M, mask));
+   */
+
   /**
    * The key binding for clearing the console.
    */

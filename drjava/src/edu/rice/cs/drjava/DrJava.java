@@ -47,10 +47,12 @@ import java.util.jar.JarFile;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import java.awt.event.*;
 
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.drjava.ui.SplashScreen;
+import edu.rice.cs.drjava.ui.ClasspathFilter;
 import edu.rice.cs.drjava.ui.AWTExceptionHandler;
 import edu.rice.cs.drjava.ui.SimpleInteractionsWindow;
 import edu.rice.cs.util.PreventExitSecurityManager;
@@ -631,14 +633,20 @@ public class DrJava implements OptionConstants {
       "or debug programs.)"
     };
     
-    int result = JOptionPane.showConfirmDialog(null,
-                                               text,
-                                               "Locate 'tools.jar'?",
+    int result = JOptionPane.showConfirmDialog(null, text, "Locate 'tools.jar'?",
                                                JOptionPane.YES_NO_OPTION);
     
     if (result == JOptionPane.YES_OPTION) {
       JFileChooser chooser = new JFileChooser();
-      // TO DO: add a file filter
+      chooser.setFileFilter(new ClasspathFilter() {
+        public boolean accept(File f) {
+          String ext = getExtension(f);
+          return ext != null && ext.equals("jar");
+        }
+        public String getName() {
+          return "Jar files";
+        }
+      });
       
       // Loop until we find a good tools.jar or the user gives up
       do {
