@@ -26,7 +26,7 @@
       </category>
       <view
             name="Interactions Pane"
-            icon="icons/drjava16.png"
+            icon="icons/drjava16.gif"
             category="edu.rice.cs.drjava"
             class="edu.rice.cs.drjava.plugins.eclipse.views.InteractionsView"
             id="edu.rice.cs.drjava.InteractionsView">
@@ -38,7 +38,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             name="DrJava"
-            icon="icons/drjava16.png"
+            icon="icons/drjava16.gif"
             class="edu.rice.cs.drjava.plugins.eclipse.DrJavaPerspective"
             id="edu.rice.cs.drjava.DrJavaPerspective">
       </perspective>
