@@ -551,6 +551,11 @@
         <include name="edu/rice/cs/LICENSE" />
       </fileset>
     </jar>
+  <!-- Copy the dynamicjava.jar to the lib directory -->
+  <copy file="${jarfile}"
+          tofile="${lib_dir}/dynamicjava.jar"
+          overwrite="yes"/>
+  <echo message="dynamicjava.jar has been created in your project directory and copied to the lib directory." />
   </target>
 
   <!-- Run the program! -->

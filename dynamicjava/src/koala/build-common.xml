@@ -12,6 +12,7 @@
   Assumes these targets exist:
     stable
     development
+    jar
  
 -->
 <!-- <taskdef name="javamake" classname="com.sun.tools.javamake.ant.JavaMake"/>  -->
@@ -103,12 +104,12 @@ target="jsr14"
 <!-- Commit source to CVS archive
      Before doing do, we update our copy with the CVS copy. This ensures that
      if there were any clashes, we have to resolve them now. Then we
-     recompile (from scratch) and retest. If this all succeeds, we can commit.
+     recompile (from scratch), create a jar file, and retest. If this all succeeds, we can commit.
 
      After committing, we tag the build we just made with the tag
      projectname-date-time.
 -->
-<target name="do-commit" depends="clean, update, test, make-version-stamp">
+<target name="do-commit" depends="clean, update, jar, test, make-version-stamp">  
   <property name="version-tag"
             value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
 
@@ -116,11 +117,8 @@ target="jsr14"
   <echo message="All tests passed. Rebuilding to put version tag (${version-tag}) into the code." />
   <antcall target="compile" />
 
-  <!-- Copy the dynamicjava.jar to the lib directory and commit it. -->
-  <copy file="${jarfile}"
-          tofile="${lib_dir}/dynamicjava.jar"
-          overwrite="yes"/>
-  <echo message="Copied current dynamicjava.jar to the lib directory. Please commit it to keep DrJava in sync with the koala code base." />
+  <!-- Remind user to commit the new dynamicjar.jar file. -->
+  <echo message="The built dynamicjava.jar file has been copied to the lib directory. Please commit it to keep DrJava in sync with the koala code base." />
   
   <tempfile property="commit-comments-filename" 
             destdir="${java.io.tmpdir}"

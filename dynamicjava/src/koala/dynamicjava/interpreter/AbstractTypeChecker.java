@@ -2514,10 +2514,10 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
           throw new ExecutionError("assignment.types", node);
         }
       }
-      else if (rc != null) {
-        if (TigerUtilities.boxesTo(rc, lc)) { 
-          return _box(v, lc);
-        }
+      else /* lc is not Primitive */
+        if (rc != null) {
+          if (rc.isPrimitive() && lc.isAssignableFrom(rc)) return _box(v,_correspondingRefClass(rc));
+          if (rc.isPrimitive() && TigerUtilities.boxesTo(rc, lc)) return _box(v, lc);
         if (!lc.isAssignableFrom(rc) && !rc.isAssignableFrom(lc)) {
           throw new ExecutionError("assignment.types", node);
         }
@@ -2838,40 +2838,78 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
 
   
   /**
-   * Returns the primitive type that corresponds to the given reference type.
-   * @param refType the reference type
+   * Returns the primitive type that corresponds to the given reference class.
+   * @param refType the reference class
    * @return the corresponding primitive type
    */
-  protected static PrimitiveType _correspondingPrimType(Class<?> refType) {
-    if (refType == Boolean.class) {
+  protected static PrimitiveType _correspondingPrimType(Class<?> refClass) {
+    if (refClass == Boolean.class) {
       return new BooleanType();
     }
-    else if (refType == Byte.class) {
+    else if (refClass == Byte.class) {
       return new ByteType();
     }
-    else if (refType == Character.class) {
+    else if (refClass == Character.class) {
       return new CharType();
     }
-    else if (refType == Short.class) {
+    else if (refClass == Short.class) {
       return new ShortType();
     }
-    else if (refType == Integer.class) {
+    else if (refClass == Integer.class) {
       return new IntType();
     }
-    else if (refType == Long.class) {
+    else if (refClass == Long.class) {
       return new LongType();
     }
-    else if (refType == Float.class) {
+    else if (refClass == Float.class) {
       return new FloatType();
     }
-    else if (refType == Double.class) {
+    else if (refClass == Double.class) {
       return new DoubleType();
     }
     else {
-      throw new RuntimeException("No corresponding primitive type for reference type " + 
-                                 refType + ".");
+      throw new RuntimeException("No corresponding primitive type for reference class " + 
+                                 refClass + ".");
     }
   }
+  
+  /**
+   * Returns the reference class that corresponds to the given primitive class.
+   * @param primClass the primtive class
+   * @return the corresponding reference class
+   */
+  protected static Class<?> _correspondingRefClass(Class<?> primClass) {
+    System.out.println(primClass);
+    if (primClass == boolean.class) {
+      return Boolean.class;
+    }
+    else if (primClass == byte.class) {
+      return Byte.class;
+    }
+    else if (primClass == char.class) {
+      return Character.class;
+    }
+    else if (primClass == short.class) {
+      return Short.class;
+    }
+    else if (primClass == int.class) {
+      return Integer.class;
+    }
+    else if (primClass == long.class) {
+      return Long.class;
+    }
+    else if (primClass == float.class) {
+      return Float.class;
+    }
+    else if (primClass == double.class) {
+      return Double.class;
+    }
+    else {
+      throw new RuntimeException("No corresponding reference class for primitive class (?) " + 
+                                 primClass + ".");
+    }
+  }
+  
   
   /**
    * If autoboxing is supported

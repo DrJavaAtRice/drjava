@@ -119,6 +119,11 @@ public class DynamicjavaTest extends DynamicJavaTestCase {
     assertEquals("Successful cast test", new Integer(12), interpret(testString));
   }
   
+  public void testAutoBoxing() {
+    testString = "Object o = 5; o;";
+    assertEquals("Evaluation of autoboxed int 5", new Integer(5), interpret(testString));
+  }
+  
   public void testNonGenericList(){
     testString = 
       "import java.util.*;"+
