@@ -135,13 +135,27 @@ public abstract class AbstractConsoleController {
 
     // System.out
     _systemOutStyle.addAttributes(_defaultStyle);
-    _systemOutStyle.addAttribute(StyleConstants.Foreground, Color.green.darker().darker());
+    _systemOutStyle.addAttribute(StyleConstants.Foreground,
+                                 DrJava.getConfig().getSetting(OptionConstants.SYSTEM_OUT_COLOR));
     _adapter.setDocStyle(ConsoleDocument.SYSTEM_OUT_STYLE, _systemOutStyle);
+    DrJava.getConfig().addOptionListener(OptionConstants.SYSTEM_OUT_COLOR,
+                                         new OptionListener<Color>() {
+      public void optionChanged(OptionEvent<Color> oe) {
+        _systemOutStyle.addAttribute(StyleConstants.Foreground, oe.value);
+      }
+    });
    
     // System.err
     _systemErrStyle.addAttributes(_defaultStyle);
-    _systemErrStyle.addAttribute(StyleConstants.Foreground, Color.red);
+    _systemErrStyle.addAttribute(StyleConstants.Foreground,
+                                 DrJava.getConfig().getSetting(OptionConstants.SYSTEM_ERR_COLOR));
     _adapter.setDocStyle(ConsoleDocument.SYSTEM_ERR_STYLE, _systemErrStyle);
+    DrJava.getConfig().addOptionListener(OptionConstants.SYSTEM_ERR_COLOR,
+                                         new OptionListener<Color>() {
+      public void optionChanged(OptionEvent<Color> oe) {
+        _systemErrStyle.addAttribute(StyleConstants.Foreground, oe.value);
+      }
+    });
   }
   
   /**

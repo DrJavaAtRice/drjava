@@ -94,7 +94,6 @@ public class InteractionsController extends AbstractConsoleController {
    * Style to use for debug messages.
    */
   protected final SimpleAttributeSet _debugStyle;
-  protected static final Color SYSTEM_IN_COLOR = Color.magenta.darker().darker();
   protected static final String INPUT_ENTERED_NAME = "Input Entered";
   protected static final String INSERT_NEWLINE_NAME = "Insert Newline";
 
@@ -479,22 +478,17 @@ public class InteractionsController extends AbstractConsoleController {
    * A box that can be inserted into the interactions pane for separate input.
    */
   class InputBox extends JTextArea {
+    private static final int BORDER_WIDTH = 1;
+    private static final int INNER_BUFFER_WIDTH = 3;
+    private static final int OUTER_BUFFER_WIDTH = 2;
+    private Color _bgColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
+    private Color _fgColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
+    private Color _sysInColor = DrJava.getConfig().getSetting(OptionConstants.SYSTEM_IN_COLOR);
     public InputBox() {
-      //super(1, 80);
-      DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR,
-                                           new OptionListener<Color>() {
-        public void optionChanged(OptionEvent<Color> oe) {
-          setBorder(_createBorder());
-        }
-      });
-      DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_BACKGROUND_COLOR,
-                                           new OptionListener<Color>() {
-        public void optionChanged(OptionEvent<Color> oe) {
-          setBorder(_createBorder());
-        }
-      });
+      setForeground(_sysInColor);
+      setBackground(_bgColor);
+      setCaretColor(_fgColor);
       setBorder(_createBorder());
-      setForeground(SYSTEM_IN_COLOR);
       setLineWrap(true);
 
       InputMap im = getInputMap(WHEN_FOCUSED);
@@ -503,14 +497,36 @@ public class InteractionsController extends AbstractConsoleController {
       ActionMap am = getActionMap();
       am.put(INPUT_ENTERED_NAME, _inputEnteredAction);
       am.put(INSERT_NEWLINE_NAME, _insertNewlineAction);
+
+      DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR,
+                                           new OptionListener<Color>() {
+        public void optionChanged(OptionEvent<Color> oe) {
+          _fgColor = oe.value;
+          setBorder(_createBorder());
+          setCaretColor(oe.value);
+        }
+      });
+      DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_BACKGROUND_COLOR,
+                                           new OptionListener<Color>() {
+        public void optionChanged(OptionEvent<Color> oe) {
+          _bgColor = oe.value;
+          setBorder(_createBorder());
+          setBackground(oe.value);
+        }
+      });
+      DrJava.getConfig().addOptionListener(OptionConstants.SYSTEM_IN_COLOR,
+                                           new OptionListener<Color>() {
+        public void optionChanged(OptionEvent<Color> oe) {
+          _sysInColor = oe.value;
+          setForeground(oe.value);
+        }
+      });
     }
 
     private Border _createBorder() {
-      Color outerColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
-      Color innerColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
-      Border outerouter = BorderFactory.createLineBorder(innerColor, 2);
-      Border outer = BorderFactory.createLineBorder(outerColor, 1);
-      Border inner = BorderFactory.createLineBorder(innerColor, 3);
+      Border outerouter = BorderFactory.createLineBorder(_bgColor, OUTER_BUFFER_WIDTH);
+      Border outer = BorderFactory.createLineBorder(_fgColor, BORDER_WIDTH);
+      Border inner = BorderFactory.createLineBorder(_bgColor, INNER_BUFFER_WIDTH);
       Border temp = BorderFactory.createCompoundBorder(outer, inner);
       return BorderFactory.createCompoundBorder(outerouter, temp);
     }

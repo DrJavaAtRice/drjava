@@ -524,6 +524,12 @@ public class ConfigFrame extends JFrame {
                                                 "The color for breakpoints in the Definitions Pane.", true));
     panel.addComponent(new ColorOptionComponent(OptionConstants.DEBUG_THREAD_COLOR, "Debugger Location Color", this,
                                                 "The color for the location of the current suspended thread in the Definitions Pane.", true));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.SYSTEM_OUT_COLOR, "System.out Color", this,
+                                                "The color for System.out in the Interactions and Console Panes."));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.SYSTEM_ERR_COLOR, "System.err Color", this,
+                                                "The color for System.err in the Interactions and Console Panes."));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.SYSTEM_IN_COLOR, "System.in Color", this,
+                                                "The color for System.in in the Interactions Pane."));
     panel.displayComponents();
   }
   

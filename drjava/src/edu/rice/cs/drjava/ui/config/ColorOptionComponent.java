@@ -93,13 +93,25 @@ public class ColorOptionComponent extends OptionComponent<Color> {
     _panel.add(_colorField, BorderLayout.CENTER);
     _panel.add(_button, BorderLayout.EAST);
     if (_isBackgroundColor) {
-      _colorField.setForeground(Color.black);
+//      _colorField.setForeground(Color.black);
+      _colorField.setForeground(DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
+      DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR,
+                                           new OptionListener<Color>() {
+        public void optionChanged(OptionEvent<Color> oe) {
+          _colorField.setForeground(oe.value);
+        }
+      });
     }
     else {
-      _colorField.setBackground(Color.white);
-      // Would be nice to use background color here (need a listener in configframe?)
-      //_colorField.setBackground(DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR)););
-    }
+//      _colorField.setBackground(Color.white);
+      _colorField.setBackground(DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR));
+       DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_BACKGROUND_COLOR,
+                                           new OptionListener<Color>() {
+        public void optionChanged(OptionEvent<Color> oe) {
+          _colorField.setBackground(oe.value);
+        }
+      });
+   }
     _color = DrJava.getConfig().getSetting(_option);
     _updateField(_color);
   }

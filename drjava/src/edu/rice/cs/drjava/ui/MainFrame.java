@@ -352,7 +352,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Saves the current document. */
   private Action _saveAction = new AbstractAction("Save") {
     public void actionPerformed(ActionEvent ae) {
-      JOptionPane.showMessageDialog(MainFrame.this, "saving");
       _save();
     }
   };

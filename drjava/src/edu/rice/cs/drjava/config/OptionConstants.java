@@ -92,6 +92,13 @@ public interface OptionConstants {
     new ColorOption("definitions.single.quoted.color", Color.magenta);
   public static final ColorOption DEFINITIONS_NUMBER_COLOR =
     new ColorOption("definitions.number.color", Color.cyan.darker());
+  public static final ColorOption SYSTEM_OUT_COLOR =
+    new ColorOption("system.out.color", Color.green.darker().darker());
+  public static final ColorOption SYSTEM_ERR_COLOR =
+    new ColorOption("system.err.color", Color.red);
+  public static final ColorOption SYSTEM_IN_COLOR =
+    new ColorOption("system.in.color", Color.magenta.darker().darker());
+    
   
   /**
    * Color for background of definitions pane.

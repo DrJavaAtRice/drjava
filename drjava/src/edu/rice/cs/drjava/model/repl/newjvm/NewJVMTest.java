@@ -52,7 +52,7 @@ import edu.rice.cs.drjava.model.*;
  * @version $Id$
  */
 public final class NewJVMTest extends TestCase {
-  final boolean printMessages = true;
+  final boolean printMessages = false;
   
   private static TestJVMExtension _jvm;
 
