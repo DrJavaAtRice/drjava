@@ -67,11 +67,17 @@ public class EventHandler extends Thread {
         while (it.hasNext()) {
           handleEvent(it.nextEvent());
         }
-      } catch (InterruptedException exc) {
+      }
+      catch (InterruptedException exc) {
         // Do nothing. Any changes will be seen at top of loop.
-      } catch (VMDisconnectedException discExc) {
+      }
+      catch (VMDisconnectedException discExc) {
         handleDisconnectedException();
         break;
+      }
+      catch (Exception ex) {
+        _manager.printMessage("An unexpected exception occurred:\n" + ex);
+        _manager.printMessage("The debugger may have become unstable as a result.");
       }
     }
     _manager.notifyDebuggerShutdown();    
@@ -108,23 +114,25 @@ public class EventHandler extends Thread {
   
   private void _handleBreakpointEvent(BreakpointEvent e) {
     synchronized(_manager){
-      _manager.setCurrentThread(e.thread());
-      _manager.currThreadSuspended();
-      _manager.scrollToSource(e);
-      _manager.reachedBreakpoint((BreakpointRequest)e.request());
+      if (_manager.setCurrentThread(e.thread())) {
+        _manager.currThreadSuspended();
+        _manager.scrollToSource(e);
+        _manager.reachedBreakpoint((BreakpointRequest)e.request());
+      }
     }
   }
   
   private void _handleStepEvent(StepEvent e) {
     synchronized(_manager){
-      _manager.printMessage("Stepped to " + 
-                            e.location().declaringType().name() + "." +
-                            e.location().method().name() + "(...)  [line " + 
-                            e.location().lineNumber() + "]");
-      _manager.getEventRequestManager().deleteEventRequest(e.request());
-      _manager.setCurrentThread(e.thread());
-      _manager.currThreadSuspended();
-      _manager.scrollToSource(e);
+      if (_manager.setCurrentThread(e.thread())) {
+        _manager.printMessage("Stepped to " + 
+                              e.location().declaringType().name() + "." +
+                              e.location().method().name() + "(...)  [line " + 
+                              e.location().lineNumber() + "]");
+        _manager.getEventRequestManager().deleteEventRequest(e.request());
+        _manager.currThreadSuspended();
+        _manager.scrollToSource(e);
+      }
     }
   }
   

@@ -167,7 +167,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
     if (_threadTable != null) {
       ((AbstractTableModel)_threadTable.getModel()).fireTableDataChanged();
     }
-
   }
   
   
@@ -235,7 +234,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   }
   
   private void _initThreadTable() {
-    _threadTable = new JTable( new ThreadTableModel());
+    _threadTable = new JTable(new ThreadTableModel());
     _threadTable.addMouseListener(new ThreadMouseAdapter());
     _rightPane.addTab("Threads", new JScrollPane(_threadTable)); 
     // Sets the name column to always be 2 times as wide as the status column
@@ -372,9 +371,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
       switch(col) {
         case 0: return threadData.getName();
         case 1: return threadData.getStatus();
+        default: return null;
       }
       
-      return null;
     }
 
     public boolean isCellEditable(int row, int col) { 
@@ -453,13 +452,12 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private void _initPopup() {
     _threadRunningPopupMenu = new JPopupMenu("Thread Selection");
     JMenuItem threadRunningSuspend = new JMenuItem();
-    Action suspendAction
-      = new AbstractAction() {
+    Action suspendAction = new AbstractAction("Select Thread") {
       public void actionPerformed(ActionEvent e) {
-        try{
+        try {
           _debugger.suspend(getSelectedThread());
         }
-        catch(DebugException exception){
+        catch(DebugException exception) {
           JOptionPane.showMessageDialog(_frame, "Cannot suspend the thread.", "Debugger Error", JOptionPane.ERROR_MESSAGE);
         }
       }
@@ -467,17 +465,15 @@ public class DebugPanel extends JPanel implements OptionConstants {
     threadRunningSuspend.setAction(suspendAction);
     _threadRunningPopupMenu.add(threadRunningSuspend);
     threadRunningSuspend.setText("Suspend and Select Thread");
-    
+
     _threadSuspendedPopupMenu = new JPopupMenu("Thread Selection");
-    JMenuItem threadSuspendedSelect = new JMenuItem();
-    threadSuspendedSelect.setAction(suspendAction);
-    JMenuItem threadSuspendedResume = new JMenuItem();
-    threadSuspendedResume.setAction(new AbstractAction() {
+    JMenuItem threadSuspendedSelect = new JMenuItem(suspendAction);
+    JMenuItem threadSuspendedResume = new JMenuItem(new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
-        try{
+        try {
         _debugger.resume(getSelectedThread());
         }
-        catch(DebugException dbe){
+        catch(DebugException dbe) {
           JOptionPane.showMessageDialog(_frame, "Cannot resume the thread.", "Debugger Error", JOptionPane.ERROR_MESSAGE);
         }
       }
@@ -514,7 +510,11 @@ public class DebugPanel extends JPanel implements OptionConstants {
    * @return the highlighted thread
    */
   public DebugThreadData getSelectedThread() {
-    return _threads.elementAt(_threadTable.getSelectedRow());
+    int row = _threadTable.getSelectedRow();
+    if (row == -1) {
+      row = 0;  // if there is no selected index, just return the first element
+    }
+    return _threads.elementAt(row);
   }
 
   /**
@@ -763,12 +763,18 @@ public class DebugPanel extends JPanel implements OptionConstants {
      */
     public void currThreadSet(DebugThreadData thread) {
       _currentThreadID = thread.getUniqueID();
-      _threadTable.repaint();
+
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          updateData();
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
     }
   }
-  
 
-  
+
   /**
    * Enables and disables the appropriate buttons depending on if the current
    * thread has been suspended or resumed
@@ -791,7 +797,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   public String getStatusText() {
     return _statusBar.getText();
   }
-  
+
   /**
    * Concrete DebugMouseAdapter for the thread table.
    */
@@ -801,7 +807,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
 
     public void _showPopup(MouseEvent e) {
-      if (getSelectedThread().isSuspended()) {
+      DebugThreadData thread = _threads.elementAt(_lastRow);
+      if (thread.isSuspended()) {
          _threadSuspendedPopupMenu.show(e.getComponent(), e.getX(), e.getY());
       }
 //       else {
@@ -810,13 +817,14 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
 
     public void _action() {
-      if (getSelectedThread().isSuspended()) {
-         try{
-          _debugger.suspend(getSelectedThread());
+      DebugThreadData thread = _threads.elementAt(_lastRow);
+      if (thread.isSuspended()) {
+        try {
+          _debugger.suspend(thread);
         }
         catch(DebugException exception){
           JOptionPane.showMessageDialog(_frame, "Cannot suspend the thread.", 
-                                        "Debugger Erro", JOptionPane.ERROR_MESSAGE);
+                                        "Debugger Error", JOptionPane.ERROR_MESSAGE);
         }
       }
     }
@@ -835,7 +843,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
 
     protected void _action() {
-      _debugger.scrollToSource(getSelectedStackItem());
+      _debugger.scrollToSource(_stackFrames.elementAt(_lastRow));
     }
   }
   
@@ -844,18 +852,20 @@ public class DebugPanel extends JPanel implements OptionConstants {
    * bringing up a right-click menu.
    */
   private abstract class DebugMouseAdapter extends RightClickMouseAdapter {
-    private JTable _table;
+    protected JTable _table;
+    protected int _lastRow;
 
     public DebugMouseAdapter(JTable table) {
       _table = table;
+      _lastRow = -1;
     }
 
     protected abstract void _showPopup(MouseEvent e);
     protected abstract void _action();
 
     protected void _popupAction(MouseEvent e) {
-      int row = _table.rowAtPoint(e.getPoint());
-      _table.setRowSelectionInterval(row, row);
+      _lastRow = _table.rowAtPoint(e.getPoint());
+      _table.setRowSelectionInterval(_lastRow, _lastRow);
       _showPopup(e);
     }
 
@@ -863,6 +873,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       super.mousePressed(e);
 
       if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
+        _lastRow = _table.rowAtPoint(e.getPoint());
         _action();
       }
     }

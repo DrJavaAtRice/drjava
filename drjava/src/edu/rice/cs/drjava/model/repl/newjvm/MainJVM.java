@@ -388,7 +388,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public void removeInterpreter(String name) {
     // silently fail if disabled. see killInterpreter docs for details.
-    if (! _enabled) return;
+    if (!_enabled) {
+      return;
+    }
 
     ensureInterpreterConnected();
     
@@ -408,7 +410,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public boolean setActiveInterpreter(String name) {
     // silently fail if disabled. see killInterpreter docs for details.
-    if (! _enabled) return false;
+    if (!_enabled) {
+      return false;
+    }
 
     ensureInterpreterConnected();
     

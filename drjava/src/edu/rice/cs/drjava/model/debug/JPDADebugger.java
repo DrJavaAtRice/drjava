@@ -287,19 +287,28 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * This method assumes that the thread referenced by thread
    * is suspended already.
    */
-  synchronized void setCurrentThread(ThreadReference thread) {
-    _suspendedThreads.push(thread);
+  synchronized boolean setCurrentThread(ThreadReference thread) {
+    if (_suspendedThreads.isEmpty() || _suspendedThreads.peek() != thread) {
+      _suspendedThreads.push(thread);
+      return true;
+    }
+    else {
+      return false;
+    }
   }
-  
+
   /**
    * Sets the current debugged thread to the thread referenced by threadData,
    * suspending it if necessary.
    */
-  synchronized public void setCurrentThread(DebugThreadData threadData) throws DebugException{
-    if (!isReady()) return;
-    
-    if ( threadData == null)
+  synchronized public void setCurrentThread(DebugThreadData threadData) throws DebugException {
+    if (!isReady()) {
       return;
+    }
+    
+    if ( threadData == null) {
+      return;
+    }
     
     ThreadReference thread_ref = getThreadFromDebugThreadData(threadData);
     
@@ -307,7 +316,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
      * Special case to avoid overhead of scrollToSource() if we
      * are selecting the thread we have already selected currently
      */
-    if( _suspendedThreads.size() > 0 && 
+    if(_suspendedThreads.size() > 0 && 
        _suspendedThreads.peek().uniqueID() == thread_ref.uniqueID() ){
       return;
     }
@@ -315,7 +324,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     /** if we switch to a currently suspended thread, we need to remove 
      * it from the stack and put it on the top
      **/
-    if( _suspendedThreads.contains(thread_ref.uniqueID()) ){
+    if( _suspendedThreads.contains(thread_ref.uniqueID()) ) {
       _suspendedThreads.remove(thread_ref.uniqueID());
     }
     if( !thread_ref.isSuspended() ){
@@ -342,7 +351,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
     
     _suspendedThreads.push(thread_ref);
-    try{
+    try {
       if( thread_ref.frameCount() <= 0 ) {
         printMessage(thread_ref.name() + " could not be suspended. It had no stackframes.");
         resume();
@@ -1359,8 +1368,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * an interpreter's environment and then switch the Interactions window's
    * interpreter to that interpreter
    */
-  private void dumpVariablesIntoInterpreterAndSwitch() throws DebugException{
-    try{
+  private void dumpVariablesIntoInterpreterAndSwitch() throws DebugException {
+    try {
       ThreadReference suspendedThreadRef = _suspendedThreads.peek();
       String interpreterName = _getUniqueThreadName(suspendedThreadRef);
       ((DefaultGlobalModel)_model).getInteractionsModel().addDebugInterpreter(interpreterName);
@@ -1372,6 +1381,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       
       while(varsIterator.hasNext()){
         LocalVariable localVar = (LocalVariable)varsIterator.next();
+        if (printMessages) {
+          System.out.println("local variable: " + localVar);
+        }
         frame = suspendedThreadRef.frame(0);
         Value val = frame.getValue(localVar);
         _defineVariable(suspendedThreadRef, debugInterpreter,
@@ -1379,6 +1391,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       }
       
       frame = suspendedThreadRef.frame(0);
+      
       Value thisVal = frame.thisObject();
       if (thisVal != null) {
         _defineVariable(suspendedThreadRef, debugInterpreter,
@@ -1597,18 +1610,22 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    */
   synchronized void currThreadResumed() throws DebugException {
     // uncomment line 334 and the lines in currThreadSuspended to make the new functionality work
-    if( printMessages ) System.out.println("In currThreadResumed()");
+    if (printMessages) {
+      System.out.println("In currThreadResumed()");
+    }
     
     /* switch to next interpreter on the stack */
-    if( _suspendedThreads.isEmpty() ){
+    if (_suspendedThreads.isEmpty()) {
       ((DefaultInteractionsModel)_model.getInteractionsModel()).setToDefaultInterpreter();
     }
-    else{
+    else {
       ThreadReference threadRef = _suspendedThreads.peek();
       _switchToInterpreterForThreadReference(threadRef);
     }
     
-    if( printMessages ) System.out.println("Out of _copyBack()");
+    if (printMessages) {
+      System.out.println("Out of _copyBack()");
+    }
     String oldInterpreterName = _getUniqueThreadName(_runningThread);
     ((DefaultInteractionsModel)_model.getInteractionsModel()).removeInterpreter(oldInterpreterName);
     notifyListeners(new EventNotifier() {
@@ -1769,29 +1786,31 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   /** 
    * A stack from which you can remove any element, not just the top of the stack 
    */
-  protected class RandomAccessStack{
+  protected class RandomAccessStack {
     private Vector<ThreadReference> _data = new Vector<ThreadReference>();
-    
+
     public void push(ThreadReference t){
       _data.insertElementAt(t, 0);
     }
-    
-    public ThreadReference peek() throws NoSuchElementException{
-      try{
+
+    public ThreadReference peek() throws NoSuchElementException {
+      try {
         return _data.elementAt(0);
-      }catch(ArrayIndexOutOfBoundsException e){
+      }
+      catch(ArrayIndexOutOfBoundsException e){
         throw new NoSuchElementException("Cannot peek at the top of an empty RandomAccessStack!");
       }
     }
-    
-    public ThreadReference peekAt(int i) throws NoSuchElementException{
-      try{
+
+    public ThreadReference peekAt(int i) throws NoSuchElementException {
+      try {
         return _data.elementAt(i);
-      }catch(ArrayIndexOutOfBoundsException e){
-        throw new NoSuchElementException("Cannot peek at the top of an empty RandomAccessStack!");
+      }
+      catch(ArrayIndexOutOfBoundsException e){
+        throw new NoSuchElementException("Cannot peek at element " + i + " of this stack!");
       }
     }
-    
+
     public ThreadReference remove(long id) throws NoSuchElementException{
       int i = 0;
       for(i = 0; i < _data.size(); i++){
@@ -1844,7 +1863,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         _theDeadThreads.put(new Long(thread.getUniqueID()), thread);
       }
       
-      public List filter(List threads){
+      public List filter(List threads) {
         LinkedList retList = new LinkedList();
         Enumeration keys = _theDeadThreads.keys();
         
@@ -1864,8 +1883,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
               break;
             }
           }
-          
-          if( !flag ){
+
+          if(!flag) {
             _theDeadThreads.remove(key);
           }
         }
@@ -1873,37 +1892,37 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         Iterator iterator = threads.iterator();
         ThreadReference ref = null;
         
-        while(iterator.hasNext()){
+        while(iterator.hasNext()) {
           ref = (ThreadReference)iterator.next();
           if( _theDeadThreads.get(new Long(ref.uniqueID())) == null ){
             retList.add(ref);
           }
         }
-        
-        return (List)retList;
+
+        return retList;
       }
     }
     
     class SystemThreadsFilter{
-      private Hashtable<String,Boolean> _filterThese = null;
-      
+      private Hashtable<String,Boolean> _filterThese;
+
       public SystemThreadsFilter(List threads){
         _filterThese = new Hashtable<String,Boolean>();
         Iterator iterator = threads.iterator();
         String temp = null;
-        
+
         while(iterator.hasNext()){
           temp = ((ThreadReference)iterator.next()).name();
           _filterThese.put(temp, new Boolean(true));
         }
       }
-     
+
       public List filter(List list){
         LinkedList retList = new LinkedList();
         String temp = null;
         ThreadReference tempThreadRef = null;
         Iterator iterator = list.iterator();
-        
+
         while(iterator.hasNext()){
           tempThreadRef = (ThreadReference)iterator.next();
           temp = tempThreadRef.name();
@@ -1911,7 +1930,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
             retList.add(tempThreadRef);
           }
         }
-        
+
         return retList;
       }
     }

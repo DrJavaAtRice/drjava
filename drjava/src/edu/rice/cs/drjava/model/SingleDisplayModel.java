@@ -362,6 +362,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
     setActiveDocument(openedDoc);
     return openedDoc;
   }
+
   /**
    * Saves all open files, prompting for names if necessary.
    * When prompting (ie, untitled document), set that document as active.
