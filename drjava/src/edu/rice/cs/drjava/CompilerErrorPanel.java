@@ -10,10 +10,15 @@ package edu.rice.cs.drjava;
 import java.util.Arrays;
 
 import javax.swing.JPanel;
-import javax.swing.JComboBox;
+import javax.swing.JList;
+import javax.swing.JTextArea;
+import javax.swing.ListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.SwingUtilities;
+import javax.swing.ListSelectionModel;
+import javax.swing.BoxLayout;
+import javax.swing.JScrollPane;
 
 import javax.swing.text.Document;
 import javax.swing.text.Position;
@@ -22,14 +27,15 @@ import javax.swing.text.DefaultHighlighter;
 
 import javax.swing.event.CaretListener;
 import javax.swing.event.CaretEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
 
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 import java.awt.Color;
-
+import java.awt.Component;
+import java.awt.BorderLayout;
 public class CompilerErrorPanel extends JPanel {
   private static final String NEWLINE = System.getProperty("line.separator");
 
@@ -46,7 +52,7 @@ public class CompilerErrorPanel extends JPanel {
   private int _selectedError;
 
   private CompilerErrorListModel _listModel;
-  private JComboBox _errorList;
+  private JList _errorList;
   private JButton _showAllButton;
   private JButton _nextButton;
   private JButton _previousButton;
@@ -60,8 +66,8 @@ public class CompilerErrorPanel extends JPanel {
    */
   private boolean _caretGuard = false;
 
-  private ActionListener _listListener = new ActionListener() {
-    public void actionPerformed(ActionEvent e) {
+  private ListSelectionListener _listListener = new ListSelectionListener() {
+    public void valueChanged(ListSelectionEvent e) {
       if (! _caretGuard) {
         // subtract 1 to deal with the (none) line in the list
         _gotoError(_errorList.getSelectedIndex() - 1);
@@ -154,7 +160,9 @@ public class CompilerErrorPanel extends JPanel {
   }
 
   public CompilerErrorPanel(DefinitionsView view) {
-    _listModel = new CompilerErrorListModel();
+		setLayout(new BorderLayout());
+				
+		_listModel = new CompilerErrorListModel();
     _definitionsView = view;
     _definitionsView.addCaretListener(_listener);
 
@@ -163,9 +171,10 @@ public class CompilerErrorPanel extends JPanel {
     _errorPositions = new Position[0];
     _selectedError = 0;
 
-    _errorList = new JComboBox(_listModel);
-    _errorList.setEditable(false);
-    _errorList.addActionListener(_listListener);
+    _errorList = new JList(_listModel);
+		_errorList.setCellRenderer(new myCellRenderer());
+		_errorList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    _errorList.addListSelectionListener(_listListener);
     
     _showAllButton = new JButton("Show all");
     _showAllButton.addActionListener(new ActionListener() {
@@ -187,13 +196,21 @@ public class CompilerErrorPanel extends JPanel {
           _gotoError(_selectedError - 1);
         }
     });
-
+		
     _resetEnabledStatus();
-    add(_errorList);
+		//size stuff
+		_errorList.setVisibleRowCount(4);
+		JScrollPane scrollPane = new JScrollPane(_errorList);
+		//scrollPane.setPreferredSize(
+		//	_errorList.getPreferredScrollableViewportSize());
+    add(scrollPane, BorderLayout.CENTER);
     // Show all not yet implemented.
     // add(_showAllButton);
-    add(_previousButton);
-    add(_nextButton);
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+		buttonPanel.add(_previousButton);
+    buttonPanel.add(_nextButton);
+		add(buttonPanel, BorderLayout.EAST);
   }
 
   private void _gotoError(int newIndex) {
@@ -345,4 +362,43 @@ public class CompilerErrorPanel extends JPanel {
       fireContentsChanged(this, 0, Math.min(oldSize, _errors.length) + 1);
     }
   }
+
+	private class myCellRenderer extends JTextArea implements ListCellRenderer {
+		public myCellRenderer()
+			{
+				setLineWrap(true);
+				setEditable(false);
+			}
+		
+		public myCellRenderer (String text, boolean isSelected)
+			{
+				if(isSelected) {
+					setBackground(Color.yellow);
+					setForeground(Color.black);
+				}
+				setLineWrap(true);
+				setEditable(false);
+				append(text);
+			}
+
+		public Component getListCellRendererComponent (JList list,
+																									 Object value,
+																									 int index,
+																									 boolean isSelected,
+																									 boolean cellHasFocus)
+			{
+				return new myCellRenderer(value.toString(),isSelected);
+			}
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
