@@ -105,11 +105,11 @@ public class CompilerProxy implements CompilerInterface {
       _realCompiler = CompilerRegistry.createCompiler(c);
      
       StringBuffer newclasspath = new StringBuffer();
-      Vector<String> cp = DrJava.CONFIG.getSetting(OptionConstants.EXTRA_CLASSPATH);
+      Vector<File> cp = DrJava.CONFIG.getSetting(OptionConstants.EXTRA_CLASSPATH);
       //if(cp!=null) {
-        Enumeration<String> enum = cp.elements();
+        Enumeration<File> enum = cp.elements();
         while(enum.hasMoreElements()) {
-          newclasspath.append(System.getProperty("path.separator")).append(enum.nextElement());
+          newclasspath.append(System.getProperty("path.separator")).append(enum.nextElement().getAbsolutePath());
         }
       //}
       _realCompiler.setExtraClassPath(newclasspath.toString());

@@ -41,6 +41,7 @@ package edu.rice.cs.drjava.ui.config;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import gj.util.Vector;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
@@ -67,8 +68,8 @@ public class VectorOptionComponentTest extends TestCase {
   
   public void testCancelDoesNotChangeConfig() {
 
-    Vector testVector = new Vector<String>();
-    testVector.addElement("test");
+    Vector testVector = new Vector<File>();
+    testVector.addElement(new File("test"));
     
     _option.setValue(testVector);
     _option.resetToCurrent(); // should reset to the original.
@@ -81,8 +82,8 @@ public class VectorOptionComponentTest extends TestCase {
   }
   
   public void testApplyDoesChangeConfig() {
-    Vector testVector = new Vector<String>();
-    testVector.addElement("blah");
+    Vector testVector = new Vector<File>();
+    testVector.addElement(new File("blah"));
     
     _option.setValue(testVector); 
     _option.updateConfig();
@@ -93,8 +94,8 @@ public class VectorOptionComponentTest extends TestCase {
   }
   
   public void testApplyThenResetDefault() {
-    Vector testVector = new Vector<String>();
-    testVector.addElement("blah");
+    Vector testVector = new Vector<File>();
+    testVector.addElement(new File("blah"));
     
     _option.setValue(testVector);
     _option.updateConfig(); 
@@ -111,7 +112,7 @@ public class VectorOptionComponentTest extends TestCase {
    * @param o the compared Vector<T>
    * @return boolean
    */
-  public boolean vectorEquals( Vector<String> v1, Vector<String> v2) {
+  public boolean vectorEquals( Vector<File> v1, Vector<File> v2) {
     
     if (v1.size() == v2.size()) {
       

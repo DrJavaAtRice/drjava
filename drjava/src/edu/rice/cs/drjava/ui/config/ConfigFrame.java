@@ -323,7 +323,10 @@ public class ConfigFrame extends JFrame {
 
     PanelTreeNode keystrokesNode = _createPanel(new KeyStrokeConfigPanel("Key Bindings"),
                                                 _rootNode);
-    _setupKeyBindingsPanel(keystrokesNode.getPanel());    
+    _setupKeyBindingsPanel(keystrokesNode.getPanel());
+    
+    PanelTreeNode debugNode = _createPanel("Debugger");
+    _setupDebugPanel(debugNode.getPanel());
 
     PanelTreeNode miscNode = _createPanel("Miscellaneous");
     _setupMiscPanel(miscNode.getPanel());
@@ -413,6 +416,15 @@ public class ConfigFrame extends JFrame {
   }
   
   /**
+   * Add all of the components for the Debugger panel of the preferences window.
+   */ 
+  private void _setupDebugPanel ( ConfigPanel panel) {
+    panel.addComponent( new VectorOptionComponent (OptionConstants.DEBUG_SOURCEPATH, "Sourcepath", this));
+    panel.addComponent( new BooleanOptionComponent ( OptionConstants.DEBUG_STEP_DRJAVA, "Step through DrJava Source", this));
+    panel.displayComponents();
+  }
+  
+  /**
    *  Adds all of the components for the Miscellaneous panel of the preferences window.
    */
   private void _setupMiscPanel( ConfigPanel panel) {
@@ -420,7 +432,6 @@ public class ConfigFrame extends JFrame {
     panel.addComponent( new FileOptionComponent ( OptionConstants.WORKING_DIRECTORY, "Working Directory", this));
     panel.addComponent( new IntegerOptionComponent ( OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this));
     panel.addComponent( new IntegerOptionComponent ( OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this));
-    panel.addComponent( new BooleanOptionComponent ( OptionConstants.DEBUG_STEP_DRJAVA, "Step Through DrJava Source Files", this));
 
     panel.displayComponents();
   }

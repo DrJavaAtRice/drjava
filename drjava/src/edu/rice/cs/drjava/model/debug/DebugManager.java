@@ -58,6 +58,7 @@ import edu.rice.cs.drjava.model.GlobalModelListener;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
+import edu.rice.cs.drjava.config.OptionConstants;
 
 import com.sun.jdi.*;
 import com.sun.jdi.connect.*;
@@ -457,11 +458,8 @@ public class DebugManager {
     if ( (property!=null) && (property instanceof Breakpoint)) {
       Breakpoint breakpoint = (Breakpoint)property;
       _model.printDebugMessage("Breakpoint hit in class " + 
-                               breakpoint.getClassName() + ", line " +
-                               breakpoint.getLineNumber() + ".");
-      //System.out.println("Encountered a breakpoint at line "+ 
-      //                   breakpoint.getLineNumber() +
-      //                   " in file " + breakpoint.getClassName());
+                               breakpoint.getClassName() + "  [line " +
+                               breakpoint.getLineNumber() + "]");
     }
   }
   
@@ -519,20 +517,22 @@ public class DebugManager {
         className = className.substring(0, indexOfDollar);
       }
       
-      File[] roots = _model.getSourceRootSet();
-      File f = null;
-      boolean foundFile = false;
-      for (int i = 0; i < roots.length; i++) {
-        String currRoot = roots[i].getAbsolutePath();
-        //DrJava.consoleOut().println("Trying to find " + currRoot + ps + className + 
-        //                            ".java");
-        f = new File(currRoot + ps + className + ".java");
-        if (f.exists()) {
-          foundFile = true;
-          break;
+      String filename = className + ".java";
+      Vector<File> sourcepath = 
+        DrJava.CONFIG.getSetting(OptionConstants.DEBUG_SOURCEPATH);
+      File f = _getSourceFileFromPaths(filename, sourcepath);
+      //File f = null;
+      if (f == null) {
+        // If not on sourcepath, check source root set (open files)
+        File[] sourceRoots = _model.getSourceRootSet();
+        Vector<File> roots = new Vector<File>();
+        for (int i=0; i < sourceRoots.length; i++) {
+          roots.addElement(sourceRoots[i]);
         }
+        f = _getSourceFileFromPaths(filename, roots);
       }
-      if (foundFile) {
+      
+      if (f != null) {
         // Get a document for this file, forcing it to open
         //DrJava.consoleOut().println("found file: " + f.getAbsolutePath());
         try {
@@ -541,11 +541,11 @@ public class DebugManager {
         }
         catch (IOException ioe) {
           // No doc, so don't notify listener
-          DrJava.consoleOut().println("Problem opening file, won't scroll: " + ioe);
+          //DrJava.consoleOut().println("Problem opening file, won't scroll: " + ioe);
         }
         catch (OperationCanceledException oce) {
           // No doc, so don't notify listener
-          DrJava.consoleOut().println("Problem opening file, won't scroll: " + oce);
+          //DrJava.consoleOut().println("Problem opening file, won't scroll: " + oce);
         }
       }
     }
@@ -566,9 +566,44 @@ public class DebugManager {
     }
     else {
       //DrJava.consoleOut().println("couldn't open file to scroll to");
+      String className = location.declaringType().name();
+      printMessage("  (Source for " + className + " not found.)");
     }
   }
   
+  /**
+   * Searches for a source file with the given name on the provided paths.
+   * Returns null if the file is not found.
+   * @param filename Name of the source file to look for
+   * @param paths An array of directories to search
+   */
+  private File _getSourceFileFromPaths(String filename, Vector<File> paths) {
+    File f = null;
+    for (int i = 0; i < paths.size(); i++) {
+      String currRoot = paths.elementAt(i).getAbsolutePath();
+      //DrJava.consoleOut().println("Trying to find " + currRoot + ps + className + 
+      //                            ".java");
+      f = new File(currRoot + System.getProperty("file.separator") + filename);
+      if (f.exists()) {
+        return f;
+      }
+    }
+    return null;
+  }
+  
+  
+  /**
+   * Prints a message in the Interactions Pane.
+   * @param message Message to display
+   */
+  void printMessage(String message) {
+    _model.printDebugMessage(message);
+  }
+
+  
+  /**
+   * Notifies all listeners that the current thread has been suspended.
+   */
   void currThreadSuspended() {     
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
@@ -577,6 +612,9 @@ public class DebugManager {
     });
   }
   
+  /**
+   * Notifies all listeners that the current thread has been resumed.
+   */
   void currThreadResumed() {     
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
@@ -593,6 +631,7 @@ public class DebugManager {
       }
     });
   }
+
 
   /**
    * Adds a listener to this DebugManager.

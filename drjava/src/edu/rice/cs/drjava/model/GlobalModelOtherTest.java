@@ -551,8 +551,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
                !"DrJavaTestFoo".equals(result));
 
     // Add new directory to classpath through CONFIG
-    Vector<String> cp = new Vector<String>();
-    cp.addElement(tempPath + "a");
+    Vector<File> cp = new Vector<File>();
+    cp.addElement(new File(tempPath + "a"));
     DrJava.CONFIG.setSetting(EXTRA_CLASSPATH, cp);
     
     result = interpret("new DrJavaTestFoo().getClass().getName()");

@@ -122,6 +122,10 @@ public class EventHandler extends Thread {
   private void _handleStepEvent(StepEvent e) {
     //System.out.println("Step executed");
     _manager.currThreadSuspended();
+    _manager.printMessage("Stepped to " + 
+                          e.location().declaringType().name() + "." +
+                          e.location().method().name() + "(...)  [line " + 
+                          e.location().lineNumber() + "]");
     _manager.scrollToSource(e);
     _manager.getEventRequestManager().deleteEventRequest(e.request());
   }
@@ -139,7 +143,7 @@ public class EventHandler extends Thread {
       _manager.getPendingRequestManager().classPrepared(e);
     }
     catch(DebugException de) {
-      System.err.println("Error preparing action: " + de);
+      //System.err.println("Error preparing action: " + de);
     }
     // resumes this thread which was suspended because its 
     // suspend policy was SUSPEND_EVENT_THREAD

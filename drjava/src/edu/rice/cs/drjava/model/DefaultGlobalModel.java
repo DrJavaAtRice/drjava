@@ -963,11 +963,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     File[] sourceFiles = getSourceRootSet();
 
     // Adds extra.classpath to the classpath.
-    Vector<String> extraClasspath = DrJava.CONFIG.getSetting(EXTRA_CLASSPATH);
+    Vector<File> extraClasspath = DrJava.CONFIG.getSetting(EXTRA_CLASSPATH);
     if(extraClasspath != null) {
-        Enumeration<String> enum = extraClasspath.elements();
+        Enumeration<File> enum = extraClasspath.elements();
         while(enum.hasMoreElements()) {
-            classpath += enum.nextElement() + separator;
+            classpath += enum.nextElement().getAbsolutePath() + separator;
         }
     }
 
@@ -2116,23 +2116,23 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       _interpreterControl.addClassPath(sourceRoots[i].getAbsolutePath());
     }
 
-    Vector<String> cp = DrJava.CONFIG.getSetting(EXTRA_CLASSPATH);
+    Vector<File> cp = DrJava.CONFIG.getSetting(EXTRA_CLASSPATH);
     if(cp!=null) {
-      Enumeration<String> enum = cp.elements();
+      Enumeration<File> enum = cp.elements();
       while(enum.hasMoreElements()) {
-        _interpreterControl.addClassPath(enum.nextElement());
+        _interpreterControl.addClassPath(enum.nextElement().getAbsolutePath());
       }
     }
   }
 
-  private class ExtraClasspathOptionListener implements OptionListener<Vector<String>> {
+  private class ExtraClasspathOptionListener implements OptionListener<Vector<File>> {
     
-    public void optionChanged (OptionEvent<Vector<String>> oce) {
-      Vector<String> cp = oce.value;
+    public void optionChanged (OptionEvent<Vector<File>> oce) {
+      Vector<File> cp = oce.value;
       if(cp!=null) {
-        Enumeration<String> enum = cp.elements();
+        Enumeration<File> enum = cp.elements();
         while(enum.hasMoreElements()) {
-          _interpreterControl.addClassPath(enum.nextElement());
+          _interpreterControl.addClassPath(enum.nextElement().getAbsolutePath());
         }
       } 
     }    

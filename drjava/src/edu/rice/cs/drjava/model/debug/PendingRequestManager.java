@@ -182,7 +182,7 @@ public class PendingRequestManager {
       catch (DebugException e) {
         failedActions.addElement(actions.elementAt(i));
         i++;
-        DrJava.consoleOut().println("Exception preparing request!! " + e);
+       // DrJava.consoleOut().println("Exception preparing request!! " + e);
       }
     }
     

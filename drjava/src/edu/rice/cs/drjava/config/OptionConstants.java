@@ -64,8 +64,8 @@ public interface OptionConstants extends ConfigurationTool {
   public static final FileOption JSR14_COLLECTIONSPATH = 
     new FileOption("jsr14.collectionspath", FileOption.NULL_FILE);
   
-  public static final VectorOption<String> EXTRA_CLASSPATH = 
-    new ExtraClasspathOption().evaluate();
+  public static final VectorOption<File> EXTRA_CLASSPATH = 
+    new ClasspathOption().evaluate("extra.classpath");
   
   
   /* ---------- Color Options ---------- */
@@ -488,6 +488,23 @@ public interface OptionConstants extends ConfigurationTool {
     null:
     new KeyStrokeOption("key.debug.breakpoint.toggle", 
                         KeyStroke.getKeyStroke(KeyEvent.VK_B, mask));
+    
+    
+  /* ---------- Debugger Options ---------- */
+    
+  /**
+   * A classpath-structured vector of all paths to look for source files on
+   * while stepping in the debugger.
+   */
+  public static final VectorOption<File> DEBUG_SOURCEPATH = 
+    new ClasspathOption().evaluate("debug.sourcepath");
+  
+  /**
+   * Whether stepping should step through DrJava's source files
+   */    
+  public static final BooleanOption DEBUG_STEP_DRJAVA =
+    new BooleanOption("debug.step.drjava", new Boolean(false));
+    
   
   /* ---------- Misc Options ---------- */
   
@@ -538,11 +555,6 @@ public interface OptionConstants extends ConfigurationTool {
     (CodeStatus.DEVELOPMENT) ?
     new VectorOption("recent.files",new FileOption("",null),new Vector<File>()) :
     null; 
-  /**
-   * Whether stepping should step through DrJava's source files
-   */    
-  public static final BooleanOption DEBUG_STEP_DRJAVA =
-    new BooleanOption("debug.step.drjava", new Boolean(false));
 }
 
 
@@ -550,12 +562,12 @@ public interface OptionConstants extends ConfigurationTool {
  * Generate vector options separately to appease javadoc.
  * (It didn't like anonymous inner classes with generics in interfaces in Java 1.3.)
  */
-class ExtraClasspathOption {
+class ClasspathOption {
   private String warning =
     "WARNING: Configurability interface only supports path separators"+
     " of maximum length 1 character as of this moment.";
   
-  public VectorOption<String> evaluate() {
+  public VectorOption<File> evaluate(String optionName) {
     // system path separator
     String ps = System.getProperty("path.separator");
     if(ps.length() > 1) { 
@@ -564,10 +576,10 @@ class ExtraClasspathOption {
       System.err.println("using '"+ps.charAt(0)+
                          "' for delimiter.");
     }
-    StringOption sop = new StringOption("","");
-    String name = "extra.classpath";
+    FileOption fop = new FileOption("",FileOption.NULL_FILE);
+    //String name = "extra.classpath";
     char delim = ps.charAt(0);
-    return new VectorOption<String>(name,sop,"",delim,"",new Vector<String>());
+    return new VectorOption<File>(optionName,fop,"",delim,"",new Vector<File>());
   }
 }
 

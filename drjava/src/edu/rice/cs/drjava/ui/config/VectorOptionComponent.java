@@ -54,7 +54,7 @@ import gj.util.Vector;
  * Uses a file chooser for each String element.
  * @version $Id$
  */
-public class VectorOptionComponent extends OptionComponent<Vector<String>> 
+public class VectorOptionComponent extends OptionComponent<Vector<File>> 
   implements OptionConstants
 {  
   private JScrollPane _listScrollPane;
@@ -161,9 +161,9 @@ public class VectorOptionComponent extends OptionComponent<Vector<String>>
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
-    Vector current = new Vector();
+    Vector<File> current = new Vector<File>();
     for (int i = 0; i < _listModel.getSize(); i++) {
-      current.addElement(_listModel.getElementAt(i));
+      current.addElement((File)_listModel.getElementAt(i));
     }
     DrJava.CONFIG.setSetting(_option, current);
     resetToCurrent();
@@ -174,8 +174,8 @@ public class VectorOptionComponent extends OptionComponent<Vector<String>>
   /**
    * Displays the given value.
    */
-  public void setValue(Vector<String> value) {
-    String[] array = new String[value.size()];
+  public void setValue(Vector<File> value) {
+    File[] array = new File[value.size()];
     value.copyInto(array);
     _listModel.clear();
     for (int i = 0; i < array.length; i++) {
@@ -208,7 +208,7 @@ public class VectorOptionComponent extends OptionComponent<Vector<String>>
     if (returnValue == JFileChooser.APPROVE_OPTION) 
       c = jfc.getSelectedFile();
     if (c != null) {
-      _listModel.addElement(c.toString());
+      _listModel.addElement(c);
     }
     
   }
