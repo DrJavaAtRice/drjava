@@ -71,7 +71,6 @@ import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.drjava.model.debug.DebugListener;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
-import edu.rice.cs.drjava.model.repl.InteractionsEditorKit;
 import edu.rice.cs.drjava.ui.config.*;
 import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
 import edu.rice.cs.drjava.ui.JUnitPanel.JUnitErrorListPane;
@@ -82,6 +81,7 @@ import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.util.swing.DelegatingAction;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.SwingWorker;
+import edu.rice.cs.util.text.SwingDocumentAdapter;
 
 /**
  * DrJava's main window.
@@ -1046,6 +1046,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     // Platform-specific UI setup.
     PlatformFactory.ONLY.afterUISetup(_aboutAction, _editPreferencesAction, _quitAction);
+  }
+  
+  /**
+   * Releases any resources this frame is using to prepare it to
+   * be garbage collected.  Should only be called from tests.
+   */
+  public void dispose() {
+    _model.dispose();
+    super.dispose();
   }
   
   /**
@@ -2502,10 +2511,14 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _setUpTabs() {
     _outputPane = new OutputPane(_model);
     _errorPanel = new CompilerErrorPanel(_model, this);
-    _interactionsPane = new InteractionsPane(_model.getInteractionsDocument());
+    
+    // Interactions
+    SwingDocumentAdapter adapter = _model.getSwingInteractionsDocument();
+    _interactionsPane = new InteractionsPane(adapter);
     _interactionsController = 
       new InteractionsController(_model.getInteractionsDocument(),
-                                 _interactionsPane);
+                                 adapter, _interactionsPane);
+    
     _findReplace = new FindReplaceDialog(this, _model);
     
     final JScrollPane outputScroll = 
@@ -3134,7 +3147,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // NOTE: Not necessarily called from event-dispatching thread...
     //  Should figure out how to deal with invokeLater here.
     public void fileOpened(final OpenDefinitionsDocument doc) {
-	      if( !SwingUtilities.isEventDispatchThread() ){
+       if( !SwingUtilities.isEventDispatchThread() ){
         try{
           SwingUtilities.invokeAndWait(new Runnable(){
             public void run(){

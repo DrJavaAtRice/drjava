@@ -57,7 +57,7 @@ public class DefaultInteractionsDocument extends AbstractInteractionsDocument {
    * @param model GlobalModel to perform the interpretation.
    */
   public DefaultInteractionsDocument(GlobalModel model) {
-    super();
+    super(model.getSwingInteractionsDocument());
     _model = model;
   }
   

@@ -50,6 +50,8 @@ import javax.swing.*;
 import java.rmi.registry.Registry;
 
 import edu.rice.cs.util.*;
+import edu.rice.cs.util.text.DocumentAdapter;
+import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
@@ -135,6 +137,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     boolean ret = FileOps.deleteDirectory(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);
     super.tearDown();
+    //_model.dispose();
     
     _tempDir = null;
     _model = null;
@@ -146,6 +149,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    */
   protected void createModel() {
     _model = new DefaultGlobalModel(_originalModel);
+    //_model = new DefaultGlobalModel();
   }
   
   /**
@@ -294,12 +298,13 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    * @return The output from this interpretation, in String form, as it was
    *         printed to the interactions document.
    */
-  protected String interpret(String input) throws BadLocationException {
-    Document interactionsDoc = _model.getInteractionsDocument();
-    interactionsDoc.insertString(interactionsDoc.getLength(), input, null);
+  protected String interpret(String input) throws DocumentAdapterException {
+    DocumentAdapter interactionsDoc = _model.getInteractionsDocument();
+    interactionsDoc.insertText(interactionsDoc.getDocLength(), input, 
+                               InteractionsDocument.DEFAULT_STYLE);
 
     // skip 1 for newline
-    final int resultsStartLocation = interactionsDoc.getLength() + 1;
+    final int resultsStartLocation = interactionsDoc.getDocLength() + 1;
 
     TestListener listener = new TestListener() {
       public void interactionStarted() {
@@ -336,7 +341,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     listener.assertInteractionEndCount(1);
 
     // skip 1 for newline
-    final int resultsEndLocation = interactionsDoc.getLength() - 1 -
+    final int resultsEndLocation = interactionsDoc.getDocLength() - 1 -
                                    InteractionsDocument.PROMPT.length();
 
     final int resultsLen = resultsEndLocation - resultsStartLocation;
@@ -344,13 +349,14 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     // There was no output from this interaction
     if (resultsLen <= 0)
       return "";    
-    return interactionsDoc.getText(resultsStartLocation, resultsLen);
+    return interactionsDoc.getDocText(resultsStartLocation, resultsLen);
   }
 
-  protected void interpretIgnoreResult(String input) throws BadLocationException
+  protected void interpretIgnoreResult(String input) throws DocumentAdapterException
   {
-    Document interactionsDoc = _model.getInteractionsDocument();
-    interactionsDoc.insertString(interactionsDoc.getLength(), input, null);
+    DocumentAdapter interactionsDoc = _model.getInteractionsDocument();
+    interactionsDoc.insertText(interactionsDoc.getDocLength(), input, 
+                               InteractionsDocument.DEFAULT_STYLE);
 
     _model.interpretCurrentInteraction();
   }
@@ -358,7 +364,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   /**
    * Asserts that the given string exists in the Interactions Document.
    */
-  protected void assertInteractionsContains(String text) throws BadLocationException{
+  protected void assertInteractionsContains(String text) throws DocumentAdapterException{
     _assertInteractionContainsHelper(text, true);
   }
   
@@ -366,12 +372,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    * Asserts that the given string does not exist in the Interactions Document.
    */
   protected void assertInteractionsDoesNotContain(String text)
-    throws BadLocationException{
+    throws DocumentAdapterException {
     _assertInteractionContainsHelper(text, false);
   }
   
   private void _assertInteractionContainsHelper(String text, boolean shouldContain)
-    throws BadLocationException {
+    throws DocumentAdapterException {
     
     String interactText = getInteractionsText();
     int contains = interactText.lastIndexOf(text);
@@ -385,9 +391,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   /**
    * Returns the current contents of the interactions document
    */
-  protected String getInteractionsText() throws BadLocationException {
-    Document doc = _model.getInteractionsDocument();
-    return doc.getText(0, doc.getLength());
+  protected String getInteractionsText() throws DocumentAdapterException {
+    DocumentAdapter doc = _model.getInteractionsDocument();
+    return doc.getDocText(0, doc.getDocLength());
   }
   
   

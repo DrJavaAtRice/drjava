@@ -70,6 +70,11 @@ public abstract class IndentRulesTestCase extends TestCase {
     _doc = new DefinitionsDocument();
   }
   
+  public void tearDown() {
+    _doc = null;
+    System.gc();
+  }
+  
   /**
    * Clears the text of the _doc field and sets it to the
    * given string.

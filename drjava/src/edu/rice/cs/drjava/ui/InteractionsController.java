@@ -46,9 +46,12 @@ import javax.swing.event.DocumentEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.Toolkit;
+import java.awt.Color;
 
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.util.swing.SwingWorker;
+import edu.rice.cs.util.text.SwingDocumentAdapter;
+import edu.rice.cs.util.text.DocumentEditCondition;
 
 /**
  * This class installs listeners and actions between an InteractionsDocument
@@ -62,21 +65,28 @@ public class InteractionsController {
   /** Document from the model */
   protected InteractionsDocument _doc;
   
+  /** Adapter for the Swing document used by the model. */
+  protected SwingDocumentAdapter _adapter;
+  
   /** Pane from the view */
   protected InteractionsPane _pane;
   
   /**
    * Glue together the given model and view.
    * @param doc InteractionsDocument from the model
+   * @param adapter DocumentAdapter that lets the model use a Swing document
    * @param pane InteractionsPane in the view
    */
   public InteractionsController(InteractionsDocument doc,
+                                SwingDocumentAdapter adapter,
                                 InteractionsPane pane) {
     _doc = doc;
+    _adapter = adapter;
     _pane = pane;
     
-    _addListeners();
-    _addActions();
+    _addDocumentStyles();
+    _addModelListeners();
+    _addViewActions();
   }
   
   /**
@@ -87,6 +97,13 @@ public class InteractionsController {
   }
   
   /**
+   * Accessor method for the SwingDocumentAdapter.
+   */
+  public SwingDocumentAdapter getDocumentAdapter() {
+    return _adapter;
+  }
+  
+  /**
    * Accessor method for the InteractionsPane.
    */
   public InteractionsPane getPane() {
@@ -94,17 +111,95 @@ public class InteractionsController {
   }
   
   /**
+   * Adds AttributeSets as named styles to the document adapter.
+   */
+  protected void _addDocumentStyles() {
+    // Default
+    SimpleAttributeSet defaultS = new SimpleAttributeSet();
+    _adapter.addDocStyle(InteractionsDocument.DEFAULT_STYLE, defaultS);
+
+    // System.out
+    SimpleAttributeSet s = new SimpleAttributeSet(defaultS);
+    s.addAttribute(StyleConstants.Foreground, Color.green.darker().darker());
+    _adapter.addDocStyle(InteractionsDocument.SYSTEM_OUT_STYLE, s);
+   
+    // System.err
+    s = new SimpleAttributeSet(defaultS);
+    s.addAttribute(StyleConstants.Foreground, Color.red);
+    _adapter.addDocStyle(InteractionsDocument.SYSTEM_ERR_STYLE, s);
+    
+    // Error
+    s = new SimpleAttributeSet(defaultS);
+    s.addAttribute(StyleConstants.Foreground, Color.red.darker());
+    s.addAttribute(StyleConstants.Bold, new Boolean(true));
+    _adapter.addDocStyle(InteractionsDocument.ERROR_STYLE, s);
+    
+    // Debug
+    s = new SimpleAttributeSet(defaultS);
+    s.addAttribute(StyleConstants.Foreground, Color.blue.darker());
+    s.addAttribute(StyleConstants.Bold, new Boolean(true));
+    _adapter.addDocStyle(InteractionsDocument.DEBUGGER_STYLE, s);
+    
+  }
+  
+  
+  /**
    * Adds listeners to the model.
    */
-  protected void _addListeners() {
-    _doc.addDocumentListener(new CaretUpdateListener());
+  protected void _addModelListeners() {
+    _adapter.addDocumentListener(new CaretUpdateListener());
     _doc.setBeep(_pane.getBeep());
   }
   
   /**
+   * Listener to ensure that the caret always stays on or after the
+   * prompt, so that output is always scrolled to the bottom.
+   * (The prompt is always at the bottom.)
+   */
+  class CaretUpdateListener implements DocumentListener {
+    public void insertUpdate(DocumentEvent e) {
+      int caretPos = _pane.getCaretPosition();
+      int promptPos = _doc.getPromptPos();
+      int length = _doc.getDocLength();
+
+      if (_doc.inProgress()) {
+        // Scroll to the end of the document, since output has been
+        // inserted after the prompt.
+        moveToEnd();
+      }
+      else {
+        // Only update caret if it has fallen behind the prompt.
+        // (And be careful not to move it during a reset, when the
+        //  prompt pos is temporarily far greater than the length.)
+        if ((caretPos < promptPos) && (promptPos <= length)) {
+          moveToPrompt();
+        }
+      }
+    }
+
+    public void removeUpdate(DocumentEvent e) {
+      _ensureLegalCaretPos();
+    }
+    public void changedUpdate(DocumentEvent e) {
+      _ensureLegalCaretPos();
+    }
+    protected void _ensureLegalCaretPos() {
+      int length = _doc.getDocLength();
+      if (_pane.getCaretPosition() > length) {
+        _pane.setCaretPosition(length);
+      }
+    }
+  }
+  
+  
+  
+  /**
    * Adds actions to the view.
    */
-  protected void _addActions() {
+  protected void _addViewActions() {
+    // Prevent any edits before the prompt!
+    _adapter.setEditCondition(new InteractionsEditCondition());
+    
     // Get proper cross-platform mask.
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
     
@@ -150,47 +245,32 @@ public class InteractionsController {
                                 moveRightAction);
   }
   
-  
-  
   /**
-   * Listener to ensure that the caret always stays on or after the
-   * prompt, so that output is always scrolled to the bottom.
-   * (The prompt is always at the bottom.)
+   * Class to ensure that any attempt to edit the Swing document
+   * above the prompt is rejected.
    */
-  class CaretUpdateListener implements DocumentListener {
-    public void insertUpdate(DocumentEvent e) {
-      int caretPos = _pane.getCaretPosition();
-      int promptPos = _doc.getPromptPos();
-      int length = _doc.getLength();
-
-      if (_doc.inProgress()) {
-        // Scroll to the end of the document, since output has been
-        // inserted after the prompt.
-        moveToEnd();
+  class InteractionsEditCondition extends DocumentEditCondition {
+    public boolean canInsertText(int offs, String str, String style) {
+      if (offs < _doc.getPromptPos()) {
+        _pane.getBeep().run();
+        return false;
       }
       else {
-        // Only update caret if it has fallen behind the prompt.
-        // (And be careful not to move it during a reset, when the
-        //  prompt pos is temporarily far greater than the length.)
-        if ((caretPos < promptPos) && (promptPos <= length)) {
-          moveToPrompt();
-        }
+        return true;
       }
     }
-
-    public void removeUpdate(DocumentEvent e) {
-      _ensureLegalCaretPos();
-    }
-    public void changedUpdate(DocumentEvent e) {
-      _ensureLegalCaretPos();
-    }
-    protected void _ensureLegalCaretPos() {
-      int length = _doc.getLength();
-      if (_pane.getCaretPosition() > length) {
-        _pane.setCaretPosition(length);
+    public boolean canRemoveText(int offs, int len) {
+      if (offs < _doc.getPromptPos()) {
+        _pane.getBeep().run();
+        return false;
+      }
+      else {
+        return true;
       }
     }
   }
+  
+  
   
   
   // The fields below were made package private for testing purposes.
@@ -276,7 +356,7 @@ public class InteractionsController {
       if (position < _doc.getPromptPos()) { 
         moveToEnd();
       }
-      else if (position >= _doc.getLength()) {
+      else if (position >= _doc.getDocLength()) {
         // Wrap around to the start
         moveToPrompt();
       }
@@ -288,7 +368,7 @@ public class InteractionsController {
   
   /** Moves the pane's caret to the end of the document. */
   void moveToEnd() {
-    _pane.setCaretPosition(_doc.getLength());
+    _pane.setCaretPosition(_doc.getDocLength());
   }
   
   /** Moves the pane's caret to the document's prompt. */

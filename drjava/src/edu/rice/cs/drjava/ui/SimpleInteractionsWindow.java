@@ -45,6 +45,7 @@ import java.awt.event.*;
 
 import edu.rice.cs.drjava.model.repl.SimpleInteractionsDocument;
 import edu.rice.cs.drjava.model.repl.SimpleInteractionsListener;
+import edu.rice.cs.util.text.SwingDocumentAdapter;
 
 /**
  * A standalone Interactions Window that provides the functionality of
@@ -54,6 +55,7 @@ import edu.rice.cs.drjava.model.repl.SimpleInteractionsListener;
  */
 public class SimpleInteractionsWindow extends JFrame {
   private final SimpleInteractionsDocument _doc;
+  private final SwingDocumentAdapter _adapter;
   private final InteractionsPane _pane;
   private final InteractionsController _controller;
   
@@ -61,9 +63,10 @@ public class SimpleInteractionsWindow extends JFrame {
     super("Interactions Window");
     setSize(600, 400);
     
-    _doc = new SimpleInteractionsDocument();
-    _pane = new InteractionsPane(_doc);
-    _controller = new InteractionsController(_doc, _pane);
+    _adapter = new SwingDocumentAdapter();
+    _doc = new SimpleInteractionsDocument(_adapter);
+    _pane = new InteractionsPane(_adapter);
+    _controller = new InteractionsController(_doc, _adapter, _pane);
     
     _pane.setFont(Font.decode("monospaced"));
 

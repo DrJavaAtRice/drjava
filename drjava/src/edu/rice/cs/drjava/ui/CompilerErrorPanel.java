@@ -801,7 +801,9 @@ public class CompilerErrorPanel extends TabbedPanel
       DefinitionsPane defPane = _frame.getCurrentDefPane();
       if (pos != null) {
         int errPos = pos.getOffset();
-        defPane.setCaretPosition(errPos);
+        if (errPos >= 0 && errPos <= defPane.getText().length()) {
+          defPane.setCaretPosition(errPos);
+        }
       }
       defPane.requestFocus();
       defPane.getCaret().setVisible(true);

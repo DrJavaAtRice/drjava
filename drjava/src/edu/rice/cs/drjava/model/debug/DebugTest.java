@@ -57,6 +57,7 @@ import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.util.*;
+import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.drjava.CodeStatus;
 
 /**
@@ -178,7 +179,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
    * Tests that breakpoints behave correctly.
    */
   public synchronized void testBreakpoints() 
-    throws DebugException, BadLocationException, IOException, InterruptedException
+    throws DebugException, BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException
   {
     if (printMessages) System.out.println("----testBreakpoints----");
     BreakpointTestListener debugListener = new BreakpointTestListener();
@@ -283,7 +285,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
    * Tests that breakpoints and steps behave correctly.
    */
   public void testStepInto() 
-    throws DebugException, BadLocationException, IOException, InterruptedException
+    throws DebugException, BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException
   {
     if (printMessages) System.out.println("----testStepInto----");
     StepTestListener debugListener = new StepTestListener();
@@ -420,7 +423,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
    * Tests that stepping out of a method behaves correctly.
    */
   public synchronized void testStepOut() 
-    throws DebugException, BadLocationException, IOException, InterruptedException
+    throws DebugException, BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException
   {
     if (printMessages)  System.out.println("----testStepOut----");
     StepTestListener debugListener = new StepTestListener();
@@ -513,7 +517,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
    * Tests that stepping works in a public class with a package
    */
   public synchronized void testStepOverWithPackage() 
-    throws DebugException, BadLocationException, IOException, InterruptedException
+    throws DebugException, BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException
   {
     if (printMessages) System.out.println("----testStepOverWithPackage----");
     StepTestListener debugListener = new StepTestListener();
@@ -625,7 +630,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
    * search directories.
    */
   public void testDebugSourcepath() 
-    throws DebugException, BadLocationException, IOException, InterruptedException
+    throws DebugException, BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException
   {
     if (printMessages)  System.out.println("----testDebugSourcePath----");
     StepTestListener debugListener = new StepTestListener();
@@ -718,7 +724,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
    * Tests that breakpoints behave correctly in non-public classes.
    */
   public synchronized void testBreakpointsAndStepsInNonPublicClasses() 
-    throws DebugException, BadLocationException, IOException, InterruptedException
+    throws DebugException, BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException
   {
     if (printMessages) System.out.println("----testBreakpointsNonPublicClasses----");
     StepTestListener debugListener = new StepTestListener();

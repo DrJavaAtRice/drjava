@@ -243,7 +243,7 @@ public class MainFrameTest extends MultiThreadedTestCase {
 
     // Test for strict == equality
     assertTrue("UI's int. doc. should equals Model's int. doc.",
-               pane.getDocument() == model.getInteractionsDocument());
+               pane.getDocument() == model.getSwingInteractionsDocument());
   }
 
   /**

@@ -66,7 +66,6 @@ public class RecentFileManagerTest extends TestCase {
   protected static final String BAR_TEXT = "class DrJavaTestBar {}";
   private RecentFileManager _rfm;
   private JMenu _menu;
-  private DefaultGlobalModel _model = new DefaultGlobalModel();
   protected File _tempDir;
   
   /**
@@ -150,30 +149,7 @@ public class RecentFileManagerTest extends TestCase {
     final File tempFile = writeToNewTempFile(BAR_TEXT);
     final File tempFile2 = writeToNewTempFile(FOO_TEXT);
     _rfm.updateMax(2);
-    /*TestListener listener = new TestListener() {
-      public void fileOpened(OpenDefinitionsDocument doc) {
-        File file = null;
-        try {
-          file = doc.getFile();
-        }
-        catch (IllegalStateException ise) {
-          // We know file should exist
-          fail("file does not exist");
-        }
-        assertEquals("file to open", tempFile, file);
-        openCount++;
-      }
-    };
 
-    _model.addListener(listener);
-    OpenDefinitionsDocument doc = _model.openFile(new FileSelector(tempFile));
-    listener.assertOpenCount(1);
-    assertModified(false, doc);
-    assertContents(BAR_TEXT, doc);
-    OpenDefinitionsDocument doc2 = _model.openFile(new FileSelector(tempFile2));
-    listener.assertOpenCount(2);
-    assertModified(false, doc2);
-    assertContents(FOO_TEXT, doc2);*/
     _rfm.updateOpenFiles(tempFile);
     _rfm.updateOpenFiles(tempFile2);
     Vector<File> vector = _rfm.getFileVector();

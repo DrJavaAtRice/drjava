@@ -948,7 +948,9 @@ public class JUnitPanel extends TabbedPanel
       defPane.getJUnitErrorCaretListener().shouldHighlight(true);
       if (pos != null) {
         int errPos = pos.getOffset();
-        defPane.setCaretPosition(errPos);
+        if (errPos >= 0 && errPos <= defPane.getText().length()) {
+          defPane.setCaretPosition(errPos);
+        }
         //defPane.getJUnitErrorCaretListener().updateHighlight(errPos);
       }
       defPane.grabFocus();

@@ -39,13 +39,12 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-import java.awt.event.*;
-import javax.swing.text.*;
-import javax.swing.*;
 import java.util.*;
 import java.io.*;
 
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.text.DocumentAdapter;
+import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 
 /**
@@ -55,10 +54,14 @@ import edu.rice.cs.drjava.model.FileSaveSelector;
  * interpreter.
  * @version $Id$
  */
-public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
+public abstract class AbstractInteractionsDocument
   implements InteractionsDocument
 {
-
+  /**
+   * The document storing the text for this interactions model.
+   */
+  protected DocumentAdapter _document;
+  
   /**
    * Whether the interpreter is currently interpreting an interaction
    */
@@ -79,12 +82,24 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
   /**
    * Command-line history. It's not reset when the interpreter is reset.
    */
-  protected History _history = new History();
+  protected History _history;
 
   /**
    * Reset the document on startup.
    */
-  public AbstractInteractionsDocument() {
+  public AbstractInteractionsDocument(DocumentAdapter document,
+                                      int maxHistorySize) {
+    _document = document;
+    _history = new History(maxHistorySize);
+    reset();
+  }
+  
+  /**
+   * Reset the document on startup.
+   */
+  public AbstractInteractionsDocument(DocumentAdapter document) {
+    _document = document;
+    _history = new History();
     reset();
   }
   
@@ -128,13 +143,13 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
    */
   public void reset() {
     try {
-      super.remove(0, getLength());
-      super.insertString(0, BANNER, null);
+      forceRemoveText(0, _document.getDocLength());
+      forceInsertText(0, BANNER, DEFAULT_STYLE);
       insertPrompt();
       _history.moveEnd();
       setInProgress(false);
     }
-    catch (BadLocationException e) {
+    catch (DocumentAdapterException e) {
       throw new UnexpectedException(e);
     }
   }
@@ -144,10 +159,10 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
    */
   public void insertPrompt() {
     try {
-      super.insertString(getLength(), PROMPT, null);
-      _promptPos = getLength();
+      forceInsertText(_document.getDocLength(), PROMPT, DEFAULT_STYLE);
+      _promptPos = _document.getDocLength();
     }
-    catch (BadLocationException e) {
+    catch (DocumentAdapterException e) {
       throw new UnexpectedException(e);
     }
   }
@@ -158,17 +173,17 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
    */
   public void insertNewLine(int pos) {
     // Correct the position if necessary
-    if (pos > getLength()) {
-      pos = getLength();
+    if (pos > getDocLength()) {
+      pos = getDocLength();
     }
     else if (pos < 0) {
       pos = 0;
     }
     
     try {
-      insertString(pos, "\n", null);
+      insertText(pos, "\n", DEFAULT_STYLE);
     }
-    catch (BadLocationException e) {
+    catch (DocumentAdapterException e) {
       // Shouldn't happen after we've corrected it
       throw new UnexpectedException(e);
     }
@@ -177,54 +192,103 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
   /**
    * Inserts the given string with the given attributes just before the
    * most recent prompt.
-   * @param s String to insert
-   * @param a Attributes to control formatting of string
+   * @param text String to insert
+   * @param style name of style to format the string
    */
-  public void insertBeforeLastPrompt(String s, AttributeSet a) {
+  public void insertBeforeLastPrompt(String text, String style) {
     try {
       int pos;
       if (_inProgress) {
-        pos = getLength();
+        pos = getDocLength();
       }
       else {
         pos = _promptPos - PROMPT.length();
       }
 
-      _promptPos += s.length();
-      super.insertString(pos, s, a);
+      _promptPos += text.length();
+      _document.forceInsertText(pos, text, style);
       
     }
-    catch (BadLocationException ble) {
+    catch (DocumentAdapterException ble) {
       throw new UnexpectedException(ble);
     }
   }
   
   /**
-   * Override superclass insertion to prevent insertion before the prompt. 
-   * @exception BadLocationException
+   * Inserts a string into the document at the given offset
+   * and the given named style, if the edit condition allows it.
+   * @param offs Offset into the document
+   * @param str String to be inserted
+   * @param style Name of the style to use.  Must have been
+   * added using addStyle.
+   * @throws DocumentAdapterException if the offset is illegal
    */
-  public void insertString(int offs, String str, AttributeSet a)
-    throws BadLocationException
+  public void insertText(int offs, String str, String style)
+    throws DocumentAdapterException
   {
     if (offs < _promptPos) {
       _beep.run();
-    } 
-    else {
-      super.insertString(offs, str, a);
     }
+    else {
+      _document.insertText(offs, str, style);
+    }
+  }
+  
+  /**
+   * Inserts a string into the document at the given offset
+   * and the given named style, regardless of the edit condition.
+   * @param offs Offset into the document
+   * @param str String to be inserted
+   * @param style Name of the style to use.  Must have been
+   * added using addStyle.
+   * @throws DocumentAdapterException if the offset is illegal
+   */
+  public void forceInsertText(int offs, String str, String style)
+    throws DocumentAdapterException
+  {
+    _document.forceInsertText(offs, str, style);
   }
 
   /**
-   * Override superclass deletion to prevent deletion before the prompt. 
-   * @exception BadLocationException
+   * Removes a portion of the document, if the edit condition allows it.
+   * @param offs Offset to start deleting from
+   * @param len Number of characters to remove
+   * @throws DocumentAdapterException if the offset or length are illegal
    */
-  public void remove(int offs, int len) throws BadLocationException {
+  public void removeText(int offs, int len) throws DocumentAdapterException {
     if (offs < _promptPos) {
       _beep.run();
     } 
     else {
-      super.remove(offs, len);
+      _document.removeText(offs, len);
     }
+  }
+  
+  /**
+   * Removes a portion of the document, regardless of the edit condition.
+   * @param offs Offset to start deleting from
+   * @param len Number of characters to remove
+   * @throws DocumentAdapterException if the offset or length are illegal
+   */
+  public void forceRemoveText(int offs, int len) throws DocumentAdapterException {
+    _document.forceRemoveText(offs, len);
+  }
+  
+  /**
+   * Returns the length of the document.
+   */
+  public int getDocLength() {
+    return _document.getDocLength();
+  }
+  
+  /**
+   * Returns a portion of the document.
+   * @param offs First offset of the desired text
+   * @param len Number of characters to return
+   * @throws DocumentAdapterException if the offset or length are illegal
+   */
+  public String getDocText(int offs, int len) throws DocumentAdapterException {
+    return _document.getDocText(offs, len);
   }
   
   /**
@@ -233,9 +297,9 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
    */
   public String getCurrentInteraction() {
     try {
-      return getText(_promptPos, getLength() - _promptPos);
+      return getDocText(_promptPos, getDocLength() - _promptPos);
     }
-    catch (BadLocationException e) {
+    catch (DocumentAdapterException e) {
       throw new UnexpectedException(e);
     }
   }
@@ -255,9 +319,9 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
   protected void _clearCurrentInteractionText() {
     try {
       // Delete old value of current line
-      remove(_promptPos, getLength() - _promptPos);
+      removeText(_promptPos, getDocLength() - _promptPos);
     }
-    catch (BadLocationException ble) {
+    catch (DocumentAdapterException ble) {
       throw new UnexpectedException(ble);
     }
   }
@@ -269,9 +333,9 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
   protected void _replaceCurrentLineFromHistory() {
     try {
       _clearCurrentInteractionText();
-      insertString(getLength(), _history.getCurrent(), null);
+      insertText(getDocLength(), _history.getCurrent(), DEFAULT_STYLE);
     }
-    catch (BadLocationException ble) {
+    catch (DocumentAdapterException ble) {
       throw new UnexpectedException(ble);
     }
   }
@@ -345,7 +409,7 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
    * Returns whether there is a next command in the history.
    */
   public boolean hasHistoryNext() {
-    return  _history.hasNext();
+    return _history.hasNext();
   }
   
   /**
@@ -381,12 +445,12 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
    * @param exceptionClass Name of the exception that was thrown
    * @param message Message contained in the exception
    * @param stackTrace String representation of the stack trace
-   * @param set AttributeSet for formatting the exception
+   * @param styleName name of the style for formatting the exception
    */
   public void appendExceptionResult(String exceptionClass,
                                     String message,
                                     String stackTrace,
-                                    AttributeSet set)
+                                    String styleName)
   {
     //writeLock();
     try {
@@ -395,7 +459,8 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
         message = "";
       }
 
-      insertString(getLength(), exceptionClass + ": " + message + "\n", set);
+      insertText(getDocLength(), 
+                 exceptionClass + ": " + message + "\n", styleName);
 
       // An example stack trace:
       //
@@ -433,7 +498,7 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
             }
           }
 
-          insertString(getLength(), line, set);
+          insertText(getDocLength(), line, styleName);
 
           // OK, now if fileName != null we did parse out fileName
           // and lineNumber.
@@ -446,16 +511,16 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
 
             SimpleAttributeSet buttonSet = new SimpleAttributeSet(set);
             StyleConstants.setComponent(buttonSet, button);
-            insertString(getLength(), "  ", null);
-            insertString(getLength() - 1, " ", buttonSet);
+            insertString(getDocLength(), "  ", null);
+            insertString(getDocLength() - 1, " ", buttonSet);
             */
             //JOptionPane.showMessageDialog(null, "button in");
-            //insertString(getLength(), " ", null);
+            //insertString(getDocLength(), " ", null);
             //JOptionPane.showMessageDialog(null, "extra space");
           }
 
           //JOptionPane.showMessageDialog(null, "\\n");
-          insertString(getLength(), "\n", set);
+          insertText(getDocLength(), "\n", styleName);
 
         } // end the while
       }
@@ -464,7 +529,7 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
       // won't happen; we're readLine'ing from a String!
       throw new UnexpectedException(ioe);
     }
-    catch (BadLocationException ble) {
+    catch (DocumentAdapterException ble) {
       throw new UnexpectedException(ble);
     }
     finally {
@@ -473,24 +538,4 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
   }
   
   
-
-  /* (not currently used)
-  protected class ExceptionButtonListener implements ActionListener {
-    private final String _fileName;
-    private final int _lineNumber;
-
-    public ExceptionButtonListener(final String fileName, final int lineNumber)
-    {
-      _fileName = fileName;
-      _lineNumber = lineNumber;
-    }
-
-    public void actionPerformed(ActionEvent e) {
-      javax.swing.JOptionPane.showMessageDialog(null, "exception at line " + 
-                                                      _lineNumber +
-                                                      " in file " +
-                                                      _fileName);
-    }
-  }
-  */
 }

@@ -39,12 +39,10 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-import java.awt.event.*;
-import javax.swing.text.*;
-import javax.swing.*;
 import java.io.IOException;
 
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.text.DocumentAdapter;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 
 /**
@@ -52,9 +50,24 @@ import edu.rice.cs.drjava.model.FileSaveSelector;
  * interpretation of this input.
  * @version $Id$
  */
-public interface InteractionsDocument extends StyledDocument {
+public interface InteractionsDocument extends DocumentAdapter {
   public static final String BANNER = "Welcome to DrJava.\n";
   public static final String PROMPT = "> ";
+  
+  /** Default text style. */
+  public static final String DEFAULT_STYLE = "default";
+  
+  /** Style for System.out */
+  public static final String SYSTEM_OUT_STYLE = "System.out";
+  
+  /** Style for System.err */
+  public static final String SYSTEM_ERR_STYLE = "System.err";
+  
+  /** Style for error messages */
+  public static final String ERROR_STYLE = "error";
+  
+  /** Style for debugger messages */
+  public static final String DEBUGGER_STYLE = "debugger";
 
   /**
    * Interprets the current command at the prompt.
@@ -102,23 +115,10 @@ public interface InteractionsDocument extends StyledDocument {
   /**
    * Inserts the given string with the given attributes just before the
    * most recent prompt.
-   * @param s String to insert
-   * @param a Attributes to control formatting of string
+   * @param text String to insert
+   * @param style name of style to format the string
    */
-  public void insertBeforeLastPrompt(String s, AttributeSet a);
-  
-  /**
-   * Insert a string into this document, but not before prompt. 
-   * @exception BadLocationException
-   */
-  public void insertString(int offs, String str, AttributeSet a)
-    throws BadLocationException;
-
-  /**
-   * Remove a string from this document, but not before prompt. 
-   * @exception BadLocationException
-   */
-  public void remove(int offs, int len) throws BadLocationException;
+  public void insertBeforeLastPrompt(String text, String style);
   
   
   /**
@@ -142,7 +142,8 @@ public interface InteractionsDocument extends StyledDocument {
    * Saves the interactions history (or an edited history) with the given
    * file selector.
    */
-  public void saveHistory(FileSaveSelector selector, String editedVersion) throws IOException;
+  public void saveHistory(FileSaveSelector selector, String editedVersion) 
+    throws IOException;
 
   /**
    * Returns the entire history as a single string.  Commands should
@@ -207,10 +208,10 @@ public interface InteractionsDocument extends StyledDocument {
    * @param exceptionClass Name of the exception that was thrown
    * @param message Message contained in the exception
    * @param stackTrace String representation of the stack trace
-   * @param set AttributeSet for formatting the exception
+   * @param styleName name of the style for formatting the exception
    */
   public void appendExceptionResult(String exceptionClass,
                                     String message,
                                     String stackTrace,
-                                    AttributeSet set);
+                                    String styleName);
 }

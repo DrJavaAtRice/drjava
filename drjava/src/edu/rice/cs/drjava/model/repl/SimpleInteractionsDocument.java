@@ -46,6 +46,9 @@ import javax.swing.*;
 import gj.util.Vector;
 
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.text.DocumentAdapter;
+import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 
@@ -69,10 +72,18 @@ public class SimpleInteractionsDocument extends AbstractInteractionsDocument {
   protected final Vector<SimpleInteractionsListener> _listeners;
 
   /**
-   * Creates a new InteractionsDocument.
+   * Creates a new InteractionsDocument using a SwingDocumentAdapter.
    */
   public SimpleInteractionsDocument() {
-    super();
+    this(new SwingDocumentAdapter());
+  }
+  
+  /**
+   * Creates a new InteractionsDocument with the given document adapter.
+   * @param document Toolkit-independent document adapter
+   */
+  public SimpleInteractionsDocument(DocumentAdapter document) {
+    super(document, 1000);
     _interpreter = new DynamicJavaAdapter();
     _listeners = new Vector<SimpleInteractionsListener>();
   }
@@ -95,7 +106,7 @@ public class SimpleInteractionsDocument extends AbstractInteractionsDocument {
       
       // there is no return at the end of the last line
       // better to put it on now and not later.
-      insertString("\n");
+      insertText("\n");
       
       String toEval = text.trim();
       if (toEval.startsWith("java ")) {
@@ -105,7 +116,7 @@ public class SimpleInteractionsDocument extends AbstractInteractionsDocument {
       try {
         Object result = _interpreter.interpret(toEval);
         if (result != JavaInterpreter.NO_RESULT) {
-          insertString(String.valueOf(result) + "\n");
+          insertText(String.valueOf(result) + "\n");
         }
       }
       catch (ExceptionReturnedException e) {
@@ -114,7 +125,7 @@ public class SimpleInteractionsDocument extends AbstractInteractionsDocument {
         appendExceptionResult(t.getClass().getName(),
                               t.getMessage(),
                               InterpreterJVM.getStackTrace(t),
-                              null);
+                              DEFAULT_STYLE);
       }
       finally {
         setInProgress(false);
@@ -168,12 +179,12 @@ public class SimpleInteractionsDocument extends AbstractInteractionsDocument {
   /**
    * Helper method to insert a string into the InteractionsDocument.
    */
-  protected void insertString(String s) {
+  protected void insertText(String s) {
     try {
-      insertString(getLength(), s, null);
+      insertText(getDocLength(), s, DEFAULT_STYLE);
     }
-    catch (BadLocationException ble) {
-      System.err.println("Error printing text: " + ble);
+    catch (DocumentAdapterException e) {
+      System.err.println("Error printing text: " + e);
     }
   }
 }

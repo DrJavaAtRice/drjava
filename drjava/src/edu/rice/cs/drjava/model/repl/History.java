@@ -55,7 +55,7 @@ import javax.swing.*;
 public class History implements OptionConstants {
   
   // Not final because it may be updated by config
-  private static int MAX_SIZE = DrJava.getConfig().getSetting(HISTORY_MAX_SIZE).intValue();
+  private static int MAX_SIZE;
   
   /**
    * Version flag at the beginning of saved history file format
@@ -70,8 +70,12 @@ public class History implements OptionConstants {
    * Constructor, so we can add a listener to the Config item being used.
    */ 
   public History() {
+    this(DrJava.getConfig().getSetting(HISTORY_MAX_SIZE).intValue());
     DrJava.getConfig().addOptionListener(HISTORY_MAX_SIZE, new HistorySizeOptionListener());
-    
+  }
+  
+  public History(int maxSize) {
+    MAX_SIZE = maxSize;
     // Sanity check on MAX_SIZE
     if (MAX_SIZE < 0) MAX_SIZE = 0;
   }
@@ -214,16 +218,18 @@ public class History implements OptionConstants {
       return; // don't need to do anything
     }
     if (c != null) {
-	if (c.getName().indexOf('.') == -1)
-	    c = new File(c.getAbsolutePath() + "." +
-			 InteractionsHistoryFilter.HIST_EXTENSION);
-        FileOutputStream fos = new FileOutputStream(c);
-        OutputStreamWriter osw = new OutputStreamWriter(fos);
-        BufferedWriter bw = new BufferedWriter(osw);
-	if (editedVersion == null)
-	    editedVersion = getHistoryAsStringWithSemicolons();
- 	bw.write(HISTORY_FORMAT_VERSION_2 + editedVersion, 0, HISTORY_FORMAT_VERSION_2.length() + editedVersion.length());
-        bw.close();
+      if (c.getName().indexOf('.') == -1) {
+        c = new File(c.getAbsolutePath() + "." +
+                     InteractionsHistoryFilter.HIST_EXTENSION);
+      }
+      FileOutputStream fos = new FileOutputStream(c);
+      OutputStreamWriter osw = new OutputStreamWriter(fos);
+      BufferedWriter bw = new BufferedWriter(osw);
+      if (editedVersion == null) {
+        editedVersion = getHistoryAsStringWithSemicolons();
+      }
+      bw.write(HISTORY_FORMAT_VERSION_2 + editedVersion, 0, HISTORY_FORMAT_VERSION_2.length() + editedVersion.length());
+      bw.close();
     }
   }
   

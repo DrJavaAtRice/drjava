@@ -50,6 +50,7 @@ import edu.rice.cs.util.swing.FindReplaceMachine;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.repl.*;
@@ -93,9 +94,17 @@ public interface GlobalModel {
   public ListModel getDefinitionsDocuments();
 
   /**
-   * Gets the interactions document.
+   * Gets the (toolkit-independent) interactions document.
    */
   public InteractionsDocument getInteractionsDocument();
+  
+  /**
+   * Gets the Swing adapter used in the Interactions document.
+   * This should ideally be refactored so the model doesn't have
+   * to use Swing, but all the other documents are Swing anyway.
+   * (Interactions are special because they're used in Eclipse.)
+   */
+  public SwingDocumentAdapter getSwingInteractionsDocument();
 
   /**
    * Gets the junit document.

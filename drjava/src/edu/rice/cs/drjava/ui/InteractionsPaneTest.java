@@ -42,6 +42,8 @@ package edu.rice.cs.drjava.ui;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestInteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
+import edu.rice.cs.util.text.SwingDocumentAdapter;
+import edu.rice.cs.util.text.DocumentAdapterException;
 
 import junit.framework.*;
 import junit.extensions.*;
@@ -58,11 +60,11 @@ import java.rmi.registry.Registry;
  */
 public class InteractionsPaneTest extends TestCase {
   
+  protected SwingDocumentAdapter _adapter;
   protected InteractionsDocument _doc;
   protected InteractionsPane _pane;
   protected InteractionsController _controller;
   
-  protected final SimpleAttributeSet _simpleAttributes;
   
   /**
    * Create a new instance of this TestCase.
@@ -70,7 +72,6 @@ public class InteractionsPaneTest extends TestCase {
    */
   public InteractionsPaneTest(String name) {
     super(name);
-    _simpleAttributes = new SimpleAttributeSet();
   }
   
   /**
@@ -86,18 +87,20 @@ public class InteractionsPaneTest extends TestCase {
    * Setup method for each JUnit test case.
    */
   public void setUp() {
-    _doc = new TestInteractionsDocument();
-    _pane = new InteractionsPane(_doc);
+    _adapter = new SwingDocumentAdapter();
+    _doc = new TestInteractionsDocument(_adapter);
+    _pane = new InteractionsPane(_adapter);
     // Make tests silent
     _pane.setBeep(new TestBeep());
     
-    _controller = new InteractionsController(_doc, _pane);
+    _controller = new InteractionsController(_doc, _adapter, _pane);
   }
   
   public void tearDown() {
     _controller = null;
     _doc = null;
     _pane = null;
+    _adapter = null;
     System.gc();
   }
   
@@ -114,13 +117,13 @@ public class InteractionsPaneTest extends TestCase {
    * Tests that moving the caret left when it's already at the prompt will
    * cycle it to the end of the line.
    */
-  public void testCaretMovementCyclesWhenAtPrompt() throws BadLocationException {
-    _doc.insertString(_doc.getLength(), "test text", _simpleAttributes);
+  public void testCaretMovementCyclesWhenAtPrompt() throws DocumentAdapterException {
+    _doc.insertText(_doc.getDocLength(), "test text", InteractionsDocument.DEFAULT_STYLE);
     _controller.moveToPrompt();
     
     _controller.moveLeftAction.actionPerformed(null);
     assertEquals("Caret was not cycled when moved left at the prompt.",
-                 _doc.getLength(),
+                 _doc.getDocLength(),
                  _pane.getCaretPosition());
   }
   
@@ -128,8 +131,8 @@ public class InteractionsPaneTest extends TestCase {
    * Tests that moving the caret right when it's already at the end will
    * cycle it to the prompt.
    */
-  public void testCaretMovementCyclesWhenAtEnd() throws BadLocationException {
-    _doc.insertString(_doc.getLength(), "test text", _simpleAttributes);
+  public void testCaretMovementCyclesWhenAtEnd() throws DocumentAdapterException {
+    _doc.insertText(_doc.getDocLength(), "test text", InteractionsDocument.DEFAULT_STYLE);
     _controller.moveToEnd();
     
     _controller.moveRightAction.actionPerformed(null);
@@ -158,7 +161,7 @@ public class InteractionsPaneTest extends TestCase {
     _pane.setCaretPosition(1);
     _controller.moveRightAction.actionPerformed(null);
     assertEquals("Right arrow doesn't move to end when caret is before prompt.",
-                 _doc.getLength(),
+                 _doc.getDocLength(),
                  _pane.getCaretPosition());
   }
   
@@ -170,7 +173,7 @@ public class InteractionsPaneTest extends TestCase {
     _pane.setCaretPosition(1);
     _controller.historyPrevAction.actionPerformed(null);
     assertEquals("Caret not moved to end on up arrow.",
-                 _doc.getLength(),
+                 _doc.getDocLength(),
                  _pane.getCaretPosition());
   }
   
@@ -182,16 +185,16 @@ public class InteractionsPaneTest extends TestCase {
     _pane.setCaretPosition(1);
     _controller.historyNextAction.actionPerformed(null);
     assertEquals("Caret not moved to end on down arrow.",
-                 _doc.getLength(),
+                 _doc.getDocLength(),
                  _pane.getCaretPosition());
   }
   
-  public void testCaretStaysAtEndDuringInteraction() throws BadLocationException {
+  public void testCaretStaysAtEndDuringInteraction() throws DocumentAdapterException {
     _doc.setInProgress(true);
-    _doc.insertString(_doc.getLength(), "simulated output", _simpleAttributes);
+    _doc.insertText(_doc.getDocLength(), "simulated output", InteractionsDocument.DEFAULT_STYLE);
     _doc.setInProgress(false);
     assertEquals("Caret is at the end after output while in progress.",
-                 _doc.getLength(),
+                 _doc.getDocLength(),
                  _pane.getCaretPosition());
   }
   
@@ -199,17 +202,17 @@ public class InteractionsPaneTest extends TestCase {
    * Tests that the caret catches up to the prompt if it is before it and
    * output is displayed.
    */
-  public void testCaretMovesUpToPromptAfterInsert() throws BadLocationException {
-    _doc.insertString(_doc.getLength(), "typed text", _simpleAttributes);
+  public void testCaretMovesUpToPromptAfterInsert() throws DocumentAdapterException {
+    _doc.insertText(_doc.getDocLength(), "typed text", InteractionsDocument.DEFAULT_STYLE);
     _pane.setCaretPosition(1);
-    _doc.insertBeforeLastPrompt("simulated output", _simpleAttributes);
+    _doc.insertBeforeLastPrompt("simulated output", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("Caret is at the prompt after output inserted.",
                  _doc.getPromptPos(),
                  _pane.getCaretPosition());
     
     _doc.insertPrompt();
     _pane.setCaretPosition(1);
-    _doc.insertBeforeLastPrompt("simulated output", _simpleAttributes);
+    _doc.insertBeforeLastPrompt("simulated output", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("Caret is at the end after output inserted.",
                  _doc.getPromptPos(),
                  _pane.getCaretPosition());
@@ -219,8 +222,8 @@ public class InteractionsPaneTest extends TestCase {
    * Tests that the caret is moved properly when the current interaction
    * is cleared.
    */
-  public void testClearCurrentInteraction() throws BadLocationException {
-    _doc.insertString(_doc.getLength(), "typed text", _simpleAttributes);
+  public void testClearCurrentInteraction() throws DocumentAdapterException {
+    _doc.insertText(_doc.getDocLength(), "typed text", InteractionsDocument.DEFAULT_STYLE);
     _controller.moveToEnd();
     
     _doc.clearCurrentInteraction();
@@ -228,7 +231,7 @@ public class InteractionsPaneTest extends TestCase {
                  _doc.getPromptPos(),
                  _pane.getCaretPosition());
     assertEquals("Prompt is at the end after output cleared.",
-                 _doc.getLength(),
+                 _doc.getDocLength(),
                  _doc.getPromptPos());
   }
 }

@@ -53,6 +53,7 @@ import javax.swing.ListModel;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
@@ -1108,8 +1109,8 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
    * Interprets some statements, saves the history, clears the history, then loads
    * the history.
    */
-  public void testSaveClearAndLoadHistory() throws BadLocationException, 
-    InterruptedException, IOException
+  public void testSaveClearAndLoadHistory() throws DocumentAdapterException, 
+    BadLocationException, InterruptedException, IOException
   {
     TestListener listener = new TestListener() {
       public void interactionStarted() {

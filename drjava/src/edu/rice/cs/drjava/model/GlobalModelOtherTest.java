@@ -56,6 +56,7 @@ import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.util.*;
+import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.drjava.CodeStatus;
 
 /**
@@ -86,7 +87,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
    * interactions frame.
    */
   public void testInteractionPreventedFromExit()
-    throws BadLocationException, InterruptedException
+    throws DocumentAdapterException, InterruptedException
   {
     TestListener listener = new TestListener() {
       public void interactionStarted() {
@@ -146,7 +147,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
    * on an abort. I fixed the problem in {@link MainJVM#restartInterpreterJVM}.
    */
   public void testInteractionAbort()
-    throws BadLocationException, InterruptedException, IOException
+    throws BadLocationException, DocumentAdapterException, 
+    InterruptedException, IOException
   {
     doCompile(setupDocument(FOO_TEXT), tempFile());
     final String beforeAbort = interpret("DrJavaTestFoo.class.getName()");
@@ -214,7 +216,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
    * Checks that reset console works.
    */
   public void testResetConsole()
-    throws BadLocationException, InterruptedException
+    throws BadLocationException, DocumentAdapterException, InterruptedException
   {
     //System.err.println("Entering testResetConsole");
     TestListener listener = new TestListener() {
@@ -279,7 +281,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
    * "extra.classpath" config option.
    */
   public void testInteractionsCanSeeCompiledClasses()
-    throws BadLocationException, IOException, InterruptedException
+    throws BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException
   {
     // Compile Foo
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
@@ -323,7 +326,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
    * Catches SF bug #689026 ("DynamicJava can't handle certain variable names")
    */
   public void testInteractionsVariableWithLowercaseClassName()
-    throws BadLocationException, IOException, InterruptedException
+    throws BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException
   {
     // Compile a test file
     OpenDefinitionsDocument doc1 = 
@@ -341,7 +345,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
    * the REPL.
    */
   public void testInteractionsCanSeeChangedClass()
-    throws BadLocationException, IOException, InterruptedException
+    throws BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException
   {
     final String text_before = "class DrJavaTestFoo { public int m() { return ";
     final String text_after = "; } }";
@@ -364,7 +369,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
    * Checks that an anonymous inner class can be defined in the repl!
    */
   public void testInteractionsDefineAnonymousInnerClass()
-    throws BadLocationException, IOException, InterruptedException
+    throws BadLocationException, DocumentAdapterException, 
+    IOException, InterruptedException
   {
     final String interface_text = "public interface I { int getValue(); }";
     final File file = createFile("I.java");
@@ -569,7 +575,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
    * can see it.
    */
   public void testInteractionsLiveUpdateClasspath()
-    throws BadLocationException, IOException, InterruptedException
+    throws BadLocationException, DocumentAdapterException, 
+    IOException, InterruptedException
   {
       
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);

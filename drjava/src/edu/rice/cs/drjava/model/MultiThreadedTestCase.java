@@ -42,9 +42,14 @@ package edu.rice.cs.drjava.model;
 import  junit.framework.*;
 import java.io.*;
 
-public class MultiThreadedTestCase extends TestCase{
+/**
+ * TestCase which can fail if another thread causes an error or failure.
+ *
+ * @version $Id$
+ */
+public class MultiThreadedTestCase extends TestCase {
 
-  public MultiThreadedTestCase(String s){
+  public MultiThreadedTestCase(String s) {
     super(s);
   }
   
@@ -57,7 +62,7 @@ public class MultiThreadedTestCase extends TestCase{
   /**
    * Initialize test state to not failed
    */
-  public void setUp() throws IOException{
+  public void setUp() throws IOException {
     _testFailed = false;
   }
   
@@ -65,8 +70,8 @@ public class MultiThreadedTestCase extends TestCase{
    * If any tests failed, print a message saying that 
    * some tests failed in another thread (other than the testing thread)
    */
-  public void tearDown() throws IOException{
-    if( _testFailed ){
+  public void tearDown() throws IOException {
+    if( _testFailed ) {
       fail("test failed in another thread");
     }
   }

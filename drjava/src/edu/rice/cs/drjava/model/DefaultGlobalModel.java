@@ -64,6 +64,8 @@ import gj.util.Vector;
 import gj.util.Enumeration;
 import gj.util.Hashtable;
 import edu.rice.cs.util.*;
+import edu.rice.cs.util.text.SwingDocumentAdapter;
+import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -214,6 +216,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   // ---- Input/Output Document Fields ----
   
   /**
+   * The Swing document used in the InteractionsDocument.
+   * This should ideally be refactored out so the model doesn't have
+   * to use Swing, but all the other documents are Swing anyway.
+   * (Interactions are special because they're used in Eclipse.)
+   */
+  private final SwingDocumentAdapter _swingInteractionsDoc
+    = new SwingDocumentAdapter();
+  /**
    * The document used to interact with the repl.
    */
   private final InteractionsDocument _interactionsDoc
@@ -262,47 +272,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     return s;
   }
 
-  /**
-   * Attributes for System.out output in the interactions document.
-   */
-  public static final AttributeSet SYSTEM_OUT_INTERACTIONS_STYLE
-    = _getInteractionsOutStyle();
-  private static AttributeSet _getInteractionsOutStyle() {
-    SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_CONSOLE_STYLE);
-    s.addAttribute(StyleConstants.Foreground, Color.green.darker().darker());
-    return s;
-  }
-  
-  /**
-   * Attributes for System.err output in the interactions document.
-   */
-  public static final AttributeSet SYSTEM_ERR_INTERACTIONS_STYLE
-    = _getConsoleErrStyle();
-
-  /**
-   * Attributes for debug messages in the interactions document.
-   */
-  public static final AttributeSet DEBUG_STYLE
-    = _getDebugStyle();
-  private static AttributeSet _getDebugStyle() {
-    SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_CONSOLE_STYLE);
-    s.addAttribute(StyleConstants.Foreground, Color.blue.darker());
-    s.addAttribute(StyleConstants.Bold, new Boolean(true));
-    return s;
-  }
-  
-  /**
-   * Attributes for error messages in the interactions document.
-   */
-  public static final AttributeSet INTERACTIONS_ERR_STYLE
-    = _getInteractionsErrStyle();
-  private static AttributeSet _getInteractionsErrStyle() {
-    SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_CONSOLE_STYLE);
-    s.addAttribute(StyleConstants.Foreground, Color.red.darker());
-    s.addAttribute(StyleConstants.Bold, new Boolean(true));
-    return s;
-  }
-  
   
   // ----- CONSTRUCTORS -----
   
@@ -392,6 +361,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
   public InteractionsDocument getInteractionsDocument() {
     return _interactionsDoc;
+  }
+  
+  public SwingDocumentAdapter getSwingInteractionsDocument() {
+    return _swingInteractionsDoc;
   }
 
   public StyledDocument getConsoleDocument() {
@@ -642,8 +615,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    */
   public void quit() {
     if (closeAllFiles()) {
-      // Kill the interpreter
-      _interpreterControl.killInterpreter(false);
+      dispose();  // kills the interpreter
 
       if (DrJava.getSecurityManager() != null) {
         DrJava.getSecurityManager().exitVM(0);
@@ -655,6 +627,20 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       }
         
     }
+  }
+  
+  /**
+   * Prepares this model to be thrown away.  Never called in
+   * practice outside of quit(); only used in tests.
+   */
+  public void dispose() {
+    // Kill the interpreter
+    _interpreterControl.killInterpreter(false);
+
+    synchronized(_listeners) {
+      _listeners.clear();
+    }
+    _definitionsDocs.clear();
   }
 
   /**
@@ -780,7 +766,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       
       // there is no return at the end of the last line
       // better to put it on now and not later.
-      _docAppend(_interactionsDoc, "\n", null);
+      _docAppend(_interactionsDoc, "\n", InteractionsDocument.DEFAULT_STYLE);
       
       String toEval = text.trim();
       if (toEval.startsWith("java ")) {
@@ -871,12 +857,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         }
       }
       _interactionsDoc.clearCurrentInteraction();
-      _docAppend(_interactionsDoc, text, null);
+      _docAppend(_interactionsDoc, text, InteractionsDocument.DEFAULT_STYLE);
       _interactionsDoc.setInProgress(true);
       _interactionsDoc.addToHistory(text);
       // there is no return at the end of the last line
       // better to put it on now and not later.
-      //_docAppend(_interactionsDoc, "\n", null);
+      //_docAppend(_interactionsDoc, "\n", InteractionsDocument.DEFAULT_STYLE);
       
       String toEval = text.trim();
       if (toEval.startsWith("java ")) {
@@ -953,6 +939,32 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       }
     }
   }
+  
+  /**
+   * Appends a string to the given document using a named style.
+   * Also waits for a small amount of time (WRITE_DELAY) to prevent any one
+   * writer from flooding the model with print calls to the point that the 
+   * user interface could become unresponsive.
+   * @param doc InteractionsDocument to append to
+   * @param s String to append to the end of the document
+   * @param styleName Name of the style to use for s
+   */
+  private void _docAppend(InteractionsDocument doc, String s, String styleName) {
+    synchronized(_systemWriterLock) {
+      try {
+        doc.insertText(doc.getDocLength(), s, styleName);
+        
+        // Wait to prevent being flooded with println's
+        _systemWriterLock.wait(WRITE_DELAY);
+      }
+      catch (DocumentAdapterException e) {
+        throw new UnexpectedException(e);
+      }
+      catch (InterruptedException e) {
+        // It's ok, we'll go ahead and resume
+      }
+    }
+  }
  
   /** Prints System.out to the DrJava console. */
   public void systemOutPrint(String s) {
@@ -968,18 +980,18 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   /** Called when the repl prints to System.out. */
   public void replSystemOutPrint(String s) {
     systemOutPrint(s);
-    _interactionsDoc.insertBeforeLastPrompt(s, SYSTEM_OUT_INTERACTIONS_STYLE);
+    _interactionsDoc.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_OUT_STYLE);
   }
 
   /** Called when the repl prints to System.err. */
   public void replSystemErrPrint(String s) {
     systemErrPrint(s);
-    _interactionsDoc.insertBeforeLastPrompt(s, SYSTEM_ERR_INTERACTIONS_STYLE);
+    _interactionsDoc.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_ERR_STYLE);
   }
 
-  /** Called when the debugger wants to print a message. */
+  /** Called when the debugger wants to print a message.  Inserts a newline. */
   public void printDebugMessage(String s) {
-    _interactionsDoc.insertBeforeLastPrompt(s + "\n", DEBUG_STYLE);
+    _interactionsDoc.insertBeforeLastPrompt(s + "\n", InteractionsDocument.DEBUGGER_STYLE);
   }
 
 
@@ -1019,7 +1031,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    *               data type to be serializable.
    */
   public void replReturnedResult(String result) {
-    _docAppend(_interactionsDoc, result + "\n", null);
+    _docAppend(_interactionsDoc, result + "\n", InteractionsDocument.DEFAULT_STYLE);
     _interactionIsOver();
   }
 
@@ -1038,20 +1050,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     _interactionsDoc.appendExceptionResult(exceptionClass,
                                            message,
                                            stackTrace,
-                                           INTERACTIONS_ERR_STYLE);
-    /*
-     if (null == message || "null".equals(message)) {
-     message = "";
-     }
-
-     String txt = exceptionClass + ": " + message;
-     if (! stackTrace.trim().equals("")) {
-     txt += "\n" + stackTrace;
-     }
-
-     _docAppend(_interactionsDoc, txt + "\n", SYSTEM_ERR_STYLE);
-     */
-
+                                           InteractionsDocument.ERROR_STYLE);
     _interactionIsOver();
   }
 
@@ -2668,7 +2667,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   public void interactionsResetting() {
     if (!_waitingForFirstInterpreter) {
       _interactionsDoc.insertBeforeLastPrompt("Resetting Interactions...\n",
-                                              INTERACTIONS_ERR_STYLE);
+                                              InteractionsDocument.ERROR_STYLE);
       notifyListeners(new EventNotifier() {
         public void notifyListener(GlobalModelListener l) {
           l.interactionsResetting();
@@ -2737,14 +2736,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * agree, false if some disagree
    */
   protected boolean pollListeners(EventPoller p) {
-    ListIterator i = _listeners.listIterator();
-    boolean poll = true;
-
-    while(i.hasNext()) {
-      GlobalModelListener cur = (GlobalModelListener) i.next();
-      poll = poll && p.poll(cur);
+    synchronized(_listeners) {
+      ListIterator i = _listeners.listIterator();
+      boolean poll = true;
+      
+      while(i.hasNext()) {
+        GlobalModelListener cur = (GlobalModelListener) i.next();
+        poll = poll && p.poll(cur);
+      }
+      return poll;
     }
-    return poll;
   }
 
   /**

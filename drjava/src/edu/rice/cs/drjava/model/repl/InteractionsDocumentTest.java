@@ -51,6 +51,9 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.CodeStatus;
+import edu.rice.cs.util.text.DocumentAdapter;
+import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.SwingDocumentAdapter;
 
 /**
  * Tests the functionality of the AbstractInteractionsDocument.
@@ -72,7 +75,7 @@ public class InteractionsDocumentTest extends TestCase {
    * Initialize fields for each test.
    */
   protected void setUp() {
-    _doc = new TestInteractionsDocument();
+    _doc = new TestInteractionsDocument(new SwingDocumentAdapter());
   }
   
   /**
@@ -88,50 +91,50 @@ public class InteractionsDocumentTest extends TestCase {
    * Tests that the document prevents editing before the
    * prompt, and beeps if you try.
    */
-  public void testCannotEditBeforePrompt() throws BadLocationException {
+  public void testCannotEditBeforePrompt() throws DocumentAdapterException {
     TestBeep testBeep = new TestBeep();
     _doc.setBeep(testBeep);
-    int origLength = _doc.getLength();
+    int origLength = _doc.getDocLength();
     
     // Try to insert into the banner
-    _doc.insertString(1, "text", null);
+    _doc.insertText(1, "text", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("Number of beeps", 1, testBeep.numBeeps);
-    assertEquals("Doc length", origLength, _doc.getLength());
+    assertEquals("Doc length", origLength, _doc.getDocLength());
   }
   
   /**
    * Tests that clear current interaction works.
    */
-  public void testClearCurrent() throws BadLocationException {
-    int origLength = _doc.getLength();
-    _doc.insertString(_doc.getLength(), "text", null);
-    _doc.insertBeforeLastPrompt("before", null);
+  public void testClearCurrent() throws DocumentAdapterException {
+    int origLength = _doc.getDocLength();
+    _doc.insertText(origLength, "text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.insertBeforeLastPrompt("before", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("Length after inserts", 
                  origLength + 10,  // orig + "before" + "text"
-                 _doc.getLength());
+                 _doc.getDocLength());
     _doc.clearCurrentInteraction();
     assertEquals("Length after clear", 
                  origLength + 6,  // orig + "before"
-                 _doc.getLength());
+                 _doc.getDocLength());
   }
   
   /**
    * Tests that reset works.
    */
-  public void testReset() throws BadLocationException {
-    int origLength = _doc.getLength();
-    _doc.insertString(_doc.getLength(), "text", null);
-    _doc.insertBeforeLastPrompt("before", null);
+  public void testReset() throws DocumentAdapterException {
+    int origLength = _doc.getDocLength();
+    _doc.insertText(origLength, "text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.insertBeforeLastPrompt("before", InteractionsDocument.DEFAULT_STYLE);
     _doc.reset();
-    assertEquals("Length after reset", origLength, _doc.getLength());
+    assertEquals("Length after reset", origLength, _doc.getDocLength());
   }
   
   /**
    * Tests that inserting a newline works.
    */
-  public void testInsertNewLine() throws BadLocationException {
-    int origLength = _doc.getLength();
-    _doc.insertString(_doc.getLength(), "command", null);
+  public void testInsertNewLine() throws DocumentAdapterException {
+    int origLength = _doc.getDocLength();
+    _doc.insertText(origLength, "command", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("current interaction before newline",
                  "command",
                  _doc.getCurrentInteraction());
@@ -143,8 +146,12 @@ public class InteractionsDocumentTest extends TestCase {
   
   /**
    * Dummy InteractionsDocument which cannot interpret anything.
+   * Uses a Swing document for its model.
    */
   public static class TestInteractionsDocument extends AbstractInteractionsDocument {
+    public TestInteractionsDocument(DocumentAdapter adapter) {
+      super(adapter);
+    }
     public void interpretCurrentInteraction() {
       fail("interpretCurrentInteraction called unexpectedly");
     }
