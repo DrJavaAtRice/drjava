@@ -72,7 +72,7 @@ public class QuestionBraceIsParenOrBracket extends IndentRuleQuestion
   {
     // PRE: We are not inside a multiline comment.
 
-    IndentInfo info = doc.getReduced().getIndentInformation();
+    IndentInfo info = doc.getIndentInformation();
 
     // We are using fields on IndentInfo which look
     //  at the start of the line, not the current position!

@@ -72,7 +72,7 @@ public class QuestionBraceIsCurly extends IndentRuleQuestion
     // PRE: We are not inside a multiline comment.
     // PRE: The closest brace is not a '(' or a '['.
 
-    IndentInfo info = doc.getReduced().getIndentInformation();
+    IndentInfo info = doc.getIndentInformation();
 
     return info.braceType.equals(IndentInfo.openSquiggly);
   }

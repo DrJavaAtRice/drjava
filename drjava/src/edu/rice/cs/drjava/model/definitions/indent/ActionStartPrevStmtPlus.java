@@ -111,14 +111,17 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
       // Jump over {-} region if delimiter was a close brace.
       char delim = doc.getText(prevDelimiterPos, 1).charAt(0);
 
-      if (delim == '}') {
-        BraceReduction reduced = doc.getReduced();
-        reduced.resetLocation();
+      if (delim == '}') {       
+        //BraceReduction reduced = doc.getReduced();
+        //we're pretty sure the doc is in sync.
+        doc.resetReducedModelLocation();
         
         int dist = prevDelimiterPos - here + 1;
-        reduced.move(dist);
-        prevDelimiterPos -= reduced.balanceBackward() - 1;
-        reduced.move(-dist);
+        synchronized(doc){
+          doc.move(dist);
+          prevDelimiterPos -= doc.balanceBackward() - 1;
+          doc.move(-dist);
+        }
       }
     }
     catch (BadLocationException e) {

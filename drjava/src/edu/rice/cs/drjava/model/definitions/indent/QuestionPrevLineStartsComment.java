@@ -93,10 +93,10 @@ class QuestionPrevLineStartsComment extends IndentRuleQuestion {
       
       // Return if the start of the previous line is
       // in a comment.
-      BraceReduction reduced = doc.getReduced();
-      reduced.resetLocation();
-      ReducedModelState state = reduced.stateAtRelLocation(cursor -
-          reduced.absOffset());
+      //BraceReduction reduced = doc.getReduced();
+      doc.resetReducedModelLocation();
+      ReducedModelState state = doc.stateAtRelLocation(cursor -
+          doc.getCurrentLocation());
       return !state.equals(ReducedModelState.INSIDE_BLOCK_COMMENT);
     }
   }

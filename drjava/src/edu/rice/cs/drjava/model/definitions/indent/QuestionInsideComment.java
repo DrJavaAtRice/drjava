@@ -66,8 +66,8 @@ class QuestionInsideComment extends IndentRuleQuestion {
 
     int here = doc.getCurrentLocation();
     int distToStart = here - doc.getLineStartPos(here);
-    doc.getReduced().resetLocation();
-    ReducedModelState state = doc.getReduced().stateAtRelLocation(-distToStart);
+    doc.resetReducedModelLocation();
+    ReducedModelState state = doc.stateAtRelLocation(-distToStart);
     
     return (state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT));
   }

@@ -416,7 +416,17 @@ public class DefinitionsPane extends JEditorPane
     }
      
   }
-
+  
+  /**
+   * Be sure to update the document (and thus the reduced model) any time
+   * the caret position changes.
+   * @param pos
+   */
+  public void setCaretPosition(int pos) {
+    super.setCaretPosition(pos);
+    _doc.getDocument().setCurrentLocation(pos);
+  }
+  
   
   /**
    *  Creates the popup menu for the DefinitionsPane

@@ -75,35 +75,37 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion
   boolean applyRule(DefinitionsDocument doc)
   {
     // PRE: We are inside a {.
-
-    int here = doc.getCurrentLocation();
-    int origin = doc.getReduced().absOffset();
-    int lineStart = doc.getLineStartPos(doc.getCurrentLocation());
+    
+    int origin = doc.getCurrentLocation();
+    int lineStart = doc.getLineStartPos(origin);
     
     // Get brace for start of line
-    doc.getReduced().move(lineStart - origin);
-    IndentInfo info = doc.getReduced().getIndentInformation();
-    doc.getReduced().move(origin - lineStart);
-    
-    if ((!info.braceType.equals(IndentInfo.openSquiggly)) ||
-        (info.distToBrace < 0)) {
-      // Precondition not met: we should have a brace
-      return false;
-    }
-    int bracePos = lineStart - info.distToBrace;    
-    
-    // Get position of previous non-WS char (not in comments)
-    int prevNonWS = -1;
-    try {
-      prevNonWS = doc.findPrevNonWSCharPos(bracePos);
-      for (int i=0; i<_prefix.length; i++) {
-        char prefix = _prefix[i];
-        if (doc.getText(prevNonWS,1).charAt(0) == prefix) {
-          return true;
-        } 
+    synchronized(doc){
+      doc.move(lineStart - origin);
+      IndentInfo info = doc.getIndentInformation();
+      doc.move(origin - lineStart);
+      
+      
+      if ((!info.braceType.equals(IndentInfo.openSquiggly)) ||
+          (info.distToBrace < 0)) {
+        // Precondition not met: we should have a brace
+        return false;
       }
-    }
-    catch (BadLocationException e) {
+      int bracePos = lineStart - info.distToBrace;    
+      
+      // Get position of previous non-WS char (not in comments)
+      int prevNonWS = -1;
+      try {
+        prevNonWS = doc.findPrevNonWSCharPos(bracePos);
+        for (int i=0; i<_prefix.length; i++) {
+          char prefix = _prefix[i];
+          if (doc.getText(prevNonWS,1).charAt(0) == prefix) {
+            return true;
+          } 
+        }
+      }
+      catch (BadLocationException e) {
+      }    
     }
     return false;
   }

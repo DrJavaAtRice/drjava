@@ -133,9 +133,11 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   }
 
   /**
+   * This method should never be called outside of this class. Doing so can create
+   * all sorts of synchronization issues. It is package private for test purposes.
    * @return The reduced model of this document.
    */
-  public BraceReduction getReduced() {
+  BraceReduction getReduced() {
     return _reduced;
   }
 
@@ -360,7 +362,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * Add a character to the underlying reduced model.
    * @param curChar the character to be added.
    */
-  private void _addCharToReducedModel(char curChar) {
+  private synchronized void _addCharToReducedModel(char curChar) {
     _reduced.insertChar(curChar);
   }
 
@@ -462,7 +464,12 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * The actual cursor movement logic.  Helper for setCurrentLocation(int).
    * @param dist the distance from the current location to the new location.
    */
-  public void move(int dist) {
+  public synchronized void move(int dist) {
+    //if (_currentLocation != _reduced.absOffset()) {
+    //  DrJava.consoleOut().println("DefDoc.currentLocation: " + _currentLocation);
+    //  DrJava.consoleOut().println("Reduced location: " + _reduced.absOffset());
+    //}
+    
     int newLoc = _currentLocation + dist;
     if (newLoc < 0) {
       throw  new RuntimeException("location < 0?! oldLoc=" + _currentLocation + " dist=" +
@@ -598,7 +605,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @return position of first matching delimiter, or ERROR_INDEX if beginning
    * of document is reached.
    */
-  public int findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases)
+  public synchronized int findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases)
     throws BadLocationException
   {
     int j, i;
@@ -647,7 +654,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @param pos the position we're looking at
    * @return true if pos is immediately inside parentheses
    */
-  public boolean posInParenPhrase(int pos) {
+  public synchronized boolean posInParenPhrase(int pos) {
     int here = _reduced.absOffset();
     _reduced.move(pos - here);
     IndentInfo info = _reduced.getIndentInformation();
@@ -661,7 +668,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @param pos the position we're looking at
    * @return true if pos is immediately inside a paren/brace/etc
    */
-  protected boolean posNotInBlock (int pos) {
+  protected synchronized boolean posNotInBlock (int pos) {
     int here = _reduced.absOffset();
     _reduced.move(pos - here);
     IndentInfo info = _reduced.getIndentInformation();
@@ -792,7 +799,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @param pos Any position on the current line
    * @return position of the beginning of this line
    */
-  public int getLineStartPos(int pos) {
+  public synchronized int getLineStartPos(int pos) {
     int location = _reduced.absOffset();
     _reduced.move(pos - location);
     int dist = _reduced.getDistToPreviousNewline(0);
@@ -812,7 +819,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @param pos Any position on the current line
    * @return position of the end of this line
    */
-  public int getLineEndPos(int pos) {
+  public synchronized int getLineEndPos(int pos) {
     int location = _reduced.absOffset();
     _reduced.move(pos - location);
     int dist = _reduced.getDistToNextNewline();
@@ -867,7 +874,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @return position of first non-whitespace character after pos,
    * or ERROR_INDEX if end of document is reached
    */
-  public int getFirstNonWSCharPos(int pos,char[] whitespace) throws BadLocationException {
+  public synchronized int getFirstNonWSCharPos(int pos,char[] whitespace) throws BadLocationException {
     int j, i;
     char c;
     int endPos = getLength();
@@ -927,6 +934,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   public int getOffset(int lineNum) {
     
     try {
+     
       String defsText = getText(0, getLength());
       
       int curLine = 1;
@@ -937,11 +945,13 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       while (offset < defsText.length()) {
         
         if (curLine==lineNum) {
+      
           return offset;
         }
         
         int nextNewline = defsText.indexOf('\n', offset);
         if (nextNewline == -1) {
+         
           // end of the document, and couldn't find the supplied lineNum
           return -1;
         }
@@ -950,6 +960,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
           offset = nextNewline + 1;
         } 
       }
+    
       return -1;
     }
     catch (BadLocationException ble) {
@@ -965,7 +976,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @return position of first non-whitespace character before pos,
    * or ERROR_INDEX if begining of document is reached
    */
-  public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {
+  public synchronized int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {
     int j, i;
     char c;
     String text = getText(0, pos);
@@ -1062,7 +1073,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @return the relative distance backwards to the offset before
    *         the matching brace.
    */
-  public int balanceBackward() {
+  public synchronized int balanceBackward() {
     return _reduced.balanceBackward();
   }
 
@@ -1094,7 +1105,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @param start Position in document to start indenting from
    * @param end Position in document to end indenting at
    */
-  private void _indentBlock(final int start, final int end) {
+  private synchronized void _indentBlock(final int start, final int end) {
     try {
       // Keep marker at the end. This Position will be the
       // correct endpoint no matter how we change the doc
@@ -1237,7 +1248,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @param text a block of text
    * @return true if the conditions are met
    */
-  private boolean _isCommentedOrSpace(int i, String text) {
+  private synchronized boolean _isCommentedOrSpace(int i, String text) {
     ReducedToken rt = _reduced.currentToken();
     String type = rt.getType();
     return  (rt.isCommented() || type.equals("//") || type.equals("/*") || type.equals("*/")
@@ -1342,7 +1353,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * Return all highlight status info for text between start and end.
    * This should collapse adjoining blocks with the same status into one.
    */
-  public Vector<HighlightStatus> getHighlightStatus(int start, int end) {
+  public synchronized Vector<HighlightStatus> getHighlightStatus(int start, int end) {
     //DrJava.consoleErr().println("getHi: start=" + start + " end=" + end +
     //" currentLoc=" + _currentLocation);
 
@@ -1514,7 +1525,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   /**
    * Goes to a particular line in the document.
    */
-  public void gotoLine(int line) {
+  public synchronized void gotoLine(int line) {
     int dist;
     if (line < 0) {
      return;
@@ -1548,7 +1559,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    *                                    <TT>package</TT> statement but it
    *                                    is invalid.
    */
-  public String getPackageName() throws InvalidPackageException {
+  public synchronized String getPackageName() throws InvalidPackageException {
     // Where we'll build up the package name we find
     StringBuffer buf = new StringBuffer();
 
@@ -1653,6 +1664,22 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     }
   }
 
+  public synchronized IndentInfo getIndentInformation(){
+    return getReduced().getIndentInformation();
+  }
+  
+  public synchronized ReducedModelState stateAtRelLocation(int dist){
+    return getReduced().stateAtRelLocation(dist);
+  }
+  
+  public synchronized ReducedModelState getStateAtCurrent(){
+    return getReduced().getStateAtCurrent();
+  }
+  
+  public synchronized void resetReducedModelLocation() {
+    getReduced().resetLocation();
+  }
+  
  /**
    * Gets the name of the class this source file
    * This attempts to find the first declaration of a class or interface
@@ -1734,7 +1761,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @param keyword the keyword for which to search
    * @param 
    */
-  private int _findKeywordAtToplevel( String keyword, String text) {
+  private synchronized int _findKeywordAtToplevel( String keyword, String text) {
    
     int index = 0;
     boolean done = false;
@@ -1797,7 +1824,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
 
     public void run() {
       // adjust location to the start of the text to input
-      _reduced.move(_offset - _currentLocation);
+      synchronized(DefinitionsDocument.this){
+        _reduced.move(_offset - _currentLocation);
+      }
 
       // loop over string, inserting characters into reduced model
       for (int i = 0; i < _text.length(); i++) {
@@ -1823,7 +1852,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       setCurrentLocation(_offset); 
       
       // (don't move the cursor... I hope this doesn't break too much)
-      _reduced.delete(_length);
+      synchronized(DefinitionsDocument.this){
+        _reduced.delete(_length);
+      }
       _styleChanged();
     }
   }

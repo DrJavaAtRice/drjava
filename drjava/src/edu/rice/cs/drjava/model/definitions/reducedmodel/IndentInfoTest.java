@@ -53,7 +53,7 @@ public class IndentInfoTest extends TestCase {
   
   private String _text;
   private DefinitionsDocument _document;
-  private BraceReduction _reduced;
+  //private BraceReduction _reduced;
   private IndentInfo _info;
 
   public IndentInfoTest(String name) {
@@ -65,16 +65,16 @@ public class IndentInfoTest extends TestCase {
   }
 
   private void _infoTestHelper(int location,
-			       String message,
-			       int expDistToPrevNewline,
-			       int expDistToBrace,
-			       int expDistToNewline,
-			       int expDistToBraceCurrent,
-			       int expDistToNewlineCurrent) {
+          String message,
+          int expDistToPrevNewline,
+          int expDistToBrace,
+          int expDistToNewline,
+          int expDistToBraceCurrent,
+          int expDistToNewlineCurrent) {
       
     _document.setCurrentLocation(location);
-    _reduced = _document.getReduced();
-    _info = _reduced.getIndentInformation();
+    //_reduced = _document.getReduced();
+    _info = _document.getIndentInformation();
 
     assertEquals(message + " -- distToPrevNewline", expDistToPrevNewline, _info.distToPrevNewline);
     assertEquals(message + " -- distToBrace", expDistToBrace, _info.distToBrace);
@@ -82,7 +82,7 @@ public class IndentInfoTest extends TestCase {
     assertEquals(message + " -- distToBraceCurrent", expDistToBraceCurrent, _info.distToBraceCurrent);
     assertEquals(message + " -- distToNewlineCurrent", expDistToNewlineCurrent, _info.distToNewlineCurrent);  
   }
-			       
+          
   public void testFieldsForCurrentLocation() throws BadLocationException {
     
     _text = "foo {\nvoid m1(int a,\nint b) {\n}\n}";

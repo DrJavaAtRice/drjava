@@ -37,14 +37,13 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.definitions.indent;
+package edu.rice.cs.drjava.model.definitions;
 
 import junit.framework.*;
 import junit.extensions.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.indent.IndentRulesTestCase;
 
 /**
  * Tests for the helper methods in DefinitionsDocument

@@ -75,7 +75,7 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
     int pos = doc.getCurrentLocation();
 
     // Get distance to brace
-    IndentInfo info = doc.getReduced().getIndentInformation();
+    IndentInfo info = doc.getIndentInformation();
     int distToBrace = info.distToBrace;
 
     // If there is no brace, align to left margin

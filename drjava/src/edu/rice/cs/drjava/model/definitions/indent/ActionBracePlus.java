@@ -73,7 +73,7 @@ public class ActionBracePlus extends IndentRuleAction
     int here = doc.getCurrentLocation();
     int startLine = doc.getLineStartPos(here);
     doc.setCurrentLocation(startLine);
-    IndentInfo ii = doc.getReduced().getIndentInformation();
+    IndentInfo ii = doc.getIndentInformation();
     
     // Check preconditions
     if ((ii.braceType.equals("")) ||
