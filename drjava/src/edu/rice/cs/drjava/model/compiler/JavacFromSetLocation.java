@@ -44,7 +44,8 @@ import java.net.URLClassLoader;
 import java.net.URL;
 import java.net.MalformedURLException;
 
-import edu.rice.cs.drjava.model.Configuration;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 
 /**
@@ -53,36 +54,37 @@ import edu.rice.cs.util.classloader.ToolsJarClassLoader;
  *
  * @version $Id$
  */
-public class JavacFromSetLocation extends CompilerProxy {
-  // To implement #523222, we had to make this not a singleton,
-  // to allow it to re-determine the location of the compiler multiple times.
-  //public static final CompilerInterface ONLY = new JavacFromSetLocation();
-
-  /** Private constructor due to singleton. */
-  public JavacFromSetLocation() {
-    super("edu.rice.cs.drjava.model.compiler.JavacGJCompiler",
-          _getClassLoader());
-  }
-
-  private static ClassLoader _getClassLoader() {
-    String loc = Configuration.ONLY.getJavacLocation();
-    if (loc == null) {
-      throw new RuntimeException("javac location not set");
+public class JavacFromSetLocation extends CompilerProxy
+    implements OptionConstants {
+    // To implement #523222, we had to make this not a singleton,
+    // to allow it to re-determine the location of the compiler multiple times.
+    //public static final CompilerInterface ONLY = new JavacFromSetLocation();
+    
+    /** Private constructor due to singleton. */
+    public JavacFromSetLocation() {
+        super("edu.rice.cs.drjava.model.compiler.JavacGJCompiler",
+              _getClassLoader());
     }
-
-    try {
-      URL url = new File(loc).toURL();
-      return new URLClassLoader(new URL[] { url });
+    
+    private static ClassLoader _getClassLoader() {
+        String loc = DrJava.CONFIG.getSetting(JAVAC_LOCATION);
+        if (loc == null || loc.length() == 0) {
+            throw new RuntimeException("javac location not set");
+        }
+        
+        try {
+            URL url = new File(loc).toURL();
+            return new URLClassLoader(new URL[] { url });
+        }
+        catch (MalformedURLException e) {
+            throw new RuntimeException("malformed url exception");
+        }
     }
-    catch (MalformedURLException e) {
-      throw new RuntimeException("malformed url exception");
+    
+    /**
+     * Returns the name of this compiler, appropriate to show to the user.
+     */
+    public String getName() {
+        return super.getName() + " (user)";
     }
-  }
-
-  /**
-   * Returns the name of this compiler, appropriate to show to the user.
-   */
-  public String getName() {
-    return super.getName() + " (user)";
-  }
 }

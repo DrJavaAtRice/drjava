@@ -56,7 +56,10 @@ import com.sun.tools.javac.v8.util.Hashtable;
 import com.sun.tools.javac.v8.util.List;
 import com.sun.tools.javac.v8.util.Log;
 
-import edu.rice.cs.drjava.model.Configuration;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
+import gj.util.Vector;
+import gj.util.Enumeration;
 import edu.rice.cs.util.FileOps;
 
 /**
@@ -66,7 +69,7 @@ import edu.rice.cs.util.FileOps;
  *
  * @version $Id$
  */
-public class JavacGJCompiler implements CompilerInterface {
+public class JavacGJCompiler implements CompilerInterface, OptionConstants {
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new JavacGJCompiler();
 
@@ -208,9 +211,12 @@ public class JavacGJCompiler implements CompilerInterface {
     String cp = System.getProperty("java.class.path");
 
     // Adds extra.classpath to the classpath.
-    String[] ecp = Configuration.ONLY.getExtraClasspath();
-    for (int i = 0; i < ecp.length; i++) {
-      cp += System.getProperty("path.separator") + ecp[i];
+    Vector<String> ecp = DrJava.CONFIG.getSetting(EXTRA_CLASSPATH);
+    if(ecp!=null) {
+        Enumeration<String> enum = ecp.elements();
+        while(enum.hasMoreElements()) {
+            cp += System.getProperty("path.separator") + enum.nextElement();
+        }
     }
 
     options.put("-classpath", cp);

@@ -44,7 +44,8 @@ import java.net.URLClassLoader;
 import java.net.URL;
 import java.net.MalformedURLException;
 
-import edu.rice.cs.drjava.model.Configuration;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 
 /**
@@ -53,7 +54,7 @@ import edu.rice.cs.util.classloader.ToolsJarClassLoader;
  *
  * @version $Id$
  */
-public class JSR14FromSetLocation extends CompilerProxy {
+public class JSR14FromSetLocation extends CompilerProxy implements OptionConstants {
   public static final CompilerInterface ONLY = new JSR14FromSetLocation();
 
   /** Private constructor due to singleton. */
@@ -63,8 +64,8 @@ public class JSR14FromSetLocation extends CompilerProxy {
   }
 
   private static ClassLoader _getClassLoader() {
-    String loc = Configuration.ONLY.getJSR14Location();
-    if (loc == null) {
+    String loc = DrJava.CONFIG.getSetting(JSR14_LOCATION);
+    if (loc == null || loc.length() == 0) {
       throw new RuntimeException("jsr14 location not set");
     }
 

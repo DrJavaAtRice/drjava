@@ -118,8 +118,8 @@ public class SingleDisplayModel extends DefaultGlobalModel {
     "Except as contained in this notice, the name of Dyade shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization from Dyade." +
     "\n\n" +
     "DrJava version: " + Version.getBuildTimeString() + "\n" +
-    "Configuration file: " + Configuration.PROPERTIES_FILE + "\n" +
-    "Properties: " + Configuration.ONLY + "\n" +
+    "Configuration file: " + DrJava.PROPERTIES_FILE + "\n" +
+    "Properties: " + DrJava.CONFIG + "\n" +
      "JVM: " + System.getProperty("java.vm.vendor") + " " +
      System.getProperty("java.vm.version");
 

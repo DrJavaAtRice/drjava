@@ -47,14 +47,17 @@ import gjc.v6.util.Position;
 import gjc.v6.util.Hashtable;
 import gjc.v6.util.List;
 import gjc.v6.util.Log;
-
+import gj.util.Vector;
+import gj.util.Enumeration;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
 
 /**
  * The GJ compiler used by DrJava.
  * @version $Id$
  */
-public class GJv6Compiler implements CompilerInterface {
+public class GJv6Compiler implements CompilerInterface, OptionConstants{
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new GJv6Compiler();
 
@@ -94,18 +97,22 @@ public class GJv6Compiler implements CompilerInterface {
     // Since GJ doesn't have a sourcepath attribute, we just
     // put the sourcepath into the classpath instead
     String oldclasspath = System.getProperty("java.class.path");
-    String newclasspath = sourceRoot.getAbsolutePath();
+    StringBuffer newclasspath = new StringBuffer(sourceRoot.getAbsolutePath());
     if (oldclasspath.length() > 0) {
-      newclasspath += File.pathSeparator;
-      newclasspath += oldclasspath;
+      newclasspath.append(File.pathSeparator);
+      newclasspath.append(oldclasspath);
     }
 
-    String[] cp = Configuration.ONLY.getExtraClasspath();
-    for (int i = 0; i < cp.length; i++) {
-      newclasspath += System.getProperty("path.separator") + cp[i];
+    Vector<String> cp = DrJava.CONFIG.getSetting(EXTRA_CLASSPATH);
+    if(cp!=null) {
+        Enumeration<String> enum = cp.elements();
+        while(enum.hasMoreElements()) {
+            newclasspath.append(System.getProperty("path.separator")).
+                append(enum.nextElement());
+        }
     }
 
-    options.put("-classpath", newclasspath);
+    options.put("-classpath", newclasspath.toString());
 
     _compiler = JavaCompiler.make(_compilerLog, options);
   }

@@ -59,8 +59,12 @@ import java.awt.geom.*;
 
 import edu.rice.cs.util.swing.FindReplaceMachine;
 
+import gj.util.Vector;
+import gj.util.Enumeration;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.*;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.print.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
@@ -85,7 +89,7 @@ import junit.runner.ReloadingTestSuiteLoader;
  *
  * @version $Id$
  */
-public class DefaultGlobalModel implements GlobalModel {
+public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   private final DefinitionsEditorKit _editorKit = new DefinitionsEditorKit();
   private final DefaultListModel _definitionsDocs = new DefaultListModel();
   private final InteractionsDocument _interactionsDoc
@@ -1434,9 +1438,11 @@ public class DefaultGlobalModel implements GlobalModel {
       _interpreterControl.addClassPath(sourceRoots[i].getAbsolutePath());
     }
     
-    String[] cp = Configuration.ONLY.getExtraClasspath();
-    for (int i = 0; i < cp.length; i++) {
-      _interpreterControl.addClassPath(cp[i]);
+    Vector<String> cp = DrJava.CONFIG.getSetting(EXTRA_CLASSPATH);
+    if(cp!=null) {
+        Enumeration<String> enum = cp.elements();
+        while(enum.hasMoreElements())
+            _interpreterControl.addClassPath(enum.nextElement());
     }
   }
   

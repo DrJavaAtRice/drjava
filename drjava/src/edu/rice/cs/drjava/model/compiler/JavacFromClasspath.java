@@ -44,7 +44,6 @@ import java.net.URLClassLoader;
 import java.net.URL;
 import java.net.MalformedURLException;
 
-import edu.rice.cs.drjava.model.Configuration;
 import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 
 /**

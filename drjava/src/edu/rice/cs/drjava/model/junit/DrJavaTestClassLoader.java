@@ -40,8 +40,10 @@
 package edu.rice.cs.drjava.model.junit;
 
 import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.drjava.model.Configuration;
-
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
+import gj.util.Vector;
+import gj.util.Enumeration;
 import java.io.*;
 import junit.runner.*;
 
@@ -50,7 +52,7 @@ import junit.runner.*;
  *
  * @version $Id$
  */
-public class DrJavaTestClassLoader implements TestSuiteLoader {
+public class DrJavaTestClassLoader implements TestSuiteLoader, OptionConstants {
   
   GlobalModel _model;
   
@@ -65,9 +67,12 @@ public class DrJavaTestClassLoader implements TestSuiteLoader {
     File[] sourceFiles = _model.getSourceRootSet();
     
     // Adds extra.classpath to the classpath.
-    String[] extraClasspath = Configuration.ONLY.getExtraClasspath();
-    for (int i = 0; i < extraClasspath.length; i++) {
-      classpath += extraClasspath[i] + separator;
+    Vector<String> extraClasspath = DrJava.CONFIG.getSetting(EXTRA_CLASSPATH);
+    if(extraClasspath != null) {
+        Enumeration<String> enum = extraClasspath.elements();
+        while(enum.hasMoreElements()) {
+            classpath += enum.nextElement() + separator;
+        }
     }
     
     for(int i=0; i < sourceFiles.length; i++) {

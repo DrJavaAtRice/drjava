@@ -56,7 +56,8 @@ import com.sun.tools.javac.v8.util.Hashtable;
 import com.sun.tools.javac.v8.util.List;
 import com.sun.tools.javac.v8.util.Log;
 
-import edu.rice.cs.drjava.model.Configuration;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.FileOps;
 
 /**
@@ -67,7 +68,8 @@ import edu.rice.cs.util.FileOps;
  *
  * @version $Id$
  */
-public class JSR14Compiler extends JavacGJCompiler {
+public class JSR14Compiler extends JavacGJCompiler 
+    implements OptionConstants {
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new JSR14Compiler();
 
@@ -83,8 +85,8 @@ public class JSR14Compiler extends JavacGJCompiler {
     // But the docs for ClassReader say it's OK for others to mutate it!
     // And this way, we don't need to specify the entire bootclasspath,
     // just what we want to add on to it.
-    String ccp = Configuration.ONLY.getJSR14CollectionsPath();
-    if (ccp != null) {
+    String ccp = DrJava.CONFIG.getSetting(JSR14_COLLECTIONSPATH);
+    if (ccp != null || ccp.length() == 0) {
       compiler.syms.reader.bootClassPath = ccp +
                                            System.getProperty("path.separator")+
                                            compiler.syms.reader.bootClassPath;

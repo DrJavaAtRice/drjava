@@ -1052,7 +1052,7 @@ public class MainFrame extends JFrame {
    */
   public JButton _createToolbarButton(Action a) {
     final JButton result = new JButton(a);
-    result.setLabel((String) a.getValue(Action.DEFAULT));
+    result.setText((String) a.getValue(Action.DEFAULT));
     return result;
   }
   
