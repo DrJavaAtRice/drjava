@@ -313,6 +313,32 @@ public class DefinitionsDocumentTest extends TestCase {
     defModel.gotoLine(3);
     assertEquals("#0.0", 11, defModel.getCurrentLocation());
   }
+  
+  /**
+   * Test whether removeTabs actually removes all tabs.
+   */
+  public void testRemoveTabs() {
+    defModel.setIndent(2);
+    String test = "\t this \t\tis a \t\t\t\t\ttest\t\t";
+    String result = defModel._removeTabs(test);
+    assertEquals( "   this     is a           test    ", result);
+  }
+  
+  /**
+   * Test whether tabs are removed as appropriate on call to insertString.
+   */
+  public void testTabRemovalOnInsertString() throws BadLocationException {
+    defModel.setIndent(1);
+    defModel.insertString(0, " \t yet \t\tanother\ttest\t", null);
+    String result = defModel.getText(0, defModel.getLength());
+    
+    if (defModel.tabsRemoved()) {
+      assertEquals("   yet   another test ", result);
+    }
+    else { // Tabs should have been inserted.
+      assertEquals(" \t yet \t\tanother\ttest\t", result);
+    }
+  }
 }
 
 

@@ -17,6 +17,8 @@ public class DefinitionsDocument extends PlainDocument {
   private static HashSet _keywords = _makeKeywords();
   private static int _indent = 2;
   
+  private static boolean _tabsRemoved = true;
+  
   private boolean _modifiedSinceSave = false;
   
   BraceReduction _reduced = new ReducedModelControl();
@@ -73,6 +75,15 @@ public class DefinitionsDocument extends PlainDocument {
   public void insertString(int offset, String str, AttributeSet a) 
     throws BadLocationException {
       //System.err.println("insert@" + offset + ": |" + str + "|");
+      
+      // If _removeTabs is set to true, remove all tabs from str. 
+      // It is a current invariant of the tabification`functionality that 
+      // the document contains no tabs, but we want to allow the user
+      // to override this functionality.
+      if (_tabsRemoved) {
+        str = _removeTabs(str);
+      }
+      
       int locationChange = offset - _currentLocation;
       int strLength = str.length();
       int prevSize;               //stores the size of the item prev when insert begins.
@@ -91,6 +102,30 @@ public class DefinitionsDocument extends PlainDocument {
       _modifiedSinceSave = true;
       _styleChanged();
     }
+  
+  /**
+   * Given a String, return a new String will all tabs converted to spaces.
+   * Each tab is converted to two spaces.
+   * @param source the String to be converted.
+   */
+  String _removeTabs(String source) {
+    StringBuffer target = new StringBuffer();
+    for (int i = 0; i < source.length(); i++) {
+      char next = source.charAt(i);
+      
+      if (next != '\t') {
+        target.append(source.charAt(i));
+      }
+      else { 
+        // Replace tab with a number of 
+        // spaces according to the value of _indent.
+        for (int j = 0; j < _indent; j++) {
+          target.append(' ');
+        }
+      }
+    }
+    return target.toString();
+  }
 
   /**
    * Add a character to the underlying reduced model.
@@ -202,6 +237,13 @@ public class DefinitionsDocument extends PlainDocument {
    */
   public void setIndent(int indent) {
     this._indent = indent;
+  }
+  
+  /**
+   * Returns true iff tabs are removed on text insertion.
+   */
+  public boolean tabsRemoved() {
+    return _tabsRemoved;
   }
 
   /**
