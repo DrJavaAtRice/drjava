@@ -44,5 +44,4 @@ size you'd like. ANT_OPTS is put on the command line when invoking the JVM.
 -------------------------------------------------------------------------------
 To view the most current version of this document in your Web browser, go to:
 
-http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/drjava/src/edu/rice/cs/README?rev=1.1&only_with_tag=HEAD&content-type=text/vnd.viewcvs-markup
-
+http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/drjava/src/edu/rice/cs/README?rev=HEAD&content-type=text/vnd.viewcvs-markup
