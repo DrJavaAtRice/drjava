@@ -1484,6 +1484,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // create our model
     _model = new DefaultSingleDisplayModel();
     _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
+    _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
 
     // Ensure that DefinitionsPane uses the correct EditorKit!
     //   This has to be stored as a static field on DefinitionsPane because
@@ -4571,34 +4572,50 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   
+  private void nextRecentDoc(){
+    if(_df.isVisible()){
+      _df.next();
+    }else{
+      _df.setVisible(true);
+    }
+  }
+  
+  private void hideRecentDocFrame(){
+    if(_df.isVisible()){
+      _df.setVisible(false);
+      OpenDefinitionsDocument doc = _df.getDocument();
+      if(doc != null){
+        _model.getDocumentNavigator().setActiveDoc(_model.getIDocGivenODD(doc));
+      }
+    }
+  }
+  
   KeyListener _historyListener = new KeyListener(){
-      public void keyPressed(KeyEvent e){
-        if(e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE && e.isControlDown()){
-          if(_df.isVisible()){
-            _df.next();
-          }else{
-            _df.setVisible(true);
-          }
-        }
-//        else if(e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE){
-//          transferFocusUpCycle();
-//        }
+    public void keyPressed(KeyEvent e){
+      if(e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE && e.isControlDown()){
+        nextRecentDoc();
       }
-      public void keyReleased(KeyEvent e){
-        if(e.getKeyCode() == java.awt.event.KeyEvent.VK_CONTROL){
-          if(_df.isVisible()){
-            _df.setVisible(false);
-            OpenDefinitionsDocument doc = _df.getDocument();
-            if(doc != null){
-              _model.getDocumentNavigator().setActiveDoc(_model.getIDocGivenODD(doc));
-            }
-          }
-        }
+//    else if(e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE){
+//        transferFocusUpCycle();
+//    }
+    }
+    public void keyReleased(KeyEvent e){
+      if(e.getKeyCode() == java.awt.event.KeyEvent.VK_CONTROL){
+        hideRecentDocFrame();
       }
-      public void keyTyped(KeyEvent e){
-        // noop
-      }
-    };
+    }
+    public void keyTyped(KeyEvent e){
+      // noop
+    }
+  };
+  
+  FocusListener _focusListenerForRecentDocs = new FocusListener(){
+    public void focusLost(FocusEvent e){
+      hideRecentDocFrame();
+    }
+    public void focusGained(FocusEvent e){
+    }
+  };
   
   
   /**
@@ -4615,6 +4632,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     // edit
     DefinitionsPane pane = new DefinitionsPane(this, doc);
     pane.addKeyListener(_historyListener);
+    pane.addFocusListener(_focusListenerForRecentDocs);
+    
 
     // Add listeners
     _installNewDocumentListener(doc);
@@ -6127,6 +6146,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     public void projectClosed(){
       _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
+      _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
     }
 
     public void projectOpened(File projectFile, FileOpenSelector files) {
@@ -6135,6 +6155,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       open(files);
       _openProjectUpdate();
       _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
+      _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
     }
     
     public void projectRunnableChanged(){

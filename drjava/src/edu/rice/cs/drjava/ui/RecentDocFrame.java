@@ -48,6 +48,7 @@ package edu.rice.cs.drjava.ui;
 import javax.swing.*;
 import java.net.URL;
 import javax.swing.border.LineBorder;
+import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.EditorKit;

@@ -509,8 +509,8 @@ public class ConfigFrame extends JFrame {
     panel.addComponent(new FontOptionComponent(OptionConstants.FONT_TOOLBAR, "Toolbar Font", this,
                                                "The font used in the toolbar buttons."));
     if (CodeStatus.DEVELOPMENT) {
-      panel.addComponent(new BooleanOptionComponent(OptionConstants.TEXT_ANTIALIAS, "Use anti-aliased text in Definitions", this,
-                                                    "Whether to graphically smooth the text in the Definitions Pane."));
+      panel.addComponent(new BooleanOptionComponent(OptionConstants.TEXT_ANTIALIAS, "Use anti-aliased text", this,
+                                                    "Whether to graphically smooth the text."));
     }
     panel.displayComponents();
   }
