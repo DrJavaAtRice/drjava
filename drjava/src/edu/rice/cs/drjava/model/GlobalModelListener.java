@@ -148,6 +148,12 @@ public interface GlobalModelListener extends InteractionsListener,
   public void filePathContainsPound();
   
   /**
+   * Called when the selection in the navigator changes
+   * the current directory without changing the active document
+   */
+  public void currentDirectoryChanged(File dir);
+    
+  /**
    * called when the builddirectory is modified in the model
    */
   public void projectBuildDirChanged();

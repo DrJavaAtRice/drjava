@@ -273,6 +273,12 @@ public class DummySingleDisplayModelListener implements SingleDisplayModelListen
    */
   
   /**
+   * Called when the selection in the navigator changes
+   * the current directory without changing the active document
+   */
+  public void currentDirectoryChanged(File dir) { }
+  
+  /**
    * Called when trying to test a non-TestCase class.
    * @param isTestAll whether or not it was a use of the test all button
    */

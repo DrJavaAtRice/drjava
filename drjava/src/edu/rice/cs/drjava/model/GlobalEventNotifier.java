@@ -376,6 +376,22 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   }
 
   /**
+   * Called when the selection in the navigator changes
+   * the current directory without changing the active document
+   */
+  public void currentDirectoryChanged(File dir) {
+    _lock.startRead();
+    try {
+      for(GlobalModelListener l : _listeners) {
+        l.currentDirectoryChanged(dir);
+      }
+    }
+    finally {
+      _lock.endRead();
+    }
+  }
+  
+  /**
    * Called to demand that all files be saved before running the main method of
    * a document. It is up to the caller of this method to check if the documents
    * have been saved, using IGetDocuments.hasModifiedDocuments().

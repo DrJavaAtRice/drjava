@@ -662,6 +662,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void projectBuildDirChanged(){ }
     public void projectRunnableChanged(){ }
     
+    public void currentDirectoryChanged(File dir) { }
+    
     /**
      * Appends the stack trace from the listener's creation to the
      * end of the given failure message.
@@ -980,7 +982,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void saveBeforeJavadoc() {
       listenerFail("saveBeforeJavadoc fired unexpectedly");
     }
-
+    
     /**
      * Not used.
     public void saveBeforeDebug() {

@@ -5941,6 +5941,10 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     }
 
+    public void currentDirectoryChanged(File dir) {
+      _setCurrentDirectory(dir);
+    }
+    
     /**
      * Check if the current document has been modified. If it has, ask the user
      * if he would like to save or not, and save the document if yes. Also

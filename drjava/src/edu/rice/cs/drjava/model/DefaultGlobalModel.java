@@ -429,7 +429,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
 
   // ----- STATE -----
-  private FileGroupingState _state;
+  protected FileGroupingState _state;
   
   /**
    * @param state the new file grouping state that will handle
@@ -570,7 +570,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           return false;
         }
       }
-      
+      /**
+       * @return the absolute path to the project file
+       */
       public File getProjectFile() {
         return projectFile;
       }

@@ -120,12 +120,30 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * from the constructor.
    */
   private void _init() {
-    _documentNavigator.addNavigationListener(new INavigationListener() {
-      public void gainedSelection(INavigatorItem docu) {
+    
+    final NodeDataVisitor<Boolean> _gainVisitor = new NodeDataVisitor<Boolean>() {
+      public Boolean itemCase(INavigatorItem docu){
         _setActiveDoc(docu);
+        return true; 
       }
-      
-      public void lostSelection(INavigatorItem docu) {
+      public Boolean fileCase(File f){
+        if (!f.isAbsolute()) {
+          File root = _state.getProjectFile().getParentFile().getAbsoluteFile();
+          f = new File(root, f.getPath());
+        }
+        _notifier.currentDirectoryChanged(f);
+        return true;
+      }
+      public Boolean stringCase(String s){ 
+        return false; 
+      }
+    };
+    
+    _documentNavigator.addNavigationListener(new INavigationListener() {
+      public void gainedSelection(NodeData dat) {
+        dat.execute(_gainVisitor);
+      }
+      public void lostSelection(NodeData dat) {
         // not important, only one document selected at a time
       }
     });
@@ -442,19 +460,19 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
       super.newFile();
     }
   }
-
-    /**
-     * some duplicated work, but avoids duplicated code, which is our nemesis
+  
+  /**
+   * some duplicated work, but avoids duplicated code, which is our nemesis
+   */
+  public void setActiveFirstDocument() {
+    List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
+    /* this will select the active document in the navigator, which
+     * will signal a listener to call _setActiveDoc(...)
      */
-    public void setActiveFirstDocument() {
-      List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
-        /* this will select the active document in the navigator, which
-         * will signal a listener to call _setActiveDoc(...)
-         */
-      setActiveDocument(docs.get(0));
-//      _documentNavigator.setActiveDoc(getIDocGivenODD(docs.get(0)));
-//      _setActiveDoc(getIDocGivenODD(docs.get(0)));
-    }
+    setActiveDocument(docs.get(0));
+    //      _documentNavigator.setActiveDoc(getIDocGivenODD(docs.get(0)));
+    //      _setActiveDoc(getIDocGivenODD(docs.get(0)));
+  }
   
   private void _setActiveDoc(INavigatorItem idoc) {
     //Hashtable<INavigatorItem, OpenDefinitionsDocument> docs = getDefinitionsDocumentsTable();
