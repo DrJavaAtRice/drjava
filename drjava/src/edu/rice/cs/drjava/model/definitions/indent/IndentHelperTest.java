@@ -230,15 +230,27 @@ public class IndentHelperTest extends IndentRulesTestCase {
 		 -1,
 		 _doc.getFirstNonWSCharPos(39));
 
-    //      _setDocText("foo();\n// comment\nbar();\n");
-    //      assertEquals("Ignore single-line comments",
-    //      18,
-    //      _doc.getFirstNonWSCharPos(9));
-      
-    //      _setDocText("foo();\n /* bar\nblah */ boo\n");
-    //    assertEquals("Ignore multiline comments",
-    //		 23,
-    //		 _doc.getFirstNonWSCharPos(6));	 
+    _setDocText("foo();\n// comment\nbar();\n");
+    assertEquals("Ignore single-line comments",
+		 18,
+		 _doc.getFirstNonWSCharPos(6));
+    
+    _setDocText("foo();\n /* bar\nblah */ boo\n");
+    assertEquals("Ignore multiline comments",
+    		 23,
+    		 _doc.getFirstNonWSCharPos(6));	 
+    _setDocText("foo   /");
+    assertEquals("Slash at end of document",
+		 6,
+		 _doc.getFirstNonWSCharPos(4));
+    _setDocText("foo   //");
+    assertEquals("// at end",
+		 -1,
+		 _doc.getFirstNonWSCharPos(4));
+    _setDocText("foo   /*");
+    assertEquals("/* at end",
+		 -1,
+		 _doc.getFirstNonWSCharPos(4));
 
     _setDocText("abcdefghijk");
     _doc.setCurrentLocation(3);

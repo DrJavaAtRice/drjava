@@ -463,7 +463,7 @@ public class DefinitionsDocument extends PlainDocument {
     final int origLocation = _reduced.absOffset();
     // Move reduced model to location pos
     _reduced.move(pos - origLocation);
-
+    
     // Walk backwards from specificed position
     for (i = pos-1; i != DOCSTART-1; i--) {
       c = text.charAt(i);
@@ -477,12 +477,12 @@ public class DefinitionsDocument extends PlainDocument {
              (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT)) ||
              (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_SINGLE_QUOTE)) ||
              (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_DOUBLE_QUOTE))) {
-               // Ignore matching char
-             } else {
-               // Return position of matching char
-               _reduced.move(origLocation - i);
-               return i;
-             }
+	    // Ignore matching char
+	  } else {
+	    // Return position of matching char
+	    _reduced.move(origLocation - i);
+	    return i;
+	  }
           _reduced.move(pos - i);
         }
       }
@@ -586,13 +586,45 @@ public class DefinitionsDocument extends PlainDocument {
         // Move reduced model to walker's location
         _reduced.move(i - pos);
         // Check if matching char is in comment
-        // Return position of matching char
-        _reduced.move(origLocation - i);
-        return i;
+	if((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
+	   (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT))) {
+	  // Ignore matching char
+	} else { 
+	  if(_isStartOfComment(text, i - pos)) {
+	    // Move i past the start of comment characters
+	    // and continue searching
+	    i = i + 1;
+	    _reduced.move(1);
+	  } else {
+	  // Return position of matching char
+	  _reduced.move(origLocation - i);
+	  return i;
+	  }
+	}
+	_reduced.move(pos - i);
       }
     }
     _reduced.move(origLocation - pos);
     return ERROR_INDEX;
+  }
+
+  /**
+   * Helper method for getFirstNonWSCharPos
+   * Determines whether the current character is the start
+   * of a comment: "/*" or "//"
+   */
+  protected boolean _isStartOfComment(String text, int pos) {
+    char currChar = text.charAt(pos);
+    if(currChar == '/') {
+      try {
+	char afterCurrChar = text.charAt(pos + 1);
+	if((afterCurrChar == '/') || (afterCurrChar == '*')) {
+	  return true;
+	}
+      } catch (StringIndexOutOfBoundsException e) {
+      }
+    }
+    return false;
   }
   
   /**
