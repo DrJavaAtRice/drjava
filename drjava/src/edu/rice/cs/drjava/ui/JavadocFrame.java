@@ -52,7 +52,7 @@ import java.io.File;
 public class JavadocFrame extends HTMLFrame {
 
   private static final String INTRO_PAGE="index-all.html";
-  private static final String INDEX_PAGE="allclasses-noframe.html";
+  private static final String INDEX_PAGE="allclasses-frame.html";
   public JavadocFrame(File destDir) throws MalformedURLException {
     super("Javadoc Viewer",
           new URL("file", "", (new File(destDir, INTRO_PAGE)).getAbsolutePath()),

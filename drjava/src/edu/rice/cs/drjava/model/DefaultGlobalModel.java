@@ -69,6 +69,7 @@ import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
+import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -1083,56 +1084,149 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
   /**
    * Javadocs all open documents, after ensuring that all are saved.
+   * The user provides a destination, and the gm provides the package info.
    * @param destDir the absolute path to the destination directory
    * @pre The destination directory must be writable and exist.
    * @return true if Javadoc succeeded in building the HTML, otherwise false
    */
-  public boolean javadocAll(String destDir) throws IOException, InvalidPackageException {
-    
-    // Notify all listeners that Javadoc is starting.
-    this.javadocStarted();
+  public void javadocAll(DirectorySelector select, final FileSaveSelector saver) throws IOException, InvalidPackageException {
+    // Only javadoc if all are saved.
+    saveAllBeforeProceeding(GlobalModelListener.JAVADOC_REASON);
     
     if (areAnyModifiedSinceSave()) {
       // if any files haven't been saved after we told our
       // listeners to do so, don't proceed with the rest
       // of the operation.
-      return false;
+      return;
     }
     
+    // Make sure that there is at least one saved document.
+    ListModel docs = _definitionsDocs;
+    
+    boolean noneYet = true;
+    int numDocs = docs.getSize();
+    for (int i = 0; (noneYet && (i < numDocs)); i++) {
+      OpenDefinitionsDocument doc = (OpenDefinitionsDocument) docs.getElementAt(i);
+      noneYet = doc.isUntitled();
+    }
+    
+    // If there are no saved files, ignore the javadoc command.
+    if (noneYet) {
+      return;
+    }
+    
+    int returnVal;
+    Configuration config = DrJava.getConfig();
+    File destDir = config.getSetting(OptionConstants.JAVADOC_DESTINATION);
+    boolean ask = config.getSetting(OptionConstants.JAVADOC_PROMPT_FOR_DESTINATION).booleanValue();
+    
+    // Get the destination directory via the DirectorySelector, if appropriate.
+    try {
+      // If we no destination is set, or the user has asked for prompts,
+      // ask the user for a destination directory.
+      if (destDir.equals(FileOption.NULL_FILE) || ask) {
+        if (!destDir.equals(FileOption.NULL_FILE)) {
+          destDir = select.getDirectory(destDir);
+        }
+        else {
+          destDir = select.getDirectory(null);
+        }
+      }
+        
+      // Make sure the destination is writable.
+      while (!destDir.exists() || !destDir.canWrite()) {
+        // If the choice was rejected, tell the user and ask again.
+        select.warnUser("The destination directory you have chosen\n"
+                          + "does not exist or is not readable. Please\n"
+                          + "choose another directory.",
+                        "Bad Destination");
+        destDir = select.getDirectory(null);
+      }
+    }
+    catch (OperationCanceledException oce) {
+      // If the user cancels the dialog, silently return.
+      return;
+    }
+    
+    // Start a new thread to do the work.
+    final File destDirF = destDir;
+    new Thread() {
+      public void run() {
+        _javadocWorker(destDirF, saver);
+      }
+    }.start();
+  }
+    
+  /**
+   * This method handles most of the logic of performing a Javadoc operation,
+   * once we know that it won't be canceled.
+   * @param destDir the destination directory for the doc files
+   */
+  private void _javadocWorker(File destDirFile, FileSaveSelector saver) {
+    String destDir = destDirFile.getAbsolutePath();
+    
     // Accumulate a set of arguments to JavaDoc - package or file names.
-    HashSet docUnits = new HashSet();
-    HashSet sourceRootSet = new HashSet();
-    HashSet defaultRoots = new HashSet();
-    HashSet topLevelPacks = new HashSet();
+    HashSet docUnits = new HashSet();  // units to send to Javadoc (packages or files)
+    HashSet sourceRootSet = new HashSet();  // set of unique source roots for open files
+    HashSet defaultRoots = new HashSet();  // source roots for files in default package
+    HashSet topLevelPacks = new HashSet();  // top level package names to include
 
     // This depends on the current value of the "javadoc.all.packages" option.
-    boolean docAll = DrJava.getConfig().getSetting(JAVADOC_ALL_PACKAGES).booleanValue();
+    boolean docAll = DrJava.getConfig().getSetting(JAVADOC_FROM_ROOTS).booleanValue();
 
     // Each document has a package hierarchy to traverse.
     for (int i = 0; i < _definitionsDocs.getSize(); i++) {
       OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
         _definitionsDocs.getElementAt(i);
+      File file = null;
+      
       try {
-        // This call will abort the iteration if there is no file.
-        File file = doc.getFile();
+        try {
+          // This call will abort the iteration if there is no file,
+          // unless we can recover (like for a FileMovedException).
+          file = doc.getFile();
+        }
+        catch (FileMovedException fme) {
+          // The file has moved - prompt the user to recover.
+          // XXX: This is probably not thread safe!
+          if (saver.shouldSaveAfterFileMoved(doc, fme.getFile())) {
+            try {
+              doc.saveFileAs(saver);
+              file = doc.getFile();
+            }
+            catch (FileMovedException fme2) {
+              // If the user is this intent on shooting themselves in the foot,
+              // get out of the way.
+              throw new UnexpectedException(fme2);
+            }
+            catch (IOException ioe) {
+              throw new UnexpectedException(ioe);
+            }
+          }
+          else {
+            continue;
+          }
+        }
+        // After all this garbage, file should be properly initialized.
         File sourceRoot = doc.getSourceRoot();
         String pack = doc.getPackageName();
         
-        if (pack.equals("") && !defaultRoots.contains(sourceRoot)) {
-          // This file uses the default package.
-          // Look for other source files at the source root.
-          // But don't do it if we've already done it for this directory.
-          defaultRoots.add(sourceRoot);
-          File[] javaFiles = sourceRoot.listFiles(FileOps.JAVA_FILE_FILTER);
-
-          for (int j = 0; j < javaFiles.length; j++) {
-            docUnits.add(javaFiles[j].getAbsolutePath());
+        if (pack.equals("")) {
+          if (!defaultRoots.contains(sourceRoot)) {
+            // This file uses the default package.
+            // Include all the other source files at the source root.
+            // But don't do it if we've already done it for this directory.
+            defaultRoots.add(sourceRoot);
+            File[] javaFiles = sourceRoot.listFiles(FileOps.JAVA_FILE_FILTER);
+            
+            for (int j = 0; j < javaFiles.length; j++) {
+              docUnits.add(javaFiles[j].getAbsolutePath());
+            }
           }
         }
         else {
-          String topLevelPack = pack;
-          File searchRoot = new File(sourceRoot,
-                                     topLevelPack.replace('.', File.separatorChar));
+          String topLevelPack;
+          File searchRoot;
 
           int index = pack.indexOf('.');
           if (docAll && index != -1) {
@@ -1142,10 +1236,17 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             topLevelPack = pack.substring(0, index);
             searchRoot = new File(sourceRoot, topLevelPack);
           }
+          else {
+            // Only look in the current package or deeper
+            topLevelPack = pack;
+            searchRoot = new File(sourceRoot,
+                                  pack.replace('.', File.separatorChar));
+          }
 
           // But we don't want to traverse the hierarchy more than once.
           if (!topLevelPacks.contains(topLevelPack) 
                 || !sourceRootSet.contains(sourceRoot)) {
+            // HashSets don't have duplicates, so it's ok to add both in either case
             topLevelPacks.add(topLevelPack);
             sourceRootSet.add(sourceRoot);
             docUnits.addAll(FileOps.packageExplore(topLevelPack, searchRoot));
@@ -1155,16 +1256,29 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       catch (IllegalStateException ise) {
         // No file for this document; skip it
       }
+      catch (InvalidPackageException ipe) {
+        // Bad package - kill the javadoc operation and display the exception
+        // as an error.
+        _javadocErrorModel = new CompilerErrorModel
+          (new CompilerError[] { new CompilerError(file, -1, -1,
+                                                   ipe.getMessage(),
+                                                   false) },
+           this);
+         javadocStarted();
+         javadocEnded(false, null);
+         return;
+      }
     }
     
     // Don't attempt to create Javadoc if no files are open, or if open file is unnamed.
-    if (docUnits.size() == 0) { 
-      return false;
+    if (docUnits.size() == 0) {
+      return;
     }
     
     // Build the source path.
     StringBuffer sourcePath = new StringBuffer();
     String separator = System.getProperty("path.separator");
+    sourceRootSet.addAll(defaultRoots);
     File[] sourceRoots = (File[]) sourceRootSet.toArray(new File[0]);
     for(int a = 0 ; a  < sourceRoots.length; a++){
       if (a != 0){
@@ -1174,67 +1288,89 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     
     // Build the "command-line" arguments.
+    Configuration config = DrJava.getConfig();
+    String accLevel = config.getSetting(OptionConstants.JAVADOC_ACCESS_LEVEL);
+    StringBuffer accArg = new StringBuffer(10);
+    accArg.append('-');
+    accArg.append(accLevel);
+    
     ArrayList args = new ArrayList();
-    args.add("-private");
+    args.add(accArg.toString());
     args.add("-sourcepath");
     args.add(sourcePath.toString());
     args.add("-d");
     args.add(destDir);
+    
+    // Add classpath
+    args.add("-classpath");
+    Vector classVec = this.getClasspath();
+    String[] classpath = new String[classVec.size()];
+    classVec.copyInto(classpath);
+    StringBuffer cp = new StringBuffer();
+    String sep = System.getProperty("path.separator");
+    for (int i=0; i < classpath.length; i++) {
+      cp.append(classpath[i]);
+      cp.append(sep);
+    }
+    args.add(cp.toString());
+    
+    String linkVersion = config.getSetting(OptionConstants.JAVADOC_LINK_VERSION);
+    if (linkVersion.equals(OptionConstants.JAVADOC_1_3_TEXT)) {
+      args.add("-link");
+      args.add(config.getSetting(OptionConstants.JAVADOC_1_3_LINK));
+    }
+    else if (linkVersion.equals(OptionConstants.JAVADOC_1_4_TEXT)) {
+      args.add("-link");
+      args.add(config.getSetting(OptionConstants.JAVADOC_1_4_LINK));
+    }
+    
+    String custom = config.getSetting(OptionConstants.JAVADOC_CUSTOM_PARAMS);
+    StreamTokenizer st = new StreamTokenizer(new StringReader(custom));
+//    st.ordinaryChar('\'');
+    st.ordinaryChar('\\');
+    st.ordinaryChars('0','9');
+    st.ordinaryChars('-', '.');
+//    st.wordChars('\'', '\'');
+    st.wordChars('\\', '\\');
+    st.wordChars('0', '9');
+    st.wordChars('-', '.');
+    
+    try {
+      while (st.nextToken() != StreamTokenizer.TT_EOF) {
+        if ((st.ttype == StreamTokenizer.TT_WORD)
+              || (st.ttype == '"'))
+        {
+          args.add(st.sval);
+        }
+        else {
+          throw new IllegalArgumentException("Unknown token type: " + st.ttype);
+        }
+      }
+    }
+    catch (IOException ioe) {
+      // Can't happen with a StringReader.
+      throw new UnexpectedException(ioe);
+    }
+        
     args.addAll(docUnits);
 
     //TODO: put the following line in a new Thread and tell listeners javadoc has started
     //Pass the function some way to tell about its output (use the way compilers do it for
     //a model)
     //And finally, when we're done notify the listeners along with some sort of failure flag
-    boolean result;
+    boolean result = false;
     try {
-      result = javadoc_1_3((String[]) args.toArray(new String[0]));
+      // Notify all listeners that Javadoc is starting.
+      this.javadocStarted();
+      
+      result = _javadoc_1_3((String[]) args.toArray(new String[0]), classpath);
     }
     catch (Throwable e) {
       throw new UnexpectedException(e);
     }
     finally {
       // Notify all listeners that Javadoc is done.
-      this.javadocEnded();
-    }
-    return result;
-  }
-  
-  /**
-   * TODO:
-   */
-  static void ventBuffers(BufferedReader jdOut, BufferedReader jdErr,
-                          LinkedList outLines, LinkedList errLines)
-    throws IOException {
-    String output;
-    
-    if (jdOut.ready()) {
-      output = jdOut.readLine();
-      
-      while (jdOut.ready() && (output != null)) {
-//        System.out.println("[stdout]: " + output);
-        outLines.add(output);
-        if (jdOut.ready()) {
-          output = jdOut.readLine();
-        }
-        else {
-          output = null;
-        }
-      }
-    }
-    
-    if (jdErr.ready()) {
-      output = jdErr.readLine();
-      while (jdErr.ready() && (output != null)) {
-//        System.out.println("[stderr] " + output);
-        errLines.add(output);
-        if (jdErr.ready()) {
-          output = jdErr.readLine();
-        }
-        else {
-          output = null;
-        }
-      }
+      this.javadocEnded(result, destDirFile);
     }
   }
 
@@ -1247,15 +1383,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * Of course, it can be a fallback for if tools.jar isn't found in the 1.4 jdk
    * @return true if Javadoc succeeded in building the HTML, otherwise false
    */
-  private boolean javadoc_1_3(String[] args) 
-      throws IOException, ClassNotFoundException, InterruptedException {
+  private boolean _javadoc_1_3(String[] args, String[] classpath) 
+    throws IOException, ClassNotFoundException, InterruptedException {
     final String JAVADOC_CLASS = "com.sun.tools.javadoc.Main";
     Process javadocProcess;
     BufferedReader jdOut;
     BufferedReader jdErr;
     
+    // We must use this classpath nonsense to make sure our new Javadoc JVM
+    // can see everything the interactions pane can see.
     Class.forName(JAVADOC_CLASS);
-    javadocProcess =  ExecJVM.runJVMPropogateClassPath(JAVADOC_CLASS, args);
+    
+    
+    javadocProcess =  ExecJVM.runJVM(JAVADOC_CLASS, args, classpath, new String[0]);
     
 //    System.err.println("javadoc started with args:\n" + Arrays.asList(args));
     
@@ -1301,7 +1441,52 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
   
   /**
-   * TODO:
+   * Empties BufferedReaders by copying lines into LinkedLists.
+   * This is intended for use with the output streams from an ExecJVM process.
+   * Source and destination objects are specified for stdout and for stderr.
+   * TODO: Move this to the util package.
+   * @param outBuf the buffer for stdout
+   * @param errBuf the buffer for stderr
+   * @param outLines the LinkedList of Strings to be filled with the lines read from outBuf
+   * @param errLines the LinkedList of Strings to be filled with the lines read from errBuf
+   */
+  static void ventBuffers(BufferedReader outBuf, BufferedReader errBuf,
+                          LinkedList outLines, LinkedList errLines)
+    throws IOException {
+    String output;
+    
+    if (outBuf.ready()) {
+      output = outBuf.readLine();
+      
+      while (outBuf.ready() && (output != null)) {
+//        System.out.println("[stdout]: " + output);
+        outLines.add(output);
+        if (outBuf.ready()) {
+          output = outBuf.readLine();
+        }
+        else {
+          output = null;
+        }
+      }
+    }
+    
+    if (errBuf.ready()) {
+      output = errBuf.readLine();
+      while (errBuf.ready() && (output != null)) {
+//        System.out.println("[stderr] " + output);
+        errLines.add(output);
+        if (errBuf.ready()) {
+          output = errBuf.readLine();
+        }
+        else {
+          output = null;
+        }
+      }
+    }
+  }
+  
+  /**
+   * TODO: Move this to the util package.  Update to use ventBuffers logic.
    */
   static void printProcessOutput(Process theProc, String msg, String sourceName)
     throws IOException {
@@ -1330,7 +1515,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
   
   /**
-   * TODO:
+   * TODO: 
    */
   private ArrayList extractErrors(LinkedList lines) {
     // Javadoc never produces more than 100 errors, so this will never auto-expand.
@@ -1368,9 +1553,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
   
   /**
-   * Parses a line of text written by Javadoc to stderr in order to see if it lists a specific
-   * file (and optionally, a line number) and error message.
-   * If so, creates a corresponding CompilerError.
+   * Parse a line of text written by Javadoc to stderr in order to see if it
+   * lists a specific file (and optionally, a line number) and error message.
+   * If so, create a corresponding CompilerError.  If an exception stack trace
+   * is encountered, all following text is copied into a new CompilerError.
    * 
    * @param line the line of JavaDoc error output to parse - possibly null
    * @return if the error output contains the text ".java:", a CompilerError with the file,
@@ -1607,11 +1793,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
   }
   
-  private void javadocEnded() {
+  private void javadocEnded(final boolean success, final File destDir) {
     synchronized(_compilerLock) {
       _notifier.notifyListeners(new EventNotifier.Notifier() {
         public void notifyListener(GlobalModelListener l) {
-          l.javadocEnded();
+          l.javadocEnded(success, destDir);
         }
       });
     }

@@ -64,7 +64,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
   
   
   /**
-   * a hashtablethat maps Configuration Objects to a list of listeners for this
+   * a hashtable that maps Configuration Objects to a list of listeners for this
    * particular option.  Part of the magic inner workings of this package.
    */
   final Hashtable<Configuration,Vector<OptionListener<T>>> listeners=
@@ -96,10 +96,14 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
    * uses format() and getOption() so that any changes in format will automatically
    * be applied to getString().
    */
-  String getString(DefaultOptionMap om) { return format(getOption(om)); }
+  String getString(DefaultOptionMap om) {
+    return format(getOption(om));
+  }
   
   
-  
+  /**
+   * Sends an OptionEvent to all OptionListeners who have registered on this Option.
+   */
   void notifyListeners(Configuration config, T val) {
     Vector<OptionListener<T>> v = listeners.get(config);
     if(v==null) return; // no listeners

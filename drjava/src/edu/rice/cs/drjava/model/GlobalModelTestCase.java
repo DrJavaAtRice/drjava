@@ -822,7 +822,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("javadocStarted fired unexpectedly");
     }
   
-    public void javadocEnded() {
+    public void javadocEnded(boolean success, File destDir) {
       listenerFail("javadocEnded fired unexpectedly");
     }
 

@@ -156,7 +156,7 @@ public interface GlobalModelListener extends InteractionsListener {
   /**
    * Called after Javadoc is finished.
    */
-  public void javadocEnded();
+  public void javadocEnded(boolean success, File destDir);
 
   //---------------------- InteractionsListener Methods ----------------------//
   

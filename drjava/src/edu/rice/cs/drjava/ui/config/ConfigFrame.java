@@ -378,7 +378,10 @@ public class ConfigFrame extends JFrame {
     
     PanelTreeNode debugNode = _createPanel("Debugger");
     _setupDebugPanel(debugNode.getPanel());
-
+    
+    PanelTreeNode javadocNode = _createPanel("Javadoc");
+    _setupJavadocPanel(javadocNode.getPanel());
+    
     PanelTreeNode miscNode = _createPanel("Miscellaneous");
     _setupMiscPanel(miscNode.getPanel());
 
@@ -537,7 +540,40 @@ public class ConfigFrame extends JFrame {
   }
   
   /**
-   * Adds all of the components for the Miscellaneous panel of the preferences window.
+   * Add all of the components for the Javadoc panel of the preferences window.
+   */ 
+  private void _setupJavadocPanel ( ConfigPanel panel) {
+    panel.addComponent
+      (new ForcedChoiceOptionComponent(OptionConstants.JAVADOC_ACCESS_LEVEL,
+                                       "Access Level", this));
+    panel.addComponent
+      (new ForcedChoiceOptionComponent(OptionConstants.JAVADOC_LINK_VERSION,
+                                       "System Javadoc Links Version", this));
+    panel.addComponent
+      (new StringOptionComponent(OptionConstants.JAVADOC_1_3_LINK,
+                                 "Javadoc 1.3 URL", this));
+    panel.addComponent
+      (new StringOptionComponent(OptionConstants.JAVADOC_1_4_LINK,
+                                 "Javadoc 1.4 URL", this));
+    
+    panel.addComponent
+      (new BooleanOptionComponent(OptionConstants.JAVADOC_FROM_ROOTS,
+                                  "Generate Javadoc From Source Roots", this));
+    panel.addComponent
+      (new StringOptionComponent(OptionConstants.JAVADOC_CUSTOM_PARAMS,
+                                 "Custom Javadoc Parameters", this));
+    panel.addComponent
+      (new FileOptionComponent(OptionConstants.JAVADOC_DESTINATION,
+                               "Default Destination Directory", this, _fileOptionChooser));
+    panel.addComponent
+      (new BooleanOptionComponent(OptionConstants.JAVADOC_PROMPT_FOR_DESTINATION,
+                                  "Always Prompt For Destination", this));
+    
+    panel.displayComponents();
+  }
+  
+  /**
+   *  Adds all of the components for the Miscellaneous panel of the preferences window.
    */
   private void _setupMiscPanel(ConfigPanel panel) {
     panel.addComponent(new IntegerOptionComponent(OptionConstants.INDENT_LEVEL,
@@ -560,14 +596,13 @@ public class ConfigFrame extends JFrame {
         return "Directories";
       }
     });
-    panel.addComponent(workDir);
-    panel.addComponent(new IntegerOptionComponent(OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this));
-    panel.addComponent(new IntegerOptionComponent(OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.JAVAC_ALLOW_ASSERT, "Allow Assert Keyword in Java 1.4", this));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.INTERACTIONS_EXIT_PROMPT, "Prompt if Interactions Pane Exits Unexpectedly", this));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.QUIT_PROMPT, "Prompt Before Quit", this));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.BACKUP_FILES, "Keep emacs style backup files", this));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.JAVADOC_ALL_PACKAGES, "Generate JavaDoc From Source Roots", this));
+    panel.addComponent( workDir );
+    panel.addComponent( new IntegerOptionComponent( OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this));
+    panel.addComponent( new IntegerOptionComponent( OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this));
+    panel.addComponent( new BooleanOptionComponent ( OptionConstants.JAVAC_ALLOW_ASSERT, "Allow Assert Keyword in Java 1.4", this));
+    panel.addComponent( new BooleanOptionComponent( OptionConstants.INTERACTIONS_EXIT_PROMPT, "Prompt if Interactions Pane Exits Unexpectedly", this));
+    panel.addComponent( new BooleanOptionComponent( OptionConstants.QUIT_PROMPT, "Prompt Before Quit", this));
+    panel.addComponent( new BooleanOptionComponent( OptionConstants.BACKUP_FILES, "Keep emacs style backup files", this));
     
     panel.displayComponents();
   }

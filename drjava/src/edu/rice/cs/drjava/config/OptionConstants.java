@@ -40,6 +40,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.config;
 import java.io.File;
 import gj.util.Vector;
+import java.util.ArrayList;
 import java.awt.Color;
 import java.awt.Font;
 import edu.rice.cs.drjava.DrJava;
@@ -527,7 +528,93 @@ public interface OptionConstants {
    */    
   public static final BooleanOption DEBUG_STEP_DRJAVA =
     new BooleanOption("debug.step.drjava", Boolean.FALSE);
-    
+  
+  
+  
+  /* ---------- Javadoc Options ---------- */  
+  
+  /**
+   * Possible options for Javadoc access levels.
+   */
+  static final ArrayList accessLevelChoices = 
+    (new Begin<ArrayList>() {
+       public ArrayList evaluate() {
+         ArrayList aList = new ArrayList(4);
+         aList.add("public");
+         aList.add("protected");
+         aList.add("package");
+         aList.add("private");
+         return aList;
+       }
+     }).evaluate();
+  
+  /**
+   * The highest access level of classes and members to include in the javadoc.
+   */
+  public static final ForcedChoiceOption JAVADOC_ACCESS_LEVEL = 
+    new ForcedChoiceOption("javadoc.access.level", "protected", accessLevelChoices);
+  
+  /**
+   * Possible options for Javadoc system class documentation links.
+   */
+  static final String JAVADOC_NONE_TEXT = "none";
+  static final String JAVADOC_1_3_TEXT = "1.3";
+  static final String JAVADOC_1_4_TEXT = "1.4";
+  
+  static final ArrayList linkVersionChoices = 
+    (new Begin<ArrayList>() {
+       public ArrayList evaluate() {
+         ArrayList aList = new ArrayList(4);
+         aList.add(JAVADOC_NONE_TEXT);
+         aList.add(JAVADOC_1_3_TEXT);
+         aList.add(JAVADOC_1_4_TEXT);
+         return aList;
+       }
+     }).evaluate();
+     
+  /**
+   * Constants for the URLs of Sun's system class documentation for different
+   * versions of Java.
+   */
+  public static final StringOption JAVADOC_1_3_LINK = 
+    new StringOption("javadoc.1.3.link", "http://java.sun.com/j2se/1.3/docs/api");
+  public static final StringOption JAVADOC_1_4_LINK =
+    new StringOption("javadoc.1.4.link", "http://java.sun.com/j2se/1.4/docs/api");
+     
+  /**
+   * The version of Java to use for links to Javadoc for system classes.
+   */
+  public static final ForcedChoiceOption JAVADOC_LINK_VERSION =
+    new ForcedChoiceOption("javadoc.link.version", "1.3", linkVersionChoices);
+  
+  /**
+   * Whether to include the entire package heirarchy from the source roots when
+   * generating JavaDoc output.
+   */
+  public static final BooleanOption JAVADOC_FROM_ROOTS =
+    new BooleanOption("javadoc.from.roots", Boolean.FALSE);
+  
+  /**
+   * A string containing custom options to be passed to Javadoc.
+   * This needs to be tokenized before passing it to Javadoc.
+   */
+  public static final StringOption JAVADOC_CUSTOM_PARAMS =
+    new StringOption("javadoc.custom.params", "");
+  
+  /**
+   * The default destination directory for Javadoc output.
+   */
+  public static final FileOption JAVADOC_DESTINATION =
+    new FileOption("javadoc.destination", FileOption.NULL_FILE);
+  
+  /**
+   * Whether to always prompt for a destination directory, whether or not a
+   * default has been set.
+   */
+  public static final BooleanOption JAVADOC_PROMPT_FOR_DESTINATION =
+    new BooleanOption("javadoc.prompt.for.destination", Boolean.TRUE);
+  
+  
   
   /* ---------- Misc Options ---------- */
   
@@ -578,13 +665,6 @@ public interface OptionConstants {
    */
   public static final VectorOption<File> RECENT_FILES = 
     new VectorOption("recent.files",new FileOption("",null),new Vector<File>());
-  
-  /**
-   * Whether to include the entire package heirarchy from the source roots when
-   * generating JavaDoc output.
-   */
-  public static final BooleanOption JAVADOC_ALL_PACKAGES =
-    new BooleanOption("javadoc.all.packages", Boolean.FALSE);
 }
 
 

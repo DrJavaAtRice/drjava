@@ -282,6 +282,24 @@ public class MainFrame extends JFrame implements OptionConstants {
       return (rc == JOptionPane.YES_OPTION);
     }
   };
+    
+  /**
+   * Provides the view's contribution to the Javadoc interaction.
+   */
+  private DirectorySelector _javadocSelector =
+    new DirectorySelector() {
+    public File getDirectory(File start) throws OperationCanceledException {
+      _javadocChooser.setSelectedFile(start);
+      
+      int returnVal = _javadocChooser.showDialog(MainFrame.this, "Select");
+      return getChosenFile(_javadocChooser, returnVal);
+    }
+    
+    public void warnUser(String message, String title) {
+      JOptionPane.showMessageDialog(MainFrame.this, message, title,
+                                    JOptionPane.ERROR_MESSAGE);
+    }
+  };
 
   /** Resets the document in the definitions pane to a blank one. */
   private Action _newAction = new AbstractAction("New") {
@@ -429,7 +447,16 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Runs Javadoc. */
   private Action _javadocAction = new AbstractAction("Create Javadoc") {
       public void actionPerformed(ActionEvent ae) {
-          _javadocAll();
+        try {
+          _model.javadocAll(_javadocSelector, _saveSelector);
+        }
+        catch (IOException ioe) {
+          _showIOError(ioe);
+        }
+        catch (InvalidPackageException ipe) {
+          _showError(ipe, "Javadoc Error",
+                     "Javadoc encountered an invalid package name.");
+        }
       }
   };
 
@@ -1670,107 +1697,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     };
     worker.start();
-  }
-
-  /**
-   * Negotiates with the user and the global model to generate javadoc output.
-   * The user provides a destination, and the gm provides the package info.
-   */
-  private void _javadocAll() {
-    // Only javadoc if all are saved.
-    // This should really be in DefaultGlobalModel.
-    _model.saveAllBeforeProceeding(GlobalModelListener.JAVADOC_REASON);
-    
-    // Make sure that there is at least one saved document.
-    ListModel docs = _model.getDefinitionsDocuments();
-    
-    boolean noneYet = true;
-    int numDocs = docs.getSize();
-    for (int i = 0; (noneYet && (i < numDocs)); i++) {
-      OpenDefinitionsDocument doc = (OpenDefinitionsDocument) docs.getElementAt(i);
-      noneYet = doc.isUntitled();
-    }
-    
-    // If there are no saved files, ignore the javadoc command.
-    if (noneYet) {
-      return;
-    }
-    
-    // Get the destination directory via a JFileChooser.
-    try {
-      int returnVal;
-      File destDir;
-      boolean rejected = false;
-        
-      // Make sure the destination is writable.
-      do {
-        // If the choice was rejected, tell the user and ask again.
-        if (rejected) {
-          JOptionPane.showMessageDialog(this,
-                                        "The destination directory you have chosen\n"
-                                          + "does not exist or is not readable. Please\n"
-                                          + "choose another directory.",
-                                        "Bad Destination", JOptionPane.ERROR_MESSAGE);
-        }
-        
-        returnVal = _javadocChooser.showDialog(this, "Select");
-        destDir = getChosenFile(_javadocChooser, returnVal);
-      } while (!destDir.exists() || !destDir.canWrite());
-      
-      // Lock the interface for edits while generating Javadoc.
-//      Runnable doCommand = new Runnable() {
-//        public void run() {
-//          hourglassOn();
-//        }
-//      };
-//      SwingUtilities.invokeLater(doCommand);
-//      
-      // Generate the output with the GlobalModel.
-      final File destDirF = destDir;
-      final SwingWorker worker = new SwingWorker() {
-        public Object construct() {
-          try {
-            boolean success = _model.javadocAll(destDirF.getAbsolutePath());
-
-            // Display the results.
-//             System.out.println("did we get this far?");
-            if (success) {
-              _javadocFrame = new JavadocFrame(destDirF);
-              _javadocFrame.show();
-            }
-          }
-          catch (InvalidPackageException ipe) {
-            _showError(ipe, "Javadoc Error",
-                       "Javadoc encountered an invalid package name.");
-          }
-//           catch (JavadocException jde) {
-//             _showError(jde, "JavaDoc Error",
-//                        "There was an error generating the javadoc.");
-//           }
-          catch (MalformedURLException me) {
-            throw new UnexpectedException(me);
-          }
-          catch (IOException ioe) {
-            _showIOError(ioe);
-          }
-//          finally {
-//            // Unlock MainFrame for edits.
-//            Runnable doCommand = new Runnable() {
-//              public void run() {
-//                hourglassOff();
-//              }
-//            };
-//            SwingUtilities.invokeLater(doCommand);
-//          }
-          return "XXX: Unused return value!";
-        }
-      };
-      worker.start();
-    }
-    catch (OperationCanceledException oce) {
-      // If the user cancels the prompt, silently return.
-      return;
-    }
   }
 
     
@@ -3760,7 +3686,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       SwingUtilities.invokeLater(doCommand);
     }
 
-    public void javadocEnded() {
+    public void javadocEnded(final boolean success, final File destDir) {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
@@ -3769,6 +3695,18 @@ public class MainFrame extends JFrame implements OptionConstants {
           showTab(_javadocErrorPanel);
           _javadocAction.setEnabled(true);
           _javadocErrorPanel.reset();
+          
+          // Display the results.
+//             System.out.println("did we get this far?");
+          if (success) {
+            try {
+              _javadocFrame = new JavadocFrame(destDir);
+              _javadocFrame.show();
+            }
+            catch (MalformedURLException me) {
+              throw new UnexpectedException(me);
+            }
+          }
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -4270,5 +4208,5 @@ public class MainFrame extends JFrame implements OptionConstants {
       _recentFileManager.updateMax(oce.value.intValue()); 
       _recentFileManager.numberItems();
     }
-  }  
+  }
 }
