@@ -625,13 +625,23 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** Compiles all the project. */
-  private Action _compileProjectAction = new AbstractAction("Compile Project") {
+  private Action _compileOpenProjectAction = new AbstractAction("Compile Open Project Files") {
     public void actionPerformed(ActionEvent ae) {
       // right now, it's the same as compile all
       _compileAll();
     }
   };
-
+  
+  /** Compiles all the project. */
+  private Action _compileProjectAction = new AbstractAction("Compile Project") {
+    public void actionPerformed(ActionEvent ae) {
+      // right now, it's the same as compile all
+      _compileProject();
+    }
+  };
+  
+  
+  
   /** Compiles all documents in the navigators active group. */
   private Action _compileFolderAction = new AbstractAction("Compile Folder") {
     public void actionPerformed(ActionEvent ae) {
@@ -2377,6 +2387,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _projectPropertiesAction.setEnabled(true);
       _junitProjectAction.setEnabled(true);
       _junitOpenProjectFilesAction.setEnabled(true);
+      _compileOpenProjectAction.setEnabled(true);
       _compileProjectAction.setEnabled(true);
       if(_model.getBuildDirectory() != null){
         _cleanAction.setEnabled(true);
@@ -2412,6 +2423,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _projectPropertiesAction.setEnabled(false);
       _junitProjectAction.setEnabled(false);
       _junitOpenProjectFilesAction.setEnabled(false);
+      _compileOpenProjectAction.setEnabled(false);
       _compileProjectAction.setEnabled(false);
       _setUpContextMenus();
       _currentProjFile = null;
@@ -3116,9 +3128,28 @@ public class MainFrame extends JFrame implements OptionConstants {
     };
     worker.start();
   }
+
+  private void _compileProject(){
+    final SwingWorker worker = new SwingWorker() {
+      public Object construct() {
+        try {
+          hourglassOn();
+          _model.compileAll();
+          hourglassOff();
+        }
+        catch (FileMovedException fme) {
+          _showFileMovedError(fme);
+        }
+        catch (IOException ioe) {
+          _showIOError(ioe);
+        }
+        return null;
+      }
+    };
+    worker.start();
+  }
   
   private void _compileAll() {
-
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
         try {
@@ -3654,8 +3685,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_junitOpenProjectFilesAction, "Test", "Test all open project files");
     _junitOpenProjectFilesAction.setEnabled(false);
 
-  _setUpAction(_compileProjectAction, "Compile", "Compile",
-                 "Compile the current project");
+    _setUpAction(_compileOpenProjectAction, "Compile", "Compile", "Compile the open project documents");
+    _setUpAction(_compileProjectAction, "Compile", "Compile", "Compile the current project");
+    _compileOpenProjectAction.setEnabled(false);
     _compileProjectAction.setEnabled(false);
       
     _setUpAction(_runProjectAction, "Run","Run the project's main method");
@@ -4002,6 +4034,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     projectMenu.addSeparator();
     // run project
     projectMenu.add(_cleanAction);
+    projectMenu.add(_compileOpenProjectAction);
     projectMenu.add(_compileProjectAction);
     projectMenu.add(_runProjectAction);
     projectMenu.add(_junitOpenProjectFilesAction);
@@ -4607,6 +4640,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _navPanePopupMenuForRoot.add(_saveProjectAction);
     _navPanePopupMenuForRoot.add(_closeProjectAction);
     _navPanePopupMenuForRoot.addSeparator();
+    _navPanePopupMenuForRoot.add(_compileOpenProjectAction);
     _navPanePopupMenuForRoot.add(_compileProjectAction);
     _navPanePopupMenuForRoot.add(_runProjectAction);
     _navPanePopupMenuForRoot.add(_junitOpenProjectFilesAction);

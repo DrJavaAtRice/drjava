@@ -71,9 +71,14 @@ public interface FileGroupingState {
   public boolean isInProjectPath(OpenDefinitionsDocument doc);
   
   /**
-   * junits all files that the state considers "all"
+   * junits all files that the state considers "all" (ie, all files in project directory in project mode)
    */
   public void junitAll();
+  
+  /**
+   * compiles all files that the state considers "all" (ie, all files in project directory in project mode)
+   */
+  public void compileAll() throws IOException;
   
   /**
    * Returns the current project file

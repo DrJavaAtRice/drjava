@@ -422,6 +422,11 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
   public List<OpenDefinitionsDocument> getProjectDocuments();
   
   /**
+   * defers to the state to compile all (compiles all files in directory in project mode)
+   */
+  public void compileAll() throws IOException;
+  
+  /**
    * @return true if the model has a project open, false otherwise.
    */
   public boolean isProjectActive();

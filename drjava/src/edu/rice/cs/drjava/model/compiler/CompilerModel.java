@@ -47,6 +47,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.compiler;
 
 import java.io.IOException;
+import java.io.File;
 import java.util.List;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
@@ -89,6 +90,13 @@ public interface CompilerModel {
    * @throws IOException if a filesystem-related problem prevents compilation
    */
   public void compileAll() throws IOException;
+  
+  /**
+   * compiles all files with the specified source root set
+   * @param sourceroots, a list of source roots
+   * @param files a list of files to compile
+   */
+  public void compileAll(List<File> sourceroots, List<File> files) throws IOException ;
   
   /**
    * Compiles a single document with the active compiler.

@@ -425,9 +425,72 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 //    _registerOptionListeners();
 //  }
 
+  
+  // ----- returns a source root given a package and filename ----
+    protected File getSourceRoot(String packageName, File sourceFile) throws InvalidPackageException{
+      if (packageName.equals("")) {
+        return sourceFile.getParentFile();
+      }
+      
+      Stack<String> packageStack = new Stack<String>();
+      int dotIndex = packageName.indexOf('.');
+      int curPartBegins = 0;
+      
+      while (dotIndex != -1) {
+        packageStack.push(packageName.substring(curPartBegins, dotIndex));
+        curPartBegins = dotIndex + 1;
+        dotIndex = packageName.indexOf('.', dotIndex + 1);
+      }
+      
+      // Now add the last package component
+      packageStack.push(packageName.substring(curPartBegins));
+      
+      // Must use the canonical path, in case there are dots in the path
+      //  (which will conflict with the package name)
+      try {
+        File parentDir = sourceFile.getCanonicalFile();
+        while (!packageStack.empty()) {
+          String part = packageStack.pop();
+          parentDir = parentDir.getParentFile();
+
+          if (parentDir == null) {
+            throw new RuntimeException("parent dir is null?!");
+          }
+
+          // Make sure the package piece matches the directory name
+          if (! part.equals(parentDir.getName())) {
+            String msg = "The source file " + sourceFile.getAbsolutePath() +
+              " is in the wrong directory or in the wrong package. " +
+              "The directory name " + parentDir.getName() +
+              " does not match the package component " + part + ".";
+
+            throw new InvalidPackageException(-1, msg);
+          }
+        }
+
+        // OK, now parentDir points to the directory of the first component of the
+        // package name. The parent of that is the root.
+        parentDir = parentDir.getParentFile();
+        if (parentDir == null) {
+          throw new RuntimeException("parent dir of first component is null?!");
+        }
+
+        return parentDir;
+      }
+      catch (IOException ioe) {
+        String msg = "Could not locate directory of the source file: " + ioe;
+        throw new InvalidPackageException(-1, msg);
+      }
+    }
+  
+  
 
   // ----- STATE -----
   protected FileGroupingState _state;
+  
+  public void compileAll() throws IOException{
+    _state.compileAll();
+  }
   
   /**
    * @param state the new file grouping state that will handle
@@ -685,6 +748,82 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         }
       }
       
+      
+      /**
+       * returns the name of the package from a fully qualified classname
+       */
+      private String getPackageName(String classname){
+        int index = classname.lastIndexOf(".");
+        if(index != -1){
+          return classname.substring(0, index);
+        }else{
+          return "";
+        }
+      }
+      
+      // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
+      public void compileAll() throws IOException{
+        File dir = getProjectFile().getParentFile();
+        final ArrayList<File> files = FileOps.getFilesInDir(dir, true, new FileFilter(){
+          public boolean accept(File pathname){
+            return pathname.isDirectory() || 
+              pathname.getPath().toLowerCase().endsWith(".java") ||
+              pathname.getPath().toLowerCase().endsWith(".dj0") ||
+              pathname.getPath().toLowerCase().endsWith(".dj1") ||
+              pathname.getPath().toLowerCase().endsWith(".dj2");
+          }
+        });
+        ClassAndInterfaceFinder finder;
+        // the list of files to compile
+        List<File>lof = new LinkedList<File>();
+        // the list of sourceroots for the files
+        List<File>los = new LinkedList<File>();
+        for(File f: files){
+          finder = new ClassAndInterfaceFinder(f);
+          String classname = finder.getClassName();
+          String packagename = getPackageName(classname);
+          try{
+            File sourceroot = getSourceRoot(packagename, f);
+            if(!los.contains(sourceroot)){
+              los.add(sourceroot);
+            }
+            lof.add(f);
+          }catch(InvalidPackageException e){
+            // don't add the file or root
+          }
+        }
+
+        String[] exts = new String[]{".java", ".dj0", ".dj1", ".dj2"};
+        List<OpenDefinitionsDocument> lod = getDefinitionsDocuments();
+        for(OpenDefinitionsDocument d: lod){
+          if(d.isAuxiliaryFile()){
+            try{
+              File f;
+              File sourceRoot = d.getSourceRoot();
+              try{
+                f = d.getFile();
+                for(String ext: exts){
+                  if(f.getName().endsWith(ext)){
+                    lof.add(f);
+                    los.add(sourceRoot);
+                  }
+                }
+              }catch(FileMovedException fme){
+                // the file's not on disk, but send it in anyways
+                f = fme.getFile();
+                lof.add(f);
+                los.add(sourceRoot);
+              }catch(IllegalStateException e){
+                // it doesn't have a file, so don't try and test it...
+              }
+            }catch(InvalidPackageException e){
+              // don't add it if we don't have a valid packagename
+            }
+          }
+        }
+        getCompilerModel().compileAll(los, lof);
+      }
+
       // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
       public void junitAll(){
         File dir = getProjectFile().getParentFile();
@@ -734,6 +873,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         }
         getJUnitModel().junitAll(los, lof);
       }
+    
     };
   }
   
@@ -783,6 +923,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return false;
       }
 
+      public void compileAll() throws IOException{
+        getCompilerModel().compileAll();
+      }
+      
       public void junitAll(){
         getJUnitModel().junitAll();
       }

@@ -214,7 +214,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       _notifier.junitAllStarted();
       List<String> tests = _jvm.runTestSuite(qualifiedClassnames, files, true);
       _isTestInProgress = true;
-//      _notifier.junitEnded();
   }
 
   

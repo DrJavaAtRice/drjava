@@ -251,8 +251,9 @@ OTHER DEALINGS WITH THE SOFTWARE.
      </formalpara>
      <formalpara>
       <title>Compiling a Project</title>
-      <para>To compile a project, select "Compile Project" under the Project menu, or right click the root of the tree and select "Compile Project." This will compile all files in the project view including auxiliary files. All files in the external branch (Under the External Files folder) will not be compiled.</para>
+      <para>There are two options for compiling a project: compiling the open project files, or compiling the entire project. To compile all open project files, select "Compile Open Project Files" under the Project menu, or right click the root of the tree and select "Compile Open Project Files." This will compile all files in the project view including auxiliary files. All files in the external branch (Under the External Files folder) will not be compiled.</para>
      </formalpara>
+     <para>Similarly, to compile all project files, even if they are not currently open in DrJava, select "Compile Project" from the Project Menu or the Context menu for the root of the tree. This will compile every source file in the project directory as well as source files in the Auxiliary Files branch.</para>
      <para>When not in project view, the "Compile All" button compiles all open files, whereas in project view, "Compile All" only compiles the open project.</para>
      <formalpara>
       <title>Testing a Project</title>
@@ -398,6 +399,7 @@ Welcome to DrJava.
     <section id="compiling-file">
       <title>Compiling Files</title>
       <para>To compile the documents you have open in DrJava, click on the "Compile All" button on the toolbar, or choose either "Compile All" or "Compile Current Document" from the Tools menu.  Before the compilation can begin, all open files must be saved, even if only the current document is being compiled.  This is necessary because one file can depend on other files, and it is important that no files have been modified when errors are displayed.  (Otherwise, an error could be highlighted on a line which has changed.)  Once a compilation completes successfully, the Interactions Pane is reset so that the new class files can be used.  The output on the Console Tab is also reset to begin the new session, unless the "Clear Console After Interactions Reset" option in the "Miscellaneous" section of the Preferences is unchecked.</para>
+      <para>In project mode, you have the option to compile all project source files, even if those files are not currently open in DrJava. To compile all source files, click "Compile Open Project Files" in the Project Menu. This option is also available by right clicking the root of the project tree.</para>
     </section>
 
     <section id="compiling-errors">

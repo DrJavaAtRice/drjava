@@ -186,6 +186,53 @@ public class DefaultCompilerModel implements CompilerModel {
     compile(defDocs);
   }
   
+  /**
+   * compiles all files with the specified source root set
+   * @param sourceRootSet, a list of source roots
+   * @param filesToCompile a list of files to compile
+   */
+  synchronized public void compileAll(List<File> sourceRootSet, List<File> filesToCompile) throws IOException {
+    File buildDir = null;
+    if (_getter.getFileGroupingState().isProjectActive()) {
+      buildDir = _getter.getFileGroupingState().getBuildDirectory();
+    }
+    List<OpenDefinitionsDocument> defDocs = _getter.getDefinitionsDocuments();
+    // Only compile if all are saved
+    if (_hasModifiedFiles(defDocs)) {
+      //System.out.println("Has modified files");
+      _notifier.saveBeforeCompile();
+    }
+
+    // check for modified project files, in case they didn't save when prompted
+    if (_hasModifiedFiles(defDocs)) {
+      // if any files haven't been saved after we told our
+      // listeners to do so, don't proceed with the rest
+      // of the compile.
+    }
+    else {
+
+      // Get sourceroots and all files
+      File[] sourceRoots = sourceRootSet.toArray(new File[0]);;
+      File[] files = filesToCompile.toArray(new File[0]);
+
+      _notifier.compileStarted();
+
+      try {
+        // Compile the files
+        _compileFiles(sourceRoots, files, buildDir);
+      }
+      catch (Throwable t) {
+        CompilerError err = new CompilerError(t.toString(), false);
+        CompilerError[] errors = new CompilerError[] { err };
+        _distributeErrors(errors);
+      }
+      finally {
+        // Fire a compileEnded event
+        _notifier.compileEnded();
+      }
+    }
+  }
+
   
   /**
    * compiles all documents in the list of opendefinitionsdocuments sent as input
@@ -232,9 +279,7 @@ public class DefaultCompilerModel implements CompilerModel {
         }
         catch (IllegalStateException ise) {
           // No file for this document; skip it
-        }/*catch(RuntimeExceptoin e){
-         * Adam look here
-         * }*/
+        }
       }
       File[] files = filesToCompile.toArray(new File[0]);
 
