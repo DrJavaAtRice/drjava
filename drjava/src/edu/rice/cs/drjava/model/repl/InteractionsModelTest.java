@@ -64,11 +64,11 @@ import edu.rice.cs.drjava.model.DefaultGlobalModel;
  * @version $Id$
  */
 public final class InteractionsModelTest extends TestCase {
-  protected DocumentAdapter _adapter;
+  protected InteractionsDocumentAdapter _adapter;
   protected InteractionsModel _model;
 
   public void setUp() {
-    _adapter = new SwingDocumentAdapter();
+    _adapter = new InteractionsDocumentAdapter();
     _model = new TestInteractionsModel(_adapter);
   }
 
@@ -483,7 +483,7 @@ public final class InteractionsModelTest extends TestCase {
     /**
      * Constructs a new InteractionsModel.
      */
-    public TestInteractionsModel(DocumentAdapter adapter) {
+    public TestInteractionsModel(InteractionsDocumentAdapter adapter) {
       // Adapter, history size, write delay
       super(adapter, 1000, 25);
     }
@@ -523,7 +523,7 @@ public final class InteractionsModelTest extends TestCase {
     /**
      * Constructs a new InteractionsModel.
      */
-    public IncompleteInputInteractionsModel(DocumentAdapter adapter) {
+    public IncompleteInputInteractionsModel(InteractionsDocumentAdapter adapter) {
       // MainJVM, Adapter, history size, write delay
       super(new MainJVM(), adapter, 1000, 25);
       _interpreterControl.setInteractionsModel(this);

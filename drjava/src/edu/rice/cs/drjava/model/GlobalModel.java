@@ -51,7 +51,6 @@ import java.util.*;
 
 import edu.rice.cs.util.swing.DocumentIterator;
 
-import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.repl.*;
@@ -253,9 +252,9 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
 
   /**
    * TODO: remove this swing dependency.
-   * @return SwingDocumentAdapter in use by the ConsoleDocument.
+   * @return InteractionsDocumentAdapter in use by the ConsoleDocument.
    */
-  public SwingDocumentAdapter getSwingConsoleDocument();
+  public InteractionsDocumentAdapter getSwingConsoleDocument();
 
   /**
    * Resets the console.
@@ -282,9 +281,9 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
 
   /**
    * TODO: remove this swing dependency.
-   * @return SwingDocumentAdapter in use by the InteractionsDocument.
+   * @return InteractionsDocumentAdapter in use by the InteractionsDocument.
    */
-  public SwingDocumentAdapter getSwingInteractionsDocument();
+  public InteractionsDocumentAdapter getSwingInteractionsDocument();
 
   /**
    * Clears and resets the interactions pane.

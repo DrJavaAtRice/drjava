@@ -259,13 +259,7 @@ public interface OpenDefinitionsDocument extends StyledDocument, Finalizable<Def
    * Forwarding method to sync the definitions with whatever view
    * component is representing them.
    */
-  public void syncCurrentLocationWithDefinitions(int location);
-
-  /**
-   * Get the location of the cursor in the definitions according
-   * to the definitions document.
-   */
-  public int getCurrentDefinitionsLocation();
+  public void setCurrentLocation(int location);
 
   /**
    * Forwarding method to find the match for the closing brace

@@ -48,7 +48,6 @@ package edu.rice.cs.drjava.ui;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 import edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractionsModel;
-import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 
 import junit.framework.*;
@@ -60,7 +59,7 @@ import junit.framework.*;
  */
 public final class InteractionsPaneTest extends TestCase {
 
-  protected SwingDocumentAdapter _adapter;
+  protected InteractionsDocumentAdapter _adapter;
   protected InteractionsModel _model;
   protected InteractionsDocument _doc;
   protected InteractionsPane _pane;
@@ -70,7 +69,7 @@ public final class InteractionsPaneTest extends TestCase {
    * Setup method for each JUnit test case.
    */
   public void setUp() {
-    _adapter = new SwingDocumentAdapter();
+    _adapter = new InteractionsDocumentAdapter();
     _model = new TestInteractionsModel(_adapter);
     _doc = _model.getDocument();
     _pane = new InteractionsPane(_adapter);

@@ -132,7 +132,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * @param historySize Number of lines to store in the history
    * @param writeDelay Number of milliseconds to wait after each println
    */
-  public InteractionsModel(DocumentAdapter adapter, int historySize,
+  public InteractionsModel(InteractionsDocumentAdapter adapter, int historySize,
                            int writeDelay) {
     _writeDelay = writeDelay;
     _document = new InteractionsDocument(adapter, historySize);

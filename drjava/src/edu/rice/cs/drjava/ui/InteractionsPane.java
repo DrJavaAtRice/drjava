@@ -52,7 +52,7 @@ import java.awt.Toolkit;
 import edu.rice.cs.util.swing.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
-
+import edu.rice.cs.drjava.model.repl.*;
 
 /**
  * The view component for repl interaction.
@@ -66,7 +66,6 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
   // InteractionsPane must be constructed completely, so
   // this can't be placed in the constructor.
   protected HighlightManager _highlightManager = null;
-
 
   /**
    *  Highlight painter for syntax errors, currently borrowing breakpoint color.
@@ -94,7 +93,7 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
    * Uses default keymap name ("INTERACTIONS_KEYMAP")
    * @param doc StyledDocument containing the interactions history.
    */
-  public InteractionsPane(StyledDocument doc) {
+  public InteractionsPane(InteractionsDocumentAdapter doc) {
     this("INTERACTIONS_KEYMAP", doc);
   }
 
@@ -103,7 +102,7 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
    * @param keymapName the name of the keymap for this pane
    * @param doc StyledDocument containing the interactions history.
    */
-  public InteractionsPane(String keymapName, StyledDocument doc) {
+  public InteractionsPane(String keymapName, InteractionsDocumentAdapter doc) {
     super(doc);
 
     //add actions for enter key, etc.

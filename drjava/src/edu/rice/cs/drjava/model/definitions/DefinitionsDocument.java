@@ -61,6 +61,7 @@ import java.io.*;
 import java.io.File;
 
 import edu.rice.cs.util.Pair;
+import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.DrJava;
@@ -102,7 +103,7 @@ import edu.rice.cs.drjava.model.OperationCanceledException;
  * @see ReducedModelBrace
  *
  */
-public class DefinitionsDocument extends DefaultStyledDocument implements OptionConstants, Finalizable<DefinitionsDocument> {
+public class DefinitionsDocument extends SwingDocumentAdapter implements OptionConstants, Finalizable<DefinitionsDocument> {
   
   List<DocumentClosedListener> _closedListeners = new LinkedList<DocumentClosedListener>();
   

@@ -45,8 +45,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-import edu.rice.cs.util.text.DocumentAdapter;
-import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 
 /**
@@ -67,17 +65,17 @@ public class SimpleInteractionsModel extends InteractionsModel {
   protected JavaInterpreter _interpreter;
 
   /**
-   * Creates a new InteractionsModel using a SwingDocumentAdapter.
+   * Creates a new InteractionsModel using a InteractionsDocumentAdapter.
    */
   public SimpleInteractionsModel() {
-    this(new SwingDocumentAdapter());
+    this(new InteractionsDocumentAdapter());
   }
 
   /**
    * Creates a new InteractionsModel with the given document adapter.
    * @param document Toolkit-independent document adapter
    */
-  public SimpleInteractionsModel(DocumentAdapter document) {
+  public SimpleInteractionsModel(InteractionsDocumentAdapter document) {
     super(document, 1000, WRITE_DELAY);
     _interpreter = new DynamicJavaAdapter();
 

@@ -58,13 +58,9 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
-import edu.rice.cs.drjava.model.repl.InputListener;
-import edu.rice.cs.drjava.model.repl.ConsoleDocument;
-import edu.rice.cs.drjava.model.repl.InteractionsDocument;
-import edu.rice.cs.drjava.model.repl.InteractionsModel;
+import edu.rice.cs.drjava.model.repl.*;
 //import edu.rice.cs.drjava.model.repl.InputListener;
 import edu.rice.cs.util.swing.SwingWorker;
-import edu.rice.cs.util.text.SwingDocumentAdapter;
 
 /**
  * This class installs listeners and actions between an InteractionsDocument
@@ -195,20 +191,20 @@ public class InteractionsController extends AbstractConsoleController {
   /**
    * Glue together the given model and a new view.
    * @param model An InteractionsModel
-   * @param adapter SwingDocumentAdapter being used by the model's doc
+   * @param adapter InteractionsDocumentAdapter being used by the model's doc
    */
-  public InteractionsController(InteractionsModel model, SwingDocumentAdapter adapter) {
+  public InteractionsController(InteractionsModel model, InteractionsDocumentAdapter adapter) {
     this(model, adapter, new InteractionsPane(adapter));
   }
 
   /**
    * Glue together the given model and view.
    * @param model An InteractionsModel
-   * @param adapter SwingDocumentAdapter being used by the model's doc
+   * @param adapter InteractionsDocumentAdapter being used by the model's doc
    * @param pane An InteractionsPane
    */
   public InteractionsController(InteractionsModel model,
-                                SwingDocumentAdapter adapter,
+                                InteractionsDocumentAdapter adapter,
                                 InteractionsPane pane) {
     super(adapter, pane);
     _model = model;

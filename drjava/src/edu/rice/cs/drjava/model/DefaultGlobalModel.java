@@ -62,7 +62,6 @@ import java.util.Enumeration;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.util.swing.DocumentIterator;
-import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -243,7 +242,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   /**
    * The document adapter used in the Interactions model.
    */
-  private final SwingDocumentAdapter _interactionsDocAdapter;
+  private final InteractionsDocumentAdapter _interactionsDocAdapter;
 
   /**
    * The document used to display System.out and System.err,
@@ -254,7 +253,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   /**
    * The document adapter used in the console document.
    */
-  private final SwingDocumentAdapter _consoleDocAdapter;
+  private final InteractionsDocumentAdapter _consoleDocAdapter;
 
   /**
    * A lock object to prevent print calls to System.out or System.err
@@ -297,7 +296,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
     _cache = new DocumentCache();
 
-    _interactionsDocAdapter = new SwingDocumentAdapter();
+    _interactionsDocAdapter = new InteractionsDocumentAdapter();
     _interactionsModel =
       new DefaultInteractionsModel(this, _interpreterControl,
                                    _interactionsDocAdapter);
@@ -306,7 +305,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     _interpreterControl.setInteractionsModel(_interactionsModel);
     _interpreterControl.setJUnitModel(_junitModel);
 
-    _consoleDocAdapter = new SwingDocumentAdapter();
+    _consoleDocAdapter = new InteractionsDocumentAdapter();
     _consoleDoc = new ConsoleDocument(_consoleDocAdapter);
 
     _createDebugger();
@@ -365,13 +364,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
 //  public DefaultGlobalModel(MainJVM control) {
 //    _interpreterControl = control;
-//    _interactionsDocAdapter = new SwingDocumentAdapter();
+//    _interactionsDocAdapter = new InteractionsDocumentAdapter();
 //    _interactionsModel =
 //      new DefaultInteractionsModel(this, control, _interactionsDocAdapter);
 //    _interpreterControl.setInteractionsModel(_interactionsModel);
 //    _interpreterControl.setJUnitModel(this);  // to be replaced by JUnitModel
 //
-//    _consoleDocAdapter = new SwingDocumentAdapter();
+//    _consoleDocAdapter = new InteractionsDocumentAdapter();
 //    _consoleDoc = new ConsoleDocument(_consoleDocAdapter);
 //
 //    _inputListener = NoInputListener.ONLY;
@@ -657,9 +656,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
 
   /**
-   * @return SwingDocumentAdapter in use by the InteractionsDocument.
+   * @return InteractionsDocumentAdapter in use by the InteractionsDocument.
    */
-  public SwingDocumentAdapter getSwingInteractionsDocument() {
+  public InteractionsDocumentAdapter getSwingInteractionsDocument() {
     return _interactionsDocAdapter;
   }
 
@@ -671,7 +670,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return _consoleDoc;
   }
 
-  public SwingDocumentAdapter getSwingConsoleDocument() {
+  public InteractionsDocumentAdapter getSwingConsoleDocument() {
     return _consoleDocAdapter;
   }
 
@@ -2661,7 +2660,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         resetModification();
         doc.checkIfClassFileInSync();
 
-        syncCurrentLocationWithDefinitions(0);
+        setCurrentLocation(0);
 
         _notifier.fileReverted(doc);
       }
@@ -2707,7 +2706,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * Forwarding method to sync the definitions with whatever view
      * component is representing them.
      */
-    public void syncCurrentLocationWithDefinitions(int location) {
+    public void setCurrentLocation(int location) {
       getDocument().setCurrentLocation(location);
     }
 
@@ -2715,7 +2714,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * Get the location of the cursor in the definitions according
      * to the definitions document.
      */
-    public int getCurrentDefinitionsLocation() {
+    public int getCurrentLocation() {
         return getDocument().getCurrentLocation();
     }
 
@@ -3203,11 +3202,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public DocumentListener[] getDocumentListeners() {
       return getDocument().getDocumentListeners();
     }
-    
-    public int getCurrentLocation() {
-      return getDocument().getCurrentLocation();
-    }
-  
+      
     /**
      * This method is put here because the ODD is the only way to get to the defdoc
      */

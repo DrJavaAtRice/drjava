@@ -48,7 +48,6 @@ package edu.rice.cs.drjava.model.repl;
 import junit.framework.*;
 
 import edu.rice.cs.util.text.DocumentAdapterException;
-import edu.rice.cs.util.text.SwingDocumentAdapter;
 
 /**
  * Tests the functionality of the AbstractInteractionsDocument.
@@ -62,7 +61,7 @@ public final class InteractionsDocumentTest extends TestCase {
    * Initialize fields for each test.
    */
   protected void setUp() {
-    _doc = new InteractionsDocument(new SwingDocumentAdapter());
+    _doc = new InteractionsDocument(new InteractionsDocumentAdapter());
   }
 
   /**

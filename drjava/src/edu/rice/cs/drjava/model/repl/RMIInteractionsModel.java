@@ -46,7 +46,6 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.repl.newjvm.*;
-import edu.rice.cs.util.text.DocumentAdapter;
 
 import java.util.Vector;
 
@@ -66,12 +65,12 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   /**
    * Constructs an InteractionsModel which can communicate with another JVM.
    * @param control RMI interface to the Java interpreter
-   * @param adapter DocumentAdapter to use in the InteractionsDocument
+   * @param adapter InteractionsDocumentAdapter to use in the InteractionsDocument
    * @param historySize Number of lines to store in the history
    * @param writeDelay Number of milliseconds to wait after each println
    */
   public RMIInteractionsModel(MainJVM control,
-                              DocumentAdapter adapter,
+                              InteractionsDocumentAdapter adapter,
                               int historySize,
                               int writeDelay)
   {

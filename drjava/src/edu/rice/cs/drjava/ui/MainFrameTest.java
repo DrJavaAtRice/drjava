@@ -117,7 +117,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
    */
   public void testDocLocationAfterSwitch() throws BadLocationException {
     DefinitionsPane pane = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = pane.getOpenDocument();//.getDocument();
+    OpenDefinitionsDocument doc = pane.getOpenDefDocument();//.getDocument();
     /**
      * NOTE: This has been added because MainFrameTest hangs randomly (about every other time) without this line.
      * It is still unknown why this occurs - being that the above method calls are all accessors, this shouldn't be a situation
@@ -143,7 +143,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
     // Current pane should be new doc, pos 0
     pane = _frame.getCurrentDefPane();
-    doc = pane.getOpenDocument();//.getDocument();
+    doc = pane.getOpenDefDocument();//.getDocument();
     assertEquals("Location of new document", 0, doc.getCurrentLocation());
 
     // Switch back
@@ -151,7 +151,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
     // Current pane should be old doc, pos 3
     pane = _frame.getCurrentDefPane();
-    doc = pane.getOpenDocument();//.getDocument();
+    doc = pane.getOpenDefDocument();//.getDocument();
     assertEquals("Location of old document", 3, doc.getCurrentLocation());
   }
 
@@ -164,7 +164,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     throws BadLocationException, UnsupportedFlavorException, IOException {
     // First, copy some data out of the main document.
     DefinitionsPane pane = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = pane.getOpenDocument();
+    OpenDefinitionsDocument doc = pane.getOpenDefDocument();
     doc.insertString(0, "abcdefg", null);
     pane.setCaretPosition(5);
 
@@ -204,7 +204,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     throws BadLocationException, UnsupportedFlavorException, IOException {
     // First, copy some data out of the main document.
     DefinitionsPane pane = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = pane.getOpenDocument();
+    OpenDefinitionsDocument doc = pane.getOpenDefDocument();
     doc.insertString(0, "abcdefg", null);
     pane.setCaretPosition(5);
 
@@ -241,7 +241,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   public void testCorrectInteractionsDocument() throws DocumentAdapterException {
     InteractionsPane pane = _frame.getInteractionsPane();
     SingleDisplayModel model = _frame.getModel();
-    SwingDocumentAdapter doc = model.getSwingInteractionsDocument();
+    InteractionsDocumentAdapter doc = model.getSwingInteractionsDocument();
 
     // Make the test silent
     model.getInteractionsModel().getDocument().setBeep(new TestBeep());
@@ -264,7 +264,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
    */
   public void testMultilineIndentAfterScroll() throws BadLocationException {
     DefinitionsPane pane = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = pane.getOpenDocument();
+    OpenDefinitionsDocument doc = pane.getOpenDefDocument();
     String text =
       "public class stuff {\n" +
       "private int _int;\n" +

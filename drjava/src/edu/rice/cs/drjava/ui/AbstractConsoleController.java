@@ -57,9 +57,8 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
-import edu.rice.cs.drjava.model.repl.ConsoleDocument;
+import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.platform.PlatformFactory;
-import edu.rice.cs.util.text.SwingDocumentAdapter;
 
 /**
  * Abstract class to handle hooking up a console document with its pane.
@@ -69,7 +68,7 @@ public abstract class AbstractConsoleController {
   /**
    * Adapter for the Swing document used by the model.
    */
-  protected SwingDocumentAdapter _adapter;
+  protected InteractionsDocumentAdapter _adapter;
 
   /**
    * Pane from the view.
@@ -107,7 +106,7 @@ public abstract class AbstractConsoleController {
    * Initializes the document adapter and interactions pane.
    * Subclasses *must* call _init() at the end of their constructors.
    */
-  protected AbstractConsoleController(SwingDocumentAdapter adapter,
+  protected AbstractConsoleController(InteractionsDocumentAdapter adapter,
                                       InteractionsPane pane) {
     _adapter = adapter;
     _pane = pane;
@@ -319,9 +318,9 @@ public abstract class AbstractConsoleController {
   }
 
   /**
-   * Accessor method for the SwingDocumentAdapter.
+   * Accessor method for the InteractionsDocumentAdapter.
    */
-  public SwingDocumentAdapter getDocumentAdapter() {
+  public InteractionsDocumentAdapter getDocumentAdapter() {
     return _adapter;
   }
 

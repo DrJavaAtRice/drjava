@@ -51,9 +51,7 @@ import java.awt.event.KeyEvent;
 import java.awt.Toolkit;
 import java.awt.Event;
 
-import edu.rice.cs.drjava.model.repl.InputListener;
-import edu.rice.cs.drjava.model.repl.ConsoleDocument;
-import edu.rice.cs.util.text.SwingDocumentAdapter;
+import edu.rice.cs.drjava.model.repl.*;
 
 /**
  * @version $Id$
@@ -72,7 +70,7 @@ public class ConsoleController extends AbstractConsoleController {
    */
   private boolean _waiting;
 
-  public ConsoleController(ConsoleDocument doc, SwingDocumentAdapter adapter) {
+  public ConsoleController(ConsoleDocument doc, InteractionsDocumentAdapter adapter) {
     super(adapter, new InteractionsPane("CONSOLE_KEYMAP", adapter));
     _doc = doc;
     _waiting = false;

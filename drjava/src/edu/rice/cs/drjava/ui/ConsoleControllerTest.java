@@ -47,7 +47,6 @@ package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.model.GlobalModelTestCase;
 import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 
 import java.io.IOException;
@@ -62,7 +61,7 @@ import java.io.IOException;
  */
 public final class ConsoleControllerTest extends GlobalModelTestCase {
   /** Document adapter used in the console document. */
-  protected SwingDocumentAdapter _adapter;
+  protected InteractionsDocumentAdapter _adapter;
 
   /** The console document for the current console controller. */
   protected ConsoleDocument _doc;
@@ -157,7 +156,7 @@ public final class ConsoleControllerTest extends GlobalModelTestCase {
    * when input is requested.
    */
   protected class TestConsoleController extends ConsoleController {
-    public TestConsoleController(ConsoleDocument doc, SwingDocumentAdapter adapter) {
+    public TestConsoleController(ConsoleDocument doc, InteractionsDocumentAdapter adapter) {
       super(doc, adapter);
     }
 

@@ -282,7 +282,7 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
      */
     public void caretUpdate(CaretEvent e) {
       //_doc().setCurrentLocation(getCaretPosition());
-      _doc.syncCurrentLocationWithDefinitions(getCaretPosition());
+      _doc.setCurrentLocation(getCaretPosition());
       _removePreviousHighlight();
       _updateMatchHighlight();
     }
@@ -406,7 +406,7 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
       _defaultAction.actionPerformed(e);
 
       // Only indent if in code
-      _doc.syncCurrentLocationWithDefinitions(getCaretPosition());
+      _doc.setCurrentLocation(getCaretPosition());
       ReducedModelState state = _doc.getStateAtCurrent();
       if (state.equals(ReducedModelState.FREE) || _indentNonCode) {
         indent(getIndentReason());
@@ -724,7 +724,7 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
    */
   public void setCaretPosition(int pos) {
     super.setCaretPosition(pos);
-    _doc.syncCurrentLocationWithDefinitions(pos);
+    _doc.setCurrentLocation(pos);
 //    _doc.setCurrentLocation(pos);
   }
 
@@ -751,7 +751,7 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
     JMenuItem commentLinesItem = new JMenuItem("Comment Line(s)");
     commentLinesItem.addActionListener ( new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
-        _doc.syncCurrentLocationWithDefinitions(getCaretPosition());
+        _doc.setCurrentLocation(getCaretPosition());
         _commentLines();
       }
     });
@@ -760,7 +760,7 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
     JMenuItem uncommentLinesItem = new JMenuItem("Uncomment Line(s)");
     uncommentLinesItem.addActionListener ( new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
-        _doc.syncCurrentLocationWithDefinitions(getCaretPosition());
+        _doc.setCurrentLocation(getCaretPosition());
         _uncommentLines();
       }
     });
@@ -858,7 +858,7 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
   /**
    * Get the OpenDefinitionsDocument contained in this DefinitionsPane.
    */
-  public OpenDefinitionsDocument getOpenDocument() {
+  public OpenDefinitionsDocument getOpenDefDocument() {
     return _doc;
   }
 
@@ -1006,13 +1006,13 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
     // need to be run.
     try {
       // Sync caret with location before switching
-      getOpenDocument().syncCurrentLocationWithDefinitions(getCaretPosition());
+      getOpenDefDocument().setCurrentLocation(getCaretPosition());
       
       
       // Remove any error highlighting in the old def pane
       removeErrorHighlight();
       
-      _position = _doc.getCurrentDefinitionsLocation();
+      _position = _doc.getCurrentLocation();
       _selStart = getSelectionStart();
       _selEnd = getSelectionEnd();
 
@@ -1047,7 +1047,7 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
       setCaretPosition(_selStart);
       moveCaretPosition(_selEnd);
     }
-    _doc.syncCurrentLocationWithDefinitions(_position);
+    _doc.setCurrentLocation(_position);
     _scrollPane.getVerticalScrollBar().setValue(_saved_vert_pos);
     _scrollPane.getHorizontalScrollBar().setValue(_saved_horz_pos);
   }
@@ -1212,7 +1212,7 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
      * old: _doc().setCurrentLocation(getCaretPosition());
      * new:
      */
-    _doc.syncCurrentLocationWithDefinitions(getCaretPosition());
+    _doc.setCurrentLocation(getCaretPosition());
 
     final int selStart = getSelectionStart();
     final int selEnd = getSelectionEnd();
@@ -1281,8 +1281,8 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
         throw e;
       }
 
-      //_doc.syncCurrentLocationWithDefinitions(caretPos);
-      setCaretPosition(_doc.getCurrentDefinitionsLocation());
+      //_doc.setCurrentLocation(caretPos);
+      setCaretPosition(_doc.getCurrentLocation());
       _mainFrame.hourglassOff();
       //pm.close();
 

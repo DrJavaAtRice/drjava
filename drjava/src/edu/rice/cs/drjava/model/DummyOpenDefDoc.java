@@ -111,7 +111,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
    * Forwarding method to sync the definitions with whatever view
    * component is representing them.
    */
-  public void syncCurrentLocationWithDefinitions(int location) {
+  public void setCurrentLocation(int location) {
     throw new UnsupportedOperationException("Dummy method");
   }
   
@@ -452,7 +452,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
    * Get the location of the cursor in the definitions according
    * to the definitions document.
    */
-  public int getCurrentDefinitionsLocation() {
+  public int getCurrentLocation() {
     throw new UnsupportedOperationException("Dummy method");
   }
     
@@ -659,11 +659,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public UndoableEditListener[] getUndoableEditListeners() {
     throw new UnsupportedOperationException("Dummy method");
   }
-  
-  public int getCurrentLocation() {
-    throw new UnsupportedOperationException("Dummy method");
-  }
-  
+    
   public void addFinalizationListener(FinalizationListener<DefinitionsDocument> fl) {
     throw new UnsupportedOperationException("Dummy method");
   }

@@ -49,10 +49,7 @@ import javax.swing.*;
 import java.awt.Font;
 import java.awt.event.*;
 
-import edu.rice.cs.drjava.model.repl.SimpleInteractionsModel;
-//import edu.rice.cs.drjava.model.repl.SimpleRMIInteractionsModel;
-import edu.rice.cs.drjava.model.repl.InteractionsListener;
-import edu.rice.cs.util.text.SwingDocumentAdapter;
+import edu.rice.cs.drjava.model.repl.*;
 
 /**
  * A standalone Interactions Window that provides the functionality of
@@ -63,7 +60,7 @@ import edu.rice.cs.util.text.SwingDocumentAdapter;
 public class SimpleInteractionsWindow extends JFrame {
   //private final SimpleRMIInteractionsModel _rmiModel;
   private final SimpleInteractionsModel _model;
-  private final SwingDocumentAdapter _adapter;
+  private final InteractionsDocumentAdapter _adapter;
   private final InteractionsPane _pane;
   private final InteractionsController _controller;
 
@@ -75,7 +72,7 @@ public class SimpleInteractionsWindow extends JFrame {
     super(title);
     setSize(600, 400);
 
-    _adapter = new SwingDocumentAdapter();
+    _adapter = new InteractionsDocumentAdapter();
     //_rmiModel = new SimpleRMIInteractionsModel(_adapter);
     _model = new SimpleInteractionsModel(_adapter);
     _pane = new InteractionsPane(_adapter);

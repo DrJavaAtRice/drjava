@@ -93,7 +93,7 @@ public final class DefinitionsPaneTest extends TestCase {
    */
   public void testShiftBackspace() throws BadLocationException {
     DefinitionsPane definitions = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = definitions.getOpenDocument();
+    OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
     _assertDocumentEmpty(doc, "before testing");
     doc.insertString(0, "test", null);
 
@@ -136,7 +136,7 @@ public final class DefinitionsPaneTest extends TestCase {
    */
   public void testTypeBraceNotInCode() throws BadLocationException {
     DefinitionsPane definitions = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = definitions.getOpenDocument();
+    OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
     _assertDocumentEmpty(doc, "before testing");
     doc.insertString(0, "  \"", null);
 
@@ -162,7 +162,7 @@ public final class DefinitionsPaneTest extends TestCase {
     InterruptedException, java.lang.reflect.InvocationTargetException {
     final DefinitionsPane definitions = _frame.getCurrentDefPane();
     _frame.show();
-    OpenDefinitionsDocument doc = definitions.getOpenDocument();
+    OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
     _assertDocumentEmpty(doc, "before testing");
     doc.insertString(0, "/**", null);
 
@@ -191,7 +191,7 @@ public final class DefinitionsPaneTest extends TestCase {
    */
   public void testMetaKeyPress() throws BadLocationException {
     DefinitionsPane definitions = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = definitions.getOpenDocument();
+    OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
     _assertDocumentEmpty(doc, "point 0");
     // The following is the sequence of key events that happen when the user presses Meta-a
     definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(),
@@ -217,7 +217,7 @@ public final class DefinitionsPaneTest extends TestCase {
    */
   public void testMultilineCommentOrUncommentAfterScroll() throws BadLocationException {
     DefinitionsPane pane = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = pane.getOpenDocument();
+    OpenDefinitionsDocument doc = pane.getOpenDefDocument();
     String text =
       "public class stuff {\n" +
       "  private int _int;\n" +
@@ -282,7 +282,7 @@ public final class DefinitionsPaneTest extends TestCase {
 
   public void testGranularUndo() throws BadLocationException {
     DefinitionsPane definitions = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = definitions.getOpenDocument();
+    OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
 //    doc.addUndoableEditListener(doc.getUndoManager());
 
     // 1

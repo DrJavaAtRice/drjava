@@ -202,7 +202,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     // whether the end of the document was wrapped around while searching
     // for the string
     FindResult fr = _machine.findNext();
-    OpenDefinitionsDocument openDoc = _defPane.getOpenDocument();
+    OpenDefinitionsDocument openDoc = _defPane.getOpenDefDocument();
     Document doc = fr.getDocument();
     int pos = fr.getFoundOffset();
     

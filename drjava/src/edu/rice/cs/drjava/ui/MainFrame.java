@@ -78,7 +78,7 @@ import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.debug.*;
-import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
+import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.ExitingNotAllowedException;
@@ -88,7 +88,6 @@ import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.ConfirmCheckBoxDialog;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.BorderlessSplitPane;
-import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.drjava.project.*;
@@ -820,7 +819,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Delegate everything to the DefinitionsDocument.
       OpenDefinitionsDocument openDoc = _model.getActiveDocument();
       int caretPos = _currentDefPane.getCaretPosition();
-      openDoc.syncCurrentLocationWithDefinitions(caretPos);
+      openDoc.setCurrentLocation(caretPos);
       int start = _currentDefPane.getSelectionStart();
       int end = _currentDefPane.getSelectionEnd();
       _currentDefPane.endCompoundEdit();
@@ -836,7 +835,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Delegate everything to the DefinitionsDocument.
       OpenDefinitionsDocument openDoc = _model.getActiveDocument();
       int caretPos = _currentDefPane.getCaretPosition();
-      openDoc.syncCurrentLocationWithDefinitions(caretPos);
+      openDoc.setCurrentLocation(caretPos);
       int start = _currentDefPane.getSelectionStart();
       int end = _currentDefPane.getSelectionEnd();
       _currentDefPane.endCompoundEdit();
@@ -1189,7 +1188,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     try {
       int currPos = _currentDefPane.getCaretPosition();
       OpenDefinitionsDocument openDoc = _model.getActiveDocument();
-      openDoc.syncCurrentLocationWithDefinitions(currPos);
+      openDoc.setCurrentLocation(currPos);
       return openDoc.getIntelligentBeginLinePos(currPos);
     }
     catch (BadLocationException ble) {
@@ -3993,7 +3992,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     public void caretUpdate( CaretEvent ce ) {
       _model.getActiveDocument().
-        syncCurrentLocationWithDefinitions(ce.getDot());
+        setCurrentLocation(ce.getDot());
       updateLocation();
     }
 
