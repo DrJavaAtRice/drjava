@@ -807,7 +807,7 @@ public interface OptionConstants {
     new BooleanOption("find.replace.search.backwards", Boolean.FALSE);
   
   public static final BooleanOption FIND_WHOLE_WORD = 
-    new BooleanOption("find.replace.search.backwards", Boolean.FALSE);
+    new BooleanOption("find.replace.whole.word", Boolean.FALSE);
   
   public static final BooleanOption FIND_ALL_DOCUMENTS = 
     new BooleanOption("find.replace.all.documents", Boolean.FALSE);
