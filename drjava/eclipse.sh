@@ -29,7 +29,6 @@ ${ECLIPSE}/plugins/org.eclipse.ui.console_${ECLIPSE_VERSION}/console.jar${SEP}\
 ${ECLIPSE}/plugins/org.eclipse.ui.workbench_${ECLIPSE_VERSION}/workbench.jar${SEP}\
 ${ECLIPSE}/plugins/org.eclipse.debug.ui_${ECLIPSE_VERSION}/dtui.jar${SEP}\
 ${ECLIPSE}/plugins/org.eclipse.swt.${ECLIPSE_PLATFORM}_${ECLIPSE_VERSION}/ws/${ECLIPSE_PLATFORM}/swt.jar${SEP}\
-${ECLIPSE}/plugins/org.eclipse.swt.${ECLIPSE_PLATFORM}_${ECLIPSE_VERSION}/ws/${ECLIPSE_PLATFORM}/swt-pi.jar${SEP}\
 ${ECLIPSE}/plugins/org.eclipse.jdt.ui_${ECLIPSE_VERSION}/jdt.jar${SEP}\
 ${ECLIPSE}/plugins/org.eclipse.search_${ECLIPSE_VERSION}/search.jar${SEP}\
 ${ECLIPSE}/plugins/org.eclipse.jface_${ECLIPSE_VERSION}/jface.jar${SEP}\

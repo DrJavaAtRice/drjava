@@ -190,7 +190,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
    */
   protected void _notifyInteractionEnded() {
     for (int i=0; i < _listeners.size(); i++) {
-      ((InteractionsListener)_listeners.get(i)).interactionEnded();
+      _listeners.get(i).interactionEnded();
     }
   }
 
@@ -199,8 +199,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
    */
   protected void _notifySyntaxErrorOccurred(final int offset, final int length) {
     for (int i=0; i < _listeners.size(); i++) {
-      ((InteractionsListener)_listeners.get(i)).
-        interactionErrorOccurred(offset, length);
+      _listeners.get(i).interactionErrorOccurred(offset, length);
     }
   }
 
@@ -209,7 +208,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
    */
   protected void _notifyInterpreterResetting() {
     for (int i=0; i < _listeners.size(); i++) {
-      ((InteractionsListener)_listeners.get(i)).interpreterResetting();
+      _listeners.get(i).interpreterResetting();
     }
   }
 
@@ -218,7 +217,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
    */
   protected void _notifyInterpreterReady() {
     for (int i=0; i < _listeners.size(); i++) {
-      ((InteractionsListener)_listeners.get(i)).interpreterReady();
+      _listeners.get(i).interpreterReady();
     }
   }
 
@@ -228,7 +227,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
    */
   protected void _notifyInterpreterExited(final int status) {
     for (int i=0; i < _listeners.size(); i++) {
-      ((InteractionsListener)_listeners.get(i)).interpreterExited(status);
+      _listeners.get(i).interpreterExited(status);
     }
   }
 
@@ -238,7 +237,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
    */
   protected void _notifyInterpreterResetFailed(Throwable t) {
     for (int i=0; i < _listeners.size(); i++) {
-      ((InteractionsListener)_listeners.get(i)).interpreterResetFailed(t);
+      _listeners.get(i).interpreterResetFailed(t);
     }
   }
 
@@ -248,7 +247,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
    */
   protected void _notifyInterpreterChanged(final boolean inProgress) {
     for (int i=0; i < _listeners.size(); i++) {
-      ((InteractionsListener)_listeners.get(i)).interpreterChanged(inProgress);
+      _listeners.get(i).interpreterChanged(inProgress);
     }
   }
 
@@ -257,7 +256,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
    */
   protected void _notifyInteractionIncomplete() {
     for (int i=0; i < _listeners.size(); i++) {
-      ((InteractionsListener)_listeners.get(i)).interactionIncomplete();
+      _listeners.get(i).interactionIncomplete();
     }
   }
 

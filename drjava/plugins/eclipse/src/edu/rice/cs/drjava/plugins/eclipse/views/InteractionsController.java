@@ -135,7 +135,8 @@ public class InteractionsController {
           }
           catch (Throwable t) {
 //            t.printStackTrace();
-            _input = StringOps.getStackTrace(t);
+            _input = "";
+            // should log this error in some way
           }
         }
       });
@@ -419,11 +420,16 @@ public class InteractionsController {
     }
 
     public void interactionIncomplete() {
-//      newLineAction();
-      StyledText pane = _view.getTextPane();
-      int offs = pane.getCaretOffset();
-      pane.replaceTextRange(offs, 0, "\n");
-      pane.setCaretOffset(offs + 1);
+      _view.getTextPane().getDisplay().asyncExec(new Runnable() {
+        public void run() {
+//          StyledText pane = _view.getTextPane();
+//          int offs = pane.getCaretOffset();
+//          pane.replaceTextRange(offs, 0, "\n");
+//          pane.setCaretOffset(offs+1);
+//          pane.showSelection();
+          moveToEnd();
+        }
+      });
     }
   }
 
