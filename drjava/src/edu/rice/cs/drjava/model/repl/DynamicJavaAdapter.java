@@ -78,7 +78,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @param packageName Package to assume scope of.
    */
   public void setPackageScope(String packageName) {
-    StringReader reader = new StringReader("package edu.rice.cs.drjava.model.repl;");
+    StringReader reader = new StringReader("package " + packageName + ";");
     _djInterpreter.interpret(reader, "DrJava");
   }
 

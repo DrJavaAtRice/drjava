@@ -16,10 +16,11 @@ import edu.rice.cs.drjava.util.UnexpectedException;
  * @version $Id$
  */
 public class InteractionsDocument extends PlainDocument {
+  public static final String BANNER = "Welcome to DrJava.";
+  public static final String PROMPT = "\n> ";
 
   /** Index in the document of the first place that is editable. */
   int frozenPos = 0;
-  private final String banner = "Welcome to DrJava.\n";
 
   /**
    * Command-line history. It's not reset when the interpreter is reset.
@@ -65,7 +66,7 @@ public class InteractionsDocument extends PlainDocument {
   public void reset() {
     try {
       super.remove(0, getLength());
-      super.insertString(0, banner, null);
+      super.insertString(0, BANNER, null);
       prompt();
       _history.moveEnd();
     } catch (BadLocationException e) {
@@ -78,7 +79,7 @@ public class InteractionsDocument extends PlainDocument {
    */
   public void prompt() {
     try {
-      super.insertString(getLength(), "> ", null);
+      super.insertString(getLength(), PROMPT, null);
       frozenPos = getLength();
     } catch (BadLocationException e) {
       throw  new InternalError("printing prompt failed");
