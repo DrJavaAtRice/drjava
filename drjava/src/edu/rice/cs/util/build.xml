@@ -53,15 +53,6 @@
   </target>
 
   <target name="compile" depends="do-compile">
-    <!--
-    <javac srcdir="${srcroot}"
-           includes="${projpath}/**/*java"
-           destdir="${built}" 
-           bootclasspath="${jsr14_classpath}:${java.home}/lib/rt.jar"
-           target="1.1"
-           debug="on"
-           optimize="off" />
-    -->
   </target>
 
   <!-- Makes a jar. -->

@@ -74,13 +74,14 @@
 <target name="commit" depends="clean, update, test">
   <antcall target="make-version-stamp" />
 
+  <property name="version-tag"
+            value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
+
   <!-- recompile to make new version number get into code. -->
+  <echo message="All tests passed. Rebuilding to put version tag (${version-tag}) into the code." />
   <antcall target="compile" />
 
   <cvs command="commit" />
-
-  <property name="version-tag"
-            value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
 
   <cvs command="tag -c ${version-tag}" quiet="true" />
 
