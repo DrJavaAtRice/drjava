@@ -899,17 +899,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (debugger == null) return;
 
     try {
-      if (inDebugMode()) {//debugger.isReady()) {
+      if (inDebugMode()) {
         // Turn off debugger
         //DrJava.consoleOut().println("shutting down");
         debugger.shutdown();
-        hideDebugger();
       }
       else {
         // Turn on debugger
         try {
           debugger.startup();
-          showDebugger();
         }
         catch (DebugException de) {
           _showError(de, "Debugger Error",
@@ -2524,8 +2522,25 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   
+  /**
+   * Listens to events from the debugger.
+   */
   private class UIDebugListener implements DebugListener {
-    public void scrollToLineInSource(OpenDefinitionsDocument doc, final int lineNumber) {
+    
+    public void debuggerStarted() {
+      showDebugger();
+    }
+    
+    public void debuggerShutdown() {
+      hideDebugger();
+      if (_currentThreadLocationHighlight != null) {
+        _currentThreadLocationHighlight.remove();
+      }
+      _currentThreadLocationHighlight = null;
+    }
+    
+    public void threadLocationUpdated(OpenDefinitionsDocument doc, 
+                                      final int lineNumber) {
       ActionListener setSizeListener = new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
           _currentDefPane.centerViewOnLine(lineNumber);
@@ -2570,18 +2585,13 @@ public class MainFrame extends JFrame implements OptionConstants {
                                                          DefinitionsPane.BREAKPOINT_PAINTER);
     }
     
+    public void breakpointReached(Breakpoint bp) {}
+    
     public void breakpointRemoved(Breakpoint bp) {
       _model.setActiveDocument(bp.getDocument());
       _currentDefPane.getHighlightManager().removeHighlight(bp.getStartOffset(),
                                                             bp.getEndOffset(),
                                                             DefinitionsPane.BREAKPOINT_PAINTER);
-    }
-    
-    public void debuggerShutdown() {
-      if (_currentThreadLocationHighlight != null) {
-        _currentThreadLocationHighlight.remove();
-      }
-      _currentThreadLocationHighlight = null;
     }
     
     public void currThreadSuspended() {
@@ -2777,7 +2787,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       DebugManager dm = _model.getDebugManager();
       if (dm != null) {
         dm.shutdown();
-        hideDebugger();
       }
       interactionEnded();
     }

@@ -143,12 +143,18 @@ public class DebugManager {
       //DrJava.consoleOut().println("Starting up...");
       _attachToVM();
       //DrJava.consoleOut().println("Attached. VM = " +_vm);
-      EventHandler eventHandler = new EventHandler(this, _vm);
-      eventHandler.start();
+    
       //DrJava.consoleOut().println("EventHandler started...");
       ThreadDeathRequest tdr = _eventManager.createThreadDeathRequest();
       tdr.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
       tdr.enable();
+      EventHandler eventHandler = new EventHandler(this, _vm);
+      eventHandler.start();
+     // notifyListeners(new EventNotifier() {
+       // public void notifyListener(DebugListener l) {
+        //  l.debuggerStarted();
+       // }
+      //});
     }
   }
   
@@ -209,11 +215,11 @@ public class DebugManager {
         _vm = null;
         _eventManager = null;
         
-        notifyListeners(new EventNotifier() {
-          public void notifyListener(DebugListener l) {
-            l.debuggerShutdown();
-          }
-        });
+        //notifyListeners(new EventNotifier() {
+        //  public void notifyListener(DebugListener l) {
+        //    l.debuggerShutdown();
+        //  }
+        //});
       }
     }
   }
@@ -343,38 +349,34 @@ public class DebugManager {
     
   /** 
    * Steps into the execution of the currently loaded document.
+   * The flag denotes what kind of step to take. The following mark valid options:
+   * StepRequest.STEP_INTO
+   * StepRequest.STEP_OVER
+   * StepRequest.STEP_OUT
    */
   public synchronized void step(int flag) throws DebugException {
     if (_thread == null) {
-      //System.out.println("Current thread is null");
-      return;
+      throw new DebugException("Must have a thread to step.");
     }
     //if (!_thread.isSuspended()) 
       //DrJava.consoleOut().println("Current thread is not suspended while trying to create a step request!");    
     // don't allow the creation of a new StepRequest if there's already one on
     // the current thread
-    List steps = _eventManager.stepRequests();
+    List steps = _eventManager.stepRequests();    
     for (int i = 0; i < steps.size(); i++) {
       //DrJava.consoleOut().println("creating a new step: event thread: " + 
       //                            ((StepRequest)steps.get(i)).thread() + 
       //                            " current thread: " +
       //                            _thread);
       if (((StepRequest)steps.get(i)).thread().equals(_thread)) {
-        //DrJava.consoleOut().println("There's already a StepRequest on the current thread");
-        //DrJava.consoleOut().println("suspendCount: " + _thread.suspendCount());
-        /*try {
-          DrJava.consoleOut().println("frames: " + _thread.frames());
-        }
-        catch(IncompatibleThreadStateException itse) {
-          DrJava.consoleOut().println("Can't print frames, thread is not suspended!");
-        }*/
-        _thread.resume();
+        DrJava.consoleOut().println("There's already a StepRequest on the current thread");
+        DrJava.consoleOut().println("suspendCount: " + _thread.suspendCount());
         return;
       }
     }
         
     Step step = new Step(this, StepRequest.STEP_LINE, flag);
-    _thread.resume();
+    resume();
     //System.out.println("_thread resumed");
   }
   
@@ -473,10 +475,18 @@ public class DebugManager {
   synchronized void reachedBreakpoint(BreakpointRequest request) {
     Object property = request.getProperty("debugAction");
     if ( (property!=null) && (property instanceof Breakpoint)) {
-      Breakpoint breakpoint = (Breakpoint)property;
+      final Breakpoint breakpoint = (Breakpoint)property;
       _model.printDebugMessage("Breakpoint hit in class " + 
                                breakpoint.getClassName() + "  [line " +
                                breakpoint.getLineNumber() + "]");
+      notifyListeners(new EventNotifier() {
+        public void notifyListener(DebugListener l) {
+          l.breakpointReached(breakpoint);
+        }
+      });
+    }
+    else {
+      // A breakpoint we didn't set??
     }
   }
   
@@ -587,8 +597,7 @@ public class DebugManager {
         
       notifyListeners(new EventNotifier() {
         public void notifyListener(DebugListener l) {
-          l.scrollToLineInSource(docF, 
-                                 locationF.lineNumber());
+          l.threadLocationUpdated(docF, locationF.lineNumber());
         }
       });
     }
@@ -806,8 +815,28 @@ public class DebugManager {
       }
     });
   }
+  
+  /**
+   * Notifies all listeneres that the debugger has shut down.
+   */
+  synchronized void notifyDebuggerShutdown() {
+    notifyListeners(new EventNotifier() {
+      public void notifyListener(DebugListener l) {
+        l.debuggerShutdown();
+      }
+    });
+  }
 
-
+ /**
+   * Notifies all listeneres that the debugger has started.
+   */
+  synchronized void notifyDebuggerStarted() {
+    notifyListeners(new EventNotifier() {
+      public void notifyListener(DebugListener l) {
+        l.debuggerStarted();
+      }
+    });
+  }
   /**
    * Adds a listener to this DebugManager.
    * @param listener a listener that reacts on events generated by the DebugManager
@@ -816,6 +845,11 @@ public class DebugManager {
     _listeners.addLast(listener);
   }
 
+  public synchronized void removeListener(DebugListener listener){
+    //System.out.println("size A: "+_listeners.size());
+    _listeners.remove(listener);
+    //System.out.println("size B: "+_listeners.size());    
+  }
   /**
    * Lets the listeners know some event has taken place.
    * @param EventNotifier n tells the listener what happened

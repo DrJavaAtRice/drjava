@@ -200,7 +200,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     throws RemoteException
   {
     synchronized(this) {
-      //System.err.println("interpreter jvm registered: " + remote);
+      //System.out.println("interpreter jvm registered: " + remote);
       _interpreterJVM = remote;
       _startupInProgress = false;
       // wake up anyone waiting for an interpreter!
@@ -302,6 +302,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
         jvmargs = new String[] { "-Dcom.apple.backgroundOnly=true" };
       }
       
+      //System.out.println("starting interpreter... " + jvmargs[1]);
       try {
         //System.err.println("started interpreter jvm");
         _interpreterProcess = ExecJVM.

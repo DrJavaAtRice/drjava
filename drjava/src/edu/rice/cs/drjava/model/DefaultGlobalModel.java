@@ -218,6 +218,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     _interpreterControl.setModel(this);
     _interpreterControl.reset();
     _createDebugger();
+    try {
+      _debugPort = other.getDebugPort();
+    }
+    catch (IOException ioe) {
+      // Other model should already have a port, or it should be -1.
+      //  We shouldn't ever get an IOException here.
+      throw new UnexpectedException(ioe);
+    }
     
     if (CodeStatus.DEVELOPMENT) {    
       DrJava.CONFIG.addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());

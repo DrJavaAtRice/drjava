@@ -58,6 +58,7 @@ public class EventHandler extends Thread {
   }
   
   public void run() {
+    _manager.notifyDebuggerStarted();
     EventQueue queue = _vm.eventQueue();
     while (_connected) {
       try {
@@ -84,6 +85,7 @@ public class EventHandler extends Thread {
         break;
       }
     }
+    _manager.notifyDebuggerShutdown();    
   }
   
   public void handleEvent(Event e) {
@@ -124,13 +126,15 @@ public class EventHandler extends Thread {
   
   private void _handleStepEvent(StepEvent e) {
     //System.out.println("Step executed");
-    _manager.currThreadSuspended();
-    _manager.printMessage("Stepped to " + 
-                          e.location().declaringType().name() + "." +
-                          e.location().method().name() + "(...)  [line " + 
-                          e.location().lineNumber() + "]");
-    _manager.scrollToSource(e);
-    _manager.getEventRequestManager().deleteEventRequest(e.request());
+    synchronized(_manager){
+      _manager.printMessage("Stepped to " + 
+                            e.location().declaringType().name() + "." +
+                            e.location().method().name() + "(...)  [line " + 
+                            e.location().lineNumber() + "]");
+      _manager.getEventRequestManager().deleteEventRequest(e.request());
+      _manager.currThreadSuspended();
+      _manager.scrollToSource(e);
+    }
   }
   
   private void _handleModificationWatchpointEvent(ModificationWatchpointEvent e) {

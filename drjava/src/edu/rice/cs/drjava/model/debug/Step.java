@@ -75,9 +75,11 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
     _thread = _manager.getCurrentThread();
     _size = size;
     _depth = depth;
+    _countFilter = 1; //only step once.
     //_lineNumber = lineNumber;
     _initializeRequest();
     //_doc = doc;
+    
   }
   
   public boolean createRequest(ReferenceType rt) throws DebugException {
