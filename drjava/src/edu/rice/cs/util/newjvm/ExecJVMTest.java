@@ -37,48 +37,80 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
+package edu.rice.cs.util.newjvm;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import junit.framework.*;
+import java.io.*;
 
 /**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20020414-0533;
+ * Test cases for {@link ExecJVM}.
  *
  * @version $Id$
  */
-public abstract class Version {
+public class ExecJVMTest extends TestCase {
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Constructor.
+   * @param  String name
    */
-  private static final String BUILD_TIME_STRING = "20020414-0533";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public ExecJVMTest(String name) {
+    super(name);
   }
 
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  /**
+   * Creates a test suite for JUnit to run.
+   * @return a test suite based on the methods in this class
+   */
+  public static Test suite() {
+    return new TestSuite(ExecJVMTest.class);
   }
 
-  private static Date _getBuildDate() {
+  public void testExecFileCreator() throws IOException, InterruptedException {
+    File tempFile = File.createTempFile("drjava-test", ".tmp");
+    assertTrue("temp file exists", tempFile.exists());
+    boolean ret = tempFile.delete();
+    assertTrue("temp file delete succeeded", ret);
+
+    // Run new JVM to create the file
+    String className = getClass().getName() + "$FileCreator";
+    String tempName = tempFile.getAbsolutePath();
+    Process jvm = ExecJVM.runJVMPropogateClassPath(className,
+                                                   new String[] { tempName });
+
+    int result = jvm.waitFor();
+
+    // Check jvm executed OK
     try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+      assertEquals("jvm exit code", 0, result);
+      assertTrue("jvm did not create file", tempFile.exists());
+      assertTrue("jvm System.out not empty", jvm.getInputStream().read() == -1);
+      assertTrue("jvm System.err not empty", jvm.getErrorStream().read() == -1);
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
+    finally {
     }
+
+
+    // clean up file
+    ret = tempFile.delete();
+    assertTrue("temp file delete succeeded", ret);
   }
 
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
+  public static final class FileCreator {
+    public static void main(String[] args) {
+      File file = new File(args[0]);
+      boolean ret;
+
+      try {
+        ret = file.createNewFile();
+      }
+      catch (IOException ioe) {
+        ret = false;
+      }
+
+      if (!ret) {
+        throw new RuntimeException("file creation failed");
+      }
+
+      System.exit(0);
+    }
   }
-} 
+}

@@ -56,6 +56,12 @@
   </target>
 
   <target name="compile" depends="do-compile">
+    <rmic base="${built}"
+      classname="edu.rice.cs.util.newjvm.IntegratedMasterSlaveTest.MasterImpl" />
+
+    <rmic base="${built}"
+      classname="edu.rice.cs.util.newjvm.IntegratedMasterSlaveTest.CounterSlave" />
+
   </target>
 
   <!-- Makes a jar. -->

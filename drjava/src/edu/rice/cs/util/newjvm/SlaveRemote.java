@@ -37,48 +37,30 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
+package edu.rice.cs.util.newjvm;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.rmi.*;
 
 /**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20020414-0533;
- *
- * @version $Id$
+ * The remote interface for a slave JVM.
+ * All instances must also provide a no-arg constructor,
+ * which is reflectively invoked in {@link SlaveJVMRunner}.
  */
-public abstract class Version {
+interface SlaveRemote extends Remote {
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Quits the slave JVM.
    */
-  private static final String BUILD_TIME_STRING = "20020414-0533";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+  public void quit() throws RemoteException;
+  
+  /**
+   * This method is called when the slave JVM is initialized.
+   * 
+   * @param master The remote link to the master JVM. Note that
+   * the implementation of the slave class will have to downcast
+   * this reference to the correct master remote interface.
+   * Also ote that because of the GJ erasure semantics, this can't
+   * have the type it, which is MasterRemote<YourSlaveInterface>.
+   * Luckily it doesn't matter much here to use the erased type.
+   */
+  public void start(MasterRemote master) throws RemoteException;
+}

@@ -1,0 +1,51 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<!--
+  HTML file providing an overview of the contents of this package.
+
+  $Id$
+-->
+</head>
+<body bgcolor="white">
+<P>
+This package is a system to allow the invocation and control of
+a new Java virtual machine. The two JVMs can communicate by using
+RMI.
+</P>
+<P>
+To simply invoke a new JVM with no communications links, use
+the class {@link ExecJVM}. The rest of this page explains how
+to use this framework to create a new JVM and set up bidirectional
+communications using RMI.
+</P>
+<OL>
+<LI>Create a remote interface that the master JVM will support,
+    extending {@link MasterRemote}. This interface must specify of the
+    methods that the slave JVM can call on the master JVM.
+    All methods in this interface must be declared to throw
+    {@link java.rmi.RemoteException.}</LI>
+<LI>Create a remote interface that the slave JVM will support,
+    extending {@link SlaveRemote}. This interface must specify of the
+    methods that the master JVM can call on the slave JVM.
+    All methods in this interface must be declared to throw
+    {@link java.rmi.RemoteException.}</LI>
+<LI>Create the master JVM implementation, which must extend
+    {@link AbstractMasterJVM} and implement
+    YourMasterInterface. Note that the <CODE>super()</CODE> call
+    must pass to AbstractMasterJVM the fully-qualified class name
+    of the slave JVM implementation.</LI>
+<LI>Create the slave JVM implementation, which must implement
+    YourSlaveInterface.
+    Don't forget to implement {@link SlaveRemote#quit},
+    which is called when the main JVM requests the slave to quit,
+    and {@link SlaveRemote#start}, which is called when the slave JVM
+    is started.</LI>
+</OL>
+<P>
+Now you can create an instance of your master JVM class and use
+its {@link AbstractMasterJVM#invokeSlave} method to start
+the slave JVM.
+</body>
+</html>
+

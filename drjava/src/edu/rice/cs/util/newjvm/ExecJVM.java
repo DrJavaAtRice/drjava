@@ -37,7 +37,7 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
+package edu.rice.cs.util.newjvm;
 
 import java.io.*;
 import java.util.*;
