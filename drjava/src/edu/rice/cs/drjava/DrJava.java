@@ -53,6 +53,29 @@ public class DrJava {
   private static PreventExitSecurityManager _manager;
 
   public static void main(String[] args) {
+
+    /*
+    Thread dbg = new Thread() {
+      public void run() {
+        while (true) {
+          System.gc();
+          int free = (int) (Runtime.getRuntime().freeMemory() / 1000);
+          int total = (int) (Runtime.getRuntime().totalMemory() / 1000);
+          int used = total - free;
+          System.err.println(used + "k / "  + total + "k");
+
+          try {
+            Thread.currentThread().sleep(10000);
+          } 
+          catch (InterruptedException ie) {
+            break;
+          }
+        }
+      }
+    };
+    dbg.setDaemon(true);
+    dbg.start();
+    */
       
     try {
       System.setProperty("com.apple.macos.useScreenMenuBar","true");

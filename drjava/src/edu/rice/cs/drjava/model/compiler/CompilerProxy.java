@@ -55,6 +55,9 @@ public class CompilerProxy implements CompilerInterface {
    */
   private CompilerInterface _realCompiler = null;
 
+  private final String _className;
+  private final ClassLoader _newLoader;
+
   /**
    * These classes will always be loaded using the previous classloader.
    * This is important to make sure there is only one instance of them, so
@@ -78,13 +81,20 @@ public class CompilerProxy implements CompilerInterface {
   public CompilerProxy(String className,
                        ClassLoader newLoader)
   {
+    _className = className;
+    _newLoader = newLoader;
+
+    _recreateCompiler();
+  }
+
+  private void _recreateCompiler() {
     StickyClassLoader loader =
-      new StickyClassLoader(newLoader,
+      new StickyClassLoader(_newLoader,
                             getClass().getClassLoader(),
                             _useOldLoader);
 
     try {
-      Class c = loader.loadClass(className);
+      Class c = loader.loadClass(_className);
       _realCompiler = CompilerRegistry.createCompiler(c);
       //DrJava.consoleErr().println("real compiler: " + _realCompiler + " this: " + this);
     }
@@ -107,7 +117,9 @@ public class CompilerProxy implements CompilerInterface {
   public CompilerError[] compile(File sourceRoot, File[] files) {
     //DrJava.consoleErr().println("proxy to compile: " + files[0]);
 
-    return _realCompiler.compile(sourceRoot, files);
+    CompilerError[] ret =  _realCompiler.compile(sourceRoot, files);
+    _recreateCompiler();
+    return ret;
   }
 
   /**

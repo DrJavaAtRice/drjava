@@ -37,40 +37,33 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.compiler;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.io.File;
+import java.net.URLClassLoader;
+import java.net.URL;
+import java.net.MalformedURLException;
+
+import edu.rice.cs.drjava.model.Configuration;
+import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020225-1631;
+ * A compiler interface to find Javac from the classpath,
+ * but to do so via a compiler proxy so that the compiler classes can be
+ * fully unloaded/reloaded every time it is used.
  *
  * @version $Id$
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  public static final String BUILD_TIME_STRING = "20020225-1631";
+public class JavacFromClasspath extends CompilerProxy {
+  public static final CompilerInterface ONLY = new JavacFromClasspath();
 
-  /** A {@link Date} version of the build time. */
-  public static final Date BUILD_TIME = _getBuildDate();
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+  /** Private constructor due to singleton. */
+  private JavacFromClasspath() {
+    super("edu.rice.cs.drjava.model.compiler.JavacGJCompiler",
+          JavacFromClasspath.class.getClassLoader());
   }
 
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
+  public String getName() {
+    return super.getName();
   }
-} 
+}

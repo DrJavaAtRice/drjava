@@ -64,9 +64,9 @@ public class CompilerRegistry {
   public static final String[] DEFAULT_COMPILERS = {
     "edu.rice.cs.drjava.model.compiler.JSR14FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.JavacFromSetLocation",
-    "edu.rice.cs.drjava.model.compiler.JavacGJCompiler",
+    "edu.rice.cs.drjava.model.compiler.JavacFromClasspath",
     "edu.rice.cs.drjava.model.compiler.JavacFromToolsJar",
-    "edu.rice.cs.drjava.model.compiler.GJv6Compiler",
+    "edu.rice.cs.drjava.model.compiler.GJv6FromClasspath",
   };
 
   /** Singleton instance. */
