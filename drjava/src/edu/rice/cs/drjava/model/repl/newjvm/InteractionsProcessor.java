@@ -54,12 +54,14 @@ public class InteractionsProcessor implements InteractionsProcessorI {
 
   boolean precalled = false;
   boolean postcalled = false;
+  
 
   public String preProcess(String s) throws ParseException
   {
     InteractionsInput tree = new GJParser( new StringReader( s ) ).InteractionsInput();
+    JavaASTVisitor typeEraser = (JavaASTVisitor) new TypeEraser();
     // WHY do we need the cast?
-    JavaAST typeErasedTree = (JavaAST) tree.accept( new TypeEraser() );
+    JavaAST typeErasedTree = (JavaAST) tree.accept( typeEraser );
     precalled = true;
     return InteractionsPrinter.generateSource( typeErasedTree );
     //return s;
