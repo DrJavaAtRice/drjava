@@ -77,8 +77,6 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion
    */
   boolean applyRule(DefinitionsDocument doc)
   {
-    System.err.println("QuestionCurrLineStartsWithSkipComments");
-
     try
     {
       // Find the first non-whitespace character on the current line.

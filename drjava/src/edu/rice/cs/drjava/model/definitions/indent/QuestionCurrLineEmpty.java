@@ -63,14 +63,13 @@ class QuestionCurrLineEmpty extends IndentRuleQuestion {
    * @return true if this node's rule holds.
    */
   boolean applyRule(DefinitionsDocument doc) {
-    System.err.println("QuestionCurrLineEmpty");
     try {
       // Determine if there are only whitespace chars by seeing if the
       //  first non-WS char is the endOfLine
       int here = doc.getCurrentLocation();
       int endOfLine = doc.getLineEndPos(here);
       int firstNonWS = doc.getLineFirstCharPos(here);
-      return (endOfLine == firstNonWS || doc.getText(firstNonWS, 1).equals("*"));
+      return (endOfLine == firstNonWS);
     }
     catch (BadLocationException e) {
       // Shouldn't happen

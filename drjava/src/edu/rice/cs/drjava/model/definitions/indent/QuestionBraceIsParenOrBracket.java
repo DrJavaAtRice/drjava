@@ -70,7 +70,6 @@ public class QuestionBraceIsParenOrBracket extends IndentRuleQuestion
    */
   boolean applyRule(DefinitionsDocument doc)
   {
-    System.err.println("QuestionBraceIsParenOrBracket");
     // PRE: We are not inside a multiline comment.
 
     IndentInfo info = doc.getReduced().getIndentInformation();

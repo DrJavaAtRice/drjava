@@ -532,11 +532,22 @@ public class DefinitionsDocument extends PlainDocument {
 
   /**
    * Returns the indent level of the start of the statement
-   * that the cursor is on.
+   * that the cursor is on.  Uses a default set of delimiters.
+  * (';', '{', '}')
    * @param pos Cursor position
    */
   public String getIndentOfCurrStmt(int pos) throws BadLocationException {
     char[] delims = {';', '{', '}'};
+    return getIndentOfCurrStmt(pos, delims);
+  }
+  
+  /**
+   * Returns the indent level of the start of the statement
+   * that the cursor is on.
+   * @param pos Cursor position
+   * @param delims Delimiter characters denoting end of statement
+   */
+  public String getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
     
     // Get the start of the current line
     int lineStart = getLineStartPos(pos);
@@ -843,13 +854,16 @@ public class DefinitionsDocument extends PlainDocument {
   /**
    * Indents a line using the Indenter decision tree.
    */
-  private void _indentLineNew() {
+  private void _indentLine() {
     Indenter.ONLY.indent(this);
   }
   
   /**
    * Indents a line in accordance with the rules that DrJava has set up.
-   */
+   *
+   * This is the old version, which has been replaced by the indent
+   * rule decision tree.
+   *
   private void _indentLine() {
     try {
       // moves us to the end of the line
@@ -884,13 +898,16 @@ public class DefinitionsDocument extends PlainDocument {
     } catch (BadLocationException e) {
       throw  new UnexpectedException(e);
     }
-  }
+  }*/
 
   /**
    * Deals with the special cases.
    * If the first character after the previous \n is a } then -2
+   *
+   * Replaced by indent rule decision tree.
+   *
    * @exception BadLocationException
-   */
+   *
   private int _indentSpecialCases(int tab, int distToPrevNewline) throws BadLocationException {
     //not a special case.
     if (distToPrevNewline == -1)
@@ -939,7 +956,7 @@ public class DefinitionsDocument extends PlainDocument {
     }
     //return tab
     return  tab;
-  }
+  }*/
 
   /**
    * Determines if the current token is part of a comment or if the i'th character

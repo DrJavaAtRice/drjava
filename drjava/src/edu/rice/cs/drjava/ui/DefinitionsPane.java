@@ -229,7 +229,7 @@ public class DefinitionsPane extends JEditorPane {
                         getKeymap().getAction(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)));
 
   /**
-   * Likewise, regular text keys like '{' and '}' do not have special actions
+   * Likewise, regular text keys like '{', '}', and ':' do not have special actions
    * that are returned by getAction(KeyStroke). To make sure these behave right,
    * we use getDefaultAction() instead.
    */
@@ -238,6 +238,9 @@ public class DefinitionsPane extends JEditorPane {
 
   private Action _indentKeyActionOpenSquiggly =
     new IndentKeyAction("{", getKeymap().getDefaultAction());
+  
+  private Action _indentKeyActionColon =
+    new IndentKeyAction(":", getKeymap().getDefaultAction());
 
   /**
    * Constructor.  Sets up all the defaults.
@@ -266,6 +269,8 @@ public class DefinitionsPane extends JEditorPane {
       (Action)_indentKeyActionSquiggly);
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('{'),
       (Action)_indentKeyActionOpenSquiggly);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(':'),
+      (Action)_indentKeyActionColon);
     setKeymap(ourMap);
 
     // Add listener that checks if position in the document has changed.

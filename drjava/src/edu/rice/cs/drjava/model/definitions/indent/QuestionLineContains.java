@@ -81,7 +81,6 @@ public class QuestionLineContains extends IndentRuleQuestion {
    * @return true if this node's rule holds.
    */
   boolean applyRule(DefinitionsDocument doc) {
-    System.err.println("QuestionLineContains");
 
     int charPos = doc.findCharOnLine(doc.getCurrentLocation(), _findChar);
     if(charPos == DefinitionsDocument.ERROR_INDEX) {

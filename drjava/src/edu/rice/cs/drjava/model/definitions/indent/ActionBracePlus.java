@@ -72,7 +72,6 @@ public class ActionBracePlus extends IndentRuleAction
    */
   public void indentLine(DefinitionsDocument doc)
   {
-    System.err.println("ActionBracePlus");
     int here = doc.getCurrentLocation();
     int startLine = doc.getLineStartPos(here);
     doc.setCurrentLocation(startLine);

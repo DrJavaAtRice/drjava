@@ -72,11 +72,10 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
    * @param doc DefinitionsDocument containing the line to be indented.
    */
   public void indentLine(DefinitionsDocument doc) {
-    System.err.println("ActionStartPrevStmtPlus");
     String indent = "";
     int here = doc.getCurrentLocation();
     
-    // Find end of previous statement
+    // Find end of previous statement (or end of case statement)
     char[] delims = {';', '{', '}'};
     int lineStart = doc.getLineStartPos(here);
     int prevDelimiterPos;
@@ -95,7 +94,9 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
         
     // Get indent of prev statement
     try {
-      indent = doc.getIndentOfCurrStmt(prevDelimiterPos);
+      // Include colons as end of statement (ie. "case")
+      char[] indentDelims = {';', '{', '}', ':'};
+      indent = doc.getIndentOfCurrStmt(prevDelimiterPos, indentDelims);
     } catch (BadLocationException e) {
       throw new UnexpectedException(e);
     }

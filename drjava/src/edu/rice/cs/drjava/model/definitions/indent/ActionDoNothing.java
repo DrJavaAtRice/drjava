@@ -64,6 +64,5 @@ public class ActionDoNothing extends IndentRuleAction {
    * @param doc DefinitionsDocument containing the line to be indented.
    */
   public void indentLine(DefinitionsDocument doc) {
-      System.err.println("ActionDoNothing");
   }
 }

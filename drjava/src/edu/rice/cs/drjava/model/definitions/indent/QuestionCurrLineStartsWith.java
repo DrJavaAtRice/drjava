@@ -72,7 +72,6 @@ public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
    * @return true if this node's rule holds.
    */
   boolean applyRule(DefinitionsDocument doc) {
-      System.err.println("QuestionCurrLineStartsWith");
       try {
       // Find start of line
       int here = doc.getCurrentLocation();

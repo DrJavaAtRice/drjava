@@ -63,7 +63,6 @@ class QuestionInsideComment extends IndentRuleQuestion {
    * @return true if this node's rule holds.
    */
   boolean applyRule(DefinitionsDocument doc) {
-    System.err.println("QuestionInsideComment");
     int here = doc.getCurrentLocation();
     int distToStart = here - doc.getLineStartPos(here);
     doc.getReduced().resetLocation();

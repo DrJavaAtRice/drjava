@@ -109,7 +109,6 @@ public class QuestionExistsCharInStmt extends IndentRuleQuestion {
    * @return true if this node's rule holds.
    */
   boolean applyRule(DefinitionsDocument doc) {
-    System.err.println("QuestionExistsCharInStmt");
 
    // Find the position of endChar on the current line
     int endCharPos = doc.findCharOnLine(doc.getCurrentLocation(), _endChar);

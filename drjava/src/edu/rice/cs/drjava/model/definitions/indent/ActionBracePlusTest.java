@@ -69,6 +69,30 @@ public class ActionBracePlusTest extends IndentRulesTestCase
     super.setUp();
   }
   
+  public void testNoSuffix() throws BadLocationException
+  {
+    _action = new ActionBracePlus("");
+    
+    // (1) 
+    
+    _text = 
+      "method(\n"+
+      ")\n";
+
+    _aligned = 
+      "method(\n"+
+      "      )\n";
+ 
+    _setDocText(_text);
+    _action.indentLine(_doc, 0); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), _doc.getLength());
+    _action.indentLine(_doc, 7); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), _doc.getLength());
+    _action.indentLine(_doc, 8); // Aligns second line.
+    assertEquals("Line aligned to open paren.", _aligned.length(), _doc.getLength());
+    assertEquals("Line aligned to open paren.", _aligned, _doc.getText(0, _doc.getLength()));
+  }
+  
 
   public void testSpaceSuffix() throws BadLocationException
   {
@@ -157,5 +181,29 @@ public class ActionBracePlusTest extends IndentRulesTestCase
     _action.indentLine(_doc, 10); // Aligns second line.
     assertEquals("Line aligned to open bracket.", _aligned, _doc.getText(0, _doc.getLength())); 
 
+  }
+  
+  public void testLargeSuffix() throws BadLocationException
+  {
+    _action = new ActionBracePlus(" " + "  ");
+    
+    // (6) 
+    
+    _text = 
+     "var = method(foo.\n"+
+     "  bar(), arg3) + 4;";
+
+    _aligned = 
+     "var = method(foo.\n"+
+     "               bar(), arg3) + 4;";
+ 
+    _setDocText(_text);
+    _action.indentLine(_doc, 0); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), _doc.getLength());
+    _action.indentLine(_doc, 17); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), _doc.getLength());
+    _action.indentLine(_doc, 25); // Aligns second line.
+    assertEquals("Line aligned to open paren.", _aligned.length(), _doc.getLength());
+    assertEquals("Line aligned to open paren.", _aligned, _doc.getText(0, _doc.getLength()));
   }
 }

@@ -66,10 +66,10 @@ public class IndentInfo {
   //the distance to the start of the current line
   public int distToPrevNewline;
   
-  static public String noBrace = "";
-  static public String openSquiggly = "{";
-  static public String openParen = "(";
-  static public String openBracket = "[";
+  static public final String noBrace = "";
+  static public final String openSquiggly = "{";
+  static public final String openParen = "(";
+  static public final String openBracket = "[";
 
   /**
    * put your documentation comment here

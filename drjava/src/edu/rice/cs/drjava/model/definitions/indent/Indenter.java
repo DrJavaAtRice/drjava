@@ -80,7 +80,6 @@ public class Indenter
     String oneLevel = _indentLevel;
     
     IndentRule 
-      //rule05 = new ActionDoNothing(),
       rule05 = new ActionStartPrevLinePlus(" "),
       rule04 = new ActionStartPrevLinePlus(" * "), 
       rule03 = new QuestionCurrLineEmpty(rule04, rule05);
@@ -101,7 +100,7 @@ public class Indenter
       rule21 = new ActionStartStmtOfBracePlus(""),
       rule19 = new QuestionStartingNewStmt(rule22, rule27),
       rule18 = rule19,
-      rule17 = rule32,  // ?
+      rule17 = rule32,
       rule16 = new QuestionStartAfterOpenBrace(rule17, rule18),
       rule20 = new QuestionCurrLineStartsWithSkipComments("}", rule21, rule16),
       rule15 = new QuestionBraceIsCurly(rule20, rule19),
@@ -110,7 +109,9 @@ public class Indenter
       rule12 = new QuestionNewParenPhrase(rule13, rule14),
       rule11 = new QuestionBraceIsParenOrBracket(rule12, rule15),
       rule10 = new ActionStartPrevLinePlus(""),
-      rule09 = new ActionStartPrevLinePlus("* "),
+      rule9b = rule10,
+      rule9a = new ActionStartPrevLinePlus("* "),
+      rule09 = new QuestionCurrLineEmpty(rule9a, rule9b),
       rule08 = rule10,          
       rule07 = new QuestionCurrLineStartsWith("*", rule08, rule09),
       rule06 = new QuestionPrevLineStartsWith("*", rule07, rule10),

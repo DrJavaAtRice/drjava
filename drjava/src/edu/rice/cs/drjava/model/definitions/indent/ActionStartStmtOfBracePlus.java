@@ -72,8 +72,6 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
    */
   public void indentLine(DefinitionsDocument doc)
   {
-    System.err.println("ActionStartStmtOfBracePlus");
-
     int pos = doc.getCurrentLocation();
 
     // Get distance to brace

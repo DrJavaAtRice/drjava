@@ -54,20 +54,16 @@ public class QuestionCurrLineEmptyTest extends IndentRulesTestCase {
   public QuestionCurrLineEmptyTest(String name) {
     super(name);
   }
-  // generic rule always returns false...
-  // to use until we get the actual implementation
   static IndentRuleQuestion _rule = new QuestionCurrLineEmpty(null, null);
 
-  //public void testDummy() {
-  //}
-    
+   
   public void testEmpty() throws javax.swing.text.BadLocationException {
     // /*
     // 
     // */
     _setDocText("/*\n\n*/");
     //               .
-    assertEquals(true, _rule.applyRule(_doc, 3));
+    assertTrue("nothing on line", _rule.applyRule(_doc, 3));
   }
   public void testSpaces() throws javax.swing.text.BadLocationException {
     // /*
@@ -75,7 +71,7 @@ public class QuestionCurrLineEmptyTest extends IndentRulesTestCase {
     // */
     _setDocText("/*\n        \n*/");
     //                  .
-    assertEquals(true, _rule.applyRule(_doc, 6));
+    assertTrue("only spaces", _rule.applyRule(_doc, 6));
   }
   
   static String stuffExample = "/*\n   foo   \n*/";
@@ -86,10 +82,15 @@ public class QuestionCurrLineEmptyTest extends IndentRulesTestCase {
   
   public void testStuffBefore() throws javax.swing.text.BadLocationException {
     _setDocText(stuffExample);
-    assertEquals(false, _rule.applyRule(_doc, 3));
+    assertTrue("text before the cursor", !_rule.applyRule(_doc, 3));
   }
   public void testStuffAfter() throws javax.swing.text.BadLocationException {
     _setDocText(stuffExample);
-    assertEquals(false, _rule.applyRule(_doc, 11));
+    assertTrue("text after the cursor", !_rule.applyRule(_doc, 11));
+  }
+  
+  public void testLineWithStar() throws javax.swing.text.BadLocationException {
+    _setDocText("/*\n * foo\n */");
+    assertTrue("line with a star", !_rule.applyRule(_doc, 5));
   }
 }

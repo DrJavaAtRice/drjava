@@ -80,6 +80,9 @@ public class IndentTest extends TestCase {
     return  new TestSuite(IndentTest.class);
   }
 
+ 
+  
+  
   /**
    * put your documentation comment here
    * @exception BadLocationException
@@ -188,7 +191,7 @@ public class IndentTest extends TestCase {
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "\n{\n  hello;\n /*\n hello\n */", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
-    _assertContents("\n{\n  hello;\n /*\n hello\n  */", doc);
+    _assertContents("\n{\n  hello;\n /*\n hello\n */", doc);
   }
 
   /**
@@ -419,16 +422,15 @@ public class IndentTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
-   * @exception BadLocationException
-   */
+   * Not supported any more.
+   *
   public void testLargerIndent () throws BadLocationException {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "public class temp \n  {  ()\n { text here", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("public class temp \n  {  ()\n    { text here", doc);
-  }
+  }*/
 
   /**
    * put your documentation comment here
@@ -533,7 +535,7 @@ public class IndentTest extends TestCase {
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "Sys.out(\"hello\"\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
-    _assertContents("Sys.out(\"hello\"\n        ", doc);
+    _assertContents("Sys.out(\"hello\"\n          ", doc);
   }
 
   /**
@@ -573,28 +575,26 @@ public class IndentTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
-   * @exception BadLocationException
-   */
+   * Cascading indent is not used anymore.
+   *
   public void testOpenSquigglyCascade () throws BadLocationException {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "if\n  if\n    if\n{", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("if\n  if\n    if\n    {", doc);
-  }
+  }*/
 
   /**
-   * put your documentation comment here
-   * @exception BadLocationException
-   */
+   * Cascading indent is not used anymore.
+   *
   public void testOpenSquigglyCascade2 () throws BadLocationException {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "{\n  if\n    if\n      if\n{", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("{\n  if\n    if\n      if\n      {", doc);
-  }
+  }*/
 
   /**
    * put your documentation comment here
@@ -677,7 +677,7 @@ public class IndentTest extends TestCase {
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "hello\n{\n/*{\n{\n*/\nhehe", null);
     doc.indentLines(0, 21);
-    _assertContents("hello\n{\n  /*{\n  {\n  */\n  hehe", doc);
+    _assertContents("hello\n{\n  /*{\n   {\n   */\n  hehe", doc);
   }
 
   /**

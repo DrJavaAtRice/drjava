@@ -76,7 +76,6 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
    * @return true if this node's rule holds.
    */
   boolean applyRule(DefinitionsDocument doc) {
-    System.err.println("QuestionStartingNewStmt");
 
     char[] delims = {';', '{', '}'};
     int lineStart = doc.getLineStartPos(doc.getCurrentLocation());

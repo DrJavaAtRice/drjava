@@ -1,5 +1,3 @@
-
-
 /*BEGIN_COPYRIGHT_BLOCK
  *
  * This file is a part of DrJava. Current versions of this project are available
@@ -60,86 +58,99 @@ import edu.rice.cs.util.UnexpectedException;
  */
 public class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase 
 {
-    private String _text;
-    
-    private IndentRuleQuestion _rule = new QuestionStartAfterOpenBrace(null, null);
-
-    /**
-     * @param name The name of this test case.
-     */
-    public QuestionStartAfterOpenBraceTest(String name) { super(name); }
-    
-    public void setUp() { super.setUp(); }    
-    
-    public void testWithFree() throws BadLocationException 
-    {
-	int i;
-
-	/* (1) */
-	
-	_text = "method(\nint[] a, String b) {}";
-	_setDocText(_text);
-	assertTrue("START has no preceding brace.", !_rule.applyRule(_doc, 0));
-	assertTrue("START immediately follows an open paren, not a brace.", !_rule.applyRule(_doc, 8));
-	assertTrue("START immediately follows an open paren, not a brace.", !_rule.applyRule(_doc, _text.length()-1));
-
-	/* (2) */
-
-	_text = 
-	    "boolean method() {\n" +
-	    "}";
-
-	_setDocText(_text);
-	assertTrue("START immediately follows an open brace.", _rule.applyRule(_doc, 19));
-
-	/* (3) */
-
-	_text = 
-	    "boolean method(\n" +
-	    "    int[] a, String b)\n" +
-	    "{\n" +
-	    "}";
-
-	_setDocText(_text);	
-	assertTrue("START immediately follows an open paren.", !_rule.applyRule(_doc, 40));
-	assertTrue("START immediately follows an open brace.", _rule.applyRule(_doc, 41));
-
-	/* (5) */
-
-	_text = 
-	    "if (<cond>) {\n" +
-	    "\n" +
-	    "    if (\n" +
-	    "        <cond>) { ... }}";
-
-	_setDocText(_text);
-
-	assertTrue("START immediatly follows an open brace.", _rule.applyRule(_doc, 14));	    
-	assertTrue("Only WS between open brace and START.", _rule.applyRule(_doc, 15));	    
-	assertTrue("Only WS between open brace and START.", _rule.applyRule(_doc, 23));	    
-	assertTrue("START immediatly follows an open paren.", !_rule.applyRule(_doc, 25));	    
-	
-	/* (6) */
-
-	_text = 
-	    "class Foo {   \n" +
-	    "              \n" +
-	    "  /*          \n" +
-	    "   *          \n" +
-	    "   */         \n" +
-	    "  int field;  \n" +
-	    "}";
- 
-	_setDocText(_text);
-
-	assertTrue("START = DOCSTART.", !_rule.applyRule(_doc, 0));
-	assertTrue("START = DOCSTART.", !_rule.applyRule(_doc, 14));
-	assertTrue("Only WS between START and open brace.", _rule.applyRule(_doc, 15));
-	assertTrue("Only WS between START and open brace.", _rule.applyRule(_doc, 30));
-	assertTrue("Only WS between START and open brace.", _rule.applyRule(_doc, 44));
-	assertTrue("Only comment and WS between START and open brace.", _rule.applyRule(_doc, 45));
-	assertTrue("Only comment and WS between START and open brace.", _rule.applyRule(_doc, 60));
-	assertTrue("Only comment and WS between START and open brace.", _rule.applyRule(_doc, 77));
-    }
-}
+  private String _text;
   
+  private IndentRuleQuestion _rule = new QuestionStartAfterOpenBrace(null, null);
+  
+  /**
+   * @param name The name of this test case.
+   */
+  public QuestionStartAfterOpenBraceTest(String name) { super(name); }
+  
+  public void setUp() { super.setUp(); }    
+  
+  public void testWithFree() throws BadLocationException 
+  {
+    int i;
+    
+    /* (1) */
+    
+    _text = "method(\nint[] a, String b) {}";
+    _setDocText(_text);
+    assertTrue("START has no preceding brace.", !_rule.applyRule(_doc, 0));
+    assertTrue("START immediately follows an open paren, not a brace.", !_rule.applyRule(_doc, 8));
+    assertTrue("START immediately follows an open paren, not a brace.", !_rule.applyRule(_doc, _text.length()-1));
+    
+    /* (2) */
+    
+    _text = 
+      "boolean method() {\n" +
+      "}";
+    
+    _setDocText(_text);
+    assertTrue("START immediately follows an open brace.", _rule.applyRule(_doc, 19));
+    
+    /* (3) */
+    
+    _text = 
+      "boolean method(\n" +
+      "    int[] a, String b)\n" +
+      "{\n" +
+      "}";
+    
+    _setDocText(_text); 
+    assertTrue("START immediately follows an open paren.", !_rule.applyRule(_doc, 40));
+    assertTrue("START immediately follows an open brace.", _rule.applyRule(_doc, 41));
+    
+    /* (5) */
+    
+    _text = 
+      "if (<cond>) {\n" +
+      "\n" +
+      "    if (\n" +
+      "        <cond>) { ... }}";
+    
+    _setDocText(_text);
+    
+    assertTrue("START immediatly follows an open brace.", _rule.applyRule(_doc, 14));     
+    assertTrue("Only WS between open brace and START.", _rule.applyRule(_doc, 15));     
+    assertTrue("Only WS between open brace and START.", _rule.applyRule(_doc, 23));     
+    assertTrue("START immediatly follows an open paren.", !_rule.applyRule(_doc, 25));     
+    
+    /* (6) */
+    
+    _text = 
+      "class Foo {   \n" +
+      "              \n" +
+      "  /*          \n" +
+      "   *          \n" +
+      "   */         \n" +
+      "  int field;  \n" +
+      "}";
+    
+    _setDocText(_text);
+    
+    assertTrue("START = DOCSTART.", !_rule.applyRule(_doc, 0));
+    assertTrue("START = DOCSTART.", !_rule.applyRule(_doc, 14));
+    assertTrue("Only WS between START and open brace.", _rule.applyRule(_doc, 15));
+    assertTrue("Only WS between START and open brace.", _rule.applyRule(_doc, 30));
+    assertTrue("Only WS between START and open brace.", _rule.applyRule(_doc, 44));
+    assertTrue("Only comment and WS between START and open brace.", _rule.applyRule(_doc, 45));
+    assertTrue("Only comment and WS between START and open brace.", _rule.applyRule(_doc, 60));
+    assertTrue("Only comment and WS between START and open brace.", _rule.applyRule(_doc, 77));
+  }
+  
+  public void testBraceLastCharOnLine() throws BadLocationException {
+    _setDocText("{\n");
+    assertTrue("Brace only char on line.", _rule.applyRule(_doc, 2));
+    
+    _setDocText("void foo() {\n");
+    assertTrue("Brace last char on line.", _rule.applyRule(_doc, 13));
+  }
+  
+  public void testTextAfterBrace() throws BadLocationException {
+    _setDocText("{ hello\n  foo();");
+    assertTrue("Text on line after brace.", _rule.applyRule(_doc, 8));
+  }
+}
+

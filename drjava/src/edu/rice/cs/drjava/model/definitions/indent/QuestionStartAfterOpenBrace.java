@@ -74,49 +74,39 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion
    */
   boolean applyRule(DefinitionsDocument doc)
   {
-    System.err.println("QuestionStartAfterOpenBrace");
-
-    int start = doc.getLineStartPos(doc.getCurrentLocation());
-    BraceReduction reduced = doc.getReduced();
-    int origin = reduced.absOffset();
-    String text;
-    char c, peek;
-
-    try
-    {
-	text = doc.getText(DefinitionsDocument.DOCSTART, start);
+    int here = doc.getCurrentLocation();
+    int origin = doc.getReduced().absOffset();
+    int lineStart = doc.getLineStartPos(doc.getCurrentLocation());
+    
+    // Get brace for start of line
+    doc.getReduced().move(lineStart - origin);
+    IndentInfo info = doc.getReduced().getIndentInformation();
+    doc.getReduced().move(origin - lineStart);
+    
+    if ((!info.braceType.equals(IndentInfo.openSquiggly)) ||
+        (info.distToBrace < 0)) {
+      // Precondition not met: we should have a brace
+      return false;
     }
-    catch (BadLocationException e)
-    {
-	// Control flow should never reach this point.
-	throw new UnexpectedException(new RuntimeException(e.getMessage()));
+    int bracePos = lineStart - info.distToBrace;    
+    
+    // Get brace's end of line
+    int braceEndLinePos = doc.getLineEndPos(bracePos);
+    
+    // Get position of next non-WS char (not in comments)
+    int nextNonWS = -1;
+    try {
+      nextNonWS = doc.getFirstNonWSCharPos(braceEndLinePos);
     }
-    for (int i = start-1; i >= DefinitionsDocument.DOCSTART; i--)
-    {
-	
-      c = text.charAt(i);
-
-      if (c != ' ' && c != '\t' && c != '\n') 
-      {
-	  // c is not a whitespace character.
-
-          reduced.move(i - origin);
-          ReducedModelState state = reduced.getStateAtCurrent();
-          reduced.move(origin - i);
-
-          if (state.equals(ReducedModelState.FREE))
-	  {
-	      peek = text.charAt(i - 1);
-
-	      if (c == '/' && (peek == '/' || peek == '*'))
-		  i--;
-	      else if (c == '*' && peek == '/')
-		  i--;
-	      else
-		  return c == '{';
-	  }
-      }
+    catch (BadLocationException e) {
+      // This shouldn't happen
+      throw new UnexpectedException(e);
     }
-    return false;
+    
+    if (nextNonWS == DefinitionsDocument.ERROR_INDEX) {
+      return true;
+    }
+    
+    return (nextNonWS >= lineStart);
   }
 }

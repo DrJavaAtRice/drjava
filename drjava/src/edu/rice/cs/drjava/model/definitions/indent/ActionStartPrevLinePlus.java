@@ -68,7 +68,6 @@ class ActionStartPrevLinePlus extends IndentRuleAction {
    */
   public void indentLine(DefinitionsDocument doc)
   {
-    System.err.println("ActionStartPrevLinePlus");
     try {
       // Find start of line
       int here = doc.getCurrentLocation();
