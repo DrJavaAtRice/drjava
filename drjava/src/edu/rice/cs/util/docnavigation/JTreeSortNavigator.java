@@ -86,7 +86,7 @@ public class JTreeSortNavigator extends JTree
   /**
    * the currently selected item
    */
-  private INavigatorItem _currSelected;
+  private NodeData _currSelected;
   
   /**
    * the node corresponding to the [external files] node in the tree
@@ -587,34 +587,17 @@ public class JTreeSortNavigator extends JTree
    * @param e the event that characterizes the change.
    */
   public void valueChanged(TreeSelectionEvent e) {
-    DefaultMutableTreeNode treenode = (DefaultMutableTreeNode)this.getLastSelectedPathComponent();
-    if(treenode == null)
-    {
+    Object treeNode = this.getLastSelectedPathComponent();
+    if(treeNode == null || !(treeNode instanceof NodeData)) {
       return;
     }
-    else if(!treenode.isLeaf())
-    {
-      for(int i = 0; i<navListeners.size(); i++)
-      {
-        navListeners.elementAt(i).lostSelection(_currSelected);
+    NodeData newSelection = (NodeData)treeNode;
+    if(_currSelected != newSelection) {
+      for(INavigationListener listener : navListeners) {
+        listener.lostSelection(_currSelected);
+        listener.gainedSelection(newSelection);
       }
-      _currSelected = null;
-      return;
-    }
-    INavigatorItem newselection = (INavigatorItem)treenode.getUserObject();
-    if(newselection == null)
-    {
-      return;
-    }
-    
-    if(_currSelected != newselection)
-    {
-      for(int i = 0; i<navListeners.size(); i++)
-      {
-        navListeners.elementAt(i).lostSelection(_currSelected);
-        navListeners.elementAt(i).gainedSelection(newselection);
-      }
-      _currSelected = newselection;
+      _currSelected = newSelection;
     }
   }
   
@@ -817,8 +800,14 @@ public class JTreeSortNavigator extends JTree
    * if the selected node is not a leaf
    */
   public INavigatorItem getCurrentSelectedLeaf(){
-    return _currSelected;
+    return _currSelected.execute(_leafVisitor);
   }
+  
+  private NodeDataVisitor<INavigatorItem> _leafVisitor = new NodeDataVisitor<INavigatorItem>() {
+    public INavigatorItem fileCase(File f){ return null; }
+    public INavigatorItem stringCase(String s){ return null; }
+    public INavigatorItem itemCase(INavigatorItem ini){ return ini; }
+  };
   
   /**
    * @return true if the INavigatorItem is in the selected group, if a group is selected

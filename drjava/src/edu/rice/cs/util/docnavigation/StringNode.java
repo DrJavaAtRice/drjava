@@ -70,6 +70,10 @@ class StringNode extends InnerNode<String>{
     return (String) super.getUserObject();
   }
   
+  public <T> T execute(NodeDataVisitor<T> v) {
+    return v.stringCase(getData());
+  }
+  
   public String toString(){
     return getData();
   }

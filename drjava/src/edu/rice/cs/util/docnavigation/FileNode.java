@@ -71,6 +71,10 @@ public class FileNode extends InnerNode<File>{
     return (File) super.getUserObject();
   }
   
+  public <T> T execute(NodeDataVisitor<T> v) {
+    return v.fileCase(getData());
+  }
+  
   public String toString(){
     try{
       String path = getData().getCanonicalPath();

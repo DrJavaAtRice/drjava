@@ -45,32 +45,21 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
 
-import javax.swing.*;
-import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.tree.*;
-import java.awt.*;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.util.*;
-import edu.rice.cs.util.*;
+import java.io.File;
 
-
-public abstract class InnerNode<T> extends DefaultMutableTreeNode implements NodeData {
-  protected boolean _collapsed; // tree defaults to all NOT collapsed
+/**
+ * This visitor runs on NodeData.  The only variation from the
+ * standard visitor pattern is that the dispatched methods do
+ * not receive an instance of the host, but rather an instance
+ * of the data the host was meant to hold.  This allows the host
+ * to be considered a simple data wrapper.
+ */
+public interface NodeDataVisitor<Ret> {
+ 
+  public Ret fileCase(File f);
   
-  public InnerNode(T d){
-    super(d);
-  }
-  abstract public void setData(T d);
-  abstract public T getData();
+  public Ret stringCase(String s);
   
-  public void setCollapsed(boolean c) {
-    _collapsed = c;
-  }
-  public boolean isCollapsed() {
-    return _collapsed;
-  }
+  public Ret itemCase(INavigatorItem ini);
+  
 }
-

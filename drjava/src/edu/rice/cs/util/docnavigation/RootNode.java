@@ -54,23 +54,31 @@ import java.awt.*;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.util.*;
+import java.io.File;
 import edu.rice.cs.util.*;
 
-class RootNode extends DefaultMutableTreeNode{
+class RootNode extends DefaultMutableTreeNode implements NodeData {
   
+  public RootNode(File f){
+    super(f);
+  }
   public RootNode(String s){
-    super(s);
+    this(new File(s));
   }
   
-  public void setData(String f){
+  public void setData(File f){
     super.setUserObject(f);
   }
   
-  public String getData(){
-    return (String) super.getUserObject();
+  public File getData(){
+    return (File)super.getUserObject();
   }
   
   public String toString(){
-    return getData();
+    return getData().toString();
+  }
+  
+  public <T> T execute(NodeDataVisitor<T> v) {
+    return v.fileCase(getData());
   }
 }

@@ -45,32 +45,13 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
 
-import javax.swing.*;
-import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.tree.*;
-import java.awt.*;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.util.*;
-import edu.rice.cs.util.*;
-
-
-public abstract class InnerNode<T> extends DefaultMutableTreeNode implements NodeData {
-  protected boolean _collapsed; // tree defaults to all NOT collapsed
+/**
+ * Since the various nodes hold different types of data,
+ * this type allows for a visitor pattern on the nodes without
+ * exposing their TreeNode nature
+ */
+public interface NodeData {
   
-  public InnerNode(T d){
-    super(d);
-  }
-  abstract public void setData(T d);
-  abstract public T getData();
+  <T> T execute(NodeDataVisitor<T> v);
   
-  public void setCollapsed(boolean c) {
-    _collapsed = c;
-  }
-  public boolean isCollapsed() {
-    return _collapsed;
-  }
 }
-

@@ -63,10 +63,7 @@ class JListSortNavigator extends JListNavigator{
   /**
    * the currently selected item or null if none
    */
-  private INavigatorItem currentselected = null;
-  
-  /** the collection of INavigationListeners listening to this JListNavigator */
-  private Vector<INavigationListener> navListeners = new Vector<INavigationListener>();
+//  private INavigatorItem currentselected = null;
   
   /**
    * the renderer for this list
@@ -273,29 +270,6 @@ class JListSortNavigator extends JListNavigator{
     this.setListData(_docs);
   }
   
-  /**
-   * Add listener to the collection of listeners
-   * @param listener
-   */
-  public void addNavigationListener(INavigationListener listener) {
-    navListeners.add(listener);
-  }
-  
-  /**
-   * Unregister the listener listener
-   * @param listener
-   */
-  public void removeNavigationListener(INavigationListener listener) {
-    navListeners.remove(listener);
-  }
-  
-  /**
-   * returns all navigator listeners
-   */
-  public Collection<INavigationListener> getNavigatorListeners()
-  {
-      return navListeners;
-  }
   
   /**
    * executes the list case on a visitor
@@ -315,27 +289,6 @@ class JListSortNavigator extends JListNavigator{
     return this;
   }
   
-  /**
-   * called when the value of this navigator changes
-   */
-  public void valueChanged(ListSelectionEvent e)
-  {
-    if(!e.getValueIsAdjusting() && !_docs.isEmpty())
-    {
-      if(currentselected != this.getSelectedValue())
-      {
-        for(int i = 0; i<navListeners.size(); i++)
-        {
-          navListeners.elementAt(i).lostSelection(currentselected);
-          if(this.getSelectedValue() != null)
-          {
-            navListeners.elementAt(i).gainedSelection((INavigatorItem)this.getSelectedValue());
-          }
-        }
-        currentselected = (INavigatorItem)this.getSelectedValue();
-      } 
-    }
-  }
 
   public void paint(Graphics g){
     super.paint(g);

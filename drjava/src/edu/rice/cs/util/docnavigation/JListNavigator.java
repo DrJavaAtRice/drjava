@@ -304,16 +304,24 @@ class JListNavigator extends JList implements IDocumentNavigator, ListSelectionL
    */
   public void valueChanged(ListSelectionEvent e)
   {
-    if(!e.getValueIsAdjusting() && !_docs.isEmpty())
-    {
-      if(currentselected != this.getSelectedValue())
-      {
-        for(int i = 0; i<navListeners.size(); i++)
-        {
-          navListeners.elementAt(i).lostSelection(currentselected);
-          if(this.getSelectedValue() != null)
-          {
-            navListeners.elementAt(i).gainedSelection((INavigatorItem)this.getSelectedValue());
+    if(!e.getValueIsAdjusting() && !_docs.isEmpty()) {
+      if(currentselected != this.getSelectedValue()) {
+        final INavigatorItem currItem = currentselected;
+        final INavigatorItem nextItem = (INavigatorItem)JListNavigator.this.getSelectedValue();
+        NodeData currData = new NodeData() {
+          public <T> T execute(NodeDataVisitor<T> v) {
+            return v.itemCase(currItem);
+          }
+        };
+        NodeData nextData = new NodeData() {
+          public <T> T execute(NodeDataVisitor<T> v) {
+            return v.itemCase(nextItem);
+          }
+        };
+        for(INavigationListener listener: navListeners) {
+          listener.lostSelection(currData);
+          if(nextItem != null) {
+            listener.gainedSelection(nextData);
           }
         }
         currentselected = (INavigatorItem)this.getSelectedValue();
