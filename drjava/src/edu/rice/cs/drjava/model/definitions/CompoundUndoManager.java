@@ -300,4 +300,11 @@ public class CompoundUndoManager extends UndoManager {
   public String toString(){
     return "(CompoundUndoManager: " + id + ")";
   }
+  /**
+   * Used to help track down memory leaks
+   */
+//  protected void finalize() throws Throwable{
+//    super.finalize();
+//    System.out.println("Undomanager is finalized");
+//  }
 }

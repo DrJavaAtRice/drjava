@@ -122,39 +122,61 @@ public class DefaultCompilerModel implements CompilerModel {
 
   //-------------------------------- Triggers --------------------------------//
 
-  /**
-   * compiles the currently active project
-   */
-  synchronized public void compileProject(){
-  }
-  
-  
-  
+
   /**
    * Compiles all open documents, after ensuring that all are saved.
+   * If drjava is in project mode when this method is called, only 
+   * the project files are saved.  Also, at this point, we do not require
+   * external files (files not belonging to the project) to be saved
+   * before we compile the files.
+   * 
+   * <p>In project mode, since only project files are compiled, we
+   * perform the compilation with the specified build directory if 
+   * defined in the project state.</p>
    *
-   * This method used to only compile documents which were out of sync
+   * <p>This method used to only compile documents which were out of sync
    * with their class file, as a performance optimization.  However,
    * bug #634386 pointed out that unmodified files could depend on
    * modified files, in which case this would not recompile a file in
    * some situations when it should.  Since we value correctness over
-   * performance, we now always compile all open documents.
+   * performance, we now always compile all open documents.</p>
    * @throws IOException if a filesystem-related problem prevents compilation
    */
   synchronized public void compileAll() throws IOException {
+    
+    List<OpenDefinitionsDocument> defDocs =
+      _getter.getDefinitionsDocuments();
+    
+    File buildDir = null;
+    if (_getter.getFileGroupingState().isProjectActive()) {
+      buildDir = _getter.getFileGroupingState().getBuildDirectory();
+
+      // If we're in project mode, filter out only the 
+      // documents that are in the project and leave out
+      // the external files.
+      List<OpenDefinitionsDocument> projectDocs =
+        new LinkedList<OpenDefinitionsDocument>();
+    
+      for(OpenDefinitionsDocument odd : defDocs){
+        if(odd.isProjectFile()){
+            projectDocs.add(odd);
+        }
+      }
+      defDocs = projectDocs;
+    }
+
     // Only compile if all are saved
-    if (_getter.hasModifiedDocuments()) {
+    if (_hasModifiedFiles(defDocs)) {
       _notifier.saveBeforeCompile();
     }
 
-    if (_getter.hasModifiedDocuments()) {
+    // check for modified project files, in case they didn't save when prompted
+    if (_hasModifiedFiles(defDocs)) {
       // if any files haven't been saved after we told our
       // listeners to do so, don't proceed with the rest
       // of the compile.
     }
     else {
-      List<OpenDefinitionsDocument> defDocs =
-        _getter.getDefinitionsDocuments();
 
       // Get sourceroots and all files
       File[] sourceRoots = getSourceRootSet();
@@ -177,7 +199,7 @@ public class DefaultCompilerModel implements CompilerModel {
 
       try {
         // Compile the files
-        _compileFiles(sourceRoots, files);
+        _compileFiles(sourceRoots, files, buildDir);
       }
       catch (Throwable t) {
         CompilerError err = new CompilerError(t.toString(), false);
@@ -210,6 +232,11 @@ public class DefaultCompilerModel implements CompilerModel {
    */
   synchronized public void compile(OpenDefinitionsDocument doc)
       throws IOException {
+    File buildDir = null;
+    if (doc.isProjectFile()) {
+      buildDir = _getter.getFileGroupingState().getBuildDirectory();
+    }
+    
     // Only compile if all are saved
     if (_getter.hasModifiedDocuments()) {
       _notifier.saveBeforeCompile();
@@ -230,7 +257,7 @@ public class DefaultCompilerModel implements CompilerModel {
 
           File[] sourceRoots = new File[] { doc.getSourceRoot() };
 
-          _compileFiles(sourceRoots, files);
+          _compileFiles(sourceRoots, files, buildDir);
         }
         catch (Throwable e) {
           CompilerError err =
@@ -257,14 +284,16 @@ public class DefaultCompilerModel implements CompilerModel {
    * use compileAll or doc.startCompile instead.
    * @param sourceRoots An array of all sourceroots for the files to be compiled
    * @param files An array of all files to be compiled
+   * @param buildDir the output directory for all the .class files.
+   *        null means output to the same directory as the source file
    */
-  protected void _compileFiles(File[] sourceRoots, File[] files) throws IOException {
-
+  protected void _compileFiles(File[] sourceRoots, File[] files, File buildDir) throws IOException {
     CompilerError[] errors = new CompilerError[0];
 
     CompilerInterface compiler
       = CompilerRegistry.ONLY.getActiveCompiler();
 
+    compiler.setBuildDirectory(buildDir);
     if (files.length > 0) {
       errors = compiler.compile(sourceRoots, files);
     }
@@ -290,6 +319,18 @@ public class DefaultCompilerModel implements CompilerModel {
   public File[] getSourceRootSet() {
     List<OpenDefinitionsDocument> defDocs =
       _getter.getDefinitionsDocuments();
+    return getSourceRootSet(defDocs);
+  }
+  
+  /**
+   * gets an array of all sourceRoots for the list of open definitions
+   * documents, without duplicates. Note that if any of hte open
+   * documents has an invalid package statement, it won't be  added
+   * to the source root set.
+   * @param defDocs the list of OpenDefinitionsDocuments to find
+   * the source roots of
+   */
+  public File[] getSourceRootSet(List<OpenDefinitionsDocument> defDocs){
     LinkedList<File> roots = new LinkedList<File>();
 
     for (int i = 0; i < defDocs.size(); i++) {
@@ -314,6 +355,25 @@ public class DefaultCompilerModel implements CompilerModel {
     return roots.toArray(new File[0]);
   }
 
+  /**
+   * This method would normally be called from the getter; however, 
+   * with the introduction of projects, the list of files that may not
+   * be modified is not known.  We pull the relevant documents from
+   * the getter and instead of calling it from there, we check it from
+   * here.
+   * @param defDocs the list of documents to check
+   * @return whether any of the given documents are modified
+   */
+  protected boolean _hasModifiedFiles(List<OpenDefinitionsDocument> defDocs) {
+    boolean hasModifiedFiles = false;
+    for(OpenDefinitionsDocument odd : defDocs){
+      if(odd.isProjectFile()){
+        hasModifiedFiles |= odd.isModifiedSinceSave();
+      }
+    }
+    return hasModifiedFiles;
+  }
+  
   //----------------------------- Error Results -----------------------------//
 
   /** Gets the CompilerErrorModel representing the last compile. */

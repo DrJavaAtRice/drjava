@@ -50,6 +50,7 @@ import java.io.*;
 import java.awt.print.*;
 import javax.swing.ProgressMonitor;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import junit.framework.TestResult;
 
 import edu.rice.cs.util.swing.FindReplaceMachine;
@@ -476,6 +477,10 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   }
 
   public boolean isProjectFile(){
+    return false;
+  }
+  
+  public boolean belongsHuh(Document doc){
     return false;
   }
 }

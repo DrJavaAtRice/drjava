@@ -1126,8 +1126,6 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
 
     _doc.getDocument().resetUndoManager();
     
-    // ADAM LOOK HERE
-
     getDocument().addUndoableEditListener(_undoListener);
     _undoAction.updateUndoState();
     _redoAction.updateRedoState();

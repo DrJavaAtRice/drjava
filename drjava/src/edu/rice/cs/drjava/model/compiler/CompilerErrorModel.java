@@ -55,6 +55,7 @@ import java.util.HashMap;
 import javax.swing.text.*;
 
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.drjava.model.FileGroupingState;
 import edu.rice.cs.drjava.model.IGetDocuments;
 import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -130,6 +131,9 @@ public class CompilerErrorModel<T extends CompilerError> {
       }
       public boolean hasModifiedDocuments() {
         return false;
+      }
+      public FileGroupingState getFileGroupingState(){
+        throw new IllegalStateException("No state to get!");
       }
     };
     _errors = empty;

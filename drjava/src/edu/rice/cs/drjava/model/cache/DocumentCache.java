@@ -68,7 +68,7 @@ public class DocumentCache{
    */
   LinkedList<OpenDefinitionsDocument> lru;
   
-  private int CACHE_SIZE = 20;
+  private int CACHE_SIZE = 4;
   
   public DocumentCache(){
     lru = new LinkedList<OpenDefinitionsDocument>();
@@ -109,6 +109,7 @@ public class DocumentCache{
 //        System.out.println("DocumentCache.java: 114: creating document from reconstructor for " + odd);
         retdoc = pair.getSecond().make();
         pair = new Pair<DefinitionsDocument,DDReconstructor>(retdoc, pair.getSecond());
+        table.remove(odd);
         table.put(odd, pair);
       }catch(BadLocationException e){
         throw new UnexpectedException(e);

@@ -111,6 +111,9 @@ public interface CompilerInterface {
    */ 
   void addToBootClassPath(File s);
   
+  /**
+   * sets the output directory, or null for default
+   */
   void setBuildDirectory(File dir);
   
 }

@@ -290,6 +290,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
     // Perhaps do this in another thread to allow startup to continue...
     _interpreterControl.startInterpreterJVM();
+    
+    setFileGroupingState(_makeFlatFileGroupingState());
   }
 
   /**
@@ -354,6 +356,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   public void setFileGroupingState(FileGroupingState state){
     _state = state;
+  }
+  
+  public FileGroupingState getFileGroupingState(){
+    return _state;
   }
   
   public FileGroupingState _makeProjectFileGroupingState(final File buildDir, final File projectRoot) { 
@@ -1554,13 +1560,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException{
           //          System.out.println("making doc" + ConcreteOpenDefDoc.this);
           DefinitionsDocument tempDoc;
-//          if(_undo != null){
-//            System.out.println("creating doc with undomanager for " + ConcreteOpenDefDoc.this);
-//            tempDoc = new DefinitionsDocument(_notifier, _undo);
-//          }else{
             tempDoc = new DefinitionsDocument(_notifier);
             tempDoc.setOpenDefDoc(ConcreteOpenDefDoc.this);
-//          }
             
           
           if(_file != null){
@@ -2571,6 +2572,23 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     
     public String toString() {
       return "(ODD " + _id + ":" + getFilename() + ")";
+    }
+    
+    
+    /**
+     * @param doc the document to test
+     * @return true if the document belongs to this open def doc
+     */
+    public boolean belongsHuh(Document doc){
+      return _belongsHuhHelper(doc);
+    }
+    
+    private boolean _belongsHuhHelper(Document doc){
+      return false;
+    }
+    
+    private boolean _belongsHuhHelper(DefinitionsDocument doc){
+      return (doc.getOpenDefDoc() == this);
     }
   }
 

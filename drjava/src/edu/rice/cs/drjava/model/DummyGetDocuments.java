@@ -79,4 +79,9 @@ public class DummyGetDocuments implements IGetDocuments {
     throw new UnsupportedOperationException
       ("Tried to call hasModifiedDocuments on a Dummy!");
   }
+  
+  public FileGroupingState getFileGroupingState(){
+    throw new UnsupportedOperationException
+      ("Tried to call getFileGroupingState on a Dummy!");
+  }
 }

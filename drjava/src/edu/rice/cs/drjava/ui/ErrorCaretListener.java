@@ -66,7 +66,6 @@ public class ErrorCaretListener implements CaretListener {
   private final OpenDefinitionsDocument _openDoc;
   private final DefinitionsPane _definitionsPane;
   protected final MainFrame _frame;
-  private final Document _document;
 
   /**
    * Constructs a new caret listener to highlight errors.
@@ -77,7 +76,6 @@ public class ErrorCaretListener implements CaretListener {
     _openDoc = doc;
     _definitionsPane = defPane;
     _frame = frame;
-    _document = doc.getDocument();
   }
 
   /**
@@ -154,7 +152,7 @@ public class ErrorCaretListener implements CaretListener {
     int errPos = pos.getOffset();
 
     try {
-      String text = _document.getText(0, _document.getLength());
+      String text = _openDoc.getDocument().getText(0, _openDoc.getDocument().getLength());
 
       // Look for the previous newline BEFORE this character. Thus start looking
       // on the character one before this character. If this is not the case,
@@ -167,7 +165,7 @@ public class ErrorCaretListener implements CaretListener {
 
       int nextNewline = text.indexOf('\n', errPos);
       if (nextNewline == -1) {
-        nextNewline = _document.getLength();
+        nextNewline = _openDoc.getDocument().getLength();
       }
 
       removeHighlight();

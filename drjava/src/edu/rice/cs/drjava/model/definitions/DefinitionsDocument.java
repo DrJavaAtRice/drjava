@@ -3087,4 +3087,12 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
      }
   }
   */
+  
+  /**
+   * used to help track down memory leaks
+   */
+//  protected void finalize() throws Throwable{
+//    System.out.println("done with document for " + _odd);
+//    super.finalize();
+//  }
 }

@@ -48,6 +48,7 @@ package edu.rice.cs.drjava.model;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import edu.rice.cs.drjava.model.FileGroupingState;
 
 /**
  * This interface encapsulates the behavior of a document store.
@@ -92,4 +93,10 @@ public interface IGetDocuments {
    * @return whether any documents have been modified
    */
   public boolean hasModifiedDocuments();
+  
+  
+  /**
+   * gets the project state
+   */
+  public FileGroupingState getFileGroupingState();
 }

@@ -50,6 +50,7 @@ import java.util.Vector;
 import java.io.*;
 import java.awt.print.*;
 import javax.swing.ProgressMonitor;
+import javax.swing.text.Document;
 import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.util.UnexpectedException;
@@ -373,4 +374,9 @@ public interface OpenDefinitionsDocument {
    */
   public void close();
 
+  /**
+   * @return true if the document belongs to this opendefintions document
+   * @param doc the document to test
+   */
+  public boolean belongsHuh(Document doc);
 }

@@ -66,7 +66,8 @@ public class CompilerProxy implements CompilerInterface {
 
   private final String _className;
   private final ClassLoader _newLoader;
-
+  private File _buildDir;
+  
   /**
    * These classes will always be loaded using the previous classloader.
    * This is important to make sure there is only one instance of them, so
@@ -104,6 +105,8 @@ public class CompilerProxy implements CompilerInterface {
       Class c = loader.loadClass(_className);
       _realCompiler = CompilerRegistry.createCompiler(c);
 
+      _realCompiler.setBuildDirectory(_buildDir);
+      
       StringBuffer newclasspath = new StringBuffer();
       Vector<File> cp = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
       //if(cp!=null) {
@@ -235,9 +238,9 @@ public class CompilerProxy implements CompilerInterface {
   /**
    * sets the build directory for the compilers
    */
-  public void setBuildDirectory(File builddir){
-    // !!!
-    // fill in soon
+  public void setBuildDirectory(File buildDir){
+    _realCompiler.setBuildDirectory(buildDir);
+    _buildDir = buildDir;
   }
   
 }
