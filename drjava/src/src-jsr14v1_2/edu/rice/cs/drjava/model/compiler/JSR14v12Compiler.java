@@ -182,12 +182,17 @@ public class JSR14v12Compiler extends Javac141Compiler {
     }
   }
 
+  /**
+   * Both JSR-14 v1.2 and v1.3 have 12+ anonymous inner classes of Main, and
+   * JDK1.4.2 tools.jar only has 10.  In JSR-14 v2.x there is no v8 in the
+   * classnames, so hopefully this method is secure in all current platforms.
+   */
   public boolean isAvailable() {
     try {
-      Class.forName("com.sun.tools.javac.v8.Main$10");
+      Class.forName("com.sun.tools.javac.v8.Main$12");
       try {
         Class.forName("java.lang.Enum");
-        // not available since jsr14 v2.0 is on the boot classpath
+        // only available if jsr14 v2.x is on the boot classpath
         return false;
       }
       catch (Throwable t) {
