@@ -570,6 +570,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   public void resetInteractions() {
     // Keep a note that we're resetting so that the exit message is not displayed
     _interpreterControl.setIsResetting(true);
+    if (_debugManager != null)
+      _debugManager.shutdown();
     _interpreterControl.restartInterpreterJVM();
     _restoreInteractionsState();
     _interpreterControl.setIsResetting(false);

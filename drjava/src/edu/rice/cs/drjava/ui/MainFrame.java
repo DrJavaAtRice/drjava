@@ -868,11 +868,11 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   public void toggleDebugger() {
     // Make sure the debugger is available
-    if (_debugPanel == null) return;
+    DebugManager debugger = _model.getDebugManager();
+    if (debugger == null) return;
 
     try {
-      DebugManager debugger = _model.getDebugManager();
-      if (debugger.isReady()) {
+      if (_inDebugMode()) {//debugger.isReady()) {
         // Turn off debugger
         debugger.shutdown();
         hideDebugger();
@@ -1559,7 +1559,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * more legible on the higher calling level, i.e., the constructor.
    */
   private void _setUpMenuBar() {
-    boolean showDebugger = (_debugPanel != null);
+    boolean showDebugger = (_model.getDebugManager() != null);
 
     // Get proper cross-platform mask.
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -2096,7 +2096,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _findReplace = new FindReplaceDialog(this, _model);
 
     // Try to create debug panel (see if JSwat is around)
-    if (_model.getDebugManager() != null) {
+    /*if (_model.getDebugManager() != null) {
       try {
         _debugPanel = new DebugPanel(_model, this);
       }
@@ -2106,7 +2106,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     } else {
       _debugPanel = null;
-    }
+    }*/
 
     _junitPanel = new JUnitPanel(_model, this);
     _tabbedPane = new JTabbedPane();
@@ -2525,8 +2525,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     public void interactionsReset() {
-      if (_debugPanel != null) {
-        _model.getDebugManager().shutdown();
+      DebugManager dm = _model.getDebugManager();
+      if (dm != null) {
+        dm.shutdown();
         hideDebugger();
       }
       interactionEnded();
@@ -2767,6 +2768,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (n==JOptionPane.YES_OPTION){ return true;}
     else {return false;}
     
+  }
+  
+  private boolean _inDebugMode() {
+    DebugManager dm = _model.getDebugManager();
+    if (dm != null)
+      return dm.isReady();
+    else
+      return false;
   }
   
   /**

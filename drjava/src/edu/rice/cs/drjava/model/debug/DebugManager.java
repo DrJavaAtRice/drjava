@@ -149,6 +149,8 @@ public class DebugManager {
   public void startup() throws DebugException {
     if (!isReady()) {
       _attachToVM();
+      EventHandler eventHandler = new EventHandler(this, _vm);
+      eventHandler.start();
       
       //_vm.setDebugTraceMode(0);
       //String[] excludes = {"java.*", "javax.*", "sun.*", "com.sun.*", "koala.*"};
@@ -161,8 +163,14 @@ public class DebugManager {
   
   public void shutdown() {
     if (isReady()) {
-      _vm.dispose();
-      _vm = null;
+      try {
+        _vm.dispose();
+      }
+      catch (VMDisconnectedException vmde) {
+      }
+      finally {
+        _vm = null;
+      }
     }
   }
   
@@ -415,7 +423,7 @@ public class DebugManager {
       }
       Location loc = (Location) lines.get(0);
       BreakpointRequest req = _eventManager.createBreakpointRequest(loc);
-      req.setSuspendPolicy(EventRequest.SUSPEND_ALL);
+      req.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
       req.enable();
       //System.out.println("Breakpoint: " + req);
       return true;
