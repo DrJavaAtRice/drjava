@@ -42,6 +42,7 @@ package edu.rice.cs.drjava.ui.config;
 import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.event.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 import java.awt.event.*;
 import java.awt.*;
@@ -107,11 +108,20 @@ public class ConfigFrame extends JFrame {
       _tree.setSelectionPath(path);
     }
     
-    JScrollPane treeScroll = new JScrollPane(_tree);    
+    JScrollPane treeScroll = new JScrollPane(_tree);
+    JPanel treePanel = new JPanel();
+    treePanel.setLayout(new BorderLayout());
+    treePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+                                                         "Categories"));
+    treePanel.add(treeScroll, BorderLayout.CENTER);
+    cp.add(treePanel, BorderLayout.WEST);
+    cp.add(_mainPanel, BorderLayout.CENTER);
+    /*
     _splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                 treeScroll,
                                 _mainPanel);
     cp.add(_splitPane, BorderLayout.CENTER);
+    */
     
     _okButton = new JButton("OK");
     _okButton.addActionListener(new ActionListener() {
@@ -156,6 +166,7 @@ public class ConfigFrame extends JFrame {
 
     // Add buttons
     JPanel bottom = new JPanel();
+    bottom.setBorder(new EmptyBorder(5,5,5,5));
     bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
     bottom.add(Box.createHorizontalGlue());
     //bottom.add(_saveSettingsButton);
@@ -188,9 +199,9 @@ public class ConfigFrame extends JFrame {
     int width = getWidth() / 4;
     //System.out.println("width: " + getWidth());
     //System.out.println("width for divider: " + width);
-    _splitPane.setDividerLocation(width);
-    _mainPanel.setPreferredSize(new Dimension(getWidth() - width,
-                                              _splitPane.getHeight()));
+    //_splitPane.setDividerLocation(width);
+    //_mainPanel.setPreferredSize(new Dimension(getWidth() - width,
+    //                                          _splitPane.getHeight()));
     addWindowListener(new WindowAdapter() { 
       public void windowClosing(java.awt.event.WindowEvent e) { 
         cancel();

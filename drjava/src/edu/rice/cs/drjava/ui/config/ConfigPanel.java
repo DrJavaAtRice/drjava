@@ -42,6 +42,7 @@ package edu.rice.cs.drjava.ui.config;
 import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.event.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.event.*;
 import java.awt.*;
 
@@ -55,7 +56,8 @@ import gj.util.Hashtable;
  */
 public class ConfigPanel extends JPanel {
   
-  protected JLabel _title;
+  //protected JLabel _title;
+  protected String _title;
   protected Vector<OptionComponent> _components;
   
   /**
@@ -63,13 +65,15 @@ public class ConfigPanel extends JPanel {
    * @param title the title for this panel
    */
   public ConfigPanel(String title) {
-    _title = new JLabel(title);
+    //_title = new JLabel(title);
+    _title = title;
     _components = new Vector<OptionComponent>();
     
   }
   
   public String getTitle() {
-    return _title.getText();
+    //return _title.getText();
+    return _title;
   }
   
   /**
@@ -82,7 +86,9 @@ public class ConfigPanel extends JPanel {
   
   public void displayComponents() {
     this.setLayout(new BorderLayout());
-    this.add(_title, BorderLayout.NORTH);
+    //this.add(_title, BorderLayout.NORTH);
+    setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+                                               _title));
 
     JPanel panel = new JPanel();  // sits in scrollpane and compresses layout
     panel.setLayout(new BorderLayout());
@@ -106,7 +112,7 @@ public class ConfigPanel extends JPanel {
       OptionComponent comp = _components.elementAt(i);
       
       c.weightx = 0.0;
-      c.gridwidth = 1; 
+      c.gridwidth = 1;
       c.insets = labelInsets;
       
       JLabel label= comp.getLabel();
@@ -119,7 +125,7 @@ public class ConfigPanel extends JPanel {
       
       JComponent otherC = comp.getComponent();
       gridbag.setConstraints(otherC, c);
-      panel2.add(otherC);      
+      panel2.add(otherC);
     }
     /*
      for (int i=0; i<_components.size(); i++) {
@@ -133,7 +139,11 @@ public class ConfigPanel extends JPanel {
         resetToDefault();
       }
     });
-    panel.add(_resetToDefaultButton, BorderLayout.SOUTH);
+    JPanel resetPanel = new JPanel();
+    resetPanel.setLayout(new FlowLayout());
+    resetPanel.setBorder(new EmptyBorder(5,5,5,5));
+    resetPanel.add(_resetToDefaultButton);
+    panel.add(resetPanel, BorderLayout.SOUTH);
     
     this.add(scroll, BorderLayout.CENTER);
   }
