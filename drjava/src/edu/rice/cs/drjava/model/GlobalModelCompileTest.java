@@ -160,6 +160,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     }
     assertCompileErrorsPresent(_name(), false);
     listener.checkCompileOccurred();
+    _model.removeListener(listener);
   }
 
   
@@ -191,6 +192,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     }
     assertCompileErrorsPresent(_name(), false);
     listener.checkCompileOccurred();
+    _model.removeListener(listener);
   }
 
   /**
@@ -228,6 +230,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     File compiled2 = classForJava(file2, "DrJavaTestBar");
     assertTrue(_name() + "Bar Class file doesn't exist after compile", 
                compiled2.exists());
+    _model.removeListener(listener);
   }
   
   /**
@@ -264,6 +267,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     assertEquals(_name() + "Class file exists after failing compile (2)",
                  false,
                  compiled2.exists());
+    _model.removeListener(listener);
   }
 
   /**
@@ -307,6 +311,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     File compiled = classForJava(foo2File, "DrJavaTestFoo2");
     assertTrue(_name() + "Class file doesn't exist after compile",
                compiled.exists());
+    _model.removeListener(listener);
   }
 
   /**
@@ -350,7 +355,8 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
       fail("compile failed: " + getCompilerErrorString());
     }
     assertCompileErrorsPresent(_name(), false);
-    listener.checkCompileOccurred();
+    listener2.checkCompileOccurred();
+    _model.removeListener(listener2);
 
     // Make sure .class exists
     File compiled = classForJava(foo2File, "DrJavaTestFoo2");
@@ -382,6 +388,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     assertEquals(_name() + "Class file exists after failing compile",
                  false,
                  compiled.exists());
+    _model.removeListener(listener);
   }
 
   /**
@@ -409,6 +416,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     assertEquals(_name() + "Class file exists after failing compile",
                  false,
                  compiled.exists());
+    _model.removeListener(listener);
   }
 
   /**
@@ -429,6 +437,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
 
     File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue(_name() + "Class file exists after compile?!", !compiled.exists());
+    _model.removeListener(listener);
   }
 
   /**
@@ -467,6 +476,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     assertEquals("CompilerErrorModel has errors after reset", 
                  0,
                  cem.getNumErrors());
+    _model.removeListener(listener);
   }
 
   /**
@@ -493,6 +503,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     listener.assertSaveAllBeforeProceedingCount(1);
     assertModified(true, doc);
     assertContents(FOO_TEXT, doc);
+    _model.removeListener(listener);
   }
 
   /**
@@ -523,6 +534,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     assertModified(true, doc2);
     assertContents(FOO_TEXT, doc);
     assertContents(BAR_TEXT, doc2);
+    _model.removeListener(listener);
   }
 
   /**
@@ -601,6 +613,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     // Make sure .class exists
     File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
+    _model.removeListener(listener);
   }
 
   /**
@@ -687,6 +700,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     // Make sure .class exists
     File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
+    _model.removeListener(listener);
   }
 
   /**
@@ -795,6 +809,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     // Make sure .class exists
     File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue(_name() + "Class file shouldn't exist after compile", !compiled.exists());
+    _model.removeListener(listener);
   }
   
   /**
@@ -825,6 +840,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     
     listener.checkCompileOccurred();
     listener2.checkCompileOccurred();
+    _model.removeListener(listener2);
     assertCompileErrorsPresent(_name(), false);
     
     // Make sure .class exists
@@ -901,6 +917,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     assertCompileErrorsPresent(_name(), true);
     //    assertEquals("Should have 2 compiler errors", 2, _model.getNumErrors());
     listener.checkCompileOccurred();
+    _model.removeListener(listener);
 
     //TODO: rewrite these lines for the new interface
     //Position[] positions = doc.getCompilerErrorModel().getPositions();
@@ -941,6 +958,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
       }
       assertCompileErrorsPresent(_name(), false);
       listener.checkCompileOccurred();
+      _model.removeListener(listener);
       
       // Make sure .class exists
       File compiled = classForJava(file, "DrJavaTestFooGenerics");

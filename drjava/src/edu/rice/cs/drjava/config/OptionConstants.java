@@ -556,7 +556,7 @@ public interface OptionConstants {
      }).evaluate();
   
   /**
-   * The highest access level of classes and members to include in the javadoc.
+   * The lowest access level of classes and members to include in the javadoc.
    */
   public static final ForcedChoiceOption JAVADOC_ACCESS_LEVEL = 
     new ForcedChoiceOption("javadoc.access.level", "protected", accessLevelChoices);
@@ -592,7 +592,11 @@ public interface OptionConstants {
    * The version of Java to use for links to Javadoc for system classes.
    */
   public static final ForcedChoiceOption JAVADOC_LINK_VERSION =
-    new ForcedChoiceOption("javadoc.link.version", "1.3", linkVersionChoices);
+    new ForcedChoiceOption("javadoc.link.version", 
+                           (System.getProperty("java.specification.version").equals("1.3") ?
+                              JAVADOC_1_3_TEXT :
+                              JAVADOC_1_4_TEXT),
+                           linkVersionChoices);
   
   /**
    * Whether to include the entire package heirarchy from the source roots when

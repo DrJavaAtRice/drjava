@@ -296,9 +296,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     // Try to connect on our debug port
     Map args = connector.defaultArguments();
     Connector.Argument port = (Connector.Argument) args.get("port");
+    Connector.Argument host = (Connector.Argument) args.get("hostname");
     try {
       int debugPort = _model.getDebugPort();
       port.setValue("" + debugPort);
+      host.setValue("127.0.0.1"); // necessary if hostname can't be resolved
+      System.out.println("args: " + args);
       _vm = connector.attach(args);
       _eventManager = _vm.eventRequestManager();
     }

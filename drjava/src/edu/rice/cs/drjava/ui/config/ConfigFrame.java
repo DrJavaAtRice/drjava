@@ -397,27 +397,28 @@ public class ConfigFrame extends JFrame {
     FileOptionComponent javacLoc =
       new FileOptionComponent(OptionConstants.JAVAC_LOCATION,
                               "Tools.jar Location", this,
-                              "Specifies the location of tools.jar or your compiler class files or jar.",
+                              "Location of the JDK's tools.jar, which contains the compiler and debugger.",
                               _fileOptionChooser);
     javacLoc.setFileFilter(ClasspathFilter.ONLY);
     panel.addComponent(javacLoc);
     FileOptionComponent jsr14Loc =
       new FileOptionComponent(OptionConstants.JSR14_LOCATION,
-                              "JSR14 Location", this,
-                              "Specifies the location of your JSR-14 compiler class files or jar.",
+                              "JSR-14 Location", this,
+                              "Location of the JSR-14 compiler, for compiling with generics.",
                               _fileOptionChooser);
     jsr14Loc.setFileFilter(ClasspathFilter.ONLY);
     panel.addComponent(jsr14Loc);
     FileOptionComponent jsr14Col = 
       new FileOptionComponent(OptionConstants.JSR14_COLLECTIONSPATH,
-                              "JSR14 Collections Path", this,
-                               "Specifies the location of your JSR-14 collections class files or jar.",
+                              "JSR-14 Collections Path", this,
+                               "Location of the JSR-14 collect.jar file, which contains the collection classes.",
                              _fileOptionChooser);
     jsr14Col.setFileFilter(ClasspathFilter.ONLY);
     panel.addComponent(jsr14Col);
     panel.addComponent(new VectorOptionComponent(OptionConstants.EXTRA_CLASSPATH,
                                                  "Extra Classpath", this,
-                                                 "Specifies the extra classpath<br>for the interactions pane."));
+                                                 "<html>Any directories or jar files to add to the classpath<br>"+
+                                                 "of the Compiler and Interactions Pane.</html>"));
     panel.displayComponents();
   }
   
@@ -428,11 +429,10 @@ public class ConfigFrame extends JFrame {
 
     //ToolbarOptionComponent is a degenerate option component
     panel.addComponent(new ToolbarOptionComponent("Toolbar Buttons", this,
-                                                  "<html>Configures what to show in the toolbar buttons<br>" +
-                                                  "that have both text and an icon available.</html>"));
+                                                  "How to display the toolbar buttons."));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.LINEENUM_ENABLED,
                                                   "Line Number Enumeration", this,
-                                                  "Shows line numbers on the left side of the definitions pane."));
+                                                  "Whether to show line numbers on the left side of the Definitions Pane."));
     panel.displayComponents();
   }
    
@@ -440,11 +440,15 @@ public class ConfigFrame extends JFrame {
    * Add all of the components for the Font panel of the preferences window.
    */ 
   private void _setupFontPanel(ConfigPanel panel) {
-    panel.addComponent(new FontOptionComponent(OptionConstants.FONT_MAIN, "Main Font", this) );
-    panel.addComponent(new FontOptionComponent(OptionConstants.FONT_DOCLIST, "Document List Font", this));
-    panel.addComponent(new FontOptionComponent(OptionConstants.FONT_TOOLBAR, "Toolbar Font", this));
+    panel.addComponent(new FontOptionComponent(OptionConstants.FONT_MAIN, "Main Font", this,
+                                               "The font used for most text in DrJava."));
+    panel.addComponent(new FontOptionComponent(OptionConstants.FONT_DOCLIST, "Document List Font", this,
+                                               "The font used in the list of open documents."));
+    panel.addComponent(new FontOptionComponent(OptionConstants.FONT_TOOLBAR, "Toolbar Font", this,
+                                               "The font used in the toolbar buttons."));
     if (CodeStatus.DEVELOPMENT) {
-      panel.addComponent(new BooleanOptionComponent(OptionConstants.TEXT_ANTIALIAS, "Use anti-aliased text in Definitions", this));
+      panel.addComponent(new BooleanOptionComponent(OptionConstants.TEXT_ANTIALIAS, "Use anti-aliased text in Definitions", this,
+                                                    "Whether to graphically smooth the text in the Definitions Pane."));
     }
     panel.displayComponents(); 
   }
@@ -453,18 +457,30 @@ public class ConfigFrame extends JFrame {
    * Adds all of the components for the Color panel of the preferences window.
    */
   private void _setupColorPanel(ConfigPanel panel) {
-    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color", this));
-    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_KEYWORD_COLOR, "Keyword Color", this));
-    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_TYPE_COLOR, "Type Color", this));
-    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_COMMENT_COLOR, "Comment Color", this));
-    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, "Double-quoted Color", this));
-    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, "Single-quoted Color", this));
-    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_NUMBER_COLOR, "Number Color", this));
-    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_BACKGROUND_COLOR, "Background Color", this, true));
-    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_MATCH_COLOR, "Brace-matching Color", this, true));
-    panel.addComponent(new ColorOptionComponent(OptionConstants.COMPILER_ERROR_COLOR, "Compiler Error Color", this, true));
-    panel.addComponent(new ColorOptionComponent(OptionConstants.DEBUG_BREAKPOINT_COLOR, "Debugger Breakpoint Color", this, true));
-    panel.addComponent(new ColorOptionComponent(OptionConstants.DEBUG_THREAD_COLOR, "Debugger Location Color", this, true));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color", this,
+                                                "The default color for text in the Definitions Pane."));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_KEYWORD_COLOR, "Keyword Color", this,
+                                                "The color for Java keywords in the Definitions Pane."));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_TYPE_COLOR, "Type Color", this,
+                                                "The color for classes and types in the Definitions Pane."));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_COMMENT_COLOR, "Comment Color", this,
+                                                "The color for comments in the Definitions Pane."));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, "Double-quoted Color", this,
+                                                "The color for quoted strings (eg. \"...\") in the Definitions Pane."));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, "Single-quoted Color", this,
+                                                "The color for quoted characters (eg. 'a') in the Definitions Pane."));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_NUMBER_COLOR, "Number Color", this,
+                                                "The color for numbers in the Definitions Pane."));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_BACKGROUND_COLOR, "Background Color", this, 
+                                                "The background color of the Definitions Pane.", true));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_MATCH_COLOR, "Brace-matching Color", this,
+                                                "The color for matching brace highlights in the Definitions Pane.", true));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.COMPILER_ERROR_COLOR, "Compiler Error Color", this,
+                                                "The color for compiler error highlights in the Definitions Pane.", true));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEBUG_BREAKPOINT_COLOR, "Debugger Breakpoint Color", this,
+                                                "The color for breakpoints in the Definitions Pane.", true));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEBUG_THREAD_COLOR, "Debugger Location Color", this,
+                                                "The color for the location of the current suspended thread in the Definitions Pane.", true));
     panel.displayComponents();
   }
   
@@ -482,8 +498,16 @@ public class ConfigFrame extends JFrame {
     while (e.hasMoreElements()) {
       tmpKsd = (KeyStrokeData) e.nextElement();
       if (tmpKsd.getOption() != null) {
+        // Get the tooltip, or default to its name, if none
+        KeyStroke ks = tmpKsd.getKeyStroke();
+        Action a = KeyBindingManager.Singleton.get(ks);
+        String desc = (String) a.getValue(Action.SHORT_DESCRIPTION);
+        if ((desc == null) || (desc.equals(""))) {
+          desc = tmpKsd.getName();
+        }
+        
         tmpKsoc = new KeyStrokeOptionComponent((KeyStrokeOption)tmpKsd.getOption(),
-                                               tmpKsd.getName(), this);
+                                               tmpKsd.getName(), this, desc);
         if (tmpKsoc != null) { 
           _comps.add(tmpKsoc);
         }
@@ -521,8 +545,8 @@ public class ConfigFrame extends JFrame {
     VectorOptionComponent sourcePath =
       new VectorOptionComponent(OptionConstants.DEBUG_SOURCEPATH, 
                                 "Sourcepath", this,
-                                "<html>Specifies extra locations in which the<br>" +
-                                "debugger should look for java source files.</html>");
+                                "<html>Any directories in which to search for source<br>" +
+                                "files when stepping in the Debugger.</html>");
     // Source path can only include directories
     sourcePath.setFileFilter(new FileFilter() {
       public boolean accept(File f) {
@@ -542,22 +566,23 @@ public class ConfigFrame extends JFrame {
     panel.addComponent(sourcePath);
     panel.addComponent(new BooleanOptionComponent(OptionConstants.DEBUG_SHOW_THREADS,
                                                   "Show Current Threads Tab", this,
-                                                  "Shows a tab in the debugger displaying the currently running threads."));
+                                                  "Whether to show a tab in the Debugger displaying the current threads."));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.DEBUG_STEP_JAVA, 
                                                   "Step Into Java Classes", this,
-                                                  "<html>Specifies that the debugger should step into java classes,<br>" +
+                                                  "<html>Whether the Debugger should step into Java library classes,<br>" +
                                                   "including java.*, javax.*, sun.*, com.sun.*, and com.apple.mrj.*</html>"));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.DEBUG_STEP_INTERPRETER, 
                                                   "Step Into Interpreter Classes", this,
-                                                  "Specifies that the debugger should step into DynamicJava classes."));
+                                                  "<html>Whether the Debugger should step into the classes<br>" +
+                                                  "used by the Interactions Pane (DynamicJava).</html>"));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.DEBUG_STEP_DRJAVA,
                                                   "Step Into DrJava Classes", this,
-                                                  "Specifies that the debugger should step into DrJava classes."));
+                                                  "Whether the Debugger should step into DrJava's own class files."));
     panel.addComponent(new StringOptionComponent(OptionConstants.DEBUG_STEP_EXCLUDE,
                                                  "Classes/Packages To Exclude", this,
-                                                 "<html>Specifies classes that the debuggger should not step into.<br>" +
-                                                 "Should be a comma-separated list of fully-qualified classnames.<br>" +
-                                                 "To exclude an entire package, specify packagename.* in the list.</html>"));
+                                                 "<html>Any classes that the debuggger should not step into.<br>" +
+                                                 "Should be a comma-separated list of fully-qualified class names.<br>" +
+                                                 "To exclude a package, specify packagename.* in the list.</html>"));
     
     panel.displayComponents();
   }
@@ -569,39 +594,39 @@ public class ConfigFrame extends JFrame {
     panel.addComponent
       (new ForcedChoiceOptionComponent(OptionConstants.JAVADOC_ACCESS_LEVEL,
                                        "Access Level", this,
-                                       "Specifies the access level that Javadoc will use."));
+                                       "The lowest access level to include for fields and methods."));
     panel.addComponent
       (new ForcedChoiceOptionComponent(OptionConstants.JAVADOC_LINK_VERSION,
-                                       "System Javadoc Links Version", this,
-                                       "Specifies the versino of Javadoc that is available on your system."));
+                                       "Java Version for Javadoc Links", this,
+                                       "The version of Java for generating links to online Javadoc documentation."));
     panel.addComponent
       (new StringOptionComponent(OptionConstants.JAVADOC_1_3_LINK,
                                  "Javadoc 1.3 URL", this,
-                                 "<html>Specifies the URL of the Java 1.3 API<br>" +
-                                 "so Javadoc can link to Java classes.</html>"));
+                                 "The URL to the Java 1.3 API, for generating links to library classes."));
     panel.addComponent
       (new StringOptionComponent(OptionConstants.JAVADOC_1_4_LINK,
                                  "Javadoc 1.4 URL", this,
-                                 "<html>Specifies the URL of the Java 1.4 API<br>" +
-                                 "so Javadoc can link to Java classes.</html>"));
+                                 "The URL to the Java 1.4 API, for generating links to library classes."));
     
     panel.addComponent
       (new BooleanOptionComponent(OptionConstants.JAVADOC_FROM_ROOTS,
                                   "Generate Javadoc From Source Roots", this,
-                                  "Specifies that Javadoc should be generated from the source roots."));
+                                  "<html>Whether Javadoc should be generated for all packages in<br>" +
+                                  "an open document's source tree, rather than just the document's<br>" +
+                                  "own package and sub-packages.</html>"));
     panel.addComponent
       (new StringOptionComponent(OptionConstants.JAVADOC_CUSTOM_PARAMS,
                                  "Custom Javadoc Parameters", this,
-                                 "Specifies extra parameters that should be passed to Javadoc."));
+                                 "Any extra parameters to pass to Javadoc."));
     panel.addComponent
       (new FileOptionComponent(OptionConstants.JAVADOC_DESTINATION,
                                "Default Destination Directory", this,
-                               "Specifies the default directory into which Javadoc should be generated",
+                               "The default directory for saving Javadoc documentation.",
                                _fileOptionChooser));
     panel.addComponent
       (new BooleanOptionComponent(OptionConstants.JAVADOC_PROMPT_FOR_DESTINATION,
                                   "Always Prompt For Destination", this,
-                                  "Specifies that Javadoc should always ask for the destination."));
+                                  "Whether Javadoc should always prompt the user for the destination directory."));
     
     panel.displayComponents();
   }
@@ -612,11 +637,11 @@ public class ConfigFrame extends JFrame {
   private void _setupMiscPanel(ConfigPanel panel) {
     panel.addComponent(new IntegerOptionComponent(OptionConstants.INDENT_LEVEL,
                                                   "Indent Level", this,
-                                                  "Specifies the indentation level DrJava's indenter should use."));
+                                                  "The number of spaces to use for each level of indentation."));
     FileOptionComponent workDir = 
       new FileOptionComponent(OptionConstants.WORKING_DIRECTORY,
                               "Working Directory", this,
-                              "Specifies the directory that DrJava should consider the current working directory.",
+                              "The directory that DrJava should consider the current working directory.",
                               _fileOptionChooser);
     workDir.setFileFilter(new FileFilter() {
       public boolean accept(File f) {
@@ -635,20 +660,20 @@ public class ConfigFrame extends JFrame {
     });
     panel.addComponent(workDir);
     panel.addComponent(new IntegerOptionComponent(OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this,
-                                                  "Specifies that maximum number of interactions that will be kept in the history."));
+                                                  "The number of interactions to remember in the history."));
     panel.addComponent(new IntegerOptionComponent(OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this,
-                                                  "<html>Specifies the number of files to remember<br>" +
-                                                  "in the recently used files list in the File menu.</html>"));
+                                                  "<html>The number of files to remember in<br>" +
+                                                  "the recently used files list in the File menu.</html>"));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.JAVAC_ALLOW_ASSERT, "Allow Assert Keyword in Java 1.4", this,
-                                                  "<html>Specifies that the <code>assert</code> keyword should be allowed under Java 1.4.</html>"));
+                                                  "<html>Whether to allow the <code>assert</code> keyword when compiling in Java 1.4.</html>"));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.INTERACTIONS_EXIT_PROMPT, "Prompt if Interactions Pane Exits Unexpectedly", this,
-                                                  "<html>Specifies that DrJava should bring up a dialog<br>" +
-                                                  "if the interactions pane is exits unexpectedly.</html>"));
+                                                  "<html>Whether DrJava should show a dialog box if a program<br>" +
+                                                  "in the Interactions Pane exits without the user clicking Reset.</html>"));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.QUIT_PROMPT, "Prompt Before Quit", this,
-                                                  "Specifies that DrJava should bring up a confirm dialog before exiting."));
+                                                  "Whether DrJava should prompt the user before quitting."));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.BACKUP_FILES, "Keep emacs style backup files", this,
-                                                  "<html>Specifies that DrJava should keep a backup copy of each<br>" +
-                                                  "open file, named with a tilde (~) at the end of the filename.</html>"));
+                                                  "<html>Whether DrJava should keep a backup copy of each file that<br>" +
+                                                  "the user modifies, saved with a '~' at the end of the filename.</html>"));
     
     panel.displayComponents();
   }
