@@ -1090,8 +1090,10 @@ public class MainFrame extends JFrame {
    * document.  Registered with the definitionspane.
    **/
   private class PositionListener implements CaretListener {
-   
+    
     public void caretUpdate( CaretEvent ce ) {
+      _model.getActiveDocument().
+        syncCurrentLocationWithDefinitions(ce.getDot());
       updateLocation();
     }
     
