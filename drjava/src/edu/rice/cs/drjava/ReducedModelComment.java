@@ -1996,5 +1996,3 @@ public class ReducedModelComment
 			return _highlightChanged;
 		}
 }
-
-// comment to make it different
