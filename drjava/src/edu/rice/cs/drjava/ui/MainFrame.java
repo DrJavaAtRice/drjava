@@ -683,6 +683,7 @@ public class MainFrame extends JFrame {
           return true;
         case JOptionPane.NO_OPTION:
           return true;
+        case JOptionPane.CLOSED_OPTION:
         case JOptionPane.CANCEL_OPTION:
           return false;
         default:
