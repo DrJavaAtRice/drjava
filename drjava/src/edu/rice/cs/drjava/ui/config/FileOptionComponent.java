@@ -63,7 +63,8 @@ public class FileOptionComponent extends OptionComponent<File>
   private FileFilter _fileFilter;  // null if not customized
   private JPanel _panel;
   
-  public FileOptionComponent (FileOption opt, String text, Frame parent) {
+  public FileOptionComponent (FileOption opt, String text,
+                              Frame parent, JFileChooser jfc) {
     super(opt, text, parent);
     _button = new JButton();
     _button.addActionListener(new ActionListener() {
@@ -88,16 +89,8 @@ public class FileOptionComponent extends OptionComponent<File>
     _currentFile = DrJava.getConfig().getSetting(_option);
     _newFile = _currentFile;
     _updateTextField(_currentFile);
-    
-    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
-       
-    if (workDir == FileOption.NULL_FILE) {
-      workDir = new File( System.getProperty("user.dir"));
-    }
-    if (workDir.isFile() && workDir.getParent() != null) {
-      workDir = workDir.getParentFile();
-    }
-    _jfc = new JFileChooser(workDir);
+
+    _jfc = jfc;
     _fileFilter = null;
     
     _panel = new JPanel();
@@ -173,14 +166,10 @@ public class FileOptionComponent extends OptionComponent<File>
    * Shows a file chooser to pick a new file.  Allows picking directories.
    */
   public void chooseFile() {
-
     if (_newFile != FileOption.NULL_FILE && _newFile.getParent() != null) {
-      _jfc.setCurrentDirectory( new File(_newFile.getParent()));
+      _jfc.setCurrentDirectory(new File(_newFile.getParent()));
     }
     
-    _jfc.setDialogTitle("Select");
-    _jfc.setApproveButtonText("Select");
-    _jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     if (_fileFilter != null) {
       _jfc.setFileFilter(_fileFilter);
     }
@@ -193,7 +182,6 @@ public class FileOptionComponent extends OptionComponent<File>
       _newFile = c;
       _updateTextField(_newFile);
     }
-    
   }
     
   /**

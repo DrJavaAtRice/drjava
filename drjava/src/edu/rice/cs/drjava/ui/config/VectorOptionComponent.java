@@ -68,6 +68,7 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
   private JButton _moveDownButton;
   private DefaultListModel _listModel;
   private FileFilter _fileFilter;
+  private JFileChooser _jfc;
   
   public VectorOptionComponent (VectorOption<File> opt, String text, Frame parent) {
     super(opt, text, parent);
@@ -75,8 +76,11 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
     //set up list
     _listModel = new DefaultListModel();
     _list = new JList(_listModel);
+    _list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
     resetToCurrent();
-    _fileFilter = new ClasspathFilter();
+    _fileFilter = ClasspathFilter.ONLY;
+
     /*
     Vector v = DrJava.getConfig().getSetting(_option);
     String[] array = new String[v.size()];
@@ -87,6 +91,20 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
     }
     */
     
+    // set up JFileChooser
+    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
+    if (workDir == FileOption.NULL_FILE) {
+      workDir = new File( System.getProperty("user.dir"));
+    }
+    if (workDir.isFile() && workDir.getParent() != null) {
+      workDir = workDir.getParentFile();
+    }
+    _jfc = new JFileChooser(workDir);
+    _jfc.setDialogTitle("Select");
+    _jfc.setApproveButtonText("Select");
+    _jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+    _jfc.setMultiSelectionEnabled(true);
+
     _addButton = new JButton("Add");
     _addButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
@@ -125,7 +143,7 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
         }
       }
     });
-    
+
     _moveDownButton = new JButton("Move Down");
     _moveDownButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
@@ -140,7 +158,7 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
         }
       }
     });
-    
+
     JPanel buttons = new JPanel();
     //buttons.setLayout(new BoxLayout(buttons, BoxLayout.X_AXIS));
     //buttons.add(Box.createGlue());
@@ -190,7 +208,9 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
   /**
    * Return's this OptionComponent's configurable component.
    */
-  public JComponent getComponent() { return _panel; }
+  public JComponent getComponent() {
+    return _panel;
+  }
   
   /**
    * Set the file filter for this vector option component
@@ -203,27 +223,25 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
    * Shows a file chooser for adding a file to the element.
    */
   public void chooseFile() {
-    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
-        
-    if (workDir == FileOption.NULL_FILE) {
-      workDir = new File( System.getProperty("user.dir"));
+    File selection = (File) _list.getSelectedValue();
+    if (selection != null) {
+      File parent = selection.getParentFile();
+      if (parent != null) {
+        _jfc.setCurrentDirectory(parent);
+      }
     }
-    if (workDir.isFile() && workDir.getParent() != null) {
-      workDir = workDir.getParentFile();
+
+    _jfc.setFileFilter(_fileFilter);
+
+    File[] c = null;
+    int returnValue = _jfc.showDialog(_parent, null);
+    if (returnValue == JFileChooser.APPROVE_OPTION) {
+      c = _jfc.getSelectedFiles();
     }
-    JFileChooser jfc = new JFileChooser(workDir);
-    jfc.setDialogTitle("Select");
-    jfc.setApproveButtonText("Select");
-    jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-    jfc.setFileFilter(_fileFilter);
-    File c = null;
-    int returnValue = jfc.showDialog(_parent,
-                                     null);
-    if (returnValue == JFileChooser.APPROVE_OPTION) 
-      c = jfc.getSelectedFile();
     if (c != null) {
-      _listModel.addElement(c);
+      for(int i = 0; i < c.length; i++) {
+        _listModel.addElement(c[i]);
+      }
     }
-    
   }
 }

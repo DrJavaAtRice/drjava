@@ -60,7 +60,9 @@ public final class FileOptionComponentTest extends TestCase {
   }
     
   protected void setUp() {
-    _option = new FileOptionComponent( OptionConstants.JAVAC_LOCATION, "Javac Location", new Frame());
+    _option = new FileOptionComponent(OptionConstants.JAVAC_LOCATION,
+                                      "Javac Location", new Frame(),
+                                      new JFileChooser());
     DrJava.getConfig().resetToDefaults();
     
   }
@@ -102,5 +104,4 @@ public final class FileOptionComponentTest extends TestCase {
                  OptionConstants.JAVAC_LOCATION.getDefault(),
                  DrJava.getConfig().getSetting(OptionConstants.JAVAC_LOCATION));
   }
-    
 }

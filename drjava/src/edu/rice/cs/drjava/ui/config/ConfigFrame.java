@@ -82,21 +82,35 @@ public class ConfigFrame extends JFrame {
   private JButton _cancelButton;
   private JButton _saveSettingsButton;
   private JPanel _mainPanel;
+  private JFileChooser _fileOptionChooser;
   
   /**
    * Sets up the frame and displays it.
    */
-  public ConfigFrame (MainFrame frame) {
+  public ConfigFrame(MainFrame frame) {
     super("Preferences");
     
     _mainFrame = frame;
-    
+
+    File workDir = DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY);
+    if (workDir == FileOption.NULL_FILE) {
+      workDir = new File(System.getProperty("user.dir"));
+    }
+    if (workDir.isFile() && workDir.getParent() != null) {
+      workDir = workDir.getParentFile();
+    }
+    _fileOptionChooser = new JFileChooser(workDir);
+    _fileOptionChooser.setDialogTitle("Select");
+    _fileOptionChooser.setApproveButtonText("Select");
+    _fileOptionChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+    _fileOptionChooser.setFileFilter(ClasspathFilter.ONLY);
+
     _createTree();
     _createPanels();
     
     _mainPanel= new JPanel();
     _mainPanel.setLayout(new BorderLayout());
-    _tree.addTreeSelectionListener( new PanelTreeSelectionListener());
+    _tree.addTreeSelectionListener(new PanelTreeSelectionListener());
         
     Container cp = getContentPane();
     cp.setLayout(new BorderLayout());
@@ -130,7 +144,7 @@ public class ConfigFrame extends JFrame {
       public void actionPerformed(ActionEvent e) {
         // Always apply and save settings
         boolean successful = true;
-        try{
+        try {
           successful = saveSettings();
         }
         catch (IOException ioe) {}
@@ -183,7 +197,7 @@ public class ConfigFrame extends JFrame {
     
     
     // Set all dimensions ----
-    setSize( FRAME_WIDTH, FRAME_HEIGHT);
+    setSize(FRAME_WIDTH, FRAME_HEIGHT);
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = this.getSize();
@@ -376,46 +390,47 @@ public class ConfigFrame extends JFrame {
   /**
    * Add all of the components for the Resource Locations panel of the preferences window.
    */ 
-  private void _setupResourceLocPanel ( ConfigPanel panel) {
-
+  private void _setupResourceLocPanel(ConfigPanel panel) {
     FileOptionComponent javacLoc =
-      new FileOptionComponent( OptionConstants.JAVAC_LOCATION, "Tools.jar Location", this);
-    javacLoc.setFileFilter(new ClasspathFilter());
-    panel.addComponent( javacLoc );
+      new FileOptionComponent(OptionConstants.JAVAC_LOCATION,
+                              "Tools.jar Location", this, _fileOptionChooser);
+    javacLoc.setFileFilter(ClasspathFilter.ONLY);
+    panel.addComponent(javacLoc);
     FileOptionComponent jsr14Loc =
-      new FileOptionComponent( OptionConstants.JSR14_LOCATION, "JSR14 Location", this);
-    jsr14Loc.setFileFilter(new ClasspathFilter());
-    panel.addComponent( jsr14Loc );
+      new FileOptionComponent(OptionConstants.JSR14_LOCATION,
+                              "JSR14 Location", this, _fileOptionChooser);
+    jsr14Loc.setFileFilter(ClasspathFilter.ONLY);
+    panel.addComponent(jsr14Loc);
     FileOptionComponent jsr14Col = 
-      new FileOptionComponent( OptionConstants.JSR14_COLLECTIONSPATH, "JSR14 Collections Path", this);
-    jsr14Col.setFileFilter(new ClasspathFilter());
-    panel.addComponent( jsr14Col );
-    panel.addComponent( new VectorOptionComponent (OptionConstants.EXTRA_CLASSPATH, "Extra Classpath", this));
+      new FileOptionComponent(OptionConstants.JSR14_COLLECTIONSPATH,
+                              "JSR14 Collections Path", this, _fileOptionChooser);
+    jsr14Col.setFileFilter(ClasspathFilter.ONLY);
+    panel.addComponent(jsr14Col);
+    panel.addComponent(new VectorOptionComponent(OptionConstants.EXTRA_CLASSPATH,
+                                                 "Extra Classpath", this));
     panel.displayComponents();
   }
   
   /**
    * Add all of the components for the Display Options panel of the preferences window.
    */ 
-  private void _setupDisplayPanel ( ConfigPanel panel) {
+  private void _setupDisplayPanel(ConfigPanel panel) {
 
     //ToolbarOptionComponent is a degenerate option component
-    panel.addComponent( new ToolbarOptionComponent ( "Toolbar Buttons", this));
-    panel.addComponent( new BooleanOptionComponent ( OptionConstants.LINEENUM_ENABLED, "Line Number Enumeration", this));
+    panel.addComponent(new ToolbarOptionComponent("Toolbar Buttons", this));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.LINEENUM_ENABLED, "Line Number Enumeration", this));
     panel.displayComponents();
   }
    
   /**
    * Add all of the components for the Font panel of the preferences window.
    */ 
-  private void _setupFontPanel ( ConfigPanel panel) {
-    panel.addComponent( new FontOptionComponent (OptionConstants.FONT_MAIN, "Main Font", this) );
-    panel.addComponent( new FontOptionComponent (OptionConstants.FONT_DOCLIST, "Document List Font", this));
-    panel.addComponent( new FontOptionComponent (OptionConstants.FONT_TOOLBAR, "Toolbar Font", this));
+  private void _setupFontPanel(ConfigPanel panel) {
+    panel.addComponent(new FontOptionComponent(OptionConstants.FONT_MAIN, "Main Font", this) );
+    panel.addComponent(new FontOptionComponent(OptionConstants.FONT_DOCLIST, "Document List Font", this));
+    panel.addComponent(new FontOptionComponent(OptionConstants.FONT_TOOLBAR, "Toolbar Font", this));
     if (CodeStatus.DEVELOPMENT) {
-      panel.addComponent( new BooleanOptionComponent ( OptionConstants.TEXT_ANTIALIAS,
-                                                      "Use anti-aliased text in Definitions",
-                                                      this));
+      panel.addComponent(new BooleanOptionComponent(OptionConstants.TEXT_ANTIALIAS, "Use anti-aliased text in Definitions", this));
     }
     panel.displayComponents(); 
   }
@@ -423,30 +438,29 @@ public class ConfigFrame extends JFrame {
   /**
    * Adds all of the components for the Color panel of the preferences window.
    */
-  private void _setupColorPanel( ConfigPanel panel) {
-    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color", this));
-    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_KEYWORD_COLOR, "Keyword Color", this));
-    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_TYPE_COLOR, "Type Color", this));
-    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_COMMENT_COLOR, "Comment Color", this));
-    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, "Double-quoted Color", this));
-    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, "Single-quoted Color", this));
-    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_NUMBER_COLOR, "Number Color", this));
-    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_BACKGROUND_COLOR, "Background Color", this, true));
-    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_MATCH_COLOR, "Brace-matching Color", this, true));
-    panel.addComponent( new ColorOptionComponent (OptionConstants.COMPILER_ERROR_COLOR, "Compiler Error Color", this, true));
-    panel.addComponent( new ColorOptionComponent (OptionConstants.DEBUG_BREAKPOINT_COLOR, "Debugger Breakpoint Color", this, true));
-    panel.addComponent( new ColorOptionComponent (OptionConstants.DEBUG_THREAD_COLOR, "Debugger Location Color", this, true));
+  private void _setupColorPanel(ConfigPanel panel) {
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color", this));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_KEYWORD_COLOR, "Keyword Color", this));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_TYPE_COLOR, "Type Color", this));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_COMMENT_COLOR, "Comment Color", this));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, "Double-quoted Color", this));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, "Single-quoted Color", this));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_NUMBER_COLOR, "Number Color", this));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_BACKGROUND_COLOR, "Background Color", this, true));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_MATCH_COLOR, "Brace-matching Color", this, true));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.COMPILER_ERROR_COLOR, "Compiler Error Color", this, true));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEBUG_BREAKPOINT_COLOR, "Debugger Breakpoint Color", this, true));
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEBUG_THREAD_COLOR, "Debugger Location Color", this, true));
     panel.displayComponents();
   }
   
   /**
    * Adds all of the components for the Key Bindings panel of the preferences window.
    */
-  private void _setupKeyBindingsPanel( ConfigPanel panel) {
+  private void _setupKeyBindingsPanel(ConfigPanel panel) {
     // using a treeset because it automatically sorts element upon insertion
     TreeSet _comps = new TreeSet();
 
-    
     KeyStrokeData tmpKsd;
     KeyStrokeOptionComponent tmpKsoc;
     
@@ -464,7 +478,6 @@ public class ConfigFrame extends JFrame {
     // gives the KeyStrokeConfigPanel a collection of the KeyStrokeOptionComponents
     ((KeyStrokeConfigPanel)panel).setKeyStrokeComponents(_comps);
 
-    
     Iterator iter = _comps.iterator();
     while (iter.hasNext()) {
       KeyStrokeOptionComponent x = (KeyStrokeOptionComponent) iter.next();
@@ -476,8 +489,8 @@ public class ConfigFrame extends JFrame {
   /**
    * Add all of the components for the Debugger panel of the preferences window.
    */ 
-  private void _setupDebugPanel ( ConfigPanel panel) {
-    if (!_mainFrame.getModel().getDebugger().isAvailable()) {
+  private void _setupDebugPanel(ConfigPanel panel) {
+    if(!_mainFrame.getModel().getDebugger().isAvailable()) {
       // Explain how to use debugger
       String howto = 
         "\nThe debugger is not currently active.  To use the debugger, you\n" +
@@ -488,16 +501,16 @@ public class ConfigFrame extends JFrame {
         "  java -classpath drjava.jar;c:\\path\\tools.jar edu.rice.cs.drjava.DrJava\n\n" +
         "(Substituting the correct path for tools.jar.)\n" +
         "See the user documentation for more details.\n";
-        panel.addComponent( new LabelComponent(howto, this) );
+        panel.addComponent(new LabelComponent(howto, this));
     }
     
-    VectorOptionComponent sourcePath = new VectorOptionComponent (OptionConstants.DEBUG_SOURCEPATH, 
-                                                                  "Sourcepath", 
-                                                                  this);
+    VectorOptionComponent sourcePath =
+      new VectorOptionComponent(OptionConstants.DEBUG_SOURCEPATH, 
+                                "Sourcepath", this);
     // Source path can only include directories
     sourcePath.setFileFilter(new FileFilter() {
-      public boolean accept (File f) {
-        if (f.isDirectory()) {
+      public boolean accept(File f) {
+        if(f.isDirectory()) {
           return true;
         }
         return false;
@@ -510,32 +523,30 @@ public class ConfigFrame extends JFrame {
         return "Source Directories";
       }
     });
-    panel.addComponent( sourcePath );
-    panel.addComponent( new BooleanOptionComponent ( OptionConstants.DEBUG_SHOW_THREADS,
-                                                    "Show Current Threads Tab",
-                                                    this));
-    panel.addComponent( new BooleanOptionComponent ( OptionConstants.DEBUG_STEP_JAVA, 
-                                                    "Step Into Java Classes", 
-                                                    this));
-    panel.addComponent( new BooleanOptionComponent ( OptionConstants.DEBUG_STEP_INTERPRETER, 
-                                                    "Step Into Interpreter Classes", 
-                                                    this));
-    panel.addComponent( new BooleanOptionComponent ( OptionConstants.DEBUG_STEP_DRJAVA, 
-                                                    "Step Into DrJava Classes", 
-                                                    this));
+    panel.addComponent(sourcePath );
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.DEBUG_SHOW_THREADS,
+                                                  "Show Current Threads Tab", this));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.DEBUG_STEP_JAVA, 
+                                                  "Step Into Java Classes", this));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.DEBUG_STEP_INTERPRETER, 
+                                                  "Step Into Interpreter Classes", this));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.DEBUG_STEP_DRJAVA, 
+                                                  "Step Into DrJava Classes", this));
     
     panel.displayComponents();
   }
   
   /**
-   *  Adds all of the components for the Miscellaneous panel of the preferences window.
+   * Adds all of the components for the Miscellaneous panel of the preferences window.
    */
-  private void _setupMiscPanel( ConfigPanel panel) {
-    panel.addComponent( new IntegerOptionComponent ( OptionConstants.INDENT_LEVEL, "Indent Level", this));
+  private void _setupMiscPanel(ConfigPanel panel) {
+    panel.addComponent(new IntegerOptionComponent(OptionConstants.INDENT_LEVEL,
+                                                  "Indent Level", this));
     FileOptionComponent workDir = 
-      new FileOptionComponent ( OptionConstants.WORKING_DIRECTORY, "Working Directory", this);
+      new FileOptionComponent(OptionConstants.WORKING_DIRECTORY,
+                               "Working Directory", this, _fileOptionChooser);
     workDir.setFileFilter(new FileFilter() {
-      public boolean accept (File f) {
+      public boolean accept(File f) {
         if (f.isDirectory()) {
           return true;
         }
@@ -549,14 +560,14 @@ public class ConfigFrame extends JFrame {
         return "Directories";
       }
     });
-    panel.addComponent( workDir );
-    panel.addComponent( new IntegerOptionComponent( OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this));
-    panel.addComponent( new IntegerOptionComponent( OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this));
-    panel.addComponent( new BooleanOptionComponent ( OptionConstants.JAVAC_ALLOW_ASSERT, "Allow Assert Keyword in Java 1.4", this));
-    panel.addComponent( new BooleanOptionComponent( OptionConstants.INTERACTIONS_EXIT_PROMPT, "Prompt if Interactions Pane Exits Unexpectedly", this));
-    panel.addComponent( new BooleanOptionComponent( OptionConstants.QUIT_PROMPT, "Prompt Before Quit", this));
-    panel.addComponent( new BooleanOptionComponent( OptionConstants.BACKUP_FILES, "Keep emacs style backup files", this));
-    panel.addComponent( new BooleanOptionComponent( OptionConstants.JAVADOC_ALL_PACKAGES, "Generate JavaDoc From Source Roots", this));
+    panel.addComponent(workDir);
+    panel.addComponent(new IntegerOptionComponent(OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this));
+    panel.addComponent(new IntegerOptionComponent(OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.JAVAC_ALLOW_ASSERT, "Allow Assert Keyword in Java 1.4", this));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.INTERACTIONS_EXIT_PROMPT, "Prompt if Interactions Pane Exits Unexpectedly", this));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.QUIT_PROMPT, "Prompt Before Quit", this));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.BACKUP_FILES, "Keep emacs style backup files", this));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.JAVADOC_ALL_PACKAGES, "Generate JavaDoc From Source Roots", this));
     
     panel.displayComponents();
   }
@@ -591,17 +602,25 @@ public class ConfigFrame extends JFrame {
       //if this panel encountered an error while attempting to update, return false
       if (!isValidUpdate) {
         //System.out.println("Panel.update() returned false");
-        TreePath path = new TreePath(this.getPath());
+
+        //TreePath path = new TreePath(this.getPath());
+        // causes ClassCastException under jsr14 v2.0 for no apparent reason.
+        // Workaround:  store result of getPath() to temporary array.
+
+        TreeNode[] nodes = getPath();
+        TreePath path = new TreePath(nodes);
         _tree.expandPath(path);
         _tree.setSelectionPath(path);
         return false;
       }
-      
-      Enumeration childNodes = this.children();
+
+      Enumeration childNodes = children();
       while (childNodes.hasMoreElements()) {
         boolean isValidUpdateChildren = ((PanelTreeNode)childNodes.nextElement()).update();
         //if any of the children nodes encountered an error, return false
-        if (!isValidUpdateChildren) return false;
+        if (!isValidUpdateChildren) {
+          return false;
+        }
       }
       
       return true;
@@ -622,7 +641,6 @@ public class ConfigFrame extends JFrame {
   }
   
   private class PanelTreeSelectionListener implements TreeSelectionListener {
-    
     public void valueChanged(TreeSelectionEvent e) {
       Object o = _tree.getLastSelectedPathComponent();
       //System.out.println("Object o : "+o);
@@ -632,8 +650,5 @@ public class ConfigFrame extends JFrame {
         _displayPanel(child.getPanel());
       }
     }
-    
   }
-    
 }
-
