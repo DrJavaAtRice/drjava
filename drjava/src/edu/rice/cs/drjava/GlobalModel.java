@@ -183,31 +183,38 @@ public class GlobalModel {
   }
   
   /**
-   * Let the listeners know that a compile has begun.
+   * Starts compiling the source.
    */
   public void startCompile() {
     saveBeforeProceeding(GlobalModelListener.COMPILE_REASON);
-    // if the file hasn't been saved after we told our
-    // listeners to do so, don't proceed with the rest
-    // of the compile.
-    if (! isModifiedSinceSave()) {
-      _notifyListeners(new EventNotifier() {
-        public void notifyListener(GlobalModelListener l) {
-          l.compileStarted();
-        }
-      });
 
+    if (isModifiedSinceSave()) {
+      // if the file hasn't been saved after we told our
+      // listeners to do so, don't proceed with the rest
+      // of the compile.
+    }
+    else {
       File file = _definitionsDoc.getFile();
 
       try {
         String packageName = _definitionsDoc.getPackageName();
         File sourceRoot = _getSourceRoot(packageName);
         
+        _notifyListeners(new EventNotifier() {
+          public void notifyListener(GlobalModelListener l) {
+            l.compileStarted();
+          }
+        });
+
         File[] files = new File[] { file };
-        CompilerError[] errors = DrJava.compiler.compile(sourceRoot, files);
-        endCompile();
+        _compileErrors = DrJava.compiler.compile(sourceRoot, files);
         
-        // Clear the output window after compilation
+        _notifyListeners(new EventNotifier() {
+          public void notifyListener(GlobalModelListener l) {
+            l.compileEnded();
+          }
+        });
+
         resetConsole();
         _resetInteractions(packageName, sourceRoot);
       }
@@ -220,17 +227,6 @@ public class GlobalModel {
         _compileErrors = new CompilerError[] { err };
       }
     }
-  }
-  
-  /**
-   * Let the listeners know that the compiler has finished.
-   */
-  public void endCompile() {
-    _notifyListeners(new EventNotifier() {
-      public void notifyListener(GlobalModelListener l) {
-        l.compileEnded();
-      }
-    });
   }
   
   /**
@@ -343,6 +339,20 @@ public class GlobalModel {
    *                                 or if it does not match up with the
    *                                 location of the source file.
    */
+  File getSourceRoot() throws InvalidPackageException
+  {
+    return _getSourceRoot(_definitionsDoc.getPackageName());
+  }
+
+  /**
+   * Finds the root directory of the source files.
+   * @param packageName Package name, already fetched from the document
+   * @return The root directory of the source files,
+   *         based on the package statement.
+   * @throws InvalidPackageException If the package statement is invalid,
+   *                                 or if it does not match up with the
+   *                                 location of the source file.
+   */
   private File _getSourceRoot(String packageName)
     throws InvalidPackageException
   {
@@ -363,6 +373,7 @@ public class GlobalModel {
     while (dotIndex != -1)
     {
       packageStack.push(packageName.substring(curPartBegins, dotIndex));
+      curPartBegins = dotIndex + 1;
       dotIndex = packageName.indexOf('.', dotIndex + 1);
     }
 
@@ -383,7 +394,7 @@ public class GlobalModel {
         String msg = "The source file " + sourceFile.getAbsolutePath() + 
                      " is in the wrong directory or in the wrong package. " +
                      "The directory name " + parentDir.getName() +
-                     " does not match the package name " + part + ".";
+                     " does not match the package component " + part + ".";
 
         throw new InvalidPackageException(-1, msg);
       }

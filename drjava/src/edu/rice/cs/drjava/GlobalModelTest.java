@@ -602,6 +602,146 @@ public class GlobalModelTest extends TestCase {
     System.setSecurityManager(null);
   }
 
+  public void testGetSourceRootDefaultPackage()
+    throws BadLocationException, IOException, InvalidPackageException
+  {
+    // Create temp file
+    File baseTempDir = _tempFile();
+    // Delete the file and make a directory of the same name
+    assertTrue(baseTempDir.delete());
+    assertTrue(baseTempDir.mkdir());
+
+    // Now make subdirectory a/b/c
+    File subdir = new File(baseTempDir, "a");
+    subdir = new File(subdir, "b");
+    subdir = new File(subdir, "c");
+    assertTrue(subdir.mkdirs());
+
+    // Save the footext to Foo.java in the subdirectory
+    File fooFile = new File(subdir, "Foo.java");
+    _setupDocument(FOO_TEXT);
+    _model.saveFileAs(new FileSelector(fooFile));
+
+    assertEquals("source root",
+                 subdir,
+                 _model.getSourceRoot());
+
+    assertTrue(fooFile.delete());
+
+    // walk back and delete all dirs to the base
+    while (! subdir.equals(baseTempDir)) {
+      assertTrue(subdir.delete());
+      subdir = subdir.getParentFile();
+    }
+
+    assertTrue(baseTempDir.delete());
+  }
+
+  public void testGetSourceRootPackageThreeDeepValid()
+    throws BadLocationException, IOException, InvalidPackageException
+  {
+    // Create temp file
+    File baseTempDir = _tempFile();
+    // Delete the file and make a directory of the same name
+    assertTrue(baseTempDir.delete());
+    assertTrue(baseTempDir.mkdir());
+
+    // Now make subdirectory a/b/c
+    File subdir = new File(baseTempDir, "a");
+    subdir = new File(subdir, "b");
+    subdir = new File(subdir, "c");
+    assertTrue(subdir.mkdirs());
+
+    // Save the footext to Foo.java in the subdirectory
+    File fooFile = new File(subdir, "Foo.java");
+    _setupDocument("package a.b.c;\n" + FOO_TEXT);
+    _model.saveFileAs(new FileSelector(fooFile));
+
+    // Since we had the package statement the source root should be base dir
+    assertEquals("source root",
+                 baseTempDir,
+                 _model.getSourceRoot());
+
+    assertTrue(fooFile.delete());
+
+    // walk back and delete all dirs to the base
+    while (! subdir.equals(baseTempDir)) {
+      assertTrue(subdir.delete());
+      subdir = subdir.getParentFile();
+    }
+
+    assertTrue(baseTempDir.delete());
+  }
+
+  public void testGetSourceRootPackageThreeDeepInvalid()
+    throws BadLocationException, IOException
+  {
+    // Create temp file
+    File baseTempDir = _tempFile();
+    // Delete the file and make a directory of the same name
+    assertTrue(baseTempDir.delete());
+    assertTrue(baseTempDir.mkdir());
+
+    // Now make subdirectory a/b/d
+    File subdir = new File(baseTempDir, "a");
+    subdir = new File(subdir, "b");
+    subdir = new File(subdir, "d");
+    assertTrue(subdir.mkdirs());
+
+    // Save the footext to Foo.java in the subdirectory
+    File fooFile = new File(subdir, "Foo.java");
+    _setupDocument("package a.b.c;\n" + FOO_TEXT);
+    _model.saveFileAs(new FileSelector(fooFile));
+
+    // The package name is wrong so this should fail.
+    try {
+      File root = _model.getSourceRoot();
+      fail("getSourceRoot() did not fail on invalid package. It returned: " +
+           root);
+    }
+    catch (InvalidPackageException e) {
+      // good.
+    }
+
+    assertTrue(fooFile.delete());
+
+    // walk back and delete all dirs to the base
+    while (! subdir.equals(baseTempDir)) {
+      assertTrue(subdir.delete());
+      subdir = subdir.getParentFile();
+    }
+
+    assertTrue(baseTempDir.delete());
+  }
+
+  public void testGetSourceRootPackageOneDeepValid()
+    throws BadLocationException, IOException, InvalidPackageException
+  {
+    // Create temp file
+    File baseTempDir = _tempFile();
+    // Delete the file and make a directory of the same name
+    assertTrue(baseTempDir.delete());
+    assertTrue(baseTempDir.mkdir());
+
+    // Now make subdirectory a
+    File subdir = new File(baseTempDir, "a");
+    assertTrue(subdir.mkdir());
+
+    // Save the footext to Foo.java in the subdirectory
+    File fooFile = new File(subdir, "Foo.java");
+    _setupDocument("package a;\n" + FOO_TEXT);
+    _model.saveFileAs(new FileSelector(fooFile));
+
+    // Since we had the package statement the source root should be base dir
+    assertEquals("source root",
+                 baseTempDir,
+                 _model.getSourceRoot());
+
+    assertTrue(fooFile.delete());
+    assertTrue(subdir.delete());
+    assertTrue(baseTempDir.delete());
+  }
+
   /**
    * Clear all old text and insert the given text.
    */
