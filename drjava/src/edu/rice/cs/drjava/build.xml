@@ -62,8 +62,8 @@
       -->
       <classpath path="${java.class.path}" />
 
-      <!-- Uncomment below to generate more text on console for tests -->
-      <!-- <formatter type="plain" usefile="no" /> -->
+      <!-- This makes JUnit display info about each test to console -->
+      <formatter type="plain" usefile="no" />
 
       <!-- This makes JUnit run all test classes. It figures out which ones
            automatically, without needing AllTests classes.
@@ -91,7 +91,7 @@
 
   <!-- Run the program! -->
   <target name="run" depends="test">
-    <java classpath="${built}"
+    <java classpath="${built}:${java.class.path}"
           fork="true"
           classname="edu.rice.cs.drjava.MainFrame" />
   </target>
