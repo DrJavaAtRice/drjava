@@ -77,6 +77,7 @@ public class BidirectionalHashMap<Type1, Type2> {
   public Collection<Type2> values() { return forward.values(); }  
   
   public Object[] valuesArray() { return values().toArray(); }  // Return type should be Type2[];  type erasure bites!
+  public  Type2[] valuesArray(Type2[] a) { return values().toArray(a); }  // argument is hack to get the return type right
   
   public Type2 removeValue(Type1 key) {
     Type2 tmp = forward.remove(key);
