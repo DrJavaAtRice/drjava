@@ -340,7 +340,16 @@
   <!-- Allow a commit of just the docs, without testing -->
   <target name="commit-docs">
     <echo message="Committing the documentation." />
-    <cvs command="commit docs" />
+    <input message="Please enter the log message for the commit:"
+           addproperty="cvs-commit-message" />
+    <cvs>
+      <commandline>
+        <argument value="commit" />
+        <argument value="-m" />
+        <argument value="${cvs-commit-message}" />
+        <argument value="docs" />
+      </commandline>
+    </cvs>
   </target>
 
 </project>

@@ -1305,9 +1305,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    */
   public int getDebugPort() throws IOException {
     if (_debugPort == -1) {
-      ServerSocket socket = new ServerSocket(0);
-      _debugPort = socket.getLocalPort();
-      socket.close();
+      try {
+        ServerSocket socket = new ServerSocket(0);
+        _debugPort = socket.getLocalPort();
+        socket.close();
+      }
+      catch (java.net.SocketException se) {
+        // something wrong with sockets, can't use for debugger
+        _debugPort = -1;
+      }
     }
     return _debugPort;
   }

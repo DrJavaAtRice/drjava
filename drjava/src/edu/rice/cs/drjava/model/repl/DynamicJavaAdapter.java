@@ -103,8 +103,14 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       if (cause instanceof ThrownException) {
         cause = ((ThrownException) cause).getException();
       }
+      else if (cause instanceof CatchedExceptionError) {
+        cause = ((CatchedExceptionError) cause).getException();
+      }
 
       throw new ExceptionReturnedException(cause);
+    }
+    catch (CatchedExceptionError cee) {
+      throw new ExceptionReturnedException(cee.getException());
     }
     catch (InterpreterInterruptedException iie) {
       return JavaInterpreter.NO_RESULT;

@@ -204,10 +204,10 @@ public class JPDADebugger implements Debugger {
    * any state.
    */
   public synchronized void shutdown() {
-    if (isReady()) {      
-      removeAllBreakpoints();
-      removeAllWatches();
+    if (isReady()) {
       try {
+        removeAllBreakpoints();
+        removeAllWatches();
         _vm.dispose();
       }
       catch (VMDisconnectedException vmde) {
@@ -519,6 +519,10 @@ public class JPDADebugger implements Debugger {
       catch (VMMismatchException vme) {
         // Not associated with this VM; probably from a previous session.
         // Ignore and make sure it gets removed from the document.
+      }
+      catch (VMDisconnectedException vmde) {
+        // The VM has already disconnected for some reason
+        // Ignore it and make sure the breakpoint gets removed from the document
       }
     }
     //else {

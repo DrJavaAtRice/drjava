@@ -106,75 +106,105 @@ public class DrJava implements OptionConstants {
   
   /**
    * Main method for DrJava.  Uses a custom class loader to start the program.
+   * 
+   * @throws Throwable because InvocationTargetException can have a
+   * Throwable as its target exception.  (Due to the class loading...)
    */
   public static void main(String[] args) throws Throwable {
     try {
-      Method main = loadMainMethod();
-      main.invoke(null,new Object[] {args});
-    } catch(InvocationTargetException e) {
+      // Use a class loader to invoke the "beginProgram" method so that we
+      // can put tools.jar on the classpath if it is available
+      Method main = _loadMainMethod();
+      main.invoke(null, new Object[] {args});
+    } 
+    catch (InvocationTargetException e) {
+      // Throw the target exception, which is "Throwable"
       throw e.getTargetException();
-    } catch(Exception e) {
-      System.err.println(e.toString());
+    } 
+    catch (Exception e) {
+      // Couldn't start with the class loader; show the error
+      System.err.println(e);
+      
+      // Start the program manually
       beginProgram(args);
     }
   }
-  /**
-  private static Class loadClass(ClassLoader cl, String name) {
+  
+  /** (not currently used)
+  private static Class _loadClass(ClassLoader cl, String name) {
     try {
       return cl.loadClass(name);
-    } catch(Exception e) {
+    } 
+    catch(Exception e) {
       System.err.println("Error in attempt to load "+name+" using "+cl);
-      System.err.println(e.toString());
+      System.err.println(e);
       System.err.println();
       System.err.println();
     }
     return null;
   }
-  private static void testCL(ClassLoader cl) {
-    loadClass(cl,"edu.rice.cs.drjava.DrJava");
-    loadClass(cl,"com.sun.jdi.Bootstrap");
+  private static void _testCL(ClassLoader cl) {
+    _loadClass(cl,"edu.rice.cs.drjava.DrJava");
+    _loadClass(cl,"com.sun.jdi.Bootstrap");
   }
   **/
-  private static Method loadMainMethod() 
-    throws NoSuchMethodException, SecurityException {
+  
+  /**
+   * Attempts to load the DrJava.main method using a DrJavaClassLoader.
+   */
+  private static Method _loadMainMethod() 
+    throws NoSuchMethodException, SecurityException 
+  {
     Class c = DrJava.class;
+    
+    /* for this version, don't use the custom classloader yet.
+     *  Neither the URLClassLoader nor the DrJavaClassLoader
+     *  appears to work correctly-- this is a project to be taken...
+     * (Motivation: We want the debugger classes to be available
+     *  if we know where tools.jar is, but it has to be on the
+     *  classpath of the classloader to work.)
     try {
-      //File fLoc = getConfig().getSetting(JAVAC_LOCATION);
-      //if(fLoc != FileOption.NULL_FILE) {
+      //File toolsLoc = getConfig().getSetting(JAVAC_LOCATION);
+      //if(toolsLoc != FileOption.NULL_FILE) {
         //URL[] urls = new URL[] {fLoc.toURL()};
         //ClassLoader sys = ClassLoader.getSystemClassLoader();
         //ClassLoader dcl = new URLClassLoader(urls);
         ClassLoader dcl = new DrJavaClassLoader();
-        /**
-        Class uDj, dDj, uBs, dBs;
-        String djn = "edu.rice.cs.drjava.Drjava",
-          bsn = "com.sun.jdi.Bootstrap";
-        uDj = loadClass(cl,djn);
-        dDj = loadClass(dcl,djn);
-        uBs = loadClass(cl,bsn);
-        dBs = loadClass(dcl,bsn);
-        testCL(sys);
-        testCL(cl);
-        testCL(dcl);
-        **/
-        // c = 
-        // for this version, don't use the custom classloader yet.
-        dcl.loadClass("edu.rice.cs.drjava.DrJava");
+        
+        // test code
+        //Class uDj, dDj, uBs, dBs;
+        //String djn = "edu.rice.cs.drjava.Drjava",
+        //  bsn = "com.sun.jdi.Bootstrap";
+        //uDj = loadClass(cl,djn);
+        //dDj = loadClass(dcl,djn);
+        //uBs = loadClass(cl,bsn);
+        //dBs = loadClass(dcl,bsn);
+        //testCL(sys);
+        //testCL(cl);
+        //testCL(dcl);
+        // end test code
+        
+        c = dcl.loadClass("edu.rice.cs.drjava.DrJava");
       //}
-    } catch(Exception e) {
+    } 
+    catch (Exception e) {
+      // Couldn't load the class
       System.err.println(e.toString());
     }
+    */
     return c.getMethod("beginProgram",new Class[] {String[].class});
   }
   
   /**
    * Starts running DrJava.  Not done in the actual main method so a
    * custom class loader can be used.
+   * @param args Command line argument array
    */
   public static void beginProgram(final String[] args) {
     try {
       System.setProperty("com.apple.macos.useScreenMenuBar","true");
 
+      // handleCommandLineArgs will return true if the program should load
       if (handleCommandLineArgs(args)) {
         
         try {
@@ -197,6 +227,8 @@ public class DrJava implements OptionConstants {
         // CompilerRegistry notify listeners when there is a change in the list of
         // available compilers.
         final MainFrame mf = new MainFrame();
+        
+        // Make sure all uncaught exceptions are shown in an AWTExceptionHandler
         edu.rice.cs.drjava.ui.AWTExceptionHandler.setFrame(mf);
         System.setProperty("sun.awt.exception.handler", 
                            "edu.rice.cs.drjava.ui.AWTExceptionHandler");
@@ -210,14 +242,14 @@ public class DrJava implements OptionConstants {
         mf.show();
         
         
-        // redirect stdout
+        // redirect stdout to DrJava's console
         System.setOut(new PrintStream(new OutputStreamRedirector() {
           public void print(String s) {
             mf.getModel().systemOutPrint(s);
           }
         }));
         
-        // redirect stderr
+        // redirect stderr to DrJava's console
         System.setErr(new PrintStream(new OutputStreamRedirector() {
           public void print(String s) {
             mf.getModel().systemErrPrint(s);
@@ -226,7 +258,9 @@ public class DrJava implements OptionConstants {
         
       }
         
-    } catch (Throwable t) {
+    } 
+    catch (Throwable t) {
+      // Show any errors to the real System.err and in an AWTExceptionHandler
       _consoleErr.println(t.getClass().getName() + ": " + t.getMessage());
       t.printStackTrace(_consoleErr);
       new AWTExceptionHandler().handle(t);
@@ -340,7 +374,7 @@ public class DrJava implements OptionConstants {
         OpenDefinitionsDocument doc = mf.getModel().openFile(command);
       }
       catch (FileNotFoundException ex) {
-        //dialog: file not found
+        // To do: show a dialog? (file not found)
       }
       catch (AlreadyOpenException aoe) {
         // This explicitly does nothing to ignore duplicate files.
