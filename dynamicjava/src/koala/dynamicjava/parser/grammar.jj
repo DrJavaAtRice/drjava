@@ -675,6 +675,7 @@ PARSER_END(Parser)
   TOKEN :
   {
     < ABSTRACT: "abstract" >
+    | < ASSERT: "assert" >
     | < BOOLEAN: "boolean" >
     | < BREAK: "break" >
     | < BYTE: "byte" >

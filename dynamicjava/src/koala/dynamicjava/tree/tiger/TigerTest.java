@@ -122,7 +122,7 @@ public class TigerTest extends TestCase {
       assertEquals(5,interpret(testString));
       fail("Non static member should not be imported");
     } 
-    catch(RuntimeException e) {
+    catch(InterpreterException e) {
       //Expected to fail
     }
     
@@ -213,7 +213,7 @@ public class TigerTest extends TestCase {
       assertEquals(5,interpret(testString));
       fail("Method parameter types String and int are not equal!");
     }
-    catch(Error e) {
+    catch(InterpreterException e) {
       //Expected to fail
     }
     
@@ -284,7 +284,7 @@ public class TigerTest extends TestCase {
     try {
       interpret(testString);
       fail("Static method cannot reference non-static members of super class");
-    } catch(Error e) {
+    } catch(InterpreterException e) {
       //Expected to fail
     }
     
@@ -336,7 +336,7 @@ public class TigerTest extends TestCase {
       interpret(testString);
       fail("Non static member should not be imported");
     } 
-    catch(RuntimeException e) {
+    catch(InterpreterException e) {
       //Expected to fail
     }
   
@@ -477,7 +477,7 @@ public class TigerTest extends TestCase {
       interpret(testString);
       fail("Non static member should not be imported");
     } 
-    catch(RuntimeException e) {
+    catch(InterpreterException e) {
       //Expected to fail
     }
   }

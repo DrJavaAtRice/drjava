@@ -276,7 +276,7 @@ public class TreeCompiler {
             context.declareMemberStaticImport(node.getName());
           // Declare the package or class importation
         } catch (ClassNotFoundException e) {
-          throw new RuntimeException("Uncaught Class Not Found Exception");
+          throw new CatchedExceptionError(e, node);
         }
       }
       else {

@@ -342,14 +342,26 @@ public class ImportationManagerTest extends TestCase {
     assertEquals("Initial list of staticly imported methods should be empty",0,methods.size());
     assertEquals("Initial list of staticly imported inner classes should be empty",0,classes.size());
     
-    im.declareMemberStaticImport("java.lang.Integer.MAX_VALUE");
+    
+    try {
+      im.declareMemberStaticImport("java.lang.Integer.MAX_VALUE");
+    }
+    catch(ClassNotFoundException e) {
+      fail("Class java.lang.Integer should be found");
+    }
     assertEquals("List of staticly imported methods should not have changed",0,methods.size());
     assertEquals("List of staticly imported inner classes should not have changed",0,classes.size());
     assertEquals("List of staticly imported fields should contain one imported field",1,fields.size());
     assertEquals("List of staticly imported fields should contain java.lang.Integer.MAX_VALUE","MAX_VALUE",fields.get(0).getName());
     assertEquals("List of staticly imported fields should contain java.lang.Integer.MAX_VALUE","public static final int java.lang.Integer.MAX_VALUE",fields.get(0).toString());
     
-    im.declareMemberStaticImport("java.lang.Integer.valueOf");
+    
+    try {
+      im.declareMemberStaticImport("java.lang.Integer.valueOf");
+    }
+    catch(ClassNotFoundException e) {
+      fail("Class java.lang.Integer should be found");
+    }
     assertEquals("List of staticly imported inner classes should not have changed",0,classes.size());
     assertEquals("List of staticly imported fields should not have changed",1,fields.size());
     assertEquals("List of staticly imported methods should contain all three valueOf methods",3,methods.size());
@@ -366,7 +378,12 @@ public class ImportationManagerTest extends TestCase {
     //The first class in the list which successfully works is the one used when the user actually instantiates the class, and both are needed because 
     //Different methods require different formats, and having both can't hurt anything. Any of the methods that use the list of classes try and catch through the
     //list until they come across a class that fits
-    im.declareMemberStaticImport("javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag");
+    try {
+      im.declareMemberStaticImport("javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag");
+    }
+    catch(ClassNotFoundException e) {
+      fail("Class javax.security.auth.login.AppConfigurationEntry should be found");
+    }
     assertEquals("List of staticly imported fields should not have changed",1,fields.size());
     assertEquals("List of staticly imported methods should not have changed",3,methods.size());
     assertEquals("List of staticly imported inner classes should contain the AppConfigurationEntry$LoginModuleControlFlag class",2,classes.size());
@@ -375,7 +392,13 @@ public class ImportationManagerTest extends TestCase {
     assertEquals("List of staticly imported inner classes should contain the AppConfigurationEntry$LoginModuleControlFlag class",
                  "javax.security.auth.login.AppConfigurationEntry$LoginModuleControlFlag",classes.get(1));
     
-    im.declareMemberStaticImport("javax.swing.plaf.basic.BasicOptionPaneUI.ButtonAreaLayout");
+    
+    try {
+      im.declareMemberStaticImport("javax.swing.plaf.basic.BasicOptionPaneUI.ButtonAreaLayout");
+    }
+    catch(ClassNotFoundException e) {
+      fail("Class javax.swing.plaf.basic.BasicOptionPaneUI should be found");
+    }
     assertEquals("List of staticly imported fields should not have changed",1,fields.size());
     assertEquals("List of staticly imported methods should not have changed",3,methods.size());
     assertEquals("List of staticly imported inner classes should contain the BasicOptionPaneUI$ButtonAreaLayout class",4,classes.size());
@@ -384,7 +407,13 @@ public class ImportationManagerTest extends TestCase {
     assertEquals("List of staticly imported inner classes should contain the BasicOptionPaneUI$ButtonAreaLayout class as its first entry",
                  "javax.swing.plaf.basic.BasicOptionPaneUI$ButtonAreaLayout",classes.get(1));
     
-    im.declareMemberStaticImport("java.lang.Integer.toString");
+    
+    try {
+      im.declareMemberStaticImport("java.lang.Integer.toString");
+    }
+    catch(ClassNotFoundException e) {
+      fail("Class java.lang.Integer should be found");
+    }
     assertEquals("List of staticly imported fields should not have changed",1,fields.size());
     assertEquals("List of staticly imported inner classes should not have changed",4,classes.size());
     assertEquals("List of staticly imported methods should contain the two static toString methods in the Integer class",5,methods.size());

@@ -270,7 +270,7 @@ public class ImportationManager implements Cloneable {
    * combination in the case of members of the same name.
    * @param member - the name of the member being staticly imported
    */  
-  public void declareMemberStaticImport(String member) {
+  public void declareMemberStaticImport(String member) throws ClassNotFoundException{
     int i = member.lastIndexOf('.');
     String surroundingClassName = member;
     if (i > 0) {
@@ -279,17 +279,14 @@ public class ImportationManager implements Cloneable {
     
     Class surroundingClass;
     
-    try {    
-      try {
-        surroundingClass = Class.forName(surroundingClassName, true, classLoader);
-        
-      } catch (ClassNotFoundException e) {
-        // try to find an inner class with this name
-        surroundingClass = findInnerClass(surroundingClassName);
-      }
+    try {
+      surroundingClass = Class.forName(surroundingClassName, true, classLoader);
+      
     } catch (ClassNotFoundException e) {
-      throw new RuntimeException("Class " + surroundingClassName + " not found");      
+      // try to find an inner class with this name
+      surroundingClass = findInnerClass(surroundingClassName);
     }
+    
     
        
     boolean foundSomethingToImport = false;
@@ -359,7 +356,7 @@ public class ImportationManager implements Cloneable {
     if(foundSomethingToImport)
       return;
     
-    throw new RuntimeException("No public members of the name " + member);
+    throw new ClassNotFoundException("No public members of the name " + member);
   }
   
   
@@ -558,7 +555,6 @@ public class ImportationManager implements Cloneable {
         //Will throw lots of these
       }
       catch(ClassNotFoundException cnfe) {
-        throw new RuntimeException("Class existed on static import and does not exist on method lookup");
       }
     }
     
@@ -656,7 +652,6 @@ public class ImportationManager implements Cloneable {
         throw new RuntimeException("Ambiguous Field exception: Field " + name + " is ambiguous");
       }
       catch(ClassNotFoundException cnfe) {
-        throw new RuntimeException("Class existed on static import and does not exist on field lookup");
       }
       
     }

@@ -309,7 +309,7 @@ public class GlobalContext extends VariableContext implements Context {
    * Declares a new single-type-import clause for the importation of a static member
    * @param member the method or field name
    */
-  public void declareMemberStaticImport(String member) {
+  public void declareMemberStaticImport(String member) throws ClassNotFoundException{
     importationManager.declareMemberStaticImport(member);
   }
   

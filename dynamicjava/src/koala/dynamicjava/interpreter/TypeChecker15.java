@@ -156,7 +156,7 @@ public class TypeChecker15 extends AbstractTypeChecker {
       else 
         context.declareMemberStaticImport(node.getName());
     } catch(ClassNotFoundException e) {
-      throw new RuntimeException("Uncaught Class Not Found Exception");
+      throw new CatchedExceptionError(e,node);
     }
   }
   

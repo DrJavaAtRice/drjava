@@ -139,7 +139,7 @@ public interface Context extends SimpleContext {
      * Declares a new single-type-import clause for the importation of a static member
      * @param member the method or field name
      */
-    void declareMemberStaticImport(String member);
+    void declareMemberStaticImport(String member) throws ClassNotFoundException;
 
     /**
      * Returns the fully qualified class name that wraps the given staticly imported method

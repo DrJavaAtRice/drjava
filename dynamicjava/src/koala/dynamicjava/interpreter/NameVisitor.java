@@ -111,7 +111,7 @@ public class NameVisitor extends VisitorObject<Node> {
           context.declareMemberStaticImport(node.getName());
       }
       catch (ClassNotFoundException e) {
-        throw new RuntimeException("Uncaught Class Not Found Exception");
+        throw new CatchedExceptionError(e,node);
       }
     }
     else {      
