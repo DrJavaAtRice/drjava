@@ -9,6 +9,7 @@ import java.awt.event.*;
 import java.beans.*;
 import javax.swing.text.*;
 
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.util.swing.FindReplaceMachine;
 import edu.rice.cs.drjava.util.swing.ContinueCommand;
 
@@ -244,8 +245,10 @@ class FindReplaceDialog extends JDialog {
     setSize(520, 200);
   }
   
-  public void setMachine(FindReplaceMachine machine) {
-    _machine = machine;
+  public void setMachine(DefinitionsPane defPane) {
+    _defPane = defPane;
+    OpenDefinitionsDocument doc = defPane.getOpenDocument();
+    _machine = doc.createFindReplaceMachine();
   }
 
   

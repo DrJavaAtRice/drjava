@@ -248,6 +248,13 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
+   * Get the OpenDefinitionsDocument contained in this DefinitionsPane.
+   */
+  public OpenDefinitionsDocument getOpenDocument() {
+    return _doc;
+  }
+  
+  /**
    * Set the caret position and also scroll to make sure the location is
    * visible.
    * @param pos Location to scroll to.
