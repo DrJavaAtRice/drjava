@@ -433,6 +433,29 @@ public class NameVisitor extends VisitorObject<Node> {
     }
     return null;
   }
+ 
+  /**
+   * Visits an AssertStatement
+   * @param node the node to visit
+   */
+  public Node visit(AssertStatement node) {
+    //Visits the components of this node
+    Node n = node.getCondition();
+    Node o = n.acceptVisitor(this);
+    if(o != null) {
+      rejectReferenceType(o,n);
+      node.setCondition((Expression)o);
+    }
+    
+    n = node.getFailString();
+    if(n != null) {
+      o = n.acceptVisitor(this);
+      if(o != null) {
+        node.setFailString((Expression)o);
+      }
+    }
+    return null;    
+  }
   
   /**
    * Visits a VariableDeclaration

@@ -19,10 +19,5 @@ sed "s/List interfaceMemberDeclaration[(]/List<Node> interfaceMemberDeclaration(
 sed "s/List blockStatement[(]/List<Node> blockStatement(/" |
 sed "s/List forInit[(]/List<Node> forInit(/" |
 sed "s/List statementExpressionList[(]/List<Node> statementExpressionList(/" |
-sed "s/Vector/Vector<Object>/g"
-
-
-
-
-
+sed "s/Vector/Vector<Object>/g" |
 sed "s/LinkedList VariableDeclaratorList()/LinkedList<VariableDeclarator> VariableDeclaratorList()/g"

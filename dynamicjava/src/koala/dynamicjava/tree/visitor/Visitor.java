@@ -156,6 +156,12 @@ public interface Visitor<T> {
   T visit(IfThenElseStatement node);
   
   /**
+   * Visits an AssertStatement
+   * @param node the node to visit
+   */
+  T visit(AssertStatement node);
+  
+  /**
    * Visits a Literal
    * @param node the node to visit
    */

@@ -462,4 +462,69 @@ public class EvaluationVisitorTest extends DynamicJavaTestCase {
     
   }
   
+  //Assert tests
+  public void testSimpleTopLevelAssert() {
+    testString = "assert(true);";
+    
+    interpret(testString);
+    
+    testString = "assert(false);";
+    try {
+      interpret(testString);
+      fail("Assertion should have failed");
+    }
+    catch(AssertionError e) {
+      //Expected 
+    }
+     
+    testString = "boolean bool = true;\n"+
+      "boolean c = false;\n"+
+      "assert(bool);";
+    interpret(testString);
+    
+    testString = "assert(c);";
+    try {
+      interpret(testString);
+      fail("Assertion should have failed");
+    }
+    catch(AssertionError e) {
+      //Expected 
+    } 
+  }
+  
+  public void testAutoBoxAssert() {
+   testString = "Boolean bool = true;\n"+
+     "Boolean c = false;\n"+
+     "assert(bool);";
+   interpret(testString);
+    
+   testString = "assert(c);";
+    try{
+      interpret(testString);
+      fail("Assertion should have failed");
+    }
+    catch(AssertionError e) {
+      //Expected 
+    }
+  }
+  
+  public void testExpressionAssert() {
+    testString = "assert( true || false );";
+    interpret(testString);
+    
+      
+    testString = "assert true || false \n";
+    interpret(testString);
+  }
+  
+  public void testMessagePassedWithAssert() {
+    testString = "assert(false) : \"this message was passed\";";
+    try{
+      interpret(testString);
+      fail("Assertion should have failed");
+    }
+    catch(AssertionError e) {
+      assertEquals(e.getMessage(),"this message was passed");
+    }
+  }
 }

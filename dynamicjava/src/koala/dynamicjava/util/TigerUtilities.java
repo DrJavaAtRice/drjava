@@ -80,13 +80,28 @@ public class TigerUtilities {
    * Disabling this field and then attempting to use a feature of 1.5 will cause a
    * WrongVersionException to be thrown
    */
-  private static boolean _tigerEnabled = (VERSION >= 1.5);
-
+  private static boolean _tigerEnabled;
+  
+  static {
+    resetVersion();
+  }
+  
+  
   /**
    * Resets _tigerEnabled based upon the version of the runtime environement that is being used.
    */
   public static void resetVersion() {
-    _tigerEnabled = (VERSION >= 1.5);
+    try {
+      //Class.forName("java.lang.Enum");
+      Class.forName("com.sun.javadoc.ParameterizedType");
+      _tigerEnabled = true;
+    }
+    catch (Throwable t) {
+      // failed to load java.lang.Enum, so jsr14 v2.0 is not on the boot claspath.
+      // This logic avoids a restart if _usingJSR14v20 with the correct boot classpath.
+      //t.printStackTrace();
+      _tigerEnabled = (VERSION >= 1.5);
+    }    
   }
 
   /**

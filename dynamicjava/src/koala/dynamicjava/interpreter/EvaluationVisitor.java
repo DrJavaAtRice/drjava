@@ -707,6 +707,22 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   }
 
   /**
+   * Visits an AssertStatement
+   * @param node the node to visit
+   */
+  public Object visit(AssertStatement node) {
+    if (! (((Boolean)node.getCondition().acceptVisitor(this)).booleanValue())) {
+      String toThrow = "";
+      Expression n = node.getFailString();
+      if(n != null) {
+        toThrow = n.acceptVisitor(this).toString();
+      }
+      throw new AssertionError(toThrow);
+    }
+    return null;
+  }
+  
+  /**
    * Visits a BlockStatement
    * @param node the node to visit
    */

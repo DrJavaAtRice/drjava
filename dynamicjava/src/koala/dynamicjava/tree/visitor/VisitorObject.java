@@ -193,6 +193,14 @@ public class VisitorObject<T> implements Visitor<T> {
   }
   
   /**
+   * Visits an AssertStatement
+   * @param node the node to visit
+   */
+  public T visit(AssertStatement node) {
+    return null;
+  }
+  
+  /**
    * Visits a Literal
    * @param node the node to visit
    */

@@ -476,6 +476,34 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     return null;
   }
 
+    /**
+   * Visits an AssertStatement
+   * @param node the node to visit
+   */
+  public Class<?> visit(AssertStatement node) {
+    Expression cond = node.getCondition();
+    
+    //Check the condition
+    Class<?> type = cond.acceptVisitor(this);
+    if(type != boolean.class && type != Boolean.class) {
+      throw new ExecutionError("condition.type", node);
+    }
+    
+    // Auto unbox; Boolean->boolean
+    if(type == Boolean.class) {
+      //add method call on expression;
+      // "cond.booleanValue();"
+      node.setCondition(_unbox(cond, type));
+    }
+    
+    //Check the failure string
+    Expression failString = node.getFailString();
+    if(failString != null) {
+      Class<?> type2 = failString.acceptVisitor(this);
+    }
+    return null;
+  }
+  
   /**
    * Visits a SynchronizedStatement
    * @param node the node to visit

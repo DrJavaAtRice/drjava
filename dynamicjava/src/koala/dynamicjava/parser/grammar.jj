@@ -1157,6 +1157,7 @@ PARSER_END(Parser)
          | node=block()
          | node=emptyStatement()
          | node=ifStatement()
+         | node=assertStatement()
          | node=whileStatement()
          | node=doStatement()
          | node=switchStatement()
@@ -2482,6 +2483,7 @@ PARSER_END(Parser)
        | node=emptyStatement()
        | node=statementExpression() ";"
        | node=ifStatement()
+       | node=assertStatement()
        | node=whileStatement()
        | node=doStatement()
        | node=switchStatement()
@@ -2574,7 +2576,32 @@ PARSER_END(Parser)
       _throwParseException(pe,"Invalid if statement");
     }
   }
-
+ 
+  
+  /**
+   * Parses an assert statement
+   * @see koala.dynamicjava.tree.AssertStatement
+   */
+  AssertStatement assertStatement() :
+  {
+    Token t, t2;
+    Expression exp, falseString = null;
+  }
+  {
+    try { 
+      t="assert" exp=expression() [":" falseString=expression()] (t2=";" | t2=<EOF>)
+      {   
+        return new AssertStatement(exp, falseString, filename,
+                                   t.beginLine,      t.beginColumn,
+                                   t2.endLine, t2.endColumn);
+       }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe,"Invalid assert statement");
+    }
+  }
+  
+  
   /**
    * Parses a while statement
    * @see koala.dynamicjava.tree.WhileStatement
@@ -4202,7 +4229,7 @@ ForSlashEachStatement forStatement() :
   {
   }
   {
-    "package" | "import" | "{" | ";" | "if" | "while" | "do" | "switch" | "for" | "break" | "continue" | "return" | "throw" | "try"
+    "package" | "import" | "{" | ";" | "if" | "assert" | "while" | "do" | "switch" | "for" | "break" | "continue" | "return" | "throw" | "try"
       |  LOOKAHEAD(2) ("synchronized" "(")
       | LOOKAHEAD(2) (<IDENTIFIER> ":")
       | LOOKAHEAD(methodDeclarationLookahead()) methodDeclarationLookahead()
