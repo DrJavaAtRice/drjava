@@ -119,7 +119,7 @@ public class StickyClassLoader extends ClassLoader {
    *                             vital to ensure that only one copy of some
    *                             classes are loaded, since two differently
    *                             loaded versions of a class act totally
-   *                             independantly! (That is, they have different,
+   *                             independently! (That is, they have different,
    *                             incompatible types.) Often it'll be necessary
    *                             to make key interfaces that are used between
    *                             components get loaded via one standard 
@@ -131,7 +131,7 @@ public class StickyClassLoader extends ClassLoader {
                            final String[] classesToLoadWithOld)
   {
     super(oldLoader);
-    _newLoader = newLoader;
+    _newLoader = newLoader; // to be used only in getResource()!
     _classesToLoadWithOld = new String[classesToLoadWithOld.length];
     System.arraycopy(classesToLoadWithOld, 0, _classesToLoadWithOld, 0,
                      classesToLoadWithOld.length);
@@ -184,7 +184,7 @@ public class StickyClassLoader extends ClassLoader {
   protected Class loadClass(String name, boolean resolve) 
     throws ClassNotFoundException
   {
-    // check if it's already loaded!
+    // check if it's already loaded in the JVM!
     Class clazz;
     clazz = findLoadedClass(name);
     if (clazz != null) {
@@ -217,6 +217,9 @@ public class StickyClassLoader extends ClassLoader {
     else {
       // Load with the secondary loader
       clazz = _loadWithSecondary(name);
+      // If this fails don't fall back to loading with oldClassloader (or, 
+      // equivalently, getParent()) cuz getResource() (called by _loadWithSecondary())
+      // calls getParent.getResource() if _newLoader.getResource() returns null
     }
 
     if (resolve) {
@@ -241,10 +244,12 @@ public class StickyClassLoader extends ClassLoader {
     // we get the data using getResource because if we just delegate
     // the call to loadClass on old or new loader, it will use that
     // loader as the associated class loader for the class. that's bad.
+    // The method does not depend on the newLoader except indirectly
+    // in the call to getResource()
     try {
       String fileName = name.replace('.', '/') + ".class";
       
-      URL resource = getResource(fileName);
+      URL resource = getResource(fileName); // only dependency on newLoader!
       if (resource == null) {
         throw new ClassNotFoundException("Resource not found: " + fileName);
       }
