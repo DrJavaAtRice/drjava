@@ -1015,6 +1015,15 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     if(_doc.getUndoableEditListeners().length == 0){
       _resetUndo();
     }
+    int len = getDJDocument().getLength();
+    if(len < _position){
+      // the document changed since we're set inactive
+      //so set selection to be none
+      _position = len;
+      _selStart = len;
+      _selEnd = len;
+    }
+    
     setCaretPosition(_position);
     if(_position == _selStart){
       setCaretPosition(_selEnd);

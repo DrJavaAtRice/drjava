@@ -155,6 +155,10 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
 //    _doc.setCurrentLocation(pos);
   }
   
+  public void moveCaretPosition(int pos){
+    super.moveCaretPosition(pos);
+  }
+  
   
   /**
    * Runs indent(int) with a default value of Indenter.OTHER
