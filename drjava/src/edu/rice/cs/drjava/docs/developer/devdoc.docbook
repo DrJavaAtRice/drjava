@@ -261,11 +261,11 @@ cvs -z3 -d:pserver:anonymous@cvs.sf.net:/cvsroot/drjava co src
           <programlisting>
 ${HOME}/drjava/src/edu/rice/cs/lib/jsr14.jar
 ${HOME}/drjava/src/edu/rice/cs/lib/GJv6.jar
-${HOME}/drjava/src/edu/rice/cs/lib/compilers-jsr14v1_0.jar
-${HOME}/drjava/src/edu/rice/cs/lib/compilers-jsr14v1_2.jar
+${HOME}/drjava/src/edu/rice/cs/lib/compilers.jar
 ${HOME}/drjava/src/edu/rice/cs/lib/dynamicjava.jar
 ${HOME}/drjava/src/edu/rice/cs/lib/gj-util.jar
 ${HOME}/drjava/src/edu/rice/cs/lib/junit.jar
+${HOME}/drjava/src/edu/rice/cs/lib/platform.jar
 ${HOME}/drjava/built/
 ${JAVA_HOME}/lib/tools.jar
           </programlisting>
@@ -280,11 +280,11 @@ ${JAVA_HOME}/lib/tools.jar
           <programlisting>
 c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\jsr14.jar
 c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\GJv6.jar
-c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\compilers-jsr14v1_0.jar
-c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\compilers-jsr14v1_2.jar
+c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\compilers.jar
 c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\dynamicjava.jar
 c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\gj-util.jar
 c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\junit.jar
+c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\platform.jar
 c:\cygwin\home\USERNAME\drjava\built\
 c:\j2sdk1.4.1\lib\tools.jar
           </programlisting>
@@ -353,6 +353,10 @@ ant clean compile
             <title>Testing the code: "<literal>test</literal>"</title>
             <para>This will run all of the unit tests in the current package.  Specifically, this looks for all JUnit tests in classes with names that end in <literal>Test</literal>, compiling classes if necessary.  This can be a very time consuming task (ie. over 15 minutes on slower computers).  Note that this task is run automatically when you commit code to ensure that nothing breaks.  As a side note, <literal>test</literal> is the default Ant task for DrJava, so running Ant with no arguments will invoke this task.</para>
           </formalpara>
+
+          <para>Since running all the tests can take a very long time, there is an option to run only those tests which match a certain regular expression.  When running Ant, specify a <literal>-Dtest-spec</literal> argument with the regular expression matching the tests you want to run, <emphasis>not including the word <literal>Test</literal></emphasis>.  For example, to run only the GlobalModelCompileTest, use the following command.</para>
+
+          <programlisting>ant -Dtest-spec="GlobalModelCompile" test</programlisting>
         </listitem>
 
         <listitem>
