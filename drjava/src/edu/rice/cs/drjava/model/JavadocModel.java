@@ -63,16 +63,35 @@ public interface JavadocModel {
   /**
    * Javadocs all open documents, after ensuring that all are saved.
    * The user provides a destination, and the gm provides the package info.
+   * 
    * @param select a command object for selecting a directory and warning a user
    *        about bad input
    * @param saver a command object for saving a document (if it moved/changed)
    * @param classpath a collection of classpath elements to be used by Javadoc
    * @param listener an object to be notified of start and end events, etc.
+   * 
    * @throws IOException if there is a problem manipulating files
-   * @throws InvalidPackageException if a document has a bad package statement
    */
   public void javadocAll(DirectorySelector select, FileSaveSelector saver,
                          List<String> classpath,
                          JavadocListener listener)
-    throws IOException, InvalidPackageException;
+    throws IOException;
+  
+  /**
+   * Generates Javadoc for the given document only, after ensuring it is saved.
+   * Saves the output to a temporary directory, which is provided in the
+   * javadocEnded event on the provided listener.
+   * 
+   * @param doc Document to generate Javadoc for
+   * @param saver a command object for saving the document (if it moved/changed)
+   * @param classpath a collection of classpath elements to be used by Javadoc
+   * @param listener an object to be notified of start and end events, etc.
+   * 
+   * @throws IOException if there is a problem manipulating files
+   */
+  public void javadocDocument(final OpenDefinitionsDocument doc,
+                              final FileSaveSelector saver,
+                              final List<String> classpath,
+                              final JavadocListener listener)
+    throws IOException;
 }

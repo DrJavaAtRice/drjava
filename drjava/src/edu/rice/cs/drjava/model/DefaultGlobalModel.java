@@ -1828,6 +1828,17 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         }
       }
     }
+    
+    /**
+     * Generates Javadoc for this document, saving the output to a temporary
+     * directory.  The location is provided to the javadocEnded event on
+     * the given listener.
+     * @param saver FileSaveSelector for saving the file if it needs to be saved
+     */
+    public void generateJavadoc(FileSaveSelector saver) throws IOException {
+      // Use the model's classpath, and use the EventNotifier as the listener
+      javadocDocument(this, saver, getClasspath(), getNotifier());
+    }
 
     /**
      * Determines if the definitions document has changed since the
@@ -2379,11 +2390,27 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     _javadocModel.resetJavadocErrors();
   }
   
+  /**
+   * Javadocs all open documents, after ensuring that all are saved.
+   */
   public void javadocAll(DirectorySelector select, FileSaveSelector saver,
                          List<String> classpath,
                          JavadocListener listener)
-    throws IOException, InvalidPackageException {
+    throws IOException
+  {
     _javadocModel.javadocAll(select, saver, classpath, listener);
+  }
+  
+  /**
+   * Generates Javadoc for the given document only, after ensuring it is saved.
+   */
+  public void javadocDocument(final OpenDefinitionsDocument doc,
+                              final FileSaveSelector saver,
+                              final List<String> classpath,
+                              final JavadocListener listener)
+    throws IOException
+  {
+    _javadocModel.javadocDocument(doc, saver, classpath, listener);
   }
   
   /**

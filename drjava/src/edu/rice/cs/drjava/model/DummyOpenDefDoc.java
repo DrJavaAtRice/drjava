@@ -318,6 +318,16 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   }
   
   /**
+   * Generates Javadoc for this document, saving the output to a temporary
+   * directory.  The location is provided to the javadocEnded event on
+   * the given listener.
+   * @param saver FileSaveSelector for saving the file if it needs to be saved
+   */
+  public void generateJavadoc(FileSaveSelector saver) throws IOException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  /**
    * Gets the name of the package this source file claims it's in (with the
    * package keyword). It does this by minimally parsing the source file
    * to find the package statement.

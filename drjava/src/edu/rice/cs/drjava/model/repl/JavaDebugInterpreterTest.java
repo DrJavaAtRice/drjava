@@ -63,6 +63,7 @@ import koala.dynamicjava.interpreter.context.*;
  * @version $Id$
  */
 public final class JavaDebugInterpreterTest extends DebugTestCase {
+  private static final String _newLine = System.getProperty("line.separator");
   private JavaDebugInterpreter _debugInterpreter;
   
   private String _assignedInterpreterName;
@@ -310,7 +311,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
               "finally {System.out.println(MonkeyInner.MonkeyTwoDeep.this.twoDeepFoo);}");
     assertInteractionsDoesNotContain("18");
     assertInteractionsDoesNotContain("6");
-    assertInteractionsContains("8\n13\n");
+    assertInteractionsContains("8" + _newLine + "13" + _newLine);
     
     // Tests that the debugger has the correct notion of 
     interpret("foo");

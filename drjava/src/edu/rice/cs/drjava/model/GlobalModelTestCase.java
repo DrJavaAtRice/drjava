@@ -318,8 +318,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     interactionsDoc.insertText(interactionsDoc.getDocLength(), input,
                                InteractionsDocument.DEFAULT_STYLE);
 
-    // skip 1 for newline
-    final int resultsStartLocation = interactionsDoc.getDocLength() + 1;
+    // skip the right length for the newline
+    int newLineLen = System.getProperty("line.separator").length();
+    final int resultsStartLocation = interactionsDoc.getDocLength() + newLineLen;
 
     TestListener listener = new TestListener() {
       public void interactionStarted() {
@@ -351,8 +352,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     listener.assertInteractionStartCount(1);
     listener.assertInteractionEndCount(1);
 
-    // skip 1 for newline
-    final int resultsEndLocation = interactionsDoc.getDocLength() - 1 -
+    // skip the right length for the newline
+    final int resultsEndLocation = interactionsDoc.getDocLength() - newLineLen -
                                    interactionsDoc.getPrompt().length();
 
     final int resultsLen = resultsEndLocation - resultsStartLocation;
@@ -394,8 +395,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     int contains = interactText.lastIndexOf(text);
     assertTrue("Interactions document should " +
                (shouldContain ? "" : "not ")
-                 + "contain: "
-                 +text,
+                 + "contain:\n"
+                 + text
+                 + "\nActual contents of Interactions document:\n"
+                 + interactText,
                (contains != -1) == shouldContain);
   }
   

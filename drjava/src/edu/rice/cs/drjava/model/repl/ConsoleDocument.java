@@ -219,7 +219,8 @@ public class ConsoleDocument implements DocumentAdapter {
     }
     
     try {
-      insertText(pos, "\n", DEFAULT_STYLE);
+      String newLine = System.getProperty("line.separator");
+      insertText(pos, newLine, DEFAULT_STYLE);
     }
     catch (DocumentAdapterException e) {
       // Shouldn't happen after we've corrected it

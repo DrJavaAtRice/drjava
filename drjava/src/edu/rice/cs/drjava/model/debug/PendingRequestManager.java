@@ -45,8 +45,7 @@ import com.sun.jdi.*;
 import com.sun.jdi.request.*;
 import com.sun.jdi.event.*;
 
-import gj.util.Hashtable;
-
+import java.util.Hashtable;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Vector;

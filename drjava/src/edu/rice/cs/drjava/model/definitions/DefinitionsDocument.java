@@ -42,7 +42,7 @@ package edu.rice.cs.drjava.model.definitions;
 import javax.swing.text.*;
 import javax.swing.undo.*;
 import javax.swing.event.DocumentEvent;
-import gj.util.Vector;
+import java.util.Vector;
 import java.util.Hashtable;
 import java.util.HashSet;
 import java.util.StringTokenizer;
@@ -394,8 +394,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     // Prevent going over max size
     if (_helperCache.size() >= MAX_CACHE_SIZE) {
       if (_helperCacheHistory.size() > 0) {
-        _helperCache.remove( _helperCacheHistory.elementAt(0) );
-        _helperCacheHistory.removeElementAt(0);
+        _helperCache.remove( _helperCacheHistory.get(0) );
+        _helperCacheHistory.remove(0);
       }
       else {
         // Shouldn't happen
@@ -405,7 +405,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     Object prev = _helperCache.put(key, result);
     // Add to history if the insert increased the size of the table
     if (prev == null) {
-      _helperCacheHistory.addElement(key);
+      _helperCacheHistory.add(key);
     }
     
     /*
@@ -439,7 +439,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    */
   protected void _clearCache() {
     _helperCache.clear();
-    _helperCacheHistory.removeAllElements();
+    _helperCacheHistory.clear();
     _cacheInUse = false;
   }
   

@@ -48,8 +48,9 @@ import  java.awt.event.*;
 import  java.io.*;
 import  java.util.*;
 
-import gj.util.Stack;
-import gj.util.Hashtable;
+// TODO: Check synchronization.
+import java.util.Stack;
+import java.util.Hashtable;
 import edu.rice.cs.util.Pair;
 
 import edu.rice.cs.util.UnexpectedException;

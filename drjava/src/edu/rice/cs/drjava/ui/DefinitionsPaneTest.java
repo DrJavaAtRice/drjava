@@ -62,8 +62,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.net.URL;
 
-import gj.util.Vector;
-
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.platform.*;

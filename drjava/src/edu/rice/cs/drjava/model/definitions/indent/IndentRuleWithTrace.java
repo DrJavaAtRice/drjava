@@ -40,8 +40,9 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import gj.util.Vector;
 
+// TODO: Check synchronization.
+import java.util.Vector;
 import java.io.PrintStream;
 
 /**
@@ -66,7 +67,7 @@ public abstract class IndentRuleWithTrace implements IndentRule{
       ps.println("No trace to print");
     } else {
       for (int x = 0; x < trace.size(); x++){
-	ps.println(trace.elementAt(x));
+        ps.println(trace.get(x));
       }
       ps.println("******************************");
     }
@@ -86,7 +87,7 @@ public abstract class IndentRuleWithTrace implements IndentRule{
   protected static void _addToIndentTrace(String ruleName, String direction, boolean terminus){
     if (ruleTraceEnabled){
       if(startOver){
-	trace = new Vector<String>();
+ trace = new Vector<String>();
       }
       startOver = terminus;
       trace.addElement(ruleName + " " + direction);

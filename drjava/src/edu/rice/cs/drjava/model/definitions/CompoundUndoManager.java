@@ -42,7 +42,7 @@ package edu.rice.cs.drjava.model.definitions;
 import javax.swing.text.*;
 import javax.swing.undo.*;
 import javax.swing.event.DocumentEvent;
-import gj.util.Vector;
+import java.util.Vector;
 import java.util.Hashtable;
 import java.util.HashSet;
 import java.util.StringTokenizer;
@@ -102,15 +102,15 @@ public class CompoundUndoManager extends UndoManager {
    * @return the key for the compound edit
    */
   public int startCompoundEdit() {
-    _compoundEdits.insertElementAt(new CompoundEdit(), 0);
-    _keys.insertElementAt(new Integer(_nextKey), 0);
+    _compoundEdits.add(0, new CompoundEdit());
+    _keys.add(0, new Integer(_nextKey));
     if(_nextKey < Integer.MAX_VALUE) {
       _nextKey++;
     }
     else {
       _nextKey = Integer.MIN_VALUE;
     }
-    return _keys.elementAt(0).intValue();
+    return _keys.get(0).intValue();
   }
   
   /**
@@ -118,9 +118,9 @@ public class CompoundUndoManager extends UndoManager {
    * @param key the key that was returned by startCompoundEdit()
    */
   public void endCompoundEdit(int key) {
-    if(_keys.elementAt(0).intValue() == key) {
-      CompoundEdit compoundEdit = _compoundEdits.elementAt(0);
-      _compoundEdits.removeElementAt(0);
+    if(_keys.get(0).intValue() == key) {
+      CompoundEdit compoundEdit = _compoundEdits.get(0);
+      _compoundEdits.remove(0);
       compoundEdit.end();
 
       if (!_compoundEditInProgress()) {
@@ -128,9 +128,9 @@ public class CompoundUndoManager extends UndoManager {
         _notifyUndoHappened();
       }
       else {
-        _compoundEdits.firstElement().addEdit(compoundEdit);
+        _compoundEdits.get(0).addEdit(compoundEdit);
       }
-      _keys.removeElementAt(0);
+      _keys.remove(0);
 
       // signal view to update undo state
     }
@@ -162,7 +162,7 @@ public class CompoundUndoManager extends UndoManager {
    */
   public boolean addEdit(UndoableEdit e) {
     if (_compoundEditInProgress()) {
-      return _compoundEdits.firstElement().addEdit(e);
+      return _compoundEdits.get(0).addEdit(e);
     }
     else {
       boolean result = super.addEdit(e);

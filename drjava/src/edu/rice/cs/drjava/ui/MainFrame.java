@@ -479,8 +479,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
-  /** Runs Javadoc. */
-  private Action _javadocAction = new AbstractAction("Create Javadoc") {
+  /** Runs Javadoc on all open documents (and the files in their packages). */
+  private Action _javadocAllAction = new AbstractAction("Javadoc All Documents") {
       public void actionPerformed(ActionEvent ae) {
         try {
 //          Vector<String> gjClasspath = _model.getClasspath();
@@ -492,11 +492,19 @@ public class MainFrame extends JFrame implements OptionConstants {
         catch (IOException ioe) {
           _showIOError(ioe);
         }
-        catch (InvalidPackageException ipe) {
-          _showError(ipe, "Javadoc Error",
-                     "Javadoc encountered an invalid package name.");
-        }
       }
+  };
+  
+  /** Runs Javadoc on the current document. */
+  private Action _javadocCurrentAction = new AbstractAction("Javadoc Current Document") {
+    public void actionPerformed(ActionEvent ae) {
+      try {
+        _model.getActiveDocument().generateJavadoc(_saveSelector);
+      }
+      catch (IOException ioe) {
+        _showIOError(ioe);
+      }
+    }
   };
 
   /** Default cut action.  Returns focus to the correct pane. */
@@ -2329,7 +2337,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_resetInteractionsAction, "Reset", "Reset interactions");
   
     _setUpAction(_junitAction, "Test", "Run JUnit over the current document");
-    _setUpAction(_javadocAction, "Javadoc", "Test", "Create Javadoc for open documents");
+    _setUpAction(_javadocAllAction, "Javadoc", "Create Javadoc for the packages of all open documents");
+    _setUpAction(_javadocCurrentAction, "Javadoc Current", "Create Javadoc for the current document");
 
   }
 
@@ -2520,7 +2529,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       _addMenuItem(toolsMenu, _runAction, KEY_RUN);
     }
     _addMenuItem(toolsMenu, _junitAction, KEY_TEST);
-    toolsMenu.add(_javadocAction);
+    toolsMenu.add(_javadocAllAction);
+    toolsMenu.add(_javadocCurrentAction);
     toolsMenu.addSeparator();
     
     toolsMenu.add(_loadHistoryAction);
@@ -2742,7 +2752,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     _junitButton = _createToolbarButton(_junitAction);
     _toolBar.add(_junitButton);
-    _javadocButton = _createToolbarButton(_javadocAction);
+    _javadocButton = _createToolbarButton(_javadocAllAction);
     _toolBar.add(_javadocButton);
 
 
@@ -2953,6 +2963,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _docPanePopupMenu.add(_runAction);
     }
     _docPanePopupMenu.add(_junitAction);
+    _docPanePopupMenu.add(_javadocCurrentAction);
     _docList.addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
         _docList.setSelectedIndex(_docList.locationToIndex(e.getPoint()));
@@ -3963,7 +3974,8 @@ public class MainFrame extends JFrame implements OptionConstants {
 //          MainFrame.this.hourglassOn();
           showTab(_javadocErrorPanel);
           _javadocErrorPanel.setJavadocInProgress();
-          _javadocAction.setEnabled(false);
+          _javadocAllAction.setEnabled(false);
+          _javadocCurrentAction.setEnabled(false);
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -3976,7 +3988,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           // Now done in _javadocAll
 //          MainFrame.this.hourglassOff();
           showTab(_javadocErrorPanel);
-          _javadocAction.setEnabled(true);
+          _javadocAllAction.setEnabled(true);
+          _javadocCurrentAction.setEnabled(true);
           _javadocErrorPanel.reset();
           
           // Display the results.
@@ -3994,7 +4007,8 @@ public class MainFrame extends JFrame implements OptionConstants {
               className = "";
             }
             try {
-              URL address = destDir.getAbsoluteFile().toURL();
+              File index = new File(destDir, "index.html");
+              URL address = index.getAbsoluteFile().toURL();
               if (!PlatformFactory.ONLY.openURL(address)) {
                 JavadocFrame _javadocFrame = new JavadocFrame(destDir, className);
                 _javadocFrame.show();
@@ -4095,7 +4109,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void saveBeforeCompile() {
       _saveAllBeforeProceeding
         ("To compile, you must first save ALL modified files.\n" +
-         "Would you like to save and then compile?");
+         "Would you like to save and then compile?",
+         ALWAYS_SAVE_BEFORE_COMPILE,
+         "Always save before compiling");
     }
 
     /**
@@ -4105,39 +4121,50 @@ public class MainFrame extends JFrame implements OptionConstants {
       _saveAllBeforeProceeding
         ("To run this document's main method, you must first\n" +
          "save ALL modified files and compile this document.\n" +
-         "Would you like to save and compile now?");
+         "Would you like to save and compile now?",
+         ALWAYS_SAVE_BEFORE_RUN,
+         "Always save and compile before running");
     }
     
     public void saveBeforeJUnit() {
       _saveAllBeforeProceeding
         ("To run JUnit, you must first save and compile ALL modified\n" +
-         "files. Would you like to save and compile now?");
+         "files. Would you like to save and compile now?",
+         ALWAYS_SAVE_BEFORE_JUNIT,
+         "Always save and compile before testing with JUnit");
     }
     
     public void saveBeforeJavadoc() {
       _saveAllBeforeProceeding
         ("To run Javadoc, you must first save ALL modified files.\n" +
-         "Would you like to save and then run Javadoc?");
+         "Would you like to save and then run Javadoc?",
+         ALWAYS_SAVE_BEFORE_JAVADOC,
+         "Always save before running Javadoc");
     }
     
     public void saveBeforeDebug() {
       _saveAllBeforeProceeding
         ("To use debugging commands, you must first save and compile\n" +
-         "ALL modified files. Would you like to save and then compile?");
+         "ALL modified files. Would you like to save and then compile?",
+         ALWAYS_SAVE_BEFORE_DEBUG,
+         "Always save and compile before debugging");
     }
   
     /**
      * Helper method shared by all "saveBeforeX" methods.
      * @param message a prompt message to be displayed to the user
+     * @param option the BooleanOption for the prompt dialog checkbox
+     * @param checkMsg the description of the checkbox ("Always save before X")
      */
-    private void _saveAllBeforeProceeding(String message) {
+    private void _saveAllBeforeProceeding(String message, BooleanOption option,
+                                          String checkMsg) {
       if (_model.hasModifiedDocuments()) {
-        if (!DrJava.getConfig().getSetting(ALWAYS_SAVE_BEFORE_COMPILE).booleanValue()) {
+        if (!DrJava.getConfig().getSetting(option).booleanValue()) {
           ConfirmCheckBoxDialog dialog =
             new ConfirmCheckBoxDialog(MainFrame.this,
                                       "Must save all files to continue",
                                       message,
-                                      "Always save before compiling");
+                                      checkMsg);
           int rc = dialog.show();
           switch (rc) {
             case JOptionPane.YES_OPTION:
@@ -4145,7 +4172,7 @@ public class MainFrame extends JFrame implements OptionConstants {
               // don't break, since no option and yes option both check the checkbox
             case JOptionPane.NO_OPTION:
               if (dialog.getCheckBoxValue()) {
-                DrJava.getConfig().setSetting(ALWAYS_SAVE_BEFORE_COMPILE, Boolean.TRUE);
+                DrJava.getConfig().setSetting(option, Boolean.TRUE);
               }
               break;
             case JOptionPane.CANCEL_OPTION:

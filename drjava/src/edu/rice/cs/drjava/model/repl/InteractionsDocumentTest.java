@@ -153,7 +153,7 @@ public final class InteractionsDocumentTest extends TestCase {
                  _doc.getCurrentInteraction());
     _doc.insertNewLine(origLength + 2);
     assertEquals("current interaction after newline",
-                 "co\nmmand",
+                 "co" + System.getProperty("line.separator") + "mmand",
                  _doc.getCurrentInteraction());
   }
   

@@ -42,7 +42,8 @@ package edu.rice.cs.drjava.model.definitions;
 import javax.swing.text.*;
 import java.awt.*;
 import javax.swing.event.DocumentEvent;
-import gj.util.Vector;
+// TODO: Check synchronization.
+import java.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
@@ -132,7 +133,7 @@ public class ColoringView extends PlainView implements OptionConstants {
       throw  new RuntimeException("GetHighlightStatus returned nothing!");
     }
     for (int i = 0; i < stats.size(); i++) {
-      HighlightStatus stat = stats.elementAt(i);
+      HighlightStatus stat = stats.get(i);
       setFormattingForState(g, stat.getState());
       // If this highlight status extends past p1, end at p1
       int length = stat.getLength();

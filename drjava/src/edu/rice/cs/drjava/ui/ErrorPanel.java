@@ -50,7 +50,9 @@ import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
-import gj.util.Hashtable;
+
+// TODO: Check synchronization.
+import java.util.Hashtable;
 
 import javax.swing.*;
 import javax.swing.text.*;
@@ -451,14 +453,19 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
           Rectangle startRect = modelToView(startPos);
           Rectangle endRect = modelToView(endPos - 1);
 
-          // Add the end rect onto the start rect to make a rectangle
-          // that encompasses the entire error
-          startRect.add(endRect);
-
-          //System.err.println("scrll vis: " + startRect);
-
-          scrollRectToVisible(startRect);
-
+          if (startRect != null && endRect != null) {
+            // Add the end rect onto the start rect to make a rectangle
+            // that encompasses the entire error
+            startRect.add(endRect);
+            
+            //System.err.println("scrll vis: " + startRect);
+            
+            scrollRectToVisible(startRect);
+          }
+          else {
+            // Couldn't draw the box to highlight, so don't highlight anything
+            _removeListHighlight();
+          }
         }
         catch (BadLocationException badBadLocation) {}
 

@@ -39,8 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import gj.util.Stack;
-import gj.util.Vector;
+import java.util.Stack;
 
 /**
  * Keeps track of the true braces (i.e., "(){}[]").

@@ -41,7 +41,7 @@ package edu.rice.cs.drjava.model.definitions;
 
 import javax.swing.undo.CannotUndoException;
 import javax.swing.text.*;
-import gj.util.Vector;
+import java.util.Vector;
 
 import junit.framework.*;
 import junit.extensions.*;
@@ -231,12 +231,12 @@ public final class DefinitionsDocumentTest extends TestCase
     for (int i = 0; i < v.size(); i++) {
       assertEquals("Item #" + i + "in highlight vector starts at right place",
                    walk,
-                   v.elementAt(i).getLocation());
+                   v.get(i).getLocation());
       // Sanity check: length > 0?
       assertTrue("Item #" + i + " in highlight vector has positive length",
-                 v.elementAt(i).getLength() > 0);
+                 v.get(i).getLength() > 0);
       
-      walk += v.elementAt(i).getLength();
+      walk += v.get(i).getLength();
     }
     assertEquals("Location after walking highlight vector",
                  end,
@@ -257,19 +257,19 @@ public final class DefinitionsDocumentTest extends TestCase
     _checkHighlightStatusConsistent(v, 0, _defModel.getLength());
     // Make sure the keywords are highlighted
     assertEquals("vector length", 12, v.size());
-    assertEquals(HighlightStatus.KEYWORD, v.elementAt(0).getState());
-    assertEquals(HighlightStatus.NORMAL, v.elementAt(1).getState());
-    assertEquals(HighlightStatus.KEYWORD, v.elementAt(2).getState());
-    assertEquals(HighlightStatus.NORMAL, v.elementAt(3).getState());
-    assertEquals(HighlightStatus.TYPE, v.elementAt(4).getState());
-    assertEquals(HighlightStatus.NORMAL, v.elementAt(5).getState());
+    assertEquals(HighlightStatus.KEYWORD, v.get(0).getState());
+    assertEquals(HighlightStatus.NORMAL, v.get(1).getState());
+    assertEquals(HighlightStatus.KEYWORD, v.get(2).getState());
+    assertEquals(HighlightStatus.NORMAL, v.get(3).getState());
+    assertEquals(HighlightStatus.TYPE, v.get(4).getState());
+    assertEquals(HighlightStatus.NORMAL, v.get(5).getState());
 
-    assertEquals(HighlightStatus.KEYWORD, v.elementAt(6).getState());
-    assertEquals(HighlightStatus.NORMAL, v.elementAt(7).getState());
-    assertEquals(HighlightStatus.TYPE, v.elementAt(8).getState());
-    assertEquals(HighlightStatus.NORMAL, v.elementAt(9).getState());
-    assertEquals(HighlightStatus.NUMBER, v.elementAt(10).getState());
-    assertEquals(HighlightStatus.NORMAL, v.elementAt(11).getState());
+    assertEquals(HighlightStatus.KEYWORD, v.get(6).getState());
+    assertEquals(HighlightStatus.NORMAL, v.get(7).getState());
+    assertEquals(HighlightStatus.TYPE, v.get(8).getState());
+    assertEquals(HighlightStatus.NORMAL, v.get(9).getState());
+    assertEquals(HighlightStatus.NUMBER, v.get(10).getState());
+    assertEquals(HighlightStatus.NORMAL, v.get(11).getState());
   }
   
   /**
@@ -292,14 +292,14 @@ public final class DefinitionsDocumentTest extends TestCase
     // Make sure the keyword is highlighted
 
     assertEquals("vector length", 2, v.size());
-    assertEquals(HighlightStatus.TYPE, v.elementAt(0).getState());
-    assertEquals(HighlightStatus.NORMAL, v.elementAt(1).getState());
+    assertEquals(HighlightStatus.TYPE, v.get(0).getState());
+    assertEquals(HighlightStatus.NORMAL, v.get(1).getState());
     // Now only ask for highlights for "in"
     v = _defModel.getHighlightStatus(0, 2);
     _checkHighlightStatusConsistent(v, 0, 2);
     assertEquals("vector length", 1, v.size());
-    assertEquals(0, v.elementAt(0).getLocation());
-    assertEquals(2, v.elementAt(0).getLength());
+    assertEquals(0, v.get(0).getLocation());
+    assertEquals(2, v.get(0).getLength());
   }
   
   /**

@@ -60,7 +60,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
    * Message to signal that input is required from the console.
    */
   public static final String INPUT_REQUIRED_MESSAGE =
-    "Please enter input in the Console tab.\n";
+    "Please enter input in the Console tab." + _newLine;
   
   /**
    * Model that contains the interpreter to use.

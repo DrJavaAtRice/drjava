@@ -47,7 +47,7 @@ import java.awt.event.*;
 import java.awt.*;
 import java.net.*;
 import java.io.*;
-import gj.util.Vector;
+import java.util.Vector;
 import edu.rice.cs.util.UnexpectedException;
 
 /**
@@ -158,7 +158,7 @@ public class HTMLFrame extends JFrame {
   }
 
   public void addHyperlinkListener(HyperlinkListener linkListener) {
-    _hyperlinkListeners.addElement(linkListener);
+    _hyperlinkListeners.add(linkListener);
     _contentsDocPane.addHyperlinkListener(linkListener);
     _mainDocPane.addHyperlinkListener(linkListener);
   }
@@ -226,7 +226,7 @@ public class HTMLFrame extends JFrame {
 
     _linkError = false;
     _hyperlinkListeners = new Vector<HyperlinkListener>();
-    _hyperlinkListeners.addElement(_resetListener);
+    _hyperlinkListeners.add(_resetListener);
     _mainDocPane.addHyperlinkListener(_resetListener);
 
     if (baseDir != null) {
@@ -291,7 +291,7 @@ public class HTMLFrame extends JFrame {
     _mainDocPane = new JEditorPane();
     _mainDocPane.setEditable(false);
     for (int i = 0; i < _hyperlinkListeners.size(); i++) {
-      _mainDocPane.addHyperlinkListener(_hyperlinkListeners.elementAt(i));
+      _mainDocPane.addHyperlinkListener(_hyperlinkListeners.get(i));
     }
     _displayPage(_lastURL);
 

@@ -38,8 +38,11 @@
  END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
-import gj.util.Hashtable;
-import gj.util.Vector;
+import java.util.Hashtable;
+import java.util.Vector;
+// TODO: Change the usage of these classes to Collections style.
+// TODO: Do these need to be synchronized?
+
 
 /**
  * Represents a configurable option in DrJava that has a static (programmatic) type of T.

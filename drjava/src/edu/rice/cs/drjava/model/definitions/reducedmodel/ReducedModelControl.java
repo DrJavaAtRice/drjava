@@ -39,8 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import gj.util.Stack;
-import gj.util.Vector;
+import java.util.Vector;
 
 /**
  * This class provides an implementation of the BraceReduction
@@ -431,7 +430,7 @@ public class ReducedModelControl implements BraceReduction {
       }
       else {
         // add old one to the vector and start new one
-        vec.addElement(new HighlightStatus(curLocation, curLength, curState));
+        vec.add(new HighlightStatus(curLocation, curLength, curState));
         curLocation += curLength; // new block starts after previous one
         curLength = cursor.current().getSize();
         curState = nextState;
@@ -447,7 +446,7 @@ public class ReducedModelControl implements BraceReduction {
     }
 
     // Add the last one, which has not been added yet
-    vec.addElement(new HighlightStatus(curLocation, curLength, curState));
+    vec.add(new HighlightStatus(curLocation, curLength, curState));
 
     cursor.dispose();
     

@@ -42,7 +42,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
 
-import gj.util.Vector;
+import java.util.Vector;
 import java.io.PrintStream;
 import junit.framework.*;
 import javax.swing.text.BadLocationException;
@@ -91,7 +91,7 @@ public final class IndentRuleWithTraceTest extends IndentRulesTestCase{
     Vector<String> actual = IndentRuleWithTrace.getTrace();
     assertEquals("steps in trace", 4, actual.size());
     for(int x = 0; x < actual.size(); x++){
-      assertEquals("check trace step " + x, expected[x], actual.elementAt(x));
+      assertEquals("check trace step " + x, expected[x], actual.get(x));
     }
   }
 }

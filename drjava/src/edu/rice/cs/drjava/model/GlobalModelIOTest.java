@@ -1168,6 +1168,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
   public void testSaveClearAndLoadHistory() throws DocumentAdapterException,
     BadLocationException, InterruptedException, IOException
   {
+    String newLine = System.getProperty("line.separator");
     TestListener listener = new TestListener() {
       public void interactionStarted() {
         synchronized(this) {
@@ -1188,6 +1189,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     FileSelector fs = new FileSelector(f);
     String s1 = "int x = 5;";
     String s2 = "System.out.println(\"x = \" + x)";
+    String s3 = "int y;" + newLine + "int z;";
     listener.assertInteractionStartCount(0);
     listener.assertInteractionEndCount(0);
     interpretIgnoreResult(s1);
@@ -1215,21 +1217,32 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
         }
       }
     }
+    interpretIgnoreResult(s3);
+    while (listener.interactionEndCount == 2) {
+      synchronized(listener) {
+        try {
+          listener.wait();
+        }
+        catch (InterruptedException ie) {
+          throw new UnexpectedException(ie);
+        }
+      }
+    }
     // check that the history contains the correct value
     assertEquals("History and getHistoryAsString should be the same.",
-                 s1+'\n'+s2+'\n',
+                 s1 + newLine + s2 + newLine + s3 + newLine,
                  _model.getHistoryAsString());
     assertEquals("History and getHistoryAsStringWithSemicolons don't match up correctly.",
-                 s1+"\n"+s2+";\n",
+                 s1 + newLine + s2 + ";" + newLine + s3 + newLine,
                  _model.getHistoryAsStringWithSemicolons());
-    listener.assertInteractionEndCount(2);
-    listener.assertInteractionStartCount(2);
+    listener.assertInteractionEndCount(3);
+    listener.assertInteractionStartCount(3);
     _model.saveHistory(fs);
     
     // check that the file contains the correct value
-    //String newLine = System.getProperty("line.separator");
     assertEquals("contents of saved file",
-                 History.HISTORY_FORMAT_VERSION_2 + s1 + "\n" + s2 + ";\n",
+                 History.HISTORY_FORMAT_VERSION_2 + 
+                 s1 + newLine + s2 + ";" + newLine + s3 + newLine,
                  FileOps.readFileAsString(f));
     
     _model.clearHistory();
@@ -1238,7 +1251,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
                  "",
                  _model.getHistoryAsString());
     _model.loadHistory(fs);
-    while (listener.interactionEndCount == 2) {
+    while (listener.interactionEndCount == 3) {
       synchronized(listener) {
         try {
           listener.wait();
@@ -1253,8 +1266,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     assertEquals("Output of loaded history is not correct",
                  "x = 5",
                  con.getDocText(0, con.getDocLength()).trim());
-    listener.assertInteractionStartCount(3);
-    listener.assertInteractionEndCount(3);
+    listener.assertInteractionStartCount(4);
+    listener.assertInteractionEndCount(4);
     _model.removeListener(listener);
   }
   

@@ -44,7 +44,6 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
-import gj.util.Vector;
 import java.util.List;
 import java.util.Iterator;
 import java.util.StringTokenizer;

@@ -39,9 +39,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import gj.util.Stack;
-import gj.util.Vector;
-
 /**
  * A refactoring of the common code between ReducedModelComment and 
  * ReducedModelBrace.  Both of the refactored classes extend this class.

@@ -42,8 +42,6 @@ package edu.rice.cs.drjava.model.junit;
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
-import gj.util.Vector;
-import gj.util.Enumeration;
 import java.io.*;
 import junit.runner.*;
 

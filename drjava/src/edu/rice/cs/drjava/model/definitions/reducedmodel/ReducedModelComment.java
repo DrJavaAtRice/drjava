@@ -39,9 +39,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import gj.util.Stack;
-import gj.util.Vector;
-
 /**
  * Keeps track of newlines, comment blocks, and single and double-quoted strings.
  * This reduced sub-model is used for coloring purposes.  Given the information
@@ -246,7 +243,6 @@ public class ReducedModelComment extends AbstractReducedModel {
   *  <li> inside a gap: use helper function
   *  <li>otherwise, just insert normally
   * </OL>
-  * @return a Vector of highlighting information after the cursor
   */
   public void insertNewline() {
     if (_cursor.atStart()) {
@@ -314,7 +310,6 @@ public class ReducedModelComment extends AbstractReducedModel {
    *  <li>otherwise, just insert normally
    * </OL>
    * @param quote the type of quote to insert
-   * @return a Vector of highlighting information after the cursor
    */
   public void insertQuote(String quote) {
     if (_cursor.atStart()) {

@@ -41,7 +41,6 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
-import gj.util.Vector;
 
 /**
  * A node in the decision tree used for the indentation system.

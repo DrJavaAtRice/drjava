@@ -38,7 +38,7 @@
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
-import gj.util.*;
+import java.util.Hashtable;
 /**
  * the association of an OptionName with the ability to parse something to type T
  * the special property is that if U extends T, then OptionParser<U> extends OptionParser<T>.

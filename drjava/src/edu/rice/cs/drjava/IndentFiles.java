@@ -41,7 +41,9 @@ package edu.rice.cs.drjava;
 
 import java.io.*;
 import java.lang.reflect.Method;
-import gj.util.Vector;
+import java.util.Vector;
+// TODO: Change the usage of these classes to Collections style.
+// TODO: Do these need to be synchronized?
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
@@ -88,7 +90,7 @@ public class IndentFiles {
           silent = true;
         }
         else {
-          filenames.addElement(arg);
+          filenames.add(arg);
         }
       }
       indentFiles(filenames, indentLevel, silent);
@@ -122,7 +124,7 @@ public class IndentFiles {
     Indenter indenter = new Indenter(indentLevel);
     if (!silent) System.out.println("DrJava - Indenting files:");
     for (int i = 0; i < filenames.size(); i++) {
-      String fname = filenames.elementAt(i);
+      String fname = filenames.get(i);
       File file = new File(fname);
       if (!silent) { 
         System.out.print("  " + fname + " ... ");

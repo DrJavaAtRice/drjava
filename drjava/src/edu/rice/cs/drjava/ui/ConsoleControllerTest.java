@@ -113,7 +113,7 @@ public final class ConsoleControllerTest extends GlobalModelTestCase {
     assertEquals("read() returns the correct character", expected, result);
     result = interpret("System.in.read()");
     assertEquals("second read() should get the end-of-line character",
-                 String.valueOf((int) '\n'), result);
+                 String.valueOf((int) System.getProperty("line.separator").charAt(0)), result);
   }
 
   /**

@@ -46,7 +46,7 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.StringTokenizer;
 
-import gj.util.Vector;
+import java.util.Vector;
 import java.util.ArrayList;
 
 import edu.rice.cs.drjava.CodeStatus;
@@ -64,6 +64,8 @@ import edu.rice.cs.util.text.DocumentAdapterException;
  * @version $Id$
  */
 public abstract class InteractionsModel implements InteractionsModelCallback {
+  
+  protected static final String _newLine = System.getProperty("line.separator");
   
   /**
    * InteractionsDocument containing the commands and history.
@@ -160,7 +162,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       
       // there is no return at the end of the last line
       // better to put it on now and not later.
-      _docAppend("\n", InteractionsDocument.DEFAULT_STYLE);
+      _docAppend(_newLine, InteractionsDocument.DEFAULT_STYLE);
       
       String toEval = text.trim();
       if (toEval.startsWith("java ")) {
@@ -261,7 +263,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
           BufferedReader br = new BufferedReader(isr);
           String currLine;
           while ((currLine = br.readLine()) != null) {
-            strings.addElement(currLine);
+            strings.add(currLine);
           }
           br.close(); // win32 needs readers closed explicitly!
         }
@@ -277,7 +279,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       boolean firstLine = true;
       int formatVersion = 1;
       for (int j = 0; j < strings.size(); j++) {
-        currString = strings.elementAt(j);
+        currString = strings.get(j);
         if (currString.length() > 0) {
           // check for file format version string.
           // NOTE: the original file format did not have a version string
@@ -289,15 +291,15 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
               // When reading this format, we need to make sure each line ends in a semicolon.
               // This behavior can be buggy; that's why the format was changed.
               if (currString.charAt(currString.length() - 1) == ';') {
-                text += currString + "\n";
+                text += currString + _newLine;
               }
               else {
-                text += currString + ";\n";
+                text += currString + ";" + _newLine;
               }
               break;
             case(2):
               if (!firstLine) { // don't include format version string in output
-                text += currString + "\n";
+                text += currString + _newLine;
               }
               break;
           }
@@ -429,7 +431,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    *               data type to be serializable.
    */
   public void replReturnedResult(String result) {
-    _docAppend(result + "\n", InteractionsDocument.DEFAULT_STYLE);
+    _docAppend(result + _newLine, InteractionsDocument.DEFAULT_STYLE);
     _interactionIsOver();
   }
 
@@ -500,7 +502,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * @param th The Throwable thrown by System.exit
    */
   public void interpreterResetFailed(Throwable th) {    
-    _document.insertBeforeLastPrompt("Reset Failed! See the console tab for details.\n",
+    _document.insertBeforeLastPrompt("Reset Failed! See the console tab for details." + _newLine,
                                      InteractionsDocument.ERROR_STYLE);
     _document.setInProgress(false);
     _notifyInterpreterResetFailed(th);
@@ -518,7 +520,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    */
   public void interpreterResetting() {
     if (!_waitingForFirstInterpreter) {
-      _document.insertBeforeLastPrompt("Resetting Interactions...\n",
+      _document.insertBeforeLastPrompt("Resetting Interactions..." + _newLine,
                                        InteractionsDocument.ERROR_STYLE);
       _document.setInProgress(true);
       _notifyInterpreterResetting();

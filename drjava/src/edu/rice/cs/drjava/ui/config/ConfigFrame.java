@@ -53,7 +53,6 @@ import java.util.TreeSet;
 import java.util.Iterator;
 
 import javax.swing.tree.*;
-import gj.util.Hashtable;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
@@ -650,7 +649,24 @@ public class ConfigFrame extends JFrame {
                                                   "Whether DrJava should prompt the user before quitting."));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_COMPILE, "Automatically Save Before Compiling", this,
                                                   "<html>Whether DrJava should automatically save before<br>" +
-                                                  "recompiling, or instead as the user each time</html>"));
+                                                  "recompiling, or instead should ask the user each time.</html>"));
+    
+    // TODO: this is dev-only until the sync issues with interactions are worked out
+    if (CodeStatus.DEVELOPMENT) {
+      panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_RUN, "Automatically Save and Compile Before Running Main Method", this,
+                                                    "<html>Whether DrJava should automatically save and compile before running<br>" +
+                                                    "a document's main method, or instead should ask the user each time.</html>"));
+    }
+    
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_JUNIT, "Automatically Save and Compile Before Testing", this,
+                                                  "<html>Whether DrJava should automatically save and compile before<br>" +
+                                                  "testing with JUnit, or instead should ask the user each time</html>"));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_JAVADOC, "Automatically Save Before Generating Javadoc", this,
+                                                  "<html>Whether DrJava should automatically save before generating<br>" +
+                                                  "Javadoc, or instead should ask the user each time</html>"));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_DEBUG, "Automatically Save and Compile Before Debugging", this,
+                                                  "<html>Whether DrJava should automatically save and compile before<br>" +
+                                                  "debugging, or instead should ask the user each time</html>"));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_BREAKPOINT_OUT_OF_SYNC, "Warn on Breakpoint If out of Sync", this,
                                                   "<html>Whether DrJava should prompt the user if the class file<br>" +
                                                   "is out of sync before setting a breakpoint in that file</html>."));

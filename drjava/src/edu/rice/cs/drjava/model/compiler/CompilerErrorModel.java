@@ -49,7 +49,11 @@ import edu.rice.cs.drjava.model.IGetDocuments;
 import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileMovedException;
-import gj.util.Hashtable;
+
+
+import java.util.List;
+import java.util.LinkedList;
+import java.util.HashMap;
 import java.lang.reflect.Array;
 
 /**
@@ -96,13 +100,36 @@ public class CompilerErrorModel<T extends CompilerError> {
    * The file used as the index *must* be a canonical file, or else
    * errors won't always be associated with the right documents.
    */
-  private final Hashtable<File, StartAndEndIndex> _filesToIndexes = 
-    new Hashtable<File, StartAndEndIndex>();
+  private final HashMap<File, StartAndEndIndex> _filesToIndexes = 
+    new HashMap<File, StartAndEndIndex>();
   
   /**
    * The global model which created/controls this object.
    */
   private final IGetDocuments _model;
+  
+  /**
+   * Constructs an empty CompilerErrorModel.
+   */
+  public CompilerErrorModel() {
+    _model = new IGetDocuments() {
+      public OpenDefinitionsDocument getDocumentForFile(File file) {
+        throw new IllegalStateException("No documents to get!");
+      }
+      public boolean isAlreadyOpen(File file) {
+        return false;
+      }
+      public List<OpenDefinitionsDocument> getDefinitionsDocuments() {
+        return new LinkedList<OpenDefinitionsDocument>();
+      }
+      public boolean hasModifiedDocuments() {
+        return false;
+      }
+    };
+    _errors = new T[0];
+    _numErrors = 0;
+    _positions = new Position[0];
+  }
 
   /**
    * Constructs a new CompilerErrorModel to be maintained

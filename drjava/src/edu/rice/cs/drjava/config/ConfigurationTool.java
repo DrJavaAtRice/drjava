@@ -38,11 +38,11 @@
  END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
-import java.io.File;
-import java.io.IOException;
-import gj.util.Vector;
-import java.awt.Color;
-import edu.rice.cs.drjava.DrJava;
+//import java.io.File;
+//import java.io.IOException;
+//import java.util.Vector;
+//import java.awt.Color;
+//import edu.rice.cs.drjava.DrJava;
 
 /**
  * Interface which sets up the global configuration object at runtime.
@@ -61,43 +61,43 @@ public interface ConfigurationTool {
   //  DrJava.java now creates the config object after determining if the
   //  user has specified a custom config file.
   
-  /**
-   * The ".drjava" file in the user's home directory.
-   */
-  //public static final File PROPERTIES_FILE =  
-  //  new File(System.getProperty("user.home"), ".drjava");  
-  
-  /**
-   * The global Configuration object to use for all configurable options.
-   */
-  //public static final FileConfiguration CONFIG = new DefaultFileConfig().evaluate();
+//  /**
+//   * The ".drjava" file in the user's home directory.
+//   */
+//  public static final File PROPERTIES_FILE =  
+//    new File(System.getProperty("user.home"), ".drjava");  
+//  
+//  /**
+//   * The global Configuration object to use for all configurable options.
+//   */
+//  public static final FileConfiguration CONFIG = new DefaultFileConfig().evaluate();
 }
 
 /**
  * Generate the CONFIG object separately to appease the almighty Javadoc.
  * (It didn't like anonymous inner classes with generics in interfaces in Java 1.3.)
- *
-class DefaultFileConfig {
-  public FileConfiguration evaluate() {
-    try { 
-      ConfigurationTool.PROPERTIES_FILE.createNewFile(); 
-      // be nice and ensure a config file 
-    } 
-    catch(IOException e) { // IOException occurred 
-    } 
-    FileConfiguration config = 
-      new FileConfiguration(ConfigurationTool.PROPERTIES_FILE); 
-    try { 
-      config.loadConfiguration(); 
-    }
-    catch (Exception e) {
-      // problem parsing the config file.
-      // Use defaults and remember what happened (for the UI)
-      config.resetToDefaults();
-      config.storeStartupException(e);
-    }
-    return config;
-  }
-}*/
+ */
+//class DefaultFileConfig {
+//  public FileConfiguration evaluate() {
+//    try { 
+//      ConfigurationTool.PROPERTIES_FILE.createNewFile(); 
+//      // be nice and ensure a config file 
+//    } 
+//    catch(IOException e) { // IOException occurred 
+//    } 
+//    FileConfiguration config = 
+//      new FileConfiguration(ConfigurationTool.PROPERTIES_FILE); 
+//    try { 
+//      config.loadConfiguration(); 
+//    }
+//    catch (Exception e) {
+//      // problem parsing the config file.
+//      // Use defaults and remember what happened (for the UI)
+//      config.resetToDefaults();
+//      config.storeStartupException(e);
+//    }
+//    return config;
+//  }
+//}
 
 

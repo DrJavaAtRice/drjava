@@ -775,6 +775,30 @@ public interface OptionConstants {
     new BooleanOption("save.before.compile", Boolean.FALSE);
 
   /**
+   * Whether to prompt to save before running.
+   */
+  public static final BooleanOption ALWAYS_SAVE_BEFORE_RUN =
+    new BooleanOption("save.before.run", Boolean.FALSE);
+
+  /**
+   * Whether to prompt to save before testing.
+   */
+  public static final BooleanOption ALWAYS_SAVE_BEFORE_JUNIT =
+    new BooleanOption("save.before.junit", Boolean.FALSE);
+
+  /**
+   * Whether to prompt to save before compiling.
+   */
+  public static final BooleanOption ALWAYS_SAVE_BEFORE_JAVADOC =
+    new BooleanOption("save.before.javadoc", Boolean.FALSE);
+
+  /**
+   * Whether to prompt to save before compiling.
+   */
+  public static final BooleanOption ALWAYS_SAVE_BEFORE_DEBUG =
+    new BooleanOption("save.before.debug", Boolean.FALSE);
+
+  /**
    * Whether to warn if a document has been modified before allowing the
    * user to set a breakpoint in it.
    */

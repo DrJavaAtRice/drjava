@@ -43,7 +43,8 @@ import java.awt.event.*;
 import javax.swing.text.*;
 import javax.swing.*;
 
-import gj.util.Vector;
+// TODO: Is synchronization used properly here?
+import java.util.Vector;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.DocumentAdapter;
@@ -101,7 +102,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
     try {
       Object result = _interpreter.interpret(toEval);
       if (result != Interpreter.NO_RESULT) {
-        _docAppend(String.valueOf(result) + "\n", 
+        _docAppend(String.valueOf(result) + System.getProperty("line.separator"), 
                    InteractionsDocument.DEFAULT_STYLE);
       }
     }
@@ -154,21 +155,21 @@ public class SimpleInteractionsModel extends InteractionsModel {
    * Adds a listener to this model.
    */
   public void addInteractionsListener(InteractionsListener l) {
-    _listeners.addElement(l);
+    _listeners.add(l);
   }
 
   /**
    * Removes the given listener from this model.
    */
   public void removeInteractionsListener(InteractionsListener l) {
-    _listeners.removeElement(l);
+    _listeners.remove(l);
   }
 
   /**
    * Removes all listeners from this model.
    */
   public void removeAllInteractionListeners() {
-    _listeners.removeAllElements();
+    _listeners.clear();
   }
 
   
@@ -177,7 +178,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
    */
   protected void _notifyInteractionStarted() {
     for (int i=0; i < _listeners.size(); i++) {
-      _listeners.elementAt(i).interactionStarted();
+      _listeners.get(i).interactionStarted();
     }
   }
   
@@ -186,7 +187,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
    */
   protected void _notifyInteractionEnded() {
     for (int i=0; i < _listeners.size(); i++) {
-      _listeners.elementAt(i).interactionEnded();
+      _listeners.get(i).interactionEnded();
     }
   }
   
@@ -196,7 +197,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
    */
   protected void _notifySyntaxErrorOccurred(final int offset, final int length) {
     for (int i=0; i < _listeners.size(); i++) {
-      _listeners.elementAt(i).interactionErrorOccurred(offset, length);
+      _listeners.get(i).interactionErrorOccurred(offset, length);
     }
   }
   

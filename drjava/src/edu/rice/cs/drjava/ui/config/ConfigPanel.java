@@ -46,8 +46,8 @@ import javax.swing.border.EmptyBorder;
 import java.awt.event.*;
 import java.awt.*;
 
-import gj.util.Vector;
-import gj.util.Hashtable;
+// TODO: Check synchronization.
+import java.util.Vector;
 
 /**
  * The panel on which each set of configuration options (e.g. Fonts, Colors) 
@@ -81,7 +81,7 @@ public class ConfigPanel extends JPanel {
    * @param oc the OptionComponent to be added
    */ 
   public void addComponent( OptionComponent oc) {
-    _components.addElement(oc);
+    _components.add(oc);
   }
   
   public void displayComponents() {
@@ -109,7 +109,7 @@ public class ConfigPanel extends JPanel {
     Insets labelInsets = new Insets(0, 10, 0, 10);
     Insets compInsets  = new Insets(0, 0, 0, 0);
     for (int i=0; i<_components.size(); i++) {
-      OptionComponent comp = _components.elementAt(i);
+      OptionComponent comp = _components.get(i);
       
       c.weightx = 0.0;
       c.gridwidth = 1;
@@ -129,7 +129,7 @@ public class ConfigPanel extends JPanel {
     }
     /*
      for (int i=0; i<_components.size(); i++) {
-     panel2.add(_components.elementAt(i));
+     panel2.add(_components.get(i));
      }*/
     
     // Reset Button
@@ -155,7 +155,7 @@ public class ConfigPanel extends JPanel {
   public boolean update() {
     
     for (int i= 0; i<_components.size();i++) {
-      boolean isValidUpdate = _components.elementAt(i).updateConfig();
+      boolean isValidUpdate = _components.get(i).updateConfig();
       if (!isValidUpdate) return false;
     }  
     
@@ -167,7 +167,7 @@ public class ConfigPanel extends JPanel {
    */
   public void resetToCurrent() {
     for (int i=0; i < _components.size(); i++) {
-      _components.elementAt(i).resetToCurrent();
+      _components.get(i).resetToCurrent();
     }
   }
   
@@ -176,7 +176,7 @@ public class ConfigPanel extends JPanel {
    */
   public void resetToDefault() {
     for (int i=0; i < _components.size(); i++) {
-      _components.elementAt(i).resetToDefault();
+      _components.get(i).resetToDefault();
     }
   }
 }

@@ -39,7 +39,6 @@
 
 package edu.rice.cs.drjava.config;
 import java.util.Properties; // don't import all of java.util, or gj.util to prevent name collisions
-import gj.util.Vector;
 import java.util.Iterator;
 import java.io.*;
 import java.lang.reflect.*;

@@ -39,7 +39,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import gj.util.Vector;
+import java.util.Vector;
+
 /**
  * The interface BraceReduction serves as the template for our reduced
  * view of a java document, which stores only the information necessary

@@ -39,7 +39,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-import gj.util.Vector;
+// TODO: Is synchronization used properly here?
+import java.util.Vector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
@@ -63,7 +64,8 @@ public class History implements OptionConstants {
    * Version flag at the beginning of saved history file format
    * If this is not present in a saved history, it is assumed to be the original format.
    */
-  public static final String HISTORY_FORMAT_VERSION_2 = "// DrJava saved history v2\n";
+  public static final String HISTORY_FORMAT_VERSION_2 = 
+    "// DrJava saved history v2" + System.getProperty("line.separator");
     
   private Vector<String> _vector = new Vector<String>();
   private int _cursor = -1;
@@ -101,12 +103,12 @@ public class History implements OptionConstants {
     // for consistency in saved History files, WILL save sequential duplicate entries
     if (item.trim().length() > 0) {
       //if (_vector.isEmpty() || ! _vector.lastElement().equals(item)) {
-      _vector.addElement(item);
+      _vector.add(item);
         
         // If adding the new element has filled _vector to beyond max 
         // capacity, spill the oldest element out of the History.
       if (_vector.size() > MAX_SIZE) {
-        _vector.removeElementAt(0);
+        _vector.remove(0);
         }
       //}
       moveEnd();
@@ -152,7 +154,7 @@ public class History implements OptionConstants {
    */
   public String getCurrent() {
     if (hasNext()) {
-      return  _vector.elementAt(_cursor);
+      return  _vector.get(_cursor);
     }
     else {
       return "";
@@ -170,8 +172,7 @@ public class History implements OptionConstants {
    * Clears the vector
    */
   public void clear() {
-    // apparently gj's Vector doesn't have the clear() method
-    _vector.setSize(0);
+    _vector.clear();
   }
   
   /**
@@ -182,9 +183,9 @@ public class History implements OptionConstants {
    */
   public String getHistoryAsStringWithSemicolons() {
     String s = "";
-    char delimiter = '\n';
+    String delimiter = System.getProperty("line.separator");
     for (int i = 0; i < _vector.size(); i++) {
-      String nextLine = _vector.elementAt(i);
+      String nextLine = _vector.get(i);
       int nextLength = nextLine.length();
       if ((nextLength > 0) && (nextLine.charAt(nextLength-1) != ';')) {
         nextLine += ";";
@@ -200,9 +201,9 @@ public class History implements OptionConstants {
    */
   public String getHistoryAsString() {
     String s = "";
-    char delimiter = '\n';
+    String delimiter = System.getProperty("line.separator");
     for (int i = 0; i < _vector.size(); i++) {
-      s +=_vector.elementAt(i) + delimiter;
+      s +=_vector.get(i) + delimiter;
     }
     return s;
   }
@@ -248,17 +249,17 @@ public class History implements OptionConstants {
             OutputStreamWriter osw = new OutputStreamWriter(os);
             BufferedWriter bw = new BufferedWriter(osw);
             String file = HISTORY_FORMAT_VERSION_2 + editedVersion;
-            if (PlatformFactory.ONLY.isWindowsPlatform()) {
-              StringBuffer buf = new StringBuffer();
-              String lineSep = System.getProperty("line.separator");
-              int last = 0;
-              for (int i = file.indexOf('\n'); i != -1; i = file.indexOf('\n', last)) {
-                buf.append(file.substring(last, i));
-                buf.append(lineSep);
-                last = i+1;
-              }
-              file = buf.toString();
-            }
+//            if (PlatformFactory.ONLY.isWindowsPlatform()) {
+//              StringBuffer buf = new StringBuffer();
+//              String lineSep = System.getProperty("line.separator");
+//              int last = 0;
+//              for (int i = file.indexOf('\n'); i != -1; i = file.indexOf('\n', last)) {
+//                buf.append(file.substring(last, i));
+//                buf.append(lineSep);
+//                last = i+1;
+//              }
+//              file = buf.toString();
+//            }
             bw.write(file, 0, file.length());
             bw.close();
           }
@@ -285,7 +286,7 @@ public class History implements OptionConstants {
         int numToDelete = size() - newSize;
         
         for (int i=0; i< numToDelete; i++) {
-          _vector.removeElementAt(0);
+          _vector.remove(0);
         }
         
         moveEnd();

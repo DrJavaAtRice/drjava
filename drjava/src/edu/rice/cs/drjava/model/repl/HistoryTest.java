@@ -196,13 +196,16 @@ public final class HistoryTest extends TestCase implements OptionConstants{
     DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(20));
     assertEquals("testGetHistoryAsString:", "", _history.getHistoryAsString());
     
+    String newLine = System.getProperty("line.separator");
+    
     _history.add("some text");
-    assertEquals("testGetHistoryAsString:", "some text\n", _history.getHistoryAsString());
+    assertEquals("testGetHistoryAsString:", "some text" + newLine, _history.getHistoryAsString());
     
     _history.add("some more text");
-    _history.add("some text followed by a newline\n");
+    _history.add("some text followed by a newline" + newLine);
     assertEquals("testGetHistoryAsString:",  
-                 "some text\nsome more text\nsome text followed by a newline\n\n",
+                 "some text" + newLine + "some more text" + newLine +
+                 "some text followed by a newline" + newLine + newLine,
                  _history.getHistoryAsString());
   }
 }

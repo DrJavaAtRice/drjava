@@ -47,8 +47,6 @@ import gjc.v6.util.Position;
 import gjc.v6.util.Hashtable;
 import gjc.v6.util.List;
 import gjc.v6.util.Log;
-import gj.util.Vector;
-import gj.util.Enumeration;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.util.UnexpectedException;

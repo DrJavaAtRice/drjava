@@ -534,13 +534,14 @@ public class InterpreterJVM extends AbstractSlaveJVM
     // OK, now rebuild string
     StringBuffer buf = new StringBuffer();
     ListIterator itor = traceItems.listIterator();
+    String newLine = System.getProperty("line.separator");
     boolean first = true;
     while (itor.hasNext()) {
       if (first) {
         first = false;
       }
       else {
-        buf.append("\n");
+        buf.append(newLine);
       }
 
       buf.append("  " + ((String) itor.next()).trim());

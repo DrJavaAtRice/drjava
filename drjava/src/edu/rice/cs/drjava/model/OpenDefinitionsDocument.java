@@ -146,6 +146,14 @@ public interface OpenDefinitionsDocument {
    * not on the classpath.
    */
   public void startJUnit() throws ClassNotFoundException, IOException;
+  
+  /**
+   * Generates Javadoc for this document, saving the output to a temporary
+   * directory.  The location is provided to the javadocEnded event on
+   * the given listener.
+   * @param saver FileSaveSelector for saving the file if it needs to be saved
+   */
+  public void generateJavadoc(FileSaveSelector saver) throws IOException;
 
   /**
    * Determines if this definitions document has changed since the
