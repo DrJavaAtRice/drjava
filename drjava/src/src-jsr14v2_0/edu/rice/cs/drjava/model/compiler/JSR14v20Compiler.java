@@ -58,7 +58,6 @@ import com.sun.tools.javac.util.Hashtable;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Log;
 
-import edu.rice.cs.drjava.DrJava;
 import gj.util.Vector;
 import gj.util.Enumeration;
 import edu.rice.cs.util.FileOps;
@@ -272,7 +271,6 @@ public class JSR14v20Compiler implements CompilerInterface {
     options.put("-source", "1.5");
     options.put("-target", "1.5");
     options.put("-fork", "on");
-    options.put("-J-Xbootclasspath/p:/home/jhsia/drjava/src/edu/rice/cs/lib/jsr14.jar", "");
     //options.put("-novariance","");
   }
   
@@ -316,13 +314,12 @@ public class JSR14v20Compiler implements CompilerInterface {
      * JSR14 uses this crazy signature on warning method because it localizes
      * the warning message.
      */
-    public void warning(int pos, String key, String arg0, String arg1,
-                        String arg2, String arg3)
+    public void warning(int pos, String key, Object[] args ...)
     {
-      super.warning(pos, key, arg0, arg1, arg2, arg3);
+      super.warning(pos, key, args);
+      System.out.println("warning: pos = " + pos);
 
-      String msg = getText("compiler.warn." + key,
-        arg0, arg1, arg2, arg3, null, null, null);
+      String msg = getText("compiler.warn." + key, args);
 
       _errors.addLast(new CompilerError(new File(currentSource().toString()),
                                         Position.line(pos) - 1, // gj is 1 based
@@ -335,15 +332,12 @@ public class JSR14v20Compiler implements CompilerInterface {
      * JSR14 uses this crazy signature on error method because it localizes
      * the error message.
      */
-    public void error(int pos, String key, String arg0, String arg1,
-                      String arg2, String arg3, String arg4, String arg5,
-                      String arg6)
+    public void error(int pos, String key, Object[] args ...)
     {
-      super.error(pos, key, arg0, arg1, arg2, arg3, arg4, arg5, arg6);
+      super.error(pos, key, args);
+      System.out.println("error: pos = " + pos);
 
-      String msg = getText("compiler.err." + key,
-                           arg0, arg1, arg2, arg3,
-                           arg4, arg5, arg6);
+      String msg = getText("compiler.err." + key, args);
 
       _errors.addLast(new CompilerError(new File(currentSource().toString()),
                                         Position.line(pos) - 1, // gj is 1 based
