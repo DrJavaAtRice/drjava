@@ -11,7 +11,7 @@ public interface JavaInterpreter {
   /**
    * Interprets the given string.
    * @param s Java source to interpret
-   * @return The result of the interpretation, or {@see #NO_RESULT} if
+   * @return The result of the interpretation, or {@link #NO_RESULT} if
    *         the interpretation had no return value.
    */
   public Object interpret(String s);

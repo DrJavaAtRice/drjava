@@ -111,7 +111,7 @@ public class ThreadedInterpreterWrapper {
 
   /**
    * Set the scope for unqualified names to the given package.
-   * Forwards to {link JavaInterpreter#setPackageScope}.
+   * Forwards to {@link JavaInterpreter#setPackageScope}.
    * @param packageName Package to assume scope of.
    */
   public void setPackageScope(final String packageName) {
