@@ -212,6 +212,21 @@ public class DynamicjavaTest extends DynamicJavaTestCase {
     assertEquals("first of l2 should be 5.5", new Double(5.5), interpret(testString));
   }
 
+  public void testForEachLengthOfNewList(){
+    testString = 
+      "import java.util.*;"+
+      "List l = new LinkedList();"+
+      "l.add(new Double(5.5));"+
+      "l.add(new Double(7.3));"+
+      "List l2 = new LinkedList();" +
+      "for(final Object d: l){"+
+      "l2.add(d);" +
+      "}" +
+      "l2.size();";
+    
+    assertEquals("the size of the list should be 2", 2, interpret(testString));
+  }
+
   public void testForEachWithArray(){
     testString = 
       "import java.util.*;"+
