@@ -66,4 +66,9 @@ public class Pair<T,U> implements Serializable{
   public U getSecond() {
     return _second;
   }
+  
+  public String toString() {
+    return "("+getFirst().toString()+", "+getSecond().toString()+")"; 
+  }
+    
 }
