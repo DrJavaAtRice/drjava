@@ -93,6 +93,18 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   {
     public ClassLoaderExtension(Interpreter i) {
       super(i);
+
+      // The protected variable classLoader contains the class loader to use
+      // to find classes. When a new class path is added to the loader,
+      // it adds on an auxilary classloader and chains the old classLoader
+      // onto the end.
+      // Here we initialize classLoader to be the system class loader.
+      // This makes sure that we can find classes that are in the system's
+      // class path, even though we don't fully delegate to the system
+      // loader. (We just ask the system loader to get us the bytes of the
+      // class, and then we call defineClass ourselves.)
+      classLoader = ClassLoader.getSystemClassLoader();
+      
       //System.err.println("created loader extension");
     }
 
