@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.net.URL;
 
 import edu.rice.cs.drjava.DrJava;
@@ -112,7 +113,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenu _toolsMenu;
   private JMenu _debugMenu;
   private JMenu _helpMenu;
-  private final FindReplaceDialog _findReplace;
+  private FindReplaceDialog _findReplace;
   private JButton _saveButton;
   private JButton _compileButton;
   private JButton _junitButton;
@@ -129,6 +130,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenuItem _toggleBreakpointMenuItem;
   private JMenuItem _printBreakpointsMenuItem;
   private JMenuItem _clearAllBreakpointsMenuItem;
+  private LinkedList _tabs;
 
   public SingleDisplayModel getModel() {
     return _model;
@@ -354,8 +356,9 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Opens the find/replace dialog. */
   private Action _findReplaceAction = new AbstractAction("Find/Replace...") {
     public void actionPerformed(ActionEvent ae) {
-      if(!_findReplace.isOpen()) {
-        _tabbedPane.add("Find/Replace", _findReplace);
+      if(!_findReplace.isDisplayed()) {
+        //_tabbedPane.add("Find/Replace", _findReplace);
+        showTab(_findReplace);
         _findReplace.beginListeningTo(_currentDefPane);
       }
       _tabbedPane.setSelectedComponent(_findReplace);  
@@ -611,7 +614,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     _setAllFonts(mainFont);
     _docList.setFont(doclistFont);
-    _findReplace = new FindReplaceDialog(this, _model);
 
     //     frameSize = this.getSize();
     //     System.out.println("Actual Frame Height: " + frameSize.height);
@@ -1619,7 +1621,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _outputPane = new OutputPane(_model);
     _errorPanel = new CompilerErrorPanel(_model, this);
     _interactionsPane = new InteractionsPane(_model);
-    //_findReplace = new FindReplacePanel(this, _model);
+    _findReplace = new FindReplaceDialog(this, _model);
 
     // Try to create debug panel (see if JSwat is around)
     if (_model.getDebugManager() != null) {
@@ -1637,10 +1639,19 @@ public class MainFrame extends JFrame implements OptionConstants {
     _junitPanel = new JUnitPanel(_model, this);
     _tabbedPane = new JTabbedPane();
     _tabbedPane.add("Interactions", new BorderlessScrollPane(_interactionsPane));
-    _tabbedPane.add("Compiler output", _errorPanel);
+    //_tabbedPane.add("Compiler output", _errorPanel);
     _tabbedPane.add("Console", new JScrollPane(_outputPane));
-    _tabbedPane.add("Test output", _junitPanel);
+    //_tabbedPane.add("Test output", _junitPanel);
+    
+    _tabs = new LinkedList();
 
+    _tabs.addLast(_errorPanel);
+    _tabs.addLast(_junitPanel);
+    _tabs.addLast(_findReplace);
+    
+    // Show compiler output pane by default
+    showTab(_errorPanel);
+    
     // Select interactions pane when interactions tab is selected
     _tabbedPane.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
@@ -1735,7 +1746,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     // overall size. Then we can set _docSplitPane's divider. Ahh, Swing.
     // Also, according to the Swing docs, we need to set these dividers AFTER
     // we have shown the window. How annoying.
-    _mainSplit.setDividerLocation(0.6);//2*getHeight()/3);
+    _mainSplit.setDividerLocation(2*getHeight()/3);
+    _mainSplit.setDividerSize(getHeight()/60);
     _mainSplit.setOneTouchExpandable(true);
     _docSplitPane.setDividerLocation(DOC_LIST_WIDTH);
     _docSplitPane.setOneTouchExpandable(true);
@@ -1901,7 +1913,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       } catch (IOException e) {
         _showIOError(e);
       }
-      if(_findReplace.isOpen()) {
+      if(_findReplace.isDisplayed()) {
         _findReplace.stopListening();
         _findReplace.beginListeningTo(_currentDefPane);
         //uninstallFindReplaceDialog(_findReplace);
@@ -1925,7 +1937,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     public void compileStarted() {
-      _tabbedPane.setSelectedIndex(COMPILE_TAB);
+      if (!_errorPanel.isDisplayed())
+        showTab(_errorPanel);
+      //_tabbedPane.setSelectedIndex(COMPILE_TAB);
       _saveAction.setEnabled(false);
       //_compileAction.setEnabled(false);
       hourglassOn();
@@ -1939,7 +1953,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     public void junitStarted() {
-      _tabbedPane.setSelectedIndex(JUNIT_TAB);
+      if (!_junitPanel.isDisplayed())
+        showTab(_junitPanel);
+      //_tabbedPane.setSelectedIndex(JUNIT_TAB);
       _saveAction.setEnabled(false);
       hourglassOn();
     }
@@ -2159,5 +2175,26 @@ public class MainFrame extends JFrame implements OptionConstants {
     //System.err.println("Called show yet?");
     //_tabbedPane.removeTabAt(index);
     _tabbedPane.remove(c);
+    ((TabbedPanel)c).setDisplayed(false);
+    _tabbedPane.setSelectedIndex(0);
+    _currentDefPane.requestFocus();
+  }
+  
+  public void showTab(Component c) {
+    int numVisible = 0;
+    TabbedPanel tp;
+    for (int i = 0; i < _tabs.size(); i++) {
+      tp = (TabbedPanel)_tabs.get(i);
+      if (tp == c) {
+        // 2 right now is a magic number for the number of tabs always visible
+        // interactions & console
+        _tabbedPane.insertTab(tp.getName(), null, tp, null, numVisible + 2);
+        _tabbedPane.setSelectedIndex(numVisible + 2);
+        tp.setDisplayed(true);
+        break;
+      }
+      if (tp.isDisplayed())
+        numVisible++;
+    }
   }
 }

@@ -58,13 +58,13 @@ import edu.rice.cs.util.UnexpectedException;
  * The dialog box that handles requests for finding and replacing text.
  * @version $Id$
  */
- class FindReplaceDialog extends JPanel implements OptionConstants{
+ class FindReplaceDialog extends TabbedPanel implements OptionConstants{
   private JOptionPane _optionPane;
   private JButton _findNextButton;
   private JButton _replaceButton;
   private JButton _replaceFindButton;
   private JButton _replaceAllButton;
-  private JButton _closeButton;
+  //private JButton _closeButton;
   private JTextField _findField = new JTextField(20);
   private JTextField _replaceField = new JTextField(20);
   private JLabel _message;
@@ -72,19 +72,12 @@ import edu.rice.cs.util.UnexpectedException;
    private JCheckBox _matchCase;
    private JPanel _matchCaseAndClosePanel;
    private JPanel _rightPanel;
-   private JPanel _closePanel; // holds the close button such that it can't 
+   //private JPanel _closePanel; // holds the close button such that it can't 
    // be resized
   private FindReplaceMachine _machine;
   private SingleDisplayModel _model;
-  private MainFrame _frame;
   private DefinitionsPane _defPane = null;
   private boolean _caretChanged;
-   private boolean _open = false;
-
-   public boolean isOpen() {
-     return _open;
-   }
-
 
    /** 
     * Listens for changes to the cursor position in order
@@ -109,7 +102,7 @@ import edu.rice.cs.util.UnexpectedException;
     */
   public void beginListeningTo(DefinitionsPane defPane) {
     if(_defPane==null) {
-      _open = true;
+      _displayed = true;
       _defPane = defPane;
       _defPane.addCaretListener(_caretListener);
       _caretChanged = true;
@@ -144,7 +137,7 @@ import edu.rice.cs.util.UnexpectedException;
     if(_defPane!=null) {
       _defPane.removeCaretListener(_caretListener);
       _defPane = null;
-      _open = false;
+      _displayed = false;
     } else {
       // Probably a double-click on close...
       //throw new UnexpectedException(new RuntimeException("FindReplaceDialog should be listening to something"));
@@ -153,7 +146,7 @@ import edu.rice.cs.util.UnexpectedException;
   }
 
   private Action _findNextAction = new AbstractAction("Find Next") {
-      public void actionPerformed(ActionEvent e) {
+      public void actionPerformed(ActionEvent e) {        
         _doFind();
         _findField.requestFocus();
       }
@@ -257,19 +250,18 @@ import edu.rice.cs.util.UnexpectedException;
   };
 
 
-  private Action _closeAction = new AbstractAction("X") {
+  /*private Action _closeAction = new AbstractAction("X") {
     public void actionPerformed(ActionEvent e) {      
       // removeTab automatically calls show()
       _close();
     }
-  };
+  };*/
 
-   private void _close() {
-     _frame.removeTab(this);
-     if (_open)
+   protected void _close() {
+     if (_displayed)
        stopListening();
+     super._close();
        //_frame.uninstallFindReplaceDialog(this);
-     _open = false;
    }
   
   /**
@@ -279,11 +271,10 @@ import edu.rice.cs.util.UnexpectedException;
    * document text being searched over
    */
   public FindReplaceDialog(MainFrame frame, SingleDisplayModel model) {
-    super();
-    _frame = frame;
+    super(frame, "Find/Replace");
     _model = model;
     
-    addKeyListener(new KeyListener() {
+    _mainPanel.addKeyListener(new KeyListener() {
       public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
           _close();
@@ -302,7 +293,7 @@ import edu.rice.cs.util.UnexpectedException;
     _replaceButton = new JButton(_replaceAction);
     _replaceFindButton = new JButton(_replaceFindAction);
     _replaceAllButton = new JButton(_replaceAllAction);
-    _closeButton = new JButton(_closeAction);
+    //_closeButton = new JButton(_closeAction);
     _message = new JLabel("");
 
     _replaceAction.setEnabled(false);
@@ -347,12 +338,12 @@ import edu.rice.cs.util.UnexpectedException;
     _matchCase = new JCheckBox("Match Case", true);
     _matchCase.addItemListener(mcl);
 
-    _closePanel = new JPanel(new BorderLayout());
-    _closePanel.add(_closeButton, BorderLayout.NORTH);
+    //_closePanel = new JPanel(new BorderLayout());
+    //_closePanel.add(_closeButton, BorderLayout.NORTH);
 
     _matchCaseAndClosePanel = new JPanel(new BorderLayout());
     _matchCaseAndClosePanel.add(_matchCase, BorderLayout.WEST);
-    _matchCaseAndClosePanel.add(_closePanel, BorderLayout.EAST);
+    //_matchCaseAndClosePanel.add(_closePanel, BorderLayout.EAST);
 
     _rightPanel = new JPanel(new GridLayout(2,2));
     _rightPanel.add(wrap(_findField));
@@ -360,7 +351,7 @@ import edu.rice.cs.util.UnexpectedException;
     _rightPanel.add(wrap(_replaceField));
     _rightPanel.add(_message);
 
-    hookComponents(this,_rightPanel,_labelPanel,buttons);
+    hookComponents(_mainPanel,_rightPanel,_labelPanel,buttons);
 
     _machine = new FindReplaceMachine();
     
@@ -420,11 +411,6 @@ import edu.rice.cs.util.UnexpectedException;
           _replaceAllAction.setEnabled(true);
       }
     });
-        
-    // let the dialog size itself correctly.
-    //pack();
-    // centers the dialog in the middle of MainFrame
-    //setLocationRelativeTo(_frame);
   }
 
    private static Container wrap(JComponent comp) {
@@ -501,9 +487,7 @@ import edu.rice.cs.util.UnexpectedException;
     * change. 
     */ 
   private void _selectFoundItem(int from, int to) {
-    try {
-      _defPane.select(from, to);
-      
+    try {    
       JViewport v = _frame.getDefViewport();
       int viewHeight = (int)v.getSize().getHeight();
       // Scroll to make sure this item is visible
@@ -511,7 +495,6 @@ import edu.rice.cs.util.UnexpectedException;
       Rectangle startRect = _defPane.modelToView(from);
       int startRectY = (int)startRect.getY();
       startRect.setLocation(0, startRectY-viewHeight/2);
-      //Rectangle endRect = _defPane.modelToView(to - 1);
       Point endPoint = new Point(0, startRectY+viewHeight/2-1);
       
       // Add the end rect onto the start rect to make a rectangle
@@ -519,7 +502,14 @@ import edu.rice.cs.util.UnexpectedException;
       startRect.add(endPoint);     
       
       _defPane.scrollRectToVisible(startRect);
-      _defPane.requestFocus();
+      _defPane.select(from, to);
+      
+      // Found this little statement that will show the selected text
+      // in _defPane without giving _defPane focus, previously allowing the
+      // user to hit enter repeatedly and change the document while finding
+      // next
+      _defPane.getCaret().setSelectionVisible(true);
+      _findField.requestFocus();
     } 
     catch (BadLocationException badBadLocation) {}
   }

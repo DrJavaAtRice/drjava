@@ -62,7 +62,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
  *
  * @version $Id$
  */
-public class JUnitPanel extends JPanel {
+public class JUnitPanel extends TabbedPanel {
 
   /** Highlight painter for selected list items. */
   private static final DefaultHighlighter.DefaultHighlightPainter
@@ -88,7 +88,6 @@ public class JUnitPanel extends JPanel {
   private int _numErrors;
 
   private final SingleDisplayModel _model;
-  private final MainFrame _frame;
   private final JUnitErrorListPane _errorListPane;
 
   /**
@@ -97,12 +96,11 @@ public class JUnitPanel extends JPanel {
    * @param frame MainFrame in which we are displayed
    */
   public JUnitPanel(SingleDisplayModel model, MainFrame frame) {
+    super(frame, "Test output");
     _model = model;
-    _frame = frame;
     _errorListPane = new JUnitErrorListPane();
 
-
-    setLayout(new BorderLayout());
+    _mainPanel.setLayout(new BorderLayout());
 
     // We make the vertical scrollbar always there.
     // If we don't, when it pops up it cuts away the right edge of the
@@ -113,7 +111,7 @@ public class JUnitPanel extends JPanel {
                       JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
 
-    add(scroller, BorderLayout.CENTER);
+    _mainPanel.add(scroller, BorderLayout.CENTER);
   }
 
   /**
@@ -528,7 +526,7 @@ public class JUnitPanel extends JPanel {
 
         //System.err.println("scrll vis: " + startRect);
 
-        scrollRectToVisible(startRect);
+        _mainPanel.scrollRectToVisible(startRect);
 
       }
       catch (BadLocationException badBadLocation) {}

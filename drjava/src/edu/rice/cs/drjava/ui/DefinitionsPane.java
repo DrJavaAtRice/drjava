@@ -507,7 +507,6 @@ public class DefinitionsPane extends JEditorPane
     }
   }
 
-
   /**
    * The undo action.
    */
@@ -594,5 +593,5 @@ public class DefinitionsPane extends JEditorPane
       }
     }
   }
-
+  
 }

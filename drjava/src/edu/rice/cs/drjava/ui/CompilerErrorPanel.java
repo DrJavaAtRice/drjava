@@ -65,7 +65,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
  *
  * @version $Id$
  */
-public class CompilerErrorPanel extends JPanel {
+public class CompilerErrorPanel extends TabbedPanel {
 
   /** Highlight painter for selected list items. */
   private static final DefaultHighlighter.DefaultHighlightPainter
@@ -91,7 +91,6 @@ public class CompilerErrorPanel extends JPanel {
   private int _numErrors;
 
   private final SingleDisplayModel _model;
-  private final MainFrame _frame;
 
   private final JButton _showAllButton;
   private final JButton _nextButton;
@@ -105,8 +104,8 @@ public class CompilerErrorPanel extends JPanel {
    * @param frame MainFrame in which we are displayed
    */
   public CompilerErrorPanel(SingleDisplayModel model, MainFrame frame) {
+    super(frame, "Compiler output");
     _model = model;
-    _frame = frame;
 
     _showAllButton = new JButton("Show all");
     _showAllButton.addActionListener(new ActionListener() {
@@ -153,7 +152,7 @@ public class CompilerErrorPanel extends JPanel {
       }
     });
 
-    setLayout(new BorderLayout());
+    _mainPanel.setLayout(new BorderLayout());
 
     // We make the vertical scrollbar always there.
     // If we don't, when it pops up it cuts away the right edge of the
@@ -181,8 +180,8 @@ public class CompilerErrorPanel extends JPanel {
     compilerPanel.add(uiBox,BorderLayout.CENTER);
     uiBox.add(_compilerChoiceBox,BorderLayout.NORTH);
     uiBox.add(new JPanel(),BorderLayout.CENTER);
-    add(scroller, BorderLayout.CENTER);
-    add(compilerPanel, BorderLayout.EAST);
+    _mainPanel.add(scroller, BorderLayout.CENTER);
+    _mainPanel.add(compilerPanel, BorderLayout.EAST);
   }
 
   /**
