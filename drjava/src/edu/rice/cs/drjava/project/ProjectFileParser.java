@@ -279,7 +279,8 @@ public class ProjectFileParser {
     }
     public List<DocFile> forCons(Cons c) {
       List<DocFile> list = c.getRest().accept(this);
-      list.add(0, ProjectFileParser.ONLY.parseFile(c.getFirst(), _parentDir));
+      DocFile tmp = ProjectFileParser.ONLY.parseFile(c.getFirst(), _parentDir);
+      list.add(0,tmp); // add to the end
       return list;
     }
   };

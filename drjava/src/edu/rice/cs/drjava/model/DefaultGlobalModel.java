@@ -1168,10 +1168,20 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     
     ArrayList<DocFile> al = new ArrayList<DocFile>();
     for(DocFile f: srcFiles){
-      al.add(f);
+      if (f.isActive()) {
+        al.add(f); // add to end
+      }
+      else {
+        al.add(0,f); // add to beginning
+      }
     }
     for(DocFile f: auxFiles){
-      al.add(f);
+      if (f.isActive()) {
+        al.add(f); // add to end
+      }
+      else {
+        al.add(0,f); // add to beginning
+      }
     }
     
     return al.toArray(new DocFile[0]);
@@ -1934,7 +1944,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     private long _timestamp;
 
     private String _packageName = null;
-      
+    
+    private int _initVScroll;
+    private int _initHScroll;
+    private int _initSelStart;
+    private int _initSelEnd;
+    
 //    boolean _shouldRun;
 //    private GlobalModelListener _notifyListener = new DummySingleDisplayModelListener() {
 //      public synchronized void interpreterReady() {
@@ -1968,15 +1983,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       _file = null;
       init();
     }
-    
-    /** 
-     * Currently, the package name is the only special info saved into
-     * the OpenDefinitionsDocument at this time.
-     */
-    ConcreteOpenDefDoc(File f, String packageName) throws IOException{
-      this(f);
-      _packageName = packageName;
-    }
+//    
+//    /** 
+//     * Currently, the package name is the only special info saved into
+//     * the OpenDefinitionsDocument at this time.
+//     */
+//    ConcreteOpenDefDoc(File f, String packageName) throws IOException{
+//      this(f);
+//      _packageName = packageName;
+//    }
     
     public void init(){
       _id = ID_COUNTER++;
@@ -2103,7 +2118,26 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         }
       };
     }
-
+    
+    public int getInitialVerticalScroll() {
+      return _initVScroll;
+    }
+    public int getInitialHorizontalScroll() {
+      return _initHScroll;
+    }
+    public int getInitialSelectionStart() {
+      return _initSelStart;
+    }
+    public int getInitialSelectionEnd() {
+      return _initSelEnd;
+    }
+    
+    void setPackage(String pack) { _packageName = pack; }
+    void setInitialVScroll(int i) { _initVScroll = i; }
+    void setInitialHScroll(int i) { _initHScroll = i; }
+    void setInitialSelStart(int i) { _initSelStart = i; }
+    void setInitialSelEnd(int i) { _initSelEnd = i; }
+      
     /**
      * Originally designed to allow undoManager to set the current document to
      * be modified whenever an undo or redo is performed.
@@ -2112,8 +2146,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public void setModifiedSinceSave() {
       getDocument().setModifiedSinceSave();
     }
-    
-        
+
+
     /**
      * Gets the definitions document being handled.
      * @return document being handled
@@ -2249,6 +2283,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       }
       return filename;
     }
+      
 
     // TODO: Move this to where it can be static.
     private class TrivialFSS implements FileSaveSelector {
@@ -3147,8 +3182,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     
     
-    
-    
     /**
      * Implementation of the javax.swing.text.Document interface
      */
@@ -3629,12 +3662,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       if (openDoc != null) {
         throw new AlreadyOpenException(openDoc);
       }
-      final OpenDefinitionsDocument doc;
+      final ConcreteOpenDefDoc doc = new ConcreteOpenDefDoc(file);
       if (file instanceof DocFile) {
-        doc = new ConcreteOpenDefDoc(file, ((DocFile)file).getPackage());
-      }
-      else {
-        doc = new ConcreteOpenDefDoc(file);
+        DocFile df = (DocFile)file;
+        Pair<Integer,Integer> scroll = df.getScroll();
+        Pair<Integer,Integer> sel = df.getSelection();
+        doc.setPackage(df.getPackage());
+        doc.setInitialVScroll(scroll.getFirst());
+        doc.setInitialHScroll(scroll.getSecond());
+        doc.setInitialSelStart(sel.getFirst());
+        doc.setInitialSelEnd(sel.getSecond());
       }
       
       INavigatorItem idoc = makeIDocFromODD(doc);

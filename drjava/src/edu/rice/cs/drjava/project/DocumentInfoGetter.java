@@ -54,8 +54,8 @@ import edu.rice.cs.util.Pair;
  * give information specific to a single document that is
  * to be saved by the project file builder.  These objects
  * are passed to the builder upon a save.  These objects
- * should not be cached anywhere.  They are meant for 
- * temporary transmition of data.
+ * should not be cached anywhere so that they may be gc'd.
+ * They are meant for temporary transmition of data.
  */
 public interface DocumentInfoGetter {
   

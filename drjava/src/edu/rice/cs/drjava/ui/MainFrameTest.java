@@ -150,16 +150,19 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     
     // Create a new file
     SingleDisplayModel model = _frame.getModel();
-    model.newFile();
+    OpenDefinitionsDocument oldDoc = doc;
+    OpenDefinitionsDocument newDoc = model.newFile();
 
     // Current pane should be new doc, pos 0
     pane = _frame.getCurrentDefPane();
     doc = pane.getOpenDefDocument();//.getDocument();
+    assertEquals("New curr DefPane's document", newDoc, doc);
     assertEquals("Location of new document", 0, doc.getCurrentLocation());
 
     // Switch back
     model.setActiveNextDocument();
-
+    assertEquals("Next active doc", oldDoc, model.getActiveDocument());
+                 
     // Current pane should be old doc, pos 3
     pane = _frame.getCurrentDefPane();
     doc = pane.getOpenDefDocument();//.getDocument();

@@ -553,6 +553,14 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     // Start the pane out with the NULL_DOCUMENT so that
     // it doesn't start out with a reference to the defdoc
     _doc = doc;
+    
+    // read the initial selection/scrolling values from the document
+    // to be set when the pane is first notified active
+    _selStart = _doc.getInitialSelectionStart();
+    _selEnd = _doc.getInitialSelectionEnd();
+    _savedVScroll = _doc.getInitialVerticalScroll();
+    _savedHScroll = _doc.getInitialHorizontalScroll();
+    
     //super.setDocument(NULL_DOCUMENT);
     _resetUndo();
     
@@ -933,8 +941,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    * when setting the definitions pane to be inactive
    */
   
-  private int _saved_vert_pos;
-  private int _saved_horz_pos;
+  private int _savedVScroll;
+  private int _savedHScroll;
   private int _position;
   private int _selStart;
   private int _selEnd;
@@ -964,8 +972,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _selStart = getSelectionStart();
       _selEnd = getSelectionEnd();
 
-      _saved_vert_pos = _scrollPane.getVerticalScrollBar().getValue();
-      _saved_horz_pos = _scrollPane.getHorizontalScrollBar().getValue();
+      _savedVScroll = _scrollPane.getVerticalScrollBar().getValue();
+      _savedHScroll = _scrollPane.getHorizontalScrollBar().getValue();
 
       super.setDocument(NULL_DOCUMENT);
     }
@@ -996,8 +1004,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       moveCaretPosition(_selEnd);
     }
     _doc.setCurrentLocation(_position);
-    _scrollPane.getVerticalScrollBar().setValue(_saved_vert_pos);
-    _scrollPane.getHorizontalScrollBar().setValue(_saved_horz_pos);
+    _scrollPane.getVerticalScrollBar().setValue(_savedVScroll);
+    _scrollPane.getHorizontalScrollBar().setValue(_savedHScroll);
   }
   
   

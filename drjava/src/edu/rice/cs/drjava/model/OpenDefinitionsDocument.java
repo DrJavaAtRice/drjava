@@ -386,10 +386,31 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    */
   public boolean belongsHuh(Document doc);
   
+  /**
+   * @return the initial vertical scroll the pane should use when initialized
+   */
+  public int getInitialVerticalScroll();
   
   /**
-   * returns a list of all registered undoable edit listeners
+   * @return the initial vertical scroll the pane should use when initialized
    */
+  public int getInitialHorizontalScroll();
+  
+  /**
+   * @return the starting location of the cursor selection that should be set
+   * in the pane when initialized
+   */
+  public int getInitialSelectionStart();
+  
+  /**
+   * @return the final location of the cursor selection that should be set in
+   * the pane when it is initialized
+   */
+  public int getInitialSelectionEnd();
+  
+//  /**
+//   * returns a list of all registered undoable edit listeners
+//   */
 //  public List<UndoableEditListener> getUndoableEditListeners();
 
 }

@@ -814,4 +814,20 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
+  public int getInitialVerticalScroll(){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int getInitialHorizontalScroll(){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int getInitialSelectionStart(){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int getInitialSelectionEnd(){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
 }
