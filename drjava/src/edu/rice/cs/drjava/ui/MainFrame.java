@@ -3302,7 +3302,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _interactionsPane = _interactionsController.getPane();
 
 //    _model.setInputListener(_consoleController.getInputListener());
-    _model.setInputListener(_interactionsController.getInputListener());
+//    _model.getInteractionsModel().setInputListener(_interactionsController.getInputListener());
+    // Moved to the interactions controller.
 
     _findReplace = new FindReplaceDialog(this, _model);
 

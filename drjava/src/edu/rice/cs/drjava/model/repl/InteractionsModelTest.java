@@ -101,7 +101,7 @@ public final class InteractionsModelTest extends TestCase {
    */
   protected void _assertMainTransformation(String typed, String expected) {
     assertEquals("main transformation should match expected",
-                 expected, _model._testClassCall(typed));
+                 expected, TestInteractionsModel._testClassCall(typed));
   }
 
 
@@ -394,7 +394,38 @@ public final class InteractionsModelTest extends TestCase {
   }
 
   /**
-   * A generic InteractionsModel.
+   * Tests that setting and changing an input listener works correctly.
+   */
+  public void testSetChangeInputListener() {
+    InputListener listener1 = new InputListener() {
+      public String getConsoleInput() {
+        return "input1";
+      }
+    };
+
+    InputListener listener2 = new InputListener() {
+      public String getConsoleInput() {
+        return "input2";
+      }
+    };
+
+    try {
+      _model.getConsoleInput();
+      fail("Should not have allowed getting input before a listener is installed!");
+    }
+    catch (IllegalStateException ise) {
+      assertEquals("Should have thrown the correct exception.",
+                   "No input listener installed!", ise.getMessage());
+    }
+
+    _model.setInputListener(listener1);
+    assertEquals("First input listener should return correct input", "input1", _model.getConsoleInput());
+    _model.changeInputListener(listener1, listener2);
+    assertEquals("Second input listener should return correct input", "input2", _model.getConsoleInput());
+  }
+
+  /**
+   * A generic InteractionsModel for testing purposes.
    */
   public static class TestInteractionsModel extends InteractionsModel {
     String toEval = null;
@@ -434,10 +465,6 @@ public final class InteractionsModelTest extends TestCase {
     protected void _notifyInterpreterReady() {}
     protected void _interpreterResetFailed(Throwable t) {}
     protected void _notifyInteractionIncomplete() {}
-    public String getConsoleInput() {
-      fail("cannot get input from System.in in a test");
-      return null;
-    }
     protected boolean _checkInteraction(String code) {
       return true;
     }

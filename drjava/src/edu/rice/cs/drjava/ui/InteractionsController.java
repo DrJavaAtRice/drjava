@@ -58,10 +58,11 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
-import edu.rice.cs.drjava.model.InputListener;
+import edu.rice.cs.drjava.model.repl.InputListener;
 import edu.rice.cs.drjava.model.repl.ConsoleDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsModel;
+//import edu.rice.cs.drjava.model.repl.InputListener;
 import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
 
@@ -215,15 +216,17 @@ public class InteractionsController extends AbstractConsoleController {
     _errStyle = new SimpleAttributeSet();
     _debugStyle = new SimpleAttributeSet();
 
+    _model.setInputListener(_inputListener);
+
     _init();
   }
 
   /**
    * Gets the input listener for console input requests.
-   */
+   *
   public InputListener getInputListener() {
     return _inputListener;
-  }
+  }*/
 
   public void notifyInputEnteredAction() {
     synchronized(_inputEnteredAction) {

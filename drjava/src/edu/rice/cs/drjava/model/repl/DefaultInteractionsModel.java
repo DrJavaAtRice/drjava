@@ -135,21 +135,6 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   }
 
   /**
-   * Called when input is requested from System.in.
-   * @return the input
-   */
-  public String getConsoleInput() {
-//    if (_document.inProgress()) {
-//      _docAppend(INPUT_REQUIRED_MESSAGE, InteractionsDocument.DEBUGGER_STYLE);
-//    }
-//    else {
-//      _document.insertBeforeLastPrompt(INPUT_REQUIRED_MESSAGE,
-//                                       InteractionsDocument.DEBUGGER_STYLE);
-//    }
-    return _model.getConsoleInput();
-  }
-
-  /**
    * Called when the Java interpreter is ready to use.
    * Adds any open documents to the classpath.
    */

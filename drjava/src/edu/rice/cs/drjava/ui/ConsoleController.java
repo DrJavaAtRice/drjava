@@ -51,7 +51,7 @@ import java.awt.event.KeyEvent;
 import java.awt.Toolkit;
 import java.awt.Event;
 
-import edu.rice.cs.drjava.model.InputListener;
+import edu.rice.cs.drjava.model.repl.InputListener;
 import edu.rice.cs.drjava.model.repl.ConsoleDocument;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
 

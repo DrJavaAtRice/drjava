@@ -82,6 +82,14 @@ public class SimpleInteractionsModel extends InteractionsModel {
     _interpreter = new DynamicJavaAdapter();
 
     _interpreter.defineVariable("INTERPRETER", _interpreter);
+
+    setInputListener(new InputListener() {
+      public String getConsoleInput() {
+        _document.insertBeforeLastPrompt("Cannot read from System.in." + _newLine,
+                                         InteractionsDocument.ERROR_STYLE);
+        return null;
+      }
+    });
   }
 
   /**
@@ -155,16 +163,6 @@ public class SimpleInteractionsModel extends InteractionsModel {
    */
   public void setInterpreterPrivateAccessible(boolean accessible) {
     _interpreter.setPrivateAccessible(accessible);
-  }
-
-  /**
-   * Does not allow input from System.in.
-   * @return empty string
-   */
-  public String getConsoleInput() {
-    _document.insertBeforeLastPrompt("Cannot read from System.in." + _newLine,
-                                     InteractionsDocument.ERROR_STYLE);
-    return "";
   }
 
   /**

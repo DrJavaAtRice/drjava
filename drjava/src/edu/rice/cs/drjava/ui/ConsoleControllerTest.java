@@ -85,7 +85,7 @@ public final class ConsoleControllerTest extends GlobalModelTestCase {
     _doc = _model.getConsoleDocument();
     _controller = new TestConsoleController(_doc, _adapter);
     _pane = _controller.getPane();
-    _model.setInputListener(_controller.getInputListener());
+    _model.getInteractionsModel().setInputListener(_controller.getInputListener());
     _lock = _controller.getInputWaitObject();  // convenience alias for use in this test
   }
 

@@ -749,37 +749,6 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     _model.removeListener(listener);
   }
 
-  /**
-   * Tests that setting and changing an input listener works correctly.
-   */
-  public void testSetChangeInputListener() {
-    InputListener listener1 = new InputListener() {
-      public String getConsoleInput() {
-        return "input1";
-      }
-    };
-
-    InputListener listener2 = new InputListener() {
-      public String getConsoleInput() {
-        return "input2";
-      }
-    };
-
-    try {
-      _model.getConsoleInput();
-      fail("Should not have allowed getting input before a listener is installed!");
-    }
-    catch (IllegalStateException ise) {
-      assertEquals("Should have thrown the correct exception.",
-                   "No input listener installed!", ise.getMessage());
-    }
-
-    _model.setInputListener(listener1);
-    assertEquals("First input listener should return correct input", "input1", _model.getConsoleInput());
-    _model.changeInputListener(listener1, listener2);
-    assertEquals("Second input listener should return correct input", "input2", _model.getConsoleInput());
-  }
-
   public void testRunMainMethod() throws Exception {
     File dir = new File(_tempDir, "bar");
     dir.mkdir();

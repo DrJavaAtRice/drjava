@@ -125,6 +125,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Interactions processor, currently a pre-processor **/
   private InteractionsProcessorI _interactionsProcessor;
 
+  /** The input listener to listen for requests to System.in. */
+  protected InputListener _inputListener;
+
   /**
    * Constructs an InteractionsModel.
    * @param adapter DocumentAdapter to use in the InteractionsDocument
@@ -142,6 +145,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _debugPort = -1;
     _debugPortSet = false;
     _interactionsProcessor = new InteractionsProcessor();
+    _inputListener = NoInputListener.ONLY;
   }
 
   /**
@@ -563,7 +567,43 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * Returns a line of text entered by the user at the equivalent
    * of System.in.
    */
-  public abstract String getConsoleInput();
+  public String getConsoleInput() {
+    return _inputListener.getConsoleInput();
+  }
+
+  /**
+   * Sets the listener for any type of single-source input event.
+   * The listener can only be changed with the changeInputListener method.
+   * @param listener a listener that reacts to input requests
+   * @throws IllegalStateException if the input listener is locked
+   */
+  public void setInputListener(InputListener listener) {
+    if (_inputListener == NoInputListener.ONLY) {
+      _inputListener = listener;
+    }
+    else {
+      throw new IllegalStateException("Cannot change the input listener until it is released.");
+    }
+  }
+
+  /**
+   * Changes the input listener. Takes in the old listener to ensure that the owner
+   * of the original listener is aware that it is being changed. It is therefore
+   * important NOT to include a public accessor to the input listener on the model.
+   * @param oldListener the listener that was installed
+   * @param newListener the listener to be installed
+   */
+  public void changeInputListener(InputListener oldListener, InputListener newListener) {
+    // syncrhonize to prevent concurrent modifications to the listener
+    synchronized (NoInputListener.ONLY) {
+      if (_inputListener == oldListener) {
+        _inputListener = newListener;
+      }
+      else {
+        throw new IllegalArgumentException("The given old listener is not installed!");
+      }
+    }
+  }
 
   /**
    * Any common behavior when an interaction ends.
@@ -805,5 +845,18 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    */
   protected static String _deleteSemiColon(String s) {
     return  s.substring(0, s.length() - 1);
+  }
+
+  /**
+   * Singleton InputListener which should never be asked for input.
+   */
+  private static class NoInputListener implements InputListener {
+    public static final NoInputListener ONLY = new NoInputListener();
+    private NoInputListener() {
+    }
+
+    public String getConsoleInput() {
+      throw new IllegalStateException("No input listener installed!");
+    }
   }
 }

@@ -241,23 +241,6 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    */
   public void systemErrPrint(String s);
 
-  /**
-   * Sets the listener for any type of single-source input event.
-   * The listener can only be changed with the changeInputListener method.
-   * @param listener a listener that reacts to input requests
-   * @throws IllegalStateException if the input listener is locked
-   */
-  public void setInputListener(InputListener listener);
-
-  /**
-   * Changes the input listener. Takes in the old listener to ensure that
-   * the owner of the original listener is aware that it is being changed.
-   * @param oldListener the previous listener
-   * @param newListener the listener to install
-   * @throws IllegalArgumentException if oldListener is not the currently installed listener
-   */
-  public void changeInputListener(InputListener oldListener, InputListener newListener);
-
   //----------------------------- Interactions -----------------------------//
 
   /**

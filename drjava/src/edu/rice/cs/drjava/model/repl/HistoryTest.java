@@ -74,6 +74,9 @@ public final class HistoryTest extends TestCase implements OptionConstants{
     DrJava.getConfig().resetToDefaults();
   }
 
+  /**
+   * Cleans up temporary files and tries to free used variables after each test.
+   */
   public void tearDown() {
     boolean ret = FileOps.deleteDirectory(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);

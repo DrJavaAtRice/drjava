@@ -958,6 +958,12 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public String getConsoleInput() {
       throw new IllegalStateException("Cannot request input from dummy interactions model!");
     }
+    public void setInputListener(InputListener il) {
+      throw new IllegalStateException("Cannot set the input listener of dummy interactions model!");
+    }
+    public void changeInputListener(InputListener from, InputListener to) {
+      throw new IllegalStateException("Cannot change the input listener of dummy interactions model!");
+    }
     public void replReturnedVoid() {}
     public void replReturnedResult(String result) {}
     public void replThrewException(String exceptionClass,

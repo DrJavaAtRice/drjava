@@ -224,11 +224,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   private PageFormat _pageFormat = new PageFormat();
 
-  /**
-   * Listens for requests from System.in.
-   */
-  private InputListener _inputListener;
-
 
   // ----- CONSTRUCTORS -----
 
@@ -248,8 +243,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
     _consoleDocAdapter = new SwingDocumentAdapter();
     _consoleDoc = new ConsoleDocument(_consoleDocAdapter);
-
-    _inputListener = NoInputListener.ONLY;
 
     _createDebugger();
 
@@ -2288,63 +2281,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
   }
 
-  /**
-   * Sets the listener for any type of single-source input event.
-   * The listener can only be changed with the changeInputListener method.
-   * @param listener a listener that reacts to input requests
-   * @throws IllegalStateException if the input listener is locked
-   */
-  public void setInputListener(InputListener listener) {
-    if (_inputListener == NoInputListener.ONLY) {
-      _inputListener = listener;
-    }
-    else {
-      throw new IllegalStateException("Cannot change the input listener until it is released.");
-    }
-  }
-
-  /**
-   * Changes the input listener. Takes in the old listener to ensure that the owner
-   * of the original listener is aware that it is being changed. It is therefore
-   * important NOT to include a public accessor to the input listener on the model.
-   * @param oldListener the listener that was installed
-   * @param newListener the listener to be installed
-   */
-  public void changeInputListener(InputListener oldListener, InputListener newListener) {
-    // syncrhonize to prevent concurrent modifications to the listener
-    synchronized(NoInputListener.ONLY) {
-      if (_inputListener == oldListener) {
-        _inputListener = newListener;
-      }
-      else {
-        throw new IllegalArgumentException("The given old listener is not installed!");
-      }
-    }
-  }
-
-  /**
-   * Gets input from the console through the currently installed input listener.
-   * @return the console input
-   */
-  public String getConsoleInput() {
-    _consoleDoc.insertPrompt();
-    return _inputListener.getConsoleInput();
-  }
-
-  /**
-   * Singleton InputListener which should never be asked for input.
-   */
-  private static class NoInputListener implements InputListener {
-    public static final NoInputListener ONLY = new NoInputListener();
-    private NoInputListener() {
-    }
-
-    public String getConsoleInput() {
-      throw new IllegalStateException("No input listener installed!");
-    }
-  }
-
-  private class ExtraClasspathOptionListener implements OptionListener<Vector<File>> {
+   private class ExtraClasspathOptionListener implements OptionListener<Vector<File>> {
     public void optionChanged (OptionEvent<Vector<File>> oce) {
       Vector<File> cp = oce.value;
       if(cp!=null) {

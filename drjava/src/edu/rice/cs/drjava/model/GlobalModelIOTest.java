@@ -1397,7 +1397,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
    * Tests that input can be written to and read from the console correctly.
    */
   public void testConsoleInput() throws DocumentAdapterException {
-    _model.setInputListener(new InputListener() {
+    _model.getInteractionsModel().setInputListener(new InputListener() {
       int n = 0;
       public String getConsoleInput() {
         n++;
