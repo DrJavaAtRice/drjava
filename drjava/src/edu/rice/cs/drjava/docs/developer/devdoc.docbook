@@ -111,6 +111,13 @@
 
         <listitem>
           <formalpara>
+            <title>Mac OS X Developer Tools (Mac OS X only)</title>
+            <para>If you will be developing on a Mac OS X platform, you will need to install the Developer Tools to get build tools like CVS.  This package can be downloaded for free from the Apple Developer Connection, <ulink url="http://connect.apple.com">http://connect.apple.com</ulink>, or you can install their equivalents from the Fink project at <ulink url="http://fink.sourceforge.net">http://fink.sourceforge.net</ulink>.</para>
+          </formalpara>
+        </listitem>
+
+        <listitem>
+          <formalpara>
             <title>Ant</title>
             <para>Ant is a build tool similar to "make", but which uses XML build scripts.  We use Ant to compile, test, and commit DrJava code.  You will need to download version 1.5.1 or later from <ulink url="http://www.apache.org/dist/ant/binaries/">http://www.apache.org/dist/ant/binaries/</ulink>.  Decompress the package and copy the <filename>jakarta-ant-1.5.1</filename> folder to a convenient location (eg. <filename>/usr/local/ant</filename>, <filename>~/ant/</filename>, or <filename>c:\jakarta-ant-1.5.1</filename>).</para>
           </formalpara>
@@ -262,18 +269,18 @@ cvs -z3 -d:pserver:anonymous@cvs.sf.net:/cvsroot/drjava co src
             <para>Add the following items in order to the front of your <literal>CLASSPATH</literal> environment variable in your <filename>~/.bashrc</filename> (Linux) or <filename>~/.profile</filename> (Mac OS X) file.  Separate the items with a colon, and make sure the line occurs after the definition of the <literal>JAVA_HOME</literal> variable.  Note that <filename>tools.jar</filename> is not necessary in Mac OS X.  You will need to start a new Terminal for the changes to take effect.</para>
           </formalpara>
           <programlisting>
-~/drjava/src/edu/rice/cs/lib/jsr14.jar
-~/drjava/src/edu/rice/cs/lib/GJv6.jar
-~/drjava/src/edu/rice/cs/lib/compilers-jsr14v1_0.jar
-~/drjava/src/edu/rice/cs/lib/compilers-jsr14v1_2.jar
-~/drjava/src/edu/rice/cs/lib/dynamicjava.jar
-~/drjava/src/edu/rice/cs/lib/gj-util.jar
-~/drjava/src/edu/rice/cs/lib/junit.jar
-~/drjava/built/
+${HOME}/drjava/src/edu/rice/cs/lib/jsr14.jar
+${HOME}/drjava/src/edu/rice/cs/lib/GJv6.jar
+${HOME}/drjava/src/edu/rice/cs/lib/compilers-jsr14v1_0.jar
+${HOME}/drjava/src/edu/rice/cs/lib/compilers-jsr14v1_2.jar
+${HOME}/drjava/src/edu/rice/cs/lib/dynamicjava.jar
+${HOME}/drjava/src/edu/rice/cs/lib/gj-util.jar
+${HOME}/drjava/src/edu/rice/cs/lib/junit.jar
+${HOME}/drjava/built/
 ${JAVA_HOME}/lib/tools.jar
           </programlisting>
-          <para>In Mac OS X, you will also need to set the ANT_OPTS variable to include the JSR-14 compiler on the front of the "bootclasspath".  Add the following line to your <filename>~/.profile</filename> file.</para>
-          <programlisting>export ANT_OPTS='-Xbootclasspath/p:~/drjava/src/edu/rice/cs/lib/jsr14.jar'</programlisting>
+          <para>In Mac OS X, you will also need to set the ANT_OPTS variable to include the JSR-14 compiler on the front of the "bootclasspath".  Add the following line to your <filename>~/.profile</filename> file, subsituting the correct home directory.</para>
+          <programlisting>export ANT_OPTS='-Xbootclasspath/p:/Users/USERNAME/drjava/src/edu/rice/cs/lib/jsr14.jar'</programlisting>
         </listitem>
         <listitem>
           <formalpara>
