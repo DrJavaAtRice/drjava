@@ -272,10 +272,21 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests substracting two Integers.
    */
-  public void testSubtractingTwoIntegers() {
-    Node exp = _parseCode("new Integer(1) - new Integer(2);").get(0);
+  public void testSubtractingTwoIntegers() throws ExceptionReturnedException {
+    String text = "new Integer(1) - new Integer(2);";
+    BinaryExpression exp = (BinaryExpression)_parseCode(text).get(0);
     
     exp.acceptVisitor(_typeChecker);
+    
+    String expected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 1 1 int)]))";
+    String actual = exp.getLeftExpression().toString();
+    assertEquals("Should have unboxed correctly.", expected, actual);
+    
+    expected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 2 2 int)]))";
+    actual = exp.getRightExpression().toString();
+    assertEquals("Should have unboxed correctly.", expected, actual);
+    
+    _interpreter.interpret(text);
   }
     
   ///////////// Additive Assignemt //////////////////////
@@ -314,30 +325,62 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests multiplying two Integers.
    */
-  public void testMultiplyingTwoIntegers() {
-    Node exp = _parseCode("new Integer(1) * new Integer(2);").get(0);
+  public void testMultiplyingTwoIntegers() throws ExceptionReturnedException {
+    String text = "new Integer(1) * new Integer(2);";
+    BinaryExpression exp = (BinaryExpression)_parseCode(text).get(0);
     
     exp.acceptVisitor(_typeChecker);
+    
+    String expected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 1 1 int)]))";
+    String actual = exp.getLeftExpression().toString();
+    assertEquals("Should have unboxed correctly.", expected, actual);
+    
+    expected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 2 2 int)]))";
+    actual = exp.getRightExpression().toString();
+    assertEquals("Should have unboxed correctly.", expected, actual);
+    
+    _interpreter.interpret(text);
   }
   
   /**
    * Tests dividing two Integers.
    */
-  public void testDividingTwoIntegers() {
-    Node exp = _parseCode("new Integer(1) / new Integer(2);").get(0);
+  public void testDividingTwoIntegers() throws ExceptionReturnedException {
+    String text = "new Integer(1) / new Integer(2);";
+    BinaryExpression exp = (BinaryExpression)_parseCode(text).get(0);
     
     exp.acceptVisitor(_typeChecker);
+    
+    String expected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 1 1 int)]))";
+    String actual = exp.getLeftExpression().toString();
+    assertEquals("Should have unboxed correctly.", expected, actual);
+    
+    expected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 2 2 int)]))";
+    actual = exp.getRightExpression().toString();
+    assertEquals("Should have unboxed correctly.", expected, actual);
+    
+    _interpreter.interpret(text);
   }
   
   /**
    * Tests dividing two Integers.
    */
-  public void testModingTwoIntegers() {
-    Node exp = _parseCode("new Integer(1) % new Integer(2);").get(0);
+  public void testModingTwoIntegers() throws ExceptionReturnedException {
+    String text = "new Integer(1) % new Integer(2);";
+    BinaryExpression exp = (BinaryExpression)_parseCode(text).get(0);
     
     exp.acceptVisitor(_typeChecker);
+    
+    String expected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 1 1 int)]))";
+    String actual = exp.getLeftExpression().toString();
+    assertEquals("Should have unboxed correctly.", expected, actual);
+    
+    expected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 2 2 int)]))";
+    actual = exp.getRightExpression().toString();
+    assertEquals("Should have unboxed correctly.", expected, actual);
+    
+    _interpreter.interpret(text);
   }
-  
   //////////// Multiplicitive Assignments ///////////////
   
   /**

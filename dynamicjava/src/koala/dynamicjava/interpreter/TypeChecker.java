@@ -1990,7 +1990,7 @@ public class TypeChecker extends VisitorObject<Class> {
   /**
    * Visits a numeric expression
    */
-  private static Class visitNumericExpression(BinaryExpression node, String s) {
+  protected static Class visitNumericExpression(BinaryExpression node, String s) {
     Expression leftExp = node.getLeftExpression();
     Expression rightExp = node.getRightExpression();
     
