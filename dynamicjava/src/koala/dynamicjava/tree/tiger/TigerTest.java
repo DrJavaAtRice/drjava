@@ -595,9 +595,9 @@ public class TigerTest extends DynamicJavaTestCase {
         "  }\n"+
         "}\n"+
         "B b = new B();\n"+
-        "b.new C(\"Str1\",\"Str2\",\"Str3\").getStr();\n";
+        "b.new C(\"Str1\",\"Str2\",\"Str3\",\"Str4\").getStr();\n";
 
-      assertEquals("Str1Str2Str3", interpret(testString));
+      assertEquals("Str1Str2Str3Str4", interpret(testString));
     }
 
     // Testing static method with varargs

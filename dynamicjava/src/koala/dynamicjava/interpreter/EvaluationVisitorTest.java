@@ -354,6 +354,93 @@ public class EvaluationVisitorTest extends DynamicJavaTestCase {
     res = interpret(text);
     assertTrue("res should be an instance of a List", res instanceof java.util.List);
     assertEquals("first element should be 1", new Integer(1), ((java.util.List)res).get(0));
+    
+    text = "Arrays.asList(1,2,3,4)";
+    res = interpret(text);
+    assertTrue("res should be an instance of a List", res instanceof java.util.List);
+    assertEquals("size should be 4", 4, ((java.util.List)res).size());
+    assertEquals("last element should be 4", new Integer(4), ((java.util.List)res).get(3));
+    
+    text = 
+      "class ClassD { " +
+      "  public String m(String ... args) { " +
+      "    String ret = \"\"; " +
+      "    for(String s : args) ret += s; " +
+      "    return ret; " + 
+      "  }" +
+      "}\n" +
+      "new ClassD().m(\"a\",\"b\",\"c\",\"d\");";
+    res = interpret(text);
+    assertEquals("Wrong output.", "abcd", res);
+
+    text = 
+      "public class ClassE { " +
+      "  public class Inner { " +
+      "    public String m(String ... args) { " +
+      "      String ret = \"\"; " +
+      "      for(String s : args) ret += s; " +
+      "      return ret; " + 
+      "    }" +
+      "  }" +
+      "}\n" +
+      "(new ClassE()).new Inner().m(\"a\",\"b\",\"c\",\"d\");";
+    res = interpret(text);
+    assertEquals("Wrong output.", "abcd", res);
+    
+    text = 
+      "public class ClassF { " +
+      "  public ClassF(String ... args) { " +
+      "    for (String s : args) " +
+      "      System.out.println(s);" +
+      "  } " + 
+      "  public String m(String ... args) { " +
+      "    String ret = \"\"; " +
+      "    for(String s : args) ret += s; " +
+      "    return ret; " + 
+      "  }" +
+      "}\n" +
+      "new ClassF(\"a\",\"b\",\"c\",\"d\").m(\"a\",\"b\",\"c\",\"d\")";
+    res = interpret(text);
+    assertEquals("Wrong output.", "abcd", res);
+    
+    text =
+      "public class ClassG {\n"+
+      "  public class Inner {\n"+
+      "    String str = \"\";\n"+
+      "    public Inner(String ... args){\n"+
+      "      for(String  s: args) {\n"+
+      "        str = str+s;\n"+
+      "      }\n"+
+      "    }\n"+
+      "    public String getStr(){\n"+
+      "      return str;\n"+
+      "    }\n"+
+      "  }\n"+
+      "}\n"+
+      "(new ClassG()).new Inner(\"a\",\"b\",\"c\",\"d\").getStr();\n";
+    res = interpret(text);
+    assertEquals("Wrong Output.", "abcd", res);
+    
+    text =
+      "public class B {\n"+
+      "  public class C {\n"+
+      "    String str = \"\";\n"+
+      "    public C(String ... args){\n"+
+      "      for(String  s: args) {\n"+
+      "        str = str+s;\n"+
+      "      }\n"+
+//      "      for(int i=0;i<s.length;i++) {\n"+
+//      "        str = str+s[i];\n"+
+//      "      }\n"+
+      "    }\n"+
+      "    public String getStr(){\n"+
+      "      return str;\n"+
+      "    }\n"+
+      "  }\n"+
+      "}\n"+
+      "(new B()).new C(\"Str1\",\"Str2\",\"Str3\",\"Str4\").getStr();\n";
+    res = interpret(text);
+    assertEquals("Wrong Output.", "Str1Str2Str3Str4", res);
   }
     
     

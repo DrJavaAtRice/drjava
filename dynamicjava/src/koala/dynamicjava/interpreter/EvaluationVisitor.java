@@ -801,9 +801,12 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   private Object buildArrayOfRemainingArgs(Class[] typs, int larg_size, Iterator<Expression> it) {
     if(! typs[typs.length-1].isArray())
       throw new RuntimeException("Last argument is not variable arguments");
+        
     Class<?> componentType = typs[typs.length-1].getComponentType();
     Object argArray = Array.newInstance(componentType,new int[]{(larg_size-typs.length+1)});
-    for(int j = 0; j < larg_size-typs.length+1; j++){
+    
+    int n = larg_size-typs.length+1;
+    for(int j = 0; j < n; j++){
       Object p  = it.next().acceptVisitor(this);
       Object casted = performCast(componentType, p);
       if (componentType.isPrimitive()) {
@@ -849,7 +852,9 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   
   
   /**
-   * Visits an ObjectMethodCall
+   * Visits an ObjectMethodCall.
+   * This method expects that the argument list is compatible with
+   * the declared method signature.
    * @param node the node to visit
    */
   public Object visit(ObjectMethodCall node) {
@@ -858,7 +863,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Object obj  = exp.acceptVisitor(this);
 
     if (node.hasProperty(NodeProperties.METHOD)) {
-      Method   m    = (Method)node.getProperty(NodeProperties.METHOD);
+      Method m    = (Method)node.getProperty(NodeProperties.METHOD);
       Class[]  typs = m.getParameterTypes();
 
       // Relax the protection for members?
@@ -872,21 +877,32 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       // Fill the arguments
       if (larg != null) {
         args = new Object[typs.length];
-        Iterator<Expression> it = larg.iterator();
-        int      i  = 0;
+        ListIterator<Expression> it = larg.listIterator();
+        int i  = 0;
         while (i < typs.length-1) {
           Object p  = it.next().acceptVisitor(this);
           args[i] = performCast(typs[i], p);
           i++;
         }
         if(typs.length > 0){
-          if(!TigerUtilities.isVarArgs(m)){
-            Object p  = it.next().acceptVisitor(this);
-            args[i] = performCast(typs[i], p);
-            i++;
-          } else { 
-            /* Pass an array with all the remaining arguments of 'it' */
-            args[typs.length-1] = buildArrayOfRemainingArgs(typs, larg.size(), it );
+          Object last = null;
+          if (it.hasNext()) {
+            last = it.next().acceptVisitor(this);
+          }
+          
+          if(!TigerUtilities.isVarArgs(m)) {
+            args[i] = last;
+          }
+//          else if (last == null) {
+//            Class<?> compType = typs[i].getComponentType();
+//            args[i] = Array.newInstance(compType, 0);
+//          }
+          else if (last != null && typs[i].isAssignableFrom(last.getClass())){
+            args[i] = last;
+          }
+          else { // Either more/less args given than expected or is of the component type
+            it.previous(); // back up since we pulled the expression out a few lines above
+            args[i] = buildArrayOfRemainingArgs(typs, larg.size(), it);
           }
         }
       }
@@ -963,7 +979,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     
     // Fill the arguments
     if (larg != null) {
-      Iterator<Expression> it = larg.iterator();
+      ListIterator<Expression> it = larg.listIterator();
       int      i  = 0;
       args        = new Object[typs.length];
       while (i < typs.length-1) {
@@ -971,10 +987,23 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         i++;
       }
       if(typs.length > 0){
-        if(!TigerUtilities.isVarArgs(m)){
-          args[i] = it.next().acceptVisitor(this);
-          i++;
-        } else {
+        Object last = null;
+        if (it.hasNext()) {
+          last = it.next().acceptVisitor(this);
+        }
+        
+        if(!TigerUtilities.isVarArgs(m)) {
+          args[i] = last;
+        }
+        //          else if (last == null) {
+        //            Class<?> compType = typs[i].getComponentType();
+        //            args[i] = Array.newInstance(compType, 0);
+        //          }
+        else if (last != null && typs[i].isAssignableFrom(last.getClass())){
+          args[i] = last;
+        }
+        else { // Either more/less args given than expected or is of the component type
+          it.previous(); // back up since we pulled the expression out a few lines above
           args[i] = buildArrayOfRemainingArgs(typs, larg.size(), it);
         }
       }
@@ -1016,11 +1045,22 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         i++;
       }
       if(typs.length > 0){
-        Object last = it.next().acceptVisitor(this);
-        if(!TigerUtilities.isVarArgs(m) || 
-           (last != null && typs[i].isAssignableFrom(last.getClass()))){
+        Object last = null;
+        if (it.hasNext()) {
+          last = it.next().acceptVisitor(this);
+        }
+        
+        if(!TigerUtilities.isVarArgs(m)) {
           args[i] = last;
-        } else {
+        }
+        //          else if (last == null) {
+        //            Class<?> compType = typs[i].getComponentType();
+        //            args[i] = Array.newInstance(compType, 0);
+        //          }
+        else if (last != null && typs[i].isAssignableFrom(last.getClass())){
+          args[i] = last;
+        }
+        else { // Either more/less args given than expected or is of the component type
           it.previous(); // back up since we pulled the expression out a few lines above
           args[i] = buildArrayOfRemainingArgs(typs, larg.size(), it);
         }
@@ -1093,16 +1133,29 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     // Fill the arguments
     if (larg != null) {
       args = new Object[typs.length];
-      Iterator<Expression> it = larg.iterator();
+      ListIterator<Expression> it = larg.listIterator();
       int      i  = 0;
       while (i < typs.length-1) {
         args[i++] = it.next().acceptVisitor(this);
       }
-    
       if(typs.length > 0){
-        if(!TigerUtilities.isVarArgs(cons)){
-          args[i++] = it.next().acceptVisitor(this);
-        } else {
+        Object last = null;
+        if (it.hasNext()) {
+          last = it.next().acceptVisitor(this);
+        }
+        
+        if(!TigerUtilities.isVarArgs(cons)) {
+          args[i] = last;
+        }
+        //          else if (last == null) {
+        //            Class<?> compType = typs[i].getComponentType();
+        //            args[i] = Array.newInstance(compType, 0);
+        //          }
+        else if (last != null && typs[i].isAssignableFrom(last.getClass())){
+          args[i] = last;
+        }
+        else { // Either more/less args given than expected or is of the component type
+          it.previous(); // back up since we pulled the expression out a few lines above
           args[i] = buildArrayOfRemainingArgs(typs, larg.size(), it);
         }
       }
@@ -1187,19 +1240,34 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       args = new Object[typs.length];
       args[0] = node.getExpression().acceptVisitor(this);
 
-      Iterator<Expression> it = larg.iterator();
+      ListIterator<Expression> it = larg.listIterator();
       int      i  = 1;
       while (i < typs.length-1) { // the +1 for the hidden parameter, and the -1 for the varargs
         args[i++] = it.next().acceptVisitor(this);
       }
-      if(typs.length > 1){ 
-        if(!TigerUtilities.isVarArgs(cons)){
-          args[i++] = it.next().acceptVisitor(this);
-        } else {
-          args[i++] = buildArrayOfRemainingArgs(typs, larg.size()+1, it);
+      if(typs.length > 0){
+        Object last = null;
+        if (it.hasNext()) {
+          last = it.next().acceptVisitor(this);
+        }
+        
+        if(!TigerUtilities.isVarArgs(cons)) {
+          args[i] = last;
+        }
+        //          else if (last == null) {
+        //            Class<?> compType = typs[i].getComponentType();
+        //            args[i] = Array.newInstance(compType, 0);
+        //          }
+        else if (last != null && typs[i].isAssignableFrom(last.getClass())){
+          args[i] = last;
+        }
+        else { // Either more/less args given than expected or is of the component type
+          it.previous(); // back up since we pulled the expression out a few lines above
+          args[i] = buildArrayOfRemainingArgs(typs, larg.size()+1, it);
         }
       }
-    } else {
+    } 
+    else {
       args = new Object[] { node.getExpression().acceptVisitor(this) };
     }
 
@@ -1232,15 +1300,29 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     // Fill the arguments
     if (larg != null) {
       args = new Object[typs.length];
-      Iterator<Expression> it = larg.iterator();
+      ListIterator<Expression> it = larg.listIterator();
       int      i  = 0;
       while (i < typs.length-1) {
         args[i++] = it.next().acceptVisitor(this);
       }
       if(typs.length > 0){
-        if(!TigerUtilities.isVarArgs(cons)){
-          args[i++] = it.next().acceptVisitor(this);
-        } else {
+        Object last = null;
+        if (it.hasNext()) {
+          last = it.next().acceptVisitor(this);
+        }
+        
+        if(!TigerUtilities.isVarArgs(cons)) {
+          args[i] = last;
+        }
+        //          else if (last == null) {
+        //            Class<?> compType = typs[i].getComponentType();
+        //            args[i] = Array.newInstance(compType, 0);
+        //          }
+        else if (last != null && typs[i].isAssignableFrom(last.getClass())){
+          args[i] = last;
+        }
+        else { // Either more/less args given than expected or is of the component type
+          it.previous(); // back up since we pulled the expression out a few lines above
           args[i] = buildArrayOfRemainingArgs(typs, larg.size(), it);
         }
       }
