@@ -94,15 +94,6 @@
     <cvs command="update -A ${file_with_build_name}"
          cvsRoot="${cvsroot}" quiet="true" />
 
-    <!-- generate javadoc for the committed version! -->
-    <antcall target="generate_javadoc">
-      <param name="javadoc_dir" value="${public_javadoc_dir}" />
-      <param name="javadoc_title" value="${version-tag}" />
-    </antcall>
-
-    <!-- give group permissions to write over the javadoc -->
-    <chmod perm="g+w,a+rX" dir="${public_javadoc_dir}" type="both" />
-
     <!-- Create distribution jar.
          We modify property jarfile for this call to put the jar in
          the right place.
@@ -112,6 +103,16 @@
     <antcall target="jar">
       <param name="jarfile" value="${distjar}" />
     </antcall>
+
+    <!-- generate javadoc for the committed version! -->
+    <antcall target="generate_javadoc">
+      <param name="javadoc_dir" value="${public_javadoc_dir}" />
+      <param name="javadoc_title" value="${version-tag}" />
+    </antcall>
+
+    <!-- give group permissions to write over the javadoc -->
+    <chmod perm="g+w,a+rX" dir="${public_javadoc_dir}" type="both" />
+    <chmod perm="g+w,a+rX" file="${public_javadoc_dir}" type="both" />
 
     <echo message="New version ${version-tag} committed to CVS." />
   </target>
