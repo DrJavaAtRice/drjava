@@ -1162,8 +1162,8 @@ public class MainFrame extends JFrame {
       new CompilerErrorCaretListener(doc, _errorPanel.getErrorListPane(), pane);
     pane.addErrorCaretListener(caretListener);
     // add a listener to update line and column.
-    pane.addCaretListener( _posListener );
-    _posListener.updateLocation();
+    //pane.addCaretListener( _posListener );
+    //_posListener.updateLocation();
 
     // Add to a scroll pane
     JScrollPane scroll = new BorderlessScrollPane(pane,
@@ -1228,11 +1228,7 @@ public class MainFrame extends JFrame {
     // reset the undo/redo menu items
     _undoAction.setDelegatee(_currentDefPane.getUndoAction());
     _redoAction.setDelegatee(_currentDefPane.getRedoAction());
-    
-    // this causes a nasty bug when first starting DrJava
-    // i'm leaving it out for now.
-     _posListener.updateLocation();
-
+     
   }
 
   /**
@@ -1311,6 +1307,7 @@ public class MainFrame extends JFrame {
       _setCurrentDirectory(active);
 
       updateFileTitle();
+      //_posListener.updateLocation();
       _currentDefPane.grabFocus();
     }
 

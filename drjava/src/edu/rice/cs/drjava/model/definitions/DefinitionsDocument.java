@@ -442,7 +442,8 @@ public class DefinitionsDocument extends PlainDocument {
     
     // test to see which is easier: starting from the top
     // or calculating relatively.
-    if( _cachedLocation - here > here ){ 
+    if( (_cachedLocation - here > here ) ||
+        ( here <= getFirstNewLine() ) ){ 
       _cachedLineNum = getLineFromScratch(); 
     }
     else {
@@ -469,6 +470,13 @@ public class DefinitionsDocument extends PlainDocument {
     return count;
   }
   
+  public int getFirstNewLine(){
+    int _copyLocation = getCurrentLocation();
+    setCurrentLocation( DOCSTART );
+    int ret = _reduced.getDistToNextNewline();
+    setCurrentLocation( _copyLocation );
+    return ret;
+  }
   
 
   /**
@@ -495,9 +503,15 @@ public class DefinitionsDocument extends PlainDocument {
    else{
      int distNextNewLine = _reduced.getDistToNextNewline();
      while (distNextNewLine != -1 && getCurrentLocation()<currLoc) {
-       setCurrentLocation( getCurrentLocation()+distNextNewLine+1 );
+       try{
+         setCurrentLocation( getCurrentLocation()+distNextNewLine+1 );
+         distNextNewLine = _reduced.getDistToNextNewline();
+       }
+       catch( IllegalArgumentException iae ){
+         setCurrentLocation( currLoc );
+         distNextNewLine = -1;
+       }
        count++;
-       distNextNewLine = _reduced.getDistToNextNewline();
      }
      if( getCurrentLocation() != currLoc ){ count--; }
    }
