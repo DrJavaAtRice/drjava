@@ -180,9 +180,7 @@ public class JSR14v20Compiler implements CompilerInterface {
     }
 
     try {
-      System.out.println("About to compile");
       compiler.compile(filesToCompile);
-      System.out.println("Finished compilation");
     }
     catch (Throwable t) {
       // GJ defines the compile method to throw Throwable?!
@@ -293,13 +291,10 @@ public class JSR14v20Compiler implements CompilerInterface {
   }
 
   protected void initCompiler(File[] sourceRoots) {
-    System.out.println("initCompiler");
     context = createContext(sourceRoots);
     compilerLog = new OurLog(context);
 
-    System.out.println("about to make a JavaCompiler");
     compiler = JavaCompiler.make(context);
-    System.out.println("made a JavaCompiler");
   }
 
   /**
