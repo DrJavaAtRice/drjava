@@ -420,7 +420,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
        * different indentation than pressing other keys, for bug 681203
        */
       protected int getIndentReason(){
-	    return Indenter.ENTER_KEY_PRESS;
+     return Indenter.ENTER_KEY_PRESS;
       }
   };
 

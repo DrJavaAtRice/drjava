@@ -63,8 +63,7 @@ import edu.rice.cs.drjava.model.*;
 public class JUnitErrorModelTest extends GlobalModelJUnitTest {
 
   private JUnitErrorModel _m;
-  private String _testString;
-  
+
   private static final String MONKEYTEST_FAIL_TEXT =
     "import junit.framework.*; \n" +
     "import java.io.*; \n" +
@@ -90,7 +89,6 @@ public class JUnitErrorModelTest extends GlobalModelJUnitTest {
     
   /**
    * Constructor.
-   * @param  String name
    */
   public JUnitErrorModelTest(String name) {
     super(name);
@@ -104,23 +102,12 @@ public class JUnitErrorModelTest extends GlobalModelJUnitTest {
     return  new TestSuite(JUnitErrorModelTest.class);
   }
   
-  public void testSubstring() {
-   
-    _m = new JUnitErrorModel();
-    String expected = _m._substring("a simple test", 0, 2);
-    
-    assertEquals("_substring returned an invalid String",
-                 "a ",
-                 expected);
-    
-  }
-  
   /**
    * Tests that the errors array contains all encountered failures and errors in the right order. 
    */
   public void testErrorsArrayInOrder() throws Exception { 
     
-    _m = new JUnitErrorModel();
+    _m = new JUnitErrorModel(new JUnitError[0], _model, false);
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
     final File file = new File(_tempDir, "MonkeyTestFail.java");
     doc.saveFile(new FileSelector(file));
@@ -142,95 +129,27 @@ public class JUnitErrorModelTest extends GlobalModelJUnitTest {
     //final TestResult testResults = doc.startJUnit();
     
     //_m = new JUnitErrorModel(doc.getDocument(), "MonkeyTestFail", testResults);
-    _m = doc.getJUnitErrorModel();
+    _m = _model.getJUnitErrorModel();
     
     //JUnitError[] errorsWithPositions = _m.getErrorsWithPositions();
     //JUnitError[] errorsWithoutPositions = _m.getErrorsWithoutPositions();
     //assertTrue("testResults should not be null", testResults != null);
     
-    assertEquals("the test results should have one error and one failure "+_m.getErrorsWithPositions().length+" "+_m.getErrorsWithoutPositions().length,
+    assertEquals("the test results should have one error and one failure "+_m.getErrors().length,
                  2,
-                  _m.getErrorsWithPositions().length);
+                  _m.getErrors().length);
     
-    assertEquals("test case has one error reported" + _m.getErrorsWithPositions()[0].message(),
-                 _m.getErrorsWithPositions()[0].isWarning(),
+    assertEquals("test case has one error reported" + _m.getErrors()[0].message(),
+                 _m.getErrors()[0].isWarning(),
                  false
                  );
 
-    assertEquals("test case has one failure reported" + _m.getErrorsWithPositions()[1].message(),
-                 _m.getErrorsWithPositions()[1].isWarning(),
+    assertEquals("test case has one failure reported" + _m.getErrors()[1].message(),
+                 _m.getErrors()[1].isWarning(),
                  true
                  );
     //_model.setResetAfterCompile(true);
     
   }
-  
-  /**
-   * Tests that the JUnitErrorModel contained within any other open documents is cleared
-   * when JUnit is run on a given document.
-   */
-  public void testClearOthersWhenJUnitRun() throws Exception {
-
-    // Temporarily disabled?  Why?
-    
-    
-    OpenDefinitionsDocument doc1 = setupDocument(MONKEYTEST_FAIL_TEXT);
-    final File file1 = new File(_tempDir, "MonkeyTestFail.java");
-    doc1.saveFile(new FileSelector(file1));
-    
-    TestShouldSucceedListener listener = new TestShouldSucceedListener();
-    _model.addListener(listener);
-    synchronized(listener) {
-      doc1.startCompile();
-      listener.wait();
-    }
-    listener.checkCompileOccurred();
-    synchronized(listener) {
-      doc1.startJUnit();
-      listener.assertJUnitStartCount(1);
-      listener.wait();
-    }
-    //final TestResult tr1 = doc1.startJUnit();
-    JUnitErrorModel m1before = doc1.getJUnitErrorModel();
-    _model.removeListener(listener);
-    OpenDefinitionsDocument doc2 = setupDocument(NONPUBLIC_TEXT);
-    final File file2 = new File(_tempDir, "NonPublic.java");
-    doc2.saveFile(new FileSelector(file2));
-    //final TestResult tr2 = doc2.startJUnit();
-    TestShouldSucceedListener listener2 = new TestShouldSucceedListener();
-    _model.addListener(listener2);
-    
-    synchronized(listener2) {
-      doc2.startCompile();
-      listener2.wait();
-    }
-    
-    listener2.checkCompileOccurred();
-    synchronized(listener2) {
-      doc2.startJUnit();
-      listener2.assertJUnitStartCount(1);
-      listener2.wait();
-    }
-    JUnitErrorModel m1after = doc1.getJUnitErrorModel();
-    JUnitErrorModel m2 = doc2.getJUnitErrorModel();
-    
-    assertEquals("test case has errors",
-                 2,
-                 m1before.getNumErrors()
-                 );
-
-    assertEquals("test case has errors",
-                 1,
-                 m2.getNumErrors()
-                 );
-    
-    assertEquals("test case has errors",
-                 0,
-                 m1after.getNumErrors()
-                 );
-    _model.removeListener(listener2);
-    
-  }
-  
 }
 

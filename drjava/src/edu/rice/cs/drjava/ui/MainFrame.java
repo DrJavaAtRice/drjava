@@ -69,7 +69,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.ui.config.*;
-import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
+import edu.rice.cs.drjava.ui.CompilerErrorPanel.CompilerErrorListPane;
 import edu.rice.cs.drjava.ui.JUnitPanel.JUnitErrorListPane;
 import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeOptionListener;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
@@ -133,12 +133,12 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   // Tabbed panel fields
   private JTabbedPane _tabbedPane;
-  private CompilerErrorPanel _errorPanel;
+  private CompilerErrorPanel _compilerErrorPanel;
   private OutputPane _outputPane;
   private InteractionsPane _interactionsPane;
   private InteractionsController _interactionsController;  // move to controller
   private DebugPanel _debugPanel;
-  private JUnitPanel _junitPanel;
+  private JUnitPanel _junitErrorPanel;
   private FindReplaceDialog _findReplace;
   private LinkedList _tabs;
   
@@ -416,6 +416,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Runs JUnit on the document in the definitions pane. */
   private Action _junitAction = new AbstractAction("Test Using JUnit") {
     public void actionPerformed(ActionEvent ae) {
+
       _junit();
       //_setDividerLocation();  is this necessary?
     }
@@ -1002,10 +1003,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     _undoAction.setDelegatee(_currentDefPane.getUndoAction());
     _redoAction.setDelegatee(_currentDefPane.getRedoAction());
 
-    _errorPanel.getErrorListPane().setLastDefPane(_currentDefPane);
-    _errorPanel.reset();
-    _junitPanel.getJUnitErrorListPane().setLastDefPane(_currentDefPane);
-    _junitPanel.reset();
+    _compilerErrorPanel.getErrorListPane().setLastDefPane(_currentDefPane);
+    _compilerErrorPanel.reset();
+    _junitErrorPanel.getErrorListPane().setLastDefPane(_currentDefPane);
+    _junitErrorPanel.reset();
 
     // set up menu bar and actions
     _setUpActions();
@@ -1270,14 +1271,14 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Returns whether the compiler output tab is currently showing.
    */
   public boolean isCompilerTabSelected() {
-    return _tabbedPane.getSelectedComponent() == _errorPanel;
+    return _tabbedPane.getSelectedComponent() == _compilerErrorPanel;
   }
   
   /**
    * Returns whether the test output tab is currently showing.
    */
   public boolean isTestTabSelected() {
-    return _tabbedPane.getSelectedComponent() == _junitPanel;
+    return _tabbedPane.getSelectedComponent() == _junitErrorPanel;
   }
   
   /**
@@ -1983,28 +1984,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   /**
-   * Update all appropriate listeners that the CompilerErrorModels
-   * have changed.
-   */
-  void updateErrorListeners() {
-    // Loop through each errorListener and tell it to update itself
-    ListModel docs = _model.getDefinitionsDocuments();
-    for (int i = 0; i < docs.getSize(); i++) {
-      OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
-        docs.getElementAt(i);
-      JScrollPane scroll = (JScrollPane) _defScrollPanes.get(doc);
-      if (scroll != null) {
-        DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
-        CompilerErrorCaretListener listener = pane.getErrorCaretListener();
-        listener.resetErrorModel();
-
-        JUnitErrorCaretListener junitListener = pane.getJUnitErrorCaretListener();
-        junitListener.resetErrorModel();
-      }
-    }
-  }
-
-  /**
    * Removes the CompilerErrorCaretListener corresponding to
    * the given document, after that document has been closed.
    * (Allows pane and listener to be garbage collected...)
@@ -2590,7 +2569,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   private void _setUpTabs() {
     _outputPane = new OutputPane(_model);
-    _errorPanel = new CompilerErrorPanel(_model, this);
+    _compilerErrorPanel = new CompilerErrorPanel(_model, this);
     
     // Interactions
     _interactionsController = 
@@ -2602,7 +2581,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     final JScrollPane outputScroll = 
       new BorderlessScrollPane(_outputPane);
-    _junitPanel = new JUnitPanel(_model, this);
+    _junitErrorPanel = new JUnitPanel(_model, this);
     _tabbedPane = new JTabbedPane();
     _tabbedPane.addChangeListener(new ChangeListener () {
       public void stateChanged(ChangeEvent e) {
@@ -2630,12 +2609,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     _tabs = new LinkedList();
 
-    _tabs.addLast(_errorPanel);
-    _tabs.addLast(_junitPanel);
+    _tabs.addLast(_compilerErrorPanel);
+    _tabs.addLast(_junitErrorPanel);
     _tabs.addLast(_findReplace);
     
     // Show compiler output pane by default
-    showTab(_errorPanel);
+    showTab(_compilerErrorPanel);
     
     _tabbedPane.setSelectedIndex(0);
     
@@ -2676,11 +2655,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Add listeners
     _installNewDocumentListener(doc.getDocument());
     CompilerErrorCaretListener caretListener =
-      new CompilerErrorCaretListener(doc, _errorPanel.getErrorListPane(), pane, this);
+      new CompilerErrorCaretListener(doc, _compilerErrorPanel.getErrorListPane(), pane, this);
     pane.addErrorCaretListener(caretListener);
 
     JUnitErrorCaretListener junitCaretListener =
-      new JUnitErrorCaretListener(doc, _junitPanel.getJUnitErrorListPane(), pane, this);
+      new JUnitErrorCaretListener(doc, _junitErrorPanel.getErrorListPane(), pane, this);
     pane.addJUnitErrorCaretListener(junitCaretListener);
 
     // add a listener to update line and column.
@@ -2919,8 +2898,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _interactionsPane.setFont(f);
     _outputPane.setFont(f);
     _findReplace.setFieldFont(f);
-    _errorPanel.setListFont(f);
-    _junitPanel.setListFont(f);
+    _compilerErrorPanel.setListFont(f);
+    _junitErrorPanel.setListFont(f);
   }
   
   
@@ -3385,8 +3364,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           _revertAction.setEnabled(!active.isUntitled());
           
           // Update error highlights
-          _errorPanel.getErrorListPane().selectNothing();
-          _junitPanel.getJUnitErrorListPane().selectNothing();
+          _compilerErrorPanel.getErrorListPane().selectNothing();
+          _junitErrorPanel.getErrorListPane().selectNothing();
           
           int pos = _currentDefPane.getCaretPosition();
           _currentDefPane.getErrorCaretListener().updateHighlight(pos);
@@ -3452,13 +3431,13 @@ public class MainFrame extends JFrame implements OptionConstants {
       Runnable doCommand = new Runnable() {
         public void run() {
           // Is this necessary?
-          //ErrorListPane elp = _errorPanel.getErrorListPane();
+          //CompilerErrorListPane elp = _compilerErrorPanel.getErrorListPane();
           //elp.setSize(_tabbedPane.getMinimumSize());
           //_setDividerLocation();
 
           hourglassOn();
-          showTab(_errorPanel);
-          _errorPanel.setCompilationInProgress();
+          showTab(_compilerErrorPanel);
+          _compilerErrorPanel.setCompilationInProgress();
           _saveAction.setEnabled(false);
         }
       };
@@ -3469,9 +3448,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          updateErrorListeners();
-          _errorPanel.reset();
-          _junitPanel.reset();
+          _compilerErrorPanel.reset();
+          _junitErrorPanel.reset();
           if (inDebugMode()) _updateDebugStatus();
           hourglassOff();
         }
@@ -3485,10 +3463,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          showTab(_junitPanel);
-          _junitPanel.setJUnitInProgress(doc);
+          showTab(_junitErrorPanel);
+          _junitErrorPanel.setJUnitInProgress(doc);
           _junitAction.setEnabled(false);
-          updateErrorListeners();
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -3499,13 +3476,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void junitSuiteStarted(final int numTests) {
       SwingUtilities.invokeLater( new Runnable() {
         public void run() {
-          _junitPanel.progressReset(numTests);
+          _junitErrorPanel.progressReset(numTests);
         }
       });
     }
   
-    public void junitTestStarted(final OpenDefinitionsDocument doc, final String name) {
-      _junitPanel.getJUnitErrorListPane().testStarted(name);
+    public void junitTestStarted(final String name) {
+      _junitErrorPanel.getErrorListPane().testStarted(name);
     }
   
     public void junitTestEnded(final OpenDefinitionsDocument doc, final String name,
@@ -3513,9 +3490,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       // syncUI...?
       SwingUtilities.invokeLater( new Runnable() {
         public void run() {
-          _junitPanel.getJUnitErrorListPane().
+          _junitErrorPanel.getErrorListPane().
             testEnded(name, wasSuccessful, causedError);
-          _junitPanel.progressStep(wasSuccessful);
+          _junitErrorPanel.progressStep(wasSuccessful);
         }
       });
     }
@@ -3524,10 +3501,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          showTab(_junitPanel);
+          showTab(_junitErrorPanel);
           _junitAction.setEnabled(true);
-          updateErrorListeners();
-          _junitPanel.reset();
+          _junitErrorPanel.reset();
         }
       };
       SwingUtilities.invokeLater(doCommand);

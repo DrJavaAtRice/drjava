@@ -76,7 +76,7 @@ import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.drjava.model.debug.DebugListener;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.ui.config.*;
-import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
+import edu.rice.cs.drjava.ui.CompilerErrorPanel.CompilerErrorListPane;
 import edu.rice.cs.drjava.ui.JUnitPanel.JUnitErrorListPane;
 import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeOptionListener;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;

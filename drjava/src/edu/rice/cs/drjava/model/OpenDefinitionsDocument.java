@@ -139,32 +139,6 @@ public interface OpenDefinitionsDocument {
   public void startJUnit() throws ClassNotFoundException, IOException;
 
   /**
-   * Returns the model responsible for maintaining all current errors
-   * within this OpenDefinitionsDocument's file.
-   */
-  public CompilerErrorModel getCompilerErrorModel();
-
-  /**
-   * Sets this OpenDefinitionsDocument's notion of all current errors
-   * within the corresponding file.
-   * @param model CompilerErrorModel containing all errors for this file
-   */
-  public void setCompilerErrorModel(CompilerErrorModel model);
-
-  /**
-   * Returns the model responsible for maintaining all current
-   * JUnit errors within this OpenDefinitionsDocument.
-   */
-  public JUnitErrorModel getJUnitErrorModel();
-
-  /**
-   * Sets the OpenDefinitionDocument's notion of all JUnit errors
-   * within this current document.
-   * @param model JUnitErrorModel containing all JUnit errors for this file.
-   */
-  public void setJUnitErrorModel(JUnitErrorModel model);
-
-  /**
    * Determines if this definitions document has changed since the
    * last save.
    * @return true if the document has been modified

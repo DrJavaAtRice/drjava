@@ -151,7 +151,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     if (printMessages) System.out.println("after test");
     assertEquals("test case should have no errors reported",
                  0,
-                 doc.getJUnitErrorModel().getNumErrors());
+                 _model.getJUnitErrorModel().getNumErrors());
     
     _model.setResetAfterCompile(true);
   }
@@ -183,7 +183,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     assertEquals("test case has one error reported",
                  1,
-                 doc.getJUnitErrorModel().getNumErrors());
+                 _model.getJUnitErrorModel().getNumErrors());
     
     _model.setResetAfterCompile(true);
   }
@@ -267,7 +267,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    
     assertEquals("test case has one error reported",
                  1,
-                 doc.getJUnitErrorModel().getNumErrors());
+                 _model.getJUnitErrorModel().getNumErrors());
                  
     _model.setResetAfterCompile(true);
   }
@@ -355,7 +355,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
         _model.resetInteractions();
       }
       
-      public void junitTestStarted(OpenDefinitionsDocument doc, String name) {
+      public void junitTestStarted(String name) {
         assertEquals("running wrong test", "testInfinite", name);
         junitTestStartedCount++;
       }
@@ -434,7 +434,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     assertEquals("test case should have no errors reported after modifying",
                  0,
-                 doc.getJUnitErrorModel().getNumErrors());
+                 _model.getJUnitErrorModel().getNumErrors());
     doc.saveFile(new FileSelector(file));
     
     listener = new TestShouldSucceedListener();
@@ -446,7 +446,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     assertEquals("test case should have no errors reported after saving",
                  0,
-                 doc.getJUnitErrorModel().getNumErrors());
+                 _model.getJUnitErrorModel().getNumErrors());
     
     _model.setResetAfterCompile(false);
   }
@@ -465,7 +465,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
       assertJUnitStartCount(1);
       junitSuiteStartedCount++;
     }
-    public void junitTestStarted(OpenDefinitionsDocument doc, String name) {
+    public void junitTestStarted(String name) {
       junitTestStartedCount++;
     }
     public void junitTestEnded(OpenDefinitionsDocument doc, String name,

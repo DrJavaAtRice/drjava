@@ -130,7 +130,7 @@ public interface GlobalModelListener {
    * Called when a particular test is started.
    * @param testName The name of the test being started.
    */
-  public void junitTestStarted(OpenDefinitionsDocument doc, String name);
+  public void junitTestStarted(String name);
   
   /**
    * Called when a particular test has ended.

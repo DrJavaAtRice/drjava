@@ -76,7 +76,7 @@ public class JUnitTestManager {
         try {
           if (!_isTestCase(className)) {
             _jvm.nonTestCase();
-            return;
+           return;
           }
           Test suite = _testRunner.getTest(className);
           TestResult result = _testRunner.doRun(suite); 
@@ -100,7 +100,6 @@ public class JUnitTestManager {
             i++;
           }
           
-          Arrays.sort(errors);
           _jvm.testSuiteFinished(errors);
         }
         catch (Throwable t) {
@@ -156,7 +155,7 @@ public class JUnitTestManager {
       failure.thrownException().toString(): 
       failure.thrownException().getMessage();
       
-      return new JUnitError(fileName, lineNum, 0, exception,
+      return new JUnitError(new File(fileName), lineNum, 0, exception,
                             ! (failure.thrownException() instanceof AssertionFailedError),
                             testName,
                             sWriter.toString());

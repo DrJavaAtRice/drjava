@@ -39,94 +39,46 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.junit;
 
-import java.io.*;
-import junit.framework.*;
-import java.util.Enumeration;
+import edu.rice.cs.drjava.model.compiler.CompilerError;
+
+import java.io.File;
+import java.io.Serializable;
 
 /**
  * A class to represent JUnit errors.  Having this class allows DrJava
  * to make the errors as legible as possible.
  * @version $Id$
  */
-public class JUnitError extends TestResult implements Comparable, Serializable {
-  //private File _file;
-  private String _fileName;
+public class JUnitError extends CompilerError implements Comparable, Serializable {
 
-  /** zero-based line number. */
-  private int _lineNumber;
-
-  /** zero-based column number. */
-  private int _startColumn;
-  private String _message;
   private String _test;
-  private boolean _isError;
   private String _stackTrace;
   
   /**
    * Constructor.
-   * @param     File file the file where the error occurred
-   * @param     int lineNumber the line number of the error
-   * @param     int startColumn the starting column of the error
-   * @param     String message  the error message
-   * @param     boolean isError true if the error is a warning
+   * @param     file the file where the error occurred
+   * @param     lineNumber the line number of the error
+   * @param     startColumn the starting column of the error
+   * @param     message  the error message
+   * @param     isWarning true if the error is a warning
+   * @param     test the name of the test that failed
    */
-  public JUnitError(String fileName, int lineNumber, int startColumn, String message,
-      boolean isError, String test, String stackTrace) {
-    _fileName = fileName;
-    _lineNumber = lineNumber;
-    _startColumn = startColumn;
-    _message = message;
-    _isError = isError;
+  public JUnitError(File file, int lineNumber, int startColumn, String message,
+      boolean isWarning, String test, String stackTrace) {
+    super(file, lineNumber, startColumn, message, isWarning);
     _test = test;
     _stackTrace = stackTrace;
   }
 
   /**
-   * Gets a String representation of the error.
-   * @return the error as a String
+   * Constructor for an error with no associated location (all JUnitErrors
+   * have a file, which is the file being tested).  This constructor also
+   * provides a default stackTrace.
    */
-  public String toString() {
-    return "";
-  }
-
-  /**
-   * Gets the file.
-   * @return the file with errors.
-   *
-  public File file() {
-    return _file;
-  }*/
-
-  /**
-   * Gets the full name of the file.
-   * @return the file name.
-   */
-  public String fileName() {
-    return _fileName;
-  }
-
-  /**
-   * Gets the line number of the error.
-   * @return the line number
-   */
-  public int lineNumber() {
-    return  _lineNumber;
-  }
-
-  /**
-   * Gets the column where the error begins.
-   * @return the starting column
-   */
-  public int startColumn() {
-    return  _startColumn;
-  }
-
-  /**
-   * Gets the error message.
-   * @return the error message.
-   */
-  public String message() {
-    return  _message;
+  public JUnitError(File file, String message, boolean isWarning, String test) {
+    super(file, message, isWarning);
+    _stackTrace = "No associated stack trace";
+    _test = test;
   }
 
   /**
@@ -137,68 +89,12 @@ public class JUnitError extends TestResult implements Comparable, Serializable {
     return  _test;
   }
 
+  /**
+   * All JUnit errors are Throwables that have been thrown, so all have
+   * a stack trace
+   * @return the stack trace associated with the error
+   */
   public String stackTrace() {
     return _stackTrace;
   }
-
-  /**
-   * Determines if the error is a warning.
-   * @return true if the error is a warning.
-   */
-  public boolean isWarning() {
-    return  _isError;
-  }
-
-  /**
-   * Compares by file, then by line, then by column.
-   * Errors without files are considered equal, but less
-   * than any errors with files.
-   */
-  public int compareTo(Object o) {
-    JUnitError other = (JUnitError)o;
-    
-    // Determine if I have a file
-    if (_fileName != null) {
-      if (other.fileName() == null) {
-        // Errors with files are bigger
-        return 1;
-      }
-      else {
-        // Compare by file
-        int fileComp = new File(_fileName).compareTo(new File(other.fileName()));
-        if (fileComp != 0) {
-          return fileComp;
-        }
-        else {
-          // Compare by position
-          return compareByPosition(other);
-        }
-      }
-    }
-    else {
-      // My file is null
-      if (other.fileName() == null) {
-        return 0;
-      }
-      else {
-        // Errors without files are smaller
-        return -1;
-      }
-    }
-  }
-
-  /**
-   * Compares this error with the given one, based first
-   * on line number, and then by column.
-   */
-  private int compareByPosition(JUnitError other) {
-    // Compare by line unless lines are equal
-    if (_lineNumber == other.lineNumber()) {
-      return  _startColumn - other.startColumn();
-    }
-    else {
-      return  _lineNumber - other.lineNumber();
-    }
-  }
-
 }

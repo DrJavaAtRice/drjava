@@ -263,7 +263,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /**
    * Runs a JUnit Test class in the Interpreter JVM.
    * @param className Name of the TestCase class
-   * @param fileName Name of the file for the TestCase class
+   * @param fileName the name of the file for the TestCase class
    */
   public void runTestSuite(String className, String fileName) {
     // silently fail if disabled. see killInterpreter docs for details.

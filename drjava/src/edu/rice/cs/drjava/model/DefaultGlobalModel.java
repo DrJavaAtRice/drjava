@@ -83,12 +83,6 @@ import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.model.junit.*;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 
-import junit.framework.Test;
-import junit.framework.TestResult;
-import junit.textui.TestRunner;
-import junit.runner.TestSuiteLoader;
-import junit.runner.ReloadingTestSuiteLoader;
-
 
 /**
  * Handles the bulk of DrJava's program logic.
@@ -164,12 +158,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   private Object _compilerLock = new Object();
   
-  /**
-   * An array of all current compiler errors which do not have files.
-   * Errors with files are stored on their respective OpenDefinitionsDocuments.
-   */
-  private CompilerError[] _compilerErrorsWithoutFiles = new CompilerError[0];
-  
+  private CompilerErrorModel _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], this);
+
+  private JUnitErrorModel _junitErrorModel = new JUnitErrorModel(new JUnitError[0], this, false);
+
   /**
    * The total number of current compiler errors, including both errors
    * with and without files.
@@ -369,8 +361,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return _interactionsModel.getDocument();
   }
 
+  public JUnitErrorModel getJUnitErrorModel() {
+    return _junitErrorModel;
+  }
+
   public StyledDocument getConsoleDocument() {
     return _consoleDoc;
+  }
+
+  public CompilerErrorModel getCompilerErrorModel() {
+    return _compilerErrorModel;
   }
 
   public StyledDocument getJUnitDocument() {
@@ -383,14 +383,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
   public void setPageFormat(PageFormat format) {
     _pageFormat = format;
-  }
-
-  /**
-   * Returns an array of all current compiler errors which do not have files.
-   * All other errors are stored on their respective OpenDefinitionsDocuments.
-   */
-  public CompilerError[] getCompilerErrorsWithoutFiles() {
-    return _compilerErrorsWithoutFiles;
   }
 
   /**
@@ -1062,7 +1054,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       }
     }
   }
-  
+
   /**
    * Javadocs all open documents, after ensuring that all are saved.
    * @param destDir the absolute path to the destination directory
@@ -1143,17 +1135,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       sourcePath.append(sourceRoots[a].getAbsolutePath());
     }
     
-    
-//     StringBuffer javadocCommand = new StringBuffer("java -classpath " +
-//                                                    System.getProperty("java.class.path") +
-//                                                    " com.sun.tools.javadoc.Main " +
-//                                                    "-private " + 
-//                                                    "-sourcepath " + sourcePath + "*");
-//     for (int a = 0; a < files.length; a++){
-//       javadocCommand.append(" " + files[a]);
-//     }
-//     System.out.println("javadoc started with command:\n" + javadocCommand);
-    
     // Build the "command-line" arguments.
     ArrayList args = new ArrayList();
     args.add("-private");
@@ -1163,7 +1144,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     args.add(destDir);
     args.addAll(docUnits);
     
-    System.err.println("javadoc started with args:\n" + args);
+    System.out.println("javadoc started with args:\n" + args);
 
     //TODO: put the following line in a new Thread and tell listeners javadoc has started
     //Pass the function some way to tell about its output (use the way compilers do it for
@@ -1370,7 +1351,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     synchronized(_compilerLock) {
       _notifier.notifyListeners(new EventNotifier.Notifier() {
         public void notifyListener(GlobalModelListener l) {
-          l.junitTestStarted(_docBeingTested, testName);
+          l.junitTestStarted(testName);
         }
       });
     }
@@ -1404,8 +1385,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       if (_docBeingTested == null) {
         return;
       }
-      _docBeingTested.setJUnitErrorModel(new JUnitErrorModel(_docBeingTested.getDocument(), errors));
-      
+      _junitErrorModel = new JUnitErrorModel(errors, this, true);
+
       _docBeingTested = null;
       _notifier.notifyListeners(new EventNotifier.Notifier() {
         public void notifyListener(GlobalModelListener l) {
@@ -1442,8 +1423,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      */
     DefinitionsDocumentHandler(DefinitionsDocument doc) {
       _doc = doc;
-      _errorModel = new CompilerErrorModel();
-      _junitErrorModel = new JUnitErrorModel();
+      _errorModel = new CompilerErrorModel<CompilerError> (new CompilerError[0], null);
+      _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
       _breakpoints = new Vector<Breakpoint>();
     }
 
@@ -1575,7 +1556,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           if (! file.getCanonicalFile().getName().equals(file.getName())) {
             file.renameTo(file);
           }
-          
+
           // have FileOps save the file the correct way
           FileOps.saveFile(new FileOps.DefaultFileSaver(file){
             public void saveTo(File file) throws IOException{
@@ -1592,7 +1573,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             }
           });
           
-          
           _doc.resetModification();
           _doc.setFile(file);
           _doc.setCachedClassFile(null);
@@ -1602,7 +1582,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
               l.fileSaved(openDoc);
             }
           });
-          
+
           // Make sure this file is on the classpath
           try {
             File classpath = getSourceRoot();
@@ -1762,13 +1742,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           return;
         }
         ListModel docs = getDefinitionsDocuments();
-        // walk thru all open documents, resetting the JUnitErrorModel
-        for (int i = 0; i < docs.getSize(); i++) {
-          OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
-            docs.getElementAt(i);
-          doc.setJUnitErrorModel( new JUnitErrorModel() );
-        }
-        
+
+        //reset the JUnitErrorModel
+        _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
+
         // Compile and save before proceeding.
         /*saveAllBeforeProceeding(GlobalModelListener.JUNIT_REASON);
         if (areAnyModifiedSinceSave()) {
@@ -1855,44 +1832,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           throw enae;
         }
       }
-    }
-
-    /**
-     * Returns the model responsible for maintaining all current errors
-     * within this OpenDefinitionsDocument's file.
-     */
-    public CompilerErrorModel getCompilerErrorModel() {
-      return _errorModel;
-    }
-
-    /**
-     * Sets this OpenDefinitionsDocument's notion of all current errors
-     * within the corresponding file.
-     * @param model CompilerErrorModel containing all errors for this file
-     */
-    public void setCompilerErrorModel(CompilerErrorModel model) {
-      if (model == null) {
-        model = new CompilerErrorModel();
-      }
-      _errorModel = model;
-    }
-
-
-    /**
-     * Returns the model responsible for maintaining all JUnit
-     * errors within this OpenDefinitionsDocument's file.
-     */
-    public JUnitErrorModel getJUnitErrorModel() {
-      return _junitErrorModel;
-    }
-
-    /**
-     * Sets the OpenDefinitionDocument's notion of all JUnit errors
-     * within this current document.
-     * @param model JUnitErrorModel containing all JUnit errors for this file.
-     */
-    public void setJUnitErrorModel(JUnitErrorModel model) {
-      _junitErrorModel = model;
     }
 
     /**
@@ -2414,16 +2353,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
   /**
    * Resets the compiler error state to have no errors.
-   * Also resets the JUnit error state.
+   * Also resets the JUnit error state.  Since we went to
+   * a single CompilerErrorModel and a single JUnitErrorModel,
+   * this <b>should</b> no longer be necessary
    */
   public void resetCompilerErrors() {
-    // Reset CompilerErrorModels (and JUnitErrorModels)
-    for (int i = 0; i < _definitionsDocs.getSize(); i++) {
-      OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
-        _definitionsDocs.getElementAt(i);
-      doc.setCompilerErrorModel(new CompilerErrorModel());
-      doc.setJUnitErrorModel(new JUnitErrorModel());
-    }
+    // Reset CompilerErrorModel (and JUnitErrorModel)
+    //TODO: see if we can get by without this function
+    _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], this);
+    _junitErrorModel = new JUnitErrorModel(new JUnitError[0], this, false);
     _numErrors = 0;
   }
   
@@ -2433,57 +2371,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * OpenDefinitionsDocument, opening files if necessary.
    */
   private void _distributeErrors(CompilerError[] errors)
-    throws IOException
-  {
+    throws IOException {
     resetCompilerErrors();
     
     // Store number of errors
     _numErrors = errors.length;
-    
-    // Sort the errors by file and position
-    Arrays.sort(errors);
-    
-    // Filter out ones without files
-    int numWithoutFiles = 0;
-    for (int i = 0; i < errors.length; i++) {
-      if (errors[i].file() == null) {
-        numWithoutFiles++;
-      }
-      else {
-        // Since sorted, finding one with a file means we're done
-        break;
-      }
-    }
-    
-    // Copy errors without files into GlobalModel's array
-    _compilerErrorsWithoutFiles = new CompilerError[numWithoutFiles];
-    System.arraycopy(errors, 0, _compilerErrorsWithoutFiles, 0,
-                     numWithoutFiles);
-    
-    // Create error models and give to their respective documents
-    for (int i = numWithoutFiles; i < errors.length; i++) {
-      File file = errors[i].file();
-      OpenDefinitionsDocument doc = getDocumentForFile(file);
-      
-      // Find all other errors with this file
-      int numErrors = 1;
-      int j = i + 1;
-      while ((j < errors.length) &&
-             (file.equals(errors[j].file()))) {
-        j++;
-        numErrors++;
-      }
-      
-      // Create a model with all errors with this file
-      CompilerError[] fileErrors = new CompilerError[numErrors];
-      System.arraycopy(errors, i, fileErrors, 0, numErrors);
-      CompilerErrorModel model =
-        new CompilerErrorModel(fileErrors, doc.getDocument(), file);
-      doc.setCompilerErrorModel(model);
-      
-      // Continue with errors for the next file
-      i = j - 1;
-    }
+
+    _compilerErrorModel = new CompilerErrorModel(errors, this);
   }
 
   /**
@@ -2678,9 +2572,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       catch (FileMovedException fme) {
         fileName = fme.getFile().getAbsolutePath();
       }
-      errors[0] = new JUnitError(fileName, -1, -1, "Previous test was interrupted", true,
+      errors[0] = new JUnitError(new File(fileName), -1, -1, "Previous test was interrupted", true,
                                  "", "No associated stack trace");
-      _docBeingTested.setJUnitErrorModel(new JUnitErrorModel(_docBeingTested.getDocument(), errors));
+      _junitErrorModel = new JUnitErrorModel(errors, this, true);
       _docBeingTested = null;
       _notifier.notifyListeners(new EventNotifier.Notifier() {
         public void notifyListener(GlobalModelListener l) {

@@ -42,6 +42,7 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 import java.io.*;
 
 import edu.rice.cs.drjava.CodeStatus;
+import java.util.Date;
 
 /**
  * Simple logging class to help debug the JVM communication code.
@@ -62,10 +63,10 @@ public class Log {
           System.getProperty("file.separator");
         
         File f = new File(dir, s);
-        FileWriter w = new FileWriter(f);
+        FileWriter w = new FileWriter(f, true);
         _writer = new PrintWriter(w);
         
-        log("Log opened");
+        log("Log opened: " + (new Date()));
       }
       catch (IOException ioe) {}
     }

@@ -39,17 +39,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
-import javax.swing.*;
-import javax.swing.text.*;
-import javax.swing.event.*;
-import java.awt.event.*;
-import java.awt.*;
-
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.model.junit.*;
-import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.ui.JUnitPanel.JUnitErrorListPane;
 
 /**
@@ -58,16 +49,7 @@ import edu.rice.cs.drjava.ui.JUnitPanel.JUnitErrorListPane;
  *
  * @version $Id$
  */
-public class JUnitErrorCaretListener implements CaretListener {
-  private final OpenDefinitionsDocument _openDoc;
-  private final JUnitErrorListPane _errorListPane;
-  private final DefinitionsPane _definitionsPane;
-  private final MainFrame _frame;
-  private final Document _document;
-
-  private JUnitErrorModel _model;
-  private Position[] _positions;
-  private boolean _shouldHighlight = true;  
+public class JUnitErrorCaretListener extends CompilerErrorCaretListener {
 
   /**
    * Constructs a new caret listener to highlight JUnit errors.
@@ -76,187 +58,14 @@ public class JUnitErrorCaretListener implements CaretListener {
                                  JUnitErrorListPane errorListPane,
                                  DefinitionsPane defPane,
                                  MainFrame frame) {
-    _openDoc = doc;
-    _errorListPane = errorListPane;
-    _definitionsPane = defPane;
-    _frame = frame;
-    _document = doc.getDocument();
-
-    resetErrorModel();
+    super(doc, errorListPane, defPane, frame);
   }
 
-  /**
-   * Gets the OpenDefinitionsDocument corresponding to this listener.
-   */
-  public OpenDefinitionsDocument getOpenDefDoc() {
-    return _openDoc;
+  protected CompilerErrorModel getErrorModel(){
+    return _frame.getModel().getJUnitErrorModel();
   }
 
-  /**
-   * Resets the JUnitErrorModel after a new test.
-   */
-  public void resetErrorModel() {
-    _model = _openDoc.getJUnitErrorModel();
-    _positions = _model.getPositions();
-  }
-
-  /**
-   * After each update to the caret, determine if changes in
-   * highlighting need to be made.  Highlights the error if
-   * the test tab is showing.
-   */
-  public void caretUpdate(CaretEvent evt) {
-    if (_positions.length == 0) {
-      return;
-    }
-
-    // Now we can assume at least one error.
-    shouldHighlight(true);
-    updateHighlight(evt.getDot());
-  }
-
-  /**
-   * Update the highlight appropriately.
-   */
-  public void updateHighlight(int curPos) {
-    // Don't highlight unless test tab selected
-    if (!_frame.isTestTabSelected()) {
-      _errorListPane.selectNothing();
-      return;
-    }
-
-    // check if the dot is on a line with an error.
-    // Find the first error that is on or after the dot. If this comes
-    // before the newline after the dot, it's on the same line.
-    int errorAfter; // index of the first error after the dot
-    for (errorAfter = 0; errorAfter < _positions.length; errorAfter++) {   
-      Position pos = _positions[errorAfter];
-      if (pos == null) {
-        return;
-      }
-      if (pos.getOffset() >= curPos) {
-        break;
-      }
-    }
-   
-    // index of the first error before the dot
-    int errorBefore = errorAfter - 1;
-
-    // this will be set to what we want to select, or -1 if nothing
-    int shouldSelect = -1;
-
-    if (errorBefore >= 0) { // there's an error before the dot
-      int errPos = _positions[errorBefore].getOffset();
-      //System.out.println("Error before: " + _positions[errorBefore] + _positions[errorBefore].getOffset());
-      try {
-        String betweenDotAndErr = _document.getText(errPos, curPos - errPos);
-
-        if (betweenDotAndErr.indexOf('\n') == -1) {
-          shouldSelect = errorBefore;
-        }
-      }
-      catch (BadLocationException willNeverHappen) {}
-    }
-    
-    if ((shouldSelect == -1) && (errorAfter != _positions.length)) {
-      // we found an error on/after the dot
-      // if there's a newline between dot and error,
-      // then it's not on this line
-      int errPos = _positions[errorAfter].getOffset();
-      //System.out.println("Error on or after:" + _positions[errorAfter] + _positions[errorAfter].getOffset());
-      try {
-        String betweenDotAndErr = _document.getText(curPos, errPos - curPos);
-
-        if (betweenDotAndErr.indexOf('\n') == -1) {
-          shouldSelect = errorAfter;
-        }
-      }
-      catch (BadLocationException willNeverHappen) {}
-    }
-
-    // if no error is on this line, select the (none) item
-    if (shouldSelect == -1) {
-      _errorListPane.selectNothing();
-    }
-    else {
-      
-      // Select item wants the JUnitError
-      JUnitError[] errors = _model.getErrorsWithPositions();
-      try {
-        _errorListPane.selectItem(errors[shouldSelect]);
-        
-        if (_errorListPane.shouldShowHighlightsInSource()) {
-          // No need to move the caret since it's already here!
-          _highlightErrorInSource(shouldSelect);
-        }
-      }
-      catch (IllegalArgumentException e) {
-        // A new test could perhaps have started before this listener
-        //  has been reset, so be prepared if it throws an exception.
-        //  We'll ignore it here, so nothing gets highlighted.
-      }
-    }
-
-  }
-
-  /**
-   * Sets whether the given error should or should not be highlighted. Errors without
-   *  location do not highlight the source.
-   */
-  public void shouldHighlight( boolean sH) {
-    _shouldHighlight = sH;
-  }
-  
-  /**
-   * Indicates that the given error should or should not be highlighted. Errors without
-   *  location do not highlight the source.
-   */
-  public boolean shouldHighlight() {
-    return _shouldHighlight;
-  }
-  
-  /**
-   * Highlights the given error in the source.
-   * @param newIndex Index into _errors array
-   */
-  private void _highlightErrorInSource(int newIndex) {
-    
-    Position pos = _positions[newIndex];
-    if (pos == null) {
-      return;
-    }
-    int errPos = pos.getOffset();
-
-    if (!_shouldHighlight) return;
-    
-    try {
-      String text = _document.getText(0, _document.getLength());
-
-      // Look for the previous newline BEFORE this character. Thus start looking
-      // on the character one before this character. If this is not the case,
-      // if the error is at a newline character, both prev and next newlines
-      // will be set to that place, resulting in nothing being highlighted.
-      int prevNewline = text.lastIndexOf('\n', errPos - 1);
-      if (prevNewline == -1) {
-        prevNewline = 0;
-      }
-
-      int nextNewline = text.indexOf('\n', errPos);
-      if (nextNewline == -1) {
-        nextNewline = _document.getLength();
-      }
-
-      if (_errorListPane.getLastDefPane() != null) {
-        _errorListPane.getLastDefPane().removeTestErrorHighlight();
-      }
-      prevNewline++;
-      if (prevNewline <= nextNewline) {
-        _definitionsPane.addTestErrorHighlight(prevNewline, nextNewline);
-      }
-      _errorListPane.setLastDefPane(_definitionsPane);
-    }
-    catch (BadLocationException impossible) {
-      throw new UnexpectedException(impossible);
-    }
+  protected boolean tabSelected(){
+    return _frame.isTestTabSelected();
   }
 }

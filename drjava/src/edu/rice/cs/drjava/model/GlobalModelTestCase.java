@@ -102,10 +102,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     "class DrJavaTestFoo { int cur_package = 5; }";
 
 
-  /**
-   * Constructor.
-   * @param  String name
-   */
   public GlobalModelTestCase(String name) {
     super(name);
   }
@@ -292,22 +288,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    */
   protected String getCompilerErrorString() {
     StringBuffer buf = new StringBuffer();
-    buf.append(_model.getNumErrors());
     buf.append(" compiler error(s):\n");
-    CompilerError[] modelErrors = _model.getCompilerErrorsWithoutFiles();
-    if (modelErrors.length > 0) {
-      buf.append("Without files:\n");
-      for (int i=0; i < modelErrors.length; i++) {
-        buf.append(modelErrors[i]);
-        buf.append("\n  ");
-      }
-    }
-    buf.append("With files:\n");
-    ListModel docs = _model.getDefinitionsDocuments();
-    for (int i=0; i < docs.getSize(); i++) {
-      OpenDefinitionsDocument doc = (OpenDefinitionsDocument) docs.getElementAt(i);
-      buf.append(doc.getCompilerErrorModel().toString());
-    }
+    buf.append(_model.getCompilerErrorModel().toString());
     return buf.toString();
   }
 
@@ -795,7 +777,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("junitSuiteStarted fired unexpectedly");
     }
   
-    public void junitTestStarted(OpenDefinitionsDocument doc, String name) {
+    public void junitTestStarted(String name) {
       listenerFail("junitTestStarted fired unexpectedly");
     }
   

@@ -55,6 +55,7 @@ import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.junit.JUnitError;
+import edu.rice.cs.drjava.model.junit.JUnitErrorModel;
 import edu.rice.cs.drjava.model.compiler.*;
 
 import junit.framework.TestResult;
@@ -109,9 +110,9 @@ public interface GlobalModel {
   public InteractionsDocument getInteractionsDocument();
 
   /**
-   * Gets the junit document.
+   * Gets the JUnitErrorModel.
    */
-  public StyledDocument getJUnitDocument();
+  public JUnitErrorModel getJUnitErrorModel();
 
   /**
    * Gets the console document.
@@ -119,9 +120,9 @@ public interface GlobalModel {
   public StyledDocument getConsoleDocument();
 
   /**
-   * Gets the array of all compile errors without Files.
+   * Gets the CompilerErrorModel representing the last compile
    */
-  public CompilerError[] getCompilerErrorsWithoutFiles();
+  public CompilerErrorModel getCompilerErrorModel();
 
   /**
    * Gets the total number of current errors.

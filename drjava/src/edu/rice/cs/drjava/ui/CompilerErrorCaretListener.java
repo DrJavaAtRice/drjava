@@ -39,18 +39,16 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
-import javax.swing.*;
-import javax.swing.text.*;
-import javax.swing.event.*;
-import java.awt.event.*;
-import java.awt.*;
-
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.model.compiler.*;
-import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
+import edu.rice.cs.drjava.model.compiler.CompilerError;
+import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
+import edu.rice.cs.util.UnexpectedException;
+
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.Position;
 
 /**
  * Listens to the caret in a particular DefinitionsPane and
@@ -60,20 +58,16 @@ import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
  */
 public class CompilerErrorCaretListener implements CaretListener {
   private final OpenDefinitionsDocument _openDoc;
-  private final ErrorListPane _errorListPane;
+  private final ErrorPanel.ErrorListPane _errorListPane;
   private final DefinitionsPane _definitionsPane;
-  private final MainFrame _frame;
+  protected final MainFrame _frame;
   private final Document _document;
-
-  private CompilerErrorModel _model;
-  private Position[] _positions;
-  
 
   /**
    * Constructs a new caret listener to highlight compiler errors.
    */
   public CompilerErrorCaretListener(OpenDefinitionsDocument doc,
-                                    ErrorListPane errorListPane,
+                                    ErrorPanel.ErrorListPane errorListPane,
                                     DefinitionsPane defPane,
                                     MainFrame frame) {
     _openDoc = doc;
@@ -81,8 +75,6 @@ public class CompilerErrorCaretListener implements CaretListener {
     _definitionsPane = defPane;
     _frame = frame;
     _document = doc.getDocument();
-
-    resetErrorModel();
   }
 
   /**
@@ -93,23 +85,14 @@ public class CompilerErrorCaretListener implements CaretListener {
   }
 
   /**
-   * Resets the CompilerErrorModel after a new compile.
-   */
-  public void resetErrorModel() {
-    _model = _openDoc.getCompilerErrorModel();
-    _positions = _model.getPositions();
-  }
-
-  /**
    * After each update to the caret, determine if changes in
    * highlighting need to be made.  Highlights the line if the
    * compiler output tab is showing.
    */
   public void caretUpdate(CaretEvent evt) {
-    if (_positions.length == 0) {
+    if (!getErrorModel().hasErrorsWithPositions(_openDoc)) {
       return;
     }
-
     // Now we can assume at least one error.
     updateHighlight(evt.getDot());
   }
@@ -119,82 +102,27 @@ public class CompilerErrorCaretListener implements CaretListener {
    */
   public void updateHighlight(int curPos) {
     // Don't highlight unless compiler tab selected
-    if (!_frame.isCompilerTabSelected()) {
+    if (!tabSelected()) {
       _errorListPane.selectNothing();
       return;
     }
-    
-    //DrJava.consoleOut().println("updateHighlight: " + curPos);
-    // check if the dot is on a line with an error.
-    // Find the first error that is on or after the dot. If this comes
-    // before the newline after the dot, it's on the same line.
-    int errorAfter; // index of the first error after the dot
-    //if (_positions == null) {
-    //  DrJava.consoleOut().println("positions array is null!");
-    //}
-    for (errorAfter = 0; errorAfter < _positions.length; errorAfter++) {
-      if (_positions[errorAfter] == null) {
-        // Something is wrong here, but this is happening on warnings!
-        //  Need to figure out why...
-        //DrJava.consoleOut().println("Found a null position (1)!  index: " + errorAfter);
-        return;
-      }
-      if (_positions[errorAfter].getOffset() >= curPos) {
-        break;
-      }
-    }
 
-    // index of the first error before the dot
-    int errorBefore = errorAfter - 1;
+    CompilerErrorModel model =  getErrorModel();
 
-    // this will be set to what we want to select, or -1 if nothing
-    int shouldSelect = -1;
-
-    if (errorBefore >= 0) { // there's an error before the dot
-      Position p = _positions[errorBefore];
-      //if (p == null) {
-      //  DrJava.consoleOut().println("Found a null position (2)!  index: " + errorBefore);
-      //}
-      int errPos = _positions[errorBefore].getOffset();
-      try {
-        String betweenDotAndErr = _document.getText(errPos, curPos - errPos);
-
-        if (betweenDotAndErr.indexOf('\n') == -1) {
-          shouldSelect = errorBefore;
-        }
-      }
-      catch (BadLocationException willNeverHappen) {}
-    }
-
-    if ((shouldSelect == -1) && (errorAfter != _positions.length)) {
-      // we found an error on/after the dot
-      // if there's a newline between dot and error,
-      // then it's not on this line
-      int errPos = _positions[errorAfter].getOffset();
-      try {
-        String betweenDotAndErr = _document.getText(curPos, errPos - curPos);
-
-        if (betweenDotAndErr.indexOf('\n') == -1) {
-          shouldSelect = errorAfter;
-        }
-      }
-      catch (BadLocationException willNeverHappen) {}
-    }
+    CompilerError error = model.getErrorAtOffset(_openDoc, curPos);
 
     // if no error is on this line, select the (none) item
-    if (shouldSelect == -1) {
+    if (error == null) {
       _errorListPane.selectNothing();
-    }
-    else {
+    } else {
       
       if (_errorListPane.shouldShowHighlightsInSource()) {
         // No need to move the caret since it's already here!
-        _highlightErrorInSource(shouldSelect);
+        _highlightErrorInSource(model.getPosition(error));
       }
        
       // Select item wants the CompilerError
-      CompilerError[] errors = _model.getErrorsWithPositions();
-      _errorListPane.selectItem(errors[shouldSelect]);
+      _errorListPane.selectItem(error);
     }
   }
   
@@ -207,12 +135,19 @@ public class CompilerErrorCaretListener implements CaretListener {
     }
   }
   
+  protected CompilerErrorModel getErrorModel(){
+    return _frame.getModel().getCompilerErrorModel();
+  }
+
+  protected boolean tabSelected(){
+    return _frame.isCompilerTabSelected();
+  }
+
   /**
    * Highlights the given error in the source.
-   * @param newIndex Index into _errors array
+   * @param pos the position of the error
    */
-  private void _highlightErrorInSource(int newIndex) {
-    Position pos = _positions[newIndex];
+  private void _highlightErrorInSource(Position pos) {
     if (pos == null) {
       return;
     }

@@ -45,9 +45,7 @@ import gj.util.Vector;
 import gj.util.Hashtable;
 import gj.util.Enumeration;
 import java.io.*;
-import java.rmi.server.*;
 import java.rmi.*;
-import java.net.MalformedURLException;
 
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.OutputStreamRedirector;
@@ -58,8 +56,6 @@ import edu.rice.cs.drjava.model.repl.*;
 
 // For Windows focus fix
 import javax.swing.JDialog;
-import java.awt.Dimension;
-import java.awt.Toolkit;
 
 /**
  * This is the main class for the interpreter JVM.

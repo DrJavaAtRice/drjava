@@ -39,27 +39,29 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.io.File;
-import java.io.IOException;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.OptionEvent;
+import edu.rice.cs.drjava.config.OptionListener;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.SingleDisplayModel;
+import edu.rice.cs.drjava.model.compiler.CompilerError;
+import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
+import edu.rice.cs.drjava.model.compiler.CompilerInterface;
+import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
+import edu.rice.cs.util.UnexpectedException;
 
 import javax.swing.*;
-import javax.swing.text.*;
-import javax.swing.event.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.event.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.Position;
 import java.awt.*;
-
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.CodeStatus;
-import edu.rice.cs.util.swing.HighlightManager;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.model.compiler.*;
-import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.drjava.model.SingleDisplayModel;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.config.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.io.File;
 
 /**
  * The panel which houses the list of errors after an unsuccessful compilation.
@@ -70,87 +72,26 @@ import edu.rice.cs.drjava.config.*;
  *
  * @version $Id$
  */
-public class CompilerErrorPanel extends TabbedPanel 
-  implements OptionConstants {
-
-  /** Highlight painter for selected list items. */
-  private static DefaultHighlighter.DefaultHighlightPainter
-    _listHighlightPainter
-      =  new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
-
-  private static final SimpleAttributeSet NORMAL_ATTRIBUTES = _getNormalAttributes();
-  private static final SimpleAttributeSet BOLD_ATTRIBUTES = _getBoldAttributes();
-
-  private static final SimpleAttributeSet _getBoldAttributes() {
-    SimpleAttributeSet s = new SimpleAttributeSet();
-    StyleConstants.setBold(s, true);
-    return s;
-  }
-
-  private static final SimpleAttributeSet _getNormalAttributes() {
-    SimpleAttributeSet s = new SimpleAttributeSet();
-    return s;
-  }
+public class CompilerErrorPanel extends ErrorPanel {
 
   /** Whether a compile has occurred since the last compiler change. */
   private boolean _compileHasOccurred;
 
-  /** The total number of errors in the list */
-  private int _numErrors;
+  private CompilerErrorListPane _errorListPane;
 
-  private final SingleDisplayModel _model;
-
-  /*
-  private final JButton _showAllButton;
-  private final JButton _nextButton;
-  private final JButton _previousButton;
-  */
-  
-  private final ErrorListPane _errorListPane;
   private final JComboBox _compilerChoiceBox;
-  private JCheckBox _showHighlightsCheckBox;
-  
+
   /**
    * Constructor.
    * @param model SingleDisplayModel in which we are running
    * @param frame MainFrame in which we are displayed
    */
   public CompilerErrorPanel(SingleDisplayModel model, MainFrame frame) {
-    super(frame, "Compiler Output");
-    _model = model;
+    super(model, frame, "Compiler Output");
     _compileHasOccurred = false;
     _numErrors = 0;
 
-    /*
-    _showAllButton = new JButton("Show all");
-    _showAllButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          _showAllErrors();
-        }
-    });
-
-    _nextButton = new JButton("Next");
-    _nextButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          int index = _errorListPane.getSelectedIndex() + 1;
-          if (index < _numErrors) {
-            _errorListPane.switchToError(index);
-          }
-        }
-    });
-
-    _previousButton = new JButton("Previous");
-    _previousButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          int index = _errorListPane.getSelectedIndex() -1 ;
-          if (index >= 0) {
-            _errorListPane.switchToError(index);
-          }
-        }
-    });
-    */
-
-    _errorListPane = new ErrorListPane();
+    _errorListPane = new CompilerErrorListPane();
 
 
     // Limitation: Only compiler choices are those that were available
@@ -158,21 +99,20 @@ public class CompilerErrorPanel extends TabbedPanel
     // Also: The UI will go out of sync with reality if the active compiler
     // is later changed somewhere else. This is because there is no way
     // to listen on the active compiler.
-    _compilerChoiceBox = new JComboBox(_model.getAvailableCompilers());
+    _compilerChoiceBox = new JComboBox(getModel().getAvailableCompilers());
     _compilerChoiceBox.setEditable(false);
-    _compilerChoiceBox.setSelectedItem(_model.getActiveCompiler());
+    _compilerChoiceBox.setSelectedItem(getModel().getActiveCompiler());
     _compilerChoiceBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         CompilerInterface compiler = (CompilerInterface)
           _compilerChoiceBox.getSelectedItem();
         if (compiler != null) {
-          _model.setActiveCompiler(compiler);
+          getModel().setActiveCompiler(compiler);
         }
         else {
-          _model.setActiveCompiler(NoCompilerAvailable.ONLY);
+          getModel().setActiveCompiler(NoCompilerAvailable.ONLY);
         }
-        _model.resetCompilerErrors();
-        _frame.updateErrorListeners();
+        getModel().resetCompilerErrors();
         _compileHasOccurred = false;
         reset();
       }
@@ -188,17 +128,6 @@ public class CompilerErrorPanel extends TabbedPanel
                       JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                       JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-    // Disable buttons. They don't totally work and who needs em.
-    /*
-    JPanel buttonPanel = new JPanel();
-    buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
-    buttonPanel.add(_previousButton);
-    buttonPanel.add(_nextButton);
-    // Show all not yet implemented.
-    // buttonPanel.add(_showAllButton);
-    add(buttonPanel, BorderLayout.EAST);
-    */
-    
     JPanel compilerPanel = new JPanel(new BorderLayout());
     compilerPanel.setBorder(new EmptyBorder(0,5,0,5)); // 5 pix padding on sides
     JPanel uiBox = new JPanel(new BorderLayout());
@@ -218,11 +147,11 @@ public class CompilerErrorPanel extends TabbedPanel
     _showHighlightsCheckBox = new JCheckBox( "Highlight source", true);
     _showHighlightsCheckBox.addChangeListener( new ChangeListener() {
       public void stateChanged (ChangeEvent ce) {
-        DefinitionsPane lastDefPane = _errorListPane.getLastDefPane();
+        DefinitionsPane lastDefPane = getErrorListPane().getLastDefPane();
         
         if (_showHighlightsCheckBox.isSelected()) {
           //lastDefPane.setCaretPosition( lastDefPane.getCaretPosition());
-          _errorListPane.switchToError(_errorListPane.getSelectedIndex());
+          getErrorListPane().switchToError(getErrorListPane().getSelectedIndex());
           lastDefPane.requestFocus();
           lastDefPane.getCaret().setVisible(true);
         }
@@ -243,7 +172,7 @@ public class CompilerErrorPanel extends TabbedPanel
     
     public void optionChanged(OptionEvent<File> oce) {
       _compilerChoiceBox.removeAllItems();
-      CompilerInterface[] availCompilers = _model.getAvailableCompilers();
+      CompilerInterface[] availCompilers = getModel().getAvailableCompilers();
       for (int i=0; i<availCompilers.length; i++) {
         _compilerChoiceBox.addItem(availCompilers[i]);
       }
@@ -251,248 +180,44 @@ public class CompilerErrorPanel extends TabbedPanel
   }
   
   /**
-   * Returns the ErrorListPane that this panel manages.
+   * Returns the CompilerErrorListPane that this panel manages.
    */
-  public ErrorListPane getErrorListPane() {
+  public CompilerErrorListPane getErrorListPane() {
     return _errorListPane;
   }
   
-  /** Changes the font of the error list. */
-  public void setListFont(Font f) {
-    StyleConstants.setFontFamily(NORMAL_ATTRIBUTES, f.getFamily());
-    StyleConstants.setFontSize(NORMAL_ATTRIBUTES, f.getSize());
-
-    StyleConstants.setFontFamily(BOLD_ATTRIBUTES, f.getFamily());
-    StyleConstants.setFontSize(BOLD_ATTRIBUTES, f.getSize());
-  }
-
   /** Called when compilation begins. */
   public void setCompilationInProgress() {
     _errorListPane.setCompilationInProgress();
   }
-  
+
+  protected CompilerErrorModel<CompilerError> getErrorModel(){
+    return getModel().getCompilerErrorModel();
+  }
+
   /**
    * Clean up when the tab is closed.
    */
   protected void _close() {
     super._close();
-    _model.resetCompilerErrors();
-    _frame.updateErrorListeners();
+    getModel().resetCompilerErrors();
     reset();
   }
 
   /**
    * Reset the errors to the current error information.
-   * @param errors the current error information
    */
   public void reset() {
-    _numErrors = _model.getNumErrors();
+    _numErrors = getModel().getNumErrors();
 
-    _errorListPane.updateListPane();
-    _resetEnabledStatus();
+    _errorListPane.updateListPane(true);
   }
 
+  class CompilerErrorListPane extends ErrorPanel.ErrorListPane {
 
-  private void _showAllErrors() {
-  }
-
-  /**
-   * Reset the enabled status of the "next", "previous", and "show all"
-   * buttons in the compiler error panel.  (Not currently used.)
-   */
-  private void _resetEnabledStatus() {
-    /*
-    _nextButton.setEnabled(_errorListPane.getSelectedIndex() < _numErrors - 1);
-    _previousButton.setEnabled(_errorListPane.getSelectedIndex() > 0);
-    _showAllButton.setEnabled(_numErrors != 0);
-    */
-  }
-
-
-
-  /**
-   * A pane to show compiler errors. It acts a bit like a listbox (clicking
-   * selects an item) but items can each wrap, etc.
-   */
-  public class ErrorListPane extends JEditorPane {
-    
-    /**
-     * Index into _errorListPositions of the currently selected error.
-     */
-    private int _selectedIndex;
-
-    /**
-     * The start position of each error in the list. This position is the place
-     * where the error starts in the error list, as opposed to the place where
-     * the error exists in the source.
-     */
-    private Position[] _errorListPositions;
-
-    /**
-     * Table mapping Positions in the error list to CompilerErrors.
-     */
-    private final Hashtable _errorTable;
-
-    /**
-     * The DefinitionsPane with the current error highlight.
-     * (Initialized to the current pane.)
-     */
-    private DefinitionsPane _lastDefPane;
-
-    // when we create a highlight we get back a tag we can use to remove it
-    private HighlightManager.HighlightInfo _listHighlightTag = null;
-
-    private HighlightManager _highlightManager = new HighlightManager(this);
-    
-    // on mouse click, highlight the error in the list and also in the source
-    private MouseAdapter _mouseListener = new MouseAdapter() {
-      public void mousePressed(MouseEvent e) {
-        selectNothing();
-      }
-      public void mouseReleased(MouseEvent e) {
-        CompilerError error = _errorAtPoint(e.getPoint());
-        
-        if (_isEmptySelection() && error != null) {
-          _errorListPane.switchToError(error);
-        }
-        else {
-          selectNothing();
-        }
-      }
-    };
-    
-    /**
-     * Constructs the ErrorListPane.
-     */
-    public ErrorListPane() {
-      // If we set this pane to be of type text/rtf, it wraps based on words
-      // as opposed to based on characters.
-      super("text/rtf", "");
-      addMouseListener(_mouseListener);
-
-      _selectedIndex = 0;
-      _errorListPositions = new Position[0];
-      _errorTable = new Hashtable();
-      _lastDefPane = _frame.getCurrentDefPane();
-
-      ErrorListPane.this.setFont(new Font("Courier", 0, 20));
-
-      // We set the editor pane disabled so it won't get keyboard focus,
-      // which makes it uneditable, and so you can't select text inside it.
-      //setEnabled(false);    
-      
-      // Set the editor pane to be uneditable, but allow selecting text.
-      setEditable(false);
-      
-      DrJava.getConfig().addOptionListener( OptionConstants.COMPILER_ERROR_COLOR, new CompilerErrorColorOptionListener());    
-    }
-    
-    /**
-     * Returns true if the errors should be highlighted in the source
-     * @return the status of the JCheckBox _showHighlightsCheckBox
-     */
-    public boolean shouldShowHighlightsInSource() {
-      return _showHighlightsCheckBox.isSelected();
-    }
-    
-    /**
-     * Get the index of the current error in the error array.
-     */
-    public int getSelectedIndex() { return _selectedIndex; }
-
-    /**
-     * Allows the ErrorListPane to remember which DefinitionsPane
-     * currently has an error highlight.
-     */
-    public void setLastDefPane(DefinitionsPane pane) {
-      _lastDefPane = pane;
-    }
-
-    /**
-     * Gets the last DefinitionsPane with an error highlight.
-     */
-    public DefinitionsPane getLastDefPane() {
-      return _lastDefPane;
-    }
-
-    /**
-     * Returns CompilerError associated with the given visual coordinates.
-     * Returns null if none.
-     */
-    private CompilerError _errorAtPoint(Point p) {
-      int modelPos = viewToModel(p);
-
-      if (modelPos == -1)
-        return null;
-
-      // Find the first error whose position preceeds this model position
-      int errorNum = -1;
-      for (int i = 0; i < _errorListPositions.length; i++) {
-        if (_errorListPositions[i].getOffset() <= modelPos) {
-          errorNum = i;
-        }
-        else { // we've gone past the correct error; the last value was right
-          break;
-        }
-      }
-
-      if (errorNum >= 0) {
-        return (CompilerError) _errorTable.get(_errorListPositions[errorNum]);
-      }
-      else {
-        return null;
-      }
-    }
-
-    /**
-     * Returns the index into _errorListPositions corresponding
-     * to the given CompilerError.
-     */
-    private int _getIndexForError(CompilerError error) {
-      if (error == null) {
-        throw new IllegalArgumentException("Couldn't find index for null error");
-      }
-
-      for (int i = 0; i < _errorListPositions.length; i++) {
-        CompilerError e = (CompilerError)
-          _errorTable.get(_errorListPositions[i]);
-
-        if (error.equals(e)) {
-          return i;
-        }
-      }
-
-      throw new IllegalArgumentException("Couldn't find index for error " + error);
-    }
-    
-    /**
-     * Returns true if the text selection interval is empty.
-     */
-    private boolean _isEmptySelection() {
-      return getSelectionStart() == getSelectionEnd();
-    }
-
-    /**
-     * Update the pane which holds the list of errors for the viewer.
-     */
-    public void updateListPane() {
-      try {
-        _errorListPositions = new Position[_numErrors];
-        _errorTable.clear();
-
-        if (_numErrors == 0) {
-          _updateNoErrors();
-        }
-        else {
-          _updateWithErrors();
-        }
-      }
-      catch (BadLocationException e) {
-        throw new UnexpectedException(e);
-      }
-
-      // Force UI to redraw
-      revalidate();
+    protected void _updateWithErrors() throws BadLocationException {
+      DefaultStyledDocument doc = new DefaultStyledDocument();
+      _updateWithErrors("error", "found", doc);
     }
 
     /** Puts the error pane into "compilation in progress" state. */
@@ -518,320 +243,34 @@ public class CompilerErrorPanel extends TabbedPanel
 
     /**
      * Used to show that the last compile was successful.
+     * @param done ignored: we assume that this is only called after compilation is
+     * completed
      */
-    private void _updateNoErrors() throws BadLocationException {
+    protected void _updateNoErrors(boolean done) throws BadLocationException {
       DefaultStyledDocument doc = new DefaultStyledDocument();
       String message;
       if (_compileHasOccurred) {
         message = "Last compilation completed successfully.";
       }
       else {
-        if (_model.getAvailableCompilers().length == 0) {
+        if (getModel().getAvailableCompilers().length == 0) {
           message = "No compiler is available.  Please specify one in\n" +
                     "the Preferences dialog in the Edit menu.";
         }
         else {
-          if (_model.getActiveCompiler() == NoCompilerAvailable.ONLY) {
+          if (getModel().getActiveCompiler() == NoCompilerAvailable.ONLY) {
             message = "No compiler available.";
           }
           else {
-            message = _model.getActiveCompiler().getName() + " compiler ready.";
+            message = getModel().getActiveCompiler().getName() + " compiler ready.";
           }
         }
       }
-      
+
       doc.insertString(0, message, NORMAL_ATTRIBUTES);
       setDocument(doc);
 
       selectNothing();
-    }
-
-    /**
-     * Used to show that the last compile was unsuccessful.
-     */
-    private void _updateWithErrors() throws BadLocationException {
-      DefaultStyledDocument doc = new DefaultStyledDocument();
-      
-      // Print how many errors
-      StringBuffer numErrMsg = new StringBuffer("" + _numErrors);
-      numErrMsg.append(" error");
-      if (_numErrors > 1) {
-        numErrMsg.append("s");
-      }
-      numErrMsg.append(" found:\n");
-      doc.insertString(doc.getLength(), numErrMsg.toString(), BOLD_ATTRIBUTES);
-      
-      int errorNum = 0;
-      // Show errors without files
-      CompilerError[] errorsNoFiles = _model.getCompilerErrorsWithoutFiles();
-      for (int i = 0; i < errorsNoFiles.length; i++, errorNum++) {
-        int startPos = doc.getLength();
-        _insertErrorText(errorsNoFiles, i, doc);
-
-        // Note to user that there is no file for this error
-        doc.insertString(doc.getLength(),
-                         "(no associated file)",
-                         NORMAL_ATTRIBUTES);
-        doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
-        Position pos = doc.createPosition(startPos);
-        _errorListPositions[errorNum] = pos;
-        _errorTable.put(pos, errorsNoFiles[i]);
-      }
-
-      // Show errors for each file
-      ListModel defDocs = _model.getDefinitionsDocuments();
-      for (int i = 0; i < defDocs.getSize(); i++) {
-        // Get errors for this file
-        OpenDefinitionsDocument openDoc = (OpenDefinitionsDocument)
-          defDocs.getElementAt(i);
-        CompilerErrorModel errorModel = openDoc.getCompilerErrorModel();
-        CompilerError[] errorsWithoutPositions =
-          errorModel.getErrorsWithoutPositions();
-        CompilerError[] errorsWithPositions =
-          errorModel.getErrorsWithPositions();
-
-        if ((errorsWithoutPositions.length > 0) ||
-            (errorsWithPositions.length > 0)) {
-
-          // Grab filename for this set of errors
-          String filename = openDoc.getFilename();
-
-          // Show errors without source locations
-          for (int j = 0; j < errorsWithoutPositions.length; j++, errorNum++) {
-            int startPos = doc.getLength();
-            _insertErrorText(errorsWithoutPositions, j, doc);
-
-            // Note to user that there is no source info for this error
-            doc.insertString(doc.getLength(),
-                             " (no source location)",
-                             NORMAL_ATTRIBUTES);
-            doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
-
-            Position pos = doc.createPosition(startPos);
-            _errorListPositions[errorNum] = pos;
-            _errorTable.put(pos, errorsWithoutPositions[j]);
-          }
-
-          // Show errors with source locations
-          for (int j = 0; j < errorsWithPositions.length; j++, errorNum++) {
-            int startPos = doc.getLength();
-            CompilerError currError = errorsWithPositions[j];
-            // Show file
-            doc.insertString(doc.getLength(), "File: ", BOLD_ATTRIBUTES);
-            String fileAndLineNumber = filename + "  [line: " + (currError.lineNumber()+1) + "]";
-            doc.insertString(doc.getLength(), fileAndLineNumber + "\n", NORMAL_ATTRIBUTES);
-
-            // Show error
-            _insertErrorText(errorsWithPositions, j, doc);
-            doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
-            Position pos = doc.createPosition(startPos);
-            _errorListPositions[errorNum] = pos;
-            _errorTable.put(pos, errorsWithPositions[j]);
-          }
-        }
-      }
-
-      setDocument(doc);
-
-      // Select the first error
-      _errorListPane.switchToError(0);
-    }
-
-    /**
-     * Puts an error message into the array of errors at the specified index.
-     * @param array the array of errors
-     * @param i the index at which the message will be inserted
-     * @param doc the document in the error pane
-     */
-    private void _insertErrorText(CompilerError[] array, int i, Document doc)
-      throws BadLocationException
-      {
-        CompilerError error = array[i];
-
-        if (error.isWarning()) {
-          doc.insertString(doc.getLength(), "Warning: ", BOLD_ATTRIBUTES);
-        }
-        else {
-          doc.insertString(doc.getLength(), "Error: ", BOLD_ATTRIBUTES);
-        }
-
-        doc.insertString(doc.getLength(), error.message(), NORMAL_ATTRIBUTES);
-      }
-
-    /**
-     * When the selection of the current error changes, remove
-     * the highlight in the error pane.
-     */
-    private void _removeListHighlight() {
-      if (_listHighlightTag != null) {
-        _listHighlightTag.remove();
-        _listHighlightTag = null;
-      }
-    }
-
-    /**
-     * Don't select any errors in the error pane.
-     */
-    public void selectNothing() {
-      _selectedIndex = -1;
-      _removeListHighlight();
-      _resetEnabledStatus();
-
-      // Remove highlight from the defPane that has it
-      _lastDefPane.removeCompilerErrorHighlight();
-    }
-
-    /**
-     * Selects the given error inside the error list pane.
-     */
-    public void selectItem(CompilerError error) {
-      try {
-        // Find corresponding index
-        int i = _getIndexForError(error);
-        
-        _selectedIndex = i;
-        _removeListHighlight();
-        
-        int startPos = _errorListPositions[i].getOffset();
-        
-        // end pos is either the end of the document (if this is the last error)
-        // or the char where the next error starts
-        int endPos;
-        if (i + 1 >= (_numErrors)) {
-          endPos = getDocument().getLength();
-        }
-        else {
-          endPos = _errorListPositions[i + 1].getOffset();
-        }
-        
-        try {
-          _listHighlightTag =
-            _highlightManager.addHighlight(startPos,
-                                           endPos,
-                                           _listHighlightPainter);
-          
-          // Scroll to make sure this item is visible
-          Rectangle startRect = modelToView(startPos);
-          Rectangle endRect = modelToView(endPos - 1);
-          
-          // Add the end rect onto the start rect to make a rectangle
-          // that encompasses the entire error
-          startRect.add(endRect);
-          
-          //System.err.println("scrll vis: " + startRect);
-          
-          scrollRectToVisible(startRect);
-          
-        }
-        catch (BadLocationException badBadLocation) {}
-        
-        _resetEnabledStatus();
-      }
-      catch (IllegalArgumentException iae) {
-        // This shouldn't be happening, but it was reported in bug 704006.
-        // (_getIndexForError throws it.)
-        // We'll at least fail a little more gracefully.
-        _removeListHighlight();
-        _resetEnabledStatus();
-      }
-    }
-
-    /**
-     * Change all state to select a new error, including moving the
-     * caret to the error, if a corresponding position exists.
-     * @param doc OpenDefinitionsDocument containing this error
-     * @param errorNum Error number, which is either in _errorsWithoutPositions
-     * (if errorNum < _errorsWithoutPositions.length) or in _errors (otherwise).
-     * If it's in _errors, we need to subtract _errorsWithoutPositions.length
-     * to get the index into the array.
-     */
-    void switchToError(CompilerError error) {
-      if (error == null) return;
-
-      // check and see if this error is without source info, and
-      // if so don't try to highlight source info!
-      boolean errorHasLocation = (error.lineNumber() > -1);
-
-      if (errorHasLocation) {
-        try {
-          OpenDefinitionsDocument doc = _model.getDocumentForFile(error.file());
-          CompilerErrorModel errorModel = doc.getCompilerErrorModel();
-          CompilerError[] errorsWithPositions =
-            errorModel.getErrorsWithPositions();
-
-          int index = Arrays.binarySearch(errorsWithPositions, error);
-          if (index >= 0) {
-            _gotoErrorSourceLocation(doc, index);
-          }
-        }
-        catch (IOException ioe) {
-          // Don't highlight the source if file can't be opened
-        }
-      }
-      else {
-        // Remove last highlight
-        _lastDefPane.removeCompilerErrorHighlight();
-      }
-
-      // Select item wants the error, which is what we were passed
-      _errorListPane.selectItem(error);
-    }
-
-    /**
-     * Another interface to switchToError.
-     * @param index Index into the array of positions in the ErrorListPane
-     */
-    void switchToError(int index) {
-      if ((index >= 0) && (index < _errorListPositions.length)) {
-        Position pos = _errorListPositions[index];
-        CompilerError error = (CompilerError) _errorTable.get(pos);
-        switchToError(error);
-      }
-    }
-
-    /**
-     * Jumps to error location in source
-     * @param doc OpenDefinitionsDocument containing the error
-     * @param idx Index into _errors array
-     */
-    private void _gotoErrorSourceLocation(OpenDefinitionsDocument doc,
-                                          final int idx) {
-      CompilerErrorModel errorModel = doc.getCompilerErrorModel();
-      Position[] positions = errorModel.getPositions();
-
-
-      if ((idx < 0) || (idx >= positions.length)) return;
-
-      Position pos = positions[idx];
-      // switch to correct def pane
-      _model.setActiveDocument(doc);
-
-      // move caret to that position
-      DefinitionsPane defPane = _frame.getCurrentDefPane();
-      if (pos != null) {
-        int errPos = pos.getOffset();
-        if (errPos >= 0 && errPos <= defPane.getText().length()) {
-          defPane.setCaretPosition(errPos);
-        }
-      }
-      defPane.requestFocus();
-      defPane.getCaret().setVisible(true);
-    }
-    
-    /**
-     * The OptionListener for compiler COMPILER_ERROR_COLOR 
-     */
-    private class CompilerErrorColorOptionListener implements OptionListener<Color> {
-      
-      public void optionChanged(OptionEvent<Color> oce) {
-
-        _listHighlightPainter
-          =  new DefaultHighlighter.DefaultHighlightPainter(oce.value);
-        
-        if (_listHighlightTag != null) {
-          _listHighlightTag.refresh(_listHighlightPainter);
-        }
-      }
     }
 
   }

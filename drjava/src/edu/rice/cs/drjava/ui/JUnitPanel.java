@@ -39,26 +39,25 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.io.File;
-import java.io.IOException;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.SingleDisplayModel;
+import edu.rice.cs.drjava.model.junit.JUnitError;
+import edu.rice.cs.drjava.model.junit.JUnitErrorModel;
+import edu.rice.cs.util.UnexpectedException;
 
 import javax.swing.*;
-import javax.swing.text.*;
-import javax.swing.event.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.event.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.text.*;
 import java.awt.*;
-
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.junit.*;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.HighlightManager;
-import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.drjava.model.SingleDisplayModel;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.config.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * The panel which displays all the testing errors.
@@ -66,16 +65,8 @@ import edu.rice.cs.drjava.config.*;
  *
  * @version $Id$
  */
-public class JUnitPanel extends TabbedPanel 
-  implements OptionConstants{
+public class JUnitPanel extends ErrorPanel{
 
-  /** Highlight painter for selected list items. */
-  private static DefaultHighlighter.DefaultHighlightPainter
-    _listHighlightPainter
-      = new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
-
-  private static final SimpleAttributeSet NORMAL_ATTRIBUTES = _getNormalAttributes();
-  private static final SimpleAttributeSet BOLD_ATTRIBUTES = _getBoldAttributes();
   private static final SimpleAttributeSet OUT_OF_SYNC_ATTRIBUTES = _getOutOfSyncAttributes();
   
   private static final SimpleAttributeSet _getOutOfSyncAttributes() {
@@ -85,40 +76,23 @@ public class JUnitPanel extends TabbedPanel
     return s;
   }
 
-  private static final SimpleAttributeSet _getBoldAttributes() {
-    SimpleAttributeSet s = new SimpleAttributeSet();
-    StyleConstants.setBold(s, true);
-    return s;
-  }
-
-  private static final SimpleAttributeSet _getNormalAttributes() {
-    SimpleAttributeSet s = new SimpleAttributeSet();
-    return s;
-  }
-  
   private static final String TEST_OUT_OF_SYNC = "The document being tested has been modified " +
     "and should be recompiled!\n";
 
-
-  /** The total number of errors in the list */
-  private int _numErrors;
-  private final SingleDisplayModel _model;
-  private final JUnitErrorListPane _errorListPane;
-  private OpenDefinitionsDocument _docBeingTested;
+  protected JUnitErrorListPane _errorListPane;
   private int _testCount;
   private boolean _testsSuccessful;
-  
+  private OpenDefinitionsDocument _odd = null;
+
   private JUnitProgressBar _progressBar;
-  private JCheckBox _showHighlightsCheckBox;
-  
+
   /**
    * Constructor.
    * @param model SingleDisplayModel in which we are running
    * @param frame MainFrame in which we are displayed
    */
   public JUnitPanel(SingleDisplayModel model, MainFrame frame) {
-    super(frame, "Test Output");
-    _model = model;
+    super(model, frame, "Test Output");
     _testCount = 0;
     _testsSuccessful = true;
     _errorListPane = new JUnitErrorListPane();
@@ -152,11 +126,11 @@ public class JUnitPanel extends TabbedPanel
     _showHighlightsCheckBox = new JCheckBox( "Highlight source", true);
     _showHighlightsCheckBox.addChangeListener( new ChangeListener() {
       public void stateChanged (ChangeEvent ce) {
-        DefinitionsPane lastDefPane = _errorListPane.getLastDefPane();
+        DefinitionsPane lastDefPane = getErrorListPane().getLastDefPane();
         
         if (_showHighlightsCheckBox.isSelected()) {
           //lastDefPane.setCaretPosition( lastDefPane.getCaretPosition());
-          _errorListPane.switchToError(_errorListPane.getSelectedIndex());
+          _errorListPane.switchToError(getErrorListPane().getSelectedIndex());
           lastDefPane.requestFocus();
           lastDefPane.getCaret().setVisible(true);
         }
@@ -172,68 +146,45 @@ public class JUnitPanel extends TabbedPanel
   }
   
   /**
-   * Returns the ErrorListPane that this panel manages.
+   * Returns the JUnitErrorListPane that this panel manages.
    */
-  public JUnitErrorListPane getJUnitErrorListPane() {
+  public JUnitErrorListPane getErrorListPane() {
     return _errorListPane;
   }
 
-  /** Changes the font of the error list. */
-  public void setListFont(Font f) {
-    StyleConstants.setFontFamily(NORMAL_ATTRIBUTES, f.getFamily());
-    StyleConstants.setFontSize(NORMAL_ATTRIBUTES, f.getSize());
-
-    StyleConstants.setFontFamily(BOLD_ATTRIBUTES, f.getFamily());
-    StyleConstants.setFontSize(BOLD_ATTRIBUTES, f.getSize());
-  }
-
   /** Called when compilation begins. */
-  public void setJUnitInProgress(OpenDefinitionsDocument doc) {
-    _errorListPane.setJUnitInProgress(doc);
+  public void setJUnitInProgress(OpenDefinitionsDocument odd) {
+    _odd = odd;
   }
-  
+
+  protected JUnitErrorModel getErrorModel(){
+    return getModel().getJUnitErrorModel();
+  }
+
   /**
    * Clean up when the tab is closed.
    */
   protected void _close() {
     super._close();
-    if (_docBeingTested != null) {
-      _docBeingTested.setJUnitErrorModel(new JUnitErrorModel());
-    }
-    _frame.updateErrorListeners();
+    //formerly, this would also reset the JUnitErrorModel, but that doesn't seem to be necessary
     reset();
   }
 
   /**
    * Reset the errors to the current error information.
-   * @param errors the current error information
    */
   public void reset() {
-    if (_docBeingTested != null) {
-      JUnitErrorModel juem = _docBeingTested.getJUnitErrorModel();
-      boolean testsHaveRun = false;
-      if (juem != null) {
-        _numErrors = juem.getErrorsWithoutPositions().length + juem.getErrorsWithPositions().length;
-        testsHaveRun = juem.haveTestsRun();
-      } else {
-        _numErrors = 0;
-      }
-      _errorListPane.updateListPane(testsHaveRun);
+    JUnitErrorModel juem = _model.getJUnitErrorModel();
+    boolean testsHaveRun = false;
+    if (juem != null) {
+      _numErrors = juem.getErrors().length;
+      testsHaveRun = juem.haveTestsRun();
+    } else {
+      _numErrors = 0;
     }
-    _resetEnabledStatus();
-    _errorListPane.setCaretPosition(0);
+    _errorListPane.updateListPane(testsHaveRun);
   }
 
-  private void _showAllErrors() {
-  }
-
-  /**
-   * Reset the enabled status of the "next", "previous", and "show all"
-   * buttons in the compiler error panel.
-   */
-  private void _resetEnabledStatus() {
-  }
-  
   /**
    * Resets the progress bar to start counting the given number of tests.
    */
@@ -254,166 +205,146 @@ public class JUnitPanel extends TabbedPanel
     _progressBar.step(_testCount, _testsSuccessful);
   }
 
-
-
   /**
    * A pane to show JUnit errors. It acts a bit like a listbox (clicking
    * selects an item) but items can each wrap, etc.
    */
-  public class JUnitErrorListPane extends JEditorPane {
-
-    /**
-     * Index into _errorListPositions of the currently selected error.
-     */
-    private int _selectedIndex;
-
-    /**
-     * The start position of each error in the list. This position is the place
-     * where the error starts in the error list, as opposed to the place where
-     * the error exists in the source.
-     */
-    private Position[] _errorListPositions;
-
-    /**
-     * Table mapping Positions in the error list to JUnitErrors.
-     */
-    private final Hashtable _errorTable;
-
-    /**
-     * The DefinitionsPane with the current error highlight.
-     * (Initialized to the current pane.)
-     */
-    private DefinitionsPane _lastDefPane;
-
-    // when we create a highlight we get back a tag we can use to remove it
-    private HighlightManager.HighlightInfo _listHighlightTag = null;
-
-    // on mouse click, highlight the error in the list and also in the source
-    /**private MouseAdapter _mouseListener = new MouseAdapter() {
-      public void mouseClicked(MouseEvent e) {
-        JUnitError error = _errorAtPoint(e.getPoint());
-
-        if (error == null) {
-          selectNothing();
-        }
-        else {
-          _errorListPane.switchToError(error);
-        }
-      }
-    };*/
-    
-    private class PopupAdapter extends MouseAdapter {
-      
-      private JUnitError _error = null;
-      
-      public void mousePressed(MouseEvent e) {
-        selectNothing();
-        
-        maybeShowPopup(e);      
-      }
-
-      public void mouseReleased(MouseEvent e) {
-        _error = _errorAtPoint(e.getPoint());
-
-        if (_isEmptySelection() && _error != null) {
-          _errorListPane.switchToError(_error);
-        }
-        else {
-          selectNothing();
-        }
-        maybeShowPopup(e);
-      }
-      
-      private void maybeShowPopup(MouseEvent e) {
-        //if (SwingUtilities.isRightMouseButton(e)) {
-        if (e.isPopupTrigger()) {
-          _popMenu.show(e.getComponent(),
-                        e.getX(), e.getY());
-        }
-      }
-      //}
-        
-      public JUnitError getError() {
-        return _error;
-      }
-      
-    }
-    
+  public class JUnitErrorListPane extends ErrorPanel.ErrorListPane {
     private JPopupMenu _popMenu;
-    private PopupAdapter _popupAdapter;
     private Window _stackFrame = null;
     private JTextArea _stackTextArea;
     private final JLabel _errorLabel = new JLabel(),
-      _testLabel = new JLabel(), _fileLabel = new JLabel();
-    
-    private HighlightManager _highlightManager = new HighlightManager(this);
-    
+    _testLabel = new JLabel(), _fileLabel = new JLabel();
+    protected PopupAdapter _popupAdapter = new PopupAdapter();
+
     /**
-     * Constructs the ErrorListPane.
+     * Constructs the JUnitErrorListPane.
      */
     public JUnitErrorListPane() {
-      // If we set this pane to be of type text/rtf, it wraps based on words
-      // as opposed to based on characters.
-      super("text/rtf", "");
-      
-      _createPopupMenu();
-      _popupAdapter = new PopupAdapter();
-      addMouseListener(_popupAdapter);
-      //addMouseListener(_mouseListener);
+      super();
+      this.removeMouseListener(defaultMouseListener);
+      this.addMouseListener(_popupAdapter);
+    }
 
-      _selectedIndex = 0;
+    /**
+     * Provides the ability to display the name of the test being run.
+     * Not currently used, since it appears and disappears to quickly
+     * to be useful in the current setup.
+     */
+    public void testStarted(String name) {
+//      Document doc = getDocument();
+//      try {
+//        doc.insertString(doc.getLength(),
+//                         "  " + name,
+//                         NORMAL_ATTRIBUTES);
+//      }
+//      catch (BadLocationException ble) {
+//        // Inserting at end, shouldn't happen
+//        throw new UnexpectedException(ble);
+//      }
+    }
+
+    /**
+     * Provides the ability to display the results of a test that has finished.
+     * Not currently used, since it appears and disappears to quickly
+     * to be useful in the current setup.
+     */
+    public void testEnded(String name, boolean wasSuccessful, boolean causedError) {
+//      Document doc = getDocument();
+//      String status = "ok";
+//      if (!wasSuccessful) {
+//        status = (causedError) ? "error" : "failed";
+//      }
+//      try {
+//        doc.insertString(doc.getLength(),
+//                         "  [" + status + "]\n",
+//                         NORMAL_ATTRIBUTES);
+//      }
+//      catch (BadLocationException ble) {
+//        // Inserting at end, shouldn't happen
+//        throw new UnexpectedException(ble);
+//      }
+    }
+
+    /** Puts the error pane into "compilation in progress" state. */
+    public void setJUnitInProgress() {
       _errorListPositions = new Position[0];
-      _errorTable = new Hashtable();
-      _lastDefPane = _frame.getCurrentDefPane();
-      //System.out.println("lastDefPane = " + _lastDefPane);
+      progressReset(0);
 
-      JUnitErrorListPane.this.setFont(new Font("Courier", 0, 20));
-      
-      // We set the editor pane disabled so it won't get keyboard focus,
-      // which makes it uneditable, and so you can't select text inside it.
-      //setEnabled(false);
-      
-      // Set the editor pane to be uneditable, but allow selecting text.
-      setEditable(false);
-      
-      DrJava.getConfig().addOptionListener( OptionConstants.COMPILER_ERROR_COLOR, new CompilerErrorColorOptionListener());    
+      DefaultStyledDocument doc = new DefaultStyledDocument();
+      _checkSync(doc);
+
+      try {
+        doc.insertString(doc.getLength(),
+                         "Testing in progress, please wait...\n",
+                         NORMAL_ATTRIBUTES);
+      }
+      catch (BadLocationException ble) {
+        throw new UnexpectedException(ble);
+      }
+      setDocument(doc);
+
+      selectNothing();
     }
-    
-    
-    private void _createPopupMenu() {
-      
-      _popMenu = new JPopupMenu();
-      JMenuItem stackTraceItem = new JMenuItem("Show Stack Trace");
-      stackTraceItem.addActionListener ( new AbstractAction() {
-        public void actionPerformed( ActionEvent ae) {
-          JUnitError error = _popupAdapter.getError();
-          if (error != null) {
-            if (_stackFrame == null) {
-              _setupStackTraceFrame();
-            }
-            _displayStackTrace(error);
-          }
+
+    /**
+     * Used to show that the last compile was unsuccessful.
+     */
+    protected void _updateWithErrors() throws BadLocationException {
+      DefaultStyledDocument doc = new DefaultStyledDocument();
+      _checkSync(doc);
+      _updateWithErrors("test", "failed", doc);
+    }
+
+    /**
+     * Used to show that the last compile was successful.
+     */
+    protected void _updateNoErrors(boolean haveTestsRun) throws BadLocationException {
+      DefaultStyledDocument doc = new DefaultStyledDocument();
+      _checkSync(doc);
+      String msg = (haveTestsRun) ? "All tests completed successfully." : "";
+
+      doc.insertString(doc.getLength(),
+                       msg,
+                       NORMAL_ATTRIBUTES);
+      setDocument(doc);
+
+      selectNothing();
+    }
+
+    /**
+     * Checks the document being tested to see if it's in sync. If not,
+     * displays a message in the document in the test output pane.
+     */
+    private void _checkSync(Document doc) {
+      if (_odd == null) {
+        return;
+      }
+      if (!_odd.checkIfClassFileInSync()) {
+        try {
+          doc.insertString(doc.getLength(), TEST_OUT_OF_SYNC, OUT_OF_SYNC_ATTRIBUTES);
         }
-      });
-      _popMenu.add(stackTraceItem);
-      
+        catch (BadLocationException ble) {
+          throw new UnexpectedException(ble);
+        }
+      }
     }
-        
+
     private void _setupStackTraceFrame() {
-      
+
       //DrJava.consoleOut().println("Stack Trace for Error: \n"+ e.stackTrace());
       JDialog _dialog = new JDialog(_frame,"JUnit Error Stack Trace",false);
       _stackFrame = _dialog;
       _stackTextArea = new JTextArea();
       _stackTextArea.setEditable(false);
       _stackTextArea.setLineWrap(false);
-      JScrollPane scroll = new 
-        BorderlessScrollPane(_stackTextArea, 
+      JScrollPane scroll = new
+        BorderlessScrollPane(_stackTextArea,
                              JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                              JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-      
+
       ActionListener closeListener = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {        
+        public void actionPerformed(ActionEvent e) {
           _stackFrame.hide();
         }
       };
@@ -434,36 +365,10 @@ public class JUnitPanel extends TabbedPanel
       topPanel.add(_errorLabel);
       cp.add(topPanel, BorderLayout.NORTH);
       _dialog.setSize(600, 500);
-      /**
-      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-      Dimension frameSize = _stackFrame.getSize();
-      _stackFrame.setLocation((screenSize.width - frameSize.width) / 2,
-                              (screenSize.height - frameSize.height) / 2);
-      **/
       // initial location is relative to parent (MainFrame)
       _dialog.setLocationRelativeTo(_frame);
-      //_stackFrame.setResizable(false);
-      
     }
-    
-    /**
-     * Checks the document being tested to see if it's in sync. If not,
-     * displays a message in the document in the test output pane.
-     */
-    private void _checkSync(Document doc) {
-      if (_docBeingTested == null) {
-        return;
-      }
-      if (!_docBeingTested.checkIfClassFileInSync()) {
-        try {
-          doc.insertString(doc.getLength(), TEST_OUT_OF_SYNC, OUT_OF_SYNC_ATTRIBUTES); 
-        }
-        catch (BadLocationException ble) {
-          throw new UnexpectedException(ble);
-        }
-      }
-    }
-      
+
     private void _displayStackTrace (JUnitError e) {
       _errorLabel.setText((e.isWarning() ? "Error: " : "Failure: ") +
                           e.message());
@@ -478,505 +383,62 @@ public class JUnitPanel extends TabbedPanel
       _stackTextArea.setCaretPosition(0);
       _stackFrame.show();
     }
-    
-    /**
-     * Returns true if the errors should be highlighted in the source
-     * @return the status of the JCheckBox _showHighlightsCheckBox
-     */
-    public boolean shouldShowHighlightsInSource() {
-      return _showHighlightsCheckBox.isSelected();
-    }
-    
-    /**
-     * Get the index of the current error in the error array.
-     */
-    public int getSelectedIndex() { return _selectedIndex; }
 
-    /**
-     * Returns true if the text selection interval is empty.
-     */
-    private boolean _isEmptySelection() {
-      return getSelectionStart() == getSelectionEnd();
-    }
-    
-    /**
-     * Allows the ErrorListPane to remember which DefinitionsPane
-     * currently has an error highlight.
-     */
-    public void setLastDefPane(DefinitionsPane pane) {
-      _lastDefPane = pane;
-    }
+    private class PopupAdapter extends MouseAdapter {
 
-    /**
-     * Gets the last DefinitionsPane with an error highlight.
-     */
-    public DefinitionsPane getLastDefPane() {
-      return _lastDefPane;
-    }
+      private JUnitError _error = null;
 
-    /**
-     * Returns JUnitError associated with the given visual coordinates.
-     * Returns null if none.
-     */
-    private JUnitError _errorAtPoint(Point p) {
-      int modelPos = viewToModel(p);
-
-      if (modelPos == -1)
-        return null;
-
-      // Find the first error whose position preceeds this model position
-      int errorNum = -1;
-      for (int i = 0; i < _errorListPositions.length; i++) {
-        if (_errorListPositions[i].getOffset() <= modelPos) {
-          errorNum = i;
-        }
-        else { // we've gone past the correct error; the last value was right
-          break;
-        }
-      }
-
-      if (errorNum >= 0) {
-        return (JUnitError) _errorTable.get(_errorListPositions[errorNum]);
-      }
-      else {
-        return null;
-      }
-    }
-
-    /**
-     * Returns the index into _errorListPositions corresponding
-     * to the given JUnitError.
-     */
-    private int _getIndexForError(JUnitError error) {
-      if (error == null) {
-        throw new IllegalArgumentException("Couldn't find index for null error");
-      }
-
-      for (int i = 0; i < _errorListPositions.length; i++) {
-        JUnitError e = (JUnitError)
-          _errorTable.get(_errorListPositions[i]);
-
-        if (error.equals(e)) {
-          return i;
-        }
-      }
-
-      throw new IllegalArgumentException("Couldn't find index for error " + error);
-    }
-
-    /**
-     * Update the pane which holds the list of errors for the viewer.
-     */
-    public void updateListPane(boolean haveTestsRun) {
-      try {
-        _errorListPositions = new Position[_numErrors];
-        _errorTable.clear();
-
-        if (_numErrors == 0) {
-          _updateNoErrors(haveTestsRun);
-        }
-        else {
-          _updateWithErrors();
-        }
-      }
-      catch (BadLocationException e) {
-        throw new UnexpectedException(e);
-      }
-
-      // Force UI to redraw
-      revalidate();
-    }
-
-    /** Puts the error pane into "compilation in progress" state. */
-    public void setJUnitInProgress(OpenDefinitionsDocument odd) {
-      _docBeingTested = odd;
-      _errorListPositions = new Position[0];
-      progressReset(0);
-
-      DefaultStyledDocument doc = new DefaultStyledDocument();
-      _checkSync(doc);
-      
-      try {
-        doc.insertString(doc.getLength(),
-                         "Testing in progress, please wait...\n",
-                         NORMAL_ATTRIBUTES);
-      }
-      catch (BadLocationException ble) {
-        throw new UnexpectedException(ble);
-      }
-      setDocument(doc);
-
-      selectNothing();
-    }
-
-    /**
-     * Provides the ability to display the name of the test being run.
-     * Not currently used, since it appears and disappears to quickly
-     * to be useful in the current setup.
-     */
-    public void testStarted(String name) {
-      /*
-      Document doc = getDocument();
-      try {
-        doc.insertString(doc.getLength(),
-                         "  " + name,
-                         NORMAL_ATTRIBUTES);
-      }
-      catch (BadLocationException ble) {
-        // Inserting at end, shouldn't happen
-        throw new UnexpectedException(ble);
-      }
-      */
-    }
-    
-    /**
-     * Provides the ability to display the results of a test that has finished.
-     * Not currently used, since it appears and disappears to quickly
-     * to be useful in the current setup.
-     */
-    public void testEnded(String name, boolean wasSuccessful, boolean causedError) {
-      /*
-      Document doc = getDocument();
-      String status = "ok";
-      if (!wasSuccessful) {
-        status = (causedError) ? "error" : "failed";
-      }
-      try {
-        doc.insertString(doc.getLength(),
-                         "  [" + status + "]\n",
-                         NORMAL_ATTRIBUTES);
-      }
-      catch (BadLocationException ble) {
-        // Inserting at end, shouldn't happen
-        throw new UnexpectedException(ble);
-      }
-      */
-    }
-    
-    /**
-     * Used to show that the last compile was successful.
-     */
-    private void _updateNoErrors(boolean haveTestsRun) throws BadLocationException {
-      DefaultStyledDocument doc = new DefaultStyledDocument();
-      _checkSync(doc);
-      String msg = (haveTestsRun) ? "All tests completed successfully." : "";
-      
-      doc.insertString(doc.getLength(),
-                       msg,
-                       NORMAL_ATTRIBUTES);
-      setDocument(doc);
-
-      selectNothing();
-    }
-
-    /**
-     * Used to show that the last compile was unsuccessful.
-     */
-    private void _updateWithErrors() throws BadLocationException {
-      DefaultStyledDocument doc = new DefaultStyledDocument();
-      _checkSync(doc);
-      int errorNum = 0;
-      
-      // Print how many errors
-      StringBuffer numErrMsg = new StringBuffer("" + _numErrors);
-      numErrMsg.append(" test");
-      if (_numErrors > 1) {
-        numErrMsg.append("s");
-      }
-      numErrMsg.append(" failed:\n");
-      doc.insertString(doc.getLength(), numErrMsg.toString(), BOLD_ATTRIBUTES);
-
-      // Show errors for each file
-      JUnitErrorModel errorModel = _docBeingTested.getJUnitErrorModel();
-      JUnitError[] errorsWithPositions = errorModel.getErrorsWithPositions();
-      JUnitError[] errorsWithoutPositions = errorModel.getErrorsWithoutPositions();
-      
-      if ((errorsWithoutPositions.length > 0) ||
-            (errorsWithPositions.length > 0)) {
-
-        // Grab filename for this set of errors
-        String filename = _docBeingTested.getFilename();
-        
-        // Show errors without source locations
-        for (int j = 0; j < errorsWithoutPositions.length; j++, errorNum++) {
-          int startPos = doc.getLength();
-          
-          doc.insertString(doc.getLength(), "================\n", NORMAL_ATTRIBUTES);
-          
-          doc.insertString(doc.getLength(), "File: ", BOLD_ATTRIBUTES);
-          doc.insertString(doc.getLength(), filename + "\n", NORMAL_ATTRIBUTES);
-
-          _insertErrorText(errorsWithoutPositions, j, doc);
-          
-          // Note to user that there is no source info for this error
-          doc.insertString(doc.getLength(),
-                           " (no source location)",
-                           NORMAL_ATTRIBUTES);
-          doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
-          
-          Position pos = doc.createPosition(startPos);
-          _errorListPositions[errorNum] = pos;
-          _errorTable.put(pos, errorsWithoutPositions[j]);
-        }
-        
-        
-        // Show errors with source locations
-        for (int j = 0; j < errorsWithPositions.length; j++, errorNum++) {
-          int startPos = doc.getLength();
-          JUnitError currError = errorsWithPositions[j];
-          
-          //WARNING: the height of the highlight box in JUnitError panel is dependent on the 
-          // presence of this extra line. If removed, code must be changed in order to account for its
-          // absence.
-          doc.insertString(doc.getLength(), "================\n", NORMAL_ATTRIBUTES);
-          
-          // Show file
-          doc.insertString(doc.getLength(), "File: ", BOLD_ATTRIBUTES);
-          String fileAndLineNumber = filename + "  [line: " + (currError.lineNumber()+1) + "]";
-          doc.insertString(doc.getLength(), fileAndLineNumber + "\n", NORMAL_ATTRIBUTES);
-
-          // Show error
-          _insertErrorText(errorsWithPositions, j, doc);
-          doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
-          Position pos = doc.createPosition(startPos);
-          _errorListPositions[errorNum] = pos;
-          _errorTable.put(pos, errorsWithPositions[j]);
-        }
-      }
-
-      setDocument(doc);
-
-      // Select the first error
-      _errorListPane.switchToError(0);
-    }
-
-    /**
-     * Puts an error message into the array of errors at the specified index.
-     * @param array the array of errors
-     * @param i the index at which the message will be inserted
-     * @param doc the document in the error pane
-     */
-    private void _insertErrorText(JUnitError[] array, int i, Document doc)
-      throws BadLocationException
-      {
-        JUnitError error = array[i];
-        String errorName = error.testName();
-        if (errorName == null) {
-          errorName = "null";
-        }
-        
-        if (!"".equals(errorName)) {
-          doc.insertString(doc.getLength(), "Test: ", BOLD_ATTRIBUTES);
-          doc.insertString(doc.getLength(), errorName, NORMAL_ATTRIBUTES);
-          doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
-        }
-
-        //TO DO: change isWarning to isError
-        if (error.isWarning()) {
-          doc.insertString(doc.getLength(), "Error: ", BOLD_ATTRIBUTES);
-        }
-        else {
-          doc.insertString(doc.getLength(), "Failure: ", BOLD_ATTRIBUTES);
-        }
-        
-        doc.insertString(doc.getLength(), error.message(), NORMAL_ATTRIBUTES);
-        
-      }
-
-    /**
-     * When the selection of the current error changes, remove
-     * the highlight in the error pane.
-     */
-    private void _removeListHighlight() {
-      //System.out.println("_removeHighlight():  _listHighlightTag == "+_listHighlightTag);
-      if (_listHighlightTag != null) {
-       _listHighlightTag.remove();
-        _listHighlightTag = null;
-      }
-    }
-
-    /**
-     * Don't select any errors in the error pane.
-     */
-    public void selectNothing() {
-      _selectedIndex = -1;
-      _removeListHighlight();
-      _resetEnabledStatus();
-
-      // Remove highlight from the defPane that has it
-      _lastDefPane.removeTestErrorHighlight();
-    }
-
-    /**
-     * Selects the given error inside the error list pane.
-     */
-    public void selectItem(JUnitError error) {
-      // Find corresponding index
-      int i = _getIndexForError(error);
-
-      _selectedIndex = i;
-      _removeListHighlight();
-
-      int startPos = _errorListPositions[i].getOffset() + 16; //16 ='s for the beginning line
-      
-      // end pos is either the end of the document (if this is the last error)
-      // or the char where the next error starts
-      int endPos;
-      if (i + 1 >= (_numErrors)) {
-        endPos = getDocument().getLength();
-      }
-      else {
-        endPos = _errorListPositions[i + 1].getOffset();
-      }
-
-      try {
-        _listHighlightTag =
-          _highlightManager.addHighlight(startPos,
-                                         endPos,
-                                         _listHighlightPainter);
-
-        // Scroll to make sure this item is visible
-        Rectangle startRect = modelToView(startPos);
-        Rectangle endRect = modelToView(endPos - 1);
-
-        //System.err.println("error = " + error + " i = " + i + " startPos = " + startPos + " startRect = " + startRect);
-        
-        // Add the end rect onto the start rect to make a rectangle
-        // that encompasses the entire error
-        startRect.add(endRect);
-
-        //System.err.println("scrll vis: " + startRect);
-
-        scrollRectToVisible(startRect);
-
-      }
-      catch (BadLocationException badBadLocation) {}
-
-      _resetEnabledStatus();
-    }
-
-    /**
-     * Change all state to select a new error, including moving the
-     * caret to the error, if a corresponding position exists.
-     * @param doc OpenDefinitionsDocument containing this error
-     * @param errorNum Error number, which is either in _errorsWithoutPositions
-     * (if errorNum < _errorsWithoutPositions.length) or in _errors (otherwise).
-     * If it's in _errors, we need to subtract _errorsWithoutPositions.length
-     * to get the index into the array.
-     */
-    void switchToError(JUnitError error) {
-      if (error == null) return;
-
-      // check and see if this error is without source info, and
-      // if so don't try to highlight source info!
-      boolean errorHasLocation = (error.lineNumber() > -1);
-      
-      try {
-      
-        OpenDefinitionsDocument doc = _model.getDocumentForFile(new File(error.fileName()));
-        JUnitErrorModel errorModel = doc.getJUnitErrorModel();
-        
-        if (errorHasLocation) {
-          JUnitError[] errorsWithPositions = errorModel.getErrorsWithPositions();
-          //System.out.println("error has location" +error.lineNumber() + " " + error);
-          //System.out.println("error size: " + errors.length);
-          //for (int i=0; i< errors.length; i++) {
-          //  System.out.println("errors [" + i + "] " + errors[i].lineNumber() + " " + errors[i]);
-          //}
-          
-          int index = Arrays.binarySearch(errorsWithPositions, error);
-          //System.out.println("index of error: " + index);
-          if (index >= 0) {
-            _gotoErrorSourceLocation(doc, index);
+      public PopupAdapter (){
+        _popMenu = new JPopupMenu();
+        JMenuItem stackTraceItem = new JMenuItem("Show Stack Trace");
+        stackTraceItem.addActionListener ( new AbstractAction() {
+          public void actionPerformed( ActionEvent ae) {
+            JUnitError error = getError();
+            if (error != null) {
+              if (_stackFrame == null) {
+                _setupStackTraceFrame();
+              }
+              _displayStackTrace(error);
+            }
           }
+        });
+        _popMenu.add(stackTraceItem);
+      }
 
+      public void mousePressed(MouseEvent e) {
+        selectNothing();
+
+        maybeShowPopup(e);
+      }
+
+      public void mouseReleased(MouseEvent e) {
+        //TODO: get rid of cast in the next line, if possible
+        _error = (JUnitError)_errorAtPoint(e.getPoint());
+
+        if (_isEmptySelection() && _error != null) {
+          _errorListPane.switchToError(_error);
         }
-        
         else {
-          // Remove last highlight
-          _lastDefPane.removeTestErrorHighlight();
-          
-          DefinitionsPane defPane = _frame.getCurrentDefPane();
-          defPane.getJUnitErrorCaretListener().shouldHighlight(false);
-          
-          // still switch to document despite the fact that the error has no lineNum
-          _model.setActiveDocument(doc);
-          _removeListHighlight();
+          selectNothing();
+        }
+        maybeShowPopup(e);
+      }
+
+      private void maybeShowPopup(MouseEvent e) {
+        //Ask if the popuptrigger was pressed, rather than if the
+        //right mouse button was pressed
+        if (e.isPopupTrigger()) {
+          _popMenu.show(e.getComponent(),
+                        e.getX(), e.getY());
         }
       }
-      catch (IOException ioe) {
-        // Don't highlight the source if file can't be opened
+
+      public JUnitError getError() {
+        return _error;
       }
-      
-      // Select item wants the error, which is what we were passed
-      _errorListPane.selectItem(error);
-      
+
     }
 
-    /**
-     * Another interface to switchToError.
-     * @param index Index into the array of positions in the ErrorListPane
-     */
-    void switchToError(int index) {
-      if ((index >= 0) && (index < _errorListPositions.length)) {
-        Position pos = _errorListPositions[index];
-        JUnitError error = (JUnitError) _errorTable.get(pos);
-        switchToError(error);
-      }
-    }
-
-    /**
-     * Jumps to error location in source
-     * @param doc OpenDefinitionsDocument containing the error
-     * @param idx Index into _errors array
-     */
-    private void _gotoErrorSourceLocation(OpenDefinitionsDocument doc,
-                                          final int idx) {
-      JUnitErrorModel errorModel = doc.getJUnitErrorModel();
-      Position[] positions = errorModel.getPositions();
-         
-      //System.out.println("index clicked: " + idx);
-      
-      if ((idx < 0) || (idx >= positions.length)) return;
-      //System.out.println("index clicked: " + idx);
-      //System.out.println("position: " + errors[idx].lineNumber());
-      
-      Position pos = positions[idx];
- 
-      //set the active document (implicit call to updateHighlight() )
-      _model.setActiveDocument(doc);
-     
-      //set caret then grab focus
-       // switch to correct def pane, and inform it that it should highlight
-      DefinitionsPane defPane = _frame.getCurrentDefPane();
-      defPane.getJUnitErrorCaretListener().shouldHighlight(true);
-      if (pos != null) {
-        int errPos = pos.getOffset();
-        if (errPos >= 0 && errPos <= defPane.getText().length()) {
-          defPane.setCaretPosition(errPos);
-        }
-        //defPane.getJUnitErrorCaretListener().updateHighlight(errPos);
-      }
-      defPane.grabFocus();
-      defPane.getCaret().setVisible(true);
-    }
-    
-     /**
-     * The OptionListener for compiler COMPILER_ERROR_COLOR 
-     */
-    private class CompilerErrorColorOptionListener implements OptionListener<Color> {
-      
-      public void optionChanged(OptionEvent<Color> oce) {
-
-        _listHighlightPainter
-          =  new DefaultHighlighter.DefaultHighlightPainter(oce.value);
-       
-        if (_listHighlightTag != null) {
-          _listHighlightTag.refresh(_listHighlightPainter);
-        }
-      }
-    }
-    
   }
 
 }

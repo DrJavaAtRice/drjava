@@ -95,9 +95,9 @@ public class EventNotifier {
    * @param EventNotifier n tells the listener what happened
    */
   public void notifyListeners(Notifier n) {
+    int listeners = 0;
     synchronized(_listeners) {
       Enumeration<GlobalModelListener> i = _listeners.elements();
-
       while(i.hasMoreElements()) {
         GlobalModelListener cur = i.nextElement();
         n.notifyListener(cur);
