@@ -286,7 +286,7 @@
   <javac srcdir="${srcroot}"
          includes="${projpath}/**/*java"
          destdir="${built}"
-         bootclasspath="${jsr14_collect_classpath}:{sun.boot.class.path}" 
+         bootclasspath="${jsr14_collect_classpath}:${sun.boot.class.path}" 
 	 classpath="${classpath_text}"
          source="1.5"
          debug="on"
