@@ -269,13 +269,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
         DebugManager.WatchData watch = _watches.elementAt(row);
         switch(col) {
           case 0: return watch.getName();
-          case 1: Object value = watch.getValue();
-          if (value == null)
-            return "null";
-          else if (value == DebugManager.WatchUndefinedValue.Singleton)
-            return "<not in scope>";
-          else
-            return value.toString();        
+          case 1: return watch.getValue(); 
           case 2: return watch.getType();
         }
         return null;

@@ -199,6 +199,17 @@ public interface GlobalModel {
    * which fires the interactionsReset() event.
    */
   public void resetInteractions();
+  
+  /**
+   * Called when the interactionsJVM has begun to be resetted
+   */
+  public void interactionsResetting();
+  
+  /**
+   * Called when a new InteractionsJVM has registered as is ready 
+   * for use.
+   */
+  public void interactionsReady();
 
   /**
    * Resets the console.

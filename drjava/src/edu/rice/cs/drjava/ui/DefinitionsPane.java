@@ -73,6 +73,7 @@ import edu.rice.cs.drjava.model.debug.Breakpoint;
 public class DefinitionsPane extends JEditorPane 
   implements OptionConstants {
   private static final EditorKit EDITOR_KIT = new DefinitionsEditorKit();
+  private static final int UNDO_LIMIT = 100;
 
   /**
    * Our parent window.
@@ -80,7 +81,7 @@ public class DefinitionsPane extends JEditorPane
   private MainFrame _mainFrame;
   private GlobalModel _model;
   private final OpenDefinitionsDocument _doc;
-  private UndoManager _undoManager;
+  private OurUndoManager _undoManager;
   private UndoAction _undoAction;
   private RedoAction _redoAction;
   private HighlightManager _highlightManager;
@@ -296,7 +297,8 @@ public class DefinitionsPane extends JEditorPane
      */
     public void undoableEditHappened(UndoableEditEvent e) {
       //Remember the edit and update the menus
-      _undoManager.addEdit(e.getEdit());
+      UndoWithPosition undo = new UndoWithPosition(e.getEdit(), getCaretPosition());
+      _undoManager.addEdit(undo);      
       _undoAction.updateUndoState();
       _redoAction.updateRedoState();
     }
@@ -410,7 +412,7 @@ public class DefinitionsPane extends JEditorPane
   {
     _mainFrame = mf;
     _model = model;
-    _doc = doc;
+    _doc = doc;    
     setDocument(_doc);
     setContentType("text/java");
     setBackground(DrJava.CONFIG.getSetting(DEFINITIONS_BACKGROUND_COLOR));
@@ -859,7 +861,8 @@ public class DefinitionsPane extends JEditorPane
     if (_redoAction == null) {
       _redoAction = new RedoAction();
     }
-    _undoManager = new UndoManager();
+    _undoManager = new OurUndoManager();
+    _undoManager.setLimit(UNDO_LIMIT);
 
     getDocument().addUndoableEditListener(_undoListener);
     _undoAction.updateUndoState();
@@ -933,7 +936,7 @@ public class DefinitionsPane extends JEditorPane
    * The undo action.
    */
   private class UndoAction extends AbstractAction {
-
+    
     /**
      * Constructor.
     */
@@ -948,7 +951,19 @@ public class DefinitionsPane extends JEditorPane
      */
     public void actionPerformed(ActionEvent e) {
       try {
+        UndoableEdit edit = _undoManager.getNextUndo();
+        int pos = -1;
+        if (edit != null && edit instanceof UndoWithPosition) {
+          pos = ((UndoWithPosition)edit).getPosition();
+        }
+        
+        if (pos > -1) {
+          //centerViewOnOffset(pos);
+          setCaretPosition(pos);
+        }
         _undoManager.undo();
+        _doc.getDocument().setModifiedSinceSave();
+        _mainFrame.updateFileTitle();
       } catch (CannotUndoException ex) {
         System.out.println("Unable to undo: " + ex);
         ex.printStackTrace();
@@ -992,7 +1007,19 @@ public class DefinitionsPane extends JEditorPane
      */
     public void actionPerformed(ActionEvent e) {
       try {
+        UndoableEdit edit = _undoManager.getNextRedo();
+        int pos = -1;
+        if (edit instanceof UndoWithPosition) {
+          pos = ((UndoWithPosition)edit).getPosition();
+        }
         _undoManager.redo();
+        
+        if (pos > -1) {
+          //centerViewOnOffset(pos);
+          setCaretPosition(pos);
+        }
+        _doc.getDocument().setModifiedSinceSave();
+        _mainFrame.updateFileTitle();
       } catch (CannotRedoException ex) {
         System.out.println("Unable to redo: " + ex);
         ex.printStackTrace();
@@ -1013,6 +1040,82 @@ public class DefinitionsPane extends JEditorPane
         setEnabled(false);
         putValue(Action.NAME, "Redo");
       }
+    }
+  }
+  
+  /**
+   * Wrapper for UndoableEdit that pairs UndoableEdits with their
+   * caret positions
+   */
+  private class UndoWithPosition implements UndoableEdit {
+    private UndoableEdit _undo;
+    private int _pos;
+    
+    public UndoWithPosition(UndoableEdit undo, int pos) {
+      _undo = undo;
+      _pos = pos;
+    }
+    
+    public int getPosition() {
+      return _pos;
+    }
+    
+    public boolean addEdit(UndoableEdit ue) {
+      return _undo.addEdit(ue);
+    }
+    
+    public boolean canRedo() {
+      return _undo.canRedo();
+    }
+    
+    public boolean canUndo() {
+      return _undo.canUndo();
+    }
+    
+    public void die() {
+      _undo.die();
+    }
+    
+    public String getPresentationName() {
+      return _undo.getPresentationName();
+    }
+    
+    public String getUndoPresentationName() {
+      return _undo.getUndoPresentationName();
+    }
+    
+    public String getRedoPresentationName() {
+      return _undo.getRedoPresentationName();
+    }
+    
+    public boolean isSignificant() {
+      return _undo.isSignificant();
+    }
+    
+    public void redo() {
+      _undo.redo();
+    }
+    
+    public boolean replaceEdit(UndoableEdit ue) {
+      return _undo.replaceEdit(ue);
+    }
+    
+    public void undo() {
+      _undo.undo();
+    }
+  }
+  
+  /**
+   * Is used to be able to call editToBeUndone and editToBeRedone since they
+   * are protected methods in UndoManager
+   */
+  private class OurUndoManager extends UndoManager {
+    public UndoableEdit getNextUndo() {
+      return editToBeUndone();
+    }
+    
+    public UndoableEdit getNextRedo() {
+      return editToBeRedone();
     }
   }
 }

@@ -96,14 +96,23 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
 
       public void interactionsExited(int status) {
         assertInteractionStartCount(1);
+        assertInteractionsResettingCount(1);
         interactionsExitedCount++;
         lastExitStatus = status;
+      }
+      
+      public void interactionsResetting() {
+        assertInteractionStartCount(1);
+        assertInteractionsExitedCount(0);
+        assertInteractionsResetCount(0);
+        interactionsResettingCount++;
       }
 
       public void interactionsReset() {
         synchronized(this) {
           assertInteractionStartCount(1);
           assertInteractionsExitedCount(1);
+          assertInteractionsResettingCount(1);
           interactionsResetCount++;
           this.notify();
         }
@@ -118,6 +127,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     _model.removeListener(listener);
 
     listener.assertInteractionStartCount(1);
+    listener.assertInteractionsResettingCount(1);
     listener.assertInteractionsResetCount(1);
     listener.assertInteractionsExitedCount(1);
     assertEquals("exit status", 23, listener.lastExitStatus);
@@ -139,14 +149,12 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
   public void testInteractionAbort()
     throws BadLocationException, InterruptedException, IOException
   {
-    //System.err.println("Entering testInteractionAbort");
     _doCompile(setupDocument(FOO_TEXT), tempFile());
     final String beforeAbort = interpret("DrJavaTestFoo.class.getName()");
     assertEquals("DrJavaTestFoo", beforeAbort);
     
     TestListener listener = new TestListener() {
       public void interactionStarted() {
-        //System.err.println("start notice");
         interactionStartCount++;
       }
 
@@ -157,22 +165,28 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
       }
 
       public void interactionsExited(int status) {
-        //System.err.println("exit notice");
         try {
           Thread.currentThread().sleep(1000);
         } catch (InterruptedException e) {
-          //System.err.println("Interrupted!");
         }
         assertInteractionStartCount(1);
         interactionsExitedCount++;
       }
 
+      public void interactionsResetting() {
+        assertInteractionStartCount(1);
+        assertInteractionsExitedCount(0);
+        assertInteractionsResetCount(0);
+        interactionsResettingCount++;
+      }
+      
       public void interactionsReset() {
         synchronized(this) {
-          //System.err.println("reset notice");
           assertInteractionStartCount(1);
           assertInteractionsExitedCount(0);
+          assertInteractionsResettingCount(1);
           interactionsResetCount++;
+          this.notify();
         }
       }
     };
@@ -181,26 +195,20 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     synchronized(listener) {
       interpretIgnoreResult("while (true) {}");
       listener.assertInteractionStartCount(1);
-      //System.err.println("about to abort");
       _model.resetInteractions();
-      //System.err.println("about to wait for abort");
+      listener.wait();
     }
-    //System.err.println("waiting done");
+    listener.assertInteractionsResettingCount(1);
     listener.assertInteractionsResetCount(1);
-    //System.err.println("after wait");
     listener.assertInteractionsExitedCount(0);
-    //System.err.println("after wait");
     _model.removeListener(listener);
 
     // now make sure it still works!
-    //System.err.println("after wait");
     assertEquals("5", interpret("5"));
 
     // make sure we can still see class foo
-    //System.err.println("about to check DrJavaTestFoo");
     final String afterAbort = interpret("DrJavaTestFoo.class.getName()");
     assertEquals("DrJavaTestFoo", afterAbort);
-    //System.err.println("done check DrJavaTestFoo: " + afterAbort);
   }
 
   /**
@@ -262,13 +270,16 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
    * reasonably.
    */
   private void _doCompile(OpenDefinitionsDocument doc, File file)
-    throws IOException
+    throws IOException, InterruptedException
   {
     doc.saveFile(new FileSelector(file));
 
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
-    doc.startCompile();
+    synchronized(listener) {
+      doc.startCompile();
+      listener.wait();
+    }
     listener.checkCompileOccurred();
     assertCompileErrorsPresent(false);
     _model.removeListener(listener);
@@ -279,7 +290,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
    * can see it.
    */
   public void testInteractionsCanSeeCompile()
-    throws BadLocationException, IOException
+    throws BadLocationException, IOException, InterruptedException
   {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     _doCompile(doc, tempFile());
@@ -296,7 +307,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
    * the REPL.
    */
   public void testInteractionsCanSeeChangedClass()
-    throws BadLocationException, IOException
+    throws BadLocationException, IOException, InterruptedException
   {
     final String text_before = "class DrJavaTestFoo { public int m() { return ";
     final String text_after = "; } }";
@@ -320,7 +331,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
    * Checks that an anonymous inner class can be defined in the repl!
    */
   public void testInteractionsDefineAnonymousInnerClass()
-    throws BadLocationException, IOException
+    throws BadLocationException, IOException, InterruptedException
   {
     final String interface_text = "public interface I { int getValue(); }";
     final File file = createFile("I.java");
@@ -525,7 +536,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
    * can see it.
    */
   public void testInteractionsLiveUpdateClasspath()
-    throws BadLocationException, IOException
+    throws BadLocationException, IOException, InterruptedException
   {
       
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);

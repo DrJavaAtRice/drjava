@@ -127,30 +127,12 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
   private String _name() {
     return "compiler=" + _model.getActiveCompiler().getName() + ": ";
   }
-
-  /**
-   * Tests a normal compile that should work.
-   */
-  public void testCompileNormal() throws BadLocationException, IOException {
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
-    final File file = tempFile();
-    doc.saveFile(new FileSelector(file));    
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
-    _model.addListener(listener);
-    doc.startCompile();
-    assertCompileErrorsPresent(_name(), false);
-    listener.checkCompileOccurred();
-
-    // Make sure .class exists
-    File compiled = classForJava(file, "DrJavaTestFoo");
-    assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
-  }
   
   /**
    * Tests calling compileAll with different source roots works.
    */
   public void testCompileAllDifferentSourceRoots()
-    throws BadLocationException, IOException
+    throws BadLocationException, IOException, InterruptedException
   {
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
@@ -165,7 +147,10 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
-    _model.compileAll();
+    synchronized(listener) {
+      _model.compileAll();
+      listener.wait();
+    }
     assertCompileErrorsPresent(_name(), false);
     listener.checkCompileOccurred();
 
@@ -213,26 +198,36 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
   }
 
   /**
-   * Test that one compiled file can depend on the other.
+   * Test that one compiled file can depend on the other and that when a keyword
+   * is part of a field name, the file will compile.
    * We compile DrJavaTestFoo and then DrJavaTestFoo2 (which extends DrJavaTestFoo). This shows
    * that the compiler successfully found DrJavaTestFoo2 when compiling DrJavaTestFoo.
    */
   public void testCompileClasspathOKDefaultPackage()
-    throws BadLocationException, IOException
+    throws BadLocationException, IOException, InterruptedException
   {
     // Create/compile foo, assuming it works
-    OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc1 = setupDocument(FOO_PACKAGE_AS_PART_OF_FIELD);
     final File fooFile = new File(_tempDir, "DrJavaTestFoo.java");
+    
     doc1.saveFile(new FileSelector(fooFile));
-    doc1.startCompile();
-
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
+    _model.addListener(listener); 
+    synchronized(listener) {   
+      doc1.startCompile();
+      listener.wait();
+    }
+    _model.removeListener(listener);
     OpenDefinitionsDocument doc2 = setupDocument(FOO2_EXTENDS_FOO_TEXT);
     final File foo2File = new File(_tempDir, "DrJavaTestFoo2.java");
     doc2.saveFile(new FileSelector(foo2File));
 
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
-    _model.addListener(listener);
-    doc2.startCompile();
+    CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();
+    _model.addListener(listener2);
+    synchronized(listener2) {
+      doc2.startCompile();
+      listener2.wait();
+    }
     assertCompileErrorsPresent(_name(), false);
     listener.checkCompileOccurred();
 
@@ -248,7 +243,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
    * that the compiler successfully found DrJavaTestFoo2 when compiling DrJavaTestFoo.
    */
   public void testCompileClasspathOKDifferentPackages()
-    throws BadLocationException, IOException
+    throws BadLocationException, IOException, InterruptedException
   {
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
@@ -261,16 +256,25 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
       setupDocument("package a;\n" + "public " + FOO_TEXT);
     final File fooFile = new File(aDir, "DrJavaTestFoo.java");
     doc1.saveFile(new FileSelector(fooFile));
-    doc1.startCompile();
-
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
+    _model.addListener(listener);
+    synchronized(listener) {
+      doc1.startCompile();
+      listener.wait();
+    }
+    _model.removeListener(listener);
+    
     OpenDefinitionsDocument doc2 =
       setupDocument("package b;\nimport a.DrJavaTestFoo;\n" + FOO2_EXTENDS_FOO_TEXT);
     final File foo2File = new File(bDir, "DrJavaTestFoo2.java");
     doc2.saveFile(new FileSelector(foo2File));
 
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
-    _model.addListener(listener);
-    doc2.startCompile();
+    CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();
+    _model.addListener(listener2);
+    synchronized(listener2) {
+      doc2.startCompile();
+      listener2.wait();
+    }
     assertCompileErrorsPresent(_name(), false);
     listener.checkCompileOccurred();
 
@@ -278,29 +282,6 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     File compiled = classForJava(foo2File, "DrJavaTestFoo2");
     assertTrue(_name() + "Class file doesn't exist after compile",
                compiled.exists());
-  }
-
-  /**
-   * Tests a compile that should work that uses a field that contains
-   * the text "package" as a component of the name.
-   */
-  public void testCompileWithPackageAsPartOfFieldName()
-    throws BadLocationException, IOException
-  {
-    OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_PART_OF_FIELD);
-    final File file = tempFile();
-
-    // No listener for save -- assume it works
-    doc.saveFile(new FileSelector(file));
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
-    _model.addListener(listener);
-    doc.startCompile();
-    assertCompileErrorsPresent(_name(), false);
-    listener.checkCompileOccurred();
-
-    // Make sure .class exists
-    File compiled = classForJava(file, "DrJavaTestFoo");
-    assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
   }
 
   /**
@@ -408,75 +389,6 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
   }
 
   /**
-   * If we try to compile an unsaved file but we do save it from within
-   * saveAllBeforeProceeding, the compile should occur happily.
-   */
-  public void testCompileUnsavedButSaveWhenAsked()
-    throws BadLocationException, IOException
-  {
-    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
-    final File file = tempFile();
-
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
-      public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
-        assertEquals(_name() + "save reason", COMPILE_REASON, reason);
-        assertModified(true, doc);
-        assertSaveCount(0);
-        assertCompileStartCount(0);
-        assertCompileEndCount(0);
-        assertInteractionsResetCount(0);
-        assertConsoleResetCount(0);
-
-        try {
-          doc.saveFile(new FileSelector(file));
-        }
-        catch (IOException ioe) {
-          fail("Save produced exception: " + ioe);
-        }
-
-        saveAllBeforeProceedingCount++;
-      }
-
-      public void fileSaved(OpenDefinitionsDocument doc) {
-        assertModified(false, doc);
-        assertSaveAllBeforeProceedingCount(0);
-        assertCompileStartCount(0);
-        assertCompileEndCount(0);
-        assertInteractionsResetCount(0);
-        assertConsoleResetCount(0);
-
-        File f = null;
-        try {
-          f = doc.getFile();
-        }
-        catch (IllegalStateException ise) {
-          // We know file should exist
-          throw new UnexpectedException(ise);
-        }
-        catch (FileMovedException fme) {
-          // We know file should exist
-          fail("file does not exist");
-        }
-        assertEquals(_name() + "file saved", file, f);
-        saveCount++;
-      }
-    };
-
-    _model.addListener(listener);
-    doc.startCompile();
-
-    // Check events fired
-    listener.assertSaveAllBeforeProceedingCount(1);
-    listener.assertSaveCount(1);
-    assertCompileErrorsPresent(_name(), false);
-    listener.checkCompileOccurred();
-
-    // Make sure .class exists
-    File compiled = classForJava(file, "DrJavaTestFoo");
-    assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
-  }
-
-  /**
    * If we try to compile an unsaved file, and if we don't save when
    * asked to saveAllBeforeProceeding, it should not do the compile
    * or any other actions.
@@ -532,13 +444,13 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     assertContents(BAR_TEXT, doc2);
   }
 
-/**
+  /**
    * If we try to compile while any files (including the active file) are unsaved 
    * but we do save it from within saveAllBeforeProceeding, the compile should 
    * occur happily.
    */
   public void testCompileAnyUnsavedButSaveWhenAsked()
-    throws BadLocationException, IOException
+    throws BadLocationException, IOException, InterruptedException
   {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
@@ -593,7 +505,10 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     };
     
     _model.addListener(listener);
-    doc.startCompile();
+    synchronized(listener) {
+      doc.startCompile();
+      listener.wait();
+    }
 
     // Check events fired
     listener.assertSaveAllBeforeProceedingCount(1);
@@ -612,7 +527,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
    * happily.
    */
   public void testCompileActiveSavedAnyUnsavedButSaveWhenAsked()
-    throws BadLocationException, IOException
+    throws BadLocationException, IOException, InterruptedException
   {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
@@ -673,7 +588,10 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     assertModified(false, doc);
     assertModified(true, doc2);
     _model.addListener(listener);
-    doc.startCompile();
+    synchronized(listener) {
+      doc.startCompile();
+      listener.wait();
+    }
     assertTrue(!_model.areAnyModifiedSinceSave());
     
     // Check events fired
@@ -689,30 +607,10 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
   }
 
   /**
-   * After creating a new file and saving it, this test checks that the new document is
-   * not in sync before compiling and is in sync afterwards.
-   */
-  public void testInSyncAfterCompile()
-    throws BadLocationException, IOException
-  {
-    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
-    final File file = tempFile();
-    
-    doc.saveFile(new FileSelector(file));
-    assertTrue(!doc.checkIfClassFileInSync());
-    doc.startCompile();
-    assertTrue(doc.checkIfClassFileInSync());
-    
-    // Make sure .class exists
-    File compiled = classForJava(file, "DrJavaTestFoo");
-    assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
-  }
-
-  /**
    * After creating a new file, saving, and compiling it, this test checks that the new document is
    * in sync after compiling and is out of sync after modifying and even saving it.
    */
-  public void testOutOfSyncAfterModification()
+  public void testClassFileSynchronization()
     throws BadLocationException, IOException
   {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
@@ -773,19 +671,29 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
    * Tests a compile on a file that references a non-public class defined in another 
    * class with a name different than the non-public class
    */
-  public void testCompileReferenceToNonPublicClass() throws BadLocationException, IOException {
+  public void testCompileReferenceToNonPublicClass() throws BadLocationException, IOException, InterruptedException {
     OpenDefinitionsDocument doc = setupDocument(FOO_NON_PUBLIC_CLASS_TEXT);
     OpenDefinitionsDocument doc2 = setupDocument(FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT);
     final File file = tempFile();
     final File file2 = tempFile(1);
     doc.saveFile(new FileSelector(file));
     doc2.saveFile(new FileSelector(file2));
-    doc.startCompile();
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
-    doc2.startCompile();
+    synchronized(listener) {
+      doc.startCompile();
+      listener.wait();
+    }
+    _model.removeListener(listener);
+    CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();
+    _model.addListener(listener2);
+    synchronized(listener2) {
+      doc2.startCompile();
+      listener2.wait();
+    }
     
     listener.checkCompileOccurred();
+    listener2.checkCompileOccurred();
     assertCompileErrorsPresent(_name(), false);
     
     // Make sure .class exists

@@ -136,6 +136,11 @@ public interface GlobalModelListener {
   //public void interactionCaretPositionChanged(int pos);
 
   /**
+   * Called when the interactionsJVM has begun to be resetted
+   */
+  public void interactionsResetting();
+  
+  /**
    * Called when the interactions window is reset.
    */
   public void interactionsReset();

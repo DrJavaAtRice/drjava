@@ -720,7 +720,7 @@ public class DebugManager {
     for (int i = 0; i < _watches.size(); i++) {
       WatchData currWatch = _watches.elementAt(i);
       String currName = currWatch.getName();
-      Object currValue = currWatch.getValue();
+      String currValue = currWatch.getValue();
       // check for "this"
       if (currName.equals("this")) {
         ObjectReference obj = currFrame.thisObject();
@@ -940,13 +940,13 @@ public class DebugManager {
    */
   public class WatchData {
     private String _name;
-    private Object _value;
+    private String _value;
     private Type _type;
     private boolean _changed;
     
     public WatchData(String name) {
       _name = name;
-      _value = WatchUndefinedValue.Singleton;
+      _value = WatchUndefinedValue.Singleton.toString();
       _type = null;
       _changed = false;
     }
@@ -955,7 +955,7 @@ public class DebugManager {
       return _name;
     }
     
-    public Object getValue() {
+    public String getValue() {
       return _value;
     }
     
@@ -969,18 +969,19 @@ public class DebugManager {
     
     public void setValue(Object value) {
       if (value != null) {
-        if (!value.equals(_value)) {
+        if (!(value.toString()).equals(_value)) {
           _changed = true;
         }
         else {
           _changed = false;
         }
+        _value = value.toString();
       }
       else {
         // Value is null-- don't mark it as changed
         _changed = false;
+        _value = "null";
       }
-      _value = value;
     }
     
     public void setType(Type type) {
@@ -1055,10 +1056,14 @@ public class DebugManager {
     }
   }
   
-  public static class WatchUndefinedValue {
+  public static class WatchUndefinedValue{
     public static final WatchUndefinedValue Singleton = new WatchUndefinedValue();
     
     private WatchUndefinedValue() {
+    }
+    
+    public String toString() {
+      return "<not in scope>";
     }
   }
 }

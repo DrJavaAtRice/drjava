@@ -143,7 +143,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
+    TestListener listener = new TestListener() {
       public void junitStarted() { junitStartCount++; }
       public void junitEnded() { junitEndCount++; }
       public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
@@ -287,7 +287,10 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     };
     
     _model.addListener(listener);
-    doc.startJUnit();
+    synchronized(listener) {
+      doc.startJUnit();
+      listener.wait();
+    }
     
     // Check events fired
     listener.assertSaveAllBeforeProceedingCount(1);
@@ -318,7 +321,10 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     };
     
     _model.addListener(listener);
-    doc.startJUnit();
+    synchronized(listener) {
+      doc.startJUnit();
+      listener.wait();
+    }
     
     // Check events fired
     listener.assertJUnitStartCount(1);
@@ -345,7 +351,11 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     // Clear document so we can make sure it's written to after startJUnit
     _model.getJUnitDocument().remove(0, _model.getJUnitDocument().getLength() - 1);
      
-    final TestResult testResults = doc.startJUnit();
+    TestResult testResults;
+    synchronized(listener) {
+      testResults = doc.startJUnit();
+      listener.wait();
+    }
     
     //System.err.println(testResults.toString());
     

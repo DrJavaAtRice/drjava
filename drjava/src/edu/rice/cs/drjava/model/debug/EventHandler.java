@@ -110,7 +110,7 @@ public class EventHandler extends Thread {
       _handleVMDisconnectEvent((VMDisconnectEvent) e);
     }
     else 
-      throw new Error("Unexpected event type");
+      throw new Error("Unexpected event type: " + e);
   }
   
   private void _handleBreakpointEvent(BreakpointEvent e) {

@@ -48,6 +48,7 @@ import java.awt.event.*;
 
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.util.swing.SwingWorker;
 
 /**
  * The view component for repl interaction.
@@ -92,7 +93,19 @@ public class InteractionsPane extends JTextPane {
   // The fields below were made package private for testing purposes.
   AbstractAction _evalAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      _model.interpretCurrentInteraction();
+      SwingWorker worker = new SwingWorker() {
+        public Object construct() {
+          _model.interpretCurrentInteraction();
+          return null;
+        }
+      };
+      worker.start();
+    }
+  };
+  
+  AbstractAction _newlineAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      insertNewline();
     }
   };
   
@@ -183,6 +196,9 @@ public class InteractionsPane extends JTextPane {
     Keymap ourMap = addKeymap("INTERACTIONS_KEYMAP", getKeymap());
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), 
                                  _evalAction);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 
+                                                        java.awt.Event.SHIFT_MASK), 
+                                 _newlineAction);
 
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_B, mask), 
                                  _clearCurrentAction);
@@ -222,6 +238,16 @@ public class InteractionsPane extends JTextPane {
     
     getDocument().addDocumentListener(new CaretUpdateListener());
     moveToEnd();
+  }
+  
+  private void insertNewline() {
+    StyledDocument interactionsDoc = _model.getInteractionsDocument();
+    try {
+      interactionsDoc.insertString(interactionsDoc.getLength(), "\n  ", null);
+    }
+    catch (BadLocationException ble) {
+      // the end should be legal
+    }
   }
   
   private void moveToEnd() {

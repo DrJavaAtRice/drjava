@@ -451,6 +451,7 @@ public abstract class GlobalModelTestCase extends TestCase {
     protected int interactionEndCount;
     //protected int interactionCaretPositionChangedCount;
     protected int consoleResetCount;
+    protected int interactionsResettingCount;
     protected int interactionsResetCount;
     protected int interactionsExitedCount;
     protected int saveAllBeforeProceedingCount;
@@ -476,6 +477,7 @@ public abstract class GlobalModelTestCase extends TestCase {
       interactionEndCount = 0;
       //interactionCaretPositionChangedCount = 0;
       consoleResetCount = 0;
+      interactionsResettingCount = 0;
       interactionsResetCount = 0;
       saveAllBeforeProceedingCount = 0;
       nonTestCaseCount = 0;
@@ -538,6 +540,12 @@ public abstract class GlobalModelTestCase extends TestCase {
       assertEquals("number of times compileEnded fired", i, compileEndCount);
     }
 
+    public void assertInteractionsResettingCount(int i) {
+      assertEquals("number of times interactionsResetting fired",
+                   i,
+                   interactionsResettingCount);
+    }
+    
     public void assertInteractionsResetCount(int i) {
       assertEquals("number of times interactionsReset fired",
                    i,
@@ -633,6 +641,10 @@ public abstract class GlobalModelTestCase extends TestCase {
       fail("compileEnded fired unexpectedly");
     }
 
+    public void interactionsResetting() {
+      fail("interactionsResetting fired unexpectedly");
+    }
+    
     public void interactionsReset() {
       fail("interactionsReset fired unexpectedly");
     }
@@ -671,6 +683,7 @@ public abstract class GlobalModelTestCase extends TestCase {
     public void compileStarted() {
       assertCompileStartCount(0);
       assertCompileEndCount(0);
+      assertInteractionsResettingCount(0);
       assertInteractionsResetCount(0);
       assertConsoleResetCount(0);
       compileStartCount++;
@@ -679,18 +692,32 @@ public abstract class GlobalModelTestCase extends TestCase {
     public void compileEnded() {
       assertCompileEndCount(0);
       assertCompileStartCount(1);
+      assertInteractionsResettingCount(0);
       assertInteractionsResetCount(0);
       assertConsoleResetCount(0);
       assertCompileErrorDuringJUnitCount(0);
       compileEndCount++;
     }
 
-    public void interactionsReset() {
+    public void interactionsResetting() {
+      assertInteractionsResettingCount(0);
       assertInteractionsResetCount(0);
       assertCompileStartCount(1);
       assertCompileEndCount(1);
       // don't care whether interactions or console are reset first
-      interactionsResetCount++;
+      interactionsResettingCount++;
+    }
+    
+    public void interactionsReset() {
+      synchronized(this) {
+        assertInteractionsResettingCount(1);
+        assertInteractionsResetCount(0);
+        assertCompileStartCount(1);
+        assertCompileEndCount(1);
+        // don't care whether interactions or console are reset first
+        interactionsResetCount++;
+        notify();
+      }
     }
 
     public void consoleReset() {
@@ -704,6 +731,7 @@ public abstract class GlobalModelTestCase extends TestCase {
     public void checkCompileOccurred() {
       assertCompileEndCount(1);
       assertCompileStartCount(1);
+      assertInteractionsResettingCount(1);
       assertInteractionsResetCount(1);
       assertConsoleResetCount(1);
       assertCompileErrorDuringJUnitCount(0);

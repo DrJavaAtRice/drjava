@@ -125,6 +125,9 @@ public class MainFrame extends JFrame implements OptionConstants {
   private FindReplaceDialog _findReplace;
   private LinkedList _tabs;
   
+  private JPanel _interactionsWithSyncPanel;
+  private JLabel _syncStatus;
+  
   private JPanel _statusBar;
   private JLabel _fileNameField;
   private JLabel _currLocationField;
@@ -364,24 +367,30 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Default cut action.  Returns focus to def pane. */
   Action cutAction = new DefaultEditorKit.CutAction() {
     public void actionPerformed(ActionEvent e) {
+      Component c = SwingUtilities.findFocusOwner(MainFrame.this);
       super.actionPerformed(e);
-      _currentDefPane.requestFocus();
+      //_currentDefPane.requestFocus();
+      c.requestFocus();
     }
   };
 
   /** Default copy action.  Returns focus to def pane. */
   Action copyAction = new DefaultEditorKit.CopyAction() {
     public void actionPerformed(ActionEvent e) {
+      Component c = SwingUtilities.findFocusOwner(MainFrame.this);
       super.actionPerformed(e);
-      _currentDefPane.requestFocus();
+      //_currentDefPane.requestFocus();
+      c.requestFocus();
     }
   };
 
   /** Default paste action.  Returns focus to def pane. */
   Action pasteAction = new DefaultEditorKit.PasteAction() {
     public void actionPerformed(ActionEvent e) {
+      Component c = SwingUtilities.findFocusOwner(MainFrame.this);
       super.actionPerformed(e);
-      _currentDefPane.requestFocus();
+      //_currentDefPane.requestFocus();
+      c.requestFocus();
     }
   };
 
@@ -482,6 +491,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     new AbstractAction("Reset Interactions")
   {
     public void actionPerformed(ActionEvent ae) {
+      this.setEnabled(false);
       String title = "Confirm Reset Interactions";
       
       String message = "Are you sure you want to reset the " +
@@ -494,11 +504,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (rc == JOptionPane.YES_OPTION) {
         final SwingWorker worker = new SwingWorker() {
           public Object construct() {
-            _interactionsPane.setEditable(false);
-            _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             _model.resetInteractions();
-            _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-            _interactionsPane.setEditable(true);
             return null;
           }
         };
@@ -1304,8 +1310,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
         try {
-          _interactionsPane.setEditable(false);
-          _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
           _model.getActiveDocument().startCompile();
         }
         catch (FileMovedException fme) {
@@ -1313,11 +1317,6 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
         catch (IOException ioe) {
           _showIOError(ioe);
-        }
-        finally {
-          // Make sure interactions pane always comes back!
-          _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-          _interactionsPane.setEditable(true);
         }
         return null;
       }
@@ -1329,9 +1328,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
-        try {
-          _interactionsPane.setEditable(false);
-          _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        try {          
           _model.compileAll();
         }
         catch (FileMovedException fme) {
@@ -1339,11 +1336,6 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
         catch (IOException ioe) {
           _showIOError(ioe);
-        }
-        finally {
-          // Make sure interactions pane always comes back
-          _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-          _interactionsPane.setEditable(true);
         }
         return null;
       }
@@ -2099,10 +2091,18 @@ public class MainFrame extends JFrame implements OptionConstants {
     boolean useText = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
     final Icon icon = (useIcon) ? (Icon) a.getValue(Action.SMALL_ICON) : null;
     if (icon == null) {
-      ret = new JButton( (String) a.getValue(Action.DEFAULT));
+      ret = new JButton( (String) a.getValue(Action.DEFAULT)) {
+        public boolean isFocusTraversable() {
+          return false;
+        }
+      };
     }
     else {
-      ret = new JButton(icon);
+      ret = new JButton(icon) {
+        public boolean isFocusTraversable() {
+          return false;
+        }
+      };
       if (useText) {
         ret.setText((String) a.getValue(Action.DEFAULT));
       }
@@ -2134,7 +2134,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     boolean useIcons = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
     Font buttonFont = DrJava.CONFIG.getSetting(FONT_TOOLBAR);
     
-    final JButton result = new JButton(a);
+    final JButton result = new JButton(a) {
+      public boolean isFocusTraversable() {
+        return false;
+      }
+    };
     result.setText((String) a.getValue(Action.DEFAULT));
     result.setFont(buttonFont);
     if (!useIcons) result.setIcon(null);
@@ -2329,9 +2333,14 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
     });
+    
+    _interactionsWithSyncPanel = new JPanel(new BorderLayout());
+    _syncStatus = new JLabel("Testing");
+    _interactionsWithSyncPanel.add(new BorderlessScrollPane(_interactionsPane),
+                                   BorderLayout.CENTER);
+    //_interactionsWithSyncPanel.add(_syncStatus, BorderLayout.SOUTH);
                                     
-    _tabbedPane.add("Interactions", 
-                    new BorderlessScrollPane(_interactionsPane));
+    _tabbedPane.add("Interactions", _interactionsWithSyncPanel);
     _tabbedPane.add("Console", outputScroll);
     
     _tabs = new LinkedList();
@@ -2659,7 +2668,8 @@ public class MainFrame extends JFrame implements OptionConstants {
    * is in sync. Clears the debugPanel's status bar in this case
    */
   private void _updateDebugStatus() {
-    if (!inDebugMode());
+    if (!inDebugMode())
+      return;
 
     // if the document is untitled, don't show that it is out of sync since it can't be debugged anyway
     if (_model.getActiveDocument().isUntitled() || _model.getActiveDocument().getDocument().getClassFileInSync()) {
@@ -3052,6 +3062,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       // we don't restore the interactions pane to life, since
       // the interactionsReset event will do it.
     }
+    
+    public void interactionsResetting() {
+      _resetInteractionsAction.setEnabled(false);
+      _interactionsPane.setEditable(false);
+      _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    }
 
     public void interactionsReset() {
       DebugManager dm = _model.getDebugManager();
@@ -3059,6 +3075,8 @@ public class MainFrame extends JFrame implements OptionConstants {
         dm.shutdown();
       }
       interactionEnded();
+      _interactionsPane.getCaret().setVisible(true);
+      _resetInteractionsAction.setEnabled(true);
     }
 
     public void consoleReset() {

@@ -121,6 +121,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   
   // Used to prevent multiple threads from accessing the compiler at the same time
   private Object _compilerLock = new Object();
+  // Used to prevent multiple threads from accessing the interpreter at the same time
+  private Object _interpreterLock = new Object();
 
   public static final Indenter INDENTER;
 
@@ -603,7 +605,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       _debugManager.shutdown();
     }
     _interpreterControl.restartInterpreterJVM();
-    _restoreInteractionsState();
+    //_restoreInteractionsState();
     //_interpreterControl.setIsResetting(false);
     
     /* Old approach.  (Didn't kill leftover interactions threads)
@@ -683,26 +685,28 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * pane.
    */
   public void interpretCurrentInteraction() {
-    notifyListeners(new EventNotifier() {
-      public void notifyListener(GlobalModelListener l) {
-      l.interactionStarted();
+    synchronized(_interpreterLock) {
+      notifyListeners(new EventNotifier() {
+        public void notifyListener(GlobalModelListener l) {
+          l.interactionStarted();
+        }
+      });
+      
+      String text = _interactionsDoc.getCurrentInteraction();
+      _interactionsDoc.setInProgress(true);
+      _interactionsDoc.addToHistory(text);
+      
+      // there is no return at the end of the last line
+      // better to put it on now and not later.
+      _docAppend(_interactionsDoc, "\n", null);
+      
+      String toEval = text.trim();
+      if (toEval.startsWith("java ")) {
+        toEval = _testClassCall(toEval);
+      }
+      
+      _interpreterControl.interpret(toEval);
     }
-    });
-
-    String text = _interactionsDoc.getCurrentInteraction();
-    _interactionsDoc.setInProgress(true);
-    _interactionsDoc.addToHistory(text);
-
-    // there is no return at the end of the last line
-    // better to put it on now and not later.
-    _docAppend(_interactionsDoc, "\n", null);
-
-    String toEval = text.trim();
-    if (toEval.startsWith("java ")) {
-      toEval = _testClassCall(toEval);
-    }
-
-    _interpreterControl.interpret(toEval);
   }
 
   /**
@@ -822,7 +826,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       throw new UnexpectedException(e);
     }
   }
-  
+ 
   /** Prints System.out to the DrJava console. */
   public void systemOutPrint(String s) {
     _docAppend(_consoleDoc, s, SYSTEM_OUT_STYLE);
@@ -930,7 +934,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     });
 
     // all old interactions are irrelevant, so reset them
-    _restoreInteractionsState();
+    //_restoreInteractionsState();
   }
 
   /**
@@ -2350,13 +2354,25 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       } 
     }    
   }
+  
+  /**
+   * Called when the interactions reset process begins. This will diabled the
+   * reset and make the interactions pane uneditable.
+   */
+  public void interactionsResetting() {    
+    notifyListeners(new EventNotifier() {
+      public void notifyListener(GlobalModelListener l) {
+      l.interactionsResetting();
+    }
+    });
+  }
 
   /**
-   * Sets up a new interpreter to clear out the interpreter's environment.
+   * Called when a new interpreter has been registered.
    * If the setup works and the package directory exists,
    * interactionsReset() is fired.
    */
-  private void _restoreInteractionsState() {
+  public void interactionsReady() {
     _resetInteractionsClasspath();
     _interactionsDoc.reset();
 

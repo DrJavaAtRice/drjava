@@ -44,6 +44,10 @@ import java.rmi.server.*;
 import java.rmi.*;
 import java.io.*;
 
+import javax.swing.Timer;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
 import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.DrJava;
@@ -58,6 +62,8 @@ import edu.rice.cs.drjava.model.repl.*;
 public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
   /** The name of the RMI object for the present JVM. */
   private final String _identifier;
+  
+  private final static int RESET_TIME_OUT = 60;
 
   /**
    * The global model.
@@ -70,9 +76,11 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
    * Is there a JVM in the process of starting up?
    * This variable is protected by synchronized(this).
    */
-  //private boolean _startupInProgress = false;
+  private boolean _startupInProgress = false;
   
   private RestartThread _restartThread = null;
+  private RestartThread _timerThread = null;
+  private Timer _restartTimer = null;
   
   /**
    * Keeps track of whether we are currently in the process of cleanly
@@ -203,9 +211,22 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     throws RemoteException
   {
     synchronized(this) {
-      //System.out.println("interpreter jvm registered: " + remote);
-      _interpreterJVM = remote;
-      //_startupInProgress = false;
+      if (_interpreterJVM != null) { 
+        try {
+          //DrJava.consoleOut().println("killing jvm! " + i);
+          remote.exitJVM();
+        }
+        catch (RemoteException re) {
+        }
+        return;
+      }
+      _timerThread.disable();
+      _interpreterJVM = remote;    
+      // _model may be null if we're running a test on this
+      if (_model != null) {
+        _model.interactionsReady();
+      }
+      _startupInProgress = false;
       // wake up anyone waiting for an interpreter!
       notify();
     }
@@ -251,6 +272,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     synchronized(this) {
       if ((_interpreterProcess != null) && (_interpreterJVM != null)) {
         try {
+          //DrJava.consoleOut().println("killing jvm! " + i);
           _interpreterJVM.exitJVM();
         }
         catch (RemoteException re) {
@@ -264,6 +286,8 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     }
   }
 
+  int i = 0;
+  
   /**
    * Kills current interpreter JVM if any, then starts a new one.
    * It turns out that before I added the {@link #_startupInProgress} guard,
@@ -276,13 +300,18 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
    */
   public void restartInterpreterJVM() {
     synchronized(this) {
-      /**
+      i++;
+      //DrJava.consoleOut().println("MainJVM: iteration " + i);
+      
       if (_startupInProgress) {
         return;
       }
-
-      _startupInProgress = true;
-      */
+      _startupInProgress = true;   
+      
+      // _model may be null if we're running a test on this
+      if (_model != null)
+        _model.interactionsResetting();
+      
       if (_restartThread != null) {
         //DrJava.consoleOut().println("Disabling _restartThread");
         _restartThread.disable();
@@ -320,32 +349,64 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
         //DrJava.consoleOut().println("In MainJVM: starting interpreter jvm");
         _interpreterProcess = ExecJVM.
             runJVMPropogateClassPath(className, args, jvmargs);//classpath, jvmargs);
-        //DrJava.consoleOut().println("In MainJVM: started interpreter jvm");
+        //DrJava.consoleOut().println("In MainJVM: started interpreter jvm " +i);
         
         // Start a thread to wait for the interpreter to die and to fire
         // off a new one (and notify model) when it happens
-        _restartThread = new RestartThread() {
+        _restartThread = new RestartThread(i) {
           public void run() {
             try {
               int status = _interpreterProcess.waitFor();
               //DrJava.consoleOut().println("In Thread: interpreterProcess ended. status=" +
-              //                            status);
-              if (_shouldReset) {
-                //DrJava.consoleOut().println("I should reset");
-                restartInterpreterJVM();
-                //if (!_isResetting()) {
-                replCalledSystemExit(status);
-                //}
+              //                            status + ", i = " + j);
+              synchronized(MainJVM.this) {
+                if (_shouldReset) {
+                  //DrJava.consoleOut().println("I should reset (thread " + j + ")");
+                  boolean currentlyStarting = _startupInProgress;
+                  //DrJava.consoleOut().println("Currently starting for " + j + " = " + currentlyStarting);
+                  restartInterpreterJVM();
+                  if (!currentlyStarting) {
+                    //DrJava.consoleOut().println("Not starting up, so display message, thread " + j);
+                    replCalledSystemExit(status);
+                  }
+                }
               }
+              //DrJava.consoleOut().println("Thread finished: " + j);
             }
             catch (InterruptedException ie) {
               throw new edu.rice.cs.util.UnexpectedException(ie);
             }
           }
         };
-
-        //DrJava.consoleOut().println("In MainJVM: starting thread");
+        // If RESET_TIME_OUT seconds pass before the new InterpreterJVM registers, try restarting the JVM
+        _timerThread = new RestartThread(i) {
+          public void run() {
+            _restartTimer = new Timer(RESET_TIME_OUT*1000, new ActionListener() {
+              int count = 0;
+              public void actionPerformed(ActionEvent e) {
+                synchronized(MainJVM.this) {
+                  if (!_shouldReset) {
+                    _stopTimerThread();
+                    return;
+                  }
+                  if (count < 2) {
+                    _model.printDebugMessage("Could not connect to InterpreterJVM, trying again...");
+                    restartInterpreterJVM();
+                    count++;
+                    return;
+                  }
+                  _model.printDebugMessage("Connection failed, the interactions window will not work");
+                  _stopTimerThread();
+                }
+              }
+            });               
+            _restartTimer.setRepeats(true);
+            _restartTimer.start();   
+          }
+        };
+        //DrJava.consoleOut().println("In MainJVM: starting thread " + i);
         _restartThread.start();
+        _timerThread.start();
       }
       catch (IOException ioe) {
         _threwException(ioe);
@@ -354,6 +415,9 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     }
   }
   
+  private void _stopTimerThread() {
+    _restartTimer.stop();
+  }
   /**
    * Returns the debug port to use, as specified by the model.
    * Returns -1 if no usable port could be found.
@@ -458,6 +522,11 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
   
   private class RestartThread extends Thread {
     protected boolean _shouldReset = true;
+    int j;
+    
+    public RestartThread(int i) {
+      j = i;
+    }
     
     public void disable() {
       _shouldReset = false;

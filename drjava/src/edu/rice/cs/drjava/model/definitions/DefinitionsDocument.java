@@ -480,6 +480,14 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
                                                  DocumentEvent.EventType.CHANGE);
     fireChangedUpdate(evt);
   }
+  
+  /**
+   * Originally designed to allow undoManager to set the current document to
+   * be modified whenever an undo or redo is performed.
+   */
+  public void setModifiedSinceSave() {
+    _modifiedSinceSave = true;
+  }
 
   /**
    * Whenever this document has been saved, this method should be called
