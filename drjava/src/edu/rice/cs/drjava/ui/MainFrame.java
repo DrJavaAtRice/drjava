@@ -116,7 +116,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private CompilerErrorPanel _errorPanel;
   private OutputPane _outputPane;
   private InteractionsPane _interactionsPane;
-  private DebugPanel _debugPanel;
+  //private DebugPanel _debugPanel;
   private JUnitPanel _junitPanel;
   private FindReplaceDialog _findReplace;
   private LinkedList _tabs;
@@ -2442,7 +2442,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     _interactionsPane.setFont(f);
     _outputPane.setFont(f);
-    if (_debugPanel != null) _debugPanel.setFonts(f);
+    //if (_debugPanel != null) _debugPanel.setFonts(f);
     _errorPanel.setListFont(f);
     _junitPanel.setListFont(f);
   }

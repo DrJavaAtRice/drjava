@@ -87,13 +87,13 @@ public class DefinitionsDocumentTest extends TestCase
   public void testInsertToDoc() throws BadLocationException {
     defModel.insertString(0, "a/*bc */\"\\{}()", null);
     assertEquals("#0.0", defModel.getText(0, 8), "a/*bc */");
-    assertEquals("#0.1", 14, defModel._currentLocation);
+    assertEquals("#0.1", 14, defModel.getCurrentLocation());
     defModel.insertString(0, "Start:", null);
     assertEquals("#1.0", defModel.getText(0, 14), "Start:a/*bc */");
-    assertEquals("#1.1", 6, defModel._currentLocation);
+    assertEquals("#1.1", 6, defModel.getCurrentLocation());
     // document is:
     // Start:=>a/*bc */"\\{}()
-    BraceReduction rm = defModel._reduced;
+    BraceReduction rm = defModel.getReduced();
     assertEquals("2.1", FREE, rm.getStateAtCurrent());
     rm.move(2);
     // document is:
@@ -139,7 +139,7 @@ public class DefinitionsDocumentTest extends TestCase
    * @exception BadLocationException
    */
   public void testInsertStarIntoStarSlash() throws BadLocationException {
-    BraceReduction rm = defModel._reduced;
+    BraceReduction rm = defModel.getReduced();
     defModel.insertString(0, "/**/", null);
     // Put new star between second star and second slash
     defModel.insertString(3, "*", null);
@@ -159,7 +159,7 @@ public class DefinitionsDocumentTest extends TestCase
    * @exception BadLocationException
    */
   public void testInsertSlashIntoStarSlash() throws BadLocationException {
-    BraceReduction rm = defModel._reduced;
+    BraceReduction rm = defModel.getReduced();
     defModel.insertString(0, "/**/", null);
     // Put new slash between second star and second slash
     defModel.insertString(3, "/", null);
@@ -179,7 +179,7 @@ public class DefinitionsDocumentTest extends TestCase
    * @exception BadLocationException
    */
   public void testInsertStarIntoSlashStar() throws BadLocationException {
-    BraceReduction rm = defModel._reduced;
+    BraceReduction rm = defModel.getReduced();
     defModel.insertString(0, "/**/", null);
     // Put new star between second star and second slash
     defModel.insertString(1, "*", null);
@@ -201,8 +201,8 @@ public class DefinitionsDocumentTest extends TestCase
     defModel.insertString(0, "a/*bc */", null);
     defModel.remove(3, 3);
     assertEquals("#0.0", "a/**/", defModel.getText(0, 5));
-    assertEquals("#0.1", 3, defModel._currentLocation);
-    BraceReduction rm = defModel._reduced;
+    assertEquals("#0.1", 3, defModel.getCurrentLocation());
+    BraceReduction rm = defModel.getReduced();
     assertEquals("1.0", "*/", rm.currentToken().getType());
     // no longer support getBlockOffset
     //        assertEquals("1.1",0,rm.getBlockOffset());

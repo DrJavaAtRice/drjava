@@ -241,11 +241,8 @@ public interface GlobalModel {
   /** Called when the repl prints to System.err. */
   public void replSystemErrPrint(String s);
 
-  /** Called when the debugger prints to System.out. */
-  public void debugSystemOutPrint(String s);
-
-  /** Called when the debugger prints to System.err. */
-  public void debugSystemErrPrint(String s);
+  /** Called when the debugger wants to print a message. */
+  public void printDebugMessage(String s);
 
   /**
    * Signifies that the most recent interpretation completed successfully,

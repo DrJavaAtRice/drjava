@@ -63,6 +63,13 @@ import edu.rice.cs.drjava.model.DefaultGlobalModel;
  * when this document is updated. Also, that synchronization is maintained
  * even across undo/redo -- this is done by making the undo/redo commands know
  * how to restore the reduced model state.
+ * 
+ * The reduced model is not thread-safe, so it is essential that ONLY this
+ * DefinitionsDocument call methods on it.  Any information from the reduced
+ * model should be obtained through helper methods on DefinitionsDocument,
+ * and ALL methods in DefinitionsDocument which reference the reduced model
+ * (via the _reduced field) MUST be synchronized.  This prevents any thread
+ * from seeing an inconsistent state in the middle of another thread's changes.
  *
  * @see BraceReduction
  * @see ReducedModelControl
@@ -94,11 +101,12 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   private int _cachedNextLineLoc;
   /**
    * The reduced model of the document that handles most of the
-   * document logic and keeps track of state.
+   * document logic and keeps track of state.  Should ONLY be referenced from
+   * this class, and all references to it MUST be synchronized.
    */
-  BraceReduction _reduced = new ReducedModelControl();
+  private BraceReduction _reduced = new ReducedModelControl();
   /** The absolute character offset in the document. */
-  int _currentLocation = 0;
+  private int _currentLocation = 0;
   
   private File _file;
   private long _timestamp;

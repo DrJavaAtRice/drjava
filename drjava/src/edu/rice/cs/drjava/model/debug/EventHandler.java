@@ -114,7 +114,7 @@ public class EventHandler extends Thread {
     System.out.println("Breakpoint reached");
     _manager.setCurrentThread(e.thread());
     _manager.scrollToSource(e);
-    _manager.hitBreakpoint((BreakpointRequest)e.request());
+    _manager.reachedBreakpoint((BreakpointRequest)e.request());
     //((LocatableEvent) e).thread().suspend();
   }
   

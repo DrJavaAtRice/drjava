@@ -354,7 +354,7 @@ public class IndentTest extends TestCase {
    */
   public void testIndentInfoSquiggly() throws BadLocationException {
     //empty document
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     IndentInfo ii = rm.getIndentInformation();
     _assertIndentInfo(ii, noBrace, -1, -1, -1);
     //single newline
@@ -388,7 +388,7 @@ public class IndentTest extends TestCase {
    */
   public void testIndentInfoParen() throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n(\n", null);
     IndentInfo ii = rm.getIndentInformation();
     _assertIndentInfo(ii, openParen, 2, 2, 0);
@@ -415,7 +415,7 @@ public class IndentTest extends TestCase {
    */
   public void testIndentInfoBracket() throws BadLocationException {
     // just bracket
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n[\n", null);
     IndentInfo ii = rm.getIndentInformation();
     _assertIndentInfo(ii, openBracket, 2, 2, 0);
@@ -441,7 +441,7 @@ public class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testIndentInfoPrevNewline () throws BadLocationException {
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "{\n  {\nhello", null);
     // {\n  {\nhello#
     IndentInfo ii = rm.getIndentInformation();
@@ -453,7 +453,7 @@ public class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testEndOfBlockComment () throws BadLocationException {
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n{\n  hello;\n /*\n hello\n */", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n{\n  hello;\n /*\n hello\n */", doc);
@@ -464,7 +464,7 @@ public class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testAfterBlockComment () throws BadLocationException {
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n{\n  hello;\n  /*\n  hello\n  */\nhello", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n{\n  hello;\n  /*\n  hello\n  */\n  hello", doc);
@@ -475,7 +475,7 @@ public class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testAfterBlockComment3 () throws BadLocationException {
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n{\n  hello;\n  /*\n  hello\n  grr*/\nhello", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n{\n  hello;\n  /*\n  hello\n  grr*/\n  hello", doc);
@@ -486,7 +486,7 @@ public class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testAfterBlockComment4 () throws BadLocationException {
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n{\n  hello;\n /*\n  hello\n */ hello", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n{\n  hello;\n /*\n  hello\n  */ hello", doc);
@@ -497,7 +497,7 @@ public class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testAfterBlockComment2 () throws BadLocationException {
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n{\n  hello;\n  /*\n  hello\n  */ (\nhello", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n{\n  hello;\n  /*\n  hello\n  */ (\n      hello", doc);
@@ -508,7 +508,7 @@ public class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testIndentInfoBlockComments () throws BadLocationException {
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "(\n /*\n*\n", null);
     // (\n/*\n*#\n
     rm.move(-1);
@@ -521,7 +521,7 @@ public class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testIndentInfoBlockComments2 () throws BadLocationException {
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n(\n /*\n*\n", null);
     // \n(\n/*\n*#\n
     rm.move(-1);
@@ -534,7 +534,7 @@ public class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testIndentInfoBlockComments3 () throws BadLocationException {
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "{\n  /*\n*\n", null);
     // (\n/*\n*#\n
     rm.move(-1);
@@ -547,7 +547,7 @@ public class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testIndentInfoBlockComments4 () throws BadLocationException {
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n{\n  /*\n*\n", null);
     // \n(\n/*\n*#\n
     rm.move(-1);
@@ -560,7 +560,7 @@ public class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testSkippingBraces () throws BadLocationException {
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n{\n   { ()}\n}", null);
     IndentInfo ii = rm.getIndentInformation();
     _assertIndentInfo(ii, openSquiggly, 12, 12, 1);
@@ -572,7 +572,7 @@ public class IndentTest extends TestCase {
    */
   public void testSkippingComments () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n{\n   //{ ()\n}", null);
     IndentInfo ii = rm.getIndentInformation();
     _assertIndentInfo(ii, openSquiggly, 13, 13, 1);
@@ -584,7 +584,7 @@ public class IndentTest extends TestCase {
    */
   public void testSkippingCommentsBraceAtBeginning () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "{\n   //{ ()}{", null);
     IndentInfo ii = rm.getIndentInformation();
     _assertIndentInfo(ii, openSquiggly, -1, 13, 11);
@@ -596,7 +596,7 @@ public class IndentTest extends TestCase {
    */
   public void testNothingToIndentOn () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "   //{ ()}{", null);
     IndentInfo ii = rm.getIndentInformation();
     _assertIndentInfo(ii, noBrace, -1, -1, -1);
@@ -608,7 +608,7 @@ public class IndentTest extends TestCase {
    */
   public void testStartSimple () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "abcde", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("abcde", doc);
@@ -620,7 +620,7 @@ public class IndentTest extends TestCase {
    */
   public void testStartSpaceIndent () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "  abcde", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("abcde", doc);
@@ -632,7 +632,7 @@ public class IndentTest extends TestCase {
    */
   public void testStartBrace () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "public class temp \n {", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("public class temp \n{", doc);
@@ -644,7 +644,7 @@ public class IndentTest extends TestCase {
    */
   public void testEndBrace () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "public class temp \n{ \n  }", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("public class temp \n{ \n}", doc);
@@ -656,7 +656,7 @@ public class IndentTest extends TestCase {
    */
   public void testInsideClass () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "public class temp \n{ \ntext here", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("public class temp \n{ \n  text here", doc);
@@ -668,7 +668,7 @@ public class IndentTest extends TestCase {
    */
   public void testInsideClassWithBraceSets () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "public class temp \n{  ()\ntext here", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("public class temp \n{  ()\n  text here", doc);
@@ -680,7 +680,7 @@ public class IndentTest extends TestCase {
    */
   public void testIgnoreBraceOnSameLine () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "public class temp \n{  ()\n{text here", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("public class temp \n{  ()\n  {text here", doc);
@@ -691,7 +691,7 @@ public class IndentTest extends TestCase {
    *
   public void testLargerIndent () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "public class temp \n  {  ()\n { text here", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("public class temp \n  {  ()\n    { text here", doc);
@@ -703,7 +703,7 @@ public class IndentTest extends TestCase {
    */
   public void testWeird () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "hello\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("hello\n  ", doc);
@@ -715,7 +715,7 @@ public class IndentTest extends TestCase {
    */
   public void testWierd2 () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "hello", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("hello", doc);
@@ -727,7 +727,7 @@ public class IndentTest extends TestCase {
    */
   public void testMotion () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "hes{\n{abcde", null);
     doc.insertString(11, "\n{", null);
     // hes{\n{abcde\n{#
@@ -744,7 +744,7 @@ public class IndentTest extends TestCase {
    */
   public void testNextCharIsNewline () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "hes{\n{abcde", null);
     doc.insertString(11, "\n{", null);
     // hes{\n{abcde\n{#
@@ -761,7 +761,7 @@ public class IndentTest extends TestCase {
    */
   public void testFor () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "for(;;)\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("for(;;)\n  ", doc);
@@ -773,7 +773,7 @@ public class IndentTest extends TestCase {
    */
   public void testFor2 () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "{\n  for(;;)\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("{\n  for(;;)\n    ", doc);
@@ -785,7 +785,7 @@ public class IndentTest extends TestCase {
    */
   public void testOpenParen () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "hello(\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("hello(\n      ", doc);
@@ -797,7 +797,7 @@ public class IndentTest extends TestCase {
    */
   public void testPrintString () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "Sys.out(\"hello\"\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("Sys.out(\"hello\"\n          ", doc);
@@ -809,7 +809,7 @@ public class IndentTest extends TestCase {
    */
   public void testOpenBracket () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "hello[\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("hello[\n      ", doc);
@@ -821,7 +821,7 @@ public class IndentTest extends TestCase {
    */
   public void testSquigglyAlignment () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "{\n  }", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("{\n}", doc);
@@ -833,7 +833,7 @@ public class IndentTest extends TestCase {
    */
   public void testSpaceBrace () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "   {\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("   {\n     ", doc);
@@ -844,7 +844,7 @@ public class IndentTest extends TestCase {
    *
   public void testOpenSquigglyCascade () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "if\n  if\n    if\n{", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("if\n  if\n    if\n    {", doc);
@@ -855,7 +855,7 @@ public class IndentTest extends TestCase {
    *
   public void testOpenSquigglyCascade2 () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "{\n  if\n    if\n      if\n{", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("{\n  if\n    if\n      if\n      {", doc);
@@ -867,7 +867,7 @@ public class IndentTest extends TestCase {
    */
   public void testEnter () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n\n", doc);
@@ -879,7 +879,7 @@ public class IndentTest extends TestCase {
    */
   public void testEnter2 () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n", doc);
@@ -891,7 +891,7 @@ public class IndentTest extends TestCase {
    */
   public void testNotRecognizeComments () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\nhello //bal;\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\nhello //bal;\n  ", doc);
@@ -903,7 +903,7 @@ public class IndentTest extends TestCase {
    */
   public void testNotRecognizeComments2 () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\nhello; /*bal*/\n ", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\nhello; /*bal*/\n", doc);
@@ -915,7 +915,7 @@ public class IndentTest extends TestCase {
    */
   public void testBlockIndent () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "hello\n{\n{\n  {", null);
     doc.indentLines(8, 13);
     _assertContents("hello\n{\n  {\n    {", doc);
@@ -928,7 +928,7 @@ public class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testBlockIndent2 () throws BadLocationException {
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "  x;\n  y;\n", null);
     doc.indentLines(0, doc.getLength());
     _assertContents("x;\ny;\n", doc);
@@ -939,7 +939,7 @@ public class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testIndentInsideCommentBlock () throws BadLocationException {
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "hello\n{\n/*{\n{\n*/\nhehe", null);
     doc.indentLines(0, 21);
     _assertContents("hello\n{\n  /*{\n   {\n   */\n  hehe", doc);
@@ -951,7 +951,7 @@ public class IndentTest extends TestCase {
    */
   public void testSecondLineProblem () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n", doc);
@@ -963,7 +963,7 @@ public class IndentTest extends TestCase {
    */
   public void testSecondLineProblem2 () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "a\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("a\n  ", doc);
@@ -975,7 +975,7 @@ public class IndentTest extends TestCase {
    */
   public void testSmallFileProblem () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc._reduced;
+    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n\n", doc);

@@ -90,12 +90,18 @@ public class Step extends DebugAction<StepRequest> {
    */
   protected void _createRequest() throws DebugException {
     DrJava.consoleOut().println("Step._createRequest starting...");
+    boolean excludeDrJava = false;  // will be an advanced config option
     
     _request = _manager.getEventRequestManager().
       createStepRequest(_manager.getCurrentThread(), _size, _depth);
     for (int i=0; i<excludes.length; ++i) {
       _request.addClassExclusionFilter(excludes[i]);
     }
+    if (excludeDrJava) {
+      _request.addClassExclusionFilter("edu.rice.cs.drjava.*");
+      _request.addClassExclusionFilter("edu.rice.cs.util.*");
+    }
+    
     DrJava.consoleOut().println("Created a step request: " + _request + 
                                 " size: " + _size + " depth: " + _depth);
       //DrJava.consoleOut().println("new Step: " + toString());

@@ -45,7 +45,6 @@ import java.util.ListIterator;
 import java.util.LinkedList;
 import java.util.Map;
 import javax.swing.ListModel;
-//import java.util.Iterator;
 
 import gj.util.Enumeration;
 import gj.util.Hashtable;
@@ -60,21 +59,14 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
-// JSwat stuff
-/**
-import com.bluemarsh.jswat.*;
-import com.bluemarsh.jswat.ui.*;
-import com.bluemarsh.jswat.breakpoint.*;
-import com.bluemarsh.util.StringTokenizer;
-*/
-
 import com.sun.jdi.*;
 import com.sun.jdi.connect.*;
 import com.sun.jdi.request.*;
 import com.sun.jdi.event.*;
 
 /**
- * Interface between DrJava and JPDA.
+ * An integrated debugger which attaches to the Interactions JVM using
+ * Sun's Java Platform Debugger Architecture (JPDA/JDI) interface.
  * 
  * @version $Id$
  */
@@ -82,20 +74,6 @@ public class DebugManager {
   public static final int STEP_INTO = StepRequest.STEP_INTO;
   public static final int STEP_OVER = StepRequest.STEP_OVER;
   public static final int STEP_OUT = StepRequest.STEP_OUT;
-  /**
-   * Whether the debugger has been initialized and is ready for use.
-   */
-  //private boolean _isReady;
-
-  /**
-   * Session object used by JSwat.
-   */
-  //private Session _session;
-  
-  /**
-   * Instance of JSwat.
-   */
-  //private JSwat _swat;
   
   /**
    * Reference to DrJava's model.
@@ -112,51 +90,66 @@ public class DebugManager {
    */
   private EventRequestManager _eventManager;
 
+  /**
+   * Vector of all current Breakpoints, with and without EventRequests.
+   */
   private Vector<Breakpoint> _breakpoints;
   
   /**
-   * Maps class names to vector's of pending DebugAction
+   * Keeps track of any DebugActions whose classes have not yet been
+   * loaded, so that EventRequests can be created when the correct
+   * ClassPrepareEvent occurs.
    */
   private PendingRequestManager _pendingRequestManager;
   
   /**
-   * Provides a way for the DebugManager to communicate with the view
+   * Provides a way for the DebugManager to communicate with the view.
    */
   private LinkedList _listeners;
   
   /**
-   * The Thread that the DebugManager is currently analyzing
+   * The Thread that the DebugManager is currently analyzing.
    */
   private ThreadReference _thread;
   
   /**
-   * Writer to use for output messages.
+   * Builds a new DebugManager to debug code in the Interactions JVM,
+   * using the JPDA/JDI interfaces.
+   * Does not actually connect to the InteractionsJVM until startup().
    */
-  //private Writer _logwriter;
-  
-  /**
-   * Builds a newset DebugManager which interfaces to JSwat.
-   * Does not instantiate JSwat until init is called.
-   */
-  public DebugManager(GlobalModel model) throws DebugException {
-    //_isReady = false;
-    //session = null;
-    //_swat = null;
+  public DebugManager(GlobalModel model) {
     _model = model;
     _vm = null;
     _eventManager = null;
     _thread = null;
     _listeners = new LinkedList();
     _breakpoints = new Vector<Breakpoint>();
-    //_logwriter = new PrintWriter(DrJava.consoleOut());
     _pendingRequestManager = new PendingRequestManager(this);
   }
+
   
-  public EventRequestManager getEventRequestManager() {
-    return _eventManager;
+  /**
+   * Attaches the debugger to the Interactions JVM to prepare for debugging.
+   */
+  public synchronized void startup() throws DebugException {
+    if (!isReady()) {
+      //DrJava.consoleOut().println("Starting up...");
+      _attachToVM();
+      //DrJava.consoleOut().println("Attached. VM = " +_vm);
+      EventHandler eventHandler = new EventHandler(this, _vm);
+      eventHandler.start();
+      //DrJava.consoleOut().println("EventHandler started...");
+      ThreadDeathRequest tdr = _eventManager.createThreadDeathRequest();
+      tdr.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+      tdr.enable();
+    }
   }
   
+  /**
+   * Handles the details of attaching to the InteractionsJVM.
+   */
   private void _attachToVM() throws DebugException {
+    // Get the connector
     VirtualMachineManager vmm = Bootstrap.virtualMachineManager();
     List connectors = vmm.attachingConnectors();
     AttachingConnector connector = null;
@@ -171,16 +164,16 @@ public class DebugManager {
       throw new DebugException("Could not find an AttachingConnector!");
     }
     
-    // Try to connect
+    // Try to connect on our debug port
     Map args = connector.defaultArguments();
     Connector.Argument port = (Connector.Argument) args.get("port");
     try {
       int debugPort = _model.getDebugPort();
-      System.out.println("using port: " + debugPort);
+      //System.out.println("using port: " + debugPort);
       port.setValue("" + debugPort);
       _vm = connector.attach(args);
       _eventManager = _vm.eventRequestManager();
-      DrJava.consoleOut().println("Connected to VM @ port "+debugPort);
+      //DrJava.consoleOut().println("Connected to VM @ port "+debugPort);
     }
     catch (IOException ioe) {
       throw new DebugException("Could not connect to VM: " + ioe);
@@ -190,30 +183,13 @@ public class DebugManager {
     }
   }
   
-  public synchronized void startup() throws DebugException {
-    if (!isReady()) {
-      DrJava.consoleOut().println("Starting up...");
-      _attachToVM();
-      DrJava.consoleOut().println("Attached. VM = " +_vm);
-      EventHandler eventHandler = new EventHandler(this, _vm);
-      eventHandler.start();
-      DrJava.consoleOut().println("EventHandler started...");
-      ThreadDeathRequest tdr = _eventManager.createThreadDeathRequest();
-      tdr.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-      tdr.enable();
-      
-      //_vm.setDebugTraceMode(0);
-      //String[] excludes = {"java.*", "javax.*", "sun.*", "com.sun.*", "koala.*"};
-      //EventThread eventThread = new EventThread(_vm, excludes, 
-      //                                          new PrintWriter(DrJava.consoleOut())); 
-      //eventThread.setEventRequests(false);
-      //eventThread.start();
-    }
-  }
-  
+  /**
+   * Disconnects the debugger from the Interactions JVM and cleans up
+   * any state.
+   */
   public synchronized void shutdown() {
     if (isReady()) {
-      DrJava.consoleOut().println("Shutting down...");
+      //DrJava.consoleOut().println("Shutting down...");
       
       removeAllBreakpoints();
       try {
@@ -225,7 +201,6 @@ public class DebugManager {
       finally {
         _vm = null;
         _eventManager = null;
-        //remove all remaining breakpoints
         
         notifyListeners(new EventNotifier() {
           public void notifyListener(DebugListener l) {
@@ -239,8 +214,38 @@ public class DebugManager {
   /**
    * Returns the status of the debugger
    */
-  public boolean isReady() {
+  public synchronized boolean isReady() {
     return _vm != null;
+  }
+  
+  
+  /**
+   * Returns the current EventRequestManager from JDI, or null if 
+   * startup() has not been called.
+   */
+  synchronized EventRequestManager getEventRequestManager() {
+    return _eventManager;
+  }
+  
+  /**
+   * Returns the pending request manager used by the debugger.
+   */
+  synchronized PendingRequestManager getPendingRequestManager() {
+    return _pendingRequestManager;
+  }
+  
+  /**
+   * Sets the debugger's currently active thread.
+   */
+  synchronized void setCurrentThread(ThreadReference thread) {
+    _thread = thread;
+  }
+  
+  /**
+   * Returns the debugger's currently active thread.
+   */
+  synchronized ThreadReference getCurrentThread() {
+    return _thread;
   }
   
   /**
@@ -248,27 +253,26 @@ public class DebugManager {
    * if the class could not be found.  Makes no attempt to load the class
    * if it is not already loaded.
    */
-  ReferenceType getReferenceType(String className) {
+  synchronized ReferenceType getReferenceType(String className) {
     return getReferenceType(className, -1);
   }
   
   /**
    * Returns the loaded ReferenceType for the given class name, or null
    * if the class could not be found.  Makes no attempt to load the class
-   * if it is not already loaded. If the lineNumber is greater than -1, we're 
-   * trying to get the ReferenceType for a Breakpoint so we have to check 
-   * if the lineNumber falls in one of the inner classes of the given
-   * class. In that case, the ReferenceType of that inner class must be 
-   * returned, not that of the outer class.
+   * if it is not already loaded.  If the lineNumber is greater than -1,
+   * ensures that the returned ReferenceType contains the given lineNumber,
+   * searching through inner classes if necessary.  If no inner classes
+   * contain the line number, null is returned.
    */
-  ReferenceType getReferenceType(String className, int lineNumber) {
-    System.out.println("Looking for RefType for class: " + className);
-    System.out.println("on line number: " + lineNumber);
+  synchronized ReferenceType getReferenceType(String className, int lineNumber) {
+    //System.out.println("Looking for RefType for class: " + className);
+    //System.out.println("on line number: " + lineNumber);
     
     // Get all classes that match this name
     List classes = _vm.classesByName(className);
-    System.out.println("Num of classes found: " + classes.size());
-    ReferenceType ref = null; //Reference type is null
+    //System.out.println("Num of classes found: " + classes.size());
+    ReferenceType ref = null;
     
     // Assume first one is correct, for now
     if (classes.size() > 0) {
@@ -296,7 +300,7 @@ public class DebugManager {
               }
             }
             catch (AbsentInformationException aie) {
-              // skipping this inner class
+              // skipping this inner class, look in another
             }
           }
         }
@@ -309,120 +313,25 @@ public class DebugManager {
     //else throw new DebugException ("Couldn't find the class corresponding to '" + className +"'.");
   }
   
-  PendingRequestManager getPendingRequestManager() {
-    return _pendingRequestManager;
-  }
-  
-  /**
-   * Prepares an instantiation of the debugger.
-   *
-  public void init(UIAdapter adapter) {
-    _session = new Session();
-    
-    // Test for the JDI package before we continue.
-    Bootstrap.virtualMachineManager();
-    
-    _swat = JSwat.instanceOf();
-   
-    // Load the jswat settings file.
-    File dir = new File(System.getProperty("user.home") + File.separator + ".jswat");
-    File f = new File(dir, "settings");
-    AppSettings props = AppSettings.instanceOf();
-    props.load(f);
-    
-    adapter.buildInterface();
-    _session.init(adapter);
-
-    _session.addListener(new DebugOutputAdapter());
-
-    // Start without any breakpoints
-    clearAllBreakpoints(false);
-    
-    performCommand("classpath " + _model.getClasspath());
-    
-    // TO DO: start without a file loaded?
-    
-     _isReady = true;
-   }*/
-  
-  /**
-   * Cleans up JSwat's session object when the debugger is finished.
-   *
-  public void endSession() {
-    Main.endSession(_session);
-  }*/
-  
-  /**
-   * Cleans up all parts of the debugger after it is finished.
-   *
-  public void cleanUp() {
-    _session = null;
-    _swat = null;
-    
-    _isReady = false;
-  }*/
-    
-  /**
-   * Sends a command directly to JSwat.
-   * @param command JSwat command to perform
-   *
-  public void performCommand(String command) {
-    Manager manager = _session.getManager(CommandManager.class);
-    ((CommandManager)manager).handleInput(command);
-  }*/
-  
-  /**
-   * Attaches the given Writer directly to JSwat's status Log.
-   * @param w Writer to which to write log messages
-   *
-  public void attachLogWriter(Writer w) {
-    Log log = _session.getStatusLog();
-    log.attach(w);
-    log.start();
-    _logwriter = w;
-  }*/
-  
- 
-  /**
-   * Starts executing the currently loaded document.
-   *
-  public void start(OpenDefinitionsDocument doc) throws ClassNotFoundException{
-
-      _model.saveAllBeforeProceeding(GlobalModelListener.DEBUG_REASON);
-
-    if (_model.areAnyModifiedSinceSave()) return; // they cancelled the save.
-
-    String className = mapClassName(doc);
-    if (className == null) {
-      throw new ClassNotFoundException();
-    }
-
-    performCommand( "run " + className );
-    
-  }*/
   
   /**
    * Suspends execution of the currently running document.
    */
-  public void suspend() {
-    //performCommand( "suspend" );
+  public synchronized void suspend() {
     _vm.suspend();
   }
   
   /**
    * Resumes execution of the currently loaded document.
    */
-  public void resume() {
-    //performCommand( "resume" );
+  public synchronized void resume() {
     _vm.resume();
   }
     
   /** 
    * Steps into the execution of the currently loaded document.
-   * Stepping will walk into method calls.
    */
-  public void step(int flag) throws DebugException {
-    //performCommand( "step" );
+  public synchronized void step(int flag) throws DebugException {
     if (_thread == null) {
       System.out.println("Current thread is null");
       return;
@@ -432,55 +341,12 @@ public class DebugManager {
     System.out.println("_thread resumed");
   }
   
-  /** 
-   * Steps over the next line of the currently loaded document.
-   * Calling next will not walk into method calls.
-   *
-  public void stepOver(OpenDefinitionsDocument doc) throws DebugException {
-    //performCommand( "next" );
-    if (_thread == null) {
-      System.out.println("Current thread is null");
-      return;
-    }
-    Step step = new Step(doc, this, StepRequest.STEP_MIN, StepRequest.STEP_OVER);
-  }*/
-    
-  /** 
-   * Steps out of the execution of the currently loaded document.
-   * Stepping will jump back to the parent frame.
-   *
-  public void stepOut(OpenDefinitionsDocument doc) throws DebugException {
-    //performCommand( "step" );
-    if (_thread == null) {
-      System.out.println("Current thread is null");
-      return;
-    }
-    Step step = new Step(doc, this, StepRequest.STEP_MIN, StepRequest.STEP_OUT);
-  }  */
-  
-
-
-  /**
-   * Removes all breakpoints from the session.
-   * @param visibleMessage Whether to display a status message after clearing
-   *
-  public void clearAllBreakpoints(boolean visibleMessage) {
-    BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
-    Iterator i=bpManager.breakpoints(true);
-    Breakpoint bp;
-    while (i.hasNext()) {
-      bp = (Breakpoint)i.next();
-      bpManager.removeBreakpoint(bp);
-      i=bpManager.breakpoints(true);
-    }
-    if (visibleMessage) 
-      writeToLog("All breakpoints removed.\n");      
-  }*/
 
   /**
    * Toggles whether a breakpoint is set at the given line in the given
    * document.
    * @param doc Document in which to set or remove the breakpoint
+   * @param offset Start offset on the line to set the breakpoint
    * @param lineNumber Line on which to set or remove the breakpoint
    */
   public synchronized void toggleBreakpoint(OpenDefinitionsDocument doc, 
@@ -499,13 +365,11 @@ public class DebugManager {
   /**
    * Sets a breakpoint.
    *
-   * @param className the name of the class in which to break
-   * @param lineNumber the line number at which to break
+   * @param breakpoint The new breakpoint to set
    */
   public synchronized void setBreakpoint(final Breakpoint breakpoint)
   {
-
-    System.out.println("setting: " + breakpoint);
+    //System.out.println("setting: " + breakpoint);
     /*
     if (breakpoint.getRequest() != null)
       _breakpoints.put(breakpoint.getRequest(), breakpoint);*/
@@ -522,14 +386,12 @@ public class DebugManager {
  /**
   * Removes a breakpoint.
   * Called from ToggleBreakpoint -- even with BPs that are not active.
-  * This takes in a LineBreakpoint (only kind DrJava creates) so that we can
-  * get out the line number and unlighlight it if necessary.
   *
   * @param breakpoint The breakpoint to remove.
   * @param className the name of the class the BP is being removed from.
   */
   public synchronized void removeBreakpoint(final Breakpoint breakpoint) {
-    System.out.println("unsetting: " + breakpoint);
+    //System.out.println("unsetting: " + breakpoint);
     _breakpoints.removeElement(breakpoint);
     
     if ( breakpoint.getRequest() != null && _eventManager != null) {
@@ -548,246 +410,29 @@ public class DebugManager {
   }
 
   /**
-   * Removes all the breakpoints from the manager's vector of breakpoints
+   * Removes all the breakpoints from the manager's vector of breakpoints.
    */
-  public void removeAllBreakpoints() {
-    
+  public synchronized void removeAllBreakpoints() {
     while (_breakpoints.size() > 0) {
-      
       removeBreakpoint( _breakpoints.elementAt(0));
     }
-    
   }
-  
-  /**
-   * Prints all location breakpoints via writeToLog().
-   *
-  public void printBreakpoints() {
-    BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
-    Iterator i = bpManager.breakpoints(true);
-    Object o;
-    LineBreakpoint lbp;
-    MethodBreakpoint mbp;
-
-    if (!i.hasNext()) {
-      writeToLog("No Breakpoints Set.\n");
-    }
-    else {
-      writeToLog("Current Breakpoints:\n");
-    }
-    
-    while (i.hasNext()) { // remember, ONLY locationbreakpoints
-      o = i.next();
-      if (o instanceof LineBreakpoint) {
-        lbp = (LineBreakpoint)o;  
-        writeToLog(" " + lbp.getClassName() +
-                   ":" + lbp.getLineNumber() +
-                   "\n");
-      }
-      if (o instanceof MethodBreakpoint) {
-        mbp = (MethodBreakpoint)o;
-        writeToLog(" " + mbp.getClassName() +
-                   ":" + mbp.getMethodName() +
-                   ":" + mbp.getLineNumber() +
-                   "\n");     
-      }
-    }
-  }*/
-  
-  /*   
-  public void addWatch();
-  
-  public void removeWatch();
-  */
 
   /**
-   * Return the fully-qualified classname corresponding to the
-   * given source file. Returns null if file has an error.
-   *
-   * Note: assumes each file contains source for exactly one
-   * class whose name is the same as the filename.
-   * 
-   * Based on code from JSwat.
-   * 
-   * @param doc   document containing class.
-   * @return  Classname, or null if error.
-   *
-  private final static String mapClassName(final OpenDefinitionsDocument doc) {
-    File source;
-    String fpath, rpath;
-    try {
-      source = doc.getDocument().getFile();
-      fpath = source.getCanonicalPath();
-      rpath = doc.getSourceRoot().getCanonicalPath();
-    }
-    catch (IOException ioe) {
-      return null;
-    } catch (InvalidPackageException ipe) {
-      return null;
-    }
-    // Don't need the filename extension.
-    int idx = fpath.lastIndexOf(".java");
-    if (idx > 0) {
-      fpath = fpath.substring(0, idx);
-    }
-
-    int longest = -1;
-    if (fpath.startsWith(rpath)) {
-      int len = rpath.length();
-      if (rpath.charAt(len - 1) != File.separatorChar) {
-        // Path list entry does not end with a separator so
-        // we must add one to remove it from fpath.
-        len++;
-      }
-      if (len > longest) {
-        // Save the length for the possible best match.
-        // This may change as we go through the list.
-        longest = len;
-      }
-    }
-  
-    if (longest > -1) {
-      // Convert the file separators to dots.
-      fpath = fpath.replace(File.separatorChar, '.');
-      fpath = fpath.substring(longest);
-      return fpath;
-    } else {
-      return null;
-    }    
-  }*/
-  
-  
-  /*
-   * Class DebugOutputAdapter is responsible for displaying the output
-   * of a debuggee process to the Log. It reads both the standard output
-   * and standard error streams from the debuggee VM. For it to operate
-   * correctly it must be added as a session listener.
-   *
-   * @author  Nathan Fiedler, with modifications
+   * Called when a breakpoint is reached.  The Breakpoint object itself
+   * should be stored in the "debugAction" property on the request.
+   * @param request The BreakPointRequest reached by the debugger
    */
-  //class DebugOutputAdapter implements SessionListener {
-    /** When this reaches 2, the output streams are finished. */
-    //protected int outputCompleteCount;
-    
-    
-    /**
-     * Constructs a DebugOutputAdapter to output to the manager's log.
-     *
-    public DebugOutputAdapter() {
-    }*/
-    
-    /**
-     * Called when the Session is about to begin an active debugging
-     * session. That is, JSwat is about to debug a debuggee VM.
-     * Panels are not activated in any particular order.
-     *
-     * @param  session  Session being activated.
-     *
-    public void activate(Session session) {
-      // Attach to the stderr and stdout input streams of the passed
-      // VirtualMachine and begin reading from them. Everything read
-      // will be displayed in the text area.
-      com.sun.jdi.VirtualMachine vm = session.getVM();
-      if (vm.process() == null) {
-        // Must be a remote process, which can't provide us
-        // with an input and error streams.
-        // We're automatically finished reading output.
-        outputCompleteCount = 2;
-      } else {
-        // Assume output reading is not complete.
-        outputCompleteCount = 0;
-        // Create readers for the input and error streams.
-        displayOutput(vm.process().getErrorStream(),false);
-        displayOutput(vm.process().getInputStream(),true);
-      }
-    }*/
-    
-    /**
-     * Called when the Session is about to close down.
-     *
-     * @param  session  Session being closed.
-     *
-    public void close(Session session) {
-    }*/
-    
-    /**
-     * Called when the Session is about to end an active debugging
-     * session. That is, JSwat is about to terminate the connection
-     * with the debuggee VM.
-     * Panels are not deactivated in any particular order.
-     *
-     * @param  session  Session being deactivated.
-     *
-    public synchronized void deactivate(Session session) {
-      // Wait for the output readers to finish.
-      while (outputCompleteCount < 2) {
-        try {
-          wait();
-        } catch (InterruptedException ie) {
-          break;
-        }
-      }
-    }*/
-    
-    /** 
-     * Create a thread that will retrieve and display any output
-     * from the given input stream.
-     *
-     * @param  is  InputStream to read from.
-     *
-    protected void displayOutput(final InputStream is, final boolean isOut) {
-      Thread thr = new Thread("output reader") { 
-        public void run() {
-          try {
-            BufferedReader br =
-              new BufferedReader(new InputStreamReader(is));
-            String line;
-            // Dump until there's nothing left.
-            while ((line = br.readLine()) != null) {
-              line += "\n";
-              if (isOut)
-                _model.debugSystemOutPrint(line);
-              else
-                _model.debugSystemErrPrint(line);
-            }
-          } catch (IOException ioe) {
-            _model.debugSystemErrPrint("Error reading from streams.\n");
-          } finally {
-            notifyOutputComplete();
-          }
-        }
-      };
-      thr.setPriority(Thread.MIN_PRIORITY);
-      thr.start();
-    }*/
-    
-    /**
-     * Called after the Session has added this listener to the
-     * Session listener list.
-     *
-     * @param  session  Session adding this listener.
-     *
-    public void init(Session session) {
-    }*/
-    
-    /**
-     * Notify any waiters that one of the reader threads has
-     * finished reading its output. This must be a separate
-     * method in order to be synchronized on 'this' object.
-     *
-    protected synchronized void notifyOutputComplete() {
-      outputCompleteCount++;
-      notifyAll();
-    }*/
-  //}
-  
-  public void hitBreakpoint(BreakpointRequest request) {
+  synchronized void reachedBreakpoint(BreakpointRequest request) {
     Object property = request.getProperty("debugAction");
     if ( (property!=null) && (property instanceof Breakpoint)) {
       Breakpoint breakpoint = (Breakpoint)property;
-      System.out.println("Encountered a breakpoint at line "+ 
-                         breakpoint.getLineNumber() +
-                         " in file " + breakpoint.getClassName());
+      _model.printDebugMessage("Breakpoint hit in class " + 
+                               breakpoint.getClassName() + ", line " +
+                               breakpoint.getLineNumber() + ".");
+      //System.out.println("Encountered a breakpoint at line "+ 
+      //                   breakpoint.getLineNumber() +
+      //                   " in file " + breakpoint.getClassName());
     }
   }
   
@@ -795,7 +440,7 @@ public class DebugManager {
    * Returns a Vector<Breakpoint> that contains all of the Breakpoint objects that
    * all open documents contain.
    */
-  public Vector<Breakpoint> getBreakpoints() {
+  public synchronized Vector<Breakpoint> getBreakpoints() {
     Vector<Breakpoint> sortedBreakpoints = new Vector<Breakpoint>();
     ListModel docs = _model.getDefinitionsDocuments();
     for (int i = 0; i < docs.getSize(); i++) {
@@ -813,7 +458,7 @@ public class DebugManager {
    * and centers the definition pane's view on the appropriate line number
    * @param e should be a LocatableEvent
    */
-  void scrollToSource(LocatableEvent e) {
+  synchronized void scrollToSource(LocatableEvent e) {
     Location location = e.location();
     OpenDefinitionsDocument doc = null;
     
@@ -885,25 +530,15 @@ public class DebugManager {
       DrJava.consoleOut().println("couldn't open file to scroll to");
     }
   }
-  
-  void setCurrentThread(ThreadReference thread) {
-    _thread = thread;
-  }
-  
-  ThreadReference getCurrentThread() {
-    return _thread;
-  }
 
   /**
    * Adds a listener to this DebugManager.
    * @param listener a listener that reacts on events generated by the DebugManager
    */
-  public void addListener(DebugListener listener) {
+  public synchronized void addListener(DebugListener listener) {
     _listeners.addLast(listener);
   }
 
-  
-  
   /**
    * Lets the listeners know some event has taken place.
    * @param EventNotifier n tells the listener what happened

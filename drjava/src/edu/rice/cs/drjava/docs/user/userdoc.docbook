@@ -130,11 +130,16 @@
   <!-- Chapter: Interactions Pane -->
   <chapter id="interactions">
     <title>Interactions Pane</title>
-    <para>One of the key strengths of DrJava is its Interactions Pane, which allows the user to enter and evaluate arbitrary Java statements and expressions on the fly.  This can be remarkably useful for beginning students, who no longer have to write main methods, recompile, and run from a command line simply to test how a class or method behaves.  It can also be used to experiment with new libraries, or even create graphical Swing objects interactively.</para>
+    <para>One of the key strengths of DrJava is its Interactions Pane, which allows the user to enter and evaluate arbitrary Java statements and expressions on the fly.  This can be remarkably useful for beginning students, who no longer have to write main methods, recompile, and run from a command line simply to test how a class or method behaves.  From a teaching standpoint, it is a very easy way to get students started with Java without having to explain the full meaning of "public static void main".  The Interactions Pane can also be used to experiment with new libraries, or even create graphical Swing objects interactively.</para>
 
     <formalpara>
       <title>How to Use</title>
-      <para>DrJava uses <ulink url="http://koala.ilog.fr/djava">DynamicJava</ulink> as the interpreter for the Interactions Pane, which allows execution of any valid Java statements as well as the evaluation of Java expressions.  Simply define variables and call methods as in a main method, or even define new classes and methods.  DrJava provides the ability both to reset the Interactions Pane, if the user wishes to start from scratch, and to abort the current interaction, in the case that a method never returns.</para>
+      <para>DrJava uses <ulink url="http://koala.ilog.fr/djava">DynamicJava</ulink> as the interpreter for the Interactions Pane, which allows execution of any valid Java statements as well as the evaluation of Java expressions.  Simply define variables and call methods as if in a method, or even define new classes and methods.  DrJava provides the ability both to reset the Interactions Pane, if the user wishes to start from scratch, and to abort the current interaction, in the case that a method never returns.</para>
+    </formalpara>
+
+    <formalpara>
+      <title>Running the Main Method</title>
+      <para>For convenience, DrJava supports calling the main method in the Interactions Pane by simply entering "java" followed by the class name and any arguments.  For example, to run MyClass with args "arg1" and "arg2", type the following into the Interactions Pane: "java MyClass arg1 arg2".</para>
     </formalpara>
 
     <formalpara>

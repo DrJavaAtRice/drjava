@@ -69,7 +69,7 @@ import com.bluemarsh.jswat.view.*;
  * @version $Id$
  */
 public class DebugPanel extends JPanel implements OptionConstants {
-  
+/*
   private static final String BANNER_TEXT = "JSwat Debugger Console\n\n";
 
   private final SingleDisplayModel _model;
@@ -88,15 +88,16 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
     //  private Object _curBreakpointTag=null; // currently highlighted line
     //  private int    _curBP;                 // and its associated tag.
-    
+   
+*/
   /**
    * Action performed when the Enter key is pressed.
-   */
+   *
   private ActionListener _performAction = new ActionListener() {
     public void actionPerformed(ActionEvent e) {
       _performCommand();
     }
-  };                                                             
+  };*/                                                             
 
   /**
    * Highlighter
@@ -118,7 +119,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
    * Constructor.
    * @param model SingleDisplayModel in which we are running
    * @param frame MainFrame in which we are displayed
-   */
+   *
   public DebugPanel(SingleDisplayModel model, MainFrame frame) {
     _model = model;
     _frame = frame;
@@ -156,7 +157,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     
     _logger = new DebugLogger(System.err);
     reset();
-  }
+  }*/
   
   /**
    * Returns the UIAdapter used by JSwat.
@@ -168,16 +169,16 @@ public class DebugPanel extends JPanel implements OptionConstants {
   /**
    * Sets the font for displaying text.
    * @param f Font to be used for input and output
-   */
+   *
   public void setFonts(Font f) {
     _outputPane.setFont(f);
     _inputField.setFont(f);
-  }
+  }*/
   
   /**
    * Sends the command currently in the inField to the JSwat debugger.
    * (Specific to JSwat, used in Advanced mode.)
-   */
+   *
   private void _performCommand() {
     String cmd = _inputField.getText().trim();
     if (!cmd.equals("")) {
@@ -187,12 +188,12 @@ public class DebugPanel extends JPanel implements OptionConstants {
       // Execute command
       //_model.getDebugManager().performCommand(cmd);
     }
-  }
+  }*/
   
   /**
    * Appends the given string to the output document and scrolls
    * to the end.
-   */
+   *
   private void _appendString(String s) {
     try {
       _outputDoc.insertString(_outputDoc.getLength(), s, null);
@@ -204,11 +205,11 @@ public class DebugPanel extends JPanel implements OptionConstants {
       // Can't happen: getLength() and endPos are always legal
     }
     _outputPane.repaint();
-  }
+  }*/
   
   /**
    * Resets the output document by removing all text and inserting the banner.
-   */
+   *
   public void reset() {
     try {
       _outputDoc.remove(0, _outputDoc.getLength());
@@ -218,25 +219,25 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
     
     _appendString(BANNER_TEXT);
-  }
+  }*/
   
  
 
   /**
    * A Writer which writes to the output pane.
    */
-  private class DebugLogger extends BufferedWriter {
-    public DebugLogger(OutputStream os) {
-      super(new PrintWriter(os));
-    }
+  //private class DebugLogger extends BufferedWriter {
+  //  public DebugLogger(OutputStream os) {
+  //    super(new PrintWriter(os));
+  //  }
     
     /**
      * Writes a line to the output document.
-     */
+     *
     public void write(String s) {
       _appendString(s);
-    }
-  }
+    }*/
+  //}
   
   /**
    * A UIAdapter for JSwat, to be used for displaying JSwat's status.

@@ -103,7 +103,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   private final InteractionsDocument _interactionsDoc
     = new InteractionsDocument();
   private final StyledDocument _consoleDoc = new DefaultStyledDocument();
-  private final StyledDocument _debugDoc = new DefaultStyledDocument();
   private final StyledDocument _junitDoc = new DefaultStyledDocument();
   private final LinkedList _listeners = new LinkedList();
   private PageFormat _pageFormat = new PageFormat();
@@ -116,7 +115,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   private CompilerError[] _compilerErrorsWithoutFiles;
   private int _numErrors;
 
-  // Create a debug manager
+  // Debug manager (null if not available)
   private DebugManager _debugManager = null;
   private int _debugPort = -1;
 
@@ -154,12 +153,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   public static final AttributeSet SYSTEM_ERR_INTERACTIONS_STYLE
     = _getErrStyle();
 
-  public static final AttributeSet SYSTEM_OUT_DEBUG_STYLE
-    = _getOutInsideInteractionsStyle();
+  public static final AttributeSet DEBUG_STYLE
+    = _getDebugStyle();
 
   private static AttributeSet _getOutInsideInteractionsStyle() {
     SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_STYLE);
     s.addAttribute(StyleConstants.Foreground, Color.green.darker().darker());
+    return s;
+  }
+  
+  private static AttributeSet _getDebugStyle() {
+    SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_STYLE);
+    s.addAttribute(StyleConstants.Foreground, Color.blue.darker());
+    s.addAttribute(StyleConstants.Bold, new Boolean(true));
     return s;
   }
   
@@ -254,10 +260,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
   public StyledDocument getConsoleDocument() {
     return _consoleDoc;
-  }
-
-  public StyledDocument getDebugDocument() {
-    return _debugDoc;
   }
 
   public StyledDocument getJUnitDocument() {
@@ -493,13 +495,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
       // Clean up debugger if necessary
       //if ((_debugManager != null) && (_debugManager.isReady())) {
-      //  _debugManager.endSession();
+      //  _debugManager.shutdown();
       //}
+      
       if (DrJava.getSecurityManager() != null) {
         DrJava.getSecurityManager().exitVM(0);
       }
       else {
-        //might be being debugged
+        //might be being debugged by another DrJava
         System.exit(0);
       }
         
@@ -575,8 +578,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   public void resetInteractions() {
     // Keep a note that we're resetting so that the exit message is not displayed
     _interpreterControl.setIsResetting(true);
-    if (_debugManager != null)
+    if ((_debugManager != null) && (_debugManager.isReady())){
       _debugManager.shutdown();
+    }
     _interpreterControl.restartInterpreterJVM();
     _restoreInteractionsState();
     _interpreterControl.setIsResetting(false);
@@ -828,17 +832,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     _interactionsDoc.insertBeforeLastPrompt(s, SYSTEM_ERR_INTERACTIONS_STYLE);
   }
 
-  /** Called when the repl prints to System.out. */
-  public void debugSystemOutPrint(String s) {
-    systemOutPrint(s);
-    _docAppend(_debugDoc, s, SYSTEM_OUT_DEBUG_STYLE);
+  /** Called when the debugger wants to print a message. */
+  public void printDebugMessage(String s) {
+    _interactionsDoc.insertBeforeLastPrompt(s + "\n", DEBUG_STYLE);
   }
 
-  /** Called when the repl prints to System.err. */
-  public void debugSystemErrPrint(String s) {
-    systemErrPrint(s);
-    _docAppend(_debugDoc, s, SYSTEM_ERR_STYLE);
-  }
 
   private void _interactionIsOver() {
     _interactionsDoc.setInProgress(false);
@@ -2083,20 +2081,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         // JPDA not available, so we won't use it.
         _debugManager = null;
       }
-      catch(DebugException de) {
-        // Problem while connecting, so we won't use debugger.
-        _debugManager = null;
-      }
-      //}
-      //else {
-      //  _debugManager = null;
-      //}
-    }
-    /* else {
-     _debugManager = null;
-     }
-    }*/
-    
+    }    
   }
 
 
