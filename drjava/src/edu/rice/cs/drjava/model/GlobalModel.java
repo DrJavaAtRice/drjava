@@ -50,12 +50,12 @@ public interface GlobalModel {
   /**
    * Gets the interactions document.
    */
-  public Document getInteractionsDocument();
+  public StyledDocument getInteractionsDocument();
 
   /**
    * Gets the console document.
    */
-  public Document getConsoleDocument();
+  public StyledDocument getConsoleDocument();
 
   /**
    * Gets the array of all compile errors without Files.
@@ -156,6 +156,54 @@ public interface GlobalModel {
   public void interpretCurrentInteraction();
 
   /**
+   * Aborts the currently running interaction.
+   */
+  public void abortCurrentInteraction();
+
+  /** Called when the repl prints to System.out. */
+  public void replSystemOutPrint(String s);
+
+  /** Called when the repl prints to System.err. */
+  public void replSystemErrPrint(String s);
+
+  /**
+   * Signifies that the most recent interpretation completed successfully,
+   * returning no value.
+   */
+  public void replReturnedVoid();
+
+  /**
+   * Signifies that the most recent interpretation completed successfully,
+   * returning a value.
+   *
+   * @param result The .toString-ed version of the value that was returned
+   *               by the interpretation. We must return the String form
+   *               because returning the Object directly would require the
+   *               data type to be serializable.
+   */
+  public void replReturnedResult(String result);
+
+  /**
+   * Signifies that the most recent interpretation was ended 
+   * due to an exception being thrown.
+   *
+   * @param exceptionClass The name of the class of the thrown exception
+   * @param message The exception's message
+   * @param stackTrace The stack trace of the exception
+   */
+  public void replThrewException(String exceptionClass,
+                                 String message,
+                                 String stackTrace);
+
+  /**
+   * Signifies that the most recent interpretation contained a call to
+   * System.exit.
+   *
+   * @param status The exit status that will be returned.
+   */
+  public void replCalledSystemExit(int status);
+
+  /**
    * Returns all registered compilers that are actually available.
    * That is, for all elements in the returned array, .isAvailable()
    * is true.
@@ -189,5 +237,5 @@ public interface GlobalModel {
    * @throws InvalidPackageException if the package statement in one
    *  of the open documents is invalid.
    */
-  public File[] getSourceRootSet() throws InvalidPackageException;
+  public File[] getSourceRootSet();
 }

@@ -98,23 +98,110 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
    * Checks that System.exit is handled appropriately from
    * interactions frame.
    */
-  public void testInteractionPreventedFromExit() throws BadLocationException
+  public void testInteractionPreventedFromExit()
+    throws BadLocationException, InterruptedException
   {
-    String result = interpret("System.exit(-1);");
+    TestListener listener = new TestListener() {
+      public void interactionStarted() {
+        interactionStartCount++;
+      }
 
-    assertEquals("interactions result",
-                 DefaultGlobalModel.EXIT_CALLED_MESSAGE,
-                 result);
+      public void interactionsExited(int status) {
+        assertInteractionStartCount(1);
+        interactionsExitedCount++;
+        lastExitStatus = status;
+      }
+
+      public void interactionsReset() {
+        synchronized(this) {
+          assertInteractionStartCount(1);
+          assertInteractionsExitedCount(1);
+          interactionsResetCount++;
+          this.notify();
+        }
+      }
+    };
+
+    _model.addListener(listener);
+    synchronized(listener) {
+      interpretIgnoreResult("System.exit(23);");
+      listener.wait();
+    }
+
+    listener.assertInteractionStartCount(1);
+    listener.assertInteractionsResetCount(1);
+    listener.assertInteractionsExitedCount(1);
+    assertEquals("exit status", 23, listener.lastExitStatus);
+  }
+
+  /**
+   * Checks that the interpreter can be aborted and then work
+   * correctly later.
+   */
+  public void testInteractionAbort()
+    throws BadLocationException, InterruptedException
+  {
+    TestListener listener = new TestListener() {
+      public void interactionStarted() {
+        //System.err.println("start notice");
+        interactionStartCount++;
+      }
+
+      public void interactionEnded() {
+        // this can only happen on the second interpretation!
+        assertInteractionStartCount(2);
+        interactionEndCount++;
+      }
+
+      public void interactionsExited(int status) {
+        //System.err.println("exit notice");
+        assertInteractionStartCount(1);
+        interactionsExitedCount++;
+      }
+
+      public void interactionsReset() {
+        synchronized(this) {
+          //System.err.println("reset notice");
+          assertInteractionStartCount(1);
+          assertInteractionsExitedCount(1);
+          interactionsResetCount++;
+          this.notify();
+        }
+      }
+    };
+
+    _model.addListener(listener);
+    synchronized(listener) {
+      interpretIgnoreResult("while (true) {}");
+      listener.assertInteractionStartCount(1);
+      //System.err.println("about to abort");
+      _model.abortCurrentInteraction();
+      //System.err.println("about to wait for abort");
+      listener.wait();
+    }
+
+    //System.err.println("waiting done");
+    listener.assertInteractionsResetCount(1);
+    listener.assertInteractionsExitedCount(1);
+
+    // now make sure it still works!
+    //System.err.println("about to interp 5");
+    //System.err.println("done interp 5");
+    assertEquals("5", interpret("5"));
+    listener.assertInteractionStartCount(2);
+    listener.assertInteractionEndCount(1);
   }
 
   /**
    * Checks that reset console works.
-   * BROKEN because OutputPane is stupid.
    */
-  /*
-  public void testResetConsole() throws BadLocationException
+  public void testResetConsole()
+    throws BadLocationException, InterruptedException
   {
     TestListener listener = new TestListener() {
+      public void interactionStarted() {}
+      public void interactionEnded() {}
+
       public void consoleReset() {
         consoleResetCount++;
       }
@@ -129,7 +216,21 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
 
     listener.assertConsoleResetCount(1);
 
-    interpretIgnoreResult("System.out.println(\"a\");");
+    interpretIgnoreResult("System.out.print(\"a\");");
+
+    // alas, there's no very good way to know when it's done
+    // so we just wait some time hoping the println will have happened
+    int i;
+    for (i = 0; i < 10; i++) {
+      if (_model.getConsoleDocument().getLength() == 1) {
+        break;
+      }
+
+      Thread.currentThread().sleep(100);
+    }
+
+    //System.err.println("wait i=" + i);
+
     assertEquals("Length of console text",
                  1,
                  _model.getConsoleDocument().getLength());
@@ -142,7 +243,6 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
 
     listener.assertConsoleResetCount(2);
   }
-  */
 
   /**
    * Creates a new class, compiles it and then checks that the REPL
@@ -467,19 +567,17 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     // No events should fire
     _model.addListener(new TestListener());
 
-    // The package name is wrong so this should fail.
-    try {
-      File[] root = _model.getSourceRootSet();
-      fail("getSourceRoot() did not fail on invalid package. It returned: " +
-           root);
-    }
-    catch (InvalidPackageException e) {
-      // good.
-    }
+    // The package name is wrong so this should return none.
+    File[] roots = _model.getSourceRootSet();
+    assertEquals("number of source roots", 0, roots.length);
+    /*
+    fail("getSourceRoot() did not fail on invalid package. It returned: " +
+         root);
+         */
   }
 
   public void testGetSourceRootPackageOneDeepValid()
-    throws BadLocationException, IOException, InvalidPackageException
+    throws BadLocationException, IOException
   {
     // Create temp directory
     File baseTempDir = tempDirectory();
@@ -505,7 +603,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
 
 
   public void testGetMultipleSourceRootsDefaultPackage()
-    throws BadLocationException, IOException, InvalidPackageException
+    throws BadLocationException, IOException
   {
     // Create temp directory
     File baseTempDir = tempDirectory();
@@ -541,6 +639,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     File root2 = roots[1];
 
     // Make sure both source roots are in set
+    // But we don't care about the order
     if (!( (root1.equals(subdir1) && root2.equals(subdir2)) ||
            (root1.equals(subdir2) && root2.equals(subdir1)) ))
     {

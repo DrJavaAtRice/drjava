@@ -45,7 +45,7 @@ public class JavaInterpreterTest extends TestCase {
    * put your documentation comment here
    * @param cases
    */
-  private void tester(Pair[] cases) {
+  private void tester(Pair[] cases) throws ExceptionReturnedException {
     for (int i = 0; i < cases.length; i++) {
       Object out = _interpreter.interpret(cases[i].first());
       assertEquals(cases[i].first() + " interpretation wrong!", cases[i].second(), 
@@ -54,7 +54,7 @@ public class JavaInterpreterTest extends TestCase {
   }
 
   /** Make sure interpreting simple constants works. */
-  public void testConstants() {
+  public void testConstants() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       Pair.make("5", new Integer(5)), Pair.make("1356", new Integer(1356)), Pair.make("true", 
           Boolean.TRUE), Pair.make("false", Boolean.FALSE), Pair.make("\'c\'", new Character('c')), 
@@ -66,7 +66,7 @@ public class JavaInterpreterTest extends TestCase {
   }
 
   /** Test simple operations with Booleans */
-  public void testBooleanOps() {
+  public void testBooleanOps() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       //and
       Pair.make("true && false", new Boolean(false)), Pair.make("true && true", 
@@ -89,7 +89,7 @@ public class JavaInterpreterTest extends TestCase {
   /**
    * put your documentation comment here
    */
-  public void testIntegerOps() {
+  public void testIntegerOps() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       // plus
       Pair.make("5+6", new Integer(5 + 6)), 
@@ -140,7 +140,7 @@ public class JavaInterpreterTest extends TestCase {
   /**
    * put your documentation comment here
    */
-  public void testDoubleOps() {
+  public void testDoubleOps() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       // less than
       Pair.make("5.6 < 6.7", new Boolean(5.6 < 6.7)), 
@@ -175,7 +175,7 @@ public class JavaInterpreterTest extends TestCase {
   /**
    * put your documentation comment here
    */
-  public void testStringOps() {
+  public void testStringOps() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       // concatenation
       Pair.make("\"yeah\" + \"and\"", new String("yeah" + "and")), 
@@ -189,7 +189,7 @@ public class JavaInterpreterTest extends TestCase {
   /**
    * put your documentation comment here
    */
-  public void testCharacterOps() {
+  public void testCharacterOps()  throws ExceptionReturnedException{
     Pair[] cases = new Pair[] {
       // equals
       Pair.make("'c' == 'c'", new Boolean('c' == 'c'))
@@ -200,7 +200,7 @@ public class JavaInterpreterTest extends TestCase {
   /**
    * put your documentation comment here
    */
-  public void testSemicolon() {
+  public void testSemicolon() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       Pair.make("'c' == 'c'", new Boolean('c' == 'c')), 
       Pair.make("'c' == 'c';", JavaInterpreter.NO_RESULT), 
@@ -217,7 +217,7 @@ public class JavaInterpreterTest extends TestCase {
    * run it.
    */
   /**
-   public void testRunAsProgram()
+   public void testRunAsProgram() throws ExceptionReturnedException
    {
    MainFrame _m = new MainFrame();
    DefinitionsView v = _m.getDefView();

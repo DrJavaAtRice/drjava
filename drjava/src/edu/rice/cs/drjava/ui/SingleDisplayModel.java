@@ -400,13 +400,18 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    */
   private class SelectionModelListener implements ListSelectionListener {
     public void valueChanged(ListSelectionEvent e) {
-      if (!e.getValueIsAdjusting()) {
+      if (! e.getValueIsAdjusting()) {
         int index = _selectionModel.getMinSelectionIndex();
         ListModel docs = getDefinitionsDocuments();
-        if ((index < 0) || (index > docs.getSize())) {
-          throw new RuntimeException("Document index out of bounds: " + index);
+        //if ((index < 0) || (index > docs.getSize())) {
+          //throw new RuntimeException("Document index out of bounds: " + index);
+        //}
+
+        // not sure why, but i just saw this get called with index=-1
+        // let's just ignore that.
+        if ((index >= 0) && (index < docs.getSize())) {
+          _setActiveDoc(index);
         }
-        _setActiveDoc(index);
       }
     }
   }

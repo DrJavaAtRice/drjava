@@ -1,32 +1,26 @@
 package edu.rice.cs.drjava.ui;
 
-import  javax.swing.JTextArea;
-import  javax.swing.Action;
-import  javax.swing.AbstractAction;
-import  javax.swing.KeyStroke;
-import  javax.swing.text.Keymap;
-import  java.awt.Toolkit;
-import  java.awt.event.KeyEvent;
-import  java.awt.event.ActionEvent;
+import javax.swing.JTextPane;
+import javax.swing.Action;
+import javax.swing.AbstractAction;
+import javax.swing.KeyStroke;
+import javax.swing.text.Keymap;
+import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.awt.event.ActionEvent;
 
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.repl.*;
 
 /**
  * The view component for repl interaction.
+ *
  * @version $Id$
  */
-public class InteractionsPane extends JTextArea {
+public class InteractionsPane extends JTextPane {
   private GlobalModel _model;
   private AbstractAction _evalAction = new AbstractAction() {
-
-    /**
-     * put your documentation comment here
-     * @param e
-     */
     public void actionPerformed(ActionEvent e) {
-      setCaretPosition(getDocument().getLength());
-      //getInteractionsDocument().eval();
       _model.interpretCurrentInteraction();
     }
   };
@@ -38,35 +32,21 @@ public class InteractionsPane extends JTextArea {
   };
   
   private AbstractAction _historyPrevAction = new AbstractAction() {
-
-    /**
-     * put your documentation comment here
-     * @param e
-     */
     public void actionPerformed(ActionEvent e) {
       _model.recallPreviousInteractionInHistory(BEEP);
     }
   };
-  private AbstractAction _historyNextAction = new AbstractAction() {
 
-    /**
-     * put your documentation comment here
-     * @param e
-     */
+  private AbstractAction _historyNextAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       _model.recallNextInteractionInHistory(BEEP);
     }
   };
 
-  /**
-   * put your documentation comment here
-   */
   public InteractionsPane(GlobalModel model) {
     super(model.getInteractionsDocument());
     _model = model;
-    setLineWrap(true);
-    setWrapStyleWord(true);
-    _model.resetInteractions();
+    
     //add actions for enter key, etc.
     Keymap ourMap = addKeymap("INTERACTIONS_KEYMAP", getKeymap());
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), 

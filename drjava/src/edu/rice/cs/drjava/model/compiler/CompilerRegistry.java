@@ -25,7 +25,8 @@ public class CompilerRegistry {
   public static final String[] DEFAULT_COMPILERS = {
     "edu.rice.cs.drjava.model.compiler.JavacGJCompiler",
     "edu.rice.cs.drjava.model.compiler.JavacFromToolsJar",
-    "edu.rice.cs.drjava.model.compiler.GJv6Compiler"
+    // gj doesn't work on 1.4, and it sucks anyhow. let's drop it.
+    //"edu.rice.cs.drjava.model.compiler.GJv6Compiler"
   };
 
   /** Singleton instance. */

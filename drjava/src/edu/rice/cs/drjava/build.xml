@@ -34,7 +34,7 @@
 
   <!-- Reconcile source with CVS archive -->
   <target name="update" depends="init">
-    <cvs command="update -d" />
+    <cvs command="update -d -P" />
   </target>
 
   <target name="make-version-stamp">
@@ -121,10 +121,28 @@
            target="1.1"
            debug="on"
            optimize="off" />
+
+    <rmic base="${built}"
+          classname="edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM" />
+
+    <rmic base="${built}"
+          classname="edu.rice.cs.drjava.model.repl.newjvm.MainJVM" />
   </target>
 
   <!-- Unit test -->
   <target name="test-only">
+    <antcall target="run-tests">
+      <param name="test-spec" value="" />
+    </antcall>
+  </target>
+
+  <!-- Now you can run a subset of tests by doing:
+       ant -Dtest-spec=XXX run-tests
+
+       Where XXX is the substring that must be in the test's file name
+       in order to run it
+  -->
+  <target name="run-tests" if="test-spec">
     <junit printsummary="yes" haltonerror="yes" haltonfailure="yes" fork="no">
       <!-- propogate the same classpath. not sure why it doesn't
            happen by default!
@@ -142,7 +160,7 @@
         <fileset dir="${srcroot}">
           <!-- Include only from projpath to only get classes in this project!
           -->
-          <include name="${projpath}/**/*Test.java" />
+          <include name="${projpath}/**/*${test-spec}*Test.java" />
           <exclude name="**/AllTests.java" />
           <exclude name="**/Test.java" />
         </fileset>
@@ -166,8 +184,13 @@
                includes="edu/rice/cs/util/**"
                excludes="**/*Test.class" />
 
+      <!--
       <fileset dir="/home/javaplt/classes"
                includes="gj/**,gjc/**,koala/**" />
+      -->
+
+      <fileset dir="/home/javaplt/classes"
+               includes="koala/**" />
     </jar>
   </target>
 

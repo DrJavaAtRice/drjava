@@ -1,12 +1,12 @@
 package edu.rice.cs.drjava.model.repl;
 
-import  javax.swing.text.PlainDocument;
-import  javax.swing.text.AttributeSet;
-import  javax.swing.text.BadLocationException;
-import  java.awt.Toolkit;
-import  java.util.LinkedList;
-import  java.util.ListIterator;
-import  java.util.StringTokenizer;
+import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import java.awt.Toolkit;
+import java.util.LinkedList;
+import java.util.ListIterator;
+import java.util.StringTokenizer;
 
 import edu.rice.cs.util.UnexpectedException;
 
@@ -15,7 +15,7 @@ import edu.rice.cs.util.UnexpectedException;
  * of said input.
  * @version $Id$
  */
-public class InteractionsDocument extends PlainDocument {
+public class InteractionsDocument extends DefaultStyledDocument {
   public static final String BANNER = "Welcome to DrJava.";
   public static final String PROMPT = "\n> ";
 
@@ -70,7 +70,7 @@ public class InteractionsDocument extends PlainDocument {
       prompt();
       _history.moveEnd();
     } catch (BadLocationException e) {
-      throw  new InternalError("repl reset failed");
+      throw new UnexpectedException(e);
     }
   }
 
@@ -82,7 +82,7 @@ public class InteractionsDocument extends PlainDocument {
       super.insertString(getLength(), PROMPT, null);
       frozenPos = getLength();
     } catch (BadLocationException e) {
-      throw  new InternalError("printing prompt failed");
+      throw new UnexpectedException(e);
     }
   }
 
@@ -146,6 +146,3 @@ public class InteractionsDocument extends PlainDocument {
     _history.add(text);
   }
 }
-
-
-

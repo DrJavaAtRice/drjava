@@ -40,7 +40,6 @@ public interface GlobalModelListener {
    */
   public void fileClosed(OpenDefinitionsDocument doc);
 
-
   /**
    * Called after a compile is started by the GlobalModel.
    */
@@ -51,11 +50,29 @@ public interface GlobalModelListener {
    */
   public void compileEnded();
 
+  /**
+   * Called after an interaction is started by the GlobalModel.
+   */
+  public void interactionStarted();
+
+  /**
+   * Called when an interaction has finished running.
+   */
+  public void interactionEnded();
 
   /**
    * Called when the interactions window is reset.
    */
   public void interactionsReset();
+
+  /**
+   * Called when the interactions JVM was closed by System.exit
+   * or by being aborted. Immediately after this the interactions
+   * will be reset.
+   *
+   * @param status The exit code
+   */
+  public void interactionsExited(int status);
 
   /**
    * Called when the console window is reset.

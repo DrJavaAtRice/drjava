@@ -10,7 +10,8 @@ import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
  * Interface for the GlobalModel's handler of an open
  * DefinitionsDocument.  Provides a means to interact with
  * the document.
- * @version: $Id$
+ *
+ * @version $Id$
  */
 public interface OpenDefinitionsDocument {
 

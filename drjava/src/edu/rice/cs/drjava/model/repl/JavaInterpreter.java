@@ -14,7 +14,7 @@ public interface JavaInterpreter {
    * @return The result of the interpretation, or {@link #NO_RESULT} if
    *         the interpretation had no return value.
    */
-  public Object interpret(String s);
+  public Object interpret(String s) throws ExceptionReturnedException;
 
   /**
    * Adds the given path to the interpreter's classpath.

@@ -4,14 +4,13 @@ import  junit.framework.*;
 
 import java.io.*;
 
-import  java.util.Vector;
-import  javax.swing.text.BadLocationException;
-import  junit.extensions.*;
+import junit.extensions.*;
 import java.util.LinkedList;
-import javax.swing.text.Document;
-import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.*;
+import javax.swing.*;
 
-import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.*;
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
@@ -28,6 +27,12 @@ import edu.rice.cs.drjava.model.compiler.*;
  * @version $Id$
  */
 public abstract class GlobalModelTestCase extends TestCase {
+  /**
+   * the prototype global model to hold the interpreter. This prevents
+   * us from having to re-invoke the interpreter every time!
+   */
+  private static final DefaultGlobalModel _originalModel = new DefaultGlobalModel();
+
   protected GlobalModel _model;
   protected File _tempDir;
 
@@ -72,7 +77,7 @@ public abstract class GlobalModelTestCase extends TestCase {
    * Instantiates the GlobalModel to be used in the test cases.
    */
   protected void createModel() {
-    _model = new DefaultGlobalModel();
+    _model = new DefaultGlobalModel(_originalModel);
   }
 
   /**
@@ -181,7 +186,41 @@ public abstract class GlobalModelTestCase extends TestCase {
 
     // skip 1 for newline
     final int resultsStartLocation = interactionsDoc.getLength() + 1;
+
+    TestListener listener = new TestListener() {
+      public void interactionStarted() {
+        interactionStartCount++;
+      }
+
+      public void interactionEnded() {
+        assertInteractionStartCount(1);
+
+        synchronized(this) {
+          interactionEndCount++;
+          this.notify();
+        }
+      }
+    };
+
+    _model.addListener(listener);
     _model.interpretCurrentInteraction();
+
+    // wait for interpret over
+    while (listener.interactionEndCount == 0) {
+      synchronized(listener) {
+        try {
+          listener.wait();
+        }
+        catch (InterruptedException ie) {
+          throw new UnexpectedException(ie);
+        }
+      }
+    }
+
+    _model.removeListener(listener);
+    listener.assertInteractionStartCount(1);
+    listener.assertInteractionEndCount(1);
+
     final int resultsEndLocation = interactionsDoc.getLength() -
                                    InteractionsDocument.PROMPT.length();
     final int resultsLen = resultsEndLocation - resultsStartLocation;
@@ -282,9 +321,13 @@ public abstract class GlobalModelTestCase extends TestCase {
     protected int canAbandonCount;
     protected int compileStartCount;
     protected int compileEndCount;
+    protected int interactionStartCount;
+    protected int interactionEndCount;
     protected int consoleResetCount;
     protected int interactionsResetCount;
+    protected int interactionsExitedCount;
     protected int saveBeforeProceedingCount;
+    protected int lastExitStatus;
 
     public TestListener() {
       resetCounts();
@@ -298,6 +341,8 @@ public abstract class GlobalModelTestCase extends TestCase {
       canAbandonCount = 0;
       compileStartCount = 0;
       compileEndCount = 0;
+      interactionStartCount = 0;
+      interactionEndCount = 0;
       consoleResetCount = 0;
       interactionsResetCount = 0;
       saveBeforeProceedingCount = 0;
@@ -323,6 +368,14 @@ public abstract class GlobalModelTestCase extends TestCase {
       assertEquals("number of times saveFile fired", i, saveCount);
     }
 
+    public void assertInteractionStartCount(int i) {
+      assertEquals("number of times interactionStarted fired", i, interactionStartCount);
+    }
+
+    public void assertInteractionEndCount(int i) {
+      assertEquals("number of times interactionEnded fired", i, interactionEndCount);
+    }
+
     public void assertCompileStartCount(int i) {
       assertEquals("number of times compileStarted fired", i, compileStartCount);
     }
@@ -335,6 +388,12 @@ public abstract class GlobalModelTestCase extends TestCase {
       assertEquals("number of times interactionsReset fired",
                    i,
                    interactionsResetCount);
+    }
+
+    public void assertInteractionsExitedCount(int i) {
+      assertEquals("number of times interactionsExited fired",
+                   i,
+                   interactionsExitedCount);
     }
 
     public void assertConsoleResetCount(int i) {
@@ -364,6 +423,14 @@ public abstract class GlobalModelTestCase extends TestCase {
       fail("fileSaved fired unexpectedly");
     }
 
+    public void interactionStarted() {
+      fail("interactionStarted fired unexpectedly");
+    }
+
+    public void interactionEnded() {
+      fail("interactionEnded fired unexpectedly");
+    }
+
     public void compileStarted() {
       fail("compileStarted fired unexpectedly");
     }
@@ -374,6 +441,10 @@ public abstract class GlobalModelTestCase extends TestCase {
 
     public void interactionsReset() {
       fail("interactionsReset fired unexpectedly");
+    }
+
+    public void interactionsExited(int status) {
+      fail("interactionsExited(" + status + ") fired unexpectedly");
     }
 
     public void consoleReset() {

@@ -48,6 +48,7 @@ public class MainFrame extends JFrame {
   private JButton _compileButton;
   private JMenuItem _saveMenuItem;
   private JMenuItem _compileMenuItem;
+  private JMenuItem _abortInteractionMenuItem;
 
   /**
    * For opening files.
@@ -134,6 +135,26 @@ public class MainFrame extends JFrame {
     }
   };
 
+  /** Aborts current interaction. */
+  private Action _abortInteractionAction
+    = new AbstractAction("Abort current interaction")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      String title = "Confirm abort interaction";
+
+      String message = "Are you sure you would like to abort the" +
+                       "current interaction?";
+
+      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
+                                             message,
+                                             title,
+                                             JOptionPane.YES_NO_OPTION);
+      if (rc == JOptionPane.YES_OPTION) {
+        _model.abortCurrentInteraction();
+      }
+    }
+  };
+
   /** Closes the program. */
   private Action _quitAction = new AbstractAction("Quit") {
     public void actionPerformed(ActionEvent ae) {
@@ -157,7 +178,7 @@ public class MainFrame extends JFrame {
   };
 
   /** Clears DrJava's output console. */
-  private Action _clearOutputAction = new AbstractAction("Clear Output") {
+  private Action _clearOutputAction = new AbstractAction("Clear Console") {
     public void actionPerformed(ActionEvent ae) {
       _model.resetConsole();
     }
@@ -551,12 +572,17 @@ public class MainFrame extends JFrame {
 
     tmpItem = fileMenu.add(_closeAllAction);
     fileMenu.addSeparator();
+
     tmpItem = fileMenu.add(_compileAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
 
     // keep track of the compile menu item
     _compileMenuItem = tmpItem;
     _compileMenuItem.setEnabled(false);
+
+    _abortInteractionAction.setEnabled(false);
+    _abortInteractionMenuItem = fileMenu.add(_abortInteractionAction);
+    _abortInteractionMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PAUSE, ActionEvent.CTRL_MASK));
 
     fileMenu.addSeparator();
     tmpItem = fileMenu.add(_quitAction);
@@ -647,22 +673,16 @@ public class MainFrame extends JFrame {
   }
 
   private void _setUpTabs() {
-    _outputPane = new OutputPane();
+    _outputPane = new OutputPane(_model);
     _errorPanel = new CompilerErrorPanel(_model, this);
-    // Make the output view the active one
-    _outputPane.makeActive();
     _interactionsPane = new InteractionsPane(_model);
     _tabbedPane = new JTabbedPane();
     _tabbedPane.add("Interactions", new JScrollPane(_interactionsPane));
     _tabbedPane.add("Compiler output", _errorPanel);
     _tabbedPane.add("Console", new JScrollPane(_outputPane));
+    
     // Select interactions pane when interactions tab is selected
     _tabbedPane.addChangeListener(new ChangeListener() {
-
-      /**
-       * put your documentation comment here
-       * @param e
-       */
       public void stateChanged(ChangeEvent e) {
         if (_tabbedPane.getSelectedIndex() == INTERACTIONS_TAB) {
           _interactionsPane.grabFocus();
@@ -676,7 +696,7 @@ public class MainFrame extends JFrame {
    */
   private void _setUpDocumentSelector() {
     _docList = new JList(_model.getDefinitionsDocuments());
-    /** {
+    /* {
       public String getToolTipText(MouseEvent event) {
         Point location = event.getPoint();
         int index = locationToIndex(location);
@@ -850,6 +870,19 @@ public class MainFrame extends JFrame {
       _currentDefPane.grabFocus();
     }
 
+    public void interactionStarted() {
+      _interactionsPane.setEditable(false);
+      _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+      _abortInteractionMenuItem.setEnabled(true);
+    }
+
+    public void interactionEnded() {
+      _abortInteractionMenuItem.setEnabled(false);
+      _interactionsPane.setEditable(true);
+      _interactionsPane.setCaretPosition(_interactionsPane.getDocument().getLength());
+      _interactionsPane.setCursor(null);
+    }
+
     public void compileStarted() {
       _tabbedPane.setSelectedIndex(COMPILE_TAB);
       _saveButton.setEnabled(false);
@@ -864,6 +897,21 @@ public class MainFrame extends JFrame {
       _updateErrorListeners();
       _errorPanel.reset();
       _compileButton.setEnabled(true);
+    }
+
+    public void interactionsExited(int status) {
+      String msg = "The interactions window was terminated by a call " +
+                   "to System.exit(" + status + ").\n" + 
+                   "The interactions window will now be restarted.";
+
+      String title = "Interactions terminated by System.exit(" + status + ")";
+
+      JOptionPane.showMessageDialog(MainFrame.this,
+                                    msg,
+                                    title,
+                                    JOptionPane.INFORMATION_MESSAGE);
+
+      interactionEnded();
     }
 
     public void interactionsReset() {

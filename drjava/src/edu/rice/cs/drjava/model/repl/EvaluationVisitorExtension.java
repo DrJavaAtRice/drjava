@@ -1,5 +1,6 @@
 package edu.rice.cs.drjava.model.repl;
 
+import java.lang.reflect.*;
 import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.interpreter.context.*;
 import koala.dynamicjava.interpreter.error.*;
@@ -121,7 +122,16 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
 
   public Object visit(ObjectMethodCall node) {
     _checkInterrupted(node);
-    return super.visit(node);
+    Object ret = super.visit(node);
+
+    // workaround to not return null for void returns
+    Method m = (Method) node.getProperty(NodeProperties.METHOD);
+    if (m.getReturnType().equals(Void.TYPE)) {
+      return JavaInterpreter.NO_RESULT;
+    }
+    else {
+      return ret;
+    }
   }
 
   public Object visit(StaticFieldAccess node) {
@@ -141,7 +151,44 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
 
   public Object visit(StaticMethodCall node) {
     _checkInterrupted(node);
-    return super.visit(node);
+    Method m = (Method) node.getProperty(NodeProperties.METHOD);
+
+    // DynamicJava doesn't check that the method is really static!
+    if (! Modifier.isStatic(m.getModifiers())) {
+      StringBuffer buf = new StringBuffer();
+      buf.append(m.getDeclaringClass());
+      buf.append(".");
+      buf.append(m.getName());
+      buf.append("(");
+      
+      boolean first = true;
+      Class[] params = m.getParameterTypes();
+      for (int i = 0; i < params.length; i++) {
+        if (first) {
+          first = false;
+        }
+        else {
+          buf.append(", ");
+        }
+
+        buf.append(params[i].getName());
+      }
+      
+      buf.append(")");
+      buf.append(" is not a static method.");
+
+      throw new InteractionsException(buf.toString());
+    }
+
+    Object ret = super.visit(node);
+    
+    // workaround to not return null for void returns
+    if (m.getReturnType().equals(Void.TYPE)) {
+      return JavaInterpreter.NO_RESULT;
+    }
+    else {
+      return ret;
+    }
   }
 
   public Object visit(SimpleAssignExpression node) {
