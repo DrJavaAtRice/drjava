@@ -155,63 +155,44 @@ public class DefinitionsPane extends JEditorPane {
     }
   }
 
+
   /**
-   * Indent action spawned by closed squiggly brace.
+   * Used for indent action spawned by pressing the enter key, '{', or '}'.
    */
-  private class IndentKeyActionSquiggly extends AbstractAction {
+  private class IndentKeyAction extends AbstractAction {
+
+    private String _key;
+    private Action _defaultAction;
+    
+    IndentKeyAction(String key, Action defaultAction) {
+      _key = key;
+      _defaultAction = defaultAction;
+    }
 
     /** Handle the key typed event from the text field. */
     public void actionPerformed(ActionEvent e) {
-      int pos = getCaretPosition();
-      _doc().setCurrentLocation(pos);
-      try {
-        _doc().insertString(pos, "}", null);
-      } catch (BadLocationException be) {
-        throw  new IllegalArgumentException(be.toString());
-      }
+ //     int pos = getCaretPosition();
+ //     _doc().setCurrentLocation(pos);
+ //     try {
+ //       _doc().insertString(pos, _key, null);
+ //     } catch (BadLocationException be) {
+ //       throw  new IllegalArgumentException(be.toString());
+ //     }
+      _defaultAction.actionPerformed(e);
       _doc().indentLine();
     }
   }
-
-  /**
-   * Indent spawned by open squiggly brace.
-   */
-  private class IndentKeyActionOpenSquiggly extends AbstractAction {
-
-    /** Handle the key typed event from the text field. */
-    public void actionPerformed(ActionEvent e) {
-      int pos = getCaretPosition();
-      _doc().setCurrentLocation(pos);
-      try {
-        _doc().insertString(pos, "{", null);
-      } catch (BadLocationException be) {
-        throw  new IllegalArgumentException(be.toString());
-      }
-      _doc().indentLine();
-    }
-  }
-
-  /**
-   * Indent action spawned by pressing the enter key.
-   */
-  private class IndentKeyActionLine extends AbstractAction {
-
-    /** Handle the key typed event from the text field. */
-    public void actionPerformed(ActionEvent e) {
-      int pos = getCaretPosition();
-      _doc().setCurrentLocation(pos);
-      try {
-        _doc().insertString(pos, "\n", null);
-      } catch (BadLocationException be) {
-        throw  new IllegalArgumentException(be.toString());
-      }
-      _doc().indentLine();
-    }
-  }
+  
   private Action _indentKeyActionTab = new IndentKeyActionTab();
-  private Action _indentKeyActionLine = new IndentKeyActionLine();
-  private Action _indentKeyActionSquiggly = new IndentKeyActionSquiggly();
-  private Action _indentKeyActionOpenSquiggly = new IndentKeyActionOpenSquiggly();
+  private Action _indentKeyActionLine =
+    new IndentKeyAction("\n",
+                        getKeymap().getAction(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)));
+                                               
+  private Action _indentKeyActionSquiggly =
+    new IndentKeyAction("\n", getKeymap().getDefaultAction());
+  
+  private Action _indentKeyActionOpenSquiggly =
+    new IndentKeyAction("\n", getKeymap().getDefaultAction());
 
   // Constructor
   public DefinitionsPane(MainFrame mf) {
@@ -229,8 +210,10 @@ public class DefinitionsPane extends JEditorPane {
     _saveChooser = new JFileChooser(System.getProperty("user.dir"));
     //add actions for indent keay
     Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
+
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), 
                                  (Action)_indentKeyActionLine);
+
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), 
                                  (Action)_indentKeyActionTab);
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('}'), 
