@@ -72,7 +72,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
    * A temporary directory
    */
   private File _tempDir;
-
+  
   /**
    * The user name of the user running the tests.  Used in creating temporary files.
    * No it's not ...
@@ -118,10 +118,24 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   public void testDocLocationAfterSwitch() throws BadLocationException {
     DefinitionsPane pane = _frame.getCurrentDefPane();
     DefinitionsDocument doc = pane.getOpenDocument().getDocument();
+    
+    /**
+     * NOTE: This has been added because MainFrameTest hangs randomly (about every other time) without this line.
+     * It is still unknown why this occurs - being that the above method calls are all accessors, this shouldn't be a situation
+     * where the document is being accessed by insertString before it is ready to be accessed.
+     * Added 5/19/2004 by pakruse 
+     */ /**/
+    try {
+      Thread.sleep(1000); 
+    }
+    catch(java.lang.InterruptedException e) {
+    
+    }
+        
     doc.insertString(0, "abcd", null);
     pane.setCaretPosition(3);
     assertEquals("Location of old doc before switch", 3, doc.getCurrentLocation());
-
+    
     // Create a new file
     SingleDisplayModel model = _frame.getModel();
     model.newFile();
@@ -272,6 +286,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     int newPos = 20;
 
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL, new Integer(2));
+    
     doc.insertString(0, text, null);
     assertEquals("Should have inserted correctly.", text, doc.getText(0, doc.getLength()));
 

@@ -344,74 +344,74 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _model.removeListener(listener);
   }
 
-  /**
-   * Tests that an infinite loop in a test case can be aborted by clicking
-   * the Reset button.
-   */
-  public void testInfiniteLoop() throws Exception {
-    if (printMessages) System.out.println("----testInfiniteLoop-----");
-
-    final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_INFINITE_TEXT);
-    final File file = new File(_tempDir, "MonkeyTestInfinite.java");
-    doc.saveFile(new FileSelector(file));
-
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
-    TestListener listener2 = new TestListener() {
-      public void junitStarted(List<OpenDefinitionsDocument> odds) {
-        assertEquals("Documents don't match", doc, odds.get(0));
-        junitStartCount++;
-      }
-      public void junitSuiteStarted(int numTests) {
-        assertEquals("should run 1 test", 1, numTests);
-        junitSuiteStartedCount++;
-        // kill the infinite test once the tests have started
-        _model.resetInteractions();
-      }
-      public void junitTestStarted(String name) {
-        assertEquals("running wrong test", "testInfinite", name);
-        junitTestStartedCount++;
-      }
-      public void junitEnded() {
-        synchronized(this) {
-          assertInterpreterReadyCount(1);
-          junitEndCount++;
-          notify();
-        }
-      }
-      public void interpreterResetting() {
-        assertInterpreterReadyCount(0);
-        interpreterResettingCount++;
-      }
-      public void interpreterReady() {
-        assertInterpreterResettingCount(1);
-        assertJUnitEndCount(0);
-        interpreterReadyCount++;
-      }
-
-      public void consoleReset() {
-        consoleResetCount++;
-      }
-    };
-    _model.addListener(listener);
-    if (printMessages) System.out.println("before compile");
-      doc.startCompile();
-    if (_model.getCompilerModel().getNumErrors() > 0) {
-      fail("compile failed: " + getCompilerErrorString());
-    }
-    listener.checkCompileOccurred();
-    if (printMessages) System.out.println("after compile");
-    _model.removeListener(listener);
-    _model.addListener(listener2);
-    synchronized(listener2) {
-      doc.startJUnit();
-      listener2.assertJUnitStartCount(1);
-      if (printMessages) System.out.println("waiting for test");
-      listener2.wait();
-    }
-    if (printMessages) System.out.println("after test");
-    _model.removeListener(listener2);
-    listener2.assertJUnitEndCount(1);
-  }
+//  /**
+//   * Tests that an infinite loop in a test case can be aborted by clicking
+//   * the Reset button.
+//   */
+//  public void xtestInfiniteLoop() throws Exception {
+//    if (printMessages) System.out.println("----testInfiniteLoop-----");
+//
+//    final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_INFINITE_TEXT);
+//    final File file = new File(_tempDir, "MonkeyTestInfinite.java");
+//    doc.saveFile(new FileSelector(file));
+//
+//    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
+//    TestListener listener2 = new TestListener() {
+//      public void junitStarted(List<OpenDefinitionsDocument> odds) {
+//        assertEquals("Documents don't match", doc, odds.get(0));
+//        junitStartCount++;
+//      }
+//      public void junitSuiteStarted(int numTests) {
+//        assertEquals("should run 1 test", 1, numTests);
+//        junitSuiteStartedCount++;
+//        // kill the infinite test once the tests have started
+//        _model.resetInteractions();
+//      }
+//      public void junitTestStarted(String name) {
+//        assertEquals("running wrong test", "testInfinite", name);
+//        junitTestStartedCount++;
+//      }
+//      public void junitEnded() {
+//        synchronized(this) {
+//          assertInterpreterReadyCount(1);
+//          junitEndCount++;
+//          notify();
+//        }
+//      }
+//      public void interpreterResetting() {
+//        assertInterpreterReadyCount(0);
+//        interpreterResettingCount++;
+//      }
+//      public void interpreterReady() {
+//        assertInterpreterResettingCount(1);
+//        assertJUnitEndCount(0);
+//        interpreterReadyCount++;
+//      }
+//
+//      public void consoleReset() {
+//        consoleResetCount++;
+//      }
+//    };
+//    _model.addListener(listener);
+//    if (printMessages) System.out.println("before compile");
+//      doc.startCompile();
+//    if (_model.getCompilerModel().getNumErrors() > 0) {
+//      fail("compile failed: " + getCompilerErrorString());
+//    }
+//    listener.checkCompileOccurred();
+//    if (printMessages) System.out.println("after compile");
+//    _model.removeListener(listener);
+//    _model.addListener(listener2);
+//    synchronized(listener2) {
+//      doc.startJUnit();
+//      listener2.assertJUnitStartCount(1);
+//      if (printMessages) System.out.println("waiting for test");
+//      listener2.wait();
+//    }
+//    if (printMessages) System.out.println("after test");
+//    _model.removeListener(listener2);
+//    listener2.assertJUnitEndCount(1);
+//  }
 
   /**
    * Tests that when a JUnit file with no errors, after being saved and compiled,
@@ -562,6 +562,77 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertFalse("second error should be a failure", jem.getError(1).isWarning());
   }
 
+    /**
+   * Tests that an infinite loop in a test case can be aborted by clicking
+   * the Reset button.
+   */
+  public void testInfiniteLoop() throws Exception {
+    if (printMessages) System.out.println("----testInfiniteLoop-----");
+
+    final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_INFINITE_TEXT);
+    final File file = new File(_tempDir, "MonkeyTestInfinite.java");
+    doc.saveFile(new FileSelector(file));
+
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
+    TestListener listener2 = new TestListener() {
+      public void junitStarted(List<OpenDefinitionsDocument> odds) {
+        assertEquals("Documents don't match", doc, odds.get(0));
+        junitStartCount++;
+      }
+      public void junitSuiteStarted(int numTests) {
+        assertEquals("should run 1 test", 1, numTests);
+        junitSuiteStartedCount++;
+        // kill the infinite test once the tests have started
+        _model.resetInteractions();
+      }
+      public void junitTestStarted(String name) {
+        assertEquals("running wrong test", "testInfinite", name);
+        junitTestStartedCount++;
+      }
+      public void junitEnded() {
+        synchronized(this) {
+          assertInterpreterReadyCount(1);
+          junitEndCount++;
+          notify();
+        }
+      }
+      public void interpreterResetting() {
+        assertInterpreterReadyCount(0);
+        interpreterResettingCount++;
+      }
+      public void interpreterReady() {
+        assertInterpreterResettingCount(1);
+        assertJUnitEndCount(0);
+        interpreterReadyCount++;
+      }
+
+      public void consoleReset() {
+        consoleResetCount++;
+      }
+    };
+    _model.addListener(listener);
+    if (printMessages) System.out.println("before compile");
+      doc.startCompile();
+    if (_model.getCompilerModel().getNumErrors() > 0) {
+      fail("compile failed: " + getCompilerErrorString());
+    }
+    listener.checkCompileOccurred();
+    if (printMessages) System.out.println("after compile");
+    _model.removeListener(listener);
+    _model.addListener(listener2);
+    synchronized(listener2) {
+      doc.startJUnit();
+      listener2.assertJUnitStartCount(1);
+      if (printMessages) System.out.println("waiting for test");
+      listener2.wait();
+    }
+    if (printMessages) System.out.println("after test");
+    _model.removeListener(listener2);
+    listener2.assertJUnitEndCount(1);
+  }
+
+  
+  
   public static class JUnitNonTestListener extends JUnitTestListener {
     private boolean _shouldBeTestAll;
     public JUnitNonTestListener() {

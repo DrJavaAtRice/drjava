@@ -1645,7 +1645,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
             currWatch.setType(field.type().name());
           }
           catch (ClassNotLoadedException cnle) {
-            List<Type> classes = _vm.classesByName(field.typeName());  // JDK 1.5 will eliminate this warning
+            List<ReferenceType> classes = _vm.classesByName(field.typeName());  // JDK 1.5 will eliminate this warning
             if (!classes.isEmpty()) {
               currWatch.setType(classes.get(0).name());
             }
@@ -1917,7 +1917,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
             type = localVar.type();
           }
           catch(ClassNotLoadedException e) {
-            List<Type> classes = _vm.classesByName(localVar.typeName());  //JDK 1.5 will eliminate this warning
+            List<ReferenceType> classes = _vm.classesByName(localVar.typeName());  //JDK 1.5 will eliminate this warning
             if (!classes.isEmpty()) {
               type = classes.get(0);
             }
@@ -2003,8 +2003,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     StringReference sr = null;
     while (tries < OBJECT_COLLECTED_TRIES) {
       try {
-        //Added parameterization <Mirror>.
-        List<Mirror> args = new LinkedList<Mirror>();  // Mirror is the common supertype of StringReference, Value, and ReferenceType
+        //Added parameterization <Value>.
+        List<Value> args = new LinkedList<Value>();  // Mirror is the common supertype of StringReference, Value, and ReferenceType
+        //Changed from Mirror to value because invokeMethod requires a List of Value type. It does not need to be a Mirror because neither sr nor val can be a ReferenceType
         sr = _vm.mirrorOf(name);
         sr.disableCollection();
         args.add(sr);
@@ -2241,7 +2242,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     String varName = var.name();
     while (tries < OBJECT_COLLECTED_TRIES) {
       try {
-        List<Mirror> args = new LinkedList<Mirror>(); //Added parameterization <Mirror>.
+        List<Value> args = new LinkedList<Value>(); //Added parameterization <Value>
         sr = _vm.mirrorOf(varName);
         sr.disableCollection();
         args.add(sr);

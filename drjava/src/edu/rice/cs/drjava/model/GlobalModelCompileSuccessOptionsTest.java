@@ -121,43 +121,45 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
   {
 //    System.out.println("testCompileWithJavaAssert()");
     // No assert support by default (or in 1.3)
-    OpenDefinitionsDocument doc = setupDocument(FOO_WITH_ASSERT);
-    final File file = tempFile();
-    doc.saveFile(new FileSelector(file));
-    CompileShouldFailListener listener = new CompileShouldFailListener();
-    _model.addListener(listener);
-    
-    // This is a CompileShouldFailListener, so we don't need to wait.
-    doc.startCompile();
-
-    assertCompileErrorsPresent(_name(), true);
-    listener.checkCompileOccurred();
-    File compiled = classForJava(file, "DrJavaTestFoo");
-    assertTrue(_name() + "Class file exists after compile?!", !compiled.exists());
-    _model.removeListener(listener);
-    
-    
-    // Only run assertions test in 1.4
-    String version = System.getProperty("java.version");
-    if ((version != null) && ("1.4.0".compareTo(version) <= 0)) {
-      // Turn on assert support
-      DrJava.getConfig().setSetting(OptionConstants.JAVAC_ALLOW_ASSERT,
-                                    Boolean.TRUE);
+    if(Float.valueOf(System.getProperty("java.specification.version")) < 1.5) {
+      OpenDefinitionsDocument doc = setupDocument(FOO_WITH_ASSERT);
+      final File file = tempFile();
+      doc.saveFile(new FileSelector(file));
+      CompileShouldFailListener listener = new CompileShouldFailListener();
+      _model.addListener(listener);
       
-      CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
-      _model.addListener(listener2);
+      // This is a CompileShouldFailListener, so we don't need to wait.
       doc.startCompile();
-      if (_model.getCompilerModel().getNumErrors() > 0) {
-        fail("compile failed: " + getCompilerErrorString());
-      }
-      _model.removeListener(listener2);
-      assertCompileErrorsPresent(_name(), false);
-      listener2.checkCompileOccurred();
       
-      // Make sure .class exists
-      compiled = classForJava(file, "DrJavaTestFoo");
-      assertTrue(_name() + "Class file doesn't exist after compile",
-                 compiled.exists());
+      assertCompileErrorsPresent(_name(), true);
+      listener.checkCompileOccurred();
+      File compiled = classForJava(file, "DrJavaTestFoo");
+      assertTrue(_name() + "Class file exists after compile?!", !compiled.exists());
+      _model.removeListener(listener);
+      
+      
+      // Only run assertions test in 1.4
+      String version = System.getProperty("java.version");
+      if ((version != null) && ("1.4.0".compareTo(version) <= 0)) {
+        // Turn on assert support
+        DrJava.getConfig().setSetting(OptionConstants.JAVAC_ALLOW_ASSERT,
+                                      Boolean.TRUE);
+        
+        CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
+        _model.addListener(listener2);
+        doc.startCompile();
+        if (_model.getCompilerModel().getNumErrors() > 0) {
+          fail("compile failed: " + getCompilerErrorString());
+        }
+        _model.removeListener(listener2);
+        assertCompileErrorsPresent(_name(), false);
+        listener2.checkCompileOccurred();
+        
+        // Make sure .class exists
+        compiled = classForJava(file, "DrJavaTestFoo");
+        assertTrue(_name() + "Class file doesn't exist after compile",
+                   compiled.exists());
+      }
     }
   }
 

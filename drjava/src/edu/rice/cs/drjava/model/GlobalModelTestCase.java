@@ -350,6 +350,11 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       synchronized(listener) {
         _model.interpretCurrentInteraction();
         listener.wait();
+	/**///In previous versions of 1.5.0-beta compiler, several tests hang right here, because 
+	/////in DebugContextTest and JavaDebugInterpreterTest, the files that were being tested, 
+	/////for example, MonkeyStuff.java, was being compiled without the -g flag, so debugging was 
+	/////impossible. This happened because of a bug in the 1.5 compiler, which is now fixed in the new
+	/////version.
       }
     }
     catch (InterruptedException ie) {

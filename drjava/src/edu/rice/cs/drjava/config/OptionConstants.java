@@ -172,26 +172,26 @@ public interface OptionConstants {
   static class DefaultFont {
     public static Font getDefaultMainFont() {
       if (PlatformFactory.ONLY.isMac14Platform()) {
-        return Font.decode("Monaco-PLAIN-12");
+        return Font.decode("Monaco 12");
       }
       else {
-        return Font.decode("Monospaced-PLAIN-12");
+        return Font.decode("Monospaced 12");
       }
     }
     public static Font getDefaultLineNumberFont() {
       if (PlatformFactory.ONLY.isMac14Platform()) {
-        return Font.decode("Monaco-PLAIN-12");
+        return Font.decode("Monaco 12");
       }
       else {
-        return Font.decode("Monospaced-PLAIN-12");
+        return Font.decode("Monospaced 12");
       }
     }
     public static Font getDefaultDocListFont() {
       if (PlatformFactory.ONLY.isMac14Platform()) {
-        return Font.decode("Monaco-PLAIN-10");
+        return Font.decode("Monaco 10");
       }
       else {
-        return Font.decode("Monospaced-PLAIN-10");
+        return Font.decode("Monospaced 10");
       }
     }
   }
@@ -206,7 +206,7 @@ public interface OptionConstants {
 
  /** Toolbar buttons */
   public static final FontOption FONT_TOOLBAR =
-    new FontOption("font.toolbar", Font.decode("dialog-PLAIN-10"));
+    new FontOption("font.toolbar", Font.decode("dialog 10"));
 
   /**
    * Whether to draw anti-aliased text.  (Slightly slower.)

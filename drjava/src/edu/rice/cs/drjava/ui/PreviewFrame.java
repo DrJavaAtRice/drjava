@@ -302,7 +302,7 @@ public class PreviewFrame extends JFrame {
     try {
       Class spinnerClass = Class.forName("javax.swing.JSpinner");
       final JComponent spinner = (JComponent) spinnerClass.newInstance();
-      final Method getter = spinnerClass.getMethod("getValue",null);
+      final Method getter = spinnerClass.getMethod("getValue",new Class[0]);
       Object model = callMethod(spinner,spinnerClass,"getModel",null,null);
       Class modelClass = model.getClass();
       Class[] ca = new Class[] {Comparable.class};
@@ -315,7 +315,7 @@ public class PreviewFrame extends JFrame {
         public void stateChanged(ChangeEvent ev) {
           int num = _pageNumber;
           try {
-            num = ((Number) getter.invoke(spinner, null)).intValue()-1;
+            num = ((Number) getter.invoke(spinner,new Object[0])).intValue()-1;
             if ((num >= 0) && (num < _print.getNumberOfPages())) {
               _goToPage(num);
             }

@@ -55,8 +55,12 @@ public class FontOption extends Option<Font> {
 
   public FontOption(String key, Font def) { super(key,def); }
 
+  //Changed on 5/19/2004 to reflect a change in the API specifications of decode in the most recent release of 
+  //java 1.5.0 beta. Decode no longer likes "PLAIN", assuming it to be default and returning the wrong font (dialog)
+  //if the word is present /**/ This may be fixed in future versions of 1.5.0, but the use of the word PLAIN appears to
+  //have been deprecated since 1.3
   public Font parse(String s) {
-    return Font.decode(s);
+    return Font.decode(s.replace("PLAIN-",""));  //Font.decode(s);
   }
 
   /**
@@ -72,10 +76,12 @@ public class FontOption extends Option<Font> {
     if (f.isItalic()) {
       str.append("ITALIC");
     }
-    if (f.isPlain()) {
-      str.append("PLAIN");
+//    if (f.isPlain()) {
+//      str.append("PLAIN");
+//    }
+    if (! f.isPlain()) {
+      str.append("-");
     }
-    str.append("-");
     str.append(f.getSize());
 
     return str.toString();
