@@ -47,8 +47,6 @@ package edu.rice.cs.drjava.model.debug;
 
 import java.io.*;
 
-import junit.extensions.*;
-
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 

@@ -45,20 +45,9 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.junit;
 
-
-import junit.framework.*;
-
 import java.io.*;
 
-import java.util.LinkedList;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.DefaultStyledDocument;
-
-import edu.rice.cs.util.*;
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.model.compiler.*;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.GlobalModelJUnitTest.JUnitTestListener;
 
 /**
@@ -83,14 +72,14 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "  } \n" +
     "}";
 
-  private static final String NONPUBLIC_TEXT =
-    "import junit.framework.*; " +
-    "public class NonPublic extends TestCase { " +
-    "  public NonPublic(String name) { super(name); } " +
-    "  void testShouldFail() { " +
-    "    assertEquals(\"monkey\", \"baboon\"); " +
-    "  } " +
-    "}";
+//  private static final String NONPUBLIC_TEXT =
+//    "import junit.framework.*; " +
+//    "public class NonPublic extends TestCase { " +
+//    "  public NonPublic(String name) { super(name); } " +
+//    "  void testShouldFail() { " +
+//    "    assertEquals(\"monkey\", \"baboon\"); " +
+//    "  } " +
+//    "}";
 
   private static final String ABC_CLASS_ONE =
     "class ABC extends java.util.Vector {}\n";

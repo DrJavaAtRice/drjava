@@ -49,8 +49,6 @@ import edu.rice.cs.drjava.model.*;
 
 import java.io.*;
 
-import junit.framework.*;
-
 /**
  * This class contains the basic fields and methods that are necessary
  * for any test file that needs to use the JPDADebugger.

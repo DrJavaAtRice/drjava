@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,25 +32,24 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 
-/** TODO: convert ModelList representation to a doubly linked circular list;
- *  separate head and tail nodes are ugly and unnecessary. */
+/* TODO: convert ModelList representation to a doubly linked circular list;
+   separate head and tail nodes are ugly and unnecessary. */
 
 /**
  * A list class with some extra features.
@@ -65,7 +64,7 @@ class ModelList<T> {
   private int _length;
   /** a set of objects that can trigger and listen for updates to the list */
   private Set<Iterator> _listeners;
-  
+
   /**
    * Constructor.
    * Initializes the head and tail nodes, as well as the listener table
@@ -84,7 +83,7 @@ class ModelList<T> {
     _length = 0;
     _listeners = new HashSet<Iterator>();
   }
-  
+
   /**
    * Insert an item before a certain node in the list.
    * Can never be called on head node.
@@ -95,13 +94,13 @@ class ModelList<T> {
     point.pred = ins;
     _length++;
   }
-   
+
   public void insertFront(T item) {
     Iterator it = new Iterator();
     it.insert(item);
     it.dispose();
   }
-  
+
   /**
    * Remove a node from the list.
    * Can't remove head or tail node - exception thrown.
@@ -116,11 +115,11 @@ class ModelList<T> {
       _length--;
     }
   }
-  
+
   private void addListener(Iterator thing) {
     this._listeners.add(thing);
   }
-  
+
   private void removeListener(Iterator thing) {
     this._listeners.remove(thing);
   }
@@ -134,11 +133,11 @@ class ModelList<T> {
   public boolean isEmpty() {
     return (_head.succ == _tail);
   }
-  
+
   public int length() {
     return _length;
   }
-  
+
   /**
    * Create a new iterator for this list.  The constructor for the
    * iterator adds itself to the list's listeners.  The iterator
@@ -147,8 +146,8 @@ class ModelList<T> {
   public Iterator getIterator() {
     return new Iterator();
   }
-  
-  
+
+
   /**
    * A node class for the list.
    * Each node has a successor and predecessor, which is also a node
@@ -160,24 +159,24 @@ class ModelList<T> {
     Node<T> pred;
     Node<T> succ;
     private T _item;
-    
+
     Node() {
       _item = null;
       pred = this;
       succ = this;
     }
-    
+
     Node(T item, Node<T> previous, Node<T> successor) {
       _item = item;
       pred = previous;
       succ = successor;
     }
-    
+
     T getItem() {
       return _item;
     }
   }
-  
+
   /**
    * Iterators for model list.
    * The iterators are intimately coupled with the ModelList to which they
@@ -188,7 +187,7 @@ class ModelList<T> {
   class Iterator {
     private Node<T> _point;
     private int _pos;
-    
+
     /**
      * Constructor.
      * Initializes an iterator to point to its list's head.
@@ -198,7 +197,7 @@ class ModelList<T> {
       _pos = 0;
       ModelList.this.addListener(this);
     }
-    
+
     /**
      * Copy constructor.
      * Creates a new iterator with the same values as the progenitor.
@@ -209,18 +208,18 @@ class ModelList<T> {
       _pos = iter._pos;
       ModelList.this.addListener(this);
     }
-    
+
     public Iterator copy() {
       return new Iterator(this);
     }
-    
+
     /**
      * an equals test
      */
     public boolean eq(Object thing) {
       return this._point == ((Iterator)(thing))._point;
     }
-    
+
     /**
      * Force this iterator to take the values of the given iterator.
      */
@@ -228,7 +227,7 @@ class ModelList<T> {
       this._point = it._point;
       this._pos = it._pos;
     }
-    
+
     /**
      * Disposes of an iterator by removing it from the list's set of
      * listeners.  When an iterator is no longer necessary, it
@@ -242,35 +241,35 @@ class ModelList<T> {
     public void dispose() {
       ModelList.this.removeListener(this);
     }
-    
+
     /**
      * Return true if we're pointing at the head.
      */
     public boolean atStart() {
       return (_point == ModelList.this._head);
     }
-    
+
     /**
      * Return true if we're pointing at the tail.
      */
     public boolean atEnd() {
       return (_point == ModelList.this._tail);
     }
-    
+
     /**
      * Return true if we're pointing at the node after the head.
      */
     public boolean atFirstItem() {
       return (_point.pred == ModelList.this._head);
     }
-    
+
     /**
      * Return true if we're pointing at the node before the tail.
      */
     public boolean atLastItem() {
       return (_point.succ == ModelList.this._tail);
     }
-    
+
     /**
      * Return the item associated with the current node.
      */
@@ -287,7 +286,7 @@ class ModelList<T> {
         return _point.getItem();
       }
     }
-    
+
     /**
      * Return the item associated with the node before the current node.
      */
@@ -299,7 +298,7 @@ class ModelList<T> {
         return _point.pred.getItem();
       }
     }
-    
+
     /**
      * Return the item associated with the node after the current node.
      */
@@ -311,7 +310,7 @@ class ModelList<T> {
         return _point.succ.getItem();
       }
     }
-    
+
     /**
      * Insert an item before the current item.
      * If at the containing list's head, we need to move to the next node
@@ -329,12 +328,12 @@ class ModelList<T> {
       ModelList.this.insert(_point, item);
       _point = _point.pred; //puts pointer on inserted item
       notifyOfInsert(_pos);
-      
+
       //because notifyOfInsert will change the position of this iterator
       //we must change it back.
       _pos -= 1;
     }
-    
+
     /**
      * Remove the current item from the list.
      * Ends pointing to the node following the removed node.
@@ -346,7 +345,7 @@ class ModelList<T> {
       _point = tempNode;
       notifyOfRemove(_pos, _point);
     }
-    
+
     /**
      * Move to the previous node.
      * Throws exception atStart().
@@ -358,7 +357,7 @@ class ModelList<T> {
       _point = _point.pred;
       _pos--;
     }
-    
+
     /**
      * Move to the next node.
      * Throws exception atEnd().
@@ -370,7 +369,7 @@ class ModelList<T> {
       _point = _point.succ;
       _pos++;
     }
-    
+
     /**
      * Delete all nodes between the current position of this and the
      * current position of the given iterator.
@@ -387,12 +386,12 @@ class ModelList<T> {
       int leftPos;
       int rightPos;
       Node<T> rightPoint;
-      
+
       if (this._pos > iter._pos) {
         leftPos = iter._pos;
         rightPos = this._pos;
         rightPoint = this._point;
-        
+
         this._point.pred = iter._point;
         iter._point.succ = this._point;
         //determine new length
@@ -403,17 +402,17 @@ class ModelList<T> {
         leftPos = this._pos;
         rightPos = iter._pos;
         rightPoint = iter._point;
-        
+
         iter._point.pred = this._point;
         this._point.succ = iter._point;
-        
+
         ModelList.this._length -= iter._pos - this._pos - 1;
         notifyOfCollapse(leftPos, rightPos, rightPoint);
       }
       else { // this._pos == iter._pos
       }
     }
-    
+
     /**
      * When an iterator inserts an item, it notifies other iterators
      * in the set of listeners so they can stay updated.
@@ -431,7 +430,7 @@ class ModelList<T> {
         }
       }
     }
-    
+
     /**
      * When an iterator removes an item, it notifies other iterators
      * in the set of listeners so they can stay updated.
@@ -452,7 +451,7 @@ class ModelList<T> {
         }
       }
     }
-    
+
     /**
      * When an iterator collapses part of the list, it notifies other iterators
      * in the set of listeners so they can stay updated.

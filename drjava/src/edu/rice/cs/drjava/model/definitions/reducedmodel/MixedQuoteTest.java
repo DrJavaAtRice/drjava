@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,47 +32,35 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 import  junit.framework.*;
-import  java.util.Vector;
-import  junit.extensions.*;
-
 
 /**
  * Tests the interaction between double and single quotes and comments
  * @version $Id$
  */
-public final class MixedQuoteTest extends BraceReductionTestCase 
-  implements ReducedModelStates 
+public final class MixedQuoteTest extends BraceReductionTestCase
+  implements ReducedModelStates
 {
-
-  protected ReducedModelControl model;
-
-  /**
-   * Constructor.
-   * @param name a name for the test.
-   */
-  public MixedQuoteTest(String name) {
-    super(name);
-  }
+  protected ReducedModelControl _model;
 
   /**
    * Initializes the reduced models used in the tests.
    */
   protected void setUp() {
-    model = new ReducedModelControl();
+    _model = new ReducedModelControl();
   }
 
   /**
@@ -93,59 +81,59 @@ public final class MixedQuoteTest extends BraceReductionTestCase
       model.insertChar(' ');
     }
   }
-  
+
   /**
    * Tests how a single quote can eclipse the effects of a double quote by inserting
-   * the single quote before the double quote.  This test caught an error with 
+   * the single quote before the double quote.  This test caught an error with
    * getStateAtCurrent(): the check for double quote status checks if there is a double
    * quote immediately preceding, but it didn't make sure the double quote was FREE.
    * I fixed that, so now the test passes.
    */
   public void testSingleEclipsesDouble() {
-    model.insertChar('\"');
-    assertEquals("#0.0", INSIDE_DOUBLE_QUOTE, model.getStateAtCurrent());
-    model.move(-1);
-    assertEquals("#0.1", FREE, stateOfCurrentToken(model));
-    model.move(1);
-    model.insertChar('A');    
-    model.move(-1);
-    assertEquals("#1.0", INSIDE_DOUBLE_QUOTE, model.getStateAtCurrent());    
-    assertEquals("#1.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model));
-    assertTrue("#1.2", model.currentToken().isGap());
-    model.move(-1);
-    model.insertChar('\'');
-    assertEquals("#2.0", INSIDE_SINGLE_QUOTE, model.getStateAtCurrent());
-    assertEquals("#2.1", INSIDE_SINGLE_QUOTE, stateOfCurrentToken(model));
-    assertEquals("#2.2", "\"", model.currentToken().getType());
-    model.move(1);
-    assertEquals("#3.0", INSIDE_SINGLE_QUOTE, model.getStateAtCurrent());
-    assertEquals("#3.1", INSIDE_SINGLE_QUOTE, stateOfCurrentToken(model));
-    assertTrue("#3.2", model.currentToken().isGap());    
+    _model.insertChar('\"');
+    assertEquals("#0.0", INSIDE_DOUBLE_QUOTE, _model.getStateAtCurrent());
+    _model.move(-1);
+    assertEquals("#0.1", FREE, stateOfCurrentToken(_model));
+    _model.move(1);
+    _model.insertChar('A');
+    _model.move(-1);
+    assertEquals("#1.0", INSIDE_DOUBLE_QUOTE, _model.getStateAtCurrent());
+    assertEquals("#1.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(_model));
+    assertTrue("#1.2", _model.currentToken().isGap());
+    _model.move(-1);
+    _model.insertChar('\'');
+    assertEquals("#2.0", INSIDE_SINGLE_QUOTE, _model.getStateAtCurrent());
+    assertEquals("#2.1", INSIDE_SINGLE_QUOTE, stateOfCurrentToken(_model));
+    assertEquals("#2.2", "\"", _model.currentToken().getType());
+    _model.move(1);
+    assertEquals("#3.0", INSIDE_SINGLE_QUOTE, _model.getStateAtCurrent());
+    assertEquals("#3.1", INSIDE_SINGLE_QUOTE, stateOfCurrentToken(_model));
+    assertTrue("#3.2", _model.currentToken().isGap());
   }
 
   /**
    * Tests how a double quote can eclipse the effects of a single quote by inserting
-   * the double quote before the single quote. 
+   * the double quote before the single quote.
    */
   public void testDoubleEclipsesSingle() {
-    model.insertChar('\'');
-    assertEquals("#0.0", INSIDE_SINGLE_QUOTE, model.getStateAtCurrent());
-    model.move(-1);
-    assertEquals("#0.1", FREE, stateOfCurrentToken(model));
-    model.move(1);
-    model.insertChar('A');    
-    model.move(-1);
-    assertEquals("#1.0", INSIDE_SINGLE_QUOTE, model.getStateAtCurrent());    
-    assertEquals("#1.1", INSIDE_SINGLE_QUOTE, stateOfCurrentToken(model));
-    assertTrue("#1.2", model.currentToken().isGap());
-    model.move(-1);
-    model.insertChar('\"');
-    assertEquals("#2.0", INSIDE_DOUBLE_QUOTE, model.getStateAtCurrent());
-    assertEquals("#2.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model));
-    assertEquals("#2.2", "\'", model.currentToken().getType());
-    model.move(1);
-    assertEquals("#3.0", INSIDE_DOUBLE_QUOTE, model.getStateAtCurrent());
-    assertEquals("#3.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model));
-    assertTrue("#3.2", model.currentToken().isGap());    
-  }  
+    _model.insertChar('\'');
+    assertEquals("#0.0", INSIDE_SINGLE_QUOTE, _model.getStateAtCurrent());
+    _model.move(-1);
+    assertEquals("#0.1", FREE, stateOfCurrentToken(_model));
+    _model.move(1);
+    _model.insertChar('A');
+    _model.move(-1);
+    assertEquals("#1.0", INSIDE_SINGLE_QUOTE, _model.getStateAtCurrent());
+    assertEquals("#1.1", INSIDE_SINGLE_QUOTE, stateOfCurrentToken(_model));
+    assertTrue("#1.2", _model.currentToken().isGap());
+    _model.move(-1);
+    _model.insertChar('\"');
+    assertEquals("#2.0", INSIDE_DOUBLE_QUOTE, _model.getStateAtCurrent());
+    assertEquals("#2.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(_model));
+    assertEquals("#2.2", "\'", _model.currentToken().getType());
+    _model.move(1);
+    assertEquals("#3.0", INSIDE_DOUBLE_QUOTE, _model.getStateAtCurrent());
+    assertEquals("#3.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(_model));
+    assertTrue("#3.2", _model.currentToken().isGap());
+  }
 }

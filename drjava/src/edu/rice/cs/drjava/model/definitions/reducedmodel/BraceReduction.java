@@ -56,7 +56,6 @@ import java.util.Vector;
  */
 
 public interface BraceReduction {
-
   /**
    * Get the absolute character offset of the document represented by BraceReduction.
    */
@@ -102,7 +101,7 @@ public interface BraceReduction {
    * brace iff that brace is an open brace.</P>
    * @return the distance until the matching closing brace.  On
    * failure, returns -1.
-   * @see #nextBrace()
+   * @see #balanceBackward()
    */
   public int balanceForward();
 
@@ -111,7 +110,7 @@ public interface BraceReduction {
    * brace iff that brace is an closing brace.</P>
    * @return the distance until the matching open brace.  On
    * failure, returns -1.
-   * @see #previousBrace()
+   * @see #balanceForward()
    */
   public int balanceBackward();
 

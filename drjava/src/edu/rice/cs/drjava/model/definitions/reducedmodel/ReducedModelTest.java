@@ -45,11 +45,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import  junit.framework.*;
-import  java.util.Vector;
-import  junit.extensions.*;
-
-
 /**
  * Tests insertion and move and other non-delete functionality
  * of the reduced model.
@@ -58,46 +53,6 @@ import  junit.extensions.*;
 public final class ReducedModelTest extends BraceReductionTestCase
   implements ReducedModelStates
 {
-
-  protected ReducedModelControl model0;
-  protected ReducedModelControl model1;
-  protected ReducedModelControl model2;
-
-  /**
-   * put your documentation comment here
-   * @param   String name
-   */
-  public ReducedModelTest(String name) {
-    super(name);
-  }
-
-  /**
-   * put your documentation comment here
-   */
-  protected void setUp() {
-    model0 = new ReducedModelControl();
-    model1 = new ReducedModelControl();
-    model2 = new ReducedModelControl();
-  }
-
-  /**
-   * put your documentation comment here
-   * @param model
-   * @param size
-   */
-  protected void insertGap(BraceReduction model, int size) {
-    for (int i = 0; i < size; i++)
-      model.insertChar(' ');
-  }
-
-  /**
-   * put your documentation comment here
-   * @return
-   */
-  public static Test suite() {
-    return  new TestSuite(ReducedModelTest.class);
-  }
-
   /**
    * put your documentation comment here
    */

@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
@@ -53,9 +53,9 @@ class Gap extends ReducedToken {
   private int _size;
 
   /**
-   * put your documentation comment here
-   * @param     int size
-   * @param     ReducedModelState state
+   * Creates a new Gap.
+   * @param size the size of the gap
+   * @param state the state of the reduced model
    */
   Gap(int size, ReducedModelState state) {
     super(state);
@@ -63,31 +63,33 @@ class Gap extends ReducedToken {
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Gets the size of this gap.
+   * @return _size
    */
   public int getSize() {
-    return  _size;
+    return _size;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Gets the token type.
+   * @return the empty string
    */
   public String getType() {
-    return  "";
+    return "";
   }
 
   /**
-   * put your documentation comment here
-   * @param type
+   * Blows up.  The type of a Gap cannot be set.
+   * @param type the type to set to
+   * @throws RuntimeException always
    */
   public void setType(String type) {
-    throw  new RuntimeException("Can't set type on Gap!");
+    throw new RuntimeException("Can't set type on Gap!");
   }
 
   /**
-   * put your documentation comment here
+   * Blows up.  A Gap cannot be flipped.
+   * @throws RuntimeException always
    */
   public void flip() {
     throw  new RuntimeException("Can't flip a Gap!");
@@ -112,12 +114,11 @@ class Gap extends ReducedToken {
   }
 
   /**
-   * Converts a Brace to a String.
-   * Used for debugging.
-   * @return the string representation of the Brace.
+   * Converts a Brace to a String.  Used for debugging.
+   * @return the String representation of the Brace
    */
   public String toString() {
-    //String val = "Gap(size: "+_size+"): ";
+//    String val = "Gap(size: "+_size+"): ";
     String val = "";
     int i;
     for (i = 0; i < _size; i++) {
@@ -127,159 +128,155 @@ class Gap extends ReducedToken {
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is not a multi-char brace.
+   * @return <code>false</code>
    */
   public boolean isMultipleCharBrace() {
-    return  false;
+    return false;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is a gap.
+   * @return <code>true</code>
    */
   public boolean isGap() {
-    return  true;
+    return true;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is not a line comment.
+   * @return <code>false</code>
    */
   public boolean isLineComment() {
-    return  false;
+    return false;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is not the start of a block comment.
+   * @return <code>false</code>
    */
   public boolean isBlockCommentStart() {
-    return  false;
+    return false;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is not the end of a block comment.
+   * @return <code>false</code>
    */
   public boolean isBlockCommentEnd() {
-    return  false;
+    return false;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is not a newline.
+   * @return <code>false</code>
    */
   public boolean isNewline() {
-    return  false;
+    return false;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is not a /.
+   * @return <code>false</code>
    */
   public boolean isSlash() {
-    return  false;
+    return false;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is not a *.
+   * @return <code>false</code>
    */
   public boolean isStar() {
-    return  false;
+    return false;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is not a ".
+   * @return <code>false</code>
    */
   public boolean isDoubleQuote() {
-    return  false;
+    return false;
   }
-  
+
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is not a '.
+   * @return <code>false</code>
    */
   public boolean isSingleQuote() {
     return false;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is not a double escape sequence.
+   * @return <code>false</code>
    */
   public boolean isDoubleEscapeSequence() {
-    return  false;
+    return false;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is not a double escape.
+   * @return <code>false</code>
    */
   public boolean isDoubleEscape() {
-    return  false;
+    return false;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is not a \'.
+   * @return <code>false</code>
    */
   public boolean isEscapedSingleQuote() {
-    return  false;
+    return false;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is not a \".
+   * @return <code>false</code>
    */
   public boolean isEscapedDoubleQuote() {
-    return  false;
+    return false;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is not open.
+   * @return <code>false</code>
    */
   public boolean isOpen() {
-    return  false;
+    return false;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is not closed.
+   * @return <code>false</code>
    */
   public boolean isClosed() {
-    return  false;
+    return false;
   }
 
   /**
-   * put your documentation comment here
-   * @param other
-   * @return 
+   * Determines that this is not a match.
+   * @param other the token to compare to
+   * @return <code>false</code>
    */
   public boolean isMatch(ReducedToken other) {
-    return  false;
+    return false;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is not an open brace.
+   * @return <code>false</code>
    */
   public boolean isOpenBrace() {
-    return  false;
+    return false;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Determines that this is not a closed brace.
+   * @return <code>false</code>
    */
   public boolean isClosedBrace() {
-    return  false;
+    return false;
   }
-  
 }
-
-
-

@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,37 +32,28 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import  junit.framework.*;
-
 import java.io.*;
 
 import java.util.List;
-import java.util.LinkedList;
 import javax.swing.text.BadLocationException;
-import junit.extensions.*;
-import javax.swing.text.Document;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.ListModel;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.DocumentAdapterException;
-import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 
@@ -74,14 +65,6 @@ import edu.rice.cs.drjava.config.OptionConstants;
 public final class GlobalModelIOTest extends GlobalModelTestCase
   implements OptionConstants
 {
-  /**
-   * Constructor.
-   * @param  String name
-   */
-  public GlobalModelIOTest(String name) {
-    super(name);
-  }
-
   /**
    * Creates a new document, modifies it, and then does the same
    * with a second document, ensuring that the changes are separate.
@@ -223,7 +206,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
           fail("file does not exist");
         }
         try {
-          assertEquals("file to open", tempFile.getCanonicalFile(), 
+          assertEquals("file to open", tempFile.getCanonicalFile(),
                        file.getCanonicalFile());
           openCount++;
         }
@@ -298,9 +281,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
   /**
    * Attempts to open a non-existent file.
    */
-  public void testOpenNonexistentFile()
-    throws BadLocationException, IOException
-  {
+  public void testOpenNonexistentFile() throws IOException {
     _model.addListener(new TestListener());
 
     OpenDefinitionsDocument doc = null;
@@ -527,8 +508,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
   /**
    * Attempts to open a non-existent file.
    */
-  public void testOpenMultipleNonexistentFiles()
-    throws BadLocationException, IOException
+  public void testOpenMultipleNonexistentFiles() throws IOException
   {
 
     OpenDefinitionsDocument doc = null;
@@ -552,7 +532,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
         try {
           assertEquals("file to open", tempFile1.getCanonicalFile(),
                        file.getCanonicalFile());
-          
+
           openCount++;
         }
         catch (IOException ioe) {
@@ -587,19 +567,17 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
    * Error checking for openening multiple files
    * checks for null and an array w/null
    */
-  public void testOpenMultipleFilesError()
-    throws BadLocationException, IOException
-  {
+  public void testOpenMultipleFilesError() {
 
     OpenDefinitionsDocument doc = null;
     //final File tempFile1 = writeToNewTempFile(FOO_TEXT);
 
     try {
       doc = _model.openFiles(new FileOpenSelector() {
-        public File getFile() throws OperationCanceledException {
+        public File getFile() {
           return null;
         }
-        public File[] getFiles() throws OperationCanceledException {
+        public File[] getFiles() {
           return new File[] {null};
         }
       });
@@ -614,10 +592,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     try {
       doc = _model.openFiles(new FileOpenSelector() {
-        public File getFile() throws OperationCanceledException {
+        public File getFile() {
           return null;
         }
-        public File[] getFiles() throws OperationCanceledException {
+        public File[] getFiles() {
           return null;
         }
       });
@@ -997,9 +975,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     }
   }
 
-  public void testSaveAsExistsAndOpen()
-    throws BadLocationException, IOException,
-    OperationCanceledException, AlreadyOpenException{
+  public void testSaveAsExistsAndOpen() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc1,doc2;
     final File file1,file2;
 
@@ -1214,8 +1190,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
    * Interprets some statements, saves the history, clears the history, then loads
    * the history.
    */
-  public void testSaveClearAndLoadHistory() throws DocumentAdapterException,
-    BadLocationException, InterruptedException, IOException
+  public void testSaveClearAndLoadHistory()
+      throws DocumentAdapterException, IOException
   {
     String newLine = System.getProperty("line.separator");
     TestListener listener = new TestListener() {
@@ -1325,8 +1301,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
    * Loads two history files, one whose statements end in semicolons, and one whose statements do not.
    * Makes sure that it doesn't matter.
    */
-  public void testLoadHistoryWithAndWithoutSemicolons() throws BadLocationException,
-    InterruptedException, IOException, DocumentAdapterException
+  public void testLoadHistoryWithAndWithoutSemicolons()
+      throws IOException, DocumentAdapterException
   {
     TestListener listener = new TestListener() {
       public void interactionStarted() {

@@ -156,7 +156,6 @@ public class ReducedModelComment extends AbstractReducedModel {
     else {
       _checkPreviousInsertSpecial(special);
     }
-    return;
   }
 
   /**
@@ -164,13 +163,14 @@ public class ReducedModelComment extends AbstractReducedModel {
    * Delegates work to _checkPreviousInsertBackSlash and _checkPreviousInsertCommentChar,
    * depending on what's being inserted into the document.
    */
-  private void _checkPreviousInsertSpecial(String special)
-     {
-       if (special.equals("\\"))
-         _checkPreviousInsertBackSlash();
-       else
-         _checkPreviousInsertCommentChar(special);
-     }
+  private void _checkPreviousInsertSpecial(String special) {
+    if (special.equals("\\")) {
+      _checkPreviousInsertBackSlash();
+    }
+    else {
+      _checkPreviousInsertCommentChar(special);
+    }
+  }
 
   /**
   * Checks before point of insertion to make sure we don't need to combine
@@ -478,12 +478,11 @@ public class ReducedModelComment extends AbstractReducedModel {
   }
 
 
-  /**In order to interface with the ReducedModelComment two functions are
-  provided. One resets the walker and the other will both move the cursor
-  by x and return the state at that new location.
-  Once the new value has returned all new calculations will be relative to
-  that spot until the walker is reset to the _cursor.
-  */
+  /* In order to interface with the ReducedModelComment two functions are
+     provided. One resets the walker and the other will both move the cursor
+     by x and return the state at that new location.
+     Once the new value has returned all new calculations will be relative to
+     that spot until the walker is reset to the _cursor.  */
 
   /**
    * Returns the state at the relLocation, where relLocation is the location
@@ -535,15 +534,14 @@ public class ReducedModelComment extends AbstractReducedModel {
   }
 
   void getDistToIndentNewline(IndentInfo braceInfo) {
-    int walkcount = -1;
     TokenList.Iterator copyCursor = _cursor._copy();
 
-    if (braceInfo.distToBrace == -1 || copyCursor.atStart()) { // no brace
-      return;
+    if (braceInfo.distToBrace == -1 || copyCursor.atStart()) {
+      return; // no brace
     }
 
     copyCursor.move(-braceInfo.distToBrace);
-    walkcount = _getDistToPreviousNewline(copyCursor);
+    int walkcount = _getDistToPreviousNewline(copyCursor);
 
     if (walkcount == -1) {
       braceInfo.distToNewline = -1;
@@ -559,7 +557,6 @@ public class ReducedModelComment extends AbstractReducedModel {
  * the current location.  Stores this info in the IndentInfo field distToNewlineCurrent.
  */
   void getDistToCurrentBraceNewline(IndentInfo braceInfo) {
-    int walkcount = -1;
     TokenList.Iterator copyCursor = _cursor._copy();
 
     if (braceInfo.distToBraceCurrent == -1 || copyCursor.atStart()) { // no brace
@@ -567,7 +564,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     }
 
     copyCursor.move(-braceInfo.distToBraceCurrent);
-    walkcount = _getDistToPreviousNewline(copyCursor);
+    int walkcount = _getDistToPreviousNewline(copyCursor);
 
     if (walkcount == -1) {
       braceInfo.distToNewlineCurrent = -1;

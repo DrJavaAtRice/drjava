@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
@@ -79,26 +79,25 @@ class Brace extends ReducedToken implements ReducedModelStates {
 
   /**
    * Virtual constructor.
-   * This method throws an exception if the given type is not a valid
-   * brace type.
    * @param type the brace text
    * @param state whether the brace is shadwowed by a comment, quote etc
    * @return a new Brace if type is valid, otherwise null
+   * @throws BraceException if the given type is not a valid brace type.
    */
   public static Brace MakeBrace(String type, ReducedModelState state) {
     int index = findBrace(type);
     if (index == braces.length) {
-      throw  new BraceException("Invalid brace type \"" + type + "\"");
+      throw new BraceException("Invalid brace type \"" + type + "\"");
     }
     else {
-      return  new Brace(index, state);
+      return new Brace(index, state);
     }
   }
 
   /**
    * Constructor.
    * @param type the brace type
-   * @param width the size of the brace and its gap
+   * @param state the state of the reduced model
    */
   private Brace(int type, ReducedModelState state) {
     super(state);
@@ -110,14 +109,14 @@ class Brace extends ReducedToken implements ReducedModelStates {
    * @return the text of the Brace
    */
   public String getType() {
-    return  (_type == braces.length) ? "!" : braces[_type];
+    return (_type == braces.length) ? "!" : braces[_type];
   }
 
   /**
    * @return the size of the brace and its preceding gap
    */
   public int getSize() {
-    return  getType().length();
+    return getType().length();
   }
 
   /**
@@ -133,7 +132,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
       val += " ";
       val += getType().charAt(i);
     }
-    return  val;
+    return val;
   }
 
   /**
@@ -152,21 +151,21 @@ class Brace extends ReducedToken implements ReducedModelStates {
    * @return true if the brace is an opening brace.
    */
   public boolean isOpen() {
-    return  (((_type%2) == 0) && (_type < braces.length - 1));
+    return (((_type%2) == 0) && (_type < braces.length - 1));
   }
 
   /**
    * @return true if this is {|(|[
    */
   public boolean isOpenBrace() {
-    return  ((_type == 0) || (_type == 2) || (_type == 4));
+    return ((_type == 0) || (_type == 2) || (_type == 4));
   }
 
   /**
    * @return true if this is }|)|]
    */
   public boolean isClosedBrace() {
-    return  ((_type == 1) || (_type == 3) || (_type == 5));
+    return ((_type == 1) || (_type == 3) || (_type == 5));
   }
 
   /**
@@ -174,7 +173,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
    * @return true if the brace is a closing brace.
    */
   public boolean isClosed() {
-    return  !isOpen();
+    return !isOpen();
   }
 
   /**
@@ -184,7 +183,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
   public void setType(String type) {
     int index = findBrace(type);
     if (index == braces.length) {
-      throw  new BraceException("Invalid brace type \"" + type + "\"");
+      throw new BraceException("Invalid brace type \"" + type + "\"");
     }
     else {
       _type = index;
@@ -213,17 +212,18 @@ class Brace extends ReducedToken implements ReducedModelStates {
    * @return true if this is a match for other.
    */
   public boolean isMatch(ReducedToken other) {
-    if (this.getType().equals(""))
-      return  false;
+    if (this.getType().equals("")) {
+      return false;
+    }
     int off = (this.isOpen()) ? 1 : -1;
-    return  (braces[_type + off].equals(other.getType()));
+    return (braces[_type + off].equals(other.getType()));
   }
 
   /**
    * @return true if this is a quote
    */
   public boolean isDoubleQuote() {
-    return  this.getType().equals(DOUBLE_QUOTE);
+    return this.getType().equals(DOUBLE_QUOTE);
   }
 
   public boolean isSingleQuote() {
@@ -235,37 +235,36 @@ class Brace extends ReducedToken implements ReducedModelStates {
    * @return true if this is a line comment delimiter
    */
   public boolean isLineComment() {
-    return  this.getType().equals(LINE_CMT);
+    return this.getType().equals(LINE_CMT);
   }
 
   /**
    * @return true if this is a block comment open delimiter
    */
   public boolean isBlockCommentStart() {
-    return  this.getType().equals(BLK_CMT_BEG);
+    return this.getType().equals(BLK_CMT_BEG);
   }
 
   /**7
    * @return true if this is a block comment close delimiter
    */
   public boolean isBlockCommentEnd() {
-    return  this.getType().equals(BLK_CMT_END);
+    return this.getType().equals(BLK_CMT_END);
   }
 
   /**
    * @return true if this is a newline delimiter
    */
   public boolean isNewline() {
-    return  this.getType().equals(EOLN);
+    return this.getType().equals(EOLN);
   }
 
   /**
    * @return true if this is a multiple character brace
    */
   public boolean isMultipleCharBrace() {
-    return  (isLineComment() || isBlockCommentStart() ||
-             isBlockCommentEnd() ||
-             isDoubleEscapeSequence());
+    return isLineComment() || isBlockCommentStart() ||
+           isBlockCommentEnd() || isDoubleEscapeSequence();
   }
 
   /**
@@ -310,14 +309,14 @@ class Brace extends ReducedToken implements ReducedModelStates {
    * @return true if this is /
    */
   public boolean isSlash() {
-    return  this.getType().equals(SLASH);
+    return this.getType().equals(SLASH);
   }
 
   /**
    * @return true if this is *
    */
   public boolean isStar() {
-    return  this.getType().equals(STAR);
+    return this.getType().equals(STAR);
   }
 
   /**
@@ -325,7 +324,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
    * @throws RuntimeException
    */
   public void grow(int delta) {
-    throw  new RuntimeException("Braces can't grow.");
+    throw new RuntimeException("Braces can't grow.");
   }
 
   /**
@@ -333,7 +332,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
    * @throws RuntimeException
    */
   public void shrink(int delta) {
-    throw  new RuntimeException("Braces can't shrink.");
+    throw new RuntimeException("Braces can't shrink.");
   }
 
 }
@@ -345,10 +344,10 @@ class Brace extends ReducedToken implements ReducedModelStates {
 class BraceException extends RuntimeException {
 
   /**
-   * put your documentation comment here
-   * @param   String s
+   * Creates a new BraceException
+   * @param s the message
    */
-  BraceException(String s) {
+  public BraceException(String s) {
     super(s);
   }
 }

@@ -71,7 +71,7 @@ public final class NewJVMTest extends TestCase {
   public static Test suite() {
     TestSuite suite = new TestSuite(NewJVMTest.class);
     TestSetup setup = new TestSetup(suite) {
-      protected void setUp() throws RemoteException {
+      protected void setUp() {
         _jvm = new TestJVMExtension();
       }
 
@@ -285,7 +285,7 @@ public final class NewJVMTest extends TestCase {
 
     private InterpretResultVisitor<Object> _testHandler;
 
-    public TestJVMExtension() { 
+    public TestJVMExtension() {
       super();
       _testHandler = new TestResultHandler();
       startInterpreterJVM();

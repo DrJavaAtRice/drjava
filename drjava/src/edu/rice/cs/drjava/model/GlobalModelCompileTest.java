@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
@@ -63,20 +63,10 @@ import edu.rice.cs.util.text.DocumentAdapterException;
 
 /**
  * Tests to ensure that compilation behaves correctly in border cases.
- * 
+ *
  * @version $Id$
  */
 public final class GlobalModelCompileTest extends GlobalModelTestCase {
-  
-  /**
-   * Constructor.
-   * @param  String name
-   */
-  public GlobalModelCompileTest(String name) {
-    super(name);
-  }
-
-  
   /**
    * Tests calling compileAll with no source files works.
    * Doesn't reset interactions because Interactions Pane isn't used.
@@ -86,7 +76,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   {
     // Open one empty doc
     _model.newFile();
-    
+
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
     _model.getCompilerModel().compileAll();
@@ -98,7 +88,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     _model.removeListener(listener);
   }
 
-  
+
   /**
    * Tests that the interactions pane is reset after a successful
    * compile if it has been used.
@@ -114,7 +104,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     // Interpret something to force a reset
     // Note: the interpreter should reset now without any interactions.
 //    interpret("Object o = new Object();");
-    
+
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
     _model.setResetAfterCompile(true);
     _model.addListener(listener);
@@ -167,7 +157,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
-    
+
     TestListener listener = new TestListener() {
       public void saveBeforeCompile() {
         assertModified(true, doc);
@@ -176,7 +166,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         // since we don't actually save the compile should abort
       }
     };
-    
+
     _model.addListener(listener);
     doc.startCompile();
     listener.assertSaveBeforeCompileCount(1);
@@ -200,7 +190,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     final File file = tempFile();
     final File file2 = tempFile(2);
-    
+
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false) {
       public void saveBeforeCompile() {
         assertModified(true, doc);
@@ -210,7 +200,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         assertCompileEndCount(0);
         assertInterpreterReadyCount(0);
         assertConsoleResetCount(0);
-        
+
         try {
           doc.saveFile(new FileSelector(file));
           doc2.saveFile(new FileSelector(file2));
@@ -218,10 +208,10 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         catch (IOException ioe) {
           fail("Save produced exception: " + ioe);
         }
-        
+
         saveBeforeCompileCount++;
       }
-      
+
       public void fileSaved(OpenDefinitionsDocument doc) {
         assertModified(false, doc);
         assertSaveBeforeCompileCount(0);
@@ -229,10 +219,10 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         assertCompileEndCount(0);
         assertInterpreterReadyCount(0);
         assertConsoleResetCount(0);
-        
+
         //File f = null;
         try {
-          //f = 
+          //f =
           doc.getFile();
         }
         catch (IllegalStateException ise) {
@@ -247,7 +237,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         saveCount++;
       }
     };
-    
+
     _model.addListener(listener);
     doc.startCompile();
     if (_model.getCompilerModel().getNumErrors() > 0) {
@@ -259,7 +249,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     listener.assertSaveCount(2);
     assertCompileErrorsPresent("compile should succeed", false);
     listener.checkCompileOccurred();
-    
+
     // Make sure .class exists
     File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue("Class file doesn't exist after compile", compiled.exists());
@@ -279,7 +269,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     final File file = tempFile();
     final File file2 = tempFile(1);
-    
+
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false) {
       public void saveBeforeCompile() {
         assertModified(false, doc);
@@ -289,20 +279,20 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         assertCompileEndCount(0);
         assertInterpreterReadyCount(0);
         assertConsoleResetCount(0);
-        
+
         try {
           doc2.saveFile(new FileSelector(file2));
         }
         catch (IOException ioe) {
           fail("Save produced exception: " + ioe);
         }
-        
+
         saveBeforeCompileCount++;
         assertModified(false, doc);
         assertModified(false, doc2);
         assertTrue(!_model.hasModifiedDocuments());
       }
-      
+
       public void fileSaved(OpenDefinitionsDocument doc) {
         assertModified(false, doc);
         assertSaveBeforeCompileCount(0);
@@ -310,7 +300,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         assertCompileEndCount(0);
         assertInterpreterReadyCount(0);
         assertConsoleResetCount(0);
-        
+
         File f = null;
         try {
           f = doc.getFile();
@@ -327,7 +317,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         saveCount++;
       }
     };
-    
+
     assertModified(true, doc);
     doc.saveFile(new FileSelector(file));
     assertModified(false, doc);
@@ -338,19 +328,19 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
       fail("compile failed: " + getCompilerErrorString());
     }
     assertTrue(!_model.hasModifiedDocuments());
-    
+
     // Check events fired
     listener.assertCompileStartCount(1);
     listener.assertSaveBeforeCompileCount(1);
     listener.assertSaveCount(1);
     assertCompileErrorsPresent("compile should succeed", false);
     listener.checkCompileOccurred();
-    
+
     // Make sure .class exists
     File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue("Class file doesn't exist after compile", compiled.exists());
     _model.removeListener(listener);
   }
 
-  
+
 }

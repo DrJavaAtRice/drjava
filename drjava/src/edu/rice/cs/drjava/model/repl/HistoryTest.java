@@ -46,7 +46,6 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.repl;
 
 import junit.framework.*;
-import junit.extensions.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,14 +65,6 @@ public final class HistoryTest extends TestCase implements OptionConstants{
   private File _tempDir;
 
   /**
-   * Create a new instance of this TestCase.
-   * @param     String name
-   */
-  public HistoryTest(String name) {
-    super(name);
-  }
-
-  /**
    * Initialize fields for each test.
    */
   public void setUp() throws IOException {
@@ -91,18 +82,9 @@ public final class HistoryTest extends TestCase implements OptionConstants{
   }
 
   /**
-   * Return a new TestSuite for this class.
-   * @return Test
-   */
-  public static Test suite() {
-    return  new TestSuite(HistoryTest.class);
-  }
-
-  /**
    * Tests that the history doesn't overwrite files without prompting.
    */
   public void testSaveAsExistsForOverwrite() throws IOException {
-
     _history.add("some text");
     final File file1 = File.createTempFile("DrJava-test", ".hist", _tempDir);
     file1.deleteOnExit();

@@ -59,28 +59,11 @@ public final class InteractionsDocumentTest extends TestCase {
   protected InteractionsDocument _doc;
 
   /**
-   * Create a new instance of this TestCase.
-   * @param     String name
-   */
-  public InteractionsDocumentTest(String name) {
-    super(name);
-  }
-
-  /**
    * Initialize fields for each test.
    */
   protected void setUp() {
     _doc = new InteractionsDocument(new SwingDocumentAdapter());
   }
-
-  /**
-   * Return a new TestSuite for this class.
-   * @return Test
-   */
-  public static Test suite() {
-    return new TestSuite(InteractionsDocumentTest.class);
-  }
-
 
   /**
    * Tests that the document prevents editing before the

@@ -113,7 +113,7 @@ public class ReducedModelControl implements BraceReduction {
   * brace iff that brace is an open brace.</P>
   * @return the distance until the matching closing brace.  On
   * failure, returns -1.
-  * @see #nextBrace()
+  * @see #balanceBackward()
   */
   public synchronized int balanceForward() {
     return rmb.balanceForward();
@@ -123,7 +123,7 @@ public class ReducedModelControl implements BraceReduction {
   * brace iff that brace is an closing brace.</P>
   * @return the distance until the matching open brace.  On
   * failure, returns -1.
-  * @see #previousBrace()
+  * @see #balanceForward()
   */
   public synchronized int balanceBackward() {
     return rmb.balanceBackward();
@@ -218,7 +218,7 @@ public class ReducedModelControl implements BraceReduction {
     int rmc_offset = rmc.getBlockOffset();
     int rmb_size = rmbToken.getSize();
     int rmc_size = rmcToken.getSize();
-    int size = 0;
+    int size;
     if (rmb_offset < rmc_offset) {
       size = rmb_offset;
       _offset = size;
@@ -255,31 +255,34 @@ public class ReducedModelControl implements BraceReduction {
    * Move the reduced model to the previous token and update the cursor information.
    */
   void prev() {
-    int size = 0;
-    if (rmc._cursor.atEnd()){
+    int size;
+    if (rmc._cursor.atEnd()) {
       rmc.prev();
       rmb.prev();
-      if (rmc._cursor.atStart()) //because in place now.
-        return;
+      if (rmc._cursor.atStart()) {
+        return; // because in place now.
+      }
 
-      if (rmc.current().getSize() < rmb.current().getSize())
+      if (rmc.current().getSize() < rmb.current().getSize()) {
         size = -rmc.current().getSize();
-      else
+      }
+      else {
         size = -rmb.current().getSize();
+      }
       rmc.next();
       rmb.next();
-      move (size);
-      return;
+      move(size);
     }
-
-    if (rmb.getBlockOffset() < rmc.getBlockOffset()) {
+    else if (rmb.getBlockOffset() < rmc.getBlockOffset()) {
       rmb.prev();
       size = rmb.current().getSize() + rmb.getBlockOffset();
       rmb.next();
-      if (size < rmc.getBlockOffset())
+      if (size < rmc.getBlockOffset()) {
         move(-size);
-      else
+      }
+      else {
         move(-rmc.getBlockOffset());
+      }
     }
     else if (rmb.getBlockOffset() == rmc.getBlockOffset()) {
       rmb.prev();
@@ -291,12 +294,13 @@ public class ReducedModelControl implements BraceReduction {
       rmc.prev();
       size = rmc.current().getSize() + rmc.getBlockOffset();
       rmc.next();
-      if (size < rmb.getBlockOffset())
+      if (size < rmb.getBlockOffset()) {
         move(-size);
-      else
+      }
+      else {
         move(-rmb.getBlockOffset());
+      }
     }
-
   }
 
   /**

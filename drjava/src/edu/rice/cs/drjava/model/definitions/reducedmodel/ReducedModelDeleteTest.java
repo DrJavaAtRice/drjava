@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,68 +32,28 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
-
-import  junit.framework.*;
-import  java.util.Vector;
-import  junit.extensions.*;
-
 
 /**
  * Test the delete functionality of the reduced model.
  * @version $Id$
  */
-public final class ReducedModelDeleteTest extends TestCase 
+public final class ReducedModelDeleteTest extends BraceReductionTestCase
   implements ReducedModelStates
 {
-  
-  protected BraceReduction model0;
-  protected BraceReduction model1;
-  protected BraceReduction model2;
-
   /**
-   * put your documentation comment here
-   * @param   String name
-   */
-  public ReducedModelDeleteTest(String name) {
-    super(name);
-  }
-
-  /**
-   * put your documentation comment here
-   */
-  protected void setUp() {
-    model0 = new ReducedModelControl();
-    model1 = new ReducedModelControl();
-    model2 = new ReducedModelControl();
-  }
-
-  /**
-   * put your documentation comment here
-   * @return 
-   */
-  public static Test suite() {
-    return  new TestSuite(ReducedModelDeleteTest.class);
-  }
-
-  protected void insertGap(BraceReduction model, int size) {
-    for (int i = 0; i < size; i++)
-      model.insertChar(' ');
-  }
-
-  /**
-   * put your documentation comment here
+   * Tests that line comments after code are indeted correctly.
    */
   public void testHalfLineComment() {
     model1.insertChar('/');
@@ -115,7 +75,7 @@ public final class ReducedModelDeleteTest extends TestCase
   }
 
   /**
-   * put your documentation comment here
+   * Tests that inner gaps are deleted correctcly.
    */
   public void testInnerGapDelete() {
     insertGap(model1, 8);
@@ -130,7 +90,7 @@ public final class ReducedModelDeleteTest extends TestCase
   }
 
   /**
-   * put your documentation comment here
+   * Tests reduced model behavioir for deleting text then merging two gaps.
    */
   public void testDeleteAndMergeTwoGaps() {
     insertGap(model1, 5);
@@ -154,9 +114,6 @@ public final class ReducedModelDeleteTest extends TestCase
     assertEquals("#6.2", 8, model1.currentToken().getSize());
   }
 
-  /**
-   * put your documentation comment here
-   */
   public void testDeleteBlockCommentMakesLineComment() {
     model1.insertChar('/');
     assertEquals("#0.0", 1, model1.absOffset());
@@ -190,9 +147,6 @@ public final class ReducedModelDeleteTest extends TestCase
     assertEquals("#7.3", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
   }
 
-  /**
-   * put your documentation comment here
-   */
   public void testLineCommentStealsBlockCommentSlash() {
     model1.insertChar('/');
     assertEquals("#0.0", 1, model1.absOffset());
@@ -215,9 +169,6 @@ public final class ReducedModelDeleteTest extends TestCase
     assertEquals("#5.3", INSIDE_LINE_COMMENT, model1.currentToken().getState());
   }
 
-  /**
-   * put your documentation comment here
-   */
   public void testLineCommentStealsLineCommentSlash() {
     model1.insertChar('/');
     assertEquals("#0.0", 1, model1.absOffset());
@@ -240,9 +191,6 @@ public final class ReducedModelDeleteTest extends TestCase
     assertEquals("#5.3", INSIDE_LINE_COMMENT, model1.currentToken().getState());
   }
 
-  /**
-   * put your documentation comment here
-   */
   public void testDeleteNewlineAndShadowBlockCommentStart() {
     model1.insertChar('/');
     assertEquals("#0.0", 1, model1.absOffset());
@@ -278,9 +226,6 @@ public final class ReducedModelDeleteTest extends TestCase
     assertEquals("#9.2", INSIDE_LINE_COMMENT, model1.currentToken().getState());
   }
 
-  /**
-   * put your documentation comment here
-   */
   public void testBlockCommentStartEatsEnd() {
     model1.insertChar('/');
     assertEquals("#0.0", 1, model1.absOffset());
@@ -314,9 +259,6 @@ public final class ReducedModelDeleteTest extends TestCase
     assertEquals("#7.1", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
   }
 
-  /**
-   * put your documentation comment here
-   */
   public void deleteLineCommentSlashOpensBlockComment() {
     model1.insertChar('/');
     model1.insertChar('/');
@@ -367,9 +309,6 @@ public final class ReducedModelDeleteTest extends TestCase
     assertEquals("#8.2", "*/", model1.currentToken().getType());
   }
 
-  /**
-   * put your documentation comment here
-   */
   public void testStartDeleteGap() {
     model1.insertChar('/');
     model1.insertChar('*');
@@ -387,30 +326,27 @@ public final class ReducedModelDeleteTest extends TestCase
     assertEquals("#1.2", FREE, model1.getStateAtCurrent());
   }
 
-  /**
-   * put your documentation comment here
-   */
   public void testDeleteFreesBlockCommentEnd() {
     model1.insertChar('/');
     model1.insertChar('*');
     assertEquals("#0.0", 2, model1.absOffset());
-    
+
     insertGap(model1, 2);
     assertEquals("#0.1", 4, model1.absOffset());
-    
+
     model1.insertChar('*');
     model1.insertChar('/');
     assertEquals("#0.2", 6, model1.absOffset());
-    
+
     model1.move(-6);
     assertEquals("#0.3", 0, model1.absOffset());
-    
+
     model1.delete(4);
     assertEquals("#0.4", 0, model1.absOffset());
     assertEquals("#0.5", "*", model1.currentToken().getType());
     assertEquals("#0.6", FREE, model1.currentToken().getState());
     assertEquals("#0.7", FREE, model1.getStateAtCurrent());
-    
+
     model1.move(1);
     assertEquals("#1.0", 1, model1.absOffset());
     assertEquals("#1.1", "/", model1.currentToken().getType());
@@ -418,9 +354,6 @@ public final class ReducedModelDeleteTest extends TestCase
     assertEquals("#1.3", FREE, model1.getStateAtCurrent());
   }
 
-  /**
-   * put your documentation comment here
-   */
   public void testUnmaskBlockCommentedLineComment() {
     model1.insertChar('/');
     model1.insertChar('*');
@@ -448,9 +381,6 @@ public final class ReducedModelDeleteTest extends TestCase
     assertEquals("#3.1", INSIDE_LINE_COMMENT, model1.getStateAtCurrent());
   }
 
-  /**
-   * put your documentation comment here
-   */
   public void testCrazyDelete() {
     model1.insertChar('/');
     model1.insertChar('/');
@@ -477,6 +407,3 @@ public final class ReducedModelDeleteTest extends TestCase
     assertEquals("#3.2", INSIDE_LINE_COMMENT, model1.currentToken().getState());
   }
 }
-
-
-

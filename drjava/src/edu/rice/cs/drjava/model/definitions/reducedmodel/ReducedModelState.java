@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
@@ -54,11 +54,9 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
  * other editor functions.
  * @version $Id$
  */
-public abstract class ReducedModelState 
-  implements /*imports*/ ReducedModelStates 
-{
+public abstract class ReducedModelState implements ReducedModelStates {
   abstract ReducedModelState update(TokenList.Iterator copyCursor);
-  
+
   /**
    * Combines the current and next braces if they match the given types.
    * If we have braces of first and second in immediate succession, and if
@@ -68,20 +66,16 @@ public abstract class ReducedModelState
    * @param second the second half of a multiple char brace
    * @return true if we combined two braces or false if not
    */
-  boolean  _combineCurrentAndNextIfFind
-    (String first, 
-     String second, 
-     TokenList.Iterator copyCursor)
+  boolean _combineCurrentAndNextIfFind(String first, String second,
+                                       TokenList.Iterator copyCursor)
   {
-    if (copyCursor.atStart() ||
-        copyCursor.atEnd() ||
-        copyCursor.atLastItem() ||
+    if (copyCursor.atStart() || copyCursor.atEnd() || copyCursor.atLastItem() ||
         !copyCursor.current().getType().equals(first))
     {
       return false;
     }
     copyCursor.next(); // move to second one to check if we can combine
-    
+
     // The second one is eligible to combine if it exists (atLast is false),
     // if it has the right brace type, and if it has no gap.
     if (copyCursor.current().getType().equals(second)) {
@@ -95,8 +89,8 @@ public abstract class ReducedModelState
       }
       else if (copyCursor.current().getType().length() == 2) {
         String tail = copyCursor.current().getType().substring(1,2);
-        String head = copyCursor.prevItem().getType() + 
-          copyCursor.current().getType().substring(0,1);        
+        String head = copyCursor.prevItem().getType() +
+          copyCursor.current().getType().substring(0,1);
         copyCursor.current().setType(tail);
         copyCursor.prev();
         copyCursor.current().setType(head);
@@ -116,13 +110,9 @@ public abstract class ReducedModelState
       return false;
     }
   }
-  
-  
-  boolean 
-    _combineCurrentAndNextIfEscape(TokenList.Iterator copyCursor)
-  { 
-    boolean combined = false;
-    combined = combined || _combineCurrentAndNextIfFind("\\","\\",copyCursor);  // \-\
+
+  boolean _combineCurrentAndNextIfEscape(TokenList.Iterator copyCursor) {
+    boolean combined = _combineCurrentAndNextIfFind("\\","\\",copyCursor);  // \-\
     combined = combined || _combineCurrentAndNextIfFind("\\","\'",copyCursor);  // \-'
     combined = combined || _combineCurrentAndNextIfFind("\\","\\'",copyCursor);// \-\'
     combined = combined || _combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"

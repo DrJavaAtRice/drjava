@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
@@ -50,13 +50,9 @@ import java.io.*;
 import java.awt.print.*;
 import javax.swing.ProgressMonitor;
 import javax.swing.text.BadLocationException;
-import junit.framework.TestResult;
 
-import edu.rice.cs.util.swing.FindReplaceMachine;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
-import edu.rice.cs.drjava.model.junit.*;
 import edu.rice.cs.drjava.model.definitions.*;
-import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 
 /**
  * Interface for the GlobalModel's handler of an open
@@ -77,7 +73,7 @@ public interface OpenDefinitionsDocument {
    * @throws ClassNameNotFoundException if no top level class name found.
    */
   public String getFirstTopLevelClassName() throws ClassNameNotFoundException;
-    
+
   /**
    * Returns whether this document is currently untitled
    * (indicating whether it has a file yet or not).
@@ -98,7 +94,7 @@ public interface OpenDefinitionsDocument {
    * Returns the name of this file, or "(untitled)" if no file.
    */
   public String getFilename();
-  
+
   /**
    * Saves the document with a FileWriter.  If the file name is already
    * set, the method will use that name instead of whatever selector
@@ -134,7 +130,7 @@ public interface OpenDefinitionsDocument {
    * @exception IOException if a file with errors cannot be opened
    */
   public void startCompile() throws IOException;
-  
+
   /**
    * Runs the main method in this document in the interactions pane.
    * Demands that the definitions be saved and compiled before proceeding.
@@ -153,7 +149,7 @@ public interface OpenDefinitionsDocument {
    * not on the classpath.
    */
   public void startJUnit() throws ClassNotFoundException, IOException;
-  
+
   /**
    * Generates Javadoc for this document, saving the output to a temporary
    * directory.  The location is provided to the javadocEnded event on
@@ -219,7 +215,7 @@ public interface OpenDefinitionsDocument {
    *         the matching brace.
    */
   public int balanceBackward();
-  
+
   /**
    * Forwarding method to find the match for the open brace
    * immediately to the right, assuming there is such a brace.
@@ -295,7 +291,7 @@ public interface OpenDefinitionsDocument {
   public Pageable getPageable() throws IllegalStateException;
 
   public void cleanUpPrintJob();
-  
+
   /**
    * Checks if the document is modified. If not, searches for the class file
    * corresponding to this document and compares the timestamps of the
@@ -311,30 +307,30 @@ public interface OpenDefinitionsDocument {
    * @return the Breakpoint at the given lineNumber, or null if it does not exist.
    */
   public Breakpoint getBreakpointAt( int lineNumber);
-  
+
   /**
    * Add the supplied Breakpoint to the hashtable, keyed by its BreakpointRequest
    * @param breakpoint the Breakpoint to be inserted into the hashtable
    */
   public void addBreakpoint( Breakpoint breakpoint);
-  
+
   /**
    * Remove the given Breakpoint from the hashtable.
    * @param breakpoint the Breakpoint to be removed.
    */
   public void removeBreakpoint( Breakpoint breakpoint);
-  
+
   /**
    * Returns a Vector<Breakpoint> that contains all of the Breakpoint objects that
    * this document contains
    */
   public Vector<Breakpoint> getBreakpoints();
-  
+
   /**
    * Tells the document to remove all breakpoints
    */
   public void clearBreakpoints();
-  
+
   /**
    * Called to indicate the document is being closed, so to remove
    * all related state from the debug manager.

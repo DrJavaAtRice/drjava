@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,30 +32,24 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import junit.framework.*;
-import junit.extensions.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import javax.swing.ListModel;
 import java.util.List;
 
-import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
-import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.drjava.model.compiler.*;
 
 /**
  * Tests the indenting functionality on the level of the GlobalModel.
@@ -68,16 +62,8 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
   private static final String FOO_EX_2 = "int foo;\n";
   private static final String BAR_CALL_1 = "bar(monkey,\n";
   private static final String BAR_CALL_2 = "banana)\n";
-  private static final String BEAT_1 = "void beat(Horse dead,\n";
-  private static final String BEAT_2 = "          Stick pipe)\n";
-
-  public GlobalIndentTest(String name) {
-    super(name);
-  }
-
-  public static Test suite() {
-    return  new TestSuite(GlobalIndentTest.class);
-  }
+//  private static final String BEAT_1 = "void beat(Horse dead,\n";
+//  private static final String BEAT_2 = "          Stick pipe)\n";
 
   /**
    * Tests indent that increases the size of the tab when the
@@ -87,7 +73,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
    * character.
    * @throws BadLocationException
    */
-  public void testIndentGrowTabAtStart() 
+  public void testIndentGrowTabAtStart()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
     Document doc = openDoc.getDocument();
@@ -107,7 +93,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
    * same place.
    * @throws BadLocationException
    */
-  public void testIndentGrowTabAtMiddle() 
+  public void testIndentGrowTabAtMiddle()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
     Document doc = openDoc.getDocument();
@@ -127,7 +113,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
    * same place.
    * @throws BadLocationException
    */
-  public void testIndentGrowTabAtEnd() 
+  public void testIndentGrowTabAtEnd()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
     Document doc = openDoc.getDocument();
@@ -149,7 +135,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
    * character.
    * @throws BadLocationException
    */
-  public void testIndentShrinkTabAtStart() 
+  public void testIndentShrinkTabAtStart()
       throws BadLocationException, OperationCanceledException{
     OpenDefinitionsDocument openDoc = _getOpenDoc();
     Document doc = openDoc.getDocument();
@@ -169,7 +155,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
    * same place.
    * @throws BadLocationException
    */
-  public void testIndentShrinkTabAtMiddle() 
+  public void testIndentShrinkTabAtMiddle()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
     Document doc = openDoc.getDocument();
@@ -189,7 +175,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
    * same place.
    * @throws BadLocationException
    */
-  public void testIndentShrinkTabAtEnd() 
+  public void testIndentShrinkTabAtEnd()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
     Document doc = openDoc.getDocument();
@@ -208,7 +194,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
    * The cursor is at the start of the line.
    * @exception BadLocationException
    */
-  public void testIndentSameAsLineAboveAtStart() 
+  public void testIndentSameAsLineAboveAtStart()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
     Document doc = openDoc.getDocument();
@@ -227,7 +213,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
    * The cursor is at the end of the line.
    * @exception BadLocationException
    */
-  public void testIndentSameAsLineAboveAtEnd() 
+  public void testIndentSameAsLineAboveAtEnd()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
     Document doc = openDoc.getDocument();
@@ -246,7 +232,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
    * The cursor is at the start of the line.
    * @exception BadLocationException
    */
-  public void testIndentInsideParenAtStart() 
+  public void testIndentInsideParenAtStart()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
     Document doc = openDoc.getDocument();
@@ -265,7 +251,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
    * The cursor is at the end of the line.
    * @exception BadLocationException
    */
-  public void testIndentInsideParenAtEnd() 
+  public void testIndentInsideParenAtEnd()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
     Document doc = openDoc.getDocument();
@@ -282,7 +268,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
   /**
    * Indent does nothing to change the document when everything is in place.
    */
-  public void testIndentDoesNothing() 
+  public void testIndentDoesNothing()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
     Document doc = openDoc.getDocument();
@@ -302,7 +288,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
    * correctly followed yet, so until it is, leave this method commented.
    * @exception BadLocationException
    *
-  public void testIndentSquigglyAfterTwoLines() 
+  public void testIndentSquigglyAfterTwoLines()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
     Document doc = openDoc.getDocument();
@@ -321,7 +307,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
    * Indents block comments with stars as they should.
    * Uncomment this method when the correct functionality is implemented.
    */
-//  public void testIndentBlockCommentStar() 
+//  public void testIndentBlockCommentStar()
 //      throws BadLocationException, OperationCanceledException {
 //    OpenDefinitionsDocument openDoc = _getOpenDoc();
 //    Document doc = openDoc.getDocument();

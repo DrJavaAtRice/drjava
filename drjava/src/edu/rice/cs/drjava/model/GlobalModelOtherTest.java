@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,39 +32,29 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import junit.framework.*;
-
 import java.io.*;
-
 import javax.swing.text.BadLocationException;
 import javax.swing.event.*;
-import junit.extensions.*;
-import java.util.LinkedList;
-import javax.swing.text.Document;
-import javax.swing.text.DefaultStyledDocument;
 import java.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.drjava.model.compiler.*;
-import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.DocumentAdapterException;
-import edu.rice.cs.drjava.CodeStatus;
 
 /**
  * A test on the GlobalModel that does deals with everything outside of
@@ -84,27 +74,19 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     "}\n";
 
   /**
-   * Constructor.
-   * @param  String name
-   */
-  public GlobalModelOtherTest(String name) {
-    super(name);
-  }
-
-  /**
    * Tests that the undoableEditHappened event is fired if the undo manager
    * is in use.
    */
   public void testUndoEventsOccur() throws BadLocationException {
     final OpenDefinitionsDocument doc = _model.newFile();
-    
+
     // Have to add an undoable edit listener for Undo to work
     doc.getDocument().addUndoableEditListener(new UndoableEditListener() {
       public void undoableEditHappened(UndoableEditEvent e) {
         doc.getDocument().getUndoManager().addEdit(e.getEdit());
       }
     });
-    
+
     TestListener listener = new TestListener() {
       public void undoableEditHappened() {
         undoableEditCount++;
@@ -115,7 +97,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     _model.removeListener(listener);
     listener.assertUndoableEditCount(1);
   }
-  
+
   /**
    * Checks that System.exit is handled appropriately from
    * interactions pane.
@@ -134,7 +116,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
         interpreterExitedCount++;
         lastExitStatus = status;
       }
-      
+
       public void interpreterResetting() {
         assertInteractionStartCount(1);
         assertInterpreterExitedCount(0);
@@ -167,7 +149,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     listener.assertInterpreterExitedCount(1);
     assertEquals("exit status", 23, listener.lastExitStatus);
   }
-  
+
   /**
    * Checks that System.exit is handled appropriately from
    * interactions frame when there is a security manager in
@@ -177,12 +159,12 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     throws DocumentAdapterException, InterruptedException
   {
     TestListener listener = new TestListener() {
-      
+
       public void interpreterResetting() {
         assertInterpreterResetFailedCount(0);
         interpreterResettingCount++;
       }
-      
+
       public void interpreterResetFailed(Throwable t) {
         synchronized(this) {
           assertInterpreterResettingCount(1);
@@ -198,10 +180,10 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
 
     // Prevent the Interactions JVM from quitting
     interpret("edu.rice.cs.drjava.DrJava.enableSecurityManager();");
-    
+
     // Don't show the pop-up message
     _model._interpreterControl.setShowMessageOnResetFailure(false);
-    
+
     _model.addListener(listener);
     synchronized(listener) {
       _model.resetInteractions();
@@ -228,16 +210,17 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
    * and I can never reproduce it in the test case. Grr.
    *
    * OK, now I found the explanation: We were in some cases running two new JVMs
-   * on an abort. I fixed the problem in {@link MainJVM#restartInterpreterJVM}.
+   * on an abort. I fixed the problem in MainJVM#restartInterpreterJVM
+   *
+   * The above method no longer exists...  Does anyone remember what this meant? -nrh
    */
-  public void testInteractionAbort()
-    throws BadLocationException, DocumentAdapterException,
-    InterruptedException, IOException
+  public void testInteractionAbort() throws BadLocationException,
+      DocumentAdapterException, InterruptedException, IOException
   {
     doCompile(setupDocument(FOO_TEXT), tempFile());
     final String beforeAbort = interpret("DrJavaTestFoo.class.getName()");
     assertEquals("\"DrJavaTestFoo\"", beforeAbort);
-    
+
     TestListener listener = new TestListener() {
       public void interactionStarted() {
         interactionStartCount++;
@@ -251,7 +234,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
 
       public void interpreterExited(int status) {
         try {
-          Thread.currentThread().sleep(1000);
+          Thread.sleep(1000);
         } catch (InterruptedException e) {
         }
         assertInteractionStartCount(1);
@@ -264,7 +247,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
         assertInterpreterReadyCount(0);
         interpreterResettingCount++;
       }
-      
+
       public void interpreterReady() {
         synchronized(this) {
           assertInteractionStartCount(1);
@@ -306,7 +289,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
    * Checks that reset console works.
    */
   public void testResetConsole()
-    throws BadLocationException, DocumentAdapterException, InterruptedException
+    throws DocumentAdapterException, InterruptedException
   {
     //System.err.println("Entering testResetConsole");
     TestListener listener = new TestListener() {
@@ -384,36 +367,36 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     assertEquals("interactions result",
                  "\"DrJavaTestFoo\"",
                  interpret("new DrJavaTestFoo().getClass().getName()"));
-    
+
     // Add directory 1 to extra classpath and close doc1
     Vector<File> cp = new Vector<File>();
     cp.add(dir1);
     DrJava.getConfig().setSetting(EXTRA_CLASSPATH, cp);
     _model.closeFile(doc1);
-    
+
     // Compile Baz which extends Foo in another directory.
     OpenDefinitionsDocument doc2 = setupDocument(BAZ_TEXT);
     File dir2 = new File(_tempDir, "dir2");
     dir2.mkdir();
     File file2 = new File(dir2, "TestFile1.java");
     doCompile(doc2, file2);
-    
+
     // Ensure that Baz can use the Foo class from extra classpath
     assertEquals("interactions result",
                  "\"DrJavaTestBaz\"",
                  interpret("new DrJavaTestBaz().getClass().getName()"));
-    
+
     // Ensure that static fields can be seen
     assertEquals("result of static field",
                  "3",
                  interpret("DrJavaTestBaz.x"));
-    
+
     // Also ensure that Foo can be used directly
     assertEquals("interactions result",
                  "\"DrJavaTestFoo\"",
                  interpret("new DrJavaTestFoo().getClass().getName()"));
   }
-  
+
   /**
    * Compiles a new class in the default package with a mixed case name,
    * and ensures that it can be instantiated on a variable with an
@@ -453,7 +436,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
       doc = setupDocument(text_before + i + text_after);
       file = tempFile(i);
       doCompile(doc, file);
-      
+
       assertEquals("interactions result, i=" + i,
           String.valueOf(i),
           interpret("new DrJavaTestFoo().m()"));
@@ -485,18 +468,17 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
   }
 
   public void testGetSourceRootDefaultPackage()
-    throws BadLocationException, IOException, InvalidPackageException
+    throws BadLocationException, IOException
   {
-    // Get current working directory
-    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
-        
-    if (workDir == FileOption.NULL_FILE) {
-      workDir = new File( System.getProperty("user.dir"));
-    }
-    if (workDir.isFile() && workDir.getParent() != null) {
-      workDir = workDir.getParentFile();
-    }
-    
+    // Get current working directory (only used in the one test case, currently commented out)
+//    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
+//    if (workDir == FileOption.NULL_FILE) {
+//      workDir = new File( System.getProperty("user.dir"));
+//    }
+//    if (workDir.isFile() && workDir.getParent() != null) {
+//      workDir = workDir.getParentFile();
+//    }
+
     // Get source root (current directory only)
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 0, roots.length);
@@ -528,7 +510,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
   }
 
   public void testGetSourceRootPackageThreeDeepValid()
-    throws BadLocationException, IOException, InvalidPackageException
+    throws BadLocationException, IOException
   {
     // Create temp directory
     File baseTempDir = tempDirectory();
@@ -551,17 +533,17 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     // Since we had the package statement the source root should be base dir
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, roots.length);
-    assertEquals("source root", baseTempDir.getCanonicalFile(), 
+    assertEquals("source root", baseTempDir.getCanonicalFile(),
                  roots[0].getCanonicalFile());
 
   }
-  
+
   /**
    * Tests that getSourceRoot works with a relative path
    * when a package name is present.
    */
   public void testGetSourceRootPackageThreeDeepValidRelative()
-    throws BadLocationException, IOException, InvalidPackageException
+    throws BadLocationException, IOException
   {
     // Create temp directory
     File baseTempDir = tempDirectory();
@@ -594,16 +576,16 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
   {
     // Create temp directory
     File baseTempDir = tempDirectory();
-    
-    // Get current working directory
-    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
-        
-    if (workDir == FileOption.NULL_FILE) {
-      workDir = new File( System.getProperty("user.dir"));
-    }
-    if (workDir.isFile() && workDir.getParent() != null) {
-      workDir = workDir.getParentFile();
-    }
+
+    // Get current working directory, though not currently checked.
+//    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
+//
+//    if (workDir == FileOption.NULL_FILE) {
+//      workDir = new File( System.getProperty("user.dir"));
+//    }
+//    if (workDir.isFile() && workDir.getParent() != null) {
+//      workDir = workDir.getParentFile();
+//    }
     // Now make subdirectory a/b/d
     File subdir = new File(baseTempDir, "a");
     subdir = new File(subdir, "b");
@@ -699,7 +681,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     }
   }
 
-  
+
   /**
    * Creates a new class, compiles it and then checks that the REPL
    * can see it.
@@ -708,10 +690,10 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     throws BadLocationException, DocumentAdapterException,
     IOException, InterruptedException
   {
-      
+
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     File f = tempFile();
-    
+
     doCompile(doc, f);
 
     // Rename the directory so it's not on the classpath anymore
@@ -720,7 +702,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     tempDir.renameTo(new File(tempPath+"a"));
 
     String result = interpret("new DrJavaTestFoo().getClass().getName()");
-    
+
     // Should cause a NoClassDefFound, but we shouldn't check exact syntax.
     //  Instead, make sure it isn't "DrJavaTestFoo", as if the class was found.
     assertTrue("interactions should have an error, not the correct answer",
@@ -730,21 +712,21 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     Vector<File> cp = new Vector<File>();
     cp.add(new File(tempPath + "a"));
     DrJava.getConfig().setSetting(EXTRA_CLASSPATH, cp);
-    
+
     result = interpret("new DrJavaTestFoo().getClass().getName()");
-    
+
     // Now it should be on the classpath
     assertEquals("interactions result",
                  "\"DrJavaTestFoo\"",
                  result);
-    
-    
+
+
     // Rename directory back to clean up
     tempDir = new File(tempPath + "a");
     tempDir.renameTo( new File(tempPath));
 
   }
-  
+
   /**
    * Tests that the appropriate event is fired when the model's interpreter changes.
    */
@@ -756,19 +738,17 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
       }
     };
     _model.addListener(listener);
-    
-    // Create a new Java interpreter
-    ((RMIInteractionsModel)_model.getInteractionsModel()).
-      addJavaInterpreter("testInterpreter");
-    
-    // Set it to be active
-    ((RMIInteractionsModel)_model.getInteractionsModel()).
-      setActiveInterpreter("testInterpreter", "myPrompt>");
-    
+
+    DefaultInteractionsModel dim = _model.getInteractionsModel();
+
+    // Create a new Java interpreter, and set it to be active
+    dim.addJavaInterpreter("testInterpreter");
+    dim.setActiveInterpreter("testInterpreter", "myPrompt>");
+
     listener.assertInterpreterChangedCount(1);
     _model.removeListener(listener);
   }
-  
+
   /**
    * Tests that setting and changing an input listener works correctly.
    */
@@ -778,13 +758,13 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
         return "input1";
       }
     };
-    
+
     InputListener listener2 = new InputListener() {
       public String getConsoleInput() {
         return "input2";
       }
     };
-    
+
     try {
       _model.getConsoleInput();
       fail("Should not have allowed getting input before a listener is installed!");
@@ -793,7 +773,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
       assertEquals("Should have thrown the correct exception.",
                    "No input listener installed!", ise.getMessage());
     }
-    
+
     _model.setInputListener(listener1);
     assertEquals("First input listener should return correct input", "input1", _model.getConsoleInput());
     _model.changeInputListener(listener1, listener2);

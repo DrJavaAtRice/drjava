@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
@@ -49,22 +49,15 @@ import  junit.framework.*;
 
 import java.io.*;
 
-import java.util.LinkedList;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Position;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.compiler.*;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.text.DocumentAdapterException;
 
 /**
  * Tests to ensure that compilation fails when expected, and that the errors
  * are reported correctly.
- * 
+ *
  * Every test in this class is run for *each* of the compilers that is available.
  *
  * @version $Id$
@@ -72,10 +65,10 @@ import edu.rice.cs.util.text.DocumentAdapterException;
 public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   private static final String FOO_MISSING_CLOSE_TEXT =
     "class DrJavaTestFoo {";
-  
+
   private static final String BAR_MISSING_SEMI_TEXT =
     "class DrJavaTestBar { int x }";
-  
+
   private static final String FOO_PACKAGE_AFTER_IMPORT =
     "import java.util.*;\npackage a;\n" + FOO_TEXT;
 
@@ -90,16 +83,6 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
 
   private static final String BAR_MISSING_SEMI_TEXT_MULTIPLE_LINES =
     "class DrJavaTestFoo {\n  int a = 5;\n  int x\n }";
-  
-  /**
-   * Constructor.
-   * @param  String name
-   */
-  public GlobalModelCompileErrorsTest(String name) {
-    super(name);
-  }
-  
-
 
   /**
    * Overrides {@link TestCase#runBare} to interatively run this
@@ -123,11 +106,15 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     }
   }
 
+  /**
+   * Gets the name of the compiler.
+   * @return the string representation of the active compiler
+   */
   private String _name() {
     return "compiler=" + _model.getCompilerModel().getActiveCompiler().getName() + ": ";
   }
-  
-  
+
+
   /**
    * Tests calling compileAll with different source roots works
    * if the files have errors in them.  (Each file has 1 error.)
@@ -145,7 +132,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT);
     final File file2 = new File(bDir, "DrJavaTestBar.java");
     doc2.saveFile(new FileSelector(file2));
-    
+
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
     _model.getCompilerModel().compileAll();
@@ -266,12 +253,12 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
     doc.startCompile();
-    
+
     listener.checkCompileOccurred();
     assertCompileErrorsPresent(_name(), true);
     assertTrue(_name() + "Class file exists after failed compile",
                !compiled.exists());
-    
+
     // check that model.resetCompilerErrors works
     _model.getCompilerModel().resetCompilerErrors();
     CompilerErrorModel cem = _model.getCompilerModel().getCompilerErrorModel();
@@ -281,12 +268,12 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     _model.removeListener(listener);
   }
 
-
-
-
-  /* TODO: rewrite this test for the new error model interface
+  /**
+   * Tests the compiler errors have the correct line numbers.
+   *  TODO: rewrite this test for the new error model interface
+   *
   public void testCompileFailsCorrectLineNumbers() throws BadLocationException, IOException {
-        File aDir = new File(_tempDir, "a");
+    File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
     aDir.mkdir();
     bDir.mkdir();
@@ -296,28 +283,53 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT_MULTIPLE_LINES);
     final File file2 = new File(bDir, "DrJavaTestBar.java");
     doc2.saveFile(new FileSelector(file2));
-    
-    CompileShouldFailListener listener = new CompileShouldFailListener();
+
+    CompileShouldFailListener listener = new CompileShouldFailListener() {
+      public synchronized void compileEnded() {
+        super.compileEnded();
+        notify();
+      }
+    };
+    CompilerModel cm = _model.getCompilerModel();
     _model.addListener(listener);
-    _model.compileAll();
+    synchronized (listener) {
+      cm.compileAll();
+      try {
+        listener.wait(10000);
+      }
+      catch (InterruptedException ie) {
+        fail("Unexpected interrupted exception: " + ie.getMessage());
+      }
+    }
     assertCompileErrorsPresent(_name(), true);
-    //    assertEquals("Should have 2 compiler errors", 2, 
-    //                 _model.getCompilerModel().getNumErrors());
+//    assertEquals("Should have 2 compiler errors", 2,
+//                 _model.getCompilerModel().getNumErrors());
     listener.checkCompileOccurred();
     _model.removeListener(listener);
 
-    //TODO: rewrite these lines for the new interface
-    //Position[] positions = doc.getCompilerErrorModel().getPositions();
-    //Position[] positions2 = doc2.getCompilerErrorModel().getPositions();
+    CompilerErrorModel cme = cm.getCompilerErrorModel();
+    assertEquals("Should have had two errors", 2, cme.getNumErrors());
 
-    //assertTrue("first doc should have errors", positions.length > 0);
-    //assertTrue("second doc should have errors", positions2.length > 0);
-    //assertTrue("location of first error should be between 20 and 29 inclusive (line 2)",
-    //    positions[0].getOffset() <= 20 && positions[0].getOffset() <= 29);
-    //assertTrue("location of error should be after 34 (line 3 or 4)", positions2[0].getOffset() >= 34);
+//    TODO: rewrite these lines for the new interface
+//    Position[] positions = doc.getCompilerErrorModel().getPositions();
+//    Position[] positions2 = doc2.getCompilerErrorModel().getPositions();
 
+//    assertTrue("first doc should have errors", positions.length > 0);
+//    assertTrue("second doc should have errors", positions2.length > 0);
+//    assertTrue("location of first error should be between 20 and 29 inclusive (line 2)",
+//        positions[0].getOffset() <= 20 && positions[0].getOffset() <= 29);
+//    assertTrue("location of error should be after 34 (line 3 or 4)", positions2[0].getOffset() >= 34);
+
+    CompilerError ce1 = cme.getError(0);
+    CompilerError ce2 = cme.getError(1);
+    assertEquals("first doc should have an error", file, ce1.file());
+    assertEquals("second doc should have an error", file2, ce2.file());
+
+    Position p1 = cme.getPosition(ce1);
+    Position p2 = cme.getPosition(ce2);
+    assertTrue("location of first error should be between 20 and 29 " +
+               "inclusive (line 2), but was " + p1.getOffset(),
+               p1.getOffset() <= 20 && p1.getOffset() <= 29);
+    assertTrue("location of error should be after 34 (line 3 or 4)", p2.getOffset() >= 34);
   }*/
-  
-
-  
 }

@@ -184,13 +184,14 @@ public class ReducedModelBrace extends AbstractReducedModel {
    *backward can find it.
    */
   public int previousBrace() {
-    int relDistance = 0;
+    int relDistance;
     int dist = 0;
     resetWalkerLocationToCursor();//reset the interface to the comment model
 
     TokenList.Iterator copyCursor = _cursor._copy();
-    if (!copyCursor.atStart())
+    if (!copyCursor.atStart()) {
       copyCursor.prev();
+    }
     if (copyCursor.atStart()) {
       copyCursor.dispose();
       return -1;
@@ -277,12 +278,9 @@ public class ReducedModelBrace extends AbstractReducedModel {
     Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
     TokenList.Iterator iter = _cursor._copy();
     resetWalkerLocationToCursor();
-    int relDistance = 0;
+    int relDistance;
     int distance = 0;
-    if (iter.atStart() ||
-        iter.atFirstItem() ||
-        !openBraceImmediatelyLeft())
-    {
+    if (iter.atStart() || iter.atFirstItem() || !openBraceImmediatelyLeft()) {
 //      System.out.println("openBraceImmediatelyLeft(): "+openBraceImmediatelyLeft());
       iter.dispose();
 //      System.out.println("! atStart, atFirstItem, or no closed brace");
@@ -437,12 +435,9 @@ public class ReducedModelBrace extends AbstractReducedModel {
     Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
     TokenList.Iterator iter = _cursor._copy();
     resetWalkerLocationToCursor();
-    int relDistance = 0;
+    int relDistance;
     int distance = 0;
-    if (iter.atStart() ||
-        iter.atFirstItem() ||
-        !closedBraceImmediatelyLeft())
-    {
+    if (iter.atStart() || iter.atFirstItem() || !closedBraceImmediatelyLeft()) {
       //System.out.println("closedBraceImmediatelyLeft(): "+closedBraceImmediatelyLeft());
       iter.dispose();
       //System.out.println("! atStart, atFirstItem, or no closed brace");

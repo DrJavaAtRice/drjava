@@ -58,7 +58,6 @@ import java.util.Iterator;
  * @version $Id$
  */
 public class ForcedChoiceOptionComponent extends OptionComponent<String> {
-
   private JComboBox _comboBox;
 
   /**
