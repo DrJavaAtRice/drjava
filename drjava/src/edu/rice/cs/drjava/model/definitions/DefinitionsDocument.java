@@ -323,8 +323,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       if (delay > maxHelpDelay) {
         maxHelpDelay = delay;
         maxKey = key;
-        DrJava.consoleOut().println("   Longest: " + maxHelpDelay + "ms from " + maxKey +
-                                    ", line " + getCurrentLine());
+        //DrJava.consoleOut().println("   Longest: " + maxHelpDelay + "ms from " + maxKey +
+        //                            ", line " + getCurrentLine());
       }
     }
     else {
@@ -334,10 +334,10 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   }
   
   // Fields for monitoring performance
-  /*
-  long maxHelpDelay = 0;
-  String maxKey = "none";
-  */
+  
+  //long maxHelpDelay = 0;
+  //String maxKey = "none";
+  
   
   /**
    * Clears the helper method cache.
@@ -831,6 +831,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     final int origLocation = _currentLocation;
     // Move reduced model to location pos
     _reduced.move(pos - origLocation);
+    int reducedPos = pos;
 
     // Walk backwards from specificed position
     for (i = pos-1; i >= DOCSTART; i--) {
@@ -839,7 +840,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       for (j = 0; j < delims.length; j++) {
         if (c == delims[j]) {
           // Move reduced model to walker's location
-          _reduced.move(i - pos);
+          _reduced.move(i - reducedPos);
+          reducedPos = i;
+          
           // Check if matching char is in comment or quotes
           ReducedModelState state = _reduced.getStateAtCurrent();
           if (!state.equals(ReducedModelState.FREE)
@@ -858,11 +861,11 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
               return i;
             }
           }
-          _reduced.move(pos - i);
+          //_reduced.move(pos - i);
         }
       }
     }
-    _reduced.move(origLocation - pos);
+    _reduced.move(origLocation - reducedPos);
     
     _storeInCache(key, new Integer(ERROR_INDEX));
     return ERROR_INDEX;
@@ -1053,22 +1056,39 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     }
     
     int i = lineText.indexOf(findChar, 0);
+    
+    // Move to start of line
+    /*
+    _reduced.move(lineStart - here);
+    int reducedPos = lineStart;
+    int prevI = 0;
+    */
+    
     while(i != -1) {
       // Move reduced model to walker's location
-      this.getReduced().move(i + lineStart - here);
+      int matchIndex = i + lineStart;
+      _reduced.move(matchIndex - here);
+      //int dist = i - prevI;
+      //_reduced.move(dist);
+      //reducedPos = reducedPos + dist;
       
       // Check if matching char is in comment or quotes
-      if (!this.getReduced().getStateAtCurrent().equals(ReducedModelState.FREE)) {
+      if (!_reduced.getStateAtCurrent().equals(ReducedModelState.FREE)) {
         // Ignore matching char
       } else {
         // Return position of matching char
-        this.getReduced().move(here - (i + lineStart));
-        _storeInCache(key, new Integer(i + lineStart));
-        return (i + lineStart);
+        //_reduced.move(here - reducedPos);
+        _reduced.move(here - matchIndex);
+        _storeInCache(key, new Integer(matchIndex));
+        return matchIndex;
       }
-      this.getReduced().move(here - (i + lineStart));
+      _reduced.move(here - matchIndex);
+      
+      //prevI = i;
       i = lineText.indexOf(findChar, i+1);
     }
+    
+    //_reduced.move(here - reducedPos);
     _storeInCache(key, new Integer(ERROR_INDEX));
     return ERROR_INDEX;
   }
@@ -1212,6 +1232,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     final int origLocation = _currentLocation;
     // Move reduced model to location pos
     _reduced.move(pos - origLocation);
+    int reducedPos = pos;
     
     //int iter = 0;
     
@@ -1221,14 +1242,16 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       boolean isWhitespace = false;
       c = text.charAt(i - pos);
       // Check if character is whitespace
-      for (j = 0; j < whitespace.length; j++) {
+      for (j = 0; j < whitespace.length && !isWhitespace; j++) {
         if (c == whitespace[j]) {
           isWhitespace = true;
         }
       }
       if (!isWhitespace) {
         // Move reduced model to walker's location
-        _reduced.move(i - pos);
+        _reduced.move(i - reducedPos);
+        reducedPos = i;
+        
         // Check if non-ws char is in comment
         if((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
            (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT))) {
@@ -1253,6 +1276,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
             // and continue searching
             i = i + 1;
             _reduced.move(1);
+            reducedPos = i;
           }
           else {
             // Return position of matching char
@@ -1261,12 +1285,11 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
             return i;
           }
         }
-        _reduced.move(pos - i);
       }
     }
     //DrJava.consoleOut().println("getFirstNonWS iterations: " + iter);
     
-    _reduced.move(origLocation - pos);
+    _reduced.move(origLocation - reducedPos);
     _storeInCache(key, new Integer(ERROR_INDEX));
     return ERROR_INDEX;
   }
@@ -1348,6 +1371,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     final int origLocation = _currentLocation;
     // Move reduced model to location pos
     _reduced.move(pos - origLocation);
+    int reducedPos = pos;
     
     // Walk forward from specificed position
     for (i = pos-1; i >= 0; i--) {
@@ -1361,7 +1385,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       }
       if (!isWhitespace) {
         // Move reduced model to walker's location
-        _reduced.move(i - pos);
+        _reduced.move(i - reducedPos);
+        reducedPos = i;
+        
         // Check if matching char is in comment
         if((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
            (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT))) {
@@ -1373,6 +1399,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
             // and continue searching
             i = i - 1;
             _reduced.move(-1);
+            reducedPos = i;
           }
           else {
             // Return position of matching char
@@ -1381,10 +1408,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
             return i;
           }
         }
-        _reduced.move(pos - i);
       }
     }
-    _reduced.move(origLocation - pos);
+    _reduced.move(origLocation - reducedPos);
     _storeInCache(key, new Integer(ERROR_INDEX));
     return ERROR_INDEX;
   }
@@ -1476,13 +1502,14 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
     }
-    /*
-    long end = System.currentTimeMillis();
-    DrJava.consoleOut().println("Elapsed Time (sec): " + ((end-start)/1000));
-    DrJava.consoleOut().println("   Cache size: " + _helperCache.size());
-    DrJava.consoleOut().println("   Longest: " + maxHelpDelay + "ms from " + maxKey);
-    maxHelpDelay = 0;  maxKey = "none";
-    */
+    
+    //long end = System.currentTimeMillis();
+    //DrJava.consoleOut().println("Elapsed Time (sec): " + ((end-start)/1000));
+    //DrJava.consoleOut().println("   Cache size: " + _helperCache.size());
+    
+    //DrJava.consoleOut().println("   Longest: " + maxHelpDelay + "ms from " + maxKey);
+    //maxHelpDelay = 0;  maxKey = "none";
+    
   }
 
   /**
