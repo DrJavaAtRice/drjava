@@ -64,11 +64,4 @@ public class Javac141FromToolsJar extends CompilerProxy {
     super("edu.rice.cs.drjava.model.compiler.Javac141Compiler",
           new ToolsJarClassLoader());
   }
-
-  /**
-   * Returns the name of this compiler, appropriate to show to the user.
-   */
-  public String getName() {
-    return super.getName() + " (tools.jar)";
-  }
 }

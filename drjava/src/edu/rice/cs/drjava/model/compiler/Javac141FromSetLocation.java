@@ -88,11 +88,4 @@ public class Javac141FromSetLocation extends CompilerProxy
       throw new RuntimeException("malformed url exception");
     }
   }
-  
-  /**
-   * Returns the name of this compiler, appropriate to show to the user.
-   */
-  public String getName() {
-    return super.getName() + " (user)";
-  }
 }

@@ -67,8 +67,4 @@ public class Javac141FromClasspath extends CompilerProxy {
     super("edu.rice.cs.drjava.model.compiler.Javac141Compiler",
           Javac141FromClasspath.class.getClassLoader());
   }
-  
-  public String getName() {
-    return super.getName();
-  }
 }

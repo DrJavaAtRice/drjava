@@ -43,48 +43,36 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.compiler;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.io.File;
+import java.net.URLClassLoader;
+import java.net.URL;
+import java.net.MalformedURLException;
+
+import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20040331-0037;
+ * A compiler interface to find Javac (1.5.0+) from the classpath,
+ * but to do so via a compiler proxy so that the compiler classes can be
+ * fully unloaded/reloaded every time it is used.
  *
  * @version $Id$
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20040331-0037";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+public class Javac150FromClasspath extends CompilerProxy {
+  public static final CompilerInterface ONLY = new Javac150FromClasspath();
+  
+  /** Private constructor due to singleton. */
+  private Javac150FromClasspath() {
+    super("edu.rice.cs.drjava.model.compiler.JSR14v20Compiler",
+          Javac150FromClasspath.class.getClassLoader());
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  public boolean isAvailable() {
+    return System.getProperty("java.specification.version").equals("1.5") && super.isAvailable();
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+  
+  public String getName() {
+    return "javac 1.5.0";
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

@@ -66,31 +66,40 @@ import edu.rice.cs.drjava.config.OptionConstants;
  * @version $Id$
  */
 public class CompilerRegistry {
-  /**
-   * The list of compiler interfaces that are distributed with DrJava.
-   */
-  public static final String[] DEFAULT_COMPILERS = {
-    "edu.rice.cs.drjava.model.compiler.Javac150FromSetLocation",
-    "edu.rice.cs.drjava.model.compiler.JSR14v20FromSetLocation",
-    "edu.rice.cs.drjava.model.compiler.JSR14v12FromSetLocation",
-    "edu.rice.cs.drjava.model.compiler.JSR14FromSetLocation",
-    "edu.rice.cs.drjava.model.compiler.Javac141FromSetLocation",
-    "edu.rice.cs.drjava.model.compiler.Javac141FromClasspath",
-    "edu.rice.cs.drjava.model.compiler.Javac141FromToolsJar",
-    "edu.rice.cs.drjava.model.compiler.JavacFromSetLocation",
-    "edu.rice.cs.drjava.model.compiler.JavacFromClasspath",
-    "edu.rice.cs.drjava.model.compiler.JavacFromToolsJar",
-    "edu.rice.cs.drjava.model.compiler.GJv6FromClasspath",
-  };
 
   /**
    * A subset of DEFAULT_COMPILERS which support Generic Java.
    */
   public static final String[] GENERIC_JAVA_COMPILERS = {
+    // javac 1.5
+    "edu.rice.cs.drjava.model.compiler.Javac150FromSetLocation",
+    "edu.rice.cs.drjava.model.compiler.Javac150FromClasspath",
+    "edu.rice.cs.drjava.model.compiler.Javac150FromToolsJar",
+    
     "edu.rice.cs.drjava.model.compiler.JSR14v20FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.JSR14v12FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.JSR14FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.GJv6FromClasspath"
+  };
+  
+  /**
+   * The list of compiler interfaces that are distributed with DrJava.
+   */
+  public static final String[][] DEFAULT_COMPILERS = {
+    // JSR14
+    GENERIC_JAVA_COMPILERS,
+    // javac 1.4
+    new String[] {
+      "edu.rice.cs.drjava.model.compiler.Javac141FromSetLocation",
+        "edu.rice.cs.drjava.model.compiler.Javac141FromClasspath",
+        "edu.rice.cs.drjava.model.compiler.Javac141FromToolsJar"
+    },
+    // javac 1.3
+    new String[] {
+    "edu.rice.cs.drjava.model.compiler.JavacFromSetLocation",
+    "edu.rice.cs.drjava.model.compiler.JavacFromClasspath",
+    "edu.rice.cs.drjava.model.compiler.JavacFromToolsJar"
+    }
   };
 
   /** Singleton instance. */
@@ -108,7 +117,7 @@ public class CompilerRegistry {
   /** Private constructor due to singleton. */
   private CompilerRegistry() {
     _baseClassLoader = getClass().getClassLoader();
-    _registerDefaultCompilers();
+//    _registerDefaultCompilers();
   }
 
   /**
@@ -130,14 +139,15 @@ public class CompilerRegistry {
    * compilers. This function adds the compiler to the list, regardless
    * of whether the compiler is actualy available.
    * This method will not add a duplicate instance of the same compiler.
+   * NOTE: We're no longer using this as of 3.28.2004.  Re-add if we implement custom compilers.
    *
-   * @param name Name of the {@link CompilerInterface} implementation class.
+   * @param name Name of the {@link CompilerInterface} implementation class. 
    */
-  public void registerCompiler(String name) {
-    if (!_registeredCompilers.contains(name)) {
-      _registeredCompilers.add(name);
-    }
-  }
+//  public void registerCompiler(String name) {
+//    if (!_registeredCompilers.contains(name)) {
+//      _registeredCompilers.add(name);
+//    }
+//  }
 
   /**
    * Returns all registered compilers that are actually available.
@@ -152,35 +162,40 @@ public class CompilerRegistry {
   public CompilerInterface[] getAvailableCompilers() {
     LinkedList<CompilerInterface> availableCompilers =
       new LinkedList<CompilerInterface>();
-    Iterator<String> itor = _registeredCompilers.listIterator();
+//    Iterator<String> itor = _registeredCompilers.listIterator();
 
-    while (itor.hasNext()) {
-      String name = itor.next();
+//    while (itor.hasNext()) {
+//    String name = itor.next();
+    for (int i = 0; i < DEFAULT_COMPILERS.length; i++) {
       //DrJava.consoleOut().print("REGISTRY:  Checking compiler: " + name + ": ");
-
-      try {
-        _createCompiler(name, availableCompilers);
-      }
-      catch (Throwable t) {
+      for (int j = 0; j < DEFAULT_COMPILERS[i].length; j++) {
+        String name = DEFAULT_COMPILERS[i][j];
+        try {
+          if (_createCompiler(name, availableCompilers)) {
+            break;
+          }
+        }
+        catch (Throwable t) {
         // This compiler didn't load. Keep on going.
 //        DrJava.consoleOut().println("failed to load:");
         //t.printStackTrace(DrJava.consoleOut());
         //System.err.println();
+        }
       }
     }
 
-    itor = DrJava.getConfig().getSetting(OptionConstants.EXTRA_COMPILERS).iterator();
-
-    while (itor.hasNext()) {
-      String name = itor.next();
-      try {
-        _createCompiler(name, availableCompilers);
-      }
-      catch (Throwable t) {
-        // Custom compiler failed to load.  Signal the user?
-//        System.err.println("Unable to load " + name);
-      }
-    }
+//    itor = DrJava.getConfig().getSetting(OptionConstants.EXTRA_COMPILERS).iterator();
+//
+//    while (itor.hasNext()) {
+//      String name = itor.next();
+//      try {
+//        _createCompiler(name, availableCompilers);
+//      }
+//      catch (Throwable t) {
+//        // Custom compiler failed to load.  Signal the user?
+////        System.err.println("Unable to load " + name);
+//      }
+//    }
 
     if (availableCompilers.size() == 0) {
       availableCompilers.add(NoCompilerAvailable.ONLY);
@@ -189,7 +204,7 @@ public class CompilerRegistry {
     return availableCompilers.toArray(new CompilerInterface[0]);
   }
 
-  private void _createCompiler(String name, LinkedList<CompilerInterface> availableCompilers) throws Throwable {
+  private boolean _createCompiler(String name, LinkedList<CompilerInterface> availableCompilers) throws Throwable {
     CompilerInterface compiler = _instantiateCompiler(name);
     if (compiler.isAvailable()) {
       //DrJava.consoleOut().println("ok.");
@@ -202,8 +217,10 @@ public class CompilerRegistry {
       }
       
       availableCompilers.add(compiler);
+      return true;
     }
     else {
+      return false;
       //DrJava.consoleOut().println("not available.");
     }
   }
@@ -253,12 +270,14 @@ public class CompilerRegistry {
     }
   }
 
-
-  private void _registerDefaultCompilers() {
-    for (int i = 0; i < DEFAULT_COMPILERS.length; i++) {
-      registerCompiler(DEFAULT_COMPILERS[i]);
-    }
-  }
+  /**
+   * NOTE: We're no longer using this as of 3.28.2004.  Re-add if we implement custom compilers.
+   */
+//  private void _registerDefaultCompilers() {
+//    for (int i = 0; i < DEFAULT_COMPILERS.length; i++) {
+//      registerCompiler(DEFAULT_COMPILERS[i]);
+//    }
+//  }
 
   /**
    * Sets as active the first compiler that's available.

@@ -151,7 +151,9 @@ public class DrJava implements OptionConstants {
           UIManager.setLookAndFeel(configLAFName);
         }
 
-        _usingJSR14v20 = checkForJSR14v20();
+        // Don't use JSR14v20 if running with Java 1.5 because we putting it on the bootclasspath causes DrJava to 
+        // hang on startup.
+        _usingJSR14v20 = checkForJSR14v20() && !System.getProperty("java.specification.version").equals("1.5");
 
         checkForCompilersAndDebugger(args);
 
@@ -435,7 +437,6 @@ public class DrJava implements OptionConstants {
 
     // Try to make sure both compiler and debugger are available
     if (hasAvailableCompiler()) {
-      
       if (hasAvailableDebugger()) {
         // Everything is already on the classpath; start normally
         restartForToolsJar = false;
@@ -461,7 +462,7 @@ public class DrJava implements OptionConstants {
       else if (classLoadersCanFindDebugger()) {
         // Debugger if we restart, but no compiler => jpda in prefs?
         // Prompt use for compiler (in tools.jar)
-        promptForToolsJar(true, false);
+//        promptForToolsJar(true, false);
         restartForToolsJar = true;
       }
       else {
