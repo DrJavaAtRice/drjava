@@ -257,11 +257,11 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
        * must be executed in another thread because otherwise the notifies
        * will be received before the _notifierLock is released
        */
-      SwingUtilities.invokeLater(new Runnable(){  
+      new Thread() {
         public void run(){
           doSetCurrentThread(thread);
         }
-      });
+      }.start();
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -271,11 +271,10 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       // Close doc and make sure breakpoints are removed
     _model.closeFile(doc);
     
-    
     // Shutdown the debugger
     if (printMessages) System.out.println("Shutting down...");
     synchronized(_notifierLock) {
-      _model.resetInteractions();
+      _debugger.shutdown();
       _waitForNotifies(1);  // shutdown
       _notifierLock.wait();
     }

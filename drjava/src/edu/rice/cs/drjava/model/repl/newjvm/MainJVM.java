@@ -60,6 +60,10 @@ import edu.rice.cs.util.newjvm.*;
  * @version $Id$
  */
 public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
+  /** Name of the class to use in the remote JVM. */
+  private static final String SLAVE_CLASS_NAME = 
+    "edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM";
+  
   private Log _log = new Log("MainJVM");
   
   /** Listens to interactions-related events. */
@@ -94,7 +98,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * InteractionsModel and JUnitModel, and then call startInterpreterJVM().
    */
   public MainJVM() {
-    super(InterpreterJVM.class.getName());
+    super(SLAVE_CLASS_NAME);
 
     _interactionsModel = new DummyInteractionsModel();
     _junitModel = new DummyJUnitModel();

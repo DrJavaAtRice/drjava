@@ -54,7 +54,7 @@ import koala.dynamicjava.util.*;
  * <OL>
  *   <LI>Check thread interrupted status and throw InterruptedException
  *       if the thread was interrupted.</LI>
- *   <LI>Returns JavaInterpreter.NO_RESULT if the computation
+ *   <LI>Returns Interpreter.NO_RESULT if the computation
  *       had no result. (This is instead of returning null, which
  *       DynamicJava does.</LI>
  * </OL>     
@@ -86,61 +86,61 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
   public Object visit(WhileStatement node) {
     _checkInterrupted(node);
     super.visit(node);
-    return JavaInterpreter.NO_RESULT;
+    return Interpreter.NO_RESULT;
   }
 
   public Object visit(ForStatement node) {
     _checkInterrupted(node);
     super.visit(node);
-    return JavaInterpreter.NO_RESULT;
+    return Interpreter.NO_RESULT;
   }
 
   public Object visit(DoStatement node) {
     _checkInterrupted(node);
     super.visit(node);
-    return JavaInterpreter.NO_RESULT;
+    return Interpreter.NO_RESULT;
   }
 
   public Object visit(SwitchStatement node) {
     _checkInterrupted(node);
     super.visit(node);
-    return JavaInterpreter.NO_RESULT;
+    return Interpreter.NO_RESULT;
   }
 
   public Object visit(LabeledStatement node) {
     _checkInterrupted(node);
     super.visit(node);
-    return JavaInterpreter.NO_RESULT;
+    return Interpreter.NO_RESULT;
   }
 
   public Object visit(SynchronizedStatement node) {
     _checkInterrupted(node);
     super.visit(node);
-    return JavaInterpreter.NO_RESULT;
+    return Interpreter.NO_RESULT;
   }
 
   public Object visit(TryStatement node) {
     _checkInterrupted(node);
     super.visit(node);
-    return JavaInterpreter.NO_RESULT;
+    return Interpreter.NO_RESULT;
   }
 
   public Object visit(IfThenStatement node) {
     _checkInterrupted(node);
     super.visit(node);
-    return JavaInterpreter.NO_RESULT;
+    return Interpreter.NO_RESULT;
   }
 
   public Object visit(IfThenElseStatement node) {
     _checkInterrupted(node);
     super.visit(node);
-    return JavaInterpreter.NO_RESULT;
+    return Interpreter.NO_RESULT;
   }
 
   public Object visit(BlockStatement node) {
     _checkInterrupted(node);
     super.visit(node);
-    return JavaInterpreter.NO_RESULT;
+    return Interpreter.NO_RESULT;
   }
 
   public Object visit(Literal node) {
@@ -151,7 +151,7 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
   public Object visit(VariableDeclaration node) {
     _checkInterrupted(node);
     super.visit(node);
-    return JavaInterpreter.NO_RESULT;
+    return Interpreter.NO_RESULT;
   }
 
   public Object visit(ObjectFieldAccess node) {
@@ -166,7 +166,7 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     // workaround to not return null for void returns
     Method m = (Method) node.getProperty(NodeProperties.METHOD);
     if (m.getReturnType().equals(Void.TYPE)) {
-      return JavaInterpreter.NO_RESULT;
+      return Interpreter.NO_RESULT;
     }
     else {
       return ret;
@@ -223,7 +223,7 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     
     // workaround to not return null for void returns
     if (m.getReturnType().equals(Void.TYPE)) {
-      return JavaInterpreter.NO_RESULT;
+      return Interpreter.NO_RESULT;
     }
     else {
       return ret;
@@ -486,14 +486,14 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
   }
 
   public Object visit(PackageDeclaration node) {
-    return JavaInterpreter.NO_RESULT;
+    return Interpreter.NO_RESULT;
   }
 
   public Object visit(ImportDeclaration node) {
-    return JavaInterpreter.NO_RESULT;
+    return Interpreter.NO_RESULT;
   }
 
   public Object visit(EmptyStatement node) {
-    return JavaInterpreter.NO_RESULT;
+    return Interpreter.NO_RESULT;
   }
 }

@@ -218,7 +218,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
             _dialog("to interp: " + s);
             Object result = interpreter.getInterpreter().interpret(s);
             
-            if (result == JavaInterpreter.NO_RESULT) {
+            if (result == Interpreter.NO_RESULT) {
               //return new VoidResult();
               _dialog("void interp ret: " + result);
               _mainJVM.interpretResult(new VoidResult());

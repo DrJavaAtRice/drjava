@@ -100,7 +100,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
   public void interpret(String toEval) {
     try {
       Object result = _interpreter.interpret(toEval);
-      if (result != JavaInterpreter.NO_RESULT) {
+      if (result != Interpreter.NO_RESULT) {
         _docAppend(String.valueOf(result) + "\n", 
                    InteractionsDocument.DEFAULT_STYLE);
       }

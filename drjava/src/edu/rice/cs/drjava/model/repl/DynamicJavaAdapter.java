@@ -62,7 +62,7 @@ import edu.rice.cs.drjava.DrJava;
  * @version $Id$
  */
 public class DynamicJavaAdapter implements JavaInterpreter {
-  private TreeInterpreter _djInterpreter;
+  private koala.dynamicjava.interpreter.Interpreter _djInterpreter;
 
   /**
    * Constructor.
@@ -154,7 +154,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @param value Value to assign
    */
   public void defineVariable(String name, Object value) {
-    _djInterpreter.defineVariable(name, value);
+    ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
   
   /**
@@ -162,8 +162,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @param name Name of the variable
    * @param value boolean to assign
    */
-  public void defineVariable(String name, boolean value){
-    _djInterpreter.defineVariable(name, value);
+  public void defineVariable(String name, boolean value) {
+    ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
   
   /**
@@ -171,8 +171,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @param name Name of the variable
    * @param value byte to assign
    */
-  public void defineVariable(String name, byte value){
-    _djInterpreter.defineVariable(name, value);
+  public void defineVariable(String name, byte value) {
+    ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
 
   /**
@@ -180,8 +180,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @param name Name of the variable
    * @param value char to assign
    */
-  public void defineVariable(String name, char value){
-    _djInterpreter.defineVariable(name, value);
+  public void defineVariable(String name, char value) {
+    ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
 
   /**
@@ -189,8 +189,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @param name Name of the variable
    * @param value double to assign
    */
-  public void defineVariable(String name, double value){
-    _djInterpreter.defineVariable(name, value);
+  public void defineVariable(String name, double value) {
+    ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
   
   /**
@@ -198,8 +198,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @param name Name of the variable
    * @param value float to assign
    */
-  public void defineVariable(String name, float value){
-    _djInterpreter.defineVariable(name, value);
+  public void defineVariable(String name, float value) {
+    ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
 
   
@@ -208,8 +208,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @param name Name of the variable
    * @param value int to assign
    */
-  public void defineVariable(String name, int value){
-    _djInterpreter.defineVariable(name, value);
+  public void defineVariable(String name, int value) {
+    ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
 
   /**
@@ -217,8 +217,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @param name Name of the variable
    * @param value long to assign
    */
-  public void defineVariable(String name, long value){
-    _djInterpreter.defineVariable(name, value);
+  public void defineVariable(String name, long value) {
+    ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
 
   /**
@@ -226,9 +226,90 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @param name Name of the variable
    * @param value short to assign
    */
-  public void defineVariable(String name, short value){
-    _djInterpreter.defineVariable(name, value);
+  public void defineVariable(String name, short value) {
+    ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
+  
+  /**
+   * Assigns the given value to the given name in the interpreter.
+   * @param name Name of the variable
+   * @param value Value to assign
+   */
+  public void defineConstant(String name, Object value) {
+    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+  }
+
+  /**
+   * Assigns the given value to the given name as a constant in the interpreter.
+   * @param name Name of the variable
+   * @param value boolean to assign
+   */
+  public void defineConstant(String name, boolean value) {
+    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+  }
+
+  /**
+   * Assigns the given value to the given name as a constant in the interpreter.
+   * @param name Name of the variable
+   * @param value byte to assign
+   */
+  public void defineConstant(String name, byte value) {
+    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+  }
+
+  /**
+   * Assigns the given value to the given name as a constant in the interpreter.
+   * @param name Name of the variable
+   * @param value char to assign
+   */
+  public void defineConstant(String name, char value) {
+    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+  }
+
+  /**
+   * Assigns the given value to the given name as a constant in the interpreter.
+   * @param name Name of the variable
+   * @param value double to assign
+   */
+  public void defineConstant(String name, double value) {
+    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+  }
+
+  /**
+   * Assigns the given value to the given name as a constant in the interpreter.
+   * @param name Name of the variable
+   * @param value float to assign
+   */
+  public void defineConstant(String name, float value) {
+    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+  }
+
+  /**
+   * Assigns the given value to the given name as a constant in the interpreter.
+   * @param name Name of the variable
+   * @param value int to assign
+   */
+  public void defineConstant(String name, int value) {
+    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+  }
+
+  /**
+   * Assigns the given value to the given name as a constant in the interpreter.
+   * @param name Name of the variable
+   * @param value long to assign
+   */
+  public void defineConstant(String name, long value) {
+    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+  }
+  /**
+   * Assigns the given value to the given name as a constant in the interpreter.
+   * @param name Name of the variable
+   * @param value short to assign
+   */
+  public void defineConstant(String name, short value) {
+    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+  }
+  
   
   /**
    * Sets whether protected and private variables should be accessible in
@@ -325,6 +406,113 @@ public class DynamicJavaAdapter implements JavaInterpreter {
         //throw new InterpreterException(e);
       }
     }
+    
+    /**
+     * Assigns the given value to the given name in the interpreter.
+     * @param name Name of the variable
+     * @param value Value to assign
+     */
+    public void defineConstant(String name, Object value) {
+      Class c = (value == null) ? null : value.getClass();
+      nameVisitorContext.defineConstant(name, c);
+      checkVisitorContext.defineConstant(name, c);
+      evalVisitorContext.defineConstant(name, value);
+    }
+    
+    /**
+     * Assigns the given value to the given name as a constant in the interpreter.
+     * @param name Name of the variable
+     * @param value boolean to assign
+     */
+    public void defineConstant(String name, boolean value) {
+      Class c = boolean.class;
+      nameVisitorContext.defineConstant(name, c);
+      checkVisitorContext.defineConstant(name, c);
+      evalVisitorContext.defineConstant(name, new Boolean(value));
+    }
+    
+    /**
+     * Assigns the given value to the given name as a constant in the interpreter.
+     * @param name Name of the variable
+     * @param value byte to assign
+     */
+    public void defineConstant(String name, byte value) {
+      Class c = byte.class;
+      nameVisitorContext.defineConstant(name, c);
+      checkVisitorContext.defineConstant(name, c);
+      evalVisitorContext.defineConstant(name, new Byte(value));
+    }
+    
+    /**
+     * Assigns the given value to the given name as a constant in the interpreter.
+     * @param name Name of the variable
+     * @param value char to assign
+     */
+    public void defineConstant(String name, char value) {
+      Class c = char.class;
+      nameVisitorContext.defineConstant(name, c);
+      checkVisitorContext.defineConstant(name, c);
+      evalVisitorContext.defineConstant(name, new Character(value));
+    }
+    
+    /**
+     * Assigns the given value to the given name as a constant in the interpreter.
+     * @param name Name of the variable
+     * @param value double to assign
+     */
+    public void defineConstant(String name, double value) {
+      Class c = double.class;
+      nameVisitorContext.defineConstant(name, c);
+      checkVisitorContext.defineConstant(name, c);
+      evalVisitorContext.defineConstant(name, new Double(value));
+    }
+    
+    /**
+     * Assigns the given value to the given name as a constant in the interpreter.
+     * @param name Name of the variable
+     * @param value float to assign
+     */
+    public void defineConstant(String name, float value) {
+      Class c = float.class;
+      nameVisitorContext.defineConstant(name, c);
+      checkVisitorContext.defineConstant(name, c);
+      evalVisitorContext.defineConstant(name, new Float(value));
+    }
+    
+    /**
+     * Assigns the given value to the given name as a constant in the interpreter.
+     * @param name Name of the variable
+     * @param value int to assign
+     */
+    public void defineConstant(String name, int value) {
+      Class c = int.class;
+      nameVisitorContext.defineConstant(name, c);
+      checkVisitorContext.defineConstant(name, c);
+      evalVisitorContext.defineConstant(name, new Integer(value));
+    }
+    
+    /**
+     * Assigns the given value to the given name as a constant in the interpreter.
+     * @param name Name of the variable
+     * @param value long to assign
+     */
+    public void defineConstant(String name, long value) {
+      Class c = long.class;
+      nameVisitorContext.defineConstant(name, c);
+      checkVisitorContext.defineConstant(name, c);
+      evalVisitorContext.defineConstant(name, new Long(value));
+    }
+    /**
+     * Assigns the given value to the given name as a constant in the interpreter.
+     * @param name Name of the variable
+     * @param value short to assign
+     */
+    public void defineConstant(String name, short value) {
+      Class c = short.class;
+      nameVisitorContext.defineConstant(name, c);
+      checkVisitorContext.defineConstant(name, c);
+      evalVisitorContext.defineConstant(name, new Short(value));
+    }
   }
 
   /**
@@ -337,7 +525,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      * Constructor.
      * @param         Interpreter i
      */
-    public ClassLoaderExtension(TreeInterpreter i) {
+    public ClassLoaderExtension(koala.dynamicjava.interpreter.Interpreter i) {
       super(i);
       // The protected variable classLoader contains the class loader to use
       // to find classes. When a new class path is added to the loader,

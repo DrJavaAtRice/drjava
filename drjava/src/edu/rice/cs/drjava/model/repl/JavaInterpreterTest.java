@@ -336,6 +336,25 @@ public class JavaInterpreterTest extends TestCase {
     _interpreter.defineVariable("foo", new String("hello"));
     assertEquals("manipulated externally defined variable",
                  "\"ello\"", _interpreter.interpret("foo.substring(1,5)"));
+    _interpreter.defineVariable("x", 3);
+    assertEquals("externally defined variable x",
+                 new Integer(3), _interpreter.interpret("x"));
+    assertEquals("incremented externally defined variable x",
+                 new Integer(4), _interpreter.interpret("++x"));
+  }
+  
+  /**
+   * Tests that a constant can be defined in the interpreter by an external source.
+   */
+  public void testDefineConstantExternally() throws ExceptionReturnedException {
+    _interpreter.defineConstant("x", 3);
+    try {
+      _interpreter.interpret("x = 4");
+      fail("should not be able to assign to a constant");
+    }
+    catch (ExceptionReturnedException e) {
+      // correct, it should fail
+    }
   }
 }
 
