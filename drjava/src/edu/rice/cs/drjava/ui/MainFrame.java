@@ -1864,7 +1864,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private DirectoryChooser makeFolderChooser(File workDir) {
-    DirectoryChooser dc = new DirectoryChooser(this, null, false, false);
+    DirectoryChooser dc = new DirectoryChooser(this);
     dc.setSelectedDirectory(workDir);
     dc.setApproveButtonText("Select");
     dc.setTitle("Open Folder");
@@ -3656,7 +3656,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_newJUnitTestAction, "New", "Create a new JUnit test case class");
     _setUpAction(_newProjectAction, "New", "Make a new project");
     _setUpAction(_openAction, "Open", "Open an existing file");
-    _setUpAction(_openFolderAction, "Open Folder", "Open all files within a directory");
+    _setUpAction(_openFolderAction, "Open Folder", "OpenAll", "Open all files within a directory");
     _setUpAction(_openFileOrProjectAction, "Open", "Open an existing file or project");
     _setUpAction(_openProjectAction, "Open", "Open an existing project");
     _setUpAction(_saveAction, "Save", "Save the current document");
