@@ -338,7 +338,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       throw new IOException("No Files returned from FileChooser");
     }
   }
-
+ 
   /**
    * Saves all open files, prompting for names if necessary.
    * When prompting (ie, untitled document), set that document as active.
@@ -1099,7 +1099,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * given definitions document.
      *
      */
-    public TestResult startJUnit() throws ClassNotFoundException, IOException {
+    public TestResult startJUnit() throws ClassNotFoundException, IOException{
 
       //JUnit started, so throw out all JUnitErrorModels now, egardless of whether
       //  the tests succeed, etc.
@@ -1225,6 +1225,18 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         });
         throw e;
       }
+      catch (ExitingNotAllowedException enae) {
+        notifyListeners(new EventNotifier() {
+          public void notifyListener(GlobalModelListener l) {
+          l.junitEnded();
+        }
+        });
+        throw enae;
+      }
+      //System.err.println("JUnit tried to exit -- Resolving this bug requires some refactoring");
+      //System.err.println(" because such an error causes a System.exit(Exception) in JUnit, and");
+      //System.err.println(" we need a way of catching its output.");
+      
     }
 
     /**

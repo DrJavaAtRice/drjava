@@ -50,7 +50,7 @@ public class OptionMapLoader implements OptionConstants {
     private static Properties DEFAULT_STRINGS = new Properties();
 
     static {
-	// initialize DEFAULTS objects, based on OptionConstants using reflection.
+ // initialize DEFAULTS objects, based on OptionConstants using reflection.
         Field[] fields = OptionConstants.class.getDeclaredFields();
         for(int i = 0; i < fields.length; i++) {
             Field field = fields[i];
@@ -84,14 +84,14 @@ public class OptionMapLoader implements OptionConstants {
      * @param is the input stream to read. 
      */
     public OptionMapLoader(InputStream is) throws IOException {
-	this(new Properties(DEFAULT_STRINGS));
-	prop.load(is);
+      this(new Properties(DEFAULT_STRINGS));
+      prop.load(is);
     }
     
     private final Properties prop;
     
     private OptionMapLoader(Properties prop) {
-	this.prop = prop;
+ this.prop = prop;
     }
     
     /**
@@ -99,11 +99,11 @@ public class OptionMapLoader implements OptionConstants {
      * @param is the inputstream to read from to load these options.
      */
     public void loadInto(OptionMap map) {
-	Enumeration<OptionParser> options = DEFAULTS.keys();
-	while(options.hasMoreElements()) {
-	    OptionParser option = options.nextElement();
-	    String val = prop.getProperty(option.name);
-	    map.setString(option,val);
-	}
+ Enumeration<OptionParser> options = DEFAULTS.keys();
+ while(options.hasMoreElements()) {
+     OptionParser option = options.nextElement();
+     String val = prop.getProperty(option.name);
+     map.setString(option,val);
+ }
     }
 }

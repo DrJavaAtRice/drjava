@@ -65,7 +65,10 @@ public interface ConfigurationTool {
                 try { 
                     config.loadConfiguration(); 
                 } catch(IOException e) { 
-                } 
+                }
+                catch (Exception e) {
+                  // problem parsing the config file. Just use defaults
+                }
                 return config;
             }
         }).evaluate();

@@ -53,7 +53,8 @@ public class SavableConfiguration extends Configuration {
     }
 
     public void loadConfiguration(InputStream is) throws IOException {
-        new OptionMapLoader(is).loadInto(map);
+        
+      new OptionMapLoader(is).loadInto(map);
     }
  
     public void saveConfiguration(OutputStream os, String header) throws IOException {

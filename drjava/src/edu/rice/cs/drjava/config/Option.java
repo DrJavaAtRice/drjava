@@ -66,7 +66,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
      * particular option.  Part of the magic inner workings of this package.
      */
     final Hashtable<Configuration,Vector<OptionListener<T>>> listeners=
-	new Hashtable<Configuration,Vector<OptionListener<T>>>();
+ new Hashtable<Configuration,Vector<OptionListener<T>>>();
     
     /** 
      * constructor that takes in a name
@@ -98,32 +98,32 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
     
 
     void notifyListeners(Configuration config, T val) {
-	Vector<OptionListener<T>> v = listeners.get(config);
-	if(v==null) return; // no listeners
-	OptionEvent<T> e = new OptionEvent<T>(this,val);
-	int size = v.size();
-	for(int i = 0; i < size; i++) {
-	    v.elementAt(i).optionChanged(e);
-	}
+ Vector<OptionListener<T>> v = listeners.get(config);
+ if(v==null) return; // no listeners
+ OptionEvent<T> e = new OptionEvent<T>(this,val);
+ int size = v.size();
+ for(int i = 0; i < size; i++) {
+     v.elementAt(i).optionChanged(e);
+ }
     }
   
     /** magic listener-bag adder */
     void addListener(Configuration c, OptionListener<T> l) {
-	Vector<OptionListener<T>> v = listeners.get(c);
-	if(v==null) {
-	    v = new Vector<OptionListener<T>>();
-	    listeners.put(c,v);
-	}
-	v.addElement(l);
+ Vector<OptionListener<T>> v = listeners.get(c);
+ if(v==null) {
+     v = new Vector<OptionListener<T>>();
+     listeners.put(c,v);
+ }
+ v.addElement(l);
     }
 
     /** magic listener-bag remover */
     void removeListener(Configuration c, OptionListener<T> l) {
-	Vector<OptionListener<T>> v = listeners.get(c);
-	if(v==null) return;
-	if(v.removeElement(l) && v.size() == 0) {
-	    listeners.remove(c);
-	}
+ Vector<OptionListener<T>> v = listeners.get(c);
+ if(v==null) return;
+ if(v.removeElement(l) && v.size() == 0) {
+     listeners.remove(c);
+ }
     }
 }
 

@@ -64,6 +64,7 @@ import edu.rice.cs.drjava.model.debug.DebugManager;
 import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.util.swing.DelegatingAction;
 
 /**
@@ -907,6 +908,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     catch (NoClassDefFoundError ncde) {
       _showNoClassDefError(ncde);
+    }
+    catch (ExitingNotAllowedException enae) {
+      JOptionPane.showMessageDialog(this,
+                                    "An exception occurred while running JUnit, which could\n" +
+                                    "not be caught be DrJava.  Details about the exception should\n" +
+                                    "have been printed to your console.\n\n",
+                                    "Error Running JUnit",
+                                    JOptionPane.ERROR_MESSAGE);
     }
   }
 
