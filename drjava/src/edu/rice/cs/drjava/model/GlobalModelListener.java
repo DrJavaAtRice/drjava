@@ -164,7 +164,12 @@ public interface GlobalModelListener extends InteractionsListener,
    * @param files The files the gui should open for the model
    */
   public void projectOpened(File projectFile, FileOpenSelector files);
-  
+
+  /**
+   * called when the project is being closed
+   */
+  public void projectClosed();
+
   /**
    * called if the project's modified state has changed
    */

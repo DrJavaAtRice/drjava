@@ -112,6 +112,18 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     }
   }
   
+  public void projectClosed() {
+    _lock.startRead();
+    try {
+      for(GlobalModelListener l : _listeners) {
+        l.projectClosed();
+      }
+    }
+    finally {
+      _lock.endRead();
+    }
+  }
+  
   public void projectModified(){
     _lock.startRead();
     try {

@@ -1474,7 +1474,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   public MainFrame() {
     // Cache the config object, since we use it a zillion times.
     final Configuration config = DrJava.getConfig();
-
     // Platform-specific UI setup.
     PlatformFactory.ONLY.beforeUISetup();
 
@@ -1484,6 +1483,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // create our model
     _model = new DefaultSingleDisplayModel();
+    _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
 
     // Ensure that DefinitionsPane uses the correct EditorKit!
     //   This has to be stored as a static field on DefinitionsPane because
@@ -1555,6 +1555,9 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // DefinitionsPane
     JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
+    _df  = new RecentDocFrame(this);
+    _df.pokeDocument(_model.getActiveDocument());
+    
     _currentDefPane = (DefinitionsPane) defScroll.getViewport().getView();
     _currentDefPane.notifyActive();
     
@@ -1581,7 +1584,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     //    _setUpDocumentSelector();
     _setUpContextMenus();
 
-    // eventually add recent project manager
+    // add recent file and project manager
     _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2,
                                                _fileMenu,
                                                this,false);
@@ -1806,8 +1809,21 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // Platform-specific UI setup.
     PlatformFactory.ONLY.afterUISetup(_aboutAction, _editPreferencesAction, _quitAction);
+    setUpKeys();
   }
 
+  /**
+   * holds/shows the history of documents for ctrl-tab
+   */
+  RecentDocFrame _df;
+  
+  /**
+   * sets up the ctrl-tab listener
+   */
+  private void setUpKeys(){
+    setFocusTraversalKeysEnabled(false);
+  }
+  
   /**
    * Releases any resources this frame is using to prepare it to
    * be garbage collected.  Should only be called from tests.
@@ -2341,14 +2357,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   
-  /**
-   * Closes all files and makes a new project  
-   */
-  private void _newProject(){
-    _closeAll();
-    _saveProjectAs();
-  }
-  
   public File getCurrentProject() {
     return _currentProjFile;
   }
@@ -2643,6 +2651,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     _saveProjectHelper(_currentProjFile);
   }
   
+  
+  /**
+   * Closes all files and makes a new project  
+   */
+  private void _newProject(){
+    _closeAll();
+    _saveProjectAs();
+  }
   
   private void _saveProjectAs() {
     
@@ -4554,6 +4570,37 @@ public class MainFrame extends JFrame implements OptionConstants {
     });
   }
 
+  
+  KeyListener _historyListener = new KeyListener(){
+      public void keyPressed(KeyEvent e){
+        if(e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE && e.isControlDown()){
+          if(_df.isVisible()){
+            _df.next();
+          }else{
+            _df.setVisible(true);
+          }
+        }
+//        else if(e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE){
+//          transferFocusUpCycle();
+//        }
+      }
+      public void keyReleased(KeyEvent e){
+        if(e.getKeyCode() == java.awt.event.KeyEvent.VK_CONTROL){
+          if(_df.isVisible()){
+            _df.setVisible(false);
+            OpenDefinitionsDocument doc = _df.getDocument();
+            if(doc != null){
+              _model.getDocumentNavigator().setActiveDoc(_model.getIDocGivenODD(doc));
+            }
+          }
+        }
+      }
+      public void keyTyped(KeyEvent e){
+        // noop
+      }
+    };
+  
+  
   /**
    * Create a new DefinitionsPane and JScrollPane for an open
    * definitions document.
@@ -4567,6 +4614,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // during compile and successful switching on and off of ability to
     // edit
     DefinitionsPane pane = new DefinitionsPane(this, doc);
+    pane.addKeyListener(_historyListener);
 
     // Add listeners
     _installNewDocumentListener(doc);
@@ -4604,8 +4652,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   
 
   private void _setUpPanes() {
-   
-
     // DefinitionsPane
     JScrollPane defScroll = _defScrollPanes.get(_model.getActiveDocument());
 
@@ -4724,6 +4770,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
+  public DefinitionsPane getDefPaneGivenODD(OpenDefinitionsDocument doc){
+    JScrollPane scroll = _defScrollPanes.get(doc);
+    if (scroll == null) {
+      throw new UnexpectedException(new Exception("Breakpoint set in a closed document."));
+    }
+    DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
+    return pane;
+  }
+  
   /**
    * Addresses the Mac OS X bug where the scrollbars are disabled in
    * one document after opening another document.
@@ -5198,11 +5253,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          JScrollPane scroll = _defScrollPanes.get(bp.getDocument());
-          if (scroll == null) {
-            throw new UnexpectedException(new Exception("Breakpoint set in a closed document."));
-          }
-          DefinitionsPane bpPane = (DefinitionsPane) scroll.getViewport().getView();
+          DefinitionsPane bpPane = getDefPaneGivenODD(bp.getDocument());
           _breakpointHighlights.put(bp,
                                     bpPane.getHighlightManager().addHighlight(bp.getStartOffset(),
                                                                               bp.getEndOffset(),
@@ -5447,6 +5498,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     /** Does the work of closing a file */
     private void _fileClosed(OpenDefinitionsDocument doc){
+      _df.closeDocument(doc);
       _removeErrorListener(doc);
       ((DefinitionsPane)_defScrollPanes.get(doc).getViewport().getView()).close();
       _defScrollPanes.remove(doc);
@@ -5475,7 +5527,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // public void run() {
       Runnable command = new Runnable() {
         public void run(){
-
+          _df.pokeDocument(active);
           _switchDefScrollPane();
 
           boolean isModified = active.isModifiedSinceSave();
@@ -6073,11 +6125,16 @@ public class MainFrame extends JFrame implements OptionConstants {
 //      _saveProjectAction.setEnabled(_model.isProjectChanged());
     }
     
+    public void projectClosed(){
+      _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
+    }
+
     public void projectOpened(File projectFile, FileOpenSelector files) {
       _setUpContextMenus();
       _recentProjectManager.updateOpenFiles(projectFile);
       open(files);
       _openProjectUpdate();
+      _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
     }
     
     public void projectRunnableChanged(){

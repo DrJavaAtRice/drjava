@@ -72,6 +72,11 @@ public class DummySingleDisplayModelListener implements SingleDisplayModelListen
   public void projectOpened(File pfile, FileOpenSelector files) {  }
   
   /**
+   * called when the project is being closed
+   */
+  public void projectClosed(){  }
+  
+  /**
    * called when the projects modified state has changed
    */
   public void projectModified(){  }

@@ -1254,8 +1254,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     
     setDocumentNavigator(AWTContainerNavigatorFactory.Singleton.makeListNavigator(getDocumentNavigator()));
     setFileGroupingState(_makeFlatFileGroupingState());
-    
     _interactionsModel.getDocument().insertBeforeLastPrompt(CLASSPATH_OUT_OF_SYNC_MSG, InteractionsDocument.SYSTEM_ERR_STYLE);
+    _notifier.projectClosed();
   }
   
   /**

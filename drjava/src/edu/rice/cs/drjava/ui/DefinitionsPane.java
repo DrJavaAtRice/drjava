@@ -412,6 +412,10 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       undoMan.endCompoundEdit(_compoundEditKey);
     }
   }
+
+  
+  
+  
   /**
    * Takes in any keyboard input, checks to see if it is in the keyToActionMap
    * in KeybindingManager, if so executes the action, otherwise checks if it
@@ -576,6 +580,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     //setSize(new Dimension(1024, 1000));
     setEditable(true);
 
+    
     // add actions for indent key
     ourMap = addKeymap(INDENT_KEYMAP_NAME, getKeymap());
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
@@ -590,6 +595,19 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
                                  _indentKeyActionColon);
     setKeymap(ourMap);
 
+//    Keymap map = ourMap;
+//    KeyStroke[] ks;
+//     ks = ourMap.getBoundKeyStrokes();
+//     for(KeyStroke k:ks){
+//       System.out.println(k);
+//     }
+//     ourMap = ourMap.getResolveParent();
+//     ks = ourMap.getBoundKeyStrokes();
+//     for(KeyStroke k:ks){
+//       System.out.println(k);
+//     }
+
+     
     //this.setEditorKit(new StyledEditorKit());
 
     if (CodeStatus.DEVELOPMENT) {
