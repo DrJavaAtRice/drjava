@@ -54,17 +54,27 @@ import java.awt.event.*;
 //import edu.rice.cs.drjava.ui.RightClickMouseAdapter;
 
 class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListSelectionListener {
-  //private final DefaultListModel _docs = new DefaultListModel();
-  
+  /**
+   * the documents in this navigator
+   */
   protected Vector<INavigatorItem> _docs = new Vector<INavigatorItem>();
   
+  /**
+   * the currently selected document, or null if none
+   */
   protected INavigatorItem currentselected = null;
   
   /** the collection of INavigationListeners listening to this JListNavigator */
   protected Vector<INavigationListener> navListeners = new Vector<INavigationListener>();
   
+  /**
+   * the cell renderer for this JList
+   */
   protected DefaultListCellRenderer _renderer;
   
+  /**
+   * standard constructor
+   */
   public JListNavigator() 
   {
     super();
@@ -77,62 +87,12 @@ class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListS
     _renderer.setOpaque(true);
     this.setCellRenderer(_renderer);
     
-    /*
-    listmodel.addListDataListener(new ListDataListener(){
-      public void contentsChanged(ListDataEvent e)
-      {
-      }
-      
-      public void intervalAdded(ListDataEvent e){
-        int i = e.getIndex0();
-        _docs.add(i,  listmodel.getElementAt(i));
-      }
-      
-      public void intervalRemoved(ListDataEvent e){
-        int i = e.getIndex0();
-        _docs.remove(i);
-      }
-    });
-    setModel(_docs);
-    setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    this.addListSelectionListener(new ListSelectionListener(){
-      public void valueChanged(ListSelectionEvent e) {
-        if( !e.getValueIsAdjusting() ) {
-          // we enforce that you can only select one document
-          int index = getSelectedIndex();
-          if( _docs.size() <= 0 || index == -1 ) return;
-          INavigatorItem doc = (INavigatorItem)_docs.get(index);
-          
-          // no need for error checking, shouldn't be possible for index to be invalid here
-          Iterator<INavigationListener> listeners = navListeners.iterator();   
-          while(listeners.hasNext()) {
-            INavigationListener l = listeners.next();
-            l.gainedSelection(doc);
-          }
-        }
-      }
-    });
-    
-    this.addMouseListener(new MouseAdapter() {
-      
-      public void mousePressed(MouseEvent e) {
-        if (e.isPopupTrigger()) {
-          setSelectedIndex(locationToIndex(e.getPoint()));
-        }
-      }
-      
-      public void mouseReleased(MouseEvent e) {
-        if (e.isPopupTrigger()) {
-          setSelectedIndex(locationToIndex(e.getPoint()));
-        }
-      }
-      
-    });
-    
-    this.setCellRenderer(new InternalCellRenderer(this));
-    */
   }
   
+  /**
+   * adds the document to this navigator
+   * @param doc the document to add
+   */
   public void addDocument(INavigatorItem doc) {
     _docs.add(doc);
      this.setListData(_docs);
@@ -140,14 +100,20 @@ class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListS
     //System.out.println(doc + " got index " + _docs.indexOf(doc) + "(size was " + _docs.size() + ")");
   }
   
+  /**
+   * adds the document to this navigator to the specified path
+   * @param doc the document to add
+   * @param path the path the document should be added to
+   */
   public void addDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
     _docs.add(doc);
      this.setListData(_docs);
   }
   
   /**
+   * gets the next document in the series
+   * @param doc the document to reference from
    * @return the document which comes after doc in the list
-   * @param doc
    */
   public INavigatorItem getNext(INavigatorItem doc) {
     int i = _docs.indexOf(doc);
@@ -164,8 +130,9 @@ class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListS
   }
   
   /**
+   * gets the previous document in the series
+   * @param doc to reference from
    * @return the document which comes before doc in the list
-   * @param doc
    */
   public INavigatorItem getPrevious(INavigatorItem doc) {
     int i = _docs.indexOf(doc);
@@ -181,6 +148,10 @@ class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListS
     }
   }
   
+  /**
+   * removes the document from the navigator
+   * @param doc the document to remove
+   */
   public INavigatorItem removeDocument(INavigatorItem doc) throws IllegalArgumentException {
     int i = _docs.indexOf(doc);
     if( i == -1 ) {
@@ -206,6 +177,10 @@ class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListS
     }
   }
   
+  /**
+   * sets the document as selected
+   * @param doc the document to select
+   */
   public void setActiveDoc(INavigatorItem doc){
     if(this.contains(doc)){
         this.setSelectedValue(doc, true);
@@ -213,15 +188,18 @@ class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListS
   }
   
 
-  
+  /**
+   * noop since a list has no use for a top level path
+   */
   public void setTopLevelPath(String path)
   {
   }
   
   /**
+   * returns whether or not the navigator contains the document
+   * @param doc the document to find
    * @return true if this list contains doc (using identity as equality
    * measure), false if not.
-   * @param doc
    */
   public boolean contains(INavigatorItem doc) {
     return (_docs.indexOf(doc) != -1 );
@@ -235,16 +213,27 @@ class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListS
     return _docs.elements();
   }
   
+  /**
+   * returns the number of documents in the navigator
+   * @return the number of documents
+   */
   public int getDocumentCount()
   {
     return _docs.size();
   }
   
+  /**
+   * returns whether or not the navigator is empty
+   * @return boolean whether or not the navigator is empty
+   */
   public boolean isEmpty()
   {
     return _docs.isEmpty();
   }
   
+  /**
+   * clears the navigator and removes all documents
+   */
   public void clear()
   {
     _docs.clear();
@@ -267,42 +256,37 @@ class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListS
     navListeners.remove(listener);
   }
   
+  /**
+   * returns all the navigator listeners
+   * @return the navigator listeners
+   */
   public Collection<INavigationListener> getNavigatorListeners()
   {
       return navListeners;
   }
   
+  /**
+   * executes the list case of the visitor
+   * @algo the visitor to execute
+   * @input the input to run on the visitor
+   */
   public <InType, ReturnType> ReturnType execute(IDocumentNavigatorAlgo<InType, ReturnType> algo, InType input) {
     return algo.forList(this, input);
   }
   
-  private class InternalCellRenderer extends JLabel implements ListCellRenderer {
-    private JList _list = null;
-    
-    public InternalCellRenderer(JList list) {
-      _list = list;
-      setOpaque(true);
-    }
-    
-    public Component getListCellRendererComponent(
-                                                  JList list,
-                                                  Object value,
-                                                  int index,
-                                                  boolean isSelected,
-                                                  boolean cellHasFocus) {
-      setFont(_list.getFont());
-      setText(value.toString());
-      setBackground(isSelected ? _list.getSelectionBackground() : _list.getBackground());
-      setForeground(isSelected ? _list.getSelectionForeground() : _list.getForeground());
-      return this;
-    }
-  }
-  
+
+  /**
+   * returns a Container representation of this navigator
+   */
   public Container asContainer()
   {
     return this;
   }
   
+  /**
+   * called when the list value has changed
+   * @param e the event corresponding to the change
+   */
   public void valueChanged(ListSelectionEvent e)
   {
     if(!e.getValueIsAdjusting() && !_docs.isEmpty())
@@ -321,6 +305,26 @@ class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListS
       } 
     }
   }
+
+  
+  /**
+   * Selects the document at the x,y coordinate of the navigator pane and sets it to be
+   * the currently active document.
+   * @param x the x coordinate of the navigator pane
+   * @param y the y coordinate of the navigator pane
+   */
+  public boolean selectDocumentAt(int x, int y) {
+    int idx = locationToIndex(new java.awt.Point(x,y));
+    java.awt.Rectangle rect = getCellBounds(idx, idx);
+    
+    if(rect.contains(x, y)){
+      setActiveDoc(_docs.get(idx));
+      return true;
+    }else{
+      return false;
+    }
+  }
+
 
 
   /**

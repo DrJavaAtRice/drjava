@@ -57,14 +57,28 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory
   }
 
 
+  /**
+   * creates a new List Navigator
+   * @return a list navigator
+   */
     public IAWTContainerNavigatorActor makeListNavigator() {
         return new JListSortNavigator();
     }
 
+  /**
+   * returns a new tree Navigator with the specified root
+   * @param name the name of the root node
+   * @return a tree navigator
+   */
     public IAWTContainerNavigatorActor makeTreeNavigator(String name) {
         return new JTreeSortNavigator(name);
     }
     
+  /**
+   * creates a list navigator and migrates the navigator items from parent to the new navigator
+   * @param parent the navigator to migrate from
+   * @return the new list navigator
+   */
     public IAWTContainerNavigatorActor makeListNavigator(IDocumentNavigator parent)
     {
       IAWTContainerNavigatorActor tbr = makeListNavigator();
@@ -73,6 +87,12 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory
       return tbr;
     }
   
+  /**
+   * creates a tree navigator and migrates the navigator items from the parent to the new navigator
+   * @param name the name of the root node
+   * @param parent the navigator to migrate from
+   * @return the new tree navigator
+   */
     public IAWTContainerNavigatorActor makeTreeNavigator(String name, IDocumentNavigator parent)
     {
       IAWTContainerNavigatorActor tbr = makeTreeNavigator(name);
@@ -81,19 +101,28 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory
       return tbr;
     }
     
+    /**
+     * migrates all the navigator items from parent to child
+     * @param child the navigator to migrate to
+     * @param parent the navigator to migrate from
+     */
     private void migrateNavigatorItems(IDocumentNavigator child, IDocumentNavigator parent)
     {
       Enumeration<INavigatorItem> enumerator =  parent.getDocuments();
       while(enumerator.hasMoreElements())
       {
         INavigatorItem navitem = enumerator.nextElement();
-        child.addDocument(navitem);
         parent.removeDocument(navitem);
+        child.addDocument(navitem);
         enumerator = parent.getDocuments();
       }
-      
     }
     
+    /**
+     * migrates all the listeners from parent to child
+     * @param child the navigator to migrate to
+     * @param parent the navigator to migrate from
+     */
     private void migrateListeners(IDocumentNavigator child, IDocumentNavigator parent)
     {
       Collection<INavigationListener> listeners = parent.getNavigatorListeners();

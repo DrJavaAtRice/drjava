@@ -51,7 +51,17 @@ package edu.rice.cs.util.docnavigation;
 
 public interface IDocumentNavigatorAlgo<InType, ReturnType>
 {
-    public ReturnType forList(IDocumentNavigator navigator, InType input);
+  /**
+   * the List case for the visitor
+   * @param navigator the navigator that is executing the visitor
+   * @param input the input to the algorithm
+   */
+  public ReturnType forList(IDocumentNavigator navigator, InType input);
 
-    public ReturnType forTree(IDocumentNavigator navigator, InType input);
+  /**
+   * the Tree case for the visitor
+   * @param navigator the navigator that is executing the visitor
+   * @param input the input to the algorithm
+   */
+  public ReturnType forTree(IDocumentNavigator navigator, InType input);
 }

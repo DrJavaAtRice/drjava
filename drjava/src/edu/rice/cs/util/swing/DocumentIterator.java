@@ -64,4 +64,9 @@ public interface DocumentIterator {
    * @return the previous document.
    */
   Document getPrevDocument(Document doc);
+  
+  /**
+   * @return the number of documents being iterated over
+   */
+  int getDocumentCount();
 }

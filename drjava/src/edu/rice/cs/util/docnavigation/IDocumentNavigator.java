@@ -116,7 +116,6 @@ public interface IDocumentNavigator {
      */
     public INavigatorItem getPrevious(INavigatorItem doc);
 
-
     /**
      * Tests to see if a given document is contained in this navigator.
      *
@@ -136,21 +135,21 @@ public interface IDocumentNavigator {
     public Enumeration<INavigatorItem> getDocuments();
 
     /**
-     * Returns the number of <code>IDocuments</code> contained by this <code>IDocumentNavigator</code>
+     * Returns the number of <code>INavigatorItem</code>s contained by this <code>IDocumentNavigator</code>
      *
      * @return the number of documents within this navigator.
      */
     public int getDocumentCount();
 
     /**
-     * Returns whether this <code>IDocumentNavigator</code> contains any <code>IDocuments</code>.
+     * Returns whether this <code>IDocumentNavigator</code> contains any <code>INavigatorItem</code>s.
      *
      * @return <code>true</code> if this navigator contains one or more documents, else <code>false</code>.
      */
     public boolean isEmpty();
 
     /**
-     * Removes all <code>IDocuments</code> from this <code>IDocumentNavigator</code>.
+     * Removes all <code>INavigatorItem</code>s from this <code>IDocumentNavigator</code>.
      */
     public void clear();
 
@@ -180,11 +179,18 @@ public interface IDocumentNavigator {
      */
     public Collection<INavigationListener> getNavigatorListeners();
 
-    /*
-    public void addDocumentAwareMouseListener(IDocumentAwareMouseListener listener);
-
-    public void removeDocumentAwareMouseListener(IDocumentAwareMouseListener listener);
-    */
-
+    /**
+     * Selects the document at the x,y coordinate of the navigator pane and sets it to be
+     * the currently active document.
+     * @param x the x coordinate of the navigator pane
+     * @param y the y coordinate of the navigator pane
+     */
+    public boolean selectDocumentAt(int x, int y);
+    
+    /**
+     * visitor pattern
+     * @param algo the algorithm to run on this navigator
+     * @param input the input to the algorithm
+     */
     public <InType, ReturnType> ReturnType execute(IDocumentNavigatorAlgo<InType, ReturnType> algo, InType input);
 }

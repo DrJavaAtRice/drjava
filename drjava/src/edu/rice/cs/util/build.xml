@@ -71,7 +71,15 @@
     <rmic base="${built}"
       classpath="${classpath_text}"
       classname="edu.rice.cs.util.newjvm.IntegratedMasterSlaveTest.CounterSlave" />
+    
 
+    <copy todir="${built}">
+      <fileset dir="${srcroot}">
+        <!-- include graphics -->
+        <include name="${projpath}/**/*.gif" />
+        <include name="${projpath}/**/*.png" />
+     </fileset>
+    </copy>
   </target>
 
   <!-- Makes a jar. -->

@@ -54,21 +54,30 @@ import java.awt.event.*;
 //import edu.rice.cs.drjava.ui.RightClickMouseAdapter;
 
 class JListSortNavigator extends JListNavigator{
-  //private final DefaultListModel _docs = new DefaultListModel();
   
-  private Vector<INavigatorItem> _docs = new Vector<INavigatorItem>();
+  /**
+   * the collection of documents in this navigator
+   */
+//  private Vector<INavigatorItem> _docs = new Vector<INavigatorItem>();
   
+  /**
+   * the currently selected item or null if none
+   */
   private INavigatorItem currentselected = null;
   
   /** the collection of INavigationListeners listening to this JListNavigator */
   private Vector<INavigationListener> navListeners = new Vector<INavigationListener>();
   
+  /**
+   * the renderer for this list
+   */
   protected DefaultListCellRenderer _renderer;
   
-  private Vector<INavigatorItem> _modified_docs = new Vector<INavigatorItem>();
-
   
-  public JListSortNavigator() 
+  /**
+   * the standard constructor for this list navigator
+   */
+  public JListSortNavigator()
   {
     super();
     _renderer = new DefaultListCellRenderer();
@@ -76,19 +85,29 @@ class JListSortNavigator extends JListNavigator{
     this.setCellRenderer(_renderer);
   }
   
+  /**
+   * add the document to the list
+   * @param doc the document to add
+   */
   public void addDocument(INavigatorItem doc) {
     insertDoc(doc);
      this.setListData(_docs);
-//     this.setActiveDoc(doc);
-    //System.out.println("%" + doc == _docs.elementAt(0));
-    //System.out.println(doc + " got index " + _docs.indexOf(doc) + "(size was " + _docs.size() + ")");
   }
-  
+
+  /**
+   * adds the document to the specified path
+   * @doc the document to add
+   * @path the path to add to
+   */
   public void addDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
     insertDoc(doc);
     this.setListData(_docs);
   }
   
+  /**
+   * inserts the document into its sorted position
+   * @param doc the document to add
+   */
   private void insertDoc(INavigatorItem doc){
     int i=0;
     while(i<_docs.size() && (_docs.get(i).getName().toUpperCase().compareTo(doc.getName().toUpperCase())) < 0){
@@ -98,8 +117,9 @@ class JListSortNavigator extends JListNavigator{
   }
   
   /**
+   * gets the next document in the series
+   * @param doc the document to reference from
    * @return the document which comes after doc in the list
-   * @param doc
    */
   public INavigatorItem getNext(INavigatorItem doc) {
     int i = _docs.indexOf(doc);
@@ -116,8 +136,9 @@ class JListSortNavigator extends JListNavigator{
   }
   
   /**
-   * @return the document which comes before doc in the list
-   * @param doc
+   * gets the previous document in the series
+   * @param doc the document to reference from
+   * @return the document which comes after doc in the list
    */
   public INavigatorItem getPrevious(INavigatorItem doc) {
     int i = _docs.indexOf(doc);
@@ -133,6 +154,10 @@ class JListSortNavigator extends JListNavigator{
     }
   }
   
+  /**
+   * removes the document from the navigator
+   * @doc the document to remove
+   */
   public INavigatorItem removeDocument(INavigatorItem doc) throws IllegalArgumentException {
     int i = _docs.indexOf(doc);
     if( i == -1 ) {
@@ -168,14 +193,18 @@ class JListSortNavigator extends JListNavigator{
     }
   }
   
+  /**
+   * noop since a list has no concept of a top level path
+   */
   public void setTopLevelPath(String path)
   {
   }
   
   /**
+   * returns whether the navigator contains the document or not
+   * @param doc in question
    * @return true if this list contains doc (using identity as equality
    * measure), false if not.
-   * @param doc
    */
   public boolean contains(INavigatorItem doc) {
     return (_docs.indexOf(doc) != -1 );
@@ -189,16 +218,25 @@ class JListSortNavigator extends JListNavigator{
     return _docs.elements();
   }
   
+  /**
+   * @return the number of documents in this navigator
+   */
   public int getDocumentCount()
   {
     return _docs.size();
   }
   
+  /**
+   * @return whether or not the navigator is empty
+   */
   public boolean isEmpty()
   {
     return _docs.isEmpty();
   }
   
+  /**
+   * removes all documents from the navigator
+   */
   public void clear()
   {
 //    System.out.println("clearing list data");
@@ -222,42 +260,35 @@ class JListSortNavigator extends JListNavigator{
     navListeners.remove(listener);
   }
   
+  /**
+   * returns all navigator listeners
+   */
   public Collection<INavigationListener> getNavigatorListeners()
   {
       return navListeners;
   }
   
+  /**
+   * executes the list case on a visitor
+   * @param the visitor to execute
+   * @input the input to the visitor
+   */
   public <InType, ReturnType> ReturnType execute(IDocumentNavigatorAlgo<InType, ReturnType> algo, InType input) {
     return algo.forList(this, input);
   }
   
-  private class InternalCellRenderer extends JLabel implements ListCellRenderer {
-    private JList _list = null;
-    
-    public InternalCellRenderer(JList list) {
-      _list = list;
-      setOpaque(true);
-    }
-    
-    public Component getListCellRendererComponent(
-                                                  JList list,
-                                                  Object value,
-                                                  int index,
-                                                  boolean isSelected,
-                                                  boolean cellHasFocus) {
-      setFont(_list.getFont());
-      setText(value.toString());
-      setBackground(isSelected ? _list.getSelectionBackground() : _list.getBackground());
-      setForeground(isSelected ? _list.getSelectionForeground() : _list.getForeground());
-      return this;
-    }
-  }
   
+  /**
+   * @return a Container representation of this navigator
+   */
   public Container asContainer()
   {
     return this;
   }
   
+  /**
+   * called when the value of this navigator changes
+   */
   public void valueChanged(ListSelectionEvent e)
   {
     if(!e.getValueIsAdjusting() && !_docs.isEmpty())
@@ -278,6 +309,7 @@ class JListSortNavigator extends JListNavigator{
   }
 
 
+  
   /**
    * returns a renderer for this object
    */

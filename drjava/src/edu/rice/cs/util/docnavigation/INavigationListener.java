@@ -51,7 +51,15 @@ package edu.rice.cs.util.docnavigation;
 
 public interface INavigationListener
 {
+  /**
+   * run when an item in a navigator is selected
+   * @param doc the doc that is selected
+   */
   public void gainedSelection(INavigatorItem doc);
   
+  /**
+   * run when an item in a navigator is unselected
+   * @param doc the doc that is unselected
+   */
   public void lostSelection(INavigatorItem doc);
 }

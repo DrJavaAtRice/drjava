@@ -51,15 +51,32 @@ package edu.rice.cs.util.docnavigation;
 
 public interface IDocumentNavigatorFactory
 {
-  //static final int LIST_FLAVOR = 0;
   
-  //static final int TREE_FLAVOR = 1;
-  
+  /**
+   * creates a new List Navigator
+   * @return a list navigator
+   */
   public IDocumentNavigator makeListNavigator();
   
+  /**
+   * returns a new tree Navigator with the specified root
+   * @param name the name of the root node
+   * @return a tree navigator
+   */
   public IDocumentNavigator makeTreeNavigator(String name);
   
+  /**
+   * creates a list navigator and migrates the navigator items from parent to the new navigator
+   * @param parent the navigator to migrate from
+   * @return the new list navigator
+   */
   public IDocumentNavigator makeListNavigator(IDocumentNavigator parent);
   
+  /**
+   * creates a tree navigator and migrates the navigator items from the parent to the new navigator
+   * @param name the name of the root node
+   * @param parent the navigator to migrate from
+   * @return the new tree navigator
+   */
   public IDocumentNavigator makeTreeNavigator(String name, IDocumentNavigator parent);
 }

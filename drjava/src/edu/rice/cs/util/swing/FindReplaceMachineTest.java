@@ -112,6 +112,10 @@ public class FindReplaceMachineTest extends TestCase {
           return _docPrev;
         }
       }
+      
+      public int getDocumentCount() { 
+        return 3; 
+      }
     });
     _frm.setDocument(_doc);
     // _initFrm(0);

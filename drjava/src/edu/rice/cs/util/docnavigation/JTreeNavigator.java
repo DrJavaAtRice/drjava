@@ -432,4 +432,18 @@ public class JTreeNavigator extends JTree implements IAWTContainerNavigatorActor
   public Component getRenderer(){
     return _renderer;
   }
+  
+  
+  /**
+   * Selects the document at the x,y coordinate of the navigator pane and sets it to be
+   * the currently active document.
+   * @param x the x coordinate of the navigator pane
+   * @param y the y coordinate of the navigator pane
+   */
+  public boolean selectDocumentAt(int x, int y) {
+    System.err.println("should be setting a document active");
+    return false;
+  }
+
+  
 }

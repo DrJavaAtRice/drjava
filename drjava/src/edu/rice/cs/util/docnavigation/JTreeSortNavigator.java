@@ -62,40 +62,76 @@ import edu.rice.cs.util.*;
 
 public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorActor, TreeSelectionListener {
   
-   HashMap<INavigatorItem, DefaultMutableTreeNode> _doc2node =
+  /**
+   * maps documents to tree nodes
+   */
+  private HashMap<INavigatorItem, DefaultMutableTreeNode> _doc2node =
     new HashMap<INavigatorItem, DefaultMutableTreeNode>();
   
+  /**
+   * maps path's to nodes and nodes to paths
+   */
   private BidirectionalHashMap<String, DefaultMutableTreeNode> _path2node = 
     new BidirectionalHashMap<String, DefaultMutableTreeNode>();
   
+  /**
+   * the root of the tree
+   */
   private DefaultMutableTreeNode _root;
   
+  /**
+   * the model of the tree
+   */
   private DefaultTreeModel _model;
   
+  /**
+   * the currently selected item
+   */
   private INavigatorItem _currSelected;
   
+  /**
+   * the node corresponding to the [external files] node in the tree
+   * this will hold files that are not in the project directory
+   */
   private DefaultMutableTreeNode _nonProjRoot = new DefaultMutableTreeNode("[External Files]");
   
+  /**
+   * flag if the nonproject node has children
+   */
   private boolean _hasnonprojfilesopen = false;
   
   /** the collection of INavigationListeners listening to this JListNavigator */
   private Vector<INavigationListener> navListeners = new Vector<INavigationListener>();
   
+  /**
+   * the renderer for this JTree
+   */
   protected CustomTreeCellRenderer _renderer;
 
-  private static final String ICON_PATH = "icons/";
   
+  /**
+   * sets the foreground color of this JTree
+   * @param c the color to set to
+   */
   public void setForeground(Color c){
     super.setForeground(c);
     _renderer.setTextNonSelectionColor(c);
   }
   
+  /**
+   * sets the background color of this tree
+   * @param c the color to set to
+   */
   public void setBackground(Color c){
     super.setBackground(c);
     if(_renderer != null)
       _renderer.setBackgroundNonSelectionColor(c);
   }
   
+  /**
+   * standard constructor
+   * @param name the name of the root node
+   */
   public JTreeSortNavigator(String name) {
     super(new DefaultTreeModel(new DefaultMutableTreeNode(name)));
     
@@ -106,7 +142,6 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
     _renderer = new CustomTreeCellRenderer();
     _renderer.setOpaque(false);
 //    _renderer.setJavaIcon(getIcon("javaicon.gif"));
-    _renderer.setJavaIcon(getIcon("javaicon.gif"));
     this.setCellRenderer(_renderer);
 
     
@@ -129,8 +164,7 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
   public void addDocument(INavigatorItem doc) {
    
     
-    if(!_hasnonprojfilesopen)
-    {
+    if(!_hasnonprojfilesopen) {
       insertFolderSortedInto(_nonProjRoot, _root);
     }
     
@@ -214,6 +248,12 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
     child.setUserObject(doc);
   }
   
+  
+  /**
+   * inserts the child node (INavigatorItem) into the sorted position as a parent node's child
+   * @param child the node to add
+   * @param parent the node to add under
+   */
   private void insertNodeSortedInto(DefaultMutableTreeNode child, DefaultMutableTreeNode parent){
     int numChildren = parent.getChildCount();
     int i=0;
@@ -244,6 +284,11 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
     _model.insertNodeInto(child, parent, i);
   }
   
+  /**
+   * inserts a folder (String) into sorted position under the parent
+   * @param child the folder to add
+   * @param parent the folder to add under
+   */
   private void insertFolderSortedInto(DefaultMutableTreeNode child, DefaultMutableTreeNode parent){
     int numChildren = parent.getChildCount();
     int i=0;
@@ -281,8 +326,15 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
   }
   
   
+  /**
+   * the top level path of this tree
+   */
   private String _topLevelPath = "";
   
+  /**
+   * sets the top level path of this tree
+   * @param path the new top level path for this tree
+   */
   public void setTopLevelPath(String path) {
     _topLevelPath = path;
   }
@@ -335,7 +387,7 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
   }
   
   
-  /* sets the input document to be active */
+  /** sets the input document to be active */
   public void setActiveDoc(INavigatorItem doc){
     DefaultMutableTreeNode node = _doc2node.get(doc);
     if(this.contains(doc)){
@@ -467,11 +519,19 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
     navListeners.remove(listener);
   }
   
+  /**
+   * retuns a collection of all navigator listeners
+   */
   public Collection<INavigationListener> getNavigatorListeners()
   {
     return navListeners;
   }
   
+  /**
+   * standard visitor pattern
+   * @param algo the visitor to run
+   * @param input the input for the visitor
+   */
   public <InType, ReturnType> ReturnType execute(IDocumentNavigatorAlgo<InType, ReturnType> algo, InType input) {
     return algo.forTree(this, input);
   }
@@ -521,19 +581,50 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
     return _renderer;
   }
   
-  
+  /**
+   * the cell renderer for this tree
+   */
   private class CustomTreeCellRenderer extends DefaultTreeCellRenderer{
-    Icon javaIcon;
-    String _filename;
-
+    private String    _filename;
+    private ImageIcon _javaIcon;
+    private ImageIcon _advancedMIcon;
+    private ImageIcon _advancedIcon;
+    private ImageIcon _intermediateMIcon;
+    private ImageIcon _intermediateIcon;
+    private ImageIcon _beginnerMIcon;
+    private ImageIcon _beginnerIcon;
+    private ImageIcon _otherIcon;
+    private ImageIcon _javaMIcon;
+    private ImageIcon _otherMIcon;
+    
+    /**
+     * simple constructor
+     */
     public CustomTreeCellRenderer(){
-      javaIcon = null;
+      _javaIcon   = _getIconResource("JavaIcon.gif");
+      _javaMIcon  = _getIconResource("JavaMIcon.gif");
+      _beginnerIcon   = _getIconResource("BeginnerIcon.gif");
+      _beginnerMIcon  = _getIconResource("BeginnerMIcon.gif");
+      _intermediateIcon   = _getIconResource("IntermediateIcon.gif");
+      _intermediateMIcon  = _getIconResource("IntermediateMIcon.gif");
+      _advancedIcon   = _getIconResource("AdvancedIcon.gif");
+      _advancedMIcon  = _getIconResource("AdvancedMIcon.gif");
+      _otherIcon  = _getIconResource("OtherIcon.gif");
+      _otherMIcon = _getIconResource("OtherMIcon.gif");
     }
     
-    public void setJavaIcon(Icon icon){
-      javaIcon = icon;
+    private ImageIcon _getIconResource(String name) {
+      URL url = JTreeSortNavigator.class.getResource("icons/" + name);
+      if (url != null) {
+        return new ImageIcon(url);
+      }
+      return null;
     }
     
+    /**
+     * returns the component for a cell
+     * @param tree
+     */
     public Component getTreeCellRendererComponent(
                             JTree tree,
                             Object value,
@@ -548,30 +639,78 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
                             expanded, leaf, row,
                             hasFocus);
             DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
-            if(value instanceof INavigatorItem){
+            if(node.getUserObject() instanceof INavigatorItem){
               INavigatorItem doc = (INavigatorItem)(node.getUserObject());
-              _filename = doc.getName();
-              if (leaf && javaIcon != null && _filename.endsWith(".java")) {
-                setIcon(javaIcon);
+              _filename = doc.toString();
+              if (leaf) {
+                if (_javaIcon != null && _filename.endsWith(".java  ")) {
+                  setIcon(_javaIcon);
+                }
+                else if (_javaMIcon != null && _filename.endsWith(".java *")) {
+                  setIcon(_javaMIcon);
+                }
+                else if (_beginnerIcon != null && _filename.endsWith(".dj0  ")) {
+                  setIcon(_beginnerIcon);
+                }
+                else if (_beginnerMIcon != null && _filename.endsWith(".dj0 *")) {
+                  setIcon(_beginnerMIcon);
+                }
+                else if (_intermediateIcon != null && _filename.endsWith(".dj1  ")) {
+                  setIcon(_intermediateIcon);
+                }
+                else if (_intermediateMIcon != null && _filename.endsWith(".dj1 *")) {
+                  setIcon(_intermediateMIcon);
+                }
+                else if (_intermediateIcon != null && _filename.endsWith(".dj2  ")) {
+                  setIcon(_advancedIcon);
+                }
+                else if (_advancedMIcon != null && _filename.endsWith(".dj2 *")) {
+                  setIcon(_advancedMIcon);
+                }
+                else if (_otherMIcon != null && _filename.endsWith(" *")) {
+                  setIcon(_otherMIcon);
+                }
+                else if (_otherIcon != null) {
+                  setIcon(_otherIcon);
+                }
               }
             }else if(value instanceof String){
               // a directory
             }
-              
-              
-             
+            
             return this;
     }
   }
+
   
-  
-  
-  
-  public static ImageIcon getIcon(String name) {
-    URL url = JTreeSortNavigator.class.getResource(ICON_PATH + name);
-    if (url != null) {
-      return new ImageIcon(url);
+  /**
+   * Selects the document at the x,y coordinate of the navigator pane and sets it to be
+   * the currently active document.
+   * @param x the x coordinate of the navigator pane
+   * @param y the y coordinate of the navigator pane
+   */
+  public boolean selectDocumentAt(int x, int y) {
+    TreePath path = getPathForLocation(x, y);
+    if(path == null){
+      return false;
+    }else{
+      DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
+      if(node.getUserObject() instanceof INavigatorItem){
+        this.expandPath(path);
+        this.setSelectionPath(path);
+        return true;
+      }else{
+        return false;
+      }
     }
-    return null;
   }
+
+
+//  public static ImageIcon getIcon(String name) {
+//    URL url = JTreeSortNavigator.class.getResource(ICON_PATH + name);
+//    if (url != null) {
+//      return new ImageIcon(url);
+//    }
+//    return null;
+//  }
 }
