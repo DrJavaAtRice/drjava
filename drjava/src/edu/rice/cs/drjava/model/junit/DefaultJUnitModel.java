@@ -186,6 +186,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     for (OpenDefinitionsDocument doc : _getter.getDefinitionsDocuments() ) { 
       if (doc.isInProjectPath() || doc.isAuxiliaryFile())  lod.add(doc);
     }
+    junitDocs(lod);
   }
   
   /**
