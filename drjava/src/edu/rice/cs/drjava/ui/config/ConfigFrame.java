@@ -237,12 +237,12 @@ public class ConfigFrame extends JFrame {
 
   /**
    * Returns the current working directory, or the user's current directory
-   * if none is set. 20031027 Changed default value to user's home directory.
+   * if none is set. 20040213 Changed default value to user's current directory.
    */
   private File _getWorkDir() {
     File workDir = DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY);
     if (workDir == FileOption.NULL_FILE) {
-      workDir = new File(System.getProperty("user.home"));
+      workDir = new File(System.getProperty("user.dir"));
     }
     if (workDir.isFile() && workDir.getParent() != null) {
       workDir = workDir.getParentFile();

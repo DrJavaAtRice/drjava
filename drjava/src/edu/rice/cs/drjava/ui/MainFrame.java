@@ -1272,10 +1272,10 @@ public class MainFrame extends JFrame implements OptionConstants {
 
 
     // Working directory is default place to start, else
-    // use user.home, not user.dir like we were before.
+    // use user.dir (bug #895998).
     File workDir = config.getSetting(WORKING_DIRECTORY);
     if (workDir == FileOption.NULL_FILE) {
-      workDir = new File(System.getProperty("user.home"));
+      workDir = new File(System.getProperty("user.dir"));
     }
     if (workDir.isFile() && workDir.getParent() != null) {
       workDir = workDir.getParentFile();
