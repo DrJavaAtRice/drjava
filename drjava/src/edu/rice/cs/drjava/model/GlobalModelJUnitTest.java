@@ -221,7 +221,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
    * Tests that a JUnit file with an error is reported to have an error.
    */
   public void testElspethOneJUnitError() throws Exception {
-    if (printMessages) System.out.println("----testOneJUnitError-----");
+    if (printMessages) System.out.println("----testElspethOneJUnitError-----");
 
     OpenDefinitionsDocument doc = setupDocument(ELSPETH_ERROR_TEXT);
     final File file = new File(_tempDir, "Elspeth.java");
@@ -244,7 +244,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _model.removeListener(listener);
   }
 
-
+  
   /**
    * Tests that a test class which throws a *real* Error (not an Exception)
    * is handled correctly.

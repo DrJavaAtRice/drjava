@@ -194,28 +194,24 @@ public class JUnitTestManager {
     if (failedTest instanceof TestCase) {
       testName = ((TestCase)failedTest).getName();
     }
-
+    
     String testString = failedTest.toString();
     int firstIndex = testString.indexOf('(') + 1;
     int secondIndex = testString.indexOf(')');
+    
+    /**
+     * junit can come back with a string in two different formats:
+     * so we'll parse both formats, and then decide which one to use
+     */
+    
+    String className;
     String className1 = testString.substring(firstIndex, secondIndex);
     String className2 = testString.substring(0, firstIndex-1);
-    String className;
     if(firstIndex == secondIndex){
       className = className2;
     }else{
       className = className1;
     }
-    
-    int indexOfClass = classNames.indexOf(className);
-    File file;
-    if (indexOfClass != -1) {
-      file = files.get(indexOfClass);
-    }
-    else {
-      file = _jmc.getFileForClassName(className);
-    }
-
 //    String ps = System.getProperty("file.separator");
 //    // replace periods with the System's file separator
 //    className = StringOps.replace(className, ".", ps);
@@ -230,8 +226,42 @@ public class JUnitTestManager {
 
     String classNameAndTest = className + "." + testName;
     String stackTrace = StringOps.getStackTrace(failure.thrownException());
-
+    
+    /**
+     * if the classname is not in the stacktrace, then the test that
+     * failed was inherited by a superclass. let's look for that classname
+     */
+    if(stackTrace.indexOf(className) == -1){
+      /* get the stack trace of the junit error */
+      String trace = failure.trace();
+      /* knock off the first line of the stack trace.
+       * now the string will look like
+       * at my.package.class(file.java:line)
+       * at other.package.class(anotherfile.java:line)
+       * etc...
+       */
+      trace = trace.substring(trace.indexOf('\n')+1);
+      while(trace.indexOf("junit.framework.Assert") != -1 &&
+            trace.indexOf("junit.framework.Assert") < trace.indexOf("(")){
+        /* the format of the trace will have "at junit.framework.Assert..."
+         * on each line until the line of the actual source file.
+         * if the exception was thrown from the test case (so the test failed
+         * without going through assert), then the source file will be on
+         * the first line of the stack trace
+         */
+        trace = trace.substring(trace.indexOf('\n')+1);
+      }
+      trace = trace.substring(trace.indexOf('(')+1);
+      trace = trace.substring(0, trace.indexOf(')'));
+      className = trace.substring(0,trace.indexOf(':'));
+      className = trace.substring(0,trace.lastIndexOf('.'));
+      classNameAndTest = className + "." + testName;
+    }
+    
+    
+    
     int lineNum = _lineNumber(stackTrace, classNameAndTest);
+    
 //    if (lineNum > -1) _errorsWithPos++;
 
     String exception =  (isError) ?
@@ -258,6 +288,16 @@ public class JUnitTestManager {
 //    }catch(IOException e){
 //      
 //    }
+
+    int indexOfClass = classNames.indexOf(className);
+    File file;
+    if (indexOfClass != -1) {
+      file = files.get(indexOfClass);
+    }
+    else {
+      file = _jmc.getFileForClassName(className);
+    }
+    
     //The conditional has been added because of the augmented code in the .dj0 files - it causes the error to be highlighted on the wrong line
     //At the elementary level it should always be off by one
     //NOTE: this presupposes that 
@@ -271,12 +311,14 @@ public class JUnitTestManager {
   private int _lineNumber(String sw, String classname) {
     int lineNum;
 
+    
     int idxClassname = sw.indexOf(classname);
     if (idxClassname == -1) {
       return -1;
     }
 
     String theLine = sw.substring(idxClassname, sw.length());
+    
     theLine = theLine.substring(theLine.indexOf(classname), theLine.length());
     theLine = theLine.substring(theLine.indexOf("(") + 1, theLine.length());
     theLine = theLine.substring(0, theLine.indexOf(")"));

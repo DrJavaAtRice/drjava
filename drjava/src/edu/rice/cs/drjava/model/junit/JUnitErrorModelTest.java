@@ -50,6 +50,9 @@ import java.io.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.GlobalModelJUnitTest.JUnitTestListener;
 
+
+
+
 /**
  * A test on the GlobalModel for JUnit testing.
  *
@@ -72,6 +75,54 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "  } \n" +
     "}";
 
+  private static final String TEST_ONE = 
+    "import junit.framework.TestCase;\n" +
+    "public class TestOne extends TestCase {\n" +
+    "  public void testMyMethod() {\n" +
+    "    assertTrue(false);\n" +
+    "  }\n" +
+    "  public TestOne() {\n" +
+    "    super();\n" +
+    "  }\n" +
+    "  public java.lang.String toString() {\n" +
+    "    return \"TestOne(\" + \")\";\n" +
+    "  }\n" +
+    "  public boolean equals(java.lang.Object o) {\n" +
+    "    if ((o == null) || getClass() != o.getClass()) return false;\n" +
+    "    return true;\n" +
+    "  }\n" +
+    "  public int hashCode() {\n" +
+    "    return getClass().hashCode();\n" +
+    "  }\n" +
+    "  public void testThrowing() throws Exception{\n" +
+    "    throw new Exception(\"here\");\n" +
+    "  }\n" +
+    "  public void testFail(){\n" +
+    "    fail(\"i just failed the test\");\n" +
+    "  }\n" +
+    "}";
+  
+  private static final String TEST_TWO = 
+    "import junit.framework.TestCase;\n" +
+    "public class TestTwo extends TestOne {\n" +
+    "  public void testTwo() {\n" +
+    "    assertTrue(true);\n" +
+    "  }\n" +
+    "  public TestTwo() {\n" +
+    "    super();\n" +
+    "  }\n" +
+    "  public java.lang.String toString() {\n" +
+    "    return \"TestTwo(\" + \")\";\n" +
+    "  }\n" +
+    "  public boolean equals(java.lang.Object o) {\n" +
+    "    if ((o == null) || getClass() != o.getClass()) return false;\n" +
+    "    return true;\n" +
+    "  }\n" +
+    "  public int hashCode() {\n" +
+    "    return getClass().hashCode();\n" +
+    "  }\n" +
+    "}";
+  
 //  private static final String NONPUBLIC_TEXT =
 //    "import junit.framework.*; " +
 //    "public class NonPublic extends TestCase { " +
@@ -233,8 +284,52 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
                  _m.getNumErrors());
     
     assertEquals("the error line should be line number 2", 2, _m.getError(0).lineNumber());
+  }
+
+
+  /**
+   * test errors that occur in superclass
+   */
+  public void testErrorInSuperClass() throws Exception {
+    OpenDefinitionsDocument doc1 = setupDocument(TEST_ONE);
+    OpenDefinitionsDocument doc2 = setupDocument(TEST_TWO);
+    final File file1 = new File(_tempDir, "TestOne.java");
+    final File file2 = new File(_tempDir, "TestTwo.java");
+    doc1.saveFile(new FileSelector(file1));
+    doc2.saveFile(new FileSelector(file2));
+    JUnitTestListener listener = new JUnitTestListener();
+    _model.addListener(listener);
+    _model.getCompilerModel().compileAll();
+//        doc1.startCompile();
+//        doc2.startCompile();
+    synchronized(listener) {
+      doc1.startJUnit();
+      listener.wait();
+    }
+
+    _m = _model.getJUnitModel().getJUnitErrorModel();
+    
+    assertEquals("test case has one error reported", 3, _m.getNumErrors());
+    assertTrue("first error should be an error not a warning", !_m.getError(0).isWarning());
+    
+    assertTrue("it's a junit error", _m.getError(0) instanceof JUnitError);
+    
+    assertEquals("The first error is on line 5", 3, _m.getError(0).lineNumber());
+    assertEquals("The first error is on line 5", 19, _m.getError(1).lineNumber());
+    assertEquals("The first error is on line 5", 22, _m.getError(2).lineNumber());
+    
+    synchronized(listener) {
+      doc2.startJUnit();
+      listener.wait();
+    }
+    assertEquals("test case has one error reported", 3, _m.getNumErrors());
+    assertTrue("first error should be an error not a warning", !_m.getError(0).isWarning());
+    assertEquals("The first error is on line 5", 3, _m.getError(0).lineNumber());
+    assertEquals("The first error is on line 5", 19, _m.getError(1).lineNumber());
+    assertEquals("The first error is on line 5", 22, _m.getError(2).lineNumber());
     
     
+    _model.removeListener(listener);
   }
 }
 
