@@ -133,19 +133,7 @@ public class TreeInterpreter implements Interpreter {
       
       while (it.hasNext()) {
         Node n = it.next();
-        
-        NameVisitor nv = new NameVisitor(nameVisitorContext);
-        Node o = n.acceptVisitor(nv);
-        if (o != null) n = o;
-        
-        TypeChecker tc = new TypeChecker(checkVisitorContext);
-        n.acceptVisitor(tc);
-        
-        evalVisitorContext.defineVariables
-          (checkVisitorContext.getCurrentScopeVariables());
-        
-        EvaluationVisitor ev = new EvaluationVisitor(evalVisitorContext);
-        result = n.acceptVisitor(ev);
+        result = interpret(n);
       }
       
       return result;
@@ -898,5 +886,26 @@ public class TreeInterpreter implements Interpreter {
       importationManager = im;
       interpreter        = TreeInterpreter.this;
     }
+  }
+
+  /**
+   * Runs the interpreter, on an already parsed AST
+   * @param is    the reader from which the statements are read
+   * @param fname the name of the parsed stream
+   * @return the result of the evaluation of the last statement
+   */
+  public Object interpret(Node AST) throws InterpreterException {
+    NameVisitor nv = new NameVisitor(nameVisitorContext);
+    Node o = AST.acceptVisitor(nv);
+    if (o != null) AST = o;
+    
+    TypeChecker tc = new TypeChecker(checkVisitorContext);
+    AST.acceptVisitor(tc);
+    
+    evalVisitorContext.defineVariables
+      (checkVisitorContext.getCurrentScopeVariables());
+    
+    EvaluationVisitor ev = new EvaluationVisitor(evalVisitorContext);
+    return AST.acceptVisitor(ev);
   }
 }
