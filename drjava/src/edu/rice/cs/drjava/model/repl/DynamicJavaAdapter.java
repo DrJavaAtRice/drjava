@@ -49,7 +49,8 @@ import java.util.*;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
-
+import java.net.MalformedURLException;
+import edu.rice.cs.drjava.model.repl.newjvm.ClasspathManager;
 import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.interpreter.context.*;
 import koala.dynamicjava.interpreter.error.*;
@@ -81,8 +82,12 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   /**
    * Constructor.
    */
-  public DynamicJavaAdapter() {
-    _djInterpreter = new InterpreterExtension();
+  
+  ClasspathManager cpm;
+  
+  public DynamicJavaAdapter(ClasspathManager c) {
+    cpm = c;
+    _djInterpreter = new InterpreterExtension(c);
   }
 
   /**
@@ -150,11 +155,37 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * Adds a path to the current classpath.
    * @param path the path to add
    */
-  public void addClassPath(String path) {
-    //DrJava.consoleErr().println("Added class path: " + path);
-    _djInterpreter.addClassPath(path);
+//  public void addClassPath(String path) {
+//    //DrJava.consoleErr().println("Added class path: " + path);
+//    _djInterpreter.addClassPath(path);
+//  }
+
+  
+  public void addProjectClassPath(URL path) {
+    cpm.addProjectCP(path);
   }
 
+
+  public void addBuildDirectoryClassPath(URL path) {
+    cpm.addBuildDirectoryCP(path);
+  }
+
+  public void addProjectFilesClassPath(URL path) {
+    cpm.addProjectFilesCP(path);
+  }
+
+  public void addExternalFilesClassPath(URL path) {
+    cpm.addExternalFilesCP(path);
+  }
+  
+  public void addExtraClassPath(URL path) {
+    cpm.addExtraCP(path);
+  }
+  
+  
+  
+  
+  
   /**
    * Set the scope for unqualified names to the given package.
    * @param packageName Package to assume scope of.
@@ -432,10 +463,11 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     /**
      * Constructor.
      */
-    public InterpreterExtension() {
+    public InterpreterExtension(ClasspathManager cpm) {
       super(new JavaCCParserFactory());
 
-      classLoader = new ClassLoaderExtension(this);
+      
+      classLoader = new ClassLoaderExtension(this, cpm);
       // We have to reinitialize these variables because they automatically
       // fetch pointers to classLoader in their constructors.
       nameVisitorContext = makeGlobalContext(this);
@@ -622,141 +654,135 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * A class loader for the interpreter.
    */
   public static class ClassLoaderExtension extends TreeClassLoader {
-    private static class WrapperClassLoader extends ClassLoader{
-      ClassLoader cl;
-      public WrapperClassLoader(ClassLoader c){
-        cl = c;
-      }
-      
-      public URL getResource(String name){
-        if(name.startsWith("edu/rice/cs/")){
-          return null;
-        }else{
-          return cl.getResource(name);
-        }
-      }
-    }
     
-  
+    // the classpath is augmented by calling addURL(URL url) on this class
+    // this will update the classloader variable to contain the new classpath entry
+    
+    
   private static boolean classLoaderCreated = false;
-
-    private static StickyClassLoader _stickyLoader;
-
-    /**
-     * Constructor.
-     * @param         Interpreter i
-     */
-    public ClassLoaderExtension(koala.dynamicjava.interpreter.Interpreter i) {
-      super(i);
-      // The protected variable classLoader contains the class loader to use
-      // to find classes. When a new class path is added to the loader,
-      // it adds on an auxilary classloader and chains the old classLoader
-      // onto the end.
-      // Here we initialize classLoader to be the system class loader.
-      classLoader = new WrapperClassLoader(getClass().getClassLoader()); // classLoader is only used in getResource()
-      // NOTE that the superclass of ClassLoaderExtension (TreeClassLoader) adds (appends)
-      // URLs to the classpath of this classloader
-
-      // don't load the dynamic java stuff using the sticky loader!
-      // without this, interpreter-defined classes don't work.
-      String[] excludes = {
-        "edu.rice.cs.drjava.model.repl.DynamicJavaAdapter$InterpreterExtension",
-        "edu.rice.cs.drjava.model.repl.DynamicJavaAdapter$ClassLoaderExtension"
-      };
-
-      if (!classLoaderCreated) {
-        _stickyLoader = new StickyClassLoader(this, // Sticky's newLoader, indirectly points to the (dynamic) classLoader
-                                              classLoader, // Sticky's oldLoader
-                                              excludes);
-        classLoaderCreated = true;
-      }
-
-      // we will use this to getResource classes
-    }
-
-    /**
-     * Delegates all resource requests to {@link #classLoader} (the system class loader by default).
-     * This method is called by the {@link StickyClassLoader}.
-     */
-    public URL getResource(String name) {
-      return classLoader.getResource(name);
-    }
-
-    protected Class loadClass(String name, boolean resolve)
-      throws ClassNotFoundException
-    {
-      Class clazz;
-
-      // check the cache
-      if (classes.containsKey(name)) {
-        clazz = (Class) classes.get(name);
-      }
-      else {
-        try {
-          clazz = _stickyLoader.loadClass(name);
-        }
-        catch (ClassNotFoundException e) {
-          // If it exceptions, just fall through to here to try the interpreter.
-          // If all else fails, try loading the class through the interpreter.
-          // That's used for classes defined in the interpreter.
-          clazz = interpreter.loadClass(name);
-        }
-      }
-
-      if (resolve) {
-        resolveClass(clazz);
-      }
-
-      return clazz;
+  
+  private static StickyClassLoader _stickyLoader;
+  
+  // manages the classpath for the interpreter
+  ClasspathManager cpm;
+  
+  /**
+   * Constructor.
+   * @param         Interpreter i
+   */
+  public ClassLoaderExtension(koala.dynamicjava.interpreter.Interpreter i, ClasspathManager c) {
+    super(i);
+    cpm = c;
+    // The protected variable classLoader contains the class loader to use
+    // to find classes. When a new class path is added to the loader,
+    // it adds on an auxilary classloader and chains the old classLoader
+    // onto the end.
+    // Here we initialize classLoader to be the system class loader, and wrap it to not load edu.rice.cs classes
+    classLoader = new WrapperClassLoader(getClass().getClassLoader()); // classLoader is only used in getResource()
+    // NOTE that the superclass of ClassLoaderExtension (TreeClassLoader) adds (appends)
+    // URLs to the classpath of this classloader
+    
+    // don't load the dynamic java stuff using the sticky loader!
+    // without this, interpreter-defined classes don't work.
+    String[] excludes = {
+      "edu.rice.cs.drjava.model.repl.DynamicJavaAdapter$InterpreterExtension",
+      "edu.rice.cs.drjava.model.repl.DynamicJavaAdapter$ClassLoaderExtension"
+    };
+    
+    if (!classLoaderCreated) {
+      _stickyLoader = new StickyClassLoader(this, // Sticky's newLoader, indirectly points to the (dynamic) classLoader
+                                            classLoader, // Sticky's oldLoader
+                                            excludes);
+      classLoaderCreated = true;
     }
     
+    // we will use this to getResource classes
+  }
+  
+  /**
+   * Delegates all resource requests to {@link #classLoader} (the system class loader by default).
+   * This method is called by the {@link StickyClassLoader}.
+   */
+  public URL getResource(String name) {
+    // use the cpm to get the resource for the specified name
+    return cpm.getClassLoader().getResource(name);
+    //return classLoader.getResource(name);
+  }
+  
+  
+  protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException{
+    Class clazz;
     
-    /**
-     * Adds an URL to the class path.  DynamicJava's version of this creates a
-     * new URLClassLoader with the given URL, using the old loader as a parent.
-     * This seems to cause problems for us in certain cases, such as accessing
-     * static fields or methods in a class that extends a superclass which is
-     * loaded by "child" classloader...
-     *
-     * Instead, we'll replace the old URLClassLoader with a new one containing
-     * all the known URLs.
-     *
-     * (I don't know if this really works yet, so I'm not including it in
-     * the current release.  CSR, 3-13-2003)
-     *
-    public void addURL(URL url) {
-      if (classLoader == null) {
-        classLoader = new URLClassLoader(new URL[] { url });
-      }
-      else if (classLoader instanceof URLClassLoader) {
-        URL[] oldURLs = ((URLClassLoader)classLoader).getURLs();
-        URL[] newURLs = new URL[oldURLs.length + 1];
-        System.arraycopy(oldURLs, 0, newURLs, 0, oldURLs.length);
-        newURLs[oldURLs.length] = url;
-
-        // Create a new class loader with all the URLs
-        classLoader = new URLClassLoader(newURLs);
-      }
-      else {
-        classLoader = new URLClassLoader(new URL[] { url }, classLoader);
-      }
-    }*/
-
-    /*
-    public Class defineClass(String name, byte[] code)  {
-      File file = new File("debug-" + name + ".class");
-
+    // check the cache
+    if (classes.containsKey(name)) {
+      clazz = (Class) classes.get(name);
+    }
+    else {
       try {
-        FileOutputStream out = new FileOutputStream(file);
-        out.write(code);
-        out.close();
-        DrJava.consoleErr().println("debug class " + name + " to " + file.getAbsolutePath());
+        clazz = _stickyLoader.loadClass(name);
       }
-      catch (Throwable t) {}
-
-      Class c = super.defineClass(name, code);
-      return c;
+      catch (ClassNotFoundException e) {
+        // If it exceptions, just fall through to here to try the interpreter.
+        // If all else fails, try loading the class through the interpreter.
+        // That's used for classes defined in the interpreter.
+        clazz = interpreter.loadClass(name);
+      }
     }
-    */
+    
+    if (resolve) {
+      resolveClass(clazz);
+    }
+    
+    return clazz;
+  }
+  
+  
+  /**
+   * Adds an URL to the class path.  DynamicJava's version of this creates a
+   * new URLClassLoader with the given URL, using the old loader as a parent.
+   * This seems to cause problems for us in certain cases, such as accessing
+   * static fields or methods in a class that extends a superclass which is
+   * loaded by "child" classloader...
+   *
+   * Instead, we'll replace the old URLClassLoader with a new one containing
+   * all the known URLs.
+   *
+   * (I don't know if this really works yet, so I'm not including it in
+   * the current release.  CSR, 3-13-2003)
+   *
+   public void addURL(URL url) {
+   if (classLoader == null) {
+   classLoader = new URLClassLoader(new URL[] { url });
+   }
+   else if (classLoader instanceof URLClassLoader) {
+   URL[] oldURLs = ((URLClassLoader)classLoader).getURLs();
+   URL[] newURLs = new URL[oldURLs.length + 1];
+   System.arraycopy(oldURLs, 0, newURLs, 0, oldURLs.length);
+   newURLs[oldURLs.length] = url;
+   
+   // Create a new class loader with all the URLs
+   classLoader = new URLClassLoader(newURLs);
+   }
+   else {
+   classLoader = new URLClassLoader(new URL[] { url }, classLoader);
+   }
+   }*/
+  
+  /*
+   public Class defineClass(String name, byte[] code)  {
+   File file = new File("debug-" + name + ".class");
+   
+   try {
+   FileOutputStream out = new FileOutputStream(file);
+   out.write(code);
+   out.close();
+   DrJava.consoleErr().println("debug class " + name + " to " + file.getAbsolutePath());
+   }
+   catch (Throwable t) {}
+   
+   Class c = super.defineClass(name, code);
+   return c;
+   }
+   */
   }
 }

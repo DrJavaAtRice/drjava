@@ -48,6 +48,7 @@ package edu.rice.cs.drjava.model;
 import java.awt.print.PageFormat;
 import java.io.*;
 import java.util.*;
+import java.net.URL;
 
 import edu.rice.cs.util.swing.DocumentIterator;
 
@@ -347,7 +348,7 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
   /**
    * Returns the current classpath in use by the Interpreter JVM.
    */
-  public Vector<String> getClasspath();
+  public Vector<URL> getClasspath();
 
   // TODO: Move history methods to a more appropriate home.
 

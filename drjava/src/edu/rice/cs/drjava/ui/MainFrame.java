@@ -751,10 +751,14 @@ public class MainFrame extends JFrame implements OptionConstants {
       public void actionPerformed(ActionEvent ae) {
         try {
           JavadocModel jm = _model.getJavadocModel();
-          File suggestedDir =
-            jm.suggestJavadocDestination(_model.getActiveDocument());
+          File suggestedDir = jm.suggestJavadocDestination(_model.getActiveDocument());
           _javadocSelector.setSuggestedDir(suggestedDir);
-          jm.javadocAll(_javadocSelector, _saveSelector, _model.getClasspath());
+          Vector<URL> cps = _model.getClasspath();
+          List<String> cp = new LinkedList<String>();
+          for(URL u: cps){
+            cp.add(u.toString());
+          }
+          jm.javadocAll(_javadocSelector, _saveSelector, cp);
         }
         catch (IOException ioe) {
           _showIOError(ioe);
@@ -1031,10 +1035,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent e) {
 //      String classpath = "";
       StringBuffer cpBuf = new StringBuffer();
-      Vector<String> classpathElements = _model.getClasspath();
+      Vector<URL> classpathElements = _model.getClasspath();
       for(int i = 0; i < classpathElements.size(); i++) {
 //        classpath += classpathElements.get(i);
-        cpBuf.append(classpathElements.get(i));
+        cpBuf.append(classpathElements.get(i).getPath());
         if (i + 1 < classpathElements.size()) {
 //          classpath += "\n";
           cpBuf.append("\n");

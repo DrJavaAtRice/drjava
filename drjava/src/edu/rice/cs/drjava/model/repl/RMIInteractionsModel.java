@@ -48,6 +48,7 @@ package edu.rice.cs.drjava.model.repl;
 import edu.rice.cs.drjava.model.repl.newjvm.*;
 import edu.rice.cs.util.text.DocumentAdapter;
 
+import java.net.URL;
 import java.util.Vector;
 
 /**
@@ -108,10 +109,31 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    * Adds the given path to the interpreter's classpath.
    * @param path Path to add
    */
-  public void addToClassPath(String path) {
-    _interpreterControl.addClassPath(path);
+//  public void addToClassPath(String path) {
+//    _interpreterControl.addClassPath(path);
+//  }
+//  
+  public void addProjectClassPath(URL path){
+    _interpreterControl.addProjectClassPath(path);
   }
 
+  public void addBuildDirectoryClassPath(URL path){
+    _interpreterControl.addBuildDirectoryClassPath(path);
+  }
+  
+  public void addProjectFilesClassPath(URL path){
+    _interpreterControl.addProjectFilesClassPath(path);
+  }
+  
+  public void addExternalFilesClassPath(URL path){
+    _interpreterControl.addExternalFilesClassPath(path);
+  }
+  
+  public void addExtraClassPath(URL path){
+    _interpreterControl.addExtraClassPath(path);
+  }
+  
+  
   /**
    * Resets the Java interpreter.
    */
@@ -207,7 +229,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    * Gets the interpreter classpath from the interpreter jvm.
    * @return a vector of classpath elements
    */
-  public Vector<String> getClasspath() {
+  public Vector<URL> getClasspath() {
     return _interpreterControl.getClasspath();
   }
 }

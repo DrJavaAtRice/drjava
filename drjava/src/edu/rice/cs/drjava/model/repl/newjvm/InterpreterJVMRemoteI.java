@@ -49,6 +49,7 @@ import java.rmi.RemoteException;
 import java.util.Vector;
 import java.util.List;
 import java.io.File;
+import java.net.URL;
 import edu.rice.cs.util.newjvm.*;
 
 /**
@@ -59,8 +60,13 @@ import edu.rice.cs.util.newjvm.*;
  */
 public interface InterpreterJVMRemoteI extends SlaveRemote {
   public void interpret(String s) throws RemoteException;
-  public void addClassPath(String s) throws RemoteException;
-  public List<String> runTestSuite(List<String> classNames, List<File> files, boolean isTestAll)
+  public void addProjectClassPath(URL s) throws RemoteException;
+  public void addBuildDirectoryClassPath(URL s) throws RemoteException;
+  public void addProjectFilesClassPath(URL s) throws RemoteException;
+  public void addExternalFilesClassPath(URL s) throws RemoteException;
+  public void addExtraClassPath(URL s) throws RemoteException;
+  
+    public List<String> runTestSuite(List<String> classNames, List<File> files, boolean isTestAll)
     throws RemoteException;
   public void setPackageScope(String s) throws RemoteException;
   //public void reset() throws RemoteException;
@@ -110,7 +116,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   /**
    * Returns a copy of the list of unique entries on the classpath.
    */
-  public Vector<String> getAugmentedClasspath() throws RemoteException;
+  public Vector<URL> getAugmentedClasspath() throws RemoteException;
 
   /**
    * Gets the string representation of the value of a variable in the current interpreter.

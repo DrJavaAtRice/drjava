@@ -47,6 +47,7 @@ package edu.rice.cs.drjava.model.repl;
 
 import junit.framework.*;
 
+import java.net.URL;
 import java.io.File;
 import java.io.IOException;
 
@@ -544,9 +545,22 @@ public final class InteractionsModelTest extends TestCase {
       fail("cannot getVariableClassName in a test");
       return null;
     }
-    public void addToClassPath(String path) {
+    public void addProjectClassPath(URL path) {
       fail("cannot add to classpath in a test");
     }
+    public void addBuildDirectoryClassPath(URL path) {
+      fail("cannot add to classpath in a test");
+    }
+    public void addProjectFilesClassPath(URL path) {
+      fail("cannot add to classpath in a test");
+    }
+    public void addExternalFilesClassPath(URL path) {
+      fail("cannot add to classpath in a test");
+    }
+    public void addExtraClassPath(URL path) {
+      fail("cannot add to classpath in a test");
+    }
+
     protected void _resetInterpreter() {
       fail("cannot reset interpreter in a test");
     }

@@ -65,9 +65,9 @@ public final class InterpreterJVMTest extends TestCase {
   
   public void setUp() {
     _debugInterpreters = InterpreterJVM.ONLY.getInterpreters();
-    _interpreter1 = new DynamicJavaAdapter();
-    _interpreter2 = new DynamicJavaAdapter();
-    _interpreter3 = new DynamicJavaAdapter();
+    _interpreter1 = new DynamicJavaAdapter(new ClasspathManager());
+    _interpreter2 = new DynamicJavaAdapter(new ClasspathManager());
+    _interpreter3 = new DynamicJavaAdapter(new ClasspathManager());
   }
   /**
    * ensures that our InterpreterJVM adds named debug interpreters correctly

@@ -56,6 +56,7 @@ import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.lang.reflect.*;
 
+import edu.rice.cs.drjava.model.repl.newjvm.ClasspathManager;
 import edu.rice.cs.util.UnexpectedException;
 
 /**
@@ -96,6 +97,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * @param className the class name of the current context of "this"
    */
   public JavaDebugInterpreter(String name, String className) {
+    super(new ClasspathManager());
     _name = name;
     setClassName(className);
     _translationVisitor = makeTranslationVisitor();

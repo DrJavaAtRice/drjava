@@ -102,9 +102,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
    * Checks that System.exit is handled appropriately from
    * interactions pane.
    */
-  public void testExitInteractions()
-    throws DocumentAdapterException, InterruptedException
-  {
+  public void testExitInteractions() throws DocumentAdapterException, InterruptedException{
     TestListener listener = new TestListener() {
       public void interactionStarted() {
         interactionStartCount++;

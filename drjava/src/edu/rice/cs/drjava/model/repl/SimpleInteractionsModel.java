@@ -45,8 +45,10 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
+import java.net.URL;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
+import edu.rice.cs.drjava.model.repl.newjvm.ClasspathManager;
 
 /**
  * A simple implementation of an InteractionsModel, which uses a
@@ -78,7 +80,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
    */
   public SimpleInteractionsModel(InteractionsDocumentAdapter document) {
     super(document, 1000, WRITE_DELAY);
-    _interpreter = new DynamicJavaAdapter();
+    _interpreter = new DynamicJavaAdapter(new ClasspathManager());
 
     _interpreter.defineVariable("INTERPRETER", _interpreter);
 
@@ -138,9 +140,42 @@ public class SimpleInteractionsModel extends InteractionsModel {
    * Adds the given path to the interpreter's classpath.
    * @param path Path to add
    */
-  public void addToClassPath(String path) {
-    _interpreter.addClassPath(path);
+  public void addProjectClassPath(URL path) {
+    _interpreter.addProjectClassPath(path);
   }
+
+  /**
+   * Adds the given path to the interpreter's classpath.
+   * @param path Path to add
+   */
+  public void addBuildDirectoryClassPath(URL path) {
+    _interpreter.addBuildDirectoryClassPath(path);
+  }
+
+  /**
+   * Adds the given path to the interpreter's classpath.
+   * @param path Path to add
+   */
+  public void addProjectFilesClassPath(URL path) {
+    _interpreter.addProjectFilesClassPath(path);
+  }
+
+  /**
+   * Adds the given path to the interpreter's classpath.
+   * @param path Path to add
+   */
+  public void addExternalFilesClassPath(URL path) {
+    _interpreter.addExternalFilesClassPath(path);
+  }
+
+  /**
+   * Adds the given path to the interpreter's classpath.
+   * @param path Path to add
+   */
+  public void addExtraClassPath(URL path) {
+    _interpreter.addExtraClassPath(path);
+  }
+
 
   /**
    * Defines a variable in the interpreter to the given value.
@@ -179,7 +214,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
    */
   protected void _resetInterpreter() {
     interpreterResetting();
-    _interpreter = new DynamicJavaAdapter();
+    _interpreter = new DynamicJavaAdapter(new ClasspathManager());
     interpreterReady();
   }
 

@@ -77,8 +77,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
    * @param control RMI interface to the Interpreter JVM
    * @param adapter InteractionsDocumentAdapter to use for the document
    */
-  public DefaultInteractionsModel(DefaultGlobalModel model, MainJVM control,
-                                  DocumentAdapter adapter) {
+  public DefaultInteractionsModel(DefaultGlobalModel model, MainJVM control, DocumentAdapter adapter) {
     super(control, adapter,
           DrJava.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue(),
           DefaultGlobalModel.WRITE_DELAY);
@@ -139,7 +138,6 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
    * Adds any open documents to the classpath.
    */
   public void interpreterReady() {
-    // TO DO: How can we reset the classpath without having a model field?
     _model.resetInteractionsClasspath();
     super.interpreterReady();
   }

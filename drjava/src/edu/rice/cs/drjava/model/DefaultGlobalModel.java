@@ -57,6 +57,8 @@ import javax.swing.event.UndoableEditListener;
 import java.io.*;
 import java.util.*;
 import java.rmi.RemoteException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import java.util.Vector;
 import java.util.Enumeration;
@@ -208,7 +210,12 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       synchronized(DefaultGlobalModel.this) {
         if(_state.getBuildDirectory() != null) {
           //        System.out.println("adding for reset: " + _state.getBuildDirectory().getAbsolutePath());
-          _interpreterControl.addClassPath(_state.getBuildDirectory().getAbsolutePath());
+          try{
+            _interpreterControl.addBuildDirectoryClassPath(new File(_state.getBuildDirectory().getAbsolutePath()).toURL());
+          }catch(MalformedURLException murle){
+            // edit this later! this is bad! we should handle this exception better!
+            throw new RuntimeException(murle);
+          }
         }
       }
     }
@@ -620,7 +627,13 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     _state.setBuildDirectory(f);
     if(f != null){
 //      System.out.println("adding: " + f.getAbsolutePath());
-      _interpreterControl.addClassPath(f.getAbsolutePath());
+      try{
+        _interpreterControl.addBuildDirectoryClassPath(new File(f.getAbsolutePath()).toURL());
+      }catch(MalformedURLException murle){
+        // this is bad! change this! we should handle this exception better!
+        // show a popup like "invalide build directory" or something
+        throw new RuntimeException(murle);
+      }
     }
     
 //        InteractionsDocument iDoc = _interactionsModel.getDocument();
@@ -1219,7 +1232,11 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     // Make sure this is on the classpath
     try {
       File classpath = odd.getSourceRoot();
-      _interactionsModel.addToClassPath(classpath.getAbsolutePath());
+      if(odd.isProjectFile() || odd.isAuxiliaryFile()){
+        _interactionsModel.addProjectFilesClassPath(classpath.toURL());
+      }else{
+        _interactionsModel.addExternalFilesClassPath(classpath.toURL());
+      }
     }
     catch (InvalidPackageException e) {
       // Invalid package-- don't add it to classpath
@@ -2095,7 +2112,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   /**
    * Returns the current classpath in use by the Interpreter JVM.
    */
-  public Vector<String> getClasspath() {
+  public Vector<URL> getClasspath() {
     return _interpreterControl.getClasspath();
   }
 
@@ -2791,7 +2808,15 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
           // Make sure this file is on the classpath
           try {
             File classpath = getSourceRoot();
-            _interactionsModel.addToClassPath(classpath.getAbsolutePath());
+            try{
+              if(isProjectFile() || isAuxiliaryFile()){
+                _interactionsModel.addProjectFilesClassPath(new File(classpath.getAbsolutePath()).toURL());
+              }else{
+                _interactionsModel.addExternalFilesClassPath(new File(classpath.getAbsolutePath()).toURL());
+              }
+            }catch(MalformedURLException murle){
+              // fail silently
+            }
           }
           catch (InvalidPackageException e) {
             // Invalid package-- don't add to classpath
@@ -2985,7 +3010,12 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
      */
     public void generateJavadoc(FileSaveSelector saver) throws IOException {
       // Use the model's classpath, and use the EventNotifier as the listener
-      _javadocModel.javadocDocument(this, saver, getClasspath());
+      List<String> cp = new LinkedList<String>();
+      Vector<URL> cps = getClasspath();
+      for(URL p:cps){
+        cp.add(p.toString());
+      }
+      _javadocModel.javadocDocument(this, saver, cp);
     }
     
     /**
@@ -4073,7 +4103,15 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   private void addDocToClasspath(OpenDefinitionsDocument doc){
     try {
       File classpath = doc.getSourceRoot();
-      _interactionsModel.addToClassPath(classpath.getAbsolutePath());
+      try{
+        if(doc.isProjectFile() || doc.isAuxiliaryFile()){
+          _interactionsModel.addProjectFilesClassPath(classpath.toURL());
+        }else{
+          _interactionsModel.addExternalFilesClassPath(classpath.toURL());
+        }
+      }catch(MalformedURLException murle){
+        // fail silently
+      }
     }
     catch (InvalidPackageException e) {
       // Invalid package-- don't add it to classpath
@@ -4122,31 +4160,48 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   /**
    * Adds the source roots for all open documents and the paths on the
    * "extra classpath" config option to the interpreter's classpath.
+   * 
+   * this is called when the interpreter becomes ready
    */
   public void resetInteractionsClasspath() {
-    //  Ideally, we'd like to put the open docs before the config option,
-    //  but this is inconsistent with how the classpath was defined
-    //  as it was built up.  (The config option is inserted on startup,
-    //  and docs are added as they are opened.  It shouldn't switch after
-    //  a reset.)
-
-    // switch the order of the two code segments
-    // also put build directory
-    
     
     Vector<File> cp = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
     if(cp!=null) {
       Enumeration<File> en = cp.elements();
       while(en.hasMoreElements()) {
-        _interactionsModel.addToClassPath(en.nextElement().getAbsolutePath());
+        // this forwards directly to InterpreterJVM.addClassPath(String)
+        try{
+          _interactionsModel.addExtraClassPath(en.nextElement().toURL());
+        }catch(MalformedURLException murle){
+          // fail silently
+        }
       }
     }
 
-    File[] sourceRoots = getSourceRootSet();
-    for (int i = 0; i < sourceRoots.length; i++) {
-      _interactionsModel.addToClassPath(sourceRoots[i].getAbsolutePath());
+    List<OpenDefinitionsDocument> odds = getProjectDocuments();
+    for (OpenDefinitionsDocument odd: odds) {
+      // this forwards directly to InterpreterJVM.addClassPath(String)
+      try{
+        _interactionsModel.addProjectFilesClassPath(odd.getSourceRoot().toURL());
+      }catch(MalformedURLException murle){
+        // fail silently
+      }catch(InvalidPackageException e){
+        // oh well, who cares
+      }
     }
-  }
+
+    odds = getNonProjectDocuments();
+    for (OpenDefinitionsDocument odd: odds) {
+      // this forwards directly to InterpreterJVM.addClassPath(String)
+      try{
+        _interactionsModel.addExternalFilesClassPath(odd.getSourceRoot().toURL());
+      }catch(MalformedURLException murle){
+        // fail silently
+      }catch(InvalidPackageException e){
+        // oh well, who cares
+      }
+    }
+}
 
    private class ExtraClasspathOptionListener implements OptionListener<Vector<File>> {
     public void optionChanged (OptionEvent<Vector<File>> oce) {
@@ -4154,7 +4209,12 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       if(cp!=null) {
         Enumeration<File> en = cp.elements();
         while(en.hasMoreElements()) {
-          _interactionsModel.addToClassPath(en.nextElement().getAbsolutePath());
+        // this forwards directly to InterpreterJVM.addClassPath(String)
+          try{
+            _interactionsModel.addExtraClassPath(en.nextElement().toURL());
+          }catch(MalformedURLException murle){
+            // dont' add it
+          }
         }
       }
     }
