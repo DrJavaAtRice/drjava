@@ -37,48 +37,37 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import  junit.framework.*;
+import java.io.*;
 
-/**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030227-1950;
- *
- * @version $Id$
- */
-public abstract class Version {
+public class MultiThreadedTestCase extends TestCase{
+
+  public MultiThreadedTestCase(String s){
+    super(s);
+  }
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Flag to keep track of whether or not a test failed in 
+   * another thread (other than the testing thread).
    */
-  private static final String BUILD_TIME_STRING = "20030227-1950";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  protected static boolean _testFailed = false;
+  
+  /**
+   * Initialize test state to not failed
+   */
+  public void setUp() throws IOException{
+    _testFailed = false;
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
+  
+  /**
+   * If any tests failed, print a message saying that 
+   * some tests failed in another thread (other than the testing thread)
+   */
+  public void tearDown() throws IOException{
+    if( _testFailed ){
+      fail("test failed in another thread");
     }
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

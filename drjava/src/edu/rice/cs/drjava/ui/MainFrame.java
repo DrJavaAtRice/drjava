@@ -49,6 +49,7 @@ import java.awt.event.*;
 import java.awt.*;
 import java.awt.print.*;
 import java.beans.*;
+import java.lang.reflect.InvocationTargetException;
 
 import java.io.*;
 import java.util.Hashtable;
@@ -168,6 +169,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JList _docList;
   private JButton _saveButton;
   private JButton _compileButton;
+  private JButton _closeButton;
   private JButton _junitButton;
   private JToolBar _toolBar;
   
@@ -1060,6 +1062,20 @@ public class MainFrame extends JFrame implements OptionConstants {
     return _interactionsPane;
   }
 
+   /**
+   * @return The frame's compileAll button (Package private accessor)
+   */
+  JButton getCloseButton() {
+    return _closeButton;
+  }
+  
+  /**
+   * @return The frame's compileAll button (Package private accessor)
+   */
+  JButton getCompileAllButton() {
+    return _compileButton;
+  }
+  
   /**
    * Make the cursor an hourglass.
    */
@@ -2337,7 +2353,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _toolBar.add(_createToolbarButton(_openAction));
     _saveButton = _createToolbarButton(_saveAction);
     _toolBar.add(_saveButton);
-    _toolBar.add(_createToolbarButton(_closeAction));
+    _closeButton = _createToolbarButton(_closeAction);
+    _toolBar.add(_closeButton);
     
     // Cut, copy, paste
     _toolBar.addSeparator();
@@ -3116,7 +3133,28 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // NOTE: Not necessarily called from event-dispatching thread...
     //  Should figure out how to deal with invokeLater here.
-    public void fileOpened(final OpenDefinitionsDocument doc) { 
+    public void fileOpened(final OpenDefinitionsDocument doc) {
+	      if( !SwingUtilities.isEventDispatchThread() ){
+        try{
+          SwingUtilities.invokeAndWait(new Runnable(){
+            public void run(){
+              _fileOpened(doc);
+            }});
+        }
+        catch(InterruptedException ex){
+          /** we don't expect to be interrupted */
+          throw new UnexpectedException(ex);
+        }
+        catch(InvocationTargetException ex2){
+          /** we don't expect _fileOpened() to throw any exceptions */
+          throw new UnexpectedException(ex2);
+        }
+      }
+      else{
+        _fileOpened(doc);
+      }
+    }
+    private void _fileOpened(final OpenDefinitionsDocument doc){
       // Fix OS X scrollbar bug before switching
       _reenableScrollBar();
       _createDefScrollPane(doc);
@@ -3131,12 +3169,40 @@ public class MainFrame extends JFrame implements OptionConstants {
         // Recover, show it in the list anyway
         _recentFileManager.updateOpenFiles(fme.getFile());
       }
-    }
+    } 
 
-    public void fileClosed(OpenDefinitionsDocument doc) {
+     /**
+     * NOTE: Makes certain that this action occurs in the event dispatching
+     * thread
+     */
+    public void fileClosed(final OpenDefinitionsDocument doc) {
+      if( !SwingUtilities.isEventDispatchThread() ){
+        try{
+          SwingUtilities.invokeAndWait(new Runnable(){
+            public void run(){
+              _fileClosed(doc);
+            }});
+        }
+        catch(InterruptedException ex){
+          /** we don't expect to be interrupted */
+          throw new UnexpectedException(ex);
+        }
+        catch(InvocationTargetException ex2){
+          /** we don't expect _fileOpened() to throw any exceptions */
+          throw new UnexpectedException(ex2);
+        }
+      }
+      else{
+        _fileClosed(doc);
+      }
+    }
+    
+    /** Does the work of closing a file */
+    private void _fileClosed(OpenDefinitionsDocument doc){
       _removeErrorListener(doc);
       _defScrollPanes.remove(doc);
     }
+
     public void fileReverted(OpenDefinitionsDocument doc) {
       updateFileTitle();
       _saveAction.setEnabled(false);
@@ -3728,6 +3794,14 @@ public class MainFrame extends JFrame implements OptionConstants {
         _currentDefPane.requestFocus();
       }
     }, null, "Find Next");
+  }
+  
+   /**
+   * @param listener The ComponentListener to add to the open documents list
+   * This method allows for testing of the dancing UI (See MainFrameTest.testDancingUI()).
+   */
+  public void addComponentListenerToOpenDocumentsList(ComponentListener listener){
+    _docSplitPane.getLeftComponent().addComponentListener(listener);
   }
   
   /**

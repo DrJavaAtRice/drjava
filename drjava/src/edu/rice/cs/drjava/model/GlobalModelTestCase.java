@@ -66,7 +66,7 @@ import edu.rice.cs.drjava.model.compiler.*;
  *
  * @version $Id$
  */
-public abstract class GlobalModelTestCase extends TestCase {
+public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   /**
    * the prototype global model to hold the interpreter. This prevents
    * us from having to re-invoke the interpreter every time!
@@ -77,11 +77,6 @@ public abstract class GlobalModelTestCase extends TestCase {
   protected DefaultGlobalModel _model;
   protected File _tempDir;
   
-  /**
-   * Keep track of whether the test failed in another thread.
-   */
-  protected static boolean _testFailed;
-
   protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
   protected static final String BAR_TEXT = "class DrJavaTestBar {}";
   protected static final String BAZ_TEXT = 
@@ -124,22 +119,22 @@ public abstract class GlobalModelTestCase extends TestCase {
    * </LI>
    * </OL>
    */
-  protected void setUp() throws IOException {
+  public void setUp() throws IOException {
     DrJava.getConfig().resetToDefaults();
     createModel();
     String user = System.getProperty("user.name");
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
-    _testFailed = false;
+    super.setUp();
   }
 
   /**
    * Teardown for each test case, which recursively deletes the
    * temporary directory created in setUp.
    */
-  protected void tearDown() throws IOException {
+  public void tearDown() throws IOException {
     boolean ret = FileOps.deleteDirectory(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);
-    if (_testFailed) fail("test failed in another thread");
+    super.tearDown();
     
     _tempDir = null;
     _model = null;
@@ -897,7 +892,7 @@ public abstract class GlobalModelTestCase extends TestCase {
       assertConsoleResetCount(1);
     }
   }
-
+    
   /**
    * A model listener for situations expecting a compilation to fail.
    */

@@ -48,21 +48,32 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.rmi.registry.Registry;
-import java.io.IOException;
+import java.io.*;
 
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.*;
 
 /**
  * Test functions of MainFrame.
  *
  * @version $Id$
  */
-public class MainFrameTest extends TestCase {
+public class MainFrameTest extends MultiThreadedTestCase {
   
   private MainFrame _frame;
+  
+  /**
+   * A temporary directory
+   */
+  private File _tempDir;
+  /**
+   * The user name of the user running the tests.  Used in creating temporary files.
+   */
+  private String user = System.getProperty("user.name");
+
   
   /**
    * Constructor.
@@ -83,16 +94,18 @@ public class MainFrameTest extends TestCase {
   /**
    * Setup method for each JUnit test case.
    */
-  public void setUp() {
+  public void setUp() throws IOException{
     _frame = new MainFrame();
+    _frame.pack();
+    super.setUp();
   }
   
-  public void tearDown() {
+  public void tearDown() throws IOException{
+    super.tearDown();
     _frame.dispose();
     _frame = null;
     System.gc();
-  }
-  
+  }  
   
   /**
    * Tests that the returned JButton of <code>createManualToolbarButton</code>:
@@ -391,5 +404,216 @@ public class MainFrameTest extends TestCase {
     assertTrue("End: defPane1",defPane1.isEditable());
     assertTrue("End: defPane2",defPane2.isEditable());
     
+  }
+
+  /**
+   * A Test to guarantee that the Dancing UI bug will not rear its ugly head again.
+   * Basically, add a component listener to the leftComponent of _docSplitPane and
+   * make certain its size does not change while compiling a class which depends on
+   * another class.
+   */
+  public void testDancingUIFileOpened() throws IOException {
+      /** 
+     * Maybe this sequence of calls should be incorporated into one function
+     * createTestDir(), which would get the username and create the temporary 
+     * directory
+     * Only sticky part is deciding where to put it, in FileOps maybe?
+     */
+     String user = System.getProperty("user.name");
+     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+     File ForceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.java");
+     String ForceOpenClass1_string =
+       "public class ForceOpenClass1 {\n" +
+       "  ForceOpenClass2 class2;\n" +
+       "  ForceOpenClass3 class3;\n\n" +   
+       "  public ForceOpenClass1() {\n" +
+       "    class2 = new ForceOpenClass2();\n" + 
+       "    class3 = new ForceOpenClass3();\n" + 
+       "  }\n" + 
+       "}";
+     
+     File ForceOpenClass2_file = new File(_tempDir, "ForceOpenClass2.java");
+     String ForceOpenClass2_string =
+       "public class ForceOpenClass2 {\n" +
+       "  inx x = 4;\n" +
+       "}";
+     
+     File ForceOpenClass3_file = new File(_tempDir, "ForceOpenClass3.java");
+     String ForceOpenClass3_string = 
+       "public class ForceOpenClass3 {\n" +
+       "  String s = \"asf\";\n" +
+       "}";
+     
+     FileOps.writeStringToFile(ForceOpenClass1_file, ForceOpenClass1_string);
+     FileOps.writeStringToFile(ForceOpenClass2_file, ForceOpenClass2_string);
+     FileOps.writeStringToFile(ForceOpenClass2_file, ForceOpenClass2_string);
+     
+     //_frame.setVisible(true);
+     _frame.pack();
+     _frame.open(new FileOpenSelector(){
+       public File[] getFiles(){
+         File[] return_me = new File[1];
+         return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
+         return return_me;
+       }
+     });
+     ComponentAdapter listener = new ComponentAdapter(){
+       public void componentResized(ComponentEvent event){
+         _testFailed = true;
+         fail("testDancingUI: Open Documents List danced!");
+       }
+     };
+     _frame.addComponentListenerToOpenDocumentsList(listener);
+     SingleDisplayModelCompileListener compileListener = 
+       new SingleDisplayModelCompileListener();
+     _frame.getModel().addListener(compileListener);
+     
+     synchronized(compileListener){
+       SwingUtilities.invokeLater(new Runnable(){
+         public void run(){
+           _frame.getCompileAllButton().doClick();
+         }
+       });
+      
+       try{
+         compileListener.wait();
+       }
+       catch(InterruptedException exception){
+         fail(exception.toString());
+       }
+     }
+     
+     if( !FileOps.deleteDirectory(_tempDir) ){
+       System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
+                          "\nDo it by hand.\n");
+     }
+  }
+
+    /**
+   * A Test to guarantee that the Dancing UI bug will not rear its ugly head again.
+   * Basically, add a component listener to the leftComponent of _docSplitPane and
+   * make certain its size does not change while closing an OpenDefinitionsDocument 
+   * outside the event thread
+   */
+  public void testDancingUIFileClosed() throws IOException {
+    /** 
+     * Maybe this sequence of calls should be incorporated into one function
+     * createTestDir(), which would get the username and create the temporary 
+     * directory
+     * Only sticky part is deciding where to put it, in FileOps maybe?
+     */
+     String user = System.getProperty("user.name");
+     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+     File ForceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.java");
+     String ForceOpenClass1_string =
+       "public class ForceOpenClass1 {\n" +
+       "  ForceOpenClass2 class2;\n" +
+       "  ForceOpenClass3 class3;\n\n" +   
+       "  public ForceOpenClass1() {\n" +
+       "    class2 = new ForceOpenClass2();\n" + 
+       "    class3 = new ForceOpenClass3();\n" + 
+       "  }\n" + 
+       "}";
+     
+     FileOps.writeStringToFile(ForceOpenClass1_file, ForceOpenClass1_string);
+     
+     //_frame.setVisible(true);
+     _frame.pack();
+     ComponentAdapter listener = new ComponentAdapter(){
+       public void componentResized(ComponentEvent event){
+         _testFailed = true;
+         fail("testDancingUI: Open Documents List danced!");
+       }
+     };
+     _frame.addComponentListenerToOpenDocumentsList(listener);
+     SingleDisplayModelFileClosedListener closeListener = 
+       new SingleDisplayModelFileClosedListener();
+     
+     _frame.open(new FileOpenSelector(){
+         public File[] getFiles(){
+           File[] return_me = new File[1];
+           return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
+           return return_me;
+         }
+       });
+
+     _frame.getModel().addListener(closeListener);
+       
+     synchronized(closeListener){       
+       Thread thread = new Thread(new Runnable(){
+         public void run(){
+           _frame.getCloseButton().doClick();
+         }
+       });
+       SwingUtilities.invokeLater(thread);
+       
+       try{
+         closeListener.wait();
+       }
+       catch(InterruptedException exception){
+         fail(exception.toString());
+       }
+     }
+     
+     if( !FileOps.deleteDirectory(_tempDir) ){
+       System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
+                          "\nDo it by hand.\n");
+     }
+  }
+  
+  /**
+   * A CompileListener for SingleDisplayModel (instead of
+   * GlobalModel)
+   */
+  class SingleDisplayModelCompileListener
+    extends GlobalModelTestCase.TestListener
+    implements SingleDisplayModelListener{
+    
+    public void compileStarted(){
+    }
+    
+    /**
+     * Just notify when the compile has ended
+     */
+    public void compileEnded(){
+      synchronized(this){
+        notify();
+      }
+    }
+    
+    public void fileOpened(OpenDefinitionsDocument doc) {}
+    
+    
+    public void activeDocumentChanged(OpenDefinitionsDocument active){
+    }
+  }
+
+    /**
+   * A FileClosedListener for SingleDisplayModel (instead of
+   * GlobalModel)
+   */
+  class SingleDisplayModelFileClosedListener
+    extends GlobalModelTestCase.TestListener
+    implements SingleDisplayModelListener{
+    
+    public void fileClosed(OpenDefinitionsDocument doc) {
+      synchronized(this){
+        notify();
+      }
+    }
+    
+    public void fileOpened(OpenDefinitionsDocument doc){
+    }
+    
+    public void newFileCreated(OpenDefinitionsDocument doc){
+    }
+    
+    public void activeDocumentChanged(OpenDefinitionsDocument active){
+    }
+  }
+
+  /** Create a new temporary file in _tempDir. */
+  protected File tempFile(String fileName) throws IOException {
+    return File.createTempFile(fileName, ".java", _tempDir);
   }
 }
