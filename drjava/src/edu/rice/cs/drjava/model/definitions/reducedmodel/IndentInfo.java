@@ -45,13 +45,16 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
  */
 public class IndentInfo {
   public String braceType;      //the type of brace.
-  //the distance to infront of the newline directly preceding the brace.
+
+  //the distance to in front of the newline directly preceding the brace.
   //____\n|_____
   public int distToNewline;
+
   //distance to behind the brace  ____|{_____
   public int distToBrace;
+
   //the distance to in front of the newline directly behind the cursor
-  public int distToPrevNewline;                 //put us at space after newline
+  public int distToPrevNewline;        //put us at space after newline
   static public String noBrace = "";
   static public String openSquiggly = "{";
   static public String openParen = "(";

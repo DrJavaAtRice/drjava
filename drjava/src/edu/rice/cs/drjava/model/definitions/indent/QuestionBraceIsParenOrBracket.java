@@ -71,25 +71,10 @@ public class QuestionBraceIsParenOrBracket extends IndentRuleQuestion
   boolean applyRule(DefinitionsDocument doc)
   {
     // PRE: We are not inside a multiline comment.
-    
-    throw new RuntimeException("Not yet implemented!");
-    
-    /*
-     * pos := START
-     *   
-     * while (pos < DOCSTART)  
-     *    if char[pos] = '[' or char[pos] = '('
-     *       return TRUE  
-     *    
-     *    else if char[pos] = '{'
-     *       return FALSE  
-     *  
-     *    else   
-     *       pos := pos + 1  
-     *
-     * return FALSE
-     *  
-     * [Note: ensure return char is not in // comment!!]
-     */    
+
+    IndentInfo info = doc.getReduced().getIndentInformation();
+
+    return info.braceType.equals(IndentInfo.openParen) 
+	|| info.braceType.equals(IndentInfo.openBracket); 
   }
 }

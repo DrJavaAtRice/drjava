@@ -81,9 +81,21 @@ public class Indenter
    */
   public void buildSimpleTree() 
   {
-    IndentRule rule = new QuestionInsideComment(new ActionBracePlus(""),
-                                                new ActionDoNothing());
-    _topRule = rule;
+    IndentRule 
+      rule05 = new ActionDoNothing(),
+      rule04 = new ActionStartPrevLinePlus(" "), 
+      rule03 = new QuestionCurrLineEmpty(rule04, rule05);
+    IndentRule 
+      rule11 = new QuestionBraceIsParenOrBracket(rule05, rule05),  // Change for real tree
+      rule10 = rule03,      
+      rule09 = new ActionStartPrevLinePlus("* "),
+      rule08 = new ActionStartPrevLinePlus(""),
+      rule07 = new QuestionCurrLineStartsWith("*", rule08, rule09),
+      rule06 = new QuestionPrevLineStartsWith("*", rule07, rule10),
+      rule02 = new QuestionPrevLineStartsComment(rule03, rule06),
+      rule01 = new QuestionInsideComment(rule02, rule11);
+    
+    _topRule = rule01;
   }
   
   /**

@@ -69,14 +69,13 @@ public class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
      */
     public QuestionBraceIsParenOrBracketTest(String name) { super(name); }
     
-    public void setUp() {}
+    public void setUp() { super.setUp(); }
     
     public void testParen() throws BadLocationException 
     {
-	/*
 	int i;
 
-	/* (1)* /
+	/* (1) */ 
 	
 	_text = "boolean method(int[] a, String b)";
 	_setDocText(_text);
@@ -84,7 +83,7 @@ public class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
 	for (i = 0; i < _text.length(); i++)
 	    assertTrue("START has no brace.", !_rule.applyRule(_doc, i));
 
-	/* (2)* /
+	/* (2) */ 
 
 	_text = 
 	    "boolean method\n" +
@@ -95,7 +94,7 @@ public class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
 	for (i = 0; i < _text.length(); i++)
 	    assertTrue("START has no brace.", !_rule.applyRule(_doc, i));
 
-	/* (3)* /
+	/* (3) */ 
 
 	_text = 
 	    "boolean method(\n" +
@@ -111,7 +110,7 @@ public class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
 	for (i = 16; i < _text.length(); i++)
 	    assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, i));	    
 
-	/* (4)* /
+	/* (4) */ 
 
 	_text = 
 	    "if (<cond>) {\n" +
@@ -128,7 +127,7 @@ public class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
 	for (i = 23; i < _text.length(); i++)
 	    assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, i));	    
 
-	/* (5)* /
+	/* (5) */ 
 
 	_text = 
 	    "method(\n" +
@@ -142,15 +141,13 @@ public class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
 	assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, 8));	    
 	assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, 30));	    
 	assertTrue("START has no brace.", !_rule.applyRule(_doc, _text.length() - 1));	    
-	*/
     }
 
     public void testBracket() throws BadLocationException
     {
-	/*
 	int i;
 
-	/* (1)* /
+	/* (1) */ 
 
 	_text = 
 	    "boolean method(int[\n" +
@@ -170,7 +167,7 @@ public class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
 	for (i = 29; i < _text.length(); i++)
 	    assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, i));	    
 
-	/* (2)* /
+	/* (2) */ 
 
 	_text = "array1[i]\n" +
 	    "       [j]";
@@ -180,7 +177,7 @@ public class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
 	for (i = 0; i < _text.length(); i++)
 	    assertTrue("START has no brace.", !_rule.applyRule(_doc, i));
 
-	/* (3)* /
+	/* (3) */ 
 
 	_text = 
 	    "array1[\n" +
@@ -192,15 +189,13 @@ public class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
 	assertTrue("START's paren is an open bracket.", _rule.applyRule(_doc, 8));
 	assertTrue("START's paren is an open bracket.", _rule.applyRule(_doc, 22));
 	assertTrue("START's paren is an open bracket.", _rule.applyRule(_doc, 23));
-	*/
     }
 
     public void testCurly() throws BadLocationException
     {
-	/*
 	int i;
 
-	/* (1)* /
+	/* (1) */ 
 	
 	_text = 
 	    "class X extends Base\n" +
@@ -214,7 +209,7 @@ public class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
 	assertTrue("START is curly brace.", !_rule.applyRule(_doc, 21));
 	assertTrue("START is close brace.", !_rule.applyRule(_doc, 23));
 	
-	/* (2)* /
+	/* (2) */ 
 	
 	_text = 
 	    "class X extends Base\n" +
@@ -230,7 +225,7 @@ public class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
 	assertTrue("START's brace is curly brace.", !_rule.applyRule(_doc, 23));
 	assertTrue("START is close curly brace.", !_rule.applyRule(_doc, _text.length() - 1));
 
-	/* (3)* /
+	/* (3) */ 
 	
 	_text = 
 	    "class X extends Base\n" +
@@ -245,7 +240,6 @@ public class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
 	assertTrue("START is open curly brace.", !_rule.applyRule(_doc, 21));
 	assertTrue("START has no brace.", !_rule.applyRule(_doc, 24));
 	assertTrue("START's brace is open curly brace.", !_rule.applyRule(_doc, _text.length() - 1));	
-	*/
     }
 }
 

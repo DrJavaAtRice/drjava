@@ -75,7 +75,7 @@ public class MainFrame extends JFrame {
 
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
 
-  final SingleDisplayModel _model;
+  private final SingleDisplayModel _model;
 
   private Hashtable _defScrollPanes;
   private DefinitionsPane _currentDefPane;
@@ -102,6 +102,10 @@ public class MainFrame extends JFrame {
   private JMenuItem _compileMenuItem;
   private JMenuItem _abortInteractionMenuItem;
 
+  public SingleDisplayModel getModel() {
+    return _model;
+  }
+  
   /**
    * For opening files.
    * We have a persistent dialog to keep track of the last directory

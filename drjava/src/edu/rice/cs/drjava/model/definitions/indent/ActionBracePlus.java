@@ -71,7 +71,7 @@ public class ActionBracePlus extends IndentRuleAction
   public void indentLine(DefinitionsDocument doc)
   {
     // For testing only
-      doc.setTab("---", doc.getCurrentLocation()); // pos arg?
+    doc.setTab("---", doc.getCurrentLocation());
   }
 
 }

@@ -72,7 +72,7 @@ public class QuestionBraceOnPrevLineTest extends IndentRulesTestCase
      */
     public QuestionBraceOnPrevLineTest(String name) { super(name); }
     
-    public void setUp() {}
+    public void setUp() { super.setUp(); }
 
     public void testWithParen() throws BadLocationException 
     {

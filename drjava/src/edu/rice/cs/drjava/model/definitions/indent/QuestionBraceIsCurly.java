@@ -46,13 +46,13 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  * Determines whether or not the last block or expression list 
  * opened previous to the start of the current line was opened 
  * by the character '{'. 
- * This questions corresponds to rule 15 in our decision tree.
+ * This questions corresponds to rule 12 in our decision tree.
  * @version $Id$
  */
 public class QuestionBraceIsCurly extends IndentRuleQuestion 
 {
   /**
-   * @param yesRule The decision subtree for the case that this rule applies 
+   * @param yesRule The decision subtree for the case that this rule applies
    * in the current context.
    * @param noRule The decision subtree for the case that this rule does not
    * apply in the current context.
@@ -64,33 +64,16 @@ public class QuestionBraceIsCurly extends IndentRuleQuestion
   
   /**
    * @param doc The DefinitionsDocument containing the current line.
-   * @return True iff the last block or expression list  opened previous 
+   * @return True iff the last block or expression list opened previous 
    * to the start of the current line was opened by the character '{'. 
    */
   boolean applyRule(DefinitionsDocument doc)
   {
-    // PRE: we are not inside a multiline comment
-    // PRE: the current block or expression list was *not* 
-    //      opened by '[' or '('.
-    
-    throw new RuntimeException("Not yet implemented!");
-    
-    /*
-    * pos := START
-    * 
-    * while (pos < DOCSTART)
-    *    if char[pos] = '{'
-    *       return TRUE
-    *  
-    *    else if char[pos] = '[' or char[pos] = '('
-    *       return false
-    *
-    *    else 
-    *       pos := pos - 1
-    *
-    * return FALSE
-    *
-    * [Note: ensure return char is not in // comment!!]
-    */ 
+    // PRE: We are not inside a multiline comment.
+    // PRE: The closest brace is not a '(' or a '['.
+
+    IndentInfo info = doc.getReduced().getIndentInformation();
+
+    return info.braceType.equals(IndentInfo.openSquiggly);
   }
 }

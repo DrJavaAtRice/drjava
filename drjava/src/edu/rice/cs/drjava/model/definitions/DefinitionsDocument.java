@@ -460,33 +460,34 @@ public class DefinitionsDocument extends PlainDocument {
     char c;
     String text = getText(DOCSTART, pos);
 
+    final int origLocation = _reduced.absOffset();
     // Move reduced model to location pos
-    _reduced.move(pos - _currentLocation);
+    _reduced.move(pos - origLocation);
 
     // Walk backwards from specificed position
     for (i = pos-1; i != DOCSTART-1; i--) {
       c = text.charAt(i);
       // Check if character is one of the delimiters
       for (j = 0; j < delims.length; j++) {
- if (c == delims[j]) {
-   // Move reduced model to walker's location
-   _reduced.move(i - pos);
-   // Check if matching char is in comment or quotes
-   if((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
-      (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT)) ||
-      (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_SINGLE_QUOTE)) ||
-      (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_DOUBLE_QUOTE))) {
-     // Ignore matching char
-   } else {
-     // Return position of matching char
-     _reduced.move(_currentLocation - i);
-     return i;
-   }
-   _reduced.move(pos - i);
- }
+        if (c == delims[j]) {
+          // Move reduced model to walker's location
+          _reduced.move(i - pos);
+          // Check if matching char is in comment or quotes
+          if((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
+             (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT)) ||
+             (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_SINGLE_QUOTE)) ||
+             (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_DOUBLE_QUOTE))) {
+               // Ignore matching char
+             } else {
+               // Return position of matching char
+               _reduced.move(origLocation - i);
+               return i;
+             }
+          _reduced.move(pos - i);
+        }
       }
     }
-    _reduced.move(_currentLocation - pos);
+    _reduced.move(origLocation - pos);
     return ERROR_INDEX;
   }
   
@@ -567,8 +568,9 @@ public class DefinitionsDocument extends PlainDocument {
     String text = getText(pos, endPos - pos);
     char[] whitespace = {' ', '\t', '\n'};
 
+    final int origLocation = _reduced.absOffset();
     // Move reduced model to location pos
-    _reduced.move(pos - _currentLocation);
+    _reduced.move(pos - origLocation);
 
     // Walk forward from specificed position
     for (i = pos; i != endPos; i++) {
@@ -576,20 +578,20 @@ public class DefinitionsDocument extends PlainDocument {
       c = text.charAt(i - pos);
       // Check if character is whitespace
       for (j = 0; j < whitespace.length; j++) {
- if (c == whitespace[j]) {
-   isWhitespace = true;
- }
+        if (c == whitespace[j]) {
+          isWhitespace = true;
+        }
       }
       if (!isWhitespace) {
- // Move reduced model to walker's location
- _reduced.move(i - pos);
- // Check if matching char is in comment
- // Return position of matching char
- _reduced.move(_currentLocation - i);
- return i;
+        // Move reduced model to walker's location
+        _reduced.move(i - pos);
+        // Check if matching char is in comment
+        // Return position of matching char
+        _reduced.move(origLocation - i);
+        return i;
       }
     }
-    _reduced.move(_currentLocation - pos);
+    _reduced.move(origLocation - pos);
     return ERROR_INDEX;
   }
   

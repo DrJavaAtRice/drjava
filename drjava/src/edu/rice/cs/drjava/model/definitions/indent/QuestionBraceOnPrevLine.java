@@ -75,22 +75,28 @@ public class QuestionBraceOnPrevLine extends IndentRuleQuestion
     // PRE: The most recently opened expression list or block
     //      was opened by a '{'.
     
-    throw new RuntimeException("Not yet implemented!");
+    IndentInfo info = doc.getReduced().getIndentInformation();
     
+    //info.distToPrevNewline;    //______|\n_____x___
+    //info.distToNewline;        //______\n|____{_____x___
+    //info.distToBrace;          //______|{_____x___
+    
+    return true;
+
     /*
-    * pos := START
-    * counter := 0
-    *
-    * while (pos > DOCSTART)   
-    *    if char[pos] = '{' 
-    *       return (counter = 1)     [if pos is not in // comment!!]
-    *  
-    *    else if char[pos] = '\n'
-    *       counter := counter + 1
-    *       pos := pos - 1
-    *
-    * return false
-    *
-    */
+     * pos := START
+     * counter := 0
+     *
+     * while (pos > DOCSTART)   
+     *    if char[pos] = '{' 
+     *       return (counter = 1)     [if pos is not in // comment!!]
+     *  
+     *    else if char[pos] = '\n'
+     *       counter := counter + 1
+     *       pos := pos - 1
+     *
+     * return false
+     *
+     */
   }
 }
