@@ -794,12 +794,14 @@ public class DebugPanel extends JPanel implements OptionConstants {
          _threadSuspendedPopupMenu.show(e.getComponent(), e.getX(), e.getY());
       }
       else {
-         _threadRunningPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+//         _threadRunningPopupMenu.show(e.getComponent(), e.getX(), e.getY());
       }
     }
 
     public void _action() {
-      _debugger.suspend(getSelectedThread());
+      if (getSelectedThread().isSuspended()) {
+        _debugger.suspend(getSelectedThread());
+      }
     }
   }
   

@@ -60,7 +60,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * @param context the context
    * @return visitor the visitor
    */
-  public EvaluationVisitorExtension makeEvaluationVisitor(Context context) {
-    return new DebugEvaluationVisitor(context, _name);
-  }
+//   public EvaluationVisitorExtension makeEvaluationVisitor(Context context) {
+//     return new DebugEvaluationVisitor(context, _name);
+//   }
 }
