@@ -1,4 +1,4 @@
-package edu.rice.cs.drjava.util;
+package edu.rice.cs.util;
 
 /**
  * An exception which DrJava throws on an unexpected error.

@@ -5,6 +5,11 @@ import java.io.File;
 
 /**
  * A class loader that tries to load classes from tools.jar.
+ * It will never delegate to the system loader.
+ *
+ * NOTE: I am not sure if this loader will work perfectly correctly
+ * if you use loadClass. Currently its purpose is to be used from
+ * {@link StickyClassLoader}, which just needs getResource.
  *
  * @version $Id$
  */
@@ -27,5 +32,12 @@ public class ToolsJarClassLoader extends URLClassLoader {
     catch (MalformedURLException e) {
       return new URL[0];
     }
+  }
+
+  /**
+   * Gets the requested resource, bypassing the parent classloader.
+   */
+  public URL getResource(String name) {
+    return findResource(name);
   }
 }

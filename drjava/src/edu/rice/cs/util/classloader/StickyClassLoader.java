@@ -11,7 +11,7 @@ import edu.rice.cs.util.FileOps;
  *
  * @version $Id$
  */
-class StickyClassLoader extends ClassLoader {
+public class StickyClassLoader extends ClassLoader {
   private final ClassLoader _newLoader;
   private final String[] _classesToLoadWithOld;
 
@@ -44,6 +44,8 @@ class StickyClassLoader extends ClassLoader {
     if (resource == null) {
       resource = getParent().getResource(name);
     }
+
+    //System.err.println("resource: " + name + " --> " + resource);
 
     return resource;
   }
