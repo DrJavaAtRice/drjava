@@ -432,6 +432,7 @@ public abstract class GlobalModelTestCase extends TestCase {
     protected int interactionsResetCount;
     protected int interactionsExitedCount;
     protected int saveBeforeProceedingCount;
+    protected int saveAllBeforeProceedingCount;
     protected int nonTestCaseCount;
     protected int lastExitStatus;
 
@@ -452,6 +453,7 @@ public abstract class GlobalModelTestCase extends TestCase {
       consoleResetCount = 0;
       interactionsResetCount = 0;
       saveBeforeProceedingCount = 0;
+      saveAllBeforeProceedingCount = 0;
       nonTestCaseCount = 0;
       lastExitStatus = 0;
     }
@@ -523,6 +525,12 @@ public abstract class GlobalModelTestCase extends TestCase {
                    i,
                    saveBeforeProceedingCount);
     }
+
+    public void assertSaveAllBeforeProceedingCount(int i) {
+      assertEquals("number of times saveAllBeforeProceeding fired",
+                   i,
+                   saveAllBeforeProceedingCount);
+    }
     
     public void assertNonTestCaseCount(int i) {
       assertEquals("number of times nonTestCase fired",
@@ -584,8 +592,12 @@ public abstract class GlobalModelTestCase extends TestCase {
 
     public void saveBeforeProceeding(GlobalModelListener.SaveReason reason) {
       fail("saveBeforeProceeding fired unexpectedly");
+    }    
+
+    public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
+      fail("saveAllBeforeProceeding fired unexpectedly");
     }
-    
+
     public void nonTestCase() {
       fail("nonTestCase fired unexpectedly");
     }

@@ -775,7 +775,41 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     return _debugManager;
   }
 
+  /**
+   * Called to demand that one or more listeners saves the
+   * definitions document before proceeding.  It is up to the caller
+   * of this method to check if the document has been saved.
+   * Fires saveBeforeProceeding(SaveReason) if isModifiedSinceSave() is true.
+   * @param reason the reason behind the demand to save the file
+   */
+    public void saveAllBeforeProceeding(final GlobalModelListener.SaveReason reason)
+    {
+      if (areAnyModifiedSinceSave()) {
+        notifyListeners(new EventNotifier() {
+          public void notifyListener(GlobalModelListener l) {
+          l.saveAllBeforeProceeding(reason);
+        }
+        });
+      }
+    }
 
+    /**
+     * Checks if any open definitions documents have been modified 
+     * since last being saved. 
+     * @return whether any documents have been modified
+     */
+    public boolean areAnyModifiedSinceSave() {
+	boolean modified = false;
+	for (int i = 0; i < _definitionsDocs.getSize(); i++) {
+	    OpenDefinitionsDocument doc = (OpenDefinitionsDocument)_definitionsDocs.getElementAt(i);
+	    if (doc.isModifiedSinceSave()) {
+		modified = true;
+		break;
+	    }
+	}
+	return modified;
+    }
+    
 
   // ---------- DefinitionsDocumentHandler inner class ----------
 
@@ -975,11 +1009,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * an error will be put in compileErrors.
      */
     public void startCompile() throws IOException {
-      saveBeforeProceeding(GlobalModelListener.COMPILE_REASON);
+      saveAllBeforeProceeding(GlobalModelListener.COMPILE_REASON);
       CompilerError[] errors = new CompilerError[0];
 
-      if (isModifiedSinceSave()) {
-        // if the file hasn't been saved after we told our
+      if (areAnyModifiedSinceSave()) {
+        // if any files haven't been saved after we told our
         // listeners to do so, don't proceed with the rest
         // of the compile.
       }
@@ -1044,7 +1078,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      */
     public TestResult startJUnit() throws ClassNotFoundException, IOException {
       // Compile and save before proceeding.
-      saveBeforeProceeding(GlobalModelListener.JUNIT_REASON);
+      saveAllBeforeProceeding(GlobalModelListener.JUNIT_REASON);
       if (isModifiedSinceSave()) {
         return null;
       }

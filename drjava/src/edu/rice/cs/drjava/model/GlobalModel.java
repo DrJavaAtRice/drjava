@@ -321,4 +321,21 @@ public interface GlobalModel {
    */
   public DebugManager getDebugManager();
 
+  /**
+   * Called to demand that one or more listeners saves the
+   * definitions document before proceeding.  It is up to the caller
+   * of this method to check if the document has been saved.
+   * Fires saveBeforeProceeding(SaveReason) if isModifiedSinceSave() is true.
+   * @param reason the reason behind the demand to save the file
+   */
+    public void saveAllBeforeProceeding(final GlobalModelListener.SaveReason reason);
+
+    
+
+    /**
+     * Checks if any open definitions documents have been modified 
+     * since last being saved. 
+     * @return whether any documents have been modified
+     */
+    public boolean areAnyModifiedSinceSave();
 }

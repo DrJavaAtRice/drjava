@@ -343,7 +343,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     final File file = tempFile();
 
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
-      public void saveBeforeProceeding(GlobalModelListener.SaveReason reason) {
+      public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
         assertEquals(_name() + "save reason", COMPILE_REASON, reason);
         assertModified(true, doc);
         assertSaveCount(0);
@@ -359,12 +359,12 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
           fail("Save produced exception: " + ioe);
         }
 
-        saveBeforeProceedingCount++;
+        saveAllBeforeProceedingCount++;
       }
 
       public void fileSaved(OpenDefinitionsDocument doc) {
         assertModified(false, doc);
-        assertSaveBeforeProceedingCount(0);
+        assertSaveAllBeforeProceedingCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
         assertInteractionsResetCount(0);
@@ -387,7 +387,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     doc.startCompile();
 
     // Check events fired
-    listener.assertSaveBeforeProceedingCount(1);
+    listener.assertSaveAllBeforeProceedingCount(1);
     listener.assertSaveCount(1);
     assertCompileErrorsPresent(_name(), false);
     listener.checkCompileOccurred();
@@ -408,19 +408,196 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
 
     TestListener listener = new TestListener() {
-      public void saveBeforeProceeding(GlobalModelListener.SaveReason reason) {
+      public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
         assertModified(true, doc);
         assertEquals(_name() + "save reason", COMPILE_REASON, reason);
-        saveBeforeProceedingCount++;
+        saveAllBeforeProceedingCount++;
         // since we don't actually save the compile should abort
       }
     };
 
     _model.addListener(listener);
     doc.startCompile();
-    listener.assertSaveBeforeProceedingCount(1);
+    listener.assertSaveAllBeforeProceedingCount(1);
     assertModified(true, doc);
     assertContents(FOO_TEXT, doc);
   }
 
+  /**
+   * If we try to compile while any files are unsaved, and if we don't 
+   * save when asked to saveBeforeProceeding, it should not do the compile
+   * or any other actions.
+   */
+  public void testCompileAbortsIfAnyUnsaved()
+    throws BadLocationException, IOException
+  {
+    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+
+    TestListener listener = new TestListener() {
+      public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
+        assertModified(true, doc);
+	assertModified(true, doc2);
+        assertEquals(_name() + "save reason", COMPILE_REASON, reason);
+        saveAllBeforeProceedingCount++;
+        // since we don't actually save the compile should abort
+      }
+    };
+
+    _model.addListener(listener);
+    doc.startCompile();
+    listener.assertSaveAllBeforeProceedingCount(1);
+    assertModified(true, doc);
+    assertModified(true, doc2);
+    assertContents(FOO_TEXT, doc);
+    assertContents(BAR_TEXT, doc2);
+  }
+
+/**
+   * If we try to compile while any files (including the active file) are unsaved 
+   * but we do save it from within saveBeforeProceeding, the compile should 
+   * occur happily.
+   */
+  public void testCompileAnyUnsavedButSaveWhenAsked()
+    throws BadLocationException, IOException
+  {
+    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    final File file = tempFile();
+    final File file2 = tempFile(2);
+
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
+      public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
+        assertEquals(_name() + "save reason", COMPILE_REASON, reason);
+        assertModified(true, doc);
+	assertModified(true, doc2);
+        assertSaveCount(0);
+        assertCompileStartCount(0);
+        assertCompileEndCount(0);
+        assertInteractionsResetCount(0);
+        assertConsoleResetCount(0);
+
+        try {
+          doc.saveFile(new FileSelector(file));
+	  doc2.saveFile(new FileSelector(file2));
+        }
+        catch (IOException ioe) {
+          fail("Save produced exception: " + ioe);
+        }
+
+        saveAllBeforeProceedingCount++;
+      }
+
+      public void fileSaved(OpenDefinitionsDocument doc) {
+        assertModified(false, doc);
+        assertSaveAllBeforeProceedingCount(0);
+        assertCompileStartCount(0);
+        assertCompileEndCount(0);
+        assertInteractionsResetCount(0);
+        assertConsoleResetCount(0);
+
+        File f = null;
+        try {
+          f = doc.getFile();
+        }
+        catch (IllegalStateException ise) {
+          // We know file should exist
+          throw new UnexpectedException(ise);
+        }
+        //assertEquals(_name() + "file saved", file, f);
+        saveCount++;
+      }
+    };
+
+    _model.addListener(listener);
+    doc.startCompile();
+
+    // Check events fired
+    listener.assertSaveAllBeforeProceedingCount(1);
+    listener.assertSaveCount(2);
+    assertCompileErrorsPresent(_name(), false);
+    listener.checkCompileOccurred();
+
+    // Make sure .class exists
+    File compiled = classForJava(file, "Foo");
+    assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
+  }
+
+/**
+   * If we try to compile while any files (but not the active file) are unsaved 
+   * but we do save it from within saveBeforeProceeding, the compile should occur 
+   * happily.
+   */
+  public void testCompileActiveSavedAnyUnsavedButSaveWhenAsked()
+    throws BadLocationException, IOException
+  {
+    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    final File file = tempFile();
+    final File file2 = tempFile(1);
+
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
+      public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
+        assertEquals(_name() + "save reason", COMPILE_REASON, reason);
+        assertModified(false, doc);
+	assertModified(true, doc2);
+        assertSaveCount(0);
+        assertCompileStartCount(0);
+        assertCompileEndCount(0);
+        assertInteractionsResetCount(0);
+        assertConsoleResetCount(0);
+
+        try {
+	  doc2.saveFile(new FileSelector(file2));
+        }
+        catch (IOException ioe) {
+          fail("Save produced exception: " + ioe);
+        }
+
+        saveAllBeforeProceedingCount++;
+	assertModified(false, doc);
+	assertModified(false, doc2);
+	assertTrue(!_model.areAnyModifiedSinceSave());
+      }
+
+      public void fileSaved(OpenDefinitionsDocument doc) {
+        assertModified(false, doc);
+        assertSaveAllBeforeProceedingCount(0);
+        assertCompileStartCount(0);
+        assertCompileEndCount(0);
+        assertInteractionsResetCount(0);
+        assertConsoleResetCount(0);
+
+        File f = null;
+        try {
+          f = doc.getFile();
+        }
+        catch (IllegalStateException ise) {
+          // We know file should exist
+          throw new UnexpectedException(ise);
+        }
+        assertEquals(_name() + "file saved", file2, f);
+        saveCount++;
+      }
+    };
+
+    assertModified(true, doc);
+    doc.saveFile(new FileSelector(file));
+    assertModified(false, doc);
+    assertModified(true, doc2);
+    _model.addListener(listener);
+    doc.startCompile();
+    assertTrue(!_model.areAnyModifiedSinceSave());
+
+    // Check events fired
+    listener.assertCompileStartCount(1);
+    listener.assertSaveAllBeforeProceedingCount(1);
+    listener.assertSaveCount(1);
+    assertCompileErrorsPresent(_name(), false);
+    listener.checkCompileOccurred();
+
+    // Make sure .class exists
+    File compiled = classForJava(file, "Foo");
+    assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
+  }
 }

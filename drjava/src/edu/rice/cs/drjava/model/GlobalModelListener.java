@@ -143,6 +143,12 @@ public interface GlobalModelListener {
    * before the GlobalModel can proceed with another action.  
    */
   public void saveBeforeProceeding(SaveReason reason);
+
+  /**
+   * Called to demand that the listeners save all open documents
+   * before the GlobalModel can proceed with another action.  
+   */
+  public void saveAllBeforeProceeding(SaveReason reason);
   
   /**
    * Called when trying to test a non-TestCase class.

@@ -133,7 +133,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
       public void junitStarted() { junitStartCount++; }
       public void junitEnded() { junitEndCount++; }
-      public void saveBeforeProceeding(GlobalModelListener.SaveReason reason) {
+      public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
         assertEquals("should be JUNIT reason to save", JUNIT_REASON, reason);
         assertModified(true, doc);
         assertSaveCount(0);
@@ -147,12 +147,12 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
           fail("Save produced exception: " + ioe);
         }
         
-        saveBeforeProceedingCount++;
+        saveAllBeforeProceedingCount++;
       }
       
       public void fileSaved(OpenDefinitionsDocument doc) {
         assertModified(false, doc);
-        assertSaveBeforeProceedingCount(0);
+        assertSaveAllBeforeProceedingCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
         
@@ -173,7 +173,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     doc.startJUnit();
     
     // Check events fired
-    listener.assertSaveBeforeProceedingCount(1);
+    listener.assertSaveAllBeforeProceedingCount(1);
     listener.assertSaveCount(0);
     listener.assertJUnitStartCount(0);
     listener.assertJUnitEndCount(0);
@@ -229,7 +229,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
       public void junitStarted() { junitStartCount++; }
       public void junitEnded() { junitEndCount++; }
-      public void saveBeforeProceeding(GlobalModelListener.SaveReason reason) {
+      public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
         assertEquals("should be JUNIT reason to save", JUNIT_REASON, reason);
         assertModified(true, doc);
         assertSaveCount(0);
@@ -243,12 +243,12 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
           fail("Save produced exception: " + ioe);
         }
         
-        saveBeforeProceedingCount++;
+        saveAllBeforeProceedingCount++;
       }
       
       public void fileSaved(OpenDefinitionsDocument doc) {
         assertModified(false, doc);
-        assertSaveBeforeProceedingCount(0);
+        assertSaveAllBeforeProceedingCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
         
@@ -269,7 +269,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     doc.startJUnit();
     
     // Check events fired
-    listener.assertSaveBeforeProceedingCount(1);
+    listener.assertSaveAllBeforeProceedingCount(1);
     listener.assertSaveCount(1);
     assertCompileErrorsPresent("JUNIT", false);
     listener.checkCompileOccurred();

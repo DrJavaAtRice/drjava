@@ -1489,7 +1489,7 @@ public class MainFrame extends JFrame {
     _tabbedPane.add("Interactions", new BorderlessScrollPane(_interactionsPane));
     _tabbedPane.add("Compiler output", _errorPanel);
     _tabbedPane.add("Console", new JScrollPane(_outputPane));
-    _tabbedPane.add("Test output", _junitPanel);
+    //_tabbedPane.add("Test output", _junitPanel);
 
     // Select interactions pane when interactions tab is selected
     _tabbedPane.addChangeListener(new ChangeListener() {
@@ -1727,7 +1727,7 @@ public class MainFrame extends JFrame {
     }
 
     public void junitStarted() {
-      _tabbedPane.setSelectedIndex(JUNIT_TAB);
+	//_tabbedPane.setSelectedIndex(JUNIT_TAB);
       _saveAction.setEnabled(false);
       hourglassOn();
     }
@@ -1788,6 +1788,41 @@ public class MainFrame extends JFrame {
       switch (rc) {
         case JOptionPane.YES_OPTION:
           _save();
+          break;
+        case JOptionPane.NO_OPTION:
+          // do nothing
+          break;
+        default:
+          throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
+      }
+    }
+
+    public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
+      String message;
+      if (reason == COMPILE_REASON) {
+        message =
+          "To compile, you must first save all modified files.\n" +
+          "Would you like to save and then compile?";
+      }
+      else if (reason == JUNIT_REASON) {
+        message =
+          "To run JUnit, you must first save and compile all modified\n" +
+          "files. Would like to save and then compile?";
+      }
+      else if (reason == DEBUG_REASON) {
+        message =
+          "To use debugging commands, you must first save and compile\n" +
+          "all modified files. Would like to save and then compile?";
+      }
+      else {
+        throw new RuntimeException("Invalid reason for forcing a save.");
+      }
+      int rc = JOptionPane.showConfirmDialog(MainFrame.this, message,
+                                             "Must save to continue",
+                                             JOptionPane.YES_NO_OPTION);
+      switch (rc) {
+        case JOptionPane.YES_OPTION:
+          _saveAll();
           break;
         case JOptionPane.NO_OPTION:
           // do nothing

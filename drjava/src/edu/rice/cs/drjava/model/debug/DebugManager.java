@@ -181,11 +181,9 @@ public class DebugManager {
    */
   public void start(OpenDefinitionsDocument doc) throws ClassNotFoundException{
 
-    if (doc.isModifiedSinceSave()) {
-      doc.saveBeforeProceeding(GlobalModelListener.DEBUG_REASON);
-    }
+      _model.saveAllBeforeProceeding(GlobalModelListener.DEBUG_REASON);
 
-    if (doc.isModifiedSinceSave()) return; // they cancelled the save.
+    if (_model.areAnyModifiedSinceSave()) return; // they cancelled the save.
 
     String className = mapClassName(doc);
     if (className == null) {
@@ -255,11 +253,9 @@ public class DebugManager {
     
     BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
 
-    if (doc.isModifiedSinceSave()) {
-      doc.saveBeforeProceeding(GlobalModelListener.DEBUG_REASON);
-    }
+    _model.saveAllBeforeProceeding(GlobalModelListener.DEBUG_REASON);
 
-    if (doc.isModifiedSinceSave()) return; // they cancelled the save.
+    if (_model.areAnyModifiedSinceSave()) return; // they cancelled the save.
 
     String className = mapClassName(doc);
     if (className == null) {
