@@ -121,8 +121,10 @@ public interface OpenDefinitionsDocument {
    * saved and compiled before proceeding with testing.  Fires the appropriate
    * events as the testing proceeds and finishes.
    * @exception IOException if a file with errors cannot be opened
+   * @exception ClassNotFoundException when the class is compiled to a location
+   * not on the classpath.
    */
-  public TestResult startJUnit() throws IOException;
+  public TestResult startJUnit() throws ClassNotFoundException, IOException;
 
   /**
    * Returns the model responsible for maintaining all current errors

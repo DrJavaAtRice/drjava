@@ -664,6 +664,12 @@ public class MainFrame extends JFrame {
     catch (IOException ioe) {
       _showIOError(ioe);
     }
+    catch (ClassNotFoundException cnfe) {
+      _showClassNotFoundError(cnfe);
+    }
+    catch (NoClassDefFoundError ncde) {
+      _showNoClassDefError(ncde);
+    }
   }
   
   private void _showIOError(IOException ioe) {
@@ -671,7 +677,18 @@ public class MainFrame extends JFrame {
                "An I/O exception occurred during the last operation.");
   }
   
-  private void _showError(Exception e, String title, String message) {
+  private void _showClassNotFoundError(ClassNotFoundException cnfe) {
+    _showError(cnfe, "Class Not Found",
+               "A ClassNotFound exception occurred during the last operation.\n" +
+               "Please check that your classpath includes all relevant paths.\n\n");
+  }
+  
+  private void _showNoClassDefError(NoClassDefFoundError ncde) {
+    _showError(ncde, "No Class Def",
+               "A NoClassDefFoundError occurred during the last operation.\n" +
+               "Please check that your classpath includes all relevant paths.\n\n");
+  }
+  private void _showError(Throwable e, String title, String message) {
     JOptionPane.showMessageDialog(this,
                                   message + "\n" + e,
                                   title,

@@ -78,7 +78,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
   private static final String MONKEYTEST_COMPILEERROR_TEXT =
     "import junit.framework.*; " + 
     "public class MonkeyTestCompileError extends TestCase { " +
-    "  donkeyfart MonkeyTestFail(String name) { super(name); } " +
+    "  Object MonkeyTestFail(String name) { super(name); } " +
     "  public void testShouldFail() { " +
     "    assertEquals(\"monkey\", \"baboon\"); " +
     "  } " +
@@ -107,8 +107,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    * Tests that startJUnit() does not execute if there are compile 
    * errors in the file
    */
-  public void testDoNotRunJUnitWhenCompileErrorsOccur() 
-    throws BadLocationException, IOException {
+  public void testDoNotRunJUnitWhenCompileErrorsOccur() throws Exception {
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_COMPILEERROR_TEXT);
     final File file = new File(_tempDir, "MonkeyTestCompileError.java");
     doc.saveFile(new FileSelector(file));
@@ -127,8 +126,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    * Tests that startJUnit() does not execute if the user runs it
    * with an unsaved file and then chooses not to save the file.
    */
-  public void testDoNotRunJUnitUnsavedAndDoNotSaveWhenAsked()
-    throws BadLocationException, IOException {
+  public void testDoNotRunJUnitUnsavedAndDoNotSaveWhenAsked() throws Exception {
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     
@@ -187,7 +185,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
   /**
    * Tests that a JUnit file with no errors is reported to have no errors.
    */
-  public void testNoJUnitErrors() throws BadLocationException, IOException {
+  public void testNoJUnitErrors() throws Exception {
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     doc.saveFile(new FileSelector(file));
@@ -209,7 +207,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
   /**
    * Tests that a JUnit file with an error is reported to have an error.
    */
-  public void testOneJUnitError() throws BadLocationException, IOException {
+  public void testOneJUnitError() throws Exception {
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
     final File file = new File(_tempDir, "MonkeyTestFail.java");
     doc.saveFile(new FileSelector(file));
@@ -232,8 +230,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    * it with an unsaved file and then chooses to save the file.
    */
   public void testRunJUnitUnsavedButSaveWhenAsked()
-    throws BadLocationException, IOException 
-  {
+    throws Exception {
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     
@@ -291,12 +288,12 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     File compiled = classForJava(file, "MonkeyTestPass");
     assertTrue("JUNIT: Class file doesn't exist after compile", compiled.exists());    
   }
-  
+ 
   /**
    * Tests that the ui is notified to put up an error dialog if JUnit
    * is run on a non-TestCase.
    */
-  public void testNonTestCaseError() throws BadLocationException, IOException {
+  public void testNonTestCaseError() throws Exception {
     final OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
     final File file = new File(_tempDir, "NonTestCase.java");
     doc.saveFile(new FileSelector(file));

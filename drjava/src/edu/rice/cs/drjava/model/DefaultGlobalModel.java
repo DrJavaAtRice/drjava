@@ -278,7 +278,7 @@ public class DefaultGlobalModel implements GlobalModel {
       tempDoc.resetModification();
       
       tempDoc.setCurrentLocation(0);
-
+      
       final OpenDefinitionsDocument doc =
         new DefinitionsDocumentHandler(tempDoc);
       _definitionsDocs.addElement(doc);
@@ -969,11 +969,12 @@ public class DefaultGlobalModel implements GlobalModel {
      *
      * @return The results of running the tests specified in the
      * given definitions document.
+     * 
      */
-    public TestResult startJUnit() throws IOException {
-      // Compile and save before proceeding
+    public TestResult startJUnit() throws ClassNotFoundException, IOException {
+      // Compile and save before proceeding.
       saveBeforeProceeding(GlobalModelListener.JUNIT_REASON);
-      if(isModifiedSinceSave()) {
+      if (isModifiedSinceSave()) {
         return null;
       }
       try {
@@ -994,25 +995,42 @@ public class DefaultGlobalModel implements GlobalModel {
           getJUnitDocument().remove(0, getJUnitDocument().getLength() - 1);
         } 
         catch (BadLocationException e) {
-          throw new UnexpectedException(e);
+          notifyListeners(new EventNotifier() {
+            public void notifyListener(GlobalModelListener l) {
+            l.junitEnded();
+            l.nonTestCase();
+          }
+          });
+          return null;
         }
         
         JUnitTestRunner testRunner = getTestRunner();
         
         String testFilename = testFile.getName();
-        if(testFilename.toLowerCase().endsWith(".java")) {
+        if (testFilename.toLowerCase().endsWith(".java")) {
           testFilename = testFilename.substring(0, testFilename.length() - 5); 
         } 
         else {
-          throw new UnexpectedException
-            (new IllegalArgumentException("File is not a Java file."));
+          notifyListeners(new EventNotifier() {
+            public void notifyListener(GlobalModelListener l) {
+            l.junitEnded();
+            l.nonTestCase();
+          }
+          });
+          return null;
         }
         String packageName;
         try {
           packageName = _doc.getPackageName();
         } 
-        catch(InvalidPackageException e) {
-          throw new UnexpectedException(e);
+        catch (InvalidPackageException e) {
+          notifyListeners(new EventNotifier() {
+            public void notifyListener(GlobalModelListener l) {
+            l.junitEnded();
+            l.nonTestCase();
+          }
+          });
+          return null;
         }
         if(!packageName.equals("")) {
           testFilename = packageName + "." + testFilename;
@@ -1029,7 +1047,12 @@ public class DefaultGlobalModel implements GlobalModel {
           }
         }
         catch (ClassNotFoundException e) {
-          throw new UnexpectedException(e);
+          notifyListeners(new EventNotifier() {
+            public void notifyListener(GlobalModelListener l) {
+            l.junitEnded();
+          }
+          });
+          throw e;
         }
         
         Test suite = testRunner.getTest(testFilename);
@@ -1044,7 +1067,23 @@ public class DefaultGlobalModel implements GlobalModel {
       } 
       catch (IllegalStateException e) {
         // No file exists, don't try to compile and test
+        notifyListeners(new EventNotifier() {
+          public void notifyListener(GlobalModelListener l) {
+          l.junitEnded();
+          l.nonTestCase();
+        }
+        });
         return null;
+      }
+      catch (NoClassDefFoundError e) {
+        // Method getTest in junit.framework.BaseTestRunner can throw a
+        // NoClassDefFoundError (via reflection).
+        notifyListeners(new EventNotifier() {
+          public void notifyListener(GlobalModelListener l) {
+          l.junitEnded();
+        }
+        });
+        throw e;
       }
     }
     

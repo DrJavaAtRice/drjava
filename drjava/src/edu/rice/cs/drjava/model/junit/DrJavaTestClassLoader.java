@@ -35,11 +35,12 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.junit;
 
 import edu.rice.cs.drjava.model.GlobalModel;
+import edu.rice.cs.drjava.model.Configuration;
 
 import java.io.*;
 import junit.runner.*;
@@ -50,30 +51,37 @@ import junit.runner.*;
  * @version $Id$
  */
 public class DrJavaTestClassLoader implements TestSuiteLoader {
-
+  
   GlobalModel _model;
-
+  
   public DrJavaTestClassLoader(GlobalModel model) {
+    super();
     _model = model;
   }
   
   protected String getDrJavaClasspath() {
     String separator= System.getProperty("path.separator");
-    String classpath="";
+    String classpath= "";
     File[] sourceFiles = _model.getSourceRootSet();
-
-    for(int i=0; i<sourceFiles.length; i++) {
-      classpath = classpath + sourceFiles[i].getAbsolutePath() + separator;
+    
+    // Adds extra.classpath to the classpath.
+    String[] extraClasspath = Configuration.ONLY.getExtraClasspath();
+    for (int i = 0; i < extraClasspath.length; i++) {
+      classpath += extraClasspath[i] + separator;
+    }
+    
+    for(int i=0; i < sourceFiles.length; i++) {
+      classpath += sourceFiles[i].getAbsolutePath() + separator;
     }
     return classpath;
   }
-
+  
   public Class load(String suiteClassName) throws ClassNotFoundException {
     String classpath = getDrJavaClasspath();
     TestCaseClassLoader loader= new TestCaseClassLoader(classpath);
     return loader.loadClass(suiteClassName, true);
   }
-
+  
   public Class reload(Class aClass) throws ClassNotFoundException {
     String classpath = getDrJavaClasspath();
     TestCaseClassLoader loader= new TestCaseClassLoader(classpath);

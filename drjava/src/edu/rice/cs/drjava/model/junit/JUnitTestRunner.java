@@ -35,7 +35,7 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.junit;
 
@@ -62,18 +62,18 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
    * to write to.
    */
   private StyledDocument _doc;
-
+  
   /**
    * Used to tie the output of the ui textrunner
    * to our pane.
    */
   private PrintStream _writer;
-
+  
   /**
    * Class loader that uses DrJava's classpath
    */
   TestSuiteLoader _classLoader;
-
+  
   /**
    * Constructor
    */
@@ -93,7 +93,7 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
       }
     };
   }
-
+  
   /**
    * Provides our own PrintStream which outputs
    * to the appropriate document;
@@ -101,11 +101,11 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
   protected PrintStream getWriter() {
     return _writer;
   }
-
+  
   protected PrintStream writer() {
     return getWriter();
   }
-
+  
   /**
    * Writes text to the document in the JUnit
    * pane.
@@ -120,7 +120,7 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
       throw new UnexpectedException(e);
     }
   }
-
+  
   /**
    * Overrides method in super class to always return
    * a reloading test suite loader.
@@ -133,11 +133,13 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
    * Checks whether the given file name corresponds to 
    * a valid JUnit TestCase.
    */
-  public boolean isTestCase(String fileName) throws ClassNotFoundException {
+  public boolean isTestCase(String fileName) 
+    throws ClassNotFoundException 
+  {
     return Class.forName("junit.framework.TestCase")
-      .isAssignableFrom(loadSuiteClass(fileName));
+      .isAssignableFrom(getLoader().load(fileName));
   }
-
+  
   /**
    * Overrides method in super class to print
    * failed message to the JUnit console when

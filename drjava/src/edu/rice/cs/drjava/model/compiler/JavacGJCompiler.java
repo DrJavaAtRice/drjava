@@ -207,7 +207,7 @@ public class JavacGJCompiler implements CompilerInterface {
 
     String cp = System.getProperty("java.class.path");
 
-    // add extra classpath to the classpath
+    // Adds extra.classpath to the classpath.
     String[] ecp = Configuration.ONLY.getExtraClasspath();
     for (int i = 0; i < ecp.length; i++) {
       cp += System.getProperty("path.separator") + ecp[i];
