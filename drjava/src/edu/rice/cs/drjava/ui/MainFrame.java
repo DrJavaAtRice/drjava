@@ -1360,7 +1360,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // Compile
     tmpItem = toolsMenu.add(_compileAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, mask));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
 
     // keep track of the compile menu item
     _compileMenuItem = tmpItem;

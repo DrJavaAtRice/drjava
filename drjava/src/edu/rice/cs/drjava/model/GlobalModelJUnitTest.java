@@ -335,7 +335,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
      
     final TestResult testResults = doc.startJUnit();
     
-    System.err.println(testResults.toString());
+    //System.err.println(testResults.toString());
     
     // Check events fired
     listener.assertJUnitStartCount(1);

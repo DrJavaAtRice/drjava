@@ -145,77 +145,77 @@ public class DrJava implements ConfigurationTool, OptionConstants {
       // no compiler available; let's try to let the user pick one.
       final String[] text = {
         "DrJava can not find any Java compiler. Would you ",
-          "like to configure the location of the compiler? ",
-          "The compiler is generally located in 'tools.jar', ",
-          "in the 'lib' subdirectory under your JDK ",
-          "installation directory. (If you say 'No', DrJava ",
-          "will be unable to compile programs.)"
+        "like to configure the location of the compiler? ",
+        "The compiler is generally located in 'tools.jar', ",
+        "in the 'lib' subdirectory under your JDK ",
+        "installation directory. (If you say 'No', DrJava ",
+        "will be unable to compile programs.)"
       };
-        
-        int result = JOptionPane.showConfirmDialog(null,
-                                                   text,
-                                                   "Compiler not found",
-                                                   JOptionPane.YES_NO_OPTION);
-        
-        if (result == JOptionPane.YES_OPTION) {
-          JFileChooser chooser = new JFileChooser();
-          
-          do {
-            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-              File jar = chooser.getSelectedFile();
-              
-              // set the javac property
-              CONFIG.setSetting(JAVAC_LOCATION,
-                                jar.getAbsolutePath());
-              
-              // need to re-call getAvailable for it to re-check availability
-              CompilerInterface[] compilers
-                = CompilerRegistry.ONLY.getAvailableCompilers();
-              
-              if (compilers[0] != NoCompilerAvailable.ONLY) {
-                CompilerRegistry.ONLY.setActiveCompiler(compilers[0]);
-                try {
-                  CONFIG.saveConfiguration();
-                } catch(IOException e) {
-                  // for now, do nothing
-                }
-              }
-            }
-          }
-          while (CompilerRegistry.ONLY.isNoCompilerAvailable() &&
-                 _userWantsToPickAgain());
-        }
-    }
-  }
-  
-  private static boolean _userWantsToPickAgain() {
-    final String[] text = {
-      "The file you chose did not appear to contain the compiler. ",
-        "Would you like to pick again? The compiler is generally ",
-        "located in 'tools.jar', in the 'lib' subdirectory under ",
-        "your JDK installation directory.",
-        "(If you say 'No', DrJava will be unable to compile programs.)"
-    };
-      
-      /*
-       final String text = 
-       "The file you chose did not appear to contain the compiler.\n" + 
-       "Would you like to pick again? The compiler is generally\n" + 
-       "located in 'tools.jar', in the 'lib' subdirectory under\n" + 
-       "your JDK installation directory.\n" + 
-       "(If you say 'No', DrJava will be unable to compile programs.)";
-       
-       final JTextArea area = new JTextArea(text);
-       area.setEditable(false);
-       */
-      
       
       int result = JOptionPane.showConfirmDialog(null,
                                                  text,
                                                  "Compiler not found",
                                                  JOptionPane.YES_NO_OPTION);
       
-      return result == JOptionPane.YES_OPTION;
+      if (result == JOptionPane.YES_OPTION) {
+        JFileChooser chooser = new JFileChooser();
+        
+        do {
+          if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            File jar = chooser.getSelectedFile();
+            
+            // set the javac property
+            CONFIG.setSetting(JAVAC_LOCATION,
+                              jar.getAbsolutePath());
+            
+            // need to re-call getAvailable for it to re-check availability
+            CompilerInterface[] compilers
+              = CompilerRegistry.ONLY.getAvailableCompilers();
+            
+            if (compilers[0] != NoCompilerAvailable.ONLY) {
+              CompilerRegistry.ONLY.setActiveCompiler(compilers[0]);
+              try {
+                CONFIG.saveConfiguration();
+              } catch(IOException e) {
+                // for now, do nothing
+              }
+            }
+          }
+        }
+        while (CompilerRegistry.ONLY.isNoCompilerAvailable() &&
+               _userWantsToPickAgain());
+      }
+    }
+  }
+  
+  private static boolean _userWantsToPickAgain() {
+    final String[] text = {
+      "The file you chose did not appear to contain the compiler. ",
+      "Would you like to pick again? The compiler is generally ",
+      "located in 'tools.jar', in the 'lib' subdirectory under ",
+      "your JDK installation directory.",
+      "(If you say 'No', DrJava will be unable to compile programs.)"
+    };
+      
+    /*
+     final String text = 
+     "The file you chose did not appear to contain the compiler.\n" + 
+     "Would you like to pick again? The compiler is generally\n" + 
+     "located in 'tools.jar', in the 'lib' subdirectory under\n" + 
+     "your JDK installation directory.\n" + 
+     "(If you say 'No', DrJava will be unable to compile programs.)";
+     
+     final JTextArea area = new JTextArea(text);
+     area.setEditable(false);
+     */
+    
+    
+    int result = JOptionPane.showConfirmDialog(null,
+                                               text,
+                                               "Compiler not found",
+                                               JOptionPane.YES_NO_OPTION);
+    
+    return result == JOptionPane.YES_OPTION;
   }
   
   public static PreventExitSecurityManager getSecurityManager() {
