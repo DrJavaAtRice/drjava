@@ -43,7 +43,8 @@
          bootclasspath="${jsr14_classpath}:${sun.boot.class.path}"
          target="1.1"
          debug="on"
-         optimize="off"/>
+         
+optimize="off"/>
 </target>
 
 <!-- Init target. All others depend on it. Initialize the directory. -->
@@ -280,6 +281,7 @@
   <delete dir="${private_javadoc_dir}" />
   <delete dir="${built}/${projpath}" />
   <delete file="${jarfile}" />
+  <delete file="${osxdir}/${osxtag}.tar.gz" />
   <delete dir="${doc_dir}" />
 </target>
 
