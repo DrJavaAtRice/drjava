@@ -140,6 +140,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     } catch(FileMovedException fme){
       file = fme.getFile();
     }
+    System.out.println("Removing an Aux file");
     LinkedList<File> newAuxiliaryFiles = new LinkedList<File>();  
     for(File f: _auxiliaryFiles){
       try{

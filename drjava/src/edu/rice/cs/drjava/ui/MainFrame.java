@@ -2818,7 +2818,32 @@ public class MainFrame extends JFrame implements OptionConstants {
 //    LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
 //    l.add(_model.getActiveDocument());
 //    _model.closeFiles(l);
-    _model.closeFile(_model.getActiveDocument());
+    
+    try{
+      if(_model.getActiveDocument().isAuxiliaryFile() || 
+         _model.getActiveDocument().isProjectFile()){
+        String text = "Closing this file will permanently remove it from the current project." + 
+          "\nAre you sure that you want to close this file?";
+        
+        int rc = JOptionPane.showConfirmDialog(MainFrame.this,
+                                             text,
+                                             "Close " + 
+                                               _model.getActiveDocument().getFile().getName() + 
+                                               "?",
+                                             JOptionPane.YES_NO_OPTION);
+        if(rc != JOptionPane.YES_OPTION)
+          return;
+      }
+      
+      //Either this is an external file or user actually wants to close it
+      _model.closeFile(_model.getActiveDocument());
+        
+    }
+    catch(FileMovedException e){
+      //Not sure what exactly should be done.
+      //For now, let's just say the error is unexpected.
+      throw new UnexpectedException(e);
+    }
   }
   
   private void _junitFolder(){
