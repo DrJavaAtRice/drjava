@@ -57,8 +57,8 @@ import edu.rice.cs.util.text.DocumentAdapterException;
  * Tests the functionality of the InteractionsDocumentAdapter.
  */
 public final class InteractionsDocumentAdapterTest extends TestCase {
-  
-  
+
+
   protected InteractionsDocumentAdapter _adapter;
   protected InteractionsModel _model;
   protected InteractionsDocument _doc;
@@ -67,7 +67,7 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
   /**
    * Initialize fields for each test.
    */
-  protected void setUp() {    
+  protected void setUp() {
     mf = new MainFrame();
     GlobalModel gm = mf.getModel();
     _model = gm.getInteractionsModel();
@@ -75,7 +75,7 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
     _doc = gm.getInteractionsDocument();
 
   }
-  
+
   /**
    * Tests that the styles list is updated and reset properly
    */
@@ -83,24 +83,24 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
     // the banner and the prompt are inserted in the styles list when the document is constructed
     assertEquals("StylesList before insert should contain 2 pairs",
                  2, _adapter.getStylesList().size());
-                   
-    // Insert some text                   
+
+    // Insert some text
     _doc.insertText(_doc.getDocLength(), "5", InteractionsDocument.NUMBER_RETURN_STYLE);
-    
-    assertEquals("StylesList before reset should contain 3 pairs", 
+
+    assertEquals("StylesList before reset should contain 3 pairs",
                  3, _adapter.getStylesList().size());
-    
-    assertEquals("The first element of StylesList before reset should be", 
+
+    assertEquals("The first element of StylesList before reset should be",
                  "((21, 22), number.return.style)", _adapter.getStylesList().get(0).toString());
-    assertEquals("The second element of StylesList before reset should be", 
+    assertEquals("The second element of StylesList before reset should be",
                  "((19, 21), default)", _adapter.getStylesList().get(1).toString());
-    assertEquals("The third element of StylesList before reset should be", 
+    assertEquals("The third element of StylesList before reset should be",
                  "((0, 19), object.return.style)", _adapter.getStylesList().get(2).toString());
-    
+
     synchronized(_model){
       // Reset should clear
       _model.setWaitingForFirstInterpreter(false);
-      //this adds the "Resetting Interactions" 
+      //this adds the "Resetting Interactions"
       _model.resetInterpreter();
       _model.interpreterResetting();
     }
@@ -112,7 +112,7 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
                    "(("+(47+returnNum)+", "+(72+returnNum*2)+"), error)", _adapter.getStylesList().get(0).toString());
     }
   }
-  
+
   /**
    * Tests that a null style is not added to the list. Fix for bug #995719
    */
@@ -120,16 +120,16 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
     // the banner and the prompt are inserted in the styles list when the document is constructed
     assertEquals("StylesList before insert should contain 2 pairs",
                  2, _adapter.getStylesList().size());
-    
-    // Insert some text                   
+
+    // Insert some text
     _doc.insertText(_doc.getDocLength(), "5", InteractionsDocument.NUMBER_RETURN_STYLE);
-    
-    assertEquals("StylesList should contain 3 pairs", 
+
+    assertEquals("StylesList should contain 3 pairs",
                  3, _adapter.getStylesList().size());
-    
+
     // Insert some text with a null style
     _doc.insertText(_doc.getDocLength(), "6", null);
-    
+
     assertEquals("StylesList should still contain 3 pairs - null string should not have been inserted",
                  3, _adapter.getStylesList().size());
   }

@@ -148,7 +148,7 @@ public final class InteractionsModelTest extends TestCase {
     _model = new IncompleteInputInteractionsModel(_adapter);
     assertReplThrewContinuationException("for (;;");
   }
-  
+
   protected void assertReplThrewContinuationException(String code) throws DocumentAdapterException {
     assertTrue(_model instanceof IncompleteInputInteractionsModel);
     IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel)_model;
@@ -157,10 +157,10 @@ public final class InteractionsModelTest extends TestCase {
                    InteractionsDocument.DEFAULT_STYLE);
     model.interpretCurrentInteraction();
     try { Thread.sleep(5000); } catch(InterruptedException ie){}; // allow for the exception to be generated!
-    assertTrue("Code '"+code+"' should generate a continuation exception but not a syntax exception", 
+    assertTrue("Code '"+code+"' should generate a continuation exception but not a syntax exception",
                (model.isContinuationException() == true) && (model.isSyntaxException() == false));
   }
-  
+
   protected void assertReplThrewSyntaxException(String code) throws DocumentAdapterException {
     assertTrue(_model instanceof IncompleteInputInteractionsModel);
     IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel)_model;
@@ -169,11 +169,11 @@ public final class InteractionsModelTest extends TestCase {
                    InteractionsDocument.DEFAULT_STYLE);
     model.interpretCurrentInteraction();
     try { Thread.sleep(5000); } catch(InterruptedException ie){}; // allow for the exception to be generated!
-    assertTrue("Code '"+code+"' should generate a syntax exception but not a continuation exception", 
+    assertTrue("Code '"+code+"' should generate a syntax exception but not a continuation exception",
                (model.isSyntaxException() == true) && (model.isContinuationException() == false));
   }
-      
-  
+
+
   /**
    * Tests that "java Classname [args]" runs the class's main method, with
    * simple delimited arguments.
@@ -474,49 +474,48 @@ public final class InteractionsModelTest extends TestCase {
     _model.changeInputListener(listener1, listener2);
     assertEquals("Second input listener should return correct input", "input2", _model.getConsoleInput());
   }
-  
+
   /**
    * Tests that the interactions history is stored correctly. See bug # 992455
    */
   public void testInteractionsHistoryStoredCorrectly() throws DocumentAdapterException {
     final Object _lock = new Object();
     String code = "public class A {\n";
-    
+
     InteractionsDocument doc = _model.getDocument();
-    
+
     // Insert text and evaluate
     doc.insertText(doc.getDocLength(), code,
                    InteractionsDocument.DEFAULT_STYLE);
-    
-    _model.interpretCurrentInteraction();   
+
+    _model.interpretCurrentInteraction();
     //Simulate result
     _model.replReturnedSyntaxError("Encountered Unexpected \"<EOF>\"", "public class A {\n", -1, -1, -1, -1);
-    
+
     assertEquals("Current interaction should still be there - should not have interpreted", "public class A {\n" + System.getProperty("line.separator"),
                  doc.getCurrentInteraction());
-    
     History h = doc.getHistory();
     assertEquals("History should be empty", 0, h.size());
-    
+
     code = "}\n";
-    
-    doc.insertText(doc.getDocLength(), code, 
+
+    doc.insertText(doc.getDocLength(), code,
                    InteractionsDocument.DEFAULT_STYLE);
-    
-    
+
+
     synchronized(_lock) {
-      _model.interpretCurrentInteraction();        
+      _model.interpretCurrentInteraction();
       _model.replReturnedVoid();
     }
-    
+
     synchronized(_lock) {
       assertEquals("Current interaction should not be there - should have interpreted", "", doc.getCurrentInteraction());
       assertEquals("History should contain one interaction", 1, h.size());
     }
-    
-    
-    
-    
+
+
+
+
   }
 
   /**
@@ -561,11 +560,11 @@ public final class InteractionsModelTest extends TestCase {
     protected void _interpreterResetFailed(Throwable t) {}
     protected void _notifyInteractionIncomplete() {}
   }
-  
+
   public static class IncompleteInputInteractionsModel extends RMIInteractionsModel {
     boolean continuationException;
     boolean syntaxException;
-    
+
     /**
      * Constructs a new InteractionsModel.
      */
@@ -601,9 +600,9 @@ public final class InteractionsModelTest extends TestCase {
     protected void _notifyInterpreterReady() {}
     protected void _interpreterResetFailed(Throwable t) {}
     protected void _notifyInteractionIncomplete() {}
-    
+
     protected void _notifyInterpreterChanged(boolean inProgress) {}
-    
+
     public void replThrewException(String exceptionClass,
                                    String message,
                                    String stackTrace,
@@ -618,7 +617,7 @@ public final class InteractionsModelTest extends TestCase {
       syntaxException = true;
       continuationException = false;
     }
-    
+
     public void replReturnedSyntaxError(String errorMessage,
                                         String interaction,
                                         int startRow,
@@ -635,13 +634,13 @@ public final class InteractionsModelTest extends TestCase {
       syntaxException = true;
       continuationException = false;
     }
-    
+
     public boolean isContinuationException() {
       return continuationException;
     }
-    
+
     public boolean isSyntaxException() {
       return syntaxException;
-    } 
+    }
   }
 }

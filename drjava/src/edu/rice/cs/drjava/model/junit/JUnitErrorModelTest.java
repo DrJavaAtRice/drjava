@@ -75,7 +75,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "  } \n" +
     "}";
 
-  private static final String TEST_ONE = 
+  private static final String TEST_ONE =
     "import junit.framework.TestCase;\n" +
     "public class TestOne extends TestCase {\n" +
     "  public void testMyMethod() {\n" +
@@ -101,8 +101,8 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "    fail(\"i just failed the test\");\n" +
     "  }\n" +
     "}";
-  
-  private static final String TEST_TWO = 
+
+  private static final String TEST_TWO =
     "import junit.framework.TestCase;\n" +
     "public class TestTwo extends TestOne {\n" +
     "  public void testTwo() {\n" +
@@ -122,7 +122,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "    return getClass().hashCode();\n" +
     "  }\n" +
     "}";
-  
+
 //  private static final String NONPUBLIC_TEXT =
 //    "import junit.framework.*; " +
 //    "public class NonPublic extends TestCase { " +
@@ -240,18 +240,18 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
                  _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     _model.removeListener(listener2);
   }
-  
-  private static final String LANGUAGE_LEVEL_TEST = 
+
+  private static final String LANGUAGE_LEVEL_TEST =
     "class MyTest extends junit.framework.TestCase {\n"+
-    "  void testMyMethod() {\n"+ 
+    "  void testMyMethod() {\n"+
     "    assertEquals(\"OneString\", \"TwoStrings\");\n"+
     "  }\n"+
     "}\n";
-    
-  
+
+
   /**
    * Tests that an elementary level file has the previous line of the actual error reported as the line of its error.
-   * Necessitated by the added code in the .java file associated with the .dj0 file (the import statement added by the 
+   * Necessitated by the added code in the .java file associated with the .dj0 file (the import statement added by the
    * language level compiler)
    */
   public void testLanguageLevelJUnitErrorLine() throws Exception {
@@ -259,7 +259,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc = setupDocument(LANGUAGE_LEVEL_TEST);
     final File file = new File(_tempDir, "MyTest.dj0");
     doc.saveFile(new FileSelector(file));
-    
+
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     doc.startCompile();
@@ -272,17 +272,17 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
       listener.assertJUnitStartCount(1);
       listener.wait();
     }
-    
+
     // Clear document so we can make sure it's written to after startJUnit
     _model.getJUnitModel().getJUnitDocument().remove
       (0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);
-    
+
     _m = _model.getJUnitModel().getJUnitErrorModel();
-    
+
     assertEquals("the test results should have one failure "+_m.getNumErrors(),
                  1,
                  _m.getNumErrors());
-    
+
     assertEquals("the error line should be line number 2", 2, _m.getError(0).lineNumber());
   }
 
@@ -308,16 +308,16 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     }
 
     _m = _model.getJUnitModel().getJUnitErrorModel();
-    
+
     assertEquals("test case has one error reported", 3, _m.getNumErrors());
     assertTrue("first error should be an error not a warning", !_m.getError(0).isWarning());
-    
+
     assertTrue("it's a junit error", _m.getError(0) instanceof JUnitError);
-    
+
     assertEquals("The first error is on line 5", 3, _m.getError(0).lineNumber());
     assertEquals("The first error is on line 5", 19, _m.getError(1).lineNumber());
     assertEquals("The first error is on line 5", 22, _m.getError(2).lineNumber());
-    
+
     synchronized(listener) {
       doc2.startJUnit();
       listener.wait();
@@ -327,8 +327,8 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     assertEquals("The first error is on line 5", 3, _m.getError(0).lineNumber());
     assertEquals("The first error is on line 5", 19, _m.getError(1).lineNumber());
     assertEquals("The first error is on line 5", 22, _m.getError(2).lineNumber());
-    
-    
+
+
     _model.removeListener(listener);
   }
 }
