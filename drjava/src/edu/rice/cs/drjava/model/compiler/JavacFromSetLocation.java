@@ -54,10 +54,12 @@ import edu.rice.cs.util.classloader.ToolsJarClassLoader;
  * @version $Id$
  */
 public class JavacFromSetLocation extends CompilerProxy {
-  public static final CompilerInterface ONLY = new JavacFromSetLocation();
+  // To implement #523222, we had to make this not a singleton,
+  // to allow it to re-determine the location of the compiler multiple times.
+  //public static final CompilerInterface ONLY = new JavacFromSetLocation();
 
   /** Private constructor due to singleton. */
-  private JavacFromSetLocation() {
+  public JavacFromSetLocation() {
     super("edu.rice.cs.drjava.model.compiler.JavacGJCompiler",
           _getClassLoader());
   }

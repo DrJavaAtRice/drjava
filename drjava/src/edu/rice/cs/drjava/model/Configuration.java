@@ -80,11 +80,38 @@ public final class Configuration {
   }
 
   /**
+   * Saves the properties back to a file.
+   * This will do nothing if it can't save to the properties file
+   * for some reason.
+   * This is a temporary hack to enable feature req #523222.
+   */
+  public void saveProperties() {
+    try {
+      _properties.store(new FileOutputStream(PROPERTIES_FILE),
+                        "DrJava config (see " +
+                          "http://sourceforge.net/docman/display_doc.php?docid=9158&group_id=44253" +
+                          ")");
+    }
+    catch (IOException ioe) {
+      // oh well, couldn't save.
+    }
+  }
+
+
+  /**
+   * Changes the setting for the javac classpath.
+   * This is a temporary hack to enable feature req #523222.
+   */
+  public void setJavacLocation(String s) {
+    _properties.setProperty(JAVAC_LOCATION_KEY, s);
+  }
+
+  /**
    * Returns the setting for the javac classpath, or null if none was
    * specified.
    */
   public String getJavacLocation() {
-    return (String) _properties.get(JAVAC_LOCATION_KEY);
+    return _properties.getProperty(JAVAC_LOCATION_KEY);
   }
 
   /**
@@ -92,7 +119,7 @@ public final class Configuration {
    * specified.
    */
   public String getJSR14Location() {
-    return (String) _properties.get(JSR14_LOCATION_KEY);
+    return _properties.getProperty(JSR14_LOCATION_KEY);
   }
 
   /**
@@ -100,7 +127,7 @@ public final class Configuration {
    * or null if none was specified.
    */
   public String getJSR14CollectionsPath() {
-    return (String) _properties.get(JSR14_COLLECTIONS_KEY);
+    return _properties.getProperty(JSR14_COLLECTIONS_KEY);
   }
 
   /**
@@ -112,7 +139,7 @@ public final class Configuration {
    * @return An array of items to add to the classpaths.
    */
   public String[] getExtraClasspath() {
-    String path = (String) _properties.get(EXTRA_CLASSPATH_KEY);
+    String path = _properties.getProperty(EXTRA_CLASSPATH_KEY);
     if (path == null) {
       return new String[0];
     }

@@ -151,6 +151,10 @@ public class CompilerRegistry {
            availableCompilers.toArray(new CompilerInterface[0]);
   }
 
+  public boolean isNoCompilerAvailable() {
+    return getActiveCompiler() == NoCompilerAvailable.ONLY;
+  }
+
   /**
    * Sets which compiler is the "active" compiler.
    *
