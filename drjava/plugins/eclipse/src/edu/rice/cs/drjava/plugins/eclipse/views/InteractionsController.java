@@ -267,6 +267,14 @@ public class InteractionsController {
       }
     }
     
+    public void interpreterResetFailed(Throwable t) {
+      String title = "Interactions Could Not Reset";
+      String msg = "The interactions window could not be reset:\n" +
+        t.toString();
+      _view.showInfoDialog(title, msg);
+      interpreterReady();
+    }
+    
     /** Enables the Interactions Pane. */
     protected void _enableInteractionsPane() {
       _view.setBusyCursorShown(false);

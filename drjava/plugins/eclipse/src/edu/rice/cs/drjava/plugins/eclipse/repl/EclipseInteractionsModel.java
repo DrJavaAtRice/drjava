@@ -152,11 +152,23 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
   
   /**
    * Called when input is requested from System.in.
-   * @return the input
+   * @return the input (currently just a newline)
    */
   public String getConsoleInput() {
     // TODO: Read input from a console?
+    _document.insertBeforeLastPrompt("System.in is not yet supported." + _newLine,
+                                     InteractionsDocument.ERROR_STYLE);
     return "\n";
+  }
+  
+  /**
+   * Any extra action to perform (beyond notifying listeners) when
+   * the interpreter fails to reset.
+   * @param t The Throwable thrown by System.exit
+   */
+  protected void _interpreterResetFailed(Throwable t) {
+    _document.insertBeforeLastPrompt("Reset Failed!" + _newLine,
+                                     InteractionsDocument.ERROR_STYLE);
   }
   
   /**
@@ -229,6 +241,16 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
   protected void _notifyInterpreterExited(final int status) {
     for (int i=0; i < _listeners.size(); i++) {
       ((InteractionsListener)_listeners.get(i)).interpreterExited(status);
+    }
+  }
+  
+  /**
+   * Notifies listeners that the interpreter reset failed.
+   * @param t Throwable explaining why the reset failed.
+   */
+  protected void _notifyInterpreterResetFailed(Throwable t) {
+    for (int i=0; i < _listeners.size(); i++) {
+      ((InteractionsListener)_listeners.get(i)).interpreterResetFailed(t);
     }
   }
   
