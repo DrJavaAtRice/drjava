@@ -44,7 +44,7 @@ public class Parser implements ParserConstants {
   private Map<String, TypeParameter> TypeParamsMap = new HashMap<String, TypeParameter>();
   // contains the latest defined type parameters list whose
   // full declaration has not finished yet. That is to take
-  // care of the fact that the scope of a type parameter is
+  // care of the fact that the scope of a type parameter
   // covers the rest of the definition of the type parameters
   // list beyond a parameter's own definition (for example,
   // class Enum<E extends Enum<E>>, in Java 1.5 API). When
@@ -1785,7 +1785,7 @@ public class Parser implements ParserConstants {
                                 typ.getBeginLine(), typ.getBeginColumn(),
                                 typ.getEndLine(),   typ.getEndColumn());
           }
-          if(lastFormalParameterIsVarArgs) flags |= 0x00000080; // Modifier.VARARGS == 0x00000080 /**/
+          if(lastFormalParameterIsVarArgs) flags |= 0x00000080; // java.lang.reflect.Modifier.VARARGS == 0x00000080 /**/
 
           if (typeParameters == null){
           {if (true) return new MethodDeclaration(flags, typ, id.image, params,
@@ -1940,7 +1940,7 @@ public class Parser implements ParserConstants {
       typ = type();
       jj_consume_token(VAR_ARGS);
       id = jj_consume_token(IDENTIFIER);
-      // convert the type of the formal to be an array
+      // convert the type of the formal parameter to be an array
       typ = new ArrayType(typ, 1,
                           filename,
                           typ.getBeginLine(), typ.getBeginColumn(),
@@ -2398,7 +2398,7 @@ public class Parser implements ParserConstants {
    * @see koala.dynamicjava.tree.Node
    */
   final public EnumDeclaration.EnumBody enumBody() throws ParseException {
-    List<EnumDeclaration.EnumConstant> consts = null;
+    List<EnumDeclaration.EnumConstant> consts = new LinkedList<EnumDeclaration.EnumConstant>();
     List<Node>         decl = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case IDENTIFIER:

@@ -1113,4 +1113,11 @@ public class TigerTest extends DynamicJavaTestCase {
     
     assertEquals("Str should equal \"Case Clubs\"", "Case Clubs", interpret(testString));
   }
+
+  public void testNoNullPointerExceptionForEmptyEnum(){
+    testString =
+      "public enum Suit { ; }";
+    assertEquals("Interpreting empty null should return a null", null, interpret(testString));
+  }
+
 }

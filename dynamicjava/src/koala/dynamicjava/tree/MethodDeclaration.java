@@ -255,9 +255,9 @@ public class MethodDeclaration extends Node {
 
   // Not strictly needed. just added as a convenience /**/
   public boolean isVarArgs(){
-    return (accessFlags & 0x00000080) != 0; // Modifier.VARARGS == 0x00000080 /**/
+    return (accessFlags & 0x00000080) != 0; // java.lang.reflect.Modifier.VARARGS == 0x00000080 /**/
   }
-  
+
   /**
    * Allows a visitor to traverse the tree
    * @param visitor the visitor to accept

@@ -1,4 +1,4 @@
-javacc grammar.jj
+../../../../../javacc-3.2/bin/javacc grammar.jj
 ./fixparser Parser.java > newParser.java
 mv newParser.java Parser.java
 cd ../../
