@@ -42,6 +42,7 @@ package edu.rice.cs.drjava.model.compiler;
 import java.io.*;
 import junit.framework.*;
 import edu.rice.cs.util.classloader.LimitingClassLoader;
+import edu.rice.cs.drjava.DrJava;
 
 /**
  * Test cases for {@link CompilerRegistry}.
@@ -155,6 +156,20 @@ public class CompilerRegistryTest extends TestCase {
     assertEquals("Active compiler",
                  NoCompilerAvailable.ONLY,
                  _registry.getActiveCompiler());
+    
+    assertEquals("DrJava.java should not see an available compiler",
+                 false,
+                 DrJava.hasAvailableCompiler());
+  }
+  
+  /**
+   * Tests that DrJava.java can see whether CompilerRegistry has an
+   * available compiler.
+   */
+  public void testAvailableCompilerSeenByDrJava() {
+    assertEquals("DrJava.java should agree with CompilerRegistry",
+                 _registry.getActiveCompiler() != NoCompilerAvailable.ONLY,
+                 DrJava.hasAvailableCompiler());
   }
 
   /**

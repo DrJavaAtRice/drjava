@@ -42,6 +42,7 @@ package edu.rice.cs.drjava;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.MalformedURLException;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.*;
@@ -52,18 +53,25 @@ import edu.rice.cs.drjava.ui.AWTExceptionHandler;
 import edu.rice.cs.util.PreventExitSecurityManager;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.OutputStreamRedirector;
+import edu.rice.cs.util.newjvm.ExecJVM;
+import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.config.*;
+
 /** 
  * Main class for DrJava. 
  * @version $Id$
  */
 public class DrJava implements OptionConstants {
+  /** Class to probe to see if the debugger is available */
+  public static final String TEST_DEBUGGER_CLASS = "com.sun.jdi.Bootstrap";
+  
   private static final PrintStream _consoleOut = System.out;
   private static final PrintStream _consoleErr = System.err;
   private static PreventExitSecurityManager _manager;
   private static String[] _filesToOpen = new String[0];
+  private static boolean _attemptingAugmentedClasspath = false;
   
   /*
    * Config objects can't be public static final, since we have to delay 
@@ -105,102 +113,12 @@ public class DrJava implements OptionConstants {
   
   
   /**
-   * Main method for DrJava.  Uses a custom class loader to start the program.
-   * 
-   * @throws Throwable because InvocationTargetException can have a
-   * Throwable as its target exception.  (Due to the class loading...)
-   */
-  public static void main(String[] args) throws Throwable {
-    try {
-      // Use a class loader to invoke the "beginProgram" method so that we
-      // can put tools.jar on the classpath if it is available
-      Method main = _loadMainMethod();
-      main.invoke(null, new Object[] {args});
-    } 
-    catch (InvocationTargetException e) {
-      // Throw the target exception, which is "Throwable"
-      throw e.getTargetException();
-    } 
-    catch (Exception e) {
-      // Couldn't start with the class loader; show the error
-      System.err.println(e);
-      
-      // Start the program manually
-      beginProgram(args);
-    }
-  }
-  
-  /** (not currently used)
-  private static Class _loadClass(ClassLoader cl, String name) {
-    try {
-      return cl.loadClass(name);
-    } 
-    catch(Exception e) {
-      System.err.println("Error in attempt to load "+name+" using "+cl);
-      System.err.println(e);
-      System.err.println();
-      System.err.println();
-    }
-    return null;
-  }
-  private static void _testCL(ClassLoader cl) {
-    _loadClass(cl,"edu.rice.cs.drjava.DrJava");
-    _loadClass(cl,"com.sun.jdi.Bootstrap");
-  }
-  **/
-  
-  /**
-   * Attempts to load the DrJava.main method using a DrJavaClassLoader.
-   */
-  private static Method _loadMainMethod() 
-    throws NoSuchMethodException, SecurityException 
-  {
-    Class c = DrJava.class;
-    
-    /* for this version, don't use the custom classloader yet.
-     *  Neither the URLClassLoader nor the DrJavaClassLoader
-     *  appears to work correctly-- this is a project to be taken...
-     * (Motivation: We want the debugger classes to be available
-     *  if we know where tools.jar is, but it has to be on the
-     *  classpath of the classloader to work.)
-    try {
-      //File toolsLoc = getConfig().getSetting(JAVAC_LOCATION);
-      //if(toolsLoc != FileOption.NULL_FILE) {
-        //URL[] urls = new URL[] {fLoc.toURL()};
-        //ClassLoader sys = ClassLoader.getSystemClassLoader();
-        //ClassLoader dcl = new URLClassLoader(urls);
-        ClassLoader dcl = new DrJavaClassLoader();
-        
-        // test code
-        //Class uDj, dDj, uBs, dBs;
-        //String djn = "edu.rice.cs.drjava.Drjava",
-        //  bsn = "com.sun.jdi.Bootstrap";
-        //uDj = loadClass(cl,djn);
-        //dDj = loadClass(dcl,djn);
-        //uBs = loadClass(cl,bsn);
-        //dBs = loadClass(dcl,bsn);
-        //testCL(sys);
-        //testCL(cl);
-        //testCL(dcl);
-        // end test code
-        
-        c = dcl.loadClass("edu.rice.cs.drjava.DrJava");
-      //}
-    } 
-    catch (Exception e) {
-      // Couldn't load the class
-      System.err.println(e.toString());
-    }
-    */
-    return c.getMethod("beginProgram",new Class[] {String[].class});
-  }
-  
-  /**
    * Starts running DrJava.  Not done in the actual main method so a
    * custom class loader can be used.
    * @param args Command line argument array
    */
-  public static void beginProgram(final String[] args) {
+  //public static void beginProgram(final String[] args) {
+  public static void main(final String[] args) {
     try {
       // handleCommandLineArgs will return true if the program should load
       if (handleCommandLineArgs(args)) {
@@ -213,7 +131,7 @@ public class DrJava implements OptionConstants {
           throw new UnexpectedException(ise);
         }
       
-        setupCompilerIfNeeded();
+        checkForCompilersAndDebugger(args);
 
         // Show splash screen
         SplashScreen splash = new SplashScreen();
@@ -284,6 +202,10 @@ public class DrJava implements OptionConstants {
         }
       }
       
+      if (args[i].equals("-attemptingAugmentedClasspath")) {
+        _attemptingAugmentedClasspath = true;
+      }
+      
       if (args[i].equals("-help") || args[i].equals("-?")) {
         displayUsage();
         return false;
@@ -351,6 +273,20 @@ public class DrJava implements OptionConstants {
     }
   }
   
+  /**
+   * Saves the contents of the config file.
+   * TO DO: log any IOExceptions that occur
+   */
+  protected static void _saveConfig() {
+    try {
+      getConfig().saveConfiguration();
+    }
+    catch(IOException e) {
+      // for now, do nothing
+      // TO DO: log this error
+    }
+  }
+  
   
   /**
    * Handle the list of files specified on the command line.  Feature request #509701.
@@ -384,68 +320,298 @@ public class DrJava implements OptionConstants {
   }
   
   /**
-   * Implements feature req #523222: Prompt user for compiler if none found.
+   * Check to see if a compiler and the debugger are available, and
+   * if JSR-14 is available if its location is specified.  If necessary,
+   * starts DrJava in a new JVM with an augmented classpath to make these 
+   * available.  If it can't find them at all, it prompts the user to 
+   * optionally specify tools.jar
+   * @param args Command line argument array, in case we need to restart
    */
-  static void setupCompilerIfNeeded() {
-    if (CompilerRegistry.ONLY.isNoCompilerAvailable()) {
-      // no compiler available; let's try to let the user pick one.
+  static void checkForCompilersAndDebugger(String[] args) {
+    if (_attemptingAugmentedClasspath) {
+      // We're on our second attempt-- just load DrJava
+      return;
+    }
+    
+    boolean restartForToolsJar = false;
+
+    // Try to make sure both compiler and debugger are available
+    if (hasAvailableCompiler()) {
+      
+      if (hasAvailableDebugger()) {
+        // Everything is already on the classpath; start normally
+        restartForToolsJar = false;
+      }
+      else if (classLoadersCanFindDebugger()) {
+        // We know where tools.jar is, so restart with it on the classpath
+        restartForToolsJar = true;
+      }
+      else {
+        // Have a compiler (probably JSR14) but can't find JDI classes...
+        // Prompt user for debugger (in tools.jar)
+        restartForToolsJar = promptForToolsJar(false, true);
+      }
+    }
+    else {
+      
+      if (hasAvailableDebugger()) {
+        // Debugger but no compiler => probably jpda on classpath.
+        // Prompt user for compiler (in tools.jar)
+        promptForToolsJar(true, false);
+        // don't need to restart for tools.jar
+      }
+      else if (classLoadersCanFindDebugger()) {
+        // Debugger if we restart, but no compiler => jpda in prefs?
+        // Prompt use for compiler (in tools.jar)
+        promptForToolsJar(true, false);
+        restartForToolsJar = true;
+      }
+      else {
+        // No debugger or compiler
+        // Prompt user for tools.jar
+        restartForToolsJar = promptForToolsJar(true, true);
+      }
+    }
+    
+    // Check to see if we need to restart for JSR14 (not working yet)
+    //boolean restartForJSR14 = shouldPrependJSR14ToBootclasspath();
+    boolean restartForJSR14 = false;
+
+    restartIfNecessary(restartForToolsJar, restartForJSR14, args);
+  }
+  
+  /**
+   * Returns whether the CompilerRegistry has been able to load a compiler.
+   */
+  public static boolean hasAvailableCompiler() {
+    return !CompilerRegistry.ONLY.isNoCompilerAvailable();
+  }
+  
+  /**
+   * Returns whether the debugger will be able to load successfully.
+   * Checks for the ability to load the com.sun.jdi.Bootstrap class.
+   */
+  public static boolean hasAvailableDebugger() {
+    try {
+      Class.forName(TEST_DEBUGGER_CLASS);
+      return true;
+    }
+    catch (ClassNotFoundException cnfe) {
+      return false;
+    }
+  }
+  
+  /**
+   * Returns whether the debugger will be able to load successfully
+   * if we restart with our notion of tools.jar on the classpath.
+   * Uses ToolsJarClassLoader to try to load com.sun.jdi.Bootstrap.
+   */
+  public static boolean classLoadersCanFindDebugger() {
+    // First check the specified location
+    File jar = getConfig().getSetting(JAVAC_LOCATION);
+    if (jar != FileOption.NULL_FILE) {
+      try {
+        URL[] urls = new URL[] { jar.toURL() };
+        URLClassLoader loader = new URLClassLoader(urls);
+        loader.loadClass(TEST_DEBUGGER_CLASS);
+        return true;
+      }
+      catch (ClassNotFoundException e) {
+        // no debugger in this jar file; try ToolsJarClasLoader
+      }
+      catch (MalformedURLException e) {
+        // specified jar invalid; try ToolsJarClassLoader
+      }
+    }
+
+    // If not, try to guess tools.jar location
+    ToolsJarClassLoader loader = new ToolsJarClassLoader();
+    try {
+      loader.loadClass("com.sun.jdi.Bootstrap");
+      return true;
+    }
+    catch (ClassNotFoundException cnfe) {
+      return false;
+    }
+  }
+
+  /**
+   * Returns whether we should restart to prepend the specified JSR-14
+   * jar to the bootclasspath.  This allows us to use JSR-14 on a Mac,
+   * when tools.jar usually shows up on the classpath before JSR-14.
+   */
+  static boolean shouldPrependJSR14ToBootclasspath() {
+    //System.out.println("JSR-14:" + getConfig().getSetting(JSR14_LOCATION));
+    //System.out.println("generics avail:" + CompilerRegistry.ONLY.areGenericJavaCompilersAvailable());
+    return (getConfig().getSetting(JSR14_LOCATION) != FileOption.NULL_FILE) &&
+      !CompilerRegistry.ONLY.areGenericJavaCompilersAvailable();
+  }
+
+  
+  /**
+   * Tries to run a new DrJava process with our notion of tools.jar
+   * appended to the end of the classpath.  This should allow us to
+   * always make the debugger available.
+   * @param forToolsJar Whether to restart DrJava to find tools.jar
+   * @param forJSR14 Whether to restart DrJava to get JSR-14
+   * @param args Array of command line arguments to pass
+   */
+  public static void restartIfNecessary(boolean forToolsJar, 
+                                        boolean forJSR14,
+                                        String[] args) {
+    if (!forToolsJar && !forJSR14) {
+      // Don't need to restart: just continue normally
+      return;
+    }
+    
+    //System.out.println("restarting with debugger...");
+    
+    String pathSep = System.getProperty("path.separator");
+    String classpath = System.getProperty("java.class.path");
+    
+    // Class arguments
+    String[] classArgs = new String[args.length + 1];
+    System.arraycopy(args, 0, classArgs, 0, args.length);
+    classArgs[args.length] = "-attemptingAugmentedClasspath";
+    
+    // JVM arguments
+    String[] jvmArgs = new String[0];
+    
+    if (forToolsJar) {
+      // Try to restart with tools.jar on the classpath
+      classpath += pathSep;
+    
+      // Add tools.jar from preferences if specified
+      File toolsFromConfig = getConfig().getSetting(JAVAC_LOCATION);
+      if (toolsFromConfig != FileOption.NULL_FILE) {
+        classpath += toolsFromConfig.getAbsolutePath() + pathSep;
+      }
+      
+      // Fall back on guesses from ToolsJarClassLoader
+      classpath += ToolsJarClassLoader.getToolsJarClasspath();
+    }
+    
+    if (forJSR14) {
+      // Try to prepend JSR-14 to the bootclasspath
+      File jsr14 = getConfig().getSetting(JSR14_LOCATION);
+      if (jsr14 != FileOption.NULL_FILE) {
+        String arg = "-Xbootclasspath/p:" + jsr14.getAbsolutePath();
+        jvmArgs = new String[1];
+        jvmArgs[0] = arg;
+      }
+    }
+    
+    // Run a new copy of DrJava and exit
+    try {
+      ExecJVM.runJVM("edu.rice.cs.drjava.DrJava", classArgs, 
+                     classpath, jvmArgs);
+      System.exit(0);
+    }
+    catch (IOException ioe) {
+      // Display error
       final String[] text = {
-        "DrJava can not find any Java compiler. Would you ",
-        "like to configure the location of the compiler? ",
-        "The compiler is generally located in 'tools.jar', ",
-        "in the 'lib' subdirectory under your JDK ",
-        "installation directory. (If you say 'No', DrJava ",
-        "will be unable to compile programs.)"
+        "DrJava was unable to load its debugger.  Would you ",
+        "like to start DrJava without a debugger?",
+        "\nReason: " + ioe.toString()
       };
-      
-      int result = JOptionPane.showConfirmDialog(null,
-                                                 text,
-                                                 "Compiler not found",
+      int result = JOptionPane.showConfirmDialog(null, text,
+                                                 "Could Not Load Debugger",
                                                  JOptionPane.YES_NO_OPTION);
-      
-      if (result == JOptionPane.YES_OPTION) {
-        JFileChooser chooser = new JFileChooser();
-        
-        do {
-          if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            File jar = chooser.getSelectedFile();
-            
-            // set the javac property
-            getConfig().setSetting(JAVAC_LOCATION,
-                              jar);//.getAbsolutePath());
-            
-            // need to re-call getAvailable for it to re-check availability
-            CompilerInterface[] compilers
-              = CompilerRegistry.ONLY.getAvailableCompilers();
-            
-            if (compilers[0] != NoCompilerAvailable.ONLY) {
-              CompilerRegistry.ONLY.setActiveCompiler(compilers[0]);
-              try {
-                getConfig().saveConfiguration();
-              } catch(IOException e) {
-                // for now, do nothing
-              }
-            }
-          }
-        }
-        while (CompilerRegistry.ONLY.isNoCompilerAvailable() &&
-               _userWantsToPickAgain());
+      if (result != JOptionPane.YES_OPTION) {
+        System.exit(0);
       }
     }
   }
   
-  private static boolean _userWantsToPickAgain() {
+  /**
+   * Prompts the user that the location of tools.jar needs to be
+   * specified to be able to use the compiler and/or the debugger.
+   * Returns whether it will be necessary to restart after the
+   * user's response in order to make the debugger available on
+   * the classpath.
+   * @param needCompiler whether DrJava needs tools.jar for a compiler
+   * @param needDebugger whether DrJava needs tools.jar for the debugger
+   * @return whether we will need to restart to put tools.jar on classpath
+   */
+  public static boolean promptForToolsJar(boolean needCompiler,
+                                          boolean needDebugger) {
+    boolean restartRequired = false;
     final String[] text = {
-      "The file you chose did not appear to contain the compiler. ",
-      "Would you like to pick again? The compiler is generally ",
-      "located in 'tools.jar', in the 'lib' subdirectory under ",
-      "your JDK installation directory.",
-      "(If you say 'No', DrJava will be unable to compile programs.)"
+      "DrJava cannot find the Java SDK's 'tools.jar' file. ",
+      "This file is necessary to compile files and use the ",
+      "debugger.  It is generally located in the 'lib' ",
+      "subdirectory of your Java installation directory. ",
+      "Would you like to specify its location? ",
+      "(If you say 'No', DrJava might be unable to compile ",
+      "or debug programs.)"
     };
     
     int result = JOptionPane.showConfirmDialog(null,
                                                text,
-                                               "Compiler not found",
+                                               "Locate 'tools.jar'?",
+                                               JOptionPane.YES_NO_OPTION);
+    
+    if (result == JOptionPane.YES_OPTION) {
+      JFileChooser chooser = new JFileChooser();
+      // TO DO: add a file filter
+      
+      // Loop until we find a good tools.jar or the user gives up
+      do {
+        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+          File jar = chooser.getSelectedFile();
+          
+          if (jar != null) {
+            // set the tools.jar property
+            getConfig().setSetting(JAVAC_LOCATION, jar);
+            
+            // Adjust if we needed a compiler
+            if (needCompiler) {
+              // need to re-call getAvailable for it to re-check availability
+              CompilerInterface[] compilers
+                = CompilerRegistry.ONLY.getAvailableCompilers();
+              
+              if (compilers[0] != NoCompilerAvailable.ONLY) {
+                needCompiler = false;
+                CompilerRegistry.ONLY.setActiveCompiler(compilers[0]);
+                _saveConfig();
+              }
+            }
+            
+            // Adjust if we need a debugger
+            if (needDebugger) {
+              if (classLoadersCanFindDebugger()) {
+                needDebugger = false;
+                restartRequired = true;
+                _saveConfig();
+              }
+            }
+          }
+        }
+      }
+      while ((needCompiler || needDebugger) && _userWantsToPickAgain());
+    }
+    
+    return restartRequired;
+  }
+  
+  /**
+   * Displays a prompt to the user indicating that tools.jar could not be
+   * found in the specified location, and asks if he would like to specify
+   * a new location.
+   */
+  private static boolean _userWantsToPickAgain() {
+    final String[] text = {
+      "The file you chose did not appear to be a valid 'tools.jar'. ",
+      "Would you like to pick again? The 'tools.jar' file is ",
+      "generally located in the 'lib' subdirectory under your ",
+      "JDK installation directory.",
+      "(If you say 'No', DrJava might be unable to compile or ",
+      "debug programs.)"
+    };
+    
+    int result = JOptionPane.showConfirmDialog(null,
+                                               text,
+                                               "Locate 'tools.jar'?",
                                                JOptionPane.YES_NO_OPTION);
     
     return result == JOptionPane.YES_OPTION;
