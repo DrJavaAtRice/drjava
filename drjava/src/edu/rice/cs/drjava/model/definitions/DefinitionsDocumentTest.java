@@ -39,9 +39,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions;
 
+import javax.swing.undo.CannotUndoException;
 import javax.swing.text.*;
-import javax.swing.event.*;
-import java.util.*;
 import gj.util.Vector;
 
 import junit.framework.*;
@@ -1180,6 +1179,8 @@ public class DefinitionsDocumentTest extends TestCase
     _defModel.addUndoableEditListener(_defModel.getUndoManager());
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,new Integer(2));
 
+    // 1
+    
     // Start a compound edit and verify the returned key
     int key = _defModel.getUndoManager().startCompoundEdit();
     assertEquals("Should have returned the correct key.", 0, key);
@@ -1198,6 +1199,84 @@ public class DefinitionsDocumentTest extends TestCase
     _defModel.getUndoManager().endCompoundEdit(key);
     _defModel.getUndoManager().undo();
     assertEquals("Should have undone correctly.", "", 
+                 _defModel.getText(0, _defModel.getLength()));
+    
+    // 2
+    
+    String commented = 
+      "// public class foo {\n" +
+      "//   int bar;\n" +
+      "// }";
+    
+    // Start a compound edit and verify the returned key
+    key = _defModel.getUndoManager().startCompoundEdit();
+    assertEquals("Should have returned the correct key.", 2, key);
+    
+    // Insert a test string into the document
+    _defModel.insertString(0, text, null);
+    assertEquals("Should have inserted the text properly.", text, 
+                 _defModel.getText(0, _defModel.getLength()));
+    
+    // Indent the lines, so as to trigger a nested compond edit
+    _defModel.indentLines(0, _defModel.getLength());
+    assertEquals("Should have indented correctly.", indented, 
+                 _defModel.getText(0, _defModel.getLength()));
+    
+    // End the outer compound edit trigger a second compound edit
+    _defModel.getUndoManager().endCompoundEdit(key);
+    _defModel.commentLines(0, _defModel.getLength());
+    assertEquals("Should have commented correctly.", commented, 
+                 _defModel.getText(0, _defModel.getLength()));
+    
+    // Undo the second compound edit
+    _defModel.getUndoManager().undo();
+    assertEquals("Should have undone the commenting.", indented,
+                 _defModel.getText(0, _defModel.getLength()));
+    
+    // Undo the first compound edit
+    _defModel.getUndoManager().undo();
+    assertEquals("Should have undone the indenting and inserting.", "",
+                 _defModel.getText(0, _defModel.getLength()));
+    
+    // 3    
+    
+    // Start a compound edit and verify the returned key
+    key = _defModel.getUndoManager().startCompoundEdit();
+    assertEquals("Should have returned the correct key.", 5, key);
+    
+    // Insert a test string into the document
+    _defModel.insertString(0, text, null);
+    assertEquals("Should have inserted the text properly.", text, 
+                 _defModel.getText(0, _defModel.getLength()));
+    
+    // Indent the lines, so as to trigger a nested compond edit
+    _defModel.indentLines(0, _defModel.getLength());
+    assertEquals("Should have indented correctly.", indented, 
+                 _defModel.getText(0, _defModel.getLength()));
+    
+    // Try to undo the nested edit
+    try {
+      _defModel.getUndoManager().undo();
+      fail("Should not have allowed undoing a nested edit.");
+    }
+    catch (CannotUndoException e) {
+      // Correct: cannot undo a nested edit
+    }
+    
+    // Try end the compound edit with a wrong key
+    try {
+      _defModel.getUndoManager().endCompoundEdit(key + 1);
+      fail("Should not have allowed ending a compound edit with a wrong key.");
+    }
+    catch (IllegalStateException e) {
+      assertEquals("Should have printed the correct error message.", 
+                   "Improperly nested compound edits.", e.getMessage());
+    }
+    
+    // End the compound edit and undo
+    _defModel.getUndoManager().endCompoundEdit(key);
+    _defModel.getUndoManager().undo();
+    assertEquals("Should have undone the indenting and inserting.", "",
                  _defModel.getText(0, _defModel.getLength()));
   }
 }
