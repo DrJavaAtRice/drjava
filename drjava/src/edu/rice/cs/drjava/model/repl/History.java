@@ -280,28 +280,35 @@ public class History implements OptionConstants {
   }
   
   /**
+   * Changes the maximum number of interactions remembered by this History.
+   * @param newSize New number of interactions to remember.
+   */
+  public void setMaxSize(int newSize) {
+    // Sanity check
+    if (newSize < 0) newSize = 0;
+    
+    // Remove old elements if the new size is less than current size
+    if (size() > newSize) {
+      
+      int numToDelete = size() - newSize;
+      
+      for (int i=0; i< numToDelete; i++) {
+        _vector.remove(0);
+      }
+      
+      moveEnd();
+    }
+    MAX_SIZE = newSize;
+  }
+  
+  /**
    * The OptionListener for HISTORY_MAX_SIZE
    */
   public class HistorySizeOptionListener implements OptionListener<Integer> {
    
     public void optionChanged (OptionEvent<Integer> oce) {
       int newSize = oce.value.intValue();
-      
-      // Sanity check
-      if (newSize < 0) newSize = 0;
-      
-      // Remove old elements if the new size is less than current size
-      if (size() > newSize) {
-        
-        int numToDelete = size() - newSize;
-        
-        for (int i=0; i< numToDelete; i++) {
-          _vector.remove(0);
-        }
-        
-        moveEnd();
-      }
-      MAX_SIZE = newSize;
+      setMaxSize(newSize);
     }
   }
 }

@@ -163,6 +163,10 @@ public final class HistoryTest extends TestCase implements OptionConstants{
                  _history.getCurrent());
   }
   
+  /**
+   * Tests that the history size can be updated, both through
+   * the config framework and the setMaxSize method.
+   */
   public void testLiveUpdateOfHistoryMaxSize() {
     
     int maxLength = 20;
@@ -172,28 +176,28 @@ public final class HistoryTest extends TestCase implements OptionConstants{
       _history.add("testing " + i);
     }
     
+    assertEquals("History size should be 20",
+                 20, _history.size());
+    
     DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(10));
     
     assertEquals("History size should be 10",
                  10, _history.size());
     
-    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(100));
+    _history.setMaxSize(100);
     
     assertEquals("History size should still be 10",
-                 10,
-                 _history.size());
+                 10, _history.size());
     
-    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(0));
+    _history.setMaxSize(0);
     
     assertEquals("History size should be 0",
-                 0,
-                 _history.size());
+                 0, _history.size());
     
     DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(-1));
     
     assertEquals("History size should still be 0",
-                 0,
-                 _history.size());
+                 0, _history.size());
   }
   
   /**
