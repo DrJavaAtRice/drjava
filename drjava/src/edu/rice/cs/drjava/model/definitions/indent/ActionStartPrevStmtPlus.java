@@ -39,27 +39,27 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import edu.rice.cs.util.UnexpectedException;
-
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+import edu.rice.cs.util.UnexpectedException;
 
 import javax.swing.text.BadLocationException;
 
 /**
  * Indents the current line in the document to the indent level of the
- * start of the contract or statement of the brace enclosing the current
- * position, plus the given suffix.
+ * start of the statement previous to the one the cursor is currently on,
+ * plus the given suffix string.
+ *
  * @version $Id$
  */
-public class ActionStartStmtOfBracePlus extends IndentRuleAction {
+public class ActionStartPrevStmtPlus extends IndentRuleAction {
   private String _suffix;
   
   /**
    * Constructs a new rule with the given suffix string.
    * @param prefix String to append to indent level of brace
    */
-  public ActionStartStmtOfBracePlus(String suffix) {
+  public ActionStartPrevStmtPlus(String suffix) {
     super();
     _suffix = suffix;
   }
@@ -68,38 +68,38 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
    * Properly indents the line that the caret is currently on.
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
+   *
    * @param doc DefinitionsDocument containing the line to be indented.
    */
-  public void indentLine(DefinitionsDocument doc)
-  {
-    int pos = doc.getCurrentLocation();
-
-    // Get distance to brace
-    IndentInfo info = doc.getReduced().getIndentInformation();
-    int distToBrace = info.distToBrace;
-      
-    // If there is no brace, align to left margin
-    if (distToBrace == -1) {
-      doc.setTab(_suffix, pos);
-      return;
-//      throw new UnexpectedException(new RuntimeException("Precondition for ActionStartStmtOfBracePlus " +
-//        "not met: there is no brace."));
-    }
-
-    // Get the absolute position of the brace
-    int bracePos = pos - distToBrace;
-
+  public void indentLine(DefinitionsDocument doc) {
     String indent = "";
+    int here = doc.getCurrentLocation();
+    
+    // Find end of previous statement
+    char[] delims = {';', '{', '}'};
+    int lineStart = doc.getLineStartPos(here);
+    int prevDelimiterPos;
     try {
-      indent = doc.getIndentOfCurrStmt(bracePos);
+      prevDelimiterPos = doc.findPrevDelimiter(lineStart, delims);
     } catch (BadLocationException e) {
       // Should not happen
       throw new UnexpectedException(e);
     }
 
-    indent = indent + _suffix;
+    // For DOCSTART, align to left margin
+    if(prevDelimiterPos <= DefinitionsDocument.DOCSTART) {
+      doc.setTab(_suffix, here);
+      return;
+    }
+        
+    // Get indent of prev statement
+    try {
+      indent = doc.getIndentOfCurrStmt(prevDelimiterPos);
+    } catch (BadLocationException e) {
+      throw new UnexpectedException(e);
+    }
 
-    doc.setTab(indent, pos);
+    indent = indent + _suffix;
+    doc.setTab(indent, here);
   }
-    
 }

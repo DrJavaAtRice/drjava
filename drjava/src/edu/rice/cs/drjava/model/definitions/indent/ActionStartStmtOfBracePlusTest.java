@@ -225,7 +225,7 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
     rule2.indentLine(_doc, 28);
     assertEquals("nested braces, with suffix", 
                  aligned2, _doc.getText(0, _doc.getLength()));
-		 }*/
+   }*/
   
   /**
    * Tests indenting with commented delimiters
@@ -289,7 +289,32 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
     rule2.indentLine(_doc, 30);
     assertEquals("start in different brace, with suffix", 
                  aligned2, _doc.getText(0, _doc.getLength()));
-		 }*/
+   }*/
+  
+  /**
+   * Tests indenting without an enclosing brace
+   */
+  public void testNoBrace() throws BadLocationException {
+    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
+    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus("  "); // 2 spaces
+    
+    String text = "package foo;\n" +
+                  "import bar.*;\n";
+    String aligned1 = "package foo;\n" +
+                      "import bar.*;\n";
+    String aligned2 = "package foo;\n" +
+                      "  import bar.*;\n";
+    
+    _setDocText(text);
+    rule1.indentLine(_doc, 13);
+    assertEquals("no brace, no suffix", 
+                 aligned1, _doc.getText(0, _doc.getLength()));
+    
+    _setDocText(text);
+    rule2.indentLine(_doc, 13);
+    assertEquals("no brace, with suffix", 
+                 aligned2, _doc.getText(0, _doc.getLength()));
+  }
 }
 
 
