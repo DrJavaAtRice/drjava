@@ -1,6 +1,5 @@
 package  edu.rice.cs.drjava;
 
-
 /**
  * @version $Id$
  */

@@ -1,10 +1,3 @@
-/* $Id$ */
-
-/* If click on combobox, move cursor to error location.
- * If move cursor onto line with error, select error in combobox but do
- * not move the cursor.
- */
-
 package edu.rice.cs.drjava;
 
 import java.util.Arrays;
@@ -47,6 +40,12 @@ import java.awt.Component;
 import java.awt.BorderLayout;
 import java.awt.Font;
 
+/**
+ * @version $Id$
+ * If click on combobox, move cursor to error location.
+ * If move cursor onto line with error, select error in combobox but do
+ * not move the cursor.
+ */
 public class CompilerErrorPanel extends JPanel {
   /** Highlight painter for selected errors in the defs doc. */
   private static final DefaultHighlighter.DefaultHighlightPainter
