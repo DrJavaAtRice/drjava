@@ -90,7 +90,9 @@ public class TypeChecker extends VisitorObject<Class> {
   }
 
   /**
-   * Visits a WhileStatement
+   * Visits a WhileStatement first by checking the 
+   * condition type and unboxing if necessary then by 
+   * recurring to its body.
    * @param node the node to visit
    */
   public Class visit(WhileStatement whileStmt) {
@@ -120,7 +122,7 @@ public class TypeChecker extends VisitorObject<Class> {
   public Class visit(ForEachStatement node){
     /* to be filled in shortly */
 
-    
+  
         /*examples*/
     /*
      * Collection<String> c = ... ;
@@ -1061,23 +1063,29 @@ return null;
    */
   public Class visit(NotExpression node) {
     // Check the type
-    Node  n = node.getExpression();
-    Class c = n.acceptVisitor(this);
+    Expression exp = node.getExpression();
+    Class c = exp.acceptVisitor(this);
 
-    if (c != boolean.class) {
+    if (c != boolean.class && c != Boolean.class) {
       throw new ExecutionError("not.expression.type", node);
     }
-    node.setProperty(NodeProperties.TYPE, c);
+    node.setProperty(NodeProperties.TYPE, boolean.class);
+
+    // Auto-unbox, if necessary
+    if (_isBoxingType(c)) {
+      node.setExpression(_unbox(exp, c));
+    }
 
     // Compute the expression if it is constant
-    if (n.hasProperty(NodeProperties.VALUE)) {
-      if (((Boolean)n.getProperty(NodeProperties.VALUE)).booleanValue()) {
+    if (exp.hasProperty(NodeProperties.VALUE)) {
+      if (((Boolean) exp.getProperty(NodeProperties.VALUE)).booleanValue()) {
         node.setProperty(NodeProperties.VALUE, Boolean.FALSE);
-      } else {
+      } 
+      else {
         node.setProperty(NodeProperties.VALUE, Boolean.TRUE);
       }
     }
-    return c;
+    return boolean.class;
   }
 
   /**
@@ -1086,31 +1094,49 @@ return null;
    */
   public Class visit(ComplementExpression node) {
     // Check the type
-    Node  n = node.getExpression();
-    Class c = n.acceptVisitor(this);
+    Expression e = node.getExpression();
+    Class c = e.acceptVisitor(this);
+    Class returnType = c;
 
-    if (c == char.class || c == byte.class || c == short.class) {
-      node.setProperty(NodeProperties.TYPE, c = int.class);
-    } else if (c == int.class  || c == long.class) {
-      node.setProperty(NodeProperties.TYPE, c);
-    } else {
+    if (c == char.class      || c == byte.class || c == short.class ||
+        c == Character.class || c == Byte.class || c == Short.class) {
+      node.setProperty(NodeProperties.TYPE, int.class);
+    } 
+    else if (c == int.class     || c == long.class ||
+             c == Integer.class || c == Long.class) {
+      if (c == Integer.class) {
+        returnType = int.class;
+      }
+      else if (c == Long.class) {
+        returnType = long.class;
+      }
+      node.setProperty(NodeProperties.TYPE, returnType);
+    } 
+    else {
       throw new ExecutionError("complement.expression.type", node);
     }
 
+    // Auto-unbox, if necessary
+    if (_isBoxingType(c)) {
+      node.setExpression(_unbox(e, c));
+    }
+    
     // Compute the expression if it is constant
-    if (n.hasProperty(NodeProperties.VALUE)) {
-      Object o = n.getProperty(NodeProperties.VALUE);
+    if (e.hasProperty(NodeProperties.VALUE)) {
+      Object o = e.getProperty(NodeProperties.VALUE);
+      
       if (o instanceof Character) {
         o = new Integer(((Character)o).charValue());
       }
       if (c == int.class) {
         o = new Integer(~((Number)o).intValue());
-      } else {
+      } 
+      else {
         o = new Long(~((Number)o).longValue());
       }
       node.setProperty(NodeProperties.VALUE, o);
     }
-    return c;
+    return returnType;
   }
 
   /**
@@ -1123,9 +1149,8 @@ return null;
     // Compute the expression if it is constant
     Node  n = node.getExpression();
     if (n.hasProperty(NodeProperties.VALUE)) {
-      node.setProperty
-        (NodeProperties.VALUE,
-         InterpreterUtilities.plus(c, n.getProperty(NodeProperties.VALUE)));
+      node.setProperty(NodeProperties.VALUE,
+                       InterpreterUtilities.plus(c, n.getProperty(NodeProperties.VALUE)));
     }
     return c;
   }
@@ -1415,20 +1440,22 @@ return null;
     Class lc = ln.acceptVisitor(this);
     Class rc = rn.acceptVisitor(this);
 
+    // Check the equality rules, and un-box
     checkEqualityStaticRules(lc, rc, node);
 
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
-      node.setProperty
-        (NodeProperties.VALUE,
-         InterpreterUtilities.equalTo(lc, rc,
-                                      ln.getProperty(NodeProperties.VALUE),
-                                      rn.getProperty(NodeProperties.VALUE)));
+      node.setProperty(NodeProperties.VALUE,
+                       InterpreterUtilities.equalTo(lc, rc,
+                                                    ln.getProperty(NodeProperties.VALUE),
+                                                    rn.getProperty(NodeProperties.VALUE)));
     }
 
     // Set the type property
     node.setProperty(NodeProperties.TYPE, boolean.class);
+    
+    // Return the type of the expression (always boolean)
     return boolean.class;
   }
 
@@ -1438,25 +1465,27 @@ return null;
    */
   public Class visit(NotEqualExpression node) {
     // Check the types
-    Node  ln = node.getLeftExpression();
-    Node  rn = node.getRightExpression();
+    Node ln = node.getLeftExpression();
+    Node rn = node.getRightExpression();
     Class lc = ln.acceptVisitor(this);
     Class rc = rn.acceptVisitor(this);
 
+    // Check the equality rules, and un-box
     checkEqualityStaticRules(lc, rc, node);
 
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
-      node.setProperty
-        (NodeProperties.VALUE,
-         InterpreterUtilities.notEqualTo(lc, rc,
-                                         ln.getProperty(NodeProperties.VALUE),
-                                         rn.getProperty(NodeProperties.VALUE)));
+      node.setProperty(NodeProperties.VALUE,
+                       InterpreterUtilities.notEqualTo(lc, rc,
+                                                       ln.getProperty(NodeProperties.VALUE),
+                                                       rn.getProperty(NodeProperties.VALUE)));
     }
 
     // Set the type property
     node.setProperty(NodeProperties.TYPE, boolean.class);
+    
+    // Return boolean type
     return boolean.class;
   }
 
@@ -1551,18 +1580,16 @@ return null;
   public Class visit(BitAndExpression node) {
     Class c = visitBitwiseExpression(node);
 
-    Node  ln = node.getLeftExpression();
-    Node  rn = node.getRightExpression();
+    Node ln = node.getLeftExpression();
+    Node rn = node.getRightExpression();
 
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
-      node.setProperty
-        (NodeProperties.VALUE,
-         InterpreterUtilities.bitAnd
-           (c,
-            ln.getProperty(NodeProperties.VALUE),
-            rn.getProperty(NodeProperties.VALUE)));
+      node.setProperty(NodeProperties.VALUE,
+                       InterpreterUtilities.bitAnd(c,
+                                                   ln.getProperty(NodeProperties.VALUE),
+                                                   rn.getProperty(NodeProperties.VALUE)));
     }
     return c;
   }
@@ -1795,14 +1822,23 @@ return null;
    * @param node the node to visit
    */
   public Class visit(OrExpression node) {
-    Node  ln = node.getLeftExpression();
-    Node  rn = node.getRightExpression();
+    Expression ln = node.getLeftExpression();
+    Expression rn = node.getRightExpression();
     Class lc = ln.acceptVisitor(this);
     Class rc = rn.acceptVisitor(this);
 
     // Check the types of the operands
-    if (lc != boolean.class || rc != boolean.class) {
+    if (!(lc == boolean.class || lc == Boolean.class) || 
+        !(rc == boolean.class || rc == Boolean.class) ) {
       throw new ExecutionError("or.type", node);
+    }
+
+    // Auto-unbox, if necessary
+    if (lc == Boolean.class) {
+      node.setLeftExpression(_unbox(ln, lc));
+    }
+    if (rc == Boolean.class) {
+      node.setRightExpression(_unbox(rn, rc));
     }
 
     // Compute the expression if it is constant
@@ -1842,73 +1878,102 @@ return null;
    * @param node the node to visit
    */
   public Class visit(ConditionalExpression node) {
+    // Get the type of the conidition expression
+    Expression condExp = node.getConditionExpression();
+    Class type = condExp.acceptVisitor(this);
+    
     // Check the condition
-    if (node.getConditionExpression().acceptVisitor(this) != boolean.class) {
+    if (type != boolean.class && type != Boolean.class) {
       throw new ExecutionError("condition.type", node);
     }
 
+    // Auto-unbox, if necessary
+    if (type == Boolean.class) {
+      node.setConditionExpression(_unbox(condExp, type));
+    }
+
     // Determine the type of the expression
-    Node  n1 = node.getIfTrueExpression();
-    Node  n2 = node.getIfFalseExpression();
+    Node n1 = node.getIfTrueExpression();
+    Node n2 = node.getIfFalseExpression();
     Class c1 = n1.acceptVisitor(this);
     Class c2 = n2.acceptVisitor(this);
     Class ec = null;
 
+    // See if the expression is typable
     if (c1 == c2) {
       ec = c1;
-    } else if (c1 == null) {
+    } 
+    else if (c1 == null) {
       ec = c2;
-    } else if (c2 == null) {
+    }
+    else if (c2 == null) {
       ec = c1;
-    } else if (!c1.isPrimitive() && !c2.isPrimitive()) {
+    }
+    else if (!c1.isPrimitive() && !c2.isPrimitive()) {
       if (c1.isAssignableFrom(c2)) {
         ec = c1;
-      } else if (c2.isAssignableFrom(c1)) {
+      }
+      else if (c2.isAssignableFrom(c1)) {
         ec = c2;
-      } else {
+      }
+      else {
         throw new ExecutionError("incompatible.types", node);
       }
-    } else if (c1 == boolean.class || c2 == boolean.class ||
-               c1 == void.class    || c2 == void.class) {
+    } 
+    else if (c1 == boolean.class || c2 == boolean.class ||
+             c1 == void.class    || c2 == void.class) {
       throw new ExecutionError("incompatible.types", node);
-    } else if ((c1 == short.class && c2 == byte.class) ||
-               (c1 == byte.class  && c2 == short.class)) {
+    }
+    else if ((c1 == short.class && c2 == byte.class) ||
+             (c1 == byte.class  && c2 == short.class)) {
       ec = short.class;
-    } else if ((c2 == byte.class || c2 == short.class || c2 == char.class) &&
-               n1.hasProperty(NodeProperties.VALUE) && c1 == int.class) {
-      Number n = (Number)n1.getProperty(NodeProperties.VALUE);
+    }
+    else if ((c2 == byte.class || c2 == short.class || c2 == char.class) &&
+             n1.hasProperty(NodeProperties.VALUE) && c1 == int.class) {
+      Number n = (Number) n1.getProperty(NodeProperties.VALUE);
       if (c2 == byte.class) {
         if (n.intValue() == n.byteValue()) {
           ec = byte.class;
-        } else {
+        }
+        else {
           ec = int.class;
         }
-      } else if (n.intValue() == n.shortValue()) {
+      } 
+      else if (n.intValue() == n.shortValue()) {
         ec = (c2 == char.class) ? char.class : short.class;
-      } else {
+      }
+      else {
         ec = int.class;
       }
-    } else if ((c1 == byte.class || c1 == short.class || c1 == char.class) &&
+    } 
+    else if ((c1 == byte.class || c1 == short.class || c1 == char.class) &&
                n2.hasProperty(NodeProperties.VALUE) && c2 == int.class) {
       Number n = (Number)n2.getProperty(NodeProperties.VALUE);
       if (c1 == byte.class) {
         if (n.intValue() == n.byteValue()) {
           ec = byte.class;
-        } else {
+        } 
+        else {
           ec = int.class;
         }
-      } else if (n.intValue() == n.shortValue()) {
+      } 
+      else if (n.intValue() == n.shortValue()) {
         ec = (c1 == char.class) ? char.class : short.class;
-      } else {
+      }
+      else {
         ec = int.class;
       }
-    } else if (c1 == double.class || c2 == double.class) {
+    } 
+    else if (c1 == double.class || c2 == double.class) {
       ec = double.class;
-    } else if (c1 == float.class || c2 == float.class) {
+    }
+    else if (c1 == float.class || c2 == float.class) {
       ec = float.class;
-    } else if (c1 == long.class || c2 == long.class) {
+    } 
+    else if (c1 == long.class || c2 == long.class) {
       ec = long.class;
-    } else {
+    }
+    else {
       ec = int.class;
     }
     node.setProperty(NodeProperties.TYPE, ec);
@@ -2043,20 +2108,40 @@ return null;
   }
 
   /**
-   * Visits an unary operation
-   * !! This method has not been modified for boxing/unboxing !!
+   * Visits an unary operation.
    */
   private Class visitUnaryOperation(UnaryExpression node, String s) {
-    Class c = node.getExpression().acceptVisitor(this);
+    Expression exp = node.getExpression();
+    Class c = exp.acceptVisitor(this);
+    Class returnType = c;
 
-    if (c == char.class || c == byte.class || c == short.class || c == int.class) {
+    if (c == char.class      || c == byte.class || c == short.class || c == int.class ||
+        c == Character.class || c == Byte.class || c == Short.class || c == Integer.class) {
       node.setProperty(NodeProperties.TYPE, int.class);
-    } else if (c == long.class || c == float.class || c == double.class) {
-      node.setProperty(NodeProperties.TYPE, c);
-    } else {
+    }
+    else if (c == long.class || c == float.class || c == double.class ||
+             c == Long.class || c == Float.class || c == Double.class) {
+      if (c == Long.class) {
+        returnType = long.class;
+      }
+      else if (c == Float.class) {
+        returnType = float.class;
+      }
+      else if (c == Double.class) {
+        returnType = double.class;
+      }
+      node.setProperty(NodeProperties.TYPE, returnType);
+    }
+    else {
       throw new ExecutionError(s, node);
     }
-    return c;
+    
+    // Auto-unbox, if necessary
+    if (_isBoxingType(c)) {
+      node.setExpression(_unbox(exp, c));
+    }
+    
+    return returnType;
   }
 
   /**
@@ -2196,24 +2281,47 @@ return null;
 
   /**
    * Checks the typing rules in an equality operation
-   * !! This method has not yet been modified for boxing/unboxing !!
    * @param lc the class of the left operand
    * @param rc the class of the right operand
    * @param s  the error message
    * @param n  the current node
    */
-  private static void checkEqualityStaticRules(Class lc, Class rc, Node n) {
+  private static void checkEqualityStaticRules(Class lc, Class rc, BinaryExpression n) {
+    Expression leftExp = n.getLeftExpression();
+    Expression rightExp = n.getRightExpression();
+
+    // Auto-unbox, if necessary
+    /**
+     * We have not decided what the correct semantics
+     * for the == operator is for boxed/primitive types
+     */
+    if (lc != null && rc != null) {
+      if (_isBoxingType(lc) && rc.isPrimitive()) {
+        ObjectMethodCall methodCall = _unbox(leftExp, lc);
+        n.setLeftExpression(methodCall);
+        lc = (Class) methodCall.getProperty(NodeProperties.TYPE);
+      }
+      if (_isBoxingType(rc) && lc.isPrimitive()) {
+        ObjectMethodCall methodCall = _unbox(rightExp, rc);
+        n.setRightExpression(methodCall);
+        rc = (Class) methodCall.getProperty(NodeProperties.TYPE);
+      }
+    }
+
     if (lc != rc || lc == void.class) {
-      if (lc == void.class    || rc == void.class     ||
+      if (lc == void.class    || rc == void.class ||
           lc == boolean.class || rc == boolean.class) {
         throw new ExecutionError("compare.type", n);
-      } else if ((lc == null && rc.isPrimitive()) ||
-                 (rc == null && lc.isPrimitive())) {
+      } 
+      else if ((lc == null && rc.isPrimitive()) ||
+               (rc == null && lc.isPrimitive())) {
         throw new ExecutionError("compare.type", n);
-      } else if (lc != null && rc != null) {
+      } 
+      else if (lc != null && rc != null) {
         if (lc.isPrimitive() ^ rc.isPrimitive()) {
           throw new ExecutionError("compare.type", n);
-        } else if (!lc.isPrimitive() && !rc.isPrimitive()) {
+        }
+        else if (!lc.isPrimitive() && !rc.isPrimitive()) {  
           if (!lc.isAssignableFrom(rc) && !rc.isAssignableFrom(lc)) {
             throw new ExecutionError("compare.type", n);
           }
@@ -2223,21 +2331,36 @@ return null;
   }
 
   /**
-   * Visits a relational expression
-   * !! This method has not yet been modified for boxing/unboxing !!
+   * Visits a relational expression.  This simply makes sure
+   * the types are numerical primitives/boxing types, 
+   * performs the unboxing if necessary, and sets the type
+   * of the overall expression to the boolean primitive type
+   * @param node the relational expression: (> < >= <=)
+   * @return the type of the expression: boolean
    */
   private Class visitRelationalExpression(BinaryExpression node) {
     // Check the types
-    Class lc = node.getLeftExpression().acceptVisitor(this);
-    Class rc = node.getRightExpression().acceptVisitor(this);
+    Expression leftExp = node.getLeftExpression();
+    Expression rightExp = node.getRightExpression();
+    Class lc = leftExp.acceptVisitor(this);
+    Class rc = rightExp.acceptVisitor(this);
 
     if (lc == null          || rc == null           ||
         lc == void.class    || rc == void.class     ||
         lc == boolean.class || rc == boolean.class  ||
-        !lc.isPrimitive()   || !rc.isPrimitive()) {
+        !(lc.isPrimitive()  || _isBoxingType(lc))   || 
+        !(rc.isPrimitive()  || _isBoxingType(rc))) {
       throw new ExecutionError("relational.expression.type", node);
     }
 
+    // Auto-unbox, if necessary
+    if (_isBoxingType(lc)) {
+      node.setLeftExpression(_unbox(leftExp, lc));
+    }
+    if (_isBoxingType(rc)) {
+      node.setRightExpression(_unbox(rightExp, rc));
+    }
+    
     // The type of the expression is always boolean
     node.setProperty(NodeProperties.TYPE, boolean.class);
     return boolean.class;
@@ -2482,33 +2605,43 @@ return null;
    */
   private static ObjectMethodCall _unbox(Expression child, Class type) {
     String methodName = "";
+    Class unboxedType = type;
     if (type == Boolean.class) {
       methodName = "booleanValue";
+      unboxedType = boolean.class;
     }
     else if (type == Byte.class) {
       methodName = "byteValue";
+      unboxedType = byte.class;
     }
     else if (type == Character.class) {
       methodName = "charValue";
+      unboxedType = char.class;
     }
     else if (type == Short.class) {
       methodName = "shortValue";
+      unboxedType = short.class;
     }
     else if (type == Integer.class) {
       methodName = "intValue";
+      unboxedType = int.class;
     }
     else if (type == Long.class) {
       methodName = "longValue";
+      unboxedType = long.class;
     }
     else if (type == Float.class) {
       methodName = "floatValue";
+      unboxedType = float.class;
     }
     else if (type == Double.class) {
       methodName = "doubleValue";
+      unboxedType = double.class;
     }
     else {
       throw new ExecutionError("unbox.type", child);
     }
+    
     // Return a call to the method described in methodName
     // with no params and the file info of the child we are
     // unboxing
@@ -2526,6 +2659,7 @@ return null;
                                                        child.getEndLine(),
                                                        child.getEndColumn());
     methodCall.setProperty(NodeProperties.METHOD, method);
+    methodCall.setProperty(NodeProperties.TYPE, unboxedType);
     return methodCall;
   }
 }
