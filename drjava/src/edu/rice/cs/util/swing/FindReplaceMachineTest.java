@@ -71,6 +71,19 @@ public class FindReplaceMachineTest extends TestCase
     "see no evilprev, speak no evilprev.";
   private static final String EVIL_TEXT_NEXT = "Hear no evilnext, " +
     "see no evilnext, speak no evilnext.";
+  private static final String FIND_WHOLE_WORD_TEST_1 = 
+      "public class Foo\n" +
+      "{\n" + 
+      "        /**\n" +
+      "         * Barry Good!\n" +
+      "         * (what I really mean is bar)\n" + 
+      "         */\n" +
+      "        public void bar() \n" +
+      "        {\n" + 
+      "                this.bar();\n" +
+      "        }\n" +
+      "}";
+
   /**
    * Constructor.
    * @param name a name for the test.
@@ -424,6 +437,36 @@ public class FindReplaceMachineTest extends TestCase
                  docNext.getText(0, docNext.getLength()));
   }
 
+
+    public void testWholeWordSearchOnTestString1() throws BadLocationException {
+        doc.insertString(0, FIND_WHOLE_WORD_TEST_1, null);
+        System.err.println(FIND_WHOLE_WORD_TEST_1);
+        _initFrm(0);
+        frm.setFindWord("bar");
+        frm.setMatchWholeWord();
+        frm.setSearchBackwards(false);
+        
+        _testFindNextSucceeds(frm, CONTINUE, 0, 91);
+        _testFindNextSucceeds(frm, CONTINUE, 0, 128);
+        _testFindNextSucceeds(frm, CONTINUE, 0, 166);
+        frm.setLastFindWord();
+        frm.setSearchBackwards(true);
+        _testFindNextSucceeds(frm, CONTINUE, 0, 125);
+        _testFindNextSucceeds(frm, CONTINUE, 0, 88);
+        _testFindNextSucceeds(frm, CONTINUE, 0, 163);
+
+        frm.setFindWord("ubl");
+        _testFindNextFails(frm, CONTINUE, 0, 163);
+
+        frm.setSearchBackwards(false);
+        frm.setFindWord("pub");
+        _testFindNextFails(frm, CONTINUE, 0, 163);
+
+        frm.setSearchBackwards(true);
+        frm.setFindWord("pub");
+        _testFindNextFails(frm, CONTINUE, 0, 163);
+    }
+
   /**
    test case no longer applies -- we always wrap
    public void testReplaceAllHalt() throws BadLocationException {
@@ -479,7 +522,7 @@ public class FindReplaceMachineTest extends TestCase
     public boolean shouldContinue() { 
       return true; 
     } 
-  }; 
+  };
   
   /**
   private static ContinueCommand HALT = new ContinueCommand() {  
