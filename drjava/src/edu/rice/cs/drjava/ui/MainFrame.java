@@ -3115,9 +3115,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       if(f != null){
         OpenDefinitionsDocument doc = _model.getDocumentForFile(f);
         doc.runMain();
-        if(false){
-          throw new ClassNameNotFoundException("asdf");
-        }
       }
     }
     catch (ClassNameNotFoundException e) {

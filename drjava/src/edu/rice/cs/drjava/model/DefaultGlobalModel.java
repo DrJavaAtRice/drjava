@@ -660,6 +660,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       public void cleanBuildDirectory() throws FileMovedException, IOException{
         File dir = this.getBuildDirectory();
         cleanHelper(dir);
+        if(!dir.exists()){
+          dir.mkdirs();
+        }
       }
       
       private void cleanHelper(File f){
@@ -2406,13 +2409,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public boolean saveFile(FileSaveSelector com) throws IOException {
       FileSaveSelector realCommand;
       final File file;
-
+      
       if (!isModifiedSinceSave() && !isUntitled()) {
         // Don't need to save.
         //  Return true, since the save wasn't "canceled"
         return true;
       }
-
+      
       try {
         if (isUntitled()) {
           realCommand = com;
@@ -2433,7 +2436,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             }
           }
         }
-        
         return saveFileAs(realCommand);
       }
       catch (IllegalStateException ise) {
@@ -2449,6 +2451,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * a file to save to.  Once the file has been saved succssfully,
      * this method fires fileSave(File).  If the save fails for any
      * reason, the event is not fired.
+     * This is synchronized against the compiler model to prevent saving and
+     * compiling at the same time- this used to freeze drjava.
      * @param com a selector that picks the file name.
      * @throws IOException if the save fails due to an IO error
      * @return true if the file was saved, false if the operation was canceled
@@ -2522,10 +2526,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           /* update the navigator */
           _documentNavigator.refreshDocument(getIDocGivenODD(this), fixPathForNavigator(file.getCanonicalPath()));
         }
-        
-
         return true;
-
       }
       catch (OperationCanceledException oce) {
         // Thrown by com.getFile() if the user cancels.
