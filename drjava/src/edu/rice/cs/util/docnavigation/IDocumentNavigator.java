@@ -201,4 +201,16 @@ public interface IDocumentNavigator {
      * @param input the input to the algorithm
      */
     public <InType, ReturnType> ReturnType execute(IDocumentNavigatorAlgo<InType, ReturnType> algo, InType input);
+ 
+    /**
+     * @return true if a group if INavigatorItems selected
+     */
+    public boolean isGroupSelected();
+    
+    /**
+     * @return true if the INavigatorItem is in the selected group, if a group is selected
+     */
+    public boolean isSelectedInGroup(INavigatorItem i);
+      
+     
 }

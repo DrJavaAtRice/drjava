@@ -58,6 +58,7 @@ import java.awt.*;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.util.*;
+import java.io.IOException;
 import edu.rice.cs.util.*;
 
 public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorActor, TreeSelectionListener {
@@ -65,19 +66,19 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
   /**
    * maps documents to tree nodes
    */
-  private HashMap<INavigatorItem, DefaultMutableTreeNode> _doc2node =
-    new HashMap<INavigatorItem, DefaultMutableTreeNode>();
+  private HashMap<INavigatorItem, LeafNode> _doc2node =
+    new HashMap<INavigatorItem, LeafNode>();
   
   /**
    * maps path's to nodes and nodes to paths
    */
-  private BidirectionalHashMap<String, DefaultMutableTreeNode> _path2node = 
-    new BidirectionalHashMap<String, DefaultMutableTreeNode>();
+  private BidirectionalHashMap<String, InnerNode> _path2node = 
+    new BidirectionalHashMap<String, InnerNode>();
   
   /**
    * the root of the tree
    */
-  private DefaultMutableTreeNode _root;
+  private FileNode _root;
   
   /**
    * the model of the tree
@@ -93,7 +94,7 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
    * the node corresponding to the [external files] node in the tree
    * this will hold files that are not in the project directory
    */
-  private DefaultMutableTreeNode _nonProjRoot = new DefaultMutableTreeNode("[External Files]");
+  private StringNode _nonProjRoot = new StringNode("[External Files]");
   
   /**
    * flag if the nonproject node has children
@@ -132,13 +133,15 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
    * standard constructor
    * @param name the name of the root node
    */
-  public JTreeSortNavigator(String name) {
-    super(new DefaultTreeModel(new DefaultMutableTreeNode(name)));
-    
+  public JTreeSortNavigator(String projfilepath) {
+    super(new DefaultTreeModel(new FileNode(new File(projfilepath))));
+    String tlp = projfilepath.substring(0, projfilepath.lastIndexOf(File.separator));
+    setTopLevelPath(tlp);
+
     this.addTreeSelectionListener(this);
     
     _model = (DefaultTreeModel) this.getModel();
-    _root = (DefaultMutableTreeNode) _model.getRoot();
+    _root = (FileNode) _model.getRoot();
     _renderer = new CustomTreeCellRenderer();
     _renderer.setOpaque(false);
 //    _renderer.setJavaIcon(getIcon("javaicon.gif"));
@@ -168,7 +171,7 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
       insertFolderSortedInto(_nonProjRoot, _root);
     }
     
-    DefaultMutableTreeNode node = new DefaultMutableTreeNode(doc.getName());
+    LeafNode node = new LeafNode(doc);
     node.setUserObject(doc);
     //_root.add(node);
     insertNodeSortedInto(node, _nonProjRoot);
@@ -198,7 +201,7 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
     }   
     // if the file is at the top level
     if (path.equals(_topLevelPath)) {
-      DefaultMutableTreeNode node = new DefaultMutableTreeNode(doc.getName());
+      LeafNode node = new LeafNode(doc);
       node.setUserObject(doc);
       insertNodeSortedInto(node, _root);
       _doc2node.put(doc, node);
@@ -211,18 +214,18 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
     StringTokenizer tok = new StringTokenizer(path, File.separator);
     //ArrayList<String> elements = new ArrayList<String>();
     String pathSoFar="";
-    DefaultMutableTreeNode lastNode = _root;
+    InnerNode lastNode = _root;
     while(tok.hasMoreTokens()) {
       String element = tok.nextToken();
       pathSoFar += (element + "/");
-      DefaultMutableTreeNode thisNode;
+      InnerNode thisNode;
       //System.out.println("pathsofar = " + pathSoFar);
       // if the node is not in the hashmap yet
       if (!_path2node.containsKey(pathSoFar)) {
         // make a new node
         
         /* this inserts a folder node */
-        thisNode = new DefaultMutableTreeNode(element);
+        thisNode = new FileNode(new File(_topLevelPath + File.separator + pathSoFar));
         insertFolderSortedInto(thisNode, lastNode);
           this.expandPath(new TreePath(lastNode.getPath()));
         // associate the path so far with that node
@@ -241,7 +244,7 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
     
     /* lastNode is the node of the folder to add into */
     
-    DefaultMutableTreeNode child = new DefaultMutableTreeNode(doc);
+    LeafNode child = new LeafNode(doc);
     _doc2node.put(doc, child);
     insertNodeSortedInto(child, lastNode);
 //    _model.insertNodeInto(child, lastNode, lastNode.getChildCount());
@@ -255,30 +258,26 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
    * @param child the node to add
    * @param parent the node to add under
    */
-  private void insertNodeSortedInto(DefaultMutableTreeNode child, DefaultMutableTreeNode parent){
+  private void insertNodeSortedInto(LeafNode child, InnerNode parent){
     int numChildren = parent.getChildCount();
     int i=0;
     int indexToAdd = i;
-    String newName;
-    if(child.getUserObject() instanceof String){
-      newName = (String) child.getUserObject();
-    }else
-    if(child.getUserObject() instanceof INavigatorItem){
-      newName = ((INavigatorItem)child.getUserObject()).getName();
-    }else{
-      newName = child.toString();
-    }
-    String oldName = (String)parent.getUserObject();
+    String newName = child.toString();
+    String oldName = parent.getUserObject().toString();
     
     DefaultMutableTreeNode parentsKid;
 
     while(i<numChildren){
       parentsKid = ((DefaultMutableTreeNode)parent.getChildAt(i));
-      if(((DefaultMutableTreeNode)parentsKid).getUserObject()  instanceof INavigatorItem){
-        oldName = ((INavigatorItem)((DefaultMutableTreeNode)parentsKid).getUserObject()).getName();
+      if(parentsKid instanceof InnerNode){
+        // do nothing, it's a folder
+      }else if(parentsKid instanceof LeafNode){
+        oldName = ((LeafNode)parentsKid).getData().getName();
         if((newName.toUpperCase().compareTo(oldName.toUpperCase()) < 0)){
           break;
         }
+      }else{
+        throw new IllegalStateException("found a node in navigator that is not an InnerNode or LeafNode");
       }
       i++;
     }
@@ -290,35 +289,29 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
    * @param child the folder to add
    * @param parent the folder to add under
    */
-  private void insertFolderSortedInto(DefaultMutableTreeNode child, DefaultMutableTreeNode parent){
+  private void insertFolderSortedInto(InnerNode child, InnerNode parent){
     int numChildren = parent.getChildCount();
     int i=0;
     int indexToAdd = i;
-    String newName;
-    if(child.getUserObject() instanceof String){
-      newName = (String) child.getUserObject();
-    }else
-    if(child.getUserObject() instanceof INavigatorItem){
-      newName = ((INavigatorItem)child.getUserObject()).getName();
-    }else{
-      newName = child.toString();
-    }
-    String oldName = (String)parent.getUserObject();
+    String newName = child.toString();
+    String oldName = parent.getUserObject().toString();
     
     DefaultMutableTreeNode parentsKid;
 
     int countFolders = 0;
     while(i<numChildren){
       parentsKid = ((DefaultMutableTreeNode)parent.getChildAt(i));
-      if(((DefaultMutableTreeNode)parentsKid).getUserObject()  instanceof String){
+      if(parentsKid instanceof InnerNode){
         countFolders++;
-        oldName = (String)((DefaultMutableTreeNode)parentsKid).getUserObject();
+        oldName = ((InnerNode)parentsKid).getData().toString();
         if((newName.toUpperCase().compareTo(oldName.toUpperCase()) < 0)){
           break;
         }
-      }else{
-        // we're no longer comparing to other folders, so break out of loop
+      }else if(parentsKid instanceof LeafNode){
+        // we're out of folders, and starting into the files, so just break out.
         break;
+      }else{
+        throw new IllegalStateException("found a node in navigator that is not an InnerNode or LeafNode");
       }
       i++;
     }
@@ -357,17 +350,16 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
   }
   
   
-  private DefaultMutableTreeNode getNodeForDoc(INavigatorItem doc){
+  private LeafNode getNodeForDoc(INavigatorItem doc){
     return _doc2node.get(doc);
   }
   
   /**
    * only takes in nodes that have a inavigatoritem as their object
    */
-  private INavigatorItem removeNode(DefaultMutableTreeNode toRemove){
-    
+  private INavigatorItem removeNode(LeafNode toRemove){
     _model.removeNodeFromParent(toRemove);
-    _doc2node.remove((INavigatorItem)toRemove.getUserObject());
+    _doc2node.remove(toRemove.getData());
    
     Enumeration enumeration = _root.depthFirstEnumeration();
     while(enumeration.hasMoreElements())
@@ -376,7 +368,7 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
       if(next.getChildCount() == 0 && !_doc2node.containsValue(next) && next != _root)
       {
         _model.removeNodeFromParent((MutableTreeNode)next); 
-        _path2node.removeKey((DefaultMutableTreeNode)next);
+        _path2node.removeKey((InnerNode)next);
       }
     }
    
@@ -388,6 +380,7 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
     return (INavigatorItem)toRemove.getUserObject();
   }
     
+
   /**
    * Resets a given <code>INavigatorItem<code> in the tree.  This may affect the
    * placement of the item or its display to reflect any changes made in the model.
@@ -403,7 +396,7 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
      * index out of bounds exception when painting.
      */
     synchronized(this){
-      DefaultMutableTreeNode node = getNodeForDoc(doc);
+      LeafNode node = getNodeForDoc(doc);
       removeNode(node);
       addDocument(doc, path);
     }
@@ -729,7 +722,12 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
       return false;
     }else{
       DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
-      if(node.getUserObject() instanceof INavigatorItem){
+      if(node instanceof LeafNode){
+        this.expandPath(path);
+        this.setSelectionPath(path);
+        this.scrollPathToVisible(path);
+        return true;
+      }else if(node instanceof InnerNode){
         this.expandPath(path);
         this.setSelectionPath(path);
         this.scrollPathToVisible(path);
@@ -740,6 +738,40 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
     }
   }
 
+  /**
+   * @return true if a group if INavigatorItems selected
+   */
+  public boolean isGroupSelected(){
+    TreePath p = getSelectionPath();
+    TreeNode n = (TreeNode) p.getLastPathComponent();
+    if(n instanceof InnerNode){
+      return true;
+    }else{
+      return false;
+    }
+  }
+  
+  /**
+   * @return true if the INavigatorItem is in the selected group, if a group is selected
+   */
+  public boolean isSelectedInGroup(INavigatorItem i){
+    TreePath p = getSelectionPath();
+    TreeNode n = (TreeNode) p.getLastPathComponent();
+    TreeNode l = _doc2node.get(i);
+    
+    if(n == _root){
+      return true;
+    }
+    
+    while(l.getParent() != _root){
+      if(l.getParent() == n){
+        return true;
+      }
+      l = l.getParent();
+    }
+    
+    return false;
+  }
 
 //  public static ImageIcon getIcon(String name) {
 //    URL url = JTreeSortNavigator.class.getResource(ICON_PATH + name);
@@ -748,4 +780,75 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
 //    }
 //    return null;
 //  }
+}
+
+
+
+class LeafNode extends DefaultMutableTreeNode{
+  public LeafNode(INavigatorItem i){
+    super(i);
+  }
+  public void setData(INavigatorItem i){
+    super.setUserObject(i);
+  }
+  
+  public INavigatorItem getData(){
+    return (INavigatorItem) super.getUserObject();
+  }
+  
+  public String toString(){
+    return getData().getName();
+  }
+}
+
+abstract class InnerNode<T> extends DefaultMutableTreeNode{
+  public InnerNode(T d){
+    super(d);
+  }
+  abstract public void setData(T d);
+  abstract public T getData();
+}
+
+class FileNode extends InnerNode<File>{
+  public FileNode(File f){
+    super(f);
+  }
+  
+  public void setData(File f){
+    super.setUserObject(f);
+  }
+  
+  public File getData(){
+    return (File) super.getUserObject();
+  }
+  
+  public String toString(){
+    try{
+      String path = getData().getCanonicalPath();
+      int index = path.lastIndexOf(File.separator);
+      path = path.substring(index+1);
+      return path;
+    }catch(IOException e){
+      return getData().toString();
+    }
+  }
+}
+
+class StringNode extends InnerNode<String>{
+  
+  public StringNode(String s){
+    super(s);
+  }
+  
+  public void setData(String f){
+    super.setUserObject(f);
+  }
+  
+  public String getData(){
+    return (String) super.getUserObject();
+  }
+  
+  public String toString(){
+    return getData();
+  }
 }

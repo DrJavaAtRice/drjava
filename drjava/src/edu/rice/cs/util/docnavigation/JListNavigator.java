@@ -153,6 +153,7 @@ class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListS
    * @param doc the document to remove
    */
   public INavigatorItem removeDocument(INavigatorItem doc) throws IllegalArgumentException {
+    System.err.println("removing from old list " + doc);
     int i = _docs.indexOf(doc);
     if( i == -1 ) {
       throw new IllegalArgumentException("Document " + doc + " not found in Document Navigator");
@@ -353,4 +354,19 @@ class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListS
   public Component getRenderer(){
     return _renderer;
   }
+  
+  /**
+   * @return true if a group if INavigatorItems selected
+   */
+  public boolean isGroupSelected(){
+    return false;
+  }
+  
+  /**
+   * @return true if the INavigatorItem is in the selected group, if a group is selected
+   */
+  public boolean isSelectedInGroup(INavigatorItem i){
+    return false;
+  }
+  
 }
