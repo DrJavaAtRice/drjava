@@ -54,7 +54,7 @@ public abstract class GlobalModelTestCase extends TestCase {
    * </OL>
    */
   protected void setUp() throws IOException {
-    _model = new DefaultGlobalModel();
+    createModel();
     String user = System.getProperty("user.name");
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
   }
@@ -68,6 +68,19 @@ public abstract class GlobalModelTestCase extends TestCase {
     assertTrue("delete temp directory " + _tempDir, ret);
   }
 
+  /**
+   * Instantiates the GlobalModel to be used in the test cases.
+   */
+  protected void createModel() {
+    _model = new DefaultGlobalModel();
+  }
+  
+  /**
+   * Get the instance of the GlobalModel.
+   */
+  protected GlobalModel getModel() {
+    return _model;
+  }
 
   /**
    * Clear all old text and insert the given text.
@@ -228,7 +241,7 @@ public abstract class GlobalModelTestCase extends TestCase {
                  errors.length > 0);
   }
 
-  protected class FileSelector implements FileOpenSelector, FileSaveSelector {
+  public class FileSelector implements FileOpenSelector, FileSaveSelector {
     private File _file;
 
     public FileSelector(File f) {
@@ -240,7 +253,7 @@ public abstract class GlobalModelTestCase extends TestCase {
     }
   }
 
-  protected class CancelingSelector implements FileOpenSelector, FileSaveSelector
+  public class CancelingSelector implements FileOpenSelector, FileSaveSelector
   {
     public File getFile() throws OperationCanceledException {
       throw new OperationCanceledException();
@@ -252,7 +265,7 @@ public abstract class GlobalModelTestCase extends TestCase {
    * This allows us to test whether quit() correctly tries to exit without
    * letting the exit actually occur.
    */
-  protected class PreventExitSecurityManager extends SecurityManager {
+  public class PreventExitSecurityManager extends SecurityManager {
     private int _attempts = 0;
 
     public int getAttempts() { return _attempts; }
@@ -271,7 +284,7 @@ public abstract class GlobalModelTestCase extends TestCase {
    * By default it expects no events to be fired. To customize,
    * subclass and override one or more methods.
    */
-  protected static class TestListener implements GlobalModelListener {
+  public static class TestListener implements GlobalModelListener {
     protected int newCount;
     protected int openCount;
     protected int closeCount;
@@ -389,7 +402,7 @@ public abstract class GlobalModelTestCase extends TestCase {
     }
   }
 
-  protected static class CompileShouldSucceedListener extends TestListener {
+  public static class CompileShouldSucceedListener extends TestListener {
     public void compileStarted() {
       assertCompileStartCount(0);
       assertCompileEndCount(0);
@@ -433,7 +446,7 @@ public abstract class GlobalModelTestCase extends TestCase {
   /**
    * A model listener for situations expecting a compilation to fail.
    */
-  protected static class CompileShouldFailListener extends TestListener {
+  public static class CompileShouldFailListener extends TestListener {
     public void compileStarted() {
       assertCompileStartCount(0);
       assertCompileEndCount(0);
