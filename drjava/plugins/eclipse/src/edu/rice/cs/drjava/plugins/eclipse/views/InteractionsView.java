@@ -42,7 +42,6 @@ package edu.rice.cs.drjava.plugins.eclipse.views;
 import org.eclipse.ui.part.*;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.*;
 import org.eclipse.swt.SWT;
 
 import edu.rice.cs.drjava.model.repl.SimpleInteractionsDocument;
@@ -87,8 +86,7 @@ public class InteractionsView extends ViewPart {
   public Runnable getBeep() {
     return new Runnable() {
       public void run() {
-        // TO DO: how do you generate a beep in eclipse?
-        System.out.println("BEEP!");
+        _styledText.getDisplay().beep();
       }
     };
   }

@@ -63,19 +63,19 @@ public class DrJavaPerspective implements IPerspectiveFactory {
     
     // bottom: interactions window, console, search, (JUnit?)
     IFolderLayout bottom =
-      layout.createFolder("bottom", layout.BOTTOM, 0.75f, editorArea);
-    bottom.addView("edu.rice.cs.drjava.plugins.eclipse.views.InteractionsView");
+      layout.createFolder("bottom", IPageLayout.BOTTOM, 0.75f, editorArea);
+    bottom.addView("edu.rice.cs.drjava.InteractionsView");
     bottom.addPlaceholder(IDebugUIConstants.ID_CONSOLE_VIEW);
     bottom.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
     
     // left: same as Java perspective, need the package view for the files
     IFolderLayout left =
-      layout.createFolder("left", layout.LEFT, 0.25f, editorArea);
+      layout.createFolder("left", IPageLayout.LEFT, 0.25f, editorArea);
     left.addView(JavaUI.ID_PACKAGES);
     //the next two are necessary for now, but if we can prevent the
     //behavior that causes them to be needed, that would be preferable
     left.addPlaceholder(JavaUI.ID_TYPE_HIERARCHY);
-    left.addPlaceholder(layout.ID_RES_NAV);
+    left.addPlaceholder(IPageLayout.ID_RES_NAV);
     
     // need to be able to launch programs and create new files
     // perhaps we could create our own more simplified action set

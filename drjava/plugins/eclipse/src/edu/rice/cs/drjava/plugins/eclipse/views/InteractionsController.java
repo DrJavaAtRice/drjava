@@ -39,10 +39,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.plugins.eclipse.views;
 
-import javax.swing.*;
-import javax.swing.text.*;
-import javax.swing.event.*;
-import java.awt.event.*;
 
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -52,11 +48,9 @@ import org.eclipse.swt.SWT;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.SimpleInteractionsDocument;
 import edu.rice.cs.drjava.model.repl.SimpleInteractionsListener;
-import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.text.SWTDocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapter;
 import edu.rice.cs.util.text.DocumentEditCondition;
-import edu.rice.cs.util.text.DocumentAdapterException;
 
 /**
  * This class installs listeners and actions between an InteractionsDocument
@@ -194,8 +188,8 @@ public class InteractionsController {
   class KeyUpdateListener implements VerifyKeyListener {
     public void verifyKey(VerifyEvent event) {
       StyledText pane = _view.getTextPane();
-      int caretPos = pane.getCaretOffset();
-      //System.out.println("event consumer: keycode: " + event.keyCode);
+      //int caretPos = pane.getCaretOffset();
+      //System.out.println("event consumer: keycode: " + event.keyCode + ", char: " + event.character);
       
       // -- Branch to an action on certain keystrokes --
       //  (needs to be refactored for better OO code)
@@ -224,53 +218,17 @@ public class InteractionsController {
       else if (event.keyCode == SWT.ARROW_RIGHT) {
         event.doit = moveRightAction();
       }
+      // shift+home
+      else if (event.keyCode == SWT.HOME && (event.stateMask & SWT.SHIFT) == 1) {
+      	event.doit = selectToPromptPosAction();
+      }
+      // home
+      else if (event.keyCode == SWT.HOME) {
+      	event.doit = gotoPromptPosAction();
+      }
+      // shortcut for clear command?  (ctrl+B is build project)
     }
   }
-  
-  
-//     // Get proper cross-platform mask.
-//     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-//     
-//     // Add actions with keystrokes
-//     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), 
-//                                 evalAction);
-//     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 
-//                                                        java.awt.Event.SHIFT_MASK), 
-//                                 newLineAction);
-// 
-//     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_B, mask), 
-//                                 clearCurrentAction);
-// 
-//     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0), 
-//                                 gotoPromptPosAction);
-//     
-//     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_HOME,
-//                                                        java.awt.Event.SHIFT_MASK), 
-//                                 selectToPromptPosAction);
-// 
-//     // Up and down need to be bound both for keypad and not
-//     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0), 
-//                                 historyPrevAction);
-//     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), 
-//                                 historyPrevAction);
-//     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, 0), 
-//                                 historyNextAction);
-//     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), 
-//                                 historyNextAction);
-//     
-//     // Left needs to be prevented from rolling cursor back before the prompt.
-//     // Both left and right should lock when caret is before the prompt.
-//     // Caret is allowed before the prompt for the purposes of mouse-based copy-
-//     // and-paste.
-//     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, 0),
-//                                 moveLeftAction);
-//     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0),
-//                                 moveLeftAction);
-//     
-//     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_RIGHT, 0),
-//                                 moveRightAction);
-//     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0),
-//                                 moveRightAction);
   
   
   
@@ -318,34 +276,32 @@ public class InteractionsController {
   }
 
   /** Removes all text after the prompt. */
-  AbstractAction clearCurrentAction = new AbstractAction() {
-    public void actionPerformed(ActionEvent e) {
-      _doc.clearCurrentInteraction();
-    }
-  };
+  boolean clearCurrentAction() {
+  	_doc.clearCurrentInteraction();
+  	return false;
+  }
 
   /** Moves the caret to the prompt. */
-  AbstractAction gotoPromptPosAction = new AbstractAction() {
-    public void actionPerformed(ActionEvent e) {
-      moveToPrompt();
-    }
-  };
+  boolean gotoPromptPosAction() {
+    moveToPrompt();
+    return false;
+  }
   
-  AbstractAction selectToPromptPosAction = new AbstractAction() {
-    public void actionPerformed(ActionEvent e) {
-      // Selects the text between the old pos and the prompt
-      StyledText pane = _view.getTextPane();
-      int start = _doc.getPromptPos();
-      int end = pane.getCaretOffset();
-      if (end < start) {
-        int t = start;
-        start = end;
-        end = t;
-      }
-      
-      pane.setSelection(start, end);
+  /** Selects all text between the caret and the prompt */
+  boolean selectToPromptPosAction() {
+    // Selects the text between the old pos and the prompt
+    StyledText pane = _view.getTextPane();
+    int start = _doc.getPromptPos();
+    int end = pane.getCaretOffset();
+    if (end < start) {
+      int t = start;
+      start = end;
+      end = t;
     }
-  };
+    
+    pane.setSelection(start, end);
+    return false;
+  }
   
   /** Moves the caret left or wraps around. */
   boolean moveLeftAction() {
@@ -382,10 +338,12 @@ public class InteractionsController {
   /** Moves the pane's caret to the end of the document. */
   void moveToEnd() {
     _view.getTextPane().setCaretOffset(_doc.getDocLength());
+	_view.getTextPane().showSelection();
   }
   
   /** Moves the pane's caret to the document's prompt. */
   void moveToPrompt() {
     _view.getTextPane().setCaretOffset(_doc.getPromptPos());
+    _view.getTextPane().showSelection();
   }
 }

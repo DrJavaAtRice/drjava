@@ -41,8 +41,6 @@ package edu.rice.cs.util.text;
 
 import org.eclipse.swt.custom.StyledText;
 
-import gj.util.Hashtable;
-
 import org.eclipse.swt.events.*;
 
 /**
