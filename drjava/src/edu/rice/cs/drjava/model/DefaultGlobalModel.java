@@ -635,7 +635,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   public FileGroupingState _makeProjectFileGroupingState(final File jarMainClass, 
                                                          final File buildDir, 
                                                          final File projectFile, 
-                                                         final File[] projectFiles) {
+                                                         final File[] projectFiles,
+                                                         final ClasspathVector classpath) {
     return new FileGroupingState() {
       
       private File _builtDir = buildDir;
@@ -648,7 +649,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       
       HashSet<String> _projFilePaths = new HashSet<String>();
       
-      private ClasspathVector _projExtraClasspath = new ClasspathVector();
+      private ClasspathVector _projExtraClasspath = classpath;
       
       /** Initialization Block */
       { 
@@ -1291,6 +1292,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       Vector<File> exCpF = exCp.asFileVector();
       for(File f : exCpF) {
         builder.addClasspathFile(f);
+        System.out.println("Saving project classpath entry " + f);
       }
     } else {
       System.err.println("Project ClasspathVector is null!");
@@ -1314,7 +1316,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       _auxiliaryFiles = auxFileList;
     }
     
-    setFileGroupingState(_makeProjectFileGroupingState(mainClass, d, new File(filename), srcFiles));
+    setFileGroupingState(_makeProjectFileGroupingState(mainClass, d, new File(filename), srcFiles, exCp));
   }
   
   /**
@@ -1371,15 +1373,13 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       for(File file: auxFiles) { _auxiliaryFiles.add(file); }
     }
     
-    setFileGroupingState(_makeProjectFileGroupingState(mainClass, buildDir, projectFile, srcFiles));
-    setBuildDirectory(buildDir);
-    
     File[] projectclasspaths = ir.getClasspaths();
     ClasspathVector extraClasspaths = new ClasspathVector();
     for(File f : projectclasspaths) {
       extraClasspaths.add(f);
     }
-    setProjectExtraClasspath(extraClasspaths);
+    
+    setFileGroupingState(_makeProjectFileGroupingState(mainClass, buildDir, projectFile, srcFiles, extraClasspaths));
     
 //    Vector<File> currentclasspaths = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
 //    for(int i = 0; i<projectclasspaths.length; i++){
