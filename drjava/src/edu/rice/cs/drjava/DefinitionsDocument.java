@@ -6,7 +6,7 @@ import javax.swing.text.StyleContext.SmallAttributeSet;
 import javax.swing.text.*;
 import gj.util.Vector;
 
-/**
+/** 
 	 hasHighlightChanged()
 	 getHighLightInformation()
 	 getMatchingBrace  - given absolute offset
