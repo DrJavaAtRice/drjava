@@ -52,6 +52,8 @@ import javax.swing.*;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeExpansionListener;
+import javax.swing.event.TreeExpansionEvent;
 import javax.swing.tree.*;
 import java.io.File;
 import java.awt.*;
@@ -61,7 +63,8 @@ import java.util.*;
 import java.io.IOException;
 import edu.rice.cs.util.*;
 
-public class JTreeSortNavigator extends JTree implements IDocumentNavigator, TreeSelectionListener {
+public class JTreeSortNavigator extends JTree 
+  implements IDocumentNavigator, TreeSelectionListener, TreeExpansionListener {
   
   /**
    * maps documents to tree nodes
@@ -134,6 +137,7 @@ public class JTreeSortNavigator extends JTree implements IDocumentNavigator, Tre
     
 //
     this.addTreeSelectionListener(this);
+    this.addTreeExpansionListener(this);
     
     _model = (DefaultTreeModel) this.getModel();
 //    _root = null;
@@ -847,6 +851,103 @@ public class JTreeSortNavigator extends JTree implements IDocumentNavigator, Tre
     }
     GroupNode n = new GroupNode(name, f);
     _roots.add(n);
+  }
+  
+  ///////// Methods that handle expansion/collapsing of folders in tree ///////////
+  
+  /**
+   * Called whenever an item in the tree has been collapsed.
+   */
+  public void treeCollapsed(TreeExpansionEvent event) {
+    Object o = event.getPath().getLastPathComponent();
+    if (o instanceof InnerNode) {
+      ((InnerNode)o).setCollapsed(true);
+    }
+  }
+  /**
+   * Called whenever an item in the tree has been expanded.
+   */
+  public void treeExpanded(TreeExpansionEvent event) {
+    Object o = event.getPath().getLastPathComponent();
+    if (o instanceof InnerNode) {
+      ((InnerNode)o).setCollapsed(false);
+    }
+  }
+     
+  /**
+   * Collapses all the paths in the tree that match one of the path strings included
+   * in the given hash set.  Path strings must follow a specific format in order for
+   * them to work. See the documentation of <code>generatePathString</code> for 
+   * information on the format of the path strings.
+   * @param paths A hash set of path strings.  
+   */
+  public void collapsePaths(String[] paths) {
+    HashSet<String> set = new HashSet<String>();
+    for (String s : paths) {
+      set.add(s);
+    }
+    collapsePaths(set);
+  }
+  void collapsePaths(HashSet<String> paths) {
+    Enumeration<TreeNode> nodes = ((DefaultMutableTreeNode)_model.getRoot()).depthFirstEnumeration();
+    ArrayList<String> list = new ArrayList<String>();
+    while (nodes.hasMoreElements()) {
+      DefaultMutableTreeNode tn = (DefaultMutableTreeNode)nodes.nextElement();
+      if (tn instanceof InnerNode) {
+        TreePath tp = new TreePath(tn.getPath());
+        String s = generatePathString(tp);
+        boolean shouldCollapse = paths.contains(s);
+        if (shouldCollapse) { 
+          collapsePath(tp);
+        }
+      }
+    }
+  }
+  
+  /**
+   * @return an array of path strings corresponding to the paths of the tree nodes that
+   * are currently collapsed. See the documentation of <code>generatePathString</code>
+   * for information on the format of the path strings.
+   */
+  public String[] getCollapsedPaths() {
+    Enumeration<TreeNode> nodes = ((DefaultMutableTreeNode)_model.getRoot()).depthFirstEnumeration();
+    ArrayList<String> list = new ArrayList<String>();
+    while (nodes.hasMoreElements()) {
+      DefaultMutableTreeNode tn = (DefaultMutableTreeNode)nodes.nextElement();
+      if (tn instanceof InnerNode && ((InnerNode)tn).isCollapsed()) {
+        TreePath tp = new TreePath(tn.getPath());
+        list.add(generatePathString(tp));
+      }
+    }
+    return list.toArray(new String[0]);
+  }
+  
+  /**
+   * Generates a path string for the given tree node.
+   * <p>The path string does not include the project root node, but rather a period in 
+   * its place. Following the "./" is one of the 3 main groups, "[ Source Files ]",
+   * "[ Auxiliary ]", "[ External ]".  The nodes in the path are represented by their
+   * names delimited by the forward slash ("/").  The path ends with a final delimeter.</p>
+   * <p>(e.g. "./[ Source Files ]/util/docnavigation/")</p>
+   * @return the path string for the given node in the JTree
+   */
+  public String generatePathString(TreePath tp) {
+    String path = "";
+    
+    TreeNode root = (TreeNode) _model.getRoot();
+    
+    while (tp != null) {
+      TreeNode curr = (TreeNode) tp.getLastPathComponent();
+      if (curr == root) {
+        path = "./" + path;
+      }
+      else {
+        path = curr + "/" + path;
+      }
+      tp = tp.getParentPath();
+    }
+    
+    return path;
   }
 }
 

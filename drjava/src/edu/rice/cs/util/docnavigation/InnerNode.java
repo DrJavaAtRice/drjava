@@ -58,10 +58,19 @@ import edu.rice.cs.util.*;
 
 
 public abstract class InnerNode<T> extends DefaultMutableTreeNode{
+  protected boolean _collapsed; // tree defaults to all NOT collapsed
+  
   public InnerNode(T d){
     super(d);
   }
   abstract public void setData(T d);
   abstract public T getData();
+  
+  public void setCollapsed(boolean c) {
+    _collapsed = c;
+  }
+  public boolean isCollapsed() {
+    return _collapsed;
+  }
 }
 
