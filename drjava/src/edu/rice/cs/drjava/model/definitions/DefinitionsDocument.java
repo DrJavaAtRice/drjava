@@ -405,27 +405,24 @@ public class DefinitionsDocument extends PlainDocument {
   }
   
   /** return the current column of the cursor position */
-  /** passes simple included test cases, not really working. */ 
   public int getCurrentCol() {
-    int dist = _reduced.getDistToPreviousNewline( _currentLocation );
-    if( dist==-1 ){dist = _currentLocation+1;}
-    if( dist==0 ){ dist = 1; }
-    else{ dist = dist++;}
-    return dist;
+    int dist = getLineStartPos( getCurrentLocation() );
+    return getCurrentLocation() - dist + 1;
   }
   
-  /** return the current row of the cursor position */
+  /** return the current line of the cursor position */
   /** untested, uncalled */
-  public int getCurrentRow() {
-    int count=0;
-    int _copyLocation = _currentLocation;
-    int distPrevNewLine = _reduced.getDistToPreviousNewline( _currentLocation );
-    while (distPrevNewLine != -1 && _currentLocation>0) {
-      _currentLocation -= distPrevNewLine;
+  public int getCurrentLine() {
+    int count=1;
+    int _copyLocation = getCurrentLocation();
+    int distPrevNewLine = _reduced.getDistToPreviousNewline( 0 );
+
+    while (distPrevNewLine != -1 && getCurrentLocation()>0) {
+      setCurrentLocation( getCurrentLocation()-distPrevNewLine-1 );
       count++;
-      distPrevNewLine = _reduced.getDistToPreviousNewline( _currentLocation );
+      distPrevNewLine = _reduced.getDistToPreviousNewline( 0 );
     }
-    _currentLocation = _copyLocation;
+    setCurrentLocation( _copyLocation );
     return count;
   }
   

@@ -85,7 +85,9 @@ public class MainFrame extends JFrame {
   private CompilerErrorPanel _errorPanel;
   private OutputPane _outputPane;
   private InteractionsPane _interactionsPane;
+  private JPanel _statusBar;
   private JLabel _fileNameField;
+  private JLabel _currLocationField;
   private JTabbedPane _tabbedPane;
   private JSplitPane _docSplitPane;
   private JList _docList;
@@ -1060,8 +1062,16 @@ public class MainFrame extends JFrame {
  CompoundBorder(new EmptyBorder(2,2,2,2),
          new CompoundBorder(new BevelBorder(BevelBorder.LOWERED),
        new EmptyBorder(2,2,2,2))));
+    /*
+    _currLocationField = new JLabel();
+    _currLocationField.setFont(_fileNameField.getFont().deriveFont(Font.PLAIN));
+    _currLocationField.setBorder(new 
+ CompoundBorder(new EmptyBorder(2,2,2,2),
+         new CompoundBorder(new BevelBorder(BevelBorder.LOWERED),
+       new EmptyBorder(2,2,2,2))));
     // _fileNameField.setBorder(new javax.swing.border.EmptyBorder(2,2,2,2));
-    // _fileNameField.setBorder(new javax.swing.border.BevelBorder(BevelBorder.LOWERED));
+    // _fileNameField.setBorder(new javax.swing.border.BevelBorder(BevelBorder.LOWERED));*/
+   // _statusBar = new JPanel();
     getContentPane().add(_fileNameField, BorderLayout.SOUTH);
   }
 

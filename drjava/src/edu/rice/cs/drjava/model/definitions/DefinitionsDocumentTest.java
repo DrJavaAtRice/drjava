@@ -383,11 +383,87 @@ public class DefinitionsDocumentTest extends TestCase
   /**
    * Tests returning the current column in the document.
    */
-//  public void testGetColumn2() throws BadLocationException {
-//    final String s = "1234567890\n1234\n12345";
-//    defModel.insertString(0, s, null);
-//    assertEquals("#0.0", 5, defModel.getCurrentCol() );
-//  }
+  public void testGetColumn2() throws BadLocationException {
+    final String s = "1234567890\n1234\n12345";
+    defModel.insertString(0, s, null);
+    assertEquals("#0.0", 6, defModel.getCurrentCol() );
+  }
+  
+  /**
+   * Test returning second line in a two-line document.
+   * @exception BadLocationException
+   */
+  public void testGetLine1() throws BadLocationException {
+    final String s = "a\n";
+    defModel.insertString(0, s, null);
+    defModel.gotoLine(2);
+    assertEquals("#0.0", 2, defModel.getCurrentLine());
+  }
+
+  /**
+   * Test going to a specific line.
+   * @exception BadLocationException
+   */
+  public void testGetLine2() throws BadLocationException {
+    final String s = "abcd\n";
+    defModel.insertString(0, s, null);
+    defModel.gotoLine(2);
+    assertEquals("#0.0", 2, defModel.getCurrentLine());
+  }
+
+  /**
+   * Test going to the fourth line in a four line document.
+   * @exception BadLocationException
+   */
+  public void testGetLine3() throws BadLocationException {
+    final String s = "a\nb\nc\n";
+    defModel.insertString(0, s, null);
+    defModel.gotoLine(4);
+    assertEquals("#0.0", 4, defModel.getCurrentLine());
+  }
+
+  /**
+   * Test going to a line beyond the number of lines in a document
+   * just goes to the end of the file.
+   * @exception BadLocationException
+   */
+  public void testGetLine4() throws BadLocationException {
+    final String s = "a\nb\nc\n";
+    defModel.insertString(0, s, null);
+    defModel.gotoLine(8);
+    assertEquals("#0.0", 4, defModel.getCurrentLine());
+  }
+
+  /**
+   * Test going to the first line of an empty document
+   * doesn't do anything funny.  It should stay in the same
+   * location.
+   */
+  public void testGetLine5() {
+    defModel.gotoLine(1);
+    assertEquals("#0.0", 1, defModel.getCurrentLine());
+  }
+
+  /**
+   * Test going to a line that is greater than the line count
+   * of an empty document just keeps you in your current location.
+   */
+  public void testGetLine6() {
+    defModel.gotoLine(4);
+    assertEquals("#0.0", 1, defModel.getCurrentLine());
+  }
+
+  /**
+   * Test that going to a line within the document's line count
+   * sets the current position to the first character of the line.
+   * @exception BadLocationException
+   */
+  public void testGetLine7() throws BadLocationException {
+    final String s = "11111\n2222\n33333\n44444";
+    defModel.insertString(0, s, null);
+    defModel.gotoLine(3);
+    assertEquals("#0.0", 3, defModel.getCurrentLine());
+  }
   
   /**
    * Test whether removeTabs actually removes all tabs.
