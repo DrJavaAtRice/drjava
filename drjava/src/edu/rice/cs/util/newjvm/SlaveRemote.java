@@ -45,6 +45,8 @@ import java.rmi.*;
  * The remote interface for a slave JVM.
  * All instances must also provide a no-arg constructor,
  * which is reflectively invoked in {@link SlaveJVMRunner}.
+ *
+ * @version $Id$
  */
 public interface SlaveRemote extends Remote {
   /**

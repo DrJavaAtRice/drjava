@@ -56,6 +56,8 @@ import java.rmi.server.UnicastRemoteObject;
  * <DT>3</DT><DD>Error instantiating slave implementation class</DD>
  * </DL>
  * If the slave JVM completes successfully, it will exit with code 0.
+ *
+ * @version $Id$
  */
 public final class SlaveJVMRunner {
 

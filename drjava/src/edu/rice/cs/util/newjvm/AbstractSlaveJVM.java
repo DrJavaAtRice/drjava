@@ -45,6 +45,8 @@ import java.rmi.*;
  * A partial implementation of a {@link SlaveRemote} that provides
  * the quit functionality and that also periodically checks if the master is
  * still alive and automatically quits if not.
+ *
+ * @version $Id$
  */
 public abstract class AbstractSlaveJVM implements SlaveRemote {
   public static final int CHECK_MAIN_VM_ALIVE_MINUTES = 1;

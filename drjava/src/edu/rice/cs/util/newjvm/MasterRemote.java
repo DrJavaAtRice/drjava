@@ -43,6 +43,8 @@ import java.rmi.*;
 
 /**
  * The remote interface for a master JVM.
+ *
+ * @version $Id$
  */
 // The type parameter specifies the remote interface for the slave JVM.
 // (Generics removed because they confused rmic!)

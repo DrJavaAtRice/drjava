@@ -48,6 +48,8 @@ import java.io.*;
  * RMI, a second Java virtual machine.
  * This class is used by subclassing it.
  * (See package documentation for more details.)
+ *
+ * @version $Id$
  */
 public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   implements MasterRemote/*<SlaveType>*/
