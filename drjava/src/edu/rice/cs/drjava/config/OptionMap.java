@@ -47,7 +47,7 @@ public interface OptionMap {
 
     public <T> T setOption(Option<T> o, T val);
 
-    public String getString(Option<Object> o);
+    public <T> String getString(OptionParser<T> o);
     
     public <T> T setString(OptionParser<T> o, String s);
 

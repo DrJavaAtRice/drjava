@@ -82,6 +82,8 @@ public abstract class OptionParser<T> implements ParseStrategy<T> {
     // this package-private magic stuff makes all of the config "magic" types work.
     // basically, it's achieved via a double-dispatch stunt, so that the type information
     // is saved.
+
+    abstract String getString(DefaultOptionMap om);
     
     /**
      * uses parse() and setOption() so that any changes in parsing will automatically

@@ -75,7 +75,7 @@ public class OptionMapLoader implements OptionConstants {
      * Constructor creates
      * @param is the input stream to read. 
      */
-    public OptionMapLoader(final InputStream is) throws IOException {
+    public OptionMapLoader(InputStream is) throws IOException {
 	this(new Properties(DEFAULT_STRINGS));
 	prop.load(is);
     }

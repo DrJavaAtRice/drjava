@@ -52,7 +52,7 @@ public class DefaultOptionMap
 	return o.setOption(this,val); 
     }
   
-    public String getString(Option<Object> o) {
+    public <T> String getString(OptionParser<T> o) {
 	return o.getString(this);
     }
   

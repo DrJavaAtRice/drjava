@@ -41,7 +41,7 @@ package edu.rice.cs.drjava.config;
 
 public class Configuration {  
     
-    private OptionMap map;
+    protected OptionMap map;
   
     public Configuration(OptionMap om) {
 	map = om;
