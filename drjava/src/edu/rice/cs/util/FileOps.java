@@ -342,7 +342,10 @@ public abstract class FileOps {
     File file = fileSaver.getTargetFile();
     File backup = null;
     boolean tempFileUsed = true;
-    if (!file.canWrite()) {
+    // file.canWrite() is false if file.exists() is false
+    // but we want to be able to save a file that doesn't
+    // yet exist.
+    if (file.exists() && !file.canWrite()) {
       throw new IOException("Permission denied");
     }
     /* First back up the file, if necessary */
