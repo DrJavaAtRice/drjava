@@ -275,7 +275,7 @@ ${HOME}/drjava/src/edu/rice/cs/lib/clover.jar
 ${HOME}/drjava/built/
 ${JAVA_HOME}/lib/tools.jar
           </programlisting>
-          <para>In Mac OS X, you will also need to set the ANT_OPTS variable to include the JSR-14 compiler on the front of the "bootclasspath".  Add the following line to your <filename>~/.profile</filename> file, subsituting the correct home directory.</para>
+          <para>In Mac OS X 10.2 ("Jaguar") or earlier, you will likely also need to set the ANT_OPTS variable to include the JSR-14 compiler on the front of the "bootclasspath".  This is not necessary in OS X 10.3 ("Panther"), and should not be used if you encounter a "checkOverride" error from RMIC when compiling.  To set the ANT_OPTS variable, add the following line to your <filename>~/.profile</filename> file, subsituting the correct home directory.</para>
           <programlisting>export ANT_OPTS='-Xbootclasspath/p:/Users/USERNAME/drjava/src/edu/rice/cs/lib/jsr14.jar'</programlisting>
         </listitem>
         <listitem>
