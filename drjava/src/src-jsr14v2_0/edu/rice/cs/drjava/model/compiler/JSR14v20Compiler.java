@@ -317,7 +317,7 @@ public class JSR14v20Compiler implements CompilerInterface {
     public void warning(int pos, String key, Object[] args ...)
     {
       super.warning(pos, key, args);
-      System.out.println("warning: pos = " + pos);
+      //System.out.println("warning: pos = " + pos);
 
       String msg = getText("compiler.warn." + key, args);
 
@@ -335,7 +335,7 @@ public class JSR14v20Compiler implements CompilerInterface {
     public void error(int pos, String key, Object[] args ...)
     {
       super.error(pos, key, args);
-      System.out.println("error: pos = " + pos);
+      //System.out.println("error: pos = " + pos);
 
       String msg = getText("compiler.err." + key, args);
 
