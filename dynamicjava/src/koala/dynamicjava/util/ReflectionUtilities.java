@@ -60,7 +60,26 @@ public class ReflectionUtilities {
     }
     
     if (mm.isEmpty()) {
-      throw new NoSuchMethodException(cl.getName()+" constructor");
+      // It is here that we have to take care of boxing/unboxing and varargs
+      
+      
+      // Do second pass for finding a varargs method that matches given method call
+      
+      ms = getVarArgsConstructors(cl, ac.length);
+      
+      // Search for the methods with good parameter types and
+      // put them in 'mm'
+      it = ms.iterator();
+      while (it.hasNext()) {
+        Constructor m = it.next();
+        if (hasVarArgsCompatibleSignatures(m.getParameterTypes(), ac)) {
+          mm.add(m);
+        }
+      }
+      
+      if(mm.isEmpty()){
+        throw new NoSuchMethodException(cl.getName()+" constructor");
+      }
     }
     
     // Select the most specific constructor
@@ -88,6 +107,26 @@ public class ReflectionUtilities {
     
     for (int i = 0; i < ms.length; i++) {
       if (ms[i].getParameterTypes().length == params) {
+        result.add(ms[i]);
+      }
+    }
+    return result;
+  }
+  
+  /**
+   * Gets all the variable arguments constructors in the given class or super classes,
+   * even the redefined constructors are returned.
+   * @param cl     the class where the varargs constructor was declared
+   * @param params the number of parameters
+   * @return a list that contains the found constructors, an empty list if no
+   *         matching constructor was found.
+   */
+  public static List<Constructor> getVarArgsConstructors(Class cl, int params) {
+    List<Constructor>  result = new LinkedList<Constructor>();
+    Constructor[] ms = cl.getDeclaredConstructors();
+    
+    for (int i = 0; i < ms.length; i++) {
+      if (ms[i].isVarArgs() && ms[i].getParameterTypes().length <= params) {
         result.add(ms[i]);
       }
     }

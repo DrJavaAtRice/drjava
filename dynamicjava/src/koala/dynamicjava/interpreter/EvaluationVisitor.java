@@ -480,6 +480,26 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   }
 
   /**
+   * Private method that is used for evaluating (calling) all kinds of variable arguments method calls
+   * @param typs       The types of the formal parameters
+   * @param typs_len   The number of formal parameters in the method declaration
+   * @param larg_size  The number of actual parameters passed to the method
+   * @param it         An expression iterator that holds the values of the actual arguments, STANDING
+   *                     AT THE FIRST ACTUAL PARAMETER TO BE PUT IN THE VARARGS ARRAY
+   */
+  private Object buildArrayOfRemainingArgs(Class[] typs, int larg_size, Iterator<Expression> it) {
+    assert(typs[typs.length-1].isArray());
+    Class componentType = typs[typs.length-1].getComponentType();
+    Object argArray = Array.newInstance(componentType,new int[]{(larg_size-typs.length+1)});
+    for(int j = 0; j < larg_size-typs.length+1; j++){
+      Object p  = it.next().acceptVisitor(this);
+      Array.set(argArray, j, performCast(componentType, p));
+    }
+    return argArray;
+  }
+  
+  
+  /**
    * Visits an ObjectMethodCall
    * @param node the node to visit
    */
@@ -516,15 +536,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
             Object p  = it.next().acceptVisitor(this);
             args[i] = performCast(typs[i], p);
             i++;
-          } else { // Pass an array with all the remaining arguments
-            assert(typs[typs.length-1].isArray());
-            Class componentType = typs[typs.length-1].getComponentType();
-            Object argArray = Array.newInstance(componentType,new int[]{(larg.size()-typs.length+1)});
-            for(int j = 0; j < larg.size()-typs.length+1; j++){
-              Object p  = it.next().acceptVisitor(this);
-              Array.set(argArray, j, performCast(componentType, p));
-            }
-            args[typs.length-1] = argArray;
+          } else { // Pass an array with all the remaining arguments of 'it'
+            args[typs.length-1] = buildArrayOfRemainingArgs(typs, larg.size(), it );
           }
         }
       }
@@ -596,14 +609,24 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     List<Expression> larg  = node.getArguments();
     Object[] args  = Constants.EMPTY_OBJECT_ARRAY;
 
+    Class[] typs = m.getParameterTypes();
+    
     // Fill the arguments
     if (larg != null) {
       Iterator<Expression> it = larg.iterator();
       int      i  = 0;
-      args        = new Object[larg.size()];
-      while (it.hasNext()) {
+      args        = new Object[typs.length];
+      while (i < typs.length-1) {
         args[i] = it.next().acceptVisitor(this);
         i++;
+      }
+      if(typs.length > 0){
+        if(!m.isVarArgs()){
+          args[i] = it.next().acceptVisitor(this);
+          i++;
+        } else {
+          args[i] = buildArrayOfRemainingArgs(typs, larg.size(), it);
+        }
       }
     }
 
@@ -631,14 +654,24 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     List<Expression> larg = node.getArguments();
     Object[] args = Constants.EMPTY_OBJECT_ARRAY;
 
+    Class[] typs = m.getParameterTypes();
+    
     // Fill the arguments
     if (larg != null) {
-      args = new Object[larg.size()];
+      args = new Object[typs.length];
       Iterator<Expression> it = larg.iterator();
       int      i  = 0;
-      while (it.hasNext()) {
+      while (i < typs.length-1) {
         args[i] = it.next().acceptVisitor(this);
         i++;
+      }
+      if(typs.length > 0){
+        if(!m.isVarArgs()){
+          args[i] = it.next().acceptVisitor(this);
+          i++;
+        } else {
+          args[i] = buildArrayOfRemainingArgs(typs, larg.size(), it);
+        }
       }
     }
 
@@ -699,16 +732,27 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    * @param node the node to visit
    */
   public Object visit(SimpleAllocation node) {
+    Constructor cons = (Constructor)node.getProperty(NodeProperties.CONSTRUCTOR);
     List<Expression> larg = node.getArguments();
     Object[] args = Constants.EMPTY_OBJECT_ARRAY;
 
+    Class[] typs = cons.getParameterTypes();
+
     // Fill the arguments
     if (larg != null) {
-      args = new Object[larg.size()];
+      args = new Object[typs.length];
       Iterator<Expression> it = larg.iterator();
       int      i  = 0;
-      while (it.hasNext()) {
+      while (i < typs.length-1) {
         args[i++] = it.next().acceptVisitor(this);
+      }
+    
+      if(typs.length > 0){
+        if(!cons.isVarArgs()){
+          args[i++] = it.next().acceptVisitor(this);
+        } else {
+          args[i] = buildArrayOfRemainingArgs(typs, larg.size(), it);
+        }
       }
     }
 
@@ -785,14 +829,23 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     List<Expression> larg = node.getArguments();
     Object[]    args = null;
 
+    Class[] typs = cons.getParameterTypes();
+    
     if (larg != null) {
-      args = new Object[larg.size() + 1];
+      args = new Object[typs.length];
       args[0] = node.getExpression().acceptVisitor(this);
 
       Iterator<Expression> it = larg.iterator();
       int      i  = 1;
-      while (it.hasNext()) {
+      while (i < typs.length-1) { // the +1 for the hidden parameter, and the -1 for the varargs
         args[i++] = it.next().acceptVisitor(this);
+      }
+      if(typs.length > 1){ 
+        if(!cons.isVarArgs()){
+          args[i++] = it.next().acceptVisitor(this);
+        } else {
+          args[i++] = buildArrayOfRemainingArgs(typs, larg.size()+1, it);
+        }
       }
     } else {
       args = new Object[] { node.getExpression().acceptVisitor(this) };
@@ -818,16 +871,26 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    * @param node the node to visit
    */
   public Object visit(ClassAllocation node) {
+    Constructor cons = (Constructor)node.getProperty(NodeProperties.CONSTRUCTOR);
     List<Expression> larg = node.getArguments();
     Object[]    args = Constants.EMPTY_OBJECT_ARRAY;
 
+    Class[] typs = cons.getParameterTypes();
+    
     // Fill the arguments
     if (larg != null) {
-      args = new Object[larg.size()];
+      args = new Object[typs.length];
       Iterator<Expression> it = larg.iterator();
       int      i  = 0;
-      while (it.hasNext()) {
+      while (i < typs.length-1) {
         args[i++] = it.next().acceptVisitor(this);
+      }
+      if(typs.length > 0){
+        if(!cons.isVarArgs()){
+          args[i++] = it.next().acceptVisitor(this);
+        } else {
+          args[i] = buildArrayOfRemainingArgs(typs, larg.size(), it);
+        }
       }
     }
 

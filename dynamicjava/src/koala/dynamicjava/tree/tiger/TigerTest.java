@@ -123,7 +123,7 @@ public class TigerTest extends TestCase {
     
     
     /**/ // Not yet working...
-    public void xtestInterpretConstructorVarArgs(){
+    public void testInterpretConstructorVarArgs(){
       testString =
         "public class C {\n"+
         "  String str = \"\";\n"+
@@ -141,8 +141,30 @@ public class TigerTest extends TestCase {
       assertEquals("Str1Str2Str3", interpret(testString));
     }
     
+    /**/ // Not yet working...
+    public void testInterpretInnerClassConstructorVarArgs(){
+      testString =
+        "public class B {\n"+
+        "  public class C {\n"+
+        "    String str = \"\";\n"+
+        "    public C(String ... s){\n"+
+        "      for(int i=0;i<s.length;i++) {\n"+
+        "        str = str+s[i];\n"+
+        "      }\n"+
+        "    }\n"+
+        "    public String getStr(){\n"+
+        "      return str;\n"+
+        "    }\n"+
+        "  }\n"+
+        "}\n"+
+        "B b = new B();\n"+
+        "b.new C(\"Str1\",\"Str2\",\"Str3\").getStr();\n";
+    
+      assertEquals("Str1Str2Str3", interpret(testString));
+    }
+    
     // Aint working yet...
-    public void xtestInterpretStaticMethodVarArgs(){
+    public void testInterpretStaticMethodVarArgs(){
     testString =
       "public class C {\n"+
       "  public static String someMethod(String ... s){\n"+

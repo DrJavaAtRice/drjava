@@ -1892,6 +1892,7 @@ PARSER_END(Parser)
          bl = t.beginLine;
          bc = t.beginColumn;
        }
+       if(lastFormalParameterIsVarArgs) flag |= 0x00000080; // Modifier.VARARGS == 0x00000080 /**/
        return new ConstructorDeclaration(flag, id.image, params, exceptions, ci, stmts, lastFormalParameterIsVarArgs,
                                          filename,
                                          bl, bc,
