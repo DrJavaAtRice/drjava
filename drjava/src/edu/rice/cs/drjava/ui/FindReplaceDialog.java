@@ -126,7 +126,7 @@ import edu.rice.cs.util.UnexpectedException;
   /** How the dialog responds to window events. */
   private WindowListener _dialogListener = new WindowAdapter() {
     public void windowClosing(WindowEvent ev) {
-      _close();
+      hide();
     }
   };
 
@@ -151,6 +151,7 @@ import edu.rice.cs.util.UnexpectedException;
     // around while searching for the string
     FindResult fr = _machine.findNext();
     if (fr.getWrapped()) {
+      Toolkit.getDefaultToolkit().beep();
       _message.setText("Reached the end of the document, continuing from the beginning.");
     }
     int pos = fr.getFoundOffset();
@@ -225,6 +226,7 @@ import edu.rice.cs.util.UnexpectedException;
       _machine.setReplaceWord(_replaceField.getText());
       _message.setText("");
       int count = _machine.replaceAll();
+      Toolkit.getDefaultToolkit().beep();
       _message.setText("Replaced " + count + " occurrence" + ((count == 1) ? "" :
                                                               "s") + ".");
       _replaceAction.setEnabled(false);
@@ -235,7 +237,7 @@ import edu.rice.cs.util.UnexpectedException;
 
   private Action _closeAction = new AbstractAction("Close") {
     public void actionPerformed(ActionEvent e) {
-      _close();
+      hide();
     }
   };
   
@@ -253,12 +255,12 @@ import edu.rice.cs.util.UnexpectedException;
     addKeyListener(new KeyListener() {
       public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-          _close();
+          hide();
         }
       }
       public void keyReleased(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-          _close();
+          hide();
         }
       }
       public void keyTyped(KeyEvent e) {
@@ -314,7 +316,7 @@ import edu.rice.cs.util.UnexpectedException;
     main.add(buttons);
     main.add(_message);
     
-    setDefaultCloseOperation(HIDE_ON_CLOSE);
+    setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
     _machine = new FindReplaceMachine();
     
     _findField.addActionListener(_findNextAction);
@@ -399,13 +401,19 @@ import edu.rice.cs.util.UnexpectedException;
     try {
       _defPane.select(from, to);
       
+      JViewport v = _frame.getDefViewport();
+      int viewHeight = (int)v.getSize().getHeight();
       // Scroll to make sure this item is visible
+      // Centers the selection in the viewport
       Rectangle startRect = _defPane.modelToView(from);
-      Rectangle endRect = _defPane.modelToView(to - 1);
+      int startRectY = (int)startRect.getY();
+      startRect.setLocation(0, startRectY-viewHeight/2);
+      //Rectangle endRect = _defPane.modelToView(to - 1);
+      Point endPoint = new Point(0, startRectY+viewHeight/2-1);
       
       // Add the end rect onto the start rect to make a rectangle
-      // that encompasses the entire error
-      startRect.add(endRect);      
+      // that encompasses the entire selection
+      startRect.add(endPoint);      
       
       _defPane.scrollRectToVisible(startRect);
       _defPane.requestFocus();
@@ -414,9 +422,9 @@ import edu.rice.cs.util.UnexpectedException;
     catch (BadLocationException badBadLocation) {}
   }
  
-  private void _close() {
+   /*private void _close() {
     hide();
-  }
+    }*/
 
   public void hide() {
     
@@ -429,7 +437,7 @@ import edu.rice.cs.util.UnexpectedException;
       _defPane.setCaretPosition(_machine.getCurrentOffset());
       }*/
     
-    _defPane.requestFocus();
+    //_defPane.requestFocus();
     _frame.uninstallFindReplaceDialog(this);
     super.hide();
   }  

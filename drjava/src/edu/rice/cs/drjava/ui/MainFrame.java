@@ -1062,14 +1062,38 @@ public class MainFrame extends JFrame {
       if (lineStr != null) {
         int lineNum = Integer.parseInt(lineStr);
         int pos = _model.getActiveDocument().gotoLine(lineNum);
-        _currentDefPane.setPositionAndScroll(pos);
+        _currentDefPane.setCaretPosition(pos);
+
+        // this code was taken from FindReplaceDialog's 
+        // _selectFoundItem method
+        JScrollPane defScroll = (JScrollPane)
+          _defScrollPanes.get(_model.getActiveDocument());
+        int viewHeight = (int)defScroll.getViewport().getSize().getHeight();
+        // Scroll to make sure this item is visible
+        // Centers the selection in the viewport
+        Rectangle startRect = _currentDefPane.modelToView(pos);
+        int startRectY = (int)startRect.getY();
+        startRect.setLocation(0, startRectY-viewHeight/2);
+        //Rectangle endRect = _defPane.modelToView(to - 1);
+        Point endPoint = new Point(0, startRectY+viewHeight/2-1);
+        startRect.add(endPoint);      
+      
+        _currentDefPane.scrollRectToVisible(startRect);
+
+        //Commented out this call because it would be impossible to
+        //center the viewport on pos without passing in the viewport.
+        //Perhaps setPositionAndScroll can be changed in the future to
+        //allow this.
+        //_currentDefPane.setPositionAndScroll(pos);
         _currentDefPane.requestFocus();
       }
-    } catch (NumberFormatException nfe) {
+    } 
+    catch (NumberFormatException nfe) {
       // invalid input for line number
       Toolkit.getDefaultToolkit().beep();
       // Do nothing.
     }
+    catch (BadLocationException ble) {}
   }
 
   /**
@@ -2027,6 +2051,12 @@ public class MainFrame extends JFrame {
   public void uninstallFindReplaceDialog(FindReplaceDialog frd) {
     //remove listeners
     frd.stopListening();
+  }
+
+  public JViewport getDefViewport() {
+    JScrollPane defScroll = (JScrollPane)
+      _defScrollPanes.get(_model.getActiveDocument());
+    return defScroll.getViewport();
   }
 
 }
