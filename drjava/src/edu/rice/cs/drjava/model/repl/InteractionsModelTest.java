@@ -129,6 +129,15 @@ public final class InteractionsModelTest extends TestCase {
     _assertProcessedContents("java Foo \"a b\"c d",
                              "Foo.main(new String[]{\"a b\",\"c\",\"d\"});");
 
+    // java Foo c:\file.txt
+    // Foo.main("c:\\file.txt");
+    _assertProcessedContents("java Foo c:\\file.txt",
+                             "Foo.main(new String[]{\"c:\\\\file.txt\"});");
+
+    // java Foo /home/user/file
+    // Foo.main("/home/user/file");
+    _assertProcessedContents("java Foo /home/user/file",
+                             "Foo.main(new String[]{\"/home/user/file\"});");
   }
 
   /**

@@ -555,19 +555,17 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * interpretor can use.
    */
   protected static String _testClassCall(String s) {
-    LinkedList ll = new LinkedList();
-    if (s.endsWith(";"))
+    if (s.endsWith(";")) {
       s = _deleteSemiColon(s);
+    }
     StreamTokenizer st = new StreamTokenizer(new StringReader(s));
-    st.ordinaryChar('\'');
+    st.ordinaryChar('\'');  // clear the quote status of '
     st.ordinaryChar('\\');
     st.ordinaryChars('0','9');
-    st.ordinaryChars('-', '.');
-    st.wordChars('\'', '\'');
-    st.wordChars('\\', '\\');
-    st.wordChars('0', '9');
-    st.wordChars('-', '.');
-    
+    st.ordinaryChars('-', '.'); // clear the "numeric" status from these
+    st.wordChars(33, 33); // '!'
+    st.wordChars(35, '\u00ff'); // make everything a word char except "
+
     try {
       st.nextToken();             //don't want to get back java
       st.nextToken();             //move to second token
