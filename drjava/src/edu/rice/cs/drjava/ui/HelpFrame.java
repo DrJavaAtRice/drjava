@@ -48,6 +48,7 @@ import java.awt.event.*;
 import java.awt.*;
 
 import java.net.URL;
+import java.net.MalformedURLException;
 import java.io.*;
 
 import edu.rice.cs.drjava.DrJava;
@@ -65,7 +66,8 @@ public class HelpFrame extends JFrame {
   private static final String HELP_PATH = "/edu/rice/cs/drjava/docs/user/";
   private static final String CONTENTS_PAGE = "index.html";
   private static final String HOME_PAGE = "intro.html";
-  
+  private static final URL INTRO_URL = 
+    HelpFrame.class.getResource(HELP_PATH + HOME_PAGE);
   private JEditorPane _mainDocPane;
   private JSplitPane _splitPane;
   private JEditorPane _contentsDocPane;
@@ -221,10 +223,10 @@ public class HelpFrame extends JFrame {
     } else {
       _displayError();
     }
-    URL introUrl = HelpFrame.class.getResource(HELP_PATH + HOME_PAGE);
-    if (introUrl != null) {
-      _history = new HistoryList(introUrl);
-      _displayPage(introUrl);
+
+    if (INTRO_URL != null) {
+      _history = new HistoryList(INTRO_URL);
+      _displayPage(INTRO_URL);
     } else {
       _displayError();
     }
@@ -295,11 +297,27 @@ public class HelpFrame extends JFrame {
         // Only follow links within the documentation
         URL url = event.getURL();
         String protocol = url.getProtocol();
-        String path = url.getPath();
-        if (("file".equals(protocol) || "jar".equals(protocol))
-              && path.indexOf(HELP_PATH) >= 0) {
-          jumpTo(url);
+        
+        if ((!"file".equals(protocol)) && (!"jar".equals(protocol))) {
+          return; // we only handle file/jar protocols
         }
+        
+        // perform path testing
+        String path = url.getPath();
+        
+        if(path.indexOf(HELP_PATH+CONTENTS_PAGE) >= 0) {
+          try {
+            url = new URL(url,HOME_PAGE); // redirect to home, not contents
+          } catch(MalformedURLException murle) {
+          }
+        } else if(path.indexOf(HELP_PATH) < 0) {
+          // not anywhere in the help section
+          return;
+        }
+        if(url.sameFile(_history.contents)) {
+          return; // we're already here!
+        }
+        jumpTo(url);
       }
     }
   };

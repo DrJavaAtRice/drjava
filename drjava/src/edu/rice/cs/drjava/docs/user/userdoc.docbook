@@ -674,5 +674,52 @@ public static Test suite() {
     </section>      
     
   </appendix>
- 
+
+  <!-- ---- Appendix: Setting up DrJava ---- -->
+  <appendix id="platform-setup">
+    <title>Setting up DrJava on your platform</title>
+    <para>DrJava also has the ability to load or handle files similarly to other applications on your platform.  For example, many platforms such as Windows and MacOS allow you to associate files with a particular application.  In addition, some platforms allow for you to drop files upon an application's icon.</para>
+
+    <section id="win32-associations">
+      <title>Associating .java files to DrJava, on Windows</title>
+      <para>There is a fairly involved, yet simple process for making setting up DrJava as your default java editor in Windows.</para>
+      <para>Some pieces of information that you'll need to determine before setting up:
+        <orderedlist>
+          <listitem><para>The complete path to your java launcher.  We recommend javaw.exe, since it lauches without a command prompt window.</para></listitem>
+          <listitem><para>The complete path to your drjava .jar file.  You may wish to make a copy of your build and name it as drjava.jar, and then in order to update your DrJava installation, just copy a new build over the drjava.jar file.</para></listitem>
+        </orderedlist>
+      </para>
+      <para>Once you've decided or determined the above items of information, you can proceed to add or changing your .java file associations.</para>
+      <orderedlist>
+        <listitem><para>The first step is finding the Folder Settings dialog.  Depending on version, it's accessible on Windows at a couple of common locations:
+          <itemizedlist>
+            <listitem><para>The "Settings" group of the Start Menu</para></listitem>
+            <listitem><para>The "Tools" group on Windows Explorer</para></listitem>
+            <listitem><para>A clickable icon in the Control Panel</para></listitem>
+          </itemizedlist>
+        </para></listitem>
+        <listitem><para>Within the FolderOptions dialog, click/select the File Types tab.  Windows may make you wait while it makes a list of its known file types.</para></listitem>
+        <listitem><para>Search the list for the ".java" extension type.  It is possible that it is not in the list, in that case do the following:
+          <orderedlist>
+            <listitem><para>Click the the button to create a new File Type.</para></listitem>
+            <listitem><para>Type in "java" as the extension, and then click OK</para></listitem>
+          </orderedlist>
+        </para></listitem>
+        <listitem><para>Select the ".java" file type, and click "Advanced". It should pop up the "Edit File Type" dialog.</para></listitem>
+        <listitem><para>Where it shows the list of "actions", click "New". It should show a "New Action" dialog.</para></listitem>
+        <listitem><para>Where it prompts you for the action, type in "open".</para></listitem>
+        <listitem><para>Where it asks you for the application to perform the action, type the following into the field:
+          <orderedlist>
+            <listitem><para>First, the path to your java launcher (or javaw launcher).  If your path includes a space character, put the entire path between quotation marks.</para></listitem>
+            <listitem><para>Follow it with a space character, and then a "-jar" (without the quotes).</para></listitem>
+            <listitem><para>After the -jar, input another space character, and then the literal path to the DrJava jar file.  If your path includes a space character, put the entire path in between quotation marks.</para></listitem>
+            <listitem><para>After the jar path, input another space, and then the literal string "%1", including the quotation makrs.</para></listitem>
+          </orderedlist>
+        </para></listitem>
+        <listitem><para>You may select an icon, if you wish.  Then click OK.</para></listitem>
+        <listitem><para>Click the "Close" button on the Folder Options dialog.</para></listitem>
+        <listitem><para>You should be all set, and done configuring your file associations.  Now whenever you see a ".java" file on Windows, double clicking it should launch DrJava for editing it.</para></listitem>
+      </orderedlist>
+    </section>
+  </appendix>
 </book>
