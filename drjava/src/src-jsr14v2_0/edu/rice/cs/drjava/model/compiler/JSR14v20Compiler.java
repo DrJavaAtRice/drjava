@@ -89,6 +89,7 @@ public class JSR14v20Compiler implements CompilerInterface {
   private String _extraClassPath = "";
 
   protected boolean _allowAssertions = false;  
+  protected boolean _warningsEnabled = true;
   
   private boolean _isJSR14v2_4;
   private boolean _isJSR14v2_5 = false;
@@ -102,7 +103,7 @@ public class JSR14v20Compiler implements CompilerInterface {
   protected Context context = null;
   
   private String _builtPath = "";
-
+  
   /** A writer that discards its input. */
   private static final Writer NULL_WRITER = new Writer() {
     public void write(char cbuf[], int off, int len) throws IOException {}
@@ -291,36 +292,18 @@ public class JSR14v20Compiler implements CompilerInterface {
     _allowAssertions = allow;
   }
   
+   /**
+   * Sets whether or not warnings are allowed
+   */
+  public void setWarningsEnabled(boolean warningsEnabled) {
+    _warningsEnabled = warningsEnabled;
+  }
+  
   protected Context createContext(File[] sourceRoots) {
     Context context = new Context();
     Options options = Options.instance(context);
-    
-    if(CompilerWarnings.SHOW_UNCHECKED) {
-      options.put("-Xlint:unchecked","");
-    }
-    
-    if(CompilerWarnings.SHOW_DEPRECATION) {
-      options.put("-Xlint:deprecation","");
-    }
-
-    if(CompilerWarnings.SHOW_PATH) {
-      options.put("-Xlint:path","");
-    }
-    
-    if(CompilerWarnings.SHOW_SERIAL) {
-      options.put("-Xlint:serial","");
-    }
-    
-    if(CompilerWarnings.SHOW_FINALLY) {
-      options.put("-Xlint:finally","");
-    }
-    
-    if(CompilerWarnings.SHOW_FALLTHROUGH) {
-      options.put("-Xlint:fallthrough","");
-      options.put("-Xlint:switchcheck",""); //Some compilers appear to use this option instead. Anyone know anything about this?
-    }
-    
-    // Turn on debug -- maybe this should be setable some day?
+    options.putAll(CompilerOptions.getOptions(_warningsEnabled));
+    //Should be setable some day?
     options.put("-g", "");
 
     // Set output target version

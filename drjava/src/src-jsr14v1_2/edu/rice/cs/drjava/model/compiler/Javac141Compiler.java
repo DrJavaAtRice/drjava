@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 
 import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.Arrays;
 
 // Uses Java 1.4.1+ / JSR-14 v1.2 compiler classes
@@ -82,6 +83,8 @@ public class Javac141Compiler implements CompilerInterface {
   private String _extraClassPath = "";
 
   protected boolean _allowAssertions = false;
+  
+  protected boolean _warningsEnabled = true;
     
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new Javac141Compiler();
@@ -262,35 +265,26 @@ public class Javac141Compiler implements CompilerInterface {
     _allowAssertions = allow;
   }
   
+  /**
+   * Sets whether or not warnings are allowed
+   */
+  public void setWarningsEnabled(boolean warningsEnabled) {
+    _warningsEnabled = warningsEnabled;
+  }
+  
   protected Context createContext(File[] sourceRoots) {
     Context context = new Context();
     Options options = Options.instance(context);
     
-    if(CompilerWarnings.SHOW_UNCHECKED) {
-      options.put("-Xlint:unchecked","");
-    }
+    HashMap/*<String,String>*/ toAdd = CompilerOptions.getOptions(_warningsEnabled);
+    LinkedList /*<String>*/ keys = new LinkedList/*<String>*/(toAdd.keySet());
+    LinkedList /*<String>*/values = new LinkedList/*<String>*/(toAdd.values());
+        
+    for(int i = 0; i< toAdd.size(); i++)
+      options.put((String)values.get(i), (String)values.get(i));
     
-    if(CompilerWarnings.SHOW_DEPRECATION) {
-      options.put("-Xlint:deprecation","");
-    }
-
-    if(CompilerWarnings.SHOW_PATH) {
-      options.put("-Xlint:path","");
-    }
+    //options.putAll(CompilerOptions.getOptions(_warningsEnabled));
     
-    if(CompilerWarnings.SHOW_SERIAL) {
-      options.put("-Xlint:serial","");
-    }
-    
-    if(CompilerWarnings.SHOW_FINALLY) {
-      options.put("-Xlint:finally","");
-    }
-    
-    if(CompilerWarnings.SHOW_FALLTHROUGH) {
-      options.put("-Xlint:fallthrough","");
-      options.put("-Xlint:switchcheck",""); //Some compilers appear to use this option instead. Anyone know anything about this?
-    }
-
     // Turn on debug -- maybe this should be setable some day?
     options.put("-g", "");
 

@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 
 import java.util.LinkedList;
+import java.util.HashMap;
 
 // Importing the Java 1.3 / JSR-14 v1.0 Compiler classes
 import com.sun.tools.javac.v8.JavaCompiler;
@@ -86,6 +87,11 @@ public class JavacGJCompiler implements CompilerInterface {
    * Whether to allow 1.4 assertions.
    */
   private boolean _allowAssertions = false;
+  
+  /**
+   * Whether to allow warnings to be shown
+   */
+  private boolean _warningsEnabled = true;
     
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new JavacGJCompiler();
@@ -318,6 +324,13 @@ public class JavacGJCompiler implements CompilerInterface {
   }
   
   /**
+   * Sets whether or not warnings are allowed
+   */
+  public void setWarningsEnabled(boolean warningsEnabled) {
+    _warningsEnabled = warningsEnabled;
+  }
+  
+  /**
    * This method allows us to set the JSR14 collections path across a class loader.
    * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
    */
@@ -327,32 +340,17 @@ public class JavacGJCompiler implements CompilerInterface {
   
   protected Hashtable createOptionsHashtable(File[] sourceRoots) {
     Hashtable options = Hashtable.make();
-
-    if(CompilerWarnings.SHOW_UNCHECKED) {
-      options.put("-Xlint:unchecked","");
-    }
     
-    if(CompilerWarnings.SHOW_DEPRECATION) {
-      options.put("-Xlint:deprecation","");
-    }
-
-    if(CompilerWarnings.SHOW_PATH) {
-      options.put("-Xlint:path","");
-    }
+    HashMap/*<String,String>*/ toAdd = CompilerOptions.getOptions(_warningsEnabled);
+    LinkedList /*<String>*/ keys = new LinkedList/*<String>*/(toAdd.keySet());
+    LinkedList /*<String>*/values = new LinkedList/*<String>*/(toAdd.values());
+        
+    for(int i = 0; i< toAdd.size(); i++)
+      options.put((String)values.get(i), (String)values.get(i));
     
-    if(CompilerWarnings.SHOW_SERIAL) {
-      options.put("-Xlint:serial","");
-    }
     
-    if(CompilerWarnings.SHOW_FINALLY) {
-      options.put("-Xlint:finally","");
-    }
+    //options.putAll(CompilerOptions.getOptions(_warningsEnabled));
     
-    if(CompilerWarnings.SHOW_FALLTHROUGH) {
-      options.put("-Xlint:fallthrough","");
-      options.put("-Xlint:switchcheck",""); //Some compilers appear to use this option instead. Anyone know anything about this?
-    }
-
     // Turn on debug -- maybe this should be setable some day?
     options.put("-g", "");
 
