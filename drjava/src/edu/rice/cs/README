@@ -17,12 +17,13 @@ by Brian Stoler (bstoler@rice.edu)
 
 6) cvs -d $CVSROOT checkout src
 
-7) Install Ant: http://jakarta.apache.org/ant
+7) Install Ant (version 1.5 or later): http://jakarta.apache.org/ant
 
 8) Download the JSR-14 prototype compiler (with generics) from
    http://developer.java.sun.com/developer/earlyAccess/adding_generics.
    Then unzip the file you downloaded, and move the included javac.jar to
    ~/sf/src/edu/rice/cs/lib/jsr14.jar.
+   (Note that if you download JSR-14 v1.2, you will need Java 1.4.)
 
 9) Set CLASSPATH environment variable to include all of the following:
    * ~/sf/built (this is where compiled classes will go)
@@ -31,11 +32,24 @@ by Brian Stoler (bstoler@rice.edu)
    * ~/sf/src/edu/rice/cs/lib/GJv6.jar
    * ~/sf/src/edu/rice/cs/lib/gj-util.jar
    * ~/sf/src/edu/rice/cs/lib/dynamicjava.jar
+   * ~/sf/src/edu/rice/cs/lib/compilers-jsr14v1_0.jar
    * The tools.jar file in your JDK's lib directory
 
 That should be it! Make sure all the environment variables are exported if
 you're using UNIX. Of course you'll probably want to set them from within
 a script or your .bashrc or .cshrc or whatever.
+
+
+To compile the classes:
+
+1) Change to the src/edu/rice/cs/util/ directory.
+
+2) Run "ant clean compile"
+
+3) Change to the src/edu/rice/cs/drjava/ directory.
+
+4) Run "ant clean compile"
+
 
 Some potential problems and their solutions
 -------------------------------------------
