@@ -139,7 +139,7 @@ public class DirectoryChooser extends JPanel {
   private JPanel   _buttonPanel;
   private JPanel   _accessoryPanel;
   private JPanel   _southPanel;
-  
+  private GlassPane _glassPane;
   protected JComponent _accessory;
   
   protected JPopupMenu _treePopup;
@@ -263,14 +263,15 @@ public class DirectoryChooser extends JPanel {
     _normalFileFilters = new LinkedList<FileFilter>();
     _fileSelectionListeners = new Hashtable<FileSelectionListener, TreeSelectionListener>();
     _fdManager = new DefaultFileDisplayManager();
-  
+    _glassPane = new GlassPane();
+    _glassPane.setVisible(false);
+    
     _offLimits = new HashSet<File>();
     File[] shellRoots = (File[])ShellFolder.get("fileChooserComboBoxFolders");
     for(File f : shellRoots) {
       _offLimits.add(f);
     }
     
-    ////////////////
     
     GridBagLayout layout = new GridBagLayout();
     GridBagConstraints c = new GridBagConstraints();
@@ -570,7 +571,7 @@ public class DirectoryChooser extends JPanel {
         _finalResult = CANCEL_OPTION;
       }
     });
-    
+    diag.setGlassPane(_glassPane);
     diag.setLocationRelativeTo(null);
     diag.setSize(330, 400);
     return diag;
@@ -969,13 +970,26 @@ public class DirectoryChooser extends JPanel {
     super.setEnabled(enable);
     if (_treeIsGenerated) {
       _tree.setEnabled(enable);
-      _scroller.setEnabled(enable);
-      _scroller.getHorizontalScrollBar().setEnabled(enable);
-      _scroller.getVerticalScrollBar().setEnabled(enable);
     }
+    _scroller.setEnabled(enable);
+    _scroller.getHorizontalScrollBar().setEnabled(enable);
+    _scroller.getVerticalScrollBar().setEnabled(enable);
+    _newFolderButton.setEnabled(enable);
+    _approveButton.setEnabled(enable);
+    _cancelButton.setEnabled(enable);
   }
   
   //////////////////// PROTECTED UTILITY METHODS /////////////////
+  
+  protected synchronized void hourglassOn() {
+    this.setEnabled(false);
+//    _glassPane.setVisible(true);
+  }
+  
+  protected synchronized void hourglassOff() {
+    this.setEnabled(true);
+//    _glassPane.setVisible(false);
+  }
   
   protected void treeShouldBeRegenerated() {
     if (_treeIsGenerated) {
@@ -1121,7 +1135,7 @@ public class DirectoryChooser extends JPanel {
   protected void  ensureHasChildren(DefaultMutableTreeNode node) {
     if (!_treeIsGenerated) return;
     if (node.getChildCount() == 1 && node.getChildAt(0) instanceof EmptyTreeNode) {
-      
+      hourglassOn();
       File parentFile = getFileForTreeNode(node);
       node.removeAllChildren(); // get rid of dummy node
       
@@ -1139,6 +1153,7 @@ public class DirectoryChooser extends JPanel {
         }
       }
       ((DefaultTreeModel)_tree.getModel()).nodeStructureChanged(node);
+      hourglassOff();
     }
   }
   
@@ -1535,7 +1550,22 @@ public class DirectoryChooser extends JPanel {
         return new File(_parent, getText());
     }
   }
-    
+  
+  /**
+   * Blocks access to DrJava while the hourglass cursor is on
+   */
+  private class GlassPane extends JComponent {
+
+    /**
+     * Creates a new GlassPane over the DrJava window
+     */
+    public GlassPane() {
+      addKeyListener(new KeyAdapter() {});
+      addMouseListener(new MouseAdapter() {});
+      super.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    }
+  }
+  
   /**
    * Allows the DirectoryChooser to recongnize any of the 
    * temporary leaves put on the directories in order to 
@@ -1561,8 +1591,8 @@ public class DirectoryChooser extends JPanel {
       dir = new File(args[0]);
     }
     else {
-      dir = new File("/home/jlugo");
-      if (!dir.exists()) dir = null;
+//      dir = new File("/home/jlugo");
+//      if (!dir.exists()) dir = null;
     }
     
     final DirectoryChooser d = new DirectoryChooser((Frame)null,dir);
@@ -1603,12 +1633,13 @@ public class DirectoryChooser extends JPanel {
         System.out.println("Selected("+ (e.isAddedFile() ? "+" : "-") +") " + e.getFile());
       }
     });
-//    int res = d.showDialog();
-    JFrame jf = new JFrame();
-    jf.getContentPane().add(d);
-    jf.setSize(300,300);
-    d.setEnabled(false);
-    jf.setVisible(true);
+    d.hourglassOn();
+    int res = d.showDialog();
+//    JFrame jf = new JFrame();
+//    jf.getContentPane().add(d);
+//    jf.setSize(300,300);
+////    d.setEnabled(false);
+//    jf.setVisible(true);
     
 //    d.startRename();
     

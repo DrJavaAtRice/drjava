@@ -41,50 +41,41 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
  * OTHER DEALINGS WITH THE SOFTWARE.
  * 
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
+package edu.rice.cs.util.swing;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import javax.swing.*;
+import java.awt.*;
 
-/**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20040813-1607;
- *
- * @version $Id$
- */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20040813-1607";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+class LayeredIcon implements Icon {
+  private Icon[] _layers;
+  private int[] _xoffs;
+  private int[] _yoffs;
+  private int _w;
+  private int _h;
+  public LayeredIcon(Icon[] layers, int[] x, int[] y) {
+    _layers = layers;
+    _xoffs = x;
+    _yoffs = y;
+    if (layers.length != x.length || x.length != y.length) {
+      throw new IllegalArgumentException("Array lengths don't match");
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
+    _w = 0; _h = 0;
+    for (int i=0; i < layers.length; i++) {
+      _w = Math.max(_w, layers[i].getIconWidth() + x[i]);
+      _h = Math.max(_h, layers[i].getIconHeight() + x[i]);
     }
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
+  public int getIconHeight(){
+    return _h;
   }
-} 
+  public int getIconWidth(){
+    return _w;
+  }
+  public void paintIcon(Component c, Graphics g, int x, int y){
+    for (int i=0; i < _layers.length; i++) {
+      _layers[i].paintIcon(c,g, x+_xoffs[i], y+_yoffs[i]);
+    }
+  }
+}

@@ -139,4 +139,34 @@ public class JTreeSortNavigatorTest extends TestCase {
     
   }
   
+  private String _name;
+  /**
+   * When the node is the only child of its parent and it is refreshed it should not
+   * try to delete the parent.
+   */
+  public void testRenameDocument() {
+    _name = "MyTest.dj0";
+    INavigatorItem item = new INavigatorItem() {
+      public String getName() { return _name; }
+      public boolean equals(Object o) { return o == this; }
+    };
+    Object _lock = new Object();
+    synchronized(_lock) {
+      tree.addDocument(item, "folder3/");
+    }
+    InnerNode folder3 = (InnerNode)source.getChildAt(2);
+    assertEquals("folder3 should have 1 children", 1, folder3.getChildCount());
+    synchronized(_lock) {
+      _name = "MyTest.expected";
+      tree.refreshDocument(item, "folder3/");
+    }
+    synchronized(_lock) {
+      assertEquals("folder3 should have 1 children", 1, folder3.getChildCount());
+      LeafNode node = (LeafNode)folder3.getChildAt(0);;
+      assertEquals("should have been renamed", _name, node.toString());
+      assertEquals("node should have same parent", folder3, node.getParent());
+      tree.removeDocument(item);
+    }
+  }
+  
 }

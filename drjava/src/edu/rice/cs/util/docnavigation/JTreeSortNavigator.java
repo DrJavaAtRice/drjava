@@ -469,12 +469,13 @@ public class JTreeSortNavigator extends JTree
     }
     InnerNode newParent = _path2node.getValue(newPath); // node that should be parent
     
+    
     if (newParent == oldParent) { 
       if (!node.toString().equals(doc.getName())) {
-        removeNode(node);
         LeafNode newLeaf= new LeafNode(doc);
         _doc2node.put(doc,newLeaf);
         insertNodeSortedInto(newLeaf, newParent);
+        _model.removeNodeFromParent(node);
       }
       // don't do anything if its name or parents haven't changed
     }
