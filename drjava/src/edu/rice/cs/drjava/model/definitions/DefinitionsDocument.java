@@ -1676,13 +1676,13 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
         }
       }
 
+      setCurrentLocation(oldLocation);
       return text.substring(index,endIndex);
     }
     catch (BadLocationException ble) {
       throw new UnexpectedException(ble);
     }
     finally {
-      System.out.println("In finally");
       setCurrentLocation(oldLocation);
     }
   }
