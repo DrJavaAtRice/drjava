@@ -11,6 +11,9 @@ import java.util.LinkedList;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
 /**
+ * Tests the interface to the GlobalModel.  The test here substitutes as a sort
+ * of false UI that runs all the methods in GlobalModel, simulating
+ * user input.
  * @version $Id$
  */
 public class GlobalModelTest extends TestCase {
@@ -60,6 +63,10 @@ public class GlobalModelTest extends TestCase {
     return  new TestSuite(GlobalModelTest.class);
   }
 
+  /**
+   * Creates a new document, modifies it, then allows a new document
+   * to be created after ignoring the changes made.
+   */
   public void testNewFileAllowAbandon() throws BadLocationException {
     _setupDocument(FOO_TEXT);
 
@@ -83,6 +90,10 @@ public class GlobalModelTest extends TestCase {
     _assertLength(0);
   }
 
+  /**
+   * Creates a new document, modifies it, but disallows a call to create
+   * a new document without saving changes.
+   */
   public void testNewFileDisallowAbandon() throws BadLocationException {
     _setupDocument(FOO_TEXT);
 
@@ -100,6 +111,9 @@ public class GlobalModelTest extends TestCase {
     _assertContents(FOO_TEXT);
   }
 
+  /**
+   * Opens a file, disregarding any changes made to the current document.
+   */
   public void testOpenRealFileAllowAbandon()
     throws BadLocationException, IOException
   {
@@ -120,6 +134,9 @@ public class GlobalModelTest extends TestCase {
     tempFile.delete();
   }
 
+  /**
+   * Initiates a file open, but cancels.
+   */
   public void testCancelOpenFileAllowAbandon()
     throws BadLocationException, IOException
   {
@@ -139,6 +156,9 @@ public class GlobalModelTest extends TestCase {
     _assertContents(FOO_TEXT);
   }
 
+  /**
+   * Attempts to open a non-existent file.
+   */
   public void testOpenNonexistentFile()
     throws BadLocationException, IOException
   {
@@ -156,6 +176,10 @@ public class GlobalModelTest extends TestCase {
     _assertModified(false);
   }
 
+  /**
+   * Attempts to open a file, but decides to not throw away
+   * changes, which causes the open to fail.
+   */
   public void testOpenFileDisallowAbandon()
     throws BadLocationException, IOException
   {
@@ -175,6 +199,9 @@ public class GlobalModelTest extends TestCase {
     _assertContents(FOO_TEXT);
   }
 
+  /**
+   * Attempts to make the first save of a document, but cancels instead.
+   */
   public void testCancelFirstSave() throws BadLocationException, IOException
   {
     _setupDocument(FOO_TEXT);
@@ -187,6 +214,9 @@ public class GlobalModelTest extends TestCase {
     _assertContents(FOO_TEXT);
   }
 
+  /**
+   * Makes a first save of the current document.
+   */
   public void testRealSaveFirstSave() throws BadLocationException, IOException
   {
     _setupDocument(FOO_TEXT);
@@ -213,6 +243,9 @@ public class GlobalModelTest extends TestCase {
     file.delete();
   }
 
+  /**
+   * Saves a file already saved and overwrites its contents.
+   */
   public void testSaveAlreadySaved() throws BadLocationException, IOException
   {
     _setupDocument(FOO_TEXT);
@@ -374,6 +407,9 @@ public class GlobalModelTest extends TestCase {
     file2.delete();
   }
 
+  /**
+   * Tests a normal compile that should work.
+   */
   public void testCompileNormal() throws BadLocationException, IOException {
     _setupDocument(FOO_TEXT);
     final File file = _tempFile();
@@ -482,6 +518,9 @@ public class GlobalModelTest extends TestCase {
     _assertContents(FOO_TEXT);
   }
 
+  /**
+   * Exits the program without having written anything to the current document.
+   */
   public void testQuitEmptyDocument() {
     PreventExitSecurityManager manager = new PreventExitSecurityManager();
     System.setSecurityManager(manager);
@@ -501,6 +540,10 @@ public class GlobalModelTest extends TestCase {
     System.setSecurityManager(null);
   }
 
+  /**
+   * Exits the program without saving any changes made to the current document.
+   * Loses the changes.
+   */
   public void testQuitUnsavedDocumentAllowAbandon() {
     PreventExitSecurityManager manager = new PreventExitSecurityManager();
     System.setSecurityManager(manager);
@@ -526,6 +569,9 @@ public class GlobalModelTest extends TestCase {
     System.setSecurityManager(null);
   }
 
+  /**
+   * Attempts to exit with unsaved changes, but doesn't allow the quit.
+   */
   public void testQuitUnsavedDocumentDisallowAbandon()
     throws BadLocationException
   {

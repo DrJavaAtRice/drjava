@@ -10,6 +10,14 @@ import java.util.Stack;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
+/**
+ * Handles the bulk of DrJava's program logic.
+ * The UI components interface with the GlobalModel through its public methods,
+ * and GlobalModel responds via the GlobalModelListener interface.
+ * This removes the dependency on the UI for the logical flow of the program's
+ * features.  With the current implementation, we can finally test the compile
+ * functionality of DrJava, along with many other things.
+ */
 public class GlobalModel {
   
   private DefinitionsEditorKit _editorKit;
