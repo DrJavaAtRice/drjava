@@ -122,12 +122,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   public static final AttributeSet SYSTEM_ERR_STYLE = _getErrStyle();
   private static AttributeSet _getErrStyle() {
     SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_STYLE);
-    s.addAttribute(StyleConstants.Foreground, Color.red.darker());
+    s.addAttribute(StyleConstants.Foreground, Color.red);
     return s;
   }
 
   public static final AttributeSet SYSTEM_OUT_INTERACTIONS_STYLE
     = _getOutInsideInteractionsStyle();
+  
+  public static final AttributeSet SYSTEM_ERR_INTERACTIONS_STYLE
+    = _getErrStyle();
 
   public static final AttributeSet SYSTEM_OUT_DEBUG_STYLE
     = _getOutInsideInteractionsStyle();
@@ -137,7 +140,17 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     s.addAttribute(StyleConstants.Foreground, Color.green.darker().darker());
     return s;
   }
-
+  
+  public static final AttributeSet INTERACTIONS_ERR_STYLE
+    = _getInteractionsErrStyle();
+  
+  private static AttributeSet _getInteractionsErrStyle() {
+    SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_STYLE);
+    s.addAttribute(StyleConstants.Foreground, Color.red.darker());
+    s.addAttribute(StyleConstants.Bold, new Boolean(true));
+    return s;
+  }
+  
   /**
    * Constructor.  Initializes all the documents and the interpreter.
    */
@@ -613,6 +626,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   /** Called when the repl prints to System.err. */
   public void replSystemErrPrint(String s) {
     _docAppend(_consoleDoc, s, SYSTEM_ERR_STYLE);
+    _interactionsDoc.insertBeforeLastPrompt(s, SYSTEM_ERR_INTERACTIONS_STYLE);
   }
 
   /** Called when the repl prints to System.out. */
@@ -675,7 +689,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     _interactionsDoc.appendExceptionResult(exceptionClass,
                                            message,
                                            stackTrace,
-                                           SYSTEM_ERR_STYLE);
+                                           INTERACTIONS_ERR_STYLE);
     /*
      if (null == message || "null".equals(message)) {
      message = "";
