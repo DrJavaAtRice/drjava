@@ -242,7 +242,14 @@ public class JavacGJCompiler implements CompilerInterface {
   public boolean isAvailable() {
     try {
       Class.forName(COMPILER_CLASS_NAME);
-      return true;
+      try {
+        Class.forName("java.lang.Enum");
+        // not available since jsr14 v2.0 is on the boot classpath
+        return false;
+      }
+      catch (SecurityException se) {
+        return true;
+      }
     }
     catch (Exception e) {
       return false;

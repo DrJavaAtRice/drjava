@@ -58,7 +58,7 @@ import com.sun.tools.javac.v8.util.Hashtable;
 import com.sun.tools.javac.v8.util.List;
 import com.sun.tools.javac.v8.util.Log;
 
-import edu.rice.cs.drjava.DrJava;
+//import edu.rice.cs.drjava.DrJava;
 import gj.util.Vector;
 import gj.util.Enumeration;
 import edu.rice.cs.util.FileOps;

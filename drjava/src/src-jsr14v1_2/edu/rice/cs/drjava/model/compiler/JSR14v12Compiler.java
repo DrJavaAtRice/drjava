@@ -59,7 +59,6 @@ import com.sun.tools.javac.v8.util.List;
 import com.sun.tools.javac.v8.util.Log;
 import com.sun.tools.javac.v8.code.ClassReader;
 
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.FileOps;
 
 /**
@@ -182,15 +181,30 @@ public class JSR14v12Compiler extends Javac141Compiler {
       options.put("-target", "1.5");
     }
   }
-  
+
+  public boolean isAvailable() {
+    try {
+      Class.forName("com.sun.tools.javac.v8.Main$10");
+      try {
+        Class.forName("java.lang.Enum");
+        // not available since jsr14 v2.0 is on the boot classpath
+        return false;
+      }
+      catch (SecurityException se) {
+        return true;
+      }
+    }
+    catch (Exception e) {
+      return false;
+    }
+  }
+
   public String getName() { 
     if (!post12) {
       return "JSR-14 v1.2";
     }
     else {
-      return "JSR-14 v1.3+";
+      return "JSR-14 v1.3";
     }
   }
-
-
 }

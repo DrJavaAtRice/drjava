@@ -202,6 +202,7 @@ public class JSR14v20Compiler implements CompilerInterface {
   public boolean isAvailable() {
     try {
       Class.forName(COMPILER_CLASS_NAME);
+      Class.forName("java.lang.Enum");
       return _isValidVersion();
     }
     catch (Exception e) {
