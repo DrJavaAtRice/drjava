@@ -271,6 +271,20 @@ public interface OpenDefinitionsDocument {
   public File getSourceRoot() throws InvalidPackageException;
 
   /**
+   * Gets the name of the package this source file claims it's in (with the
+   * package keyword). It does this by minimally parsing the source file
+   * to find the package statement.
+   *
+   * @return The name of package this source file declares itself to be in,
+   *         or the empty string if there is no package statement (and thus
+   *         the source file is in the empty package).
+   *
+   * @exception InvalidPackageException if there is some sort of a
+   *                                    <TT>package</TT> statement but it
+   *                                    is invalid.
+   */
+  public String getPackageName() throws InvalidPackageException;
+  /**
    *
    */
   public void preparePrintJob() throws BadLocationException, FileMovedException;

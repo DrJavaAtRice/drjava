@@ -167,6 +167,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JButton _saveButton;
   private JButton _compileButton;
   private JButton _closeButton;
+  private JButton _javadocButton;
   private JButton _junitButton;
   private JToolBar _toolBar;
   
@@ -191,6 +192,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   // Cached frames and dialogs
   private ConfigFrame _configFrame;
   private HelpFrame _helpFrame;
+  private JavadocFrame _javadocFrame;
   private AboutDialog _aboutDialog;
 
   /**
@@ -233,6 +235,13 @@ public class MainFrame extends JFrame implements OptionConstants {
    * from which we saved.
    */
   private JFileChooser _saveChooser;
+
+  /**
+   * For placing javadoc output.
+   * We have a persistent dialog to keep track of the last place we
+   * placed javadoc
+   */
+  private JFileChooser _javadocChooser;
 
   /**
    * Returns the files to open to the model (command pattern).
@@ -410,6 +419,13 @@ public class MainFrame extends JFrame implements OptionConstants {
       _junit();
       //_setDividerLocation();  is this necessary?
     }
+  };
+
+  /** Runs Javadoc. */
+  private Action _javadocAction = new AbstractAction("Create Javadoc") {
+      public void actionPerformed(ActionEvent ae) {
+          _javadocAll();
+      }
   };
 
   /** Default cut action.  Returns focus to the correct pane. */
@@ -945,6 +961,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     _saveChooser = new JFileChooser();
     _saveChooser.setCurrentDirectory(workDir);
     _saveChooser.setFileFilter(new JavaSourceFilter());
+
+    _javadocChooser = new JFileChooser();
+    _javadocChooser.setCurrentDirectory(workDir);
+    _javadocChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
     
     //set up the hourglass cursor
     setGlassPane(new GlassPane());
@@ -1562,7 +1582,24 @@ public class MainFrame extends JFrame implements OptionConstants {
     worker.start();
   }
 
-  
+  private void _javadocAll() {
+    try {
+      int returnVal = _javadocChooser.showDialog(MainFrame.this, "Create Javadoc!");
+      File destDir;
+      try {
+        destDir = getChosenFile(_javadocChooser, returnVal);
+      } catch(OperationCanceledException oce){
+        return;
+      }
+      _model.javadocAll(destDir.getAbsolutePath());
+      _javadocFrame = new JavadocFrame(destDir);
+      _javadocFrame.show();
+    } catch (IOException ioe) {
+      _showIOError(ioe);
+    }
+  }
+
+    
   /**
    * Suspends the current execution of the debugger
    *
@@ -2000,6 +2037,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_resetInteractionsAction, "Reset", "Reset interactions");
   
     _setUpAction(_junitAction, "Test", "Run JUnit over the current document");
+    _setUpAction(_javadocAction, "Doc", "Test", "Create javadoc");
 
   }
 
@@ -2184,6 +2222,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _addMenuItem(toolsMenu, _compileAllAction, KEY_COMPILE_ALL);
     _addMenuItem(toolsMenu, _compileAction, KEY_COMPILE);
     toolsMenu.add(_junitAction);
+    toolsMenu.add(_javadocAction);
 
     // Abort/reset interactions, clear console
     toolsMenu.addSeparator();
@@ -2401,6 +2440,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     _junitButton = _createToolbarButton(_junitAction);
     _toolBar.add(_junitButton);
+    _javadocButton = _createToolbarButton(_javadocAction);
+    _toolBar.add(_javadocButton);
 
 
     getContentPane().add(_toolBar, BorderLayout.NORTH);
@@ -2801,6 +2842,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _setCurrentDirectory(File file) {
     _openChooser.setCurrentDirectory(file.getAbsoluteFile());
     _saveChooser.setCurrentDirectory(file.getAbsoluteFile());
+    _javadocChooser.setCurrentDirectory(file.getAbsoluteFile());
   }
   /**
    * Sets the current directory to be that of document's file.
@@ -3497,12 +3539,17 @@ public class MainFrame extends JFrame implements OptionConstants {
       else if (reason == JUNIT_REASON) {
         message =
           "To run JUnit, you must first save and compile ALL modified\n" +
-          "files. Would like to save and then compile?";
+          "files. Would you like to save and then compile?";
+      }
+      else if (reason == JAVADOC_REASON) {
+        message =
+          "To run JavaDoc, you must first save ALL modified files.\n" +
+          "Would you like to save and then run JavaDoc?"; 
       }
       else if (reason == DEBUG_REASON) {
         message =
           "To use debugging commands, you must first save and compile\n" +
-          "ALL modified files. Would like to save and then compile?";
+          "ALL modified files. Would you like to save and then compile?";
       }
       else {
         throw new RuntimeException("Invalid reason for forcing a save.");

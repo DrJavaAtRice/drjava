@@ -66,6 +66,11 @@ public interface GlobalModelListener {
   public static final SaveReason JUNIT_REASON = new SaveReason();
 
   /**
+   * This enumeration of save reason means that we want to run JavaDoc.
+   */
+  public static final SaveReason JAVADOC_REASON = new SaveReason();
+
+  /**
    * This enumeration of save reason means that we want to debug with JSwat.
    */
   public static final SaveReason DEBUG_REASON = new SaveReason();

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -37,48 +37,37 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.event.HyperlinkEvent;
+import java.net.URL;
+import java.net.MalformedURLException;
+import java.io.File;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030403-0208;
- *
+ * DrJava's Javadoc viewing frame
  * @version $Id$
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20030403-0208";
+public class JavadocFrame extends HTMLFrame {
 
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
+  private static final String INTRO_PAGE="index-all.html";
+  private static final String INDEX_PAGE="allclasses-noframe.html";
+  public JavadocFrame(File destDir) throws MalformedURLException {
+    super("Javadoc Viewer",
+          new URL("file", "", (new File(destDir, INTRO_PAGE)).getAbsolutePath()),
+          new URL("file", "", (new File(destDir, INDEX_PAGE)).getAbsolutePath()),
+           "DrJavadoc.png");
 
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+    ;
+    addHyperlinkListener(
+      new HyperlinkListener() {
+        public void hyperlinkUpdate(HyperlinkEvent event){
+          if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+            URL url = event.getURL();
+            jumpTo(url);
+          }
+        }
+      });
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

@@ -64,6 +64,7 @@ import gj.util.Vector;
 import gj.util.Enumeration;
 import gj.util.Hashtable;
 import edu.rice.cs.util.*;
+import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.drjava.DrJava;
@@ -250,6 +251,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * Attributes for System.err output in the console document.
    */
   public static final AttributeSet SYSTEM_ERR_CONSOLE_STYLE = _getConsoleErrStyle();
+
   private static AttributeSet _getConsoleErrStyle() {
     SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_CONSOLE_STYLE);
     s.addAttribute(StyleConstants.Foreground, Color.red);
@@ -1061,6 +1063,150 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
   }
   
+  /**
+   * Javadocs all open documents, after ensuring that all are saved.
+   */
+  public void javadocAll(String destDir) throws IOException {
+    // Only javadoc if all are saved
+    saveAllBeforeProceeding(GlobalModelListener.JAVADOC_REASON);
+    
+    // Get the sourceroots
+    File[] sourceRoots = getSourceRootSet();
+    File[] files = new File[_definitionsDocs.getSize()];
+    String[] docUnits = new String[_definitionsDocs.getSize()];
+    for (int i = 0; i < _definitionsDocs.getSize(); i++) {
+      OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
+        _definitionsDocs.getElementAt(i);
+      try {
+        files[i] = doc.getFile();
+        docUnits[i] = doc.getPackageName();
+        
+        if (docUnits[i].equals("")) {
+          // This file uses the default package.
+          docUnits[i] = files[i].getAbsolutePath();
+        }
+      }
+      catch (InvalidPackageException ipe) {
+        throw new UnexpectedException(ipe);
+      }
+      catch (IllegalStateException ise) {
+        // No file for this document; skip it
+      }
+    }
+    
+    // Build the source path.
+    StringBuffer sourcePath = new StringBuffer();
+    String separator= System.getProperty("path.separator");
+    for(int a = 0 ; a  < sourceRoots.length; a++){
+      if (a != 0){
+        sourcePath.append(separator);
+      }
+      sourcePath.append(sourceRoots[a].getAbsolutePath());
+    }
+    
+    
+//     StringBuffer javadocCommand = new StringBuffer("java -classpath " +
+//                                                    System.getProperty("java.class.path") +
+//                                                    " com.sun.tools.javadoc.Main " +
+//                                                    "-private " + 
+//                                                    "-sourcepath " + sourcePath + "*");
+    //       for (int a = 0; a < files.length; a++){
+    //  javadocCommand.append(" " + files[a]);
+    //       }
+//     System.out.println("javadoc started with command:\n" + javadocCommand);
+    
+    // Build the "command-line" arguments.
+    ArrayList args = new ArrayList();
+    args.add("-private");
+    args.add("-sourcepath");
+    args.add(sourcePath.toString());
+    args.addAll(Arrays.asList(docUnits));
+    args.add("-d");
+    args.add(destDir);
+    
+    System.err.println("javadoc started with args:\n" + args);
+
+    //TODO: put the following line in a new Thread and tell listeners javadoc has started
+    //Pass the function some way to tell about its output (use the way compilers do it for
+    //a model)
+    //And finally, when we're done notify the listeners along with some sort of failure flag
+    javadoc_1_3((String[]) args.toArray(docUnits));
+  }
+
+  /**
+   * This function invokes javadoc.  It should work for all versions of Java
+   * from 1.3 on, assuming com.sun.tools.javadoc is in the classpath (generally
+   * found in the same tools.jar that is needed for using the debugger) OR
+   * javadoc is in the path.  Note: this should be moved to the platform
+   * specific area of the code base when we develop the 1.4 javadoc process.
+   * Of course, it can be a fallback for if tools.jar isn't found in the 1.4 jdk
+   */
+  private void  javadoc_1_3(String[] args) throws IOException {
+    final String JAVADOC_CLASS = "com.sun.tools.javadoc.Main" ;
+    Process javadocProcess = null;
+    boolean failed = true;
+    try {
+      Class.forName(JAVADOC_CLASS);
+      javadocProcess =  ExecJVM.runJVMPropogateClassPath(JAVADOC_CLASS, args);
+      failed = false;
+    }
+    catch (ClassNotFoundException cnfe) {
+    }
+    catch (UnsupportedClassVersionError ucve) {
+    }
+
+    if (failed) {
+      //If we get here, we will just have to try using the javadoc program
+      //which is hopefully on the system path
+      String[] fullArgs = new String[args.length + 1];
+      fullArgs[0] = "javadoc";
+      for(int a = 0; a < args.length; a++) {
+        fullArgs[a + 1] = args[a];
+      }
+      javadocProcess =  Runtime.getRuntime().exec(fullArgs);
+      //TODO: try/catch the previous line and prompt for javadoc's location
+      //on failure....and even keep the location in the drjava config
+    }
+
+    //Get a handle on the streams that the process produces
+    BufferedReader jdOut =
+      new BufferedReader(new InputStreamReader(javadocProcess.getInputStream()));
+    BufferedReader jdErr =
+      new BufferedReader(new InputStreamReader (javadocProcess.getErrorStream()));
+
+
+    boolean done = false;
+
+    //Loop until javadoc is done, putting its output on the console
+    while (!done) {
+      String output = jdOut.readLine();
+      while (output != null){
+        System.out.println("[javadoc] " + output);
+        output = jdOut.readLine();
+      }
+
+      output = jdErr.readLine();
+      while(output!= null){
+        System.err.println("[javadoc] " + output);
+        output = jdErr.readLine();
+      }
+      try {
+        int value = javadocProcess.exitValue();
+        done = true;
+        System.out.println("Javadoc finished with exit code " + value);
+      } catch (IllegalThreadStateException itse) {
+        done = false;
+      }
+
+    }
+
+
+
+
+  }
+
+
+
   /**
    * Compile the given files (with the given sourceroots), and update
    * the model with any errors that result.  Does not notify listeners;
@@ -2136,6 +2282,23 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public File getSourceRoot() throws InvalidPackageException
     {
       return _getSourceRoot(_doc.getPackageName());
+    }
+    
+    /**
+     * Gets the name of the package this source file claims it's in (with the
+     * package keyword). It does this by minimally parsing the source file
+     * to find the package statement.
+     *
+     * @return The name of package this source file declares itself to be in,
+     *         or the empty string if there is no package statement (and thus
+     *         the source file is in the empty package).
+     *
+     * @exception InvalidPackageException if there is some sort of a
+     *                                    <TT>package</TT> statement but it
+     *                                    is invalid.
+     */
+    public String getPackageName() throws InvalidPackageException {
+      return _doc.getPackageName();
     }
 
     /**
