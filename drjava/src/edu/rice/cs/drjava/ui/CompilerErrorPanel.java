@@ -325,14 +325,17 @@ public class CompilerErrorPanel extends TabbedPanel
     
     // on mouse click, highlight the error in the list and also in the source
     private MouseAdapter _mouseListener = new MouseAdapter() {
-      public void mouseClicked(MouseEvent e) {
+      public void mousePressed(MouseEvent e) {
+        selectNothing();
+      }
+      public void mouseReleased(MouseEvent e) {
         CompilerError error = _errorAtPoint(e.getPoint());
         
-        if (error == null) {
-          selectNothing();
+        if (_isEmptySelection() && error != null) {
+          _errorListPane.switchToError(error);
         }
         else {
-          _errorListPane.switchToError(error);
+          selectNothing();
         }
       }
     };
@@ -355,7 +358,10 @@ public class CompilerErrorPanel extends TabbedPanel
 
       // We set the editor pane disabled so it won't get keyboard focus,
       // which makes it uneditable, and so you can't select text inside it.
-      setEnabled(false);    
+      //setEnabled(false);    
+      
+      // Set the editor pane to be uneditable, but allow selecting text.
+      setEditable(false);
       
       DrJava.getConfig().addOptionListener( OptionConstants.COMPILER_ERROR_COLOR, new CompilerErrorColorOptionListener());    
     }
@@ -436,6 +442,13 @@ public class CompilerErrorPanel extends TabbedPanel
       }
 
       throw new IllegalArgumentException("Couldn't find index for error " + error);
+    }
+    
+    /**
+     * Returns true if the text selection interval is empty.
+     */
+    private boolean _isEmptySelection() {
+      return getSelectionStart() == getSelectionEnd();
     }
 
     /**

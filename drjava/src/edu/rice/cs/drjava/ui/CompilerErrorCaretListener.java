@@ -191,7 +191,7 @@ public class CompilerErrorCaretListener implements CaretListener {
       _errorListPane.selectItem(errors[shouldSelect]);
     }
   }
-
+  
   /**
    * Highlights the given error in the source.
    * @param newIndex Index into _errors array

@@ -271,18 +271,20 @@ public class JUnitPanel extends TabbedPanel
       private JUnitError _error = null;
       
       public void mousePressed(MouseEvent e) {
-        _error = _errorAtPoint(e.getPoint());
-
-        if (_error == null) {
-          selectNothing();
-        }
-        else {
-          _errorListPane.switchToError(_error);
-        }
+        selectNothing();
+        
         maybeShowPopup(e);      
       }
 
       public void mouseReleased(MouseEvent e) {
+        _error = _errorAtPoint(e.getPoint());
+
+        if (_isEmptySelection() && _error != null) {
+          _errorListPane.switchToError(_error);
+        }
+        else {
+          selectNothing();
+        }
         maybeShowPopup(e);
       }
       
@@ -333,7 +335,10 @@ public class JUnitPanel extends TabbedPanel
       
       // We set the editor pane disabled so it won't get keyboard focus,
       // which makes it uneditable, and so you can't select text inside it.
-      setEnabled(false);
+      //setEnabled(false);
+      
+      // Set the editor pane to be uneditable, but allow selecting text.
+      setEditable(false);
       
       DrJava.getConfig().addOptionListener( OptionConstants.COMPILER_ERROR_COLOR, new CompilerErrorColorOptionListener());    
     }
@@ -451,6 +456,13 @@ public class JUnitPanel extends TabbedPanel
      */
     public int getSelectedIndex() { return _selectedIndex; }
 
+    /**
+     * Returns true if the text selection interval is empty.
+     */
+    private boolean _isEmptySelection() {
+      return getSelectionStart() == getSelectionEnd();
+    }
+    
     /**
      * Allows the ErrorListPane to remember which DefinitionsPane
      * currently has an error highlight.
