@@ -1644,6 +1644,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       }
     }
     public void revertFile() throws IOException {
+
+      //need to remove old, possibly invalid breakpoints
+      removeFromDebugger();
+      
       final OpenDefinitionsDocument doc = this;
       
       try {
@@ -1660,10 +1664,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         syncCurrentLocationWithDefinitions(0);
         
         notifyListeners(new EventNotifier() {
-            public void notifyListener(GlobalModelListener l) {
+          public void notifyListener(GlobalModelListener l) {
               l.fileReverted(doc);
             }
-          });
+        });
       } catch (IllegalStateException docFailed) {
         //cant revert file if doc has no file
         throw new UnexpectedException(docFailed);

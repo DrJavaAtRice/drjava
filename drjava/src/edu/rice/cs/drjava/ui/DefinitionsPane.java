@@ -84,6 +84,12 @@ public class DefinitionsPane extends JEditorPane
   private UndoAction _undoAction;
   private RedoAction _redoAction;
   private HighlightManager _highlightManager;
+
+  /**
+   * Flag used to determine if the user has already been warned about debugging
+   * when the document within this defpane has been modified since its last save.
+   */
+  private boolean _hasWarnedAboutModified = false;
   
   /**
    * Our current paren/brace/bracket matching highlight.
@@ -419,7 +425,7 @@ public class DefinitionsPane extends JEditorPane
     }
      
   }
-  
+
   /**
    * Be sure to update the document (and thus the reduced model) any time
    * the caret position changes.
@@ -768,6 +774,13 @@ public class DefinitionsPane extends JEditorPane
     }
   }
 
+  public boolean hasWarnedAboutModified() {
+    return _hasWarnedAboutModified;
+  }
+  
+  public void hasWarnedAboutModified( boolean hasWarned) {
+    _hasWarnedAboutModified = hasWarned;
+  }
   
   public void addBreakpointHighlight( Breakpoint bp ) {
     /*

@@ -370,6 +370,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     Action resumeAction = new AbstractAction( "Resume" ) {
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerResume();
+        _closeButton.requestFocus();
       }
     };
     _resumeButton = new JButton(resumeAction);
@@ -377,6 +378,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     Action stepIntoAction = new AbstractAction( "Step Into" ) {
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerStep(DebugManager.STEP_INTO);
+        _stepIntoButton.requestFocus();
       }
     };
     _stepIntoButton = new JButton(stepIntoAction);
@@ -384,6 +386,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     Action stepOverAction = new AbstractAction( "Step Over" ) {
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerStep(DebugManager.STEP_OVER);
+        _stepOverButton.requestFocus();
       }
     };
     _stepOverButton = new JButton(stepOverAction);
@@ -391,6 +394,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     Action stepOutAction = new AbstractAction( "Step Out" ) {
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerStep(DebugManager.STEP_OUT);
+        _stepOutButton.requestFocus();
       }
     };
     _stepOutButton = new JButton(stepOutAction);
@@ -454,7 +458,28 @@ public class DebugPanel extends JPanel implements OptionConstants {
               //DrJava.consoleOut().println("matched, classname: " + bpDoc.getUserObject());
               
               // Create a new breakpoint in this node
-              // TO DO: Sort by line number!
+
+              //Sort breakpoints by line number.
+              Enumeration lineNumbers = doc.children();
+              while (lineNumbers.hasMoreElements()) {
+                DefaultMutableTreeNode lineNumber = (DefaultMutableTreeNode)lineNumbers.nextElement();
+                
+                //if line number of indexed breakpoint is less than new breakpoint, continue
+                if (((Integer)lineNumber.getUserObject()).intValue() > bp.getLineNumber()) {
+                  
+                  //else, add to the list
+                  DefaultMutableTreeNode newBreakpoint = 
+                    new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
+                  _bpTreeModel.insertNodeInto(newBreakpoint,
+                                              doc,
+                                              doc.getIndex(lineNumber));
+                  
+                  // Make sure this node is visible
+                  _bpTree.scrollPathToVisible(new TreePath(newBreakpoint.getPath()));
+                  return;
+                }
+              }
+              //if none are greater, add at the end 
               DefaultMutableTreeNode newBreakpoint = 
                 new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
               _bpTreeModel.insertNodeInto(newBreakpoint,
@@ -466,7 +491,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
               return;
             }
           }
-          
           // No matching document node was found, so create one
           _bpTreeModel.insertNodeInto(bpDocNode,
                                       _breakpointRootNode,
@@ -481,7 +505,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
           TreePath pathToNewBreakpoint = new TreePath(newBreakpoint.getPath());
           _bpTree.scrollPathToVisible(pathToNewBreakpoint);
           //_bpTree.setSelectionPath(pathToNewBreakpoint);
-        }
+          }
+        
       };
       SwingUtilities.invokeLater(doCommand);
     }

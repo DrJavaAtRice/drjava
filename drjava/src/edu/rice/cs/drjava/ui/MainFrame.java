@@ -163,7 +163,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Object _debugStepTimerLock = new Object();
   
   private HighlightManager.HighlightInfo _currentThreadLocationHighlight = null;
-  
+  private gj.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo> _breakpointHighlights;
+   
   /**
    * @return The model providing the logic for this view.
    */
@@ -891,6 +892,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     DrJava.CONFIG.addOptionListener( OptionConstants.LINEENUM_ENABLED, new LineEnumOptionListener());
     DrJava.CONFIG.addOptionListener( OptionConstants.RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
     
+    // Initialize breakpoint highlights hashtable, for easy removal of highlights
+    _breakpointHighlights = new gj.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
+    
     // Set the configuration frame to null
     _configFrame = null;
     
@@ -1193,6 +1197,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _save() {
     try {
       _model.getActiveDocument().saveFile(_saveSelector);
+      _currentDefPane.hasWarnedAboutModified(false);
     }
     catch (IOException ioe) {
       _showIOError(ioe);
@@ -1222,6 +1227,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     try {
       _model.getActiveDocument().revertFile();
       _currentDefPane.resetUndo();
+      _currentDefPane.hasWarnedAboutModified(false);
     }
     catch (IOException ioe) {
       _showIOError(ioe);
@@ -1330,6 +1336,44 @@ public class MainFrame extends JFrame implements OptionConstants {
   void debuggerToggleBreakpoint() {
     if (inDebugMode()) {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
+      
+      boolean isUntitled = doc.getDocument().isUntitled();
+      if (isUntitled) {
+        JOptionPane.showMessageDialog(this,
+                                      "Before you can set a breakpoint you must save and compile\n" +
+                                      "this document.",
+                                      "Cannot set breakpoint on untitled document.",
+                                      JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+      
+      boolean isModified = doc.isModifiedSinceSave();
+      if (isModified  && !_currentDefPane.hasWarnedAboutModified()) {
+        
+        int rc = JOptionPane.showConfirmDialog(this,
+                                               "This document has been modified since its last save and\n" + 
+                                               "may be out of sync with the debugger. It is suggested that\n" +
+                                               "you save and recompile before continuing to debug in order\n" +
+                                               "to avoid any unexpected errors. Would you still like to toggle\n" +
+                                               "the breakpoint at the specified line?",
+                                               "Toggle breakpoint on modified file?",
+                                               JOptionPane.YES_NO_OPTION);
+        _currentDefPane.hasWarnedAboutModified(true);
+        
+        switch (rc) {
+          case JOptionPane.YES_OPTION:
+            break;
+          case JOptionPane.NO_OPTION:
+          case JOptionPane.CANCEL_OPTION:
+          case JOptionPane.CLOSED_OPTION:
+            // do nothing
+            return;
+          default:
+            throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
+        }
+        
+      }
+           
       try {
         DebugManager debugger = _model.getDebugManager();
         debugger.toggleBreakpoint(doc, 
@@ -1434,8 +1478,25 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
-
+  
   /**
+   * Shows a brief warning to the user, to inform him/her that the file he/she is
+   * debugging has been modified since its last save and should probably be saved 
+   * and recompiled. Does not actually save or recompile for the user.
+   */
+  private void _showDebuggingModifiedFileWarning() {
+    JOptionPane.showMessageDialog(this,
+                                  "This document has been modified since its last save and\n" + 
+                                  "may be out of sync with the debugger. It is suggested that\n" +
+                                  "you save and recompile before continuing to debug in order\n" +
+                                  "to avoid any unexpected errors.",
+                                  "Debugging modified file!",
+                                  JOptionPane.WARNING_MESSAGE);
+
+    _currentDefPane.hasWarnedAboutModified(true);
+  } 
+
+   /**
    * Returns the File selected by the JFileChooser.
    * @param fc File chooser presented to the user
    * @param choice return value from fc
@@ -2634,6 +2695,18 @@ public class MainFrame extends JFrame implements OptionConstants {
                                                                endOffset,
                                                                DefinitionsPane.THREAD_PAINTER);
           //DrJava.consoleOut().println("MF: done with thread loc update");
+          
+          //System.out.println("Doc modified? "+ doc.isModifiedSinceSave());
+          //System.out.println("Already warned? " + _hasWarnedAboutModified);
+          if (doc.isModifiedSinceSave() && 
+              !_currentDefPane.hasWarnedAboutModified()) {
+            
+            _showDebuggingModifiedFileWarning();
+
+            //no need to update flag, because previous method call will do it
+            //_hasWarnedAboutModified = true;
+          }
+          
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -2644,12 +2717,15 @@ public class MainFrame extends JFrame implements OptionConstants {
       Runnable doCommand = new Runnable() {
         public void run() {
           _model.setActiveDocument(bp.getDocument());
-          _currentDefPane.getHighlightManager().addHighlight(bp.getStartOffset(),
-                                                             bp.getEndOffset(),
-                                                             DefinitionsPane.BREAKPOINT_PAINTER);
+          _breakpointHighlights.put(bp, 
+                                    _currentDefPane.getHighlightManager().addHighlight(bp.getStartOffset(),
+                                                                                       bp.getEndOffset(),
+                                                                                       DefinitionsPane.BREAKPOINT_PAINTER));
         }
       };
       SwingUtilities.invokeLater(doCommand);
+      
+
     }
     
     public void breakpointReached(Breakpoint bp) {
@@ -2657,7 +2733,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     public void breakpointRemoved(final Breakpoint bp) {
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
+      /*Runnable doCommand = new Runnable() {
         public void run() {
           _model.setActiveDocument(bp.getDocument());
           _currentDefPane.getHighlightManager().removeHighlight(bp.getStartOffset(),
@@ -2665,7 +2741,11 @@ public class MainFrame extends JFrame implements OptionConstants {
                                                                 DefinitionsPane.BREAKPOINT_PAINTER);
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      SwingUtilities.invokeLater(doCommand);*/
+      
+      HighlightManager.HighlightInfo highlight = _breakpointHighlights.get(bp);
+      highlight.remove();
+      _breakpointHighlights.remove(bp);
     }
     
     /**

@@ -348,7 +348,11 @@ public class DebugManager {
     
     if (_thread == null)
       DrJava.consoleOut().println("Resume called while _thread was null");
-    _thread.resume();
+    
+    int suspendCount = _thread.suspendCount();
+    for (int i=suspendCount; i>0; i--) {
+      _thread.resume();
+    }
     currThreadResumed();
   }
     
