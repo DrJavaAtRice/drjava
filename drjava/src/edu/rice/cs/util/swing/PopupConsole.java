@@ -98,9 +98,6 @@ public class PopupConsole {
   protected Runnable _interruptCommand;
   protected Lambda<Object,String> _insertTextCommand;
   
-  // allows threads to wait for the console to be ready to input text externally
-  protected final Object CONSOLE_READY = new Object(); 
-  
   // used to ensure thread safety when using insertConsoleText and interruptConsole
   protected final Object commandLock = new Object();
   
@@ -141,7 +138,8 @@ public class PopupConsole {
    * the <code>insertConsoleText</code> method.
    * @return The text inputted by the user
    */
-  public synchronized String getConsoleInput() {     
+  public synchronized String getConsoleInput() { 
+    System.out.println("Console Input");
     Frame parentFrame = JOptionPane.getFrameForComponent(_parentComponent);
     if (parentFrame.isVisible()) 
       return showDialog(parentFrame) + "\n";
@@ -154,9 +152,12 @@ public class PopupConsole {
    * has been inputted so far.
    */
   public void interruptConsole() {
+    System.out.println("acquiring commandLock");
     synchronized(commandLock) {
+      System.out.println("lock acquired");
       if (_interruptCommand != null) _interruptCommand.run();
     }
+    System.out.println("command lock released");
   }
   
   /**
@@ -166,24 +167,23 @@ public class PopupConsole {
    * input from the user
    */
   public void insertConsoleText(String txt) {
-    if (_insertTextCommand != null) 
-      synchronized(commandLock) {
-      _insertTextCommand.apply(txt); 
+    synchronized(commandLock) {
+      if (_insertTextCommand != null) 
+        _insertTextCommand.apply(txt); 
+      else
+        throw new IllegalStateException("Console not ready for text insertion");
     }
-    else
-      throw new IllegalStateException("Console not ready for text insertion");
   }
   
   /**
    * Causes the current thread to wait until the console is ready for input 
-   * via the insertConsoleText method. Do not use if the console is already
-   * ready. This may be used right before a call to getConsoleInput make the
-   * thread wait for the console to be ready for input. If this is not used,
-   * the thread may run into an IllegalStateException thrown by insertConsoleText
+   * via the insertConsoleText method. This should be used right before a call to 
+   * <code>insertConsoleText</code> or <code>interruptConsole</code> to avoid
+   * calling these methods before the console starts receiving any input.
    */
   public void waitForConsoleReady() throws InterruptedException {
-    synchronized(CONSOLE_READY) {
-      CONSOLE_READY.wait();
+    synchronized(commandLock) {
+      if (_interruptCommand == null) commandLock.wait();
     }
   }
   
@@ -243,14 +243,12 @@ public class PopupConsole {
           return null;
         }
       };
-    }
-    
-    synchronized(CONSOLE_READY) {
-      CONSOLE_READY.notifyAll();
+      commandLock.notifyAll();
     }
     
     dialog.setVisible(true);
     dialog.dispose();
+    
     synchronized(commandLock) {
       _interruptCommand = null;
       _insertTextCommand = null;
@@ -318,29 +316,38 @@ public class PopupConsole {
   protected String silentInput() {
     final Object monitor = new Object();
     final StringBuffer input = new StringBuffer();
-    synchronized(commandLock) {
-      _insertTextCommand = new Lambda<Object,String>() {
-        public synchronized Object apply(String s) {
-          input.append(s);
-          return null;
-        }
-      };
-      _interruptCommand = new Runnable() {
-        public void run() {
-          _insertTextCommand = null;
-          _interruptCommand = null;
-          synchronized(monitor) {
-            monitor.notify();
+    synchronized(monitor) {
+      synchronized(commandLock) {
+        _insertTextCommand = new Lambda<Object,String>() {
+          public synchronized Object apply(String s) {
+            input.append(s);
+            return null;
           }
-        }
-      };
-    }
-    synchronized (CONSOLE_READY) {
-      CONSOLE_READY.notifyAll();
-    }
-    synchronized (monitor) {
+        };
+        
+        _interruptCommand = new Runnable() {
+          public void run() {
+            System.out.println("in interrupt command");
+            _insertTextCommand = null;
+            _interruptCommand = null;
+            synchronized(monitor) {
+              System.out.println("notifying monitor");
+              monitor.notifyAll();
+            }
+            System.out.println("released lock on monitor");
+          }
+        };
+        
+        commandLock.notifyAll();
+      }
       try {
-        monitor.wait();
+        long time = System.currentTimeMillis();
+        System.out.println("waiting for monitor");
+        
+        monitor.wait(4000);
+        
+        System.out.println("done waiting - time=" + (System.currentTimeMillis() - time));
+        if (System.currentTimeMillis() - time > 3999) throw new RuntimeException("monitor.wait() timeout");
       } catch (InterruptedException e) { }
     }
     return input.toString();
