@@ -55,6 +55,7 @@ import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.config.OptionConstants;
 
 import com.bluemarsh.jswat.*;
 import com.bluemarsh.jswat.ui.*;
@@ -136,10 +137,14 @@ public class DebugPanel extends JPanel {
       
     // Add the fields to the panel
     add(_scrollPane, BorderLayout.CENTER);
-    add(_inputField, BorderLayout.SOUTH);
+
+    boolean advancedMode = DrJava.CONFIG.getSetting(OptionConstants.DEBUGGER_ADVANCED).booleanValue();
+    if (advancedMode) {
+      add(_inputField, BorderLayout.SOUTH);
     
-    // Listen for enter key
-    _inputField.addActionListener(_performAction);
+      // Listen for enter key
+      _inputField.addActionListener(_performAction);
+    }
     
     _logger = new DebugLogger(System.err);
     reset();

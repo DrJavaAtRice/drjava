@@ -81,7 +81,12 @@ public interface OptionConstants {
    */
   public static final BooleanOption DEBUGGER_ENABLED =
     new BooleanOption("debugger.enabled", new Boolean(false));
-  
+
+  /**
+   * Whether the integrated debugger should display the advanced mode JSwat console
+   */    
+  public static final BooleanOption DEBUGGER_ADVANCED =
+    new BooleanOption("debugger.advanced", new Boolean(false));
 }
 
 
