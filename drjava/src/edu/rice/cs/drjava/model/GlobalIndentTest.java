@@ -56,7 +56,7 @@ import edu.rice.cs.drjava.model.compiler.*;
  * that the cursor position in the document is consistent with a standard.
  * @version $Id$
  */
-public class GlobalIndentTest extends GlobalModelTestCase {
+public final class GlobalIndentTest extends GlobalModelTestCase {
   private static final String FOO_EX_1 = "public class Foo {\n";
   private static final String FOO_EX_2 = "int foo;\n";
   private static final String BAR_CALL_1 = "bar(monkey,\n";

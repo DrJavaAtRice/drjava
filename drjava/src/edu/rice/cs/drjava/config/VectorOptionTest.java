@@ -47,8 +47,9 @@ import junit.framework.*;
  * Class according to the JUnit protocol.
  * Tests the proper functionality of the class
  * VectorOption.
+ * @version $Id$
  */
-public class VectorOptionTest extends TestCase {
+public final class VectorOptionTest extends TestCase {
   private VectorOption<Integer> _ivo;
   private VectorOption<Boolean> _bvo;
   

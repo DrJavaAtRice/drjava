@@ -54,7 +54,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  *
  * @version $Id$
  */
-public class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
+public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
 
   /**
    * Tests the indentation decision tree.

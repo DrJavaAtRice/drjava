@@ -49,7 +49,7 @@ import  junit.extensions.*;
  * of the reduced model.
  * @version $Id$
  */
-public class ReducedModelTest extends BraceReductionTestCase 
+public final class ReducedModelTest extends BraceReductionTestCase 
   implements ReducedModelStates 
 {
    

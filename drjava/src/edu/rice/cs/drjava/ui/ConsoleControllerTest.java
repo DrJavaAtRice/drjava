@@ -56,7 +56,7 @@ import java.io.IOException;
  * 
  * @version $Id$
  */
-public class ConsoleControllerTest extends GlobalModelTestCase {
+public final class ConsoleControllerTest extends GlobalModelTestCase {
   protected SwingDocumentAdapter _adapter;
   protected ConsoleDocument _doc;
   protected InteractionsPane _pane;

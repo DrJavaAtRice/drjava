@@ -54,7 +54,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
  * This questions corresponds to rule 15 in our decision tree.
  * @version $Id$
  */
-public class QuestionBraceIsCurlyTest extends IndentRulesTestCase 
+public final class QuestionBraceIsCurlyTest extends IndentRulesTestCase 
 {
   // PRE: we are not inside a multiline comment
   // PRE: the current block or expression list was *not* 

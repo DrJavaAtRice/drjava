@@ -48,7 +48,7 @@ import  junit.extensions.*;
  * Tests the Brace class.
  * @version $Id$
  */
-public class BraceTest extends TestCase implements ReducedModelStates {
+public final class BraceTest extends TestCase implements ReducedModelStates {
  
   protected Brace rparen;
   protected Brace lparen;

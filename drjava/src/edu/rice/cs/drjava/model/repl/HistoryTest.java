@@ -59,7 +59,7 @@ import edu.rice.cs.util.FileOps;
  * Tests the functionality of the repl History.
  * @version $Id$
  */
-public class HistoryTest extends TestCase implements OptionConstants{
+public final class HistoryTest extends TestCase implements OptionConstants{
   private History _history;
   private File _tempDir;
   

@@ -46,7 +46,7 @@ import gj.util.Hashtable;
 /**
  * simple test suite over InterpreterJVM
  */
-public class InterpreterJVMTest extends TestCase {
+public final class InterpreterJVMTest extends TestCase {
   private InterpreterJVM jvm = InterpreterJVM.ONLY;
   private Hashtable<String,InterpreterData> _debugInterpreters;
   private JavaInterpreter _interpreter1;

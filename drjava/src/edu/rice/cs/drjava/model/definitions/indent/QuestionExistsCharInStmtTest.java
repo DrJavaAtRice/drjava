@@ -57,7 +57,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
  *
  * @version $Id$
  */
-public class QuestionExistsCharInStmtTest extends IndentRulesTestCase {
+public final class QuestionExistsCharInStmtTest extends IndentRulesTestCase {
 
   /**
    * Tests the indentation decision tree.

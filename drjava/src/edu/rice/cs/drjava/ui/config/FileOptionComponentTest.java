@@ -51,7 +51,7 @@ import junit.extensions.*;
 /**
  * Tests functionality of this OptionComponent
  */
-public class FileOptionComponentTest extends TestCase {
+public final class FileOptionComponentTest extends TestCase {
   
   private static FileOptionComponent _option;
  

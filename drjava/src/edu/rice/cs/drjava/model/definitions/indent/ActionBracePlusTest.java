@@ -54,7 +54,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
  * can be passed through the constructor.
  * @version $Id$
  */
-public class ActionBracePlusTest extends IndentRulesTestCase 
+public final class ActionBracePlusTest extends IndentRulesTestCase 
 {
   private String _text, _aligned;
   

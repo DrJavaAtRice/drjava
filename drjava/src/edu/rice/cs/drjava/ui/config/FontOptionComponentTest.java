@@ -50,7 +50,7 @@ import junit.extensions.*;
 /**
  * Tests functionality of this OptionComponent
  */
-public class FontOptionComponentTest extends TestCase {
+public final class FontOptionComponentTest extends TestCase {
   
   private static FontOptionComponent _option;
  

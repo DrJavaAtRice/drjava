@@ -170,7 +170,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * Whether or not to reset the interactions JVM after compiling.
    * Should only be false in test cases.
    */
-  private boolean _resetAfterCompile = true;
+  //private boolean _resetAfterCompile = true;
   
   
   // ---- JUnit Fields ----
@@ -973,10 +973,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * Sets whether or not the Interactions JVM will be reset after
    * a compilation succeeds.  This should ONLY be used in tests!
    * @param shouldReset Whether to reset after compiling
-   */
+   *
   void setResetAfterCompile(boolean shouldReset) {
     _resetAfterCompile = shouldReset;
-  }
+  }*/
   
   /**
    * Compiles all open documents, after ensuring that all are saved.
@@ -1038,10 +1038,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             }
           });
           
-          // Only clear console/interactions if there were no errors
+          // Only clear interactions if there were no errors
           if (_numErrors == 0) {
-            resetConsole();
-            if (_resetAfterCompile) {
+            //resetConsole();
+            if (/*_resetAfterCompile && */
+                _interactionsModel.interpreterUsed()) {
               resetInteractions();
             }
           }
@@ -1890,9 +1891,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * saved before proceeding with the compile. If the compile can
      * proceed, a compileStarted event is fired which guarantees that
      * a compileEnded event will be fired when the compile finishes or
-     * fails.  If the compilation succeeds, then calls are
-     * made to resetConsole() and resetInteractions(), which fire
-     * events of their own, contingent on the conditions.  If the current
+     * fails.  If the compilation succeeds, then a call is
+     * made to resetInteractions(), which fires an
+     * event of its own, contingent on the conditions.  If the current
      * package as determined by getSourceRoot(String) and getPackageName()
      * is invalid, compileStarted and compileEnded will fire, and
      * an error will be put in compileErrors.
@@ -1943,10 +1944,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
                 }
               });
               
-              // Only clear console/interactions if there were no errors
+              // Only clear interactions if there were no errors
               if (_numErrors == 0) {
-                resetConsole();
-                if (_resetAfterCompile) {
+                //resetConsole();
+                if (/*_resetAfterCompile && */
+                    _interactionsModel.interpreterUsed()) {
                   resetInteractions();
                 }
               }

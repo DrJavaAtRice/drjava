@@ -54,7 +54,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
  * This questions corresponds to rule 11 in our decision tree.
  * @version $Id$
  */
-public class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase 
+public final class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase 
 {
     // PRE: We are not inside a multiline comment.
  

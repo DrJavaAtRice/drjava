@@ -1497,8 +1497,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * @return the approrpiate Method to call in the InterpreterJVM in order
    * to define a variable of the type val
    */
-  private Method getDefineVariableMethod(ReferenceType interpreterRef, 
-                                         Value val)
+  private Method _getDefineVariableMethod(ReferenceType interpreterRef, 
+                                          Value val)
     throws DebugException
   {
     List methods = null;
@@ -1507,7 +1507,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     String signature_mid = "";
     String signature = "";
     
-    if( val instanceof ObjectReference ){
+    if((val == null) || ( val instanceof ObjectReference )){
       signature_mid = "Ljava/lang/Object;";
     }
     else if( val instanceof BooleanValue ){
@@ -1535,7 +1535,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       signature_mid = "S";
     }
     else{
-      throw new IllegalArgumentException("Tried to define a variable which is not an Object or a primitive type");
+      throw new IllegalArgumentException("Tried to define a variable which is\n" +
+                                         "not an Object or a primitive type:\n" +
+                                         val);
     }
     
     signature = signature_beginning + signature_mid + signature_end;
@@ -1712,7 +1714,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     List args = new LinkedList();
     args.add(_vm.mirrorOf(name));
     args.add(val);
-    Method method2Call = getDefineVariableMethod(rtDebugInterpreter,  val);
+    Method method2Call = _getDefineVariableMethod(rtDebugInterpreter,  val);
     
     /* System.out.println("Calling " + method2Call.toString() + "with " + args.get(0).toString()); */
     debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args, 
@@ -1868,7 +1870,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       if( printMessages ) DrJava.consoleOut().println("Invoking " + method2Call.name());
       Value v = interpreter.invokeMethod(threadRef, method2Call, args, 
                                          ObjectReference.INVOKE_SINGLE_THREADED);
-      v = _convertToActualType(threadRef, localVar, v);
+      if (v != null) {
+        v = _convertToActualType(threadRef, localVar, v);
+      }
       frame = threadRef.frame(0);
       frame.setValue(localVar, v);
     }

@@ -50,7 +50,7 @@ import junit.extensions.*;
 /**
  * Tests functionality of this OptionComponent
  */
-public class KeyStrokeOptionComponentTest extends TestCase {
+public final class KeyStrokeOptionComponentTest extends TestCase {
   
   private static KeyStrokeOptionComponent _option;
  

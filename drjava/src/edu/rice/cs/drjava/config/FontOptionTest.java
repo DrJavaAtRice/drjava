@@ -48,7 +48,7 @@ import edu.rice.cs.drjava.CodeStatus;
  * the proper functionality of the class FontOption.
  * @version $Id$
  */
-public class FontOptionTest extends TestCase
+public final class FontOptionTest extends TestCase
 {
   /**
    * @param name The name of this test case.

@@ -47,7 +47,7 @@ import junit.extensions.*;
  * Tests the functionality of the ModelList list class.
  * @version $Id$
  */
-public class ModelListTest extends TestCase {
+public final class ModelListTest extends TestCase {
   protected ModelList<Integer> fEmpty;
   protected ModelList<Integer> fFull;
   

@@ -52,7 +52,7 @@ import junit.extensions.*;
 /**
  * Tests functionality of this OptionComponent
  */
-public class VectorOptionComponentTest extends TestCase {
+public final class VectorOptionComponentTest extends TestCase {
   
   private static VectorOptionComponent _option;
  

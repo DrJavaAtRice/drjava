@@ -97,7 +97,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
    * Interprets the given command.
    * @param toEval command to be evaluated
    */
-  public void interpret(String toEval) {
+  protected void _interpret(String toEval) {
     try {
       Object result = _interpreter.interpret(toEval);
       if (result != Interpreter.NO_RESULT) {
@@ -144,7 +144,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
   /**
    * Resets the Java interpreter.
    */
-  public void resetInterpreter() {
+  protected void _resetInterpreter() {
     interpreterResetting();
     _interpreter = new DynamicJavaAdapter();
     interpreterReady();

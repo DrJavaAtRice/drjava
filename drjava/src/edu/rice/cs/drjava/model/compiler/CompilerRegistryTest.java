@@ -51,7 +51,7 @@ import edu.rice.cs.drjava.DrJava;
  *
  * @version $Id$
  */
-public class CompilerRegistryTest extends TestCase {
+public final class CompilerRegistryTest extends TestCase {
   private static final CompilerRegistry _registry = CompilerRegistry.ONLY;
   private static final String[] _defaultCompilers
     = CompilerRegistry.DEFAULT_COMPILERS;

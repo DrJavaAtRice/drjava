@@ -73,6 +73,11 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected boolean _waitingForFirstInterpreter;
   
   /**
+   * Whether the interpreter has been used since its last reset.
+   */
+  protected boolean _interpreterUsed;
+  
+  /**
    * A lock object to prevent multiple threads from interpreting at once.
    */
   private final Object _interpreterLock;
@@ -111,6 +116,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _writeDelay = writeDelay;
     _document = new InteractionsDocument(adapter, historySize);
     _waitingForFirstInterpreter = true;
+    _interpreterUsed = false;
     _interpreterLock = new Object();
     _writerLock = new Object();
     _debugPort = -1;
@@ -166,7 +172,17 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * Interprets the given command.
    * @param toEval command to be evaluated
    */
-  public abstract void interpret(String toEval);
+  public final void interpret(String toEval) {
+    _interpreterUsed = true;
+    _interpret(toEval);
+  }
+  
+  /**
+   * Interprets the given command.  This should only be called from
+   * interpret, never directly.
+   * @param toEval command to be evaluated
+   */
+  protected abstract void _interpret(String toEval);
   
   /**
    * Notifies listeners that an interaction has started.
@@ -175,9 +191,27 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected abstract void _notifyInteractionStarted();
   
   /**
-   * Resets the Java interpreter.
+   * Resets the Java interpreter, resetting the flag to indicate whether
+   * the interpreter has been used since the last reset.
    */
-  public abstract void resetInterpreter();
+  public final void resetInterpreter() {
+    _interpreterUsed = false;
+    _resetInterpreter();
+  }
+  
+  /**
+   * Resets the Java interpreter.  This should only be called from
+   * resetInterpreter, never directly.
+   */
+  protected abstract void _resetInterpreter();
+  
+  /**
+   * Returns whether the interpreter has been used since the last reset
+   * operation.  (Set to true in interpret and false in resetInterpreter.)
+   */
+  public boolean interpreterUsed() {
+    return _interpreterUsed;
+  }
   
   /**
    * Adds the given path to the interpreter's classpath.

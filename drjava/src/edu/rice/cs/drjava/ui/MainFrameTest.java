@@ -64,7 +64,7 @@ import edu.rice.cs.util.text.*;
  *
  * @version $Id$
  */
-public class MainFrameTest extends MultiThreadedTestCase {
+public final class MainFrameTest extends MultiThreadedTestCase {
   
   private MainFrame _frame;
   

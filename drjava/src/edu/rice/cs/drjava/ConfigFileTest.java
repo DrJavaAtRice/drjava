@@ -53,7 +53,7 @@ import edu.rice.cs.drjava.config.*;
  * Tests that a custom config file can be specified.
  * @version $Id$
  */
-public class ConfigFileTest extends TestCase {
+public final class ConfigFileTest extends TestCase {
   private static final String CUSTOM_PROPS =
     "indent.level = 5\n" +
     "history.max.size = 1\n" +

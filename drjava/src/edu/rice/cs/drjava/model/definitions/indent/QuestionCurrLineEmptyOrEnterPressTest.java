@@ -48,7 +48,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  * 
  * @version $Id$
  */
-public class QuestionCurrLineEmptyOrEnterPressTest extends IndentRulesTestCase {
+public final class QuestionCurrLineEmptyOrEnterPressTest extends IndentRulesTestCase {
   public QuestionCurrLineEmptyOrEnterPressTest(String name) {
     super(name);
   }

@@ -58,7 +58,7 @@ import edu.rice.cs.util.*;
  * Test the tab/enter/squiggly indenting functionality.
  * @version $Id$
  */
-public class IndentTest extends TestCase {
+public final class IndentTest extends TestCase {
   protected DefinitionsDocument doc;
 
   static String noBrace = IndentInfo.noBrace;

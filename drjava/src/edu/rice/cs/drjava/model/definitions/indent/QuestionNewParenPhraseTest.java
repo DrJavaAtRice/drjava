@@ -52,7 +52,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
  * open paren, or open bracket.)
  * @version $Id$
  */
-public class QuestionNewParenPhraseTest extends IndentRulesTestCase {
+public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
 
   /**
    * Tests the indentation decision tree.

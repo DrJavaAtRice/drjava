@@ -48,7 +48,7 @@ import edu.rice.cs.drjava.model.GlobalModelTestCase.TestListener;
  * of a global model.
  * @version $Id$
  */
-public class EventNotifierTest extends TestCase {
+public final class EventNotifierTest extends TestCase {
   
   protected EventNotifier _notifier;
   

@@ -46,7 +46,7 @@ import junit.framework.*;
  * the proper functionality of the class StringOption.
  * @version $Id$
  */
-public class StringOptionTest extends TestCase
+public final class StringOptionTest extends TestCase
 {
   /**
    * @param name The name of this test case.

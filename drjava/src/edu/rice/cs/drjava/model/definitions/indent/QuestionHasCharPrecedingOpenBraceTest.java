@@ -51,7 +51,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
  * of the class QuestionHasCharPrecedingOpenBrace.
  * @version $Id$
  */
-public class QuestionHasCharPrecedingOpenBraceTest extends IndentRulesTestCase
+public final class QuestionHasCharPrecedingOpenBraceTest extends IndentRulesTestCase
 {
   private String _text;
     

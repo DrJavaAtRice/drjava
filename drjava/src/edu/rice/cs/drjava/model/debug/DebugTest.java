@@ -66,7 +66,9 @@ import edu.rice.cs.drjava.CodeStatus;
  *
  * @version $Id$
  */
-public class DebugTest extends GlobalModelTestCase implements OptionConstants {
+public final class DebugTest extends GlobalModelTestCase
+  implements OptionConstants
+{
 
   final boolean printEvents = false;
   final boolean printMessages = false;

@@ -49,7 +49,7 @@ import edu.rice.cs.drjava.model.definitions.indent.IndentRulesTestCase;
  * Tests for the helper methods in DefinitionsDocument
  * @version $Id$
  */
-public class IndentHelperTest extends IndentRulesTestCase {
+public final class IndentHelperTest extends IndentRulesTestCase {
 
   public IndentHelperTest(String name) {
     super(name);

@@ -47,7 +47,7 @@ import java.awt.Color;
  * the proper functionality of the class ColorOption.
  * @version $Id$
  */
-public class ColorOptionTest extends TestCase
+public final class ColorOptionTest extends TestCase
 {
   /**
    * @param name The name of this test case.

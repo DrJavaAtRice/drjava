@@ -43,9 +43,9 @@ import  junit.framework.*;
 
 import java.io.*;
 
-import  java.util.Vector;
-import  javax.swing.text.BadLocationException;
-import  junit.extensions.*;
+import java.util.Vector;
+import javax.swing.text.BadLocationException;
+import junit.extensions.*;
 import java.util.LinkedList;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
@@ -65,7 +65,9 @@ import edu.rice.cs.drjava.config.OptionConstants;
  *
  * @version $Id$
  */
-public class GlobalModelIOTest extends GlobalModelTestCase implements OptionConstants{
+public final class GlobalModelIOTest extends GlobalModelTestCase
+  implements OptionConstants
+{
   /**
    * Constructor.
    * @param  String name

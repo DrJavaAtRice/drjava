@@ -63,7 +63,7 @@ import edu.rice.cs.drjava.model.compiler.*;
  *
  * @version $Id$
  */
-public class SingleDisplayModelTest extends GlobalModelTestCase {
+public final class SingleDisplayModelTest extends GlobalModelTestCase {
   /**
    * Constructor.
    * @param  String name

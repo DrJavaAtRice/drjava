@@ -35,56 +35,58 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
- END_COPYRIGHT_BLOCK*/package edu.rice.cs.drjava.config;
- 
- import junit.framework.*;
- 
- /**
-  * Class according to the JUnit protocol. Tests
-  * the proper functionality of the class BooleanOption.
-  * @version $Id$
-  */
- public class BooleanOptionTest extends TestCase
- {
-   /**
-    * @param name The name of this test case.
-    */
-   public BooleanOptionTest(String name) { super(name); }
-   
-   public void setUp() {}
-   
-   public void testGetName()
-   {
-     BooleanOption bo1 = new BooleanOption("enable JUnit",null);
-     BooleanOption bo2 = new BooleanOption("use menu icons",null);
-     
-     assertEquals("enable JUnit", bo1.getName());
-     assertEquals("use menu icons",   bo2.getName());
-   }
-   
-   public void testParse()
-   {
-     BooleanOption bo = new BooleanOption("enable JUnit",null);
-     
-     assertEquals(Boolean.TRUE, bo.parse("true"));
-     assertEquals(Boolean.FALSE, bo.parse("false"));
-     assertEquals(Boolean.FALSE, bo.parse(" faLse "));
-     
-     try { bo.parse("3"); fail(); }
-     catch (OptionParseException e) {}
-     
-     try { bo.parse("Tue"); fail(); }
-     catch (OptionParseException e) {}
-   }
-   
-   public void testFormat()
-   {
-     BooleanOption bo1 = new BooleanOption("max_files",null);
-     BooleanOption bo2 = new BooleanOption("indent_size",null);
-     
-     assertEquals("true",  bo1.format(Boolean.TRUE));
-     assertEquals("true",  bo2.format(Boolean.TRUE));
-     assertEquals("false", bo1.format(Boolean.FALSE));
-     assertEquals("false", bo2.format(Boolean.FALSE));
-   }
- }
+ END_COPYRIGHT_BLOCK*/
+
+package edu.rice.cs.drjava.config;
+
+import junit.framework.*;
+
+/**
+ * Class according to the JUnit protocol. Tests
+ * the proper functionality of the class BooleanOption.
+ * @version $Id$
+ */
+public final class BooleanOptionTest extends TestCase
+{
+  /**
+   * @param name The name of this test case.
+   */
+  public BooleanOptionTest(String name) { super(name); }
+  
+  public void setUp() {}
+  
+  public void testGetName()
+  {
+    BooleanOption bo1 = new BooleanOption("enable JUnit",null);
+    BooleanOption bo2 = new BooleanOption("use menu icons",null);
+    
+    assertEquals("enable JUnit", bo1.getName());
+    assertEquals("use menu icons",   bo2.getName());
+  }
+  
+  public void testParse()
+  {
+    BooleanOption bo = new BooleanOption("enable JUnit",null);
+    
+    assertEquals(Boolean.TRUE, bo.parse("true"));
+    assertEquals(Boolean.FALSE, bo.parse("false"));
+    assertEquals(Boolean.FALSE, bo.parse(" faLse "));
+    
+    try { bo.parse("3"); fail(); }
+    catch (OptionParseException e) {}
+    
+    try { bo.parse("Tue"); fail(); }
+    catch (OptionParseException e) {}
+  }
+  
+  public void testFormat()
+  {
+    BooleanOption bo1 = new BooleanOption("max_files",null);
+    BooleanOption bo2 = new BooleanOption("indent_size",null);
+    
+    assertEquals("true",  bo1.format(Boolean.TRUE));
+    assertEquals("true",  bo2.format(Boolean.TRUE));
+    assertEquals("false", bo1.format(Boolean.FALSE));
+    assertEquals("false", bo2.format(Boolean.FALSE));
+  }
+}

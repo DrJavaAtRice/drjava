@@ -269,6 +269,15 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   {
     doc.saveFile(new FileSelector(file));
 
+    // Perform a mindless interpretation to force interactions to reset.
+    //  (only to simplify this method)
+    try {
+      interpret("2+2");
+    }
+    catch (DocumentAdapterException e) {
+      throw new UnexpectedException(e);
+    }
+
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
     _model.addListener(listener);
     synchronized(listener) {
@@ -921,13 +930,14 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       }
     }
 
+    /* Note: console is no longer reset after a compile
     public void consoleReset() {
       assertConsoleResetCount(0);
       assertCompileStartCount(1);
       assertCompileEndCount(1);
       // don't care whether interactions or console are reset first
       consoleResetCount++;
-    }
+    }*/
 
     public void checkCompileOccurred() {
       assertCompileEndCount(1);
@@ -936,7 +946,13 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
         assertInteractionsResettingCount(1);
         assertInteractionsResetCount(1);
       }
-      assertConsoleResetCount(1);
+      else {
+        assertInteractionsResettingCount(0);
+        assertInteractionsResetCount(0);
+      }
+
+      // Note: console is no longer reset after a compile
+      //assertConsoleResetCount(1);
     }
   }
     

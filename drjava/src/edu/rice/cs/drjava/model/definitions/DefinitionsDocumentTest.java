@@ -55,7 +55,7 @@ import edu.rice.cs.drjava.model.EventNotifier;
  * Tests the functionality of the definitions document.
  * @version $Id$
  */
-public class DefinitionsDocumentTest extends TestCase
+public final class DefinitionsDocumentTest extends TestCase
   implements ReducedModelStates 
 {
   private DefinitionsDocument _defModel;

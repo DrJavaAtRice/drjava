@@ -58,7 +58,7 @@ import java.rmi.registry.Registry;
  *
  * @version $Id$
  */
-public class InteractionsPaneTest extends TestCase {
+public final class InteractionsPaneTest extends TestCase {
   
   protected SwingDocumentAdapter _adapter;
   protected InteractionsModel _model;

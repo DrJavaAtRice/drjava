@@ -46,7 +46,7 @@ import junit.framework.*;
  * the proper functionality of the class IntegerOption.
  * @version $Id$
  */
-public class IntegerOptionTest extends TestCase
+public final class IntegerOptionTest extends TestCase
 {
   /**
    * @param name The name of this test case.

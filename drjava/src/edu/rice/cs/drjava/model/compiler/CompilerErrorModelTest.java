@@ -56,7 +56,11 @@ import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.util.UnexpectedException;
 
-public class CompilerErrorModelTest extends TestCase {
+/**
+ * Tests the CompilerErrorModel.
+ * @version $Id$
+ */
+public final class CompilerErrorModelTest extends TestCase {
   private File[] files;
   private String[] texts;
   private TestDocGetter getter;

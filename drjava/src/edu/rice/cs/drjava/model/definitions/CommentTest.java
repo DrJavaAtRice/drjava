@@ -55,7 +55,7 @@ import edu.rice.cs.drjava.model.EventNotifier;
  * Test the comment lines / uncomment lines functionality.
  * @version $Id$
  */
-public class CommentTest extends TestCase {
+public final class CommentTest extends TestCase {
   protected DefinitionsDocument doc;
   private Integer indentLevel = new Integer(2);
   private Integer configIndent;

@@ -55,7 +55,7 @@ import edu.rice.cs.util.FileOps;
  * Tests opening/creating files specified as command line arguments.
  * @version $Id$
  */
-public class CommandLineTest extends TestCase {
+public final class CommandLineTest extends TestCase {
 
   /**
    * The MainFrame we're working with.

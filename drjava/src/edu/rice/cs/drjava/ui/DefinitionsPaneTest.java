@@ -90,7 +90,7 @@ import edu.rice.cs.util.swing.SwingWorker;
  * Tests the Definitions Pane
  * @version $Id$
  */
-public class DefinitionsPaneTest extends TestCase {
+public final class DefinitionsPaneTest extends TestCase {
   
   private MainFrame _frame;
   

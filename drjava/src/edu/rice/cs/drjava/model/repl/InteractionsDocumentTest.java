@@ -62,7 +62,7 @@ import edu.rice.cs.util.text.SwingDocumentAdapter;
  * Most history functionality is tested in HistoryTest.
  * @version $Id$
  */
-public class InteractionsDocumentTest extends TestCase {
+public final class InteractionsDocumentTest extends TestCase {
   protected InteractionsDocument _doc;
   
   /**

@@ -51,8 +51,9 @@ import edu.rice.cs.util.newjvm.ExecJVM;
 /**
  * Class according to the JUnit protocol. Tests
  * the proper functionality of the class KeyStrokeOption.
+ * @version $Id$
  */
-public class KeyStrokeOptionTest extends TestCase
+public final class KeyStrokeOptionTest extends TestCase
 {
   /**
    * @param name The name of this test case.

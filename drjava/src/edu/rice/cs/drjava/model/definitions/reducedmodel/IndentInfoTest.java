@@ -50,7 +50,7 @@ import edu.rice.cs.drjava.model.EventNotifier;
  
  * @version $Id$
  */
-public class IndentInfoTest extends TestCase {
+public final class IndentInfoTest extends TestCase {
   
   private String _text;
   private DefinitionsDocument _document;

@@ -78,7 +78,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    * Interprets the given command.
    * @param toEval command to be evaluated
    */
-  public void interpret(String toEval) {
+  protected void _interpret(String toEval) {
     _interpreterControl.interpret(toEval);
   }
   
@@ -93,7 +93,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   /**
    * Resets the Java interpreter.
    */
-  public void resetInterpreter() {
+  protected void _resetInterpreter() {
     _interpreterControl.killInterpreter(true);
   }
   

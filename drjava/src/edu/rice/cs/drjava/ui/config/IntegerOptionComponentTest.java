@@ -50,7 +50,7 @@ import junit.extensions.*;
 /**
  * Tests functionality of this OptionComponent
  */
-public class IntegerOptionComponentTest extends TestCase {
+public final class IntegerOptionComponentTest extends TestCase {
   
   private static IntegerOptionComponent _option;
  

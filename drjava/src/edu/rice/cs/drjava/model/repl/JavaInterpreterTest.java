@@ -51,7 +51,7 @@ import  java.io.File;
  * Tests the functionality of the repl interpreter.
  * @version $Id$
  */
-public class JavaInterpreterTest extends TestCase {
+public final class JavaInterpreterTest extends TestCase {
   private JavaInterpreter _interpreter;
   static public boolean testValue;
 

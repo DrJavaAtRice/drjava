@@ -54,7 +54,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
  *
  * @version $Id$
  */
-public class QuestionLineContainsTest extends IndentRulesTestCase {
+public final class QuestionLineContainsTest extends IndentRulesTestCase {
 
   /**
    * Tests the indentation decision tree.
@@ -74,14 +74,14 @@ public class QuestionLineContainsTest extends IndentRulesTestCase {
     _setDocText("return test ? x : y;\n}\n");
     _doc.setCurrentLocation(0);
     assertTrue("colon in text (after startdoc)",
-	       rule.applyRule(_doc, Indenter.OTHER));
+        rule.applyRule(_doc, Indenter.OTHER));
     _setDocText("foo();\nreturn test ? x : y;\n}\n");
     _doc.setCurrentLocation(10);
     assertTrue("colon in text (after newline)",
-	       rule.applyRule(_doc, Indenter.OTHER));
+        rule.applyRule(_doc, Indenter.OTHER));
     _doc.setCurrentLocation(25);
     assertTrue("colon in text (after colon on line)",
-	       rule.applyRule(_doc, Indenter.OTHER));
+        rule.applyRule(_doc, Indenter.OTHER));
   }    
   
   /**
@@ -111,10 +111,10 @@ public class QuestionLineContainsTest extends IndentRulesTestCase {
     _setDocText("//case 1:\nreturn test; //? x : y\n}\n");
     _doc.setCurrentLocation(0);
     assertTrue("entire line with colon in comment (no colon, single line comment)",
-	       !rule.applyRule(_doc, Indenter.OTHER));
+        !rule.applyRule(_doc, Indenter.OTHER));
     _doc.setCurrentLocation(10);
     assertTrue("part of line with colon in comment (no colon, single line comment)",
-	       !rule.applyRule(_doc, Indenter.OTHER));
+        !rule.applyRule(_doc, Indenter.OTHER));
 
     // No colon, multi-line comment
     _setDocText("foo();\nreturn test; /*? x : y*/\n}\n");

@@ -52,7 +52,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  * Assumes cursor is within a brace.
  * @version $Id$
  */
-public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
+public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
 
   /**
    * Tests the indentation decision tree.

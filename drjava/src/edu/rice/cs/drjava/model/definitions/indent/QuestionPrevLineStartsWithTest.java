@@ -51,7 +51,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
  * starts with a particular string.
  * @version $Id$
  */
-public class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
+public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
 
   /**
    * Tests the indentation decision tree.

@@ -44,7 +44,7 @@ import edu.rice.cs.javaast.parser.*;
 import edu.rice.cs.javaast.tree.*;
 import edu.rice.cs.javaast.*;
 
-public class InteractionsProcessorTest extends TestCase {
+public final class InteractionsProcessorTest extends TestCase {
 
   InteractionsProcessor _ip;
 

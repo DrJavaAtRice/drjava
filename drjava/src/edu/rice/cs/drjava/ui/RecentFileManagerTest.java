@@ -60,7 +60,7 @@ import edu.rice.cs.util.FileOps;
  *
  * @version $Id$
  */
-public class RecentFileManagerTest extends TestCase {
+public final class RecentFileManagerTest extends TestCase {
   
   protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
   protected static final String BAR_TEXT = "class DrJavaTestBar {}";

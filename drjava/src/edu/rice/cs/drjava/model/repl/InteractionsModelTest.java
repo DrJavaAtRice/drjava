@@ -50,7 +50,7 @@ import edu.rice.cs.util.text.*;
  * Tests the functionality of an InteractionsModel.
  * @version $Id$
  */
-public class InteractionsModelTest extends TestCase {
+public final class InteractionsModelTest extends TestCase {
   protected DocumentAdapter _adapter;
   protected InteractionsModel _model;
   
@@ -78,7 +78,7 @@ public class InteractionsModelTest extends TestCase {
    */
   public void testInterpretCurrentInteraction() throws DocumentAdapterException {
     TestInteractionsModel model = new TestInteractionsModel(_adapter) {
-      public void interpret(String toEval) {
+      protected void _interpret(String toEval) {
         this.toEval = toEval;
       }
     };
@@ -103,7 +103,7 @@ public class InteractionsModelTest extends TestCase {
    */
   public void testInterpretJavaClassname() throws DocumentAdapterException {
     TestInteractionsModel model = new TestInteractionsModel(_adapter) {
-      public void interpret(String toEval) {
+      protected void _interpret(String toEval) {
         this.toEval = toEval;
       }
     };
@@ -152,13 +152,13 @@ public class InteractionsModelTest extends TestCase {
       super(adapter, 1000, 25);
     }
     
-    public void interpret(String toEval) {
+    protected void _interpret(String toEval) {
       fail("cannot interpret in a test");
     }
     public void addToClassPath(String path) {
       fail("cannot add to classpath in a test");
     }
-    public void resetInterpreter() {
+    protected void _resetInterpreter() {
       fail("cannot reset interpreter in a test");
     }
     protected void _notifyInteractionStarted() {}

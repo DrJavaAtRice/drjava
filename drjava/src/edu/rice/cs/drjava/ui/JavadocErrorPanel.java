@@ -88,7 +88,7 @@ public class JavadocErrorPanel extends ErrorPanel{
    * @param frame MainFrame in which we are displayed
    */
   public JavadocErrorPanel(SingleDisplayModel model, MainFrame frame) {
-    super(model, frame, "Javadoc Errors");
+    super(model, frame, "Javadoc Output");
 //     _testCount = 0;
     _successful = true;
     _errorListPane = new JavadocErrorListPane();

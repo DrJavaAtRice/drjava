@@ -56,8 +56,8 @@ import edu.rice.cs.util.UnexpectedException;
  *
  * @version $Id$
  */
-public class GlobalModelJUnitTest extends GlobalModelTestCase {
-  final boolean printMessages = false;
+public final class GlobalModelJUnitTest extends GlobalModelTestCase {
+  static final boolean printMessages = false;
   
   private static final String MONKEYTEST_PASS_TEXT =
     "import junit.framework.*; " + 
@@ -128,7 +128,6 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    */
   public void testNoJUnitErrors() throws Exception {
     if (printMessages) System.out.println("----testNoJUnitErrors-----");
-    _model.setResetAfterCompile(false);
     
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
@@ -136,10 +135,8 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     TestShouldSucceedListener listener = new TestShouldSucceedListener();
     _model.addListener(listener);
     if (printMessages) System.out.println("before compile");
-    //synchronized(listener) {
-      doc.startCompile();
-      //listener.wait();
-    //}
+    // Doesn't reset interactions because interpreter is not used
+    doc.startCompile();
     if (printMessages) System.out.println("after compile");
     listener.checkCompileOccurred();
     synchronized(listener) {
@@ -152,8 +149,6 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertEquals("test case should have no errors reported",
                  0,
                  _model.getJUnitErrorModel().getNumErrors());
-    
-    _model.setResetAfterCompile(true);
   }
   
   /**
@@ -161,7 +156,6 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    */
   public void testOneJUnitError() throws Exception {
     if (printMessages) System.out.println("----testOneJUnitError-----");
-    _model.setResetAfterCompile(false);
     
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
     final File file = new File(_tempDir, "MonkeyTestFail.java");
@@ -169,10 +163,8 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     TestShouldSucceedListener listener = new TestShouldSucceedListener();
     _model.addListener(listener);
     if (printMessages) System.out.println("before compile");
-    //synchronized(listener) {
-      doc.startCompile();
-      //listener.wait();
-    //}
+    // Doesn't reset interactions because interpreter is not used
+    doc.startCompile();
     if (printMessages) System.out.println("after compile");
     synchronized(listener) {
       doc.startJUnit();
@@ -184,8 +176,6 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertEquals("test case has one error reported",
                  1,
                  _model.getJUnitErrorModel().getNumErrors());
-    
-    _model.setResetAfterCompile(true);
   }
  
   /**
@@ -194,7 +184,6 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    */
   public void testNonTestCaseError() throws Exception {
     if (printMessages) System.out.println("----testNonTestCaseError-----");
-    _model.setResetAfterCompile(false);
     
     final OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
     final File file = new File(_tempDir, "NonTestCase.java");
@@ -206,10 +195,8 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     _model.addListener(listener);
     if (printMessages) System.out.println("before compile");
-    //synchronized(listener) {
-      doc.startCompile();
-      //listener.wait();
-    //}
+    // Doesn't reset interactions because interpreter is not used
+    doc.startCompile();
     if (printMessages) System.out.println("after compile");
     synchronized(listener) {
       doc.startJUnit();
@@ -225,8 +212,6 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitSuiteStartedCount(0);
     listener.assertJUnitTestStartedCount(0);
     listener.assertJUnitTestEndedCount(0);
-    
-    _model.setResetAfterCompile(true);
   }
   
   /**
@@ -235,7 +220,6 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    */
   public void testResultOfNonPublicTestCase() throws Exception {
     if (printMessages) System.out.println("----testResultOfNonPublicTestCase-----");
-    _model.setResetAfterCompile(false);
     
     final OpenDefinitionsDocument doc = setupDocument(NONPUBLIC_TEXT);
     final File file = new File(_tempDir, "NonPublic.java");
@@ -246,10 +230,8 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     _model.addListener(listener);
     
     if (printMessages) System.out.println("before compile");
-    //synchronized(listener) {
-      doc.startCompile();
-      //listener.wait();
-    //}
+    // Doesn't reset interactions because interpreter is not used
+    doc.startCompile();
     if (printMessages) System.out.println("after compile");
     
     synchronized(listener) {
@@ -268,13 +250,10 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertEquals("test case has one error reported",
                  1,
                  _model.getJUnitErrorModel().getNumErrors());
-                 
-    _model.setResetAfterCompile(true);
   }
   
   public void testDoNotRunJUnitIfFileHasBeenMoved() throws Exception {
     if (printMessages) System.out.println("----testDoNotRunJUnitIfFileHasBeenMoved-----");
-    _model.setResetAfterCompile(false);
     
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
@@ -292,8 +271,6 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
       //JUnit should not have started, because the documents file is not
       // where it should be on the disk.
     }
-    
-    _model.setResetAfterCompile(true);
   }
   
   /**
@@ -301,8 +278,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    */
   public void testNoClassFile() throws Exception {
     if (printMessages) System.out.println("----testNoClassFile-----");
-    _model.setResetAfterCompile(false);
-    
+
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     doc.saveFile(new FileSelector(file));
@@ -325,8 +301,6 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitSuiteStartedCount(0);
     listener.assertJUnitTestStartedCount(0);
     listener.assertJUnitTestEndedCount(0);
-    
-    _model.setResetAfterCompile(true);
   }
   
   /**
@@ -335,7 +309,6 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    */
   public void testInfiniteLoop() throws Exception {
     if (printMessages) System.out.println("----testInfiniteLoop-----");
-    _model.setResetAfterCompile(false);
     
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_INFINITE_TEXT);
     final File file = new File(_tempDir, "MonkeyTestInfinite.java");
@@ -381,13 +354,11 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     };
     _model.addListener(listener);
     if (printMessages) System.out.println("before compile");
-    //synchronized(listener) {
-      doc.startCompile();
-      if (_model.getNumErrors() > 0) {
-        fail("compile failed: " + getCompilerErrorString());
-      }
-      //listener.wait();
-    //}
+    // Doesn't reset interactions because interpreter is not used
+    doc.startCompile();
+    if (_model.getNumErrors() > 0) {
+      fail("compile failed: " + getCompilerErrorString());
+    }
     if (printMessages) System.out.println("after compile");
     _model.removeListener(listener);
     _model.addListener(listener2);
@@ -400,8 +371,6 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     if (printMessages) System.out.println("after test");
     _model.removeListener(listener2);
     listener2.assertJUnitEndCount(1);
-    
-    _model.setResetAfterCompile(true);
   }  
   
   /**
@@ -410,7 +379,6 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    */
   public void testUnsavedAndUnCompiledChanges() throws Exception {
     if (printMessages) System.out.println("----testUnsavedAndUnCompiledChanges-----");
-    _model.setResetAfterCompile(false);
     
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
@@ -418,10 +386,8 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     TestShouldSucceedListener listener = new TestShouldSucceedListener(true);
     _model.addListener(listener);
     if (printMessages) System.out.println("before compile");
-    //synchronized(listener) {
-      doc.startCompile();
-      //listener.wait();
-    //}
+    // Doesn't reset interactions because interpreter is not used
+    doc.startCompile();
     if (printMessages) System.out.println("after compile");
     changeDocumentText(MONKEYTEST_FAIL_TEXT, doc);
     synchronized(listener) {
@@ -447,11 +413,9 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertEquals("test case should have no errors reported after saving",
                  0,
                  _model.getJUnitErrorModel().getNumErrors());
-    
-    _model.setResetAfterCompile(false);
   }
   
-  protected class TestShouldSucceedListener extends CompileShouldSucceedListener {
+  public static class TestShouldSucceedListener extends CompileShouldSucceedListener {
     public TestShouldSucceedListener() {
       super(false);  // don't reset interactions after compile by default
     }

@@ -52,7 +52,7 @@ import javax.swing.text.BadLocationException;
  * also does some of the work, and any subclass may substitute its own version of getRuleName()
  * @version $Id$
  */
-public class IndentRuleWithTraceTest extends IndentRulesTestCase{
+public final class IndentRuleWithTraceTest extends IndentRulesTestCase{
 
   /**
    * put your documentation comment here
@@ -84,9 +84,9 @@ public class IndentRuleWithTraceTest extends IndentRulesTestCase{
     rule1.indentLine(_doc, 75, Indenter.OTHER);
 
     String[] expected = {"edu.rice.cs.drjava.model.definitions.indent.QuestionInsideComment No",
-			 "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsParenOrBracket No",
-			 "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsCurly Yes",
-			 "edu.rice.cs.drjava.model.definitions.indent.ActionBracePlus "};
+    "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsParenOrBracket No",
+    "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsCurly Yes",
+    "edu.rice.cs.drjava.model.definitions.indent.ActionBracePlus "};
 
     Vector<String> actual = IndentRuleWithTrace.getTrace();
     assertEquals("steps in trace", 4, actual.size());

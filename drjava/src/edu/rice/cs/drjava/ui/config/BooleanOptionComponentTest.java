@@ -50,7 +50,7 @@ import junit.extensions.*;
 /**
  * Tests functionality of this OptionComponent
  */
-public class BooleanOptionComponentTest extends TestCase {
+public final class BooleanOptionComponentTest extends TestCase {
   
   private static BooleanOptionComponent _option;
  

@@ -39,8 +39,6 @@
 
 package edu.rice.cs.drjava.model.junit;
 
-import edu.rice.cs.util.*;
-import edu.rice.cs.drjava.model.*;
 
 import junit.framework.*;
 
@@ -51,16 +49,18 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
 
+import edu.rice.cs.util.*;
+import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.drjava.model.GlobalModelJUnitTest.TestShouldSucceedListener;
 
 /**
  * A test on the GlobalModel for JUnit testing.
  *
  * @version $Id$
  */
-public class JUnitErrorModelTest extends GlobalModelJUnitTest {
+public final class JUnitErrorModelTest extends GlobalModelTestCase {
 
   private JUnitErrorModel _m;
 
@@ -103,7 +103,8 @@ public class JUnitErrorModelTest extends GlobalModelJUnitTest {
   }
   
   /**
-   * Tests that the errors array contains all encountered failures and errors in the right order. 
+   * Tests that the errors array contains all encountered failures and errors
+   * in the right order.
    */
   public void testErrorsArrayInOrder() throws Exception { 
     
@@ -114,10 +115,8 @@ public class JUnitErrorModelTest extends GlobalModelJUnitTest {
     
     TestShouldSucceedListener listener = new TestShouldSucceedListener();
     _model.addListener(listener);
-    synchronized(listener) {
-      doc.startCompile();
-      listener.wait();
-    }
+    // Interactions are not reset because interpreter wasn't used
+    doc.startCompile();
     listener.checkCompileOccurred();
     synchronized(listener) {
       doc.startJUnit();

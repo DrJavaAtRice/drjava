@@ -48,5 +48,5 @@ package edu.rice.cs.drjava;
  * test period should be surrounded by a conditional based on this flag.
  */
 public class CodeStatus {
-  public static final boolean DEVELOPMENT = true;
+  public static final boolean DEVELOPMENT = false;
 }

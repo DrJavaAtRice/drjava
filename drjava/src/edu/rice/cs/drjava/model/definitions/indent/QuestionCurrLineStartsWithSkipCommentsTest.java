@@ -51,7 +51,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
  * of the class QuestionCurrLineStartsWithSkipComments.
  * @version $Id$
  */
-public class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRulesTestCase
+public final class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRulesTestCase
 {
   private String _text;
     

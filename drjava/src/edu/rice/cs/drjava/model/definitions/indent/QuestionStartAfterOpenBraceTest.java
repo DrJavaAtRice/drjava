@@ -56,7 +56,7 @@ import edu.rice.cs.util.UnexpectedException;
  *
  * @version $Id$
  */
-public class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase 
+public final class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase 
 {
   private String _text;
   

@@ -54,7 +54,7 @@ import koala.dynamicjava.interpreter.context.*;
  * 
  * @version $Id$
  */
-public class JavaDebugInterpreterTest extends TestCase {
+public final class JavaDebugInterpreterTest extends TestCase {
   private JavaDebugInterpreter _debugInterpreter;
   
   private String _assignedInterpreterName;

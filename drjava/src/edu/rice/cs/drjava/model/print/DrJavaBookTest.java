@@ -49,7 +49,7 @@ import  junit.extensions.*;
  * Test functions of DrJavaBook
  *
  */
-public class DrJavaBookTest extends TestCase {
+public final class DrJavaBookTest extends TestCase {
   /**
    * The DrJavaBook instance we will be testing
    */

@@ -47,7 +47,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
  *
  * @version $Id$
  */
-public class ActionStartPrevLinePlusTest extends IndentRulesTestCase {
+public final class ActionStartPrevLinePlusTest extends IndentRulesTestCase {
   private String _suffix;
   public ActionStartPrevLinePlusTest(String name) {
     super(name);

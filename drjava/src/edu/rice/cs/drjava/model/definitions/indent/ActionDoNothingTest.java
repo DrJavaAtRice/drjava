@@ -50,7 +50,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
  * Tests the action rule which does nothing to the given text.
  * @version $Id$
  */
-public class ActionDoNothingTest extends IndentRulesTestCase {
+public final class ActionDoNothingTest extends IndentRulesTestCase {
 
   /**
    * Tests the indentation decision tree.

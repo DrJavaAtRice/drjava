@@ -66,7 +66,9 @@ import edu.rice.cs.drjava.CodeStatus;
  *
  * @version $Id$
  */
-public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
+public final class GlobalModelOtherTest extends GlobalModelTestCase
+  implements OptionConstants
+{
   /**
    * Constructor.
    * @param  String name

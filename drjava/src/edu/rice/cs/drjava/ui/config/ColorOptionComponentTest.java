@@ -52,7 +52,7 @@ import junit.extensions.*;
  * Tests functionality of this OptionComponent
  * @version $Id:
  */
-public class ColorOptionComponentTest extends TestCase {
+public final class ColorOptionComponentTest extends TestCase {
   
   private static ColorOptionComponent _option;
  
