@@ -186,7 +186,13 @@ public class TigerUtilities {
             c == short.class || c == Short.class);
   }
   
-  
+  /**
+   * Returns true iff the given primitive class can be boxed 
+   * to the given reference class.
+   * @param prim - the primitive class being boxed
+   * @param ref - the reference class being boxed to
+   * @return true iff the given primitive class can be boxed to the given reference class
+   */  
   public static boolean boxesTo(Class prim, Class ref) {
     return 
       (prim == int.class     && (ref == Integer.class   || 

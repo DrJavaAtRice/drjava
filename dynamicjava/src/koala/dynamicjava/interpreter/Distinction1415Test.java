@@ -253,8 +253,60 @@ public class Distinction1415Test extends TestCase {
     
     //Set the java runtime version back to the correct version
     TigerUtilities.resetVersion();
+  }
+   
+  /**
+   * Test that the use of methods with variable arguments fails when the runtime environment is set to 1.4
+   */
+  public void testVarArgs14(){
+    TigerUtilities.setTigerEnabled(false);
+    try {
+      
+      testString =
+        "public class C {\n"+
+        "  public int someMethod(int ... i){\n"+
+        "    return i[3];\n"+
+        "  }\n"+
+        "}\n"+
+        "new C().someMethod(0,1,2,3);";
+      
+      assertEquals(new Integer(3), interpret(testString));
+      fail("Should have thrown a WrongVersionException");
+    }
+    catch(WrongVersionException wve) {
+      //Expected to throw a WrongVersionException
+    }
     
+    //Set the java runtime version back to the correct version
+    TigerUtilities.resetVersion();
   }
   
+  /**
+   * Test that the use of methods with variable arguments does not fail when the runtime environment is set to 1.5
+   */
+  public void testVarArgs15(){
+    TigerUtilities.setTigerEnabled(true);
+    try {
+      
+      testString =
+        "public class C {\n"+
+        "  public int someMethod(int ... i){\n"+
+        "    return i[3];\n"+
+        "  }\n"+
+        "}\n"+
+        "new C().someMethod(0,1,2,3);";
+      
+      assertEquals(new Integer(3), interpret(testString));
+    }
+    catch(WrongVersionException wve) {
+      fail("Should not have thrown a WrongVersionException");
+    }
+    
+    //Set the java runtime version back to the correct version
+    TigerUtilities.resetVersion();
+  }   
 }
+  
+
+
 

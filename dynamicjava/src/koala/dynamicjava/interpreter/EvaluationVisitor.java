@@ -1287,8 +1287,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Class calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
-    if (_isBoxingType(resType)) {
-      calcType = _correspondingPrimType(resType);
+    if (TigerUtilities.isBoxingType(resType)) {
+      calcType = TigerUtilities.correspondingPrimType(resType);
     }
     
     // Perform the operation
@@ -1332,8 +1332,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Class calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
-    if (_isBoxingType(resType)) {
-      calcType = _correspondingPrimType(resType);
+    if (TigerUtilities.isBoxingType(resType)) {
+      calcType = TigerUtilities.correspondingPrimType(resType);
     }
     
     // Perform the operation
@@ -1377,8 +1377,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Class calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
-    if (_isBoxingType(resType)) {
-      calcType = _correspondingPrimType(resType);
+    if (TigerUtilities.isBoxingType(resType)) {
+      calcType = TigerUtilities.correspondingPrimType(resType);
     }
     
     // Perform the operation
@@ -1422,8 +1422,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Class calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
-    if (_isBoxingType(resType)) {
-      calcType = _correspondingPrimType(resType);
+    if (TigerUtilities.isBoxingType(resType)) {
+      calcType = TigerUtilities.correspondingPrimType(resType);
     }
     
     // Perform the operation
@@ -1467,8 +1467,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Class calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
-    if (_isBoxingType(resType)) {
-      calcType = _correspondingPrimType(resType);
+    if (TigerUtilities.isBoxingType(resType)) {
+      calcType = TigerUtilities.correspondingPrimType(resType);
     }
     
     // Perform the operation
@@ -1626,8 +1626,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Class calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
-    if (_isBoxingType(resType)) {
-      calcType = _correspondingPrimType(resType);
+    if (TigerUtilities.isBoxingType(resType)) {
+      calcType = TigerUtilities.correspondingPrimType(resType);
     }
     
     // Perform the operation
@@ -1651,8 +1651,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Class calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
-    if (_isBoxingType(resType)) {
-      calcType = _correspondingPrimType(resType);
+    if (TigerUtilities.isBoxingType(resType)) {
+      calcType = TigerUtilities.correspondingPrimType(resType);
     }
     
     // Perform the operation
@@ -1676,8 +1676,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Class calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
-    if (_isBoxingType(resType)) {
-      calcType = _correspondingPrimType(resType);
+    if (TigerUtilities.isBoxingType(resType)) {
+      calcType = TigerUtilities.correspondingPrimType(resType);
     }
     
     // Perform the operation
@@ -1701,8 +1701,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Class calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
-    if (_isBoxingType(resType)) {
-      calcType = _correspondingPrimType(resType);
+    if (TigerUtilities.isBoxingType(resType)) {
+      calcType = TigerUtilities.correspondingPrimType(resType);
     }
     
     // Perform the operation
@@ -1752,8 +1752,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Class calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
-    if (_isBoxingType(resType)) {
-      calcType = _correspondingPrimType(resType);
+    if (TigerUtilities.isBoxingType(resType)) {
+      calcType = TigerUtilities.correspondingPrimType(resType);
     }
     
     // Perform the operation
@@ -1798,8 +1798,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Class calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
-    if (_isBoxingType(resType)) {
-      calcType = _correspondingPrimType(resType);
+    if (TigerUtilities.isBoxingType(resType)) {
+      calcType = TigerUtilities.correspondingPrimType(resType);
     }
     
     // Perform the operation
@@ -1843,8 +1843,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Class calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
-    if (_isBoxingType(resType)) {
-      calcType = _correspondingPrimType(resType);
+    if (TigerUtilities.isBoxingType(resType)) {
+      calcType = TigerUtilities.correspondingPrimType(resType);
     }
     
     // Perform the operation
@@ -1888,8 +1888,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Class calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
-    if (_isBoxingType(resType)) {
-      calcType = _correspondingPrimType(resType);
+    if (TigerUtilities.isBoxingType(resType)) {
+      calcType = TigerUtilities.correspondingPrimType(resType);
     }
     
     // Perform the operation
@@ -1933,8 +1933,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Class calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
-    if (_isBoxingType(resType)) {
-      calcType = _correspondingPrimType(resType);
+    if (TigerUtilities.isBoxingType(resType)) {
+      calcType = TigerUtilities.correspondingPrimType(resType);
     }
     
     // Perform the operation
@@ -1978,8 +1978,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Class calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
-    if (_isBoxingType(resType)) {
-      calcType = _correspondingPrimType(resType);
+    if (TigerUtilities.isBoxingType(resType)) {
+      calcType = TigerUtilities.correspondingPrimType(resType);
     }
     
     // Perform the operation
@@ -2119,53 +2119,4 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return o;
   }
-  
-  /**
-   * Returns the primitive type that corresponds to the given reference type.
-   * @param refType the reference type
-   * @return the corresponding primitive type
-   */
-  private static Class _correspondingPrimType(Class refType) {
-    if (refType == Boolean.class) {
-      return boolean.class;
-    }
-    else if (refType == Byte.class) {
-      return byte.class;
-    }
-    else if (refType == Character.class) {
-      return char.class;
-    }
-    else if (refType == Short.class) {
-      return short.class;
-    }
-    else if (refType == Integer.class) {
-      return int.class;
-    }
-    else if (refType == Long.class) {
-      return long.class;
-    }
-    else if (refType == Float.class) {
-      return float.class;
-    }
-    else if (refType == Double.class) {
-      return double.class;
-    }
-    else {
-      throw new RuntimeException("No corresponding primitive type for reference type " + 
-                                 refType + ".");
-    }
-  } // end method: _correspondingPrimType 
-  
-  /**
-   * Returns true iff the given class is a boxing (reference) type.
-   * @param c the <code>Class</code> to check
-   * @return true iff it is a boxing type
-   */
-  private static boolean _isBoxingType(Class c) {
-    return (c == Integer.class   || c == Long.class   ||
-            c == Boolean.class   || c == Double.class ||
-            c == Character.class || c == Short.class  ||
-            c == Byte.class      || c == Float.class );
-  }
-  
 }
