@@ -373,7 +373,7 @@ ant clean compile
         <listitem>
           <formalpara>
             <title>Committing changes: "<literal>commit</literal>"</title>
-            <para>This will commit the code on your computer to the CVS repository.  This task incorporates most of the other tasks:  it updates your code to ensure it is not out of date, it compiles your code, and it runs all the unit tests.  If these tasks pass, it will ask for a commit message and commit the code.  If you have not set up an SSH key pair (see <link linkend="env-sf-keypair">Sourceforge SSH Key Pairs</link>), you will have to enter your Sourceforge password several times.  (Once to update, once to commit, and once to tag the code for a potential release.)</para>
+            <para>This will commit the code on your computer to the CVS repository.  This task incorporates most of the other tasks:  it updates your code to ensure it is not out of date, it compiles your code, and it runs all the unit tests.  If these tasks pass, it will ask for a commit message and commit the code.  (You can either type the message manually on one line, or specify the name of a file containing the message, if you want to have multiple lines.)  If you have not set up an SSH key pair (see <link linkend="env-sf-keypair">Sourceforge SSH Key Pairs</link>), you will have to enter your Sourceforge password several times.  (Once to update, once to commit, and once to tag the code for a potential release.)</para>
           </formalpara>
         </listitem>
 
