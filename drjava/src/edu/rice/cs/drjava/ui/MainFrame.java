@@ -395,6 +395,22 @@ public class MainFrame extends JFrame {
     setBounds(0, 0, GUI_WIDTH, GUI_HEIGHT);
     setSize(GUI_WIDTH, GUI_HEIGHT);
 
+    // suggested from zaq@nosi.com, to keep the frame on the screen!
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+    Dimension frameSize = this.getSize();
+
+    if (frameSize.height > screenSize.height) {
+      frameSize.height = screenSize.height;
+    }
+
+    if (frameSize.width > screenSize.width) {
+      frameSize.width = screenSize.width;
+    }
+
+    this.setLocation((screenSize.width - frameSize.width) / 2, 
+        (screenSize.height - frameSize.height) / 2);
+
     _setUpPanes();
     updateFileTitle();
     _setAllFonts(new Font("Monospaced", 0, 12));

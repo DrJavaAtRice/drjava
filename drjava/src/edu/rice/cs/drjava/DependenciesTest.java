@@ -49,7 +49,7 @@ import java.text.SimpleDateFormat;
  * @version $Id$
  */
 public class DependenciesTest extends TestCase {
-  public static final String REQUIRED_UTIL_VERSION = "20020221-1554";
+  public static final String REQUIRED_UTIL_VERSION = "20020227-1359";
 
   /**
    * Constructor.
@@ -73,7 +73,7 @@ public class DependenciesTest extends TestCase {
   public void testUtilVersion() throws Throwable {
     Date required = new SimpleDateFormat("yyyyMMdd-HHmm z").parse(REQUIRED_UTIL_VERSION + " GMT");
 
-    Date found = edu.rice.cs.util.Version.BUILD_TIME;
+    Date found = edu.rice.cs.util.Version.getBuildTime();
 
     assertTrue("Util package date is " + found + ", but at least " + required +
                  " was required! You need to update/compile the util package.",

@@ -89,7 +89,7 @@ import edu.rice.cs.drjava.model.compiler.*;
  */
 public class SingleDisplayModel extends DefaultGlobalModel {
   public static final String ABOUT_TEXT =
-    "DrJava " + Version.BUILD_TIME_STRING + "\n" +
+    "DrJava " + Version.getBuildTimeString() + "\n" +
     "Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)\n" +
     "See http://drjava.sourceforge.net for more information on DrJava or " +
     "to obtain the latest version of the program or its source code." +
@@ -117,7 +117,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
     "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL DYADE BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n" +
     "Except as contained in this notice, the name of Dyade shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization from Dyade." +
     "\n\n" +
-    "DrJava version: " + Version.BUILD_TIME_STRING + "\n" +
+    "DrJava version: " + Version.getBuildTimeString() + "\n" +
     "Configuration file: " + Configuration.PROPERTIES_FILE + "\n" +
     "Properties: " + Configuration.ONLY + "\n" +
      "JVM: " + System.getProperty("java.vm.vendor") + " " +

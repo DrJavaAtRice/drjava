@@ -56,10 +56,18 @@ public abstract class Version {
    * This string will be automatically expanded upon "ant commit".
    * Do not edit it by hand!
    */
-  public static final String BUILD_TIME_STRING = "@DATE@-@TIME@";
+  private static final String BUILD_TIME_STRING = "@DATE@-@TIME@";
 
   /** A {@link Date} version of the build time. */
-  public static final Date BUILD_TIME = _getBuildDate();
+  private static final Date BUILD_TIME = _getBuildDate();
+
+  public static String getBuildTimeString() {
+    return BUILD_TIME_STRING;
+  }
+
+  public static Date getBuildTime() {
+    return BUILD_TIME;
+  }
 
   private static Date _getBuildDate() {
     try {
