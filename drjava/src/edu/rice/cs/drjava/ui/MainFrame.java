@@ -476,12 +476,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
-  /** Indents the current selection. 
+  /** Indents the current selection. */
   private Action _indentLinesAction = new AbstractAction("Indent Line(s)") {
     public void actionPerformed(ActionEvent ae) {
-      _currentDefPane.indentLines();
+      _currentDefPane.indent();
     }
-  };*/
+  };
   
   
   /** Clears DrJava's output console. */
@@ -2043,14 +2043,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     _addMenuItem(editMenu, pasteAction, KEY_PASTE);
     _addMenuItem(editMenu, _selectAllAction, KEY_SELECT_ALL);
 
+    // Indent lines
+    editMenu.addSeparator();
+    //_addMenuItem(editMenu, _indentLinesAction, KEY_INDENT);
+    editMenu.add(_indentLinesAction);
+    
     // Find/replace, goto
     editMenu.addSeparator();
     _addMenuItem(editMenu, _findReplaceAction, KEY_FIND_REPLACE);
     _addMenuItem(editMenu, _gotoLineAction, KEY_GOTO_LINE);
-    
-    // Indent lines
-    //editMenu.addSeparator();
-    //_addMenuItem(editMenu, _indentLinesAction, KEY_INDENT);
       
     // Next, prev doc
     editMenu.addSeparator();

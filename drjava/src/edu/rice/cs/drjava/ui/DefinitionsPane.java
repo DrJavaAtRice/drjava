@@ -325,7 +325,7 @@ public class DefinitionsPane extends JEditorPane
     public void actionPerformed(ActionEvent e) {
       //int pos = getCaretPosition();
       //_doc().setCurrentLocation(pos);
-      _indent();
+      indent();
     }
   }
 
@@ -358,7 +358,7 @@ public class DefinitionsPane extends JEditorPane
      */
     public void actionPerformed(ActionEvent e) {
       _defaultAction.actionPerformed(e);
-      _indent();
+      indent();
     }
   }
 
@@ -505,7 +505,7 @@ public class DefinitionsPane extends JEditorPane
     JMenuItem indentItem = new JMenuItem("Indent Line(s)");
     indentItem.addActionListener ( new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
-        indentLines();
+        _indentLines();
       }
     });
     _popMenu.add(indentItem);
@@ -577,7 +577,7 @@ public class DefinitionsPane extends JEditorPane
   /**
    *  Indents the lines contained within the given selection.
    */
-  void indentLines() {
+  private void _indentLines() {
     _doc.indentLinesInDefinitions(getSelectionStart(), getSelectionEnd());
   }
   
@@ -845,8 +845,8 @@ public class DefinitionsPane extends JEditorPane
    * The purpose is to divorce the pane from the document so we can just
    * pass a document to DefinitionsPane and that's all it cares about.
    */
-  private void _indent() {
-    // because _indent() is a function called directly by the Keymap
+  public void indent() {
+    // because indent() is a function called directly by the Keymap
     // it does not go through the regular insertString channels and thus
     // it may not be in sync with the document's position.  For that
     // reason, we must sync the document with the pane before we go
@@ -883,7 +883,7 @@ public class DefinitionsPane extends JEditorPane
         _mainFrame.hourglassOn();
       }
       //_doc.indentLinesInDefinitions(selStart, selEnd);
-      indentLines();
+      _indentLines();
       setCaretPosition(_doc.getCurrentDefinitionsLocation());
       if (showWaitCursor) {
         _mainFrame.hourglassOff();

@@ -127,10 +127,26 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   private final Hashtable _helperCache;
   
   /**
+   * Keeps track of the order of elements added to the helper method cache,
+   * so that the oldest elements can be removed when the maximum size is
+   * reached.  A true LRU cache might be more effective, though I'm not sure
+   * what the exact pattern of helper method reuse is-- this should be
+   * sufficient without significantly decreasing the effectiveness of the cache.
+   */
+  private final Vector<String> _helperCacheHistory;
+  
+  /**
    * Whether anything is stored in the cache.  (Prevents clearing the table
    * unnecessarily on every change to the document.)
    */
   private boolean _cacheInUse;
+  
+  /**
+   * Maximum number of elements to allow in the helper method cache.
+   * Only encountered when indenting very large blocks, since the cache
+   * is cleared after each change to the document.
+   */
+  private static final int MAX_CACHE_SIZE = 10000;
 
   /**
    * Constant for starting position of document.
@@ -160,6 +176,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     _classFileInSync = false;
     _classFile = null;
     _helperCache = new Hashtable();
+    _helperCacheHistory = new Vector();
     _cacheInUse = false;
   }
 
@@ -312,7 +329,23 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    */
   protected void _storeInCache(String key, Object result) {
     _cacheInUse = true;
-    _helperCache.put(key, result);
+    
+    // Prevent going over max size
+    if (_helperCache.size() >= MAX_CACHE_SIZE) {
+      if (_helperCacheHistory.size() > 0) {
+        _helperCache.remove( _helperCacheHistory.elementAt(0) );
+        _helperCacheHistory.removeElementAt(0);
+      }
+      else {
+        // Shouldn't happen
+        throw new RuntimeException("Cache larger than cache history!");
+      }
+    }
+    Object prev = _helperCache.put(key, result);
+    // Add to history if the insert increased the size of the table
+    if (prev == null) {
+      _helperCacheHistory.addElement(key);
+    }
     
     /*
     long end = System.currentTimeMillis();
@@ -345,6 +378,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    */
   protected void _clearCache() {
     _helperCache.clear();
+    _helperCacheHistory.removeAllElements();
     _cacheInUse = false;
   }
   
@@ -1506,6 +1540,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     //long end = System.currentTimeMillis();
     //DrJava.consoleOut().println("Elapsed Time (sec): " + ((end-start)/1000));
     //DrJava.consoleOut().println("   Cache size: " + _helperCache.size());
+    //DrJava.consoleOut().println("   Cache History size: " + _helperCacheHistory.size());
     
     //DrJava.consoleOut().println("   Longest: " + maxHelpDelay + "ms from " + maxKey);
     //maxHelpDelay = 0;  maxKey = "none";
