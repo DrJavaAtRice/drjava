@@ -368,7 +368,13 @@ public class JSR14v20Compiler implements CompilerInterface {
       return true;
     }
     catch (Exception e) {
-      return false;
+      try {
+        Class.forName("com.sun.tools.javac.main.Main+1");
+        return true;
+      }
+      catch (Exception e2) {
+        return false;
+      }
     }    
   }
 
