@@ -139,7 +139,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    * documents, and thus that a new one should not be created.
    */
   private boolean _isClosingAllDocs;
-
+  
   /**
    * Creates a SingleDisplayModel.
    *
@@ -179,7 +179,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
   public void setActiveDocument(OpenDefinitionsDocument doc) {
     setActiveDocument(_getDocumentIndex(doc));
   }
-
+  
   /**
    * Sets the currently active document by updating the selection model.
    * The selection model will trigger our SelectionModelListener

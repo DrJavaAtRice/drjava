@@ -40,6 +40,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.debug;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
@@ -53,7 +54,7 @@ import com.sun.jdi.request.*;
  * The breakpoint object which has references to its OpenDefinitionsDocument and its 
  * StepRequest
  */
-public class Step extends DebugAction<StepRequest> { 
+public class Step extends DebugAction<StepRequest> implements OptionConstants { 
   private ThreadReference _thread;
   private int _size;
   private int _depth;
@@ -89,21 +90,21 @@ public class Step extends DebugAction<StepRequest> {
    * @throws DebugException if the request could not be created.
    */
   protected void _createRequest() throws DebugException {
-    DrJava.consoleOut().println("Step._createRequest starting...");
-    boolean excludeDrJava = false;  // will be an advanced config option
+    //DrJava.consoleOut().println("Step._createRequest starting...");
+    boolean stepDrJava = DrJava.CONFIG.getSetting(DEBUG_STEP_DRJAVA).booleanValue();  
     
     _request = _manager.getEventRequestManager().
       createStepRequest(_manager.getCurrentThread(), _size, _depth);
     for (int i=0; i<excludes.length; ++i) {
       _request.addClassExclusionFilter(excludes[i]);
     }
-    if (excludeDrJava) {
+    if (!stepDrJava) {
       _request.addClassExclusionFilter("edu.rice.cs.drjava.*");
       _request.addClassExclusionFilter("edu.rice.cs.util.*");
     }
     
-    DrJava.consoleOut().println("Created a step request: " + _request + 
-                                " size: " + _size + " depth: " + _depth);
+    //DrJava.consoleOut().println("Created a step request: " + _request + 
+    //                            " size: " + _size + " depth: " + _depth);
       //DrJava.consoleOut().println("new Step: " + toString());
       //_breakpointReq.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
       //_breakpointReq.enable();

@@ -545,7 +545,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       }
     }
     return doc;
-  }
+  }    
 
   /**
    * Set the indent tab size for all definitions documents.

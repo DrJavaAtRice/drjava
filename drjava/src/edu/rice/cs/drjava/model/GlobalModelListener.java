@@ -47,6 +47,7 @@ import java.io.File;
  * @version $Id$
  */
 public interface GlobalModelListener {
+
   /**
    * Reasons provided for demanding a save before proceeding.
    */

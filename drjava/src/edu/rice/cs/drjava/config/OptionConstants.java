@@ -538,6 +538,11 @@ public interface OptionConstants extends ConfigurationTool {
     (CodeStatus.DEVELOPMENT) ?
     new VectorOption("recent.files",new FileOption("",null),new Vector<File>()) :
     null; 
+  /**
+   * Whether stepping should step through DrJava's source files
+   */    
+  public static final BooleanOption DEBUG_STEP_DRJAVA =
+    new BooleanOption("debug.step.drjava", new Boolean(false));
 }
 
 

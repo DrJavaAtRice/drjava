@@ -127,7 +127,6 @@ public class DebugManager {
     _pendingRequestManager = new PendingRequestManager(this);
   }
 
-  
   /**
    * Attaches the debugger to the Interactions JVM to prepare for debugging.
    */
@@ -318,14 +317,20 @@ public class DebugManager {
    * Suspends execution of the currently running document.
    */
   public synchronized void suspend() {
-    _vm.suspend();
+    if (_thread == null)
+      DrJava.consoleOut().println("Suspend called while _thread was null");
+    _thread.suspend();
+    currThreadSuspended();
   }
   
   /**
    * Resumes execution of the currently loaded document.
    */
   public synchronized void resume() {
-    _vm.resume();
+    if (_thread == null)
+      DrJava.consoleOut().println("Resume called while _thread was null");
+    _thread.resume();
+    currThreadResumed();
   }
     
   /** 
@@ -333,12 +338,36 @@ public class DebugManager {
    */
   public synchronized void step(int flag) throws DebugException {
     if (_thread == null) {
-      System.out.println("Current thread is null");
+      //System.out.println("Current thread is null");
       return;
     }
+    //if (!_thread.isSuspended()) 
+      //DrJava.consoleOut().println("Current thread is not suspended while trying to create a step request!");    
+    // don't allow the creation of a new StepRequest if there's already one on
+    // the current thread
+    List steps = _eventManager.stepRequests();
+    for (int i = 0; i < steps.size(); i++) {
+      //DrJava.consoleOut().println("creating a new step: event thread: " + 
+      //                            ((StepRequest)steps.get(i)).thread() + 
+      //                            " current thread: " +
+      //                            _thread);
+      if (((StepRequest)steps.get(i)).thread().equals(_thread)) {
+        //DrJava.consoleOut().println("There's already a StepRequest on the current thread");
+        //DrJava.consoleOut().println("suspendCount: " + _thread.suspendCount());
+        /*try {
+          DrJava.consoleOut().println("frames: " + _thread.frames());
+        }
+        catch(IncompatibleThreadStateException itse) {
+          DrJava.consoleOut().println("Can't print frames, thread is not suspended!");
+        }*/
+        _thread.resume();
+        return;
+      }
+    }
+        
     Step step = new Step(this, StepRequest.STEP_LINE, flag);
     _thread.resume();
-    System.out.println("_thread resumed");
+    //System.out.println("_thread resumed");
   }
   
 
@@ -454,6 +483,14 @@ public class DebugManager {
   }
   
   /**
+   * Prints the list of breakpoints in the current session of DrJava, both pending
+   * resolved Breakpoints are listed
+   */
+  public synchronized void printBreakpoints() {
+    _model.printDebugMessage("Breakpoints: " + getBreakpoints());
+  }
+  
+  /**
    * Takes the location of event e, opens the document corresponding to its class
    * and centers the definition pane's view on the appropriate line number
    * @param e should be a LocatableEvent
@@ -487,8 +524,8 @@ public class DebugManager {
       boolean foundFile = false;
       for (int i = 0; i < roots.length; i++) {
         String currRoot = roots[i].getAbsolutePath();
-        DrJava.consoleOut().println("Trying to find " + currRoot + ps + className + 
-                                    ".java");
+        //DrJava.consoleOut().println("Trying to find " + currRoot + ps + className + 
+        //                            ".java");
         f = new File(currRoot + ps + className + ".java");
         if (f.exists()) {
           foundFile = true;
@@ -497,8 +534,9 @@ public class DebugManager {
       }
       if (foundFile) {
         // Get a document for this file, forcing it to open
-        DrJava.consoleOut().println("found file: " + f.getAbsolutePath());
+        //DrJava.consoleOut().println("found file: " + f.getAbsolutePath());
         try {
+          //doc = _model.getDocumentForFile(f, location.lineNumber());
           doc = _model.getDocumentForFile(f);
         }
         catch (IOException ioe) {
@@ -514,7 +552,7 @@ public class DebugManager {
     
     // Open and scroll if doc was found
     if (doc != null) {
-      DrJava.consoleOut().println("Will scroll to line: " + location.lineNumber());
+      //DrJava.consoleOut().println("Will scroll to line: " + location.lineNumber());
 
       final OpenDefinitionsDocument docF = doc;
       final Location locationF = location;
@@ -522,13 +560,38 @@ public class DebugManager {
       notifyListeners(new EventNotifier() {
         public void notifyListener(DebugListener l) {
           l.scrollToLineInSource(docF, 
-                                     locationF.lineNumber());
+                                 locationF.lineNumber());
         }
       });
     }
     else {
-      DrJava.consoleOut().println("couldn't open file to scroll to");
+      //DrJava.consoleOut().println("couldn't open file to scroll to");
     }
+  }
+  
+  void currThreadSuspended() {     
+    notifyListeners(new EventNotifier() {
+      public void notifyListener(DebugListener l) {
+        l.currThreadSuspended();
+      }
+    });
+  }
+  
+  void currThreadResumed() {     
+    notifyListeners(new EventNotifier() {
+      public void notifyListener(DebugListener l) {
+        l.currThreadResumed();
+      }
+    });
+  }
+  
+  void currThreadDied() {
+    _model.printDebugMessage("Current thread has died");
+    notifyListeners(new EventNotifier() {
+      public void notifyListener(DebugListener l) {
+        l.currThreadDied();
+      }
+    });
   }
 
   /**

@@ -587,13 +587,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
-  private Action _suspendDebugAction =
+  /** Suspend debugging */
+  /*private Action _suspendDebugAction =
     new AbstractAction("Suspend Debugger")
   {
     public void actionPerformed(ActionEvent ae) {
       _debugSuspend();
     }
-  };
+  };*/
 
   /** Toggles a breakpoint on the current line */
   Action _toggleBreakpointAction =
@@ -898,7 +899,8 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     try {
       if (inDebugMode()) {//debugger.isReady()) {
-        // Turn off debugger        
+        // Turn off debugger
+        //DrJava.consoleOut().println("shutting down");
         debugger.shutdown();
         hideDebugger();
       }
@@ -941,6 +943,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Hide the debugger tab and update the Debug menu accordingly.
    */
   public void hideDebugger() {
+    //DrJava.consoleOut().println("Calling hideDebugger");
     /**
     _model.getDebugManager().cleanUp();
     _tabbedPane.remove(_debugPanel);
@@ -1242,30 +1245,35 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Suspends the current execution of the debugger
    */
   private void _debugSuspend(){
-    _model.getDebugManager().suspend();
+    if (inDebugMode())
+      _model.getDebugManager().suspend();
   }
 
   /**
    * Resumes the debugger's current execution
    */
   private void _resumeDebugger() {
-    _model.getDebugManager().resume();
-    if (_currentThreadLocationHighlight != null) {
-      _currentThreadLocationHighlight.remove();
+    if (inDebugMode()) {
+      _model.getDebugManager().resume();
+      if (_currentThreadLocationHighlight != null) {
+        _currentThreadLocationHighlight.remove();
+      }
+      _currentThreadLocationHighlight = null;
     }
-    _currentThreadLocationHighlight = null;
   }
 
   /**
    * Steps in the debugger
    */
   private void _debugStep(int flag) {
-    try {
-      _model.getDebugManager().step(flag);
-    }
-    catch (DebugException de) {
-      _showError(de, "Debugger Error",
-                 "Could not create a step request.");
+    if (inDebugMode()) {
+      try {
+        _model.getDebugManager().step(flag);
+      }
+      catch (DebugException de) {
+        _showError(de, "Debugger Error",
+                   "Could not create a step request.");
+      }
     }
   }
 
@@ -1299,15 +1307,18 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Toggles a breakpoint on the current line
    */
   void toggleBreakpoint() {
-    OpenDefinitionsDocument doc = _model.getActiveDocument();
-    try {
-      _model.getDebugManager().toggleBreakpoint(doc, 
-                                                _currentDefPane.getCaretPosition(),
-                                                _currentDefPane.getCurrentLine());
-    }
-    catch (DebugException de) {
-      _showError(de, "Debugger Error",
-                 "Could not set a breakpoint at the current line.");
+    if (inDebugMode()) {
+      OpenDefinitionsDocument doc = _model.getActiveDocument();
+      try {
+        DebugManager debugger = _model.getDebugManager();
+        debugger.toggleBreakpoint(doc, 
+                                  _currentDefPane.getCaretPosition(),
+                                  _currentDefPane.getCurrentLine());
+      }
+      catch (DebugException de) {
+        _showError(de, "Debugger Error",
+                   "Could not set a breakpoint at the current line.");
+      }
     }
     
     /**
@@ -1331,7 +1342,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Displays all breakpoints currently set in the debugger
    */
   private void _printBreakpoints() {
-    System.out.println(_model.getDebugManager().getBreakpoints());
+    _model.getDebugManager().printBreakpoints();
   }
 
   /**
@@ -1883,27 +1894,21 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     });*/
     
-    debugMenu.addSeparator();
-
-    // TO DO: Add accelerators?
-    //_runDebuggerMenuItem = debugMenu.add(_runDebuggerAction);
-    _addMenuItem(debugMenu, _suspendDebugAction, KEY_DEBUG_SUSPEND);
-    _addMenuItem(debugMenu, _resumeDebugAction, KEY_DEBUG_RESUME);
-    _addMenuItem(debugMenu, _stepIntoDebugAction, KEY_DEBUG_STEP_INTO);
-    _addMenuItem(debugMenu, _stepOverDebugAction, KEY_DEBUG_STEP_OVER);
-    _addMenuItem(debugMenu, _stepOutDebugAction, KEY_DEBUG_STEP_OUT);
-    //_suspendDebugMenuItem = debugMenu.add(_suspendDebugAction);
-    //_resumeDebugMenuItem = debugMenu.add(_resumeDebuggerAction);
-    //_stepIntoDebugMenuItem = debugMenu.add(_stepIntoDebugAction);
-    //_stepOverDebugMenuItem = debugMenu.add(_stepOverDebugAction);
-    //_stepOutDebugMenuItem = debugMenu.add(_stepOutDebugAction);
-
-    debugMenu.addSeparator(); // breakpoints section:
+    debugMenu.addSeparator(); // breakpoints section
 
     _addMenuItem(debugMenu, _toggleBreakpointAction, KEY_DEBUG_BREAKPOINT_TOGGLE);
     //_toggleBreakpointMenuItem = debugMenu.add(_toggleBreakpointAction);
     _printBreakpointsMenuItem = debugMenu.add(_printBreakpointsAction);
     _clearAllBreakpointsMenuItem = debugMenu.add(_clearAllBreakpointsAction);
+
+    debugMenu.addSeparator(); // debug actions
+    
+    //_runDebuggerMenuItem = debugMenu.add(_runDebuggerAction);
+    //_addMenuItem(debugMenu, _suspendDebugAction, KEY_DEBUG_SUSPEND);
+    _addMenuItem(debugMenu, _resumeDebugAction, KEY_DEBUG_RESUME);
+    _addMenuItem(debugMenu, _stepIntoDebugAction, KEY_DEBUG_STEP_INTO);
+    _addMenuItem(debugMenu, _stepOverDebugAction, KEY_DEBUG_STEP_OVER);
+    _addMenuItem(debugMenu, _stepOutDebugAction, KEY_DEBUG_STEP_OUT);
 
     // Start off disabled
     _setDebugMenuItemsEnabled(false);
@@ -1913,19 +1918,33 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   /**
-   * Enables and disables the debug menu items.
+   * Called every time the debug mode checkbox is toggled
    */
   private void _setDebugMenuItemsEnabled(boolean enabled) {
     _debuggerEnabledMenuItem.setSelected(enabled);
     //_runDebuggerAction.setEnabled(enabled);
-    _suspendDebugAction.setEnabled(enabled);
-    _resumeDebugAction.setEnabled(enabled);
-    _stepIntoDebugAction.setEnabled(enabled);
-    _stepOverDebugAction.setEnabled(enabled);
-    _stepOutDebugAction.setEnabled(enabled);
+    //_suspendDebugAction.setEnabled(false);
+    _resumeDebugAction.setEnabled(false);
+    _stepIntoDebugAction.setEnabled(false);
+    _stepOverDebugAction.setEnabled(false);
+    _stepOutDebugAction.setEnabled(false);
     _toggleBreakpointAction.setEnabled(enabled);
     _printBreakpointsAction.setEnabled(enabled);
     _clearAllBreakpointsAction.setEnabled(enabled);
+  }
+  
+  /**
+   * Enables and disables the appropriate menu items in the debug menu
+   * depending upon the state of the current thread
+   * @param isSuspended is true when the current thread has just been suspended
+   * false if the current thread has just been resumed
+   */
+  private void _setThreadDependentDebugMenuItems(boolean isSuspended) {    
+    //_suspendDebugAction.setEnabled(!isSuspended);
+    _resumeDebugAction.setEnabled(isSuspended);
+    _stepIntoDebugAction.setEnabled(isSuspended);
+    _stepOverDebugAction.setEnabled(isSuspended);
+    _stepOutDebugAction.setEnabled(isSuspended);
   }
 
   /**
@@ -2323,7 +2342,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * for the current active document.
    */
   private void _switchDefScrollPane() {    
-    // Sync caret with location before swtiching
+    // Sync caret with location before switching
     _currentDefPane.getOpenDocument().
       syncCurrentLocationWithDefinitions( _currentDefPane.getCaretPosition() );
 
@@ -2492,12 +2511,36 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   private class UIDebugListener implements DebugListener {
-    public void scrollToLineInSource(OpenDefinitionsDocument doc, int lineNumber) {
-      _model.setActiveDocument(doc);
-      _currentDefPane.centerViewOnLine(lineNumber);
+    public void scrollToLineInSource(OpenDefinitionsDocument doc, final int lineNumber) {
+      ActionListener setSizeListener = new ActionListener() {
+        public void actionPerformed(ActionEvent ae) {
+          _currentDefPane.centerViewOnLine(lineNumber);
+          _docList.revalidate();
+          _docList.repaint();
+          _docSplitPane.revalidate();
+          _docSplitPane.repaint();
+        }
+      };
+      _currentDefPane.addSetSizeListener(setSizeListener);
+      if (!_model.getActiveDocument().equals(doc)) {
+        //DrJava.consoleOut().println("Don't need to setActiveDocument here");
+        _model.setActiveDocument(doc);
+      }
+      
+      if (_currentDefPane.getSize().getWidth() > 0 &&
+          _currentDefPane.getSize().getHeight() > 0) {
+        _currentDefPane.centerViewOnLine(lineNumber); 
+        _docList.revalidate();
+        _docList.repaint();
+        _docSplitPane.revalidate();
+        _docSplitPane.repaint();
+      }
 
       if (_currentThreadLocationHighlight != null) {
         _currentThreadLocationHighlight.remove();
+        _currentThreadLocationHighlight = null;
+        _currentDefPane.revalidate();
+        _currentDefPane.repaint();
       }
       DefinitionsDocument defDoc = doc.getDocument();
       int startOffset = defDoc.getOffset(lineNumber);
@@ -2525,6 +2568,25 @@ public class MainFrame extends JFrame implements OptionConstants {
         _currentThreadLocationHighlight.remove();
       }
       _currentThreadLocationHighlight = null;
+    }
+    
+    public void currThreadSuspended() {
+      _setThreadDependentDebugMenuItems(true);
+    }
+    
+    public void currThreadResumed() {
+      _setThreadDependentDebugMenuItems(false);
+    }
+    
+    public void currThreadDied() {
+      if (_currentThreadLocationHighlight != null) {
+        _currentThreadLocationHighlight.remove();
+        _currentThreadLocationHighlight = null;
+        _currentDefPane.revalidate();
+        _currentDefPane.repaint();
+      }
+      if (inDebugMode())
+        _setDebugMenuItemsEnabled(true);
     }
   }
 
@@ -2566,6 +2628,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     public void fileReverted(OpenDefinitionsDocument doc) {
       updateFileTitle();
+      _saveAction.setEnabled(false);
       _currentDefPane.setPositionAndScroll(0);
     }
     public void activeDocumentChanged(OpenDefinitionsDocument active) {
@@ -2609,6 +2672,20 @@ public class MainFrame extends JFrame implements OptionConstants {
         //installFindReplaceDialog(_findReplace);
       }
     }
+    /*
+    public void activeDocumentChanged(OpenDefinitionsDocument active, int lineNumber) {
+      activeDocumentChanged(active);
+      try { 
+        Thread.sleep(1000);
+      }
+      catch( InterruptedException ie) {
+      }
+      _currentDefPane.centerViewOnLine(lineNumber);
+      _docList.revalidate();
+      _docList.repaint();
+      _docSplitPane.revalidate();
+      _docSplitPane.repaint();
+    }*/
     
     public void interactionStarted() {
       _interactionsPane.setEditable(false);

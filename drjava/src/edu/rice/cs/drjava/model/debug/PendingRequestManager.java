@@ -83,7 +83,7 @@ public class PendingRequestManager {
       request.addClassFilter(className + "*");
       request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
       request.enable();
-      System.out.println("Creating prepareRequest in class " + className);
+      //System.out.println("Creating prepareRequest in class " + className);
     }
     actions.addElement(action);
     _pendingActions.put(className, actions);
@@ -123,7 +123,7 @@ public class PendingRequestManager {
    */
   public void classPrepared (ClassPrepareEvent event) throws DebugException {
     ReferenceType rt = event.referenceType(); 
-    System.out.println("In classPrepared. rt: " + rt);
+    //System.out.println("In classPrepared. rt: " + rt);
     //System.out.println("equals getReferenceType: " + 
     //                   rt.equals(_manager.getReferenceType(rt.name())));
     String className = rt.name();
@@ -135,7 +135,7 @@ public class PendingRequestManager {
     }
     Vector<DebugAction> actions = _pendingActions.get(className);
     Vector<DebugAction> failedActions = new Vector<DebugAction>();
-    System.out.println("actions: " + actions);
+    //System.out.println("actions: " + actions);
     if (actions == null) {
       // any actions that were waiting for this class to be prepared have been
       // removed

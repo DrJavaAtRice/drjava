@@ -498,8 +498,8 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
    * change. 
    */ 
   private void _selectFoundItem(int from, int to) {
-    _defPane.select(from, to);
     _defPane.centerViewOnOffset(from);
+    _defPane.select(from, to);
       
       // Found this little statement that will show the selected text
       // in _defPane without giving _defPane focus, previously allowing the

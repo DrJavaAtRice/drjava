@@ -108,18 +108,18 @@ public abstract class DocumentDebugAction<T extends EventRequest>
   public boolean createRequest(ReferenceType rt) throws DebugException {
     if (!rt.isPrepared()) {
       // Can't create a request if class not prepared
-      DrJava.consoleOut().println("createRequest: not prepared!");
+      //DrJava.consoleOut().println("createRequest: not prepared!");
       return false;
     }
     
     _createRequest(rt);
     if (_request != null) {
       _prepareRequest(_request);
-      DrJava.consoleOut().println("Request successfully created: " + _request);
+      //DrJava.consoleOut().println("Request successfully created: " + _request);
       return true;
     }
     else {
-      DrJava.consoleOut().println("createRequest didn't assign to _request...");
+      //DrJava.consoleOut().println("createRequest didn't assign to _request...");
       return false;
     }
   }
@@ -131,12 +131,12 @@ public abstract class DocumentDebugAction<T extends EventRequest>
    */
   protected void _initializeRequest(ReferenceType ref) throws DebugException {
     if (ref != null) {
-      DrJava.consoleOut().println("Found a ref, creating request right away.");
+      //DrJava.consoleOut().println("Found a ref, creating request right away.");
       createRequest(ref);
     }
     if (_request == null) {
       // couldn't create the request yet, add to the pending request manager
-      DrJava.consoleOut().println("No ref, add to pending request manager");
+      //DrJava.consoleOut().println("No ref, add to pending request manager");
       _manager.getPendingRequestManager().addPendingRequest(this);
     }
   }

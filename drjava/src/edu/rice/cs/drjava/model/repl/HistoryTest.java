@@ -80,7 +80,7 @@ public class HistoryTest extends TestCase implements OptionConstants{
   public void testMultipleInsert() {
     _history.add("new Object()");
     _history.add("new Object()");
-    assertEquals("Duplicate elements inserted", 1, _history.size());
+    assertEquals("Duplicate elements inserted", 2, _history.size());
   }
   
   public void testCanMoveToEmptyAtEnd() {

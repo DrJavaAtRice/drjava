@@ -111,11 +111,11 @@ public abstract class DebugAction<T extends EventRequest> {
     _createRequest();
     if (_request != null) {
       _prepareRequest(_request);
-      DrJava.consoleOut().println("Request successfully created: " + _request);
+      //DrJava.consoleOut().println("Request successfully created: " + _request);
       return true;
     }
     else {
-      DrJava.consoleOut().println("createRequest didn't assign to _request...");
+      //DrJava.consoleOut().println("createRequest didn't assign to _request...");
       return false;
     }
   }

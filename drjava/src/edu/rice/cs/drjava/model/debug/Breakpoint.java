@@ -91,7 +91,7 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
     //_doc = doc;
     //_createBreakpointRequest();
     
-    DrJava.consoleOut().println("Breakpoint lineNumber is " + lineNumber);
+    //DrJava.consoleOut().println("Breakpoint lineNumber is " + lineNumber);
   }
  
   /*private void _createBreakpointRequest() throws DebugException {
@@ -129,7 +129,7 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
    * @throws DebugException if the request could not be created.
    */
   protected void _createRequest(ReferenceType rt) throws DebugException {
-    DrJava.consoleOut().println("Breakpoint._createRequest starting...");
+    //DrJava.consoleOut().println("Breakpoint._createRequest starting...");
     /*
     DrJava.consoleOut().println("rt.isVerified: " + rt.isVerified() +
                                 " rt.isInitialized: " + rt.isInitialized() +
@@ -145,7 +145,7 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
       }
       Location loc = (Location) lines.get(0);
       _request = _manager.getEventRequestManager().createBreakpointRequest(loc);
-      DrJava.consoleOut().println("Created a breakpoint request: " + _request);
+      //DrJava.consoleOut().println("Created a breakpoint request: " + _request);
       //DrJava.consoleOut().println("new Breakpoint: " + toString());
       //_breakpointReq.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
       //_breakpointReq.enable();

@@ -47,15 +47,14 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
  * @version $Id$
  */
 public interface DebugListener {
-  
+
   /**
    * Called when the given line is reached by the debugger, to request that
    * the line be displayed.
    * @param doc Document to display
    * @param lineNumber Line to display or highlight
    */
-  public void scrollToLineInSource(OpenDefinitionsDocument doc, int lineNumber);
-  
+  public void scrollToLineInSource(OpenDefinitionsDocument doc, int lineNumber);  
   
   /**
    * Called when a breakpoint is set in a document.
@@ -67,12 +66,25 @@ public interface DebugListener {
    * Called when a breakpoint is removed from a document.
    * @param bp the breakpoint
    */
-  public void breakpointRemoved(Breakpoint bp);
-  
+  public void breakpointRemoved(Breakpoint bp);  
   
   /**
    * Called when debugger mode has been disabled.
    */
   public void debuggerShutdown();
   
+  /**
+   * Called when the current thread is suspended
+   */
+  public void currThreadSuspended();
+  
+  /**
+   * Called when the current thread is resumed
+   */
+  public void currThreadResumed();
+  
+  /**
+   * Called when the current thread dies
+   */
+  public void currThreadDied();
 }

@@ -420,6 +420,7 @@ public class ConfigFrame extends JFrame {
     panel.addComponent( new FileOptionComponent ( OptionConstants.WORKING_DIRECTORY, "Working Directory", this));
     panel.addComponent( new IntegerOptionComponent ( OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this));
     panel.addComponent( new IntegerOptionComponent ( OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this));
+    panel.addComponent( new BooleanOptionComponent ( OptionConstants.DEBUG_STEP_DRJAVA, "Step Through DrJava Source Files", this));
 
     panel.displayComponents();
   }

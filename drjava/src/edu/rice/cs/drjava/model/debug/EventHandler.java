@@ -79,7 +79,7 @@ public class EventHandler extends Thread {
       } catch (InterruptedException exc) {
         // Do nothing. Any changes will be seen at top of loop.
       } catch (VMDisconnectedException discExc) {
-        System.out.println("Got disc exception");
+        //System.out.println("Got disc exception");
         handleDisconnectedException();
         break;
       }
@@ -87,7 +87,7 @@ public class EventHandler extends Thread {
   }
   
   public void handleEvent(Event e) {
-    System.out.println("handleEvent: "+e);
+    //System.out.println("handleEvent: "+e);
     if (e instanceof BreakpointEvent) {
       _handleBreakpointEvent((BreakpointEvent) e);
     }
@@ -111,7 +111,8 @@ public class EventHandler extends Thread {
   }
   
   private void _handleBreakpointEvent(BreakpointEvent e) {
-    System.out.println("Breakpoint reached");
+    //System.out.println("Breakpoint reached");
+    _manager.currThreadSuspended();
     _manager.setCurrentThread(e.thread());
     _manager.scrollToSource(e);
     _manager.reachedBreakpoint((BreakpointRequest)e.request());
@@ -119,20 +120,21 @@ public class EventHandler extends Thread {
   }
   
   private void _handleStepEvent(StepEvent e) {
-    System.out.println("Step executed");
+    //System.out.println("Step executed");
+    _manager.currThreadSuspended();
     _manager.scrollToSource(e);
     _manager.getEventRequestManager().deleteEventRequest(e.request());
   }
   
   private void _handleClassPrepareEvent(ClassPrepareEvent e) {
-    DrJava.consoleOut().println("ClassPrepareEvent occured");
-    DrJava.consoleOut().println("In " + e.referenceType().name());
-    try {
+    //DrJava.consoleOut().println("ClassPrepareEvent occured");
+    //DrJava.consoleOut().println("In " + e.referenceType().name());
+    /*try {
       DrJava.consoleOut().println("sourcename " + e.referenceType().sourceName());
     }
     catch(AbsentInformationException aie) {
       DrJava.consoleOut().println("no info");
-    }
+    }*/
     try {
       _manager.getPendingRequestManager().classPrepared(e);
     }
@@ -142,30 +144,37 @@ public class EventHandler extends Thread {
     // resumes this thread which was suspended because its 
     // suspend policy was SUSPEND_EVENT_THREAD
     e.thread().resume();
-    DrJava.consoleOut().println("resumed thread");
+    //DrJava.consoleOut().println("resumed thread");
   }
   
   private void _handleThreadDeathEvent(ThreadDeathEvent e) {
-    //System.out.println("**Thread " + e.thread() + " died**");
+    //System.out.println("**Thread " + e.thread() + " died**"); 
     if (e.thread().equals(_manager.getCurrentThread())) {
+      //DrJava.consoleOut().println("in handle thread death: event thread: " + e.thread() + " current thread: " +
+      //                            _manager.getCurrentThread());
+      _manager.currThreadDied();
       _manager.setCurrentThread(null);
-    }
+    }      
     //e.thread().resume();
   }
   
   private void _handleVMDeathEvent(VMDeathEvent e) {
-    System.out.println("VM died");    
+    //System.out.println("VM died");    
     _cleanUp(e);
   }
   
   private void _handleVMDisconnectEvent(VMDisconnectEvent e) {
-    System.out.println("VM disconnected");
+    //System.out.println("VM disconnected");    
     _cleanUp(e);
   }
   
   private void _cleanUp(Event e) {
-    DrJava.consoleOut().println("event: "+e);
+    //DrJava.consoleOut().println("event: "+e);
     _connected = false;
+    if (_manager.getCurrentThread() != null) {
+      _manager.currThreadDied();
+      _manager.setCurrentThread(null);
+    }
     _manager.shutdown();
   }
   /**
@@ -189,8 +198,12 @@ public class EventHandler extends Thread {
           } 
         }
         eventSet.resume(); // Resume the VM
-      } catch (InterruptedException exc) {
+      } 
+      catch (InterruptedException exc) {
         // ignore
+      }
+      catch (VMDisconnectedException vmie) {
+        handleDisconnectedException();
       }
     }
   }
