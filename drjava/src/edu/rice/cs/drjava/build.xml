@@ -113,6 +113,7 @@
     <zip zipfile="${jarfile}">
       <zipfileset src="${lib_dir}/gj-util.jar" />
       <zipfileset src="${lib_dir}/dynamicjava.jar" />
+      <zipfileset src="${lib_dir}/junit.jar" />
     </zip>
 
     <jar jarfile="${jarfile}" manifest="${manifest}" update="true" >

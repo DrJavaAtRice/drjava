@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -37,48 +37,55 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import  javax.swing.JTextPane;
+import  javax.swing.text.AttributeSet;
+import  javax.swing.text.BadLocationException;
+import  javax.swing.text.StyleContext;
+import  javax.swing.text.StyleConstants;
+import  javax.swing.event.DocumentListener;
+import  javax.swing.event.DocumentEvent;
+import  java.awt.Color;
+import  java.awt.Rectangle;
+import  java.io.PrintStream;
+
+import edu.rice.cs.drjava.model.GlobalModel;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020412-2109;
+ * The view component to which System.out and System.err is redirected
+ * when DrJava is run.
  *
  * @version $Id$
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20020412-2109";
+public class JUnitPane extends JTextPane {
 
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+  private class ScrollToEndDocumentListener implements DocumentListener {
+    public void insertUpdate(DocumentEvent e) {
+      try {
+        Rectangle endPos = modelToView(getDocument().getLength());
+        // If the window is not on the screen, this will be null
+        // In that case, don't try to scroll!
+        if (endPos != null) {
+          scrollRectToVisible(endPos);
+        }
+      } catch (BadLocationException willNeverHappenISwear) {}
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+
+    public void removeUpdate(DocumentEvent e) {}
+    public void changedUpdate(DocumentEvent e) {}
   }
 
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
+  public JUnitPane(final GlobalModel model) {
+    super(model.getJUnitDocument());
+
+    // user can't edit this thing!
+    setEditable(false);
+
+    // when we make the view uneditable, it no longer scrolls when text is
+    // added. To get around this we wrote this listener to scroll on output.
+    // Unfortunately it slows the output window down. Maybe there's a better
+    // way?
+    getDocument().addDocumentListener(new ScrollToEndDocumentListener());
   }
-} 
+}

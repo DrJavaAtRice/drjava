@@ -60,6 +60,11 @@ public interface GlobalModelListener {
   public static final SaveReason COMPILE_REASON = new SaveReason();
 
   /**
+   * This enumeration of save reason means that we want to run JUnit.
+   */
+  public static final SaveReason JUNIT_REASON = new SaveReason();
+
+  /**
    * Called after a new document is created.
    */
   public void newFileCreated(OpenDefinitionsDocument doc);
@@ -88,6 +93,16 @@ public interface GlobalModelListener {
    * Called when a compile has finished running.
    */
   public void compileEnded();
+
+  /**
+   * Called after JUnit is started by the GlobalModel.
+   */
+  public void junitStarted();
+
+  /**
+   * Called after JUnit is finished running tests.
+   */
+  public void junitEnded();
 
   /**
    * Called after an interaction is started by the GlobalModel.

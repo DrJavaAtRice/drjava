@@ -52,6 +52,8 @@ import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
 
+import junit.framework.TestResult;
+
 /**
  * Handles the bulk of DrJava's program logic.
  * The UI components interface with the GlobalModel through its public methods,
@@ -90,6 +92,11 @@ public interface GlobalModel {
    * Gets the interactions document.
    */
   public StyledDocument getInteractionsDocument();
+
+  /**
+   * Gets the junit document.
+   */
+  public StyledDocument getJUnitDocument();
 
   /**
    * Gets the console document.
@@ -296,4 +303,5 @@ public interface GlobalModel {
    *  of the open documents is invalid.
    */
   public File[] getSourceRootSet();
+
 }

@@ -42,6 +42,7 @@ package edu.rice.cs.drjava.model;
 import java.io.*;
 import java.awt.print.*;
 import javax.swing.text.BadLocationException;
+import junit.framework.TestResult;
 
 import edu.rice.cs.util.swing.FindReplaceMachine;
 import edu.rice.cs.drjava.model.definitions.*;
@@ -114,6 +115,14 @@ public interface OpenDefinitionsDocument {
    * @exception IOException if a file with errors cannot be opened
    */
   public void startCompile() throws IOException;
+
+  /**
+   * Starts testing the source using JUnit.  Demands that the definitions be
+   * saved and compiled before proceeding with testing.  Fires the appropriate
+   * events as the testing proceeds and finishes.
+   * @exception IOException if a file with errors cannot be opened
+   */
+  public TestResult startJUnit() throws IOException;
 
   /**
    * Returns the model responsible for maintaining all current errors

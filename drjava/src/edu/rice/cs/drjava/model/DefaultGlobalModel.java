@@ -66,6 +66,14 @@ import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.newjvm.*;
 import edu.rice.cs.drjava.model.compiler.*;
+import edu.rice.cs.drjava.model.junit.*;
+
+import junit.framework.Test;
+import junit.framework.TestResult;
+import junit.textui.TestRunner;
+import junit.runner.TestSuiteLoader;
+import junit.runner.ReloadingTestSuiteLoader;
+
 
 /**
  * Handles the bulk of DrJava's program logic.
@@ -83,8 +91,10 @@ public class DefaultGlobalModel implements GlobalModel {
   private final InteractionsDocument _interactionsDoc
     = new InteractionsDocument();
   private final StyledDocument _consoleDoc = new DefaultStyledDocument();
+  private final StyledDocument _junitDoc = new DefaultStyledDocument();
   private final LinkedList _listeners = new LinkedList();
   private PageFormat _pageFormat = new PageFormat();
+  private final TestRunner _junitTestRunner = new JUnitTestRunner(this);
 
   // blank final, set differently in the two constructors
   private final MainJVM _interpreterControl;
@@ -187,12 +197,20 @@ public class DefaultGlobalModel implements GlobalModel {
     return _consoleDoc;
   }
 
+  public StyledDocument getJUnitDocument() {
+    return _junitDoc;
+  }
+
   public PageFormat getPageFormat() {
     return _pageFormat;
   }
 
   public void setPageFormat(PageFormat format) {
     _pageFormat = format;
+  }
+
+  public TestRunner getTestRunner() {
+    return _junitTestRunner;
   }
 
   /** Errors without associated files */
@@ -686,8 +704,6 @@ public class DefaultGlobalModel implements GlobalModel {
     return (File[]) roots.toArray(new File[0]);
   }
 
-
-
   // ---------- DefinitionsDocumentHandler inner class ----------
 
   /**
@@ -902,7 +918,7 @@ public class DefaultGlobalModel implements GlobalModel {
                 l.compileStarted();
               }
             });
-
+	    
             File[] files = new File[] { file };
 
             String packageName = _doc.getPackageName();
@@ -941,6 +957,72 @@ public class DefaultGlobalModel implements GlobalModel {
         catch (IllegalStateException ise) {
           // No file exists, don't try to compile
         }
+      }
+    }
+    
+    /**
+     * Runs JUnit on the current document.
+     *
+     * @return The results of running the test/s specified in the
+     * given definitions document.
+     */
+    public TestResult startJUnit() throws IOException {
+      /* Compile and save before proceeding */
+      saveBeforeProceeding(GlobalModelListener.JUNIT_REASON);
+      if(isModifiedSinceSave()) {
+	return null;
+      }
+
+      try {
+	File testFile = getFile();
+	
+	startCompile();
+	if(getNumErrors() != 0) {
+	  return null;
+	}
+	
+	notifyListeners(new EventNotifier() {
+	  public void notifyListener(GlobalModelListener l) {
+	    l.junitStarted();
+	  }
+	});
+	
+	try {
+	  getJUnitDocument().remove(0, getJUnitDocument().getLength() - 1);
+	} catch (BadLocationException e) {
+	  throw new UnexpectedException(e);
+	}
+	
+	TestRunner testRunner = getTestRunner();
+	
+	String testFilename = testFile.getName();
+	if(testFilename.toLowerCase().endsWith(".java")) {
+	  testFilename = testFilename.substring(0, testFilename.length() - 5);	
+	} else {
+	  throw new UnexpectedException(new
+					IllegalArgumentException("File is not a Java file."));
+	}
+	String packageName;
+	try {
+	  packageName = _doc.getPackageName();
+	} catch(InvalidPackageException e) {
+	  throw new UnexpectedException(e);
+	}
+	if(!packageName.equals("")) {
+	  testFilename = packageName + "." + testFilename;
+	}
+	Test suite= testRunner.getTest(testFilename);
+	TestResult testResult = testRunner.doRun(suite, false);
+	
+	notifyListeners(new EventNotifier() {
+	  public void notifyListener(GlobalModelListener l) {
+	    l.junitEnded();
+	  }
+	});
+	return testResult;
+      } catch (IllegalStateException e) {
+	// No file exists, don't try to compile and test
+	return null;
       }
     }
 

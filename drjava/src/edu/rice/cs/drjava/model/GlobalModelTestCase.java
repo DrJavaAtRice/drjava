@@ -413,6 +413,8 @@ public abstract class GlobalModelTestCase extends TestCase {
     protected int canAbandonCount;
     protected int compileStartCount;
     protected int compileEndCount;
+    protected int junitStartCount;
+    protected int junitEndCount;
     protected int interactionStartCount;
     protected int interactionEndCount;
     protected int consoleResetCount;
@@ -458,6 +460,14 @@ public abstract class GlobalModelTestCase extends TestCase {
 
     public void assertSaveCount(int i) {
       assertEquals("number of times saveFile fired", i, saveCount);
+    }
+
+    public void assertJUnitStartCount(int i) {
+      assertEquals("number of times junitStarted fired", i, junitStartCount);
+    }
+
+    public void assertJUnitEndCount(int i) {
+      assertEquals("number of times junitEnded fired", i, junitEndCount);
     }
 
     public void assertInteractionStartCount(int i) {
@@ -513,6 +523,14 @@ public abstract class GlobalModelTestCase extends TestCase {
 
     public void fileSaved(OpenDefinitionsDocument doc) {
       fail("fileSaved fired unexpectedly");
+    }
+
+    public void junitStarted() {
+      fail("junitStarted fired unexpectedly");
+    }
+
+    public void junitEnded() {
+      fail("junitEnded fired unexpectedly");
     }
 
     public void interactionStarted() {

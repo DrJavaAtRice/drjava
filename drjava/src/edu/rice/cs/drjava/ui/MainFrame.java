@@ -68,6 +68,7 @@ public class MainFrame extends JFrame {
   private static final int INTERACTIONS_TAB = 0;
   private static final int COMPILE_TAB = 1;
   private static final int OUTPUT_TAB = 2;
+  private static final int JUNIT_TAB = 3;
 
   // GUI Dimensions
   private static final int GUI_WIDTH = 800;
@@ -86,6 +87,7 @@ public class MainFrame extends JFrame {
   private CompilerErrorPanel _errorPanel;
   private OutputPane _outputPane;
   private InteractionsPane _interactionsPane;
+  private JUnitPane _junitPane;
   private JPanel _statusBar;
   private JLabel _fileNameField;
   private JLabel _currLocationField;
@@ -102,6 +104,7 @@ public class MainFrame extends JFrame {
   private FindReplaceDialog _findReplace;
   private JButton _saveButton;
   private JButton _compileButton;
+  private JButton _junitButton;
   private JMenuItem _saveMenuItem;
   private JMenuItem _compileMenuItem;
   private JMenuItem _abortInteractionMenuItem;
@@ -248,6 +251,13 @@ public class MainFrame extends JFrame {
   private Action _compileAction = new AbstractAction("Compile Current Document") {
     public void actionPerformed(ActionEvent ae) {
       _compile();
+    }
+  };
+
+  /** Runs JUnit on the document in the definitions pane. */
+  private Action _junitAction = new AbstractAction("Test") {
+    public void actionPerformed(ActionEvent ae) {
+      _junit();
     }
   };
 
@@ -641,6 +651,15 @@ public class MainFrame extends JFrame {
   private void _compile() {
     try {
       _model.getActiveDocument().startCompile();
+    }
+    catch (IOException ioe) {
+      _showIOError(ioe);
+    }
+  }
+
+  private void _junit() {
+    try {
+      _model.getActiveDocument().startJUnit();
     }
     catch (IOException ioe) {
       _showIOError(ioe);
@@ -1062,6 +1081,10 @@ public class MainFrame extends JFrame {
     _toolBar.addSeparator();
     _toolBar.add(_createToolbarButton(_findReplaceAction));
 
+    // Junit
+    _toolBar.addSeparator();
+    _junitButton = _toolBar.add(_junitAction);
+
     getContentPane().add(_toolBar, BorderLayout.NORTH);
   }
 
@@ -1109,10 +1132,12 @@ public class MainFrame extends JFrame {
     _outputPane = new OutputPane(_model);
     _errorPanel = new CompilerErrorPanel(_model, this);
     _interactionsPane = new InteractionsPane(_model);
+    _junitPane = new JUnitPane(_model);
     _tabbedPane = new JTabbedPane();
     _tabbedPane.add("Interactions", new BorderlessScrollPane(_interactionsPane));
     _tabbedPane.add("Compiler output", _errorPanel);
     _tabbedPane.add("Console", new JScrollPane(_outputPane));
+    _tabbedPane.add("Test output", new JScrollPane(_junitPane));
 
     // Select interactions pane when interactions tab is selected
     _tabbedPane.addChangeListener(new ChangeListener() {
@@ -1339,6 +1364,18 @@ public class MainFrame extends JFrame {
       //_compileAction.setEnabled(true);
     }
 
+    public void junitStarted() {
+      _tabbedPane.setSelectedIndex(JUNIT_TAB);
+      _saveAction.setEnabled(false);
+      hourglassOn();
+    }
+
+    public void junitEnded() {
+      hourglassOff();
+      _updateErrorListeners();
+      _errorPanel.reset();
+    }
+
     public void interactionsExited(int status) {
       String msg = "The interactions window was terminated by a call " +
                    "to System.exit(" + status + ").\n" +
@@ -1367,6 +1404,10 @@ public class MainFrame extends JFrame {
       if (reason == COMPILE_REASON) {
         message = "To compile, you must first save the current file. " +
           "Would you like to save and then compile?";
+      }
+      else if(reason == JUNIT_REASON) {
+	message = "To run JUnit, you must first save and compile the current " + 
+	  "file. Would like to save and then compile?";
       }
       else {
         throw new RuntimeException("Invalid reason for forcing a save.");
