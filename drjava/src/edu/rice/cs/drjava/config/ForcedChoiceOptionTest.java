@@ -35,50 +35,66 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.config;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import junit.framework.*;
+import java.util.ArrayList;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030626-1451;
- *
+ * Class according to the JUnit protocol. Tests
+ * the proper functionality of the class ForcedChoiceOption.
  * @version $Id$
  */
-public abstract class Version {
+public final class ForcedChoiceOptionTest extends TestCase
+{
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * @param name The name of this test case.
    */
-  private static final String BUILD_TIME_STRING = "20030626-1451";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public ForcedChoiceOptionTest(String name) { super(name); }
+  
+  public void setUp() {}
+  
+  public void testGetName()
+  { 
+    ForcedChoiceOption fco = new ForcedChoiceOption("javadoc_access",
+                                                    "protected",
+                                                    null);
+    
+    assertEquals("javadoc_access", fco.getName());
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  public void testParse()
+  {
+    ArrayList aList = new ArrayList(4);
+    
+    aList.add("public");
+    aList.add("protected");
+    aList.add("package");
+    aList.add("private");
+    ForcedChoiceOption fco = new ForcedChoiceOption("javadoc_access",
+                                                   "protected",
+                                                   aList);
+    
+    assertEquals(new String("private"), fco.parse("private"));
+    try { fco.parse("Private"); fail(); }
+    catch (OptionParseException e) {}
+    
+    try { fco.parse("true"); fail(); }
+    catch (OptionParseException e) {}
+    
+    try { fco.parse(".33"); fail(); }
+    catch (OptionParseException e) {}
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+  
+  public void testFormat()
+  {
+    ForcedChoiceOption fco = new ForcedChoiceOption("javadoc_access",
+                                                    "protected",
+                                                    null);
+    
+    assertEquals("private",  fco.format(new String("private")));
+    assertEquals("public",  fco.format(new String("public")));
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

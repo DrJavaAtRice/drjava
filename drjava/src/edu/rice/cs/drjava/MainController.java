@@ -39,46 +39,39 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
-
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030626-1451;
- *
+ * Main controller class for DrJava.  This class sets up all of the appropriate
+ * cross-references between components at runtime.  Almost all of the function-
+ * -ality of DrJava is hidden in components with extremely high-level interfaces.
+ * This class ensures that each component is registered with all other components
+ * that need to call its methods.  In essence, this class manages component
+ * associations.  Any details more low-level than who talks to who should be
+ * handled by components through their interfaces.
  * @version $Id$
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+public class MainController {
+  /*
+   * Things that MainController needs to manage:
+   *   DJWindow [aka: MainFrame] (register view components)
+   *   Menu Bar Manager (register with DJWindow [+ ViewerWindows + AboutWindow on Mac])
+   *     Menus (register with MBM, add Actions)
+   *       File, Edit, Tools, Debugger, View, Documents, Help
+   *   Tool Bar (register with DJWindow, add Actions)
+   *   Document List (register with DJWindow + View Menu + Documents Menu)
+   *   Document Pane (register with DJWindow + DocumentList + Documents Menu + Debugger)
+   *   Tab Manager (register with DJWindow + View Menu, add Tabs)
+   *     Tabs (register with TM)
+   *       Interactions, Console, Compiler, JUnit, Javadoc, FindBugs, Find/Replace
+   *   Debugger (register with DJWindow [or maybe TM?])
+   *   ViewerWindow
+   *     Help, Javadoc HTML
+   *   AboutWindow
+   *   PreferencesWindow (to be refactored in another pass)
+   *   Configuration
+   * 
+   * Behaviors that MainController will support:
+   *   Lock edits
+   *   Display Message (warning, error)
+   *   Display File Dialog (open, save, select directory)
    */
-  private static final String BUILD_TIME_STRING = "20030626-1451";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}
