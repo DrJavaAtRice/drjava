@@ -18,14 +18,13 @@
   <property name="jars_dir" value="/home/javaplt/public_html/drjava/builds" />
 
   <!-- put new javadoc in this directory after each commit -->
-  <property name="public_javadoc_dir" value="/home/javaplt/public_html/drjava/javadoc" />
+  <property name="public_javadoc_dir" value="/home/javaplt/public_html/javadoc/${ant.project.name}" />
 
   <!-- put javadoc in this directory if generating private javadoc -->
   <property name="private_javadoc_dir" value="${srcroot}/../javadoc" />
 
   <property name="jarfile" value="${srcroot}/../drjava.jar" />
   <property name="manifest" value="manifest" />
-  <property name="cvsroot" value="/home/javaplt/.cvsroot" />
 
   <!-- Init target. All others depend on it. Initialize the directory. -->
   <target name="init">
@@ -35,7 +34,7 @@
 
   <!-- Reconcile source with CVS archive -->
   <target name="update" depends="init">
-    <cvs command="update -d" cvsRoot="${cvsroot}" />
+    <cvs command="update -d" />
   </target>
 
   <target name="make-version-stamp">
@@ -65,21 +64,29 @@
     <!-- recompile to make new version number get into code. -->
     <antcall target="compile" />
 
-    <cvs command="commit" cvsRoot="${cvsroot}" />
+    <cvs command="commit" />
 
     <property name="version-tag"
               value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
 
-    <cvs command="tag -c ${version-tag}" cvsRoot="${cvsroot}" quiet="true" />
+    <cvs command="tag -c ${version-tag}" quiet="true" />
 
-    <!-- Create distribution jar.
-         We modify property jarfile for this call to put the jar in
-         the right place.
-    -->
-    <property name="distjar" value="${jars_dir}/${version-tag}.jar" />
+    <echo message="New version ${version-tag} committed to CVS." />
+    <echo message="Note: This version has not yet been released. To release it, type the following on a CS net host (sun or frosty): ant -Dversion-tag=${version-tag} release" />
 
+  </target>
+
+  <!-- generate jar and javadoc
+       Requires version-tag to be set (via command line -Dversion-tag=)
+       For example, to release drjava-20020101-0000, you'd type:
+
+       ant -Dversion-tag=drjava-20020101-0000 release
+
+       Note: Release must be run on CS net
+  -->
+  <target name="release" if="version-tag">
     <antcall target="jar">
-      <param name="jarfile" value="${distjar}" />
+      <param name="jarfile" value="${jars_dir}/${version-tag}.jar" />
     </antcall>
 
     <!-- generate javadoc for the committed version! -->
@@ -89,11 +96,11 @@
     </antcall>
 
     <!-- give group permissions to write over the javadoc -->
-    <chmod perm="g+w,a+rX" dir="${public_javadoc_dir}" type="both" />
-    <chmod perm="g+w,a+rX" file="${public_javadoc_dir}" type="both" />
-
-    <echo message="New version ${version-tag} committed to CVS." />
+    <chmod perm="g+w,a+rX" dir="${public_javadoc_dir}" type="both" includes="**" />
   </target>
+
+  <target name="commit-and-release" depends="commit, release" />
+
 
   <!-- Compile. We have to start at srcroot and then selectively include
        just this project in order for it to realize what files have already
@@ -104,6 +111,7 @@
            includes="${projpath}/**/*java"
            destdir="${built}" 
            bootclasspath="${jsr14_classpath}:${java.home}/lib/rt.jar"
+           target="1.1"
            debug="on"
            optimize="off" />
   </target>
@@ -207,9 +215,9 @@
              Use="yes"
              Version="yes"
              Windowtitle="${javadoc_title}">
-      <link href="http://java.sun.com/j2se/1.3/docs/api" />
-      <link href="http://junit.org/junit/javadoc/3.7" />
-      <link href="http://www-sop.inria.fr/koala/djava/javadoc" />
+      <link href="http://www.cs.rice.edu/~javaplt/javadoc/java-api" />
+      <link href="http://www.cs.rice.edu/~javaplt/javadoc/junit" />
+      <link href="http://www.cs.rice.edu/~javaplt/javadoc/dynamicjava" />
     </javadoc>
 
     <!-- delete source we generated without generics -->
