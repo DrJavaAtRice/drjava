@@ -407,4 +407,43 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
                  _sdModel.getDisplayFilename(doc));
 
   }
+  
+  public void testDeleteFileWhileOpen() 
+    throws IOException, OperationCanceledException, AlreadyOpenException  {
+    String txt = "This is some test text";
+    File f = writeToNewTempFile(txt);
+    OpenDefinitionsDocument doc1 = _sdModel.openFile(new FileSelector(f));
+    OpenDefinitionsDocument doc2 = _sdModel.newFile();
+    f.delete();
+    _sdModel.closeFile(doc1);
+    // TODO: possibly test with more files; test to make sure the 
+    // active document get's switched correctly.
+    
+    // Closing one file works.  It doesn't work when you are closing 
+    // multiple files including the one that doesn't exist on the file system.
+    
+    // Furthermore, if the user clicks "YES" to save to a different location, 
+    // it doesn't prompt for the location to save, but immediately procedes with
+    // the closing and runs into the DocumentNotFound exception which ultimately
+    // leads to the View breaking.  Solution may lie in whatever is not letting
+    // the file selector show up when clicking "YES" to resave.
+  }
+  public void testDeleteFileBeforeCloseAll() 
+    throws IOException, OperationCanceledException, AlreadyOpenException {
+    final File[] files = new File[10];
+    for (int i=0; i < 10; i++) {
+      String txt = "Text for file " + i;
+      files[i] = writeToNewTempFile(txt);
+    }
+    FileOpenSelector fos = new FileOpenSelector() {
+      public File[] getFiles() throws OperationCanceledException {
+        return files;
+      }
+    };
+    _sdModel.openFiles(fos);
+    OpenDefinitionsDocument doc = _sdModel.getDefinitionsDocuments().get(5);
+    _sdModel.setActiveDocument(doc);
+    files[5].delete();
+    _sdModel.closeAllFiles();
+  }
 }

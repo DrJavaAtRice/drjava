@@ -671,15 +671,22 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       public boolean isProjectActive() { return true; }
       
       public boolean isInProjectPath(OpenDefinitionsDocument doc){
+        File projectRoot = projectFile.getParentFile();
+        if(doc.isUntitled()) return false;
+        // If the file does not exist, we still want to tell if it's in the correct
+        // path.  The file may have been in at one point and had been removed, in which
+        // case we should treat it as an untitled project file that should be resaved.
         try {
-          File projectRoot = projectFile.getParentFile();
-          if(doc.isUntitled()) return false;
-          String filePath = doc.getFile().getParentFile().getCanonicalPath() + File.separator;
+          File f;
+          try { f = doc.getFile(); } 
+          catch(FileMovedException fme) { f = fme.getFile(); }
+          
+          String filePath = f.getParentFile().getCanonicalPath() + File.separator;
           String projectPath = projectRoot.getCanonicalPath() + File.separator;
           return (filePath.startsWith(projectPath));
         }
         catch(IOException e) {
-          System.out.println(e);
+          System.out.println(e); // What should we do in this case?
           return false;
         }
       }
@@ -1584,15 +1591,16 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    */
   public boolean closeFileWithoutPrompt(OpenDefinitionsDocument doc) {
     final OpenDefinitionsDocument closedDoc = doc;
+//    new Exception("Closed document " + doc).printStackTrace();
     // Only fire event if doc exists and was removed from list
     INavigatorItem idoc = _documentsRepos.removeKey(closedDoc);
     String name = idoc.toString();
-    closedDoc.close();
+//    closedDoc.close();
     
     if (idoc != null) {
       _documentNavigator.removeDocument(idoc);
       _notifier.fileClosed(closedDoc);
-      //        closedDoc.close();
+      closedDoc.close();
       return true;
     }
     return false;
@@ -2439,7 +2447,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
             _editorKit.read(reader, tempDoc, 0);
             reader.close(); // win32 needs readers closed explicitly!
           }
-          
+          _loc = Math.max(_loc, tempDoc.getLength());
           tempDoc.setCurrentLocation(_loc);
           for(DocumentListener d : _list) {
             if (d instanceof DocumentUIListener) {
@@ -2522,23 +2530,26 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
 //        System.out.println("  " + e.getStackTrace()[2]);
 //        System.out.println("  " + e.getStackTrace()[3]);
 //        System.out.println("  " + e.getStackTrace()[4]);
-//      }
-      try{
-        return _cacheAdapter.getDocument();
-      }catch(FileMovedException e){
-//        System.out.println("DefaultGlobalModel: 1430: FileMovedException should be handled by box that fixes everything.");
-      }catch(IOException e){
-//        System.out.println("DefaultGlobalModel: 1432: IOException should be handled by box that fixes everything.");
-      }
+      //      }
       try {
-        _notifier.documentNotFound(this,_file);
-        _documentNavigator.refreshDocument(getIDocGivenODD(this), _file.getCanonicalFile().getParent());
-      } catch(IOException ioe) {
-        throw new UnexpectedException(ioe);
+        return _cacheAdapter.getDocument();
+      } catch(IOException e) {
+//        new Exception("* get document IOEx").printStackTrace(System.out);
+        try {
+          _notifier.documentNotFound(this,_file);
+          if (!isUntitled()) 
+            _documentNavigator.refreshDocument(getIDocGivenODD(this), _file.getCanonicalFile().getParent());
+          else
+            
+          return _cacheAdapter.getDocument();
+          
+        } catch(IOException ioe) {
+          throw new UnexpectedException(ioe);
+        }
+        //        System.out.println("DefaultGlobalModel: 1432: IOException should be handled by box that fixes everything.");
       }
       
-      return getDocument();
-
+      return null;
     }
 
     /** 
@@ -2555,7 +2566,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
      * @return true if the document is untitled and has no file
      */
     public boolean isUntitled() {
-      return (_file == null);
+//      return (_file == null || !_file.exists());
+      return _file == null;
     }
 
     /**
@@ -2582,15 +2594,16 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
      * Returns true if the file exists on disk. Returns false if the file has been moved or deleted
      */
     public boolean fileExists() {
-      try {        
-        getFile();
-        return true;
-      } 
-      catch(IllegalStateException ise) {
-      } 
-      catch(FileMovedException fme) {
-      }
-      return false;
+//      try {        
+//        getFile();
+//        return true;
+//      } 
+//      catch(IllegalStateException ise) {
+//      } 
+//      catch(FileMovedException fme) {
+//      }
+//      return false;
+      return _file != null && _file.exists();
     }
     
     /**
@@ -2621,20 +2634,12 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
      * Returns the name of this file, or "(untitled)" if no file.
      */
     public String getFilename() {
-      String filename = "(Untitled)";
-      try {
-        File file = getFile();
-        filename = file.getName();
+      if (_file == null) {
+        return "(Untitled)";
       }
-      catch (IllegalStateException ise) {
-        // No file, leave as "untitled"
+      else {
+        return _file.getName();
       }
-      catch (FileMovedException fme) {
-        // Recover, even though file has been deleted
-        File file = fme.getFile();
-        filename = file.getName();
-      }
-      return filename;
     }
       
 
@@ -3224,7 +3229,10 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
      */
     public boolean canAbandonFile() {
       final OpenDefinitionsDocument doc = this;
-      if (isModifiedSinceSave()) {
+      if (isModifiedSinceSave() || 
+          (_file != null    && 
+           !_file.exists()  && 
+           _cacheAdapter.isReady())) {
         return _notifier.canAbandonFile(doc);
       }
       else {

@@ -86,13 +86,13 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "}";
   
   private static final String MONKEYTEST_PASS_TEXT =
-    "import junit.framework.*; " +
-    "public class MonkeyTestPass extends TestCase { " +
-    "  public MonkeyTestPass(String name) { super(name); } " +
-    "  public void testShouldPass() { " +
-    "    assertEquals(\"monkey\", \"monkey\"); " +
-    "  } " +
-    "}";
+    "import junit.framework.*; \n" +
+    "public class MonkeyTestPass extends TestCase { \n" +
+    "  public MonkeyTestPass(String name) { super(name); } \n" +
+    "  public void testShouldPass() { \n" +
+    "    assertEquals(\"monkey\", \"monkey\"); \n" +
+    "  } \n" +
+    "}\n";
 
   private static final String MONKEYTEST_FAIL_TEXT =
     "import junit.framework.*; " +
@@ -171,6 +171,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     doc.saveFile(new FileSelector(file));
+    
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     if (printMessages) System.out.println("before compile");
@@ -183,7 +184,10 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
       if (printMessages) System.out.println("waiting for test");
       listener.wait();
     }
-    if (printMessages) System.out.println("after test");
+    if (printMessages) {
+      System.out.println("after test");
+      System.out.println("erros: "+_model.getJUnitModel().getJUnitErrorModel());
+    }
     assertEquals("test case should have no errors reported",
                  0,
                  _model.getJUnitModel().getJUnitErrorModel().getNumErrors());

@@ -110,7 +110,7 @@ public class ConfigFrame extends JFrame {
     _browserChooser.setApproveButtonText("Select");
     _browserChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-    _dirChooser = new DirectoryChooser();
+    _dirChooser = new DirectoryChooser(this);
     _dirChooser.setSelectedDirectory(_getWorkDir());
     _dirChooser.setDialogTitle("Select");
     _dirChooser.setApproveButtonText("Select");

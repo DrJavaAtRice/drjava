@@ -103,20 +103,22 @@ public interface SingleDisplayModel extends GlobalModel {
    * Sets the active document to be the previous one in the list.
    */
   public void setActivePreviousDocument();
-
-  /**
-   * Returns whether we are in the process of closing all documents.
-   * (Don't want to prompt the user to revert files that have become
-   * modified on disk if we're just closing everything.)
-   * TODO: Move to DGM?  Make private?
-   */
-  public boolean isClosingAllFiles();
+//
+//  /**
+//   * Returns whether we are in the process of closing all documents.
+//   * (Don't want to prompt the user to revert files that have become
+//   * modified on disk if we're just closing everything.)
+//   * TODO: Move to DGM?  Make private?
+//   */
+//  public boolean isClosingAllFiles();
   
   /**
    * Shared code between close project and close All files which only sets 
    * the new active document after all documents to be closed have been closed
+   * @param docList the list of files to close
+   * @param together if true then no file will be closed unless they can all be closed
    */
-  public boolean closeFiles(List<OpenDefinitionsDocument> docList);
+  public boolean closeFiles(List<OpenDefinitionsDocument> docList, boolean together);
   
   public OpenDefinitionsDocument getODDGivenIDoc(INavigatorItem idoc);
     

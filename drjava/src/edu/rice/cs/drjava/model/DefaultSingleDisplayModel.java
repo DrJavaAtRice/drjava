@@ -220,16 +220,16 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
       //   _setActiveDoc(prevKey);
     }
   }
-
-  /**
-   * Returns whether we are in the process of closing all documents.
-   * (Don't want to prompt the user to revert files that have become
-   * modified on disk if we're just closing everything.)
-   * TODO: Move to DGM?  Make private?
-   */
-  public boolean isClosingAllFiles() {
-    return _isClosingAllDocs;
-  }
+//
+//  /**
+//   * Returns whether we are in the process of closing all documents.
+//   * (Don't want to prompt the user to revert files that have become
+//   * modified on disk if we're just closing everything.)
+//   * TODO: Move to DGM?  Make private?
+//   */
+//  public boolean isClosingAllFiles() {
+//    return _isClosingAllDocs;
+//  }
 
   //----------------------- End SingleDisplay Methods -----------------------//
 
@@ -336,32 +336,9 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * @return true if the document was closed
    */
    public synchronized boolean closeFile(OpenDefinitionsDocument doc) {
-//     INavigatorItem switchTo =_documentNavigator.getNext(getIDocGivenODD(doc));
-//     /** if we can't move forward, go backwards */
-//     if( switchTo == getIDocGivenODD(doc)) {
-//       switchTo = _documentNavigator.getPrevious(switchTo);
-//     }
-     
-     if( super.closeFile(doc) ) {
-       // Select next document if not closing all documents
-       if (!_isClosingAllDocs) {
-         _ensureNotEmpty();
-         
-         // if( _hasOneEmptyDocument() ) {
-         if(getDocumentCount() == 1){
-           setActiveFirstDocument();
-         }
-//         else {
-//           /* this will select the active document in the navigator, which
-//            * will signal a listener to call _setActiveDoc(...)
-//            */
-//           _documentNavigator.setActiveDoc(switchTo);
-//           //_setActiveDoc(switchTo);
-//         }
-       }
-       return true;
-     }
-     return false;
+     List<OpenDefinitionsDocument> list = new LinkedList<OpenDefinitionsDocument>();
+     list.add(doc);
+     return closeFiles(list, false);
    }
    
    /**
@@ -373,69 +350,64 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     //Fix: close the currently active document last
     * @return true if all documents were closed
     */
-  public synchronized boolean closeAllFiles() {
-    _isClosingAllDocs = true;
-    
-    List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
-    OpenDefinitionsDocument active = getActiveDocument();
-    boolean keepClosing = true;
-    for(OpenDefinitionsDocument d: docs){
-      if(d != active && keepClosing){
-        keepClosing = closeFile(d);
-      }
-    }
-    if(keepClosing){
-      keepClosing = closeFile(active);
-    }
-    _isClosingAllDocs = false;
-    _ensureNotEmpty();
-    setActiveFirstDocument();
-    return keepClosing;
-  }
-    
+   public synchronized boolean closeAllFiles() {
+     List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
+     return closeFiles(docs, false);
+   }
+  
+  
   
   
   /**
-   * Shared code between close project and close All files which only sets 
-   * the new active document after all documents to be closed have been closed
+   * This function closes a group of files assuming that there is some sort of 
+   * continuity with the list of documents that are being closed.  This assumption
+   * is mostly made in order to decide which document to activate.
+   * <p>
+   * The corner cases in which the file that is being closed had been externally
+   * deleted have been addressed in a few places, namely DefaultGlobalModel.canAbandonFile()
+   * and MainFrame.ModelListener.canAbandonFile().  If the DefinitionsDocument for the 
+   * OpenDefinitionsDocument being closed is not in the cache (see model.cache.DocumentCache)
+   * then it is closed without prompting the user to save it.  If it is in the cache, then
+   * we can successfully notify the user that the file had been deleted and ask whether to
+   * saveAs, close, or cancel.
+   * @param docList the list od OpenDefinitionsDocuments to close
+   * @param together if true then no files will be closed if not all can be abandoned
+   * @return whether all files were closed
    */
-  public synchronized boolean closeFiles(List<OpenDefinitionsDocument> docList) {
-    OpenDefinitionsDocument last = null;
-    Iterator<OpenDefinitionsDocument> it = docList.iterator();
-    while(it.hasNext()) {
-      last = it.next();
-      if(it.hasNext())
-        closeFile(last);      
-    }
-    if(last != null) {
-      IDocumentNavigator nav = getDocumentNavigator();
-      INavigatorItem switchTo = nav.getNext(getIDocGivenODD(last));
-      /** if we can't move forward, go backwards */
-      if( switchTo == getIDocGivenODD(last)) {
-        switchTo = nav.getPrevious(switchTo);
-      }
-      
-      //close the last file
-      if (closeFile(last))
-      {        
-        if(getDocumentCount() == 1){
-          setActiveFirstDocument();
-        }
-        else {
-          /* this will select the active document in the navigator, which
-           * will signal a listener to call _setActiveDoc(...)
-           */
-          nav.setActiveDoc(switchTo);
-        }
-      }
-      else
-      {
-        nav.setActiveDoc(getIDocGivenODD(last)); 
+  public synchronized boolean closeFiles(List<OpenDefinitionsDocument> docList, boolean together) {
+    if (docList.size() == 0) return true;
+
+    if (together) { // if together then do all prompting at once
+      for (OpenDefinitionsDocument doc : docList) {
+        if (!doc.canAbandonFile()) return false;
       }
     }
+    
+    // create new file before you start closing in order to have 
+    // an active file that's not in the list of closing files.
+    // If the current active document is closed before the MainFrame
+    // can switch to a new file, drjava throws some unexpected exceptions
+    // relating to the document not being found.
+    OpenDefinitionsDocument newDoc = null;
+    if (docList.size() == getDefinitionsDocumentsSize()) newDoc = newFile();
+    _ensureNotActive(docList);
+        
+    // Close all files. If together, then don't let it prompt a 2nd time;
+    // but, if not together, then call closeFile which may prompt the user.
+    for (OpenDefinitionsDocument doc : docList) {
+      if (together) {
+        super.closeFileWithoutPrompt(doc);
+      }
+      else if (!super.closeFile(doc)) {
+        setActiveDocument(doc);
+        if (newDoc != null) super.closeFile(newDoc); // undo previous newFile() 
+        return false;
+      }
+    }
+        
     return true;
   }
-
+  
   /**
    * Returns whether there is currently only one open document
    * which is untitled and unchanged.
@@ -453,6 +425,32 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     if ((!_isClosingAllDocs) &&
         (getDefinitionsDocumentsSize() == 0)) {
       super.newFile();
+    }
+  }
+  
+  /**
+   * Makes sure that none of the documents in the list are active.
+   */
+  private void _ensureNotActive(List<OpenDefinitionsDocument> docs) {
+    if (docs.contains(getActiveDocument())) {
+      // Find the one that should be the new active document
+      IDocumentNavigator nav = getDocumentNavigator();
+      
+      INavigatorItem item = getIDocGivenODD(docs.get(docs.size()-1));
+      INavigatorItem nextActive = nav.getNext(item);
+      if (!nextActive.equals(item)) {
+        nav.setActiveDoc(nextActive); 
+        return;
+      }
+      
+      item = getIDocGivenODD(docs.get(0));
+      nextActive = nav.getPrevious(item);
+      if (!nextActive.equals(item)) { 
+        nav.setActiveDoc(nextActive);
+        return;
+      }
+      
+      throw new RuntimeException("No document to set active before closing");
     }
   }
   

@@ -47,6 +47,7 @@ package edu.rice.cs.drjava.ui;
 
 import javax.swing.*;
 import javax.swing.text.*;
+import javax.swing.event.*;
 import javax.swing.border.Border;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -140,25 +141,32 @@ public class InteractionsController extends AbstractConsoleController {
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             _box = new InputBox();
-
-            /*        if (_busy()) {
+            _pane.setEditable(true);
+             int pos = _doc.getPositionBeforePrompt();
+             _pane.setCaretPosition(pos);
+             _pane.insertComponent(_box);
+            moveToEnd();
+            _pane.setEditable(false);
+            _pane.setVisible(true);
+/*
+                    if (_busy()) {
              _pane.setEditable(true);
              moveToEnd();
              _pane.insertComponent(_box);
              _pane.setEditable(false);
              }
              else {
-             DocumentEditCondition ec = _doc.getEditCondition();
-             _doc.setEditCondition(new DocumentEditCondition());
+//             DocumentEditCondition ec = _doc.getEditCondition();
+//             _doc.setEditCondition(new DocumentEditCondition());
              int pos = _doc.getPositionBeforePrompt();
              _pane.setCaretPosition(pos);
              _pane.insertComponent(_box);
              _doc.setPromptPos(_doc.getPromptPos() + 1);
              //            _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
-             _doc.setEditCondition(ec);
+//             _doc.setEditCondition(ec);
              }
              */
-            int pos = _doc.getPositionBeforePrompt();
+            
             _doc.insertBeforeLastPrompt(" ", _doc.DEFAULT_STYLE);
             SimpleAttributeSet att = new SimpleAttributeSet();
             StyleConstants.setComponent(att, _box);
@@ -174,7 +182,9 @@ public class InteractionsController extends AbstractConsoleController {
 
             _inputEnteredAction.setEnabled(true);
             //          _insertNewlineAction.setEnabled(true);
+            
             _box.requestFocus();
+            
           }
         });
 
@@ -688,7 +698,6 @@ public class InteractionsController extends AbstractConsoleController {
         }
       });
     }
-
     private Border _createBorder() {
       Border outerouter = BorderFactory.createLineBorder(_bgColor, OUTER_BUFFER_WIDTH);
       Border outer = BorderFactory.createLineBorder(_fgColor, BORDER_WIDTH);

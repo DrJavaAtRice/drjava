@@ -2592,7 +2592,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       //    for(OpenDefinitionsDocument d: projDocs){
       //      _model.closeFile(d);
       //    }
-      _model.closeFiles(projDocs);
+      boolean couldClose = _model.closeFiles(projDocs, true);
+      if (!couldClose) return false;
       _model.closeProject();
       Component renderer = _model.getDocumentNavigator().getRenderer();
       new ForegroundColorListener(renderer);
@@ -2796,10 +2797,10 @@ public class MainFrame extends JFrame implements OptionConstants {
    * the active document
    */
   private void _close() {
-    LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
-    l.add(_model.getActiveDocument());
-    _model.closeFiles(l);
-    //_model.closeFile(_model.getActiveDocument());
+//    LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
+//    l.add(_model.getActiveDocument());
+//    _model.closeFiles(l);
+    _model.closeFile(_model.getActiveDocument());
   }
   
   private void _junitFolder(){
@@ -2828,7 +2829,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           l.add(_model.getODDGivenIDoc(n));
         }
       }
-      _model.closeFiles(l);
+      _model.closeFiles(l, false);
     }
   }
 
@@ -5985,17 +5986,20 @@ public class MainFrame extends JFrame implements OptionConstants {
           _posListener.updateLocation();
 
           // Check if modified (but only if we're not closing all files)
-          if (!_model.isClosingAllFiles()) {
-            try {
-              active.revertIfModifiedOnDisk();
-            }
-            catch (FileMovedException fme) {
-              _showFileMovedError(fme);
-            }
-            catch (IOException e) {
-              _showIOError(e);
-            }
-          }
+          // condition commented out because the document shouldn't be changing during
+          // a close-all. Also, because we phased out the isClosingAllFiles method
+          
+//          if (!_model.isClosingAllFiles()) {
+             try {
+               active.revertIfModifiedOnDisk();
+             }
+             catch (FileMovedException fme) {
+               _showFileMovedError(fme);
+             }
+             catch (IOException e) {
+               _showIOError(e);
+             }
+//          }
 
           // Change Find/Replace to the new defpane
           if (_findReplace.isDisplayed()) {
@@ -6482,39 +6486,45 @@ public class MainFrame extends JFrame implements OptionConstants {
      *         or not as they chose. If false, the user wishes to cancel.
      */
     public boolean canAbandonFile(OpenDefinitionsDocument doc) {
-      String fname;
-
+      String text,fname;
+      OpenDefinitionsDocument lastActive = _model.getActiveDocument();
       _model.setActiveDocument(doc);
-
+      boolean notFound = false;
       try {
         File file = doc.getFile();
         fname = file.getName();
+        text = fname + " has been modified. Would you like to save it?";
       }
       catch (IllegalStateException ise) {
         // No file exists
         fname = "Untitled file";
+        text = "Untitled file has been modified. Would you like to save it?";
       }
       catch (FileMovedException fme) {
         // File was deleted, but use the same name anyway
         fname = fme.getFile().getName();
+        text = fname + " not found on disk. Would you like to save to another file?";
+        notFound = true;
       }
-
-      String text = fname + " has been modified. Would you like to save it?";
+      
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
                                              text,
                                              "Save " + fname + "?",
                                              JOptionPane.YES_NO_CANCEL_OPTION);
-
       switch (rc) {
         case JOptionPane.YES_OPTION:
-          return _save();
+          boolean r = false;
+          if (notFound) r = _saveAs(); else r = _save();
+          _model.setActiveDocument(lastActive);
+          return r;
         case JOptionPane.NO_OPTION:
+          _model.setActiveDocument(lastActive);
           return true;
         case JOptionPane.CLOSED_OPTION:
         case JOptionPane.CANCEL_OPTION:
           return false;
         default:
-          throw new RuntimeException("Invalid rc: " + rc);
+          throw new RuntimeException("Invalid option: " + rc);
       }
     }
 
@@ -6603,7 +6613,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void documentNotFound(OpenDefinitionsDocument d, File f) {
-           
+      
       String text = "File " + f.getAbsolutePath() +
         "\ncould not be found on disk!  It was probably moved\n" +
         "or deleted.  Would you like to try to find it?";
@@ -6623,10 +6633,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       else{
         //Close the file that wasn't found
-        LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
-        l.add(d);
-        _model.closeFiles(l);
-        throw new DocumentClosedException(d,"Document in " + f + "closed unexpectedly");
+//        LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
+//        l.add(d);
+//        _model.closeFiles(l);
+//        _model.closeFile(d);
+//        d.setFile(null);
+//        throw new DocumentClosedException(d,"Document in " + f + "closed unexpectedly");
       }
     }
   }
