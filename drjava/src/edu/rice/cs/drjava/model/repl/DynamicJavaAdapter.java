@@ -1,7 +1,8 @@
 package edu.rice.cs.drjava.model.repl;
 
-import  java.util.*;
-import  java.io.*;
+import java.util.*;
+import java.io.*;
+import java.net.URL;
 
 import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.interpreter.context.*;
@@ -12,13 +13,15 @@ import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.util.*;
 
+import edu.rice.cs.util.classloader.StickyClassLoader;
+import edu.rice.cs.drjava.DrJava;
+
 /**
  * An implementation of the interpreter for the repl pane.
  * @version $Id$
  */
 public class DynamicJavaAdapter implements JavaInterpreter {
   private Interpreter _djInterpreter;
-  private static final ClassLoadChecker _checker = new ClassLoadChecker();
 
   /**
    * Constructor.
@@ -89,7 +92,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * We also override the evaluation visitor to allow the interpreter to be
    * interrupted and to return NO_RESULT if there was no result.
    */
-  public class InterpreterExtension extends TreeInterpreter {
+  public static class InterpreterExtension extends TreeInterpreter {
 
     /**
      * Constructor.
@@ -107,6 +110,25 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       evalVisitorContext.setAdditionalClassLoaderContainer(classLoader);
       //System.err.println("set loader: " + classLoader);
     }
+
+    /*
+    public static Object invokeMethod(String key, Object obj, Object[] params) {
+      DrJava.consoleErr().println("invoke: key=" + key + " obj=" + obj + " params len=" + params.length);
+      MethodDescriptor md = (MethodDescriptor)methods.get(key);
+      DrJava.consoleErr().println("md=" + md);
+
+      return TreeInterpreter.invokeMethod(key, obj, params);
+    }
+
+    public void registerMethod(String sig,
+                               MethodDeclaration  md,
+                               ImportationManager im)
+    {
+      DrJava.consoleErr().println("register method: sig=" + sig + " md=" + md + " im=" + im);
+
+      super.registerMethod(sig, md, im);
+    }
+    */
 
     /**
      * Extends the interpret method to deal with possible interrupted
@@ -155,7 +177,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   /**
    * A class loader for the interpreter.
    */
-  public class ClassLoaderExtension extends TreeClassLoader {
+  public static class ClassLoaderExtension extends TreeClassLoader {
+    private StickyClassLoader _stickyLoader;
 
     /**
      * Constructor.
@@ -168,151 +191,75 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       // it adds on an auxilary classloader and chains the old classLoader
       // onto the end.
       // Here we initialize classLoader to be the system class loader.
-      // This makes sure that we can find classes that are in the system's
-      // class path, even though we don't fully delegate to the system
-      // loader. (We just ask the system loader to get us the bytes of the
-      // class, and then we call defineClass ourselves.)
-      classLoader = ClassLoader.getSystemClassLoader();
-      //System.err.println("created loader extension");
+      classLoader = getClass().getClassLoader();
+
+      // don't load the dynamic java stuff using the sticky loader!
+      // without this, interpreter-defined classes don't work.
+      String[] excludes = {
+        "edu.rice.cs.drjava.model.repl.DynamicJavaAdapter$InterpreterExtension",
+        "edu.rice.cs.drjava.model.repl.DynamicJavaAdapter$ClassLoaderExtension"
+      };
+
+      // we will use this to getResource classes
+      _stickyLoader = new StickyClassLoader(this,
+                                            getClass().getClassLoader(),
+                                            excludes);
     }
 
-    /**
-     * Overrides loadClass to try to load all classes we can ourselves, only
-     * delegating to the system loader if we can't load a class.
-     * This is because any classes loaded by the system loader are never
-     * unloaded.
-     * @exception ClassNotFoundException
-     */
-    protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
-      //System.err.println("loadClass: " + name);
-      if (_checker.mustUseSystemLoader(name)) {
-        return  super.loadClass(name, resolve);
-      } 
-      else {
-        return  findClass(name);
+    public Class defineClass(String name, byte[] code)  {
+      File file = new File("debug-" + name + ".class");
+
+
+      /*
+      try {
+        FileOutputStream out = new FileOutputStream(file);
+        out.write(code);
+        out.close();
+        DrJava.consoleErr().println("debug class " + name + " to " + file.getAbsolutePath());
       }
+      catch (Throwable t) {}
+      */
+      
+      Class c = super.defineClass(name, code);
+      return c;
     }
 
     /**
-     * Try to load the class ourselves. We do this so its classloader property
-     * will be set to this loader, so all other classes that are referenced
-     * from this class will be loaded by our loader.
-     * @exception ClassNotFoundException
+     * Delegates all resource requests to {@link #classLoader}.
+     * This method is called by the {@link StickyClassLoader}.
      */
-    protected Class findClass(String name) throws ClassNotFoundException {
-      //System.err.println("findClass: " + name);
+    public URL getResource(String name) {
+      return classLoader.getResource(name);
+    }
+
+    protected Class loadClass(String name, boolean resolve)
+      throws ClassNotFoundException
+    {
+      Class clazz;
+
       // check the cache
       if (classes.containsKey(name)) {
-        return  (Class)classes.get(name);
-      }
-
-      try {
-        // classLoader contains URL class loaders to load from other
-        // paths/urls. if we have one, try to load there.
-        if (classLoader != null) {
-          // getResourceAsStream finds a file that's in the classpath. It's
-          // generally used to load resources (like images) from the same
-          // location as class files. However for our purposes of loading the
-          // bytes of a class file, this works perfectly. It will find the class
-          // in any place in the classpath, and it doesn't force us to search
-          // the classpath ourselves.
-          // (The classpath includes URLs to other places even!)
-          String fileName = name.replace('.', '/') + ".class";
-          InputStream stream = classLoader.getResourceAsStream(fileName);
-          if (stream == null) {
-            throw  new IOException();
-          }
-          byte[] data = new byte[stream.available()];
-          stream.read(data);
-          return  defineClass(name, data, 0, data.length);
-        }
-      }
-      catch (Throwable t) {}
-
-      // Now try to just use the standard loader
-      // Before, we didn't do this, and it resulted in getting some
-      // class format errors (illegal constant pool) when loading.
-      // i don't know why, but some classes seem to need to be loaded
-      // using standard loader.
-      ClassLoader l;
-      if (classLoader != null) {
-        l = classLoader;
+        clazz = (Class) classes.get(name);
       }
       else {
-        l = ClassLoader.getSystemClassLoader();
+        try {
+          clazz = _stickyLoader.loadClass(name);
+        }
+        catch (ClassNotFoundException e) {
+          // If it exceptions, just fall through to here to try the interpreter.
+          // If all else fails, try loading the class through the interpreter.
+          // That's used for classes defined in the interpreter.
+          clazz = interpreter.loadClass(name);
+
+
+        }
       }
 
-      try {
-        return l.loadClass(name);
+      if (resolve) {
+        resolveClass(clazz);
       }
-      catch (Throwable t) {}
 
-      // If it exceptions, just fall through to here to try the interpreter.
-      // If all else fails, try loading the class through the interpreter.
-      // That's used for classes defined in the interpreter.
-      return  interpreter.loadClass(name);
+      return clazz;
     }
   }
 }
-
-
-/** Figures out whether a class can be loaded by a custom class loader or not. */
-class ClassLoadChecker {
-  private final SecurityManager _security = System.getSecurityManager();
-  /**
-   * Map of package name (string) to whether must use system loader (boolean).
-   */
-  private HashMap _checkedPackages = new HashMap();
-
-  /**
-   * If name begins with java., must use System loader. This
-   * is regardless of the security manager.
-   * javax. too, though this is not documented
-   * @param name
-   * @return 
-   */
-  public boolean mustUseSystemLoader(String name) {
-    // If name begins with java., must use System loader. This
-    // is regardless of the security manager.
-    // javax too, though this is not documented
-    // And com.sun.tools.javac.* doesn't seem to work unless
-    // I use the system loader! Also never documented!
-    if (name.startsWith("java.") ||
-        name.startsWith("javax.") ||
-        name.startsWith("com.sun."))
-    {
-      return true;
-    }
-    // No security manager? We can do whatever we want!
-    if (_security == null) {
-      return  false;
-    }
-    int lastDot = name.lastIndexOf('.');
-    String packageName;
-    if (lastDot == -1) {
-      packageName = "";
-    } 
-    else {
-      packageName = name.substring(0, lastDot);
-    }
-    // Check the cache first
-    Object cacheCheck = _checkedPackages.get(packageName);
-    if (cacheCheck != null) {
-      return  ((Boolean)cacheCheck).booleanValue();
-    }
-    // Now try to get the package info. If it fails, it's a system class.
-    try {
-      _security.checkPackageDefinition(packageName);
-      // Succeeded, so does not require system loader.
-      _checkedPackages.put(packageName, Boolean.FALSE);
-      return  false;
-    } 
-    catch (SecurityException se) {
-      // Failed, so does require system loader.
-      _checkedPackages.put(packageName, Boolean.TRUE);
-      return  true;
-    }
-  }
-}
-
-

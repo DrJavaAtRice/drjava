@@ -114,6 +114,36 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   }
 
   /**
+   * Checks that an anonymous inner class can be defined in the repl!
+   */
+  public void testInteractionsDefineAnonymousInnerClass()
+    throws BadLocationException, IOException
+  {
+    final String interface_text = "public interface I { int getValue(); }";
+    final File file = createFile("I.java");
+
+    OpenDefinitionsDocument doc;
+
+    doc = setupDocument(interface_text);
+    doc.saveFile(new FileSelector(file));
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
+    _model.addListener(listener);
+
+    doc.startCompile();
+    listener.checkCompileOccurred();
+    assertCompileErrorsPresent(false);
+    _model.removeListener(listener);
+
+    for (int i = 0; i < 5; i++) {
+      String s = "new I() { public int getValue() { return " + i + "; } }.getValue()";
+
+      assertEquals("interactions result, i=" + i,
+                   String.valueOf(i),
+                   interpret(s));
+    }
+  }
+
+  /**
    * Exits the program without opening any documents.
    */
   public void testQuitNoDocuments() {

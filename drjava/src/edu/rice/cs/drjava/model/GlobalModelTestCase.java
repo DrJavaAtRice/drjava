@@ -93,6 +93,10 @@ public abstract class GlobalModelTestCase extends TestCase {
     return FileOps.createTempDirectory("DrJava-test", _tempDir);
   }
 
+  protected File createFile(String name) { 
+    return new File(_tempDir, name);
+  }
+
   /**
    * Given a .java file and a class file name,
    * returns the corresponding .class file.
