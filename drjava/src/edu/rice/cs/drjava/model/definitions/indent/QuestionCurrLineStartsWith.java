@@ -52,7 +52,6 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  */
 public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
   private String _prefix;
-  private boolean _searchComments;
   
   /**
    * Constructs a new rule for the given prefix string.

@@ -75,6 +75,6 @@ public class QuestionBraceIsParenOrBracket extends IndentRuleQuestion
     IndentInfo info = doc.getReduced().getIndentInformation();
 
     return info.braceType.equals(IndentInfo.openParen) 
-	|| info.braceType.equals(IndentInfo.openBracket); 
+      || info.braceType.equals(IndentInfo.openBracket); 
   }
 }
