@@ -1033,20 +1033,38 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _selStart = len;
       _selEnd = len;
     }
-    
-    setCaretPosition(_position);
-    if(_position == _selStart){
-      setCaretPosition(_selEnd);
-      moveCaretPosition(_selStart);
-    }else{
-      setCaretPosition(_selStart);
-      moveCaretPosition(_selEnd);
+//    setCaretPosition(_position);
+    Object _lock = new Object();
+    synchronized(_lock) {
+      if(_position == _selStart){
+        setCaretPosition(_selEnd);
+        moveCaretPosition(_selStart);
+        _doc.setCurrentLocation(_selStart);
+      }else{
+        setCaretPosition(_selStart);
+        moveCaretPosition(_selEnd);
+        _doc.setCurrentLocation(_selEnd);
+      }
     }
-    _doc.setCurrentLocation(_position);
-    _scrollPane.getVerticalScrollBar().setValue(_savedVScroll);
-    _scrollPane.getHorizontalScrollBar().setValue(_savedHScroll);
+    synchronized(_lock) {
+      _scrollPane.getVerticalScrollBar().setValue(_savedVScroll);
+      _scrollPane.getHorizontalScrollBar().setValue(_savedHScroll);
+    }
   }
   
+  public int getVerticalScroll() {
+    if (getDocument() == NULL_DOCUMENT)
+      return _savedVScroll;
+    else 
+      return _scrollPane.getVerticalScrollBar().getValue();    
+  }
+  
+  public int getHorizontalScroll() {
+    if (getDocument() == NULL_DOCUMENT)
+      return _savedHScroll;
+    else 
+      return _scrollPane.getHorizontalScrollBar().getValue();
+  }
   
   public int getCurrentLine() {
     try {

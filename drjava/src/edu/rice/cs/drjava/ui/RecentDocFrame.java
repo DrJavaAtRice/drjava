@@ -226,8 +226,11 @@ public class RecentDocFrame extends JWindow{
         docfile = null;
       }
       String text = getTextFor(doc);
+      
+      _fdm = _frame.getFileDisplayManager30(doc.isModifiedSinceSave());
       _label.setText(_fdm.getName(docfile));
       _label.setIcon(_fdm.getIcon(docfile));
+      
       if(text.length() > 0){
         // as wide as the text area wants, but only 200px high
         _textpane.setText(text);

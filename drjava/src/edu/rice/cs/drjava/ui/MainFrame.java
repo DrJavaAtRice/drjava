@@ -1506,22 +1506,42 @@ public class MainFrame extends JFrame implements OptionConstants {
   // ------------- File Display Managers for File Icons ------------
   
   private static DJFileDisplayManager _djFileDisplayManager20;
+  private static DJFileDisplayManager _djFileDisplayManagerM20;
   private static DJFileDisplayManager _djFileDisplayManager30;
-  
+  private static DJFileDisplayManager _djFileDisplayManagerM30;
+  private static Icon _djProjectIcon;
   static {
-    Icon java, dj0, dj1, dj2;
+    Icon java, dj0, dj1, dj2, other;
     
     java = MainFrame.getIcon("JavaIcon20.gif");
     dj0 = MainFrame.getIcon("ElementaryIcon20.gif");
     dj1 = MainFrame.getIcon("IntermediateIcon20.gif");
     dj2 = MainFrame.getIcon("AdvancedIcon20.gif");
-    _djFileDisplayManager20 = new DJFileDisplayManager(java,dj0,dj1,dj2);
+    other = MainFrame.getIcon("OtherIcon20.gif");
+    _djFileDisplayManager20 = new DJFileDisplayManager(java,dj0,dj1,dj2,other);
     
     java = MainFrame.getIcon("JavaIcon30.gif");
     dj0 = MainFrame.getIcon("ElementaryIcon30.gif");
     dj1 = MainFrame.getIcon("IntermediateIcon30.gif");
     dj2 = MainFrame.getIcon("AdvancedIcon30.gif");
-    _djFileDisplayManager30 = new DJFileDisplayManager(java,dj0,dj1,dj2);
+    other = MainFrame.getIcon("OtherIcon30.gif");
+    _djFileDisplayManager30 = new DJFileDisplayManager(java,dj0,dj1,dj2,other);
+    
+    java = MainFrame.getIcon("JavaMIcon20.gif");
+    dj0 = MainFrame.getIcon("ElementaryMIcon20.gif");
+    dj1 = MainFrame.getIcon("IntermediateMIcon20.gif");
+    dj2 = MainFrame.getIcon("AdvancedMIcon20.gif");
+    other = MainFrame.getIcon("OtherMIcon20.gif");
+    _djFileDisplayManagerM20 = new DJFileDisplayManager(java,dj0,dj1,dj2,other);
+    
+    java = MainFrame.getIcon("JavaMIcon30.gif");
+    dj0 = MainFrame.getIcon("ElementaryMIcon30.gif");
+    dj1 = MainFrame.getIcon("IntermediateMIcon30.gif");
+    dj2 = MainFrame.getIcon("AdvancedMIcon30.gif");
+    other = MainFrame.getIcon("OtherMIcon30.gif");
+    _djFileDisplayManagerM30 = new DJFileDisplayManager(java,dj0,dj1,dj2,other);
+    
+    _djProjectIcon = MainFrame.getIcon("ProjectIcon.gif");
   }
   
   /**
@@ -1535,12 +1555,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     private Icon _dj0;
     private Icon _dj1;
     private Icon _dj2;
+    private Icon _other;
     
-    public DJFileDisplayManager(Icon java, Icon dj0, Icon dj1, Icon dj2) {
+    public DJFileDisplayManager(Icon java, Icon dj0, Icon dj1, Icon dj2, Icon other) {
       _java = java;
       _dj0 = dj0;
       _dj1 = dj1;
       _dj2 = dj2;
+      _other = other;
     }
     
     /**
@@ -1550,6 +1572,7 @@ public class MainFrame extends JFrame implements OptionConstants {
      * ui/icons directory.
      */
     public Icon getIcon(File f) {
+      if (f == null) return _other;
       Icon ret = null;
       if (!f.isDirectory()) {
         String name = f.getName().toLowerCase();
@@ -1565,15 +1588,44 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   
-  public static FileDisplayManager getFileDisplayManager20() {
-    return _djFileDisplayManager20;
-  }
+  private DisplayManager<INavigatorItem> _navPaneDisplayManager = new DisplayManager<INavigatorItem>() {
+    public Icon getIcon(INavigatorItem item) {
+      OpenDefinitionsDocument odd = _model.getODDGivenIDoc(item);
+      File f = null;
+      try {
+        f = odd.getFile();
+      }
+      catch (IllegalStateException ise) {
+      }
+      catch (FileMovedException fme) {
+      }
+      if (odd.isModifiedSinceSave())
+        return _djFileDisplayManagerM20.getIcon(f);
+      else 
+        return _djFileDisplayManager20.getIcon(f);
+    }
+    public String getName(INavigatorItem name) {
+      return name.getName();
+    }
+  };
   
-  public static FileDisplayManager getFileDisplayManager30() {
-    return _djFileDisplayManager30;
+  
+  public static DJFileDisplayManager getFileDisplayManager20(boolean modified) {
+    return modified ? _djFileDisplayManagerM20 : _djFileDisplayManager20;
+  }
+  public static DJFileDisplayManager getFileDisplayManager20() {
+    return getFileDisplayManager20(false);
+  }
+  public static DJFileDisplayManager getFileDisplayManager30(boolean modified) {
+    return modified ? _djFileDisplayManagerM30 : _djFileDisplayManager30;
+  }
+  public static DJFileDisplayManager getFileDisplayManager30() {
+    return getFileDisplayManager30(false);
   }
 
-
+  public DisplayManager<INavigatorItem> getNavPaneDisplayManager() {
+    return _navPaneDisplayManager;
+  }
 
 
 
@@ -2394,6 +2446,11 @@ public class MainFrame extends JFrame implements OptionConstants {
    * as dictated by the model.
    */
   private void _resetNavigatorPane() {
+    if (_model.getDocumentNavigator() instanceof JTreeSortNavigator) {
+      JTreeSortNavigator nav = (JTreeSortNavigator)_model.getDocumentNavigator();
+      nav.setDisplayManager(getNavPaneDisplayManager());
+      nav.setRootIcon(_djProjectIcon);
+    }
     _docSplitPane.remove(_docSplitPane.getLeftComponent());
     _docSplitPane.setLeftComponent(new JScrollPane(_model.getDocumentNavigator().asContainer()));
     Font doclistFont = DrJava.getConfig().getSetting(FONT_DOCLIST);
@@ -2938,8 +2995,8 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
       public Pair<Integer,Integer> getScroll() {
-        int scrollv = scroller.getVerticalScrollBar().getValue();
-        int scrollh = scroller.getHorizontalScrollBar().getValue();
+        int scrollv = pane.getVerticalScroll();
+        int scrollh = pane.getHorizontalScroll();
         return new Pair<Integer,Integer>(scrollv,scrollh); 
       }
       public File getFile(){
@@ -3250,28 +3307,33 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   
   private void _runProject(){
-    try {
-      final File f = _model.getMainClass();
-      if(f != null){
-        OpenDefinitionsDocument doc = _model.getDocumentForFile(f);
-        doc.runMain();
+    if (_model.isProjectActive()){
+      try {
+        final File f = _model.getMainClass();
+        if(f != null){
+          OpenDefinitionsDocument doc = _model.getDocumentForFile(f);
+          doc.runMain();
+        }
+      }
+      catch (ClassNameNotFoundException e) {
+        // Display a warning message if a class name can't be found.
+        String msg =
+          "DrJava could not find the top level class name in the\n" +
+          "current document, so it could not run the class.  Please\n" +
+          "make sure that the class is properly defined first.";
+        
+        JOptionPane.showMessageDialog(MainFrame.this, msg, "No Class Found",
+                                      JOptionPane.ERROR_MESSAGE);
+      }
+      catch (FileMovedException fme) {
+        _showFileMovedError(fme);
+      }
+      catch (IOException ioe) {
+        _showIOError(ioe);
       }
     }
-    catch (ClassNameNotFoundException e) {
-      // Display a warning message if a class name can't be found.
-      String msg =
-        "DrJava could not find the top level class name in the\n" +
-        "current document, so it could not run the class.  Please\n" +
-        "make sure that the class is properly defined first.";
-
-      JOptionPane.showMessageDialog(MainFrame.this, msg, "No Class Found",
-                                    JOptionPane.ERROR_MESSAGE);
-    }
-    catch (FileMovedException fme) {
-      _showFileMovedError(fme);
-    }
-    catch (IOException ioe) {
-      _showIOError(ioe);
+    else {
+      _runMain();
     }
   }
   
@@ -4117,7 +4179,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     projectMenu.add(_cleanAction);
     projectMenu.add(_compileOpenProjectAction);
     projectMenu.add(_compileProjectAction);
-    projectMenu.add(_runProjectAction);
+    _addMenuItem(projectMenu, _runProjectAction, KEY_RUN_MAIN);
     projectMenu.add(_junitOpenProjectFilesAction);
     projectMenu.add(_junitProjectAction);
     

@@ -1409,8 +1409,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
     IDocumentNavigator newNav = 
       AWTContainerNavigatorFactory.Singleton.makeTreeNavigator(projfilepath, getDocumentNavigator(), l);
-
-    
+        
     setDocumentNavigator(newNav);
     
     File buildDir = ir.getBuildDirectory();

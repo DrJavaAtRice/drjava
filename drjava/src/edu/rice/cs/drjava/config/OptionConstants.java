@@ -535,10 +535,16 @@ public interface OptionConstants {
     new KeyStrokeOption("key.compile.all", KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
 
   /**
-   * The key binding for openning the preferences dialog
+   * The key binding for running the main method of the current document
    */
   public static final KeyStrokeOption KEY_RUN =
     new KeyStrokeOption("key.run", KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0));
+  
+  /**
+   * The key binding for running the project's main document
+   */
+  public static final KeyStrokeOption KEY_RUN_MAIN =
+    new KeyStrokeOption("key.run.main", KeyStroke.getKeyStroke(KeyEvent.VK_F4, 0));
 
   /**
    * The key binding for testing the current document
