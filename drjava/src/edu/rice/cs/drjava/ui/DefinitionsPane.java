@@ -346,77 +346,127 @@ public class DefinitionsView extends JEditorPane
     }
   }
 
-
 		public void findReplace () {
 				FindReplaceDialog box = new FindReplaceDialog(_mainFrame, this);
 		}
 
-		public int findText (String fWord) {
-				System.out.println("find " + fWord);
-				return findNextText(fWord, 0);
+	public boolean findNextText(String fWord)
+		{
+			return findNextTextHelper(fWord, true, false);
 		}
-
-		public int findNextText (String fWord, int currentPosition) {
-				System.out.println("findnext " + fWord);
-				String text = "";
-				try {
-						text = _doc().getText(0, _doc().getLength());
-				} catch (BadLocationException WillNeverHappen){}
-						
-				int place = text.indexOf(fWord, currentPosition);
-
-				if (place == -1) {
-						Toolkit.getDefaultToolkit().beep();
-				} else {
-						_selectWord(place, fWord.length());
-				}
-				return place;
+	
+	boolean findNextTextHelper(String fWord, boolean interactive,
+														 boolean confirm) {
+		int currentPosition = getCaretPosition();
+		boolean found = _findNextText(fWord, currentPosition, _doc().getLength());
+		if ((!found) && (currentPosition > 0)) {
+			if (interactive)
+				confirm = (JOptionPane.showConfirmDialog(null,
+																		 "Continue searching from start of file?",
+																		 "Continue search?",
+																		 JOptionPane.YES_NO_OPTION) ==
+									 JOptionPane.YES_OPTION);
+			if(confirm)
+				found = _findNextText(fWord, 0, currentPosition);
 		}
+		return found;
+	}
+	
+	private boolean _findNextText (String fWord, int start, int end) {
+		String text = "";
+		try {
+			text = _doc().getText(start, end-start);
+		} catch (BadLocationException WillNeverHappen){}
+		
+		
+		int place = text.indexOf(fWord);
+		if (place == -1) {
+			return false;
+		} else {
+			_selectWord(start + place, fWord.length());
+			return true;
+		}
+	}
+	
+	/** Replaces first word that matches fWord.  Invariant: word has been found.
+	 */
+	public boolean replaceText(String fWord, String rWord) {
+		// getSelectedText could return null, so fWord must call the equals
+		if (fWord.equals(getSelectedText())) {
+			int start = getSelectionStart();
+			int length = getSelectionEnd() - start;
+			
+			try {
+				_doc().remove(start, length);
+				_doc().insertString(start, rWord, null);
+				_selectWord(start, rWord.length());
+			} catch (BadLocationException e) {}
+			return true;
+		} else 
+			return false;
+	}
+	
+	public boolean replaceFindText(String fWord, String rWord) {
+		return replaceFindTextHelper(fWord, rWord, true, false);
+	}				
 
-		/** Replaces first word that matches fWord.  Invariant: word has been found.
-		 */
-		public int replaceText(String fWord, String rWord, int currentPosition) {
-				try {
-						String text = "";
-												
-						text = _doc().getText(0, _doc().getLength());
-												
-						int place = text.indexOf(fWord, currentPosition);
-						if (place == -1)
-								return -1;
-						
-						_doc().remove(place, fWord.length());
-						_doc().insertString(place, rWord, null);
-						_selectWord(place, rWord.length());
-						return place + rWord.length();
-				} catch (BadLocationException WillNeverHappen){
-						System.out.println("HOLY MOTHER OF JESUS");
-						return 0;
+	boolean replaceFindTextHelper(String fWord, String rWord,
+																boolean interactive, boolean confirm) {
+		boolean good = replaceText(fWord, rWord);
+		
+		if (good)
+			good = findNextTextHelper(fWord, interactive, confirm);
+		
+		return good;
+	}
+
+	public int replaceAllText(String fWord, String rWord) {
+		return replaceAllTextHelper(fWord, rWord, true, false);
+	}
+	
+	int replaceAllTextHelper(String fWord, String rWord,
+														boolean interactive, boolean confirm) {
+		int currentPosition = getCaretPosition();
+		int count = 0;
+		
+		count += _replaceAllText(fWord, rWord, _doc().getLength());
+		//insert confirm
+		if (currentPosition > 0)
+			{
+				if (interactive)
+				confirm = (JOptionPane.showConfirmDialog(null,
+																		 "Continue searching from start of file?",
+																		 "Continue search?",
+																		 JOptionPane.YES_NO_OPTION) ==
+									 JOptionPane.YES_OPTION);
+				if (confirm) {
+					setCaretPosition(0);
+					count += _replaceAllText(fWord, rWord, currentPosition);
 				}
+				
+			}
+		// unselect
+		setCaretPosition(getSelectionEnd());
+		return count;
+	}
+
+	private int _replaceAllText(String fWord, String rWord, int end) {
+		int position = getCaretPosition();
+		int count = 0;
+		while (_findNextText(fWord, position, end)) {
+			replaceText(fWord, rWord);
+			end += rWord.length() - fWord.length();
+			position = getCaretPosition();
+			count++;
 		}
 		
-		public int replaceAllText(String fWord, String rWord, int currentPosition) {
-				_replaceAllText(fWord, rWord, currentPosition, _doc().getLength());
-				//insert confirm
-				_replaceAllText(fWord, rWord, 0, currentPosition);
-				return 0;
-		}
-
-		private void _replaceAllText(String fWord, String rWord, int start, int end) {
-				int position = start;
-				while (position < end) {
-						int tmp = findNextText(fWord, position);
-						if ((tmp == -1) || (tmp >= end))
-								break;
-						else
-								position = replaceText(fWord, rWord, tmp);
-				}
-		}
-
-		private void _selectWord(int place, int wordLength) {
-	 			setCaretPosition(place);
-				moveCaretPosition(place + wordLength);
-				return;
-		}
-
+		return count;
+	}
+	
+	private void _selectWord(int place, int wordLength) {
+		setCaretPosition(place);
+		moveCaretPosition(place + wordLength);
+		return;
+	}
+	
 }

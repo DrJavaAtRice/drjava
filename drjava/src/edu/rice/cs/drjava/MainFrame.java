@@ -248,7 +248,7 @@ public class MainFrame extends JFrame
 
 
     //getContentPane().setLayout(new BoxLayout(getContentPane(),BoxLayout.Y_AXIS));
-    show();
+//    show();
     setSize(300, 500);
 
     // This is annoyingly order-dependent. Since split2 contains split1,
@@ -267,5 +267,10 @@ public class MainFrame extends JFrame
     setTitle(filename + " - DrJava");
     _fileNameField.setText(filename);
   }
+		
+		DefinitionsView getDefView()
+		{
+				return _definitionsView;
+		}
 }
 

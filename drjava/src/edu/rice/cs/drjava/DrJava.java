@@ -21,6 +21,7 @@ public class DrJava {
     _consoleErr = System.err;
 
     MainFrame mf = new MainFrame();
+		mf.show();
   }
 
   public static PrintStream consoleErr() { return _consoleErr; }

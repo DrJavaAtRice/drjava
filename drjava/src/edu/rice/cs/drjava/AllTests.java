@@ -18,7 +18,7 @@ public class AllTests
     allSuite.addTest(ReducedModelTest.suite());
 		allSuite.addTest(ReducedModelDeleteTest.suite());
 		allSuite.addTest(BackSlashTest.suite());
-		
+		allSuite.addTest(FindReplaceTest.suite());
     return allSuite;
   }
 }
