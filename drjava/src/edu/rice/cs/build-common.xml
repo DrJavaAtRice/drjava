@@ -77,7 +77,7 @@
 </target>
 
 <target name="check_for_jsr14" unless="jsr14_ok">
-  <fail message=" JSR-14 prototype compiler was not found. A jar file containing the compiler must be put in ${lib_dir}/jsr14.jar. (We can not distribute the jar for licensing reasons.) To download jsr14, go to http://developer.java.sun.com/developer/earlyAccess/adding_generics. Then unzip the file you downloaded, and move the included javac.jar to lib/jsr14.jar." />
+  <fail message=" JSR-14 prototype compiler was not found. A jar file containing the compiler must be put in ${lib_dir}/jsr14.jar. (We can not distribute the jar for licensing reasons.) To download jsr14, go to http://developer.java.sun.com/developer/earlyAccess/adding_generics. Then unzip the file you downloaded, and move the included javac.jar (or gjc-rt.jar) to lib/jsr14.jar." />
 </target>
 
 <!-- Reconcile source with CVS archive -->
