@@ -75,7 +75,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
   /**
    * List of listeners to this document.
    */
-  protected final LinkedList _listeners;
+  protected final LinkedList<InteractionsListener> _listeners;
 
   /**
    * Whether we have already warned the user to reset after a compilation
@@ -100,7 +100,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
                                   SWTDocumentAdapter adapter)
   {
     super(control, adapter, HISTORY_SIZE, WRITE_DELAY);
-    _listeners = new LinkedList();
+    _listeners = new LinkedList<InteractionsListener>();
     _warnedToReset = false;
     if (DEBUG) {
       _debugSystemOutAndErr();
@@ -181,7 +181,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
    */
   protected void _notifyInteractionStarted() {
     for (int i=0; i < _listeners.size(); i++) {
-      ((InteractionsListener)_listeners.get(i)).interactionStarted();
+      _listeners.get(i).interactionStarted();
     }
   }
 
