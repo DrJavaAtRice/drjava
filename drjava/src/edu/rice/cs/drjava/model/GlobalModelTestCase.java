@@ -421,6 +421,7 @@ public abstract class GlobalModelTestCase extends TestCase {
     protected int interactionsResetCount;
     protected int interactionsExitedCount;
     protected int saveBeforeProceedingCount;
+    protected int nonTestCaseCount;
     protected int lastExitStatus;
 
     public TestListener() {
@@ -440,6 +441,8 @@ public abstract class GlobalModelTestCase extends TestCase {
       consoleResetCount = 0;
       interactionsResetCount = 0;
       saveBeforeProceedingCount = 0;
+      nonTestCaseCount = 0;
+      lastExitStatus = 0;
     }
 
     public void assertAbandonCount(int i) {
@@ -509,6 +512,13 @@ public abstract class GlobalModelTestCase extends TestCase {
                    i,
                    saveBeforeProceedingCount);
     }
+    
+    public void assertNonTestCaseCount(int i) {
+      assertEquals("number of times nonTestCase fired",
+                   i,
+                   nonTestCaseCount);
+    }
+    
     public void newFileCreated(OpenDefinitionsDocument doc) {
       fail("newFileCreated fired unexpectedly");
     }
@@ -563,6 +573,10 @@ public abstract class GlobalModelTestCase extends TestCase {
 
     public void saveBeforeProceeding(GlobalModelListener.SaveReason reason) {
       fail("saveBeforeProceeding fired unexpectedly");
+    }
+    
+    public void nonTestCase() {
+      fail("nonTestCase fired unexpectedly");
     }
 
     public boolean canAbandonFile(OpenDefinitionsDocument doc) {

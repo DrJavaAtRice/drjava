@@ -135,10 +135,14 @@ public interface GlobalModelListener {
 
   /**
    * Called to demand that the listeners save the current document
-   * before the GlobalModel can proceed with another action.  Right
-   * now, this is only used by GlobalModel.startCompile().
+   * before the GlobalModel can proceed with another action.  
    */
   public void saveBeforeProceeding(SaveReason reason);
+  
+  /**
+   * Called when trying to test a non-TestCase class.
+   */
+  public void nonTestCase();
 
   /**
    * Called to ask the listener if it is OK to abandon the current

@@ -94,7 +94,7 @@ public class DefaultGlobalModel implements GlobalModel {
   private final StyledDocument _junitDoc = new DefaultStyledDocument();
   private final LinkedList _listeners = new LinkedList();
   private PageFormat _pageFormat = new PageFormat();
-  private final TestRunner _junitTestRunner = new JUnitTestRunner(this);
+  private final JUnitTestRunner _junitTestRunner = new JUnitTestRunner(this);
   
   // blank final, set differently in the two constructors
   private final MainJVM _interpreterControl;
@@ -209,7 +209,7 @@ public class DefaultGlobalModel implements GlobalModel {
     _pageFormat = format;
   }
   
-  public TestRunner getTestRunner() {
+  public JUnitTestRunner getTestRunner() {
     return _junitTestRunner;
   }
   
@@ -965,7 +965,7 @@ public class DefaultGlobalModel implements GlobalModel {
     /**
      * Runs JUnit on the current document.
      *
-     * @return The results of running the test/s specified in the
+     * @return The results of running the tests specified in the
      * given definitions document.
      */
     public TestResult startJUnit() throws IOException {
@@ -995,7 +995,7 @@ public class DefaultGlobalModel implements GlobalModel {
           throw new UnexpectedException(e);
         }
         
-        TestRunner testRunner = getTestRunner();
+        JUnitTestRunner testRunner = getTestRunner();
         
         String testFilename = testFile.getName();
         if(testFilename.toLowerCase().endsWith(".java")) {
@@ -1015,7 +1015,22 @@ public class DefaultGlobalModel implements GlobalModel {
         if(!packageName.equals("")) {
           testFilename = packageName + "." + testFilename;
         }
-        Test suite= testRunner.getTest(testFilename);
+        try {
+          if (! testRunner.isTestCase(testFilename)) {
+            notifyListeners(new EventNotifier() {
+              public void notifyListener(GlobalModelListener l) {
+              l.nonTestCase();
+              l.junitEnded();
+            }
+            });
+            return null;
+          }
+        }
+        catch (ClassNotFoundException e) {
+          throw new UnexpectedException(e);
+        }
+        
+        Test suite = testRunner.getTest(testFilename);
         TestResult testResult = testRunner.doRun(suite, false);
         
         notifyListeners(new EventNotifier() {
@@ -1024,7 +1039,8 @@ public class DefaultGlobalModel implements GlobalModel {
         }
         });
         return testResult;
-      } catch (IllegalStateException e) {
+      } 
+      catch (IllegalStateException e) {
         // No file exists, don't try to compile and test
         return null;
       }

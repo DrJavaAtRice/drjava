@@ -55,25 +55,25 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 public class DefinitionsEditorKit extends DefaultEditorKit {
   private static final ViewFactory _factory = new ViewFactory() {
     public View create(Element elem) {
-	// The following line is for performance analysis only!
-	// return new WrappedPlainView(elem, true);
-	return new ColoringView(elem);
+      // The following line is for performance analysis only!
+      // return new WrappedPlainView(elem, true);
+      return new ColoringView(elem);
     }
   };
-
+  
   /** Factory method to make this view create correct model objects. */
   public Document createDefaultDocument() {
     return  _createDefaultTypedDocument();
   }
-
+  
   /**
    * Creates a new DefinitionsDocument.
    * @return a new DefinitionsDocument.
    */
   private static DefinitionsDocument _createDefaultTypedDocument() {
-    return  new DefinitionsDocument();
+    return new DefinitionsDocument();
   }
-
+  
   /**
    * Get the MIME content type of the document.
    * @return "text/java"
@@ -81,14 +81,14 @@ public class DefinitionsEditorKit extends DefaultEditorKit {
   public String getContentType() {
     return "text/java";
   }
-
+  
   /**
    * We want to use our ColoringView to render text, so here we return
    * a factory that creates ColoringViews.
    */
-   public final ViewFactory getViewFactory() {
-     return _factory;
-   }
+  public final ViewFactory getViewFactory() {
+    return _factory;
+  }
 }
 
 

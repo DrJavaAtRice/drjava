@@ -82,16 +82,16 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
     _doc = model.getJUnitDocument();
     _classLoader = new DrJavaTestClassLoader(model);
     _writer =  new PrintStream(System.out) {
-	public void print(String s) {
-	  _docAppend(s);
-	}
-	public void println(String s) {
-	  print(s + "\n");
-	}
-	public void println() {
-	  print("\n");
-	}
-      };
+      public void print(String s) {
+        _docAppend(s);
+      }
+      public void println(String s) {
+        print(s + "\n");
+      }
+      public void println() {
+        print("\n");
+      }
+    };
   }
 
   /**
@@ -113,9 +113,10 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
   private void _docAppend(String text) {
     try {
       _doc.insertString(_doc.getLength(), 
-			text, 
-			DefaultGlobalModel.SYSTEM_OUT_STYLE);
-    } catch (BadLocationException e) {
+                        text, 
+                        DefaultGlobalModel.SYSTEM_OUT_STYLE);
+    } 
+    catch (BadLocationException e) {
       throw new UnexpectedException(e);
     }
   }
@@ -126,6 +127,15 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
    */
   public TestSuiteLoader getLoader() {
     return _classLoader;
+  }
+  
+  /**
+   * Checks whether the given file name corresponds to 
+   * a valid JUnit TestCase.
+   */
+  public boolean isTestCase(String fileName) throws ClassNotFoundException {
+    return Class.forName("junit.framework.TestCase")
+      .isAssignableFrom(loadSuiteClass(fileName));
   }
 
   /**

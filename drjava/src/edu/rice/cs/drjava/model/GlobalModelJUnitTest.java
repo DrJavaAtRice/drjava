@@ -35,7 +35,7 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
@@ -65,7 +65,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     "    assertEquals(\"monkey\", \"monkey\"); " +
     "  } " +
     "}";
-
+  
   private static final String MONKEYTEST_FAIL_TEXT =
     "import junit.framework.*; " + 
     "public class MonkeyTestFail extends TestCase { " +
@@ -74,7 +74,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     "    assertEquals(\"monkey\", \"baboon\"); " +
     "  } " +
     "}";
-
+  
   private static final String MONKEYTEST_COMPILEERROR_TEXT =
     "import junit.framework.*; " + 
     "public class MonkeyTestCompileError extends TestCase { " +
@@ -83,7 +83,10 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     "    assertEquals(\"monkey\", \"baboon\"); " +
     "  } " +
     "}";
-
+  
+  private static final String NON_TESTCASE_TEXT =
+    "public class NonTestCase {}";
+  
   /**
    * Constructor.
    * @param  String name
@@ -91,7 +94,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
   public GlobalModelJUnitTest(String name) {
     super(name);
   }
-
+  
   /**
    * Creates a test suite for JUnit to run.
    * @return a test suite based on the methods in this class
@@ -99,7 +102,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
   public static Test suite() {
     return  new TestSuite(GlobalModelJUnitTest.class);
   }
-
+  
   /**
    * Tests that startJUnit() does not execute if there are compile 
    * errors in the file
@@ -109,9 +112,9 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_COMPILEERROR_TEXT);
     final File file = new File(_tempDir, "MonkeyTestCompileError.java");
     doc.saveFile(new FileSelector(file));
-
+    
     CompileShouldFailListener listener = new CompileShouldFailListener();
-
+    
     _model.addListener(listener);
     doc.startJUnit();
     listener.checkCompileOccurred();
@@ -119,7 +122,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitStartCount(0);
     listener.assertJUnitEndCount(0);
   }
-
+  
   /**
    * Tests that startJUnit() does not execute if the user runs it
    * with an unsaved file and then chooses not to save the file.
@@ -128,7 +131,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     throws BadLocationException, IOException {
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
-
+    
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
       public void junitStarted() { junitStartCount++; }
       public void junitEnded() { junitEndCount++; }
@@ -138,23 +141,23 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
         assertSaveCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
-
+        
         try {
           doc.saveFile(new CancelingSelector());
         }
         catch (IOException ioe) {
           fail("Save produced exception: " + ioe);
         }
-
+        
         saveBeforeProceedingCount++;
       }
-
+      
       public void fileSaved(OpenDefinitionsDocument doc) {
         assertModified(false, doc);
         assertSaveBeforeProceedingCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
-
+        
         File f = null;
         try {
           f = doc.getFile();
@@ -167,20 +170,20 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
         saveCount++;
       }
     };
-
+    
     _model.addListener(listener);
     doc.startJUnit();
-
+    
     // Check events fired
     listener.assertSaveBeforeProceedingCount(1);
     listener.assertSaveCount(0);
     listener.assertJUnitStartCount(0);
     listener.assertJUnitEndCount(0);
   }
-
-
-
-
+  
+  
+  
+  
   /**
    * Tests that a JUnit file with no errors is reported to have no errors.
    */
@@ -191,18 +194,18 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     doc.startCompile();
     // Clear document so we can make sure it's written to after startJUnit
     _model.getJUnitDocument().remove(0, 
-				     _model.getJUnitDocument().getLength() - 1);
+                                     _model.getJUnitDocument().getLength() - 1);
     final TestResult testResults = doc.startJUnit();
-
+    
     assertEquals("test case should have no errors reported",
-		 0,
-		 testResults.failureCount());
-
+                 0,
+                 testResults.failureCount());
+    
     assertTrue("junit document should have been written to " +
-	       "so it's length should be greater than zero",
-	       _model.getJUnitDocument().getLength() > 0);
+               "so it's length should be greater than zero",
+               _model.getJUnitDocument().getLength() > 0);
   }
-		 
+  
   /**
    * Tests that a JUnit file with an error is reported to have an error.
    */
@@ -214,25 +217,26 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     // Clear document so we can make sure it's written to after startJUnit
     _model.getJUnitDocument().remove(0, _model.getJUnitDocument().getLength() - 1);
     final TestResult testResults = doc.startJUnit();
-
+    
     assertEquals("test case has one error reported",
-		 1,
-		 testResults.failureCount());
-
+                 1,
+                 testResults.failureCount());
+    
     assertTrue("junit document should have been written to " +
-	       "so it's length should be greater than zero",
-	       _model.getJUnitDocument().getLength() > 0);
+               "so it's length should be greater than zero",
+               _model.getJUnitDocument().getLength() > 0);
   }
-
+  
   /**
    * Tests that startJUnit() executes happily if the user runs
    * it with an unsaved file and then chooses to save the file.
    */
   public void testRunJUnitUnsavedButSaveWhenAsked()
-    throws BadLocationException, IOException {
+    throws BadLocationException, IOException 
+  {
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
-
+    
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
       public void junitStarted() { junitStartCount++; }
       public void junitEnded() { junitEndCount++; }
@@ -242,23 +246,23 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
         assertSaveCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
-
+        
         try {
           doc.saveFile(new FileSelector(file));
         }
         catch (IOException ioe) {
           fail("Save produced exception: " + ioe);
         }
-
+        
         saveBeforeProceedingCount++;
       }
-
+      
       public void fileSaved(OpenDefinitionsDocument doc) {
         assertModified(false, doc);
         assertSaveBeforeProceedingCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
-
+        
         File f = null;
         try {
           f = doc.getFile();
@@ -271,10 +275,10 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
         saveCount++;
       }
     };
-
+    
     _model.addListener(listener);
     doc.startJUnit();
-
+    
     // Check events fired
     listener.assertSaveBeforeProceedingCount(1);
     listener.assertSaveCount(1);
@@ -282,9 +286,33 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
     listener.assertJUnitStartCount(1);
     listener.assertJUnitEndCount(1);
-
+    
     // Make sure .class exists
     File compiled = classForJava(file, "MonkeyTestPass");
     assertTrue("JUNIT: Class file doesn't exist after compile", compiled.exists());    
+  }
+  
+  /**
+   * Tests that the ui is notified to put up an error dialog if JUnit
+   * is run on a non-TestCase.
+   */
+  public void testNonTestCaseError() throws BadLocationException, IOException {
+    final OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
+    final File file = new File(_tempDir, "NonTestCase.java");
+    doc.saveFile(new FileSelector(file));
+    
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
+      public void junitStarted() { junitStartCount++; }
+      public void junitEnded() { junitEndCount++; }
+      public void nonTestCase() { nonTestCaseCount++; }
+    };
+    
+    _model.addListener(listener);
+    doc.startJUnit();
+    
+    // Check events fired
+    listener.assertJUnitStartCount(1);
+    listener.assertJUnitEndCount(1);
+    listener.assertNonTestCaseCount(1);
   }
 }

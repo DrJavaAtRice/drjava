@@ -35,7 +35,7 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
@@ -69,19 +69,19 @@ public class MainFrame extends JFrame {
   private static final int COMPILE_TAB = 1;
   private static final int OUTPUT_TAB = 2;
   private static final int JUNIT_TAB = 3;
-
+  
   // GUI Dimensions
   private static final int GUI_WIDTH = 800;
   private static final int GUI_HEIGHT = 700;
   private static final int DOC_LIST_WIDTH = 150;
-
+  
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
-
+  
   private final SingleDisplayModel _model;
-
+  
   private Hashtable _defScrollPanes;
   private DefinitionsPane _currentDefPane;
-
+  
   // These should be final but can't be, as the code is currently organized,
   // because they are not set in the constructor
   private CompilerErrorPanel _errorPanel;
@@ -108,7 +108,7 @@ public class MainFrame extends JFrame {
   private JMenuItem _saveMenuItem;
   private JMenuItem _compileMenuItem;
   private JMenuItem _abortInteractionMenuItem;
-
+  
   public SingleDisplayModel getModel() {
     return _model;
   }
@@ -125,13 +125,13 @@ public class MainFrame extends JFrame {
    * from which we saved.
    */
   private JFileChooser _saveChooser;
-
+  
   private FileOpenSelector _openSelector = new FileOpenSelector() {
     public File getFile() throws OperationCanceledException {
       return getOpenFile();
     }
   };
-
+  
   private FileSaveSelector _saveSelector = new FileSaveSelector() {
     public File getFile() throws OperationCanceledException {
       return getSaveFile();
@@ -145,8 +145,8 @@ public class MainFrame extends JFrame {
          "File Open Warning",
          JOptionPane.WARNING_MESSAGE);
     }
-
-
+    
+    
     public boolean verifyOverwrite() {
       Object[] options = {"Yes","No"};
       int n = JOptionPane.showOptionDialog
@@ -160,17 +160,17 @@ public class MainFrame extends JFrame {
          options[1]);
       if (n==JOptionPane.YES_OPTION){ return true;}
       else {return false;}
-
+      
     }
   };
-
+  
   /** Resets the document in the definitions pane to a blank one. */
   private Action _newAction = new AbstractAction("New") {
     public void actionPerformed(ActionEvent ae) {
       _new();
     }
   };
-
+  
   /**
    * Asks user for file name and and reads that file into
    * the definitions pane.
@@ -180,7 +180,7 @@ public class MainFrame extends JFrame {
       _open();
     }
   };
-
+  
   /**
    * Closes the current active document, prompting to save if necessary.
    */
@@ -189,7 +189,7 @@ public class MainFrame extends JFrame {
       _close();
     }
   };
-
+  
   /**
    * Closes all open documents, prompting to save if necessary.
    */
@@ -198,36 +198,36 @@ public class MainFrame extends JFrame {
       _closeAll();
     }
   };
-
-
+  
+  
   /** Saves the current document. */
   private Action _saveAction = new AbstractAction("Save") {
     public void actionPerformed(ActionEvent ae) {
       _save();
     }
   };
-
+  
   /** Prints the current document. */
   private Action _printAction = new AbstractAction("Print") {
     public void actionPerformed(ActionEvent ae) {
       _print();
     }
   };
-
+  
   /** Opens the print preview window */
   private Action _printPreviewAction = new AbstractAction("Print Preview") {
     public void actionPerformed(ActionEvent ae) {
       _printPreview();
     }
   };
-
+  
   /** Opens the page setup window. */
   private Action _pageSetupAction = new AbstractAction("Page Setup") {
     public void actionPerformed(ActionEvent ae) {
       _pageSetup();
     }
   };
-
+  
   /**
    * Asks the user for a file name and saves the document
    * currently in the definitions pane to that file.
@@ -237,7 +237,7 @@ public class MainFrame extends JFrame {
       _saveAs();
     }
   };
-
+  
   /**
    * Saves all documents, prompting for file names as necessary
    */
@@ -246,47 +246,47 @@ public class MainFrame extends JFrame {
       _saveAll();
     }
   };
-
+  
   /** Compiles the document in the definitions pane. */
   private Action _compileAction = new AbstractAction("Compile Current Document") {
     public void actionPerformed(ActionEvent ae) {
       _compile();
     }
   };
-
+  
   /** Runs JUnit on the document in the definitions pane. */
   private Action _junitAction = new AbstractAction("Test Using JUnit") {
     public void actionPerformed(ActionEvent ae) {
       _junit();
     }
   };
-
+  
   /** Default cut action. */
   private Action _cutAction = new DefaultEditorKit.CutAction();
-
+  
   /** Default copy action. */
   private Action _copyAction = new DefaultEditorKit.CopyAction();
-
+  
   /** Default paste action. */
   private Action _pasteAction = new DefaultEditorKit.PasteAction();
-
-
+  
+  
   /** Undoes the last change to the active definitions document. */
   private DelegatingAction _undoAction = new DelegatingAction();
-
+  
   /** Redoes the last undo to the active definitions document. */
   private DelegatingAction _redoAction = new DelegatingAction();
-
+  
   /** Aborts current interaction. */
   private Action _abortInteractionAction
     = new AbstractAction("Abort Current Interaction")
   {
     public void actionPerformed(ActionEvent ae) {
       String title = "Confirm abort interaction";
-
+      
       String message = "Are you sure you would like to abort the " +
-                       "current interaction?";
-
+        "current interaction?";
+      
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
                                              message,
                                              title,
@@ -296,14 +296,14 @@ public class MainFrame extends JFrame {
       }
     }
   };
-
+  
   /** Closes the program. */
   private Action _quitAction = new AbstractAction("Quit") {
     public void actionPerformed(ActionEvent ae) {
       _model.quit();
     }
   };
-
+  
   /** Opens the find/replace dialog. */
   private Action _findReplaceAction = new AbstractAction("Find/Replace") {
     public void actionPerformed(ActionEvent ae) {
@@ -311,21 +311,21 @@ public class MainFrame extends JFrame {
       _findReplace.show();
     }
   };
-
+  
   /** Asks the user for a line number and goes there. */
   private Action _gotoLineAction = new AbstractAction("Goto Line") {
     public void actionPerformed(ActionEvent ae) {
       _gotoLine();
     }
   };
-
+  
   /** Clears DrJava's output console. */
   private Action _clearOutputAction = new AbstractAction("Clear Console") {
     public void actionPerformed(ActionEvent ae) {
       _model.resetConsole();
     }
   };
-
+  
   /** Clears the interactions console. */
   private Action _resetInteractionsAction =
     new AbstractAction("Reset Interactions")
@@ -334,16 +334,16 @@ public class MainFrame extends JFrame {
       _model.resetInteractions();
     }
   };
-
+  
   /** Pops up an info dialog. */
   private Action _aboutAction = new AbstractAction("About") {
-
+    
     public void actionPerformed(ActionEvent ae) {
       //JOptionPane.showMessageDialog(MainFrame.this, _model.getAboutText());
       new AboutDialog(MainFrame.this, _model.getAboutText()).show();
     }
   };
-
+  
   /** Switches to next document. */
   private Action _switchToNextAction =
     new AbstractAction("Next Document")
@@ -352,7 +352,7 @@ public class MainFrame extends JFrame {
       _model.setNextActiveDocument();
     }
   };
-
+  
   /** Switches to previous document. */
   private Action _switchToPrevAction =
     new AbstractAction("Previous Document")
@@ -361,7 +361,7 @@ public class MainFrame extends JFrame {
       _model.setPreviousActiveDocument();
     }
   };
-
+  
   /** How DrJava responds to window events. */
   private WindowListener _windowCloseListener = new WindowListener() {
     public void windowActivated(WindowEvent ev) {}
@@ -376,7 +376,7 @@ public class MainFrame extends JFrame {
       _currentDefPane.requestFocus();
     }
   };
-
+  
   /** Creates the main window, and shows it. */
   public MainFrame() {
     // Set up the status bar
@@ -384,7 +384,7 @@ public class MainFrame extends JFrame {
     // can understand the notion of the Location area.
     _posListener = new PositionListener();
     _setUpStatusBar();
-
+    
     _model = new SingleDisplayModel();
     String userdir = System.getProperty("user.dir");
     _openChooser = new JFileChooser(userdir);
@@ -400,83 +400,83 @@ public class MainFrame extends JFrame {
     // COMMENTED UNTIL COMPLETE
     //_posListener = new PositionListener();
     _setUpTabs();
-
+    
     // DefinitionsPane
     _defScrollPanes = new Hashtable();
     JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
     _currentDefPane = (DefinitionsPane) defScroll.getViewport().getView();
-
     
-
+    
+    
     // Need to set undo/redo actions to point to the initial def pane
     // on switching documents later these pointers will also switch
     _undoAction.setDelegatee(_currentDefPane.getUndoAction());
     _redoAction.setDelegatee(_currentDefPane.getRedoAction());
-
+    
     _errorPanel.getErrorListPane().setLastDefPane(_currentDefPane);
     _errorPanel.reset();
-
+    
     // set up menu bar and actions
     _setUpActions();
     _setUpMenuBar();
     _setUpToolBar();
     _setUpDocumentSelector();
-
+    
     setBounds(0, 0, GUI_WIDTH, GUI_HEIGHT);
     setSize(GUI_WIDTH, GUI_HEIGHT);
-
+    
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = this.getSize();
     final int menubarHeight = 24;
-
+    
     if (frameSize.height > screenSize.height - menubarHeight) {
-//       System.out.println("Too Tall! " + 
-//     screenSize.height + " vs. " + frameSize.height);
- 
+      //       System.out.println("Too Tall! " + 
+      //     screenSize.height + " vs. " + frameSize.height);
+      
       frameSize.height = screenSize.height - menubarHeight;
-
-//       System.out.println("Frame Height: " + frameSize.height);
+      
+      //       System.out.println("Frame Height: " + frameSize.height);
     }
-
+    
     if (frameSize.width > screenSize.width) {
-//       System.out.println("Too Wide! " +
-//     screenSize.width + " vs. " + frameSize.width);
-
+      //       System.out.println("Too Wide! " +
+      //     screenSize.width + " vs. " + frameSize.width);
+      
       frameSize.width = screenSize.width;
-
-//       System.out.println("Frame Width: " + frameSize.height);
+      
+      //       System.out.println("Frame Width: " + frameSize.height);
     }
-
+    
     this.setSize(frameSize);
     this.setLocation((screenSize.width - frameSize.width) / 2, 
-        (screenSize.height - frameSize.height - menubarHeight) / 2);
-
+                     (screenSize.height - frameSize.height - menubarHeight) / 2);
+    
     _setUpPanes();
     updateFileTitle();
     _setAllFonts(new Font("Monospaced", 0, 12));
     _docList.setFont(new Font("Monospaced", 0, 10));
     _findReplace = new FindReplaceDialog(this, _currentDefPane);
-
-//     frameSize = this.getSize();
-//     System.out.println("Actual Frame Height: " + frameSize.height);
+    
+    //     frameSize = this.getSize();
+    //     System.out.println("Actual Frame Height: " + frameSize.height);
   }
-
+  
   /**
    * Make the cursor an hourglass.
    */
   public void hourglassOn() {
     getGlassPane().setVisible(true);
   }
-
+  
   /**
    * Return the cursor to normal.
    */
   public void hourglassOff() {
     getGlassPane().setVisible(false);
   }
-
-
+  
+  
   /**
    * Updates the title bar with the name of the active document.
    */
@@ -487,7 +487,7 @@ public class MainFrame extends JFrame {
     _fileNameField.setText(_model.getDisplayFullPath(doc));
     _docList.repaint();
   }
-
+  
   /**
    * Prompt the user to select a place to open a file from, then load it.
    * Ask the user if they'd like to save previous changes (if the current
@@ -498,7 +498,7 @@ public class MainFrame extends JFrame {
     int rc = _openChooser.showOpenDialog(this);
     return getChosenFile(_openChooser, rc);
   }
-
+  
   /**
    * Prompt the user to select a place to save the current document.
    */
@@ -507,15 +507,15 @@ public class MainFrame extends JFrame {
     int rc = _saveChooser.showSaveDialog(this);
     return getChosenFile(_saveChooser, rc);
   }
-
+  
   /**
    * Returns the current DefinitionsPane.
    */
   public DefinitionsPane getCurrentDefPane() {
     return _currentDefPane;
   }
-
-
+  
+  
   /**
    * Makes sure save and compile buttons and menu items
    * are enabled and disabled appropriately after document
@@ -524,28 +524,28 @@ public class MainFrame extends JFrame {
   private void _installNewDocumentListener(Document d) {
     d.addDocumentListener(new DocumentListener() {
       public void changedUpdate(DocumentEvent e) {
-        _saveAction.setEnabled(true);
-        //_compileAction.setEnabled(false);
-        updateFileTitle();
-      }
-      public void insertUpdate(DocumentEvent e) {
-        _saveAction.setEnabled(true);
-        //_compileAction.setEnabled(false);
-        updateFileTitle();
-      }
-      public void removeUpdate(DocumentEvent e) {
-        _saveAction.setEnabled(true);
-        //_compileAction.setEnabled(false);
-        updateFileTitle();
-      }
+      _saveAction.setEnabled(true);
+      //_compileAction.setEnabled(false);
+      updateFileTitle();
+    }
+    public void insertUpdate(DocumentEvent e) {
+      _saveAction.setEnabled(true);
+      //_compileAction.setEnabled(false);
+      updateFileTitle();
+    }
+    public void removeUpdate(DocumentEvent e) {
+      _saveAction.setEnabled(true);
+      //_compileAction.setEnabled(false);
+      updateFileTitle();
+    }
     });
   }
-
-
+  
+  
   private void _new() {
     _model.newFile();
   }
-
+  
   private void _open() {
     try {
       _model.openFile(_openSelector);
@@ -570,7 +570,7 @@ public class MainFrame extends JFrame {
                                                  title,
                                                  JOptionPane.OK_CANCEL_OPTION);
       if (choice == JOptionPane.OK_OPTION) {
-
+        
         _model.setActiveDocument(openDoc);
       }
     }
@@ -581,11 +581,11 @@ public class MainFrame extends JFrame {
       _showIOError(ioe);
     }
   }
-
+  
   private void _close() {
     _model.closeFile(_model.getActiveDocument());
   }
-
+  
   private void _print() {
     try {
       _model.getActiveDocument().print();
@@ -595,7 +595,7 @@ public class MainFrame extends JFrame {
       _showError(e, "Print Error", "An error occured while printing.");
     }
   }
-
+  
   /**
    * Opens a new PrintPreview frame.
    */
@@ -609,17 +609,17 @@ public class MainFrame extends JFrame {
       _showError(e, "Print Error", "An error occured while preparing the print preview.");
     }
   }
-
+  
   private void _pageSetup() {
     PrinterJob job = PrinterJob.getPrinterJob();
     _model.setPageFormat(job.pageDialog(_model.getPageFormat()));
   }
-
+  
   private void _closeAll() {
     _model.closeAllFiles();
   }
-
-
+  
+  
   private void _save() {
     try {
       _model.getActiveDocument().saveFile(_saveSelector);
@@ -628,8 +628,8 @@ public class MainFrame extends JFrame {
       _showIOError(ioe);
     }
   }
-
-
+  
+  
   private void _saveAs() {
     try {
       _model.getActiveDocument().saveFileAs(_saveSelector);
@@ -638,7 +638,7 @@ public class MainFrame extends JFrame {
       _showIOError(ioe);
     }
   }
-
+  
   private void _saveAll() {
     try {
       _model.saveAllFiles(_saveSelector);
@@ -647,7 +647,7 @@ public class MainFrame extends JFrame {
       _showIOError(ioe);
     }
   }
-
+  
   private void _compile() {
     try {
       _model.getActiveDocument().startCompile();
@@ -656,7 +656,7 @@ public class MainFrame extends JFrame {
       _showIOError(ioe);
     }
   }
-
+  
   private void _junit() {
     try {
       _model.getActiveDocument().startJUnit();
@@ -665,20 +665,20 @@ public class MainFrame extends JFrame {
       _showIOError(ioe);
     }
   }
-
+  
   private void _showIOError(IOException ioe) {
     _showError(ioe, "Input/output error",
                "An I/O exception occurred during the last operation.");
   }
-
+  
   private void _showError(Exception e, String title, String message) {
     JOptionPane.showMessageDialog(this,
                                   message + "\n" + e,
                                   title,
                                   JOptionPane.ERROR_MESSAGE);
   }
-
-
+  
+  
   /**
    * Returns the File selected by the JFileChooser.
    * @param fc File chooser presented to the user
@@ -703,7 +703,7 @@ public class MainFrame extends JFrame {
         throw  new RuntimeException("filechooser returned bad rc " + choice);
     }
   }
-
+  
   /**
    * Ask the user what line they'd like to jump to, then go there.
    */
@@ -727,7 +727,7 @@ public class MainFrame extends JFrame {
       // Do nothing.
     }
   }
-
+  
   /**
    * Update all appropriate listeners that the CompilerErrorModels
    * have changed.
@@ -746,7 +746,7 @@ public class MainFrame extends JFrame {
       }
     }
   }
-
+  
   /**
    * Removes the CompilerErrorCaretListener corresponding to
    * the given document, after that document has been closed.
@@ -759,7 +759,7 @@ public class MainFrame extends JFrame {
       pane.removeCaretListener(pane.getErrorCaretListener());
     }
   }
-
+  
   /**
    * Initializes all action objects.
    * Adds icons and descriptions to several of the actions.
@@ -774,26 +774,26 @@ public class MainFrame extends JFrame {
     _setUpAction(_closeAction, "Close", "Close the current document");
     _setUpAction(_closeAllAction, "CloseAll", "Close all documents");
     _setUpAction(_saveAllAction, "SaveAll", "Save all open documents");
-
+    
     _setUpAction(_compileAction, "Compile", "Compile the current document");
     _setUpAction(_printAction, "Print", "Print the current document");
     _setUpAction(_pageSetupAction, "PageSetup", "Page Setup");
     _setUpAction(_printPreviewAction, "PrintPreview", "Print Preview");
-
+    
     _setUpAction(_cutAction, "Cut", "Cut selected text to the clipboard");
     _setUpAction(_copyAction, "Copy", "Copy selected text to the clipboard");
     _setUpAction(_pasteAction, "Paste", "Paste text from the clipboard");
-
+    
     _cutAction.putValue(Action.NAME, "Cut");
     _copyAction.putValue(Action.NAME, "Copy");
     _pasteAction.putValue(Action.NAME, "Paste");
-
+    
     _setUpAction(_switchToPrevAction, "Back", "Previous Document");
     _setUpAction(_switchToNextAction, "Forward", "Next Document");
-
+    
     _setUpAction(_findReplaceAction, "Find", "Find/Replace");
     _setUpAction(_aboutAction, "About", "About");
-
+    
     _setUpAction(_undoAction, "Undo", "Undo previous command");
     _setUpAction(_redoAction, "Redo", "Redo last undo");
     
@@ -805,7 +805,7 @@ public class MainFrame extends JFrame {
     
     _setUpAction(_junitAction, "Test", "Run JUnit over the current document");
   }
-
+  
   private void _setUpAction(Action a, String _default, String shortDesc) {
     // Commented out so that the toolbar buttons use text instead of icons.
     // createManualToolbarButton was modified as well.
@@ -813,8 +813,8 @@ public class MainFrame extends JFrame {
     a.putValue(Action.DEFAULT, _default);
     a.putValue(Action.SHORT_DESCRIPTION, shortDesc);
   }
-
-
+  
+  
   /**
    * Returns the icon with the given name.
    * All icons are assumed to reside in the /edu/rice/cs/drjava/ui/icons
@@ -829,7 +829,7 @@ public class MainFrame extends JFrame {
     }
     return null;
   }
-
+  
   /**
    * Sets up the components of the menu bar and links them to the private
    * fields within MainFrame.  This method serves to make the code
@@ -841,15 +841,15 @@ public class MainFrame extends JFrame {
     _editMenu = _setUpEditMenu();
     _toolsMenu = _setUpToolsMenu();
     _helpMenu = _setUpHelpMenu();
-
+    
     _menuBar.add(_fileMenu);
     _menuBar.add(_editMenu);
     _menuBar.add(_toolsMenu);
     _menuBar.add(_helpMenu);
     setJMenuBar(_menuBar);
   }
-
-
+  
+  
   /**
    * Creates and returns a file menu.  Side effects: sets values for
    * _saveMenuItem and _compileMenuItem.
@@ -874,7 +874,7 @@ public class MainFrame extends JFrame {
     // keep track of the save menu item
     _saveMenuItem = tmpItem;
     _saveAction.setEnabled(false);
-
+    
     tmpItem = fileMenu.add(_saveAsAction);
     
     tmpItem = fileMenu.add(_saveAllAction);
@@ -885,12 +885,12 @@ public class MainFrame extends JFrame {
     tmpItem = fileMenu.add(_closeAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
                                                   ActionEvent.CTRL_MASK));
-
+    
     tmpItem = fileMenu.add(_closeAllAction);
-
+    
     // Page setup, print preview, print
     fileMenu.addSeparator();
-
+    
     fileMenu.add(_pageSetupAction);
     fileMenu.add(_printPreviewAction);
     tmpItem = fileMenu.add(_printAction);
@@ -899,20 +899,20 @@ public class MainFrame extends JFrame {
     
     // Quit
     fileMenu.addSeparator();
-
+    
     tmpItem = fileMenu.add(_quitAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,
                                                   ActionEvent.CTRL_MASK));
     return fileMenu;
   }
-
+  
   /**
    * Creates and returns a edit menu.
    */
   private JMenu _setUpEditMenu() {
     JMenuItem tmpItem;
     JMenu editMenu = new JMenu("Edit");
-
+    
     // Undo, redo
     tmpItem = editMenu.add(_undoAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
@@ -923,7 +923,7 @@ public class MainFrame extends JFrame {
     
     // Cut, copy, paste
     editMenu.addSeparator();
-
+    
     tmpItem = editMenu.add(_cutAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
                                                   ActionEvent.CTRL_MASK));
@@ -942,7 +942,7 @@ public class MainFrame extends JFrame {
     tmpItem = editMenu.add(_gotoLineAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G,
                                                   ActionEvent.CTRL_MASK));
-
+    
     // Next, prev doc
     editMenu.addSeparator();
     tmpItem = editMenu.add(_switchToPrevAction);
@@ -951,7 +951,7 @@ public class MainFrame extends JFrame {
     tmpItem = editMenu.add(_switchToNextAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD,
                                                   ActionEvent.CTRL_MASK));
-
+    
     // Add the menus to the menu bar
     return editMenu;
   }
@@ -962,19 +962,19 @@ public class MainFrame extends JFrame {
   private JMenu _setUpToolsMenu() {
     JMenuItem tmpItem;
     JMenu toolsMenu = new JMenu("Tools");
-
+    
     // Compile
     tmpItem = toolsMenu.add(_compileAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
-
+    
     // keep track of the compile menu item
     _compileMenuItem = tmpItem;
     
     toolsMenu.add(_junitAction);
-
+    
     // Abort/reset interactions, clear console
     toolsMenu.addSeparator();
-
+    
     _abortInteractionAction.setEnabled(false);
     _abortInteractionMenuItem = toolsMenu.add(_abortInteractionAction);
     _abortInteractionMenuItem
@@ -985,7 +985,7 @@ public class MainFrame extends JFrame {
     // Add the menus to the menu bar
     return toolsMenu;
   }
-
+  
   /**
    * Creates and returns a help menu.
    */
@@ -994,7 +994,7 @@ public class MainFrame extends JFrame {
     helpMenu.add(_aboutAction);
     return helpMenu;
   }
-
+  
   JButton _createManualToolbarButton(Action a) {
     final JButton ret;
     
@@ -1009,20 +1009,20 @@ public class MainFrame extends JFrame {
     else {
       ret = new JButton(icon);
     }
-
+    
     ret.setEnabled(false);
     ret.addActionListener(a);
     ret.setToolTipText( (String) a.getValue(Action.SHORT_DESCRIPTION));
     
     a.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent evt) {
-        if ("enabled".equals(evt.getPropertyName())) {
-          Boolean val = (Boolean) evt.getNewValue();
-          ret.setEnabled(val.booleanValue());
-        }
+      if ("enabled".equals(evt.getPropertyName())) {
+        Boolean val = (Boolean) evt.getNewValue();
+        ret.setEnabled(val.booleanValue());
       }
+    }
     });
-
+    
     return ret;
   }
   
@@ -1035,7 +1035,7 @@ public class MainFrame extends JFrame {
     result.setLabel((String) a.getValue(Action.DEFAULT));
     return result;
   }
-
+  
   /**
    * Sets up the toolbar with several useful buttons.
    * Most buttons are always enabled, but those that are not are
@@ -1043,9 +1043,9 @@ public class MainFrame extends JFrame {
    */
   private void _setUpToolBar() {
     _toolBar = new JToolBar();
-
+    
     _toolBar.setFloatable(false);
-
+    
     _toolBar.addSeparator();
     
     // New, open, save, close
@@ -1061,7 +1061,7 @@ public class MainFrame extends JFrame {
     _toolBar.add(_compileButton);
     _toolBar.add(_createToolbarButton(_resetInteractionsAction));
     _toolBar.add(_createToolbarButton(_abortInteractionAction));
-
+    
     // Commented out to make room on the toolbar;
     // print actions don't need buttons.
     // Print preview, print
@@ -1074,7 +1074,7 @@ public class MainFrame extends JFrame {
     _toolBar.add(_createToolbarButton(_cutAction));
     _toolBar.add(_createToolbarButton(_copyAction));
     _toolBar.add(_createToolbarButton(_pasteAction));
-
+    
     // Undo, redo
     // Simple workaround, for now, for bug # 520742:
     // Undo/Redo button text in JDK 1.3
@@ -1087,7 +1087,7 @@ public class MainFrame extends JFrame {
     // Find
     _toolBar.addSeparator();
     _toolBar.add(_createToolbarButton(_findReplaceAction));
-
+    
     // Junit
     _toolBar.addSeparator();
     _junitButton = _createToolbarButton(_junitAction);
@@ -1095,7 +1095,7 @@ public class MainFrame extends JFrame {
     
     getContentPane().add(_toolBar, BorderLayout.NORTH);
   }
-
+  
   /**
    * Sets up the status bar with the filename field.
    */
@@ -1111,9 +1111,9 @@ public class MainFrame extends JFrame {
     _statusBar.add( _fileNameField, BorderLayout.WEST );
     _statusBar.add( _currLocationField, BorderLayout.EAST );
     _statusBar.setBorder(new 
-               CompoundBorder(new EmptyBorder(2,2,2,2),
-                              new CompoundBorder(new BevelBorder(BevelBorder.LOWERED),
-                                                 new EmptyBorder(2,2,2,2))));
+                           CompoundBorder(new EmptyBorder(2,2,2,2),
+                                          new CompoundBorder(new BevelBorder(BevelBorder.LOWERED),
+                                                             new EmptyBorder(2,2,2,2))));
     getContentPane().add(_statusBar, BorderLayout.SOUTH);
   }
   
@@ -1135,7 +1135,7 @@ public class MainFrame extends JFrame {
                                  ":" + doc.getCurrentCol() + "\t");
     }
   }
-
+  
   private void _setUpTabs() {
     _outputPane = new OutputPane(_model);
     _errorPanel = new CompilerErrorPanel(_model, this);
@@ -1146,39 +1146,39 @@ public class MainFrame extends JFrame {
     _tabbedPane.add("Compiler output", _errorPanel);
     _tabbedPane.add("Console", new JScrollPane(_outputPane));
     _tabbedPane.add("Test output", new JScrollPane(_junitPane));
-
+    
     // Select interactions pane when interactions tab is selected
     _tabbedPane.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
-        if (_tabbedPane.getSelectedIndex() == INTERACTIONS_TAB) {
-          _interactionsPane.grabFocus();
-        }
+      if (_tabbedPane.getSelectedIndex() == INTERACTIONS_TAB) {
+        _interactionsPane.grabFocus();
       }
+    }
     });
   }
-
+  
   /**
    * Configures the component used for selecting active documents.
    */
   private void _setUpDocumentSelector() {
     _docList = new JList(_model.getDefinitionsDocuments());
     /* {
-      public String getToolTipText(MouseEvent event) {
-        Point location = event.getPoint();
-        int index = locationToIndex(location);
-        String tip = null;
-        if (index >= 0) {
-          tip = _model.getDisplayFullPath(index);
-        }
-        return tip;
-      }
-    };
-    _docList.setToolTipText("Document List"); */
-
+     public String getToolTipText(MouseEvent event) {
+     Point location = event.getPoint();
+     int index = locationToIndex(location);
+     String tip = null;
+     if (index >= 0) {
+     tip = _model.getDisplayFullPath(index);
+     }
+     return tip;
+     }
+     };
+     _docList.setToolTipText("Document List"); */
+    
     _docList.setSelectionModel(_model.getDocumentSelectionModel());
     _docList.setCellRenderer(new DocCellRenderer());
   }
-
+  
   /**
    * Create a new DefinitionsPane and JScrollPane for an open
    * definitions document.
@@ -1188,7 +1188,7 @@ public class MainFrame extends JFrame {
    */
   private JScrollPane _createDefScrollPane(OpenDefinitionsDocument doc) {
     DefinitionsPane pane = new DefinitionsPane(this, _model, doc);
-
+    
     // Add listeners
     _installNewDocumentListener(doc.getDocument());
     CompilerErrorCaretListener caretListener =
@@ -1197,37 +1197,37 @@ public class MainFrame extends JFrame {
     // add a listener to update line and column.
     pane.addCaretListener( _posListener );
     _posListener.updateLocation();
-
+    
     // Add to a scroll pane
     JScrollPane scroll = new BorderlessScrollPane(pane,
-        JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-        JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                                                  JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                                                  JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     scroll.setBorder(null); // removes all default borders (MacOS X installs default borders)
     _defScrollPanes.put(doc, scroll);
     return scroll;
   }
-
-
+  
+  
   private void _setUpPanes() {
     // Document list pane
     JScrollPane listScroll =
       new BorderlessScrollPane(_docList,
-          JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-          JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-
+                               JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                               JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    
     // DefinitionsPane
     JScrollPane defScroll = (JScrollPane)
       _defScrollPanes.get(_model.getActiveDocument());
-
+    
     // Overall layout
     _docSplitPane = new BorderlessSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-         true,
-         listScroll,
-         defScroll);
+                                            true,
+                                            listScroll,
+                                            defScroll);
     JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-          true,
-          _docSplitPane,
-          _tabbedPane);
+                                      true,
+                                      _docSplitPane,
+                                      _tabbedPane);
     getContentPane().add(split, BorderLayout.CENTER);
     // This is annoyingly order-dependent. Since split2 contains split1,
     // we need to get split2's divider set up first to give split1 an overall
@@ -1239,7 +1239,7 @@ public class MainFrame extends JFrame {
     _docSplitPane.setDividerLocation(DOC_LIST_WIDTH);
     _docSplitPane.setOneTouchExpandable(true);
   }
-
+  
   /**
    * Switch to the JScrollPane containing the DefinitionsPane
    * for the current active document.
@@ -1251,23 +1251,23 @@ public class MainFrame extends JFrame {
     
     JScrollPane scroll = (JScrollPane)
       _defScrollPanes.get(_model.getActiveDocument());
-
+    
     if (scroll == null) {
       throw new UnexpectedException(new Exception(
-        "Current definitions scroll pane not found."));
+                                                  "Current definitions scroll pane not found."));
     }
-
+    
     int oldLocation = _docSplitPane.getDividerLocation();
     _docSplitPane.setRightComponent(scroll);
     _docSplitPane.setDividerLocation(oldLocation);
     _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
-
+    
     // reset the undo/redo menu items
     _undoAction.setDelegatee(_currentDefPane.getUndoAction());
     _redoAction.setDelegatee(_currentDefPane.getRedoAction());
-     
+    
   }
-
+  
   /**
    * Sets the current directory to be that of the given file.
    */
@@ -1281,7 +1281,7 @@ public class MainFrame extends JFrame {
       // no file, leave in current directory
     }
   }
-
+  
   /**
    * put your documentation comment here
    * @param f
@@ -1296,7 +1296,7 @@ public class MainFrame extends JFrame {
    * put your documentation comment here
    */
   private class GlassPane extends JComponent {
-
+    
     /**
      * put your documentation comment here
      */
@@ -1306,54 +1306,54 @@ public class MainFrame extends JFrame {
       super.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     }
   }
-
+  
   private class ModelListener implements SingleDisplayModelListener {
     public void newFileCreated(OpenDefinitionsDocument doc) {
       _createDefScrollPane(doc);
     }
-
+    
     public void fileSaved(OpenDefinitionsDocument doc) {
       _saveAction.setEnabled(false);
       //_compileAction.setEnabled(true);
       updateFileTitle();
       _currentDefPane.grabFocus();
     }
-
+    
     public void fileOpened(OpenDefinitionsDocument doc) {
       _createDefScrollPane(doc);
     }
-
+    
     public void fileClosed(OpenDefinitionsDocument doc) {
       _removeErrorListener(doc);
       _defScrollPanes.remove(doc);
     }
-
+    
     public void activeDocumentChanged(OpenDefinitionsDocument active) {
       _switchDefScrollPane();
-
+      
       boolean isModified = active.isModifiedSinceSave();
       boolean canCompile = (!isModified && !active.isUntitled());
       _saveAction.setEnabled(isModified);
       //_compileAction.setEnabled(canCompile);
-
+      
       // Update error highlights
       _errorPanel.getErrorListPane().selectNothing();
       int pos = _currentDefPane.getCaretPosition();
       _currentDefPane.getErrorCaretListener().updateHighlight(pos);
       
       _setCurrentDirectory(active);
-
+      
       updateFileTitle();
       _posListener.updateLocation();
       _currentDefPane.grabFocus();
     }
-
+    
     public void interactionStarted() {
       _interactionsPane.setEditable(false);
       _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
       _abortInteractionAction.setEnabled(true);
     }
-
+    
     public void interactionEnded() {
       _abortInteractionAction.setEnabled(false);
       _interactionsPane.setCursor(null);
@@ -1361,64 +1361,66 @@ public class MainFrame extends JFrame {
       int pos = _interactionsPane.getDocument().getLength();
       _interactionsPane.setCaretPosition(pos);
     }
-
+    
     public void compileStarted() {
       _tabbedPane.setSelectedIndex(COMPILE_TAB);
       _saveAction.setEnabled(false);
       //_compileAction.setEnabled(false);
       hourglassOn();
     }
-
+    
     public void compileEnded() {
       hourglassOff();
       _updateErrorListeners();
       _errorPanel.reset();
       //_compileAction.setEnabled(true);
     }
-
+    
     public void junitStarted() {
       _tabbedPane.setSelectedIndex(JUNIT_TAB);
       _saveAction.setEnabled(false);
       hourglassOn();
     }
-
+    
     public void junitEnded() {
       hourglassOff();
       _updateErrorListeners();
       _errorPanel.reset();
     }
-
+    
     public void interactionsExited(int status) {
       String msg = "The interactions window was terminated by a call " +
-                   "to System.exit(" + status + ").\n" +
-                   "The interactions window will now be restarted.";
-
+        "to System.exit(" + status + ").\n" +
+        "The interactions window will now be restarted.";
+      
       String title = "Interactions terminated by System.exit(" + status + ")";
-
+      
       JOptionPane.showMessageDialog(MainFrame.this,
                                     msg,
                                     title,
                                     JOptionPane.INFORMATION_MESSAGE);
-
+      
       // we don't restore the interactions pane to life, since
       // the interactionsReset event will do it.
     }
-
+    
     public void interactionsReset() {
       interactionEnded();
     }
-
+    
     public void consoleReset() {
     }
-
+    
     public void saveBeforeProceeding(GlobalModelListener.SaveReason reason) {
       String message;
       if (reason == COMPILE_REASON) {
-        message = "To compile, you must first save the current file. " +
+        message = 
+          "To compile, you must first save the current file.\n" +
           "Would you like to save and then compile?";
       }
-      else if(reason == JUNIT_REASON) {
-        message = "To run JUnit, you must first save and compile the current " + 
+      else if (reason == JUNIT_REASON) {
+        message = 
+          "To run JUnit, you must first save and compile the current\n" + 
           "file. Would like to save and then compile?";
       }
       else {
@@ -1438,7 +1440,25 @@ public class MainFrame extends JFrame {
           throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
       }
     }
-
+    public void nonTestCase() {
+      
+      String message = 
+        "The  Test  button  (and menu item) in  DrJava  invoke the JUnit\n"  +
+        "test  harness  over  the currently open document.  In order for\n" +
+        "that  to  work,  the  currently  open  document  must be a valid\n" +
+        "JUnit TestCase,  i.e., a subclass of junit.framework.TestCase.\n\n" +
+        
+        "For information on how to write JUnit TestCases, visit:\n\n" +
+        
+        "                                http://www.junit.org/\n\n";
+      
+      JOptionPane.showMessageDialog(MainFrame.this, message, 
+                                    "Test Works Only On JUnit TestCases", 
+                                    JOptionPane.ERROR_MESSAGE);
+      
+      
+    }
+    
     /**
      * Check if the current document has been modified. If it has, ask the user
      * if he would like to save or not, and save the document if yes. Also
@@ -1450,9 +1470,9 @@ public class MainFrame extends JFrame {
      */
     public boolean canAbandonFile(OpenDefinitionsDocument doc) {
       String fname;
-
+      
       _model.setActiveDocument(doc);
-
+      
       try {
         File file = doc.getFile();
         fname = file.getName();
@@ -1461,13 +1481,13 @@ public class MainFrame extends JFrame {
         // No file exists
         fname = "untitled file";
       }
-
+      
       String text = fname + " has been modified. Would you like to " + "save?";
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
-          "Would you like to save " + fname + "?",
-          text,
-          JOptionPane.YES_NO_CANCEL_OPTION);
-
+                                             "Would you like to save " + fname + "?",
+                                             text,
+                                             JOptionPane.YES_NO_CANCEL_OPTION);
+      
       switch (rc) {
         case JOptionPane.YES_OPTION:
           _save();
@@ -1482,7 +1502,7 @@ public class MainFrame extends JFrame {
       }
     }
   }
-
+  
   /**
    * Prints a display label for each item in the document list.
    */
@@ -1499,13 +1519,13 @@ public class MainFrame extends JFrame {
     {
       // Use exisiting behavior
       super.getListCellRendererComponent(list, value, index, iss, chf);
-
+      
       // Change label
       String label = _model.getDisplayFilename((OpenDefinitionsDocument)value);
       setText(label);
-
+      
       return this;
     }
   }
-
+  
 }
