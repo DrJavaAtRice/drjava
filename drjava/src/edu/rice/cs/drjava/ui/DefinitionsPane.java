@@ -61,6 +61,8 @@ public class DefinitionsView extends JEditorPane
   private UndoAction _undoAction;
   private RedoAction _redoAction;
 	private FindReplaceDialog _findReplace;
+	private JFileChooser _openChooser;
+	private JFileChooser _saveChooser;
 	private Object _matchHighlight = null;
 	private static DefaultHighlighter.DefaultHighlightPainter _highlightPainter
   = new DefaultHighlighter.DefaultHighlightPainter(Color.lightGray);
@@ -167,7 +169,8 @@ public class DefinitionsView extends JEditorPane
     _resetDocument("");
     _resetUndo();
 		_findReplace = new FindReplaceDialog(mf, this);
-
+		_openChooser = new JFileChooser(System.getProperty("user.dir"));
+		_saveChooser = new JFileChooser(System.getProperty("user.dir"));
 				
 		Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
 
@@ -236,7 +239,8 @@ public class DefinitionsView extends JEditorPane
   /** Prompt the user to select a place to save the file, then save it. */
   public boolean saveAs()
   {
-    JFileChooser fc = new JFileChooser();
+    JFileChooser fc = _saveChooser;
+		fc.setSelectedFile(null);
     int rc = fc.showSaveDialog(this);
 
     switch(rc)
@@ -320,7 +324,8 @@ public class DefinitionsView extends JEditorPane
     boolean isOK = checkAbandoningChanges();
     if (!isOK) return false;
 
-    JFileChooser fc = new JFileChooser();
+    JFileChooser fc = _openChooser;
+		fc.setSelectedFile(null);
     int rc = fc.showOpenDialog(this);
 
     switch(rc)
@@ -387,8 +392,8 @@ public class DefinitionsView extends JEditorPane
       switch (rc)
       {
         case JOptionPane.YES_OPTION:
-          save();
-          retVal = true;
+          retVal = save();
+          //retVal = true;
           break;
         case JOptionPane.NO_OPTION:
           retVal = true;

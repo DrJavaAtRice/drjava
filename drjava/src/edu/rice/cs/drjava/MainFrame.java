@@ -17,7 +17,8 @@ import javax.swing.JTextField;
 import javax.swing.text.DefaultEditorKit;
 
 import java.awt.event.ActionEvent;
-
+import java.awt.event.WindowListener;
+import java.awt.event.WindowEvent;
 import java.awt.BorderLayout;
 import java.awt.Label;
 
@@ -44,8 +45,14 @@ public class MainFrame extends JFrame
   private Action _quitAction = new AbstractAction("Quit")
   {
     public void actionPerformed(ActionEvent ae)
-    {
-      System.exit(0);
+    {			
+			boolean wantToExit = true;
+			if (_definitionsView.modifiedSinceSave()) {
+				wantToExit = _definitionsView.checkAbandoningChanges();
+			}
+			if (wantToExit) {
+				System.exit(0);
+			}
     }
   };
 
@@ -175,6 +182,24 @@ public class MainFrame extends JFrame
     _interactionsView.addClassPath(sourceDir);
   }
 
+	private WindowListener _windowCloseListener = new WindowListener() {
+		public void windowActivated(WindowEvent ev) {}
+		public void windowClosed(WindowEvent ev) {}
+		public void windowClosing(WindowEvent ev) {
+			boolean wantToExit = true;
+			if (_definitionsView.modifiedSinceSave()) {
+				wantToExit = _definitionsView.checkAbandoningChanges();
+			}
+			if (wantToExit) {
+				System.exit(0);
+			}
+		}
+		public void windowDeactivated(WindowEvent ev) {}
+		public void windowDeiconified(WindowEvent ev) {}
+		public void windowIconified(WindowEvent ev) {}
+		public void windowOpened(WindowEvent ev) {}
+	};
+
   /** Creates the main window, and shows it. */
   public MainFrame()
   {
@@ -190,6 +215,9 @@ public class MainFrame extends JFrame
     _fileMenu = new JMenu("File");
     _editMenu = new JMenu("Edit");
 
+		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		this.addWindowListener(_windowCloseListener);
+		
     // Add items to menus
     _fileMenu.add(_newAction);
     _fileMenu.add(_openAction);
@@ -233,17 +261,17 @@ public class MainFrame extends JFrame
 
 	
 
-    // Create split pane with defs and output
+    // Split2 has output view and the interactions view
+    JSplitPane split2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                                       true,
+                                       new JScrollPane(_outputView),
+                                       new JScrollPane(_interactionsView));
+
+    // Create split pane with defs and split2
     JSplitPane split1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                                        true,
                                        new JScrollPane(_definitionsView),
-                                       new JScrollPane(_outputView));
-
-    // Split2 has split1 and the interactions view
-    JSplitPane split2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                                       true,
-                                       split1,
-                                       new JScrollPane(_interactionsView));
+                                       split2);
 
 		JSplitPane split3 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 																			 true,
@@ -255,8 +283,8 @@ public class MainFrame extends JFrame
 
 
     getContentPane().add(split3, BorderLayout.SOUTH);
-    getContentPane().add(split2, BorderLayout.CENTER);
-    setSize(300, 500);
+    getContentPane().add(split1, BorderLayout.CENTER);
+    setSize(640, 480);
 
     //getContentPane().setLayout(new BoxLayout(getContentPane(),BoxLayout.Y_AXIS));
 //    show();
@@ -266,8 +294,8 @@ public class MainFrame extends JFrame
     // size. Then we can set split1's divider. Ahh, Swing.
     // Also, according to the Swing docs, we need to set these dividers AFTER
     // we have shown the window. How annoying.
-    split2.setDividerLocation(.8);
-    split1.setDividerLocation(.8);
+    split1.setDividerLocation(200);
+    split2.setDividerLocation(50);
 
     updateFileTitle("Untitled");
   }
