@@ -200,7 +200,7 @@ public class ColoringView extends PlainView implements OptionConstants {
       }
       Segment text = getLineBuffer();
       
-      if(!(_doc instanceof InteractionsDocumentAdapter) || !((InteractionsDocumentAdapter)_doc).setColoring(p1,g))      
+      if(!(_doc instanceof InteractionsDocumentAdapter) || !((InteractionsDocumentAdapter)_doc).setColoring((p0+p1)/2,g))      
         setFormattingForState(g, stat.getState());
       //      else
       //        DrJava.consoleErr().println("Highlight: p0="+p0+"; p1="+p1+"; location="+location+"; color="+g.getColor()+"; text="+text);

@@ -91,11 +91,11 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
                  3, _adapter.getStylesList().size());
     
     assertEquals("The first element of StylesList before reset should be", 
-                 "((0, 19), object.return.style)", _adapter.getStylesList().get(0).toString());
+                 "((21, 22), number.return.style)", _adapter.getStylesList().get(0).toString());
     assertEquals("The second element of StylesList before reset should be", 
                  "((19, 21), default)", _adapter.getStylesList().get(1).toString());
     assertEquals("The third element of StylesList before reset should be", 
-                 "((21, 22), number.return.style)", _adapter.getStylesList().get(2).toString());
+                 "((0, 19), object.return.style)", _adapter.getStylesList().get(2).toString());
     
     synchronized(_model){
       // Reset should clear
