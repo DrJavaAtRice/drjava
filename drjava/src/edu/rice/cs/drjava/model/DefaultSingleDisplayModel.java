@@ -129,7 +129,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
   private void _init() {
     _documentNavigator.addNavigationListener(new INavigationListener() {
      public void gainedSelection(INavigatorItem docu) {
-  _setActiveDoc(docu);
+       _setActiveDoc(docu);
      }
 
      public void lostSelection(INavigatorItem docu) {
@@ -170,11 +170,12 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * @param doc Document to set as active
    */
   public void setActiveDocument(OpenDefinitionsDocument doc) {    
-    _setActiveDoc(getIDocGivenODD(doc));
+    _documentNavigator.setActiveDoc(getIDocGivenODD(doc));
+//    _setActiveDoc(getIDocGivenODD(doc));
   }
 
     public Container getDocCollectionWidget() {
- return _documentNavigator.asContainer();
+      return _documentNavigator.asContainer();
     }
 
   /**
@@ -184,7 +185,11 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
       INavigatorItem key = getIDocGivenODD(_activeDocument);
       INavigatorItem nextKey =_documentNavigator.getNext(key);
       if( key != nextKey ) {
-   _setActiveDoc(nextKey);
+        /* this will select the active document in the navigator, which
+         * will signal a listener to call _setActiveDoc(...)
+         */
+    _documentNavigator.setActiveDoc(nextKey);
+//   _setActiveDoc(nextKey);
       }
   }
 
@@ -195,7 +200,11 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
       INavigatorItem key = getIDocGivenODD(_activeDocument);
       INavigatorItem prevKey =_documentNavigator.getPrevious(key);
       if( key != prevKey ) {
-   _setActiveDoc(prevKey);
+        /* this will select the active document in the navigator, which
+         * will signal a listener to call _setActiveDoc(...)
+         */
+        _documentNavigator.setActiveDoc(prevKey);
+//   _setActiveDoc(prevKey);
       }
   }
 
@@ -329,10 +338,14 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
        _ensureNotEmpty();
 
        if( getDefinitionsDocumentsSize() == 1 ) {
-    _setActiveFirstDocument();
+         _setActiveFirstDocument();
        }
        else {
-    _setActiveDoc(switchTo);
+        /* this will select the active document in the navigator, which
+         * will signal a listener to call _setActiveDoc(...)
+         */
+    _documentNavigator.setActiveDoc(switchTo);
+    //    _setActiveDoc(switchTo);
        }
    }
    return true;
@@ -380,8 +393,12 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
      * some duplicated work, but avoids duplicated code, which is our nemesis
      */
     private void _setActiveFirstDocument() {
- List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
- _setActiveDoc(getIDocGivenODD(docs.get(0)));
+      List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
+        /* this will select the active document in the navigator, which
+         * will signal a listener to call _setActiveDoc(...)
+         */
+    _documentNavigator.setActiveDoc(getIDocGivenODD(docs.get(0)));
+//      _setActiveDoc(getIDocGivenODD(docs.get(0)));
     }
   
   private void _setActiveDoc(INavigatorItem idoc) {
@@ -389,6 +406,9 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     
     _activeDocument = super.getODDGivenIDoc(idoc);
     _activeDocument.checkIfClassFileInSync();
+    
+//    _documentNavigator.setActiveDoc(idoc);
+
     
     // notify single display model listeners   // notify single display model listeners
     _notifier.notifyListeners(new GlobalEventNotifier.Notifier() {

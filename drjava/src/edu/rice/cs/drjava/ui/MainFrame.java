@@ -1755,8 +1755,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
     File selection = jfc.getSelectedFile();//_openChooser.getSelectedFile();
     if (selection != null) {
-      jfc.setSelectedFile(selection.getParentFile());
-      jfc.setSelectedFile(selection);
+//      jfc.setSelectedFile(selection.getParentFile());
+//      jfc.setSelectedFile(selection);
       jfc.setSelectedFile(null);
     }
     int rc = jfc.showOpenDialog(this);//_openChooser.showOpenDialog(this);
@@ -1946,7 +1946,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _model.getDocumentNavigator().asContainer().addMouseListener(new RightClickMouseAdapter()
                                                                    {
       protected void _popupAction(MouseEvent e) {
-        System.out.println(e.getSource());
+//        System.out.println(e.getSource());
         _docPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
       }
     }
@@ -2115,7 +2115,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   private boolean _save() {
     try {
       if (_model.getActiveDocument().saveFile(_saveSelector)) {
-        _currentDefPane.hasWarnedAboutModified(false);
+        _currentDefPane.hasWarnedAboutModified(false); 
+        _model.setActiveDocument(_model.getActiveDocument());
         return true;
       }
       else {
@@ -2175,9 +2176,6 @@ public class MainFrame extends JFrame implements OptionConstants {
         _showIOError(ioe);
       }
     }
-    
-
-    
   }
 
   private void _revert() {
@@ -2600,7 +2598,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private void _showError(Throwable e, String title, String message) {
-    System.out.println(e);
+//    System.out.println(e);
     JOptionPane.showMessageDialog(this,
                                   message + "\n" + e,
                                   title,

@@ -620,7 +620,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public void saveProject(String filename) throws IOException {
     
     String base = filename.substring(0, filename.lastIndexOf(File.separator));
-    System.out.println("base is " + base);
     ProjectFileBuilder builder = new ProjectFileBuilder(base);
     
     // add opendefinitionsdocument
@@ -813,22 +812,21 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   public Document getNextDocument(Document doc) {
     Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
-    while(odds.hasNext())
-    {
-      OpenDefinitionsDocument odd = odds.next();
-      if(doc == odd.getDocument())
-      {
-        if(odds.hasNext())
-        {
-          return odds.next().getDocument();
-        }
-        else
-        {
-          return _documentsRepos.valuesIterator().next().getDocument();
-        }
-      }
+    INavigatorItem item = getIDocGivenODD(getODDForDocument(doc));
+    INavigatorItem nextitem = _documentNavigator.getNext(item);
+    if(nextitem == item){
+      // we're at the end, so we need to rewind
+      // and return doc at the very beginning
+      int i = -1;
+      do{
+        item=nextitem;
+        nextitem = _documentNavigator.getPrevious(item);
+        i++;
+      }while(nextitem != item);
+      return getODDGivenIDoc(nextitem).getDocument();
+    }else{
+      return getODDGivenIDoc(nextitem).getDocument();
     }
-    throw new UnexpectedException(new IllegalStateException("Could not get the next Document for Document: " + doc));
   }
 
   /**
@@ -839,28 +837,21 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   public Document getPrevDocument(Document doc) {
     Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
-    OpenDefinitionsDocument prev = null;
-    while(odds.hasNext())
-    {
-      OpenDefinitionsDocument odd = odds.next();
-      if(doc == odd.getDocument())
-      {
-        if(prev != null)
-        {
-          return prev.getDocument();
-        }
-        else
-        {
-          while(odds.hasNext())
-          {
-            prev = odds.next();
-          }
-          return prev.getDocument();
-        }
-      }
-      prev = odd;
+    INavigatorItem item = getIDocGivenODD(getODDForDocument(doc));
+    INavigatorItem nextitem = _documentNavigator.getPrevious(item);
+    if(nextitem == item){
+      // we're at the end, so we need to rewind
+      // and return doc at the very beginning
+      int i = -1;
+      do{
+        item=nextitem;
+        nextitem = _documentNavigator.getNext(item);
+        i++;
+      }while(nextitem != item);
+      return getODDGivenIDoc(nextitem).getDocument();
+    }else{
+      return getODDGivenIDoc(nextitem).getDocument();
     }
-    throw new UnexpectedException(new IllegalStateException("Could not get the previous Document for Document: " + doc));
   }
 
   /*
@@ -1272,6 +1263,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
 
   /**
+   * 
    * Searches for a file with the given name on the current source roots and the
    * augmented classpath.
    * @param filename Name of the source file to look for
@@ -1529,6 +1521,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           _doc.setCachedClassFile(null);
           checkIfClassFileInSync();
           _notifier.fileSaved(openDoc);
+          
+          
+          INavigatorItem idoc = _documentsRepos.getKey(getODDForDocument(_doc));
+//          _documentNavigator.removeDocument(idoc);
+//          _documentNavigator.addDocument(idoc);
 
           // Make sure this file is on the classpath
           try {

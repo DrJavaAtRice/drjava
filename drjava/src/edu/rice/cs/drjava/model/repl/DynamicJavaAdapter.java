@@ -471,11 +471,13 @@ public class DynamicJavaAdapter implements JavaInterpreter {
           // Process, if necessary
           n = processTree(n);
           
+          
           NameVisitor nv = makeNameVisitor(nameVisitorContext, checkVisitorContext);
           Node o = n.acceptVisitor(nv);
           if (o != null) n = o;
 
           AbstractTypeChecker tc = AbstractTypeChecker.makeTypeChecker(checkVisitorContext);
+
           n.acceptVisitor(tc);
 
           evalVisitorContext.defineVariables

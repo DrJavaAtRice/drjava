@@ -205,7 +205,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       }
 
       try {
-//        _checkInteraction(text);
+        _checkInteraction(text);
         toEval = _interactionsProcessor.preProcess(toEval);
 
         _prepareToInterpret(text);

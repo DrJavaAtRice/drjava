@@ -146,7 +146,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     assertEquals("Location of new document", 0, doc.getCurrentLocation());
 
     // Switch back
-    model.setActivePreviousDocument();
+    model.setActiveNextDocument();
 
     // Current pane should be old doc, pos 3
     pane = _frame.getCurrentDefPane();
