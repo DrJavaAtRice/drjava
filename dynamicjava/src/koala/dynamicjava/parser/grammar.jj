@@ -1170,6 +1170,48 @@ PARSER_END(Parser)
    * @return a ReferenceType
    * @see koala.dynamicjava.tree.ReferenceType
    */
+//  ReferenceType ReferenceTypeName() :
+//  {
+//    Token id;
+//    List/*<IdentifierToken>*/ list = new LinkedList/*<IdentifierToken>*/();
+//    List/*<Type>*/ typeArgs = null;
+//  }
+//  {
+//    id=<IDENTIFIER>
+//    {
+//      list.add(new TreeToken(id));
+//    }
+//    ( LOOKAHEAD(2)
+//       "." id=<IDENTIFIER>
+//     {
+//      list.add(new TreeToken(id));
+//    }
+//    )*
+//      [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments() ]
+//    {
+//      IdentifierToken f  = list.get(0);
+//      IdentifierToken l  = list.get(list.size()-1);
+//      if(typeArgs == null){
+//        if(TypeParamsMap.containsKey(TreeUtilities.listToName(list))){
+//          return TypeParamsMap.get(TreeUtilities.listToName(list));
+//        } else if(GenericTypesEnv.contains(TreeUtilities.listToName(list))){
+//          return GenericTypesEnv.lookup(TreeUtilities.listToName(list));
+//        } else {
+//          return new ReferenceType(list,
+//                                   filename,
+//                                   f.beginLine(), f.beginColumn(),
+//                                   l.endLine(),   l.endColumn());
+//        }
+//      } else {
+//        return new GenericReferenceType(list,
+//                                        filename,
+//                                        f.beginLine(), f.beginColumn(),
+//                                        l.endLine(), l.endColumn(),
+//                                        typeArgs);
+//      }
+//    }
+//  }
+//  
   ReferenceType ReferenceTypeName() :
   {
     Token id;
@@ -1177,17 +1219,16 @@ PARSER_END(Parser)
     List/*<Type>*/ typeArgs = null;
   }
   {
-    id=<IDENTIFIER>
+    id=<IDENTIFIER> [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments() ]
     {
       list.add(new TreeToken(id));
     }
-    ( LOOKAHEAD(2)
-       "." id=<IDENTIFIER>
+    ( LOOKAHEAD("." <IDENTIFIER>) "." id=<IDENTIFIER> [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments() ]
      {
       list.add(new TreeToken(id));
-    }
+     }
     )*
-      [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments() ]
+      
     {
       IdentifierToken f  = list.get(0);
       IdentifierToken l  = list.get(list.size()-1);
@@ -3702,7 +3743,7 @@ PARSER_END(Parser)
   void nameLookahead() :
   {}
   {
-    <IDENTIFIER> ( LOOKAHEAD(2) "." <IDENTIFIER> )* [ LOOKAHEAD(TypeArguments()) TypeArguments() ]
+    <IDENTIFIER> [ LOOKAHEAD(TypeArguments()) TypeArguments() ] ( LOOKAHEAD(2) "." <IDENTIFIER> [ LOOKAHEAD(TypeArguments()) TypeArguments() ])*
   }
   
   /**
@@ -4582,12 +4623,6 @@ PARSER_END(Parser)
     }
   }
   
-// Old working stuff.    
-//    <LESS>   /**/ // REMEMBER to support <? super List>
-//      (LOOKAHEAD("?") hook="?" 
-//       ([<EXTENDS> hookedType = ReferenceTypeName()]
-//       // added to support wildcards
-//    | 
 List/*<Type>*/ TypeArguments() :
   {
     List/*<Type>*/ typeArgs = new LinkedList/*<Type>*/();

@@ -33,7 +33,7 @@ import java.util.*;
 import koala.dynamicjava.tree.visitor.*;
 
 /**
- * This class represents the anonymous inner classe allocation nodes
+ * This class represents the *anonymous* inner class allocation nodes
  * of the syntax tree
  *
  * @author  Stephane Hillion

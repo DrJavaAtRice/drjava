@@ -1,4 +1,3 @@
-
 package koala.dynamicjava.tree.tiger.generic;
 
 import java.util.*;
@@ -586,7 +585,7 @@ public class GenericTreeTest extends TestCase {
     //_interpreter.interpret("(false) ? 2/0 : 1 ");
   }
   
-  public void testInnerParameterizedClass(){
+  public void testStaticInnerParameterizedClass(){
     testString = 
       "public class A{\n"+
       "  public static class B<T>{\n"+
@@ -598,22 +597,48 @@ public class GenericTreeTest extends TestCase {
     assertEquals("fooo", interpret(testString));
   }
   
+  public void testInnerParameterizedClass(){
+    testString = 
+      "public class A{\n"+
+      "  public class B<T>{\n"+
+      "    public String toString(){return \"fooo\";}\n"+
+      "  }\n"+
+      "}\n"+
+      
+      "A a = new A();\n"+
+      "A.B<String> b = a.new B<String>(); b.toString();\n";
+    assertEquals("fooo", interpret(testString));
+  }
+  
   // SHOULD BE FIXED TO PASS!
-  public void xtestInnerParameterizedClassInParameterizedClass(){
+  public void testStaticInnerParameterizedClassInParameterizedClass(){
     testString = 
       "public class A<S>{\n"+
       "  public static class B<T>{\n"+
       "    public String toString(){return \"fooo\";}\n"+
       "  }\n"+
       "}\n"+
-      
-      "A<Integer>.B<String> b = new A<Integer>.B<String>(); b.toString();\n";
+      "A<String>.B<String> b; b = new A<String>.B<String>(); b.toString();\n";
     assertEquals("fooo", interpret(testString));
   }
+ 
+    // SHOULD BE FIXED TO PASS!
+  public void testInnerParameterizedClassInParameterizedClass(){
+    testString = 
+      "public class A<S>{\n"+
+      "  public class B<T>{\n"+
+      "    public String toString(){return \"fooo\";}\n"+
+      "  }\n"+
+      "}\n"+
+      "A<String> a = new A<String>();\n"+
+      "A<String>.B<String> b = a.new B<String>(); b.toString();\n";
+    assertEquals("fooo", interpret(testString));
+  }
+ 
   
   // SHOULD BE FIXED TO PASS!
   
-  public void xtestInnerClassInParameterizedClass(){
+  public void testInnerClassInParameterizedClass(){
     testString = 
       "public class A<T>{\n"+
       "  public static class B{\n"+
@@ -661,7 +686,7 @@ public class GenericTreeTest extends TestCase {
       "A a = new A(); a.someMethod(a.ll);\n";
     assertEquals("String1", interpret(testString));
   }
-
+  
   
   // wildcards /**/
   // Type checker should catch this error, as you are not allowed to call the add method on list, as list is read only  
@@ -693,7 +718,7 @@ public class GenericTreeTest extends TestCase {
     assertEquals("String1", interpret(testString));
   }
   
-   // wildcards, ? alone (which means extends Object)
+  // wildcards, ? alone (which means extends Object)
   public void testSingleWildcard(){
     testString =
       "import java.util.LinkedList;\n"+
@@ -734,11 +759,13 @@ public class GenericTreeTest extends TestCase {
       "List<? super Number> ln = new LinkedList<Number>();\n"+
       "ln.add(new Integer(3));\n"+
       "TestSuper ts = new TestSuper(ln);\n ts.n;";
-
+    
     assertEquals("Expect to be allowed to read from the list, but only as objects.",new Integer(3), interpret(testString));
   }
   
- /*   public void testWildcardSuper2(){
+  
+  //Wildcards
+  public void testWildcardSuper2(){
     testString =
       "import java.util.List;\n"+
       "import java.util.LinkedList;\n"+
@@ -754,12 +781,41 @@ public class GenericTreeTest extends TestCase {
       "}\n"+
       "List<? super Number> ln = new LinkedList<Number>();\n"+
       "ln.add(new Integer(3));\n"+
-      "Integer i = ln.get(0);"; //should fail, as you can only read as objects when using super
-      
-
+      "Integer i = ln.get(0);i;"; //should fail, as you can only read as objects when using super
+    
+    
     assertEquals("Expect to be allowed to read from the list, but only as objects.",new Integer(3), interpret(testString));
   }
-  */
+  
+  //test added as these differences break in the interactions pane of DrJava, most likely caused by one of DrJava's extensions.  
+  public void testInnerClasses(){
+    testString =
+      
+      "class C{\n"+
+      "  C(){\n"+
+      "  }\n"+
+      
+      "  class D{\n"+
+      "  String getSomeStr(){return \"someString\";}\n"+
+      "  }\n"+
+      "}\n"+
+      
+      "class E{\n"+
+      "  String getStr(){\n"+
+      "    C c = new C();\n"+
+      "    C.D d = c.new D();\n"+
+      "    return d.getSomeStr();\n"+
+      "  }\n"+
+      "}\n"+
+      "new E().getStr();\n";
+    
+    assertEquals("Expect to get the String \"someString\"","someString", interpret(testString));
+
+   //Same code from the method getStr taken from class E.
+    testString = 
+      "C c = new C();\n"+
+      "C.D d = c.new D();\n"+
+      "d.getSomeStr();\n";
+    assertEquals("Expect to get the String \"someString\"","someString", interpret(testString));
+  }  
 }
-
-
