@@ -20,7 +20,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 {
   private boolean _modifiedSinceSave = false;
 	private boolean _modifiedHighlights = false;
-  BraceReduction _reduced = new ReducedModel();
+  BraceReduction _reduced = new ReducedModelControl();
 	//keeps track of all lit blocks
 	Vector<StateBlock> litBlocks = new Vector<StateBlock>(); 
 	Vector<StateBlock> changes = new Vector<StateBlock>();
@@ -41,9 +41,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
     throws BadLocationException
   {
 
-		//System.out.println("STRING: "+str+"      "+str.length()+" "+
-		//	offset);
-		//variables
+
     int locationChange = offset - _currentLocation;
 		int strLength = str.length();
 		int prevSize;		//stores the size of the item prev when insert begins.
@@ -53,16 +51,6 @@ public class DefinitionsDocument extends DefaultStyledDocument
 
 		//1)adjust location
     _reduced.move(locationChange);
-		reducedOffset = _reduced.getBlockOffset();
-		//2)set mark to the previous item.
-		mark = _reduced.makeCopyCursor();
-		if (!mark.atStart()) //if not at start then get the previous item.
-			mark.prev();
-		if (mark.atStart()) //if now at start then size of current == 0
-			prevSize = 0;
-		else
-			prevSize = mark.current().getSize(); //else size == size of current
-		
 		
 		//3)loop through string inserting characters
     for (int i = 0; i < str.length(); i++)
@@ -79,15 +67,14 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		//numbers are off by prevSize + strLength + reducedOffset
 		//the adjustment is the absolute position that newStates started at
 
-		int adjustment = offset - prevSize - reducedOffset;
-		newStates = SBVectorFactory.generate(mark,0,adjustment);
 		
-		updateCurrentHighlights(newStates,adjustment);
+		newStates = _reduced.generateHighlights(offset,strLength);
+		
+		updateCurrentHighlights(newStates);
 		
 		_modifiedSinceSave = true;
 
 		updateStyles();
-
   }
 
 	private void updateStyles() {
@@ -98,7 +85,6 @@ public class DefinitionsDocument extends DefaultStyledDocument
 			    StateBlock currentSB = changedStates.elementAt(i);
 			    StyleConstants.setForeground(attributes, currentSB.state);
 			    setCharacterAttributes(currentSB.location, currentSB.size, attributes,false);
-				//setCharacterAttributes(currentSB.location, currentSB.location+currentSB.size,attributes, false);
 			}
 
 		}
@@ -152,40 +138,30 @@ public class DefinitionsDocument extends DefaultStyledDocument
     }
   }
 
+	/**
+	 *len must be positive.
+	 */
+	
   public void remove(int offset, int len) throws BadLocationException
   {
     int locationChange = offset - _currentLocation;
 		ModelList<ReducedToken>.Iterator mark;
 		Vector<StateBlock> newStates;
-		int reducedOffset;
-		int prevSize;
+
 		_reduced.move(locationChange);
-		
-		reducedOffset = _reduced.getBlockOffset();
-		
-		mark = _reduced.makeCopyCursor();
-		if (!mark.atStart()) //if not at start then get the previous item.
-			mark.prev();
-		if (mark.atStart()) //if now at start then size of current == 0
-			prevSize = 0;
-		else
-			prevSize = mark.current().getSize(); //else size == size of current
-		
-//System.err.println("doc.remove: locChange=" + locationChange);
+
 		_currentLocation = offset;		
 		_reduced.delete(len);
 		
     super.remove(offset, len);
-
-
-		int adjustment = offset - prevSize - reducedOffset;
-		newStates = SBVectorFactory.generate(mark,0,adjustment);
 		
-		updateCurrentHighlights(newStates,adjustment);
+	//		newStates = SBVectorFactory.generate(mark,0,adjustment);
+		newStates = _reduced.generateHighlights(offset,0);
+		
+		updateCurrentHighlights(newStates);
 		//else the absolute location stays the same.
 		//adjust the current location if delete works
     _modifiedSinceSave = true;
-
 		updateStyles();
   }
 
@@ -220,21 +196,23 @@ public class DefinitionsDocument extends DefaultStyledDocument
 	 *@param newStates the vector of blocks that are now lit up.
 	 *@param adjustment the point where the walk was begun.	 
 	 */
-	private void updateCurrentHighlights(Vector<StateBlock> newBlocks,
-																			 int adjustment)
+	private void updateCurrentHighlights(Vector<StateBlock> newBlocks)
 		{
-			//litBlocks
-			/**
-				 StateBlock sbLit;
-				 int i = 0;
-				 for (i = 0; i < litBlocks.size(); i++) {
-				 sbLit = newBlocks.elementAt(i);
-				 if (sbLit.location + sbLit.size >= adjustment)
-				 break;
-				 }
-			*/
 			changes = newBlocks;
 		}
+public int getCurrentLocation()
+  {
+    return _currentLocation;
+  }
+
+	public void setCurrentLocation(int loc)
+  {
+    _reduced.move(loc - _currentLocation);
+    _currentLocation = loc;
+  }
+
+
+
 }
 
 

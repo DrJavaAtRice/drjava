@@ -4,7 +4,6 @@ package edu.rice.cs.drjava;
 
 import gj.util.Stack;
 import gj.util.Vector;
-import java.util.Calendar;
 
 /**
  * This class provides an implementation of the BraceReduction
@@ -29,7 +28,7 @@ import java.util.Calendar;
  * @author Mike Yantosca, Jonathan Bannet
  */
 
-public class ReducedModel implements BraceReduction
+public class ReducedModelComment
 {
   /**
    * The character that represents the cursor in toString().
@@ -41,47 +40,60 @@ public class ReducedModel implements BraceReduction
 	 * A list of ReducedTokens (braces and gaps).
 	 * @see ModelList
 	 */
-  private ModelList<ReducedToken> _braces;
-	
+  ModelList<ReducedToken> _braces;
   /**
 	 * keeps track of cursor position in document
 	 * @see ModelList.Iterator
 	 */
-  private ModelList<ReducedToken>.Iterator _cursor;
+  ModelList<ReducedToken>.Iterator _cursor;
 	
+	/**Can be used by other classes to walk through the list of comment chars*/
+	ModelList<ReducedToken>.Iterator _walker;
   /** a relative offset within the current ReducedToken */
-  private int _offset;
-  
+  int _offset;
+  int _walkerOffset;
 
   /**
    * Constructor.  Creates a new reduced model with the cursor
 	 * at the start of a blank "page."
    */
-  public ReducedModel()
+  public ReducedModelComment()
     {
       _braces = new ModelList<ReducedToken>();
       _cursor = _braces.getIterator();
+			_walker = _cursor.copy();
 			// we should be pointing to the head of the list
 			_offset = 0;
     }
 
-	public ModelList<ReducedToken>.Iterator getCursor() {
-		return this._cursor;
-	}
+	/**
+	 *Goes back insertSize - 2.
+	 *@param offset the absolute location that the insert was committed at.
+	 *@param insertSize the size of the commited insert.
+	 */
+	public Vector<StateBlock> generateHighlights(int offset, int insertSize)
+		{
+			ModelList<ReducedToken>.Iterator mark = _cursor.copy();
+			int markOffset = -1;
+			int adjustment = 0;
+			int moveSize = 0;
+			
+			if (2 > offset){
+				moveSize = insertSize + offset;
+				adjustment = 0;
+			}
+			else {
+				moveSize = 2 + insertSize;
+				adjustment = offset - 2;
+			}
 
-	public ModelList<ReducedToken> getBraces() {
-		return this._braces;
-	}
-	
-	public int getBlockOffset() {
-		return this._offset;
-	}
+			//move back to before the insert.
+			markOffset = _move(-moveSize,mark,_offset);
 
-	public void setBlockOffset(int n) {
-		this._offset = n;
-	}
+			return SBVectorFactory.generate(mark,markOffset,adjustment);
+		}
 	
-  /**
+	/**
 	 * Package private absolute offset for tests.
 	 * We don't keep track of absolute offset as it causes too much confusion
 	 * and trouble.
@@ -159,7 +171,7 @@ public class ReducedModel implements BraceReduction
    */
 	public void insertOpenSquiggly()
 		{
-			_insertBrace("{");
+			insertGap(1);
 		}
 
   /**
@@ -168,7 +180,7 @@ public class ReducedModel implements BraceReduction
    */
   public void insertClosedSquiggly()
 		{
-			_insertBrace("}");
+			insertGap(1);
 		}
   /**
    * Inserts an open parenthesis (() into the reduced model.
@@ -176,7 +188,7 @@ public class ReducedModel implements BraceReduction
    */
   public void insertOpenParen()
 		{
-			_insertBrace("(");
+			insertGap(1);
 		}
 
   /**
@@ -185,7 +197,7 @@ public class ReducedModel implements BraceReduction
    */
   public void insertClosedParen()
 		{
-			_insertBrace(")");
+			insertGap(1);
 		}
 	
   /**
@@ -194,7 +206,7 @@ public class ReducedModel implements BraceReduction
    */
   public void insertOpenBracket()
 		{
-			_insertBrace("[");
+			insertGap(1);
 		}
 
   /**
@@ -203,7 +215,7 @@ public class ReducedModel implements BraceReduction
    */
   public void insertClosedBracket()
 		{
-			_insertBrace("]");
+			insertGap(1);
 		}
 	
   /**
@@ -791,7 +803,7 @@ public class ReducedModel implements BraceReduction
 	 *some iterator. This function passes _cursor to the _getStateAtCurrent
 	 *Helper to return the current state in the cursor iterator.
 	 */
-	public int getStateAtCurrent()
+	int getStateAtCurrent()
 		{
 			return _getStateAtCurrentHelper(_cursor);
 		}
@@ -875,7 +887,8 @@ public class ReducedModel implements BraceReduction
 			_offset = 0;
 		}
 
-	/**
+
+		/**
 	 * Helper function for top level brace insert functions.
 	 *
 	 * <OL>
@@ -923,6 +936,7 @@ public class ReducedModel implements BraceReduction
 					_insertNewBrace(text,_cursor);
 				}
 		}
+
 
 	/**
 	 * Helper function to _insertBrace.
@@ -1398,6 +1412,7 @@ public class ReducedModel implements BraceReduction
 					copyCursor.prev();
 				}
 		}
+
 	
   /**
    * Updates the BraceReduction to reflect cursor movement.
@@ -1407,7 +1422,7 @@ public class ReducedModel implements BraceReduction
    */
 	public void move(int count)
 		{
- 			_offset = _move(count, _cursor, _offset);			
+			_offset = _move(count, _cursor, _offset);			
 		}
 
 	/**
@@ -1838,260 +1853,54 @@ public class ReducedModel implements BraceReduction
 			return delTo.prevItem().getType().equals(match);
 		}
 
-  /** If the current brace is a /, a *, a // or a \n, it's not matchable.
-   *  This means it is ignored on balancing and on next/prev brace finding.
-   *  All other braces are matchable.
-   */
-  private boolean _isCurrentBraceMatchable(
-		ModelList<ReducedToken>.Iterator copyCursor)
-		{
-			return _isBraceMatchable(copyCursor.current());
-		}
-
-  private boolean _isBraceMatchable(ReducedToken token)
-		{
-			String type = token.getType();
-
-			return (!token.isGap() &&
-							!(type.equals("/")  ||
-								type.equals("*")  ||
-								type.equals("\n") ||
-								type.equals("//") ||
-								type.equals("\\") ||
-								type.equals("\\\\") ||
-								type.equals("\\\"")) &&
-							!token.isShadowed());
-		}
-
-
-/**
- *returns distance from current location of cursor to the location of the
- *previous significant brace.
- *ex. (...|)  where | signifies the cursor. previousBrace returns 4 because
- *it goes to the spot behind the (.
- * /|* returns this brace since you're in the middle of it and going
- *backward can find it.
- */
-	public int previousBrace()															
-    {
-			int dist = 0;
-		
-			ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
-			if (copyCursor.atEnd() ||
-				(!copyCursor.atStart()&& _offset == 0))
-				copyCursor.prev();
-			
-			if (_offset > 0){
-				if (_isCurrentBraceMatchable(copyCursor))
-					return _offset;
-				else{
-					dist = dist +_offset;
-					copyCursor.prev();
-				}
-			}
-      // if we're in the middle of the first brace element, we're
-      // not going to find any previous braces
-      			
-			while (!copyCursor.atStart()){				
-				if (_isCurrentBraceMatchable(copyCursor))
-					return dist + copyCursor.current().getSize();
-				else{
-					dist = dist + copyCursor.current().getSize();
-					copyCursor.prev();
-				}
-			}
-			return -1;
-		}
-
-  /**
-	 *Goes to the location before the brace. |...( where | is the cursor,
-	 *returns three since it is three moves to the location of the (
-	 *NOTE: /|* returns the next brace. It does not return this brace because
-	 *you are past it.
-   */
-  public int nextBrace()
-    {
-			int dist = 0;
-			ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
-			
-			if ( copyCursor.atStart())
-				copyCursor.next();
-			if (_offset > 0){
-				dist = dist + _offset;
-				copyCursor.next();
-			}
-      // there are no braces on the last brace element - it's empty
-      while (!copyCursor.atEnd() ){
-				if (_isCurrentBraceMatchable(copyCursor))
-					return dist;
-				else{
-					dist = dist + copyCursor.current().getSize();
-					copyCursor.next();
-				}
-			}					
-			return -1;
-		}
- 
-
-
-	public boolean openBraceImmediatelyRight()
-		{
-			return (!_cursor.atStart() && !_cursor.atEnd() &&
-							_isBraceMatchable(_cursor.current()) &&
-							_cursor.current().isOpen() &&
-							_offset == 0);
-		}
-
-
-	public boolean closedBraceImmediatelyLeft()
-		{
-			return (!_cursor.atStart() && !_cursor.atFirstItem() &&
-							_isBraceMatchable(_cursor.prevItem()) &&
-							_cursor.prevItem().isClosed() &&
-							_offset == 0);
-		}
+/**In order to interface with the ReducedModelComment two functions are
+	 provided. One resets the walker and the other will both move the cursor
+	 by x and return the state at that new location.
+	 Once the new value has returned all new calculations will be relative to
+	 that spot until the walker is reset to the _cursor.
+*/
 	
-  /**
-	 * If the current ReducedToken is an open significant brace and the
-	 * offset is 0 (i.e., if we're immediately left of said brace),
-	 * push the current Brace onto a Stack and iterate forwards,
-	 * keeping track of the distance covered.
-	 * - For every closed significant Brace, if it matches the top of the Stack,
-	 *   pop the Stack.  Increase the distance by the size of the Brace.
-	 *   If the Stack is Empty, we have a balance.  Return distance.
-	 *   If the closed Brace does not match the top of the Stack, return -1;
-	 *   We have an unmatched open Brace at the top of the Stack.
-	 * - For every open significant Brace, push onto the Stack.
-	 *   Increase distance by size of the Brace, continue.
-	 * - Anything else, increase distance by size of the ReducedToken, continue.
-   */
-  public int balanceForward()
-    {
-			Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
-			ModelList<ReducedToken>.Iterator iter = _cursor.copy();
+	/**
+	 *Returns the state at the relLocation, where relLocation is the location
+	 *relative to the walker
+	 *@param relLocation distance from walker to get state at.
+	 */
+	int stateAtRelLocation(int relLocation)
+	{
 
-			if (iter.atStart())
-				iter.next();
 
-			// here we check to make sure there is an open significant brace
-			// immediately to the right of the cursor
-			if (!iter.atEnd() &&
-					_isCurrentBraceMatchable(iter) &&
-					iter.current().isOpen() &&
-					_offset == 0)
-				{
-					// initialize the distance and the stack with the first brace,
-					// the one we are balancing
-					int distance = 0;
-					braceStack.push(iter.current());
-					distance += iter.current().getSize();
-					iter.next();
+		_walkerOffset = _move(relLocation,_walker,_walkerOffset);
+		return _getStateAtCurrentHelper(_walker);
+	}
 
-					// either we get a match and the stack is empty
-					// or we reach the end of a file and haven't found a match
-					// or we have a closed brace that doesn't have a match,
-					//    so we abort
-					while (!iter.atEnd() && !braceStack.isEmpty())
-						{
-							if (_isCurrentBraceMatchable(iter)) {
-								// closed
-								if (iter.current().isClosed()) {
-									ReducedToken popped = braceStack.pop();
-									if (!iter.current().isMatch(popped))
-										return -1;
-								}
-								// open
-								else {
-									braceStack.push(iter.current());
-								}
-							}
-							// no matter what, we always want to increase the distance
-							// by the size of the token we have just gone over
-							distance += iter.current().getSize();
-							iter.next();
-						}
-					
-					// we couldn't find a match
-					if (!braceStack.isEmpty())
-						return -1;
-					// success
-					else
-						return distance;
-				}
-			// not the right initial conditions 
-			else
-				return -1;			
-    }
-	/* 
-	 * If the previous ReducedToken is a closed significant brace,
-	 * offset is 0 (i.e., if we're immediately right of said brace),
-	 * push the previous Brace onto a Stack and iterate backwards,
-	 * keeping track of the distance covered.
-	 * - For every open significant Brace, if it matches the top of the Stack,
-	 *   pop the Stack.  Increase the distance by the size of the Brace.
-	 *   If the Stack is Empty, we have a balance.  Return distance.
-	 *   If the open Brace does not match the top of the Stack, return -1;
-	 *   We have an unmatched closed Brace at the top of the Stack.
-	 * - For every closed significant Brace, push onto the Stack.
-	 *   Increase distance by size of the Brace, continue.
-	 * - Anything else, increase distance by size of the ReducedToken, continue.
-   */
+	/**
+	 *Resets the walker to the current position in document
+	 */
+	void resetLocation()
+		{
+			_walker = _cursor.copy();
+			_walkerOffset = _offset;
+		}
 
-  public int balanceBackward()
-    { 
-			Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
-			ModelList<ReducedToken>.Iterator iter = _cursor.copy();
+	ReducedToken current()
+		{
+			return _cursor.current();
+		}
 
-			if (iter.atStart() || iter.atFirstItem())
-				return -1;
-			
-			iter.prev();
-			// here we check to make sure there is an closed significant brace
-			// immediately to the right of the cursor
-			if (_isCurrentBraceMatchable(iter) &&
-					iter.current().isClosed() &&
-					_offset == 0)
-				{
-					// initialize the distance and the stack with the first brace,
-					// the one we are balancing
-					int distance = 0;
-					braceStack.push(iter.current());
-					distance += iter.current().getSize();
-					iter.prev();
+	void  next()
+		{
+			_cursor.next();
+		}
+	void prev()
+		{
+			_cursor.prev();
+		}
 
-					// either we get a match and the stack is empty
-					// or we reach the start of a file and haven't found a match
-					// or we have a open brace that doesn't have a match,
-					//    so we abort
-					while (!iter.atStart() && !braceStack.isEmpty())
-						{
-							if (_isCurrentBraceMatchable(iter)) {
-								// open
-								if (iter.current().isOpen()) {
-									ReducedToken popped = braceStack.pop();
-									if (!iter.current().isMatch(popped))
-										return -1;
-								}
-								// closed
-								else {
-									braceStack.push(iter.current());
-								}
-							}
-							// no matter what, we always want to increase the distance
-							// by the size of the token we have just gone over
-							distance += iter.current().getSize();
-							iter.prev();
-						}
-					
-					// we couldn't find a match
-					if (!braceStack.isEmpty())
-						return -1;
-					// success
-					else
-						return distance;
-				}
-			// not the right initial conditions 
-			else
-				return -1;				
-    }	
 }
+
+
+
+
+
+
+

@@ -15,35 +15,35 @@ public interface BraceReduction
 
 	
 /**
-	 * Accessor for curson.
-	 */
-	public ModelList<ReducedToken>.Iterator getCursor();
-
-	/**
-	 * Accessor for block offset.
-	 */
-	public int getBlockOffset();
+ * Accessor for curson.
+ */
+//	public ModelList<ReducedToken>.Iterator getCursor();
 
 	/**
 	 * Mutator for block offset.
 	 */
-	public void setBlockOffset(int n);
+	//public void setBlockOffset(int n);
 
 	/**
 	 * Accessor for braces.
 	 */
-	public ModelList<ReducedToken> getBraces();
+	//public ModelList<ReducedToken> getBraces();
 
+	public int absOffset();
+	/**
+	 *Returns a vector of StateBlocks signifying the new look of the view
+	 */
+	public Vector<StateBlock> generateHighlights(int offset,int insertSize);
+	/**
+	 *returns the current
+	 */
+	ReducedToken currentToken();
+		
 	/**
 	 * Returns the current state of the cursor iterator.
-	 */
-	public int getStateAtCurrent();
+	 */	
+	int getStateAtCurrent();
 
-	/**
-	 * Returns a copy of the current curson.
-	 */
-	public ModelList<ReducedToken>.Iterator makeCopyCursor();
-	
   /**
    * Inserts an open brace ({) into the reduced model.
    */
@@ -122,17 +122,6 @@ public interface BraceReduction
    */
   public void delete( int count );
   
-  /**
-   * <P>Finds the next significant brace.</P>
-   * @return the distance to the next significant brace.
-   */
-  public int nextBrace();
-  
-  /**
-   * <P>Finds the previous significant brace.</P>
-   * @return the distance to the previous significant brace.
-   */
-  public int previousBrace();
   
   /**
    * <P>Finds the closing brace that matches the next significant
@@ -153,9 +142,16 @@ public interface BraceReduction
   public int balanceBackward();
 
 	/**
-	 * Returns true iff the brace immediately to the left is closed.
+	 *Gets the distance to the enclosing brace.
 	 */
-	public boolean closedBraceImmediatelyLeft();
+	public int getDistToEnclosingBrace();
+
+	/**
+	 *Gets distance to enclosing new line
+	 */
+	public int getDistToPrevLine();
+
+	public String simpleString();
 }
 
 

@@ -35,29 +35,49 @@ public class DefinitionsDocumentTest extends TestCase {
 				assertEquals("#1.0",defModel.getText(0,14),"Start:a/*bc */");
 				assertEquals("#1.1",6,defModel._currentLocation);
 
+				// document is:
+				// Start:=>a/*bc */"\\{}()
+
 				BraceReduction rm = defModel._reduced;
-				assertEquals("2.1",true,rm.getCursor().current().isGap());
-				assertEquals("2.2",6,rm.getBlockOffset());
-				rm.getCursor().next();
-				assertEquals("2.3","/*",rm.getCursor().current().getType());
-				rm.getCursor().next();
-				assertEquals("2.4",true,rm.getCursor().current().isGap());
+				assertEquals("2.1",0,rm.getStateAtCurrent());
+				rm.move(2);
+				// document is:
+				// Start:a/=>*bc */"\\{}()
+				assertEquals("2.3","/*",rm.currentToken().getType());
+				rm.move(2);
+				// document is:
+				// Start:a/*b=>c */"\\{}()
+				assertEquals("2.4",true,rm.currentToken().isGap());
 				assertEquals("2.5",ReducedToken.INSIDE_BLOCK_COMMENT,
-										 rm.getCursor().current().getState());
-				rm.getCursor().next();
-				assertEquals("2.6","*/",rm.getCursor().current().getType());
-				rm.getCursor().next();
-				assertEquals("2.7","\"",rm.getCursor().current().getType());
-				rm.getCursor().next();
-				assertEquals("2.8","\\",rm.getCursor().current().getType());
-				rm.getCursor().next();
-				assertEquals("2.9","{",rm.getCursor().current().getType());
-				rm.getCursor().next();
-				assertEquals("2.91","}",rm.getCursor().current().getType());
-				rm.getCursor().next();
-				assertEquals("2.92","(",rm.getCursor().current().getType());
-				rm.getCursor().next();
-				assertEquals("2.93",")",rm.getCursor().current().getType());
+										 rm.currentToken().getState());
+				rm.move(2);
+				// document is:
+				// Start:a/*bc =>*/"\{}()
+				assertEquals("2.6","*/",rm.currentToken().getType());
+				rm.move(2);
+				// document is:
+				// Start:a/*bc */=>"\{}()
+				assertEquals("2.7","\"",rm.currentToken().getType());
+				rm.move(1);
+				// document is:
+				// Start:a/*bc */"=>\{}()
+				assertEquals("2.8","\\",rm.currentToken().getType());
+				rm.move(1);
+				// document is:
+				// Start:a/*bc */"\=>{}()
+				assertEquals("2.9","{",rm.currentToken().getType());
+				rm.move(1);
+				// document is:
+				// Start:a/*bc */"\{=>}()
+				assertEquals("2.91","}",rm.currentToken().getType());
+				rm.move(1);
+				// document is:
+				// Start:a/*bc */"\{}=>()
+				assertEquals("2.92","(",rm.currentToken().getType());
+				rm.move(1);
+				// document is:
+				// Start:a/*bc */"\\{}(=>)
+				assertEquals("2.93",")",rm.currentToken().getType());
 			}
 			catch( javax.swing.text.BadLocationException e) {
 				System.out.println("EXCEPTION");
@@ -73,9 +93,12 @@ public class DefinitionsDocumentTest extends TestCase {
 				assertEquals("#0.1",3,defModel._currentLocation);
 					
 				BraceReduction rm = defModel._reduced;
-				assertEquals("1.0","*/",rm.getCursor().current().getType());
-				assertEquals("1.1",0,rm.getBlockOffset());
-				assertEquals("1.2","/*",rm.getCursor().prevItem().getType());
+				assertEquals("1.0","*/",rm.currentToken().getType());
+				// no longer support getBlockOffset
+				//				assertEquals("1.1",0,rm.getBlockOffset());
+				rm.move(-2);
+				assertEquals("1.2","/*",rm.currentToken().getType());
+				rm.move(2);
 				assertEquals("1.3",ReducedToken.INSIDE_BLOCK_COMMENT,
 										 rm.getStateAtCurrent());
 			}
@@ -173,11 +196,14 @@ public class DefinitionsDocumentTest extends TestCase {
 				Vector<StateBlock> expected = new Vector<StateBlock>();
 				defModel.insertString(0,"/*bc */ //ad}()",null);
 				defModel.remove(13,2);
-				//			assertEquals("#0.1",false, defModel.hasHighlightChanged());
+
+				// was commented out
+				//assertEquals("#0.1(was commented out)",false,
+				//					 	 defModel.hasHighlightChanged());
 				defModel.remove(4,1);
 				// /*bc*/ //ad}
 				actual = defModel.getHighLightInformation();
-				expected.addElement(new StateBlock(0, 6,
+				expected.addElement(new StateBlock(2, 4,
 																					 StateBlock.BLOCK_COMMENT_COLOR));
 				expected.addElement(new StateBlock(6, 1,
 																					 StateBlock.DEFAULT_COLOR));
@@ -257,8 +283,9 @@ public class DefinitionsDocumentTest extends TestCase {
 				Vector<StateBlock> expected = new Vector<StateBlock>();
 
 				defModel.insertString(0,"abcd/ddd",null);
-
-//				assertEquals("#0.0",false, defModel.hasHighlightChanged());
+				// was commented out
+				//assertEquals("#0.0(was commented out)",false,
+				//						 defModel.hasHighlightChanged());
 
 				defModel.insertString(5,"/",null);
 				assertEquals("#0.1",true, defModel.hasHighlightChanged());

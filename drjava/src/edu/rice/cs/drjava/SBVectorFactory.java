@@ -24,18 +24,19 @@ public class SBVectorFactory
 			//if innitially at Start... begin on first char.
 			
 			//must check the previous character's state
-			if (!it.atStart())
-				it.prev();
-				
+
 			if (it.atStart())
 					it.next();
-			else
-				start = start + (-1 * it.current().getSize());
+			//	else
+			//	start = start + (-1 * it.current().getSize());
 
-			if (!it.atEnd())
+			if (!it.atEnd()) {
 				prevState = it.current().getHighlight();
-			
-			while (!it.atEnd()){
+				length = it.current().getSize() - offset;
+				it.next();
+			}
+				
+			while (!it.atEnd()){				
 				currState = it.current().getHighlight();
 				if (prevState.equals(currState)){
 					length = length + it.current().getSize();
@@ -53,6 +54,7 @@ public class SBVectorFactory
 			return blocks;
 		}
 }
+
 
 
 

@@ -7,9 +7,9 @@ import java.util.Vector;
 import junit.extensions.*;
 
 public class ReducedModelTest extends TestCase {
-	protected ReducedModel model0;
-	protected ReducedModel model1;
-	protected ReducedModel model2;
+	protected ReducedModelControl model0;
+	protected ReducedModelControl model1;
+	protected ReducedModelControl model2;
 	
 	public ReducedModelTest(String name)
 		{
@@ -18,9 +18,9 @@ public class ReducedModelTest extends TestCase {
 	
 	protected void setUp()
 		{
-			model0 = new ReducedModel();
-			model1 = new ReducedModel();
-			model2 = new ReducedModel();
+			model0 = new ReducedModelControl();
+			model1 = new ReducedModelControl();
+			model2 = new ReducedModelControl();
 		}
 	
 	public static Test suite()
@@ -30,123 +30,129 @@ public class ReducedModelTest extends TestCase {
 
 	public void testInsertGap()
 		{
-			
+			//inserts a gap. 
 			model1.insertGap(4);
-			assertTrue("#0.0", model1.getCursor().prevItem().isGap());
-			assertTrue("#0.1", model1.getCursor().atEnd());
-			assertEquals("#0.2", 4, model1.getCursor().prevItem().getSize());
-			model2.getCursor().next();
+			model1.move(-4);
+			//checks to make sure it is a gap
+			assertTrue("#0.0", model1.currentToken().isGap());			
+			assertEquals("#0.2", 4, model1.currentToken().getSize());
+			model1.move(4);
+			//inserts another gap after the afor mentioned gap
 			model2.insertGap(5);
-			assertTrue("#1.0", model2.getCursor().prevItem().isGap());
-			assertTrue("#1.1", model2.getCursor().atEnd());
-			assertEquals("#1.2", 5, model2.getCursor().prevItem().getSize());
+			model2.move(-5);
+			//makes sure they united to form an Uber gap.
+			assertTrue("#1.0", model2.currentToken().isGap());
+			assertEquals("#1.2", 5, model2.currentToken().getSize());
 		}
 
-	
-public void testInsertGapBeforeGap()
+	/**
+	 *Test that a gap inserted previous to a gap, unites with that gap.
+	 */
+	public void testInsertGapBeforeGap()
 		{
 			model1.insertGap(3);
-			assertTrue("#0.0.0", model1.getCursor().atEnd());
-			model1.getCursor().prev();
+			assertTrue("#0.0.0", model1.atEnd());
+			model1.move(-3);
 			model1.insertGap(3);
-			assertTrue("#0.0", model1.getCursor().current().isGap());
-			assertEquals("#0.1", 3, model1.getBlockOffset());
-			assertEquals("#0.2", 6, model1.getCursor().current().getSize());
-			assertTrue("#0.3", model1.getCursor().atFirstItem());
-			assertTrue("#0.4", model1.getCursor().atLastItem());
-			model1.getCursor().prev();
-			model1.setBlockOffset(0); // now pointing to head.  move(int) will take
-                     			// care of this in the future
+			//insert two consecutive gaps and make sure they combine.
+			assertTrue("#0.0", model1.currentToken().isGap());
+			assertEquals("#0.1", 3, model1.absOffset());
+			assertEquals("#0.2", 6, model1.currentToken().getSize());
+			model1.move(-3);
 			model1.insertGap(2);
-			assertTrue("#1.0", model1.getCursor().current().isGap());
-			assertEquals("#1.1", 2, model1.getBlockOffset());
-			assertEquals("#1.2", 8, model1.getCursor().current().getSize());
-			assertTrue("#1.3", model1.getCursor().atFirstItem());
-			assertTrue("#1.4", model1.getCursor().atLastItem());			
+			assertTrue("#1.0", model1.currentToken().isGap());
+			assertEquals("#1.1", 2, model1.absOffset());
+			assertEquals("#1.2", 8, model1.currentToken().getSize());
 		}
 
 	public void testInsertGapAfterGap()
 		{
 			model1.insertGap(3);
-			assertTrue("#0.0", model1.getCursor().atEnd());
-			assertTrue("#0.1", model1.getCursor().prevItem().isGap());
-			assertEquals("#0.2", 3, model1.getCursor().prevItem().getSize());	
+			assertTrue("#0.0", model1.atEnd());
+			model1.move(-3);
+			assertTrue("#0.1", model1.currentToken().isGap());
+			assertEquals("#0.2", 3, model1.currentToken().getSize());	
 			model1.insertGap(4);
-			assertTrue("#1.0", model1.getCursor().atEnd());
-			assertTrue("#1.1", model1.getCursor().prevItem().isGap());
-			assertEquals("#1.2", 7, model1.getCursor().prevItem().getSize());
+			assertTrue("#1.1", model1.currentToken().isGap());
+			assertEquals("#1.2", 7, model1.currentToken().getSize());
 		}
 
+	/**Inserts one gap inside of the other*/
 	public void testInsertGapInsideGap()
 		{
 			model1.insertGap(3);
-			assertTrue("#0.0", model1.getCursor().atEnd());
-			assertTrue("#0.1", model1.getCursor().prevItem().isGap());
-			assertEquals("#0.2", 3, model1.getCursor().prevItem().getSize());			
-			model1.getCursor().prev();
+			assertTrue("#0.0", model1.atEnd());
+			model1.move(-3);
+			assertTrue("#0.1", model1.currentToken().isGap());
+			assertEquals("#0.2", 3, model1.currentToken().getSize());			
 			model1.insertGap(3);
-			assertTrue("#1.0", model1.getCursor().atLastItem());
-			assertTrue("#1.1", model1.getCursor().current().isGap());
-			assertEquals("#1.2", 6, model1.getCursor().current().getSize());
-			assertEquals("#1.3", 3, model1.getBlockOffset());
-			model1.insertGap(3);
-			assertTrue("#1.0", model1.getCursor().atLastItem());
-			assertTrue("#1.1", model1.getCursor().current().isGap());
-			assertEquals("#1.2", 9, model1.getCursor().current().getSize());
-			assertEquals("#1.3", 6, model1.getBlockOffset());			
+			assertTrue("#1.1", model1.currentToken().isGap());
+			assertEquals("#1.2", 6, model1.currentToken().getSize());
+			assertEquals("#1.3", 3, model1.absOffset());
+			model1.insertGap(4);
+			assertTrue("#1.1", model1.currentToken().isGap());
+			assertEquals("#1.2", 10, model1.currentToken().getSize());
+			assertEquals("#1.3", 7, model1._offset);			
 		}
 
 	public void testInsertBraceAtStartAndEnd()
 		{
 			model1.insertOpenParen();
-			assertTrue("#0.0", model1.getCursor().atEnd());
-			assertEquals("#0.1","(", model1.getCursor().prevItem().getType());
-			assertEquals("#0.2", 1, model1.getCursor().prevItem().getSize());
-
-			model2.getCursor().next();
+			assertTrue("#0.0", model1.atEnd());
+			model1.move(-1);
+			assertEquals("#0.1","(", model1.currentToken().getType());
+			assertEquals("#0.2", 1, model1.currentToken().getSize());
+			
 			model2.insertClosedParen();
-			assertTrue("#1.0", model2.getCursor().atEnd());
-			assertEquals("#1.1",")", model2.getCursor().prevItem().getType());
-			assertEquals("#1.2", 1, model2.getCursor().prevItem().getSize());
+			assertTrue("#1.0", model2.atEnd());
+			model2.move(-1);
+			assertEquals("#1.1",")", model2.currentToken().getType());
+			assertEquals("#1.2", 1, model2.currentToken().getSize());
 		}
 
+
+
+
+
+
+	//**************
 	public void testInsertBraceInsideGap()
 		{
 			model1.insertGap(4);
-			model1.getCursor().prev();
+			model1.move(-4);
 			model1.insertGap(3);
-			assertEquals("#0.0", 3, model1.getBlockOffset());
-			assertEquals("#0.1", 7, model1.getCursor().current().getSize());
+			assertEquals("#0.0", 3, model1.absOffset());
+			assertEquals("#0.1", 7, model1.currentToken().getSize());
 			model1.insertOpenSquiggly();
-			assertEquals("#1.0", 0, model1.getBlockOffset());
-			assertEquals("#1.1", 4, model1.getCursor().current().getSize());
-			assertTrue("#1.2", model1.getCursor().current().isGap());
-			model1.getCursor().prev();
-			assertEquals("#2.0", 1, model1.getCursor().current().getSize());
-			assertEquals("#2.1", "{", model1.getCursor().current().getType());
-			model1.getCursor().prev();
-			assertEquals("#3.0", 0, model1.getBlockOffset());
-			assertEquals("#3.1", 3, model1.getCursor().current().getSize());
-			assertTrue("#3.2", model1.getCursor().current().isGap());
+			assertEquals("#1.0", 4, model1.absOffset());
+			assertEquals("#1.1", 4, model1.currentToken().getSize());
+			assertTrue("#1.2", model1.currentToken().isGap());
+			model1.move(-1);
+			assertEquals("#2.0", 1, model1.currentToken().getSize());
+			assertEquals("#2.1", "{", model1.currentToken().getType());
+			model1.move(-3);
+			assertEquals("#3.0", 0, model1.absOffset());
+			assertEquals("#3.1", 3, model1.currentToken().getSize());
+			assertTrue("#3.2", model1.currentToken().isGap());
 		}
 
 	public void testInsertBrace()
 		{
 			model1.insertOpenSquiggly();
-			assertTrue("#0.0", model1.getCursor().atEnd());
-			model1.getCursor().prev();
-			assertEquals("#1.0", 1, model1.getCursor().current().getSize());
-			assertEquals("#1.1", "{", model1.getCursor().current().getType());
+			assertTrue("#0.0", model1.atEnd());
+			model1.move(-1);
+			assertEquals("#1.0", 1, model1.currentToken().getSize());
+			assertEquals("#1.1", "{", model1.currentToken().getType());
 			model1.insertOpenParen();
 			model1.insertOpenBracket();
-			assertEquals("#2.0", 1, model1.getCursor().current().getSize());
-			assertEquals("#2.1", "{", model1.getCursor().current().getType());
-			model1.getCursor().prev();
-			assertEquals("#3.0", 1, model1.getCursor().current().getSize());
-			assertEquals("#3.1", "[", model1.getCursor().current().getType());
-			model1.getCursor().prev();
-			assertEquals("#3.0", 1, model1.getCursor().current().getSize());
-			assertEquals("#3.1", "(", model1.getCursor().current().getType());
+			assertEquals("#2.0", 1, model1.currentToken().getSize());
+			assertEquals("#2.1", "{", model1.currentToken().getType());
+			model1.move(-1);
+ 			assertEquals("#3.0", 1, model1.currentToken().getSize());
+			assertEquals("#3.1", "[", model1.currentToken().getType());
+			model1.move(-1);
+			assertEquals("#3.0", 1, model1.currentToken().getSize());
+			assertEquals("#3.1", "(", model1.currentToken().getType());
 			
 		}
 
@@ -154,69 +160,71 @@ public void testInsertGapBeforeGap()
 		{
 			model1.insertSlash();
 			model1.insertSlash();
-			assertEquals("#0.0", 2, model1.getCursor().prevItem().getSize());			
-			model1.getCursor().prev();
-			model1.setBlockOffset(1);
+			model1.move(-1);
+			assertEquals("#0.0", 2, model1.currentToken().getSize());			
+			//move to the middle of the // and break it with a {
+			
 			model1.insertOpenSquiggly();
-			model1.setBlockOffset(0);
-			assertEquals("#1.0", "/", model1.getCursor().current().getType());
-			assertEquals("#1.1", 1, model1.getCursor().current().getSize());
-			model1.getCursor().prev();
-			assertEquals("#2.0", "{", model1.getCursor().current().getType());
-			assertEquals("#2.1", 1, model1.getCursor().current().getSize());
-			model1.getCursor().prev();
-			assertEquals("#3.0", "/", model1.getCursor().current().getType());
-			assertEquals("#3.1", 1, model1.getCursor().current().getSize());						
+			assertEquals("#1.0", "/", model1.currentToken().getType());
+			assertEquals("#1.1", 1, model1.currentToken().getSize());
+			model1.move(-1);
+			assertEquals("#2.0", "{", model1.currentToken().getType());
+			assertEquals("#2.1", 1, model1.currentToken().getSize());
+			model1.move(-1);
+			assertEquals("#3.0", "/", model1.currentToken().getType());
+			assertEquals("#3.1", 1, model1.currentToken().getSize());						
 		}
 
 		public void testInsertBraceAndBreakBlockCommentStart()
 		{
 			model1.insertSlash();
 			model1.insertStar();
-			assertEquals("#0.0", 2, model1.getCursor().prevItem().getSize());			
-			model1.getCursor().prev();
-			model1.setBlockOffset(1);
+			model1.move(-2);
+			assertEquals("#0.0", 2, model1.currentToken().getSize());			
+			model1.move(1);
 			model1.insertOpenSquiggly();
-			assertEquals("#1.0", "*", model1.getCursor().current().getType());
-			assertEquals("#1.1", 1, model1.getCursor().current().getSize());
-			model1.getCursor().prev();
-			assertEquals("#2.0", "{", model1.getCursor().current().getType());
-			assertEquals("#2.1", 1, model1.getCursor().current().getSize());
-			model1.getCursor().prev();
-			assertEquals("#3.0", "/", model1.getCursor().current().getType());
-			assertEquals("#3.1", 1, model1.getCursor().current().getSize());						
+			assertEquals("#1.0", "*", model1.currentToken().getType());
+			assertEquals("#1.1", 1, model1.currentToken().getSize());
+			model1.move(-1);
+			assertEquals("#2.0", "{", model1.currentToken().getType());
+			assertEquals("#2.1", 1, model1.currentToken().getSize());
+			model1.move(-1);
+			assertEquals("#3.0", "/", model1.currentToken().getType());
+			assertEquals("#3.1", 1, model1.currentToken().getSize());						
 		}
 	
+//**************************
+
 	public void testInsertMultipleBraces()
 		{
 			model1.insertSlash();
 			model1.insertStar();
 			model1.insertOpenSquiggly();
-			model1.getCursor().prev();
+			model1.move(-1);
 			// /*#{
 			assertEquals("#0.0",ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
+			model1.move(-2);
 			assertEquals("#0.1",ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
-
-			model1.getCursor().next();
+									 model1.currentToken().getState());
+			model1.move(3);
 			model1.insertStar();
 			model1.insertSlash();
 			// /*{*/#
+			model1.move(-2);
 			assertEquals("#1.0",ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
-			
-			model1.getCursor().prev();
-			model1.setBlockOffset(1);
+									 model1.currentToken().getState());
+			model1.move(1);
 			model1.insertOpenSquiggly();
-			model1.setBlockOffset(0);
+			model1.move(0);
       // /*{*{#/
-			
-		 assertEquals("#2.0",ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1.getCursor().prevItem().getState());
-		 assertEquals("#2.1",ReducedToken.INSIDE_BLOCK_COMMENT,
-									model1.getCursor().prevItem().getState());
-		 assertEquals("#2.2","/",model1.getCursor().current().getType());
+			model1.move(-1);
+			assertEquals("#2.0",ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1.currentToken().getState());
+			assertEquals("#2.1",ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1.currentToken().getState());
+			model1.move(1);
+			assertEquals("#2.2","/",model1.currentToken().getType());
 		}
 
 	public void testCrazyCase1()
@@ -226,130 +234,183 @@ public void testInsertGapBeforeGap()
 			model1.insertStar();
 			model1.insertSlash();
 			//should not form an end block comment
-			model1.getCursor().prev();
-			assertEquals("#0.0","/",model1.getCursor().current().getType());
-			model1.getCursor().prev();
-			assertEquals("#0.1","*",model1.getCursor().current().getType());
+			model1.move(-1);
+			assertEquals("#0.0","/",model1.currentToken().getType());
+			model1.move(-1);
+			assertEquals("#0.1","*",model1.currentToken().getType());
 			// /____#*/
 			
-			model1.getCursor().next();
+			model1.move(1);
 			model1.insertSlash();
-			assertEquals("#1.0",1,model1.getBlockOffset());
+			// /____*/#/
+			assertEquals("#1.0",2,model1.currentToken().getSize());
 			model1.move(-2);
 			// /____#*//
-			assertEquals("#1.0","*",model1.getCursor().current().getType());
+			assertEquals("#1.0","*",model1.currentToken().getType());
 
 			model1.move(-4);
 			model1.insertStar();
 			// /*#____*//
-			assertEquals("#2.0","/*",model1.getCursor().prevItem().getType());
+			model1.move(-2);
+			assertEquals("#2.0","/*",model1.currentToken().getType());
 			assertEquals("#2.1",ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
-			assertEquals("#2.2",0,model1.getBlockOffset());
-			model1.getCursor().next();
-			assertEquals("#2.2","*/",model1.getCursor().current().getType());
+									 model1.currentToken().getState());
+			model1.move(6);
+			// /*____#*//
+			assertEquals("#2.2","*/",model1.currentToken().getType());
 			assertEquals("#2.3",ReducedToken.FREE,
-									 model1.getCursor().current().getState());
+									 model1.currentToken().getState());
 			assertEquals("#2.4",ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
 			// /*____#*//
 		}
-	
+
+	/**Test sequences of inserts*/
 	public void testCrazyCase2()
 		{
 			model1.insertSlash();
 			model1.insertGap(4);
-			model1.getCursor().prev();
-			model1.setBlockOffset(2);
+			model1.move(-2);
 			model1.insertSlash();
-			model1.setBlockOffset(0);
-			model1.getCursor().prev();
-			model1.getCursor().prev();
-			//System.out.println("SHOULD BE:  /#__/__  \n"+model1.simpleString());
-			assertEquals("#0.0", 2, model1.getCursor().current().getSize());			
-			assertEquals("#0.1", "/", model1.getCursor().nextItem().getType());
-			assertEquals("#0.2", 1, model1.getCursor().nextItem().getSize());
+			model1.move(0);
+			model1.move(-3);
+			//check that double slash works.
+			assertEquals("#0.0", 2, model1.currentToken().getSize());			
 			assertEquals("#0.3",ReducedToken.FREE, model1.getStateAtCurrent());
+			model1.move(2);
+			assertEquals("#0.2", 1, model1.currentToken().getSize());
+			assertEquals("#0.1", "/", model1.currentToken().getType());
+			model1.move(-2);
 			model1.insertSlash();
-			//System.out.println(model1.simpleString());
-			assertEquals("#1.1", "//", model1.getCursor().prevItem().getType());
+			model1.move(-2);
+			assertEquals("#1.1", "//", model1.currentToken().getType());
+			assertEquals("#1.3",ReducedToken.FREE,
+									 model1.currentToken().getState());
+			model1.move(2);
+			// //#__/__
 			assertEquals("#1.2",ReducedToken.INSIDE_LINE_COMMENT,
 									 model1.getStateAtCurrent());
-			assertEquals("#1.3",ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
 			assertEquals("1.4",ReducedToken.INSIDE_LINE_COMMENT,
-									 model1.getCursor().current().getState());
+									 model1.currentToken().getState());
+			model1.move(2);
 			assertEquals("1.5",ReducedToken.INSIDE_LINE_COMMENT,
-									 model1.getCursor().nextItem().getState());
-			// //#__/__
-			//break line comment simultaneously forming a new line comment
-			model1.getCursor().prev();
-			model1.setBlockOffset(1);
+									 model1.currentToken().getState());
+			model1.move(-2);
+
+		}
+	
+	public void testLineCommentBreakCrazy()
+		{
 			model1.insertSlash();
-			model1.setBlockOffset(0);
-			// //#/__/__
-			//System.out.println(model1.simpleString());
-			assertEquals("#2.0", "//", model1.getCursor().prevItem().getType());
-			assertEquals("#2.1", "/", model1.getCursor().current().getType());
+			model1.insertSlash();
+			model1.insertGap(4);
+			model1.move(-2);
+			model1.insertSlash();
+			// //#__/__
+//break line comment simultaneously forming a new line comment
+			model1.move(-4);
+			model1.insertSlash();
+			model1.move(0);
+			 // //#/__/__
+			
+			model1.move(-2);
+			assertEquals("#2.0", "//", model1.currentToken().getType());
+			assertEquals("#2.3",ReducedToken.FREE,
+									 model1.currentToken().getState());
+			model1.move(2);
+			assertEquals("#2.1", "/", model1.currentToken().getType());
 			assertEquals("#2.2",ReducedToken.INSIDE_LINE_COMMENT,
 									 model1.getStateAtCurrent());
-			assertEquals("#2.3",ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
+
 			assertEquals("2.4",ReducedToken.INSIDE_LINE_COMMENT,
-									 model1.getCursor().current().getState());
+									 model1.currentToken().getState());
+			model1.move(1);
 			assertEquals("2.5",ReducedToken.INSIDE_LINE_COMMENT,
-									 model1.getCursor().nextItem().getState());
+									 model1.currentToken().getState());
 			//break line comment forming a block comment
-			model1.getCursor().prev();
-			model1.setBlockOffset(1);
-			model1.insertStar();
-			model1.setBlockOffset(0);
+			model1.move(-2);
+			model1.insertStar();//  ///__/__ 
+			model1.move(0);
       // /*#//__/__
-						
-			assertEquals("#3.0", "/*", model1.getCursor().prevItem().getType());
-			assertEquals("#3.1", "/", model1.getCursor().current().getType());
-			assertEquals("#3.2", "/", model1.getCursor().nextItem().getType());
+			model1.move(-2);
+			assertEquals("#3.0", "/*", model1.currentToken().getType());
+			assertEquals("#3.3",ReducedToken.FREE,
+									 model1.currentToken().getState());
+			model1.move(2);
+			assertEquals("#3.1", "/", model1.currentToken().getType());
 			assertEquals("#3.3",ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
-			assertEquals("#3.3",ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
 			assertEquals("3.4",ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1.getCursor().current().getState());
+									 model1.currentToken().getState());
+			model1.move(1);
+			assertEquals("#3.2", "/", model1.currentToken().getType());
 			assertEquals("3.5",ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1.getCursor().nextItem().getState());
-			//break block comment start with a star.
-			model1.getCursor().prev();
-			model1.setBlockOffset(1);
+									 model1.currentToken().getState());
+
+		}
+
+	public void testBreakBlockCommentWithStar()
+		{
+			// /*#//__/__
+			model1.insertSlash();
 			model1.insertStar();
-			model1.setBlockOffset(0);
+			model1.insertSlash();
+			model1.insertSlash();
+			model1.insertGap(2);
+			model1.insertSlash();
+			model1.insertGap(2);
+			
+			//break block comment start with a star.
+			model1.move(-8);
+			model1.insertStar();
 			
 			 // /*#*//__/__			
-			assertEquals("#4.0", "/*", model1.getCursor().prevItem().getType());
-			assertEquals("#4.1", "*/", model1.getCursor().current().getType());
-			assertEquals("#4.2", "/", model1.getCursor().nextItem().getType());
+			model1.move(-2);
+			assertEquals("#4.0", "/*", model1.currentToken().getType());
+			assertEquals("#4.3",ReducedToken.FREE,
+									 model1.currentToken().getState());
+			model1.move(2);
+			assertEquals("#4.1", "*/", model1.currentToken().getType());
 			assertEquals("#4.3",ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
-			assertEquals("#4.3",ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
 			assertEquals("4.4",ReducedToken.FREE,
-									 model1.getCursor().current().getState());
+									 model1.currentToken().getState());
+			model1.move(2);
+			assertEquals("#4.2", "/", model1.currentToken().getType());						
 			assertEquals("4.5",ReducedToken.FREE,
-									 model1.getCursor().nextItem().getState());
+									 model1.currentToken().getState());
 
-			model1.setBlockOffset(1);
+		}
+
+	public void testBreakCloseBlockCommentWithStar()
+		{
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertStar();
+			model1.insertSlash();
+			model1.insertSlash();
+			model1.insertGap(2);
+			model1.insertSlash();
+			model1.insertGap(2);
+
+			model1.move(-7);
 			model1.insertGap(3);
-			 // /**___#//__/__	
-			assertEquals("#5.0", true, model1.getCursor().prevItem().isGap());
+			 // /**___#//__/__
+			model1.move(-3);
+			assertEquals("#5.0", true, model1.currentToken().isGap());
+			assertEquals("#5.4",ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1.currentToken().getState());
+			model1.move(3);
 			assertEquals("#5.1",ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
-			assertEquals("#5.2", "/", model1.getCursor().current().getType());
-			assertEquals("#5.3", "/", model1.getCursor().nextItem().getType());
-			assertEquals("#5.4",ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1.getCursor().prevItem().getState());
+			assertEquals("#5.2", "/", model1.currentToken().getType());
 			assertEquals("5.5",ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1.getCursor().current().getState());
+									 model1.currentToken().getState());
+			model1.move(1);
+			assertEquals("#5.3", "/", model1.currentToken().getType());
+
 			assertEquals("5.6",ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1.getCursor().nextItem().getState());
+									 model1.currentToken().getState());
 		}
 
 	public void testBasicBlockComment()
@@ -358,102 +419,119 @@ public void testInsertGapBeforeGap()
 			model1.insertStar();
 			model1.insertStar();
 			model1.insertSlash();
-			model1.getCursor().prev();
-			assertEquals("0.0",ReducedToken.FREE,
-									 model1.getCursor().current().getState());
+			model1.move(-4);
 			assertEquals("0.1",ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
-			assertEquals("0.0","*/",
-									 model1.getCursor().current().getType());
-			assertEquals("0.1","/*",
-									 model1.getCursor().prevItem().getType());
+									 model1.currentToken().getState());
+			assertEquals("0.2","/*",
+									 model1.currentToken().getType());
+			model1.move(2);
+			assertEquals("0.3",ReducedToken.FREE,
+									 model1.currentToken().getState());
+			assertEquals("0.4","*/",
+									 model1.currentToken().getType());
+
 			model1.insertSlash();
-			assertEquals("1.0",ReducedToken.FREE,
-									 model1.getCursor().current().getState());
+			model1.move(-1);
 			assertEquals("1.1",ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1.getCursor().prevItem().getState());
-			assertEquals("1.2","*/",
-									 model1.getCursor().current().getType());
+									 model1.currentToken().getState());
 			assertEquals("1.3","/",
-									 model1.getCursor().prevItem().getType());
-			model1.insertStar();
+									 model1.currentToken().getType());
+			model1.move(1);
 			assertEquals("1.0",ReducedToken.FREE,
-									 model1.getCursor().current().getState());
-			assertEquals("1.1",ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1.getCursor().prevItem().getState());
+									 model1.currentToken().getState());
+
 			assertEquals("1.2","*/",
-									 model1.getCursor().current().getType());
-			assertEquals("1.3","*",
-									 model1.getCursor().prevItem().getType());
+									 model1.currentToken().getType());
 		}
 	
-	public void testInsertBraceAndBreakBlockCommentEnd()
+	public void testInsertBlockInsideBlockComment()
 		{
+			model1.insertSlash();
 			model1.insertStar();
 			model1.insertSlash();
-			assertEquals("#0.0", 1, model1.getCursor().prevItem().getSize());			
-			model1.getCursor().prev();
-			model1.insertOpenSquiggly();
+			model1.insertStar();
+			model1.insertSlash();
+			///*/*/#
+			model1.move(-2);
+			model1.insertStar();
+			///*/*#*/
+			model1.move(-1);
+			assertEquals("1.1",ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1.currentToken().getState());
+			assertEquals("1.3","*",
+									 model1.currentToken().getType());
+			model1.move(1);
+			assertEquals("1.0",ReducedToken.FREE,
+									 model1.currentToken().getState());
 
-			assertEquals("#1.0", "/", model1.getCursor().current().getType());
-			assertEquals("#1.1", 1, model1.getCursor().current().getSize());
-			model1.getCursor().prev();
-			assertEquals("#2.0", "{", model1.getCursor().current().getType());
-			assertEquals("#2.1", 1, model1.getCursor().current().getSize());
-			model1.getCursor().prev();
-			assertEquals("#3.0", "*", model1.getCursor().current().getType());
-			assertEquals("#3.1", 1, model1.getCursor().current().getSize());						
+			assertEquals("1.2","*/",
+									 model1.currentToken().getType());
+
+		}
+	
+	public void testInsertBlockCommentEnd()
+		{//should not form an end without a start.
+			model1.insertStar();
+			model1.insertSlash();
+			model1.move(-1);
+			assertEquals("#3.0", "/", model1.currentToken().getType());
+			assertEquals("#3.1", 1, model1.currentToken().getSize());						
 		}
 
 	public void testGetStateAtCurrent()
 		{
 			assertEquals("#0.0", ReducedToken.FREE, model1.getStateAtCurrent());
-			model1.getCursor().next();
 			assertEquals("#0.1", ReducedToken.FREE, model1.getStateAtCurrent());
 
 			model1.insertOpenParen();
+			model1.move(-1);
 			assertEquals("#1.0", ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
-
+									 model1.currentToken().getState());
+			model1.move(1);
 			model1.insertSlash();
 			model1.insertSlash();
+			model1.move(-2);
 			assertEquals("#2.0", ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
+									 model1.currentToken().getState());
+			model1.move(2);
 			assertEquals("#2.1", ReducedToken.INSIDE_LINE_COMMENT,
 						 model1.getStateAtCurrent());
 			// {//#
-			model1.getCursor().prev();
-			model1.getCursor().prev();
+			model1.move(-3);
 			model1.insertSlash();
 			model1.insertSlash();
 			// //#{//
+			model1.move(-2);
 			assertEquals("#3.0", ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
+									 model1.currentToken().getState());
+			model1.move(2);
 			assertEquals("#3.1", ReducedToken.INSIDE_LINE_COMMENT,
 						 model1.getStateAtCurrent());			
 			assertEquals("#3.2", ReducedToken.INSIDE_LINE_COMMENT,
-									 model1.getCursor().current().getState());
+									 model1.currentToken().getState());
+			model1.move(1);
 			assertEquals("#3.3", ReducedToken.INSIDE_LINE_COMMENT,
-									 model1.getCursor().nextItem().getState());
-			assertEquals("#3.4", "/", model1.getCursor().nextItem().getType());
+									 model1.currentToken().getState());
+			assertEquals("#3.4", "/", model1.currentToken().getType());
 
-			model1.getCursor().next();
+			model1.move(1);
 			assertEquals("#4.1", ReducedToken.INSIDE_LINE_COMMENT,
-									 model1.getCursor().nextItem().getState());
-			assertEquals("#4.2", "/", model1.getCursor().nextItem().getType());
+									 model1.currentToken().getState());
+			assertEquals("#4.2", "/", model1.currentToken().getType());
 		}
 
 	public void testQuotesSimple()
 		{
 			model1.insertQuote();
 			model1.insertQuote();
-			model1.getCursor().prev();
-			assertEquals("#0.0", "\"", model1.getCursor().current().getType());
-			assertEquals("#0.1", "\"", model1.getCursor().prevItem().getType());
-			assertEquals("#0.2", ReducedToken.FREE,
-									 model1.getCursor().current().getState());
+			model1.move(-2);
+			assertEquals("#0.0", "\"", model1.currentToken().getType());
 			assertEquals("#0.3", ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
+									 model1.currentToken().getState());
+			model1.move(1);
+			assertEquals("#0.1", "\"", model1.currentToken().getType());
+			assertEquals("#0.2", ReducedToken.FREE,
+									 model1.currentToken().getState());
 			assertEquals("#0.4", ReducedToken.INSIDE_QUOTE,
 									 model1.getStateAtCurrent());
 		}
@@ -462,85 +540,110 @@ public void testInsertGapBeforeGap()
 		{
 			model1.insertQuote();
 			model1.insertQuote();
-			model1.getCursor().prev();
-			assertEquals("#0.0", "\"", model1.getCursor().current().getType());
-			assertEquals("#0.1", "\"", model1.getCursor().prevItem().getType());
-			assertEquals("#0.2", ReducedToken.FREE,
-									 model1.getCursor().current().getState());
+			model1.move(-2);
+			assertEquals("#0.1", "\"", model1.currentToken().getType());
 			assertEquals("#0.3", ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
+									 model1.currentToken().getState());
+			model1.move(1);			
+			assertEquals("#0.0", "\"", model1.currentToken().getType());
+			assertEquals("#0.2", ReducedToken.FREE,
+									 model1.currentToken().getState());
 			assertEquals("#0.4", ReducedToken.INSIDE_QUOTE,
 									 model1.getStateAtCurrent());
+			
 			model1.insertGap(4);
 			// "____#"
-			assertEquals("#1.0", "\"", model1.getCursor().current().getType());
-			assertEquals("#1.1", true, model1.getCursor().prevItem().isGap());
-			assertEquals("#1.2", ReducedToken.FREE,
-									 model1.getCursor().current().getState());
+			model1.move(-4);
+			assertEquals("#1.1", true, model1.currentToken().isGap());
 			assertEquals("#1.3", ReducedToken.INSIDE_QUOTE,
-									 model1.getCursor().prevItem().getState());
+									 model1.currentToken().getState());
+			model1.move(4);
+			assertEquals("#1.0", "\"", model1.currentToken().getType());
+			
+			assertEquals("#1.2", ReducedToken.FREE,
+									 model1.currentToken().getState());
 			assertEquals("#1.4", ReducedToken.INSIDE_QUOTE,
 									 model1.getStateAtCurrent());
-			model1.getCursor().prev();
-			model1.setBlockOffset(2);
+			model1.move(-2);
 			model1.insertSlash();
-			model1.setBlockOffset(0);
-			assertEquals("#2.0", true, model1.getCursor().current().isGap());
-			assertEquals("#2.1", "/", model1.getCursor().prevItem().getType());
-			assertEquals("#2.2", "\"", model1.getCursor().nextItem().getType());
-			assertEquals("#2.3", ReducedToken.FREE,
-									 model1.getCursor().nextItem().getState());
+			// "__/__"
+			model1.move(-1);
+			assertEquals("#2.1", "/", model1.currentToken().getType());
+			model1.move(1);
+			assertEquals("#2.0", true, model1.currentToken().isGap());
 			assertEquals("#2.4", ReducedToken.INSIDE_QUOTE,
-									 model1.getCursor().current().getState());
-			assertEquals("#2.5", ReducedToken.INSIDE_QUOTE,
-									 model1.getCursor().prevItem().getState());
+									 model1.currentToken().getState());
 			assertEquals("#2.6", ReducedToken.INSIDE_QUOTE,
 									 model1.getStateAtCurrent());
-			// "__/#__"
+			model1.move(2);
+			assertEquals("#2.2", "\"", model1.currentToken().getType());
+			assertEquals("#2.3", ReducedToken.FREE,
+									 model1.currentToken().getState());					
+		}
 
+	public void testInsertQuoteToQuoteBlock()
+		{
+			model1.insertQuote();
+			model1.insertGap(2);
+			model1.insertSlash();
+			model1.insertGap(2);
+			model1.insertQuote();
+			model1.move(-3);
 			model1.insertQuote();
 			// "__/"#__"
-			assertEquals("#3.0", true, model1.getCursor().current().isGap());
-			assertEquals("#3.1", "\"", model1.getCursor().prevItem().getType());
-			assertEquals("#3.2", "\"", model1.getCursor().nextItem().getType());
-			assertEquals("#3.3", ReducedToken.FREE,
-									 model1.getCursor().nextItem().getState());
-			assertEquals("#3.4", ReducedToken.FREE,
-									 model1.getCursor().current().getState());
+			model1.move(-1);
+			assertEquals("#3.1", "\"", model1.currentToken().getType());
 			assertEquals("#3.5", ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
+									 model1.currentToken().getState());
+			model1.move(1);
+			assertEquals("#3.0", true, model1.currentToken().isGap());
+			assertEquals("#3.4", ReducedToken.FREE,
+									 model1.currentToken().getState());
 			assertEquals("#3.6", ReducedToken.FREE,
 									 model1.getStateAtCurrent());
-			model1.getCursor().prev();
-			model1.getCursor().prev();
-			// "__#/"__"
+			model1.move(2);
+			assertEquals("#3.2", "\"", model1.currentToken().getType());
+			assertEquals("#3.3", ReducedToken.FREE,
+									 model1.currentToken().getState());
+// "__/"__"
+
 			
-			assertEquals("#4.0", "/", model1.getCursor().current().getType());
-			assertEquals("#4.1", true, model1.getCursor().prevItem().isGap());
-			assertEquals("#4.2", "\"", model1.getCursor().nextItem().getType());
-			assertEquals("#4.3", ReducedToken.FREE,
-									 model1.getCursor().nextItem().getState());
-			assertEquals("#4.4", ReducedToken.INSIDE_QUOTE,
-									 model1.getCursor().current().getState());
+			model1.move(-6);
+			assertEquals("#4.1", true, model1.currentToken().isGap());
 			assertEquals("#4.5", ReducedToken.INSIDE_QUOTE,
-									 model1.getCursor().prevItem().getState());
+									 model1.currentToken().getState());
+			model1.move(2);
+			assertEquals("#4.0", "/", model1.currentToken().getType());
+			assertEquals("#4.4", ReducedToken.INSIDE_QUOTE,
+									 model1.currentToken().getState());
 			assertEquals("#4.6", ReducedToken.INSIDE_QUOTE,
 									 model1.getStateAtCurrent());
+			model1.move(1);
+			
+			assertEquals("#4.2", "\"", model1.currentToken().getType());
+			assertEquals("#4.3", ReducedToken.FREE,
+									 model1.currentToken().getState());
+			model1.move(-1);
+// "__/#"__"
+
+			//break quote with newline
 			model1.insertNewline();
 			// "__\n#/"__"
-			assertEquals("#4.5", ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
-			assertEquals("#4.6", ReducedToken.FREE,
+			model1.move(-1);
+			assertEquals("#5.5", ReducedToken.FREE,
+									 model1.currentToken().getState());
+			model1.move(1);
+			assertEquals("#5.4", ReducedToken.FREE,
+									 model1.currentToken().getState());
+			assertEquals("#5.6", ReducedToken.FREE,
 									 model1.getStateAtCurrent());
-			assertEquals("#4.3", ReducedToken.FREE,
-									 model1.getCursor().nextItem().getState());
-			assertEquals("#4.4", ReducedToken.FREE,
-									 model1.getCursor().current().getState());
-			model1.getCursor().prev();
-			model1.getCursor().prev();
-			assertEquals("#4.5", ReducedToken.INSIDE_QUOTE,
-									 model1.getCursor().current().getState());
-			assertEquals("#4.6",true,model1.getCursor().current().isGap());
+			model1.move(1);
+			assertEquals("#5.3", ReducedToken.FREE,
+									 model1.currentToken().getState());
+			model1.move(1);
+			assertEquals("#5.7", ReducedToken.INSIDE_QUOTE,
+									 model1.currentToken().getState());
+			assertEquals("#5.8",true,model1.currentToken().isGap());
 		}
 
 	public void testQuoteBreaksComment()
@@ -549,69 +652,49 @@ public void testInsertGapBeforeGap()
 			model1.insertStar();
 			model1.insertStar();
 			model1.insertSlash();
-			model1.getCursor().prev();
-			assertEquals("#0.0", "/*", model1.getCursor().prevItem().getType());
-			assertEquals("#0.1", "*/", model1.getCursor().current().getType());
-
+			model1.move(-2);
 			model1.insertQuote();			
-			model1.getCursor().prev();
+			model1.move(-1);
 			// /*#"*/
+			model1.move(-2);
+			assertEquals("#1.1", ReducedToken.FREE,
+									 model1.currentToken().getState());
+			model1.move(2);
 			assertEquals("#1.1", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());			
 			assertEquals("#1.2", ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1.getCursor().current().getState());
-			assertEquals("#1.1", ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());			
+									 model1.currentToken().getState());
+			model1.move(1);
 			assertEquals("#1.2", ReducedToken.FREE,
-									 model1.getCursor().nextItem().getState());
-			model1.getCursor().prev();
+									 model1.currentToken().getState());
+			model1.move(-3);
 			// #/*"*/
 			model1.insertQuote();
+
+			model1.move(-1);
+			assertEquals("#2.2", ReducedToken.FREE,
+									 model1.currentToken().getState());
+			model1.move(1);
 			assertEquals("#2.0", ReducedToken.INSIDE_QUOTE,
 									 model1.getStateAtCurrent());
 			assertEquals("#2.1", ReducedToken.INSIDE_QUOTE,
-									 model1.getCursor().current().getState());
-			assertEquals("#2.2", ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
-			assertEquals("#2.3", "/", model1.getCursor().current().getType());
-			assertEquals("#2.4", "*", model1.getCursor().nextItem().getType());
-			model1.getCursor().next();
+									 model1.currentToken().getState());
+			assertEquals("#2.3", "/", model1.currentToken().getType());
+			model1.move(1);
+			assertEquals("#2.4", "*", model1.currentToken().getType());
 			// "/#*"*/
-			assertEquals("#3.0", ReducedToken.INSIDE_QUOTE,
-									 model1.getStateAtCurrent());
-			assertEquals("#3.1", ReducedToken.INSIDE_QUOTE,
-									 model1.getCursor().current().getState());
-			assertEquals("#3.2", ReducedToken.INSIDE_QUOTE,
-									 model1.getCursor().prevItem().getState());
-			assertEquals("#3.3", "*", model1.getCursor().current().getType());
-			assertEquals("#3.4", "\"", model1.getCursor().nextItem().getType());
 
-			model1.getCursor().next();
-			// "/*#"*/
-			assertEquals("#4.0", ReducedToken.INSIDE_QUOTE,
-									 model1.getStateAtCurrent());
-			assertEquals("#4.1", ReducedToken.FREE,
-									 model1.getCursor().current().getState());
-			assertEquals("#4.2", ReducedToken.INSIDE_QUOTE,
-									 model1.getCursor().prevItem().getState());
-			assertEquals("#4.3", "\"", model1.getCursor().current().getType());
-			assertEquals("#4.4", "*", model1.getCursor().nextItem().getType());
-			assertEquals("#4.5", ReducedToken.FREE,
-									 model1.getCursor().nextItem().getState());
-			assertTrue("#4.6", model1.getCursor().current().isClosed());
-			model1.getCursor().next();
+			model1.move(2);
 			// "/*"#*/
 			assertEquals("#5.0", ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 			assertEquals("#5.1", ReducedToken.FREE,
-									 model1.getCursor().current().getState());
-			assertEquals("#5.2", ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
-			assertEquals("#5.3", "*", model1.getCursor().current().getType());
-			assertEquals("#5.4", "/", model1.getCursor().nextItem().getType());
+									 model1.currentToken().getState());
+			assertEquals("#5.3", "*", model1.currentToken().getType());
+			model1.move(1);
+			assertEquals("#5.4", "/", model1.currentToken().getType());
 			assertEquals("#5.5", ReducedToken.FREE,
-									 model1.getCursor().nextItem().getState());
-
+									 model1.currentToken().getState());
 		}
 
 	public void testQuoteBreakComment2()
@@ -620,23 +703,27 @@ public void testInsertGapBeforeGap()
 			model1.insertStar();
 			model1.insertStar();
 			model1.insertSlash();
-			model1.getCursor().prev();
-			assertEquals("#0.0", "/*", model1.getCursor().prevItem().getType());
-			assertEquals("#0.1", "*/", model1.getCursor().current().getType());
-			model1.getCursor().prev();
+			model1.move(-4);
+			assertEquals("#0.0", "/*", model1.currentToken().getType());
+			model1.move(2);
+			assertEquals("#0.1", "*/", model1.currentToken().getType());
+			model1.move(-2);
 			// "#/**/
 			model1.insertQuote();
+			model1.move(-1);
 			assertEquals("#1.0", ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
+									 model1.currentToken().getState());
+			assertEquals("#1.4", "\"", model1.currentToken().getType());
+			model1.move(1);
 			assertEquals("#1.1", ReducedToken.INSIDE_QUOTE,
 						 model1.getStateAtCurrent());			
+			assertEquals("#1.4", "/", model1.currentToken().getType());			
 			assertEquals("#1.2", ReducedToken.INSIDE_QUOTE,
-									 model1.getCursor().current().getState());
+									 model1.currentToken().getState());
+			model1.move(1);
 			assertEquals("#1.3", ReducedToken.INSIDE_QUOTE,
-									 model1.getCursor().nextItem().getState());
-			assertEquals("#1.4", "*", model1.getCursor().nextItem().getType());
-			assertEquals("#1.4", "\"", model1.getCursor().prevItem().getType());
-			assertEquals("#1.4", "/", model1.getCursor().current().getType());			
+									 model1.currentToken().getState());
+			assertEquals("#1.4", "*", model1.currentToken().getType());			
 		}
 
 	public void testInsertNewlineEndLineComment()
@@ -644,61 +731,41 @@ public void testInsertGapBeforeGap()
 			model1.insertSlash();
 			model1.insertSlash();
 			model1.insertGap(5);
-			model1.getCursor().prev();
-			model1.setBlockOffset(3);
+			model1.move(-2);
 			model1.insertNewline();
 			// //___\n#__
-			assertEquals("#0.0", ReducedToken.FREE, model1.getStateAtCurrent());
-			assertTrue("#0.1", model1.getCursor().current().isGap());
-			assertEquals("#0.2", "\n", model1.getCursor().prevItem().getType());
-			assertEquals("#0.3", 2, model1.getCursor().current().getSize());
+			model1.move(-1);
+			assertEquals("#0.2", "\n", model1.currentToken().getType());
 			assertEquals("#0.4", ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
+									 model1.currentToken().getState());
+			model1.move(1);
+			assertEquals("#0.0", ReducedToken.FREE, model1.getStateAtCurrent());
+			assertTrue("#0.1", model1.currentToken().isGap());
+			
+			assertEquals("#0.3", 2, model1.currentToken().getSize());
+			
 			assertEquals("#0.5", ReducedToken.FREE,
-									 model1.getCursor().current().getState());
-			
-			model1.getCursor().prev();
-			// //___#\n__
-			assertEquals("#1.0", ReducedToken.INSIDE_LINE_COMMENT,
-									 model1.getStateAtCurrent());
-			assertTrue("#1.1", model1.getCursor().prevItem().isGap());
-			assertEquals("#1.2", "\n", model1.getCursor().current().getType());
-			assertEquals("#1.3", 3, model1.getCursor().prevItem().getSize());
-			assertEquals("#1.4", ReducedToken.INSIDE_LINE_COMMENT,
-									 model1.getCursor().prevItem().getState());
-			assertEquals("#1.5", ReducedToken.FREE,
-									 model1.getCursor().current().getState());
-			
+									 model1.currentToken().getState());
 		}
 
 	public void testInsertNewlineEndQuote()
 		{
 			model1.insertQuote();
 			model1.insertGap(5);
-			model1.getCursor().prev();
-			model1.setBlockOffset(3);
+			model1.move(-2);
 			model1.insertNewline();
 			// "___\n#__
-			assertEquals("#0.0", ReducedToken.FREE, model1.getStateAtCurrent());
-			assertTrue("#0.1", model1.getCursor().current().isGap());
-			assertEquals("#0.2", "\n", model1.getCursor().prevItem().getType());
-			assertEquals("#0.3", 2, model1.getCursor().current().getSize());
+			model1.move(-1);
 			assertEquals("#0.4", ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
+									 model1.currentToken().getState());
+			assertEquals("#0.2", "\n", model1.currentToken().getType());
+			model1.move(1);
+			assertEquals("#0.0", ReducedToken.FREE, model1.getStateAtCurrent());
+			assertTrue("#0.1", model1.currentToken().isGap());
+			assertEquals("#0.3", 2, model1.currentToken().getSize());
 			assertEquals("#0.5", ReducedToken.FREE,
-									 model1.getCursor().current().getState());
+									 model1.currentToken().getState());
 			
-			model1.getCursor().prev();
-			// "___#\n__
-			assertEquals("#1.0", ReducedToken.INSIDE_QUOTE,
-									 model1.getStateAtCurrent());
-			assertTrue("#1.1", model1.getCursor().prevItem().isGap());
-			assertEquals("#1.2", "\n", model1.getCursor().current().getType());
-			assertEquals("#1.3", 3, model1.getCursor().prevItem().getSize());
-			assertEquals("#1.4", ReducedToken.INSIDE_QUOTE,
-									 model1.getCursor().prevItem().getState());
-			assertEquals("#1.5", ReducedToken.FREE,
-									 model1.getCursor().current().getState());
 		}
 
 	public void testInsertNewlineChainReaction()
@@ -708,41 +775,38 @@ public void testInsertGapBeforeGap()
 			model1.insertSlash();
 			model1.insertStar();
 			// ///*#
-			model1.getCursor().prev();
+			model1.move(-1);
 			// ///#*
+			model1.move(-1);
+			assertEquals("#0.2", "/", model1.currentToken().getType());
+			assertEquals("#0.3", ReducedToken.INSIDE_LINE_COMMENT,
+									 model1.currentToken().getState());
+			model1.move(1);
 			assertEquals("#0.0", ReducedToken.INSIDE_LINE_COMMENT,
 									 model1.getStateAtCurrent());
-			assertEquals("#0.1", "*", model1.getCursor().current().getType());
-			assertEquals("#0.2", "/", model1.getCursor().prevItem().getType());
-			assertEquals("#0.3", ReducedToken.INSIDE_LINE_COMMENT,
-									 model1.getCursor().prevItem().getState());
+			assertEquals("#0.1", "*", model1.currentToken().getType());			
 			assertEquals("#0.4", ReducedToken.INSIDE_LINE_COMMENT,
-									 model1.getCursor().current().getState());
+									 model1.currentToken().getState());
 			
-			model1.getCursor().next();
+			model1.move(1);
 			model1.insertNewline();
 			model1.insertQuote();
 			model1.insertStar();
 			model1.insertSlash();
-			model1.getCursor().prev();
+			model1.move(-1);
 			// ///*
 			// "*#/
 
 			
 			assertEquals("#1.0", ReducedToken.INSIDE_QUOTE,
 									 model1.getStateAtCurrent());
-			assertEquals("#1.1", "/", model1.getCursor().current().getType());
-			assertEquals("#1.2", "*", model1.getCursor().prevItem().getType());
-			assertEquals("#1.3", ReducedToken.INSIDE_QUOTE,
-									 model1.getCursor().prevItem().getState());
+			assertEquals("#1.1", "/", model1.currentToken().getType());
 			assertEquals("#1.4", ReducedToken.INSIDE_QUOTE,
-									 model1.getCursor().current().getState());
+									 model1.currentToken().getState());
 
-			for(int i = 0; i < 5; i++)
-				model1.getCursor().prev();
+			model1.move(-5);
 
-			assertEquals("#2.1", "/", model1.getCursor().current().getType());
-			assertEquals("#2.2", "//", model1.getCursor().prevItem().getType());
+			assertEquals("#2.1", "/", model1.currentToken().getType());
 
 			model1.insertNewline();
 			// //
@@ -750,67 +814,58 @@ public void testInsertGapBeforeGap()
 			// "*/
 			assertEquals("#3.0", ReducedToken.FREE,
 									 model1.getStateAtCurrent());
-			assertEquals("#3.1", "/*", model1.getCursor().current().getType());
-			assertEquals("#3.2", "\n", model1.getCursor().prevItem().getType());
-			assertEquals("#3.3", ReducedToken.FREE,
-									 model1.getCursor().prevItem().getState());
 			assertEquals("#3.4", ReducedToken.FREE,
-									 model1.getCursor().current().getState());
-
-			model1.getCursor().next();
-			model1.getCursor().next();
+									 model1.currentToken().getState());
+			model1.move(1);
+			assertEquals("#3.1", "/*", model1.currentToken().getType());
 
 			// //
 			// /*
 			// #"*/
+			model1.move(2);
 			assertEquals("#4.0", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
-			assertEquals("#4.1", "\"", model1.getCursor().current().getType());
-			assertEquals("#4.2", "\n", model1.getCursor().prevItem().getType());
-			assertEquals("#4.3", ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1.getCursor().prevItem().getState());
+			assertEquals("#4.1", "\"", model1.currentToken().getType());
 			assertEquals("#4.4", ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model1.getCursor().current().getState());
-
-			assertEquals("#4.5", ReducedToken.FREE,
-									 model1.getCursor().nextItem().getState());
+									 model1.currentToken().getState());
+			model1.move(1);
 			assertEquals("#4.6", "*/",
-									 model1.getCursor().nextItem().getType());
+									 model1.currentToken().getType());
 		}
 
 	public void testMoveWithinToken()
 		{
 			model1.insertGap(10);
-			assertTrue("#0.0", model1.getCursor().atEnd());
-			assertEquals("#0.1", 0, model1.getBlockOffset());
+			assertTrue("#0.0", model1.atEnd());
+			assertEquals("#0.1", 10, model1.absOffset());
 
 
 			model1.move(-5);
 			
-			assertTrue("#1.0", model1.getCursor().current().isGap());
-			assertEquals("#1.1", 5, model1.getBlockOffset());
+			assertTrue("#1.0", model1.currentToken().isGap());
+			assertEquals("#1.1", 5, model1.absOffset());
 
 			model1.move(2);
-			assertTrue("#2.0", model1.getCursor().current().isGap());
-			assertEquals("#2.1", 7, model1.getBlockOffset());
+			assertTrue("#2.0", model1.currentToken().isGap());
+			assertEquals("#2.1", 7, model1.absOffset());
 
 			model1.move(-4);
-			assertTrue("#3.0", model1.getCursor().current().isGap());
-			assertEquals("#3.1", 3, model1.getBlockOffset());
+			assertTrue("#3.0", model1.currentToken().isGap());
+			assertEquals("#3.1", 3, model1.absOffset());
 
 			model1.move(-3);
-			assertTrue("#4.0", model1.getCursor().current().isGap());
-			assertEquals("#4.1", 0, model1.getBlockOffset());
+			assertTrue("#4.0", model1.currentToken().isGap());
+			assertEquals("#4.1", 0, model1.absOffset());
 
 			model1.move(10);
-			assertTrue("#5.0", model1.getCursor().atEnd());
-			assertEquals("#5.1", 0, model1.getBlockOffset());
+			assertTrue("#5.0", model1.atEnd());
+			assertEquals("#5.1", 10, model1.absOffset());
 		}
 
 	public void testMoveOnEmpty()
 		{
 			model1.move(0);
-			assertTrue("#0.0", model1.getCursor().atStart());
+			assertTrue("#0.0", model1.atStart());
 			try {
 				model1.move(-1);
 				assertTrue("#0.1", false);
@@ -825,61 +880,6 @@ public void testInsertGapBeforeGap()
 			catch (Exception e) {
 			}			
 		}
-
-	public void testMoveOverSeveralTokens()
-		{
-			model1.insertSlash();
-			model1.insertStar();
-			model1.insertGap(4);
-			model1.insertOpenSquiggly();
-			model1.insertSlash();
-			model1.insertQuote();
-			model1.insertGap(3);
-			model1.insertNewline();
-			// /*____{"___#\n			
-			assertTrue("#0.0", model1.getCursor().atEnd());
-			assertEquals("#0.1", 0, model1.getBlockOffset());
-
-			model1.move(-12);
-			// /#*____{"___\n
-			assertEquals("#1.0", "/*", model1.getCursor().current().getType());
-			assertEquals("#1.1", 1, model1.getBlockOffset());
-
-			model1.move(11);
-			// /*____{"___#\n			
-			assertEquals("#2.0", "\n", model1.getCursor().current().getType());
-			assertEquals("#2.1", 0, model1.getBlockOffset());
-
-			model1.move(-1);
-			// /*____{"__#_\n
-			assertTrue("#3.0", model1.getCursor().current().isGap());
-			assertEquals("#3.1", 2, model1.getBlockOffset());
-
-			model1.move(-6);
-			// /*___#_{"___\n			
-			assertTrue("#4.0", model1.getCursor().current().isGap());
-			assertEquals("#4.1", 3, model1.getBlockOffset());
-
-			try {
-				model1.move(-8);
-				assertTrue("#5.0", false);
-			}
-			catch (Exception e) {
-			}
-			assertTrue("#5.1", model1.getCursor().current().isGap());
-			assertEquals("#5.2", 3, model1.getBlockOffset());
-
-			try {
-				model1.move(20);
-				assertTrue("#6.0", false);
-			}
-			catch (Exception e) {
-			}
-			assertTrue("#6.1", model1.getCursor().current().isGap());
-			assertEquals("#6.2", 3, model1.getBlockOffset());
-
-		}
-
 
   public void testMove0StaysPut()
   {
@@ -983,7 +983,7 @@ public void testInsertGapBeforeGap()
       // /*#
 			assertEquals("#5.0", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model0.getStateAtCurrent());
-			assertEquals("#5.1" + model0.simpleString(), 2, model0.absOffset());
+
 
 			model0.insertStar();
       // /**#
@@ -1094,9 +1094,9 @@ public void testInsertGapBeforeGap()
 
 	/** sets up example reduction for the following tests */
 	
-	protected ReducedModel setUpExample()
+	protected ReducedModelControl setUpExample()
 		{
-			ReducedModel model = new ReducedModel();
+			ReducedModelControl model = new ReducedModelControl();
 			model.insertOpenSquiggly();
 			model.insertNewline();
 			model.insertGap(3);
@@ -1135,48 +1135,6 @@ public void testInsertGapBeforeGap()
 			return model;
 		}
 
-	/** tests previousBrace() */
-	
-	public void testPreviousBrace()
-		{
-			// #
-			assertEquals("#1.0", -1, model0.previousBrace());
-			model0 = setUpExample();
-			// {
-			// ___
-			// (__)
-			// ___//___
-			// "_{_"/*_(_)_*/
-			// }#
-			assertEquals("#2.0", 1, model0.previousBrace());
-			model0.move(-5);
-			assertEquals("#3.0", 6, model0.previousBrace());
-			model0.move(-7);
-			assertEquals("#4.0", 4, model0.previousBrace());
-			model0.move(-14);
-			assertEquals("#5.0", 1, model0.previousBrace());
-			model0.move(-1);
-			assertEquals("#6.0", 3, model0.previousBrace());
-			model0.move(6);
-			assertEquals("#7.0", 6, model0.previousBrace());
-		}
-
-	/** tests nextBrace() */
-	
-	public void testNextBrace()
-		{
-			assertEquals("#0.0", -1, model0.nextBrace());
-			model0 = setUpExample();
-			assertEquals("#1.0", -1, model0.nextBrace());
-			model0.move(-9);
-			assertEquals("#2.0",5, model0.nextBrace());
-			model0.move(-6);
-			assertEquals("#3.0", 3, model0.nextBrace());
-			model0.move(-6);
-			assertEquals("#4.0", 5, model0.nextBrace());
-			model0.move(-1);
-			assertEquals("#5.0", 6, model0.nextBrace());			
-		}
 
 	/** tests forward balancer, e.g., '(' balances with ')' */
 	
@@ -1210,12 +1168,17 @@ public void testInsertGapBeforeGap()
 	/** tests backwards balancer, e.g., ')' balances with '(' */
 	
 	public void testBalanceBackward()
-		{
-			assertEquals("#0.0", -1, model0.balanceBackward());
+		{assertEquals("#0.0", -1, model0.balanceBackward());
 			model0 = setUpExample();
+			// {
+			// ___
+			// (__)
+			// ___//___
+			// "_{_"/*_(_)_*/
+			// }#
 			assertEquals("#1.0", 36, model0.balanceBackward());
 			model0.move(-2);
-			assertEquals("#2.0", 9, model0.balanceBackward());
+			assertEquals("#2.0", -1, model0.balanceBackward());
 			model0.move(-14);
 			assertEquals("#3.0", -1, model0.balanceBackward());
 			model0.move(-10);
@@ -1230,207 +1193,16 @@ public void testInsertGapBeforeGap()
 			model1.move(1);
 			assertEquals("#7.0", -1, model1.balanceBackward());
 		}
-
-	public void testBlockCommentChain()
-		{
-			model0.insertSlash();
-			model0.insertStar();
-			model0.insertGap(2);
-
-			model0.insertStar();
-			model0.insertSlash();
-			model0.insertStar();
-			model0.insertGap(2);
-
-			model0.insertStar();
-			model0.insertSlash();
-			model0.insertStar();
-			model0.insertGap(2);
-
-			model0.insertStar();
-			model0.insertSlash();
-			model0.insertStar();
-			model0.insertQuote();
-			// /*__*/*__*/*__*/*"#
-
-			assertEquals("#0.0", ReducedToken.INSIDE_QUOTE,
-									 model0.getStateAtCurrent());
-			assertEquals("#0.1", "\"",
-									 model0.getCursor().prevItem().getType());
-			assertEquals("#0.2", ReducedToken.FREE,
-									 model0.getCursor().prevItem().getState());
-
-			model0.move(-18);
-			model0.delete(1);
-			// #*__*/*__*/*__*/*"
-
-			assertEquals("#1.0", ReducedToken.FREE,
-									 model0.getStateAtCurrent());
-			assertEquals("#1.1", "*",
-									 model0.getCursor().current().getType());
-			assertEquals("#1.2", ReducedToken.FREE,
-									 model0.getCursor().current().getState());
-
-			model0.move(4);
-			// *__*#/*__*/*__*/*"
-
-			assertEquals("#2.0", ReducedToken.FREE,
-									 model0.getStateAtCurrent());
-			assertEquals("#2.1", "/*",
-									 model0.getCursor().current().getType());
-			assertEquals("#2.2", ReducedToken.FREE,
-									 model0.getCursor().current().getState());
-			assertEquals("#2.3", "*",
-									 model0.getCursor().prevItem().getType());
-			assertEquals("#2.4", ReducedToken.FREE,
-									 model0.getCursor().prevItem().getState());
-			assertTrue("#2.5", model0.getCursor().nextItem().isGap());
-			assertEquals("#2.6", ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model0.getCursor().nextItem().getState());
-			
-			model0.move(6);
-			// *__*/*__*/#*__*/*"
-
-			assertEquals("#3.0", ReducedToken.FREE,
-									 model0.getStateAtCurrent());
-			assertEquals("#3.1", "*",
-									 model0.getCursor().current().getType());
-			assertEquals("#3.2", ReducedToken.FREE,
-									 model0.getCursor().current().getState());
-			assertEquals("#3.3", "*/",
-									 model0.getCursor().prevItem().getType());
-			assertEquals("#3.4", ReducedToken.FREE,
-									 model0.getCursor().prevItem().getState());
-			assertTrue("#3.5", model0.getCursor().nextItem().isGap());
-			assertEquals("#3.6", ReducedToken.FREE,
-									 model0.getCursor().nextItem().getState());
-
-			model0.move(6);
-			// *__*/*__*/*__*/*#"
-
-			assertEquals("#4.0", ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model0.getStateAtCurrent());
-			assertEquals("#4.1", "\"",
-									 model0.getCursor().current().getType());
-			assertEquals("#4.2", ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model0.getCursor().current().getState());
-			assertEquals("#4.3", "/*",
-									 model0.getCursor().prevItem().getType());
-			assertEquals("#4.4", ReducedToken.FREE,
-									 model0.getCursor().prevItem().getState());
-			assertTrue("#4.5", model0.getCursor().atLastItem());
-
-			model0.move(-16);
-			model0.insertQuote();
-			// "#*__*/*__*/*__*/*"
-			
-			assertEquals("#4.0", ReducedToken.INSIDE_QUOTE,
-									 model0.getStateAtCurrent());
-			assertEquals("#4.1", "*",
-									 model0.getCursor().current().getType());
-			assertEquals("#4.2", ReducedToken.INSIDE_QUOTE,
-									 model0.getCursor().current().getState());
-			assertEquals("#4.3", "\"",
-									 model0.getCursor().prevItem().getType());
-			assertEquals("#4.4", ReducedToken.FREE,
-									 model0.getCursor().prevItem().getState());
-
-			model0.move(-1);
-
-			// go to each of the */* and note how they are now broken
-			for(int i = 5; i <= 7; i++) {
-				model0.move(5);
-				assertEquals("#" + i + ".0", ReducedToken.INSIDE_QUOTE,
-										 model0.getStateAtCurrent());
-				assertEquals("#" + i + ".1", "/",
-										 model0.getCursor().current().getType());
-				assertEquals("#" + i + ".2", ReducedToken.INSIDE_QUOTE,
-										 model0.getCursor().current().getState());
-				assertEquals("#" + i + ".3", "*",
-										 model0.getCursor().prevItem().getType());
-				assertEquals("#" + i + ".4", ReducedToken.INSIDE_QUOTE,
-										 model0.getCursor().prevItem().getState());
-				assertEquals("#" + i + ".6", "*",
-										 model0.getCursor().nextItem().getType());
-				assertEquals("#" + i + ".6", ReducedToken.INSIDE_QUOTE,
-									 model0.getCursor().nextItem().getState());
-			}
-
-      // "*__*/*__*/*__*#/*"
-			model0.move(-14);
-			model0.delete(-1);
-			model0.insertSlash();
-			// /#*__*/*__*/*__*/*"
-
-			assertEquals("#8.0", ReducedToken.FREE,
-									 model0.getStateAtCurrent());
-			assertEquals("#8.1", "/*",
-									 model0.getCursor().current().getType());
-			assertEquals("#8.2", ReducedToken.FREE,
-									 model0.getCursor().current().getState());
-			assertEquals("#8.3", 1, model0.getBlockOffset());
-			assertTrue("#8.4", model0.getCursor().nextItem().isGap());
-			assertEquals("#8.5", ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model0.getCursor().nextItem().getState());
-
-			model0.move(5);
-			// /*__*/#*__*/*__*/*"
-			assertEquals("#9.0", ReducedToken.FREE,
-									 model0.getStateAtCurrent());
-			assertEquals("#9.1", "*",
-									 model0.getCursor().current().getType());
-			assertEquals("#9.2", ReducedToken.FREE,
-									 model0.getCursor().current().getState());			
-			assertEquals("#9.3", "*/",
-									 model0.getCursor().prevItem().getType());
-			assertEquals("#9.4", ReducedToken.FREE,
-									 model0.getCursor().prevItem().getState());
-
-			model0.move(5);
-			// /*__*/*__*/#*__*/*"
-			assertEquals("#10.0", ReducedToken.FREE,
-									 model0.getStateAtCurrent());
-			assertEquals("#10.1", "/*",
-									 model0.getCursor().current().getType());
-			assertEquals("#10.2", 1, model0.getBlockOffset());
-			assertEquals("#10.3", ReducedToken.FREE,
-									 model0.getCursor().current().getState());			
-			assertEquals("#10.4", "*",
-									 model0.getCursor().prevItem().getType());
-			assertEquals("#10.5", ReducedToken.FREE,
-									 model0.getCursor().prevItem().getState());
-			assertTrue("#10.6", model0.getCursor().nextItem().isGap());
-			assertEquals("#10.7", ReducedToken.INSIDE_BLOCK_COMMENT,
-									 model0.getCursor().nextItem().getState());
-
-			model0.move(5);
-			// /*__*/*__*/*__*/#*"
-			assertEquals("#11.0", ReducedToken.FREE,
-									 model0.getStateAtCurrent());
-			assertEquals("#11.1", "*",
-									 model0.getCursor().current().getType());
-			assertEquals("#11.2", ReducedToken.FREE,
-									 model0.getCursor().current().getState());			
-			assertEquals("#11.3", "*/",
-									 model0.getCursor().prevItem().getType());
-			assertEquals("#11.4", ReducedToken.FREE,
-									 model0.getCursor().prevItem().getState());
-			assertEquals("#11.5", "\"",
-									 model0.getCursor().nextItem().getType());
-			assertEquals("#11.6", ReducedToken.FREE,
-									 model0.getCursor().nextItem().getState());
-
-			model0.move(2);
-			// /*__*/*__*/*__*/*"#			
-			assertEquals("#12.0", ReducedToken.INSIDE_QUOTE,
-									 model0.getStateAtCurrent());
-			assertEquals("#12.1", "\"",
-									 model0.getCursor().prevItem().getType());
-			assertEquals("#12.2", ReducedToken.FREE,
-									 model0.getCursor().prevItem().getState());
-
-
-		}
-
 }
+
+
+
+
+
+	
+
+
+
+
+
 

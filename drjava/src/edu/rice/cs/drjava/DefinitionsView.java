@@ -62,8 +62,7 @@ public class DefinitionsView extends JEditorPane
 
 	private CaretListener _matchListener = new CaretListener() {
 		public void caretUpdate(CaretEvent e) {
-			_doc()._reduced.move(getCaretPosition() - _doc()._currentLocation);
-			_doc()._currentLocation = getCaretPosition();
+			_doc().setCurrentLocation(getCaretPosition());
 			_mainFrame.getStatusBar().setText("");
 
 			try {
@@ -74,24 +73,15 @@ public class DefinitionsView extends JEditorPane
 	};
 
 	private void _updateMatchHighlight() throws BadLocationException {
-		if (_doc()._reduced.closedBraceImmediatelyLeft()) {
-			int to = getCaretPosition();
-			int from = _doc()._reduced.balanceBackward();
-			if (from == -1) {
-				_removePreviousHighlight();
-				_mainFrame.getStatusBar().setText(
-					"Mismatched '" +
-					_doc()._reduced.getCursor().prevItem().getType() + "'");
-			}
-			else {
-				_removePreviousHighlight();
-				from = to - from;
-				_addHighlight(from, to);
-				Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
-			}
+		_removePreviousHighlight();
+		int to = getCaretPosition();
+		int from = _doc()._reduced.balanceBackward();
+		if (from == -1) {
 		}
-		else {
-			_removePreviousHighlight();
+		else {		
+			from = to - from;
+			_addHighlight(from, to);
+			Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
 		}
 	}	
 
