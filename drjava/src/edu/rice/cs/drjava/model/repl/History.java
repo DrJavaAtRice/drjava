@@ -241,19 +241,18 @@ public class History implements OptionConstants {
           c = new File(c.getAbsolutePath() + "." +
                        InteractionsHistoryFilter.HIST_EXTENSION);
         }
-	FileOps.DefaultFileSaver saver =
-	  new FileOps.DefaultFileSaver(c) {
-	    public void saveTo(File file) throws IOException {
-	
-	      FileOutputStream fos = new FileOutputStream(file);
-	      OutputStreamWriter osw = new OutputStreamWriter(fos);
-	      BufferedWriter bw = new BufferedWriter(osw);
-	      bw.write(HISTORY_FORMAT_VERSION_2 + editedVersion, 0,
-		       HISTORY_FORMAT_VERSION_2.length() + editedVersion.length());
-	      bw.close();
-	    }
-	  };
-	FileOps.saveFile(saver);
+        FileOps.DefaultFileSaver saver =
+          new FileOps.DefaultFileSaver(c) {
+          public void saveTo(OutputStream os) throws IOException {
+            
+            OutputStreamWriter osw = new OutputStreamWriter(os);
+            BufferedWriter bw = new BufferedWriter(osw);
+            bw.write(HISTORY_FORMAT_VERSION_2 + editedVersion, 0,
+                     HISTORY_FORMAT_VERSION_2.length() + editedVersion.length());
+            bw.close();
+          }
+        };
+        FileOps.saveFile(saver);
       }
     }
   }

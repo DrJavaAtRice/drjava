@@ -801,13 +801,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   private void _registerOptionListeners(){
     // Listen to any relevant config options
     DrJava.getConfig().addOptionListener(EXTRA_CLASSPATH,
-      new ExtraClasspathOptionListener());
+                                         new ExtraClasspathOptionListener());
     DrJava.getConfig().addOptionListener(BACKUP_FILES,
-      new BackUpFileOptionListener());
+                                         new BackUpFileOptionListener());
     Boolean makeBackups = DrJava.getConfig().getSetting(BACKUP_FILES);
     FileOps.DefaultFileSaver.setBackupsEnabled(makeBackups.booleanValue());
   }
-
+  
   /**
    * Appends a string to the given document using a particular attribute set.
    * Also waits for a small amount of time (WRITE_DELAY) to prevent any one
@@ -1557,18 +1557,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             file.renameTo(file);
           }
 
-          // have FileOps save the file the correct way
+          // have FileOps save the file
           FileOps.saveFile(new FileOps.DefaultFileSaver(file){
-            public void saveTo(File file) throws IOException{
-              FileWriter writer = new FileWriter(file);
+            public void saveTo(OutputStream os) throws IOException {
               try {
-                _editorKit.write(writer, _doc, 0, _doc.getLength());
+                _editorKit.write(os, _doc, 0, _doc.getLength());
               } catch (BadLocationException docFailed){
                 // We don't expect this to happen
                 throw new UnexpectedException(docFailed);
-              }
-              finally {
-                writer.close();
               }
             }
           });
