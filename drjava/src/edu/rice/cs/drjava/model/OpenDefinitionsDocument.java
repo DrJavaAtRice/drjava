@@ -127,6 +127,15 @@ public interface OpenDefinitionsDocument {
    * @exception IOException if a file with errors cannot be opened
    */
   public void startCompile() throws IOException;
+  
+  /**
+   * Runs the main method in this document in the interactions pane.
+   * Demands that the definitions be saved and compiled before proceeding.
+   * Fires an event to signal when execution is about to begin.
+   * @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
+   * @exception IOException propagated from GlobalModel.compileAll()
+   */
+  public void runMain() throws ClassNameNotFoundException, IOException;
 
   /**
    * Starts testing the source using JUnit.  Demands that the definitions be

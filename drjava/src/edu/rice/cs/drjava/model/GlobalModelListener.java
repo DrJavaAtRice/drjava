@@ -88,6 +88,11 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
    * Called when a compile has finished running.
    */
   public void compileEnded();
+  
+  /**
+   * Called when a file's main method is about to be run.
+   */
+  public void runStarted(OpenDefinitionsDocument doc);
 
   /**
    * Called after JUnit is started by the GlobalModel.
@@ -185,18 +190,18 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   public void consoleReset();
   
   /**
-   * Called to demand that all files be saved before generating Javadoc.
-   * It is up to the caller of this method to check if the documents have been
-   * saved, using IGetDocuments.hasModifiedDocuments().
-   */
-  public void saveBeforeJavadoc();
-  
-  /**
    * Called to demand that all files be saved before compiling.
    * It is up to the caller of this method to check if the documents have been
    * saved, using IGetDocuments.hasModifiedDocuments().
    */
   public void saveBeforeCompile();
+
+  /**
+   * Called to demand that all files be saved before running the main method of
+   * a document. It is up to the caller of this method to check if the documents
+   * have been saved, using IGetDocuments.hasModifiedDocuments().
+   */
+  public void saveBeforeRun();
   
   /**
    * Called to demand that all files be saved before running JUnit tests.
@@ -204,6 +209,13 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
    * saved, using IGetDocuments.hasModifiedDocuments().
    */
   public void saveBeforeJUnit();
+  
+  /**
+   * Called to demand that all files be saved before generating Javadoc.
+   * It is up to the caller of this method to check if the documents have been
+   * saved, using IGetDocuments.hasModifiedDocuments().
+   */
+  public void saveBeforeJavadoc();
   
   /**
    * Called to demand that all files be saved before starting the debugger.

@@ -291,7 +291,7 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_UNCOMMENT_LINES =
     new KeyStrokeOption("key.uncomment.lines",
                         KeyStroke.getKeyStroke(KeyEvent.VK_SLASH,
-                                               (mask | InputEvent.ALT_MASK)));
+                                               (mask | InputEvent.SHIFT_MASK)));
     
   /**
    * The key binding for selecting previous document
@@ -305,6 +305,14 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_NEXT_DOCUMENT =
     new KeyStrokeOption("key.next.document",
                         KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, mask));
+  
+  /**
+   * The key binding for openning the preferences dialog
+   */
+  public static final KeyStrokeOption KEY_PREFERENCES =
+    new KeyStrokeOption("key.preferences",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_SEMICOLON, mask));
+  
   /**
    * The key binding for compiling current document
    */
@@ -319,6 +327,13 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_COMPILE_ALL =
     new KeyStrokeOption("key.compile.all",
                         KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
+  
+  /**
+   * The key binding for openning the preferences dialog
+   */
+  public static final KeyStrokeOption KEY_RUN =
+    new KeyStrokeOption("key.run",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0));
   
   /**
    * The key binding for aborting the current interaction.

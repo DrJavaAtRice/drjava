@@ -71,6 +71,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.debug.*;
+import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.ui.config.*;
 import edu.rice.cs.drjava.ui.CompilerErrorPanel.CompilerErrorListPane;
 import edu.rice.cs.drjava.ui.JUnitPanel.JUnitErrorListPane;
@@ -82,6 +83,7 @@ import edu.rice.cs.util.swing.DelegatingAction;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
+import edu.rice.cs.util.text.DocumentAdapterException;
 
 /**
  * DrJava's main window.
@@ -441,13 +443,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       _pageSetup();
     }
   };
-
-  /** Compiles the document in the definitions pane. */
-  private Action _compileAction = new AbstractAction("Compile Current Document") {
-    public void actionPerformed(ActionEvent ae) {
-      _compile();
-    }
-  };
   
   /** Compiles all open documents. */
   private Action _compileAllAction = new AbstractAction("Compile All Documents") {
@@ -456,10 +451,23 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
+  /** Compiles the document in the definitions pane. */
+  private Action _compileAction = new AbstractAction("Compile Current Document") {
+    public void actionPerformed(ActionEvent ae) {
+      _compile();
+    }
+  };
+  
+  /** Finds and runs the main method of the current document, if it exists. */
+  private Action _runAction = new AbstractAction("Run Document Main Method") {
+    public void actionPerformed(ActionEvent ae) {
+      _runMain();
+    }
+  };
+
   /** Runs JUnit on the document in the definitions pane. */
   private Action _junitAction = new AbstractAction("Test Using JUnit") {
     public void actionPerformed(ActionEvent ae) {
-
       _junit();
       //_setDividerLocation();  is this necessary?
     }
@@ -534,6 +542,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /**
    * Puts the given text into the current definitions pane at the current caret position.
+   * TODO: Move this near to the other methods?
    */
   private void _putTextIntoDefinitions(String text) {
     int caretPos = _currentDefPane.getCaretPosition();
@@ -1024,6 +1033,18 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
+  
+  
+  
+  
+  
+  /* ----------------------- Constructor is here! --------------------------- */
+  
+  
+  
+  
+  
+  
   /** Creates the main window, and shows it. */
   public MainFrame() {
     // Platform-specific UI setup.
@@ -1691,6 +1712,36 @@ public class MainFrame extends JFrame implements OptionConstants {
     worker.start();
     
   }
+  
+  /**
+   * Internal helper method to run the main method of the current document in
+   * the interactions pane.
+   */
+  private void _runMain() {
+    final SwingWorker worker = new SwingWorker() {
+      public Object construct() {
+        try {
+          _model.getActiveDocument().runMain();
+        }
+        catch (ClassNameNotFoundException e) {
+          // Display a warning message if a class name can't be found.
+          JOptionPane.showMessageDialog
+            (MainFrame.this, 
+             "DrJava could not find the top level class name in the\n" +
+             "current document.  Please make sure that a class is\n" +
+             "properly defined before trying to run its main method.");
+        }
+        catch (FileMovedException fme) {
+          _showFileMovedError(fme);
+        }
+        catch (IOException ioe) {
+          _showIOError(ioe);
+        }
+        return null;
+      }
+    };
+    worker.start();
+  }
 
   private void _junit() {
     final SwingWorker worker = new SwingWorker() {
@@ -2326,7 +2377,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     // access to configurations GUI
     editMenu.addSeparator();
-    editMenu.add(_editPreferencesAction);
+    _addMenuItem(editMenu, _editPreferencesAction, KEY_PREFERENCES);
     
     // Add the menus to the menu bar
     return editMenu;
@@ -2339,22 +2390,26 @@ public class MainFrame extends JFrame implements OptionConstants {
     JMenuItem tmpItem;
     JMenu toolsMenu = new JMenu("Tools");
     toolsMenu.setMnemonic(KeyEvent.VK_T);
-    // Compile, Compile all
+    
+    // Compile, Compile all, Run Main Method
     _addMenuItem(toolsMenu, _compileAllAction, KEY_COMPILE_ALL);
     _addMenuItem(toolsMenu, _compileAction, KEY_COMPILE);
+    _addMenuItem(toolsMenu, _runAction, KEY_RUN);
     toolsMenu.add(_junitAction);
     toolsMenu.add(_javadocAction);
+    toolsMenu.addSeparator();
+    
+    toolsMenu.add(_loadHistoryAction);
+    toolsMenu.add(_saveHistoryAction);
+    toolsMenu.add(_clearHistoryAction);
+    toolsMenu.addSeparator();
 
     // Abort/reset interactions, clear console
-    toolsMenu.addSeparator();
     /*
     _abortInteractionAction.setEnabled(false);
     _addMenuItem(toolsMenu, _abortInteractionAction, KEY_ABORT_INTERACTION);
     */
     toolsMenu.add(_resetInteractionsAction);
-    toolsMenu.add(_loadHistoryAction);
-    toolsMenu.add(_saveHistoryAction);
-    toolsMenu.add(_clearHistoryAction);
     toolsMenu.add(_viewInteractionsClasspathAction);
     toolsMenu.add(_copyInteractionToDefinitionsAction);
     toolsMenu.addSeparator();
@@ -2769,6 +2824,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     docPanePopupMenu.addSeparator();
     docPanePopupMenu.add(_compileAction);
     docPanePopupMenu.add(_junitAction);
+    docPanePopupMenu.add(_runAction);
     _docList.addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
         _docList.setSelectedIndex(_docList.locationToIndex(e.getPoint()));
@@ -2782,11 +2838,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     interactionsPanePopupMenu.add(copyAction);
     interactionsPanePopupMenu.add(pasteAction);
     interactionsPanePopupMenu.addSeparator();
-    interactionsPanePopupMenu.add(_resetInteractionsAction);
     interactionsPanePopupMenu.add(_loadHistoryAction);
     interactionsPanePopupMenu.add(_saveHistoryAction);
     interactionsPanePopupMenu.add(_clearHistoryAction);
     interactionsPanePopupMenu.addSeparator();
+    interactionsPanePopupMenu.add(_resetInteractionsAction);
     interactionsPanePopupMenu.add(_viewInteractionsClasspathAction);
     interactionsPanePopupMenu.add(_copyInteractionToDefinitionsAction);
     _interactionsPane.addMouseListener(new RightClickMouseAdapter() {
@@ -3210,6 +3266,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     SwingUtilities.invokeLater(doCommand);
   }
   
+
   /**
    * Blocks access to DrJava while the hourglass cursor is on
    */
@@ -3654,6 +3711,20 @@ public class MainFrame extends JFrame implements OptionConstants {
       };
       SwingUtilities.invokeLater(doCommand);
     }
+    
+    public void runStarted(final OpenDefinitionsDocument doc) {
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          // Make sure that this document is the active one.
+          _model.setActiveDocument(doc);
+          
+          // Switch to the interactions pane to show results.
+          showTab(_interactionsPane);
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
+    }
 
     public void compileEnded() {
       // Only change GUI from event-dispatching thread
@@ -3831,11 +3902,21 @@ public class MainFrame extends JFrame implements OptionConstants {
         ("To compile, you must first save ALL modified files.\n" +
          "Would you like to save and then compile?");
     }
+
+    /**
+     * Prompts the user to save and compile before running a modified file.
+     */
+    public void saveBeforeRun() {
+      _saveAllBeforeProceeding
+        ("To run this document's main method, you must first\n" +
+         "save ALL modified files and compile this document.\n" +
+         "Would you like to save and compile now?");
+    }
     
     public void saveBeforeJUnit() {
       _saveAllBeforeProceeding
         ("To run JUnit, you must first save and compile ALL modified\n" +
-         "files. Would you like to save and then compile?");
+         "files. Would you like to save and compile now?");
     }
     
     public void saveBeforeJavadoc() {
@@ -3849,7 +3930,11 @@ public class MainFrame extends JFrame implements OptionConstants {
         ("To use debugging commands, you must first save and compile\n" +
          "ALL modified files. Would you like to save and then compile?");
     }
-
+  
+    /**
+     * Helper method shared by all "saveBeforeX" methods.
+     * @param message a prompt message to be displayed to the user
+     */
     private void _saveAllBeforeProceeding(String message) {
       if (_model.hasModifiedDocuments()) {
         int rc = JOptionPane.showConfirmDialog(MainFrame.this, message,
@@ -4033,20 +4118,30 @@ public class MainFrame extends JFrame implements OptionConstants {
     int numVisible = 0;
     TabbedPanel tp;
     
-    for (int i = 0; i < _tabs.size(); i++) {
-      tp = (TabbedPanel)_tabs.get(i);
-      if (tp == c) {
-        // 2 right now is a magic number for the number of tabs always visible
-        // interactions & console
-        if (!tp.isDisplayed()) {
-          _tabbedPane.insertTab(tp.getName(), null, tp, null, numVisible + 2);
-          tp.setDisplayed(true);
+    // This retarded method doesn't work for our two always-on tabs,
+    // so here's a temporary kludge.
+    if (c == _interactionsPane) {
+      _tabbedPane.setSelectedIndex(0);
+    }
+    else if (c == _consolePane) {
+      _tabbedPane.setSelectedIndex(1);
+    }
+    else {
+      for (int i = 0; i < _tabs.size(); i++) {
+        tp = (TabbedPanel)_tabs.get(i);
+        if (tp == c) {
+          // 2 right now is a magic number for the number of tabs always visible
+          // interactions & console
+          if (!tp.isDisplayed()) {
+            _tabbedPane.insertTab(tp.getName(), null, tp, null, numVisible + 2);
+            tp.setDisplayed(true);
+          }
+          _tabbedPane.setSelectedIndex(numVisible + 2);
+          return;
         }
-        _tabbedPane.setSelectedIndex(numVisible + 2);
-        return;
+        if (tp.isDisplayed())
+          numVisible++;
       }
-      if (tp.isDisplayed())
-        numVisible++;
     }
   }
   

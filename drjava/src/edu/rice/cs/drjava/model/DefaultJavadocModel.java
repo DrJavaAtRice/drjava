@@ -73,12 +73,13 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param getter used to build the CompilerErrorModel
    */
   public DefaultJavadocModel(IGetDocuments getter) {
-  this.getter = getter;
-  this._javadocErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], getter);
+    this.getter = getter;
+    this._javadocErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], getter);
   }
   
   /**
    * Accessor for the Javadoc error model.
+   * @return the CompilerErrorModel managing Javadoc errors.
    */
   public CompilerErrorModel getJavadocErrorModel() {
     return _javadocErrorModel;
@@ -440,7 +441,7 @@ public class DefaultJavadocModel implements JavadocModel {
       }
     }
     ExecJVM.ventBuffers(javadocProcess, outLines, errLines);
-//    System.err.println("got past first waitFor.");
+//    System.err.println("Javadoc process completed.");
      
     // Unfortunately, javadoc returns 1 for normal errors and for exceptions.
     // We cannot tell them apart without parsing.
@@ -450,7 +451,9 @@ public class DefaultJavadocModel implements JavadocModel {
   
     _javadocErrorModel = new CompilerErrorModel
       ((CompilerError[])(errors.toArray(new CompilerError[errors.size()])), getter);
-//    System.out.println("built javadoc error model");
+//    System.out.println("built Javadoc error model");
+    
+    // Returns true if no "real" errors have occurred.
     return _javadocErrorModel.hasOnlyWarnings();
   }
   
@@ -573,27 +576,4 @@ public class DefaultJavadocModel implements JavadocModel {
     }
     return error;
   }
-  
-  
-//  private void javadocStarted() {
-//    synchronized(_compilerLock) {
-//      // TODO: Too many damn inner classes!
-//      _notifier.notifyListeners(new EventNotifier.Notifier() {
-//        public void notifyListener(GlobalModelListener l) {
-//          l.javadocStarted();
-//        }
-//      });
-//    }
-//  }
-//
-//  private void javadocEnded(final boolean success, final File destDir) {
-//    synchronized(_compilerLock) {
-//      _notifier.notifyListeners(new EventNotifier.Notifier() {
-//        public void notifyListener(GlobalModelListener l) {
-//          l.javadocEnded(success, destDir);
-//        }
-//      });
-//    }
-//  }
-  
 }

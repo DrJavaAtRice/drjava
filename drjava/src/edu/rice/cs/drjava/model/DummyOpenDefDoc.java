@@ -165,6 +165,16 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   }
   
   /**
+   * Runs the main method in this document in the interactions pane.
+   * Demands that the definitions be saved and compiled before proceeding.
+   * Fires an event to signal when execution is about to begin.
+   * @exception IOException propagated from GlobalModel.compileAll()
+   */
+  public void runMain() throws IOException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  /**
    * A forwarding method to indent the current line or selection
    * in the definitions.
    */

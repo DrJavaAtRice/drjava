@@ -318,7 +318,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   public long getTimestamp() {
     return _timestamp;
   }
-    /**
+  
+  /**
    * This function finds the given character in the same statement as the given
    * position, and before the given position.  It is used by QuestionExistsCharInStmt and
    * QuestionExistsCharInPrevStmt

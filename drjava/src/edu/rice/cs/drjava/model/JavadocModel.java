@@ -45,6 +45,10 @@ import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import java.util.List;
 
+/**
+ * Model interface for Javadoc integration features.
+ * Note: Implementors should have a constructor taking an IGetDocuments.
+ */
 public interface JavadocModel {
   /**
    * Accessor for the Javadoc error model.

@@ -130,6 +130,16 @@ public class EventNotifier implements GlobalModelListener {
   }
   
   /**
+   * Called when a file's main method is about to be run.
+   */
+  public void runStarted(OpenDefinitionsDocument doc) {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).runStarted(doc);
+    }
+  }
+  
+  /**
    * Called after JUnit is started by the GlobalModel.
    */
   synchronized public void junitStarted(OpenDefinitionsDocument doc) {
@@ -424,6 +434,42 @@ public class EventNotifier implements GlobalModelListener {
   }
   
   /**
+   * Called to demand that all files be saved before compiling.
+   * It is up to the caller of this method to check if the documents have been
+   * saved, using IGetDocuments.hasModifiedDocuments().
+   */
+  synchronized public void saveBeforeCompile() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).saveBeforeCompile();
+    }
+  }
+  
+  /**
+   * Called to demand that all files be saved before running the main method of
+   * a document. It is up to the caller of this method to check if the documents
+   * have been saved, using IGetDocuments.hasModifiedDocuments().
+   */
+  synchronized public void saveBeforeRun() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).saveBeforeRun();
+    }
+  }
+  
+  /**
+   * Called to demand that all files be saved before running JUnit tests.
+   * It is up to the caller of this method to check if the documents have been
+   * saved, using IGetDocuments.hasModifiedDocuments().
+   */
+  synchronized public void saveBeforeJUnit() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).saveBeforeJUnit();
+    }
+  }
+  
+  /**
    * Called before attempting Javadoc, to give users a chance to save.
    * Do not continue with Javadoc if the user doesn't save!
    */
@@ -443,30 +489,6 @@ public class EventNotifier implements GlobalModelListener {
     int size = _listeners.size();
     for(int i = 0; i < size; i++) {
       _listeners.get(i).saveBeforeDebug();
-    }
-  }
-  
-  /**
-   * Called to demand that all files be saved before compiling.
-   * It is up to the caller of this method to check if the documents have been
-   * saved, using IGetDocuments.hasModifiedDocuments().
-   */
-  synchronized public void saveBeforeCompile() {
-    int size = _listeners.size();
-    for(int i = 0; i < size; i++) {
-      _listeners.get(i).saveBeforeCompile();
-    }
-  }
-  
-  /**
-   * Called to demand that all files be saved before running JUnit tests.
-   * It is up to the caller of this method to check if the documents have been
-   * saved, using IGetDocuments.hasModifiedDocuments().
-   */
-  synchronized public void saveBeforeJUnit() {
-    int size = _listeners.size();
-    for(int i = 0; i < size; i++) {
-      _listeners.get(i).saveBeforeJUnit();
     }
   }
 }

@@ -315,7 +315,7 @@ public class CompilerErrorModel<T extends CompilerError> {
       // If there was no cached value, compute it.
       boolean clean = true;
       for (int i = 0; clean && (i < _numErrors); i++) {
-        clean = !_errors[i].isWarning();
+        clean = _errors[i].isWarning();
       }
       // Cache the value.
       _onlyWarnings = clean? 1: 0;

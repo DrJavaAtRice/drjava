@@ -1619,6 +1619,64 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         }
       }
     }
+  
+    /**
+     * Runs the main method in this document in the interactions pane.
+     * Demands that the definitions be saved and compiled before proceeding.
+     * Fires an event to signal when execution is about to begin.
+     * @exception IOException propagated from GlobalModel.compileAll()
+     */
+    public void runMain()
+      throws ClassNameNotFoundException, IOException {
+      try {
+        /*
+         * First, get the class name to use.  This relies on Java's convention of
+         * one top-level class per file.
+         */
+        DefinitionsDocument doc = getDocument();
+        String className = doc.getFirstTopLevelClassName();
+        
+        // Prompt to save and compile if document is modified.
+        if (hasModifiedDocuments()) {
+          _notifier.saveBeforeRun();
+          
+          // If the user chose to cancel, abort the run.
+          if (hasModifiedDocuments()) {
+            return;
+          }
+          else {
+            // The user chose to compile, so do so.
+            this.startCompile();
+            
+            // If the compile had errors, abort the run.
+            synchronized(_compilerLock) {
+              if (!_compilerErrorModel.hasOnlyWarnings()) {
+                return;
+              }
+            }
+          }
+        }
+        
+        // Make sure that the compiler is done before starting run.
+        synchronized(_compilerLock) {
+          // Then clear the current interaction and replace it with a "java X" line.
+          InteractionsDocument iDoc = _interactionsModel.getDocument();
+          iDoc.clearCurrentInput();
+        
+          iDoc.insertText(iDoc.getDocLength(), "java " + className, null);
+          
+          // Notify listeners that the file is about to be run.
+          _notifier.runStarted(this);
+          
+          // Finally, execute the new interaction.
+          _interactionsModel.interpretCurrentInteraction();
+        }
+      }
+      catch (DocumentAdapterException e) {
+        // This was thrown by insertText - and shouldn't have happened.
+        throw new UnexpectedException(e);
+      }
+    }
 
     /**
      * Runs JUnit on the current document. Used to compile all open documents

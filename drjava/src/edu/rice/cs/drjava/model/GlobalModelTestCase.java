@@ -568,6 +568,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected int canAbandonCount;
     protected int compileStartCount;
     protected int compileEndCount;
+    protected int runStartCount;
     protected int junitStartCount;
     protected int junitSuiteStartedCount;
     protected int junitTestStartedCount;
@@ -584,6 +585,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     //protected int interactionCaretPositionChangedCount;
     protected int consoleResetCount;
     protected int saveBeforeCompileCount;
+    protected int saveBeforeRunCount;
     protected int saveBeforeJUnitCount;
     protected int saveBeforeJavadocCount;
     protected int saveBeforeDebugCount;
@@ -606,6 +608,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       canAbandonCount = 0;
       compileStartCount = 0;
       compileEndCount = 0;
+      runStartCount = 0;
       junitStartCount = 0;
       junitSuiteStartedCount = 0;
       junitTestStartedCount = 0;
@@ -622,6 +625,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       interpreterExitedCount = 0;
       interpreterResetFailedCount = 0;
       saveBeforeCompileCount = 0;
+      saveBeforeRunCount = 0;
       saveBeforeJUnitCount = 0;
       saveBeforeJavadocCount = 0;
       saveBeforeDebugCount = 0;
@@ -712,6 +716,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void assertCompileEndCount(int i) {
       assertEquals("number of times compileEnded fired", i, compileEndCount);
     }
+    
+    public void assertRunStartCount(int i) {
+      assertEquals("number of times runStarted fired", i, runStartCount);
+    }
 
     public void assertInteractionsResettingCount(int i) {
       assertEquals("number of times interactionsResetting fired",
@@ -753,6 +761,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("number of times saveBeforeCompile fired",
                    i,
                    saveBeforeCompileCount);
+    }
+
+    public void assertSaveBeforeRunCount(int i) {
+      assertEquals("number of times saveBeforeRun fired",
+                   i,
+                   saveBeforeRunCount);
     }
 
     public void assertSaveBeforeJUnitCount(int i) {
@@ -879,6 +893,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("compileEnded fired unexpectedly");
     }
 
+    public void runStarted(OpenDefinitionsDocument doc) {
+      listenerFail("runStarted fired unexpectedly");
+    }
+
     public void interpreterResetting() {
       listenerFail("interactionsResetting fired unexpectedly");
     }
@@ -901,6 +919,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     public void saveBeforeCompile() {
       listenerFail("saveBeforeCompile fired unexpectedly");
+    }
+
+    public void saveBeforeRun() {
+      listenerFail("saveBeforeRun fired unexpectedly");
     }
 
     public void saveBeforeJUnit() {

@@ -76,6 +76,23 @@ public final class CompilerErrorModelTest extends TestCase {
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have no compiler errors.", 0, model.getNumErrors());
+    assertTrue("hasOnlyWarnings should return true.", model.hasOnlyWarnings());
+  }
+  
+  /**
+   * Tests CompilerErrorModel setup code with only warnings without files.
+   * Also tests hasOnlyWarnings logic.
+   */
+  public void testConstructOnlyWarnings() {
+    getter = new TestDocGetter();
+    errors = new CompilerError[]
+    { new CompilerError("Test warning without File", true),
+      new CompilerError("Test warning without File", true) };
+    model = new CompilerErrorModel<CompilerError>(errors, getter);
+    
+    // We successfully built the model, now test the basics.
+    assertEquals("Should have 2 compiler errors.", 2, model.getNumErrors());
+    assertTrue("hasOnlyWarnings should return true.", model.hasOnlyWarnings());
   }
   
   /**
@@ -98,6 +115,7 @@ public final class CompilerErrorModelTest extends TestCase {
     assertEquals("Should have 3 compiler errors.", 3, model.getNumErrors());
 //    System.out.println(model.getError(0) + "\n" + model.getError(1) + "\n" + model.getError(2));
     assertEquals("Errors should be sorted.", errors[1], model.getError(2));
+    assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
   /**
@@ -120,6 +138,7 @@ public final class CompilerErrorModelTest extends TestCase {
     // We successfully built the model, now test the basics.
     assertEquals("Should have 3 compiler errors.", 3, model.getNumErrors());
     assertEquals("Errors should be sorted.", errors[1], model.getError(2));
+    assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
   /**
@@ -146,6 +165,7 @@ public final class CompilerErrorModelTest extends TestCase {
     assertEquals("Errors should be sorted.", errors[1], model.getError(1));
     assertEquals("Errors should be sorted.", errors[0], model.getError(2));
     assertEquals("Errors should be sorted.", errors[2], model.getError(3));
+    assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
   /**
@@ -178,6 +198,7 @@ public final class CompilerErrorModelTest extends TestCase {
     assertEquals("Errors should be sorted.", errors[0], model.getError(4));
     assertEquals("Errors should be sorted.", errors[2], model.getError(5));
     assertEquals("Errors should be sorted.", errors[4], model.getError(6));
+    assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
   /**
@@ -212,6 +233,7 @@ public final class CompilerErrorModelTest extends TestCase {
     assertEquals("Errors should be sorted.", errors[4], model.getError(5));
     assertEquals("Errors should be sorted.", errors[6], model.getError(6));
     assertEquals("Errors should be sorted.", errors[2], model.getError(7));
+    assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
   /**
@@ -246,6 +268,7 @@ public final class CompilerErrorModelTest extends TestCase {
     assertEquals("Errors should be sorted.", errors[5], model.getError(5));
     assertEquals("Errors should be sorted.", errors[2], model.getError(6));
     assertEquals("Errors should be sorted.", errors[6], model.getError(7));
+    assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
   /**
@@ -272,6 +295,7 @@ public final class CompilerErrorModelTest extends TestCase {
     assertEquals("Errors should be sorted.", errors[3], model.getError(12));
     assertEquals("Errors should be sorted.", errors[5], model.getError(13));
     assertEquals("Errors should be sorted.", errors[1], model.getError(14));
+    assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
   /**
@@ -415,83 +439,5 @@ public final class CompilerErrorModelTest extends TestCase {
       copy[i] = errors[i];
     }
     model = new CompilerErrorModel<CompilerError>(copy, getter);
-  }
-  
-  /**
-   * Test implementation of IGetDocuments interface.
-   */
-  private static class TestDocGetter extends DummyGetDocuments {
-    /**
-     * Storage for documents and File keys.
-     */
-    HashMap<File, OpenDefinitionsDocument> docs;
-    
-    /**
-     * Convenience constructor for no-documents case.
-     */
-    private TestDocGetter() {
-      this(new File[0], new String[0]);
-    }
-    
-    /**
-     * Primary constructor, builds OpenDefDocs from Strings.
-     * @param files the keys to use when getting OpenDefDocs
-     * @param texts the text to put in the OpenDefDocs
-     */
-    private TestDocGetter(File[] files, String[] texts) {
-      if (files.length != texts.length) {
-        throw new IllegalArgumentException("Argument arrays must match in size.");
-      }
-      
-      docs = new HashMap<File, OpenDefinitionsDocument>(texts.length * 2);
-      
-      EventNotifier en = new EventNotifier();
-      for (int i = 0; i < texts.length; i++) {
-        DefinitionsDocument doc = new DefinitionsDocument(en);
-        doc.setFile(files[i]);
-        try {
-          doc.insertString(0, texts[i], null);
-        }
-        catch (BadLocationException e) {
-          throw new UnexpectedException(e);
-        }
-        docs.put(files[i], new TestOpenDoc(doc));
-      }
-    }
-    
-    public OpenDefinitionsDocument getDocumentForFile(File file)
-      throws IOException, OperationCanceledException {
-      // Try to find the key in docs.
-      if (docs.containsKey(file)) {
-        return (OpenDefinitionsDocument) docs.get(file);
-      }
-      else {
-        throw new IllegalStateException("TestDocGetter can't open new files!");
-      }
-    }
-  }
-  
-  /**
-   * Test implementation of OpenDefinitionsDocument interface.
-   */
-  private static class TestOpenDoc extends DummyOpenDefDoc {
-    DefinitionsDocument _doc;
-    TestOpenDoc(DefinitionsDocument doc) {
-      _doc = doc;
-    }
-    
-    /**
-     * This is the only method that we care about.
-     */
-    public DefinitionsDocument getDocument() {
-      return _doc;
-    }
-    
-    /**
-     * Okay, I lied.  We need this one, too.
-     */
-    public File getFile() throws IllegalStateException, FileMovedException  {
-      return _doc.getFile();
-    }
   }
 }
