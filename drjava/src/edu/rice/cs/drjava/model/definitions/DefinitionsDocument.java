@@ -490,6 +490,50 @@ public class DefinitionsDocument extends PlainDocument {
     _reduced.move(origLocation - pos);
     return ERROR_INDEX;
   }
+
+  /**
+   * Determines if the given character exists on the line where
+   * the given cursor position is. Does not search in quotes or comments.
+   * <p>
+   * <b>Does not work if character being searched for is a '/' or a '*'</b>
+   * @param pos Cursor position 
+   * @param findChar Character to search for
+   * @return true if this node's rule holds.
+   */
+  public int findCharOnLine(int pos, char findChar) {
+    int reducedAbsOffset = this.getReduced().absOffset();
+    int lineStart = this.getLineStartPos(pos);
+    int lineEnd = this.getLineEndPos(pos);
+    String lineText;
+
+    try {
+      lineText = this.getText(lineStart, lineEnd - lineStart);
+    } catch(BadLocationException e) {
+      // Should not be here
+      throw new UnexpectedException(e);
+    }
+
+    int i = lineText.indexOf(findChar, 0);
+    while(i != -1) {
+      // Move reduced model to walker's location
+      this.getReduced().move(i + lineStart - reducedAbsOffset);
+
+      // Check if matching char is in comment or quotes
+      if((this.getReduced().getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
+	 (this.getReduced().getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT)) ||
+	 (this.getReduced().getStateAtCurrent().equals(ReducedModelState.INSIDE_SINGLE_QUOTE)) ||
+	 (this.getReduced().getStateAtCurrent().equals(ReducedModelState.INSIDE_DOUBLE_QUOTE))) {
+	// Ignore matching char
+      } else {
+	// Return position of matching char
+	this.getReduced().move(reducedAbsOffset - (i + lineStart));
+	return (i + lineStart);
+      }
+      this.getReduced().move(reducedAbsOffset - (i + lineStart));
+      i = lineText.indexOf(findChar, i+1);
+    }
+    return ERROR_INDEX;
+  }
   
   /**
    * Returns the absolute position of the beginning of the
@@ -556,7 +600,7 @@ public class DefinitionsDocument extends PlainDocument {
 
   /**
    * Finds the position of the first non-whitespace character after pos.
-   * NB: Comments count as non-whitespace.
+   * NB: Skips comments
    * @param pos Position to start from
    * @return position of first non-whitespace character after pos,
    * or ERROR_INDEX if end of document is reached

@@ -37,48 +37,56 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.definitions.indent;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import javax.swing.text.*;
+import edu.rice.cs.util.UnexpectedException;
+
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020322-1229;
+ * Question rule in the indentation decision tree.  Determines if the 
+ * current line contains the given character. Does not check
+ * for the character inside comments or quotes.
+ * <p>
+ * <b>Does not work if character being searched for is a '/' or a '*'</b>
  *
  * @version $Id$
  */
-public abstract class Version {
+public class QuestionLineContains extends IndentRuleQuestion {
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Character to search for
    */
-  private static final String BUILD_TIME_STRING = "20020322-1229";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  private char _findChar;
+  
+  /**
+   * Constructs a new rule which determines if the line
+   * contains the given character.
+   * @param findChar Character to search for
+   * @param yesRule Rule to use if this rule holds
+   * @param noRule Rule to use if this rule does not hold
+   */
+  public QuestionLineContains(char findChar, IndentRule yesRule, IndentRule noRule) {
+    super(yesRule, noRule);
+    _findChar = findChar;
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+  
+  /**
+   * Determines if the given character exists on the current line.
+   * Does not search in quotes or comments.
+   * <p>
+   * <b>Does not work if character being searched for is a '/' or a '*'</b>
+   * @param doc DefinitionsDocument containing the line to be indented.
+   * @return true if this node's rule holds.
+   */
+  boolean applyRule(DefinitionsDocument doc) {
+    int charPos = doc.findCharOnLine(doc.getCurrentLocation(), _findChar);
+    if(charPos == DefinitionsDocument.ERROR_INDEX) {
+      return false;
+    } else {
+      return true;
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
   }
+}
 
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
