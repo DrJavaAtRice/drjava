@@ -45,7 +45,7 @@ import  junit.extensions.*;
 
 
 /**
- * Tests the interaction between double and single quotes.
+ * Tests the interaction between double and single quotes and comments
  * @version $Id$
  */
 public class MixedQuoteTest extends BraceReductionTestCase 

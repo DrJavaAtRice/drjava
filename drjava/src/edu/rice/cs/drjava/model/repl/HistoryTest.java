@@ -44,6 +44,10 @@ import java.util.Vector;
 import junit.extensions.*;
 import javax.swing.text.BadLocationException;
 import java.io.File;
+import java.io.IOException;
+import java.io.FileReader;
+import edu.rice.cs.drjava.model.FileSaveSelector;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.CodeStatus;
@@ -79,6 +83,31 @@ public class HistoryTest extends TestCase implements OptionConstants{
     return  new TestSuite(HistoryTest.class);
   }
 
+  public void testWriteToFile() throws IOException{
+    _history.add("new Object()");
+    _history.add("new Object()");
+    _history.add("5 * 5");
+
+    final File f1 = File.createTempFile("DrJava-test", ".history");
+    _history.writeToFile(new FileSaveSelector() {
+	private File file = f1;
+	public File getFile () { return f1;}
+	public void warnFileOpen(){}
+	public boolean verifyOverwrite(){ return true;}
+	public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile){return true;}
+      });
+
+    FileReader fr = new FileReader(f1);
+    char [] chContents = new char[32];
+    assertEquals(32, fr.read(chContents, 0, 32));
+    assertTrue(!fr.ready());
+
+    String contents = new String(chContents);
+    assertEquals("new Object()\nnew Object()\n5 * 5", contents.trim());
+			 
+    f1.delete();
+  }
+  
   public void testMultipleInsert() {
     _history.add("new Object()");
     _history.add("new Object()");

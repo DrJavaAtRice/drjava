@@ -47,6 +47,7 @@ import java.util.LinkedList;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.Position;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -91,6 +92,9 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
   
   private static final String FOO_WITH_ASSERT =
     "class DrJavaTestFoo { void foo() { assert true; } }";
+
+  private static final String BAR_MISSING_SEMI_TEXT_MULTIPLE_LINES =
+    "class DrJavaTestFoo {\n  int a = 5;\n  int x\n }";
 
   /**
    * Constructor.
@@ -201,6 +205,8 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     assertCompileErrorsPresent(_name(), true);
     assertEquals("Should have 2 compiler errors", 2, _model.getNumErrors());
     listener.checkCompileOccurred();
+
+    
 
     // Make sure .class does not exist for both files
     File compiled = classForJava(file, "DrJavaTestFoo");
@@ -870,4 +876,34 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     
     _model.setResetAfterCompile(true);
   }
+
+
+  public void testCompileFailsCorrectLineNumbers() throws BadLocationException, IOException {
+        File aDir = new File(_tempDir, "a");
+    File bDir = new File(_tempDir, "b");
+    aDir.mkdir();
+    bDir.mkdir();
+    OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AFTER_IMPORT);
+    final File file = new File(aDir, "DrJavaTestFoo.java");
+    doc.saveFile(new FileSelector(file));
+    OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT_MULTIPLE_LINES);
+    final File file2 = new File(bDir, "DrJavaTestBar.java");
+    doc2.saveFile(new FileSelector(file2));
+    
+    CompileShouldFailListener listener = new CompileShouldFailListener();
+    _model.addListener(listener);
+    _model.compileAll();
+    assertCompileErrorsPresent(_name(), true);
+    //    assertEquals("Should have 2 compiler errors", 2, _model.getNumErrors());
+    listener.checkCompileOccurred();
+    
+    Position[] positions = doc.getCompilerErrorModel().getPositions();
+    Position[] positions2 = doc2.getCompilerErrorModel().getPositions();
+
+    assertTrue("location of first error should be between 20 and 29 inclusive (line 2)",
+	       positions[0].getOffset() <= 20 && positions[0].getOffset() <= 29);
+    assertTrue("location of error should be after 34 (line 3 or 4)", positions2[0].getOffset() >= 34);
+
+  }
+  
 }

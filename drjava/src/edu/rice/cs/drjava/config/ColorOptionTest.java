@@ -35,18 +35,57 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.config;
+
+import junit.framework.*;
+import java.awt.Color;
 
 /**
- * Contains the constant that specifies whether any new features should be used
- * in any compilation or test.  This flag will be set to false when preparing 
- * stable releases and will be set to true during development of new features.
- * To set the flag to false, use the "stable" target in ant and the 
- * "development" target to set the flag to true.  All new features during a beta
- * test period should be surrounded by a conditional based on this flag.
+ * Class according to the JUnit protocol. Tests
+ * the proper functionality of the class ColorOption.
  */
-public class CodeStatus {
-  public static final boolean DEVELOPMENT = true;
+public class ColorOptionTest extends TestCase
+{
+  /**
+   * @param name The name of this test case.
+   */
+  public ColorOptionTest(String name) { super(name); }
+  
+  public void setUp() {}
+  
+  public void testGetName()
+  {
+    ColorOption io1 = new ColorOption("indent_size",null);
+    ColorOption io2 = new ColorOption("max_files",null);
+    
+    assertEquals("indent_size", io1.getName());
+    assertEquals("max_files",   io2.getName());
+  }
+  
+  public void testParse()
+  {
+    ColorOption io = new ColorOption("max_files",null);
+    
+    assertEquals(Color.BLACK, io.parse("0x000000"));
+    assertEquals(Color.GREEN, io.parse("0x00ff00"));
+    
+    try { io.parse("true"); fail(); }
+    catch (OptionParseException e) {}
+    
+    try { io.parse("black"); fail(); }
+    catch (OptionParseException e) {}
+  }
+  
+  public void testFormat()
+  {
+    ColorOption io1 = new ColorOption("max_files",null);
+    ColorOption io2 = new ColorOption("indent_size",null);
+    
+    assertEquals("#000000",  io1.format(Color.BLACK));
+    assertEquals("#ff00ff",  io2.format(Color.MAGENTA));
+    assertEquals("#ffffff", io1.format(Color.WHITE));
+
+  }
 }

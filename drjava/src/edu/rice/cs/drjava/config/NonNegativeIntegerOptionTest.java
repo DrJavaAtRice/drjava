@@ -35,18 +35,57 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.config;
+
+import junit.framework.*;
 
 /**
- * Contains the constant that specifies whether any new features should be used
- * in any compilation or test.  This flag will be set to false when preparing 
- * stable releases and will be set to true during development of new features.
- * To set the flag to false, use the "stable" target in ant and the 
- * "development" target to set the flag to true.  All new features during a beta
- * test period should be surrounded by a conditional based on this flag.
+ * Class according to the JUnit protocol. Tests
+ * the proper functionality of the class NonNegativeIntegerOption.
  */
-public class CodeStatus {
-  public static final boolean DEVELOPMENT = true;
+public class NonNegativeIntegerOptionTest extends TestCase
+{
+  /**
+   * @param name The name of this test case.
+   */
+  public NonNegativeIntegerOptionTest(String name) { super(name); }
+  
+  public void setUp() {}
+  
+  public void testGetName()
+  {
+    NonNegativeIntegerOption io1 = new NonNegativeIntegerOption("indent_size",null);
+    NonNegativeIntegerOption io2 = new NonNegativeIntegerOption("max_files",null);
+    
+    assertEquals("indent_size", io1.getName());
+    assertEquals("max_files",   io2.getName());
+  }
+  
+  public void testParse()
+  {
+    NonNegativeIntegerOption io = new NonNegativeIntegerOption("max_files",null);
+    
+    assertEquals(new Integer(3), io.parse("3"));
+    try { io.parse("-3"); fail(); }
+    catch (OptionParseException e) {}
+    
+    try { io.parse("true"); fail(); }
+    catch (OptionParseException e) {}
+    
+    try { io.parse(".33"); fail(); }
+    catch (OptionParseException e) {}
+  }
+  
+  public void testFormat()
+  {
+    NonNegativeIntegerOption io1 = new NonNegativeIntegerOption("max_files",null);
+    NonNegativeIntegerOption io2 = new NonNegativeIntegerOption("indent_size",null);
+    
+    assertEquals("33",  io1.format(new Integer(33)));
+    assertEquals("33",  io2.format(new Integer(33)));
+    assertEquals("-11", io1.format(new Integer(-11)));
+    assertEquals("-11", io2.format(new Integer(-11)));
+  }
 }

@@ -1013,6 +1013,23 @@ public class IndentTest extends TestCase {
     doc.indentLines(0, doc.getLength());
     _assertContents(indented, doc);
   }
+
+
+  /**
+   * This method tests that multiple unbraced nested lines are indented
+   * correctly.  This is currently incorrect.  Bug #627753.  Uncomment when
+   * it has been fixed
+  public void testNestedUnbraced() throws BadLocationException {
+    String text =
+      "for (int a =0; a < 5; a++)\nfor(int b = 0; b < 5; b++){\nSystem.out.println(a + b);";
+    String indented =
+      "for (int a =0; a < 5; a++)\n  for(int b = 0; b < 5; b++){\n    System.out.println(a + b);";
+    doc.insertString(0, text, null);
+    _assertContents(text, doc);
+    doc.indentLines(0, doc.getLength());
+    _assertContents(indented, doc);
+
+  } */
   
   public void testLiveUpdateOfIndentLevel() throws BadLocationException {
     
