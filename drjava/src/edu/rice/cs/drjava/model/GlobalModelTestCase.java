@@ -135,6 +135,31 @@ public abstract class GlobalModelTestCase extends TestCase {
     _model.removeListener(listener);
   }
 
+  /**
+   * Puts the given input into the interactions document and then interprets
+   * it, returning the result that was put into the interactions document.
+   * This assumes the interactions document is in a state with no text
+   * after the prompt. To be sure this is the case, you can reset interactions
+   * first.
+   *
+   * @param input text to interpret
+   * @return The output from this interpretation, in String form, as it was
+   *         printed to the interactions document.
+   */
+  protected String interpret(String input) throws BadLocationException {
+    Document interactionsDoc = _model.getInteractionsDocument();
+    interactionsDoc.insertString(interactionsDoc.getLength(), input, null);
+
+    // skip 1 for newline
+    final int resultsStartLocation = interactionsDoc.getLength() + 1;
+    _model.interpretCurrentInteraction();
+    final int resultsEndLocation = interactionsDoc.getLength() -
+                                   InteractionsDocument.PROMPT.length();
+    final int resultsLen = resultsEndLocation - resultsStartLocation;
+
+    return interactionsDoc.getText(resultsStartLocation, resultsLen);
+  }
+
   protected void assertModified(boolean b) {
     assertEquals("definitionsDocument.isModifiedSinceSave",
                  b,

@@ -57,6 +57,71 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   }
 
   /**
+   * Creates a new class, compiles it and then checks that the REPL
+   * can see it.
+   */
+  public void testInteractionsCanSeeCompile()
+    throws BadLocationException, IOException
+  {
+    setupDocument(FOO_TEXT);
+    final File file = tempFile();
+    _model.saveFile(new FileSelector(file));
+    
+    _model.startCompile();
+
+    String result = interpret("new Foo().getClass().getName()");
+
+    assertEquals("interactions result",
+                 "Foo",
+                 result);
+  }
+
+  /**
+   * Checks that the REPL is automatically put into the package
+   * scope of the class that was just compiled.
+   */
+  public void testInteractionsAutomaticallySetPackageScope()
+    throws BadLocationException, IOException
+  {
+    final File aDir = new File(_tempDir, "a");
+    aDir.mkdir();
+    final File file = new File(aDir, "Foo.java");
+
+    setupDocument("package a;\npublic " + FOO_TEXT);
+    _model.saveFile(new FileSelector(file));
+    
+    _model.startCompile();
+
+    String result = interpret("new Foo().getClass().getName()");
+
+    assertEquals("interactions result",
+                 "a.Foo",
+                 result);
+  }
+
+  /**
+   * Checks that updating a class and recompiling it is visible from
+   * the REPL.
+   */
+  public void testInteractionsCanSeeChangedClass()
+    throws BadLocationException, IOException
+  {
+    final String text_before = "class Foo { public int m() { return ";
+    final String text_after = "; } }";
+    final File file = tempFile();
+    final int num_iterations = 5;
+
+    for (int i = 0; i < num_iterations; i++) {
+      setupDocument(text_before + i + text_after);
+      _model.saveFile(new FileSelector(file));
+      _model.startCompile();
+      assertEquals("interactions result, i=" + i,
+          String.valueOf(i),
+          interpret("new Foo().m()"));
+    }
+  }
+
+  /**
    * Exits the program without having written anything to the current document.
    */
   public void testQuitEmptyDocument() {

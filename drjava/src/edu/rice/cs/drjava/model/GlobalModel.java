@@ -491,17 +491,16 @@ public class GlobalModel {
           throw  new RuntimeException(t.toString());
         }
       }
+
       if (result != JavaInterpreter.NO_RESULT) {
        _interactionsDoc.insertString(_interactionsDoc.getLength(),
-                                     "\n" + String.valueOf(result) + "\n", null);
+                                     "\n" + String.valueOf(result), null);
       } 
-      else {
-        _interactionsDoc.insertString(_interactionsDoc.getLength(), "\n", null);
-      }
+
       _interactionsDoc.prompt();
     }
     catch (BadLocationException e) {
-      throw  new InternalError("getting repl text failed");
+      throw new UnexpectedException(e);
     } 
     catch (Throwable e) {
       String message = e.getMessage();
@@ -516,14 +515,15 @@ public class GlobalModel {
         if (message.startsWith("koala.dynamicjava.interpreter.InterpreterException: Encountered")) {
           _interactionsDoc.insertString(_interactionsDoc.getLength(), 
                                         "\nError in evaluation: " + 
-                                        "Invalid syntax\n", 
+                                        "Invalid syntax", 
                                         null);
         } 
         else {
           _interactionsDoc.insertString(_interactionsDoc.getLength(),
-                                        "\nError in evaluation: " + message + 
-                                        "\n", null);
+                                        "\nError in evaluation: " + message,
+                                        null);
         }
+
         _interactionsDoc.prompt();
       } catch (BadLocationException willNeverHappen) {}
     }
