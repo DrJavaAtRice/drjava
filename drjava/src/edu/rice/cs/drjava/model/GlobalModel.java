@@ -166,6 +166,14 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    * @return true if the document was closed
    */
   public boolean closeFile(OpenDefinitionsDocument doc);
+  
+  /**
+   * Closes an open definitions document, without prompting to save if
+   * the document has been changed.  Returns whether the file
+   * was successfully closed.
+   * @return true if the document was closed
+   */
+  public boolean closeFileWithoutPrompt(OpenDefinitionsDocument doc);
 
   /**
    * Attempts to close all open documents.

@@ -1534,19 +1534,35 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public boolean closeFile(OpenDefinitionsDocument doc) {
 //    System.err.println("closing " + doc);
     boolean canClose = doc.canAbandonFile();
-    final OpenDefinitionsDocument closedDoc = doc;
     if (canClose) {
-      // Only fire event if doc exists and was removed from list
-      INavigatorItem idoc = _documentsRepos.removeKey(closedDoc);
-      String name = idoc.toString();
-      closedDoc.close();
-      
-      if (idoc != null) {
-        _documentNavigator.removeDocument(idoc);
-        _notifier.fileClosed(closedDoc);
-//        closedDoc.close();
-        return true;
-      }
+      return closeFileWithoutPrompt(doc);
+    }
+    return false;
+  }
+  
+  
+  /**
+   * Closes an open definitions document, without prompting to save if
+   * the document has been changed.  Returns whether the file
+   * was successfully closed.
+   * NOTE: This method should not be called unless it can be absolutely known that the document being closed
+   * is not the active document. closeFile() is overridden in the SingleDisplayModel to ensure that a new active document is set,
+   * but closeFileWithoutPrompt is not.
+   * 
+   * @return true if the document was closed
+   */
+  public boolean closeFileWithoutPrompt(OpenDefinitionsDocument doc) {
+    final OpenDefinitionsDocument closedDoc = doc;
+    // Only fire event if doc exists and was removed from list
+    INavigatorItem idoc = _documentsRepos.removeKey(closedDoc);
+    String name = idoc.toString();
+    closedDoc.close();
+    
+    if (idoc != null) {
+      _documentNavigator.removeDocument(idoc);
+      _notifier.fileClosed(closedDoc);
+      //        closedDoc.close();
+      return true;
     }
     return false;
   }

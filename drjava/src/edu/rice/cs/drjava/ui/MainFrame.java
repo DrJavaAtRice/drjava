@@ -6634,25 +6634,25 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Warns the user that the current file is open and query them if they wish to save over the currently open file.
    */
   private boolean _warnFileOpen(File f) {
+    OpenDefinitionsDocument d = null;
+    try {
+      d = _model.getDocumentForFile(f);
+    }
+    catch(IOException ioe) {
+      // this means the file has been deleted. If they're saving over it, don't show an I/O Error
+    }
     Object[] options = {"Yes","No"};
     int choice = JOptionPane.showOptionDialog(MainFrame.this,
-                                  "This file already exists and is open in DrJava.  Do you wish to overwrite it?",
-                                  "File Open Warning",
-                                 JOptionPane.YES_NO_OPTION,
-                                 JOptionPane.QUESTION_MESSAGE,
-                                 null,
-                                 options,
-                                 options[1]);
-    if(choice == JOptionPane.YES_OPTION) {
-      List<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
-      try {
-        l.add(_model.getDocumentForFile(f));
-      }
-      catch(IOException ioe) {
-        _showIOError(ioe);
-      }
-      _model.closeFiles(l);
-      return true;
+                                              "This file is already open in DrJava" + (d.isModifiedSinceSave() ? " and has been modified" : "") 
+                                                + ".  Do you wish to overwrite it?",
+                                                "File Open Warning",
+                                              JOptionPane.YES_NO_OPTION,
+                                              JOptionPane.QUESTION_MESSAGE,
+                                              null,
+                                              options,
+                                              options[1]);
+    if(choice == JOptionPane.YES_OPTION && d != null) {
+      return _model.closeFileWithoutPrompt(d);
     }
     return false;
   }
