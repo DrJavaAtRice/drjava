@@ -111,4 +111,10 @@ public abstract class BinaryExpression extends Expression {
     
     firePropertyChange(RIGHT_EXPRESSION, rightExpression, rightExpression = exp);
   }
+   /**
+   * Implementation of toString for use in unit testing
+   */
+  public String toString() {
+    return "("+getClass().getName()+": "+getLeftExpression()+" "+getRightExpression()+")";
+  }
 }
