@@ -36,62 +36,68 @@ package koala.dynamicjava.tree;
  */
 
 public class CharacterLiteral extends Literal {
-    /**
-     * Initializes a literal
-     * @param rep the representation of the literal
-     * @param val the value of this literal
-     */
-    public CharacterLiteral(String rep) {
-	this(rep, null, 0, 0, 0, 0);
+  /**
+   * Initializes a literal
+   * @param rep the representation of the literal
+   * @param val the value of this literal
+   */
+  public CharacterLiteral(String rep) {
+    this(rep, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Initializes a literal
+   * @param rep the representation of the literal
+   * @param val the value of this literal
+   * @param fn  the filename
+   * @param bl  the begin line
+   * @param bc  the begin column
+   * @param el  the end line
+   * @param ec  the end column
+   */
+  public CharacterLiteral(String rep,
+                          String fn, int bl, int bc, int el, int ec) {
+    super(rep,
+          new Character(decodeCharacter(rep)),
+          char.class,
+          fn, bl, bc, el, ec);
+  }
+  
+  /**
+   * Decodes the representation of a Java literal character.
+   * The input is not checked since this method always called
+   * on a string produced by the parser.
+   * @param rep the representation of the character
+   * @return the character represented by the given string
+   */
+  private static char decodeCharacter(String rep) {
+    if (rep.length() == 3) {
+      return rep.charAt(1);
     }
-
-    /**
-     * Initializes a literal
-     * @param rep the representation of the literal
-     * @param val the value of this literal
-     * @param fn  the filename
-     * @param bl  the begin line
-     * @param bc  the begin column
-     * @param el  the end line
-     * @param ec  the end column
-     */
-    public CharacterLiteral(String rep,
-			    String fn, int bl, int bc, int el, int ec) {
-	super(rep,
-	      new Character(decodeCharacter(rep)),
-	      char.class,
-	      fn, bl, bc, el, ec);
+    char c;
+    // Assume that charAt(1) == '\\' and length > 3
+    switch (c = rep.charAt(2)) {
+      case 'n' : return '\n';
+      case 't' : return '\t';
+      case 'b' : return '\b';
+      case 'r' : return '\r';
+      case 'f' : return '\f';
+      default  :
+        if (Character.isDigit(c)) {
+        int v = 0;
+        for (int i = 2; i < rep.length()-1; i++) {
+          v = (v * 7) + Integer.parseInt(""+rep.charAt(i));
+        }
+        return (char)v;
+      } else {
+        return c;
+      }
     }
-
-    /**
-     * Decodes the representation of a Java literal character.
-     * The input is not checked since this method always called
-     * on a string produced by the parser.
-     * @param rep the representation of the character
-     * @return the character represented by the given string
-     */
-    private static char decodeCharacter(String rep) {
-	if (rep.length() == 3) {
-	    return rep.charAt(1);
-	}
-	char c;
-	// Assume that charAt(1) == '\\' and length > 3
-	switch (c = rep.charAt(2)) {
-	case 'n' : return '\n';
-	case 't' : return '\t';
-	case 'b' : return '\b';
-	case 'r' : return '\r';
-	case 'f' : return '\f';
-	default  :
-	    if (Character.isDigit(c)) {
-		int v = 0;
-		for (int i = 2; i < rep.length()-1; i++) {
-		    v = (v * 7) + Integer.parseInt(""+rep.charAt(i));
-		}
-		return (char)v;
-	    } else {
-		return c;
-	    }
-	}
-    }
+  }
+  /**
+   * Implementation of toString for use in unit testing
+   */
+  public String toString() {
+    return "("+getClass().getName()+": "+getRepresentation()+" "+getValue()+" "+getType()+")";
+  }
 }

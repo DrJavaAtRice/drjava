@@ -42,7 +42,7 @@ public class StringLiteral extends Literal {
      * @param val the value of this string
      */
     public StringLiteral(String rep) {
-	this(rep, null, 0, 0, 0, 0);
+ this(rep, null, 0, 0, 0, 0);
     }
 
     /**
@@ -56,11 +56,11 @@ public class StringLiteral extends Literal {
      * @param ec  the end column
      */
     public StringLiteral(String rep, 
-			 String fn, int bl, int bc, int el, int ec) {
-	super(rep,
-	      decodeString(rep),
-	      String.class,
-	      fn, bl, bc, el, ec);
+    String fn, int bl, int bc, int el, int ec) {
+ super(rep,
+       decodeString(rep),
+       String.class,
+       fn, bl, bc, el, ec);
     }
 
     /**
@@ -71,45 +71,51 @@ public class StringLiteral extends Literal {
      * @return the character represented by the given string
      */
     public static String decodeString(String rep) {
-	char[] buf = new char[rep.length()-2];
-	int    len = 0;
-	int    i   = 1;
+ char[] buf = new char[rep.length()-2];
+ int    len = 0;
+ int    i   = 1;
 
-	while (i < rep.length()-1) {
-	    char c = rep.charAt(i++);
-	    if (c != '\\') {
-		buf[len++] = c;
-	    } else {
-		switch (c = rep.charAt(i++)) {
-		case 'n' : buf[len++] = '\n'; break;
-		case 't' : buf[len++] = '\t'; break;
-		case 'b' : buf[len++] = '\b'; break;
-		case 'r' : buf[len++] = '\r'; break;
-		case 'f' : buf[len++] = '\f'; break;
-		default  :
-		    if (Character.isDigit(c)) {
-			int v = Integer.parseInt(""+c);
-			c = rep.charAt(i++);
-			if (v < 4) {
-			    if (Character.isDigit(c)) {
-				v = (v * 7) + Integer.parseInt(""+c);
-				c = rep.charAt(i++);
-				if (Character.isDigit(c)) {
-				    v = (v * 7) + Integer.parseInt(""+c);
-				}
-			    }
-			} else {
-			    if (Character.isDigit(c)) {
-				v = (v * 7) + Integer.parseInt(""+c);
-			    }
-			}
-			buf[len++] = (char)v;
-		    } else {
-			buf[len++] = c;
-		    }
-		}	
-	    }
-	}
-	return new String(buf, 0, len);
+ while (i < rep.length()-1) {
+     char c = rep.charAt(i++);
+     if (c != '\\') {
+  buf[len++] = c;
+     } else {
+  switch (c = rep.charAt(i++)) {
+  case 'n' : buf[len++] = '\n'; break;
+  case 't' : buf[len++] = '\t'; break;
+  case 'b' : buf[len++] = '\b'; break;
+  case 'r' : buf[len++] = '\r'; break;
+  case 'f' : buf[len++] = '\f'; break;
+  default  :
+      if (Character.isDigit(c)) {
+   int v = Integer.parseInt(""+c);
+   c = rep.charAt(i++);
+   if (v < 4) {
+       if (Character.isDigit(c)) {
+    v = (v * 7) + Integer.parseInt(""+c);
+    c = rep.charAt(i++);
+    if (Character.isDigit(c)) {
+        v = (v * 7) + Integer.parseInt(""+c);
     }
+       }
+   } else {
+       if (Character.isDigit(c)) {
+    v = (v * 7) + Integer.parseInt(""+c);
+       }
+   }
+   buf[len++] = (char)v;
+      } else {
+   buf[len++] = c;
+      }
+  } 
+     }
+ }
+ return new String(buf, 0, len);
+    }
+      /**
+   * Implementation of toString for use in unit testing
+   */
+  public String toString() {
+    return "("+getClass().getName()+": "+getRepresentation()+" "+getValue()+" "+getType()+")";
+  }
 }

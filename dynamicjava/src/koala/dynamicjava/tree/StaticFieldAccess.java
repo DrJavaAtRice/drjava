@@ -102,4 +102,10 @@ public class StaticFieldAccess extends FieldAccess {
   public <T> T acceptVisitor(Visitor<T> visitor) {
     return visitor.visit(this);
   }
+    /**
+   * Implementation of toString for use in unit testing
+   */
+  public String toString() {
+    return "("+getClass().getName()+": "+getFieldName()+" "+getFieldType()+")";
+  }
 }

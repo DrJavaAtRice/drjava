@@ -36,22 +36,28 @@ package koala.dynamicjava.tree;
  */
 
 public class CharType extends PrimitiveType {
-    /**
-     * Initializes the type
-     */
-    public CharType() {
-	this(null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Initializes the type
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     */
-    public CharType(String fn, int bl, int bc, int el, int ec) {
-	super(char.class, fn, bl, bc, el, ec);
-    }
+  /**
+   * Initializes the type
+   */
+  public CharType() {
+    this(null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Initializes the type
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   */
+  public CharType(String fn, int bl, int bc, int el, int ec) {
+    super(char.class, fn, bl, bc, el, ec);
+  }
+   /**
+   * Implementation of toString for use in unit testing
+   */
+  public String toString() {
+    return "("+getClass().getName()+": "+getValue()+")";
+  }
 }

@@ -38,35 +38,41 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class AddExpression extends BinaryExpression {
-    /**
-     * Initializes the expression
-     * @param lexp  the LHS expression
-     * @param rexp  the RHS expression
-     */
-    public AddExpression(Expression lexp, Expression rexp) {
- this(lexp, rexp, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Initializes the expression
-     * @param lexp  the LHS expression
-     * @param rexp  the RHS expression
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     */
-    public AddExpression(Expression lexp, Expression rexp,
-    String fn, int bl, int bc, int el, int ec) {
- super(lexp, rexp, fn, bl, bc, el, ec);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public <T> T acceptVisitor(Visitor<T> visitor) {
- return visitor.visit(this);
-    }
+  /**
+   * Initializes the expression
+   * @param lexp  the LHS expression
+   * @param rexp  the RHS expression
+   */
+  public AddExpression(Expression lexp, Expression rexp) {
+    this(lexp, rexp, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Initializes the expression
+   * @param lexp  the LHS expression
+   * @param rexp  the RHS expression
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   */
+  public AddExpression(Expression lexp, Expression rexp,
+                       String fn, int bl, int bc, int el, int ec) {
+    super(lexp, rexp, fn, bl, bc, el, ec);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
+  /**
+   * Implementation of toString for use in unit testing
+   */
+  public String toString() {
+    return "("+getClass().getName()+": "+getLeftExpression()+" "+getRightExpression()+")";
+  }
 }

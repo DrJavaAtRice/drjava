@@ -132,4 +132,10 @@ public class Identifier implements IdentifierToken {
   public int endColumn() {
     return endLine;
   }
+   /**
+   * Implementation of toString for use in unit testing
+   */
+  public String toString() {
+    return "("+getClass().getName()+": "+image()+")";
+  }
 }

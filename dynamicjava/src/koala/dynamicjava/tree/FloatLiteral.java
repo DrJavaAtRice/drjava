@@ -41,7 +41,7 @@ public class FloatLiteral extends Literal {
      * @param rep the representation of the literal
      */
     public FloatLiteral(String rep) {
-	this(rep, null, 0, 0, 0, 0);
+ this(rep, null, 0, 0, 0, 0);
     }
 
     /**
@@ -54,9 +54,15 @@ public class FloatLiteral extends Literal {
      * @param ec  the end column
      */
     public FloatLiteral(String rep, String fn, int bl, int bc, int el, int ec) {
-	super(rep,
-	      new Float(rep),
-	      float.class,
-	      fn, bl, bc, el, ec);
+ super(rep,
+       new Float(rep),
+       float.class,
+       fn, bl, bc, el, ec);
     }
+     /**
+   * Implementation of toString for use in unit testing
+   */
+  public String toString() {
+    return "("+getClass().getName()+": "+getRepresentation()+" "+getValue()+" "+getType()+")";
+  }
 }

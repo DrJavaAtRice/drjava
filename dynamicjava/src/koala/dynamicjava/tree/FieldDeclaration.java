@@ -192,4 +192,10 @@ public class FieldDeclaration extends Node {
   public <T> T acceptVisitor(Visitor<T> visitor) {
     return visitor.visit(this);
   }    
+   /**
+   * Implementation of toString for use in unit testing
+   */
+  public String toString() {
+    return "("+getClass().getName()+": "+getAccessFlags()+" "+getType()+" "+getName()+" "+getInitializer()+")";
+  }
 }

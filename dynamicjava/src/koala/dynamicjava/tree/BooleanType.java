@@ -54,4 +54,10 @@ public class BooleanType extends PrimitiveType {
   public BooleanType(String fn, int bl, int bc, int el, int ec) {
     super(boolean.class, fn, bl, bc, el, ec);
   }
+     /**
+   * Implementation of toString for use in unit testing
+   */
+  public String toString() {
+    return "("+getClass().getName()+": "+getValue()+")";
+  }
 }

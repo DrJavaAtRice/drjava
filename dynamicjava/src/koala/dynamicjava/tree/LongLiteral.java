@@ -41,7 +41,7 @@ public class LongLiteral extends Literal {
      * @param rep the representation of the literal
      */
     public LongLiteral(String rep) {
-	this(rep, null, 0, 0, 0, 0);
+ this(rep, null, 0, 0, 0, 0);
     }
 
     /**
@@ -54,52 +54,58 @@ public class LongLiteral extends Literal {
      * @param ec  the end column
      */
     public LongLiteral(String rep, String fn, int bl, int bc, int el, int ec) {
-	super(rep,
-	      parse(rep.substring(0, rep.length()-1)),
-	      long.class,
-	      fn, bl, bc, el, ec);
+ super(rep,
+       parse(rep.substring(0, rep.length()-1)),
+       long.class,
+       fn, bl, bc, el, ec);
     }
 
     /**
      * Parse the representation of an integer
      */
     private static Long parse(String s) {
-	if (s.startsWith("0x")) {
-	    return parseHexadecimal(s.substring(2, s.length()));
-	} else if (s.startsWith("0")) {
-	    return parseOctal(s);
-	} else {
-	    return Long.valueOf(s);
-	}
+ if (s.startsWith("0x")) {
+     return parseHexadecimal(s.substring(2, s.length()));
+ } else if (s.startsWith("0")) {
+     return parseOctal(s);
+ } else {
+     return Long.valueOf(s);
+ }
     }
 
     /**
      * Parses an hexadecimal number
      */
     private static Long parseHexadecimal(String s) {
-	long value = 0;
-	for (int i = 0; i < s.length(); i++) {
-	    char c = Character.toLowerCase(s.charAt(i));
-	    if ((value >>> 60) != 0) {
-		throw new NumberFormatException(s);
-	    }
-	    value = (value << 4) + c + ((c >= 'a' && c <= 'f') ? 10 - 'a' : - '0');
-	}
-	return new Long(value);
+ long value = 0;
+ for (int i = 0; i < s.length(); i++) {
+     char c = Character.toLowerCase(s.charAt(i));
+     if ((value >>> 60) != 0) {
+  throw new NumberFormatException(s);
+     }
+     value = (value << 4) + c + ((c >= 'a' && c <= 'f') ? 10 - 'a' : - '0');
+ }
+ return new Long(value);
     }
 
     /**
      * Parses an octal number
      */
     private static Long parseOctal(String s) {
-	int value = 0;
-	for (int i = 0; i < s.length(); i++) {
-	    char c = s.charAt(i);
-	    if ((value >>> 61) != 0) {
-		throw new NumberFormatException(s);
-	    }
-	    value = (value << 3) + c - '0';
-	}
-	return new Long(value);
+ int value = 0;
+ for (int i = 0; i < s.length(); i++) {
+     char c = s.charAt(i);
+     if ((value >>> 61) != 0) {
+  throw new NumberFormatException(s);
+     }
+     value = (value << 3) + c - '0';
+ }
+ return new Long(value);
     }
+      /**
+   * Implementation of toString for use in unit testing
+   */
+  public String toString() {
+    return "("+getClass().getName()+": "+getRepresentation()+" "+getValue()+" "+getType()+")";
+  }
 }

@@ -40,7 +40,7 @@ public class ShortType extends PrimitiveType {
      * Initializes the type
      */
     public ShortType() {
-	this(null, 0, 0, 0, 0);
+ this(null, 0, 0, 0, 0);
     }
 
     /**
@@ -52,6 +52,12 @@ public class ShortType extends PrimitiveType {
      * @param ec    the end column
      */
     public ShortType(String fn, int bl, int bc, int el, int ec) {
-	super(short.class, fn, bl, bc, el, ec);
+ super(short.class, fn, bl, bc, el, ec);
     }
+      /**
+   * Implementation of toString for use in unit testing
+   */
+  public String toString() {
+    return "("+getClass().getName()+": "+getValue()+")";
+  }
 }
