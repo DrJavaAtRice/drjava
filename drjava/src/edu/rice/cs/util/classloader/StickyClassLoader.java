@@ -147,7 +147,6 @@ public class StickyClassLoader extends ClassLoader {
    */
   public URL getResource(String name) {
     URL resource = _newLoader.getResource(name);
-
     if (resource == null) {
       resource = getParent().getResource(name);
     }

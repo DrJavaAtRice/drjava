@@ -348,10 +348,12 @@ abstract class AFindReplaceMachineState {
     if (_searchAllDocuments) {
       Document startDoc = _doc;
       _searchAllDocuments = false;
+      // replace all in the first document
       int count = _replaceAllInCurrentDoc();
       _doc = _docIterator.getNextDocument(_doc);
       int n = _docIterator.getDocumentCount();
-      for (int i=0; i < n; i++) {
+      for (int i=1; i < n; i++) {
+        // replace all in the rest of the documents
         count += _replaceAllInCurrentDoc();
         _doc = _docIterator.getNextDocument(_doc);
       }

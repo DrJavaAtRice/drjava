@@ -159,9 +159,9 @@ public final class ExecJVM {
 
     String[] argArray = args.toArray(new String[0]);
 
-    //for (int i = 0; i < argArray.length; i++) {
-    //System.err.println("arg #" + i + ": " + argArray[i]);
-    //}
+//    for (int i = 0; i < argArray.length; i++) {
+//      System.err.println("arg #" + i + ": " + argArray[i]);
+//    }
 
     return Runtime.getRuntime().exec(argArray);
   }
