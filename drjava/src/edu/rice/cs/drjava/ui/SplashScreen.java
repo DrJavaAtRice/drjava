@@ -37,48 +37,32 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import javax.swing.*;
+import java.awt.Toolkit;
+import java.awt.Dimension;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030111-2048;
- *
+ * A splash screen window to be displayed as DrJava is first starting up.
  * @version $Id$
  */
-public abstract class Version {
+public class SplashScreen extends JWindow {
+  public static final String SPLASH_ICON = "splash.png";
+  private ImageIcon _icon;
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Creates a new splash screen, but does not display it.  Display the
+   * splash screen using show() and close it with dispose().
    */
-  private static final String BUILD_TIME_STRING = "20030111-2048";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public SplashScreen() {
+    _icon = MainFrame.getIcon(SPLASH_ICON);
+    JWindow splash = new JWindow();
+    getContentPane().add(new JLabel(_icon, SwingConstants.CENTER));
+    setSize(_icon.getIconWidth(), _icon.getIconHeight());
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    Dimension frameSize = getSize();
+    setLocation((screenSize.width - frameSize.width) / 2,
+                (screenSize.height - frameSize.height) / 2);
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

@@ -9,7 +9,7 @@
 	<key>CFBundleGetInfoString</key>
 	<string>DrJava IDE for Java Development</string>
 	<key>CFBundleIconFile</key>
-	<string>DrJava.icns</string>
+	<string>GenericJavaApp.icns</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

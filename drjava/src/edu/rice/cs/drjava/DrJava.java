@@ -35,7 +35,7 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
- END_COPYRIGHT_BLOCK*/
+END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava;
 
@@ -47,6 +47,7 @@ import java.lang.reflect.InvocationTargetException;
 import javax.swing.*;
 
 import edu.rice.cs.drjava.ui.MainFrame;
+import edu.rice.cs.drjava.ui.SplashScreen;
 import edu.rice.cs.drjava.ui.AWTExceptionHandler;
 import edu.rice.cs.util.PreventExitSecurityManager;
 import edu.rice.cs.util.UnexpectedException;
@@ -185,6 +186,10 @@ public class DrJava implements OptionConstants {
         }
       
         setupCompilerIfNeeded();
+
+        // Show splash screen
+        SplashScreen splash = new SplashScreen();
+        splash.show();
       
         // The MainFrame *must* be constructed after the compiler setup process has
         // occurred; otherwise, the list of compilers in the UI will be wrong.
@@ -201,6 +206,7 @@ public class DrJava implements OptionConstants {
         enableSecurityManager();
         
         openCommandLineFiles(mf, _filesToOpen);
+        splash.dispose();
         mf.show();
         
         

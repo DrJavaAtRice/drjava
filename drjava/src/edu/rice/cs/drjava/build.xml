@@ -155,7 +155,9 @@
 
         <!-- include graphics -->
         <include name="${projpath}/**/LICENSE" />
+        <include name="${projpath}/**/README" />
         <include name="${projpath}/**/*.gif" />
+        <include name="${projpath}/**/*.png" />
       </fileset>
     </copy>
 
@@ -275,6 +277,7 @@
       <!-- Include DrJava classes -->
       <fileset dir="${built}" excludes="**/*Test.class">
         <include name="${projpath}/**" />
+        <exclude name="${projpath}/docs/developer/**" />
         <include name="edu/rice/cs/util/**" />
 
         <!-- include the GPL -->

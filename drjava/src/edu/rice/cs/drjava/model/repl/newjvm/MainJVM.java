@@ -591,6 +591,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     try {
       File file = File.createTempFile("drjava", "");
       file.deleteOnExit();
+      //DrJava.consoleOut().println("DEBUG: temp file name: " + file.getAbsolutePath());
       String id = "//127.0.0.1:" + _rmiPort + "/" + file.getName();
       //DrJava.consoleOut().println("Identifier: " + id);
       return id;

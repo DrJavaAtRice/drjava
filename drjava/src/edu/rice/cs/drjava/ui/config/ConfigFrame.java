@@ -467,17 +467,18 @@ public class ConfigFrame extends JFrame {
    * Add all of the components for the Debugger panel of the preferences window.
    */ 
   private void _setupDebugPanel ( ConfigPanel panel) {
-    if (_mainFrame.getModel().getDebugger() == null) {
+    if (!_mainFrame.getModel().getDebugger().isAvailable()) {
       // Explain how to use debugger
       String howto = 
-        "\nThe debugger is not currently active.  To use the debugger, you must\n" +
-        "include Sun's tools.jar or jpda.jar on your classpath when starting DrJava.\n" +
-        "Do not use the \"-jar\" option, because it overrides the classpath.\n" +
+        "\nThe debugger is not currently active.  To use the debugger, you\n" +
+        "must include Sun's tools.jar or jpda.jar on your classpath when\n" +
+        "starting DrJava.  Do not use the \"-jar\" option, because it\n" +
+        "overrides the classpath and will not include tools.jar.\n" +
         "For example, in Windows you might type:\n\n" +
         "  java -classpath drjava.jar;c:\\path\\tools.jar edu.rice.cs.drjava.DrJava\n\n" +
         "(Substituting the correct path for tools.jar.)\n" +
         "See the user documentation for more details.\n";
-      panel.addComponent( new LabelComponent(howto, this) );
+        panel.addComponent( new LabelComponent(howto, this) );
     }
     
     VectorOptionComponent sourcePath = new VectorOptionComponent (OptionConstants.DEBUG_SOURCEPATH, 

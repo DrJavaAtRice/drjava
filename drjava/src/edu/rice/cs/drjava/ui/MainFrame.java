@@ -955,6 +955,9 @@ public class MainFrame extends JFrame implements OptionConstants {
                                                _fileMenu,
                                                this);
 
+    // Set frame icon
+    setIconImage(getIcon("drjava64.png").getImage());
+
     // Set size and position
     setBounds(0, 0, GUI_WIDTH, GUI_HEIGHT);
     setSize(GUI_WIDTH, GUI_HEIGHT);
