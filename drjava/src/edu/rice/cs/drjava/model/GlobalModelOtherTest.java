@@ -149,7 +149,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
   public void testInteractionAbort()
     throws BadLocationException, InterruptedException, IOException
   {
-    _doCompile(setupDocument(FOO_TEXT), tempFile());
+    doCompile(setupDocument(FOO_TEXT), tempFile());
     final String beforeAbort = interpret("DrJavaTestFoo.class.getName()");
     assertEquals("\"DrJavaTestFoo\"", beforeAbort);
     
@@ -274,34 +274,6 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
   }
 
   /**
-   * Saves to the given file, and then compiles the given document.
-   * The compile is expected to succeed and it is checked to make sure it worked
-   * reasonably.  This method does not return until the Interactions JVM
-   * has reset and is ready to use.
-   */
-  private void _doCompile(OpenDefinitionsDocument doc, File file)
-    throws IOException, InterruptedException
-  {
-    doc.saveFile(new FileSelector(file));
-
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
-    _model.addListener(listener);
-    synchronized(listener) {
-      //System.out.println("doc.startCompile");
-      doc.startCompile();
-      if (_model.getNumErrors() > 0) {
-        fail("compile failed: " + doc.getCompilerErrorModel());
-      }
-      //System.out.println("listener.wait");
-      listener.wait();
-    }
-    //System.out.println("listener.checkCompileOccurred");
-    listener.checkCompileOccurred();
-    assertCompileErrorsPresent(false);
-    _model.removeListener(listener);
-  }
-
-  /**
    * Creates a new class, compiles it and then checks that the REPL
    * can see it.  Then checks that a compiled class file in another
    * directory can be both accessed and extended if it is on the
@@ -315,7 +287,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     File dir1 = new File(_tempDir, "dir1");
     dir1.mkdir();
     File file1 = new File(dir1, "TestFile1.java");
-    _doCompile(doc1, file1);
+    doCompile(doc1, file1);
 
     assertEquals("interactions result",
                  "\"DrJavaTestFoo\"",
@@ -332,7 +304,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     File dir2 = new File(_tempDir, "dir2");
     dir2.mkdir();
     File file2 = new File(dir2, "TestFile1.java");
-    _doCompile(doc2, file2);
+    doCompile(doc2, file2);
     
     // Ensure that Baz can use the Foo class from extra classpath
     assertEquals("interactions result",
@@ -361,7 +333,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     for (int i = 0; i < num_iterations; i++) {
       doc = setupDocument(text_before + i + text_after);
       file = tempFile(i);
-      _doCompile(doc, file);
+      doCompile(doc, file);
       
       assertEquals("interactions result, i=" + i,
           String.valueOf(i),
@@ -381,7 +353,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     OpenDefinitionsDocument doc;
 
     doc = setupDocument(interface_text);
-    _doCompile(doc, file);
+    doCompile(doc, file);
 
     for (int i = 0; i < 3; i++) {
       String s = "new I() { public int getValue() { return " + i + "; } }.getValue()";
@@ -584,7 +556,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     File f = tempFile();
     
-    _doCompile(doc, f);
+    doCompile(doc, f);
 
     // Rename the directory so it's not on the classpath anymore
     String tempPath = f.getParent();

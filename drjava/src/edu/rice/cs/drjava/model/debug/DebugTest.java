@@ -171,65 +171,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     }
   }
   
-  /**
-   * Compiles a new file with the given text.
-   */
-  protected synchronized OpenDefinitionsDocument _doCompile(String text, File file)
-    throws IOException, BadLocationException, InterruptedException
-  {
-    OpenDefinitionsDocument doc = setupDocument(text);
-    doc.saveFile(new FileSelector(file));
-
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
-    _model.addListener(listener);
-    synchronized(listener) {
-      doc.startCompile();
-      int numErrors = _model.getNumErrors();
-      if (_model.getNumErrors() > 0) {
-        fail("compile failed: " + doc.getCompilerErrorModel());
-      }
-      listener.wait();
-    }
-    listener.checkCompileOccurred();
-    _model.removeListener(listener);
-    return doc;
-  }
   
-  /**
-   * Asserts that the given string exists in the Interactions Document.
-   */
-  protected void assertInteractionsContains(String text) throws BadLocationException{
-    _assertInteractionContainsHelper(text, true);
-  }
-  
-  /**
-   * Asserts that the given string does not exist in the Interactions Document.
-   */
-  protected void assertInteractionsDoesNotContain(String text)
-    throws BadLocationException{
-    _assertInteractionContainsHelper(text, false);
-  }
-  
-  private void _assertInteractionContainsHelper(String text, boolean shouldContain)
-    throws BadLocationException {
-    
-    String interactText = getInteractionsText();
-    int contains = interactText.lastIndexOf(text);
-    assertTrue("Interactions document should " +
-               (shouldContain ? "" : "not ")
-                 + "contain: "
-                 +text,
-               (contains != -1) == shouldContain);    
-  }
-  
-  /**
-   * Returns the current contents of the interactions document
-   */
-  protected String getInteractionsText() throws BadLocationException {
-    Document doc = _model.getInteractionsDocument();
-    return doc.getText(0, doc.getLength());
-  }
-
   
   
   /**
@@ -242,7 +184,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     BreakpointTestListener debugListener = new BreakpointTestListener();
     
     // Compile the class
-    OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS, tempFile());
+    OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS, tempFile());
     _debugger.addListener(debugListener);
     // Start debugger
     synchronized(_notifierLock) {
@@ -303,13 +245,10 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Resume until finished, waiting for interpret call to end
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
-    synchronized(interpretListener) {
-      synchronized(_notifierLock) {
-        _debugger.resume();
-        interpretListener.wait();  // wait for interactionEnded
-        _waitForNotifies(1);  // threadDied
-        _notifierLock.wait();
-      }
+    synchronized(_notifierLock) {
+      _debugger.resume();
+      _waitForNotifies(2);  // interactionEnded, threadDied
+      _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
@@ -336,6 +275,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     debugListener.assertDebuggerShutdownCount(1);  //fires
     if (printMessages) System.out.println("Shut down.");
+    _model.removeListener(interpretListener);
     _debugger.removeListener(debugListener);
   }
   
@@ -349,7 +289,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     StepTestListener debugListener = new StepTestListener();
     
     // Compile the class
-    OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS, tempFile());
+    OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS, tempFile());
    
     _debugger.addListener(debugListener); 
     // Start debugger
@@ -451,13 +391,10 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Step again to finish, waiting for interpret call to end
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
-    synchronized(interpretListener) {
-      synchronized(_notifierLock){
-        _debugger.step(Debugger.STEP_OVER);
-        interpretListener.wait();  // wait for interactionEnded
-        _waitForNotifies(1);  // threadDied
-        _notifierLock.wait();
-      }
+    synchronized(_notifierLock){
+      _debugger.step(Debugger.STEP_OVER);
+      _waitForNotifies(2);  // interactionEnded, threadDied
+      _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
@@ -490,7 +427,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Compile the class
     File file2 = new File(_tempDir, "DrJavaDebugClass.java");
-    OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS, file2);
+    OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS, file2);
     _debugger.addListener(debugListener); 
     // Start debugger and add breakpoint
     synchronized(_notifierLock) {
@@ -557,13 +494,10 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     if (printMessages) System.out.println("Shutting down...");
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
-    synchronized(interpretListener) {
-      synchronized(_notifierLock) {
-        _debugger.shutdown();
-        interpretListener.wait();  // wait for interactionEnded
-        _waitForNotifies(2);  // threadDied, shutdown
-        _notifierLock.wait();
-      }
+    synchronized(_notifierLock) {
+      _debugger.shutdown();
+      _waitForNotifies(3);  // interactionEnded, threadDied, shutdown
+      _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
@@ -588,7 +522,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     File aDir = new File(_tempDir, "a");
     aDir.mkdir();
     File file = new File(aDir, "DrJavaDebugClassWithPackage.java");
-    OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS_WITH_PACKAGE, file);
+    OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS_WITH_PACKAGE, file);
     
     _debugger.addListener(debugListener); 
     // Start debugger
@@ -654,13 +588,10 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Resume until finished, waiting for interpret call to finish
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
-    synchronized(interpretListener) {
-      synchronized(_notifierLock) {
-        _debugger.resume();
-        interpretListener.wait();  // wait for interactionEnded
-        _waitForNotifies(1);  // threadDied
-        _notifierLock.wait();
-      }
+    synchronized(_notifierLock) {
+      _debugger.resume();
+      _waitForNotifies(2);  // interactionEnded, threadDied
+      _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
@@ -701,7 +632,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Compile the class
     File file2 = new File(_tempDir, "DrJavaDebugClass.java");
-    OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS, file2);
+    OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS, file2);
     Vector<File> path = new Vector<File>();
     path.addElement(_tempDir);
     
@@ -769,13 +700,10 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     if (printMessages) System.out.println("Shutting down...");
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
-    synchronized(interpretListener) {
-      synchronized(_notifierLock) {
-        _debugger.shutdown();
-        interpretListener.wait();  // wait for interactionEnded
-        _waitForNotifies(2);  // threadDied, shutdown
-        _notifierLock.wait();
-      }
+    synchronized(_notifierLock) {
+      _debugger.shutdown();
+      _waitForNotifies(3);  // interactionEnded, threadDied, shutdown
+      _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
@@ -796,7 +724,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     StepTestListener debugListener = new StepTestListener();
     
     // Compile the class
-    OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS, tempFile());
+    OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS, tempFile());
     _debugger.addListener(debugListener);
     // Start debugger and add breakpoint (before class is loaded)
     synchronized(_notifierLock) {
@@ -868,13 +796,10 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Resume until finished, waiting for call to interpret to end
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
-    synchronized(interpretListener) {
-      synchronized(_notifierLock) {
-        _debugger.resume();
-        interpretListener.wait();  // wait for interactionEnded
-        _waitForNotifies(1);  // threadDied
-        _notifierLock.wait();
-      }
+    synchronized(_notifierLock) {
+      _debugger.resume();
+      _waitForNotifies(2);  // interactionEnded, threadDied
+      _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
@@ -1109,6 +1034,24 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       // Manager's thread: test shouldn't wait
       stepRequestedCount++;
       if (printEvents) System.out.println("stepRequested " + stepRequestedCount);
+    }
+  }
+  
+  /**
+   * TestListener that listens for an interpretation to end, and
+   * then notifies anyone waiting on it.  (Necessary to prevent tests
+   * from overlapping.)
+   */
+  public class InterpretListener extends TestListener {
+    public void interactionStarted() {
+      interactionStartCount++;
+    }
+    public void interactionEnded() {
+      synchronized(_notifierLock) {
+        interactionEndCount++;
+        if (printEvents) System.out.println("interactionEnded " + interactionEndCount);
+        _notifyObject(_notifierLock);
+      }
     }
   }
 }

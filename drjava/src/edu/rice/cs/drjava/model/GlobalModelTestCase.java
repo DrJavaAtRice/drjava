@@ -148,7 +148,7 @@ public abstract class GlobalModelTestCase extends TestCase {
   protected void createModel() {
     _model = new DefaultGlobalModel(_originalModel);
   }
-
+  
   /**
    * Clear all old text and insert the given text.
    */
@@ -239,6 +239,50 @@ public abstract class GlobalModelTestCase extends TestCase {
 
     return doc;
   }
+  
+  /**
+   * Compiles a new file with the given text.
+   * The compile is expected to succeed and it is checked to make sure it worked
+   * reasonably.  This method does not return until the Interactions JVM
+   * has reset and is ready to use.
+   * @param text Code for the class to be compiled
+   * @param file File to save the class in
+   * @return Document after it has been saved and compiled
+   */
+  protected synchronized OpenDefinitionsDocument doCompile(String text, File file)
+    throws IOException, BadLocationException, InterruptedException
+  {
+    OpenDefinitionsDocument doc = setupDocument(text);
+    doCompile(doc, file);
+    return doc;
+  }
+  
+  /**
+   * Saves to the given file, and then compiles the given document.
+   * The compile is expected to succeed and it is checked to make sure it worked
+   * reasonably.  This method does not return until the Interactions JVM
+   * has reset and is ready to use.
+   * @param doc Document containing the code to be compiled
+   * @param file File to save the class in
+   */
+  protected void doCompile(OpenDefinitionsDocument doc, File file)
+    throws IOException, InterruptedException
+  {
+    doc.saveFile(new FileSelector(file));
+
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
+    _model.addListener(listener);
+    synchronized(listener) {
+      doc.startCompile();
+      if (_model.getNumErrors() > 0) {
+        fail("compile failed: " + doc.getCompilerErrorModel());
+      }
+      listener.wait();
+    }
+    listener.checkCompileOccurred();
+    assertCompileErrorsPresent(false);
+    _model.removeListener(listener);
+  }
 
   /**
    * Puts the given input into the interactions document and then interprets
@@ -311,6 +355,43 @@ public abstract class GlobalModelTestCase extends TestCase {
 
     _model.interpretCurrentInteraction();
   }
+  
+  /**
+   * Asserts that the given string exists in the Interactions Document.
+   */
+  protected void assertInteractionsContains(String text) throws BadLocationException{
+    _assertInteractionContainsHelper(text, true);
+  }
+  
+  /**
+   * Asserts that the given string does not exist in the Interactions Document.
+   */
+  protected void assertInteractionsDoesNotContain(String text)
+    throws BadLocationException{
+    _assertInteractionContainsHelper(text, false);
+  }
+  
+  private void _assertInteractionContainsHelper(String text, boolean shouldContain)
+    throws BadLocationException {
+    
+    String interactText = getInteractionsText();
+    int contains = interactText.lastIndexOf(text);
+    assertTrue("Interactions document should " +
+               (shouldContain ? "" : "not ")
+                 + "contain: "
+                 +text,
+               (contains != -1) == shouldContain);    
+  }
+  
+  /**
+   * Returns the current contents of the interactions document
+   */
+  protected String getInteractionsText() throws BadLocationException {
+    Document doc = _model.getInteractionsDocument();
+    return doc.getText(0, doc.getLength());
+  }
+  
+  
 
   protected void assertNumOpenDocs(int num) {
     assertEquals("number of open documents",
@@ -835,20 +916,4 @@ public abstract class GlobalModelTestCase extends TestCase {
     }
   }
   
-  /**
-   * TestListener that listens for an interpretation to end, and
-   * then notifies anyone waiting on it.  (Necessary to prevent tests
-   * from overlapping.)
-   */
-  public static class InterpretListener extends TestListener {
-    public void interactionStarted() {
-      interactionStartCount++;
-    }
-    public void interactionEnded() {
-      synchronized(this) {
-        interactionEndCount++;
-        this.notify();
-      }
-    }
-  }
 }

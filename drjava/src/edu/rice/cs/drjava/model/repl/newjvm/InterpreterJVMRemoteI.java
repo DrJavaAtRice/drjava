@@ -50,7 +50,8 @@ import edu.rice.cs.util.newjvm.*;
  * @version $Id$
  */
 public interface InterpreterJVMRemoteI extends SlaveRemote {
-  public InterpretResult interpret(String s) throws RemoteException;
+  public void interpret(String s) throws RemoteException;
+  //public InterpretResult interpret(String s) throws RemoteException;
   public void addClassPath(String s) throws RemoteException;
   public void runTestSuite(String className, String fileName) throws RemoteException;
   public void setPackageScope(String s) throws RemoteException;

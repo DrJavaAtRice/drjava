@@ -106,16 +106,24 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 
     ensureInterpreterConnected();
 
-    /*
+    // Spawn thread on InterpreterJVM side
+    //  (will receive result in the interpretResult(...) method)
     try {
       //_log.log("main.interp: " + s);
       _interpreterJVM().interpret(s);
     }
+    catch (java.rmi.UnmarshalException ume) {
+      // Could not receive result from interpret; system probably exited.
+      // We will silently fail and let the interpreter restart.
+      _log.log("main.interp: UnmarshalException, so interpreter is dead:\n"
+                 + ume);
+    }
     catch (RemoteException re) {
       _threwException(re);
     }
-    */
     
+    // Spawn thread on this side (receive result "immediately")
+    /*
     Thread thread = new Thread("interpret thread: " + s) {
       public void run() {
         try {
@@ -138,17 +146,17 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 
     thread.setDaemon(true);
     thread.start();
+    */
   }
   
   /**
    * Called when a call to interpret has completed.
    * @param result The result of the interpretation
-   *
+   */
   public void interpretResult(InterpretResult result) throws RemoteException {
     //_log.log("main.interp result: " + s);
-    result.apply(HANDLER);
+    result.apply(getResultHandler());
   }
-  */
 
   public void addClassPath(String path) {
     // silently fail if diabled. see killInterpreter docs for details.

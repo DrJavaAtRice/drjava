@@ -93,6 +93,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
         }
         catch (RemoteException re) {
           // nothing to do
+          _log.log(re.toString());
         }
       }
     }));
@@ -105,6 +106,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
         }
         catch (RemoteException re) {
           // nothing to do
+          _log.log(re.toString());
         }
       }
     }));
@@ -136,36 +138,58 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
   }
 
-  public InterpretResult interpret(final String s) {
-    try {
-      _dialog("to interp: " + s);
-      Object result = _interpreter.interpret(s);
-      _dialog("interp ret: " + result);
-
-      if (result == JavaInterpreter.NO_RESULT) {
-        return new VoidResult();
+  //public InterpretResult interpret(final String s) {
+  public void interpret(final String s) {
+    Thread thread = new Thread("interpret thread: " + s) {
+      public void run() {
+        try {
+          try {
+            _dialog("to interp: " + s);
+            Object result = _interpreter.interpret(s);
+            _dialog("interp ret: " + result);
+            
+            if (result == JavaInterpreter.NO_RESULT) {
+              //return new VoidResult();
+              _mainJVM.interpretResult(new VoidResult());
+            }
+            else {
+              // we use String.valueOf because it deals with result = null!
+              _dialog("about to tell main result was " + result);
+              //return new ValueResult(String.valueOf(result));
+              _mainJVM.interpretResult(new ValueResult(String.valueOf(result)));
+            }
+          }
+          catch (ExceptionReturnedException e) {
+            Throwable t = e.getContainedException();
+            
+            //_dialog("before call to threwException");
+            //return new ExceptionResult(t.getClass().getName(),
+            //                           t.getMessage(),
+            //                           getStackTrace(t));
+            _mainJVM.interpretResult(new ExceptionResult(t.getClass().getName(),
+                                                         t.getMessage(),
+                                                         getStackTrace(t)));
+          }
+          catch (Throwable t) {
+            // A user's toString method might throw anything, so we need to be careful
+            //_dialog("thrown by toString: " + t);
+            //return new ExceptionResult(t.getClass().getName(),
+            //                           t.getMessage(),
+            //                           getStackTrace(t));
+            _mainJVM.interpretResult(new ExceptionResult(t.getClass().getName(),
+                                                         t.getMessage(),
+                                                         getStackTrace(t)));
+          }
+        }
+        catch (RemoteException re) {
+          // Can't communicate with MainJVM?  Nothing to do...
+          _log.log(re.toString());
+        }
       }
-      else {
-        // we use String.valueOf because it deals with result = null!
-        _dialog("about to tell main result was " + result);
-        return new ValueResult(String.valueOf(result));
-      }
-    }
-    catch (ExceptionReturnedException e) {
-      Throwable t = e.getContainedException();
+    };
 
-      //_dialog("before call to threwException");
-      return new ExceptionResult(t.getClass().getName(),
-                                 t.getMessage(),
-                                 getStackTrace(t));
-    }
-    catch (Throwable t) {
-      // A user's toString method might throw anything, so we need to be careful
-      //_dialog("thrown by toString: " + t);
-      return new ExceptionResult(t.getClass().getName(),
-                                 t.getMessage(),
-                                 getStackTrace(t));
-    }
+    thread.setDaemon(true);
+    thread.start();
   }
 
   private static final Log _log = new Log("IntJVM");
@@ -288,6 +312,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
     catch (RemoteException re) {
       // nothing to do
+      _log.log(re.toString());
     }
   }
   
@@ -301,6 +326,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
     catch (RemoteException re) {
       // nothing to do
+      _log.log(re.toString());
     }
   }
   
@@ -314,6 +340,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
     catch (RemoteException re) {
       // nothing to do
+      _log.log(re.toString());
     }
   }
   
@@ -330,6 +357,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
     catch (RemoteException re) {
       // nothing to do
+      _log.log(re.toString());
     }
   }
   
@@ -343,6 +371,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
     catch (RemoteException re) {
       // nothing to do
+      _log.log(re.toString());
     }
   }
 

@@ -57,9 +57,8 @@ public interface MainJVMRemoteI extends MasterRemote {
   /**
    * Called when a call to interpret has completed.
    * @param result The result of the interpretation
-   *
-  public void interpretResult(InterpretResult result) throws RemoteException;
    */
+  public void interpretResult(InterpretResult result) throws RemoteException;
   
   /**
    * Called if JUnit is invoked on a non TestCase class.
