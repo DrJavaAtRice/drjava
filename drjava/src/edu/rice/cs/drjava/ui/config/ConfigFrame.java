@@ -809,6 +809,7 @@ public class ConfigFrame extends JFrame {
    * Adds all of the components for the Compiler Options Panel of the preferences window
    */
   private void _setupCompilerPanel(ConfigPanel panel) {
+    panel.addComponent(new LabelComponent("Note: Compiler warnings not shown if compiling any Java language level files", this));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.SHOW_UNCHECKED_WARNINGS, "Show Unchecked Warnings", this, 
                                                   "<html>Give more detail for unchecked conversion warnings that are mandated<br>" + 
                                                   "by the Java Language Specification.</html>"));

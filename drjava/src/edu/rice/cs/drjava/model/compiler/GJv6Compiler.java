@@ -215,6 +215,13 @@ public class GJv6Compiler implements CompilerInterface{
     // fill in soon
   }
   
+   /**
+   * Sets whether or not warnings are allowed
+   */
+  public void setWarningsEnabled(boolean warningsEnabled) {
+    //Do we even need this file any more?
+  }
+  
   /**
    * put your documentation comment here
    */

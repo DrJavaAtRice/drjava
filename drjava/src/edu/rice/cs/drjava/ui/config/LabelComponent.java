@@ -51,7 +51,6 @@ import java.awt.*;
 /**
  * Displays a label in the form of an option component, to be displayed
  * in a config panel.
- * @version $Id$
  */
 public class LabelComponent extends OptionComponent<Object> {
   private JTextArea _text;
@@ -60,7 +59,8 @@ public class LabelComponent extends OptionComponent<Object> {
     super("", parent);
     _text = new JTextArea(text);
     _text.setEditable(false);
-    _text.setBackground(new Color(204,204,204));
+    _text.setBackground(parent.getBackground());
+//    _text.setBackground(new Color(204,204,204));
   }
 
   public LabelComponent(String text, Frame parent, String description) {

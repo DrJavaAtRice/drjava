@@ -291,6 +291,7 @@ public final class CompilerRegistryTest extends TestCase {
      public String getName() { return "Without"; }
      public boolean isAvailable() { return false; }
      public void setAllowAssertions(boolean allow) {}
+     public void setWarningsEnabled(boolean warningsEnabled) {}
      public void setExtraClassPath(String extraClassPath) {}
      public String toString(){ return "Without"; }
      public void setBuildDirectory(File builddir){}

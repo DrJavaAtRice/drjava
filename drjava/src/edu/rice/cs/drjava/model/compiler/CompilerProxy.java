@@ -66,6 +66,7 @@ public class CompilerProxy implements CompilerInterface {
 
   private final String _className;
   private final ClassLoader _newLoader;
+  private boolean _warningsEnabled = true;
   private File _buildDir;
   
   /**
@@ -117,6 +118,8 @@ public class CompilerProxy implements CompilerInterface {
       //}
       _realCompiler.setExtraClassPath(newclasspath.toString());
 
+      _realCompiler.setWarningsEnabled(_warningsEnabled);
+      
       boolean allowAssertions =
         DrJava.getConfig().getSetting(OptionConstants.JAVAC_ALLOW_ASSERT).booleanValue();
       _realCompiler.setAllowAssertions(allowAssertions);
@@ -225,6 +228,14 @@ public class CompilerProxy implements CompilerInterface {
    */
   public void setAllowAssertions(boolean allow) {
     _realCompiler.setAllowAssertions(allow);
+  }
+  
+  /**
+   * Sets whether or not warnings are allowed
+   */
+  public void setWarningsEnabled(boolean warningsEnabled) {
+    _realCompiler.setWarningsEnabled(warningsEnabled);
+    _warningsEnabled = warningsEnabled;
   }
 
   /**

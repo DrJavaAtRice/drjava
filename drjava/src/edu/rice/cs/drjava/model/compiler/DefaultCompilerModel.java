@@ -390,11 +390,15 @@ public class DefaultCompilerModel implements CompilerModel {
       //      System.out.println("Calling convert!");
       errors = llc.convert(files);//, filesToRestore);
       
+      compiler.setWarningsEnabled(true);
+      
       /**Rename any .dj0 files in files to be .java files, so the correct thing is compiled.*/
       for (int i = 0; i<files.length; i++) {
         String fileName = files[i].getAbsolutePath();
         int lastIndex = fileName.lastIndexOf(".dj");
         if (lastIndex != -1) {
+          /** If compiling a language level file, do not show warnings, as these are not caught by the language level parser */
+          compiler.setWarningsEnabled(false);
           files[i]=new File(fileName.substring(0, lastIndex) + ".java");
         }
       }

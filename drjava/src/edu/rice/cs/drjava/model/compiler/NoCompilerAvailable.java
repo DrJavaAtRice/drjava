@@ -98,6 +98,12 @@ public class NoCompilerAvailable implements CompilerInterface {
   public void setAllowAssertions(boolean allow) {
   }
   
+   /**
+   * Sets whether or not warnings are allowed
+   */
+  public void setWarningsEnabled(boolean warningsEnabled) {
+  }
+  
   /**
    * This method allows us to set the JSR14 collections path across a class loader.
    * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)

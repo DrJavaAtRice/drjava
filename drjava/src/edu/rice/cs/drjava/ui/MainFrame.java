@@ -381,9 +381,10 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JavadocDialog _javadocSelector = new JavadocDialog(this);
   
   /**
-   * Provides a dialog to open a directory
-   */
-  private FolderDialog _folderSelector = new FolderDialog(this);
+   * Provides a chooser to open a directory
+   */  
+  private JFileChooser _folderChooser;
+  private JCheckBox _openRecursiveCheckBox;
 
   private Action _moveToAuxiliaryAction = new AbstractAction("Move To Auxiliary"){
     public void actionPerformed(ActionEvent ae){
@@ -456,7 +457,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private Action _openFolderAction  = new AbstractAction("Open Folder...") {
     public void actionPerformed(ActionEvent ae) {
-      openFolder(_folderSelector);
+      openFolder(_folderChooser);
     }
   };
   
@@ -1522,6 +1523,30 @@ public class MainFrame extends JFrame implements OptionConstants {
     _openChooser.setFileFilter(_javaSourceFilter);
     _openChooser.setMultiSelectionEnabled(true);
     
+    
+    
+    _openRecursiveCheckBox = new JCheckBox("Recursive open");
+    _openRecursiveCheckBox.setSelected(DrJava.getConfig().getSetting(OptionConstants.OPEN_FOLDER_RECURSIVE).booleanValue());
+    
+    _folderChooser = new JFileChooser();
+    _folderChooser.setMultiSelectionEnabled(false);
+    _folderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    _folderChooser.setCurrentDirectory(workDir);
+    _folderChooser.setApproveButtonText("Select");
+    _folderChooser.setFileFilter(new DirectoryFilter());
+    _folderChooser.setDialogTitle("Open Folder");
+    Component c = ((BorderLayout)_folderChooser.getLayout()).getLayoutComponent(BorderLayout.SOUTH);
+    
+    JPanel buttons = (JPanel)c;
+    
+    JPanel button_row = (JPanel)buttons.getComponent(3);
+    JPanel bottom_row = new JPanel();
+    bottom_row.setLayout(new BorderLayout());
+    bottom_row.add(new JCheckBox("Recursive Open"), BorderLayout.CENTER);
+    bottom_row.add(button_row, BorderLayout.EAST);
+    buttons.add(bottom_row, 3);
+    
+    
     //Get most recently opened project for filechooser
     Vector<File> recentProjects = config.getSetting(RECENT_PROJECTS);
     
@@ -2191,7 +2216,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   private void _openFolder(){
-    openFolder(_folderSelector);
+    openFolder(_folderChooser);
   }
   
   private void _openFileOrProject() {
@@ -2442,26 +2467,41 @@ public class MainFrame extends JFrame implements OptionConstants {
    * files are missing, or the action was canceled by the user
    * @param openSelector the selector that returns the files to open
    */
-  public void openFolder(DirectorySelector openSelector) {
+  public void openFolder(JFileChooser chooser) {
     try{
-      File opendir = null;
+      File openDir = null;
       try{
-        opendir = _model.getActiveDocument().getFile().getParentFile();
+        openDir = _model.getActiveDocument().getFile().getParentFile();
       }catch(FileMovedException e){
       }catch(IllegalStateException e){
       }
       
+      if (openDir != null && openDir.exists()) {
+        // We were given a default - use it.
+        chooser.setCurrentDirectory(openDir);
+        chooser.setSelectedFile(openDir);
+      }
       
-      File dir = openSelector.getDirectory(opendir);
+      File [] filesArray = getOpenFiles(chooser);
+      DrJava.getConfig().setSetting(OptionConstants.OPEN_FOLDER_RECURSIVE, _openRecursiveCheckBox.isSelected());
+      
+      if(filesArray == null || filesArray.length == 0)
+        return;
+      
+            
+      File dir = filesArray[0];
+      
       ArrayList<File> files;
       if(dir != null && dir.isDirectory()){
-        files = FileOps.getFilesInDir(dir, openSelector.isRecursive(), new FileFilter(){
+        files = FileOps.getFilesInDir(dir, _openRecursiveCheckBox.isSelected(), new FileFilter(){
           public boolean accept(File f){ 
             return f.isDirectory() ||
               f.isFile() && 
               f.getName().endsWith(DrJava.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
           }
         });
+        
+        
         
         if(_model.isProjectActive()){
           Collections.sort(files, new Comparator<File>(){
