@@ -1125,7 +1125,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     Iterator<ThreadReference> iter = listThreads.iterator();
     Vector<DebugThreadData> threads = new Vector<DebugThreadData>();
     while (iter.hasNext()) {
-      threads.addElement(new DebugThreadData(iter.next()));
+      try {
+        threads.addElement(new DebugThreadData(iter.next()));
+      }
+      catch (ObjectCollectedException e) {
+        // this thread just died, we don't want to list it anyway
+      }
     }
     return threads;
   }

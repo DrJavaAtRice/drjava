@@ -48,8 +48,6 @@ import edu.rice.cs.util.UnexpectedException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -142,23 +140,6 @@ public class JUnitPanel extends ErrorPanel{
     _progressBar = new JUnitProgressBar();
     innerPanel.add(_progressBar, BorderLayout.NORTH);
     innerPanel.add(new JPanel(),BorderLayout.CENTER);
-        
-    _showHighlightsCheckBox = new JCheckBox("Highlight source", true);
-    _showHighlightsCheckBox.addChangeListener(new ChangeListener() {
-      public void stateChanged (ChangeEvent ce) {
-        DefinitionsPane lastDefPane = getErrorListPane().getLastDefPane();
-
-        if (_showHighlightsCheckBox.isSelected()) {
-          //lastDefPane.setCaretPosition(lastDefPane.getCaretPosition());
-          _errorListPane.switchToError(getErrorListPane().getSelectedIndex());
-          lastDefPane.requestFocus();
-          lastDefPane.getCaret().setVisible(true);
-        }
-        else {
-          lastDefPane.removeTestErrorHighlight();
-        }
-      }
-    });
 
     innerPanel.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
     _mainPanel.add(sidePanel, BorderLayout.EAST);

@@ -56,6 +56,8 @@ import java.util.Hashtable;
 
 import javax.swing.*;
 import javax.swing.text.*;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -158,12 +160,6 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
      */
     protected final Hashtable<Position, CompilerError> _errorTable = new Hashtable<Position, CompilerError>();
 
-    /**
-     * The DefinitionsPane with the current error highlight.
-     * (Initialized to the current pane.)
-     */
-    private DefinitionsPane _lastDefPane;
-
     // when we create a highlight we get back a tag we can use to remove it
     private HighlightManager.HighlightInfo _listHighlightTag = null;
 
@@ -197,7 +193,6 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
 
       _selectedIndex = 0;
       _errorListPositions = new Position[0];
-      _lastDefPane = _frame.getCurrentDefPane();
 
       this.setFont(new Font("Courier", 0, 20));
 
@@ -209,6 +204,23 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       setEditable(false);
 
       DrJava.getConfig().addOptionListener( OptionConstants.COMPILER_ERROR_COLOR, new CompilerErrorColorOptionListener());
+
+      _showHighlightsCheckBox = new JCheckBox( "Highlight source", true);
+      _showHighlightsCheckBox.addChangeListener( new ChangeListener() {
+        public void stateChanged (ChangeEvent ce) {
+          DefinitionsPane lastDefPane = _frame.getCurrentDefPane();
+          
+          if (_showHighlightsCheckBox.isSelected()) {
+            lastDefPane.setCaretPosition( lastDefPane.getCaretPosition());
+            getErrorListPane().switchToError(getSelectedIndex());
+            lastDefPane.requestFocus();
+            lastDefPane.getCaret().setVisible(true);
+          }
+          else {
+            lastDefPane.removeErrorHighlight();
+          }
+        }
+      });
 
     }
 
@@ -224,21 +236,6 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
      * Get the index of the current error in the error array.
      */
     public int getSelectedIndex() { return _selectedIndex; }
-
-    /**
-     * Allows the CompilerErrorListPane to remember which DefinitionsPane
-     * currently has an error highlight.
-     */
-    public void setLastDefPane(DefinitionsPane pane) {
-      _lastDefPane = pane;
-    }
-
-    /**
-     * Gets the last DefinitionsPane with an error highlight.
-     */
-    public DefinitionsPane getLastDefPane() {
-      return _lastDefPane;
-    }
 
     /**
      * Returns CompilerError associated with the given visual coordinates.
@@ -429,7 +426,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       _removeListHighlight();
 
       // Remove highlight from the defPane that has it
-      _lastDefPane.removeCompilerErrorHighlight();
+      _frame.getCurrentDefPane().removeErrorHighlight();
     }
 
     /**
@@ -522,7 +519,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
           }
           else {
             // Remove last highlight if we had an error with no position
-            _lastDefPane.removeCompilerErrorHighlight();
+            _frame.getCurrentDefPane().removeErrorHighlight();
           }
         }
         catch (IOException ioe) {
@@ -531,7 +528,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       }
       else {
         //Remove last highlight if we had an error with no file
-        _lastDefPane.removeCompilerErrorHighlight();
+        _frame.getCurrentDefPane().removeErrorHighlight();
       }
 
       // Select item wants the error, which is what we were passed

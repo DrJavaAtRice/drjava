@@ -133,4 +133,13 @@ public abstract class TabbedPanel extends JPanel {
   public void setDisplayed(boolean displayed) {
     _displayed = displayed;
   }
+  
+  /**
+   * This is overridden so that when switch previous pane focus is called 
+   * on the currentDefPane, the caret will move here on the first call.
+   */
+  public void requestFocus() {
+    super.requestFocus();
+    _mainPanel.requestFocus();
+  }
 }

@@ -52,26 +52,23 @@ import javax.swing.text.Position;
 
 /**
  * Listens to the caret in a particular DefinitionsPane and
- * highlights the source containing CompilerErrors as appropriate.
+ * highlights the source containing Errors as appropriate.
  *
  * @version $Id$
  */
-public class CompilerErrorCaretListener implements CaretListener {
+public class ErrorCaretListener implements CaretListener {
   private final OpenDefinitionsDocument _openDoc;
-  private final ErrorPanel.ErrorListPane _errorListPane;
   private final DefinitionsPane _definitionsPane;
   protected final MainFrame _frame;
   private final Document _document;
 
   /**
-   * Constructs a new caret listener to highlight compiler errors.
+   * Constructs a new caret listener to highlight errors.
    */
-  public CompilerErrorCaretListener(OpenDefinitionsDocument doc,
-                                    ErrorPanel.ErrorListPane errorListPane,
-                                    DefinitionsPane defPane,
-                                    MainFrame frame) {
+  public ErrorCaretListener(OpenDefinitionsDocument doc,
+                            DefinitionsPane defPane,
+                            MainFrame frame) {
     _openDoc = doc;
-    _errorListPane = errorListPane;
     _definitionsPane = defPane;
     _frame = frame;
     _document = doc.getDocument();
@@ -90,9 +87,6 @@ public class CompilerErrorCaretListener implements CaretListener {
    * compiler output tab is showing.
    */
   public void caretUpdate(CaretEvent evt) {
-    if (!getErrorModel().hasErrorsWithPositions(_openDoc)) {
-      return;
-    }
     // Now we can assume at least one error.
     updateHighlight(evt.getDot());
   }
@@ -102,27 +96,37 @@ public class CompilerErrorCaretListener implements CaretListener {
    */
   public void updateHighlight(int curPos) {
     // Don't highlight unless compiler tab selected
-    if (!tabSelected()) {
-      _errorListPane.selectNothing();
+//    if (!tabSelected()) {
+//      _errorListPane.selectNothing();
+//      return;
+//    }
+
+    ErrorPanel panel = _frame.getSelectedErrorPanel();
+    if (panel == null) {
+      // no error panel is currently selected
+      return;
+    }
+    CompilerErrorModel model =  panel.getErrorModel();
+    
+    if (!model.hasErrorsWithPositions(_openDoc)) {
       return;
     }
 
-    CompilerErrorModel model =  getErrorModel();
-
     CompilerError error = model.getErrorAtOffset(_openDoc, curPos);
 
+    ErrorPanel.ErrorListPane errorListPane = panel.getErrorListPane();
     // if no error is on this line, select the (none) item
     if (error == null) {
-      _errorListPane.selectNothing();
-    } else {
-      
-      if (_errorListPane.shouldShowHighlightsInSource()) {
+      errorListPane.selectNothing();
+    } 
+    else {      
+      if (errorListPane.shouldShowHighlightsInSource()) {
         // No need to move the caret since it's already here!
         _highlightErrorInSource(model.getPosition(error));
       }
        
       // Select item wants the CompilerError
-      _errorListPane.selectItem(error);
+      errorListPane.selectItem(error);
     }
   }
   
@@ -130,17 +134,7 @@ public class CompilerErrorCaretListener implements CaretListener {
    * Hides the error highlight in the document.
    */
   public void removeHighlight() {
-    if (_errorListPane.getLastDefPane() != null) {
-      _errorListPane.getLastDefPane().removeCompilerErrorHighlight();
-    }
-  }
-  
-  protected CompilerErrorModel getErrorModel(){
-    return _frame.getModel().getCompilerErrorModel();
-  }
-
-  protected boolean tabSelected(){
-    return _frame.isCompilerTabSelected();
+    _definitionsPane.removeErrorHighlight();
   }
 
   /**
@@ -177,9 +171,8 @@ public class CompilerErrorCaretListener implements CaretListener {
       if (prevNewline>0) prevNewline++;      
       
       if (prevNewline <= nextNewline) {
-        _definitionsPane.addCompilerErrorHighlight(prevNewline, nextNewline);
+        _definitionsPane.addErrorHighlight(prevNewline, nextNewline);
       }
-      _errorListPane.setLastDefPane(_definitionsPane);
     }
     catch (BadLocationException impossible) {
       throw new UnexpectedException(impossible);

@@ -132,11 +132,6 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   private HighlightManager.HighlightInfo _errorHighlightTag = null;
   
   /**
-   * Our current test error matching highlight.
-   */
-  private HighlightManager.HighlightInfo _testErrorHighlightTag = null;
-  
-  /**
    * Highlight painter for selected errors in the defs doc.
    */
   public static DefaultHighlighter.DefaultHighlightPainter
@@ -191,13 +186,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
         int start = _errorHighlightTag.getStartOffset();
         int end = _errorHighlightTag.getEndOffset();
         _errorHighlightTag.remove();
-        addCompilerErrorHighlight(start, end);
-      }
-      if (_testErrorHighlightTag != null) {
-        int start = _testErrorHighlightTag.getStartOffset();
-        int end = _testErrorHighlightTag.getEndOffset();
-        _testErrorHighlightTag.remove();
-        addTestErrorHighlight(start, end);
+        addErrorHighlight(start, end);
       }
     }
   }
@@ -270,17 +259,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   /**
    * Listens to caret to highlight errors as appropriate.
    */
-  private CompilerErrorCaretListener _errorListener;
-
-  /**
-   * Listens to caret to highlight JUnit errors as appropriate.
-   */
-  private JUnitErrorCaretListener _junitErrorListener;  
-
-  /**
-   * Listens to caret to highlight Javadoc errors as appropriate.
-   */
-  private JavadocErrorCaretListener _javadocErrorListener;  
+  private ErrorCaretListener _errorListener;
   
   private ActionListener _setSizeListener = null;
   
@@ -800,60 +779,29 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   }
 
   /**
-   * Add a CompilerErrorCaretListener to this pane, keeping it
+   * Add a ErrorCaretListener to this pane, keeping it
    * accessible so its error model can be updated later.
    */
-  public void addErrorCaretListener(CompilerErrorCaretListener listener) {
+  public void addErrorCaretListener(ErrorCaretListener listener) {
     _errorListener = listener;
     addCaretListener(listener);
   }
 
   /**
-   * Add a JUnitErrorCaretListener to this pane, keeping it
-   * accessible so its error model can be updated later.
+   * Gets the ErrorCaretListener for this pane.
    */
-  public void addJUnitErrorCaretListener(JUnitErrorCaretListener listener) {
-    _junitErrorListener = listener;
-    addCaretListener(listener);
-  }
-
-  /**
-   * Add a JUnitErrorCaretListener to this pane, keeping it
-   * accessible so its error model can be updated later.
-   */
-  public void addJavadocErrorCaretListener(JavadocErrorCaretListener listener) {
-    _javadocErrorListener = listener;
-    addCaretListener(listener);
-  }
-
-  /**
-   * Gets the CompilerErrorCaretListener for this pane.
-   */
-  public CompilerErrorCaretListener getErrorCaretListener() {
+  public ErrorCaretListener getErrorCaretListener() {
     return _errorListener;
   }
 
   /**
-   * Gets the JUnitErrorCaretListener for this pane.
-   */
-  public JUnitErrorCaretListener getJUnitErrorCaretListener() {
-    return _junitErrorListener;
-  }
-
-  /**
-   * Gets the JUnitErrorCaretListener for this pane.
-   */
-  public JavadocErrorCaretListener getJavadocErrorCaretListener() {
-    return _javadocErrorListener;
-  }
-
-  /**
-   * Adds a compiler error highlight to the document.
+   * Switches the location of the error highlight in the document if there
+   * was one. Otherwise adds the highlight. The invariant is that there are
+   * zero or one error highlights at any time.
    * @exception BadLocationException
    */
-  public void addCompilerErrorHighlight(int from, int to)
-  {
-    removeCompilerErrorHighlight();
+  public void addErrorHighlight(int from, int to)  {
+    removeErrorHighlight();
     _errorHighlightTag = _highlightManager.addHighlight(from, to, ERROR_PAINTER);
   }
 
@@ -861,31 +809,10 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    * Removes the previous compiler error highlight from the document after 
    * the cursor has moved.
    */
-  public void removeCompilerErrorHighlight() {
+  public void removeErrorHighlight() {
     if (_errorHighlightTag != null) {
       _errorHighlightTag.remove();
       _errorHighlightTag = null;
-    }
-  }
-  
-  /**
-   * Adds a JUnit test error highlight to the document.
-   * @exception BadLocationException
-   */
-  public void addTestErrorHighlight(int from, int to)
-  {
-    removeTestErrorHighlight();
-    _testErrorHighlightTag = _highlightManager.addHighlight(from, to, ERROR_PAINTER);
-  }
-
-  /**
-   * Removes the previous test error highlight from the document after the cursor
-   * has moved.
-   */
-  public void removeTestErrorHighlight() {
-    if (_testErrorHighlightTag != null) {
-      _testErrorHighlightTag.remove();
-      _testErrorHighlightTag = null;
     }
   }
 

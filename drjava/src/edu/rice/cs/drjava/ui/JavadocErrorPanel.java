@@ -47,8 +47,6 @@ import edu.rice.cs.util.UnexpectedException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -67,7 +65,6 @@ import java.util.Arrays;
 public class JavadocErrorPanel extends ErrorPanel{
 
   protected JavadocErrorListPane _errorListPane;
-//   private int _testCount;
   private boolean _successful;
 
   /**
@@ -77,7 +74,6 @@ public class JavadocErrorPanel extends ErrorPanel{
    */
   public JavadocErrorPanel(SingleDisplayModel model, MainFrame frame) {
     super(model, frame, "Javadoc Output");
-//     _testCount = 0;
     _successful = true;
     _errorListPane = new JavadocErrorListPane();
 
@@ -104,23 +100,6 @@ public class JavadocErrorPanel extends ErrorPanel{
     sidePanel.add(innerPanel,BorderLayout.CENTER);
     
     innerPanel.add(new JPanel(),BorderLayout.CENTER);
-        
-    _showHighlightsCheckBox = new JCheckBox( "Highlight source", true);
-    _showHighlightsCheckBox.addChangeListener( new ChangeListener() {
-      public void stateChanged (ChangeEvent ce) {
-        DefinitionsPane lastDefPane = getErrorListPane().getLastDefPane();
-        
-        if (_showHighlightsCheckBox.isSelected()) {
-          //lastDefPane.setCaretPosition( lastDefPane.getCaretPosition());
-          _errorListPane.switchToError(getErrorListPane().getSelectedIndex());
-          lastDefPane.requestFocus();
-          lastDefPane.getCaret().setVisible(true);
-        }
-        else {
-          lastDefPane.removeTestErrorHighlight();
-        }
-      }
-    });
     
     innerPanel.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
     _mainPanel.add(sidePanel, BorderLayout.EAST);

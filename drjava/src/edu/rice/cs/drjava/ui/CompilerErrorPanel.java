@@ -53,8 +53,6 @@ import edu.rice.cs.util.UnexpectedException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Position;
@@ -143,23 +141,6 @@ public class CompilerErrorPanel extends ErrorPanel {
     _mainPanel.add(compilerPanel, BorderLayout.EAST);
     DrJava.getConfig().addOptionListener( OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener());
     DrJava.getConfig().addOptionListener( OptionConstants.JSR14_LOCATION, new CompilerLocationOptionListener());
-
-    _showHighlightsCheckBox = new JCheckBox( "Highlight source", true);
-    _showHighlightsCheckBox.addChangeListener( new ChangeListener() {
-      public void stateChanged (ChangeEvent ce) {
-        DefinitionsPane lastDefPane = getErrorListPane().getLastDefPane();
-        
-        if (_showHighlightsCheckBox.isSelected()) {
-          //lastDefPane.setCaretPosition( lastDefPane.getCaretPosition());
-          getErrorListPane().switchToError(getErrorListPane().getSelectedIndex());
-          lastDefPane.requestFocus();
-          lastDefPane.getCaret().setVisible(true);
-        }
-        else {
-          lastDefPane.removeCompilerErrorHighlight();
-        }
-      }
-    });
     
     uiBox.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
   }

@@ -277,7 +277,9 @@ public class EventHandlerThread extends Thread {
    * @param e thread start event from JPDA
    */
   protected void _handleThreadStartEvent(ThreadStartEvent e) {
-    _debugger.threadStarted();
+    synchronized(_debugger) {
+      _debugger.threadStarted();
+    }
   }
   
   /**
@@ -287,26 +289,27 @@ public class EventHandlerThread extends Thread {
   protected void _handleThreadDeathEvent(ThreadDeathEvent e) throws DebugException {
     // no need to check if there are suspended threads on the stack
     // because all that logic should be in the debugger
-    
-    ThreadReference running = _debugger.getCurrentRunningThread();
-    if (e.thread().equals(running)) {
-      // Delete any step requests pending on this thread
-      EventRequestManager erm = _vm.eventRequestManager();
-      List steps = erm.stepRequests();
-      for (int i = 0; i < steps.size(); i++) {
-        StepRequest step = (StepRequest)steps.get(i);
-        if (step.thread().equals(e.thread())) {
-          erm.deleteEventRequest(step);
-          
-          // There can only be one step request per thread,
-          //  so we can stop looking
-          break;
+    synchronized(_debugger) {
+      ThreadReference running = _debugger.getCurrentRunningThread();
+      if (e.thread().equals(running)) {
+        // Delete any step requests pending on this thread
+        EventRequestManager erm = _vm.eventRequestManager();
+        List steps = erm.stepRequests();
+        for (int i = 0; i < steps.size(); i++) {
+          StepRequest step = (StepRequest)steps.get(i);
+          if (step.thread().equals(e.thread())) {
+            erm.deleteEventRequest(step);
+            
+            // There can only be one step request per thread,
+            //  so we can stop looking
+            break;
+          }
         }
+        _debugger.currThreadDied();
       }
-      _debugger.currThreadDied();
-    }
-    else {
-      _debugger.nonCurrThreadDied();
+      else {
+        _debugger.nonCurrThreadDied();
+      }
     }
     
     // Thread is suspended on death, so resume it now.
@@ -335,12 +338,14 @@ public class EventHandlerThread extends Thread {
    * @param e JPDA event indicating the debugging session has ended
    */
   protected void _cleanUp(Event e) throws DebugException {
-    _connected = false;
-    if (_debugger.isReady()) {
-      if (_debugger.hasSuspendedThreads()) {
-        _debugger.currThreadDied();
+    synchronized(_debugger) {
+      _connected = false;
+      if (_debugger.isReady()) {
+        if (_debugger.hasSuspendedThreads()) {
+          _debugger.currThreadDied();
+        }
+        _debugger.shutdown();
       }
-      _debugger.shutdown();
     }
   }
   
