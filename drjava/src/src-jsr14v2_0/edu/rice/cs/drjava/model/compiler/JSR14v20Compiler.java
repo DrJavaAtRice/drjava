@@ -55,6 +55,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
 import java.util.LinkedList;
+import java.util.Arrays;
 
 // Uses JSR-14 v2.0 compiler classes
 import com.sun.tools.javac.main.JavaCompiler;
@@ -99,6 +100,8 @@ public class JSR14v20Compiler implements CompilerInterface {
     "com.sun.tools.javac.main.JavaCompiler";
   
   protected Context context = null;
+  
+  private String _builtPath = "";
 
   /** A writer that discards its input. */
   private static final Writer NULL_WRITER = new Writer() {
@@ -202,9 +205,21 @@ public class JSR14v20Compiler implements CompilerInterface {
       // GJ defines the compile method to throw Throwable?!
       //System.err.println("Compile error: " + t);
       //t.printStackTrace();
-      return new CompilerError[] {
-        new CompilerError("Compile exception: " + t, false)
-      };
+      
+      
+      //Added to account for error in javac whereby a variable that was not declared will
+      //cause an out of memory error. This change allows us to output both errors and not
+      //just the out of memory error
+      
+      CompilerError[] errorArray = new CompilerError[compilerLog.getErrors().length + 1];
+      for(int i = 0; i < compilerLog.getErrors().length; i++) {
+        errorArray[i+1] = compilerLog.getErrors()[i];
+      }
+      errorArray[0] = new CompilerError("Compile exception: " + t, false);
+      return errorArray; 
+//      return new CompilerError[] {
+//        new CompilerError("Compile exception: " + t, false)
+//      };
     }
 
     CompilerError[] errors = compilerLog.getErrors();
@@ -308,6 +323,8 @@ public class JSR14v20Compiler implements CompilerInterface {
     }
 //    options.put("-target", "1.5");
     options.put("-fork", "on");
+    if(! _builtPath.equals(""))
+      options.put("-d",_builtPath);
   }
   
   /**
@@ -369,6 +386,10 @@ public class JSR14v20Compiler implements CompilerInterface {
       }
 //      compiler = JavaCompiler.make(context);
     }
+  }
+  
+  public void setBuildDirectory(File dir){
+    _builtPath=dir.getAbsolutePath();    
   }
   
   /**
