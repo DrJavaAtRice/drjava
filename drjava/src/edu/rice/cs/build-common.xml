@@ -286,7 +286,7 @@ optimize="off"/>
     
     <fileset dir="${srcroot}">
       <!-- get all projects within this sourceroot -->
-      <exclude name="src-jsr14v1_*/**/*.java" />
+      <exclude name="src-*/**/*.java" />
       <include name="**/*.java" />
       <!-- <include name="${projpath}/**/*.java" /> -->
     </fileset>
