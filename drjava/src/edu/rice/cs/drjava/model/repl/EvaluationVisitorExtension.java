@@ -107,6 +107,12 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     return Interpreter.NO_RESULT;
   }
 
+  public Object visit(ForEachStatement node) {
+    _checkInterrupted(node);
+    super.visit(node);
+    return Interpreter.NO_RESULT;
+  }
+
   public Object visit(DoStatement node) {
     _checkInterrupted(node);
     super.visit(node);
