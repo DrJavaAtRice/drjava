@@ -7,7 +7,7 @@ import java.util.*;
  * Every method starting with the word "test" will be called when running
  * the test with JUnit.
  */
-public class BidirectionalHashMapTest extends TestCase {
+public class OrderedBidirectionalHashMapTest extends TestCase {
   
   
   /**
@@ -26,7 +26,7 @@ public class BidirectionalHashMapTest extends TestCase {
     Integer int2 = new Integer(2);
     Integer int3 = new Integer(3);
     
-    BidirectionalHashMap<String, Integer> myhash = new BidirectionalHashMap<String, Integer>();
+    OrderedBidirectionalHashMap<String, Integer> myhash = new OrderedBidirectionalHashMap<String, Integer>();
     
     assertEquals("Expected null", null, myhash.getValue(one));
     assertEquals("Expected null", null, myhash.getValue(two));
