@@ -477,17 +477,6 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
   private void _setActiveDoc(INavigatorItem idoc) {
     //Hashtable<INavigatorItem, OpenDefinitionsDocument> docs = getDefinitionsDocumentsTable();
     
-/**
- * Here to help track down memory leaks
- */
-//    if(Runtime.getRuntime().freeMemory() < 200000){
-//      System.out.println("Running Garbage Collector");
-//      System.gc();
-//      System.out.println("~ gc ~");
-//  }
-    
-//    System.out.println(Runtime.getRuntime().freeMemory());
-    
     _activeDocument = super.getODDGivenIDoc(idoc);
     try {
     _activeDocument.checkIfClassFileInSync();

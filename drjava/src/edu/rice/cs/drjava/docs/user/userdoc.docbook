@@ -240,13 +240,17 @@ OTHER DEALINGS WITH THE SOFTWARE.
      </formalpara>
      <formalpara>
       <title>Opening a Project</title>
-      <para>To open a project, select "Open" under the Project menu, then select a previously saved project file.</para>
+      <para>To open a project, select "Open" under the Project menu, then select a previously saved project file. You can also open previously open projects in the recent project file list in the project menu. Simply open the Project Menu and click the name of the project file to open that project.</para>
      </formalpara>
      <formalpara>
       <title>Compiling a Project</title>
-      <para>To compile a project, select "Compile Project" under the Project menu. This will compile all files in the project view. All files in the external branch (Under the "External Files" folder) will not be compiled.</para>
+      <para>To compile a project, select "Compile Project" under the Project menu, or right click the root of the tree and select "Compile Project." This will compile all files in the project view including auxiliary files. All files in the external branch (Under the "External Files" folder) will not be compiled.</para>
      </formalpara>
      <para>When not in project view, the "Compile All" button compiles all open files, whereas in project view, "Compile All" only compiles the open project.</para>
+     <formalpara>
+      <title>Testing a Project</title>
+      <para>To test a project, select "Test Project" under the Project menu. This will test all JUnit test files in the project tree including "Auxiliary Files." All files in the external branch (Under the "External Files" folder) will not be tested.</para>
+     </formalpara>
      <formalpara>
       <title>Running a Project</title>
       <para>To run the main method of a project, select "Run Main Document" under the Project menu. This option is only available if you have specified a file containing the project's main method in the "Project Properties" dialog in the Project menu.</para>
@@ -276,7 +280,7 @@ OTHER DEALINGS WITH THE SOFTWARE.
      </formalpara>
      <formalpara>
       <title>Auxiliary Files</title>
-      <para>Auxiliary Files are files that are located outside of the project directory and are explicitly added to the project. Auxiliary Files are not compiled or tested when the project is compiled or tested. However, the list of Auxiliary Files is saved to the project file when the project is saved.
+      <para>Auxiliary Files are files that are located outside of the project directory and are explicitly added to the project. Auxiliary Files are compiled and tested when the project is compiled or tested. Also, the list of Auxiliary Files is saved to the project file when the project is saved.
             Auxiliary Files will also be automatically opened when the project is opened. Only a file in External Files can be moved to the Auxiliary Files branch.</para>
      </formalpara>
      <para>To add an External File to the Auxiliary Files branch, right click the filename in the External Files list and select the "Move To Auxiliary" option.
@@ -290,6 +294,7 @@ OTHER DEALINGS WITH THE SOFTWARE.
   <title>Build directory</title>
   <para>The project facility allows the user to set a build directory where class files will be compiled. This gives the user the freedom to have separate source file and built file directories. To set a project's build directory, open a project, then select "Project Properties" in the project menu.</para>
   </formalpara>
+  <para>To clean the build directory, open the Project Menu and click "Clean Built Directory." This will remove all .class files and empty directories in the built directory.</para>
   <formalpara>
   <title>Main document</title>
   <para>Additionally, the project facility allows the user to specify a "Main Document" file for your project. When "Run Main Document" is then selected in the Project menu, the main method of the "Main Document" file specified will be executed.</para>

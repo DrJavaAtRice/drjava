@@ -568,9 +568,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           String filePath = doc.getFile().getParentFile().getCanonicalPath() + File.separator;
           String projectPath = projectRoot.getCanonicalPath() + File.separator;
           return (filePath.startsWith(projectPath));
-//          return (doc.getSourceRoot().compareTo(projectRoot) == 0);
         }
         catch(IOException e) {
+          System.out.println(e);
           return false;
         }
       }
@@ -1334,6 +1334,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
     while (odds.hasNext() &&  keepClosing) {
       OpenDefinitionsDocument next = odds.next();
+      System.out.println("closing " + next);
       keepClosing = closeFile(next);
       odds = _documentsRepos.valuesIterator(); // call to closeFile can mutate Iterator, so generate a new "current" Iterator on each loop 
     }

@@ -46,16 +46,21 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.junit;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.IGetDocuments;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileMovedException;
+import edu.rice.cs.drjava.model.FileOpenSelector;
+import edu.rice.cs.drjava.model.OperationCanceledException;
+import edu.rice.cs.drjava.model.AlreadyOpenException;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
@@ -192,17 +197,40 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       _getter.getDefinitionsDocuments().iterator();
     while (it.hasNext()) {
       OpenDefinitionsDocument doc = it.next();
-      if (doc.isProjectFile()) {
+      if (doc.isInProjectPath() || doc.isAuxiliaryFile()) {
         lod.add(doc);
       }
     }
     junitDocs(lod);
   }
   
+  public void junitDirectory(File dir){
+    //reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
+    _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
+
+    ArrayList<String> classNames = new ArrayList<String>();
+    final ArrayList<File> files = FileOps.getFilesInDir(dir, true, new FileFilter(){
+      public boolean accept(File pathname){
+        return pathname.isDirectory() || 
+          pathname.getPath().toLowerCase().endsWith(".java") ||
+          pathname.getPath().toLowerCase().endsWith(".dj0") ||
+          pathname.getPath().toLowerCase().endsWith(".dj1") ||
+          pathname.getPath().toLowerCase().endsWith(".dj2");
+      }
+    });
+
+    
+//    files;
+  }
+  
+  
+  
+  
   public void junitDocs(List<OpenDefinitionsDocument> lod){
     synchronized (_compilerModel) {
       //reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
       _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
+      
       Iterator<OpenDefinitionsDocument> it = lod.iterator();
 //        _getter.getDefinitionsDocuments().iterator();
       HashMap<String,OpenDefinitionsDocument> classNamesToODDs =

@@ -175,7 +175,7 @@ public class DefaultCompilerModel implements CompilerModel {
         new LinkedList<OpenDefinitionsDocument>();
     
       for(OpenDefinitionsDocument odd : defDocs){
-        if(odd.isInProjectPath()){
+        if(odd.isInProjectPath() || odd.isAuxiliaryFile()){
             projectDocs.add(odd);
         }
       }

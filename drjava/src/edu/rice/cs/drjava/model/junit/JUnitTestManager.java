@@ -96,11 +96,15 @@ public class JUnitTestManager {
               try {
                 for (int i = 0; i < classNames.size(); i++) {
                   String className = classNames.get(i);
+                  System.out.println("is " + className + " a test? ");
                   if (_isTestCase(className)) {
+                    System.out.println("yes.");
                     Test test = _testRunner.getTest(className);
                     suite.addTest(test);
                     stuff.add(className);
                     noJUnitTests = false;
+                  }else{
+                    System.out.println("no.");
                   }
                 }
               }

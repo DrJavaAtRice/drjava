@@ -650,7 +650,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** cleans the build directory */
-  private Action _cleanAction = new AbstractAction("Clean the Built Directory"){
+  private Action _cleanAction = new AbstractAction("Clean Built Directory"){
     public void actionPerformed(ActionEvent ae){
       _clean();
     }
@@ -685,7 +685,16 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent e) {
       new Thread("Running JUnit Tests") {
         public void run() {
-          _model.getJUnitModel().junitAll();
+          try{
+            hourglassOn();
+            if(_model.isProjectActive()){
+              _model.getJUnitModel().junitProject();
+            }else{
+              _model.getJUnitModel().junitAll();
+            }
+          }finally{
+            hourglassOff();
+          }
         }
       }.start();
     }
@@ -699,6 +708,21 @@ public class MainFrame extends JFrame implements OptionConstants {
       new Thread("Running JUnit Tests") {
         public void run() {
           _model.getJUnitModel().junitProject();
+        }
+      }.start();
+    }
+  };
+  
+  /**
+   * junit a directory
+   */
+  private Action _junitDirectoryAction = new AbstractAction("Test Directory"){
+    public void actionPerformed(ActionEvent e){
+      new Thread("Running JUnit Tests"){
+        public void run(){
+          if(_model.isProjectActive()){
+            _model.getJUnitModel().junitDirectory(_model.getProjectFile().getParentFile());
+          }
         }
       }.start();
     }
@@ -3633,7 +3657,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     _setUpAction(_saveAllAction, "Save All", "SaveAll", "Save all open documents");
 
-    _setUpAction(_cleanAction, "Clean", "Clean the built directory");
+    _setUpAction(_cleanAction, "Clean", "Clean Built directory");
     _cleanAction.setEnabled(false);
     _setUpAction(_compileAction, "Compile", "Compile the current document");
     _setUpAction(_compileAllAction, "Compile All", "CompileAll",
@@ -3975,6 +3999,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     projectMenu.add(_compileProjectAction);
     projectMenu.add(_runProjectAction);
     projectMenu.add(_junitProjectAction);
+//    projectMenu.add(_junitDirectoryAction);
     
     projectMenu.addSeparator();
     // eventually add project options

@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.junit;
 
 import java.io.IOException;
+import java.io.File;
 import java.util.List;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
@@ -98,6 +99,10 @@ public interface JUnitModel {
    */
   public void junitProject();
 
+  /**
+   * Creates a JUnit test suite over all currently open project documents and runs it.
+   */
+  public void junitDirectory(File dir);
   
   /**
    * Runs JUnit over a list of documents.  Synchronized against the compiler model
