@@ -1,12 +1,15 @@
 package edu.rice.cs.drjava;
 
+/**
+ * @version $Id$
+ */
 public class UnexpectedException extends RuntimeException {
 
   private Exception _value;
 
    /**
    * Constructs an unexpected exception with
-   *<code>value.toString()</code> as it's message.
+   * <code>value.toString()</code> as it's message.
    */
   public UnexpectedException(Exception value) {
     super(value.toString());
