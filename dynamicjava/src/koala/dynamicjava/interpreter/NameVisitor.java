@@ -561,22 +561,39 @@ public class NameVisitor extends VisitorObject<Node> {
         return null;
       }
     }
+    
     if(o == null || o == defaultQualifier) {
       try {
+        AbstractTypeChecker tc = AbstractTypeChecker.makeTypeChecker(typeCheckerContext);
         //Get fully qualified name for Object o if the methodCall is to a staticly imported method
         //The full class name is given as if the user gave a call using the entire fully qualified name
         Class[] params = new Class[args!=null? args.size() : 0];
         if(args != null) {
           for(int i = 0; i < args.size(); i++) {
             String toParse = args.get(i).toString();
-            params[i]=(args.get(i).acceptVisitor(AbstractTypeChecker.makeTypeChecker(typeCheckerContext)));
+            params[i]=(args.get(i).acceptVisitor(tc));
           }
-        }   
+        }
+        boolean existsInCurrentScope = false;
+        
+        if(o == defaultQualifier) {
+          try {
+            ReflectionUtilities.lookupMethod((Class)((Node)o).acceptVisitor(tc),node.getMethodName(),params);
+            existsInCurrentScope = true;
+          }
+          catch(Exception nsme) {
+            //Expected to throw an Exception whenever the method call is to a method that does not exist in 
+            //the class specified by the default qualifier. If caught, the method does not exist in current scope and the 
+            //new Qualified name should be looked up, or if o is not of type Node.
+          } 
+        }
+          
+        
         List<IdentifierToken> ids = context.getQualifiedName(node.getMethodName(),params);
-        o = new ReferenceType(ids);
+        if (! existsInCurrentScope)
+          o = new ReferenceType(ids);
       }      
       catch(Exception e){
-        o = defaultQualifier;
         //If the class type of one of the parameters can't be found, throws an exception
         //Also, if no method found to have been imported, throws an exception
         //This will occur every time the user calls a method that has not been staticly imported

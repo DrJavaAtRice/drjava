@@ -214,6 +214,23 @@ public class TigerTest extends TestCase {
     testString =
       "sqrt(abs(-4));";
     assertEquals(2.0,interpret(testString));
+  
+    testString = 
+      "package LL;\n"+
+      "import static java.lang.Double.*;\n"+
+      "public class MM {\n"+
+      "  public static double parseDouble(String s) {\n"+
+      "    return 0.0; \n"+
+      "  }\n"+
+      "  public static double m() {\n"+
+      "    return parseDouble(\"1.5\");\n"+
+      "  }\n"+
+      "}\n"+
+      "parseDouble(\"1.5\");\n";
+    assertEquals(1.5,interpret(testString));
+    testString = "MM.m();";
+    assertEquals("Member of class should take precedence over staticly imported member",0.0,interpret(testString));
+    
     
   }
   
