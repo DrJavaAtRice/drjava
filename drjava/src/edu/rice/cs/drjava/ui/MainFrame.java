@@ -458,6 +458,39 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
+  /**
+   * Action that copies whatever is currently in the interactions pane
+   * at the prompt to the definitions pane.
+   */
+  private Action _copyInteractionToDefinitionsAction = new AbstractAction("Lift Current Interaction to Definitions") {
+    public void actionPerformed(ActionEvent e) {
+      _putTextIntoDefinitions(_interactionsController.getDocument().getCurrentInput() + "\n");
+    }
+  };
+
+  /**
+   * Action that copies the previous interaction to the definitions pane.
+   * 
+   * is there a good way to get the last history element without perturbing the current document?
+  Action copyPreviousInteractionToDefinitionsAction = new AbstractAction("Copy previous interaction to definitions") {
+    public void actionPerformed(ActionEvent e) {
+      _putTextIntoDefinitions(_interactionsController.getDocument().getCurrentInput() + "\n");
+    }
+  };*/
+
+  /**
+   * Puts the given text into the current definitions pane at the current caret position.
+   */
+  private void _putTextIntoDefinitions(String text) {
+    int caretPos = _currentDefPane.getCaretPosition();
+    DefinitionsDocument doc = _model.getActiveDocument().getDocument();
+    try {
+      doc.insertString(caretPos, text, null);
+    }
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
+    }
+  }
 
   /** Undoes the last change to the active definitions document. */
   private DelegatingAction _undoAction = new DelegatingAction() {
@@ -552,7 +585,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   
   /** Clears DrJava's output console. */
-  private Action _clearOutputAction = new AbstractAction("Clear Console") {
+  private Action _clearConsoleAction = new AbstractAction("Clear Console") {
     public void actionPerformed(ActionEvent ae) {
       _model.resetConsole();
     }
@@ -1015,7 +1048,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpMenuBar();
     _setUpToolBar();
     _setUpDocumentSelector();
-    _setUpDocPaneContextMenu();
+    _setUpContextMenus();
     
     _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2, 
                                                _fileMenu,
@@ -2259,9 +2292,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     toolsMenu.add(_loadHistoryAction);
     toolsMenu.add(_saveHistoryAction);
     toolsMenu.add(_clearHistoryAction);
+    toolsMenu.add(_copyInteractionToDefinitionsAction);
     toolsMenu.addSeparator();
 
-    toolsMenu.add(_clearOutputAction);
+    toolsMenu.add(_clearConsoleAction);
 
     // Add the menus to the menu bar
     return toolsMenu;
@@ -2651,7 +2685,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Sets up the context menu to show in the document pane.
    */
-  private void _setUpDocPaneContextMenu() {
+  private void _setUpContextMenus() {
+    // DocPane menu
     final JPopupMenu docPanePopupMenu = new JPopupMenu();
     docPanePopupMenu.add(_saveAction);
     docPanePopupMenu.add(_saveAsAction);
@@ -2666,6 +2701,25 @@ public class MainFrame extends JFrame implements OptionConstants {
       protected void _popupAction(MouseEvent e) {
         _docList.setSelectedIndex(_docList.locationToIndex(e.getPoint()));
         docPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+      }
+    });
+
+    // Interactions pane menu
+    final JPopupMenu interactionsPanePopupMenu = new JPopupMenu();
+    interactionsPanePopupMenu.add(cutAction);
+    interactionsPanePopupMenu.add(copyAction);
+    interactionsPanePopupMenu.add(pasteAction);
+    interactionsPanePopupMenu.addSeparator();
+    interactionsPanePopupMenu.add(_resetInteractionsAction);
+    interactionsPanePopupMenu.add(_loadHistoryAction);
+    interactionsPanePopupMenu.add(_saveHistoryAction);
+    interactionsPanePopupMenu.add(_clearHistoryAction);
+    interactionsPanePopupMenu.addSeparator();
+    interactionsPanePopupMenu.add(_copyInteractionToDefinitionsAction);
+    _interactionsPane.addMouseListener(new RightClickMouseAdapter() {
+      protected void _popupAction(MouseEvent e) {
+        _interactionsPane.requestFocus();
+        interactionsPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
       }
     });
   }

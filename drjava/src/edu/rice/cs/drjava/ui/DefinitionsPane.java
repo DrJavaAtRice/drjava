@@ -673,6 +673,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     }
 
     protected void _popupAction(MouseEvent e) {
+      requestFocus();
       _popMenu.show(e.getComponent(), e.getX(), e.getY());
     }
 
