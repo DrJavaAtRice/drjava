@@ -87,7 +87,9 @@ public class JSR14v20Compiler implements CompilerInterface {
   
   private String _extraClassPath = "";
 
-  protected boolean _allowAssertions = false;
+  protected boolean _allowAssertions = false;  
+  
+  private boolean _isJSR14v2_4;
     
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new JSR14v20Compiler();
@@ -128,7 +130,8 @@ public class JSR14v20Compiler implements CompilerInterface {
   protected JSR14v20Compiler() {
     if (!_isValidVersion()) {
       throw new RuntimeException("Invalid version of Java compiler.");
-    } 
+    }
+    _isJSR14v2_4 = _isJSR14v2_4();
   }
   
   /**
@@ -223,7 +226,12 @@ public class JSR14v20Compiler implements CompilerInterface {
   }
 
   public String getName() {
-    return "JSR-14 v2.0+";
+    if (_isJSR14v2_4) {
+      return "JSR-14 v2.4";
+    }
+    else {
+      return "JSR-14 v2.0/2.2";// + com.sun.tools.javac.Main.class.getResource("Main.class");
+    }
   }
 
   public String toString() {
@@ -282,6 +290,10 @@ public class JSR14v20Compiler implements CompilerInterface {
    */
   protected void _addSourceAndTargetOptions(Options options) {
     options.put("-source", "1.5");
+    if (_isJSR14v2_4) {
+      options.put("-target", "jsr14");
+    }
+//    options.put("-target", "1.5");
     options.put("-fork", "on");
   }
   
@@ -312,7 +324,7 @@ public class JSR14v20Compiler implements CompilerInterface {
       Context.class
     };
     Method m;    
-    if (_isJSR14v2_3()) {    
+    if (_isJSR14v2_4) {    
       try { 
         m = javaCompilerClass.getMethod("instance", validArgs1);
         compiler = (JavaCompiler)m.invoke(null, new Object[] {context});
@@ -324,6 +336,7 @@ public class JSR14v20Compiler implements CompilerInterface {
         throw new UnexpectedException(e);
       }
       catch (InvocationTargetException e) {
+        e.printStackTrace();
         throw new UnexpectedException(e);
       }      
     }
@@ -345,7 +358,11 @@ public class JSR14v20Compiler implements CompilerInterface {
     }
   }
   
-  private boolean _isJSR14v2_3() {
+  /**
+   * Check if we're using JSR14v2.4.  We're skipping version 2.3
+   * because it will never be officially released.
+   */
+  private boolean _isJSR14v2_4() {
     try {
       Class.forName("com.sun.tools.javac.main.Main$14");
       return true;
