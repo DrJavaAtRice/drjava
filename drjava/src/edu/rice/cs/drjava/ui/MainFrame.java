@@ -603,7 +603,7 @@ public class MainFrame extends JFrame {
     
     _setUpAction(_cutAction, "Cut", "Cut selected text to the clipboard");
     _setUpAction(_copyAction, "Copy", "Copy selected text to the clipboard");
-    _setUpAction(_pasteAction, "Copy", "Paste text from the clipboard");
+    _setUpAction(_pasteAction, "Paste", "Paste text from the clipboard");
 
     _cutAction.putValue(Action.NAME, "Cut");
     _copyAction.putValue(Action.NAME, "Copy");
@@ -771,6 +771,9 @@ public class MainFrame extends JFrame {
    */
   private void _setUpToolBar() {
     _toolBar = new JToolBar();
+    _toolBar.setFloatable(false);
+    
+    _toolBar.addSeparator();
     
     // New, open, save (disabled)
     _toolBar.add(_newAction);
@@ -779,12 +782,21 @@ public class MainFrame extends JFrame {
     
     _toolBar.addSeparator();
     
+    // Undo, redo
+    _toolBar.add(_undoAction);
+    _toolBar.add(_redoAction);
+    
+    _toolBar.addSeparator();
+    
     // Cut, copy, paste
     _toolBar.add(_cutAction);
     _toolBar.add(_copyAction);
     _toolBar.add(_pasteAction);
-    _toolBar.add(_undoAction);
-    _toolBar.add(_redoAction);
+    
+    _toolBar.addSeparator();
+    
+    // Find
+    _toolBar.add(_findReplaceAction);
     
     _toolBar.addSeparator();
     
