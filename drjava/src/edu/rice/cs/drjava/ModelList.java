@@ -68,7 +68,10 @@ class ModelList<T> {
   private void removeListener(Object thing) {
     this._listeners.remove(thing);
   }
-  
+
+  public int listenerCount() {
+    return _listeners.size();
+  }
   /**
    * Returns true if the list is empty.
    */

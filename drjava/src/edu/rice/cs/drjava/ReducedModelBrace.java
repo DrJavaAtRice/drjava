@@ -70,7 +70,6 @@ public class ReducedModelBrace implements ReducedModelStates {
   int absOffset() {
     int off = _offset;
     ModelList<ReducedToken>.Iterator it = _cursor.copy();
-    
     if (!it.atStart())
       it.prev();
     
@@ -341,16 +340,19 @@ public class ReducedModelBrace implements ReducedModelStates {
                     int currentOffset)
   {
     int retval = currentOffset;
-    ModelList<ReducedToken>.Iterator copyCursor2 = copyCursor.copy();
     
-    if (count == 0)
+    ModelList<ReducedToken>.Iterator copyCursor2 = copyCursor.copy();
+
+    if (count == 0) {
+      copyCursor2.dispose();
       return retval;
+    }
     //make copy of cursor and return new iterator?
     else if (count > 0)
       retval = _moveRight(count,copyCursor2,currentOffset);
     else
       retval = _moveLeft(Math.abs(count),copyCursor2,currentOffset);
-    
+
     copyCursor.setTo(copyCursor2);
     copyCursor2.dispose();
     return retval;

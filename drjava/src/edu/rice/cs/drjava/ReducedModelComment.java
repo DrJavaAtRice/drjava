@@ -181,7 +181,7 @@ public class ReducedModelComment implements ReducedModelStates {
     }
     // Not empty, not at start, if at end check the previous brace
     if (_cursor.atEnd()) {
-      _checkPreviousInsertSpecial(special, _cursor);
+      _checkPreviousInsertSpecial(special);
     }      
     // If inside a double character brace, break it.
     else if ((_offset > 0) && _cursor.current().isMultipleCharBrace()) {
@@ -204,10 +204,10 @@ public class ReducedModelComment implements ReducedModelStates {
       // a backslash, we want to break the following escape sequence if there
       // is one.
       _splitCurrentIfCommentBlock(false,special.equals("\\"),_cursor); //leaving us at start
-      _checkPreviousInsertSpecial(special, _cursor);
+      _checkPreviousInsertSpecial(special);
     }
     else {
-      _checkPreviousInsertSpecial(special, _cursor);
+      _checkPreviousInsertSpecial(special);
     }
     return;
   }
@@ -217,14 +217,12 @@ public class ReducedModelComment implements ReducedModelStates {
    * Delegates work to _checkPreviousInsertBackSlash and _checkPreviousInsertCommentChar,
    * depending on what's being inserted into the document.
    */  
-  private void _checkPreviousInsertSpecial(String special,
-                                           ModelList<ReducedToken>.Iterator
-                                           copyCursor)
+  private void _checkPreviousInsertSpecial(String special)
      {
        if (special.equals("\\"))
-         _checkPreviousInsertBackSlash(copyCursor);
+         _checkPreviousInsertBackSlash();
        else
-         _checkPreviousInsertCommentChar(special, copyCursor);
+         _checkPreviousInsertCommentChar(special);
      }
          
   /**
@@ -232,64 +230,59 @@ public class ReducedModelComment implements ReducedModelStates {
   * backslash with another backslash (yes, they too can be escaped).
   */
   
-  private void _checkPreviousInsertBackSlash(ModelList<ReducedToken>.Iterator
-                                             copyCursor)
-  {
-    if (!copyCursor.atStart()  && !copyCursor.atFirstItem()) {
-      if (copyCursor.prevItem().getType().equals("\\")) {
-        copyCursor.prevItem().setType("\\\\");
+  private void _checkPreviousInsertBackSlash() {
+    if (!_cursor.atStart()  && !_cursor.atFirstItem()) {
+      if (_cursor.prevItem().getType().equals("\\")) {
+        _cursor.prevItem().setType("\\\\");
         _updateBasedOnCurrentState();
         return;
       }
     }
     // Here we know the / unites with nothing behind it.
-    _insertNewBrace("\\",copyCursor); //leaving us after the brace.
-    copyCursor.prev();
+    _insertNewBrace("\\", _cursor); //leaving us after the brace.
+    _cursor.prev();
     _updateBasedOnCurrentState();
-    if (copyCursor.current().getSize() == 2) {
+    if (_cursor.current().getSize() == 2) {
       _offset = 1;
     }
     else {
-      copyCursor.next();
+      _cursor.next();
     }
-  }  
+  }
   
   /**
   * Checks before the place of insert to make sure there are no preceding
   * slashes with which the inserted slash must combine.  It then performs
   * the insert of either (/), (/ /), (/ *) or (* /).   
   */
-  private void _checkPreviousInsertCommentChar(String special,
-                                               ModelList<ReducedToken>.Iterator
-                                               copyCursor)
-  {
-    if (!copyCursor.atStart()  && !copyCursor.atFirstItem()) {
-      if ((copyCursor.prevItem().getType().equals("/")) &&
-          (copyCursor.prevItem().getState() == FREE))
+  private void _checkPreviousInsertCommentChar(String special) {
+    if (!_cursor.atStart()  && !_cursor.atFirstItem()) {
+      if ((_cursor.prevItem().getType().equals("/")) &&
+          (_cursor.prevItem().getState() == FREE))
           {
-            copyCursor.prevItem().setType("/" + special);
+            _cursor.prevItem().setType("/" + special);
             _updateBasedOnCurrentState();
             return;
           }
       // if we're after a star, 
-      else if ((copyCursor.prevItem().getType().equals("*")) &&
+      else if ((_cursor.prevItem().getType().equals("*")) &&
                (getStateAtCurrent() == INSIDE_BLOCK_COMMENT) &&
                special.equals("/"))
         {
-          copyCursor.prevItem().setType("*" + special);
-          copyCursor.prevItem().setState(FREE);
+          _cursor.prevItem().setType("*" + special);
+          _cursor.prevItem().setState(FREE);
           _updateBasedOnCurrentState();
           return;
         }
     }
     //Here we know the / unites with nothing behind it.
-    _insertNewBrace(special,copyCursor); //leaving us after the brace.
-    copyCursor.prev();
+    _insertNewBrace(special, _cursor); //leaving us after the brace.
+    _cursor.prev();
     _updateBasedOnCurrentState();
-    if (copyCursor.current().getSize() == 2)
+    if (_cursor.current().getSize() == 2)
       _offset = 1;
     else
-      copyCursor.next();
+      _cursor.next();
   }
   
   /**
@@ -695,7 +688,7 @@ public class ReducedModelComment implements ReducedModelStates {
     ReducedModelState curState = _getStateAtCurrentHelper(copyCursor);
     // Free if at the beginning     
     while (!copyCursor.atEnd()) {
-			if (curState == FREE) {
+      if (curState == FREE) {
         curState = _updateFree(copyCursor);
       }
       else if (curState == INSIDE_SINGLE_QUOTE) {
@@ -717,7 +710,7 @@ public class ReducedModelComment implements ReducedModelStates {
         if (copyCursor.atEnd()) {
           return;
         }
-			  curState = _getStateAtCurrentHelper(copyCursor);
+        curState = _getStateAtCurrentHelper(copyCursor);
       }
     }
   }
@@ -1095,6 +1088,7 @@ public class ReducedModelComment implements ReducedModelStates {
     ModelList<ReducedToken>.Iterator copyCursor2 = copyCursor.copy();
     
     if (count == 0) {
+      copyCursor2.dispose();
       return retval;
     }
     //make copy of cursor and return new iterator?
@@ -1653,7 +1647,3 @@ public class ReducedModelComment implements ReducedModelStates {
     return walkcount;
   }
 }
-
-
-
-
