@@ -200,7 +200,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     //System.err.println("about to check Foo");
     final String afterAbort = interpret("Foo.class.getName()");
     assertEquals("Foo", afterAbort);
-    System.err.println("done check Foo: " + afterAbort);
+    //System.err.println("done check Foo: " + afterAbort);
   }
 
   /**
@@ -342,6 +342,13 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   public void testGetSourceRootDefaultPackage()
     throws BadLocationException, IOException, InvalidPackageException
   {
+    // Get source root (current directory only)
+    File[] roots = _model.getSourceRootSet();
+    assertEquals("number of source roots", 1, roots.length);
+    assertEquals("source root (current directory)", 
+                 new File(System.getProperty("user.dir")),
+                 roots[0]);
+    
     // Create temp directory
     File baseTempDir = tempDirectory();
 
@@ -359,10 +366,10 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     // No events should fire
     _model.addListener(new TestListener());
 
-    // Get source root
-    File[] roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 1, roots.length);
-    assertEquals("source root", subdir, roots[0]);
+    // Get source roots
+    roots = _model.getSourceRootSet();
+    assertEquals("number of source roots", 2, roots.length);
+    assertEquals("source root", subdir, roots[1]);
   }
 
   public void testGetSourceRootPackageThreeDeepValid()
@@ -387,9 +394,10 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     _model.addListener(new TestListener());
 
     // Since we had the package statement the source root should be base dir
+    // (also contains currDir)
     File[] roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 1, roots.length);
-    assertEquals("source root", baseTempDir, roots[0]);
+    assertEquals("number of source roots", 2, roots.length);
+    assertEquals("source root", baseTempDir, roots[1]);
 
   }
 
@@ -414,13 +422,12 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     // No events should fire
     _model.addListener(new TestListener());
 
-    // The package name is wrong so this should return none.
+    // The package name is wrong so this should return only currDir
     File[] roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 0, roots.length);
-    /*
-    fail("getSourceRoot() did not fail on invalid package. It returned: " +
-         root);
-         */
+    assertEquals("number of source roots", 1, roots.length);
+    assertEquals("source root (current directory)", 
+                 new File(System.getProperty("user.dir")),
+                 roots[0]);
   }
 
   public void testGetSourceRootPackageOneDeepValid()
@@ -442,9 +449,10 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     _model.addListener(new TestListener());
 
     // Since we had the package statement the source root should be base dir
+    //  (also currDir)
     File[] roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 1, roots.length);
-    assertEquals("source root", baseTempDir, roots[0]);
+    assertEquals("number of source roots", 2, roots.length);
+    assertEquals("source root", baseTempDir, roots[1]);
 
   }
 
@@ -479,11 +487,11 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     // No events should fire
     _model.addListener(new TestListener());
 
-    // Get source roots (should be 2: no duplicates)
+    // Get source roots (should be 3: no duplicates, but also currDir)
     File[] roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 2, roots.length);
-    File root1 = roots[0];
-    File root2 = roots[1];
+    assertEquals("number of source roots", 3, roots.length);
+    File root1 = roots[1];
+    File root2 = roots[2];
 
     // Make sure both source roots are in set
     // But we don't care about the order

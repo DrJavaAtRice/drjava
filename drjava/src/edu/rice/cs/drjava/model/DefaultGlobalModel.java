@@ -771,9 +771,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * documents, without duplicates. Note that if any of the open
    * documents has an invalid package statement, it won't be added
    * to the source root set.
+   * This set includes the user's current directory, as well.
    */
   public File[] getSourceRootSet() {
     LinkedList roots = new LinkedList();
+    File currDir = new File(System.getProperty("user.dir"));
+    roots.add(currDir);
 
     for (int i = 0; i < _definitionsDocs.size(); i++) {
       OpenDefinitionsDocument doc
