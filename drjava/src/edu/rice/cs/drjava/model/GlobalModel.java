@@ -21,7 +21,6 @@ import edu.rice.cs.drjava.model.compiler.*;
  * functionality of DrJava, along with many other things.
  */
 public class GlobalModel {
-  
   private DefinitionsEditorKit _editorKit;
   private DefinitionsDocument _definitionsDoc;
   private InteractionsDocument _interactionsDoc;
@@ -249,7 +248,10 @@ public class GlobalModel {
         sourceRoot = _getSourceRoot(packageName);
         
         File[] files = new File[] { file };
-        _compileErrors = DrJava.compiler.compile(sourceRoot, files);
+
+        CompilerInterface compiler =CompilerRegistry.ONLY.getActiveCompiler();
+
+        _compileErrors = compiler.compile(sourceRoot, files);
       }
       catch (InvalidPackageException e) {
         CompilerError err = new CompilerError(file.getAbsolutePath(),
@@ -317,8 +319,10 @@ public class GlobalModel {
     try {
       _consoleDoc.remove(0, _consoleDoc.getLength());
     }
-    catch (BadLocationException impossible) {
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
     }
+
     _notifyListeners(new EventNotifier() {
       public void notifyListener(GlobalModelListener l) {
         l.consoleReset();
@@ -523,6 +527,40 @@ public class GlobalModel {
     }
   }
   
+  /**
+   * Returns all registered compilers that are actually available.
+   * That is, for all elements in the returned array, .isAvailable()
+   * is true.
+   * This method will never return null or a zero-length array.
+   *
+   * @see CompilerRegistry#getAvailableCompilers
+   */
+  public CompilerInterface[] getAvailableCompilers() {
+    return CompilerRegistry.ONLY.getAvailableCompilers();
+  }
+
+  /**
+   * Sets which compiler is the "active" compiler.
+   *
+   * @param compiler Compiler to set active.
+   *
+   * @see #getActiveCompiler
+   * @see CompilerRegistry#setActiveCompiler
+   */
+  public void setActiveCompiler(CompilerInterface compiler) {
+    CompilerRegistry.ONLY.setActiveCompiler(compiler);
+  }
+
+  /**
+   * Gets the compiler is the "active" compiler.
+   *
+   * @see #setActiveCompiler
+   * @see CompilerRegistry#getActiveCompiler
+   */
+  public CompilerInterface getActiveCompiler() {
+    return CompilerRegistry.ONLY.getActiveCompiler();
+  }
+
   /**
    * Finds the root directory of the source files.
    * @return The root directory of the source files,

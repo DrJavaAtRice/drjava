@@ -200,7 +200,7 @@ public abstract class GlobalModelTestCase extends TestCase {
    * By default it expects no events to be fired. To customize,
    * subclass and override one or more methods.
    */
-  class TestListener implements GlobalModelListener {
+  protected static class TestListener implements GlobalModelListener {
     protected int newCount;
     protected int openCount;
     protected int saveCount;
@@ -305,57 +305,6 @@ public abstract class GlobalModelTestCase extends TestCase {
       
       // this is actually unreachable but the compiler won't believe me. sigh.
       throw new RuntimeException();
-    }
-  }
-
-  protected class CompileShouldSucceedListener extends TestListener {
-    public void compileStarted() {
-      assertCompileStartCount(0);
-      assertCompileEndCount(0);
-      assertInteractionsResetCount(0);
-      assertConsoleResetCount(0);
-      compileStartCount++;
-    }
-
-    public void compileEnded() {
-      assertCompileEndCount(0);
-      assertCompileStartCount(1);
-      assertInteractionsResetCount(0);
-      assertConsoleResetCount(0);
-      compileEndCount++;
-    }
-
-    public void interactionsReset() {
-      assertInteractionsResetCount(0);
-      assertCompileStartCount(1);
-      assertCompileEndCount(1);
-      // don't care whether interactions or console are reset first
-      interactionsResetCount++;
-    }
-
-    public void consoleReset() {
-      assertConsoleResetCount(0);
-      assertCompileStartCount(1);
-      assertCompileEndCount(1);
-      // don't care whether interactions or console are reset first
-      consoleResetCount++;
-    }
-  }
-
-  /**
-   * A model listener for situations expecting a compilation to fail.
-   */
-  protected class CompileShouldFailListener extends TestListener {
-    public void compileStarted() {
-      assertCompileStartCount(0);
-      assertCompileEndCount(0);
-      compileStartCount++;
-    }
-
-    public void compileEnded() {
-      assertCompileEndCount(0);
-      assertCompileStartCount(1);
-      compileEndCount++;
     }
   }
 }
