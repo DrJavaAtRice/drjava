@@ -77,6 +77,8 @@ public abstract class GlobalModelTestCase extends TestCase {
 
   protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
   protected static final String BAR_TEXT = "class DrJavaTestBar {}";
+  protected static final String BAZ_TEXT = 
+    "class DrJavaTestBaz extends DrJavaTestFoo {}";
   protected static final String FOO_MISSING_CLOSE_TEXT =
     "class DrJavaTestFoo {";
 

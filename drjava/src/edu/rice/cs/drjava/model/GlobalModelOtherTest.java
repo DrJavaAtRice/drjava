@@ -267,7 +267,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
   /**
    * Saves to the given file, and then compiles the given document.
    * The compile is expected to succeed and it is checked to make sure it worked
-   * reasonably.
+   * reasonably.  This method does not return until the Interactions JVM
+   * has reset and is ready to use.
    */
   private void _doCompile(OpenDefinitionsDocument doc, File file)
     throws IOException, InterruptedException
@@ -287,16 +288,46 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
 
   /**
    * Creates a new class, compiles it and then checks that the REPL
-   * can see it.
+   * can see it.  Then checks that a compiled class file in another
+   * directory can be both accessed and extended if it is on the
+   * "extra.classpath" config option.
    */
-  public void testInteractionsCanSeeCompile()
+  public void testInteractionsCanSeeCompiledClasses()
     throws BadLocationException, IOException, InterruptedException
   {
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
-    _doCompile(doc, tempFile());
+    // Compile Foo
+    OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
+    File dir1 = new File(_tempDir, "dir1");
+    dir1.mkdir();
+    File file1 = new File(dir1, "TestFile1.java");
+    _doCompile(doc1, file1);
 
     String result = interpret("new DrJavaTestFoo().getClass().getName()");
-
+    assertEquals("interactions result",
+                 "DrJavaTestFoo",
+                 result);
+    
+    // Add directory 1 to extra classpath and close doc1
+    Vector<File> cp = new Vector<File>();
+    cp.addElement(dir1);
+    DrJava.CONFIG.setSetting(EXTRA_CLASSPATH, cp);
+    _model.closeFile(doc1);
+    
+    // Compile Baz which extends Foo in another directory.
+    OpenDefinitionsDocument doc2 = setupDocument(BAZ_TEXT);
+    File dir2 = new File(_tempDir, "dir2");
+    dir2.mkdir();
+    File file2 = new File(dir2, "TestFile1.java");
+    _doCompile(doc2, file2);
+    
+    // Ensure that Baz can use the Foo class from extra classpath
+    result = interpret("new DrJavaTestBaz().getClass().getName()");
+    assertEquals("interactions result",
+                 "DrJavaTestBaz",
+                 result);
+    
+    // Also ensure that Foo can be used directly
+    result = interpret("new DrJavaTestFoo().getClass().getName()");
     assertEquals("interactions result",
                  "DrJavaTestFoo",
                  result);
