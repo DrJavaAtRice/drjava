@@ -85,17 +85,21 @@ public class JUnitErrorModel {
       tf.thrownException().printStackTrace(pw);
 
       String classname = theclass + "." + tc.getName();
-      String theLine = sw.toString().substring(sw.toString().indexOf(classname));
-      theLine = theLine.substring(0, theLine.indexOf("\n"));
+      String theLine = _substring(sw.toString(), 0, sw.toString().indexOf(classname));
+      theLine = _substring(theLine, 0, theLine.indexOf("\n"));
 
-      theLine = theLine.substring(theLine.indexOf("(") + 1);
-      theLine = theLine.substring(0, theLine.indexOf(")"));
+      theLine = _substring(theLine, 0, theLine.indexOf("(") + 1);
+      theLine = _substring(theLine, 0, theLine.indexOf(")"));
 
-      String file = theLine.substring(0, theLine.indexOf(":"));
+      String file = _substring(theLine, 0, theLine.indexOf(":"));
       int lineNo = 0;
       try {
-        lineNo = new Integer(theLine.substring(theLine.indexOf(":") + 1)).intValue() - 1;
-      } catch (NumberFormatException e) {
+        lineNo = new Integer(_substring(theLine, 
+                                        theLine.indexOf(":") + 1,
+                                        theLine.length()))
+          .intValue() - 1;
+      } 
+      catch (NumberFormatException e) {
         throw new UnexpectedException(e);
       }
 
@@ -143,6 +147,19 @@ public class JUnitErrorModel {
    */
   public Document getDocument() {
     return _document;
+  }
+
+  /**
+   * Returns a substring, if it exists. Otherwise, it returns "(not applicable)".
+   * @ pre start >= 0
+   */
+  private String _substring(String s, int start, int end) {
+    if (end >= 0) {
+      return s.substring(start, end);
+    }
+    else {
+      return "0";
+    }
   }
 
   /**

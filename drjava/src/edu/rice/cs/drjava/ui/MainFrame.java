@@ -1072,7 +1072,9 @@ public class MainFrame extends JFrame {
     _setUpAction(_abortInteractionAction, "Break", "Abort the current interaction");
     _setUpAction(_resetInteractionsAction, "Reset", "Reset interactions");
 
-    _setUpAction(_junitAction, "Test", "Run JUnit over the current document");
+    // Commented out because testing is breaking on some files. We shouldn't
+    // put the button up until it works. eallen 5/31/2002
+    //_setUpAction(_junitAction, "Test", "Run JUnit over the current document");
   }
 
   private void _setUpAction(Action a, String _default, String shortDesc) {
@@ -1244,7 +1246,8 @@ public class MainFrame extends JFrame {
     // keep track of the compile menu item
     _compileMenuItem = tmpItem;
 
-    toolsMenu.add(_junitAction);
+    // Commented out until test functionality is fixed. eallen 5/31/2002
+    // toolsMenu.add(_junitAction);
 
     // Abort/reset interactions, clear console
     toolsMenu.addSeparator();
@@ -1413,8 +1416,10 @@ public class MainFrame extends JFrame {
 
     // Junit
     _toolBar.addSeparator();
-    _junitButton = _createToolbarButton(_junitAction);
-    _toolBar.add(_junitButton);
+    
+    // Commented out until test button functionality is fixed. eallen 5/31/2002
+    // _junitButton = _createToolbarButton(_junitAction);
+    // _toolBar.add(_junitButton);
 
     getContentPane().add(_toolBar, BorderLayout.NORTH);
   }
