@@ -1090,7 +1090,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     // This depends on the current value of the "javadoc.all.packages" option.
     boolean docAll = DrJava.getConfig().getSetting(JAVADOC_ALL_PACKAGES).booleanValue();
 
-    // Each document has a package heirarchy to traverse.
+    // Each document has a package hierarchy to traverse.
     for (int i = 0; i < _definitionsDocs.getSize(); i++) {
       OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
         _definitionsDocs.getElementAt(i);
@@ -1125,7 +1125,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             searchRoot = new File(sourceRoot, topLevelPack);
           }
 
-          // But we don't want to traverse the heirarchy more than once.
+          // But we don't want to traverse the hierarchy more than once.
           if (!topLevelPacks.contains(topLevelPack) 
                 || !sourceRootSet.contains(sourceRoot)) {
             topLevelPacks.add(topLevelPack);

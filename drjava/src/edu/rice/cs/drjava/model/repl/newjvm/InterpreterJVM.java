@@ -613,6 +613,16 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
   }
   
+  /**
+   * This method is called if the interpreterJVM cannot
+   * be exited (likely because of its having a
+   * security manager)
+   */
+  protected void quitFailed(Exception e) {    
+    javax.swing.JOptionPane.showMessageDialog(null, 
+                                              "DrJava's interpreterJVM could not be exited:\n" + e);
+  }
+  
   
   // ---------- JUnit methods ----------
   
