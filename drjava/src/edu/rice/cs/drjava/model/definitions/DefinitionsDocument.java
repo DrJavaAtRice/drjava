@@ -71,12 +71,7 @@ import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.Finalizable;
-import edu.rice.cs.drjava.model.FinalizationListener;
-import edu.rice.cs.drjava.model.FinalizationEvent;
-import edu.rice.cs.drjava.model.FileMovedException;
-import edu.rice.cs.drjava.model.GlobalEventNotifier;
-import edu.rice.cs.drjava.model.OperationCanceledException;
+import edu.rice.cs.drjava.model.*;
 
 
 /**
@@ -103,7 +98,7 @@ import edu.rice.cs.drjava.model.OperationCanceledException;
  * @see ReducedModelBrace
  *
  */
-public class DefinitionsDocument extends SwingDocumentAdapter implements OptionConstants, Finalizable<DefinitionsDocument> {
+public class DefinitionsDocument extends AbstractDJDocument implements Finalizable<DefinitionsDocument> {
   
   List<DocumentClosedListener> _closedListeners = new LinkedList<DocumentClosedListener>();
   
@@ -122,7 +117,7 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
   
   private boolean _closed = false;
   
-  private void throwErrorHuh(){
+  protected void throwErrorHuh(){
       if(_closed){
         throw new RuntimeException("Definitions Document is closed, yet is being used");
       }
@@ -149,14 +144,6 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
   
   /** The maximum number of undos the model can remember */
   private static final int UNDO_LIMIT = 1000;
-  /** A set of normal endings for lines. */
-  protected static HashSet<String> _normEndings = _makeNormEndings();
-  /** A set of Java keywords. */
-  protected static HashSet<String> _keywords = _makeKeywords();
-  /** A set of Java keywords. */
-  protected static HashSet<String> _primTypes = _makePrimTypes();
-  /** The default indent setting. */
-  private int _indent = 2;
   /** Determines if tabs are removed on open and converted to spaces. */
   private static boolean _tabsRemoved = true;
   /** Determines if the document has been modified since the last save. */
@@ -179,72 +166,12 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
    */
   private OpenDefinitionsDocument _odd;
   
-  /**
-   * The reduced model of the document that handles most of the
-   * document logic and keeps track of state.  Should ONLY be referenced from
-   * this class, and all references to it MUST be synchronized.
-   */
-  private BraceReduction _reduced = new ReducedModelControl();
-  /** The absolute character offset in the document. */
-  private int _currentLocation = 0;
-
-  /**
-   * The instance of the indent decision tree used by Definitions documents.
-   * TODO: should this be static?  It was before - with a static initializer.
-   */
-  private final Indenter _indenter;
-
   private CompoundUndoManager _undoManager;
   
-  /**
-   * Caches calls to the reduced model to speed up indent performance.
-   * Must be cleared every time document is changed.  Use by calling
-   * _checkCache and _storeInCache.
-   */
-  private final Hashtable<String, Object> _helperCache =
-    new Hashtable<String, Object>();
-
-  /**
-   * Keeps track of the order of elements added to the helper method cache,
-   * so that the oldest elements can be removed when the maximum size is
-   * reached.  A true LRU cache might be more effective, though I'm not sure
-   * what the exact pattern of helper method reuse is-- this should be
-   * sufficient without significantly decreasing the effectiveness of the cache.
-   */
-  private final Vector<String> _helperCacheHistory = new Vector<String>();
-
-  /**
-   * Whether anything is stored in the cache.  (Prevents clearing the table
-   * unnecessarily on every change to the document.)
-   */
-  private boolean _cacheInUse;
-
-  /**
-   * Maximum number of elements to allow in the helper method cache.
-   * Only encountered when indenting very large blocks, since the cache
-   * is cleared after each change to the document.
-   */
-  private static final int MAX_CACHE_SIZE = 10000;
-
-  /**
-   * Constant for starting position of document.
-   */
-  public static final int DOCSTART = 0;
-
-  /**
-   * Constant used by helper methods to indicate an error
-   */
-  public static final int ERROR_INDEX = -1;
-
   /**
    * keeps track of the listeners to this model
    */
   private final GlobalEventNotifier _notifier;
-
-  // Saved here to allow the listener to be removed easily
-  // This is needed to allow for garbage collection
-  private OptionListener<Integer> _listener1;
-  private OptionListener<Boolean> _listener2;
   
   /**
    * Convenience constructor for using a custom indenter.
@@ -252,9 +179,8 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
    * @param notifier used by CompoundUndoManager to announce undoable edits
    */
   public DefinitionsDocument(Indenter indenter, GlobalEventNotifier notifier) {
-    super();
+    super(indenter);
     _notifier = notifier;
-    _indenter = indenter;
     _init();
     resetUndoManager();
   }
@@ -268,9 +194,6 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
   public DefinitionsDocument(GlobalEventNotifier notifier) {
     super();
     _notifier = notifier;
-    int ind = DrJava.getConfig().getSetting(INDENT_LEVEL).intValue();
-    _indenter = new Indenter(ind);
-    _initNewIndenter();
     _init();
     resetUndoManager();
   }
@@ -284,41 +207,10 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
   public DefinitionsDocument(GlobalEventNotifier notifier, CompoundUndoManager undoManager) {
     super();
     _notifier = notifier;
-    int ind = DrJava.getConfig().getSetting(INDENT_LEVEL).intValue();
-    _indenter = new Indenter(ind);
-    _initNewIndenter();
     _init();
     _undoManager = undoManager;
   }
   
-  private void _removeIndenter(){
-    DrJava.getConfig().removeOptionListener(INDENT_LEVEL,
-                                         _listener1);
-    DrJava.getConfig().removeOptionListener(AUTO_CLOSE_COMMENTS,
-                                         _listener2);
-  }
-  
-  private void _initNewIndenter(){
-    // Create the indenter from the config values
-
-    _listener1 = new OptionListener<Integer>() {
-      public void optionChanged(OptionEvent<Integer> oce) {
-        _indenter.buildTree(oce.value.intValue());
-      }
-    };
-    
-    _listener2 = new OptionListener<Boolean>() {
-      public void optionChanged(OptionEvent<Boolean> oce) {
-        _indenter.buildTree(DrJava.getConfig().getSetting(INDENT_LEVEL).intValue());
-      }
-    };
-    
-    DrJava.getConfig().addOptionListener(INDENT_LEVEL,
-                                         _listener1);
-    DrJava.getConfig().addOptionListener(AUTO_CLOSE_COMMENTS,
-                                         _listener2);
-  }
-
   
 //  public void setUndoManager(CompoundUndoManager undoManager){
 //    if(undoManager != null)
@@ -373,18 +265,7 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
     throwErrorHuh();
     readUnlock();
   }
-  
-  
-  /**
-   * This method should never be called outside of this class. Doing so can create
-   * all sorts of synchronization issues. It is package private for test purposes.
-   * @return The reduced model of this document.
-   */
-  BraceReduction getReduced() {
-    throwErrorHuh();
-    return _reduced;
-  }
-  
+   
   
   /**
    * sets the OpenDefinitionsDocument that holds this DefinitionsDocument
@@ -408,58 +289,7 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
       return _odd;
     }
   }
-
-  /**
-   * Create a set of normal endings, i.e., semi-colons and braces for the purposes
-   * of indenting.
-   * @return the set of normal endings
-   */
-  protected static HashSet<String> _makeNormEndings() {
-    HashSet<String> normEndings = new HashSet<String>();
-    normEndings.add(";");
-    normEndings.add("{");
-    normEndings.add("}");
-    normEndings.add("(");
-    return  normEndings;
-  }
-
-  /**
-   * Create a set of Java/GJ keywords for special coloring.
-   * @return the set of keywords
-   */
-  protected static HashSet<String> _makeKeywords() {
-    final String[] words =  {
-      "import", "native", "package", "goto", "const", "if", "else",
-      "switch", "while", "for", "do", "true", "false", "null", "this",
-      "super", "new", "instanceof",    "return",
-      "static", "synchronized", "transient", "volatile", "final",
-      "strictfp", "throw", "try", "catch", "finally",
-      "throws", "extends", "implements", "interface", "class",
-      "break", "continue", "public", "protected", "private", "abstract",
-      "case", "default", "assert", "enum"
-    };
-    HashSet<String> keywords = new HashSet<String>();
-    for (int i = 0; i < words.length; i++) {
-      keywords.add(words[i]);
-    }
-    return  keywords;
-  }
-  /**
-   * Create a set of Java/GJ primitive types for special coloring.
-   * @return the set of primitive types
-   */
-  protected static HashSet<String> _makePrimTypes() {
-    final String[] words =  {
-      "boolean", "char", "byte", "short", "int",
-      "long", "float", "double", "void",
-    };
-    HashSet<String> prims = new HashSet<String>();
-    for (int i = 0; i < words.length; i++) {
-      prims.add(words[i]);
-    }
-    return  prims;
-  }
-
+  
   /**
    * Returns whether this document is currently untitled
    * (indicating whether it has a file yet or not).
@@ -526,133 +356,6 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
 //    return _timestamp;
 //  }
 
-  /**
-   * This function finds the given character in the same statement as the given
-   * position, and before the given position.  It is used by QuestionExistsCharInStmt and
-   * QuestionExistsCharInPrevStmt
-   */
-  public boolean findCharInStmtBeforePos(char findChar, int position){
-    throwErrorHuh();
-    if(position == DefinitionsDocument.ERROR_INDEX) {
-      // Should not happen
-      throw new UnexpectedException(new
-        IllegalArgumentException("Argument endChar to " +
-                                 "QuestionExistsCharInStmt must be a char " +
-                                 "that exists on the current line."));
-    }
-
-    char[] findCharDelims = {findChar, ';', '{', '}'};
-    int prevFindChar;
-
-    // Find the position of the previous occurence findChar from the
-    // position of endChar (looking in paren phrases as well)
-    try {
-      prevFindChar = this.findPrevDelimiter(position, findCharDelims, false);
-    } catch (BadLocationException e) {
-      // Should not happen
-      throw new UnexpectedException(e);
-    }
-
-    if ((prevFindChar == DefinitionsDocument.ERROR_INDEX) ||
-        (prevFindChar < 0)) {
-      // Couldn't find a previous occurence findChar
-      return false;
-    }
-
-    // Determine if prevFindChar was findChar, rather than end
-    //  of statement delimiter
-    boolean found;
-    try {
-      String foundString = this.getText(prevFindChar, 1);
-      char foundChar = foundString.charAt(0);
-      found = (foundChar == findChar);
-    }
-    catch (BadLocationException e) {
-      // Should not happen
-      throw new UnexpectedException(e);
-    }
-
-    return found;
-  }
-
-  /**
-   * Checks the helper method cache for a stored value.  Returns the
-   * value if it has been cached, or null otherwise.
-   * Calling convention for keys:
-   *   methodName:arg1:arg2
-   * @param key Name of the method and arguments
-   */
-  protected Object _checkCache(String key) {
-    throwErrorHuh();
-    //_helperCache.put(key+"|time", new Long(System.currentTimeMillis()));
-    Object result = _helperCache.get(key);
-    //if (result != null) DrJava.consoleOut().println("Using cache for " + key);
-    return result;
-  }
-
-  /**
-   * Stores the given result in the helper method cache.
-   * Calling convention for keys:
-   *   methodName:arg1:arg2
-   * @param key Name of method and arguments
-   * @param result Result of the method call
-   */
-  protected void _storeInCache(String key, Object result) {
-    throwErrorHuh();
-    _cacheInUse = true;
-
-    // Prevent going over max size
-    if (_helperCache.size() >= MAX_CACHE_SIZE) {
-      if (_helperCacheHistory.size() > 0) {
-        _helperCache.remove( _helperCacheHistory.get(0) );
-        _helperCacheHistory.remove(0);
-      }
-      else {
-        // Shouldn't happen
-        throw new RuntimeException("Cache larger than cache history!");
-      }
-    }
-    Object prev = _helperCache.put(key, result);
-    // Add to history if the insert increased the size of the table
-    if (prev == null) {
-      _helperCacheHistory.add(key);
-    }
-
-    /*
-    long end = System.currentTimeMillis();
-    Long start = (Long)_helperCache.get(key+"|time");
-    if (start != null) {
-      _helperCache.remove(key+"|time");
-      long delay = end - start.longValue();
-      if (delay > maxHelpDelay) {
-        maxHelpDelay = delay;
-        maxKey = key;
-        //DrJava.consoleOut().println("   Longest: " + maxHelpDelay + "ms from " + maxKey +
-        //                            ", line " + getCurrentLine());
-      }
-    }
-    else {
-      DrJava.consoleOut().println("  CACHE MISS: " + key);
-    }
-    */
-  }
-
-  // Fields for monitoring performance
-
-  //long maxHelpDelay = 0;
-  //String maxKey = "none";
-
-
-  /**
-   * Clears the helper method cache.
-   * Should be called every time the document is modified.
-   */
-  protected void _clearCache() {
-    throwErrorHuh();
-    _helperCache.clear();
-    _helperCacheHistory.clear();
-    _cacheInUse = false;
-  }
 
   /**
    * Gets the package and class name of this OpenDefinitionsDocument
@@ -721,9 +424,7 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
     throws BadLocationException
   {
     throwErrorHuh();
-    // Clear the helper method cache
-    if (_cacheInUse) _clearCache();
-
+    
     // If _removeTabs is set to true, remove all tabs from str.
     // It is a current invariant of the tabification functionality that
     // the document contains no tabs, but we want to allow the user
@@ -738,45 +439,8 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
     }
     super.insertString(offset, str, a);
   }
-
-  /**
-   * Updates document structure as a result of text insertion.
-   * This happens after the text has actually been inserted.
-   * Here we update the reduced model (via an {@link InsertCommand})
-   * and store information for how to undo/redo the reduced model changes
-   * inside the {@link DefaultDocumentEvent}.
-   *
-   * @see InsertCommand
-   * @see DefaultDocumentEvent
-   * @see CommandUndoableEdit
-   */
-  protected void insertUpdate(AbstractDocument.DefaultDocumentEvent chng,
-                              AttributeSet attr)
-  {
-    throwErrorHuh();
-    // Clear the helper method cache
-    if (_cacheInUse) _clearCache();
-
-    super.insertUpdate(chng, attr);
-
-    try {
-      final int offset = chng.getOffset();
-      final int length = chng.getLength();
-      final String str = getText(offset, length);
-
-      InsertCommand doCommand = new InsertCommand(offset, str);
-      RemoveCommand undoCommand = new RemoveCommand(offset, length);
-
-      // add the undo/redo
-      chng.addEdit(new CommandUndoableEdit(undoCommand, doCommand));
-      // actually do the insert
-      doCommand.run();
-    }
-    catch (BadLocationException ble) {
-      throw new UnexpectedException(ble);
-    }
-  }
-
+  
+  
   /**
    * Removes a block of text from the specified location.
    * We don't update the reduced model here; that happens
@@ -784,51 +448,12 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
    */
   public void remove(int offset, int len) throws BadLocationException {
     throwErrorHuh();
-    // Clear the helper method cache
-    if (_cacheInUse) _clearCache();
 
     if (!_modifiedSinceSave) {
       _modifiedSinceSave = true;
       _classFileInSync = false;
     }
     super.remove(offset, len);
-  }
-
-  /**
-   * Updates document structure as a result of text removal.
-   * This happens before the text has actually been removed.
-   * Here we update the reduced model (via an {@link RemoveCommand})
-   * and store information for how to undo/redo the reduced model changes
-   * inside the {@link DefaultDocumentEvent}.
-   *
-   * @see RemoveCommand
-   * @see DefaultDocumentEvent
-   * @see CommandUndoableEdit
-   */
-  protected void removeUpdate(AbstractDocument.DefaultDocumentEvent chng) {
-    throwErrorHuh();
-    // Clear the helper method cache
-    if (_cacheInUse) _clearCache();
-
-    try {
-      final int offset = chng.getOffset();
-      final int length = chng.getLength();
-      final String removedText = getText(offset, length);
-            super.removeUpdate(chng);
-
-      Runnable doCommand = new RemoveCommand(offset, length);
-      Runnable undoCommand = new InsertCommand(offset, removedText);
-
-      // add the undo/redo info
-      chng.addEdit(new CommandUndoableEdit(undoCommand, doCommand));
-
-      // actually do the removal from the reduced model
-      doCommand.run();
-    }
-    catch (BadLocationException ble) {
-      throw new UnexpectedException(ble);
-    }
-
   }
 
   /**
@@ -866,46 +491,6 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
     return target.toString();
   }
   */
-
-  /**
-   * Add a character to the underlying reduced model.
-   * @param curChar the character to be added.
-   */
-  private synchronized void _addCharToReducedModel(char curChar) {
-    throwErrorHuh();
-    // Clear the helper method cache
-    if (_cacheInUse) _clearCache();
-
-    _reduced.insertChar(curChar);
-  }
-
-  /**
-   * Fire event that styles changed from current location to the end.
-   * Right now we do this every time there is an insertion or removal.
-   * Two possible future optimizations:
-   * <ol>
-   * <li>Only fire changed event if text other than that which was inserted
-   *     or removed *actually* changed status. If we didn't changed the status
-   *     of other text (by inserting or deleting unmatched pair of quote or
-   *     comment chars), no change need be fired.
-   * <li>If a change must be fired, we could figure out the exact end
-   *     of what has been changed. Right now we fire the event saying that
-   *     everything changed to the end of the document.
-   * </ol>
-   *
-   * I don't think we'll need to do either one since it's still fast now.
-   * I think this is because the UI only actually paints the things on the
-   * screen anyway.
-   */
-  private void _styleChanged() {
-    throwErrorHuh();
-    int length = getLength() - _currentLocation;
-    //DrJava.consoleErr().println("Changed: " + _currentLocation + ", " + length);
-    DocumentEvent evt = new DefaultDocumentEvent(_currentLocation,
-                                                 length,
-                                                 DocumentEvent.EventType.CHANGE);
-    fireChangedUpdate(evt);
-  }
 
   /**
    * Originally designed to allow undoManager to set the current document to
@@ -949,47 +534,7 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
     }
   }
   
-  /**
-   * Get the current location of the cursor in the document.
-   * Unlike the usual swing document model, which is stateless, because of our implementation
-   * of the underlying reduced model, we need to keep track of the current location.
-   * @return where the cursor is as the number of characters into the document
-   */
-  public int getCurrentLocation() {
-    throwErrorHuh();
-    return  _currentLocation;
-  }
-
-  /**
-   * Change the current location of the document
-   * @param loc the new absolute location
-   */
-  public void setCurrentLocation(int loc) {
-    throwErrorHuh();
-    move(loc - _currentLocation);
-  }
-
-  /**
-   * The actual cursor movement logic.  Helper for setCurrentLocation(int).
-   * @param dist the distance from the current location to the new location.
-   */
-  public synchronized void move(int dist) {
-    throwErrorHuh();
-    //if (_currentLocation != _reduced.absOffset()) {
-    //  DrJava.consoleOut().println("DefDoc.currentLocation: " + _currentLocation);
-    //  DrJava.consoleOut().println("Reduced location: " + _reduced.absOffset());
-    //}
-
-    int newLoc = _currentLocation + dist;
-    if (newLoc < 0) {
-//      throw new RuntimeException("location < 0?! oldLoc=" + _currentLocation + " dist=" +
-//                                  dist);
-      throw new IllegalStateException("Tried to cursor to a negative location");
-    }
-    _currentLocation = newLoc;
-    _reduced.move(dist);
-  }
-
+  
   /**
    * Return the current column of the cursor position.
    * Uses a 0 based index.
@@ -1075,617 +620,6 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
     return count;
   }
 
-
-  /**
-   * Get the indent level.
-   * @return the indent level
-   */
-  public int getIndent() {
-    throwErrorHuh();
-    return _indent;
-  }
-
-  /**
-   * Set the indent to a particular number of spaces.
-   * @param indent the size of indent that you want for the document
-   */
-  public void setIndent(final int indent) {
-    throwErrorHuh();
-    DrJava.getConfig().setSetting(INDENT_LEVEL,new Integer(indent));
-    this._indent = indent;
-  }
-
-  /**
-   * Searching backwards, finds the position of the first character that is one
-   * of the given delimiters.  Does not look for delimiters inside paren phrases.
-   * (eg. skips semicolons used inside for statements.)
-   * NB: ignores comments.
-   * @param pos Position to start from
-   * @param delims array of characters to search for
-   * @return position of first matching delimiter, or ERROR_INDEX if beginning
-   * of document is reached.
-   */
-  public int findPrevDelimiter(int pos, char[] delims) throws BadLocationException {
-    throwErrorHuh();
-    return findPrevDelimiter(pos, delims, true);
-  }
-
-  /**
-   * Searching backwards, finds the position of the first character that is one
-   * of the given delimiters.  Will not look for delimiters inside a paren
-   * phrase if skipParenPhrases is true.
-   * NB: ignores comments.
-   * @param pos Position to start from
-   * @param delims array of characters to search for
-   * @param skipParenPhrases whether to look for delimiters inside paren phrases
-   *  (eg. semicolons in a for statement)
-   * @return position of first matching delimiter, or ERROR_INDEX if beginning
-   * of document is reached.
-   */
-  public synchronized int findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases)
-    throws BadLocationException
-  {
-    throwErrorHuh();
-    // Check cache
-    String key = "findPrevDelimiter:" + pos;
-    for (int i=0; i < delims.length; i++) {
-      key += ":" + delims[i];
-    }
-    key += ":" + skipParenPhrases;
-    Integer cached = (Integer) _checkCache(key);
-    if (cached != null) {
-      return cached.intValue();
-    }
-
-    int j, i;
-    char c;
-    String text = getText(DOCSTART, pos);
-
-    final int origLocation = _currentLocation;
-    // Move reduced model to location pos
-    _reduced.move(pos - origLocation);
-    int reducedPos = pos;
-
-    // Walk backwards from specificed position
-    for (i = pos-1; i >= DOCSTART; i--) {
-      c = text.charAt(i);
-      // Check if character is one of the delimiters
-      for (j = 0; j < delims.length; j++) {
-        if (c == delims[j]) {
-          // Move reduced model to walker's location
-          _reduced.move(i - reducedPos);
-          reducedPos = i;
-
-          // Check if matching char is in comment or quotes
-          ReducedModelState state = _reduced.getStateAtCurrent();
-          if (!state.equals(ReducedModelState.FREE)
-                || _isStartOfComment(text, i)
-                || ((i > 0) && _isStartOfComment(text, i - 1))) {
-            // Ignore matching char
-          } else {
-            // Found a matching char, check if we should ignore it
-            if (skipParenPhrases && posInParenPhrase()) {
-              // In a paren phrase, so ignore
-            }
-            else {
-              // Return position of matching char
-              _reduced.move(origLocation - i);
-              _storeInCache(key, new Integer(i));
-              return i;
-            }
-          }
-          //_reduced.move(pos - i);
-        }
-      }
-    }
-    _reduced.move(origLocation - reducedPos);
-
-    _storeInCache(key, new Integer(ERROR_INDEX));
-    return ERROR_INDEX;
-  }
-
-  /**
-   * Returns true if the given position is inside a paren phrase.
-   * @param pos the position we're looking at
-   * @return true if pos is immediately inside parentheses
-   */
-  public synchronized boolean posInParenPhrase(int pos) {
-    throwErrorHuh();
-    // Check cache
-    String key = "posInParenPhrase:" + pos;
-    Boolean cached = (Boolean) _checkCache(key);
-    if (cached != null) {
-      return cached.booleanValue();
-    }
-
-    int here = _currentLocation;
-    _reduced.move(pos - here);
-    boolean inParenPhrase = posInParenPhrase();
-    _reduced.move(here - pos);
-
-    _storeInCache(key, new Boolean(inParenPhrase));
-    return inParenPhrase;
-  }
-
-  /**
-   * Returns true if the reduced model's current position is inside a paren phrase.
-   * @return true if pos is immediately inside parentheses
-   */
-  public synchronized boolean posInParenPhrase() {
-    throwErrorHuh();
-    IndentInfo info = _reduced.getIndentInformation();
-    return info.braceTypeCurrent.equals(IndentInfo.openParen);
-  }
-
-  /**
-   * Returns true if the given position is not inside a paren/brace/etc phrase.
-   * @param pos the position we're looking at
-   * @return true if pos is immediately inside a paren/brace/etc
-   */
-  protected synchronized boolean posNotInBlock(int pos) {
-    throwErrorHuh();
-    // Check cache
-    String key = "posNotInBlock:" + pos;
-    Boolean cached = (Boolean) _checkCache(key);
-    if (cached != null) {
-      return cached.booleanValue();
-    }
-
-    int here = _currentLocation;
-    _reduced.move(pos - here);
-    IndentInfo info = _reduced.getIndentInformation();
-    boolean notInParenPhrase = info.braceTypeCurrent.equals(IndentInfo.noBrace);
-    _reduced.move(here - pos);
-    _storeInCache(key, new Boolean(notInParenPhrase));
-    return notInParenPhrase;
-  }
-
-  /**
-   * Returns the indent level of the start of the statement
-   * that the cursor is on.  Uses a default set of delimiters.
-   * (';', '{', '}') and a default set of whitespace characters
-   * (' ', '\t', n', ',')
-   * @param pos Cursor position
-   */
-  public String getIndentOfCurrStmt(int pos) throws BadLocationException {
-    throwErrorHuh();
-    char[] delims = {';', '{', '}'};
-    char[] whitespace = {' ', '\t', '\n',','};
-    return getIndentOfCurrStmt(pos, delims, whitespace);
-  }
-
-  /**
-   * Returns the indent level of the start of the statement
-   * that the cursor is on.  Uses a default set of whitespace characters.
-  * (' ', '\t', '\n', ',')
-   * @param pos Cursor position
-   */
-  public String getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
-    throwErrorHuh();
-    char[] whitespace = {' ', '\t', '\n',','};
-    return getIndentOfCurrStmt(pos, delims, whitespace);
-  }
-
-  /**
-   * Returns the indent level of the start of the statement
-   * that the cursor is on.
-   * @param pos Cursor position
-   * @param delims Delimiter characters denoting end of statement
-   * @param whitespace characters to skip when looking for beginning of next statement
-   */
-  public String getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
-    throwErrorHuh();
-    // Check cache
-    String key = "getIndentOfCurrStmt:" + pos;
-    for (int i=0; i < delims.length; i++) {
-      key += ":" + delims[i];
-    }
-    //long start = System.currentTimeMillis();
-    String cached = (String) _checkCache(key);
-    if (cached != null) {
-      return cached;
-    }
-
-    // Get the start of the current line
-    int lineStart = getLineStartPos(pos);
-
-    // Find the previous delimiter that closes a statement
-    boolean reachedStart = false;
-    boolean ignoreParens;
-    int prevDelimiter = lineStart;
-
-    //long mid = System.currentTimeMillis();  // START STAGE 2
-    do {
-      ignoreParens = posInParenPhrase(prevDelimiter);
-      prevDelimiter = findPrevDelimiter(prevDelimiter, delims, ignoreParens);
-      try {
-        if ((prevDelimiter > 0) && (prevDelimiter < getLength()) &&
-            (getText(prevDelimiter,1).charAt(0) == '{')) {
-          break;
-        }
-      }
-      catch (BadLocationException e) {
-        // Shouldn't happen
-        throw new UnexpectedException(e);
-      }
-      // Check delimiter found was start of document
-      if(prevDelimiter == ERROR_INDEX) {
-        reachedStart = true;
-        break;
-      }
-    } while(posInParenPhrase(prevDelimiter));  // this is being calculated twice...
-    //long mid2 = System.currentTimeMillis();  // START STAGE 3
-
-    // From the previous delimiter, find the next non-whitespace character
-    int nextNonWSChar;
-    if(reachedStart) {
-      nextNonWSChar = getFirstNonWSCharPos(DOCSTART);
-    }
-    else {
-      nextNonWSChar = getFirstNonWSCharPos(prevDelimiter+1, whitespace, false);
-    }
-    //long mid3 = System.currentTimeMillis();  // START STAGE 4
-
-    // If the end of the document was reached
-    if(nextNonWSChar == ERROR_INDEX) {
-      nextNonWSChar = getLength();
-    }
-
-    // Get the start of the line of the non-ws char
-    int lineStartStmt = getLineStartPos(nextNonWSChar);
-
-    // Get the position of the first non-ws character on this line
-    int lineFirstNonWS = getLineFirstCharPos(lineStartStmt);
-    String lineText;
-    try {
-      lineText = getText(lineStartStmt, lineFirstNonWS - lineStartStmt);
-    }
-    catch(BadLocationException e) {
-      // Should not happen
-      throw new UnexpectedException(e);
-    }
-
-    _storeInCache(key, lineText);
-    /*
-    long end = System.currentTimeMillis();
-    if (maxKey.equals(key)) {
-      DrJava.consoleOut().print("     getIndent: [" + (mid-start));
-      DrJava.consoleOut().print("] (" + (mid2-start));
-      DrJava.consoleOut().print(") [" + (mid3-start));
-      DrJava.consoleOut().println("] total: " + (end-start) + "ms");
-    }
-    */
-    return lineText;
-  }
-
-  /**
-   * Determines if the given character exists on the line where
-   * the given cursor position is. Does not search in quotes or comments.
-   * <p>
-   * <b>Does not work if character being searched for is a '/' or a '*'</b>
-   * @param pos Cursor position
-   * @param findChar Character to search for
-   * @return true if this node's rule holds.
-   */
-  public int findCharOnLine(int pos, char findChar) {
-    throwErrorHuh();
-    // Check cache
-    String key = "findCharOnLine:" + pos + ":" + findChar;
-    Integer cached = (Integer) _checkCache(key);
-    if (cached != null) {
-      return cached.intValue();
-    }
-
-    int here = _currentLocation;
-    int lineStart = this.getLineStartPos(pos);
-    int lineEnd = this.getLineEndPos(pos);
-    String lineText;
-
-    try {
-      lineText = this.getText(lineStart, lineEnd - lineStart);
-    } catch(BadLocationException e) {
-      // Should not be here
-      throw new UnexpectedException(e);
-    }
-
-    int i = lineText.indexOf(findChar, 0);
-
-    // Move to start of line
-    /*
-    _reduced.move(lineStart - here);
-    int reducedPos = lineStart;
-    int prevI = 0;
-    */
-
-    while(i != -1) {
-      // Move reduced model to walker's location
-      int matchIndex = i + lineStart;
-      _reduced.move(matchIndex - here);
-      //int dist = i - prevI;
-      //_reduced.move(dist);
-      //reducedPos = reducedPos + dist;
-
-      // Check if matching char is in comment or quotes
-      if (!_reduced.getStateAtCurrent().equals(ReducedModelState.FREE)) {
-        // Ignore matching char
-      } else {
-        // Return position of matching char
-        //_reduced.move(here - reducedPos);
-        _reduced.move(here - matchIndex);
-        _storeInCache(key, new Integer(matchIndex));
-        return matchIndex;
-      }
-      _reduced.move(here - matchIndex);
-
-      //prevI = i;
-      i = lineText.indexOf(findChar, i+1);
-    }
-
-    //_reduced.move(here - reducedPos);
-    _storeInCache(key, new Integer(ERROR_INDEX));
-    return ERROR_INDEX;
-  }
-
-  /**
-   * Returns the absolute position of the beginning of the
-   * current line.  (Just after most recent newline, or DOCSTART)
-   * Doesn't ignore comments.
-   * @param pos Any position on the current line
-   * @return position of the beginning of this line
-   */
-  public synchronized int getLineStartPos(int pos) {
-    throwErrorHuh();
-    if (pos < 0 || pos > getLength()) {
-      return -1;
-    }
-    // Check cache
-    String key = "getLineStartPos:" + pos;
-    Integer cached = (Integer) _checkCache(key);
-    if (cached != null) {
-      return cached.intValue();
-    }
-
-    int location = _currentLocation;
-    _reduced.move(pos - location);
-    int dist = _reduced.getDistToPreviousNewline(0);
-    _reduced.move(location - pos);
-    if(dist == -1) {
-      // If no previous newline was found
-      // return DOCSTART
-      _storeInCache(key, new Integer(DOCSTART));
-      return DOCSTART;
-    }
-    else {
-      _storeInCache(key, new Integer(pos - dist));
-      return pos - dist;
-    }
-  }
-
-  /**
-   * Returns the absolute position of the end of the current
-   * line.  (At the next newline, or the end of the document.)
-   * @param pos Any position on the current line
-   * @return position of the end of this line
-   */
-  public synchronized int getLineEndPos(int pos) {
-    throwErrorHuh();
-    if (pos < 0 || pos > getLength()) {
-      return -1;
-    }
-
-    // Check cache
-    String key = "getLineEndPos:" + pos;
-    Integer cached = (Integer) _checkCache(key);
-    if (cached != null) {
-      return cached.intValue();
-    }
-
-    int location = _currentLocation;
-    _reduced.move(pos - location);
-    int dist = _reduced.getDistToNextNewline();
-    _reduced.move(location - pos);
-    _storeInCache(key, new Integer(pos + dist));
-    return pos + dist;
-  }
-
-  /**
-   * Returns the absolute position of the first non-whitespace character
-   * on the current line.
-   * NB: Doesn't ignore comments.
-   * @param pos position on the line
-   * @return position of first non-whitespace character on this line, or the end
-   * of the line if no non-whitespace character is found.
-   */
-  public int getLineFirstCharPos(int pos) throws BadLocationException {
-    throwErrorHuh();
-    // Check cache
-    String key = "getLineFirstCharPos:" + pos;
-    Integer cached = (Integer) _checkCache(key);
-    if (cached != null) {
-      return cached.intValue();
-    }
-
-    int startLinePos = getLineStartPos(pos);
-    int endLinePos = getLineEndPos(pos);
-
-    // Get all text on this line
-    String text = this.getText(startLinePos, endLinePos - startLinePos);
-    int walker = 0;
-    while (walker < text.length()) {
-      if (text.charAt(walker) == ' ' ||
-          text.charAt(walker) == '\t') {
-            walker++;
-      }
-      else {
-        _storeInCache(key, new Integer(startLinePos + walker));
-        return startLinePos + walker;
-      }
-    }
-    // No non-WS char found, so return last position on line
-    _storeInCache(key, new Integer(endLinePos));
-    return endLinePos;
-  }
-
-  /**
-   * Finds the position of the first non-whitespace character after pos.
-   * NB: Skips comments and all whitespace, including newlines
-   * @param pos Position to start from
-   * @return position of first non-whitespace character after pos,
-   * or ERROR_INDEX if end of document is reached
-   */
-  public int getFirstNonWSCharPos(int pos) throws BadLocationException {
-    throwErrorHuh();
-    char[] whitespace = {' ', '\t', '\n'};
-    return getFirstNonWSCharPos(pos, whitespace, false);
-  }
-
-  /**
-   * Similar to the single-argument version, but allows including comments.
-   * @param pos Position to start from
-   * @param acceptComments if true, find non-whitespace chars in comments
-   * @return position of first non-whitespace character after pos,
-   * or ERROR_INDEX if end of document is reached
-   */
-  public int getFirstNonWSCharPos(int pos, boolean acceptComments)
-      throws BadLocationException {
-    throwErrorHuh();
-    char[] whitespace = {' ', '\t', '\n'};
-    return getFirstNonWSCharPos(pos, whitespace, acceptComments);
-  }
-
-  /**
-   * Finds the position of the first non-whitespace character after pos.
-   * NB: Skips comments and all whitespace, including newlines
-   * @param pos Position to start from
-   * @param whitespace array of whitespace chars to ignore
-   * @param acceptComments if true, find non-whitespace chars in comments
-   * @return position of first non-whitespace character after pos,
-   * or ERROR_INDEX if end of document is reached
-   */
-  public synchronized int getFirstNonWSCharPos
-    (int pos, char[] whitespace, boolean acceptComments) throws BadLocationException
-  {
-    throwErrorHuh();
-    // Check cache
-    String key = "getFirstNonWSCharPos:" + pos;
-    for (int i=0; i < whitespace.length; i++) {
-      key += ":" + whitespace[i];
-    }
-    Integer cached = (Integer) _checkCache(key);
-    if (cached != null) {
-      return cached.intValue();
-    }
-
-    int j, i;
-    char c;
-    int endPos = getLength();
-
-    // Get text from pos to end of document
-    String text = getText(pos, endPos - pos);
-
-    final int origLocation = _currentLocation;
-    // Move reduced model to location pos
-    _reduced.move(pos - origLocation);
-    int reducedPos = pos;
-
-    //int iter = 0;
-
-    // Walk forward from specificed position
-    for (i = pos; i != endPos; i++) {
-      //iter++;
-      boolean isWhitespace = false;
-      c = text.charAt(i - pos);
-      // Check if character is whitespace
-      for (j = 0; j < whitespace.length && !isWhitespace; j++) {
-        if (c == whitespace[j]) {
-          isWhitespace = true;
-        }
-      }
-      if (!isWhitespace) {
-        // Move reduced model to walker's location
-        _reduced.move(i - reducedPos);
-        reducedPos = i;
-
-        // Check if non-ws char is in comment, and we want to ignore them.
-        if (!acceptComments &&
-            ((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
-             (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT))))
-        {
-          // Ignore non-ws char
-
-          // Move to next token?  (requires making getBlockOffset public)
-          //  doesn't work yet
-//          int tokenSize = _reduced.currentToken().getSize();
-//          int offset = _reduced.getBlockOffset();
-//          //DrJava.consoleOut().println("     token len: " + tokenSize +
-//          //                            ", offset: " + offset);
-//          //DrJava.consoleOut().println("     token before: " + _reduced.currentToken().getState());
-//          _reduced.move(tokenSize - offset);
-//          i += tokenSize - offset;
-//          //DrJava.consoleOut().println("     token after: " + _reduced.currentToken().getState());
-
-        }
-        else {
-          if(!acceptComments && _isStartOfComment(text, i - pos)) {
-            // Move i past the start of comment characters
-            // and continue searching
-            i = i + 1;
-            _reduced.move(1);
-            reducedPos = i;
-          }
-          else {
-            // Return position of matching char
-            _reduced.move(origLocation - i);
-            _storeInCache(key, new Integer(i));
-            return i;
-          }
-        }
-      }
-    }
-    //DrJava.consoleOut().println("getFirstNonWS iterations: " + iter);
-
-    _reduced.move(origLocation - reducedPos);
-    _storeInCache(key, new Integer(ERROR_INDEX));
-    return ERROR_INDEX;
-  }
-  public int findPrevNonWSCharPos(int pos) throws BadLocationException {
-    throwErrorHuh();
-    char[] whitespace = {' ', '\t', '\n'};
-    return findPrevCharPos(pos, whitespace);
-  }
-
-  /**
-   * Returns the "intelligent" beginning of line.  If currPos is to
-   * the right of the first non-whitespace character, the position of the
-   * first non-whitespace character is returned.  If currPos is at or
-   * to the left of the first non-whitespace character, the beginning of
-   * the line is returned.
-   * @param currPos A position on the current line
-   */
-  public int getIntelligentBeginLinePos(int currPos) throws BadLocationException {
-    throwErrorHuh();
-    int firstChar = getLineStartPos(currPos);
-    String prefix = getText(firstChar, currPos-firstChar);
-
-    // Walk through string until we find a non-whitespace character
-    int i;
-    boolean found = false;
-    for (i = 0; i < prefix.length() && !found; i++ ) {
-      found = !Character.isWhitespace(prefix.charAt(i));
-    }
-
-    // If we found a non-WS char left of curr pos, return it
-    if (found) {
-      i--;  // want the position just before the non-WS char
-      int firstRealChar = firstChar + i;
-      if (firstRealChar < currPos) {
-        return firstRealChar;
-      }
-    }
-    // Otherwise, return the beginning of the line
-    return firstChar;
-  }
-
   /**
    * Returns the offset corresponding to the first character of the given line number,
    *  or -1 if the lineNum is not found.
@@ -1732,119 +666,7 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
     }
   }
 
-  /**
-   * Finds the position of the first non-whitespace character before pos.
-   * NB: Skips comments and all whitespace, including newlines
-   * @param pos Position to start from
-   * @param whitespace chars considered as white space
-   * @return position of first non-whitespace character before pos,
-   * or ERROR_INDEX if begining of document is reached
-   */
-  public synchronized int findPrevCharPos(int pos, char[] whitespace)
-    throws BadLocationException
-  {
-    throwErrorHuh();
-    // Check cache
-    String key = "findPrevCharPos:" + pos;
-    for (int i=0; i < whitespace.length; i++) {
-      key += ":" + whitespace[i];
-    }
-    Integer cached = (Integer) _checkCache(key);
-    if (cached != null) {
-      return cached.intValue();
-    }
-
-    int j, i;
-    char c;
-    String text = getText(0, pos);
-
-    final int origLocation = _currentLocation;
-    // Move reduced model to location pos
-    _reduced.move(pos - origLocation);
-    int reducedPos = pos;
-
-    // Walk backward from specified position
-    for (i = pos-1; i >= 0; i--) {
-      boolean isWhitespace = false;
-      c = text.charAt(i);
-      // Check if character is whitespace
-      for (j = 0; j < whitespace.length; j++) {
-        if (c == whitespace[j]) {
-          isWhitespace = true;
-        }
-      }
-      if (!isWhitespace) {
-        // Move reduced model to walker's location
-        _reduced.move(i - reducedPos);
-        reducedPos = i;
-
-        // Check if matching char is in comment
-        if((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
-           (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT))) {
-          // Ignore matching char
-        }
-        else {
-          if(_isEndOfComment(text, i)) {
-            // Move i past the start of comment characters
-            // and continue searching
-            i = i - 1;
-            _reduced.move(-1);
-            reducedPos = i;
-          }
-          else {
-            // Return position of matching char
-            _reduced.move(origLocation - i);
-            _storeInCache(key, new Integer(i));
-            return i;
-          }
-        }
-      }
-    }
-    _reduced.move(origLocation - reducedPos);
-    _storeInCache(key, new Integer(ERROR_INDEX));
-    return ERROR_INDEX;
-  }
-
-  /**
-   * Helper method for getFirstNonWSCharPos
-   * Determines whether the current character is the start
-   * of a comment: "/*" or "//"
-   */
-  protected boolean _isStartOfComment(String text, int pos) {
-    throwErrorHuh();
-    char currChar = text.charAt(pos);
-    if(currChar == '/') {
-      try {
-        char afterCurrChar = text.charAt(pos + 1);
-        if((afterCurrChar == '/') || (afterCurrChar == '*')) {
-          return true;
-        }
-      } catch (StringIndexOutOfBoundsException e) {
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Helper method for findPrevNonWSCharPos
-   * Determines whether the current character is the end
-   * of a comment: "*\/" or a hanging "//"
-   * @return true if (pos-1,pos) == '*\/' or '//'
-   */
-  protected boolean _isEndOfComment(String text, int pos) {
-    throwErrorHuh();
-    char currChar = text.charAt(pos);
-    if(currChar == '/') {
-      try {
-        char beforeCurrChar = text.charAt(pos - 1);
-        if((beforeCurrChar == '/') || (beforeCurrChar == '*')) {
-          return true;
-        }
-      } catch (StringIndexOutOfBoundsException e) {
-      }
-    }
-    return false;
-  }
+  
 
   /**
    * Returns true iff tabs are to removed on text insertion.
@@ -1854,158 +676,7 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
     return _tabsRemoved;
   }
 
-  /**
-   * Forwarding method to find the match for the closing brace
-   * immediately to the left, assuming there is such a brace.
-   * @return the relative distance backwards to the offset before
-   *         the matching brace.
-   */
-  public synchronized int balanceBackward() {
-    throwErrorHuh();
-    return _reduced.balanceBackward();
-  }
-
-  /**
-   * Forwarding method to find the match for the open brace
-   * immediately to the right, assuming there is such a brace.
-   * @return the relative distance forwards to the offset after
-   *         the matching brace.
-   */
-  public synchronized int balanceForward() {
-    throwErrorHuh();
-    return _reduced.balanceForward();
-  }
-
-  /**
-   * Default indentation - uses OTHER flag and no progress indicator.
-   * @param selStart the offset of the initial character of the region to indent
-   * @param selEnd the offset of the last character of the region to indent
-   */
-  public void indentLines(int selStart, int selEnd){
-    throwErrorHuh();
-    try {
-      indentLines(selStart, selEnd, Indenter.OTHER, null);
-    }
-    catch (OperationCanceledException oce) {
-      // Indenting without a ProgressMonitor should never be cancelled!
-      throw new UnexpectedException(oce);
-    }
-  }
-
-  /**
-   * Parameterized indentation for special-case handling.
-   * @param selStart the offset of the initial character of the region to indent
-   * @param selEnd the offset of the last character of the region to indent
-   * @param reason a flag from {@link Indenter} to indicate the reason for the indent
-   * (indent logic may vary slightly based on the trigger action)
-   * @param pm used to display progress, null if no reporting is desired
-   */
-  public void indentLines(int selStart, int selEnd,
-                          int reason, ProgressMonitor pm)
-      throws OperationCanceledException {
-    throwErrorHuh();
-    //long start = System.currentTimeMillis();
-    try {
-      // Begins a compound edit.
-      int key = _undoManager.startCompoundEdit();
-
-      if (selStart == selEnd) {
-        Position oldCurrentPosition = createPosition(_currentLocation);
-        // Indent, updating current location if necessary.
-        if (_indentLine(reason)) {
-          //int caretPos = getCaretPosition();
-          //_doc().setCurrentLocation(caretPos);
-          setCurrentLocation(oldCurrentPosition.getOffset());
-          int space = getWhiteSpace();
-          move(space);
-          //setCaretPosition(caretPos + space);
-        }
-      }
-      else {
-        _indentBlock(selStart, selEnd, reason, pm);
-      }
-      // Ends the compound edit.
-      _undoManager.endCompoundEdit(key);
-    }
-    catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
-
-    //long end = System.currentTimeMillis();
-    //DrJava.consoleOut().println("Elapsed Time (sec): " + ((end-start)/1000));
-    //DrJava.consoleOut().println("   Cache size: " + _helperCache.size());
-    //DrJava.consoleOut().println("   Cache History size: " + _helperCacheHistory.size());
-
-    //DrJava.consoleOut().println("   Longest: " + maxHelpDelay + "ms from " + maxKey);
-    //maxHelpDelay = 0;  maxKey = "none";
-
-  }
-
-  /**
-   * Indents the lines between and including the lines containing
-   * points start and end.
-   * @param start Position in document to start indenting from
-   * @param end Position in document to end indenting at
-   * @param reason a flag from {@link Indenter} to indicate the reason for the indent
-   * (indent logic may vary slightly based on the trigger action)
-   * @param pm used to display progress, null if no reporting is desired
-   */
-  private synchronized void _indentBlock(final int start, final int end,
-                                         int reason, ProgressMonitor pm)
-      throws OperationCanceledException {
-    throwErrorHuh();
-    //DrJava.consoleOut().println("indenting block of " + (end-start));
-    try {
-      // Keep marker at the end. This Position will be the
-      // correct endpoint no matter how we change the doc
-      // doing the indentLine calls.
-      final Position endPos = this.createPosition(end);
-      // Iterate, line by line, until we get to/past the end
-      int walker = start;
-      while (walker < endPos.getOffset()) {
-        setCurrentLocation(walker);
-        // Keep pointer to walker position that will stay current
-        // regardless of how indentLine changes things
-        Position walkerPos = this.createPosition(walker);
-        // Indent current line
-        // We currently ignore current location info from each line, because
-        // it probably doesn't make sense in a block context.
-        _indentLine(reason);
-        // Move back to walker spot
-        setCurrentLocation(walkerPos.getOffset());
-        walker = walkerPos.getOffset();
-
-        if (pm != null) {
-          // Update ProgressMonitor.
-          pm.setProgress(walker);
-
-          // Check for cancel button-press.
-          if (pm.isCanceled()) {
-            throw new OperationCanceledException();
-          }
-        }
-
-        // Adding 1 makes us point to the first character AFTER the next newline.
-        // We don't actually move yet. That happens at the top of the loop,
-        // after we check if we're past the end.
-        walker += _reduced.getDistToNextNewline() + 1;
-        //DrJava.consoleOut().println("progress: " + (100*(walker-start)/(end-start)));
-      }
-    }
-    catch (BadLocationException e) {
-      // Should not happen
-      throw new UnexpectedException(e);
-    }
-  }
-
-  /**
-   * Indents a line using the Indenter decision tree.  Package private for testing purposes
-   */
-  boolean _indentLine(int reason) {
-    throwErrorHuh();
-    return _indenter.indent(this, reason);
-  }
-
+ 
   /**
    * Comments out all lines between selStart and selEnd, inclusive.
    * The current cursor position is maintained after the operation.
@@ -2307,38 +978,6 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
         || (text.charAt(i) == ' '));
   }*/
 
-  /**
-   * Gets the number of whitespace characters between the current location and the rest of
-   * the document or the first non-whitespace character, whichever comes first.
-   * @return the number of whitespace characters
-   */
-  public int getWhiteSpace() {
-    throwErrorHuh();
-    try {
-      return  getWhiteSpaceBetween(0, getLength() - _currentLocation);
-    } catch (BadLocationException e) {
-      e.printStackTrace();
-    }
-    return  -1;
-  }
-
-  /**
-   *Starts at start and gets whitespace starting at relStart and either
-   *stopping at relEnd or at the first non-white space char.
-   *NOTE: relStart and relEnd are relative to where we are in the document
-   *relStart must be <= _currentLocation
-   * @exception BadLocationException
-   */
-  private int getWhiteSpaceBetween(int relStart, int relEnd) throws BadLocationException {
-    throwErrorHuh();
-    String text = this.getText(_currentLocation - relStart, Math.abs(relStart -
-        relEnd));
-    int i = 0;
-    int length = text.length();
-    while ((i < length) && (text.charAt(i) == ' '))
-      i++;
-    return  i;
-  }
 
   /**
    * The function that handles what happens when a tab key is pressed.
@@ -2369,226 +1008,6 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
       remove(_currentLocation - distToPrevNewline, currentTab - tab);
     }
   }*/
-
-  /**
-   * Sets the text between the previous newline and the first non-whitespace
-   * character of the line containing pos to tab.
-   * @param tab String to be placed between previous newline and first
-   * non-whitespace character
-   */
-  public void setTab(String tab, int pos) {
-    throwErrorHuh();
-    try {
-      int startPos = getLineStartPos(pos);
-      int firstNonWSPos = getLineFirstCharPos(pos);
-      int len = firstNonWSPos - startPos;
-
-      // Adjust prefix
-      boolean onlySpaces = _hasOnlySpaces(tab);
-      if (!onlySpaces || (len != tab.length())) {
-
-        if (onlySpaces) {
-          // Only add or remove the difference
-          int diff = tab.length() - len;
-          if (diff > 0) {
-            insertString(firstNonWSPos, tab.substring(0, diff), null);
-          }
-          else {
-            remove(firstNonWSPos + diff, -diff);
-          }
-        }
-        else {
-          // Remove the whole prefix, then add the new one
-          remove(startPos, len);
-          insertString(startPos, tab, null);
-        }
-      }
-    }
-    catch (BadLocationException e) {
-      // Should never see a bad location
-      throw new UnexpectedException(e);
-    }
-  }
-
-  /**
-   * Returns whether the given text only has spaces.
-   */
-  private boolean _hasOnlySpaces(String text) {
-    throwErrorHuh();
-    return (text.trim().length() == 0);
-  }
-
-  /**
-   * Return all highlight status info for text between start and end.
-   * This should collapse adjoining blocks with the same status into one.
-   */
-  public synchronized Vector<HighlightStatus> getHighlightStatus(int start, int end) {
-    // First move the reduced model to the start
-//    int oldLocation = _currentLocation;
-    setCurrentLocation(start);
-
-    // Now ask reduced model for highlight status for chars till end
-    Vector<HighlightStatus> v =
-      _reduced.getHighlightStatus(start, end - start);
-
-    // Go through and find any NORMAL blocks
-    // Within them check for keywords
-    for (int i = 0; i < v.size(); i++) {
-      HighlightStatus stat = v.get(i);
-
-      if (stat.getState() == HighlightStatus.NORMAL) {
-        i = _highlightKeywords(v, i);
-      }
-    }
-
-    // bstoler: Previously we moved back to the old location. This was
-    // very bad and severly slowed down rendering when scrolling.
-    // This is because parts are rendered in order. Thus, if old location is
-    // 0, but now we've scrolled to display 100000-100100, if we keep
-    // jumping back to 0 after getting every bit of highlight, it slows
-    // stuff down incredibly.
-    //setCurrentLocation(oldLocation);
-    return v;
-  }
-
-  /**
-   * Separates out keywords from normal text for the given
-   * HighlightStatus element.
-   *
-   * What this does is it looks to see if the given part of the text
-   * contains a keyword. If it does, it splits the HighlightStatus into
-   * separate blocks so that each keyword is in its own block.
-   * This will find all keywords in a given block.
-   *
-   * Note that the given block must have state NORMAL.
-   *
-   * @param v Vector with highlight info
-   * @param i Index of the single HighlightStatus to check for keywords in
-   * @return the index into the vector of the last processed element
-   */
-  private int _highlightKeywords(Vector<HighlightStatus> v, int i) {
-    throwErrorHuh();
-    // Basically all non-alphanumeric chars are delimiters
-    final String delimiters = " \t\n\r{}()[].+-/*;:=!@#$%^&*~<>?,\"`'<>|";
-    final HighlightStatus original = v.get(i);
-    final String text;
-
-    try {
-      text = getText(original.getLocation(), original.getLength());
-    }
-    catch (BadLocationException e) {
-      e.printStackTrace();
-      throw new RuntimeException(e.toString());
-    }
-
-    // Because this text is not quoted or commented, we can use the simpler
-    // tokenizer StringTokenizer.
-    // We have to return delimiters as tokens so we can keep track of positions
-    // in the original string.
-    StringTokenizer tokenizer = new StringTokenizer(text, delimiters, true);
-
-    // start and length of the text that has not yet been put back into the
-    // vector.
-    int start = original.getLocation();
-    int length = 0;
-
-    // Remove the old element from the vector.
-    v.remove(i);
-
-    // Index where we are in the vector. It's the location we would insert
-    // new things into.
-    int index = i;
-
-    boolean process;
-    int state = 0;
-    while (tokenizer.hasMoreTokens()) {
-      String token = tokenizer.nextToken();
-
-      //first check to see if we need highlighting
-      process = false;
-      if (_isType(token)) {
-        //right now keywords incl prim types, so must put this first
-        state = HighlightStatus.TYPE;
-        process = true;
-      } else if (_keywords.contains(token)) {
-        state = HighlightStatus.KEYWORD;
-        process = true;
-      } else if (_isNum(token)) {
-        state = HighlightStatus.NUMBER;
-        process = true;
-      }
-
-      if (process) {
-        // first check if we had any text before the token
-        if (length != 0) {
-          HighlightStatus newStat =
-            new HighlightStatus(start,
-                                length,
-                                original.getState());
-          v.add(index, newStat);
-          index++;
-          start += length;
-          length = 0;
-        }
-
-        // Now pull off the keyword
-        int keywordLength = token.length();
-        v.add(index, new HighlightStatus(start,
-                                              keywordLength,
-                                              state));
-        index++;
-        // Move start to the end of the keyword
-        start += keywordLength;
-      }
-      else {
-        // This is not a keyword, so just keep accumulating length
-        length += token.length();
-      }
-    }
-    // Now check if there was any text left after the keywords.
-    if (length != 0) {
-      HighlightStatus newStat =
-        new HighlightStatus(start,
-                            length,
-                            original.getState());
-      v.add(index, newStat);
-      index++;
-      length = 0;
-    }
-    // return one before because we need to point to the last one we inserted
-    return index - 1;
-    }
-
-  /**
-   * Checks to see if the current string is a number
-   * @return true if x is a parseable number
-   */
-  private boolean _isNum(String x) {
-    throwErrorHuh();
-    try {
-      Double.parseDouble(x);
-      return true;
-
-    } catch (NumberFormatException e) {
-      return false;
-    }
-  }
-
-  /**
-   * Checks to see if the current string is a type
-   * A type is assumed to be a primitive type OR
-   * anything else that begins with a capitalized character
-   */
-  private boolean _isType(String x) {
-    throwErrorHuh();
-    if (_primTypes.contains(x)) return true;
-
-    try {
-      return Character.isUpperCase(x.charAt(0));
-    } catch (IndexOutOfBoundsException e) {
-      return false;
-    }
-  }
 
   /**
    * Goes to a particular line in the document.
@@ -2732,37 +1151,6 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
       setCurrentLocation(0);
       setCurrentLocation(oldLocation);
     }
-  }
-
-  /**
-   * Returns the indent information for the current location.
-   */
-  public synchronized IndentInfo getIndentInformation() {
-    throwErrorHuh();
-    // Check cache
-    String key = "getIndentInformation:" + _currentLocation;
-    IndentInfo cached = (IndentInfo) _checkCache(key);
-    if (cached != null) {
-      return cached;
-    }
-    IndentInfo info = getReduced().getIndentInformation();
-    _storeInCache(key, info);
-    return info;
-  }
-
-  public synchronized ReducedModelState stateAtRelLocation(int dist){
-    throwErrorHuh();
-    return getReduced().moveWalkerGetState(dist);
-  }
-
-  public synchronized ReducedModelState getStateAtCurrent(){
-    throwErrorHuh();
-    return getReduced().getStateAtCurrent();
-  }
-
-  public synchronized void resetReducedModelLocation() {
-    throwErrorHuh();
-    getReduced().resetLocation();
   }
 
   /**
@@ -3013,52 +1401,6 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
     public boolean isSignificant() { return false; }
   }
 
-  private class InsertCommand implements Runnable {
-    private final int _offset;
-    private final String _text;
-
-    public InsertCommand(final int offset, final String text) {
-      _offset = offset;
-      _text = text;
-    }
-
-    public void run() {
-      // adjust location to the start of the text to input
-      synchronized(DefinitionsDocument.this){
-        _reduced.move(_offset - _currentLocation);
-      }
-
-      // loop over string, inserting characters into reduced model
-      for (int i = 0; i < _text.length(); i++) {
-        char curChar = _text.charAt(i);
-        _addCharToReducedModel(curChar);
-      }
-
-      _currentLocation = _offset + _text.length();
-      _styleChanged();
-    }
-  }
-
-  private class RemoveCommand implements Runnable {
-    private final int _offset;
-    private final int _length;
-
-    public RemoveCommand(final int offset, final int length) {
-      _offset = offset;
-      _length = length;
-    }
-
-    public void run() {
-      setCurrentLocation(_offset);
-
-      // (don't move the cursor... I hope this doesn't break too much)
-      synchronized(DefinitionsDocument.this){
-        _reduced.delete(_length);
-      }
-      _styleChanged();
-    }
-  }
-
   /**
    * Getter method for CompoundUndoManager
    * @return _undoManager
@@ -3101,6 +1443,19 @@ public class DefinitionsDocument extends SwingDocumentAdapter implements OptionC
     throwErrorHuh();
     _undoManager.documentSaved();
   }
+  
+  protected int startCompoundEdit() {
+    return _undoManager.startCompoundEdit();
+  }
+  
+  protected void endCompoundEdit(int key) {
+    _undoManager.endCompoundEdit(key);
+  }
+  
+  protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) {
+    chng.addEdit(new CommandUndoableEdit(undoCommand, doCommand));    
+  }
+  
   
   /**
    * Is used to be able to call editToBeUndone and editToBeRedone since they

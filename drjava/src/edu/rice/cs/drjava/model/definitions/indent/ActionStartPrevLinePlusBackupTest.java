@@ -85,7 +85,6 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import junit.framework.TestCase;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
 /**
  * Test class for an indent rule with a really long name.  :-)

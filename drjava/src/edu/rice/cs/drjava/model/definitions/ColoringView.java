@@ -52,7 +52,7 @@ import javax.swing.event.DocumentEvent;
 import java.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -110,7 +110,7 @@ public class ColoringView extends PlainView implements OptionConstants {
 //      });
     
     Document doc = getDocument();
-    if(doc instanceof DefinitionsDocument){
+    if(doc instanceof AbstractDJDocument){
       // delete the old color listeners, because they're hanging onto the wrong coloringview
       // add color listeners to highlight keywords etc
       DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
@@ -120,22 +120,23 @@ public class ColoringView extends PlainView implements OptionConstants {
       DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
       DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
       DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col);
-
       
-      // remove the listeners when the document closes
-      ((DefinitionsDocument)doc).addDocumentClosedListener(new DocumentClosedListener(){
-        public void close(){
-          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col);
-        }
-      });
-}
- }
+      if(doc instanceof DefinitionsDocument) {
+        // remove the listeners when the document closes
+        ((DefinitionsDocument)doc).addDocumentClosedListener(new DocumentClosedListener(){
+          public void close(){
+            DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
+            DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
+            DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
+            DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
+            DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
+            DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
+            DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col);
+          }
+        });
+      }
+    }
+  }
 
   /**
    * Renders the given range in the model as normal unselected
@@ -164,9 +165,9 @@ public class ColoringView extends PlainView implements OptionConstants {
     // Might be a PlainDocument (when DefPane is first constructed).
     //   See comments for DefinitionsEditorKit.createNewDocument() for details.
     Document doc = getDocument();
-    DefinitionsDocument _doc = null;
-    if (doc instanceof DefinitionsDocument) {
-      _doc = (DefinitionsDocument)doc;
+    AbstractDJDocument _doc = null;
+    if (doc instanceof AbstractDJDocument) {
+      _doc = (AbstractDJDocument)doc;
     }
     else {
       return x; // don't do anything if there is no definitions document

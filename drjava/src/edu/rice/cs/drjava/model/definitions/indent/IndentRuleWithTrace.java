@@ -45,7 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 // TODO: Check synchronization.
 import java.util.Vector;
@@ -105,13 +105,13 @@ public abstract class IndentRuleWithTrace implements IndentRule{
    * Properly indents the line that the current position is on.
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param doc AbstractDJDocument containing the line to be indented.
    * @param pos ?
    * @param reason ?
    * @return true if the caller should update the current location itself,
    * false if the indenter has already handled this
    */
-  public boolean indentLine(DefinitionsDocument doc, int pos, int reason) {
+  public boolean indentLine(AbstractDJDocument doc, int pos, int reason) {
     int oldPos = doc.getCurrentLocation();
     doc.setCurrentLocation(pos);
     indentLine(doc, reason);
@@ -122,7 +122,7 @@ public abstract class IndentRuleWithTrace implements IndentRule{
     return false;
   }
 
-  public boolean indentLine(DefinitionsDocument doc, int reason){
+  public boolean indentLine(AbstractDJDocument doc, int reason){
     _addToIndentTrace(getRuleName(), TERMINUS_RULE, true);
 
     //Add the next line, and every time something is indented, the indent trace will be printed

@@ -47,7 +47,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.*;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
@@ -74,30 +74,30 @@ public class QuestionNewParenPhrase extends IndentRuleQuestion {
   /**
    * Determines if the previous line ends in a comma, semicolon,
    * open paren, open bracket, operator, or comparator.
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param doc AbstractDJDocument containing the line to be indented.
    * @return true if this node's rule holds.
    */
-  boolean applyRule(DefinitionsDocument doc, int reason) {
+  boolean applyRule(AbstractDJDocument doc, int reason) {
 
     try {
       // Find start of line
       int here = doc.getCurrentLocation();
       int startLine = doc.getLineStartPos(here);
       
-      if (startLine > DefinitionsDocument.DOCSTART) {
+      if (startLine > AbstractDJDocument.DOCSTART) {
         // Find previous delimiter (looking in paren phrases)
         char[] delims = {';', ',', '(', '[', 
           '&', '|', '+', '-', '*', '/', '%', 
           '=', '<', '>', '}'
         };
         int prevDelim = doc.findPrevDelimiter(startLine, delims, false);
-        if (prevDelim == DefinitionsDocument.ERROR_INDEX) {
+        if (prevDelim == AbstractDJDocument.ERROR_INDEX) {
           return false;
         }
         
         // Make sure the delim is the previous non-WS char
         int nextNonWS = doc.getFirstNonWSCharPos(prevDelim + 1);
-        if (nextNonWS == DefinitionsDocument.ERROR_INDEX) {
+        if (nextNonWS == AbstractDJDocument.ERROR_INDEX) {
           nextNonWS = startLine;
         }
         return (nextNonWS >= startLine);

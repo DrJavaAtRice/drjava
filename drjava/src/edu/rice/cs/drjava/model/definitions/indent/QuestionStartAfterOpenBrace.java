@@ -46,7 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
 
@@ -71,12 +71,12 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion
   }
   
   /**
-   * @param doc The DefinitionsDocument containing the current line.
+   * @param doc The AbstractDJDocument containing the current line.
    * @return True the closest non-whitespace character
    * previous to the start of the current line (excluding any characters
    * inside comments or strings) is an open brace.
    */
-  boolean applyRule(DefinitionsDocument doc, int reason)
+  boolean applyRule(AbstractDJDocument doc, int reason)
   {
     
     int origin = doc.getCurrentLocation();
@@ -109,7 +109,7 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion
         throw new UnexpectedException(e);
       }
       
-      if (nextNonWS == DefinitionsDocument.ERROR_INDEX) {
+      if (nextNonWS == AbstractDJDocument.ERROR_INDEX) {
         return true;
       }
       

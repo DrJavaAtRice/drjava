@@ -47,7 +47,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.*;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 import edu.rice.cs.util.UnexpectedException;
@@ -65,10 +65,10 @@ class QuestionInsideComment extends IndentRuleQuestion {
 
   /**
    * Determines if the (start of the!!) current line in the document is in a block comment.
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param doc AbstractDJDocument containing the line to be indented.
    * @return true if this node's rule holds.
    */
-  boolean applyRule(DefinitionsDocument doc, int reason) {
+  boolean applyRule(AbstractDJDocument doc, int reason) {
 
     int here = doc.getCurrentLocation();
     int distToStart = here - doc.getLineStartPos(here);

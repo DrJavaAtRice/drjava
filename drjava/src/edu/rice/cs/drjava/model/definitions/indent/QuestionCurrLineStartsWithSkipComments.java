@@ -48,7 +48,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import javax.swing.text.*;
 import edu.rice.cs.util.UnexpectedException;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
@@ -83,11 +83,11 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion
    * Determines whether or not the current line in the document starts
    * with the character sequence specified by the String field _prefix,
    * skipping over any comments on that line.
-   * @param doc The DefinitionsDocument containing the current line.
+   * @param doc The AbstractDJDocument containing the current line.
    * @return True iff the current line in the document starts with the
    * character sequence specified by the String field _prefix.
    */
-  boolean applyRule(DefinitionsDocument doc, int reason)
+  boolean applyRule(AbstractDJDocument doc, int reason)
   {
     try
     {

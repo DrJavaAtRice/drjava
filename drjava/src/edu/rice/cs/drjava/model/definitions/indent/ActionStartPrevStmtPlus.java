@@ -45,7 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
 
@@ -78,11 +78,11 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
    *
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param doc AbstractDJDocument containing the line to be indented.
    * @return true if the caller should update the current location itself,
    * false if the indenter has already handled this
    */
-  public boolean indentLine(DefinitionsDocument doc, int reason) {
+  public boolean indentLine(AbstractDJDocument doc, int reason) {
     boolean supResult = super.indentLine(doc, reason);
     String indent = "";
     int here = doc.getCurrentLocation();
@@ -99,7 +99,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     }
 
     // For DOCSTART, align to left margin
-    if(prevDelimiterPos <= DefinitionsDocument.DOCSTART) {
+    if(prevDelimiterPos <= AbstractDJDocument.DOCSTART) {
       doc.setTab(_suffix, here);
       return supResult;
     }
@@ -159,7 +159,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     return supResult;
   }
 
-  private boolean _isPrevNonWSCharEqualTo(DefinitionsDocument doc,int pos,char c) {
+  private boolean _isPrevNonWSCharEqualTo(AbstractDJDocument doc,int pos,char c) {
     try {
       int prevPos = doc.findPrevNonWSCharPos(pos);
       if (prevPos <0) return false;

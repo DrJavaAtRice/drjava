@@ -48,7 +48,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
@@ -78,10 +78,10 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
    * Determines if the previous non-whitespace character not on
    * this line was one of the following: ';', '{', '}' or DOCSTART.
    * Ignores characters in quotes and comments.
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param doc AbstractDJDocument containing the line to be indented.
    * @return true if this node's rule holds.
    */
-  boolean applyRule(DefinitionsDocument doc, int reason) {
+  boolean applyRule(AbstractDJDocument doc, int reason) {
     
     char[] delims = {';', '{', '}'};
     int lineStart = doc.getLineStartPos(doc.getCurrentLocation());
@@ -95,7 +95,7 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
     }
     
     // For DOCSTART, imaginary delimiter at position -1
-    if(prevDelimiterPos == DefinitionsDocument.ERROR_INDEX) {
+    if(prevDelimiterPos == AbstractDJDocument.ERROR_INDEX) {
       prevDelimiterPos = -1;
     }
     
@@ -111,7 +111,7 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
     // If the first non-WS character is after the beginning of the line
     // or we reached the end of the document, then we are starting a new statement.
     return (firstNonWSAfterDelimiter >= lineStart
-              || firstNonWSAfterDelimiter == DefinitionsDocument.ERROR_INDEX);
+              || firstNonWSAfterDelimiter == AbstractDJDocument.ERROR_INDEX);
   }
 }
 

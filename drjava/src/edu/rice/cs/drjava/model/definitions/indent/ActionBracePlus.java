@@ -45,7 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
 
@@ -72,11 +72,11 @@ public class ActionBracePlus extends IndentRuleAction
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
    * Preconditions: must be inside a brace.
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param doc AbstractDJDocument containing the line to be indented.
    * @return true if the caller should update the current location itself,
    * false if the indenter has already handled this
    */
-  public boolean indentLine(DefinitionsDocument doc, int reason)
+  public boolean indentLine(AbstractDJDocument doc, int reason)
   {
     boolean supResult = super.indentLine(doc, reason);
     int here = doc.getCurrentLocation();

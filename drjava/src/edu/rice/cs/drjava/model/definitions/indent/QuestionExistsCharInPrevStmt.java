@@ -48,7 +48,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
@@ -68,7 +68,7 @@ public class QuestionExistsCharInPrevStmt extends IndentRuleQuestion {
    * Searches through the previous statement to find if it has the current character not in a 
    * comment and not in a string
    */
-  boolean applyRule(DefinitionsDocument doc, int reason) {
+  boolean applyRule(AbstractDJDocument doc, int reason) {
     //Find the end of the previous line
     int endPreviousStatement;
     try {
@@ -80,7 +80,7 @@ public class QuestionExistsCharInPrevStmt extends IndentRuleQuestion {
     }
     
     // if this is the first line, we'll get an error indicator and just return false
-    if (endPreviousStatement == DefinitionsDocument.ERROR_INDEX){
+    if (endPreviousStatement == AbstractDJDocument.ERROR_INDEX){
       return false;
     }
     

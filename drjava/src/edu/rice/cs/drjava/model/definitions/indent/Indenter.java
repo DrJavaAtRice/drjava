@@ -45,7 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
@@ -160,7 +160,7 @@ public class Indenter {
    * @return true if the caller should update the current location itself,
    * false if the indenter has already handled this
    */
-  public boolean indent(DefinitionsDocument doc, int reason)
+  public boolean indent(AbstractDJDocument doc, int reason)
   {
     return _topRule.indentLine(doc, reason);
   }

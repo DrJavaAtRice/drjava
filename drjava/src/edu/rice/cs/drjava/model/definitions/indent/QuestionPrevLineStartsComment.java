@@ -84,7 +84,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
@@ -114,10 +114,10 @@ class QuestionPrevLineStartsComment extends IndentRuleQuestion {
    * is acceptable because we think of the previous line as a continuation
    * of a larger commented out region.
    *
-   * @param  doc DefinitionsDocument containing the line to be indented.
+   * @param  doc AbstractDJDocument containing the line to be indented.
    * @return true if this node's rule holds.
    */
-  boolean applyRule(DefinitionsDocument doc, int reason) {
+  boolean applyRule(AbstractDJDocument doc, int reason) {
 
       int cursor;
 
@@ -127,7 +127,7 @@ class QuestionPrevLineStartsComment extends IndentRuleQuestion {
     // If the start of the current line is the start of the
     // document, there was no previous line and so this
     // line must have started the comment
-    if(cursor == DefinitionsDocument.DOCSTART) {
+    if(cursor == AbstractDJDocument.DOCSTART) {
       return false;
     } else {
       // Move the cursor to the previous line

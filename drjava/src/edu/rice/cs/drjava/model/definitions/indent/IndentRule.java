@@ -45,7 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
 
 /**
@@ -57,10 +57,10 @@ public interface IndentRule {
    * Properly indents the line that the given position is on.
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param doc AbstractDJDocument containing the line to be indented.
    * @param reason - The reason that indentation was initiated, specified in Indenter
    * @return true if the caller should update the current location itself,
    * false if the indenter has already handled this
    */
-  public boolean indentLine(DefinitionsDocument doc, int reason);
+  public boolean indentLine(AbstractDJDocument doc, int reason);
 }

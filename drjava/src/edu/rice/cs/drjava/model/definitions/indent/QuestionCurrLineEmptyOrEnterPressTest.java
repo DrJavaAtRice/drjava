@@ -85,7 +85,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import junit.framework.*;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**

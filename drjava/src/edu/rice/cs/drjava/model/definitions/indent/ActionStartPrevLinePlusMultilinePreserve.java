@@ -48,7 +48,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import junit.framework.*;
 import javax.swing.text.*;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
@@ -86,10 +86,10 @@ class ActionStartPrevLinePlusMultilinePreserve extends IndentRuleAction {
 
   /**
    * Forwards the call to the enclosed ActionStartPrevLinePlusMultiline _a
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param doc AbstractDJDocument containing the line to be indented.
    * @return this is always false, since we are updating the cursor location
    */
-  public boolean indentLine(DefinitionsDocument doc, int reason){
+  public boolean indentLine(AbstractDJDocument doc, int reason){
     try {
       // copy it so any changes are not remembered
       String[] suffices = new String[_suffices.length];

@@ -45,7 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
@@ -69,11 +69,11 @@ public class QuestionBraceIsCurly extends IndentRuleQuestion
   }
   
   /**
-   * @param doc The DefinitionsDocument containing the current line.
+   * @param doc The AbstractDJDocument containing the current line.
    * @return True iff the last block or expression list opened previous 
    * to the start of the current line was opened by the character '{'. 
    */
-  boolean applyRule(DefinitionsDocument doc, int reason)
+  boolean applyRule(AbstractDJDocument doc, int reason)
   {
     // PRE: We are not inside a multiline comment.
     // PRE: The closest brace is not a '(' or a '['.

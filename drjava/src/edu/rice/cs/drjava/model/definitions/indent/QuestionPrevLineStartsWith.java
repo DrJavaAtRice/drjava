@@ -48,7 +48,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import javax.swing.text.*;
 import edu.rice.cs.util.UnexpectedException;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
@@ -74,17 +74,17 @@ public class QuestionPrevLineStartsWith extends IndentRuleQuestion {
   /**
    * Determines if the previous line in the document starts with the
    * specified character.
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param doc AbstractDJDocument containing the line to be indented.
    * @return true if this node's rule holds.
    */
-  boolean applyRule(DefinitionsDocument doc, int reason) {
+  boolean applyRule(AbstractDJDocument doc, int reason) {
 
     try {
       // Find start of line
       int here = doc.getCurrentLocation();
       int startLine = doc.getLineStartPos(here);
       
-      if (startLine > DefinitionsDocument.DOCSTART) {
+      if (startLine > AbstractDJDocument.DOCSTART) {
         // Find start of previous line
         int startPrevLine = doc.getLineStartPos(startLine - 1);
         int firstChar = doc.getLineFirstCharPos(startPrevLine);

@@ -48,7 +48,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
@@ -111,10 +111,10 @@ public class QuestionExistsCharInStmt extends IndentRuleQuestion {
    * Start of the statement is the point right after when one of the
    * following characters is found: ';', '{', '}', DOCSTART.
    *
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param doc AbstractDJDocument containing the line to be indented.
    * @return true if this node's rule holds.
    */
-  boolean applyRule(DefinitionsDocument doc, int reason) {
+  boolean applyRule(AbstractDJDocument doc, int reason) {
 
    // Find the position of endChar on the current line
     int endCharPos = doc.findCharOnLine(doc.getCurrentLocation(), _endChar);

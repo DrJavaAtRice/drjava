@@ -47,7 +47,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.util.UnexpectedException;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 import javax.swing.text.BadLocationException;
@@ -74,11 +74,11 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
    * Properly indents the line that the caret is currently on.
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param doc AbstractDJDocument containing the line to be indented.
    * @return true if the caller should update the current location itself,
    * false if the indenter has already handled this
    */
-  public boolean indentLine(DefinitionsDocument doc, int reason){
+  public boolean indentLine(AbstractDJDocument doc, int reason){
     boolean supResult = super.indentLine(doc, reason);
     int pos = doc.getCurrentLocation();
 

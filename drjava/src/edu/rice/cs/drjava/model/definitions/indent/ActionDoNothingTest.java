@@ -50,7 +50,7 @@ import junit.extensions.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 /**
  * Tests the action rule which does nothing to the given text.

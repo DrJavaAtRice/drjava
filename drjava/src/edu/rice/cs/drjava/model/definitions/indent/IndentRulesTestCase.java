@@ -47,10 +47,10 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import junit.framework.*;
 import junit.extensions.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
+import javax.swing.text.*;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
+//import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
 /**
@@ -59,21 +59,36 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
  */
 public abstract class IndentRulesTestCase extends TestCase {
 
-  protected DefinitionsDocument _doc;
+  protected AbstractDJDocument _doc;
   private String _indent;
-  private GlobalEventNotifier _notifier;
+ // private GlobalEventNotifier _notifier;
 
   /**
    * Sets up the test environment.
    */
   public void setUp() {
-    _notifier = new GlobalEventNotifier();
-    _doc = new DefinitionsDocument(_notifier);
+    //_notifier = new GlobalEventNotifier();
+    //_doc = new DefinitionsDocument(_notifier);
+    _doc = new AbstractDJDocument() {
+      protected void throwErrorHuh() {
+        //Do nothing
+      }
+      protected int startCompoundEdit() {
+        //Do nothing
+        return 0;
+      }
+      protected void endCompoundEdit(int key) {
+        //Do nothing
+      }
+      protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) {
+        //Do nothing
+      }
+    };
   }
   
   public void tearDown() {
     _doc = null;
-    _notifier = null;
+    //_notifier = null;
     System.gc();
   }
   

@@ -45,7 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
 
 /**
@@ -79,20 +79,20 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
 
   /**
    * Determines if the given rule holds in this context.
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param doc AbstractDJDocument containing the line to be indented.
    * @param reason - The reason that indentation was initiated, specified in Indenter
    * @return true if this node's rule holds.
    */
-  abstract boolean applyRule(DefinitionsDocument doc, int reason);
+  abstract boolean applyRule(AbstractDJDocument doc, int reason);
 
   /**
    * Determines if the given rule holds in this context.
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param doc AbstractDJDocument containing the line to be indented.
    * @param pos Position within line to be indented.
    * @param reason - The reason that indentation was initiated, specified in Indenter
    * @return true if this node's rule holds.
    */
-  boolean applyRule(DefinitionsDocument doc, int pos, int reason) {
+  boolean applyRule(AbstractDJDocument doc, int pos, int reason) {
     int oldPos = doc.getCurrentLocation();
     doc.setCurrentLocation(pos);
     boolean result = applyRule(doc, reason);
@@ -106,12 +106,12 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
   /**
    * Determines if the given rule holds in this context and calls
    * the same method on one of its child nodes.
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * @param doc AbstractDJDocument containing the line to be indented.
    * @param reason - The reason that indentation was initiated, specified in Indenter
    * @return true if the caller should update the current location itself,
    * false if the indenter has already handled this
    */
-  public boolean indentLine(DefinitionsDocument doc, int reason)
+  public boolean indentLine(AbstractDJDocument doc, int reason)
   {
     if (applyRule(doc, reason)) {
       _addToIndentTrace(getRuleName(), YES, false);
