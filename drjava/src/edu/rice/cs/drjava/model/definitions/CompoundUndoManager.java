@@ -80,7 +80,12 @@ public class CompoundUndoManager extends UndoManager {
    * The next key to use for nested CompoundEdits.
    */
   private int _nextKey;
-  
+
+  /**
+   * The last edit that was performed before the last save
+   */
+  private UndoableEdit _savePoint;
+
   /**
    * keeps track of the listeners to this undo manager
    */
@@ -94,6 +99,7 @@ public class CompoundUndoManager extends UndoManager {
     _compoundEdits = new Vector<CompoundEdit>();
     _keys = new Vector<Integer>();
     _nextKey = 0;
+    _savePoint = null;
     _notifier = notifier;
   }
   
@@ -237,5 +243,21 @@ public class CompoundUndoManager extends UndoManager {
         l.undoableEditHappened();
       }
     });
+  }
+
+  /**
+   * Informs this undo manager that the document has been saved.
+   */
+  public void documentSaved() {
+    _savePoint = editToBeUndone();
+  }
+
+  /**
+   * Determines if the document is in the same undo state as it was when it
+   * was last saved.
+   * @return true iff all changes have been undone since the last save
+   */
+  public boolean isModified() {
+    return editToBeUndone() != _savePoint;
   }
 }

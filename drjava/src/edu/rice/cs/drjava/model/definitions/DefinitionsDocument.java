@@ -690,7 +690,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * be modified whenever an undo or redo is performed.
    */
   public void setModifiedSinceSave() {
-    _modifiedSinceSave = true;
+    _modifiedSinceSave = _undoManager.isModified();
   }
 
   /**
@@ -701,8 +701,10 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     try {
       writeLock();
       _modifiedSinceSave = false;
-      if (_file != null)
+      if (_file != null) {
         _timestamp = _file.lastModified();
+      }
+      _undoManager.documentSaved();
     }
     finally {
       writeUnlock();
