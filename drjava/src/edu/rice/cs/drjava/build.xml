@@ -240,6 +240,9 @@
       <fileset dir="${built_jsr14v1_0}">
         <exclude name="**/*Test.class" />
         <exclude name="**/*Test$*.class" />
+        <exclude name="**/MultiThreadedTestCase.class" />
+        <exclude name="**/GlobalModelTestCase.class" />
+        <exclude name="**/GlobalModelTestCase$*.class" />
         <include name="${projpath}/**" />
 
         <!-- include the GPL -->
