@@ -737,6 +737,12 @@ public class ConfigFrame extends JFrame {
                                                   "Warn to Restart to Change Look and Feel", this,
                                                   "<html>Whether DrJava should warn the user that look and feel<br>" +
                                                   "changes will not be applied until DrJava is restarted.</html>."));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_PATH_CONTAINS_POUND,
+                                                  "Warn if File's Path Contains a '#' Symbol", this,
+                                                  "<html>Whether DrJava should warn the user if the file being<br>" +
+                                                  "saved has a path that contains a '#' symbol.<br>" +
+                                                  "Users cannot use such files in the Interactions Pane<br>" +
+                                                  "because of a bug in Java.</html>"));
 
     panel.displayComponents();
   }
@@ -781,10 +787,8 @@ public class ConfigFrame extends JFrame {
                                                   "Whether to clear the Console output after resetting the Interactions Pane."));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.ALLOW_PRIVATE_ACCESS, "Allow Access of Private Members in Interactions Pane", this,
                                                   "Whether to allow users to access private (and protected) fields and methods."));
-    if(CodeStatus.DEVELOPMENT){
-      panel.addComponent(new StringOptionComponent(OptionConstants.JVM_ARGS, "JVM Args", this,
-                                                   "The command-line arguments to pass to the Interpreter JVM."));
-    }
+    panel.addComponent(new StringOptionComponent(OptionConstants.JVM_ARGS, "JVM Args for Interactions", this,
+                                                 "The command-line arguments to pass to the Interactions JVM."));
     
     panel.displayComponents();
   }

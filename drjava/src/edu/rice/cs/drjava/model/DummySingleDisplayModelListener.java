@@ -99,6 +99,11 @@ public class DummySingleDisplayModelListener implements SingleDisplayModelListen
    * Called when a file's main method is about to be run.
    */
   public void runStarted(OpenDefinitionsDocument doc) { }
+  
+  /**
+   * Called when saving a file whose path contains a '#' symbol.
+   */
+  public void filePathContainsPound() { }
 
   /**
    * Called after JUnit is started by the GlobalModel.
@@ -182,6 +187,10 @@ public class DummySingleDisplayModelListener implements SingleDisplayModelListen
    */
   public void interpreterChanged(boolean inProgress) { }
 
+  /**
+   * Called when enter was typed in the interactions pane but
+   * the interaction was incomplete.
+   */
   public void interactionIncomplete() { }
 
   //-------------------- End InteractionsListener Methods --------------------//

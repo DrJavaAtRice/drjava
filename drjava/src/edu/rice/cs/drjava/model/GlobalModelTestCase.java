@@ -612,6 +612,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected int shouldRevertFileCount;
     protected int undoableEditCount;
     protected int interactionIncompleteCount;
+    protected int filePathContainsPoundCount;
     
     public TestListener() {
       _startupTrace = new Exception();
@@ -653,6 +654,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       shouldRevertFileCount = 0;
       undoableEditCount = 0;
       interactionIncompleteCount = 0;
+      filePathContainsPoundCount = 0;
     }
 
     /**
@@ -990,6 +992,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     public void interactionIncomplete() {
       listenerFail("interactionIncomplete fired unexpectedly");
+    }
+    
+    public void filePathContainsPound() {
+      listenerFail("filePathContainsPound fired unexpectedly");
     }
   }
 

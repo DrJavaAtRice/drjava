@@ -148,6 +148,9 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    */
   public void addClassPath(String path) {
     //DrJava.consoleErr().println("Added class path: " + path);
+    // TODO: Once we move past 1.3, replace this with
+    // _djInterpreter.addClassPath(new File(path).toURI().getRawPath()) 
+    // in order to properly accept # and other special characters in paths.
     _djInterpreter.addClassPath(path);
   }
 

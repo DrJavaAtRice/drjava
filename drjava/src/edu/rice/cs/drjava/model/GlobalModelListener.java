@@ -136,5 +136,10 @@ public interface GlobalModelListener extends InteractionsListener,
    * Called when an undoable edit occurs.
    */
   public void undoableEditHappened();
+  
+  /**
+   * Called when saving a file whose path contains a '#' symbol.
+   */
+  public void filePathContainsPound();
 }
 

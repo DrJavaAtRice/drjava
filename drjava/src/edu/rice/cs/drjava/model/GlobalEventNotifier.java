@@ -747,4 +747,20 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
       _lock.endRead();
     }
   }
+
+  /**
+   * Notifies the view that the current file path contains a #.
+   */
+  public void filePathContainsPound() {
+    _lock.startRead();
+    try {
+      int size = _listeners.size();
+      for(int i = 0; i < size; i++) {
+        _listeners.get(i).filePathContainsPound();
+      }
+    }
+    finally {
+      _lock.endRead();
+    }
+  }
 }

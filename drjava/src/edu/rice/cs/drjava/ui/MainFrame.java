@@ -1517,7 +1517,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       public void optionChanged(OptionEvent<String> oe) {
         if(oe.value != "") {
           int result = JOptionPane.showConfirmDialog(_configFrame,
-                                                     "Changing JVM Args is an advanced option, bad command line arguments may break DrJava.\n"+
+                                                     "Specifying JVM Args is an advanced option. Invalid arguments may cause the\n"+
+                                                     "Interactions Pane to stop working.\n"+
                                                      "Are you sure you want to set this option?\n"+
                                                      "(You will have to reset the interactions pane before changes take effect.)",
                                                      "Confirm JVM Arguments", JOptionPane.YES_NO_OPTION);
@@ -3217,9 +3218,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Set up the 3 labels:
     _fileNameField = new JLabel();
     _fileNameField.setFont(_fileNameField.getFont().deriveFont(Font.PLAIN));
-    
+        
     _sbMessage = new JLabel();//("This is the text for the center message");
     _sbMessage.setHorizontalAlignment(SwingConstants.RIGHT);
+    JPanel fileNameAndMessagePanel = new JPanel(new BorderLayout());
+    fileNameAndMessagePanel.add(_fileNameField, BorderLayout.CENTER);
+    fileNameAndMessagePanel.add(_sbMessage, BorderLayout.EAST);
     
     _currLocationField = new JLabel();
     _currLocationField.setFont(_currLocationField.getFont().deriveFont(Font.PLAIN));
@@ -3230,8 +3234,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Create the status bar panel
     //SpringLayout layout = new SpringLayout();
     _statusBar = new JPanel(new BorderLayout());//( layout );
-    _statusBar.add( _fileNameField, BorderLayout.WEST );
-    _statusBar.add( _sbMessage, BorderLayout.CENTER );
+    _statusBar.add( fileNameAndMessagePanel, BorderLayout.CENTER );
+//    _statusBar.add( sbMessagePanel, BorderLayout.CENTER );
     _statusBar.add( _currLocationField, BorderLayout.EAST );
     _statusBar.setBorder(
       new CompoundBorder(new EmptyBorder(2,2,2,2),
@@ -4746,6 +4750,27 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
         else {
           _saveAll();
+        }
+      }
+    }
+    
+    public void filePathContainsPound() {
+      if (DrJava.getConfig().getSetting(WARN_PATH_CONTAINS_POUND).booleanValue()) {
+        String msg = 
+          "Files whose paths contain the '#' symbol cannot be used in the\n" +
+          "Interactions Pane due to a bug in Java's file to URL conversion.\n" +
+          "It is suggested that you change the name of the directory\n" +
+          "containing the '#' symbol.";
+        
+        String title = "Path Contains Pound Sign";
+        
+        ConfirmCheckBoxDialog dialog =
+          new ConfirmCheckBoxDialog(MainFrame.this, title, msg,
+                                    "Do not show this message again",
+                                    JOptionPane.WARNING_MESSAGE,
+                                    JOptionPane.DEFAULT_OPTION);
+        if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
+          DrJava.getConfig().setSetting(WARN_PATH_CONTAINS_POUND, Boolean.FALSE);
         }
       }
     }

@@ -417,12 +417,13 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     
     /******** Listeners for the right-hand check boxes ********/
     MatchCaseListener mcl = new MatchCaseListener();
-    _matchCase = new JCheckBox("Match Case ", true);
+    _matchCase = new JCheckBox("Match Case", true);
     _matchCase.addItemListener(mcl);
 
     SearchBackwardsListener bsl = new SearchBackwardsListener();
-    _searchBackwards = new JCheckBox("Search Backwards  ", false);
+    _searchBackwards = new JCheckBox("Search Backwards", false);
     _searchBackwards.addItemListener(bsl);
+//    _searchBackwards.setMargin(new Insets(0,4,0,3));
 
     SearchAllDocumentsListener sadl= new SearchAllDocumentsListener();
     _searchAllDocuments = new JCheckBox("Search All Documents", false);
@@ -431,6 +432,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     MatchWholeWordListener mwwl = new MatchWholeWordListener();
     _matchWholeWord = new JCheckBox("Whole Word");// new JRadioButton("Whole Word"); // JL
     _matchWholeWord.addItemListener(mwwl);
+    _matchCase.setPreferredSize(_matchWholeWord.getPreferredSize());
 
     //FindAnyOccurrenceListener faol = new FindAnyOccurrenceListener(); // JL
     //_findAnyOccurrence = new JRadioButton("Any Occurrence"); // JL
@@ -469,7 +471,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     JPanel farRightPanel = new JPanel(new GridLayout(2,1));
     midPanel.add(wrap(_findField));
     midPanel.add(wrap(_replaceField));
-    //midPanel.add(_message); // JL
+//    midPanel.add(wrap(_message)); // JL
     // midPanel.add(wrap(_lowerCheckPanel)); // JL
 
     /******** Set up the Panel containing both rows of checkboxes ********/

@@ -970,6 +970,12 @@ public interface OptionConstants {
   public static final BooleanOption WARN_CHANGE_LAF =
     new BooleanOption("warn.change.laf", Boolean.TRUE); 
   
+  /**
+   * Whether to warn that a file's path contains a "#' symbol.
+   */
+  public static final BooleanOption WARN_PATH_CONTAINS_POUND =
+    new BooleanOption("warn.path.contains.pound", Boolean.TRUE);
+  
   /* ---------- Misc Options ---------- */
   
   /**

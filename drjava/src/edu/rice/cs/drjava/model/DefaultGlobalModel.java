@@ -1432,6 +1432,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           if (! file.getCanonicalFile().getName().equals(file.getName())) {
             file.renameTo(file);
           }
+          
+          // Check for # in the path of the file because if there
+          // is one, then the file cannot be used in the Interactions Pane
+          if (file.getAbsolutePath().indexOf("#") != -1) {
+            _notifier.filePathContainsPound();
+          }
 
           // have FileOps save the file
           FileOps.saveFile(new FileOps.DefaultFileSaver(file){

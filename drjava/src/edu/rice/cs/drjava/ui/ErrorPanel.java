@@ -573,15 +573,15 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         _listHighlightTag.remove();
         _listHighlightTag = null;
       }
-      _prevErrorButton.setEnabled(false);
-      _nextErrorButton.setEnabled(false);
+//      _prevErrorButton.setEnabled(false);
+//      _nextErrorButton.setEnabled(false);
     }
 
     /**
      * Don't select any errors in the error pane.
      */
     public void selectNothing() {
-      _selectedIndex = -1;
+//      _selectedIndex = -1;
       _removeListHighlight();
 
       // Remove highlight from the defPane that has it
