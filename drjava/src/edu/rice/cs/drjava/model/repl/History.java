@@ -1,9 +1,11 @@
-/* $Id$ */
+package  edu.rice.cs.drjava;
 
-package edu.rice.cs.drjava;
+import  gj.util.Vector;
 
-import gj.util.Vector;
 
+/**
+ * @version $Id$
+ */
 public class History {
   private Vector<String> _vector = new Vector<String>();
   private int _cursor = -1;
@@ -29,35 +31,36 @@ public class History {
   /** Moves cursor back 1, or throws exception if there is none. */
   public void movePrevious() {
     if (!hasPrevious()) {
-      throw new ArrayIndexOutOfBoundsException();
+      throw  new ArrayIndexOutOfBoundsException();
     }
-
     _cursor--;
   }
 
   /** Moves cursor forward 1, or throws exception if there is none. */
   public void moveNext() {
     if (!hasNext()) {
-      throw new ArrayIndexOutOfBoundsException();
+      throw  new ArrayIndexOutOfBoundsException();
     }
-
     _cursor++;
   }
 
   /** Returns whether moveNext() would succeed right now. */
   public boolean hasNext() {
-    return _cursor < (_vector.size() - 1);
+    return  _cursor < (_vector.size() - 1);
   }
 
   /** Returns whether movePrevious() would succeed right now. */
   public boolean hasPrevious() {
-    return _cursor > 0;
+    return  _cursor > 0;
   }
 
   /**
    * Returns item in history at current position, or throws exception if none.
    */
   public String getCurrent() {
-    return _vector.elementAt(_cursor);
+    return  _vector.elementAt(_cursor);
   }
 }
+
+
+

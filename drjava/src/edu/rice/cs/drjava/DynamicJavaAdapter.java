@@ -16,8 +16,7 @@ import  koala.dynamicjava.parser.wrapper.JavaCCParserFactory;
 /**
  * @version $Id$
  */
-public class DynamicJavaAdapter
-    implements JavaInterpreter {
+public class DynamicJavaAdapter implements JavaInterpreter {
   private Interpreter _djInterpreter;
   private static final ClassLoadChecker _checker = new ClassLoadChecker();
 
@@ -222,7 +221,8 @@ class ClassLoadChecker {
       // Succeeded, so does not require system loader.
       _checkedPackages.put(packageName, Boolean.FALSE);
       return  false;
-    } catch (SecurityException se) {
+    } 
+    catch (SecurityException se) {
       // Failed, so does require system loader.
       _checkedPackages.put(packageName, Boolean.TRUE);
       return  true;
