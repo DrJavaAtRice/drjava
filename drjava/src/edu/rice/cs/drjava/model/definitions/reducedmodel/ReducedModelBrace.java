@@ -82,7 +82,7 @@ public class ReducedModelBrace
 					off += it.current().getSize();
 					it.prev();
 				}
-
+			it.dispose();
 			return off;
 		}
 
@@ -128,6 +128,7 @@ public class ReducedModelBrace
 				}
 
 			val += "|end|";
+			it.dispose();
 			return val;
 		}
 
@@ -420,7 +421,6 @@ public class ReducedModelBrace
 			copyCursor.current().shrink(_offset);
 			copyCursor.insert(Brace.MakeBrace(text, ReducedToken.FREE));
 			copyCursor.insert(new Gap(_offset, ReducedToken.FREE));
-			ModelList<ReducedToken>.Iterator copy2 = copyCursor.copy();
 			copyCursor.next(); // now pointing at new brace
 			copyCursor.next(); // now pointing at second half of gap
 			_offset = 0;
@@ -476,6 +476,7 @@ public class ReducedModelBrace
 				retval = _moveLeft(Math.abs(count),copyCursor2,currentOffset);
 
 			copyCursor.setTo(copyCursor2);
+			copyCursor2.dispose();
 			return retval;
 		}
 
@@ -576,6 +577,7 @@ public class ReducedModelBrace
 			// from = the _cursor
 			// to = _cursor.copy()
 			_offset = _delete(count, _offset, _cursor, copyCursor);
+			copyCursor.dispose();
 			return;
 		}
 
@@ -668,7 +670,7 @@ public class ReducedModelBrace
 				delFrom.current().grow(gapSize);
 				return gapSize;
 			}
-			
+
 			delFrom.setTo(delTo);
 			return 0;
 		}
@@ -733,9 +735,14 @@ public class ReducedModelBrace
   private boolean _isCurrentBraceMatchable(
 		ModelList<ReducedToken>.Iterator copyCursor)
 		{
-			String type = copyCursor.current().getType();
+			return _isBraceMatchable(copyCursor.current());
+		}
 
-			return (!copyCursor.current().isGap() &&
+  private boolean _isBraceMatchable(ReducedToken token)
+		{
+			String type = token.getType();
+
+			return (!token.isGap() &&
 							!(type.equals("/")  ||
 								type.equals("*")  ||
 								type.equals("\n") ||
@@ -743,9 +750,8 @@ public class ReducedModelBrace
 								type.equals("\\") ||
 								type.equals("\\\\") ||
 								type.equals("\\\"")) &&
-							!copyCursor.current().isShadowed());
+							!token.isShadowed());
 		}
-  
 
 /**
  *returns distance from current location of cursor to the location of the
@@ -764,9 +770,10 @@ public class ReducedModelBrace
 			ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
 			if (!copyCursor.atStart())
 				copyCursor.prev();
-			if (copyCursor.atStart())
+			if (copyCursor.atStart()) {
+				copyCursor.dispose();
 				return -1;
-
+			}
 			//innitialize the size.
 			dist += _offset;
 			relDistance = dist;
@@ -776,8 +783,10 @@ public class ReducedModelBrace
       			
 			while (!copyCursor.atStart()){
 				if (!copyCursor.current().isGap()) {
-					if (stateAtRelLocation(-relDistance) == ReducedToken.FREE)					
+					if (stateAtRelLocation(-relDistance) == ReducedToken.FREE) {
+						copyCursor.dispose();
 						return dist + copyCursor.current().getSize();
+					}
 					relDistance = 0;
 				}
 
@@ -785,6 +794,7 @@ public class ReducedModelBrace
 					relDistance += copyCursor.current().getSize();
 					copyCursor.prev();
 			}
+			copyCursor.dispose();
 			return -1;
 		}
 
@@ -815,6 +825,7 @@ public class ReducedModelBrace
 				if (!copyCursor.current().isGap()) {
 					if (stateAtRelLocation(relDistance) ==
 							ReducedToken.FREE){
+						copyCursor.dispose();
 						return dist;
 					}
 					relDistance = 0;
@@ -823,7 +834,7 @@ public class ReducedModelBrace
 				dist += copyCursor.current().getSize();
 				copyCursor.next();
 			}
-			
+			copyCursor.dispose();
 			return -1;
 		}
 
@@ -857,7 +868,7 @@ public class ReducedModelBrace
 
 			// here we check to make sure there is an open significant brace
 			// immediately to the right of the cursor
-			if (!iter.atEnd() && iter.current().isOpenBrace()){
+			if (!iter.atEnd() && openBraceImmediatelyRight()) {
 				if (stateAtRelLocation(relDistance) == ReducedToken.FREE)
 					{
 						relDistance = 0;
@@ -877,8 +888,10 @@ public class ReducedModelBrace
 								if (stateAtRelLocation(relDistance) == ReducedToken.FREE){
 									if (iter.current().isClosedBrace()) {
 										ReducedToken popped = braceStack.pop();
-										if (!iter.current().isMatch(popped))
+										if (!iter.current().isMatch(popped)) {
+											iter.dispose();
 											return -1;
+										}
 									}
 									//open
 									else{
@@ -895,18 +908,34 @@ public class ReducedModelBrace
 						}
 					
 					// we couldn't find a match
-					if (!braceStack.isEmpty())
-						return -1;
+						if (!braceStack.isEmpty()) {
+							iter.dispose();
+							return -1;
+						}
 					// success
-					else
-						return distance;
+						else {
+							iter.dispose();
+							return distance;
+						}
 					}
 				// not the right initial conditions 
 				
 			}
-				return -1;			
+			iter.dispose();
+			return -1;			
 		}	
-		
+
+	public boolean openBraceImmediatelyRight()
+		{
+			return ((_offset == 0) && _cursor.current().isOpen() &&
+							_isBraceMatchable(_cursor.current()));
+		}
+	
+	public boolean closedBraceImmediatelyLeft()
+		{
+			return ((_offset == 0) && _cursor.prevItem().isClosed() &&
+							_isBraceMatchable(_cursor.prevItem()));
+		}
 	/* 
 	 * If the previous ReducedToken is a closed significant brace,
 	 * offset is 0 (i.e., if we're immediately right of said brace),
@@ -929,9 +958,11 @@ public class ReducedModelBrace
 			resetLocation();
 			int relDistance = 0;
 			int distance = 0;
-			if (iter.atStart() || iter.atFirstItem())
+			if (iter.atStart() || iter.atFirstItem() ||
+				  !closedBraceImmediatelyLeft()) {
+				iter.dispose();
 				return -1;
-
+			}
 			
 			iter.prev();
 			relDistance = iter.current().getSize();
@@ -950,16 +981,19 @@ public class ReducedModelBrace
 						relDistance = iter.current().getSize();
 					}
 				}
-				else
+				else {
+					iter.dispose();
 					return -1;
+				}
 			}
 			else {
+				iter.dispose();
 				return -1;
 			}
 				// either we get a match and the stack is empty
 				// or we reach the start of a file and haven't found a match
 				// or we have a open brace that doesn't have a match,
-				//    so we abort
+				// so we abort
 				while (!iter.atStart() && !braceStack.isEmpty()) {
 					if (!iter.current().isGap()) {
 
@@ -969,6 +1003,7 @@ public class ReducedModelBrace
 							if (iter.current().isOpenBrace()) {
 								ReducedToken popped = braceStack.pop();
 								if (!iter.current().isMatch(popped)){
+									iter.dispose();
 									return -1;
 								}
 							}
@@ -992,11 +1027,14 @@ public class ReducedModelBrace
 					
 				// we couldn't find a match
 				if (!braceStack.isEmpty()){
+					iter.dispose();
 					return -1;
 				}
 				// success
-				else
+				else {
+					iter.dispose();
 					return distance;
+				}
 		}
     
 

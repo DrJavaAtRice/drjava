@@ -88,9 +88,12 @@ public class ReducedModelComment
 			}
 
 			//move back to before the insert.
-			markOffset = _move(-moveSize,mark,_offset);
+			markOffset = _move(-moveSize,mark,_offset);			
 
-			return SBVectorFactory.generate(mark,markOffset,adjustment);
+			Vector<StateBlock> states =
+				SBVectorFactory.generate(mark,markOffset,adjustment);
+			mark.dispose();
+			return states;
 		}
 	
 	/**
@@ -111,7 +114,7 @@ public class ReducedModelComment
 					off += it.current().getSize();
 					it.prev();
 				}
-
+			it.dispose();
 			return off;
 		}
 
@@ -157,6 +160,7 @@ public class ReducedModelComment
 				}
 
 			val += "|end|";
+			it.dispose();
 			return val;
 		}
 
@@ -951,6 +955,7 @@ public class ReducedModelComment
 			copyCursor.insert(new Gap(_offset, getStateAtCurrent()));
 			ModelList<ReducedToken>.Iterator copy2 = copyCursor.copy();
 			_updateBasedOnCurrentStateHelper(copy2);
+			copy2.dispose();
 			copyCursor.next(); // now pointing at new brace
 			copyCursor.next(); // now pointing at second half of gap
 			_offset = 0;
@@ -1020,6 +1025,7 @@ public class ReducedModelComment
 		{
 			ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
 			_updateBasedOnCurrentStateHelper(copyCursor);
+			copyCursor.dispose();
 		}
 
 	/**
@@ -1448,6 +1454,7 @@ public class ReducedModelComment
 				retval = _moveLeft(Math.abs(count),copyCursor2,currentOffset);
 
 			copyCursor.setTo(copyCursor2);
+			copyCursor2.dispose();
 			return retval;
 		}
 
@@ -1548,6 +1555,7 @@ public class ReducedModelComment
 			// from = the _cursor
 			// to = _cursor.copy()
 			_offset = _delete(count, _offset, _cursor, copyCursor);
+			copyCursor.dispose();
 			return;
 		}
 
@@ -1878,8 +1886,9 @@ public class ReducedModelComment
 	 */
 	void resetLocation()
 		{
+			_walker.dispose();
 			_walker = _cursor.copy();
-			_walkerOffset = _offset;
+			_walkerOffset = _offset;			
 		}
 
 	ReducedToken current()

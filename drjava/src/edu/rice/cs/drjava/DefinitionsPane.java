@@ -64,6 +64,7 @@ public class DefinitionsView extends JEditorPane
 		public void caretUpdate(CaretEvent e) {
 			_doc().setCurrentLocation(getCaretPosition());
 			_mainFrame.getStatusBar().setText("");
+			_removePreviousHighlight();
 
 			try {
 				_updateMatchHighlight();
@@ -73,7 +74,6 @@ public class DefinitionsView extends JEditorPane
 	};
 
 	private void _updateMatchHighlight() throws BadLocationException {
-		_removePreviousHighlight();
 		int to = getCaretPosition();
 		int from = _doc()._reduced.balanceBackward();
 		if (from == -1) {

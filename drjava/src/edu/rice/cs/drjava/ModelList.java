@@ -64,6 +64,16 @@ class ModelList<T>
 				}
 		}
 
+	private void addListener(Object thing)
+		{
+			this._listeners.add(thing);
+		}
+	
+	private void removeListener(Object thing)
+		{
+			this._listeners.remove(thing);
+		}
+	
 	/**
 	 * Returns true if the list is empty.
 	 */
@@ -85,7 +95,7 @@ class ModelList<T>
 	public Iterator getIterator()
 		{
 			Iterator result = new Iterator();
-			_listeners.add(result);
+			this.addListener(result);
 			return result;
 		}
 
@@ -142,7 +152,7 @@ class ModelList<T>
 			{
 				_point = ModelList.this._head;
 				_pos = 0;
-				ModelList.this._listeners.add(this);
+				ModelList.this.addListener(this);
 			}
 
 		/**
@@ -154,7 +164,7 @@ class ModelList<T>
 			{
 				_point = iter._point;
 				_pos = iter._pos;
-				ModelList.this._listeners.add(this);
+				ModelList.this.addListener(this);
 			}
 
 		public Iterator copy()
@@ -179,6 +189,11 @@ class ModelList<T>
 				this._pos = it._pos;
 			}
 
+		public void dispose()
+			{
+				ModelList.this.removeListener(this);
+			}
+		
 		/**
 		 * Return true if we're pointing at the head.
 		 */
