@@ -554,28 +554,28 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class<?>> {
     return null;
   }
 
-  /**
-   * This method visits a variable declaration without actually defining
-   * anything in the context.  This method was added to allow other objects
-   * to type check a variable declaration without actually creating a new
-   * binding in the context.  This behavior was added so that when a
-   * variable declaration has some error in it, the declaration would not
-   * make it into the context. (this method should be run on an individual 
-   * variable declaration before the type checker visitor is formally 
-   * executed on the entire AST)
-   * @param node the variable declaration to check
-   */
-  public void preCheckVariableDeclaration(VariableDeclaration node) {
-    Class<?> lc = node.getType().acceptVisitor(this);
-    Expression init = node.getInitializer();
-    if (init != null) {
-      Class<?> rc = init.acceptVisitor(this);
-      // this call to checkAssignmentStaticRules is not
-      // intended to mutate the AST for autoboxing/unboxing
-      checkAssignmentStaticRules(lc, rc, node, init);
-    }
-  }
-  
+//  /**
+//   * This method visits a variable declaration without actually defining
+//   * anything in the context.  This method was added to allow other objects
+//   * to type check a variable declaration without actually creating a new
+//   * binding in the context.  This behavior was added so that when a
+//   * variable declaration has some error in it, the declaration would not
+//   * make it into the context. (this method should be run on an individual 
+//   * variable declaration before the type checker visitor is formally 
+//   * executed on the entire AST)
+//   * @param node the variable declaration to check
+//   */
+//  public void preCheckVariableDeclaration(VariableDeclaration node) {
+//    Class<?> lc = node.getType().acceptVisitor(this);
+//    Expression init = node.getInitializer();
+//    if (init != null) {
+//      Class<?> rc = init.acceptVisitor(this);
+//      // this call to checkAssignmentStaticRules is not
+//      // intended to mutate the AST for autoboxing/unboxing
+//      checkAssignmentStaticRules(lc, rc, node, init);
+//    }
+//  }
+
   /**
    * Visits a BlockStatement
    * @param node the node to visit

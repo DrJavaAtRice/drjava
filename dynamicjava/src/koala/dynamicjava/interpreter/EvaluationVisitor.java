@@ -928,11 +928,9 @@ public class EvaluationVisitor extends VisitorObject<Object> {
             args = new Object[]{Array.newInstance(compType, 0)};
         }
       }
-      
       // Invoke the method
       try {
-        Object res = m.invoke(obj, args);
-        return res;
+        return m.invoke(obj, args);
       }
       catch (InvocationTargetException e) {
         if (e.getTargetException() instanceof Error) {

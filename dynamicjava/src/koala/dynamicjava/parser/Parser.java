@@ -1833,7 +1833,8 @@ public class Parser implements ParserConstants {
                                 typ.getBeginLine(), typ.getBeginColumn(),
                                 typ.getEndLine(),   typ.getEndColumn());
           }
-          if(lastFormalParameterIsVarArgs) flags |= 0x00000080; // java.lang.reflect.Modifier.VARARGS == 0x00000080 /**/
+          if(lastFormalParameterIsVarArgs)
+            flags |= 0x00000080; // java.lang.reflect.Modifier.VARARGS == 0x00000080 /**/
 
           if (typeParameters == null){
           {if (true) return new MethodDeclaration(flags, typ, id.image, params,

@@ -40,100 +40,113 @@ import java.util.*;
  */
 
 public interface SimpleContext {
-    /**
-     * Enters a scope
-     */
-    void enterScope();
+  /**
+   * Enters a scope
+   */
+  void enterScope();
+  
+  /**
+   * Enters a scope and defines the given entries to null.
+   * @param entries a set of string
+   */
+  void enterScope(Set<AbstractVariable> entries);
+  
+  /**
+   * Defines the given variables
+   */
+  void defineVariables(Set<AbstractVariable> vars);
+  
+  /**
+   * Returns the current scope variables (AbstractVariables) in a set
+   */
+  Set<AbstractVariable> getCurrentScopeVariables();
+  
+  /**
+   * Returns the current scope variable names in a set
+   */
+  Set<String> getCurrentScopeVariableNames();
+  
+  /**
+   * Leaves the current scope
+   * @return the set of the variables (strings) defined in the current scope
+   */
+  Set leaveScope();
+  
+  /**
+   * Tests whether a variable is defined in this context
+   * @param name the name of the entry
+   * @return false if the variable is undefined
+   */
+  boolean isDefinedVariable(String name);
+  
+  /**
+   * Tests whether a variable is final in this context
+   * @param name the name of the entry
+   * @return false if the variable is not final
+   * @exception IllegalStateException if the variable is not defined
+   */
+  boolean isFinal(String name);
+  
+  /**
+   * Defines a new variable in the current scope
+   * @param name  the name of the new entry
+   * @param value the value of the entry
+   * @exception IllegalStateException if the variable is already defined
+   */
+  void define(String name, Object value);
+  
+  /**
+   * Defines a new constant variable in the current scope
+   * @param name  the name of the new entry
+   * @param value the value of the entry
+   * @exception IllegalStateException if the variable is already defined
+   */
+  void defineConstant(String name, Object value);
+  
+  /**
+   * Returns the value of a variable with the given name
+   * @param name  the name of the value to get
+   * @exception IllegalStateException if the variable is not defined
+   */
+  Object get(String name);
+  
+  /**
+   * Sets the value of a defined variable
+   * @param name  the name of the new entry
+   * @param value the value of the entry
+   * @exception IllegalStateException if the variable is not defined
+   */
+  void set(String name, Object value);
+  
+  /**
+   * Defines a new constant variable in the current scope
+   * @param name  the name of the new entry
+   * @param value the value of the entry
+   */
+  void setConstant(String name, Object value);
+  
+  /**
+   * Defines a new variable in the current scope
+   * @param name  the name of the new entry
+   * @param value the value of the entry
+   */
+  void setVariable(String name, Object value);
+  
+  /**
+   * Creates a map that contains the constants in this context
+   */
+  Map getConstants();
+  
+  
+  /**
+   * Sets a revert point such that calling revert will remove
+   * any variable or constant bindings set after this point.
+   */
+  void setRevertPoint();
+  
+  /**
+   * Removes any bindings set after the last call to setRevertPoint
+   */
+  void revert();
 
-    /**
-     * Enters a scope and defines the given entries to null.
-     * @param entries a set of string
-     */
-    void enterScope(Set<AbstractVariable> entries);
-
-    /**
-     * Defines the given variables
-     */
-    void defineVariables(Set<AbstractVariable> vars);
-
-    /**
-     * Returns the current scope variables (AbstractVariables) in a set
-     */
-    Set<AbstractVariable> getCurrentScopeVariables();
-
-    /**
-     * Returns the current scope variable names in a set
-     */
-    Set<String> getCurrentScopeVariableNames();
-
-    /**
-     * Leaves the current scope
-     * @return the set of the variables (strings) defined in the current scope
-     */
-    Set leaveScope();
-
-    /**
-     * Tests whether a variable is defined in this context
-     * @param name the name of the entry
-     * @return false if the variable is undefined
-     */
-    boolean isDefinedVariable(String name);
-
-    /**
-     * Tests whether a variable is final in this context
-     * @param name the name of the entry
-     * @return false if the variable is not final
-     * @exception IllegalStateException if the variable is not defined
-     */
-    boolean isFinal(String name);
-
-    /**
-     * Defines a new variable in the current scope
-     * @param name  the name of the new entry
-     * @param value the value of the entry
-     * @exception IllegalStateException if the variable is already defined
-     */
-    void define(String name, Object value);
-
-    /**
-     * Defines a new constant variable in the current scope
-     * @param name  the name of the new entry
-     * @param value the value of the entry
-     * @exception IllegalStateException if the variable is already defined
-     */
-    void defineConstant(String name, Object value);
-
-    /**
-     * Returns the value of a variable with the given name
-     * @param name  the name of the value to get
-     * @exception IllegalStateException if the variable is not defined
-     */
-    Object get(String name);
-
-    /**
-     * Sets the value of a defined variable
-     * @param name  the name of the new entry
-     * @param value the value of the entry
-     * @exception IllegalStateException if the variable is not defined
-     */
-    void set(String name, Object value);
-
-    /**
-     * Defines a new constant variable in the current scope
-     * @param name  the name of the new entry
-     * @param value the value of the entry
-     */
-    void setConstant(String name, Object value);
-
-    /**
-     * Defines a new variable in the current scope
-     * @param name  the name of the new entry
-     * @param value the value of the entry
-     */
-    void setVariable(String name, Object value);
-
-    /**
-     * Creates a map that contains the constants in this context
-     */
-    Map getConstants();
 }

@@ -112,8 +112,9 @@ public class MethodInfo extends AttributeOwnerComponent {
     constantPool = cp;
     nameIndex = constantPool.putUTF8(nm);
     setSignature(rt, pt);
+    _nm = nm;
   }
-  
+  String _nm;
   /**
    * Writes the method info to the given output stream
    */

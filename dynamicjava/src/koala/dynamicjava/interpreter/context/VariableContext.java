@@ -93,9 +93,14 @@ public class VariableContext implements SimpleContext {
   }
   
   /**
-   * Enters a scope
+   * Enters a scope.
    */
   public void enterScope() {
+    // TODO: What is the correct way to handle the 
+    // revert point?  If someone sets a revert point, 
+    // enters a new scope, and leaves that scope, 
+    // should the original revert point for this scope
+    // still exist?
     scopes = LinkFactory.createLink(scopes);
     scope  = scopes.scope;
     cscope = scopes.cscope;
@@ -177,9 +182,7 @@ public class VariableContext implements SimpleContext {
    */
   public boolean isDefinedVariable(String name) {
     for (Link l = scopes; l != null; l = l.next) {
-      if (l.scope.get(name) != Scope.NO_SUCH_KEY) {
-        return true;
-      } else if (l.cscope.get(name) != Scope.NO_SUCH_KEY) {
+      if (l.scope.contains(name) || l.cscope.contains(name)) {
         return true;
       }
     }
@@ -196,7 +199,7 @@ public class VariableContext implements SimpleContext {
    */
   public boolean isFinal(String name) {
     for (Link l = scopes; l != null; l = l.next) {
-      if (l.cscope.get(name) != Scope.NO_SUCH_KEY) {
+      if (l.cscope.contains(name)) {
         return true;
       }
     }
@@ -223,7 +226,7 @@ public class VariableContext implements SimpleContext {
    */
   public void defineConstant(String name, Object value) {
     if (cscope.put(name, value) != Scope.NO_SUCH_KEY ||
-        scope.get(name) != Scope.NO_SUCH_KEY) {
+        scope.contains(name)) {
       throw new IllegalStateException(name);
     }
   }
@@ -252,8 +255,7 @@ public class VariableContext implements SimpleContext {
    */
   public void set(String name, Object value) {
     for (Link l = scopes; l != null; l = l.next) {
-      Object val = l.scope.get(name);
-      if (val != Scope.NO_SUCH_KEY) {
+      if (l.scope.contains(name)) {
         l.scope.put(name, value);
         return;
       }
@@ -292,6 +294,23 @@ public class VariableContext implements SimpleContext {
       }
     }
     return result;
+  }
+  
+  /**
+   * Sets a revert point such that calling revert will remove
+   * any variable or constant bindings set after this point.
+   */
+  public void setRevertPoint() {
+    scope.setRevertPoint();
+    cscope.setRevertPoint();
+  }
+  
+  /**
+   * Removes any bindings set after the last call to setRevertPoint
+   */
+  public void revert() {
+    scope.revert();
+    cscope.revert();
   }
   
   /**
@@ -375,45 +394,30 @@ public class VariableContext implements SimpleContext {
   }
   
   /**
-   * A table which maps a string with an object
+   * A Scope is a wrapper for a hashtable that maps variable
+   * names to the corresponding value.  Previously, the scope
+   * object was an implementation of a hashtable without the
+   * ability to unmap a variable from it.  Now the scope wraps
+   * an intance of java.util.HashMap and includes a remove 
+   * method in order to allow variables to be unmapped from the
+   * scope.
    */
-  protected static class Scope {
+  static class Scope {
     /**
-     * The load factor
+     * The hashtable that is being wrapped by the Scope object
      */
-    protected final static float LOAD_FACTOR = 0.75f;
+    protected HashMap<String,Object> _table;
     
-    /**
-     * The initial capacity
-     */
-    protected final static int INITIAL_CAPACITY = 11;
+    protected LinkedList<String> _addedKeys;
     
     /**
      * The object used to notify that a key do not exists
      */
-    protected final static Object NO_SUCH_KEY = new Object();
+    public final static Object NO_SUCH_KEY = new Object();
     
-    /**
-     * The underlying array
-     */
-    protected Entry[] table;
-    
-    /**
-     * The number of entries
-     */
-    protected int count;
-    
-    /**
-     * The resizing threshold
-     */
-    protected int threshold;
-    
-    /**
-     * Creates a new scope
-     */
-    public Scope() {
-      table     = new Entry[INITIAL_CAPACITY];
-      threshold = (int)(INITIAL_CAPACITY * LOAD_FACTOR);
+    public Scope() { 
+      _table = new HashMap<String,Object>(11,0.75f);
+      _addedKeys = new LinkedList<String>();
     }
     
     /**
@@ -421,15 +425,18 @@ public class VariableContext implements SimpleContext {
      * @return the value or NO_SUCH_KEY
      */
     public Object get(String key) {
-      int hash  = key.hashCode() & 0x7FFFFFFF;
-      int index = hash % table.length;
-      
-      for (Entry e = table[index]; e != null; e = e.next) {
-        if ((e.hash == hash) && e.key.equals(key)) {
-          return e.value;
-        }
-      }
-      return NO_SUCH_KEY;
+      if (_table.containsKey(key))
+        return _table.get(key);
+      else
+        return NO_SUCH_KEY;
+    }
+    
+    /**
+     * Returns whether a variable binding exists
+     * in this scope
+     */
+    public boolean contains(String key) {
+      return _table.containsKey(key);
     }
     
     /**
@@ -437,117 +444,45 @@ public class VariableContext implements SimpleContext {
      * @return the old value or NO_SUCH_KEY
      */
     public Object put(String key, Object value) {
-      int hash  = key.hashCode() & 0x7FFFFFFF;
-      int index = hash % table.length;
-      
-      for (Entry e = table[index]; e != null; e = e.next) {
-        if ((e.hash == hash) && e.key.equals(key)) {
-          Object old = e.value;
-          e.value = value;
-          return old;
-        }
-      }
-      
-      // The key is not in the hash table
-      if (count++ >= threshold) {
-        rehash();
-        index = hash % table.length;
-      }
-      
-      Entry e = EntryFactory.createEntry(hash, key, value, table[index]);
-      table[index] = e;
-      return NO_SUCH_KEY;
+      boolean wasThere = _table.containsKey(key);
+      Object val = _table.put(key,value);
+      _addedKeys.add(key);
+      return (wasThere) ? val : NO_SUCH_KEY;
     }
     
     /**
      * Returns a set that contains the keys
      */
     public Set<String> keySet() {
-      Set<String> result = new HashSet<String>(11);
-      for (int i = table.length-1; i >= 0; i--) {
-        for (Entry e = table[i]; e != null; e = e.next) {
-          result.add(e.key);
-        }
-      }
-      return result;
+      return _table.keySet();
     }
     
     /**
      * Clears this scope
      */
     public void clear() {
-      count = 0;
-      for (int i = table.length-1; i >= 0; i--) {
-        table[i] = null;
-      }
+      _table.clear();
+      _addedKeys.clear();
     }
     
     /**
-     * Rehash the table
+     * Unmaps all the variable bindings added since 
+     * the last call to setRevertPoint
      */
-    protected void rehash () {
-      Entry[] oldTable = table;
-      
-      table     = new Entry[oldTable.length * 2 + 1];
-      threshold = (int)(table.length * LOAD_FACTOR);
-      
-      for (int i = oldTable.length-1; i >= 0; i--) {
-        for (Entry old = oldTable[i]; old != null;) {
-          Entry e = old;
-          old = old.next;
-          
-          int index = e.hash % table.length;
-          e.next = table[index];
-          table[index] = e;
-        }
+    public void revert() {
+      for(String key : _addedKeys) {
+        _table.remove(key);
       }
+      _addedKeys.clear();
     }
     
     /**
-     * To manage collisions
+     * Any bindings set after this method is call may be
+     * unmapped by calling the revert method.
      */
-    protected static class Entry {
-      /**
-       * The hash code
-       */
-      public int hash;
-      
-      /**
-       * The variable
-       */
-      public String key;
-      
-      /**
-       * The value
-       */
-      public Object value;
-      
-      /**
-       * The next entry
-       */
-      public Entry next;
-      
-      /**
-       * Creates a new entry
-       */
-      public Entry(int hash, String key, Object value, Entry next) {
-        this.hash  = hash;
-        this.key   = key;
-        this.value = value;
-        this.next  = next;
-      }
-    }
-    
-    /**
-     * To create an entry
-     */
-    protected static class EntryFactory {
-      /**
-       * Creates a new entry
-       */
-      public static Entry createEntry(int hash, String key, Object value, Entry next) {
-        return new Entry(hash, key, value, next);
-      }
+    public void setRevertPoint() {
+      _addedKeys.clear();
     }
   }
+  
 }

@@ -99,11 +99,18 @@ public class TigerUtilities {
   
   /**
    * Resets _tigerEnabled based upon the version of the runtime environment that is being used.
+   * The isVarArgs method in the interpreter is used since it is a method
+   * that was added in jsr14 and jdk5.0 while the Method class itself has
+   * been there for some time. Attempting to get the isVarArgs method with
+   * reflection will throw an exception if the JSR14/JSR201 features were
+   * not prepended to the bootclasspath while running version 1.4 or earlier.
+   * For this reason, it's a good test for jdk5.0 features.
    */
   public static void resetVersion() {
     try {
       //Class.forName("java.lang.Enum");
 //      Class.forName("com.sun.javadoc.ParameterizedType");
+      
       java.lang.reflect.Method.class.getMethod("isVarArgs", new Class<?>[]{});
       _tigerEnabled = true;
     }
@@ -125,7 +132,7 @@ public class TigerUtilities {
    * Allows the features in 1.5 to be enabled or disabled. Used only in test cases.
    * @param enabled - a boolean that specifies whether or not Tiger features are to be enabled
    */
-  protected static void setTigerEnabled(boolean enabled) {
+  public static void setTigerEnabled(boolean enabled) {
     _tigerEnabled = enabled;
   }
 
@@ -167,17 +174,13 @@ public class TigerUtilities {
    * @return boolean that is true if tiger is enabled and <code>c.isEnum()</code>
    */
   public static boolean isEnum(Class<?> c) {
-    try {
-      return _tigerEnabled && (c.getSuperclass() == Class.forName("java.lang.Enum"));
-    }
-    // this try/catch block should in fact not be there, but to use
-    // c.isEnum() instead if the value of the ENUM flag
-    // was known (see commented line below)
-    catch(ClassNotFoundException e){
-      throw new ExecutionError("Tiger is enabled, but cannot find class java.lang.Enum! Please contact the DynamicJava/DrJava team (javaplt@cs.rice.edu).");
-    }
-
-    //return _tigerEnabled && c.isEnum();
+    System.out.println("enabled: "+_tigerEnabled+", "+c+".super: "+c.getSuperclass());
+    return _tigerEnabled && c.getSuperclass()!=null && (c.getSuperclass().getName().equals("java.lang.Enum"));
+    
+    // The following is what it should be.  The reason why this commented is that
+    // setting the ENUM modifier in the EnumDeclaration constructor causes some other
+    // problems when trying to access the elements of the enum using reflection.
+    // return _tigerEnabled && ((c.getModifiers() & ENUM) != 0); 
   }
 
   /**

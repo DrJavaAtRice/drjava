@@ -199,7 +199,9 @@ public class ClassInfoCompiler {
     
     // Define the class
     TreeClassLoader classLoader = (TreeClassLoader)interpreter.getClassLoader();
-    return classLoader.defineClass(name, classFactory.getByteCode());
+    Class<?> result = classLoader.defineClass(name, classFactory.getByteCode());
+    
+    return result;
   }
   
   /**

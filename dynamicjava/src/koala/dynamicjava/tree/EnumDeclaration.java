@@ -39,6 +39,8 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class EnumDeclaration extends ClassDeclaration {
+ 
+  
   /**
    * Creates a new enum declaration
    * @param flags the access flags
@@ -83,14 +85,22 @@ public class EnumDeclaration extends ClassDeclaration {
    */
   public EnumDeclaration(int flags, String name, List<? extends ReferenceType> impl, EnumBody body,
                           String fn, int bl, int bc, int el, int ec) {
-    super(flags, /**/// 1<<19 // | 0x4000, // | java.lang.reflect.Modifier.ENUM   NON-WORK! TigerUtilities.isEnum() is not used thus in AbstractTypeChecker
+    // the first parameter should be (flags | 0x4000), 
+    // but this causes problems when trying to create 
+    // an instance of it using reflection since you 
+    // apparently can't create enum types reflectively 
+    // using newInstance from the class object. 
+    // 
+    // The only real consequence of this is that Class.isEnum() 
+    // will return false, but since dynamicjava uses 
+    // TigerUtilities.isEnum(), this doesn't pose too big of a problem.
+    super(flags , 
           name, new ReferenceType("java.lang.Enum"), impl,
       AddValues(name,
         HandleConstructors(name,
           makeEnumBodyDeclarationsFromEnumConsts(name, body)),
         body.getConstants()),
       fn, bl, bc, el, ec);
-
     // Do all Enum checks here? /**/
   }
 

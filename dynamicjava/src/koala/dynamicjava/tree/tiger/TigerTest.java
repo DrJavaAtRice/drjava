@@ -538,12 +538,11 @@ public class TigerTest extends DynamicJavaTestCase {
       "  }\n"+
       "}\n"+
       "new C().someMethod(0,1,2,3);";
-
     assertEquals(new Integer(3), interpret(testString));
   }
 
-    public void testInterpretObjectVarArgs(){
-    testString =
+  public void testInterpretObjectVarArgs(){
+    testString = 
       "public class C {\n"+
       "  public String someMethod(String ... s){\n"+
       "    String returnStr=\"\";\n"+
