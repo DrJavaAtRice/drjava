@@ -1,40 +1,43 @@
-/* $Id$ */
+package  edu.rice.cs.drjava;
 
-package edu.rice.cs.drjava;
+import  javax.swing.text.Document;
+import  javax.swing.text.PlainDocument;
+import  javax.swing.text.DefaultEditorKit;
+import  javax.swing.text.StyledEditorKit;
+import  javax.swing.text.*;
+import  java.awt.*;
+import  javax.swing.event.DocumentEvent;
+import  gj.util.Vector;
 
-import javax.swing.text.Document;
-import javax.swing.text.PlainDocument;
-
-import javax.swing.text.DefaultEditorKit;
-import javax.swing.text.StyledEditorKit;
-import javax.swing.text.*;
-import java.awt.*;
-import javax.swing.event.DocumentEvent;
-
-import gj.util.Vector;
 
 /**
+ * @version $Id$
  * This is an editor kit for editing Java source files.
  * It functions as the controller in the MVC arrangement.
  * It implements a factory for new documents, and it also
  * has a factory for Views (the things that render the document).
  */
-public class DefinitionsEditorKit extends DefaultEditorKit
-{
+public class DefinitionsEditorKit extends DefaultEditorKit {
+
   /** Factory method to make this view create correct model objects. */
-  public Document createDefaultDocument()
-  {
-    return _createDefaultTypedDocument();
+  public Document createDefaultDocument() {
+    return  _createDefaultTypedDocument();
   }
 
-  private static DefinitionsDocument _createDefaultTypedDocument()
-  {
-    return new DefinitionsDocument();
+  /**
+   * put your documentation comment here
+   * @return 
+   */
+  private static DefinitionsDocument _createDefaultTypedDocument() {
+    return  new DefinitionsDocument();
   }
 
-  public String getContentType()
-  {
-    return "text/java";
+  /**
+   * put your documentation comment here
+   * @return 
+   */
+  public String getContentType() {
+    return  "text/java";
   }
 
   /**
@@ -42,14 +45,21 @@ public class DefinitionsEditorKit extends DefaultEditorKit
    * a factory that creates ColoringViews.
    */
   public final ViewFactory getViewFactory() {
-    return new ViewFactory() {
+    return  new ViewFactory() {
+
+      /**
+       * put your documentation comment here
+       * @param elem
+       * @return 
+       */
       public View create(Element elem) {
-        return new ColoringView(elem);
+        return  new ColoringView(elem);
         //return new WrappedPlainView(elem);
       }
     };
   }
 }
+
 
 /**
  * This view class renders text on the screen.
@@ -60,9 +70,13 @@ public class DefinitionsEditorKit extends DefaultEditorKit
 class ColoringView extends WrappedPlainView {
   private DefinitionsDocument _doc;
 
+  /**
+   * put your documentation comment here
+   * @param   Element elem
+   */
   ColoringView(Element elem) {
     super(elem);
-    _doc = (DefinitionsDocument) getDocument();
+    _doc = (DefinitionsDocument)getDocument();
   }
 
   /**
@@ -81,76 +95,73 @@ class ColoringView extends WrappedPlainView {
    * @returns the x coordinate at the end of the range
    * @exception BadLocationException if the range is invalid
    */
-  protected int drawUnselectedText(Graphics g,
-                                   int x,
-                                   int y,
-                                   int p0,
-                                   int p1) throws BadLocationException
-  {
+  protected int drawUnselectedText(Graphics g, int x, int y, int p0, int p1) throws BadLocationException {
     /*
-    DrJava.consoleErr().println("drawUnselected: " + p0 + "-" + p1 + 
-                                " doclen=" + _doc.getLength() +" x="+x+" y="+y);
-    */
-
+     DrJava.consoleErr().println("drawUnselected: " + p0 + "-" + p1 + 
+     " doclen=" + _doc.getLength() +" x="+x+" y="+y);
+     */
     // If there's nothing to show, don't do anything!
     // For some reason I don't understand we tend to get called sometimes
     // to render a zero-length area.
     if (p0 == p1) {
-      return x;
+      return  x;
     }
-
     Vector<HighlightStatus> stats = _doc.getHighlightStatus(p0, p1);
     if (stats.size() < 1) {
-      throw new RuntimeException("GetHighlightStatus returned nothing!");
+      throw  new RuntimeException("GetHighlightStatus returned nothing!");
     }
-
     for (int i = 0; i < stats.size(); i++) {
       HighlightStatus stat = stats.elementAt(i);
       setFormattingForState(g, stat.getState());
-
       // If this highlight status extends past p1, end at p1
       int length = stat.getLength();
       int location = stat.getLocation();
       if (location + length > p1) {
         length = p1 - stat.getLocation();
       }
-
       Segment text = getLineBuffer();
-
       /*
-      DrJava.consoleErr().println("Highlight: loc=" + location + " len=" +
-                                  length + " state=" + stat.getState() +
-                                  " text=" + text);
-      */
-
+       DrJava.consoleErr().println("Highlight: loc=" + location + " len=" +
+       length + " state=" + stat.getState() +
+       " text=" + text);
+       */
       _doc.getText(location, length, text);
       x = Utilities.drawTabbedText(text, x, y, g, this, location);
     }
-
     //DrJava.consoleErr().println("returning x: " + x);
-    return x;
+    return  x;
   }
 
-  protected int drawSelectedText(Graphics g,
-                                   int x,
-                                   int y,
-                                   int p0,
-                                   int p1) throws BadLocationException
+  /**
+   * put your documentation comment here
+   * @param g
+   * @param x
+   * @param y
+   * @param p0
+   * @param p1
+   * @return 
+   * @exception BadLocationException
+   */
+  protected int drawSelectedText(Graphics g, int x, int y, int p0, int p1) 
+    throws BadLocationException 
   {
     /*
-    DrJava.consoleErr().println("drawSelected: " + p0 + "-" + p1 + 
-                                " doclen=" + _doc.getLength() +" x="+x+" y="+y);
-    */
-    return super.drawSelectedText(g, x, y, p0, p1);
+     DrJava.consoleErr().println("drawSelected: " + p0 + "-" + p1 + 
+     " doclen=" + _doc.getLength() +" x="+x+" y="+y);
+     */
+    return  super.drawSelectedText(g, x, y, p0, p1);
   }
 
-
+  /**
+   * put your documentation comment here
+   * @param g
+   * @param state
+   */
   private void setFormattingForState(Graphics g, int state) {
     final Color COMMENTED_COLOR = Color.green.darker().darker();
     final Color QUOTED_COLOR = Color.red.darker();
     final Color NORMAL_COLOR = Color.black;
     final Color KEYWORD_COLOR = Color.blue;
-
     switch (state) {
       case HighlightStatus.NORMAL:
         g.setColor(NORMAL_COLOR);
@@ -165,13 +176,22 @@ class ColoringView extends WrappedPlainView {
         g.setColor(KEYWORD_COLOR);
         break;
       default:
-        throw new RuntimeException("Can't get color for invalid state: " + state);
+        throw  new RuntimeException("Can't get color for invalid state: " + state);
     }
   }
 
+  /**
+   * put your documentation comment here
+   * @param changes
+   * @param a
+   * @param f
+   */
   public void changedUpdate(DocumentEvent changes, Shape a, ViewFactory f) {
     super.changedUpdate(changes, a, f);
     // Make sure we redraw since something changed in the formatting
     getContainer().repaint();
   }
 }
+
+
+

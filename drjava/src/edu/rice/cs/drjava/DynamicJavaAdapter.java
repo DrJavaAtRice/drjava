@@ -1,68 +1,72 @@
-/* $Id$ */
+package  edu.rice.cs.drjava;
 
-package edu.rice.cs.drjava;
+import  java.util.HashMap;
+import  java.util.Date;
+import  java.io.StringReader;
+import  java.io.IOException;
+import  java.io.InputStream;
+import  koala.dynamicjava.interpreter.Interpreter;
+import  koala.dynamicjava.interpreter.InterpreterException;
+import  koala.dynamicjava.interpreter.TreeInterpreter;
+import  koala.dynamicjava.interpreter.TreeClassLoader;
+import  koala.dynamicjava.interpreter.context.GlobalContext;
+import  koala.dynamicjava.parser.wrapper.JavaCCParserFactory;
 
-import java.util.HashMap;
-import java.util.Date;
 
-import java.io.StringReader;
-import java.io.IOException;
-import java.io.InputStream;
-
-import koala.dynamicjava.interpreter.Interpreter;
-import koala.dynamicjava.interpreter.InterpreterException;
-import koala.dynamicjava.interpreter.TreeInterpreter;
-import koala.dynamicjava.interpreter.TreeClassLoader;
-
-import koala.dynamicjava.interpreter.context.GlobalContext;
-
-import koala.dynamicjava.parser.wrapper.JavaCCParserFactory;
-
-public class DynamicJavaAdapter implements JavaInterpreter {
+/**
+ * @version $Id$
+ */
+public class DynamicJavaAdapter
+    implements JavaInterpreter {
   private Interpreter _djInterpreter;
   private static final ClassLoadChecker _checker = new ClassLoadChecker();
 
+  /**
+   * put your documentation comment here
+   */
   public DynamicJavaAdapter() {
     _djInterpreter = new InterpreterExtension();
-
     // Allow access to private fields/methods from interpreter!
     //_djInterpreter.setAccessible(true);
   }
 
+  /**
+   * put your documentation comment here
+   * @param s
+   * @return 
+   */
   public Object interpret(String s) {
-
-		boolean print = false;
-		
-		/**
-		 * trims the whitespace from beginning and end of string
-		 * checks the end to see if it is a semicolon
-		 * adds a semicolon if necessary
-		 */
-		s = s.trim();
-		
-		if(!s.endsWith(";")) {
-			s += ";";
-			print = true;
-		}
-			
-		StringReader reader = new StringReader(s);
-
-    try {
-			Object result = _djInterpreter.interpret(reader, "DrJava");
-			if(print)
-				return result;
-			else
-				return JavaInterpreter.NO_RESULT;
+    boolean print = false;
+    /**
+     * trims the whitespace from beginning and end of string
+     * checks the end to see if it is a semicolon
+     * adds a semicolon if necessary
+     */
+    s = s.trim();
+    if (!s.endsWith(";")) {
+      s += ";";
+      print = true;
     }
-    catch (Throwable ie) {
+    StringReader reader = new StringReader(s);
+    try {
+      Object result = _djInterpreter.interpret(reader, "DrJava");
+      if (print)
+        return  result; 
+      else 
+        return  JavaInterpreter.NO_RESULT;
+    } catch (Throwable ie) {
       System.err.print(new Date() + ": ");
       System.err.println(ie);
       ie.printStackTrace();
       System.err.println("\n");
-      throw new RuntimeException(ie.toString());
+      throw  new RuntimeException(ie.toString());
     }
   }
 
+  /**
+   * put your documentation comment here
+   * @param path
+   */
   public void addClassPath(String path) {
     //System.err.println("Added class path: " + path);
     _djInterpreter.addClassPath(path);
@@ -76,28 +80,36 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * but we don't want to modify DynamicJava right now.
    */
   public class InterpreterExtension extends TreeInterpreter {
+
+    /**
+     * put your documentation comment here
+     */
     public InterpreterExtension() {
       super(new JavaCCParserFactory());
       classLoader = new ClassLoaderExtension(this);
-
       // We have to reinitialize these variables because they automatically
       // fetch pointers to classLoader in their constructors.
-      nameVisitorContext  = new GlobalContext(this);
+      nameVisitorContext = new GlobalContext(this);
       nameVisitorContext.setAdditionalClassLoaderContainer(classLoader);
       checkVisitorContext = new GlobalContext(this);
       checkVisitorContext.setAdditionalClassLoaderContainer(classLoader);
-      evalVisitorContext  = new GlobalContext(this);
+      evalVisitorContext = new GlobalContext(this);
       evalVisitorContext.setAdditionalClassLoaderContainer(classLoader);
-
       //System.err.println("set loader: " + classLoader);
     }
   }
 
-  public class ClassLoaderExtension extends TreeClassLoader
-  {
+  /**
+   * put your documentation comment here
+   */
+  public class ClassLoaderExtension extends TreeClassLoader {
+
+    /**
+     * put your documentation comment here
+     * @param         Interpreter i
+     */
     public ClassLoaderExtension(Interpreter i) {
       super(i);
-
       // The protected variable classLoader contains the class loader to use
       // to find classes. When a new class path is added to the loader,
       // it adds on an auxilary classloader and chains the old classLoader
@@ -108,7 +120,6 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       // loader. (We just ask the system loader to get us the bytes of the
       // class, and then we call defineClass ourselves.)
       classLoader = ClassLoader.getSystemClassLoader();
-      
       //System.err.println("created loader extension");
     }
 
@@ -118,17 +129,13 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      * This is because any classes loaded by the system loader are never
      * unloaded.
      */
-    protected Class loadClass(String name, boolean resolve)
-      throws ClassNotFoundException
-    {
+    protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
       //System.err.println("loadClass: " + name);
-
       if (_checker.mustUseSystemLoader(name)) {
-        return super.loadClass(name, resolve);
-      }
-      else
-      {
-        return findClass(name);
+        return  super.loadClass(name, resolve);
+      } 
+      else {
+        return  findClass(name);
       }
     }
 
@@ -139,12 +146,10 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      */
     protected Class findClass(String name) throws ClassNotFoundException {
       //System.err.println("findClass: " + name);
-
       // check the cache
       if (classes.containsKey(name)) {
-        return (Class)classes.get(name);
+        return  (Class)classes.get(name);
       }
-	
       try {
         // classLoader contains URL class loaders to load from other
         // paths/urls. if we have one, try to load there.
@@ -158,76 +163,73 @@ public class DynamicJavaAdapter implements JavaInterpreter {
           // (The classpath includes URLs to other places even!)
           String fileName = name.replace('.', '/') + ".class";
           InputStream stream = classLoader.getResourceAsStream(fileName);
-
           if (stream == null) {
-            throw new IOException();
+            throw  new IOException();
           }
-
           byte[] data = new byte[stream.available()];
           stream.read(data);
-
-          return defineClass(name, data, 0, data.length);
+          return  defineClass(name, data, 0, data.length);
         }
-      }
-      catch (IOException ioe) {}
+      } catch (IOException ioe) {}
       // If it exceptions, just fall through to here to try the interpreter.
-
       // If all else fails, try loading the class through the interpreter.
       // That's used for classes defined in the interpreter.
-      return interpreter.loadClass(name);
+      return  interpreter.loadClass(name);
     }
   }
 }
 
+
 /** Figures out whether a class can be loaded by a custom class loader or not. */
 class ClassLoadChecker {
   private final SecurityManager _security = System.getSecurityManager();
-
   /**
    * Map of package name (string) to whether must use system loader (boolean).
    */
   private HashMap _checkedPackages = new HashMap();
 
+  /**
+   * put your documentation comment here
+   * @param name
+   * @return 
+   */
   public boolean mustUseSystemLoader(String name) {
     // If name begins with java., must use System loader. This
     // is regardless of the security manager.
     // javax. too, though this is not documented
     if (name.startsWith("java.") || name.startsWith("javax.")) {
-      return true;
+      return  true;
     }
-
     // No security manager? We can do whatever we want!
     if (_security == null) {
-      return false;
+      return  false;
     }
-    
     int lastDot = name.lastIndexOf('.');
     String packageName;
     if (lastDot == -1) {
       packageName = "";
-    }
+    } 
     else {
       packageName = name.substring(0, lastDot);
     }
-
     // Check the cache first
     Object cacheCheck = _checkedPackages.get(packageName);
     if (cacheCheck != null) {
-      return ((Boolean) cacheCheck).booleanValue();
+      return  ((Boolean)cacheCheck).booleanValue();
     }
-
     // Now try to get the package info. If it fails, it's a system class.
     try {
       _security.checkPackageDefinition(packageName);
       // Succeeded, so does not require system loader.
       _checkedPackages.put(packageName, Boolean.FALSE);
-      return false;
-    }
-    catch (SecurityException se) {
+      return  false;
+    } catch (SecurityException se) {
       // Failed, so does require system loader.
       _checkedPackages.put(packageName, Boolean.TRUE);
-      return true;
+      return  true;
     }
   }
 }
+
+
 
