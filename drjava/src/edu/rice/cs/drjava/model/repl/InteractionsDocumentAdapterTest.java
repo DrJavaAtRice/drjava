@@ -111,4 +111,25 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
                    "((48, 74), error)", _adapter.getStylesList().get(0).toString());
     }
   }
+  
+  /**
+   * Tests that a null style is not added to the list. Fix for bug #995719
+   */
+  public void testCannotAddNullStyleToList() throws DocumentAdapterException {
+    // the banner and the prompt are inserted in the styles list when the document is constructed
+    assertEquals("StylesList before insert should contain 2 pairs",
+                 2, _adapter.getStylesList().size());
+    
+    // Insert some text                   
+    _doc.insertText(_doc.getDocLength(), "5", InteractionsDocument.NUMBER_RETURN_STYLE);
+    
+    assertEquals("StylesList should contain 3 pairs", 
+                 3, _adapter.getStylesList().size());
+    
+    // Insert some text with a null style
+    _doc.insertText(_doc.getDocLength(), "6", null);
+    
+    assertEquals("StylesList should still contain 3 pairs - null string should not have been inserted",
+                 3, _adapter.getStylesList().size());
+  }
 }

@@ -119,8 +119,9 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
       _stylesList.clear();    
       _toClear = false;
     }
-    _stylesList.add(0, new Pair<Pair<Integer,Integer>,String>
-                    (new Pair<Integer,Integer>(start,end), style));
+    if(style != null)
+      _stylesList.add(0, new Pair<Pair<Integer,Integer>,String>
+                      (new Pair<Integer,Integer>(start,end), style));
   }
   
   /**
