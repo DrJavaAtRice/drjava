@@ -261,9 +261,13 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
 
       String className = InterpreterJVM.class.getName();
       String[] args = new String[] { getIdentifier() };
+      // headless AWT in Java 1.3 on MacOS-X
+      // (headless AWT is not supposed to be available until 1.4)
+      String[] jvmargs = new String[] {"-Dcom.apple.backgroundOnly=true"};
       try {
         //System.err.println("started interpreter jvm");
-        _interpreterProcess = ExecJVM.runJVMPropogateClassPath(className, args);
+        _interpreterProcess = ExecJVM.
+            runJVMPropogateClassPath(className, args, jvmargs);
         
         // Start a thread to wait for the interpreter to die and to fire
         // off a new one (and notify model) when it happens
