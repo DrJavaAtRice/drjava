@@ -492,6 +492,76 @@ public class DefinitionsDocument extends PlainDocument {
   }
 
   /**
+   * Returns true if the given position is inside a paren phrase.
+   * @param pos the position we're looking at
+   * @return true if pos is immediately inside parentheses
+   */
+  public boolean posInParenPhrase(int pos) {
+    int here = _reduced.absOffset();
+    _reduced.move(pos - here);
+    IndentInfo info = _reduced.getIndentInformation();
+    boolean inParenPhrase = info.braceTypeCurrent.equals(IndentInfo.openParen);
+    _reduced.move(here - pos);
+    return inParenPhrase;
+  }
+
+  /**
+   * Returns the indent level of the start of the statement
+   * that the cursor is on.
+   * @param pos Cursor position
+   */
+  public String getIndentOfCurrStmt(int pos) throws BadLocationException {
+    char[] delims = {';', '{', '}'};
+
+    // Get the start of the current line
+    int lineStart = getLineStartPos(pos);
+    
+    // Find the previous delimiter that closes a statement
+    boolean reachedStart = false;
+    int prevDelimiter = lineStart; 
+    do {
+      prevDelimiter = findPrevDelimiter(prevDelimiter, delims);
+      // Check delimiter found was start of document
+      if(prevDelimiter == ERROR_INDEX) {
+	reachedStart = true;
+	break;
+      }
+    } while(posInParenPhrase(prevDelimiter));
+    
+    // From the previous delimiter, find the next
+    // non-whitespace character
+    int nextNonWSChar;
+    if(reachedStart) {
+      nextNonWSChar = getFirstNonWSCharPos(DOCSTART);
+    } else {
+      nextNonWSChar = getFirstNonWSCharPos(prevDelimiter+1);
+    }
+
+
+    // If the end of the document was reached
+    if(nextNonWSChar == ERROR_INDEX) {
+      nextNonWSChar = getLength();
+    }
+
+    // Get the start of the line of the non-ws char
+    int lineStartStmt = getLineStartPos(nextNonWSChar);
+
+    // Get the position of the first non-ws character on 
+    // this line
+    int lineFirstNonWS = getLineFirstCharPos(lineStartStmt);
+
+    String lineText = "";
+    try {
+      lineText = getText(lineStartStmt, lineFirstNonWS - lineStartStmt);
+    } catch(BadLocationException e) {
+      // Should not be here
+      throw new UnexpectedException(e);
+    } 
+
+    return lineText;
+  }
+
+  /**
    * Determines if the given character exists on the line where
    * the given cursor position is. Does not search in quotes or comments.
    * <p>
@@ -600,7 +670,7 @@ public class DefinitionsDocument extends PlainDocument {
 
   /**
    * Finds the position of the first non-whitespace character after pos.
-   * NB: Skips comments
+   * NB: Skips comments and all whitespace, including newlines
    * @param pos Position to start from
    * @return position of first non-whitespace character after pos,
    * or ERROR_INDEX if end of document is reached

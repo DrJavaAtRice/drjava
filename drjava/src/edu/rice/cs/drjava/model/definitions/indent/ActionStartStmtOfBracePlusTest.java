@@ -67,7 +67,6 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
    * Tests indenting with a single line contract
    */
   public void testSingleLineContract() throws BadLocationException {
-    /**
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
     IndentRuleAction rule2 = new ActionStartStmtOfBracePlus("   "); // 3 spaces
     
@@ -76,20 +75,19 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
     String aligned2 = "public void foo() {\n   bar();";
     
     _setDocText(text);
-    rule1.indentRule(_doc, 20);
+    rule1.indentLine(_doc, 20);
     assertEquals("single line contract, no indent, no suffix", 
                  aligned1, _doc.getText(0, _doc.getLength()));
     
     _setDocText(text);
-    rule2.indentRule(_doc, 20);
+    rule2.indentLine(_doc, 20);
     assertEquals("single line contract, no indent, with suffix", 
                  aligned2, _doc.getText(0, _doc.getLength()));
-    */
   }
   
   /**
    * Tests indenting with an indented single line contract
-   *
+   */
   public void testIndentedSingleLineContract() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
     IndentRuleAction rule2 = new ActionStartStmtOfBracePlus("   "); // 3 spaces
@@ -99,19 +97,19 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
     String aligned2 = "  y = new Foo() {\n     bar();";
     
     _setDocText(text);
-    rule1.indentRule(_doc, 20);
+    rule1.indentLine(_doc, 20);
     assertEquals("single line contract, with indent, no suffix", 
                  aligned1, _doc.getText(0, _doc.getLength()));
     
     _setDocText(text);
-    rule2.indentRule(_doc, 20);
+    rule2.indentLine(_doc, 20);
     assertEquals("single line contract, with indent, with suffix", 
                  aligned2, _doc.getText(0, _doc.getLength()));
-  }*/
+  }
   
   /**
    * Tests indenting with a multiple line contract
-   *
+   */
   public void testMultiLineContract() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
     IndentRuleAction rule2 = new ActionStartStmtOfBracePlus("  "); // 2 spaces
@@ -130,19 +128,19 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                       "      bar();";
     
     _setDocText(text);
-    rule1.indentRule(_doc, 56);
+    rule1.indentLine(_doc, 56);
     assertEquals("multi line contract, with indent, no suffix", 
                  aligned1, _doc.getText(0, _doc.getLength()));
     
     _setDocText(text);
-    rule2.indentRule(_doc, 56);
+    rule2.indentLine(_doc, 56);
     assertEquals("multi line contract, with indent, with suffix", 
                  aligned2, _doc.getText(0, _doc.getLength()));
-  }*/
+  }
   
   /**
    * Tests indenting a for statement (odd semicolons)
-   *
+   */
   public void testForStatement() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
     IndentRuleAction rule2 = new ActionStartStmtOfBracePlus("   "); // 3 spaces
@@ -152,19 +150,19 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
     String aligned2 = "  for (int i=0; i<j; i++) {\n     bar();";
     
     _setDocText(text);
-    rule1.indentRule(_doc, 28);
+    rule1.indentLine(_doc, 28);
     assertEquals("for statement, with indent, no suffix", 
                  aligned1, _doc.getText(0, _doc.getLength()));
     
     _setDocText(text);
-    rule2.indentRule(_doc, 28);
+    rule2.indentLine(_doc, 28);
     assertEquals("for statement, with indent, with suffix", 
                  aligned2, _doc.getText(0, _doc.getLength()));
-  }*/
+  }
   
   /**
    * Tests indenting a multiple line for statement (odd semicolons)
-   *
+   */
   public void testMultiLineForStatement() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
     IndentRuleAction rule2 = new ActionStartStmtOfBracePlus("  "); // 2 spaces
@@ -186,18 +184,20 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                       "    bar();";
     
     _setDocText(text);
-    rule1.indentRule(_doc, 44);
+    rule1.indentLine(_doc, 44);
     assertEquals("multi-line for statement, with indent, no suffix", 
                  aligned1, _doc.getText(0, _doc.getLength()));
     
     _setDocText(text);
-    rule2.indentRule(_doc, 44);
+    rule2.indentLine(_doc, 44);
     assertEquals("multi-line for statement, with indent, with suffix", 
                  aligned2, _doc.getText(0, _doc.getLength()));
-  }*/
+  }
   
   /**
-   * Tests indenting with nested brace
+   * Tests indenting with nested braces
+   * Note: multiple braces on a line are not yet supported.  This test
+   * will be useful in a later version.
    *
   public void testNestedBraces() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
@@ -217,19 +217,19 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                       "      foo();\n";
     
     _setDocText(text);
-    rule1.indentRule(_doc, 28);
+    rule1.indentLine(_doc, 28);
     assertEquals("nested braces, no suffix", 
                  aligned1, _doc.getText(0, _doc.getLength()));
     
     _setDocText(text);
-    rule2.indentRule(_doc, 28);
+    rule2.indentLine(_doc, 28);
     assertEquals("nested braces, with suffix", 
                  aligned2, _doc.getText(0, _doc.getLength()));
-  }*/
+		 }*/
   
   /**
    * Tests indenting with commented delimiters
-   *
+   */
   public void testCommentedBrace() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
     IndentRuleAction rule2 = new ActionStartStmtOfBracePlus("  "); // 2 spaces
@@ -248,18 +248,20 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                       "    foo();\n";
     
     _setDocText(text);
-    rule1.indentRule(_doc, 30);
+    rule1.indentLine(_doc, 30);
     assertEquals("commented brace, no suffix", 
                  aligned1, _doc.getText(0, _doc.getLength()));
     
     _setDocText(text);
-    rule2.indentRule(_doc, 30);
+    rule2.indentLine(_doc, 30);
     assertEquals("commented brace, with suffix", 
                  aligned2, _doc.getText(0, _doc.getLength()));
-  }*/
+  }
   
   /**
    * Tests having start of line belong to a different brace
+   * Note: multiple braces on a line are not yet supported.  This test
+   * will be useful in a later version.
    *
   public void testStartOfLineInDifferentBrace() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus("");
@@ -279,13 +281,16 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                       "      bar();\n";
     
     _setDocText(text);
-    rule1.indentRule(_doc, 30);
+    rule1.indentLine(_doc, 30);
     assertEquals("start in different brace, no suffix", 
                  aligned1, _doc.getText(0, _doc.getLength()));
     
     _setDocText(text);
-    rule2.indentRule(_doc, 30);
+    rule2.indentLine(_doc, 30);
     assertEquals("start in different brace, with suffix", 
                  aligned2, _doc.getText(0, _doc.getLength()));
-  }*/
+		 }*/
 }
+
+
+

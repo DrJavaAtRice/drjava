@@ -125,6 +125,134 @@ public class IndentHelperTest extends IndentRulesTestCase {
 		 _doc.getReduced().absOffset());
   }
 
+
+  public void testPosInParenPhrase() 
+    throws BadLocationException {
+
+    _setDocText("(;)");
+    assertEquals("';' in parent phrase",
+		 true,
+		 _doc.posInParenPhrase(1));
+
+    _setDocText("abcdefghijk");
+    _doc.setCurrentLocation(3);
+    int reducedModelPos = _doc.getReduced().absOffset();
+    _doc.posInParenPhrase(8);
+    assertEquals("Check that position in reduced model is unaffected " +
+		 "after call to posInParenPhrase",
+		 reducedModelPos,
+		 _doc.getReduced().absOffset());		 
+  }
+
+
+  public void testGetIndentOfCurrStmtDelimiters() throws BadLocationException {
+
+    _setDocText("foo();\n");
+    assertEquals("prev delimiter DOCSTART, no indent",
+		 "",
+		 _doc.getIndentOfCurrStmt(3));
+    _setDocText("  foo();\n");
+    assertEquals("prev delimiter DOCSTART, indent two spaces",
+		 "  ",
+		 _doc.getIndentOfCurrStmt(7));
+
+    _setDocText("bar();\nfoo();\n");
+    assertEquals("prev delimiter ';', no indent",
+		 "",
+		 _doc.getIndentOfCurrStmt(7));
+    _setDocText("  bar();\n  foo();\n");
+    assertEquals("prev delimiter ';', indent two spaces",
+		 "  ",
+		 _doc.getIndentOfCurrStmt(9));
+    
+    _setDocText("void bar()\n{\nfoo();\n");
+    assertEquals("prev delimiter '{', no indent",
+		"",
+		_doc.getIndentOfCurrStmt(13));
+    _setDocText("void bar()\n{\n  foo();\n");
+    assertEquals("prev delimiter '{', indent two spaces",
+		"  ",
+		_doc.getIndentOfCurrStmt(13));
+
+    _setDocText("}\nfoo();\n");
+    assertEquals("prev delimiter '}', no indent",
+		 "",
+		 _doc.getIndentOfCurrStmt(2));
+    _setDocText("}\n  foo();\n");
+    assertEquals("prev delimiter '}', indent two spaces",
+		 "  ",
+		 _doc.getIndentOfCurrStmt(2));
+  }
+
+  public void testGetIndentOfCurrStmtDelimiterSameLine() 
+    throws BadLocationException {
+    
+    _setDocText("bar(); foo();\n");
+    assertEquals("prev delimiter on same line, no indent",
+		 "",
+		 _doc.getIndentOfCurrStmt(6));
+
+    _setDocText("  bar(); foo();\n");
+    assertEquals("prev delimiter on same line, indent two spaces",
+		 "  ",
+		 _doc.getIndentOfCurrStmt(8));
+  }
+
+  public void testGetIndentOfCurrStmtMultipleLines()
+    throws BadLocationException {
+
+    String text = 
+      "  oogabooga();\n" +
+      "  bar().\n" +  
+      "    bump().\n" +  
+      "    //comment\n" +  
+      "    /*commment\n" +
+      "     *again;{}\n" +
+      "     */\n" +
+      "     foo();\n";
+
+    _setDocText(text);
+    assertEquals("start stmt on previous line, indent two spaces",
+		 "  ",
+		 _doc.getIndentOfCurrStmt(24));
+    assertEquals("start stmt before previous line, " +
+		 "cursor inside single-line comment " +
+		 "indent two spaces",
+		 "  ",
+		 _doc.getIndentOfCurrStmt(42));
+    assertEquals("start stmt before single-line comment, " +
+		 "cursor inside multi-line comment " +
+		 "indent two spaces",
+		 "  ",
+		 _doc.getIndentOfCurrStmt(56));
+    assertEquals("start stmt before multi-line comment, " +
+		 "indent two spaces",
+		 "  ",
+		 _doc.getIndentOfCurrStmt(88));
+  }
+
+  public void testGetIndentOfCurrStmtIgnoreDelimsInParenPhrase()
+    throws BadLocationException {
+    
+    String text =
+      "  bar.\n (;)\nfoo();";
+    
+    _setDocText(text);
+    assertEquals("ignores delimiter in paren phrase",
+		 "  ",
+		 _doc.getIndentOfCurrStmt(12));
+  }
+
+  public void testGetIndentOfCurrStmtEndOfDoc() 
+    throws BadLocationException {
+
+    _setDocText("foo.\n");
+    assertEquals("cursor at end of document, no indent",
+		 "",
+		 _doc.getIndentOfCurrStmt(5));
+		 
+  }
+
   public void testGetLineStartPos() throws BadLocationException {
     _setDocText("foo\nbar\nblah");
     assertEquals("Returns position after the previous newline",
@@ -262,6 +390,5 @@ public class IndentHelperTest extends IndentRulesTestCase {
 		 _doc.getReduced().absOffset());
   }  
 }
-
 
 

@@ -585,7 +585,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
               // open
               if (iter.current().isOpenBrace()) {
                 if (braceStack.isEmpty()) {
-		    //braceInfo.braceType = iter.current().getType();
+		  braceInfo.braceTypeCurrent = iter.current().getType();
                   braceInfo.distToBraceCurrent = distance;
                   iter.dispose();
                   return;

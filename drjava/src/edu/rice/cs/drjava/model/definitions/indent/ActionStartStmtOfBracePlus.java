@@ -39,8 +39,12 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
+import edu.rice.cs.util.UnexpectedException;
+
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+
+import javax.swing.text.BadLocationException;
 
 /**
  * Indents the current line in the document to the indent level of the
@@ -68,18 +72,32 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
    */
   public void indentLine(DefinitionsDocument doc)
   {
-    throw new RuntimeException("Not yet implemented.");
-    
-    /**
-    int startPos = startOfLine(doc, pos);
-    IndentInfo ii = doc.getIndentInfo(startPos);
-    int bracePos = ii.positionOfBrace;
-    int endOfPrevStmt = findPrevDelimiter(doc, bracePos, {';','{','}'});
-    int startStmtBrace = getFirstNonWSChar(doc, endOfPrevStmt);
-    int indent = getWSToPrevNewLine(doc, startStmtBrace);
+    int pos = doc.getCurrentLocation();
+
+    // Get distance to brace
+    IndentInfo info = doc.getReduced().getIndentInformation();
+    int distToBrace = info.distToBrace;
+      
+    // If there is no brace, s.th. went wrong!
+    if (distToBrace == -1) {
+      throw new UnexpectedException(new RuntimeException("Precondition for ActionStartStmtOfBracePlus " +
+							 "not met: there is no brace."));
+    }
+
+    // Get the absolute position of the brace
+    int bracePos = pos - distToBrace;
+
+    String indent = "";
+    try {
+      indent = doc.getIndentOfCurrStmt(bracePos);
+    } catch (BadLocationException e) {
+      // Should not happen
+      throw new UnexpectedException(e);
+    }
+
     indent = indent + _suffix;
-    
-    adjustIndent(doc, startPos, indent);
-    */
+
+    doc.setTab(indent, pos);
   }
+    
 }

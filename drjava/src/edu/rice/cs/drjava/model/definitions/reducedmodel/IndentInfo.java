@@ -44,7 +44,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
  * @version $Id$
  */
 public class IndentInfo {
-  public String braceType;      //the type of brace.
+  public String braceType;      //the type of brace at the beginning of our line
 
   //the distance to the start of the line containing
   //the brace that encloses the start of our line.
@@ -53,6 +53,9 @@ public class IndentInfo {
 
   //distance to the brace enclosing the start of our line  ____|{_____
   public int distToBrace;
+
+  // type of brace at current position
+  public String braceTypeCurrent;
 
   // distance to the start of the line containing the brace enclosing the current location
   public int distToNewlineCurrent;
@@ -75,6 +78,7 @@ public class IndentInfo {
     braceType = noBrace;
     distToNewline = -1;
     distToBrace = -1;
+    braceTypeCurrent = noBrace;
     distToNewlineCurrent = -1;
     distToBraceCurrent = -1;
   }
