@@ -176,6 +176,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    */
   public void junitAll() {
     synchronized (_compilerModel) {
+      //reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
+      _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
       Iterator<OpenDefinitionsDocument> it =
         _getter.getDefinitionsDocuments().iterator();
       HashMap<String,OpenDefinitionsDocument> classNamesToODDs =
@@ -234,7 +236,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         }
 
         //reset the JUnitErrorModel
-        // TODO: does this need to be done here?
         _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
 
         // Compile and save before proceeding.

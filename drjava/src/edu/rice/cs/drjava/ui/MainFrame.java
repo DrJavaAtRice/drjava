@@ -4574,7 +4574,6 @@ public class MainFrame extends JFrame implements OptionConstants {
           _closeInteractionsScript();
           _interactionsPane.setEditable(false);
           _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-          _interactionsController.notifyInputEnteredAction();
           if (_model.getDebugger().isAvailable()) {
             _toggleDebuggerAction.setEnabled(false);
           }
@@ -4595,6 +4594,11 @@ public class MainFrame extends JFrame implements OptionConstants {
           if (_model.getDebugger().isAvailable()) {
             _toggleDebuggerAction.setEnabled(true);
           }
+          // Moved this line here from interpreterResetting since
+          // it was possible to get an InputBox in InteractionsController
+          // between interpreterResetting and interpreterReady.
+          // Fixes bug #917054 "Interactions Reset Bug".
+          _interactionsController.notifyInputEnteredAction();
         }
       };
       SwingUtilities.invokeLater(doCommand);
