@@ -119,6 +119,11 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * If not, calling getDebugPort will generate an available port.
    */
   private boolean _debugPortSet;
+  
+  /**
+   * The String added to history when the interaction is complete or an error is thrown
+   */
+  private String _toAddToHistory = "";
 
   /** Interactions processor, currently a pre-processor **/
   //private InteractionsProcessorI _interactionsProcessor;
@@ -224,7 +229,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     addNewLine();
     _notifyInteractionStarted();
     _document.setInProgress(true);
-    _document.addToHistory(text);
+    _toAddToHistory = text; // _document.addToHistory(text);
+    //Do not add to history immediately in case the user is not finished typing when they press return
   }
   
   public void addNewLine() {
@@ -597,6 +603,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * (Do this after calling super())
    */
   protected void _interactionIsOver() {
+    _document.addToHistory(_toAddToHistory);
     _document.setInProgress(false);
     _document.insertPrompt();
     _notifyInteractionEnded();

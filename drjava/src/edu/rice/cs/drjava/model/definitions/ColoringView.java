@@ -80,6 +80,7 @@ public class ColoringView extends PlainView implements OptionConstants {
   private static Color TYPE_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_TYPE_COLOR);
   private static Font MAIN_FONT = DrJava.getConfig().getSetting(FONT_MAIN);
   
+  private final Object _lock = new Object();
   /**
    * Constructs a new coloring view.
    * @param elem the element
@@ -199,16 +200,16 @@ public class ColoringView extends PlainView implements OptionConstants {
       }
       Segment text = getLineBuffer();
       
-      if(!(_doc instanceof InteractionsDocumentAdapter) || !((InteractionsDocumentAdapter)_doc).setColoring(p1,g))      
+      if(!(_doc instanceof InteractionsDocumentAdapter) || !((InteractionsDocumentAdapter)_doc).setColoring((p1+p0)/2,g))      
         setFormattingForState(g, stat.getState());
-//      else
-//        DrJava.consoleErr().println("Highlight: p0="+p0+"; p1="+p1+"; location="+location+"; color="+g.getColor()+"; text="+text);
+      //      else
+      //        DrJava.consoleErr().println("Highlight: p0="+p0+"; p1="+p1+"; location="+location+"; color="+g.getColor()+"; text="+text);
       
-//      
-//       DrJava.consoleErr().println("Highlight: loc=" + location + " length=" +
-//       length + " state=" + stat.getState() +
-//       " text=" + text);
-//       
+      //      
+      //       DrJava.consoleErr().println("Highlight: loc=" + location + " length=" +
+      //       length + " state=" + stat.getState() +
+      //       " text=" + text);
+      //       
       _doc.getText(location, length, text);
       x = Utilities.drawTabbedText(text, x, y, g, this, location);
     }
