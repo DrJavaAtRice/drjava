@@ -54,23 +54,54 @@ import java.io.File;
  */
 public class ToolsJarClassLoader extends URLClassLoader {
   public ToolsJarClassLoader() {
-    super(_getURLs());
+    super(getToolsJarURLs());
   }
-
-  private static URL[] _getURLs() {
+  
+  /**
+   * Returns an array of possible Files for the tools.jar file.
+   */
+  public static File[] getToolsJarFiles() {
     File home = new File(System.getProperty("java.home"));
     File libDir = new File(home, "lib");
     File libDir2 = new File(home.getParentFile(), "lib");
 
+    return new File[] {
+      new File(libDir, "tools.jar"),
+      new File(libDir2, "tools.jar")
+    };
+  }
+  
+  /**
+   * Returns an array of possible URLs for the tools.jar file.
+   */
+  public static URL[] getToolsJarURLs() {
+    File[] files = getToolsJarFiles();
     try {
-      return new URL[] {
-        new File(libDir, "tools.jar").toURL(),
-        new File(libDir2, "tools.jar").toURL()
-      };
+      URL[] urls = new URL[files.length];
+      for (int i=0; i < files.length; i++) {
+        urls[i] = files[i].toURL();
+      }
+      return urls;
     }
     catch (MalformedURLException e) {
       return new URL[0];
     }
+  }
+  
+  /**
+   * Returns a string containing all possible tools.jar locations,
+   * separated by the system's path separator.
+   */
+  public static String getToolsJarClasspath() {
+    File[] files = getToolsJarFiles();
+    String classpath = "";
+    String pathSep = System.getProperty("path.separator");
+    
+    for (int i=0; i < files.length; i++) {
+      if (i > 0) classpath += pathSep;
+      classpath += files[i].getAbsolutePath();
+    }
+    return classpath;
   }
 
   /**
