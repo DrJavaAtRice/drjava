@@ -372,9 +372,6 @@ public class MainFrame extends JFrame
     _outputView.makeActive();
     
     _interactionsView = new InteractionsView();
-
-	
-
     // Split2 has output view and the interactions view
     JSplitPane split2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                                        true,

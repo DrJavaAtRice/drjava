@@ -52,7 +52,6 @@ public class ReducedModelComment
   /** a relative offset within the current ReducedToken */
   int _offset;
   int _walkerOffset;
-	boolean _highlightChanged;
   /**
    * Constructor.  Creates a new reduced model with the cursor
 	 * at the start of a blank "page."
@@ -64,58 +63,8 @@ public class ReducedModelComment
 			_walker = _cursor.copy();
 			// we should be pointing to the head of the list
 			_offset = 0;
-			_highlightChanged = false;
     }
 
-	/**
-	 *Goes back insertSize - 2.
-	 *@param offset the absolute location that the insert was committed at.
-	 *@param insertSize the size of the commited insert.
-	 */
-	public StyleUpdateMessage generateHighlights(int offset, int insertSize,
-																							 boolean simple)
-		{
-			ModelList<ReducedToken>.Iterator mark = _cursor.copy();
-			StyleUpdateMessage message;
-			if (simple) {
-				if (insertSize == 0)
-					{
-						message = new NoUpdateMessage();
-					}
-				else {
-					_move(-insertSize, mark, _offset);
-					message = new SimpleUpdateMessage(offset, insertSize,
-																						mark.current().getHighlight());
-				}
-			}
-			else {
-				int markOffset = -1;
-				int adjustment = 0;
-				int moveSize = 0;
-				
-				if (2 > offset){
-					moveSize = insertSize + offset;
-					adjustment = 0;
-				}
-				else {
-					moveSize = 2 + insertSize;
-					adjustment = offset - 2;
-				}
-				
-				//move back to before the insert.
-				markOffset = _move(-moveSize,mark,_offset);			
-				
-				Vector<StateBlock> states =
-					SBVectorFactory.generate(mark,markOffset,adjustment);
-				if (states.size() == 0)
-					message = new NoUpdateMessage();
-				else
-					message = new CompoundUpdateMessage(states);
-			}
-			mark.dispose();
-			return message;
-		}
-	
 	/**
 	 * Package private absolute offset for tests.
 	 * We don't keep track of absolute offset as it causes too much confusion
@@ -195,7 +144,6 @@ public class ReducedModelComment
    */
 	public void insertOpenSquiggly()
 		{
-			_highlightChanged = false;
 			insertGap(1);
 		}
 
@@ -205,7 +153,6 @@ public class ReducedModelComment
    */
   public void insertClosedSquiggly()
 		{
-			_highlightChanged = false;
 			insertGap(1);
 		}
   /**
@@ -214,7 +161,6 @@ public class ReducedModelComment
    */
   public void insertOpenParen()
 		{
-			_highlightChanged = false;
 			insertGap(1);
 		}
 
@@ -224,7 +170,6 @@ public class ReducedModelComment
    */
   public void insertClosedParen()
 		{
-			_highlightChanged = false;
 			insertGap(1);
 		}
 	
@@ -234,7 +179,6 @@ public class ReducedModelComment
    */
   public void insertOpenBracket()
 		{
-			_highlightChanged = false;
 			insertGap(1);
 		}
 
@@ -244,7 +188,6 @@ public class ReducedModelComment
    */
   public void insertClosedBracket()
 		{
-			_highlightChanged = false;
 			insertGap(1);
 		}
 	
@@ -277,7 +220,6 @@ public class ReducedModelComment
    */
   public void insertStar()
 		{
-			_highlightChanged = false;
 			//check if empty
 			if (_braces.isEmpty())
 				{
@@ -324,7 +266,6 @@ public class ReducedModelComment
 				{
 					_checkPreviousInsertStar(_cursor);
 				}
-			_highlightChanged = true;
 			return;
 		}
 	
@@ -389,7 +330,6 @@ public class ReducedModelComment
    */
   public void insertSlash()
 		{
-			_highlightChanged = false;
 			//check if empty
 			if (_braces.isEmpty())
 				{
@@ -437,7 +377,6 @@ public class ReducedModelComment
 				{
 					_checkPreviousInsertSlash(_cursor);
 				}
-			_highlightChanged = true;
 			return;
 		}
 
@@ -502,7 +441,6 @@ public class ReducedModelComment
    */
 	public void insertNewline()
 		{
-			_highlightChanged = false;
 			if (_cursor.atStart())
 				{
 					_insertNewEndOfLine();
@@ -521,22 +459,13 @@ public class ReducedModelComment
 					_cursor.next();
 					_cursor.next();
 					_offset = 0;
-					_highlightChanged = true;
 				}
 			else if ((_offset > 0) && _cursor.current().isGap())
 				{
-					_highlightChanged =
-						(_cursor.current().getState() == ReducedToken.INSIDE_QUOTE) ||
-						(_cursor.current().getState() == ReducedToken.INSIDE_LINE_COMMENT);
-						
 					_insertBraceToGap("\n", _cursor);
 				}
 			else
 				{
-					_highlightChanged =
-						(_cursor.current().getState() == ReducedToken.INSIDE_QUOTE) ||
-						(_cursor.current().getState() == ReducedToken.INSIDE_LINE_COMMENT);
-
 					_insertNewEndOfLine();
 				}
 			return;
@@ -580,7 +509,6 @@ public class ReducedModelComment
    */
   public void insertQuote()
 		{
-			_highlightChanged = false;
 			if (_cursor.atStart())
 				{
 					_insertNewQuote();
@@ -609,7 +537,6 @@ public class ReducedModelComment
 				{
 					_insertNewQuote();
 				}
-			_highlightChanged = true;
 			return;
 		}
 
@@ -678,7 +605,6 @@ public class ReducedModelComment
 	 */
 	public void insertBackSlash()
 		{			
-			_highlightChanged = false;
 			//check if empty
 			if (_braces.isEmpty())
 				{
@@ -726,7 +652,6 @@ public class ReducedModelComment
 				{
 					_checkPreviousInsertBackSlash(_cursor);
 				}
-			_highlightChanged = true;
 			return;
 		}
 
@@ -775,7 +700,6 @@ public class ReducedModelComment
    */
   public void insertGap( int length )
 		{
-			_highlightChanged = false;
 			//0 - a
 			if (_cursor.atStart())
 				{
@@ -815,7 +739,6 @@ public class ReducedModelComment
 					
 					_breakComment(_cursor); //leaves us inside comment
 					_insertNewGap(length); //inserts gap and goes to next item
-					_highlightChanged = true;
 					return;
 				}
 			
@@ -1608,7 +1531,6 @@ public class ReducedModelComment
    */
   public void delete( int count )
 		{
-			_highlightChanged = false;
 			if (count == 0)
 				return;
 			ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
@@ -1672,24 +1594,12 @@ public class ReducedModelComment
 													 ModelList<ReducedToken>.Iterator delFrom,
 													 ModelList<ReducedToken>.Iterator delTo)
 		{
-			_highlightChanged = !((delFrom.atStart() &&
-														 delTo.current().isGap() &&
-														 (delFrom.nextItem() == delTo.current())) ||
-														
-														(delFrom.current().isGap() &&
-														 delTo.atEnd() &&
-														 (delTo.prevItem() == delFrom.current())) ||
-														
-														(delFrom.current().isGap() &&
-														 (endOffset == 0) &&
-														 (delFrom.nextItem() == delTo.current())));			
 			delFrom.collapse(delTo);
 						
 			// if both pointing to same item, and it's a gap
 			if (delFrom.eq(delTo) && delFrom.current().isGap()){
 				// inside gap
 				delFrom.current().shrink(endOffset-offset);
-				_highlightChanged = false;
 				return offset;
 			}
 
@@ -2072,13 +1982,6 @@ public class ReducedModelComment
 				copyCursor.next();
 			}
 			return walkcount;
-		}
-	
-	
-	
-	public boolean hasHighlightChanged()
-		{
-			return _highlightChanged;
 		}
 }
 

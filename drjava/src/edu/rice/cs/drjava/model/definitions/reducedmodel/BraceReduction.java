@@ -30,12 +30,7 @@ public interface BraceReduction
 	//public ModelList<ReducedToken> getBraces();
 
 	public int absOffset();
-	/**
-	 *Returns a vector of StateBlocks signifying the new look of the view
-	 */
-	public StyleUpdateMessage generateHighlights(int offset,
-																							 int insertSize,
-																							 boolean simple);
+
 	/**
 	 *returns the current
 	 */
@@ -157,7 +152,17 @@ public interface BraceReduction
 
 	public String simpleString();
 
-	public boolean hasHighlightChanged();
+  /**
+   * Return all highlight status info for text between the current
+   * location and current location + end.
+   * This should collapse adjoining blocks with the same status into one.
+   * @param start The starting location of the area we want to get status of.
+   *              The reduced model is already at this position, but the 
+   *              parameter is needed to determine the absolute positions
+   *              needed in the HighlightStatus objects we return.
+   * @param length How far should we generate info for?             
+   */
+  public Vector<HighlightStatus> getHighlightStatus(int start, int length);
 }
 
 

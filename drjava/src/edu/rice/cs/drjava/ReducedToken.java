@@ -25,18 +25,25 @@ abstract class ReducedToken
 	 *returns whether the current char is highlighted. / / beginning a comment
 	 * would be highlighted but free, so its not the same as getState
 	 */
-	public Color getHighlight()
+	public int getHighlightState()
 		{
 			String type = getType();
-			if (type.equals("//") || (_state == INSIDE_LINE_COMMENT))
-				return StateBlock.LINE_COMMENT_COLOR;
-			if (type.equals("/*") || type.equals("*/") ||
+			if (type.equals("//") ||
+          (_state == INSIDE_LINE_COMMENT) ||
+			    type.equals("/*") ||
+          type.equals("*/") ||
 					(_state == INSIDE_BLOCK_COMMENT))
-				return StateBlock.BLOCK_COMMENT_COLOR;
+      {
+				return HighlightStatus.COMMENTED;
+      }
+
 			if ((type.equals("\"") && (_state == FREE)) ||
 					(_state == INSIDE_QUOTE))
-				return StateBlock.QUOTE_COLOR;			
-			return StateBlock.DEFAULT_COLOR;
+      {
+				return HighlightStatus.QUOTED;
+      }
+
+			return HighlightStatus.NORMAL;
 		}
 	
 	public void setState(int state)

@@ -185,11 +185,18 @@ public class DefinitionsView extends JEditorPane
 // Constructor
 	
 	public DefinitionsView(MainFrame mf)
-		{
+  {
     _mainFrame = mf;
     _resetDocument("");
     _resetUndo();
 		_findReplace = new FindReplaceDialog(mf, this);
+			
+    setContentType("text/java");
+    setBackground(Color.white);
+    setFont(new Font("Courier", 0, 12));
+    setEditable(true);
+
+		//????KEEP??????
 		_openChooser = new JFileChooser(System.getProperty("user.dir"));
 		_openChooser.setFileFilter(new JavaSourceFilter());
 		_saveChooser = new JFileChooser(System.getProperty("user.dir"));
@@ -211,7 +218,6 @@ public class DefinitionsView extends JEditorPane
 					
 		this.addCaretListener(_matchListener);
 		_mainFrame.installNewDocumentListener(_doc());
-//		this.addKeyListener(_indentKeyListener);
   }
 
   public Action getUndoAction() { return _undoAction; }
@@ -608,7 +614,6 @@ public class DefinitionsView extends JEditorPane
 			}
 		// unselect
 		setCaretPosition(getSelectionEnd());
-		saveToFile("fuckup");
 		return count;
 	}
 

@@ -82,6 +82,12 @@
             type="file">
       <arg value="-sourcepath" />
       <arg value="${srcroot}" />
+
+      <!-- Tell the compiler to generate bytecode with version number
+           that will run on JDK 1.2! -->
+      <arg value="-target" />
+      <arg value="1.2" />
+
       <arg value="-g" />
       <arg value="-d" />
       <arg value="${built}" />

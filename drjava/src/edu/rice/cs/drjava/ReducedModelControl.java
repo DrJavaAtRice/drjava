@@ -39,13 +39,6 @@ public class ReducedModelControl implements BraceReduction
 			rmc = new ReducedModelComment();
 		}
 	
-	public StyleUpdateMessage generateHighlights(int offset,
-																							 int insertSize,
-																							 boolean simple)
-		{
-			return rmc.generateHighlights(offset, insertSize, simple);
-		}
-	
 	public void insertOpenSquiggly()
 		{
 			rmb.insertOpenSquiggly();
@@ -428,11 +421,55 @@ public class ReducedModelControl implements BraceReduction
 		{
 			return rmc.getDistToNextNewline();
 		}
-	
-	public boolean hasHighlightChanged()
-		{
-			return rmc.hasHighlightChanged();
-		}
+
+  /**
+   * Return all highlight status info for text between the current
+   * location and current location + end.
+   * This should collapse adjoining blocks with the same status into one.
+   * @param start The starting location of the area we want to get status of.
+   *              The reduced model is already at this position, but the 
+   *              parameter is needed to determine the absolute positions
+   *              needed in the HighlightStatus objects we return.
+   * @param length How far should we generate info for?             
+   */
+  public Vector<HighlightStatus> getHighlightStatus(final int start,
+                                                    final int length)
+  {
+    Vector<HighlightStatus> vec = new Vector<HighlightStatus>();
+
+    int curState;
+    int curLocation;
+    int curLength;
+
+    ModelList<ReducedToken>.Iterator cursor = rmc._cursor.copy();
+    curLocation = start; //+ rmc._offset;
+    curLength = cursor.current().getSize() - rmc._offset;
+    curState = cursor.current().getHighlightState();
+
+    while ((curLocation + curLength) < (start + length)) {
+      cursor.next();
+      int nextState = cursor.current().getHighlightState();
+
+      if (nextState == curState) {
+        // add on and keep building
+        curLength += cursor.current().getSize();
+      }
+      else {
+        // add old one to the vector and start new one
+        vec.addElement(new HighlightStatus(curLocation, curLength, curState));
+        curLocation += curLength; // new block starts after previous one
+        curLength = cursor.current().getSize();
+        curState = nextState;
+      }
+    }
+
+    // Add the last one, which has not been added yet
+    vec.addElement(new HighlightStatus(curLocation, curLength, curState));
+
+    cursor.dispose();
+
+    return vec;
+  }
 }
 
 
