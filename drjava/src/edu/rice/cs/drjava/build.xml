@@ -84,7 +84,7 @@
 
        Note: Release must be run on CS net
   -->
-  <target name="release" if="version-tag" depends="update">
+  <target name="release" if="version-tag" depends="update,compile">
     <antcall target="jar">
       <param name="jarfile" value="${jars_dir}/${version-tag}.jar" />
     </antcall>
