@@ -22,6 +22,8 @@
 
 <property name="jsr14_classpath" value="${lib_dir}/jsr14.jar" />
 
+<property name="jsr14_version" value="1.0" />
+
 <property name="jars_dir" value="/home/javaplt/public_html/drjava/builds" />
 
 <!-- put javadoc in this directory if generating private javadoc -->
@@ -135,7 +137,11 @@ optimize="off"/>
 
 <!-- Compile. We have to start at srcroot and then selectively include
      just this project in order for it to realize what files have already
-     been compiled (preventing needless recompilation)
+     been compiled (preventing needless recompilation).
+
+     This is currently set to compile with JDK 1.4.1 and JSR-14 v1.3.
+     To compile with older versions of the JDK or JSR-14, remove
+     source=1.5, change target to 1.1, and uncomment the compilerarg line.
 -->
 <target name="do-compile" depends="init">
   <javac srcdir="${srcroot}"
@@ -143,13 +149,14 @@ optimize="off"/>
          destdir="${built}" 
          bootclasspath="${jsr14_classpath}:${sun.boot.class.path}"
 	 classpath="${classpath_text}"
-         target="1.1"
+         source="1.5"
+         target="1.5"
          debug="on"
          optimize="off">
-    <compilerarg value="-gj" />
+<!--    <compilerarg value="-gj" />  -->
   </javac>
  
-  <!--
+  <!--  Old approach...
     <echo message="Recompiling all classes..." />
     <apply executable="java" failonerror="yes" parallel="yes" type="file">
 
