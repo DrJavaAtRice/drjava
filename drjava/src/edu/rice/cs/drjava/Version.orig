@@ -63,7 +63,7 @@ public abstract class Version {
 
   private static Date _getBuildDate() {
     try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm").parse(BUILD_TIME_STRING);
+      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
     }
     catch (Exception e) { // parse format or whatever problem
       return null;

@@ -49,7 +49,7 @@ import java.text.SimpleDateFormat;
  * @version $Id$
  */
 public class DependenciesTest extends TestCase {
-  public static final String REQUIRED_UTIL_VERSION = "20020221-1536";
+  public static final String REQUIRED_UTIL_VERSION = "20020221-1554";
 
   /**
    * Constructor.
@@ -71,7 +71,7 @@ public class DependenciesTest extends TestCase {
    * This test ensures that the util package version is as new as we expect.
    */
   public void testUtilVersion() throws Throwable {
-    Date required = new SimpleDateFormat("yyyyMMdd-HHmm").parse(REQUIRED_UTIL_VERSION);
+    Date required = new SimpleDateFormat("yyyyMMdd-HHmm z").parse(REQUIRED_UTIL_VERSION + " GMT");
 
     Date found = edu.rice.cs.util.Version.BUILD_TIME;
 

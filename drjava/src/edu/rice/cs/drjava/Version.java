@@ -47,7 +47,7 @@ import java.text.SimpleDateFormat;
  * This file is copied to Version.java by the build process, which also
  * fills in the right values of the date and time.
  *
- * This javadoc corresponds to build drjava-20020221-1544;
+ * This javadoc corresponds to build drjava-20020221-1601;
  *
  * @version $Id$
  */
@@ -56,14 +56,14 @@ public abstract class Version {
    * This string will be automatically expanded upon "ant commit".
    * Do not edit it by hand!
    */
-  public static final String BUILD_TIME_STRING = "20020221-1544";
+  public static final String BUILD_TIME_STRING = "20020221-1601";
 
   /** A {@link Date} version of the build time. */
   public static final Date BUILD_TIME = _getBuildDate();
 
   private static Date _getBuildDate() {
     try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm").parse(BUILD_TIME_STRING);
+      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
     }
     catch (Exception e) { // parse format or whatever problem
       return null;
