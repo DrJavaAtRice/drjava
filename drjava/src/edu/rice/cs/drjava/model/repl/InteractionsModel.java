@@ -80,7 +80,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    */
   protected final InteractionsEventNotifier _notifier =
     new InteractionsEventNotifier();
-  
+
+  /**
+   * System-dependent newline string.
+   */
   protected static final String _newLine = System.getProperty("line.separator");
   
   /**
@@ -217,7 +220,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         String errMsg = pe.getInteractionsMessage();
 //        javax.swing.JOptionPane.showMessageDialog(null, "ParseException:\n" + errMsg);
         if (errMsg.endsWith("<EOF>\"")) {
-          _notifier.interactionIncomplete();
+          _notifyInteractionIncomplete();
         }
         else {
           _prepareToInterpret(text);
@@ -284,7 +287,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     catch (ParseException pe) {
       // A ParseException indicates a syntax error in the input window
       if (pe.getInteractionsMessage().endsWith("<EOF>\"")) {
-        _notifier.interactionIncomplete();
+        _notifyInteractionIncomplete();
         return false;
       }
     }
@@ -293,6 +296,11 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
     return true;
   }
+
+  /**
+   * Notifies the view that the current interaction is incomplete.
+   */
+  protected abstract void _notifyInteractionIncomplete();
 
   /**
    * Notifies listeners that an interaction has started.

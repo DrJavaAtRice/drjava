@@ -259,7 +259,7 @@ public class InteractionsController extends AbstractConsoleController {
   public InteractionsDocument getDocument() {
     return _doc;
   }
-  
+
   /**
    * Notifies the inputEnteredAction. Called by DefaultGlobalModel when reset is called so
    * that this lock is released.
@@ -407,7 +407,7 @@ public class InteractionsController extends AbstractConsoleController {
       worker.start();
     }
   };
-  
+
   /**
    * Recalls the previous command from the history.
    */

@@ -53,6 +53,7 @@ import java.net.MalformedURLException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.FileOption;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.StrictURLClassLoader;
 
 /**
@@ -83,7 +84,7 @@ public class JSR14v20FromSetLocation extends CompilerProxy implements OptionCons
       return new StrictURLClassLoader(new URL[] { url });
     }
     catch (MalformedURLException e) {
-      throw new RuntimeException("malformed url exception");
+      throw new UnexpectedException(e);
     }
   }
   

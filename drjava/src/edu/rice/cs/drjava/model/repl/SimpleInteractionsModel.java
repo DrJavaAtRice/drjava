@@ -247,4 +247,11 @@ public class SimpleInteractionsModel extends InteractionsModel {
   protected void _notifyInterpreterResetFailed(Throwable t) {
     // Won't happen in a single JVM
   }
+
+  /**
+   * Notifies listeners that the interperaction was incomplete.
+   */
+  protected void _notifyInteractionIncomplete() {
+    // Oh well.  Nothing to do.
+  }
 }

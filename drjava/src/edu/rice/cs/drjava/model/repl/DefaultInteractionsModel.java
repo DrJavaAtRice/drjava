@@ -220,4 +220,11 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected void _notifyInterpreterResetFailed(final Throwable t) {
     _notifier.interpreterResetFailed(t);
   }
+
+  /**
+   * Notifies the view that the current interaction is incomplete.
+   */
+  protected void _notifyInteractionIncomplete() {
+    _notifier.interactionIncomplete();
+  }
 }

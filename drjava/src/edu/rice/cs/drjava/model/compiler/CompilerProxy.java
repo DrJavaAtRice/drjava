@@ -89,9 +89,7 @@ public class CompilerProxy implements CompilerInterface {
    * @param loader Classloader to use
    */
 
-  public CompilerProxy(String className,
-                       ClassLoader newLoader)
-  {
+  public CompilerProxy(String className, ClassLoader newLoader) {
     _className = className;
     _newLoader = newLoader;
 
@@ -133,7 +131,6 @@ public class CompilerProxy implements CompilerInterface {
       //DrJava.consoleErr().println("real compiler: " + _realCompiler + " this: " + this);
     }
     catch (Throwable t) {
-      
         // don't do anything. realCompiler stays null.
         //DrJava.consoleErr().println("loadClass fails: " + t);
         //t.printStackTrace(DrJava.consoleErr());
