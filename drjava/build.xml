@@ -618,6 +618,8 @@
                   excludes="META-INF/MANIFEST.MF" />
       <zipfileset src="${lib_dir}/platform.jar"
                   excludes="META-INF/MANIFEST.MF" />
+      <zipfileset src="${lib_dir}/winlaf-0.4.1.jar"
+                  excludes="META-INF/MANIFEST.MF" />
 
       <!-- Include DrJava classes -->
       <fileset dir="${built}">
