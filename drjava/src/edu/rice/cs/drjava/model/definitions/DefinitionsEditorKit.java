@@ -146,18 +146,23 @@ class ColoringView extends WrappedPlainView {
 
 
   private void setFormattingForState(Graphics g, int state) {
+    final Color COMMENTED_COLOR = Color.green.darker().darker().darker();
+    final Color QUOTED_COLOR = Color.red.darker();
+    final Color NORMAL_COLOR = Color.black;
+    final Color KEYWORD_COLOR = Color.blue;
+
     switch (state) {
       case HighlightStatus.NORMAL:
-        g.setColor(Color.black);
+        g.setColor(NORMAL_COLOR);
         break;
       case HighlightStatus.COMMENTED:
-        g.setColor(Color.green);
+        g.setColor(COMMENTED_COLOR);
         break;
       case HighlightStatus.QUOTED:
-        g.setColor(Color.red);
+        g.setColor(QUOTED_COLOR);
         break;
       case HighlightStatus.KEYWORD:
-        g.setColor(Color.blue);
+        g.setColor(KEYWORD_COLOR);
         break;
       default:
         throw new RuntimeException("Can't get color for invalid state: " + state);

@@ -225,11 +225,16 @@ public class CompilerErrorPanel extends JPanel {
     _errorListPane.selectItem(newIndex);
 
     int errPos = _errorPositions[newIndex].getOffset();
+
     try {
       Document doc = _definitionsView.getDocument();
       String text = doc.getText(0, doc.getLength());
-
-      int prevNewline = text.lastIndexOf(NEWLINE, errPos);
+     
+      // Look for the previous newline BEFORE this character. Thus start looking
+      // on the character one before this character. If this is not the case,
+      // if the error is at a newline character, both prev and next newlines
+      // will be set to that place, resulting in nothing being highlighted.
+      int prevNewline = text.lastIndexOf(NEWLINE, errPos - 1);
       if (prevNewline == -1) {
         prevNewline = 0;
       }
@@ -405,9 +410,11 @@ public class CompilerErrorPanel extends JPanel {
 
     private void _updateNoErrors() throws BadLocationException {
       DefaultStyledDocument doc = new DefaultStyledDocument();
+      /*
       doc.insertString(0,
                        "Last compilation completed successfully.",
                        null);
+      */
       setDocument(doc);
 
       selectNothing();
