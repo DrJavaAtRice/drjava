@@ -97,14 +97,11 @@ public class HighlightManager {
       
       if (lineStack != null) {
         int searchResult = lineStack.search(newLite);
-        //System.out.println("searchResult: "+searchResult);
         if (searchResult == 1) return lineStack.peek();
         if (searchResult > 1) {
           lineStack.removeElement(newLite); 
-          //System.out.println("Removing old instance...");
         }
         
-        //System.out.println("Removing present highlight...");
         HighlightInfo liteOnTop = lineStack.peek();
         _component.getHighlighter().removeHighlight( liteOnTop.getHighlightTag() );
        
@@ -119,7 +116,6 @@ public class HighlightManager {
         Object highlightTag = _component.getHighlighter().addHighlight(startOffset,endOffset,p);
         newLite.setHighlightTag(highlightTag);
         lineStack.push(newLite);
-        //System.out.println("Added @ "+ startOffset+ ", "+ endOffset);
         return newLite;
       }
       catch (BadLocationException ble) {
@@ -331,5 +327,18 @@ public class HighlightManager {
         return (getStartOffset() == from && getEndOffset() == to);
       }
       
+      /**
+       * Refreshes this HighlightInfo object, obtaining a new Highlighter 
+       */
+      public void refresh ( Highlighter.HighlightPainter p ) {
+                
+        this.remove();
+        HighlightInfo newHighlight = addHighlight(getStartOffset(), 
+                                                  getEndOffset(),
+                                                  p);
+        _p = p;
+        // turn this HighlightInfo object into the newHighlight
+        _highlightTag = newHighlight.getHighlightTag();
+      }
     }
 }
