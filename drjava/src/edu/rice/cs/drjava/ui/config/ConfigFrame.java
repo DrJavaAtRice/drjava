@@ -278,11 +278,6 @@ public class ConfigFrame extends JFrame {
                                                 _rootNode);
     _setupKeyBindingsPanel(keystrokesNode.getPanel());    
 
-    /*
-    PanelTreeNode fileNode = _createPanel("File");
-    _setupFilePanel(fileNode.getPanel());
-    */
-
     PanelTreeNode pathsNode = _createPanel("Paths");
     _setupPathsPanel(pathsNode.getPanel());
     
@@ -374,17 +369,6 @@ public class ConfigFrame extends JFrame {
     panel.displayComponents();
   }
   
-  /**
-   * Adds all of the components for the File panel of the preferences window.
-   */
-  private void _setupFilePanel( ConfigPanel panel) {
-    /*
-    panel.addComponent( new FileOptionComponent (OptionConstants.FILE_LOCATION, "Normal File", this));     
-    panel.addComponent( new FileOptionComponent (OptionConstants.FILE2_LOCATION, "Not-So-Normal File", this)); 
-    panel.addComponent( new FileOptionComponent (OptionConstants.FILE3_LOCATION, "Dumb File", this)); 
-    */
-    panel.displayComponents();
-  }
   
   /**
    * Adds all of the components for the Paths panel of the preferences window.

@@ -2435,8 +2435,8 @@ public class MainFrame extends JFrame implements OptionConstants {
 
       String text = fname + " has been modified. Would you like to save it?";
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
-                                             "Save " + fname + "?",
                                              text,
+                                             "Save " + fname + "?",
                                              JOptionPane.YES_NO_CANCEL_OPTION);
 
       switch (rc) {

@@ -94,12 +94,21 @@ public class KeyStrokeOption extends Option<KeyStroke> {
         return NULL_KEYSTROKE;
       }
       
-      // Replace "command" with "meta"
+      // Replace "command" with "meta" (OS X)
       int cIndex = s.indexOf("command");
       if (cIndex > -1) {
         StringBuffer sb = new StringBuffer(s.substring(0, cIndex));
         sb.append("meta");
-        sb.append(s.substring("command".length(), s.length()));
+        sb.append(s.substring(cIndex + "command".length(), s.length()));
+        s = sb.toString();
+      }
+      
+      // Replace "option" with "alt" (OS X)
+      int oIndex = s.indexOf("option");
+      if (oIndex > -1) {
+        StringBuffer sb = new StringBuffer(s.substring(0, oIndex));
+        sb.append("alt");
+        sb.append(s.substring(oIndex + "option".length(), s.length()));
         s = sb.toString();
       }
       

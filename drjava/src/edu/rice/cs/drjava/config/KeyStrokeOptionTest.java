@@ -74,8 +74,8 @@ public class KeyStrokeOptionTest extends TestCase
     if (CodeStatus.DEVELOPMENT) {
       KeyStrokeOption io = new KeyStrokeOption("max_files",null);
       assertEquals(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,
-                                          InputEvent.ALT_MASK | InputEvent.SHIFT_MASK),
-                   io.parse("alt shift ENTER"));
+                                          InputEvent.CTRL_MASK),
+                   io.parse("ctrl ENTER"));
       assertEquals(KeyStroke.getKeyStroke(KeyEvent.VK_NUM_LOCK,
                                           InputEvent.ALT_MASK | InputEvent.SHIFT_MASK,
                                           true),
