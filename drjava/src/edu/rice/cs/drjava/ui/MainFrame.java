@@ -198,6 +198,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenu _fileMenu;
   private JMenu _editMenu;
   private JMenu _toolsMenu;
+  private JMenu _projectMenu;
   private JMenu _debugMenu;
   private JMenu _helpMenu;
   private JMenuItem _debuggerEnabledMenuItem;
@@ -390,13 +391,13 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Asks user for project file name and and reads the associated files into
    * the file navigator (and places the first source file in the editor pane)
    */
-  private Action _openProjectAction = new AbstractAction("Open Project...") {
+  private Action _openProjectAction = new AbstractAction("Open") {
     public void actionPerformed(ActionEvent ae) {
       _openProject();
     }
   };
   
-  private Action _closeProjectAction = new AbstractAction("Close Project") {
+  private Action _closeProjectAction = new AbstractAction("Close") {
     public void actionPerformed(ActionEvent ae) {
       _closeProject();
     }
@@ -439,10 +440,16 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
+//  
+//  private Action _saveProjectAction = new AbstractAction("Save") {
+//    public void actionPerformed(ActionEvent ae) {
+//      _saveProject();
+//    }
+//  };
   
-  private Action _saveProjectAction = new AbstractAction("Save Project Snapshot...") {
+  private Action _saveProjectAsAction = new AbstractAction("Save As...") {
     public void actionPerformed(ActionEvent ae) {
-      _saveProject();
+      _saveProjectAs();
     }
   };
 
@@ -1408,6 +1415,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     //    _setUpDocumentSelector();
     _setUpContextMenus();
 
+    // eventually add recent project manager
     _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2,
                                                _fileMenu,
                                                this);
@@ -2220,7 +2228,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   
-  private void _saveProject() {
+//  private void _saveProject() {
+//    
+//    
+//  }
+  
+  
+  private void _saveProjectAs() {
     
     
     // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
@@ -2885,7 +2899,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_saveAction, "Save", "Save the current document");
     _setUpAction(_saveAsAction, "Save As", "SaveAs",
                  "Save the current document with a new name");
-    _setUpAction(_saveProjectAction, "Save Project Snapshot", "SaveAs", 
+    _setUpAction(_saveProjectAsAction, "Save As", "SaveAs", 
                  "Save all currently open files to new project file");
     _setUpAction(_revertAction, "Revert", "Revert the current document to the saved version");
     //_setUpAction(_revertAllAction, "Revert All", "RevertAll",
@@ -2893,7 +2907,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     _setUpAction(_closeAction, "Close", "Close the current document");
     _setUpAction(_closeAllAction, "Close All", "CloseAll", "Close all documents");
-    _setUpAction(_closeProjectAction, "Close Project", "CloseAll", "Close the current project");
+    _setUpAction(_closeProjectAction, "Close", "CloseAll", "Close the current project");
     _closeProjectAction.setEnabled(false);
     _setUpAction(_saveAllAction, "Save All", "SaveAll", "Save all open documents");
 
@@ -3013,12 +3027,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     _fileMenu = _setUpFileMenu(mask);
     _editMenu = _setUpEditMenu(mask);
     _toolsMenu = _setUpToolsMenu(mask);
+    _projectMenu = _setUpProjectMenu(mask);
     if (showDebugger) _debugMenu = _setUpDebugMenu(mask);
     _helpMenu = _setUpHelpMenu(mask);
 
     _menuBar.add(_fileMenu);
     _menuBar.add(_editMenu);
     _menuBar.add(_toolsMenu);
+    _menuBar.add(_projectMenu);
     if (showDebugger) _menuBar.add(_debugMenu);
     _menuBar.add(_helpMenu);
     setJMenuBar(_menuBar);
@@ -3069,7 +3085,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _addMenuItem(fileMenu, _newAction, KEY_NEW_FILE);
     _addMenuItem(fileMenu, _newJUnitTestAction, KEY_NEW_TEST);
     _addMenuItem(fileMenu, _openAction, KEY_OPEN_FILE);
-    _addMenuItem(fileMenu, _openProjectAction, KEY_OPEN_PROJECT);
+    //_addMenuItem(fileMenu, _openProjectAction, KEY_OPEN_PROJECT);
     
     fileMenu.addSeparator();
 
@@ -3077,7 +3093,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _saveAction.setEnabled(true);
     _addMenuItem(fileMenu, _saveAsAction, KEY_SAVE_FILE_AS);
     _addMenuItem(fileMenu, _saveAllAction, KEY_SAVE_ALL_FILES);
-    fileMenu.add(_saveProjectAction);
+    //fileMenu.add(_saveProjectAsAction);
 
     _addMenuItem(fileMenu, _revertAction, KEY_REVERT_FILE);
     _revertAction.setEnabled(false);
@@ -3087,7 +3103,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     fileMenu.addSeparator();
     _addMenuItem(fileMenu, _closeAction, KEY_CLOSE_FILE);
     _addMenuItem(fileMenu, _closeAllAction, KEY_CLOSE_ALL_FILES);
-    _addMenuItem(fileMenu, _closeProjectAction, KEY_CLOSE_PROJECT);
+    //_addMenuItem(fileMenu, _closeProjectAction, KEY_CLOSE_PROJECT);
 
     // Page setup, print preview, print
     fileMenu.addSeparator();
@@ -3192,7 +3208,29 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Add the menus to the menu bar
     return toolsMenu;
   }
+  
+  /**
+   * Creates and returns a project menu.
+   */
+  private JMenu _setUpProjectMenu(int mask) {
+    JMenu projectMenu = new JMenu("Project");
+    projectMenu.setMnemonic(KeyEvent.VK_P);
+    // New, open
+    // will add option for new project
+    _addMenuItem(projectMenu, _openProjectAction, KEY_OPEN_PROJECT);
 
+    //Add save
+    //SaveAs
+    projectMenu.add(_saveProjectAsAction);
+
+    // Close
+    _addMenuItem(projectMenu, _closeProjectAction, KEY_CLOSE_PROJECT);
+
+    // eventually add project options
+
+    return projectMenu;
+  }
+  
   /**
    * Creates and returns a debug menu.
    */
