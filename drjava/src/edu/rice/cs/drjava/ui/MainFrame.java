@@ -2057,9 +2057,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       if( file.length < 1 ) {
         throw new IllegalStateException("Open project file selection not canceled but no project file was selected.");
       }
-      if(_model.isProjectActive())    
-        _closeProject();    
-      _openProjectHelper(file[0]);
+      if(!_model.isProjectActive() ||
+          _model.isProjectActive() && _closeProject())    
+        _openProjectHelper(file[0]);
     }
     catch(OperationCanceledException oce) {
       // do nothing, we just won't open anything
@@ -2184,8 +2184,9 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Signals the model to close the project, then
    * closes all open files.  It also restores the
    * list view navigator
+   * @return true if the project is closed, false if cancelled
    */
-  private void _closeProject(){
+  private boolean _closeProject(){
     if(_checkProjectClose()) {
       List<OpenDefinitionsDocument> projDocs = _model.getProjectDocuments();
       //    for(OpenDefinitionsDocument d: projDocs){
@@ -2204,6 +2205,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       _projectPropertiesAction.setEnabled(false);
       _setUpContextMenus();
       _currentProjFile = null;
+      return true;
+    }else{
+      return false;
     }
   }
   
@@ -2376,9 +2380,9 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   private void _closeAll() {
-    if(_model.isProjectActive())    
-      _closeProject();
-    _model.closeAllFiles();
+    if(!_model.isProjectActive() || 
+        _model.isProjectActive() && _closeProject())    
+      _model.closeAllFiles();
    // _model.setActiveFirstDocument();
   }
 
@@ -5650,6 +5654,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       });
     }
     
+    /* changes to the state */
+    
+    // ADAM
     
     public void projectRunnableChanged(){
       if(_model.getJarMainClass() != null && _model.getJarMainClass().exists()){
@@ -5657,6 +5664,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }else{
         _runProjectAction.setEnabled(false);
       }
+      _saveProjectAction.setEnabled(_model.isProjectChanged());
     }
   }
 

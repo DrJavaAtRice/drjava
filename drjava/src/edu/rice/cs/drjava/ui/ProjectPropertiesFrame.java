@@ -209,7 +209,7 @@ public class ProjectPropertiesFrame extends JFrame {
   public boolean saveSettings() {//throws IOException {
     _mainFrame.getModel().setBuildDirectory(_builtDirSelector.getFileFromField());
     _mainFrame.getModel().setJarMainClass(_jarMainClassSelector.getFileFromField());
-    _mainFrame.saveProject();
+//    _mainFrame.saveProject();
     return true;
   }
   
@@ -310,7 +310,6 @@ public class ProjectPropertiesFrame extends JFrame {
   
   public void setVisible(boolean vis){
     super.setVisible(vis);
-    System.out.println("resetting");
     reset();
   }
 }
