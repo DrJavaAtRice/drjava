@@ -110,8 +110,8 @@ public class ConstructorDeclaration extends Node {
    */
   public ConstructorDeclaration(int flags, String name,
                                 List<FormalParameter> params, List<? extends ReferenceType> excepts,
-                                ConstructorInvocation eci, List<Node> stmts, boolean va) {
-    this(flags, name, params, excepts, eci, stmts, va, null, 0, 0, 0, 0);
+                                ConstructorInvocation eci, List<Node> stmts) {
+    this(flags, name, params, excepts, eci, stmts, null, 0, 0, 0, 0);
   }
 
   /**
@@ -132,7 +132,7 @@ public class ConstructorDeclaration extends Node {
    */
   public ConstructorDeclaration(int flags, String name,
                                 List<FormalParameter> params, List<? extends ReferenceType> excepts,
-                                ConstructorInvocation eci, List<Node> stmts, boolean va,
+                                ConstructorInvocation eci, List<Node> stmts,
                                 String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
 
@@ -152,7 +152,6 @@ public class ConstructorDeclaration extends Node {
     while (it.hasNext()) {
       exceptions.add(it.next().getRepresentation());
     }
-    varargs = va;
   }
 
   /**
@@ -265,6 +264,10 @@ public class ConstructorDeclaration extends Node {
    * Implementation of toString for use in unit testing
    */
   public String toString() {
-    return "("+getClass().getName()+": "+java.lang.reflect.Modifier.toString(getAccessFlags())+" "+getName()+" "+getParameters()+" "+getExceptions()+" "+getConstructorInvocation()+" "+getStatements()+")";
+    return "("+getClass().getName()+": "+toStringHelper()+")";
+  }
+  
+  public String toStringHelper() {
+    return java.lang.reflect.Modifier.toString(getAccessFlags())+" "+getName()+" "+getParameters()+" "+getExceptions()+" "+getConstructorInvocation()+" "+getStatements();
   }
 }

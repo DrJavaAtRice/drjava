@@ -1850,6 +1850,7 @@ PARSER_END(Parser)
     Token                 t = null;
     int                   flag = 0;
     Token                 id;
+    TypeParameter[]   typeParameters = null;
     List/*<FormalParameter>*/ params;
     List/*<? extends ReferenceType>*/ exceptions = new LinkedList/*<ReferenceType>*/();
     ConstructorInvocation ci = null;
@@ -1872,6 +1873,7 @@ PARSER_END(Parser)
        flag = Modifier.PRIVATE;
      }
      ]
+      [ typeParameters = TypeParameters() ]
        id=<IDENTIFIER>
        params=formalParameters()
        [ "throws" exceptions=ReferenceTypeNameList() ]
@@ -1893,10 +1895,15 @@ PARSER_END(Parser)
          bc = t.beginColumn;
        }
        if(lastFormalParameterIsVarArgs) flag |= 0x00000080; // Modifier.VARARGS == 0x00000080 /**/
-       return new ConstructorDeclaration(flag, id.image, params, exceptions, ci, stmts, lastFormalParameterIsVarArgs,
-                                         filename,
-                                         bl, bc,
-                                         e.endLine, e.endColumn);
+       if (typeParameters == null){
+         return new ConstructorDeclaration(flag, id.image, params, exceptions, ci, stmts,
+                                           filename, bl, bc, e.endLine, e.endColumn);
+       } else {
+         GenericTypesEnv = GenericTypesEnv.getRest(); // pop added type params
+         return new PolymorphicConstructorDeclaration(flag, id.image, params,
+                                                      exceptions, ci, stmts, 
+                                                      filename, bl, bc, e.endLine, e.endColumn, typeParameters);
+       }
      }
   }
   
@@ -4220,7 +4227,7 @@ ForSlashEachStatement forStatement() :
   void constructorDeclarationLookahead() :
   {}
   {
-    modifiersLookahead() <IDENTIFIER> "("
+    modifiersLookahead() [ TypeParametersLookahead() ] <IDENTIFIER> "("
   }
   
   /**
@@ -4229,7 +4236,7 @@ ForSlashEachStatement forStatement() :
   void constructorDeclarationLookahead2() :
   {}
   {
-    modifiersLookahead()
+    modifiersLookahead()[ TypeParametersLookahead() ]
       <IDENTIFIER> formalParametersLookahead() [ "throws" nameListLookahead() ]
       "{"
       [ LOOKAHEAD(explicitConstructorInvocationLookahead())

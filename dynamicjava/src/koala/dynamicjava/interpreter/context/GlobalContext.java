@@ -488,7 +488,7 @@ public class GlobalContext extends VariableContext implements Context {
                                      params,
                                      new LinkedList<ReferenceType>(),
                                      ci,
-                                     stmts, false);
+                                     stmts);
     memb.add(csd);
 
     // Set the inheritance

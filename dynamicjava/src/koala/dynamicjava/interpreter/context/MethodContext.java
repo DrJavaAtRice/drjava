@@ -329,7 +329,7 @@ public class MethodContext extends StaticContext {
                                      params,
                                      new LinkedList<ReferenceType>(),
                                      ci,
-                                     stmts, false);
+                                     stmts);
     memb.add(csd);
 
     // Set the inheritance clause

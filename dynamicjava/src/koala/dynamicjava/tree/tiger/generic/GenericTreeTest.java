@@ -123,7 +123,7 @@ public class GenericTreeTest extends TestCase {
     _nIds.add(new Identifier("_n"));
     AssignExpression stmt = new SimpleAssignExpression(nName, new QualifiedName(_nIds));
     cstmts.add(stmt);
-    ConstructorDeclaration c = new ConstructorDeclaration(accessFlags, "C", cparams, new LinkedList<ReferenceType>(), null, cstmts, false);
+    ConstructorDeclaration c = new ConstructorDeclaration(accessFlags, "C", cparams, new LinkedList<ReferenceType>(), null, cstmts);
     body.add(c);
     List<Node> mstmts = new LinkedList<Node>();
     ReturnStatement mstmt = new ReturnStatement(nName);
@@ -816,12 +816,30 @@ public class GenericTreeTest extends TestCase {
   
   
      //Testing Polymorph Constructors
-    public void xtestInterpretPolyConstructors(){
+    public void testInterpretPolyConstructors(){
       testString =
         "public class C {\n"+
         "  String str = \"\";\n"+
-        "  public <String> C(String s){\n"+ //or <String[]>
-        "      str = s;\n"+
+        "  public <T extends String> C(T s){\n"+ 
+        "    str = s;\n"+
+        "  }\n"+
+        "  public String getStr(){\n"+
+        "    return str;\n"+
+        "  }\n"+
+        "}\n"+
+        "new C(\"Str1\").getStr();\n";
+    
+      assertEquals("Str1", interpret(testString));
+    }
+    
+    //Testing Polymorph Constructors with varargs
+    public void testInterpretPolyConstructorsVarArgs(){
+      testString =
+        "public class C {\n"+
+        "  String str = \"\";\n"+
+        "  public <T extends String> C(T ... s){\n"+
+        "    for(int i=0;i<s.length;i++) {\n"+
+        "      str = str+s[i];\n"+
         "    }\n"+
         "  }\n"+
         "  public String getStr(){\n"+

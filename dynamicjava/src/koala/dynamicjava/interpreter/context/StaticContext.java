@@ -308,7 +308,7 @@ public class StaticContext extends GlobalContext {
                                      params,
                                      new LinkedList<ReferenceType>(),
                                      ci,
-                                     stmts, false);
+                                     stmts);
     memb.add(csd);
 
     // Set the inheritance

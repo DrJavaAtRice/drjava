@@ -530,7 +530,7 @@ public class TreeClassInfo implements ClassInfo {
                                             new LinkedList<FormalParameter>(),
                                             new LinkedList<ReferenceType>(),
                                             ci,
-                                            new LinkedList<Node>(), false);
+                                            new LinkedList<Node>());
             cd.acceptVisitor(this);
             classTree.getMembers().add(cd);
           }
