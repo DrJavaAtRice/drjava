@@ -88,6 +88,7 @@ public final class InteractionsPaneTest extends TestCase {
     _pane.setBeep(new TestBeep());
 
     _controller = new InteractionsController(_model, _adapter, _pane);
+    
   }
 
   public void tearDown() {
@@ -276,35 +277,57 @@ public final class InteractionsPaneTest extends TestCase {
                  pos + 1, _pane.getCaretPosition());
   }
 
+//   public void testSystemIn() {
+//     final Object lock = new Object();
+//     final StringBuffer buf = new StringBuffer();
+//     synchronized (_controller._inputEnteredAction) {
+//       new Thread("Testing System.in") {
+//         public void run() {
+//           synchronized (_controller._inputEnteredAction) {
+//             _controller._inputEnteredAction.notify();
+//             synchronized (lock) {
+//               buf.append(_controller._inputListener.getConsoleInput());
+//             }
+//           }
+//         }
+//       }.start();
+//       try {
+//         _controller._inputEnteredAction.wait();
+//       }
+//       catch (InterruptedException ie) {
+//       }
+//     }
+//     try {
+//       Thread.sleep(2000);
+//     }
+//     catch (InterruptedException ie) {
+//     }
+//     _controller._insertNewlineAction.actionPerformed(null);
+//     _controller._inputEnteredAction.actionPerformed(null);
+//     synchronized (lock) {
+//       assertEquals("Should have returned the correct text.", "\n\n", buf.toString());
+//     }
+//   }
+  
   public void testSystemIn() {
     final Object lock = new Object();
     final StringBuffer buf = new StringBuffer();
-    synchronized (_controller._inputEnteredAction) {
-      new Thread("Testing System.in") {
-        public void run() {
-          synchronized (_controller._inputEnteredAction) {
-            _controller._inputEnteredAction.notify();
-            synchronized (lock) {
-              buf.append(_controller._inputListener.getConsoleInput());
-            }
-          }
+    
+    new Thread("Testing System.in") {
+      public void run() {
+        synchronized (lock) {
+          buf.append(_controller._inputListener.getConsoleInput());
         }
-      }.start();
-      try {
-        _controller._inputEnteredAction.wait();
       }
-      catch (InterruptedException ie) {
-      }
-    }
-    try {
-      Thread.sleep(2000);
-    }
-    catch (InterruptedException ie) {
-    }
-    _controller._insertNewlineAction.actionPerformed(null);
-    _controller._inputEnteredAction.actionPerformed(null);
+    }.start();
+    
+    try { _controller._popupConsole.waitForConsoleReady(); }
+    catch (InterruptedException ie) { }
+    
+    _controller._popupConsole.insertConsoleText("test-text");
+    _controller._popupConsole.interruptConsole();
     synchronized (lock) {
-      assertEquals("Should have returned the correct text.", "\n\n", buf.toString());
+      assertEquals("Should have returned the correct text.", "test-text\n", buf.toString());
     }
   }
   

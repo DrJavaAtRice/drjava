@@ -93,7 +93,7 @@ public class DrJava implements OptionConstants {
   private static boolean _showDrJavaDebugConsole = false;
   private static boolean _usingJSR14v20 = false;
   private static SimpleInteractionsWindow _debugConsole = null;
-
+  
   /*
    * Config objects can't be public static final, since we have to delay
    * construction until we know the config file's location.  (Might be
@@ -141,30 +141,29 @@ public class DrJava implements OptionConstants {
   //public static void beginProgram(final String[] args) {
   public static void main(final String[] args) {
     
-    
-    // TODO: figure out how to move this code to createAndShowGUI; simply moving it
-    //   fails because the splash icon is not found (different class loader?)
-    // Show splash screen
     final SplashScreen splash = new SplashScreen();
     splash.setVisible(true);
-        
-    // Schedule a job for the event-dispatching thread:
-    // creating and showing this application's GUI.
-    // ** invokeLater commented out in order to allow the splash screen to paint itself
+    splash.repaint();
+    
 //    SwingUtilities.invokeLater(new Runnable() {
-//      public void run() { 
-        createAndShowGUI(args, splash); 
+//      // Schedule a job for the event-dispatching thread:
+//      // creating and showing this application's GUI.
+//      public void run() {
+        createAndShowGUI(args); 
 //      }
 //    });
-  }  
-      
-  private static void createAndShowGUI(final String[] args, SplashScreen splash) {
+    
+    SwingUtilities.invokeLater(new Runnable() { 
+      public void run() { splash.dispose(); } 
+    });
+  }
+
+  private static void createAndShowGUI(final String[] args) {
        
     try {
-      
       // handleCommandLineArgs will return true if the program should load
       if (handleCommandLineArgs(args)) {
-
+                
         try {
           initConfig();
         }
@@ -172,7 +171,7 @@ public class DrJava implements OptionConstants {
           // Shouldn't happen: _config shouldn't be assigned yet
           throw new UnexpectedException(ise);
         }
-
+        
         String configLAFName = _config.getSetting(LOOK_AND_FEEL);
         String currLAFName = UIManager.getLookAndFeel().getClass().getName();
         if (!configLAFName.equals(currLAFName)) {
@@ -184,47 +183,45 @@ public class DrJava implements OptionConstants {
         // install L&F upgrades for windows XP.
         // For more information see: https://winlaf.dev.java.net/release_0.4.html
         net.java.plaf.LookAndFeelPatchManager.initialize();
-        
+                
         // Don't use JSR14v20 if running with Java 1.5 because we putting it on the bootclasspath causes DrJava to
         // hang on startup.
         _usingJSR14v20 = checkForJSR14v20() && !System.getProperty("java.specification.version").equals("1.5");
 
         checkForCompilersAndDebugger(args);
-
  
         // The MainFrame *must* be constructed after the compiler setup process has
         // occurred; otherwise, the list of compilers in the UI will be wrong.
         // At some point this should be fixed, which would involve making the
         // CompilerRegistry notify listeners when there is a change in the list of
         // available compilers.
-        final MainFrame mf = new MainFrame();
 
+        final MainFrame mf = new MainFrame();
+        
         // Make sure all uncaught exceptions are shown in an AWTExceptionHandler
         AWTExceptionHandler.setFrame(mf);
         System.setProperty("sun.awt.exception.handler",
                            "edu.rice.cs.drjava.ui.AWTExceptionHandler");
-
+                
         // This enabling of the security manager must happen *after* the mainframe
         // is constructed. See bug #518509.
         enableSecurityManager();
         openCommandLineFiles(mf, _filesToOpen);
-
         mf.setVisible(true);
-        splash.dispose();
-
-        // redirect stdout to DrJava's console
-        System.setOut(new PrintStream(new OutputStreamRedirector() {
-          public void print(String s) {
-            mf.getModel().systemOutPrint(s);
-          }
-        }));
-
-        // redirect stderr to DrJava's console
-        System.setErr(new PrintStream(new OutputStreamRedirector() {
-          public void print(String s) {
-            mf.getModel().systemErrPrint(s);
-          }
-        }));
+//        
+//        // redirect stdout to DrJava's console
+//        System.setOut(new PrintStream(new OutputStreamRedirector() {
+//          public void print(String s) {
+//            mf.getModel().systemOutPrint(s);
+//          }
+//        }));
+//
+//        // redirect stderr to DrJava's console
+//        System.setErr(new PrintStream(new OutputStreamRedirector() {
+//          public void print(String s) {
+//            mf.getModel().systemErrPrint(s);
+//          }
+//        }));
 
         // Show debug console if enabled
         if (_showDrJavaDebugConsole) {

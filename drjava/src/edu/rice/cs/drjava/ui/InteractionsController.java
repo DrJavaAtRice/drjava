@@ -54,6 +54,9 @@ import java.awt.event.KeyEvent;
 import java.awt.Toolkit;
 import java.awt.Color;
 import java.awt.Event;
+import java.awt.RenderingHints;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -62,6 +65,7 @@ import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.repl.*;
 //import edu.rice.cs.drjava.model.repl.InputListener;
 import edu.rice.cs.util.swing.SwingWorker;
+import edu.rice.cs.util.swing.PopupConsole;
 import edu.rice.cs.util.UnexpectedException;
 
 /**
@@ -98,6 +102,7 @@ public class InteractionsController extends AbstractConsoleController {
   /**
    * Invoked when input is completed in an input box.
    */
+  @Deprecated
   protected Action _inputEnteredAction = new AbstractAction() {
     public synchronized void actionPerformed(ActionEvent e) {
       _box.setEditable(false);
@@ -114,6 +119,7 @@ public class InteractionsController extends AbstractConsoleController {
   /**
    * Shift-Enter action in a System.in box.  Inserts a newline.
    */
+  @Deprecated
   protected Action _insertNewlineAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       _box.insert("\n", _box.getCaretPosition());
@@ -123,6 +129,7 @@ public class InteractionsController extends AbstractConsoleController {
   /**
    * Current contents of the most recent InputBox.
    */
+  @Deprecated
   private String _inputText;
 
   /**
@@ -131,71 +138,77 @@ public class InteractionsController extends AbstractConsoleController {
    */
   private InputBox _box;
 
+  PopupConsole _popupConsole = new PopupConsole(_pane, new InputBox(), "Standard Input (System.in)");
+  
   /**
-   * Listens for input requests from System.in, displaying an input box as needed.
+   * Listens for input requests from ,System.in displaying an input box as needed.
    */
   protected InputListener _inputListener = new InputListener() {
     public String getConsoleInput() {
-      synchronized(_inputEnteredAction) {
-
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            _box = new InputBox();
-            _pane.setEditable(true);
-             int pos = _doc.getPositionBeforePrompt();
-             _pane.setCaretPosition(pos);
-             _pane.insertComponent(_box);
-            moveToEnd();
-            _pane.setEditable(false);
-            _pane.setVisible(true);
-/*
-                    if (_busy()) {
-             _pane.setEditable(true);
-             moveToEnd();
-             _pane.insertComponent(_box);
-             _pane.setEditable(false);
-             }
-             else {
-//             DocumentEditCondition ec = _doc.getEditCondition();
-//             _doc.setEditCondition(new DocumentEditCondition());
-             int pos = _doc.getPositionBeforePrompt();
-             _pane.setCaretPosition(pos);
-             _pane.insertComponent(_box);
-             _doc.setPromptPos(_doc.getPromptPos() + 1);
-             //            _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
-//             _doc.setEditCondition(ec);
-             }
-             */
-            
-            _doc.insertBeforeLastPrompt(" ", _doc.DEFAULT_STYLE);
-            SimpleAttributeSet att = new SimpleAttributeSet();
-            StyleConstants.setComponent(att, _box);
-            _adapter.setCharacterAttributes(pos, 1, att, false);
-            _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
-//            try {
-//              int len = _doc.getDocLength();
-//              _doc.forceInsertText(len, " ", _doc.DEFAULT_STYLE);
-//              _doc.forceRemoveText(len, 1);
-//            }
-//            catch (DocumentAdapterException dae) {
-//            }
-
-            _inputEnteredAction.setEnabled(true);
-            //          _insertNewlineAction.setEnabled(true);
-            
-            _box.requestFocus();
-            
-          }
-        });
-
-        try {
-          _inputEnteredAction.wait();
-        }
-        catch (InterruptedException ie) {
-        }
-      }
-
-      return _inputText + "\n";
+      return _popupConsole.getConsoleInput();
+      
+//      return "input\n";
+      
+//      synchronized(_inputEnteredAction) {
+//
+//        SwingUtilities.invokeLater(new Runnable() {
+//          public void run() {
+//            _box = new InputBox();
+//            _pane.setEditable(true);
+//             int pos = _doc.getPositionBeforePrompt();
+//             _pane.setCaretPosition(pos);
+//             _pane.insertComponent(_box);
+//            moveToEnd();
+//            _pane.setEditable(false);
+//            _pane.setVisible(true);
+///*
+//                    if (_busy()) {
+//             _pane.setEditable(true);
+//             moveToEnd();
+//             _pane.insertComponent(_box);
+//             _pane.setEditable(false);
+//             }
+//             else {
+////             DocumentEditCondition ec = _doc.getEditCondition();
+////             _doc.setEditCondition(new DocumentEditCondition());
+//             int pos = _doc.getPositionBeforePrompt();
+//             _pane.setCaretPosition(pos);
+//             _pane.insertComponent(_box);
+//             _doc.setPromptPos(_doc.getPromptPos() + 1);
+//             //            _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
+////             _doc.setEditCondition(ec);
+//             }
+//             */
+//            
+//            _doc.insertBeforeLastPrompt(" ", _doc.DEFAULT_STYLE);
+//            SimpleAttributeSet att = new SimpleAttributeSet();
+//            StyleConstants.setComponent(att, _box);
+//            _adapter.setCharacterAttributes(pos, 1, att, false);
+//            _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
+////            try {
+////              int len = _doc.getDocLength();
+////              _doc.forceInsertText(len, " ", _doc.DEFAULT_STYLE);
+////              _doc.forceRemoveText(len, 1);
+////            }
+////            catch (DocumentAdapterException dae) {
+////            }
+//
+//            _inputEnteredAction.setEnabled(true);
+//            //          _insertNewlineAction.setEnabled(true);
+//            
+//            _box.requestFocus();
+//            
+//          }
+//        });
+//
+//        try {
+//          _inputEnteredAction.wait();
+//        }
+//        catch (InterruptedException ie) {
+//        }
+//      }
+//
+//      return _inputText + "\n";
     }
   };
   
@@ -278,9 +291,10 @@ public class InteractionsController extends AbstractConsoleController {
    * that this lock is released.
    */
   public void notifyInputEnteredAction() {
-    synchronized(_inputEnteredAction) {
-      _inputEnteredAction.notify();
-    }
+//    synchronized(_inputEnteredAction) {
+//      _inputEnteredAction.notify();
+//    }
+    _popupConsole.interruptConsole();
   }
 
   /**
@@ -653,27 +667,22 @@ public class InteractionsController extends AbstractConsoleController {
   /**
    * A box that can be inserted into the interactions pane for separate input.
    */
-  class InputBox extends JTextArea {
+  protected static class InputBox extends JTextArea {
     private static final int BORDER_WIDTH = 1;
     private static final int INNER_BUFFER_WIDTH = 3;
     private static final int OUTER_BUFFER_WIDTH = 2;
     private Color _bgColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
     private Color _fgColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
     private Color _sysInColor = DrJava.getConfig().getSetting(OptionConstants.SYSTEM_IN_COLOR);
+    private boolean _antiAliasText = DrJava.getConfig().getSetting(OptionConstants.TEXT_ANTIALIAS);
+    
     public InputBox() {
       setForeground(_sysInColor);
       setBackground(_bgColor);
       setCaretColor(_fgColor);
       setBorder(_createBorder());
       setLineWrap(true);
-
-      InputMap im = getInputMap(WHEN_FOCUSED);
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), INPUT_ENTERED_NAME);
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,Event.SHIFT_MASK), INSERT_NEWLINE_NAME);
-      ActionMap am = getActionMap();
-      am.put(INPUT_ENTERED_NAME, _inputEnteredAction);
-      am.put(INSERT_NEWLINE_NAME, _insertNewlineAction);
-
+      
       DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR,
                                            new OptionListener<Color>() {
         public void optionChanged(OptionEvent<Color> oe) {
@@ -697,6 +706,13 @@ public class InteractionsController extends AbstractConsoleController {
           setForeground(oe.value);
         }
       });
+      DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS,
+                                           new OptionListener<Boolean>() {
+        public void optionChanged(OptionEvent<Boolean> oce) {
+          _antiAliasText = oce.value.booleanValue();
+          InputBox.this.repaint();
+        }
+      });
     }
     private Border _createBorder() {
       Border outerouter = BorderFactory.createLineBorder(_bgColor, OUTER_BUFFER_WIDTH);
@@ -704,6 +720,17 @@ public class InteractionsController extends AbstractConsoleController {
       Border inner = BorderFactory.createLineBorder(_bgColor, INNER_BUFFER_WIDTH);
       Border temp = BorderFactory.createCompoundBorder(outer, inner);
       return BorderFactory.createCompoundBorder(outerouter, temp);
+    }
+    /**
+     * Enable anti-aliased text by overriding paintComponent.
+     */
+    protected void paintComponent(Graphics g) {
+      if (_antiAliasText && g instanceof Graphics2D) {
+        Graphics2D g2d = (Graphics2D)g;
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                             RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+      }
+      super.paintComponent(g);
     }
   }
 }
