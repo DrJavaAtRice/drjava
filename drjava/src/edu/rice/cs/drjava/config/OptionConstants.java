@@ -49,6 +49,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
 import java.awt.Toolkit;
 import edu.rice.cs.drjava.CodeStatus;
+import java.util.ArrayList;
 
 /**
  * @version $Id$
@@ -528,6 +529,12 @@ public interface OptionConstants {
    */    
   public static final BooleanOption DEBUG_STEP_DRJAVA =
     new BooleanOption("debug.step.drjava", Boolean.FALSE);
+  
+  /**
+   * Which packages to exclude when stepping.
+   */
+  public static final StringOption DEBUG_STEP_EXCLUDE = 
+    new StringOption("debug.step.exclude", "");
   
   
   

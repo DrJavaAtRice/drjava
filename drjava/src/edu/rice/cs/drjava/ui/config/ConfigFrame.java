@@ -535,6 +535,8 @@ public class ConfigFrame extends JFrame {
                                                   "Step Into Interpreter Classes", this));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.DEBUG_STEP_DRJAVA, 
                                                   "Step Into DrJava Classes", this));
+    panel.addComponent(new StringOptionComponent(OptionConstants.DEBUG_STEP_EXCLUDE,
+                                                 "Classes/Packages To Exclude", this));
     
     panel.displayComponents();
   }

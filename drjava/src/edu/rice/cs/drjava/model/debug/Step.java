@@ -47,6 +47,7 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import gj.util.Vector;
 import java.util.List;
 import java.util.Iterator;
+import java.util.StringTokenizer;
 
 import com.sun.jdi.*;
 import com.sun.jdi.request.*;
@@ -61,7 +62,7 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
   private int _depth;
   
   // Java class patterns for which we may not want events
-  private String[] javaExcludes = {"java.*", "javax.*", "sun.*", "com.sun.*"};
+  private String[] javaExcludes = {"java.*", "javax.*", "sun.*", "com.sun.*", "com.apple.mrj.*"};
    
   /**
    * @throws IllegalStateException if the document does not have a file
@@ -89,7 +90,8 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
   protected void _createRequests() throws DebugException {
     boolean stepJava = DrJava.getConfig().getSetting(DEBUG_STEP_JAVA).booleanValue();  
     boolean stepInterpreter = DrJava.getConfig().getSetting(DEBUG_STEP_INTERPRETER).booleanValue();  
-    boolean stepDrJava = DrJava.getConfig().getSetting(DEBUG_STEP_DRJAVA).booleanValue();  
+    boolean stepDrJava = DrJava.getConfig().getSetting(DEBUG_STEP_DRJAVA).booleanValue();
+    String exclude = DrJava.getConfig().getSetting(DEBUG_STEP_EXCLUDE);
     
     StepRequest request = _manager.getEventRequestManager().
       createStepRequest(_thread, _size, _depth);
@@ -105,6 +107,11 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
       request.addClassExclusionFilter("edu.rice.cs.drjava.*");
       request.addClassExclusionFilter("edu.rice.cs.util.*");
     }
+    StringTokenizer st = new StringTokenizer(exclude, ",");
+    while (st.hasMoreTokens()) {
+      request.addClassExclusionFilter(st.nextToken().trim());
+    }
+      
     
     // Add this request (the only one) to the list
     _requests.addElement(request);
