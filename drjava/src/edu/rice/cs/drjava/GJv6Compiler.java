@@ -42,13 +42,14 @@ public class GJv6Compiler implements CompilerInterface {
     _compiler = JavaCompiler.make(_compilerLog, options);
 
     // Build up classpath attribute
-    String classpath = System.getProperty("java.class.path");
-    if (! classpath.equals("")) {
-      classpath += File.pathSeparator;
+    String oldclasspath = System.getProperty("java.class.path");
+    String newclasspath = sourceRoot.getAbsolutePath();
+    if (oldclasspath.length() > 0) {
+      newclasspath += File.pathSeparator;
+      newclasspath += oldclasspath;
     }
 
-    classpath += sourceRoot.getAbsolutePath();
-    options.put("-classpath", classpath);
+    options.put("-classpath", newclasspath);
   }
 
   /**
