@@ -262,71 +262,83 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
    * @param node the node to visit
    */
   public Class<?> visit(SwitchStatement node) {
-    // Visits the components of this node
-    Expression exp = node.getSelector();
-    Class<?> c = exp.acceptVisitor(this);
-    if (c != char.class      && c != byte.class && c != short.class && c != int.class  && 
-        c != Character.class && c != Byte.class && c != Short.class && c != Integer.class) {
-      node.setProperty(NodeProperties.ERROR_STRINGS,
-                       new String[] { c.getName() });
-      throw new ExecutionError("selector.type", node);
-    }
-    // unbox it if needed
-    if (c == Character.class || c == Byte.class || c == Short.class || c == Integer.class) {
-      node.setSelector(_unbox(exp, c));
-    }
-    
-    // Check the type of the case labels
-    Iterator<SwitchBlock> it = node.getBindings().iterator();
-    while (it.hasNext()) {
-      SwitchBlock sb = it.next();
-      sb.acceptVisitor(this);
-      exp = sb.getExpression();
-      if (exp != null) {
-        Class<?> lc = NodeProperties.getType(exp);
-        if (lc != char.class &&  lc != byte.class &&
-            lc != short.class && lc != int.class) {
-          node.setProperty(NodeProperties.ERROR_STRINGS,
-                           new String[] { lc.getName() });
-          throw new ExecutionError("switch.label.type", node);
-        }
-        if (c != lc) {
-          Number n = null;
-          if (exp.hasProperty(NodeProperties.VALUE)) {
-            Object cst = exp.getProperty(NodeProperties.VALUE);
-            if (lc == char.class) {
-              n = new Integer(((Character)cst).charValue());
-            } else {
-              n = (Number)cst;
-            }
+    try {
+      // Visits the components of this node
+      Expression exp = node.getSelector();
+      Class<?> c = exp.acceptVisitor(this);
+      if (c != char.class      && c != byte.class && c != short.class && c != int.class  && 
+          c != Character.class && c != Byte.class && c != Short.class && c != Integer.class &&
+          (TigerUtilities.isTigerEnabled() && (c.getSuperclass() != Class.forName("java.lang.Enum")))) {
+        //!TigerUtilities.isEnum(c) ) {
+        node.setProperty(NodeProperties.ERROR_STRINGS,
+                         new String[] { c.getName() });
+        throw new ExecutionError("selector.type", node);
+      }
+      // unbox it if needed
+      if (c == Character.class || c == Byte.class || c == Short.class || c == Integer.class) {
+        node.setSelector(_unbox(exp, c));
+      }
+      
+      // Check the type of the case labels
+      Iterator<SwitchBlock> it = node.getBindings().iterator();
+      while (it.hasNext()) {
+        SwitchBlock sb = it.next();
+        sb.acceptVisitor(this);
+        exp = sb.getExpression();
+        if (exp != null) {
+          Class<?> lc = NodeProperties.getType(exp);
+          if (lc != char.class &&  lc != byte.class &&
+              lc != short.class && lc != int.class &&
+              (TigerUtilities.isTigerEnabled() && (lc.getSuperclass() != Class.forName("java.lang.Enum")))) {
+            //!TigerUtilities.isEnum(lc)) {
+            node.setProperty(NodeProperties.ERROR_STRINGS,
+                             new String[] { lc.getName() });
+            throw new ExecutionError("switch.label.type", node);
           }
-          if (c == byte.class) {
+          if (c != lc) {
+            Number n = null;
             if (exp.hasProperty(NodeProperties.VALUE)) {
-              if (n.byteValue() != n.intValue()) {
-                node.setProperty(NodeProperties.ERROR_STRINGS,
-                                 new String[] { c.getName() });
-                throw new ExecutionError
-                  ("switch.label.type", node);
+              Object cst = exp.getProperty(NodeProperties.VALUE);
+              if (lc == char.class) {
+                n = new Integer(((Character)cst).charValue());
+              } else {
+                n = (Number)cst;
               }
-            } else {
-              throw new ExecutionError("switch.label.type", node);
             }
-          } else if (c == short.class || c == char.class) {
-            if (exp.hasProperty(NodeProperties.VALUE)) {
-              if (n.shortValue() != n.intValue()) {
+            if (c == byte.class) {
+              if (exp.hasProperty(NodeProperties.VALUE)) {
+                if (n.byteValue() != n.intValue()) {
+                  node.setProperty(NodeProperties.ERROR_STRINGS,
+                                   new String[] { c.getName() });
+                  throw new ExecutionError
+                    ("switch.label.type", node);
+                }
+              } else {
+                throw new ExecutionError("switch.label.type", node);
+              }
+            } else if (c == short.class || c == char.class) {
+              if (exp.hasProperty(NodeProperties.VALUE)) {
+                if (n.shortValue() != n.intValue()) {
+                  node.setProperty(NodeProperties.ERROR_STRINGS,
+                                   new String[] { c.getName() });
+                  throw new ExecutionError
+                    ("switch.label.type", node);
+                }
+              } else if (lc == int.class) {
                 node.setProperty(NodeProperties.ERROR_STRINGS,
                                  new String[] { c.getName() });
-                throw new ExecutionError
-                  ("switch.label.type", node);
+                throw new ExecutionError("switch.label.type", node);
               }
-            } else if (lc == int.class) {
-              node.setProperty(NodeProperties.ERROR_STRINGS,
-                               new String[] { c.getName() });
-              throw new ExecutionError("switch.label.type", node);
             }
           }
         }
       }
+    } 
+    // this try/catch block should in fact not be there, but to use
+    // TigerUtilities.isEnum(c) instead if the value of the ENUM flag
+    // was known (see 2 commented lines above)
+    catch(ClassNotFoundException e){
+      throw new ExecutionError("Tiger is enabled, but cannot find class java.lang.Enum! Please contact the DynamicJava/DrJava team (javaplt@cs.rice.edu).");
     }
     return null;
   }

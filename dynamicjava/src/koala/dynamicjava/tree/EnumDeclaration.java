@@ -51,7 +51,24 @@ public class EnumDeclaration extends ClassDeclaration {
     this(flags, name, impl, body, null, 0, 0, 0, 0);
   }
 
-  /**
+//  /** Flag is set if symbol has a synthetic attribute.
+//   */
+//  public static final int SYNTHETIC    = 1<<16;
+//
+//  /** Flag is set if symbol is deprecated.
+//   */
+//  public static final int DEPRECATED   = 1<<17;
+//
+//  /** Flag is set for a variable symbol if the variable's definit
+//   *  has an initializer part.
+//   */
+//  public static final int HASINIT          = 1<<18;
+//
+//  /** An enumeration type or an enumeration constant.
+//   */
+//  public static final int ENUM             = 1<<19;
+
+ /**
    * Creates a new enum declaration
    * @param flags the access flags
    * @param name  the name of the enum to declare
@@ -66,7 +83,7 @@ public class EnumDeclaration extends ClassDeclaration {
    */
   public EnumDeclaration(int flags, String name, List<? extends ReferenceType> impl, EnumBody body,
                           String fn, int bl, int bc, int el, int ec) {
-    super(flags, // | java.lang.reflect.ENUM // DO SAME FOR FIELDS: ACC_ENUM /**/
+    super(flags, /**/// 1<<19 // | 0x4000, // | java.lang.reflect.Modifier.ENUM   NON-WORK! TigerUtilities.isEnum() is not used thus in AbstractTypeChecker
           name, new ReferenceType("java.lang.Enum"), impl,
       AddValues(name,
         HandleConstructors(name,
@@ -220,6 +237,7 @@ public class EnumDeclaration extends ClassDeclaration {
     int accessFlags  = java.lang.reflect.Modifier.PUBLIC;
         accessFlags |= java.lang.reflect.Modifier.STATIC;
         accessFlags |= java.lang.reflect.Modifier.FINAL;
+        accessFlags |= 0x4000; // java.lang.reflect.Modifier.ENUM; /**/ or ACC_ENUM
 
     ReferenceType enumType = new ReferenceType(enumTypeName);
 

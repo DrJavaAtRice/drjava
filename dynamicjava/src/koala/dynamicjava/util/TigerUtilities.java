@@ -117,7 +117,7 @@ public class TigerUtilities {
    * Uses short circuiting to ensure that if tiger is not enabled, <code>isVarArgs()</code> 
    * will not be called. Returns true if tiger is enabled and <code>misVarArgs()</code>  is true
    * @param m the <code>Method</code> which is being tested with <code>isVarArgs()</code>
-   * @return boolean that is true if tiger is enabled and <code>c.isVarArgs</code>
+   * @return boolean that is true if tiger is enabled and <code>c.isVarArgs()</code>
    */  
   public static boolean isVarArgs(Method m) {
     return _tigerEnabled && m.isVarArgs();
@@ -127,10 +127,30 @@ public class TigerUtilities {
    * Uses short circuiting to ensure that if tiger is not enabled, <code>isVarArgs()</code> 
    * will not be called.  Returns true if tiger is enabled and <code>c.isVarArgs()</code>  is true
    * @param c the <code>Constructor</code> which is being tested with <code>isVarArgs()</code>
-   * @return boolean that is true if tiger is enabled and <code>c.isVarArgs</code>
+   * @return boolean that is true if tiger is enabled and <code>c.isVarArgs()</code>
    */  
   public static boolean isVarArgs(Constructor c) {
     return _tigerEnabled && c.isVarArgs();
+  }
+  
+  /**
+   * Uses short circuiting to ensure that if tiger is not enabled, <code>isEnum()</code> 
+   * will not be called.  Returns true if tiger is enabled and <code>c.isEnum()</code>  is true
+   * @param c the <code>Class</code> which is being tested with <code>isEnum()</code>
+   * @return boolean that is true if tiger is enabled and <code>c.isEnum()</code>
+   */  
+  public static boolean isEnum(Class<?> c) {
+    return _tigerEnabled && c.isEnum();
+  }
+  
+  /**
+   * Uses short circuiting to ensure that if tiger is not enabled, <code>isEnumConstant()</code> 
+   * will not be called.  Returns true if tiger is enabled and <code>f.isEnumConstant()</code>  is true
+   * @param f the <code>Field</code> which is being tested with <code>isEnumConstant()</code>
+   * @return boolean that is true if tiger is enabled and <code>f.isEnumConstant()</code>
+   */  
+  public static boolean isEnumConstant(Field f) {
+    return _tigerEnabled && f.isEnumConstant();
   }
   
   /**

@@ -1092,4 +1092,25 @@ public class TigerTest extends DynamicJavaTestCase {
     assertEquals("Concat of all suits should evaluate to \"CLUBSDIAMONDSHEARTSSPADES\"", "CLUBSDIAMONDSHEARTSSPADES", interpret(testString));
   }
 
+  public void testEnumSwitch(){
+    testString = "enum Suit { CLUBS, HEARTS };\n"+
+      "Suit s = Suit.HEARTS;\n"+
+      "String str;\n"+
+      "switch(s){\n"+
+      "  case Suit.CLUBS: str = \"Case Clubs\"; break;\n"+
+      "  case Suit.HEARTS: str = \"Case Hearts\"; break;\n"+
+      "}\n"+
+      "str";
+    
+    assertEquals("Str should equal \"Case Hearts\"", "Case Hearts", interpret(testString));
+    
+    testString = "s = Suit.CLUBS;\n"+
+      "switch(s){\n"+
+      "  case Suit.CLUBS: str = \"Case Clubs\"; break;\n"+
+      "  case Suit.HEARTS: str = \"Case Hearts\"; break;\n"+
+      "}\n"+
+      "str";
+    
+    assertEquals("Str should equal \"Case Clubs\"", "Case Clubs", interpret(testString));
+  }
 }

@@ -473,25 +473,42 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       if (o instanceof Character) {
         o = new Integer(((Character)o).charValue());
       }
-      Number n = (Number)o;
+      
+      Object sel; // an Enum or a Number - no common ancestor except Object :(
+      // used to be n
+      
+      if (o instanceof Enum){
+        sel = (Enum) o;
+      }
+      else {
+        sel = (Number)o;
+      }
 
       // Search for the matching label
       ListIterator<SwitchBlock> it = node.getBindings().listIterator();
       ListIterator<SwitchBlock> dit = null;
       loop: while (it.hasNext()) {
         SwitchBlock sc = it.next();
-        Number l = null;
+        Object bind = null; // used to be 'l' (small L)
         if (sc.getExpression() != null) {
           o = sc.getExpression().acceptVisitor(this);
           if (o instanceof Character) {
             o = new Integer(((Character)o).charValue());
           }
-          l= (Number)o;
+          if(TigerUtilities.isTigerEnabled() && o instanceof Enum ){
+            bind = (Enum) o;
+          }
+          else {
+            bind = (Number)o;
+          }
         } else {
           dit = node.getBindings().listIterator(it.nextIndex() - 1);
         }
 
-        if (l != null && n.intValue() == l.intValue()) {
+        if (bind != null && 
+            ((sel instanceof Number) && ((Number)sel).intValue() == ((Number)bind).intValue()) || 
+            (TigerUtilities.isTigerEnabled() && (sel instanceof Enum) && ((Enum)sel).equals((Enum)bind))
+           ){
           processed = true;
           // When a matching label is found, interpret all the
           // remaining statements
