@@ -39,46 +39,38 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import  junit.framework.*;
+import  junit.extensions.*;
 
 /**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
+ * Test functions of StringOps.
  *
- * This javadoc corresponds to build util-20030203-0502;
- *
- * @version $Id$
  */
-public abstract class Version {
+public class StringOpsTest extends TestCase {
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Constructor.
+   * @param  String name
    */
-  private static final String BUILD_TIME_STRING = "20030203-0502";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public StringOpsTest(String name) {
+    super(name);
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  /**
+   * Creates a test suite for JUnit to run.
+   * @return a test suite based on the methods in this class
+   */
+  public static Test suite() {
+    return  new TestSuite(StringOpsTest.class);
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+  
+  /**
+   *  Test the replace() method of StringOps class
+   */
+  public void testReplace()
+  {
+    String test = "aabbccdd";
+    assertEquals("testReplace:", "aab12cdd", StringOps.replace(test, "bc", "12"));
+    test = "cabcabc";
+    assertEquals("testReplace:", "cabc", StringOps.replace(test, "cabc", "c"));
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+}
