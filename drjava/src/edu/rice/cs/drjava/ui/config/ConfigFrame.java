@@ -713,6 +713,13 @@ public class ConfigFrame extends JFrame {
                                                   "to select a destination directory.</html>"));
 
 
+    // Clean
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.NO_PROMPT_BEFORE_CLEAN,
+                                                  "Prompt before Cleaning Built Directory", this,
+                                                  "<html>Whether DrJava should prompt before cleaning the<br>" +
+                                                    "built directory of a project</html>"));
+
+    
     // Save before X
     panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_COMPILE,
                                                   "Automatically Save Before Compiling", this,

@@ -1033,6 +1033,12 @@ public interface OptionConstants {
   /* ---------- Misc Options ---------- */
 
   /**
+   * whether to warn when cleaning the build directory
+   */
+  public static final BooleanOption NO_PROMPT_BEFORE_CLEAN = 
+    new BooleanOption("no.prompt.before.clean", Boolean.FALSE);
+  
+  /**
    * open directory should default to recursive
    */
   public static final BooleanOption OPEN_FOLDER_RECURSIVE = 

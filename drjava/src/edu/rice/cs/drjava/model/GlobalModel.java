@@ -478,4 +478,9 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    * Returns true if the project state has been changed
    */
   public boolean isProjectChanged();
+  
+  /**
+   * cleans the build directory
+   */
+  public void cleanBuildDirectory() throws FileMovedException, IOException;
 }

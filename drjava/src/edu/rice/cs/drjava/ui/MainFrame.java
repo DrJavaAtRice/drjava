@@ -651,6 +651,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
+  /** cleans the build directory */
+  private Action _cleanAction = new AbstractAction("Clean the Built Directory"){
+    public void actionPerformed(ActionEvent ae){
+      _clean();
+    }
+  };
+  
   /** Compiles the document in the definitions pane. */
   private Action _compileAction = new AbstractAction("Compile Current Document") {
     public void actionPerformed(ActionEvent ae) {
@@ -1528,23 +1535,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _openRecursiveCheckBox = new JCheckBox("Recursive open");
     _openRecursiveCheckBox.setSelected(DrJava.getConfig().getSetting(OptionConstants.OPEN_FOLDER_RECURSIVE).booleanValue());
     
-    _folderChooser = new JFileChooser();
-    _folderChooser.setMultiSelectionEnabled(false);
-    _folderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    _folderChooser.setCurrentDirectory(workDir);
-    _folderChooser.setApproveButtonText("Select");
-    _folderChooser.setFileFilter(new DirectoryFilter());
-    _folderChooser.setDialogTitle("Open Folder");
-    Component c = ((BorderLayout)_folderChooser.getLayout()).getLayoutComponent(BorderLayout.SOUTH);
-    
-    JPanel buttons = (JPanel)c;
-    
-    JPanel button_row = (JPanel)buttons.getComponent(3);
-    JPanel bottom_row = new JPanel();
-    bottom_row.setLayout(new BorderLayout());
-    bottom_row.add(_openRecursiveCheckBox, BorderLayout.CENTER);
-    bottom_row.add(button_row, BorderLayout.EAST);
-    buttons.add(bottom_row, 3);
+    _folderChooser = makeFolderChooser(workDir);
     
     
     //Get most recently opened project for filechooser
@@ -1838,6 +1829,52 @@ public class MainFrame extends JFrame implements OptionConstants {
     setUpKeys();
   }
 
+  
+  private JFileChooser makeFolderChooser(File workDir){
+    _folderChooser = new JFileChooser();
+    _folderChooser.setMultiSelectionEnabled(false);
+    _folderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    _folderChooser.setCurrentDirectory(workDir);
+    _folderChooser.setApproveButtonText("Select");
+    _folderChooser.setFileFilter(new DirectoryFilter());
+    _folderChooser.setDialogTitle("Open Folder");
+    
+    
+    Container button_row = (Container)findButtonContainer(_folderChooser, _folderChooser.getApproveButtonText());
+    Container buttons = (Container) button_row.getParent();
+    
+//    Component c2 = ((BorderLayout)_folderChooser.getLayout()).getLayoutComponent(BorderLayout.SOUTH);
+    
+//    System.out.println("c1: " + c1);
+//    System.out.println("c2: " + c2);
+    
+    
+//    JPanel buttons = (JPanel)c2;
+//    JPanel button_row = (JPanel)buttons.getComponent(3);
+    JPanel bottom_row = new JPanel();
+    bottom_row.setLayout(new BorderLayout());
+    bottom_row.add(new JCheckBox("Recursive Open"), BorderLayout.CENTER);
+    bottom_row.add(button_row, BorderLayout.EAST);
+    buttons.add(bottom_row);
+    
+    return _folderChooser;
+  }
+  
+  private Container findButtonContainer(Container container, String buttonText){
+    Container answer = null;
+    Component[] cs = container.getComponents();
+    for(Component c: cs){
+      if(c instanceof JButton && ((JButton)c).getText() == buttonText){
+        return container;
+      }else if(c instanceof Container){
+        answer = findButtonContainer((Container)c, buttonText);
+      }
+      
+      if(answer != null) break;
+    }
+    return answer;
+  }
+  
   /**
    * holds/shows the history of documents for ctrl-tab
    */
@@ -2316,6 +2353,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       _projectPropertiesAction.setEnabled(true);
       _junitProjectAction.setEnabled(true);
       _compileProjectAction.setEnabled(true);
+      if(_model.getBuildDirectory() != null){
+        _cleanAction.setEnabled(true);
+      }
       _model.setProjectChanged(false);
       _resetNavigatorPane();
       _compileButton.setToolTipText("<html>Compile all documents in the project.<br>External files are excluded.</html>");
@@ -2994,6 +3034,63 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
+  private boolean showCleanWarning(){
+    //adam
+    if (!DrJava.getConfig().getSetting(NO_PROMPT_BEFORE_CLEAN).booleanValue()) {
+      ConfirmCheckBoxDialog dialog =
+        new ConfirmCheckBoxDialog(MainFrame.this,
+                                  "Clean Built Directory?",
+                                  "Cleaning your built directory will delete all\n" + 
+                                  "class files and empty folders within that directory.\n" + 
+                                  "Are you sure you want to clean\n" + 
+                                  _model.getBuildDirectory() + "?",
+                                  "Do not show this message again");
+      int rc = dialog.show();
+      switch (rc) {
+        case JOptionPane.YES_OPTION:
+          _saveAll();
+          // Only remember checkbox if they say yes
+          if (dialog.getCheckBoxValue()) {
+            DrJava.getConfig().setSetting(NO_PROMPT_BEFORE_CLEAN, Boolean.TRUE);
+          }
+          return true;
+        case JOptionPane.NO_OPTION:
+          return false;
+        case JOptionPane.CANCEL_OPTION:
+          return false;
+        case JOptionPane.CLOSED_OPTION:
+          return false;
+        default:
+          throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
+      }
+    }
+    return true;
+  }
+  
+  private void _clean(){
+    final SwingWorker worker = new SwingWorker() {
+      public Object construct() {
+          if(showCleanWarning()){
+            try {
+              hourglassOn();
+              _model.cleanBuildDirectory();
+            }
+            catch (FileMovedException fme) {
+              _showFileMovedError(fme);
+            }
+            catch (IOException ioe) {
+              _showIOError(ioe);
+            }
+            finally{
+              hourglassOff();
+            }
+          }
+          return null;
+      }
+    };
+    worker.start();
+  }
+  
   private void _compileAll() {
 
     final SwingWorker worker = new SwingWorker() {
@@ -3541,6 +3638,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     _setUpAction(_saveAllAction, "Save All", "SaveAll", "Save all open documents");
 
+    _setUpAction(_cleanAction, "Clean", "Clean the built directory");
+    _cleanAction.setEnabled(false);
     _setUpAction(_compileAction, "Compile", "Compile the current document");
     _setUpAction(_compileAllAction, "Compile All", "CompileAll",
                  "Compile all open documents");
@@ -3877,6 +3976,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     projectMenu.addSeparator();
     // run project
+    projectMenu.add(_cleanAction);
     projectMenu.add(_compileProjectAction);
     projectMenu.add(_runProjectAction);
     projectMenu.add(_junitProjectAction);
@@ -6174,6 +6274,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     /* changes to the state */
     
     public void projectBuildDirChanged(){
+      if(_model.getBuildDirectory() != null){
+        _cleanAction.setEnabled(true);
+      }else{
+        _cleanAction.setEnabled(false);
+      }
     }
     
     public void projectModified(){

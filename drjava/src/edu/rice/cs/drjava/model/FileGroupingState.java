@@ -46,6 +46,8 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import java.io.File;
+import java.io.IOException;
+import edu.rice.cs.drjava.model.FileMovedException;
 
 /**
  * This state pattern is used by the global model to store
@@ -122,5 +124,10 @@ public interface FileGroupingState {
   /**
    * Sets that the project state is no longer a snapshot of the open project.
    */
-   public void setProjectChanged(boolean changed); 
+  public void setProjectChanged(boolean changed); 
+
+  /**
+   * cleans the build directory
+   */
+  public void cleanBuildDirectory() throws FileMovedException, IOException;
 }

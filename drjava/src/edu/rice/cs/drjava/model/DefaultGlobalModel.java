@@ -541,6 +541,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public File getBuildDirectory(){
     return _state.getBuildDirectory();
   }
+  
+  public void cleanBuildDirectory() throws FileMovedException, IOException{
+    _state.cleanBuildDirectory();
+  }
 
   public FileGroupingState _makeProjectFileGroupingState(final File jarMainClass, final File buildDir, final File projectFile, final File[] projectFiles) { 
     return new FileGroupingState(){
@@ -653,6 +657,29 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return false;
       }
       
+      public void cleanBuildDirectory() throws FileMovedException, IOException{
+        File dir = this.getBuildDirectory();
+        cleanHelper(dir);
+      }
+      
+      private void cleanHelper(File f){
+        if(f.isDirectory()){
+          File fs[] = f.listFiles(new FilenameFilter(){
+            public boolean accept(File parent, String name){
+              return new File(parent, name).isDirectory() || name.endsWith(".class");
+            }
+          });
+          for(File kid: fs){
+            cleanHelper(kid);
+          }
+          if(f.listFiles().length == 0){
+            f.delete();
+          }
+        }else if(f.getName().endsWith(".class")){
+          f.delete();
+        }
+      }
+      
     };
   }
   
@@ -700,6 +727,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       
       public boolean isAuxiliaryFile(File f){
         return false;
+      }
+
+      
+      public void cleanBuildDirectory() throws FileMovedException, IOException{
+        System.out.println("not cleaning");
       }
     };
   }
@@ -1000,9 +1032,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       return retDoc;
     }
     else {
-      //if no OperationCanceledException, then getFiles should
-      //have at least one file.
-      throw new IOException("No Files returned from FileChooser");
+      //if we didn't open any files, then it's just as if they cancelled it...
+      throw new OperationCanceledException();
     }
   }
   
