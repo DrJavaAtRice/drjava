@@ -153,6 +153,11 @@ public class RecentFileManager implements OptionConstants {
     newItem.addActionListener(new AbstractAction("Open " + file.getName()) {
       public void actionPerformed(ActionEvent ae) {
         _frame.open(_recentSelector);
+        // These two lines fix the problem in 1.3 where clicking on a file
+        // in the recent file list will not show the caret, but they cause
+        // 1.4.1 to show a phantom caret that won't do anything.
+//        _frame.getCurrentDefPane().requestFocus();
+//        _frame.getCurrentDefPane().getCaret().setVisible(true);
       }
     });
     removeIfInList(file);

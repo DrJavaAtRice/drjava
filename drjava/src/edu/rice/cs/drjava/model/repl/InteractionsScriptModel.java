@@ -53,8 +53,8 @@ public class InteractionsScriptModel {
   private InteractionsDocument _doc;
   /** The interactions to perform. */
   private List<String> _interactions;
-  /** The index into the list of the next interaction. */
-  private int _nextInteraction;
+  /** The index into the list of the current interaction. */
+  private int _currentInteraction;
 
   /**
    * Constructs a new interactions script using the given model and interactions.
@@ -65,19 +65,35 @@ public class InteractionsScriptModel {
     _model = model;
     _doc = model.getDocument();
     _interactions = interactions;
-    _nextInteraction = 0;
+    _currentInteraction = -1;
   }
 
   /**
    * Enters the next interaction into the interactions pane.
    */
   public void nextInteraction() {
-    if (_nextInteraction >= _interactions.size()) {
+    if (!hasNextInteraction()) {
       throw new IllegalStateException("There is no next interaction!");
     }
     try {
       _doc.clearCurrentInteraction();
-      _doc.insertText(_doc.getDocLength(), _interactions.get(_nextInteraction++), _doc.DEFAULT_STYLE);
+      _doc.insertText(_doc.getDocLength(), _interactions.get(++_currentInteraction), _doc.DEFAULT_STYLE);
+    }
+    catch (DocumentAdapterException dae) {
+      throw new UnexpectedException(dae);
+    }
+  }
+
+  /**
+   * Enters the current interaction into the interactions pane.
+   */
+  public void currentInteraction() {
+    if (!hasCurrentInteraction()) {
+      throw new IllegalStateException("There is no current interaction!");
+    }
+    try {
+      _doc.clearCurrentInteraction();
+      _doc.insertText(_doc.getDocLength(), _interactions.get(_currentInteraction), _doc.DEFAULT_STYLE);
     }
     catch (DocumentAdapterException dae) {
       throw new UnexpectedException(dae);
@@ -88,12 +104,12 @@ public class InteractionsScriptModel {
    * Enters the previous interaction into the interactions pane.
    */
   public void prevInteraction() {
-    if (_nextInteraction <= 0) {
+    if (!hasPrevInteraction()) {
       throw new IllegalStateException("There is no previous interaction!");
     }
     try {
       _doc.clearCurrentInteraction();
-      _doc.insertText(_doc.getDocLength(), _interactions.get(--_nextInteraction), _doc.DEFAULT_STYLE);
+      _doc.insertText(_doc.getDocLength(), _interactions.get(--_currentInteraction), _doc.DEFAULT_STYLE);
     }
     catch (DocumentAdapterException dae) {
       throw new UnexpectedException(dae);
@@ -112,20 +128,27 @@ public class InteractionsScriptModel {
    */
   public void closeScript() {
     _interactions = null;
-    _nextInteraction = -1;
+    _currentInteraction = -1;
   }
 
   /**
    * @return true iff this script has another interaction to perform.
    */
   public boolean hasNextInteraction() {
-    return _nextInteraction < _interactions.size();
+    return _currentInteraction < _interactions.size() - 1;
+  }
+
+  /**
+   * @return true iff this script has a current interaction to perform.
+   */
+  public boolean hasCurrentInteraction() {
+    return _currentInteraction >= 0;
   }
 
   /**
    * @return true iff this script has a previous interaction to perform.
    */
   public boolean hasPrevInteraction() {
-    return _nextInteraction > 0;
+    return _currentInteraction > 0;
   }
 }

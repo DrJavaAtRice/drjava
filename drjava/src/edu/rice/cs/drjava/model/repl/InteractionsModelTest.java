@@ -281,6 +281,13 @@ public final class InteractionsModelTest extends TestCase {
     ism.nextInteraction();
     assertEquals("Should have put the first interaction into the interactions document.",
                  line1, doc.getCurrentInteraction());
+    try {
+      ism.prevInteraction();
+      fail("Should not have been able to get previous interaction!");
+    }
+    catch (IllegalStateException ise) {
+      // good, continue
+    }
     ism.nextInteraction();
     assertEquals("Should have put the second interaction into the interactions document.",
                  line2, doc.getCurrentInteraction());
@@ -296,9 +303,6 @@ public final class InteractionsModelTest extends TestCase {
       // good, continue
     }
     
-    ism.prevInteraction();
-    assertEquals("Should have put the second interaction into the interactions document.",
-                 line2, doc.getCurrentInteraction());
     ism.prevInteraction();
     assertEquals("Should have put the first interaction into the interactions document.",
                  line1, doc.getCurrentInteraction());

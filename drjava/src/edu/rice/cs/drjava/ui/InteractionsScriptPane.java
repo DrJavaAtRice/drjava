@@ -61,6 +61,20 @@ public class InteractionsScriptPane extends JPanel {
    * @param a the action the button should perform.
    */
   public void addButton(Action a) {
-    add(new JButton(a));
+    addButton(a, null);
+  }
+
+  /**
+   * Adds the given action to this pane as a button.
+   * @param a the action the button should perform.
+   * @param c the component to give focus to after the action is performed.
+   * For now, used so that the execute button gives focus to the interactions pane.
+   */  
+  public void addButton(Action a, Component c) {
+    JButton b = new JButton(a);
+    add(b);      
+    if (c != null) {
+      b.setNextFocusableComponent(c);
+    }
   }
 }

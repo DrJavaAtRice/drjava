@@ -1118,8 +1118,9 @@ public class MainFrame extends JFrame implements OptionConstants {
         public File getFile() throws OperationCanceledException {
           // Don't try to set the filename with getSaveFile;
           // just display the dialog and get file with getChosenFile
-          int rc = _interactionsHistoryChooser.showSaveDialog(MainFrame.this);
-          return getChosenFile(_interactionsHistoryChooser, rc);
+          return getSaveFile(_interactionsHistoryChooser);
+//          int rc = _interactionsHistoryChooser.showSaveDialog(MainFrame.this);
+//          return getChosenFile(_interactionsHistoryChooser, rc);
         }
         public void warnFileOpen() {
           _warnFileOpen();
@@ -2354,9 +2355,9 @@ public class MainFrame extends JFrame implements OptionConstants {
           return chosen;
         }
         else
-          throw new RuntimeException("filechooser returned null file");
+          throw new RuntimeException("Filechooser returned null file");
       default:                  // impossible since rc must be one of these
-        throw  new RuntimeException("filechooser returned bad rc " + choice);
+        throw  new RuntimeException("Filechooser returned bad rc " + choice);
     }
   }
   /**
@@ -3886,13 +3887,13 @@ public class MainFrame extends JFrame implements OptionConstants {
           // for a call to setSize.
           _firstCallFromSetSize = true;
           ActionListener setSizeListener = new ActionListener() {
-            public synchronized void actionPerformed(ActionEvent ae) { 
-              if (_firstCallFromSetSize) {
-                _firstCallFromSetSize = false;
-              }
-              else {
+            public void actionPerformed(ActionEvent ae) { 
+//              if (_firstCallFromSetSize) {
+//                _firstCallFromSetSize = false;
+//              }
+//              else {
                 _currentDefPane.centerViewOnLine(lineNumber);
-              }
+//              }
             }
           };
           _currentDefPane.addSetSizeListener(setSizeListener);
@@ -3931,8 +3932,10 @@ public class MainFrame extends JFrame implements OptionConstants {
             //no need to update flag, because previous method call will do it
             //_hasWarnedAboutModified = true;
           }
-          // Give the interactions pane focus so we can debug
-          _interactionsPane.requestFocus();
+          if (shouldHighlight) {
+            // Give the interactions pane focus so we can debug
+            _interactionsPane.requestFocus();
+          }
           showTab(_interactionsPane);
           _updateDebugStatus();
 

@@ -457,35 +457,46 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       e.consume();
     }
     else {
-      // The following conditional fixes bug 676586 by ignoring typed events when the meta key is down
-      if (((e.getModifiers() & InputEvent.META_MASK) != 0) && e.getKeyCode() == KeyEvent.VK_UNDEFINED) {
-        return;
+      // Allows one step undoing of the keystrokes defined on the keymap (e.g. enter, tab, '{', '}', ':').
+      Keymap km = getKeymap();
+      if (km.isLocallyDefined(ks) || km.isLocallyDefined(KeyStroke.getKeyStroke(ks.getKeyChar()))) {  
+        CompoundUndoManager undoMan = _doc.getDocument().getUndoManager();
+        int key = undoMan.startCompoundEdit();        
+        super.processKeyEvent(e);
+        undoMan.endCompoundEdit(key);
+        e.consume();
       }
-      
-      // The following conditional fixes ease of use issue 693253 by checking if a typed event is
-      // shift-delete or shift-backspace and then performing a delete or backspace operation,
-      // respectively
-      if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
-        int newModifiers = e.getModifiers() & ~(InputEvent.SHIFT_MASK);
-        
-        KeyStroke newKs = KeyStroke.getKeyStroke(ks.getKeyCode(), newModifiers, ks.isOnKeyRelease());
-        String name = KeyBindingManager.Singleton.getName(newKs);
-        
-        if (name != null && (name.equals("Delete Previous") || name.equals("Delete Next"))) {
-          // We are unsure about the third and fourth arguments (e and e.getSource()); we simply
-            // reuse the original values
-          SwingUtilities.notifyAction(KeyBindingManager.Singleton.get(newKs), newKs, e, e.getSource(), newModifiers);
-          e.consume();
+      else {
+        // The following conditional fixes bug 676586 by ignoring typed events when the meta key is down
+        if (((e.getModifiers() & InputEvent.META_MASK) != 0) && e.getKeyCode() == KeyEvent.VK_UNDEFINED) {
           return;
         }
-      }
-      
-      // backspace deletes twice without this check, overrides other keystrokes
-      // that use the mask modifier
-      if (((ks.getModifiers() & mask) == 0) && ks.getKeyChar() != '\010') {
-        super.processKeyEvent(e);
-      }
-    }    
+        
+        // The following conditional fixes ease of use issue 693253 by checking if a typed event is
+        // shift-delete or shift-backspace and then performing a delete or backspace operation,
+        // respectively
+        if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
+          int newModifiers = e.getModifiers() & ~(InputEvent.SHIFT_MASK);
+          
+          KeyStroke newKs = KeyStroke.getKeyStroke(ks.getKeyCode(), newModifiers, ks.isOnKeyRelease());
+          String name = KeyBindingManager.Singleton.getName(newKs);
+          
+          if (name != null && (name.equals("Delete Previous") || name.equals("Delete Next"))) {
+            // We are unsure about the third and fourth arguments (e and e.getSource()); we simply
+            // reuse the original values
+            SwingUtilities.notifyAction(KeyBindingManager.Singleton.get(newKs), newKs, e, e.getSource(), newModifiers);
+            e.consume();
+            return;
+          }
+        }
+        
+        // backspace deletes twice without this check, overrides other keystrokes
+        // that use the mask modifier
+        if (((ks.getModifiers() & mask) == 0) && ks.getKeyChar() != '\010') {
+          super.processKeyEvent(e);
+        }
+      }    
+    }
   }
 
   /**

@@ -1211,7 +1211,7 @@ public final class DefinitionsDocumentTest extends TestCase
     assertEquals("Should have inserted the text properly.", text, 
                  _defModel.getText(0, _defModel.getLength()));
     
-    // Indent the lines, so as to trigger a nested compond edit
+    // Indent the lines, so as to trigger a nested compound edit
     _defModel.indentLines(0, _defModel.getLength());
     assertEquals("Should have indented correctly.", indented, 
                  _defModel.getText(0, _defModel.getLength()));

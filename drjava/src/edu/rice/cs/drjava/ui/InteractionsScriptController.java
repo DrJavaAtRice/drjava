@@ -69,8 +69,10 @@ public class InteractionsScriptController {
     _interactionsPane = interactionsPane;
     _pane = new InteractionsScriptPane(4, 1);
     _pane.addButton(_prevInteractionAction);
-    _pane.addButton(_executeInteractionAction);
+    // We've decided not to have a "Current" button for now. (It also crowds out the other buttons)
+    //_pane.addButton(_currentInteractionAction);
     _pane.addButton(_nextInteractionAction);
+    _pane.addButton(_executeInteractionAction, _interactionsPane);
     _pane.addButton(_closeScriptAction);
     setActionsEnabled();
   }
@@ -80,6 +82,7 @@ public class InteractionsScriptController {
    */
   public void setActionsEnabled() {
     _nextInteractionAction.setEnabled(_model.hasNextInteraction());
+    _currentInteractionAction.setEnabled(_model.hasCurrentInteraction());
     _prevInteractionAction.setEnabled(_model.hasPrevInteraction());
     _executeInteractionAction.setEnabled(true);
   }
@@ -89,6 +92,7 @@ public class InteractionsScriptController {
    */
   public void setActionsDisabled() {
     _nextInteractionAction.setEnabled(false);
+    _currentInteractionAction.setEnabled(false);
     _prevInteractionAction.setEnabled(false);
     _executeInteractionAction.setEnabled(false);
   }
@@ -101,7 +105,7 @@ public class InteractionsScriptController {
   }
 
   /** Action to go back in the script. */
-  private Action _prevInteractionAction = new AbstractAction("Previous Interaction") {
+  private Action _prevInteractionAction = new AbstractAction("Previous") {
     public void actionPerformed(ActionEvent e) {
       _model.prevInteraction();
       setActionsEnabled();
@@ -109,17 +113,24 @@ public class InteractionsScriptController {
     }
   };
   /** Action to execute the current interaction. */
-  private Action _executeInteractionAction = new AbstractAction("Execute Current Interaction") {
+  private Action _currentInteractionAction = new AbstractAction("Current") {
     public void actionPerformed(ActionEvent e) {
-      _model.executeInteraction();
+      _model.currentInteraction();
       _interactionsPane.requestFocus();
     }
   };
   /** Action to go forward in the script. */
-  private Action _nextInteractionAction = new AbstractAction("Next Interaction") {
+  private Action _nextInteractionAction = new AbstractAction("Next") {
     public void actionPerformed(ActionEvent e) {
       _model.nextInteraction();
       setActionsEnabled();
+      _interactionsPane.requestFocus();
+    }
+  };
+  /** Action to execute the current interaction. */
+  private Action _executeInteractionAction = new AbstractAction("Execute") {
+    public void actionPerformed(ActionEvent e) {
+      _model.executeInteraction();      
       _interactionsPane.requestFocus();
     }
   };

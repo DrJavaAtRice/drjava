@@ -50,7 +50,7 @@ public interface FileSaveSelector {
 
   /**
    * Returns the file to save.
-   * @throws OperationCanceledException if the save request is canceled
+   * @throws OperationCanceledException if the save request is cancelled
    */
   public File getFile() throws OperationCanceledException;
   

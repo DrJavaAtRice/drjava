@@ -147,7 +147,8 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         _replaceAllAction.setEnabled(true);
       }
       _message.setText("");
-    } else {
+    } 
+    else {
       throw new UnexpectedException(new RuntimeException("FindReplaceDialog should not be listening to anything"));
     }
   }
@@ -172,11 +173,14 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     public void actionPerformed(ActionEvent e) {
       _doFind();
       _findField.requestFocus();
+      _defPane.getCaret().setSelectionVisible(true);
+      
     }
   };
 
   /**
-   * Abstracted out since this is called from find and replace/find
+   * Abstracted out since this is called from find and replace/find.
+   * @return if the word was found anywhere
    */
   private void _doFind() {
     _updateMachine();
@@ -217,7 +221,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     }
     // else the entire document was searched and no instance of the string
     // was found
-    else if (pos == -1) {
+    else {
       Toolkit.getDefaultToolkit().beep();
       _message.setText("Search text \"" + _machine.getFindWord() +
                        "\" not found.");
@@ -574,11 +578,11 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     int position = _machine.getCurrentOffset();
     int to, from;
     to = position;
-    if(_machine.getSearchBackwards()){
-      from = position + _machine.getFindWord().length();
+    if(!_machine.getSearchBackwards()){
+      from = position - _machine.getFindWord().length();
     }
     else {
-      from = position - _machine.getFindWord().length();
+      from = position + _machine.getFindWord().length();
     }
     _selectFoundItem(from, to);
   }
@@ -597,38 +601,11 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _defPane.centerViewOnOffset(from);
     _defPane.select(from, to);
 
-      // Found this little statement that will show the selected text
-      // in _defPane without giving _defPane focus, previously allowing the
-      // user to hit enter repeatedly and change the document while finding
-      // next
+    // Found this little statement that will show the selected text
+    // in _defPane without giving _defPane focus, previously allowing the
+    // user to hit enter repeatedly and change the document while finding
+    // next.
     _defPane.getCaret().setSelectionVisible(true);
-    /*
-    try {
-      JViewport v = _frame.getDefViewport();
-      int viewHeight = (int)v.getSize().getHeight();
-      // Scroll to make sure this item is visible
-      // Centers the selection in the viewport
-      Rectangle startRect = _defPane.modelToView(from);
-      int startRectY = (int)startRect.getY();
-      startRect.setLocation(0, startRectY-viewHeight/2);
-      Point endPoint = new Point(0, startRectY+viewHeight/2-1);
-
-      // Add the end rect onto the start rect to make a rectangle
-      // that encompasses the entire selection
-      startRect.add(endPoint);
-
-      _defPane.scrollRectToVisible(startRect);
-      _defPane.select(from, to);
-
-      // Found this little statement that will show the selected text
-      // in _defPane without giving _defPane focus, previously allowing the
-      // user to hit enter repeatedly and change the document while finding
-      // next
-      _defPane.getCaret().setSelectionVisible(true);
-      //_findField.requestFocus();
-    }
-    catch (BadLocationException badBadLocation) {}
-    */
   }
 
   /*private void _close() {
