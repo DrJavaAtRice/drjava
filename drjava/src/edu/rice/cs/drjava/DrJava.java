@@ -2,6 +2,10 @@ package  edu.rice.cs.drjava;
 
 import  java.io.PrintStream;
 
+import edu.rice.cs.drjava.model.compiler.CompilerInterface;
+import edu.rice.cs.drjava.ui.MainFrame;
+
+import edu.rice.cs.drjava.model.compiler.GJv6Compiler;
 
 /** 
  * Main class for DrJava. 
