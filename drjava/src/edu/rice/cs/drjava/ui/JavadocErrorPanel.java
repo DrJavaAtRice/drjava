@@ -66,18 +66,6 @@ import java.util.Arrays;
  */
 public class JavadocErrorPanel extends ErrorPanel{
 
-  private static final SimpleAttributeSet OUT_OF_SYNC_ATTRIBUTES = _getOutOfSyncAttributes();
-  
-  private static final SimpleAttributeSet _getOutOfSyncAttributes() {
-    SimpleAttributeSet s = new SimpleAttributeSet();
-    s.addAttribute(StyleConstants.Foreground, Color.red.darker());
-    s.addAttribute(StyleConstants.Bold, Boolean.TRUE);
-    return s;
-  }
-
-//   private static final String TEST_OUT_OF_SYNC = "The document being tested has been modified " +
-//     "and should be recompiled!\n";
-
   protected JavadocErrorListPane _errorListPane;
 //   private int _testCount;
   private boolean _successful;

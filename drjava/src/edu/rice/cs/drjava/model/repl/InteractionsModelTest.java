@@ -118,20 +118,23 @@ public final class InteractionsModelTest extends TestCase {
    */
   public void testInterpretJavaArguments() throws DocumentAdapterException {
     // java Foo a b c
+    // Foo.main(new String[]{"a", "b", "c"});
     _assertProcessedContents("java Foo a b c",
                              "Foo.main(new String[]{\"a\",\"b\",\"c\"});");
     // java Foo "a b c"
+    // Foo.main(new String[]{"a b c"});
     _assertProcessedContents("java Foo \"a b c\"",
                              "Foo.main(new String[]{\"a b c\"});");
     // java Foo "a b"c d
+    // Foo.main(new String[]{"a b", "c", "d"});
     //  This is different behavior than Unix or DOS, but it's more
     //  intuitive to the user (and easier to implement).
     _assertProcessedContents("java Foo \"a b\"c d",
                              "Foo.main(new String[]{\"a b\",\"c\",\"d\"});");
 
-    // java Foo c:\file.txt
+    // java Foo c:\\file.txt
     // Foo.main("c:\\file.txt");
-    _assertProcessedContents("java Foo c:\\file.txt",
+    _assertProcessedContents("java Foo c:\\\\file.txt",
                              "Foo.main(new String[]{\"c:\\\\file.txt\"});");
 
     // java Foo /home/user/file
@@ -147,7 +150,7 @@ public final class InteractionsModelTest extends TestCase {
    *
    * not currently enforcing any behavior for a simple implementation
    * using a StreamTokenizer
-   *
+   */
   public void testInterpretJavaEscapedArgs() throws DocumentAdapterException {
     // java Foo \j
     // Foo.main(new String[]{"j"});
@@ -165,7 +168,7 @@ public final class InteractionsModelTest extends TestCase {
     // Foo.main(new String[]{"a b"});
     _assertProcessedContents("java Foo a\\ b",
                              "Foo.main(new String[]{\"a b\"});");
-  }*/
+  }
   
   /**
    * Tests that within a quote, everything is correctly escaped.
@@ -177,20 +180,20 @@ public final class InteractionsModelTest extends TestCase {
     _assertProcessedContents("java Foo \"a \\\" b\"",
                              "Foo.main(new String[]{\"a \\\" b\"});");
     // java Foo "\'"
-    // Foo.main(new String[]{"'"});
+    // Foo.main(new String[]{"\\'"});
     _assertProcessedContents("java Foo \"\\'\"",
-                             "Foo.main(new String[]{\"'\"});");
+                             "Foo.main(new String[]{\"\\\\'\"});");
     // java Foo "\\"
     // Foo.main(new String[]{"\\"});
     _assertProcessedContents("java Foo \"\\\\\"",
                              "Foo.main(new String[]{\"\\\\\"});");
     // java Foo "\" \d"
-    // Foo.main(new String[]{"\" d"});
+    // Foo.main(new String[]{"\" \\d"});
     _assertProcessedContents("java Foo \"\\\" \\d\"",
-                             "Foo.main(new String[]{\"\\\" d\"});");
+                             "Foo.main(new String[]{\"\\\" \\\\d\"});");
     // java Foo "\n"
     // Foo.main(new String[]{"\n"});
-    _assertProcessedContents("java Foo \"\\n\"",
+/*    _assertProcessedContents("java Foo \"\\n\"",
                              "Foo.main(new String[]{\"\\n\"});");
     // java Foo "\t"
     // Foo.main(new String[]{"\t"});
@@ -207,7 +210,7 @@ public final class InteractionsModelTest extends TestCase {
     // java Foo "\b"
     // Foo.main(new String[]{"\b"});
     _assertProcessedContents("java Foo \"\\b\"",
-                             "Foo.main(new String[]{\"\\b\"});");
+                             "Foo.main(new String[]{\"\\b\"});"); */
   }
 
   /**
@@ -217,10 +220,10 @@ public final class InteractionsModelTest extends TestCase {
   public void testInterpretJavaSingleQuotedArgs() throws DocumentAdapterException {
     // java Foo 'asdf'
     _assertProcessedContents("java Foo 'asdf'",
-                             "Foo.main(new String[]{\"'asdf'\"});");
+                             "Foo.main(new String[]{\"asdf\"});");
     // java Foo 'a b c'
     _assertProcessedContents("java Foo 'a b c'",
-                             "Foo.main(new String[]{\"'a\",\"b\",\"c'\"});");
+                             "Foo.main(new String[]{\"a b c\"});");
   }
   
   

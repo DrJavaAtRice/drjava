@@ -47,8 +47,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.Toolkit;
 import java.awt.Color;
+import java.awt.Font;
 
 import edu.rice.cs.drjava.model.repl.ConsoleDocument;
+import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
 
 /**
@@ -65,6 +67,21 @@ public abstract class AbstractConsoleController {
    * Pane from the view.
    */
   protected InteractionsPane _pane;
+  
+  /**
+   * Style to use for default text.
+   */
+  protected SimpleAttributeSet _defaultStyle;
+  
+  /**
+   * Style to use for System.out.
+   */
+  protected final SimpleAttributeSet _systemOutStyle;
+  
+  /**
+   * Style to use for System.err.
+   */
+  protected final SimpleAttributeSet _systemErrStyle;
 
   /**
    * Initializes the document adapter and interactions pane.
@@ -74,6 +91,9 @@ public abstract class AbstractConsoleController {
                                       InteractionsPane pane) {
     _adapter = adapter;
     _pane = pane;
+    _defaultStyle = new SimpleAttributeSet();
+    _systemOutStyle = new SimpleAttributeSet();
+    _systemErrStyle = new SimpleAttributeSet();
   }
   
   /**
@@ -95,18 +115,46 @@ public abstract class AbstractConsoleController {
    */
   protected void _addDocumentStyles() {
     // Default
-    SimpleAttributeSet defaultS = new SimpleAttributeSet();
-    _adapter.addDocStyle(ConsoleDocument.DEFAULT_STYLE, defaultS);
+    _adapter.setDocStyle(ConsoleDocument.DEFAULT_STYLE, _defaultStyle);
 
     // System.out
-    SimpleAttributeSet s = new SimpleAttributeSet(defaultS);
-    s.addAttribute(StyleConstants.Foreground, Color.green.darker().darker());
-    _adapter.addDocStyle(ConsoleDocument.SYSTEM_OUT_STYLE, s);
+    _systemOutStyle.addAttributes(_defaultStyle);
+    _systemOutStyle.addAttribute(StyleConstants.Foreground, Color.green.darker().darker());
+    _adapter.setDocStyle(ConsoleDocument.SYSTEM_OUT_STYLE, _systemOutStyle);
    
     // System.err
-    s = new SimpleAttributeSet(defaultS);
-    s.addAttribute(StyleConstants.Foreground, Color.red);
-    _adapter.addDocStyle(ConsoleDocument.SYSTEM_ERR_STYLE, s);
+    _systemErrStyle.addAttributes(_defaultStyle);
+    _systemErrStyle.addAttribute(StyleConstants.Foreground, Color.red);
+    _adapter.setDocStyle(ConsoleDocument.SYSTEM_ERR_STYLE, _systemErrStyle);
+  }
+  
+  /**
+   * Sets the font for the document, updating all existing text.
+   * This behavior is only necessary in Mac OS X, JDK 1.4.1, since
+   * setFont() works fine on JTextPane on all other tested platforms.
+   * @param f New font to use.
+   */
+  public void setDefaultFont(Font f) {
+    if (PlatformFactory.ONLY.isMac14Platform()) {
+      SimpleAttributeSet fontSet = new SimpleAttributeSet();
+      StyleConstants.setFontFamily(fontSet, f.getFamily());
+      StyleConstants.setFontSize(fontSet, f.getSize());
+      StyleConstants.setBold(fontSet, f.isBold());
+      StyleConstants.setItalic(fontSet, f.isItalic());
+      _adapter.setCharacterAttributes(0, _adapter.getDocLength(), fontSet, false);
+      _pane.setCharacterAttributes(fontSet, false);
+      _updateStyles(fontSet);
+    }
+  }
+  
+  /**
+   * Updates all document styles with the attributes contained in newSet.
+   * @param newSet Style containing new attributes to use.
+   */
+  protected void _updateStyles(AttributeSet newSet) {
+    _defaultStyle.addAttributes(newSet);
+    _systemOutStyle.addAttributes(newSet);
+    _systemErrStyle.addAttributes(newSet);
   }
 
   /**

@@ -88,6 +88,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private JPopupMenu _threadSuspendedPopupMenu;
   private JPopupMenu _stackPopupMenu;
   private JPopupMenu _breakpointPopupMenu;
+  private JPopupMenu _watchPopupMenu;
   
   private final SingleDisplayModel _model;
   private final MainFrame _frame;
@@ -246,6 +247,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
     methodColumn = _stackTable.getColumnModel().getColumn(0);
     lineColumn = _stackTable.getColumnModel().getColumn(1);
     methodColumn.setPreferredWidth(7*lineColumn.getPreferredWidth());
+
+    _initPopup();
   }
   
   private void _initThreadTable() {
@@ -274,7 +277,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
     };
     _threadTable.getColumnModel().getColumn(0).setCellRenderer(threadTableRenderer);
     _threadTable.getColumnModel().getColumn(1).setCellRenderer(threadTableRenderer);
-    _initPopup();
   }
   
   /**
@@ -537,6 +539,29 @@ public class DebugPanel extends JPanel implements OptionConstants {
       }
     });
     _bpTree.addMouseListener(new BreakpointMouseAdapter());
+
+    _watchPopupMenu = new JPopupMenu("Watches");
+    _watchPopupMenu.add(new AbstractAction("Remove Watch") {
+      public void actionPerformed(ActionEvent e) {
+        try {
+          _debugger.removeWatch(_watchTable.getSelectedRow());
+          _watchTable.revalidate();
+          _watchTable.repaint();
+        }
+        catch (DebugException de) {
+          _frame._showDebugError(de);
+        }
+      }
+    });
+    _watchTable.addMouseListener(new DebugTableMouseAdapter(_watchTable) {
+      protected void _showPopup(MouseEvent e) {
+        if (_watchTable.getSelectedRow() < _watchTable.getRowCount() - 1) {
+          _watchPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+        }
+      }
+      protected void _action() {
+      }
+    });
   }
 
   /**
@@ -601,6 +626,13 @@ public class DebugPanel extends JPanel implements OptionConstants {
    */
   public DebugStackData getSelectedStackItem() {
     return _stackFrames.elementAt(_stackTable.getSelectedRow());
+  }
+
+  /**
+   * @return the selected watch
+   */
+  public DebugWatchData getSelectedWatch() {
+    return _watches.elementAt(_watchTable.getSelectedRow());
   }
 
   /**
@@ -912,7 +944,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       super(_threadTable);
     }
 
-    public void _showPopup(MouseEvent e) {
+    protected void _showPopup(MouseEvent e) {
       DebugThreadData thread = _threads.elementAt(_lastRow);
       if (thread.isSuspended()) {
          _threadSuspendedPopupMenu.show(e.getComponent(), e.getX(), e.getY());

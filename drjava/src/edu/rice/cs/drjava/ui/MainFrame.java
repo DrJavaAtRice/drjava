@@ -178,6 +178,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JButton _javadocButton;
   private JButton _junitButton;
   private JToolBar _toolBar;
+  private JFileChooser _interactionsHistoryChooser;
   
   // Menu fields
   private JMenuBar _menuBar;
@@ -318,8 +319,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _newJUnitTestAction = new AbstractAction("New JUnit Test Case...") {
     public void actionPerformed(ActionEvent ae) {
       String testName = JOptionPane.showInputDialog(MainFrame.this,
-                                                    "Please enter the test name:",
-                                                    "New Test Case",
+                                                    "Please enter a name for the test class:",
+                                                    "New JUnit Test Case",
                                                     JOptionPane.QUESTION_MESSAGE);
       if (testName != null) {
         String ext = ".java";
@@ -459,7 +460,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   /** Finds and runs the main method of the current document, if it exists. */
-  private Action _runAction = new AbstractAction("Run Document Main Method") {
+  private Action _runAction = new AbstractAction("Run Document's Main Method") {
     public void actionPerformed(ActionEvent ae) {
       _runMain();
     }
@@ -898,21 +899,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Show interactions tab
       _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
       
-      // Working directory is default place to start
-      File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
-      if (workDir == FileOption.NULL_FILE) {
-        workDir = new File(System.getProperty("user.dir"));
-      }
-      if (workDir.isFile() && workDir.getParent() != null) {
-        workDir = workDir.getParentFile();
-      }
-      final JFileChooser jfc = new JFileChooser();
-      jfc.setCurrentDirectory(workDir);
-      jfc.setDialogTitle("Load Interactions History");
-      jfc.setFileFilter(new InteractionsHistoryFilter());
+      _interactionsHistoryChooser.setDialogTitle("Load Interactions History");
       FileOpenSelector selector = new FileOpenSelector() {
         public File[] getFiles() throws OperationCanceledException {
-          return getOpenFiles(jfc);
+          return getOpenFiles(_interactionsHistoryChooser);
         }
       };
       try {
@@ -954,24 +944,13 @@ public class MainFrame extends JFrame implements OptionConstants {
         return; // save cancelled
       }
       
-      // Working directory is default place to start
-      File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
-      if (workDir == FileOption.NULL_FILE) {
-        workDir = new File(System.getProperty("user.dir"));
-      }
-      if (workDir.isFile() && workDir.getParent() != null) {
-        workDir = workDir.getParentFile();
-      }
-      final JFileChooser jfc = new JFileChooser();
-      jfc.setCurrentDirectory(workDir);
-      jfc.setDialogTitle("Save Interactions History");
-      jfc.setFileFilter(new InteractionsHistoryFilter());
+      _interactionsHistoryChooser.setDialogTitle("Save Interactions History");
       FileSaveSelector selector = new FileSaveSelector() {
         public File getFile() throws OperationCanceledException {
           // Don't try to set the filename with getSaveFile;
           // just display the dialog and get file with getChosenFile
-          int rc = jfc.showSaveDialog(MainFrame.this);
-          return getChosenFile(jfc, rc);
+          int rc = _interactionsHistoryChooser.showSaveDialog(MainFrame.this);
+          return getChosenFile(_interactionsHistoryChooser, rc);
         }
         public void warnFileOpen() {
           _warnFileOpen();
@@ -1091,6 +1070,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     _saveChooser = new JFileChooser();
     _saveChooser.setCurrentDirectory(workDir);
     _saveChooser.setFileFilter(new JavaSourceFilter());
+    _interactionsHistoryChooser = new JFileChooser();
+    _interactionsHistoryChooser.setCurrentDirectory(workDir);
+    _interactionsHistoryChooser.setFileFilter(new InteractionsHistoryFilter());
 
     _javadocChooser = new JFileChooser();
     _javadocChooser.setCurrentDirectory(workDir);
@@ -1219,7 +1201,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _configFrame = null;
     _helpFrame = null;
     _aboutDialog = null;
-      
+
     // If any errors occurred while parsing config file, show them
     _showConfigException();
     
@@ -2823,8 +2805,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     docPanePopupMenu.add(_printPreviewAction);
     docPanePopupMenu.addSeparator();
     docPanePopupMenu.add(_compileAction);
-    docPanePopupMenu.add(_junitAction);
     docPanePopupMenu.add(_runAction);
+    docPanePopupMenu.add(_junitAction);
     _docList.addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
         _docList.setSelectedIndex(_docList.locationToIndex(e.getPoint()));
@@ -3145,8 +3127,15 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
     }
+    
+    // Update Interactions Pane
     _interactionsPane.setFont(f);
+    _interactionsController.setDefaultFont(f);
+    
+    // Update Console Pane
     _consolePane.setFont(f);
+    _consoleController.setDefaultFont(f);
+    
     _findReplace.setFieldFont(f);
     _compilerErrorPanel.setListFont(f);
     _junitErrorPanel.setListFont(f);

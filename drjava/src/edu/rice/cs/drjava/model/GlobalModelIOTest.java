@@ -783,9 +783,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
                  FOO_TEXT,
                  FileOps.readFileAsString(file));
     assertEquals("contents of backup file 3rd write",
-   BAR_TEXT,
-   FileOps.readFileAsString(backup));
-
+                 BAR_TEXT,
+                 FileOps.readFileAsString(backup));
+    
     /* Set the config back to the original option */
     DrJava.getConfig().setSetting(BACKUP_FILES, backupStatus);
   }

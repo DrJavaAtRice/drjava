@@ -453,28 +453,35 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public OpenDefinitionsDocument newTestCase(String name, boolean makeSetUp, boolean makeTearDown) {
     StringBuffer buf = new StringBuffer();
     buf.append("import junit.framework.TestCase;\n\n");
-    buf.append("/**\n* ");
-    buf.append("JUnit test class.");
-    buf.append("\n*/\n");
+    buf.append("/**\n");
+    buf.append("* A JUnit test case class.\n");
+    buf.append("* Every method starting with the word \"test\" will be called when running\n");
+    buf.append("* the test with JUnit.\n");
+    buf.append("*/\n");
     buf.append("public class ");
     buf.append(name);
     buf.append(" extends TestCase {\n\n");
     if (makeSetUp) {
-      buf.append("/**\n* ");
-      buf.append("Sets up each test.");
-      buf.append("\n*/\n");
+      buf.append("/**\n");
+      buf.append("* This method is called before each test method, to perform any common\n");
+      buf.append("* setup if necessary.\n");
+      buf.append("*/\n");
       buf.append("public void setUp() {\n}\n\n");
     }
     if (makeTearDown) {
-      buf.append("/**\n* ");
-      buf.append("Cleans up after each test.");
-      buf.append("\n*/\n");
+      buf.append("/**\n");
+      buf.append("* This method is called after each test method, to perform any common\n");
+      buf.append("* clean-up if necessary.\n");
+      buf.append("*/\n");
       buf.append("public void tearDown() {\n}\n\n");
     }
-    buf.append("/**\n* ");
-    buf.append("Test method.");
-    buf.append("\n*/\n");
-    buf.append("public void test() {\n}\n");
+    buf.append("/**\n");
+    buf.append("* A test method.\n");
+    buf.append("* (Replace \"X\" with a few words describing the test.  You may write\n");
+    buf.append("* as many \"testSomething\" methods in this class as you wish,\n");
+    buf.append("* and each one will be executed when running JUnit over this class.)\n");
+    buf.append("*/\n");
+    buf.append("public void testX() {\n}\n");
     buf.append("}\n");
     String test = buf.toString();
 
@@ -1395,6 +1402,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public boolean saveFile(FileSaveSelector com) throws IOException {
       FileSaveSelector realCommand;
       final File file;
+      
+      if (!isModifiedSinceSave()) {
+        // Don't need to save.
+        //  Return true, since the save wasn't "canceled"
+        return true;
+      }
 
       try {
         if (_doc.isUntitled()) {
@@ -1624,6 +1637,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * Runs the main method in this document in the interactions pane.
      * Demands that the definitions be saved and compiled before proceeding.
      * Fires an event to signal when execution is about to begin.
+     * @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
      * @exception IOException propagated from GlobalModel.compileAll()
      */
     public void runMain()
@@ -1636,7 +1650,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         DefinitionsDocument doc = getDocument();
         String className = doc.getFirstTopLevelClassName();
         
-        // Prompt to save and compile if document is modified.
+        // Prompt to save and compile if any document is modified.
         if (hasModifiedDocuments()) {
           _notifier.saveBeforeRun();
           
@@ -1644,21 +1658,17 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           if (hasModifiedDocuments()) {
             return;
           }
-          else {
-            // The user chose to compile, so do so.
-            this.startCompile();
-            
-            // If the compile had errors, abort the run.
-            synchronized(_compilerLock) {
-              if (!_compilerErrorModel.hasOnlyWarnings()) {
-                return;
-              }
-            }
-          }
         }
+        // If no document is modified, still compile the current doc.
+        this.startCompile();
         
-        // Make sure that the compiler is done before starting run.
+        // Make sure that the compiler is done before continuing.
         synchronized(_compilerLock) {
+          // If the compile had errors, abort the run.
+          if (!_compilerErrorModel.hasOnlyWarnings()) {
+            return;
+          }
+          
           // Then clear the current interaction and replace it with a "java X" line.
           InteractionsDocument iDoc = _interactionsModel.getDocument();
           iDoc.clearCurrentInput();

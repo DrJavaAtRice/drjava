@@ -46,6 +46,7 @@ import java.util.ListIterator;
 import java.util.StringTokenizer;
 
 import gj.util.Vector;
+import java.util.ArrayList;
 
 import edu.rice.cs.drjava.model.FileOpenSelector;
 import edu.rice.cs.drjava.model.OperationCanceledException;
@@ -558,13 +559,34 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     if (s.endsWith(";")) {
       s = _deleteSemiColon(s);
     }
+    ArgumentTokenizer t = new ArgumentTokenizer();
+    ArrayList<String> args = t.tokenize(s, true);
+    boolean seenArg = false;
+    String className = args.get(1);
+    StringBuffer mainCall = new StringBuffer();
+    mainCall.append(className.substring(1, className.length() - 1));
+    mainCall.append(".main(new String[]{");
+    for (int i = 2; i < args.size(); i++) {
+      if (seenArg) {
+        mainCall.append(",");
+      }
+      else {
+        seenArg = true;
+      }
+      mainCall.append(args.get(i));
+    }
+    mainCall.append("});");
+    return mainCall.toString();
+    /*
     StreamTokenizer st = new StreamTokenizer(new StringReader(s));
     st.ordinaryChar('\'');  // clear the quote status of '
     st.ordinaryChar('\\');
     st.ordinaryChars('0','9');
     st.ordinaryChars('-', '.'); // clear the "numeric" status from these
+    
+    // make everything a word char except " (34)
     st.wordChars(33, 33); // '!'
-    st.wordChars(35, '\u00ff'); // make everything a word char except "
+    st.wordChars(35, '\u00ff');
 
     try {
       st.nextToken();             //don't want to get back java
@@ -601,7 +623,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       throw new UnexpectedException(ioe);
     }
     
-    
+    */
     
     
     /*

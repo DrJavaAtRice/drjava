@@ -47,6 +47,7 @@ import java.util.List;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.Configuration;
@@ -346,15 +347,10 @@ public class DefaultJavadocModel implements JavadocModel {
     }
     
     String custom = config.getSetting(OptionConstants.JAVADOC_CUSTOM_PARAMS);
-    StreamTokenizer st = new StreamTokenizer(new StringReader(custom));
-//    st.ordinaryChar('\'');
-    st.ordinaryChar('\\');
-    st.ordinaryChars('0','9');
-    st.ordinaryChars('-', '.');
-//    st.wordChars('\'', '\'');
-    st.wordChars('\\', '\\');
-    st.wordChars('0', '9');
-    st.wordChars('-', '.');
+    args.addAll(new ArgumentTokenizer().tokenize(custom));
+/*    StreamTokenizer st = new StreamTokenizer(new StringReader(custom));
+    st.ordinaryChars('\u0021','\u00ff');
+    st.wordChars('\u0021','\u00ff');
     
     try {
       while (st.nextToken() != StreamTokenizer.TT_EOF) {
@@ -372,8 +368,9 @@ public class DefaultJavadocModel implements JavadocModel {
       // Can't happen with a StringReader.
       throw new UnexpectedException(ioe);
     }
-    
+    */
     args.addAll(docUnits);
+    
 
     // Start a new Thread to execute Javadoc and tell listeners it has started
     // And finally, when we're done notify the listeners with a success flag

@@ -76,6 +76,16 @@ public class InteractionsController extends AbstractConsoleController {
   protected InteractionsDocument _doc;
   
   /**
+   * Style to use for error messages.
+   */
+  protected SimpleAttributeSet _errStyle;
+  
+  /**
+   * Style to use for debug messages.
+   */
+  protected final SimpleAttributeSet _debugStyle;
+  
+  /**
    * Glue together the given model and a new view.
    * @param model An InteractionsModel
    * @param adapter SwingDocumentAdapter being used by the model's doc
@@ -99,6 +109,8 @@ public class InteractionsController extends AbstractConsoleController {
     super(adapter, pane);
     _model = model;
     _doc = model.getDocument();
+    _errStyle = new SimpleAttributeSet();
+    _debugStyle = new SimpleAttributeSet();
     
     _init();
   }
@@ -133,16 +145,30 @@ public class InteractionsController extends AbstractConsoleController {
     super._addDocumentStyles();
 
     // Error
-    SimpleAttributeSet s = new SimpleAttributeSet();
-    s.addAttribute(StyleConstants.Foreground, Color.red.darker());
-    s.addAttribute(StyleConstants.Bold, Boolean.TRUE);
-    _adapter.addDocStyle(InteractionsDocument.ERROR_STYLE, s);
+    _errStyle.addAttributes(_defaultStyle);
+    _errStyle.addAttribute(StyleConstants.Foreground, Color.red.darker());
+    _errStyle.addAttribute(StyleConstants.Bold, Boolean.TRUE);
+    _adapter.setDocStyle(InteractionsDocument.ERROR_STYLE, _errStyle);
     
     // Debug
-    s = new SimpleAttributeSet();
-    s.addAttribute(StyleConstants.Foreground, Color.blue.darker());
-    s.addAttribute(StyleConstants.Bold, Boolean.TRUE);
-    _adapter.addDocStyle(InteractionsDocument.DEBUGGER_STYLE, s);
+    _debugStyle.addAttributes(_defaultStyle);
+    _debugStyle.addAttribute(StyleConstants.Foreground, Color.blue.darker());
+    _debugStyle.addAttribute(StyleConstants.Bold, Boolean.TRUE);
+    _adapter.setDocStyle(InteractionsDocument.DEBUGGER_STYLE, _debugStyle);
+  }
+  
+  /**
+   * Updates all document styles with the attributes contained in newSet.
+   * This behavior is only used in Mac OS X, JDK 1.4.1, since
+   * setFont() works fine on JTextPane on all other tested platforms.
+   * @param newSet Style containing new attributes to use.
+   */
+  protected void _updateStyles(AttributeSet newSet) {
+    super._updateStyles(newSet);
+    _errStyle.addAttributes(newSet);
+    StyleConstants.setBold(_errStyle, true);  // ensure err is always bold
+    _debugStyle.addAttributes(newSet);
+    StyleConstants.setBold(_debugStyle, true);  // ensure debug is always bold
   }
   
   /**

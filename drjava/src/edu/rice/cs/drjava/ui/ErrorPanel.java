@@ -47,6 +47,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.compiler.CompilerError;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
+import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
 import gj.util.Hashtable;
@@ -96,11 +97,30 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
 
   /** Changes the font of the error list. */
   public void setListFont(Font f) {
-    StyleConstants.setFontFamily(NORMAL_ATTRIBUTES, f.getFamily());
-    StyleConstants.setFontSize(NORMAL_ATTRIBUTES, f.getSize());
+    SimpleAttributeSet set = new SimpleAttributeSet();
+    StyleConstants.setFontFamily(set, f.getFamily());
+    StyleConstants.setFontSize(set, f.getSize());
+    StyleConstants.setBold(set, f.isBold());
+    StyleConstants.setItalic(set, f.isItalic());
 
-    StyleConstants.setFontFamily(BOLD_ATTRIBUTES, f.getFamily());
-    StyleConstants.setFontSize(BOLD_ATTRIBUTES, f.getSize());
+    _updateStyles(set);
+    
+    getErrorListPane().setFont(f);
+    
+    Document doc = getErrorListPane().getDocument();
+    if (doc instanceof StyledDocument) {
+      ((StyledDocument)doc).setCharacterAttributes(0, doc.getLength(), set, false);
+    }
+  }
+  
+  /**
+   * Updates all document styles with the attributes contained in newSet.
+   * @param newSet Style containing new attributes to use.
+   */
+  protected void _updateStyles(AttributeSet newSet) {
+    NORMAL_ATTRIBUTES.addAttributes(newSet);
+    BOLD_ATTRIBUTES.addAttributes(newSet);
+    StyleConstants.setBold(BOLD_ATTRIBUTES, true);  // bold should always be bold
   }
 
   abstract protected ErrorListPane getErrorListPane();

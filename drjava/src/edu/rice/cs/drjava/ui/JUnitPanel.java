@@ -155,6 +155,16 @@ public class JUnitPanel extends ErrorPanel{
   protected JUnitErrorModel getErrorModel(){
     return getModel().getJUnitErrorModel();
   }
+  
+  /**
+   * Updates all document styles with the attributes contained in newSet.
+   * @param newSet Style containing new attributes to use.
+   */
+  protected void _updateStyles(AttributeSet newSet) {
+    super._updateStyles(newSet);
+    OUT_OF_SYNC_ATTRIBUTES.addAttributes(newSet);
+    StyleConstants.setBold(OUT_OF_SYNC_ATTRIBUTES, true);  // should always be bold
+  }
 
   /** Called when work begins. */
   public void setJUnitInProgress(OpenDefinitionsDocument odd) {
