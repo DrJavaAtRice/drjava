@@ -51,6 +51,9 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.CodeStatus;
+import edu.rice.cs.drjava.model.GlobalModelTestCase.WarningFileSelector;
+import edu.rice.cs.drjava.model.GlobalModelTestCase.OverwriteException;
+import edu.rice.cs.util.FileOps;
 
 /**
  * Tests the functionality of the repl History.
@@ -58,6 +61,7 @@ import edu.rice.cs.drjava.CodeStatus;
  */
 public class HistoryTest extends TestCase implements OptionConstants{
   private History _history;
+  private File _tempDir;
   
   /**
    * Create a new instance of this TestCase.
@@ -70,9 +74,18 @@ public class HistoryTest extends TestCase implements OptionConstants{
   /**
    * Initialize fields for each test.
    */
-  protected void setUp() {
+  public void setUp() throws IOException {
+    String user = System.getProperty("user.name");
+    _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
     _history = new History();
     DrJava.getConfig().resetToDefaults();
+  }
+  
+  public void tearDown() throws IOException {
+    boolean ret = FileOps.deleteDirectory(_tempDir);
+    assertTrue("delete temp directory " + _tempDir, ret);
+    _tempDir = null;
+    _history = null;
   }
   
   /**
@@ -96,7 +109,7 @@ public class HistoryTest extends TestCase implements OptionConstants{
       public void warnFileOpen(){}
       public boolean verifyOverwrite(){ return true;}
       public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile){return true;}
-    }, null);
+    });
     
     /*FileReader fr = new FileReader(f1);
     char [] chContents = new char[fr];
@@ -108,6 +121,23 @@ public class HistoryTest extends TestCase implements OptionConstants{
     assertEquals("new Object()\nnew Object()\n5 * 5", contents.trim());*/
     
     f1.delete();
+  }
+  
+  /**
+   * Tests that the history doesn't overwrite files without prompting.
+   */
+  public void testSaveAsExistsForOverwrite()
+    throws BadLocationException, IOException {
+    
+    _history.add("some text");
+    final File file1 = File.createTempFile("DrJava-test", ".hist", _tempDir);
+    try {
+      _history.writeToFile(new WarningFileSelector(file1));
+      fail("Did not ask to verify overwrite as expected");
+    }
+    catch (OverwriteException e1) {
+      // good behavior for file saving...
+    }
   }
   
   public void testMultipleInsert() {

@@ -82,7 +82,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
   protected static final String BAR_TEXT = "class DrJavaTestBar {}";
   protected static final String BAZ_TEXT = 
-    "class DrJavaTestBaz extends DrJavaTestFoo {}";
+    "class DrJavaTestBaz extends DrJavaTestFoo { public static int x = 3; }";
   protected static final String FOO_MISSING_CLOSE_TEXT =
     "class DrJavaTestFoo {";
 
@@ -477,11 +477,11 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
     // These exceptions are specially used only in this test case.
     // They are used to verify that the code blocks 
-  public class OverwriteException extends RuntimeException{}
-  public class OpenWarningException extends RuntimeException{}
-  public class FileMovedWarningException extends RuntimeException{}
+  public static class OverwriteException extends RuntimeException{}
+  public static class OpenWarningException extends RuntimeException{}
+  public static class FileMovedWarningException extends RuntimeException{}
   
-  public class WarningFileSelector implements FileOpenSelector, FileSaveSelector {
+  public static class WarningFileSelector implements FileOpenSelector, FileSaveSelector {
     private File _file;
     public WarningFileSelector(File f) {
       _file = f;
@@ -493,10 +493,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public File[] getFiles() throws OperationCanceledException {
       return new File[] {_file};
     }
-    public void warnFileOpen(){
+    public void warnFileOpen() {
       throw new OpenWarningException();
     }
-    public boolean verifyOverwrite(){
+    public boolean verifyOverwrite() {
       throw new OverwriteException();
     }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, 
@@ -516,7 +516,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    * more like WarningFileSelector
    */
   
-    public class FileSelector implements FileOpenSelector, FileSaveSelector {
+  public static class FileSelector implements FileOpenSelector, FileSaveSelector {
     private File _file, _file2;
     public FileSelector(File f) {
       _file = f;
@@ -536,9 +536,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
         return new File[] {_file};
       }
     }
-    public void warnFileOpen(){
+    public void warnFileOpen() {
     }
-    public boolean verifyOverwrite(){
+    public boolean verifyOverwrite() {
       return true;
     }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc,
@@ -547,7 +547,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
   }
   
-  public class CancelingSelector implements FileOpenSelector, FileSaveSelector
+  public static class CancelingSelector implements FileOpenSelector, FileSaveSelector
   {
     public File getFile() throws OperationCanceledException {
       throw new OperationCanceledException();
@@ -555,9 +555,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public File[] getFiles() throws OperationCanceledException {
       throw new OperationCanceledException();
     }
-    public void warnFileOpen(){
+    public void warnFileOpen() {
     }
-    public boolean verifyOverwrite(){
+    public boolean verifyOverwrite() {
       return true;
     }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc,

@@ -201,13 +201,23 @@ public class History implements OptionConstants {
   }
   
   /**
-   * Writes this History to a the file selected in the FileSaveSelector
+   * Writes this (unedited) History to the file selected in the FileSaveSelector
    * @param selector File to save to
-   * @param editedVersion If this string is non-null, it will be saved to file
-   * instead of the lines saved in the history. The saved file will still include
+   */
+  public void writeToFile(FileSaveSelector selector) throws IOException {
+    writeToFile(selector, getHistoryAsStringWithSemicolons());
+  }
+  
+  /**
+   * Writes this History to the file selected in the FileSaveSelector
+   * @param selector File to save to
+   * @param editedVersion The edited version of the text to be saved.
+   * The saved file will still include
    * any tags or extensions needed to recognize it as a saved interactions file.
    */
-  public void writeToFile(FileSaveSelector selector, String editedVersion) throws IOException {
+  public void writeToFile(FileSaveSelector selector, String editedVersion) 
+    throws IOException
+  {
     
     File c = null;
     
@@ -217,19 +227,20 @@ public class History implements OptionConstants {
     catch (OperationCanceledException oce) {
       return; // don't need to do anything
     }
+    
+    // Make sure we ask before overwriting
     if (c != null) {
-      if (c.getName().indexOf('.') == -1) {
-        c = new File(c.getAbsolutePath() + "." +
-                     InteractionsHistoryFilter.HIST_EXTENSION);
+      if (!c.exists() || selector.verifyOverwrite()) {
+        if (c.getName().indexOf('.') == -1) {
+          c = new File(c.getAbsolutePath() + "." +
+                       InteractionsHistoryFilter.HIST_EXTENSION);
+        }
+        FileOutputStream fos = new FileOutputStream(c);
+        OutputStreamWriter osw = new OutputStreamWriter(fos);
+        BufferedWriter bw = new BufferedWriter(osw);
+        bw.write(HISTORY_FORMAT_VERSION_2 + editedVersion, 0, HISTORY_FORMAT_VERSION_2.length() + editedVersion.length());
+        bw.close();
       }
-      FileOutputStream fos = new FileOutputStream(c);
-      OutputStreamWriter osw = new OutputStreamWriter(fos);
-      BufferedWriter bw = new BufferedWriter(osw);
-      if (editedVersion == null) {
-        editedVersion = getHistoryAsStringWithSemicolons();
-      }
-      bw.write(HISTORY_FORMAT_VERSION_2 + editedVersion, 0, HISTORY_FORMAT_VERSION_2.length() + editedVersion.length());
-      bw.close();
     }
   }
   

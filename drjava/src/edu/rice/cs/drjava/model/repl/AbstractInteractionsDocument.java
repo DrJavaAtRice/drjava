@@ -388,10 +388,24 @@ public abstract class AbstractInteractionsDocument
   }
   
   /**
-   * Saves the interactions history (or an edited history) with the given
-   * file selector.
+   * Saves the unedited version of the current history to a file
+   * @param selector File to save to
    */
-  public void saveHistory(FileSaveSelector selector, String editedVersion) throws IOException {
+  public void saveHistory(FileSaveSelector selector) throws IOException {
+    _history.writeToFile(selector);
+  }
+
+  /**
+   * Saves the edited version of the current history to a file
+   * @param selector File to save to
+   * @param editedVersion Edited verison of the history which will be
+   * saved to file instead of the lines saved in the history. The saved
+   * file will still include any tags needed to recognize it as a saved
+   * interactions file.
+   */
+  public void saveHistory(FileSaveSelector selector, String editedVersion)
+    throws IOException
+  {
     _history.writeToFile(selector, editedVersion);
   }
 

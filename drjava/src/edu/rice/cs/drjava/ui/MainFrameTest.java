@@ -53,6 +53,7 @@ import java.io.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.*;
@@ -244,6 +245,8 @@ public class MainFrameTest extends MultiThreadedTestCase {
     InteractionsPane pane = _frame.getInteractionsPane();
     SingleDisplayModel model = _frame.getModel();
     SwingDocumentAdapter doc = model.getSwingInteractionsDocument();
+    // Make tests silent
+    model.getInteractionsDocument().setBeep(new TestBeep());
 
     // Test for strict == equality
     assertTrue("UI's int. doc. should equals Model's int. doc.",

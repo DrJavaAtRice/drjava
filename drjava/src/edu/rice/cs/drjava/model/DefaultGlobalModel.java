@@ -888,13 +888,24 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
   
   /**
-   * Saves the current history to a file
+   * Saves the unedited version of the current history to a file
    * @param selector File to save to
-   * @param editedVersion If this string is non-null, it will be saved to file
-   * instead of the lines saved in the history. The saved file will still include
-   * any tags needed to recognize it as a saved interactions file.
    */
-  public void saveHistory(FileSaveSelector selector, String editedVersion) throws IOException{
+  public void saveHistory(FileSaveSelector selector) throws IOException {
+    _interactionsDoc.saveHistory(selector);
+  }
+
+  /**
+   * Saves the edited version of the current history to a file
+   * @param selector File to save to
+   * @param editedVersion Edited verison of the history which will be 
+   * saved to file instead of the lines saved in the history. The saved 
+   * file will still include any tags needed to recognize it as a saved 
+   * interactions file.
+   */
+  public void saveHistory(FileSaveSelector selector, String editedVersion)
+    throws IOException
+  {
       _interactionsDoc.saveHistory(selector, editedVersion);
   }
  
@@ -1294,6 +1305,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         _debugPort = -1;
       }
     }
+//    System.out.println("debug port: " + _debugPort);
     return _debugPort;
   }
   
@@ -2632,11 +2644,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
 
   private void _resetInteractionsClasspath() {
-    File[] sourceRoots = getSourceRootSet();
-    for (int i = 0; i < sourceRoots.length; i++) {
-      _interpreterControl.addClassPath(sourceRoots[i].getAbsolutePath());
-    }
-
+    // Ideally, we'd like to put the open docs before the config option,
+    //  but this is inconsistent with how the classpath was defined
+    //  as it was built up.  (The config option is inserted on startup,
+    //  and docs are added as they are opened.  It shouldn't switch after
+    //  a reset.)
     Vector<File> cp = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
     if(cp!=null) {
       Enumeration<File> enum = cp.elements();
@@ -2644,6 +2656,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         _interpreterControl.addClassPath(enum.nextElement().getAbsolutePath());
       }
     }
+
+     File[] sourceRoots = getSourceRootSet();
+     for (int i = 0; i < sourceRoots.length; i++) {
+       _interpreterControl.addClassPath(sourceRoots[i].getAbsolutePath());
+     }
+     
   }
 
   private class ExtraClasspathOptionListener implements OptionListener<Vector<File>> {

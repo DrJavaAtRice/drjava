@@ -1168,7 +1168,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
                  _model.getHistoryAsStringWithSemicolons());
     listener.assertInteractionEndCount(2);
     listener.assertInteractionStartCount(2);
-    _model.saveHistory(fs, null);
+    _model.saveHistory(fs);
     
     // check that the file contains the correct value
     String newLine = System.getProperty("line.separator");

@@ -339,6 +339,12 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
                  "\"DrJavaTestBaz\"",
                  interpret("new DrJavaTestBaz().getClass().getName()"));
     
+    // Ensure that static fields can be seen
+    // IN PROGRESS: BUG #702733
+//    assertEquals("result of static field",
+//                 "3",
+//                 interpret("DrJavaTestBaz.x"));
+    
     // Also ensure that Foo can be used directly
     assertEquals("interactions result",
                  "\"DrJavaTestFoo\"",

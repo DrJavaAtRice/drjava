@@ -1,76 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
+<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+<plist version="0.9">
 <dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>English</string>
-	<key>CFBundleExecutable</key>
-	<string>DrJava</string>
-	<key>CFBundleGetInfoString</key>
-	<string>DrJava IDE for Java Development</string>
-	<key>CFBundleIconFile</key>
-	<string>GenericJavaApp.icns</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>DrJava</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleShortVersionString</key>
-	<string>DrJava</string>
-	<key>CFBundleSignature</key>
-	<string>DrJa</string>
 	<key>CFBundleVersion</key>
 	<string>See About DrJava...</string>
+	<key>CFBundleAllowMixedLocalizations</key>
+	<string>true</string>
+	<key>CFBundleExecutable</key>
+	<string>DrJava</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>DrJa</string>
+	<key>CFBundleGetInfoString</key>
+	<string>DrJava IDE for Java Development</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleIconFile</key>
+	<string>GenericJavaApp.icns</string>
 	<key>Java</key>
 	<dict>
-		<key>ClassPath</key>
-		<string>$JAVAROOT/DrJava.jar</string>
 		<key>MainClass</key>
 		<string>edu.rice.cs.drjava.DrJava</string>
+		<key>JVMVersion</key>
+		<string>1*</string>
+		<key>ClassPath</key>
+		<string>$JAVAROOT/DrJava.jar</string>
 		<key>Properties</key>
 		<dict>
-			<key>com.apple.hw.accellist</key>
-			<string>ATIRage128_8388608,ATIRage128_16777216,ATIRadeon_16777216,ATIRage128_33554432,ATIRadeon_33554432,ATIRadeon8500_67108864,NVidia11_33554432,NVidia20_67108864,NVidia20_134217728</string>
-			<key>com.apple.mrj.application.JVMVersion</key>
-			<string>1.3+</string>
 			<key>com.apple.mrj.application.apple.menu.about.name</key>
 			<string>DrJava</string>
-			<key>com.apple.mrj.application.classloading.verbose</key>
-			<string>false</string>
-			<key>com.apple.mrj.application.gc.async</key>
+			<key>com.apple.mrj.application.live-resize</key>
 			<string>true</string>
-			<key>com.apple.mrj.application.gc.max</key>
-			<string>128M</string>
-			<key>com.apple.mrj.application.gc.min</key>
-			<string>32M</string>
-			<key>com.apple.mrj.application.growbox.intrudes</key>
+			<key>com.apple.macos.useScreenMenuBar</key>
 			<string>true</string>
-			<key>com.apple.mrj.application.stderr</key>
-			<string>$SYSTEM</string>
-			<key>com.apple.mrj.application.stderr.append</key>
-			<string>false</string>
-			<key>com.apple.mrj.application.stderr.unicode</key>
-			<string>false</string>
-			<key>com.apple.mrj.application.stdin</key>
-			<string>/dev/null</string>
-			<key>com.apple.mrj.application.stdout</key>
-			<string>$SYSTEM</string>
-			<key>com.apple.mrj.application.stdout.append</key>
-			<string>false</string>
-			<key>com.apple.mrj.application.stdout.unicode</key>
-			<string>false</string>
-			<key>com.apple.mrj.application.verify</key>
-			<string>remote</string>
 		</dict>
 	</dict>
-	<key>NSJavaNeeded</key>
-	<string>YES</string>
-	<key>NSJavaPath</key>
-	<array>
-		<string>DrJava.jar</string>
-	</array>
-	<key>NSJavaRoot</key>
-	<string>Contents/Resources/Java</string>
 </dict>
 </plist>

@@ -803,66 +803,69 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Save the commands in the interactions window's history to a file */
   private Action _saveHistoryAction = new AbstractAction("Save Interactions History...")
   {
-      public void actionPerformed(ActionEvent ae) {
-          String[] options = {"Yes","No","Cancel"};
-          int resp = JOptionPane.showOptionDialog(MainFrame.this,
-                                                  "Edit interactions history before saving?",
-                                                  "Edit History?",
-                                                  JOptionPane.YES_NO_CANCEL_OPTION,
-                                                  JOptionPane.QUESTION_MESSAGE,
-                                                  null,options,
-                                                  options[1]);
-          // Cancel
-          if (resp == 2 || resp == JOptionPane.CLOSED_OPTION) {
-              return;
-          }
-          String history = _model.getHistoryAsStringWithSemicolons();
-
-          // Edit the history
-          if (resp == 0) {
-              history = (new HistorySaveDialog(MainFrame.this)).editHistory(history);
-          }
-          if (history == null) {
-              return; // save cancelled
-          }
-
-          // Working directory is default place to start
-          File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
-          if (workDir == FileOption.NULL_FILE) {
-              workDir = new File(System.getProperty("user.dir"));
-          }
-          if (workDir.isFile() && workDir.getParent() != null) {
-              workDir = workDir.getParentFile();
-          }
-          final JFileChooser jfc = new JFileChooser();
-          jfc.setCurrentDirectory(workDir);
-          jfc.setDialogTitle("Save Interactions History");
-          jfc.setFileFilter(new InteractionsHistoryFilter());
-          FileSaveSelector selector = new FileSaveSelector() {
-              public File getFile() throws OperationCanceledException {
-                  return getSaveFile(jfc);
-              }
-              public void warnFileOpen() {
-                  _warnFileOpen();
-              }
-              public boolean verifyOverwrite() {
-                  return _verifyOverwrite();
-              }
-              public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc,
-                                                      File oldFile) {
-                  return true;
-              }
-          };
-
-   try {
-       _model.saveHistory(selector, history);
-   }
-   catch (IOException ioe) {
-       _showIOError(new IOException("An error occured writing the history to a file"));
-   }
-
-          _interactionsPane.requestFocus();
+    public void actionPerformed(ActionEvent ae) {
+      String[] options = {"Yes","No","Cancel"};
+      int resp = JOptionPane.showOptionDialog(MainFrame.this,
+                                              "Edit interactions history before saving?",
+                                              "Edit History?",
+                                              JOptionPane.YES_NO_CANCEL_OPTION,
+                                              JOptionPane.QUESTION_MESSAGE,
+                                              null,options,
+                                              options[1]);
+      // Cancel
+      if (resp == 2 || resp == JOptionPane.CLOSED_OPTION) {
+        return;
       }
+      String history = _model.getHistoryAsStringWithSemicolons();
+      
+      // Edit the history
+      if (resp == 0) {
+        history = (new HistorySaveDialog(MainFrame.this)).editHistory(history);
+      }
+      if (history == null) {
+        return; // save cancelled
+      }
+      
+      // Working directory is default place to start
+      File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
+      if (workDir == FileOption.NULL_FILE) {
+        workDir = new File(System.getProperty("user.dir"));
+      }
+      if (workDir.isFile() && workDir.getParent() != null) {
+        workDir = workDir.getParentFile();
+      }
+      final JFileChooser jfc = new JFileChooser();
+      jfc.setCurrentDirectory(workDir);
+      jfc.setDialogTitle("Save Interactions History");
+      jfc.setFileFilter(new InteractionsHistoryFilter());
+      FileSaveSelector selector = new FileSaveSelector() {
+        public File getFile() throws OperationCanceledException {
+          // Don't try to set the filename with getSaveFile;
+          // just display the dialog and get file with getChosenFile
+          int rc = jfc.showSaveDialog(MainFrame.this);
+          return getChosenFile(jfc, rc);
+        }
+        public void warnFileOpen() {
+          _warnFileOpen();
+        }
+        public boolean verifyOverwrite() {
+          return _verifyOverwrite();
+        }
+        public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc,
+                                                File oldFile) {
+          return true;
+        }
+      };
+      
+      try {
+        _model.saveHistory(selector, history);
+      }
+      catch (IOException ioe) {
+        _showIOError(new IOException("An error occured writing the history to a file"));
+      }
+      
+      _interactionsPane.requestFocus();
+    }
   };
   
   /**
