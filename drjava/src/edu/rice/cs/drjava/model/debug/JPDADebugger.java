@@ -96,29 +96,19 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   private static final boolean printMessages = false;
   private static final int OBJECT_COLLECTED_TRIES = 5;
 
-  /**
-   * Reference to DrJava's model.
-   */
+  /** Reference to DrJava's model. */
   private DefaultGlobalModel _model;
 
-  /**
-   * VirtualMachine of the interactions JVM.
-   */
+  /** VirtualMachine of the interactions JVM. */
   private VirtualMachine _vm;
 
-  /**
-   * Manages all event requests in JDI.
-   */
+  /** Manages all event requests in JDI. */
   private EventRequestManager _eventManager;
 
-  /**
-   * Vector of all current Breakpoints, with and without EventRequests.
-   */
+  /** Vector of all current Breakpoints, with and without EventRequests. */
   private Vector<Breakpoint> _breakpoints;
 
-  /**
-   * Vector of all current Watches
-   */
+  /** Vector of all current Watches. */
   private Vector<DebugWatchData> _watches;
 
   /**
@@ -350,11 +340,11 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     throws DebugException
   {
     VirtualMachineManager vmm = Bootstrap.virtualMachineManager();
-    List connectors = vmm.attachingConnectors();  // Add parameterization <AttachingConnector>. JDK 1.5 will eliminate this check
+    List<AttachingConnector> connectors = vmm.attachingConnectors();  // Added parameterization <AttachingConnector>. JDK 1.5 will eliminate this check
     AttachingConnector connector = null;
-    java.util.Iterator iter = connectors.iterator();
+    java.util.Iterator<AttachingConnector> iter = connectors.iterator();
     while (iter.hasNext()) {
-      AttachingConnector conn = (AttachingConnector)iter.next();
+      AttachingConnector conn = iter.next();
       if (conn.name().equals("com.sun.jdi.SocketAttach")) {
         connector = conn;
       }
@@ -374,9 +364,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     throws DebugException
   {
     String className = "edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM";
-    List referenceTypes = _vm.classesByName(className);  // Add parameterization <ReferenceType>. JDK 1.5 will eliminate this check
+    List<ReferenceType> referenceTypes = _vm.classesByName(className);  // Added parameterization <ReferenceType>. JDK 1.5 will eliminate this warning
     if (referenceTypes.size() > 0) {
-      ReferenceType rt = (ReferenceType)referenceTypes.get(0);
+      ReferenceType rt = referenceTypes.get(0);
       Field field = rt.fieldByName("ONLY");
       if (field == null) {
         throw new DebugException("Unable to get ONLY field");
@@ -634,9 +624,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   synchronized Vector<ReferenceType> getReferenceTypes(String className,
                                                        int lineNumber) {
     // Get all classes that match this name
-    List classes;  
+    List<ReferenceType> classes;  
     try {
-      classes = _vm.classesByName(className);  // Add parameterization <ReferenceType> to classes. JDK 1.5 will eliminate this type warning
+      classes = _vm.classesByName(className);  // Added parameterization <ReferenceType> to classes. JDK 1.5 will eliminate this type warning
     }
     catch (VMDisconnectedException vmde) {
       // We're quitting, return empty Vector.
@@ -647,12 +637,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     Vector<ReferenceType> refTypes = new Vector<ReferenceType>();
     ReferenceType ref = null;
     for (int i=0; i < classes.size(); i++) {
-      ref = (ReferenceType) classes.get(i);
+      ref = classes.get(i);
 
       if (lineNumber != DebugAction.ANY_LINE) {
-        List lines = new LinkedList();
+        List<Location> lines = new LinkedList();   // Added parameterization <Location> to lines
         try {
-          lines = ref.locationsOfLine(lineNumber); // Add parameterization <Location> to lines. JDK 1.5 will eliminate this type warning
+          lines = ref.locationsOfLine(lineNumber); // JDK 1.5 will eliminate this type warning
         }
         catch (AbsentInformationException aie) {
           // try looking in inner classes
@@ -665,12 +655,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         if (lines.size() == 0) {
           // The ReferenceType might be in an inner class, so
           //  look for locationsOfLine for nestedTypes
-          List innerRefs = ref.nestedTypes();  // Add parameterization <ThreadReference>. JDK 1.5 will eliminate this type warning
+          List<ReferenceType> innerRefs = ref.nestedTypes();  // Added parameterization <ReferenceType>. JDK 1.5 will eliminate this type warning
           ref = null;
           for (int j = 0; j < innerRefs.size(); j++) {
             try {
-              ReferenceType currRef = (ReferenceType) innerRefs.get(j);
-              lines = currRef.locationsOfLine(lineNumber);  // Add parameterization <Location> to lines. JDK 1.5 will eliminate this type warning
+              ReferenceType currRef = innerRefs.get(j);
+              lines = currRef.locationsOfLine(lineNumber);  // JDK 1.5 will eliminate this type warning
               if (lines.size() > 0) {
                 ref = currRef;
                 break;
@@ -699,12 +689,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   protected ThreadReference _getThreadFromDebugThreadData(DebugThreadData d)
     throws NoSuchElementException
   {
-    List threads = _vm.allThreads(); // Add parameterization <ThreadReference>. JDK 1.5 will eliminate this type warning
-    Iterator iterator = threads.iterator();
+    List<ThreadReference> threads = _vm.allThreads(); // Added parameterization <ThreadReference>. JDK 1.5 will eliminate this type warning
+    Iterator<ThreadReference> iterator = threads.iterator();
     ThreadReference threadRef = null;
 
     while (iterator.hasNext()) {
-      threadRef = (ThreadReference)iterator.next();
+      threadRef = iterator.next();
       if ( threadRef.uniqueID() == d.getUniqueID() ) {
         return threadRef;
       }
@@ -903,9 +893,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
     // If there's already a step request for the current thread, delete
     //  it first
-    List steps = _eventManager.stepRequests();  // Add parameterization <StepRequest>. JDK 1.5 will eliminate this type warning
+    List<StepRequest> steps = _eventManager.stepRequests();  // Added parameterization <StepRequest>. JDK 1.5 will eliminate this type warning
     for (int i = 0; i < steps.size(); i++) {
-      StepRequest step = (StepRequest)steps.get(i);
+      StepRequest step = steps.get(i);
       if (step.thread().equals(thread)) {
         _eventManager.deleteEventRequest(step);
         break;
@@ -1140,9 +1130,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     throws DebugException
   {
     _ensureReady();
-    List listThreads;
+    List<ThreadReference> listThreads; // Add parameterization <ThreadReference> to listThreads. 
     try {
-      listThreads = _vm.allThreads();  // Add parameterization <ThreadReference> to listThreads. JDK 1.5 will eliminate this type warning
+      listThreads = _vm.allThreads();  // JDK 1.5 will eliminate this type warning
     }
     catch (VMDisconnectedException vmde) {
       // We're quitting, just pass back an empty Vector
@@ -1150,11 +1140,11 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
 
     // get an iterator from the list returned by _vm.allThreads()
-    Iterator iter = listThreads.iterator(); // Add parameterization <ThreadReference>. 
+    Iterator<ThreadReference> iter = listThreads.iterator(); // Added parameterization <ThreadReference>. 
     Vector<DebugThreadData> threads = new Vector<DebugThreadData>();
     while (iter.hasNext()) {
       try {
-        threads.add(new DebugThreadData((ThreadReference)iter.next()));
+        threads.add(new DebugThreadData(iter.next()));
       }
       catch (ObjectCollectedException e) {
         // this thread just died, we don't want to list it anyway
@@ -1180,10 +1170,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
     try {
       ThreadReference thread = _suspendedThreads.peek();
-      Iterator iter = thread.frames().iterator();
+      Iterator<StackFrame> iter = thread.frames().iterator();  // Added <StackFrame> parameterization; warning will go away in JDK 1.5
       Vector<DebugStackData> frames = new Vector<DebugStackData>();
       while (iter.hasNext()) {
-        frames.add(new DebugStackData((StackFrame)iter.next()));
+        frames.add(new DebugStackData(iter.next()));
       }
       return frames;
     }
@@ -1294,21 +1284,21 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
 
     ThreadReference threadRef = _suspendedThreads.peek();
-    Iterator i = null;
+    Iterator<StackFrame> i = null;
 
     try {
       if (threadRef.frameCount() <= 0 ) {
         printMessage("Could not scroll to source. The current thread had no stack frames.");
         return;
       }
-      i = threadRef.frames().iterator();
+      i = threadRef.frames().iterator(); // JDK 1.5 will eliminate this warning
     }
     catch (IncompatibleThreadStateException e) {
       throw new DebugException("Unable to find stack frames: " + e);
     }
 
     while (i.hasNext()) {
-      StackFrame frame = (StackFrame) i.next();
+      StackFrame frame = i.next();
 
       if (frame.location().lineNumber() == stackData.getLine() &&
           stackData.getMethod().equals(frame.location().declaringType().name() + "." +
@@ -1484,15 +1474,15 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
     try {
       StackFrame currFrame = null;
-      List frames = null;
+      List<StackFrame> frames = null;
       ThreadReference thread = _suspendedThreads.peek();
       if (thread.frameCount() <= 0 ) {
         printMessage("Could not update watch values. The current thread " +
                      "had no stack frames.");
         return;
       }
-      frames = thread.frames();
-      currFrame = (StackFrame) frames.get(0);
+      frames = thread.frames(); // JDK 1.5 will eliminate this warning
+      currFrame = frames.get(0);
       Location location = currFrame.location();
 
       ReferenceType rt = location.declaringType();
@@ -1591,10 +1581,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
           if (hasAnonymous(outerRt)) {
             // We don't know the appropriate this$N to look for so we have to
             // search for a field that begins with this$.
-            List fields = outerRt.allFields();
-            Iterator iter = fields.iterator();
+            List<Field> fields = outerRt.allFields();  // This type warning will go away in JDK 1.5
+            Iterator<Field> iter = fields.iterator();
             while (iter.hasNext()) {
-              Field f = (Field)iter.next();
+              Field f = iter.next();
               String name = f.name();
               if (name.startsWith("this$")) {
                 int lastIndex = name.lastIndexOf("$");
@@ -1645,13 +1635,13 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
           int index = rtClassName.lastIndexOf("$");
           while ((field == null) && (index != -1)) {
             rtClassName = rtClassName.substring(0, index);
-            List l = _vm.classesByName(rtClassName);
+            List<ReferenceType> l = _vm.classesByName(rtClassName); // JDK 1.5 will eliminate this warning
             if (l.isEmpty()) {
               // field is null, we will end up setting
               // the value to no value
               break;
             }
-            outerRt = (ReferenceType)l.get(0);
+            outerRt = l.get(0);
             field = outerRt.fieldByName(currName);
 
             if (field == null) {
@@ -1674,9 +1664,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
             currWatch.setType(field.type().name());
           }
           catch (ClassNotLoadedException cnle) {
-            List classes = _vm.classesByName(field.typeName());
+            List<Type> classes = _vm.classesByName(field.typeName());  // JDK 1.5 will eliminate this warning
             if (!classes.isEmpty()) {
-              currWatch.setType(((Type)classes.get(0)).name());
+              currWatch.setType(classes.get(0).name());
             }
             else {
               currWatch.setTypeNotLoaded();
@@ -1716,13 +1706,13 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     ObjectReference object = (ObjectReference) value;
     ReferenceType rt = object.referenceType();
     ThreadReference thread = _suspendedThreads.peek();
-    List toStrings = rt.methodsByName("toString");
+    List<Method> toStrings = rt.methodsByName("toString");  // JDK 1.5 will eliminate this warning
     if (toStrings.size() == 0) {
       // not sure how an Object can't have a toString method, but it happens
       return value.toString();
     }
     // Assume that there's only one method named toString
-    Method method = (Method)toStrings.get(0);
+    Method method = toStrings.get(0);
     try {
       Value stringValue = object.invokeMethod(thread, method, new LinkedList(),
                                               ObjectReference.INVOKE_SINGLE_THREADED);
@@ -1757,7 +1747,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
                                           Value val)
     throws DebugException
   {
-    List methods = null;
+    List<Method> methods = null;
     String signature_beginning = "(Ljava/lang/String;";
     String signature_end = ")V";
     String signature_mid = "";
@@ -1797,15 +1787,15 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
 
     signature = signature_beginning + signature_mid + signature_end;
-    methods = interpreterRef.methodsByName("defineVariable", signature);
+    methods = interpreterRef.methodsByName("defineVariable", signature);  // JDK 1.5 will eliminate this warning
     if (methods.size() <= 0) {
       throw new DebugException("Could not find defineVariable method.");
     }
 
     // Make sure we have a concrete method
-    Method tempMethod = (Method) methods.get(0);
+    Method tempMethod = methods.get(0);
     for (int i = 1; i < methods.size() && tempMethod.isAbstract(); i++) {
-      tempMethod = (Method) methods.get(i);
+      tempMethod = methods.get(i);
     }
     if (tempMethod.isAbstract()) {
       throw new DebugException("Could not find concrete defineVariable method.");
@@ -1858,7 +1848,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     StringReference sr = null;
     while (tries < OBJECT_COLLECTED_TRIES) {
       try{       
-        LinkedList args = new LinkedList(); //Add parameterization <StringReference>. 
+        LinkedList<StringReference> args = new LinkedList<StringReference>(); //Added parameterization <StringReference>. 
         sr = _vm.mirrorOf(interpreterName);
         sr.disableCollection();
         args.add(sr); // make the String a JDI Value
@@ -1921,8 +1911,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       }
       frame = suspendedThreadRef.frame(0);
 
-      List vars = frame.visibleVariables();
-      Iterator varsIterator = vars.iterator();
+      List<LocalVariable> vars = frame.visibleVariables();  // JDK 1.5 will eliminate this warning
+      Iterator<LocalVariable> varsIterator = vars.iterator();
 
       if (printMessages) {
         System.out.println("got visibleVariables");
@@ -1930,7 +1920,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
       // Define each variable
       while(varsIterator.hasNext()){
-        LocalVariable localVar = (LocalVariable)varsIterator.next();
+        LocalVariable localVar = varsIterator.next();
         if (printMessages) {
           System.out.println("local variable: " + localVar);
         }
@@ -1946,9 +1936,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
             type = localVar.type();
           }
           catch(ClassNotLoadedException e) {
-            List classes = _vm.classesByName(localVar.typeName());
+            List<Type> classes = _vm.classesByName(localVar.typeName());  //JDK 1.5 will eliminate this warning
             if (!classes.isEmpty()) {
-              type = (Type)classes.get(0);
+              type = classes.get(0);
             }
             else {
               type = null;
@@ -2032,15 +2022,13 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     StringReference sr = null;
     while (tries < OBJECT_COLLECTED_TRIES) {
       try {
-        //Add parameterization <Mirror>. 
-        List args = new LinkedList();  // Mirror is the common supertype of StringReference, Value, and ReferenceType
+        //Added parameterization <Mirror>. 
+        List<Mirror> args = new LinkedList<Mirror>();  // Mirror is the common supertype of StringReference, Value, and ReferenceType
         sr = _vm.mirrorOf(name);
         sr.disableCollection();
         args.add(sr);
         args.add(val);
-        if (type == null) {
-          args.add(null);
-        }
+        if (type == null) args.add(null);
         else if (type instanceof ReferenceType) {
           args.add(((ReferenceType)type).classObject());
         }
@@ -2148,12 +2136,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * @throws NoSuchElementException if no concrete method could be found
    */
   private Method _getMethod(ReferenceType rt, String name){
-    List methods = rt.methodsByName(name);
-    Iterator methodsIterator = methods.iterator();
+    List<Method> methods = rt.methodsByName(name);  // JDK 1.5 will eliminate this warning
+    Iterator<Method> methodsIterator = methods.iterator();
 
     // iterate over all the methods in the list and return the first non-abstract one
     while( methodsIterator.hasNext() ){
-      Method m = (Method)methodsIterator.next();
+      Method m = methodsIterator.next();
       if( !m.isAbstract() ){
         return m;
       }
@@ -2274,7 +2262,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     String varName = var.name();
     while (tries < OBJECT_COLLECTED_TRIES) {
       try {
-        List args = new LinkedList(); //Add parameterization <Mirror>. 
+        List<Mirror> args = new LinkedList<Mirror>(); //Added parameterization <Mirror>. 
         sr = _vm.mirrorOf(varName);
         sr.disableCollection();
         args.add(sr);
@@ -2310,13 +2298,13 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     if( printMessages ) System.out.println("Getting debug interpreter");
     if( printMessages ) System.err.println("Getting variables");
     StackFrame frame = threadRef.frame(0);
-    List vars = frame.visibleVariables();
-    Iterator varsIterator = vars.iterator();
+    List<LocalVariable> vars = frame.visibleVariables();  // Added <LocalVariable> type argument; warning will go away in JDK 1.5
+    Iterator<LocalVariable> varsIterator = vars.iterator();
 
     // Get each variable from the stack frame
     while(varsIterator.hasNext()) {
       if( printMessages ) System.out.println("Iterating through vars");
-      LocalVariable localVar = (LocalVariable)varsIterator.next();
+      LocalVariable localVar = varsIterator.next();
 
       try {
         Value v = _getValueOfLocalVariable(localVar, threadRef);
