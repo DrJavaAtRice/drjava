@@ -102,10 +102,7 @@
   <!-- commit this version and then release it. only will work on cs net. -->
   <target name="commit-and-release">
     <antcall target="commit" />
-    <antcall target="release">
-      <param name="version-tag"
-             value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
-    </antcall>
+    <antcall target="release" />
   </target>
 
 
