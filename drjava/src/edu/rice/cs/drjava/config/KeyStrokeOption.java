@@ -40,6 +40,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.CodeStatus;
+import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.util.UnexpectedException;
 import java.lang.reflect.Field;
 import javax.swing.KeyStroke;
@@ -141,7 +142,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
     // Generate modifiers text on our own, since getKeyStroke can't parse
     //  locale-specific modifiers.
     int modifiers = k.getModifiers();
-    boolean isMac = _isMacPlatform();
+    boolean isMac = PlatformFactory.ONLY.isMacPlatform();
     StringBuffer buf = new StringBuffer();
     if ((modifiers & Event.META_MASK) > 0) {
       String meta = (!isMac) ? "meta " : "command ";
@@ -183,18 +184,5 @@ public class KeyStrokeOption extends Option<KeyStroke> {
       }
     }
     return buf.toString();
-  }
-
-  /**
-   * Returns if the current platform is a Macintosh.
-   */
-  private boolean _isMacPlatform() {
-    String os = System.getProperty("os.name");
-    if (os != null) {
-      return os.toLowerCase().indexOf("mac") > -1;
-    }
-    else {
-      return false;
-    }
   }
 }

@@ -82,4 +82,32 @@ class DefaultPlatform implements PlatformSupport {
    * @param quit the Action associated with quitting the DrJava application
    */
   public void afterUISetup(Action about, Action prefs, Action quit) {}
+  
+  /**
+   * Returns whether this is a Mac platform (any JDK version).
+   */
+  public boolean isMacPlatform() {
+    return false;
+  }
+  
+  /**
+   * Returns whether this is a Mac platform with JDK 1.3.1.
+   */
+  public boolean isMac13Platform() {
+    return false;
+  }
+  
+  /**
+   * Returns whether this is a Mac platform with JDK 1.4.1.
+   */
+  public boolean isMac14Platform() {
+    return false;
+  }
+  
+  /**
+   * Returns whether this is a Windows platform.
+   */
+  public boolean isWindowsPlatform() {
+    return false;
+  }
 }

@@ -47,6 +47,7 @@ import java.net.MalformedURLException;
 
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.OutputStreamRedirector;
+import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.repl.*;
@@ -120,24 +121,11 @@ public class InterpreterJVM extends AbstractSlaveJVM
     // seems to work.  (I'd be happy to find a better solution, though.)
     // Only necessary on Windows, since frames and dialogs on other 
     // platforms appear correctly in front of DrJava.
-    if (_isWindowsPlatform()) {
+    if (PlatformFactory.ONLY.isWindowsPlatform()) {
       JDialog d = new JDialog();
       d.setSize(0,0);
       d.show();
       d.hide();
-    }
-  }
-  
-  /**
-   * Returns if the current platform is Windows.
-   */
-  private boolean _isWindowsPlatform() {
-    String os = System.getProperty("os.name");
-    if (os != null) {
-      return os.toLowerCase().indexOf("windows") == 0;
-    }
-    else {
-      return false;
     }
   }
 

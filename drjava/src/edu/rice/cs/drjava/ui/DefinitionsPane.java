@@ -517,8 +517,10 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     // Add listener that checks if position in the document has changed.
     // If it has changed, check and see if we should be highlighting matching braces.
     this.addCaretListener(_matchListener);
- 
-    _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS).booleanValue();
+    
+    if (CodeStatus.DEVELOPMENT) {
+      _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS).booleanValue();
+    }
     
     DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_BACKGROUND_COLOR,
                                     new BackgroundColorOptionListener());
@@ -530,8 +532,10 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
                                     new BreakpointColorOptionListener());
     DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_THREAD_COLOR,
                                     new ThreadColorOptionListener());
-    DrJava.getConfig().addOptionListener( OptionConstants.TEXT_ANTIALIAS,
-                                    new AntiAliasOptionListener());
+    if (CodeStatus.DEVELOPMENT) {
+      DrJava.getConfig().addOptionListener( OptionConstants.TEXT_ANTIALIAS,
+                                           new AntiAliasOptionListener());
+    }
         
     createPopupMenu();
       
@@ -547,10 +551,12 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    * Enable anti-aliased text by overriding paintComponent.
    */
   protected void paintComponent(Graphics g) {
-    if (_antiAliasText && g instanceof Graphics2D) {
-      Graphics2D g2d = (Graphics2D)g;
-      g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                           RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    if (CodeStatus.DEVELOPMENT) {
+      if (_antiAliasText && g instanceof Graphics2D) {
+        Graphics2D g2d = (Graphics2D)g;
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                             RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+      }
     }
     super.paintComponent(g);
   }

@@ -56,6 +56,7 @@ import javax.swing.tree.*;
 import gj.util.Hashtable;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
@@ -407,9 +408,11 @@ public class ConfigFrame extends JFrame {
     panel.addComponent( new FontOptionComponent (OptionConstants.FONT_MAIN, "Main Font", this) );
     panel.addComponent( new FontOptionComponent (OptionConstants.FONT_DOCLIST, "Document List Font", this));
     panel.addComponent( new FontOptionComponent (OptionConstants.FONT_TOOLBAR, "Toolbar Font", this));
-    panel.addComponent( new BooleanOptionComponent ( OptionConstants.TEXT_ANTIALIAS,
-                                                    "Use anti-aliased text in Definitions",
-                                                    this));
+    if (CodeStatus.DEVELOPMENT) {
+      panel.addComponent( new BooleanOptionComponent ( OptionConstants.TEXT_ANTIALIAS,
+                                                      "Use anti-aliased text in Definitions",
+                                                      this));
+    }
     panel.displayComponents(); 
   }
   
