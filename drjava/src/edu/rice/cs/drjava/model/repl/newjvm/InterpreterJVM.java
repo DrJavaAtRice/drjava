@@ -54,6 +54,7 @@ import java.util.List;
 import java.io.*;
 import java.rmi.*;
 import java.net.URL;
+import java.net.MalformedURLException;
 
 // NOTE: Do NOT import/use the config framework in this class!
 //  (This class runs in a different JVM, and will not share the config object)
@@ -855,7 +856,6 @@ public class InterpreterJVM extends AbstractSlaveJVM
       interpreter.addExtraClassPath(e.getEntry());
     }
 }
-  
   /**
    * Adds the given path to the classpath shared by ALL Java interpreters.
    * This method <b>cannot</b> take multiple paths separated by
@@ -887,7 +887,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     // Keep this entry on the accumulated classpath
     _classpath.add(s);
   }
-  
+ 
   /**
    * Adds the given path to the classpath shared by ALL Java interpreters.
    * This method <b>cannot</b> take multiple paths separated by
@@ -919,7 +919,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     // Keep this entry on the accumulated classpath
     _classpath.add(s);
   }
-  
+ 
   /**
    * Adds the given path to the classpath shared by ALL Java interpreters.
    * This method <b>cannot</b> take multiple paths separated by
@@ -952,6 +952,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     _classpath.add(s);
   }
   
+ 
   /**
    * Adds the given path to the classpath shared by ALL Java interpreters.
    * This method <b>cannot</b> take multiple paths separated by
@@ -983,7 +984,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     // Keep this entry on the accumulated classpath
     _classpath.add(s);
   }
-  
+ 
   /**
    * Adds the given path to the classpath shared by ALL Java interpreters.
    * This method <b>cannot</b> take multiple paths separated by
@@ -1016,36 +1017,104 @@ public class InterpreterJVM extends AbstractSlaveJVM
     _classpath.add(s);
   }
   
+//  /**
+//   * Returns a copy of the list of unique entries on the classpath.
+//   */
+//  public Vector<URL> getAugmentedClasspath() {
+//    Vector<URL> ret = new Vector<URL>();
+//    List<ClasspathEntry> locpe = classpathManager.getProjectCP();
+//    for (ClasspathEntry e: locpe) {
+//      ret.add(e.getEntry());
+//    }
+//
+//    locpe = classpathManager.getBuildDirectoryCP();
+//    for (ClasspathEntry e: locpe) {
+//      ret.add(e.getEntry());
+//    }
+//
+//    locpe = classpathManager.getProjectFilesCP();
+//    for (ClasspathEntry e: locpe) {
+//      ret.add(e.getEntry());
+//    }
+//
+//    locpe = classpathManager.getExternalFilesCP();
+//    for (ClasspathEntry e: locpe) {
+//      ret.add(e.getEntry());
+//    }
+//
+//    locpe = classpathManager.getExtraCP();
+//    for (ClasspathEntry e: locpe) {
+//      ret.add(e.getEntry());
+//    }
+//    return ret;
+//  } 
+  
   /**
    * Returns a copy of the list of unique entries on the classpath.
    */
-  public Vector<URL> getAugmentedClasspath() {
-    Vector<URL> ret = new Vector<URL>();
+  public Vector<String> getAugmentedClasspath() {
+    Vector<String> ret = new Vector<String>();
     List<ClasspathEntry> locpe = classpathManager.getProjectCP();
     for (ClasspathEntry e: locpe) {
-      ret.add(e.getEntry());
+      ret.add(e.getEntry().toString());
     }
 
     locpe = classpathManager.getBuildDirectoryCP();
     for (ClasspathEntry e: locpe) {
-      ret.add(e.getEntry());
+      ret.add(e.getEntry().toString());
     }
 
     locpe = classpathManager.getProjectFilesCP();
     for (ClasspathEntry e: locpe) {
-      ret.add(e.getEntry());
+      ret.add(e.getEntry().toString());
     }
 
     locpe = classpathManager.getExternalFilesCP();
     for (ClasspathEntry e: locpe) {
-      ret.add(e.getEntry());
+      ret.add(e.getEntry().toString());
     }
 
     locpe = classpathManager.getExtraCP();
     for (ClasspathEntry e: locpe) {
-      ret.add(e.getEntry());
+      ret.add(e.getEntry().toString());
     }
     return ret;
+  }
+  
+  public void addExtraClassPath(String s) {
+    try {
+      addExtraClassPath(new URL(s));
+    } catch(MalformedURLException e) {
+      throw new edu.rice.cs.util.UnexpectedException(e);
+    }
+  }
+  public void addProjectClassPath(String s) {
+    try {
+      addProjectClassPath(new URL(s));
+    } catch(MalformedURLException e) {
+      throw new edu.rice.cs.util.UnexpectedException(e);
+    }
+  } 
+  public void addBuildDirectoryClassPath(String s) {
+    try {
+      addBuildDirectoryClassPath(new URL(s));
+    } catch(MalformedURLException e) {
+      throw new edu.rice.cs.util.UnexpectedException(e);
+    }
+  }
+  public void addProjectFilesClassPath(String s) {
+    try {
+      addProjectFilesClassPath(new URL(s));
+    } catch(MalformedURLException e) {
+      throw new edu.rice.cs.util.UnexpectedException(e);
+    }
+  }
+  public void addExternalFilesClassPath(String s) { 
+    try {
+      addExternalFilesClassPath(new URL(s));
+    } catch(MalformedURLException e) {
+      throw new edu.rice.cs.util.UnexpectedException(e);
+    }
   }
   
   /**

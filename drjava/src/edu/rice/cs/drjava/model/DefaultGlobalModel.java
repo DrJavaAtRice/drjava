@@ -1447,7 +1447,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       }
     }));
 
-    l.add(new Pair<String, INavigatorItemFilter>("[ Auxiliary Files ]", new INavigatorItemFilter(){
+    l.add(new Pair<String, INavigatorItemFilter>("[ Remembered Files ]", new INavigatorItemFilter(){
       public boolean accept(INavigatorItem n){
         OpenDefinitionsDocument d = DefaultGlobalModel.this.getODDGivenIDoc(n);
         return d.isAuxiliaryFile();
@@ -3010,13 +3010,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
      * @param saver FileSaveSelector for saving the file if it needs to be saved
      */
     public void generateJavadoc(FileSaveSelector saver) throws IOException {
-      // Use the model's classpath, and use the EventNotifier as the listener
-      List<String> cp = new LinkedList<String>();
-      Vector<URL> cps = getClasspath();
-      for(URL p:cps){
-        cp.add(p.toString());
-      }
-      _javadocModel.javadocDocument(this, saver, cp);
+      _javadocModel.javadocDocument(this, saver, getClasspathString());
     }
     
     /**

@@ -754,12 +754,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           JavadocModel jm = _model.getJavadocModel();
           File suggestedDir = jm.suggestJavadocDestination(_model.getActiveDocument());
           _javadocSelector.setSuggestedDir(suggestedDir);
-          Vector<URL> cps = _model.getClasspath();
-          List<String> cp = new LinkedList<String>();
-          for(URL u: cps){
-            cp.add(u.toString());
-          }
-          jm.javadocAll(_javadocSelector, _saveSelector, cp);
+          String cps = _model.getClasspathString();
+          jm.javadocAll(_javadocSelector, _saveSelector, cps);
         }
         catch (IOException ioe) {
           _showIOError(ioe);

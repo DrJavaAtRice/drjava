@@ -312,7 +312,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     ensureInterpreterConnected();
     
     try{
-      _interpreterJVM().addProjectClassPath(path);
+      _interpreterJVM().addProjectClassPath(path.toString());
     }
     catch(RemoteException re){
       _threwException(re);
@@ -324,7 +324,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     ensureInterpreterConnected();
     
     try{
-      _interpreterJVM().addBuildDirectoryClassPath(path);
+      _interpreterJVM().addBuildDirectoryClassPath(path.toString());
     }
     catch(RemoteException re){
       _threwException(re);
@@ -336,7 +336,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     ensureInterpreterConnected();
     
     try{
-      _interpreterJVM().addProjectFilesClassPath(path);
+      _interpreterJVM().addProjectFilesClassPath(path.toString());
     }
     catch(RemoteException re){
       _threwException(re);
@@ -349,7 +349,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     ensureInterpreterConnected();
     
     try{
-      _interpreterJVM().addExternalFilesClassPath(path);
+      _interpreterJVM().addExternalFilesClassPath(path.toString());
     }
     catch(RemoteException re){
       _threwException(re);
@@ -361,7 +361,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     ensureInterpreterConnected();
     
     try{
-      _interpreterJVM().addExtraClassPath(path);
+      _interpreterJVM().addExtraClassPath(path.toString());
     }
     catch(RemoteException re){
       _threwException(re);
@@ -379,7 +379,16 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       ensureInterpreterConnected();
       
       try {
-        Vector<URL> classpath = new Vector<URL>(_interpreterJVM().getAugmentedClasspath());
+        Vector<String> strClasspath = new Vector<String>(_interpreterJVM().getAugmentedClasspath());
+        Vector<URL> classpath = new Vector<URL>(strClasspath.size()+_startupClasspathVector.size());
+        
+        for(String s : strClasspath) { 
+          try { classpath.add(new URL(s)); }
+          catch (MalformedURLException e) {
+           throw new edu.rice.cs.util.UnexpectedException(e);
+          }
+        }
+        
         classpath.addAll(_startupClasspathVector);
         //        for(int i = 0; i < _startupClasspathVector.size(); i++) {
         //          classpath.addElement(_startupClasspathVector.elementAt(i));

@@ -111,7 +111,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   /**
    * Returns a copy of the list of unique entries on the classpath.
    */
-  public Vector<URL> getAugmentedClasspath() throws RemoteException;
+  public Vector<String> getAugmentedClasspath() throws RemoteException;
 
   /**
    * Gets the string representation of the value of a variable in the current interpreter.
@@ -159,7 +159,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    * Only unique paths are added.
    * @param s Entry to add to the accumulated classpath
    */
-  public void addProjectClassPath(URL s) throws RemoteException;
+  public void addProjectClassPath(String s) throws RemoteException;
   
   /**
    * Adds the given path to the classpath shared by ALL Java interpreters.
@@ -168,7 +168,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    * Only unique paths are added.
    * @param s Entry to add to the accumulated classpath
    */
-  public void addBuildDirectoryClassPath(URL s) throws RemoteException;
+  public void addBuildDirectoryClassPath(String s) throws RemoteException;
   
   /**
    * Adds the given path to the classpath shared by ALL Java interpreters.
@@ -177,7 +177,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    * Only unique paths are added.
    * @param s Entry to add to the accumulated classpath
    */
-  public void addProjectFilesClassPath(URL s) throws RemoteException;
+  public void addProjectFilesClassPath(String s) throws RemoteException;
   
   /**
    * Adds the given path to the classpath shared by ALL Java interpreters.
@@ -186,7 +186,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    * Only unique paths are added.
    * @param s Entry to add to the accumulated classpath
    */
-  public void addExternalFilesClassPath(URL s) throws RemoteException;
+  public void addExternalFilesClassPath(String s) throws RemoteException;
   
   /**
    * Adds the given path to the classpath shared by ALL Java interpreters.
@@ -195,7 +195,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    * Only unique paths are added.
    * @param s Entry to add to the accumulated classpath
    */
-  public void addExtraClassPath(URL s) throws RemoteException;
+  public void addExtraClassPath(String s) throws RemoteException;
   
   
 }

@@ -185,10 +185,10 @@ public class DocumentCache{
   
   ///////////////////////////// DocManager //////////////////////////
   
-  private static final int FIRST_IN_LRU = 0;
-  private static final int OTHER_IN_LRU = 1;
-  private static final int NOT_IN_LRU = 2;
-  private static final int UNMANAGED = 3;
+  private static final int FIRST_IN_LRU = 0; // At the top of the LRU
+  private static final int OTHER_IN_LRU = 1; // In the LRU but not first
+  private static final int NOT_IN_LRU = 2;   // Inactive and not in the LRU
+  private static final int UNMANAGED = 3;    // Possibly open but not managed by LRU
   
   /**
    * Manages the retrieval of a document for a corresponding
@@ -225,6 +225,10 @@ public class DocumentCache{
     /**
      * Retrieves the document for the corresponding ODD.  If the document
      * is not in memory, it loads it into memory and then returns it.
+     * 
+     * If the file is modified in memory, it is unmanaged.  If it's not 
+     * at the front of the LRU and it is managed (unmodified in memory),
+     * then put it at the top of the LRU.  
      * @return the document that is managed by this adapter
      */
     public synchronized DefinitionsDocument getDocument() 
@@ -298,7 +302,7 @@ public class DocumentCache{
     
     // The following methods used by the cache to speed up algos
     // These enable the managers to decide when to bypass the 
-    // cache and just give the user the document.
+    // LRU and just give the user the document.
     
     void setStatus(int stat) { _stat = stat; }
     int getStatus() { return _stat; }

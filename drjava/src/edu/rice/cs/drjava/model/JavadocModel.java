@@ -114,7 +114,7 @@ public interface JavadocModel {
    * @throws IOException if there is a problem manipulating files
    */
   public void javadocAll(DirectorySelector select, FileSaveSelector saver,
-                         List<String> classpath)
+                         String classpath)
     throws IOException;
   
   /**
@@ -130,6 +130,6 @@ public interface JavadocModel {
    */
   public void javadocDocument(final OpenDefinitionsDocument doc,
                               final FileSaveSelector saver,
-                              final List<String> classpath)
+                              final String classpath)
     throws IOException;
 }
