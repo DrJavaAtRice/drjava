@@ -45,10 +45,12 @@ import javax.swing.event.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.util.Enumeration;
+import java.io.IOException;
 
 import javax.swing.tree.*;
 import gj.util.Hashtable;
 
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.*;
 
@@ -58,6 +60,9 @@ import edu.rice.cs.drjava.ui.*;
  */ 
 public class ConfigFrame extends JFrame {
   
+  private static final int FRAME_WIDTH = 700;
+  private static final int FRAME_HEIGHT = 500;
+  
   private JSplitPane _splitPane;
   private JTree _tree;
   private DefaultTreeModel _treeModel;
@@ -66,6 +71,7 @@ public class ConfigFrame extends JFrame {
   private JButton _okButton;
   private JButton _applyButton;
   private JButton _cancelButton;
+  private JButton _defaultButton;
   private JPanel _mainPanel;
   /**
    * Sets up the frame and displays it.
@@ -108,8 +114,8 @@ public class ConfigFrame extends JFrame {
     _okButton = new JButton("OK");
     _okButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        apply();
-        ConfigFrame.this.hide();
+        boolean successful = apply();
+        if (successful) ConfigFrame.this.hide();
       }
     });
     
@@ -127,9 +133,18 @@ public class ConfigFrame extends JFrame {
         ConfigFrame.this.hide();
       }
     });
+    
+    _defaultButton = new JButton("Set as default");
+    _defaultButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        setAsDefault();
+      }
+    });
 
     JPanel bottom = new JPanel();
     bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
+    bottom.add(Box.createHorizontalGlue());
+    bottom.add(_defaultButton);
     bottom.add(Box.createHorizontalGlue());
     bottom.add(_applyButton);
     bottom.add(_okButton);
@@ -141,10 +156,19 @@ public class ConfigFrame extends JFrame {
     
     
     // Set all dimensions ----
-    setSize( 600, 500);
+    setSize( FRAME_WIDTH, FRAME_HEIGHT);
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = this.getSize();
+
+    if (frameSize.height > screenSize.height) {
+      frameSize.height = screenSize.height;
+    }
+    if (frameSize.width > screenSize.width) {
+      frameSize.width = screenSize.width;
+    }
+
+    this.setSize(frameSize);
     this.setLocation((screenSize.width - frameSize.width) / 2,
                      (screenSize.height - frameSize.height) / 2);
     int width = getWidth() / 4;
@@ -157,8 +181,9 @@ public class ConfigFrame extends JFrame {
   /**
    * Call the update method to propagate down the tree, parsing input values into their config options
    */
-  public void apply() {   
-    _rootNode.update();
+  public boolean apply() {   
+    // returns false if the update did not succeed
+    return _rootNode.update();
   }
   
   /**
@@ -168,6 +193,23 @@ public class ConfigFrame extends JFrame {
     _rootNode.reset();
   }
   
+  public void setAsDefault() {
+    boolean successful = apply();
+    if (successful) {
+      try {
+        DrJava.CONFIG.saveConfiguration();
+      }
+      catch (IOException ioe) {
+        JOptionPane.showMessageDialog(this,
+                                      "Could not save changes to your '.drjava' file \n" +
+                                      "in your home directory.\n\n" + ioe,
+                                      "Could Not Save Changes",
+                                      JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+    }
+  }
+   
   private void _displayPanel(ConfigPanel cf) {
 
     _mainPanel.removeAll();
@@ -193,12 +235,16 @@ public class ConfigFrame extends JFrame {
    * Creates all of the panels contained within the frame.
    */
   private void _createPanels() {
-    PanelTreeNode fontNode = _createPanel("Fonts");
-    fontNode.getPanel().displayComponents(); 
+    /*PanelTreeNode fontNode = _createPanel("Fonts");
+    _setupFontPanel(fontNode.getPanel());
+    */
     PanelTreeNode colorNode = _createPanel("Colors");
-    colorNode.getPanel().displayComponents();
-    PanelTreeNode keystrokesNode = _createPanel("Key Bindings");
-    keystrokesNode.getPanel().displayComponents();
+    _setupColorPanel(colorNode.getPanel());
+
+    /*PanelTreeNode keystrokesNode = _createPanel("Key Bindings");
+    _setupKeyBindingsPanel(keystrokesNode.getPanel());
+    */
+
     PanelTreeNode miscNode = _createPanel("Miscellaneous");
     _setupMiscPanel(miscNode.getPanel());
 
@@ -231,10 +277,87 @@ public class ConfigFrame extends JFrame {
     return _createPanel(t, _rootNode);
   }
   
+  /**
+   * Add all of the components for the Font panel of the preferences window.
+   */ 
+  private void _setupFontPanel ( ConfigPanel panel) {
+    //panel.addComponent( new FontOptionComponent (OptionConstants.
+    //TO DO: write FontOptionComponent .. probably ought to be composed of three different entry fields,
+    //  along the lines of word processors
+    panel.displayComponents(); 
+  }
+  
+  /**
+   * Adds all of the components for the Color panel of the preferences window.
+   */
+  private void _setupColorPanel( ConfigPanel panel) {
+    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color", this));
+    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_KEYWORD_COLOR, "Keyword Color", this));
+    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_TYPE_COLOR, "Type Color", this));
+    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_COMMENT_COLOR, "Comment Color", this));
+    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, "Double-quoted Color", this));
+    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, "Single-quoted Color", this));
+    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_NUMBER_COLOR, "Number Color", this));
+    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_MATCH_COLOR, "Brace-matching Color", this));
+    panel.displayComponents();
+  }
+ 
+  /**
+   * Adds all of the components for the Key Bindings panel of the preferences window.
+   */
+  private void _setupKeyBindingsPanel( ConfigPanel panel) {
+     
+  /*
+  public static final KeyStrokeOption KEY_NEW_FILE =
+  public static final KeyStrokeOption KEY_OPEN_FILE =
+  public static final KeyStrokeOption KEY_SAVE_FILE =
+  public static final KeyStrokeOption KEY_SAVE_FILE_AS =
+  public static final KeyStrokeOption KEY_CLOSE_FILE =
+  public static final KeyStrokeOption KEY_PRINT_PREVIEW =
+  public static final KeyStrokeOption KEY_PRINT =
+  public static final KeyStrokeOption KEY_QUIT =
+  public static final KeyStrokeOption KEY_UNDO =
+  public static final KeyStrokeOption KEY_REDO =
+  public static final KeyStrokeOption KEY_CUT =
+  public static final KeyStrokeOption KEY_COPY =
+  public static final KeyStrokeOption KEY_PASTE =
+  public static final KeyStrokeOption KEY_SELECT_ALL =
+  public static final KeyStrokeOption KEY_FIND_NEXT =
+  public static final KeyStrokeOption KEY_FIND_REPLACE =
+  public static final KeyStrokeOption KEY_GOTO_LINE =
+  public static final KeyStrokeOption KEY_PREVIOUS_DOCUMENT =
+  public static final KeyStrokeOption KEY_NEXT_DOCUMENT =
+  public static final KeyStrokeOption KEY_COMPILE =
+  public static final KeyStrokeOption KEY_ABORT_INTERACTION =
+  public static final KeyStrokeOption KEY_BACKWARD =
+  public static final KeyStrokeOption KEY_BEGIN_DOCUMENT =
+  public static final KeyStrokeOption KEY_BEGIN_LINE =
+  public static final KeyStrokeOption KEY_BEGIN_PARAGRAPH =
+  public static final KeyStrokeOption KEY_PREVIOUS_WORD =
+  public static final KeyStrokeOption KEY_DELETE_NEXT =
+  public static final KeyStrokeOption KEY_DELETE_PREVIOUS =
+  public static final KeyStrokeOption KEY_DOWN =
+  public static final KeyStrokeOption KEY_UP =
+  public static final KeyStrokeOption KEY_END_DOCUMENT =
+  public static final KeyStrokeOption KEY_END_LINE =
+  public static final KeyStrokeOption KEY_END_PARAGRAPH =
+  public static final KeyStrokeOption KEY_NEXT_WORD =
+  public static final KeyStrokeOption KEY_FORWARD =
+  public static final KeyStrokeOption KEY_PAGE_DOWN =
+  public static final KeyStrokeOption KEY_PAGE_UP =
+  public static final KeyStrokeOption KEY_CUT_LINE =
+  */
+    panel.displayComponents();
+  }
+  
+  /**
+   *  Adds all of the components for the Miscellaneous panel of the preferences window.
+   */
   private void _setupMiscPanel( ConfigPanel panel) {
-    panel.addComponent( new StringOptionComponent ( OptionConstants.WORKING_DIRECTORY, "Working directory"));
-    panel.addComponent( new IntegerOptionComponent ( OptionConstants.INDENT_LEVEL, "Indent level"));
-    panel.addComponent( new IntegerOptionComponent ( OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions command history"));
+    panel.addComponent( new StringOptionComponent ( OptionConstants.WORKING_DIRECTORY, "Working directory", this));
+    panel.addComponent( new IntegerOptionComponent ( OptionConstants.INDENT_LEVEL, "Indent level", this));
+    panel.addComponent( new IntegerOptionComponent ( OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions command history", this));
+    panel.addComponent( new BooleanOptionComponent ( OptionConstants.LINEENUM_ENABLED, "Line number enumeration", this));
     panel.displayComponents();
   }
   
@@ -253,14 +376,26 @@ public class ConfigFrame extends JFrame {
     
     /**
      * Tells its panel to update, and tells all of its child nodes to update their panels.
+     * @return whether the update succeeded.
      */ 
-    public void update() {
-      _panel.update();
+    public boolean update() {
+      boolean isValidUpdate = _panel.update();
+      //if this panel encountered an error while attempting to update, return false
+      if (!isValidUpdate) {
+        TreePath path = new TreePath(this.getPath());
+        _tree.expandPath(path);
+        _tree.setSelectionPath(path);
+        return false;
+      }
       
       Enumeration childNodes = this.children();
       while (childNodes.hasMoreElements()) {
-        ((PanelTreeNode)childNodes.nextElement()).update();
+        boolean isValidUpdateChildren = ((PanelTreeNode)childNodes.nextElement()).update();
+        //if any of the children nodes encountered an error, return false
+        if (!isValidUpdateChildren) return false;
       }
+      
+      return true;
     }
     
     /**

@@ -104,12 +104,16 @@ public class ConfigPanel extends JPanel {
   
   /**
    * Tells each component in the vector to update() itself
+   * @return whether update() of all the components succeeded 
    */ 
-  public void update() {
+  public boolean update() {
     
     for (int i= 0; i<_components.size();i++) {
-      _components.elementAt(i).update();
+      boolean isValidUpdate = _components.elementAt(i).update();
+      if (!isValidUpdate) return false;
     }  
+    
+    return true;
   }
   
   /**

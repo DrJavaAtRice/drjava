@@ -51,11 +51,13 @@ import edu.rice.cs.drjava.config.*;
 public abstract class OptionComponent<T extends Option> extends JPanel {
   protected T _option;
   protected JLabel _label;
+  protected Frame _parent;
   
-  public OptionComponent (T option, String labelText) {
+  public OptionComponent (T option, String labelText, Frame parent) {
     _option = option;
     _label = new JLabel(labelText);
     _label.setHorizontalAlignment(JLabel.RIGHT);
+    _parent = parent;
   }
   
   public T getOption() {
@@ -71,13 +73,28 @@ public abstract class OptionComponent<T extends Option> extends JPanel {
    * if different from the old value and legal. Any changes should be 
    * done immediately such that current and future references to the Option 
    * should reflect the changes.
-   */
-  public abstract void update();
+   * @return false, if value is invalid; otherwise true.
+   */ 
+  public abstract boolean update();
 
   /**
    * Resets the entry field to reflect the actual stored value for the option.
    */
   public abstract void reset();
+  
+  public void showErrorMessage(String title, OptionParseException e) {
+    showErrorMessage(title, e.value, e.message);
+  }
+  
+  public void showErrorMessage(String title, String value, String message) {
+    JOptionPane.showMessageDialog(_parent,
+                                  "There was an error in one of the options that you entered.\n" +
+                                  "Option: '" + getLabelText() + "'\n" +
+                                  "Your value: " + value + "'\n" +
+                                  "Error: "+ message,
+                                  title,
+                                  JOptionPane.WARNING_MESSAGE);
+  }
   
 }
                                       

@@ -2219,7 +2219,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       JScrollPane scroll = (JScrollPane) scrollPanes.next();
       if (scroll != null) {
         DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
-        if (scroll.getRowHeader().getView() == null) {
+        if (scroll.getRowHeader() == null || scroll.getRowHeader().getView() == null) {
           if (ruleEnabled) {
             scroll.setRowHeaderView(new Rule(pane));
           }

@@ -43,29 +43,83 @@ import javax.swing.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import java.awt.*;
+import java.awt.event.*;
 
 /**
  * Graphical form of a ColorOption
  * @version $Id$
  */
 public class ColorOptionComponent extends OptionComponent<ColorOption> {
-  private JTextField _jtf;
+  private JButton _button;
+  private Color _currentColor;
+  private Color _newColor;
   
-  public ColorOptionComponent (ColorOption opt, String text) {
-    super(opt, text);
-    _jtf = new JTextField();
-    _jtf.setBackground(DrJava.CONFIG.getSetting(_option));
+  public ColorOptionComponent (ColorOption opt, String text, Frame parent) {
+    super(opt, text, parent);
+    _button = new JButton();
+    _button.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        chooseColor();
+      }
+    });
+    _button.setBackground(Color.white);
+    _currentColor = DrJava.CONFIG.getSetting(_option);
+    _newColor = _currentColor;
+    _updateButton(_currentColor);
     this.setLayout(new GridLayout(1,0));
     this.add(_label);//, BorderLayout.WEST);
-    this.add(_jtf);//, BorderLayout.CENTER);
+    this.add(_button);//, BorderLayout.CENTER);
   }
   
-  public void update() {
-    DrJava.CONFIG.setSetting(_option,_jtf.getBackground());
-    _jtf.setBackground(DrJava.CONFIG.getSetting(_option));
+  public boolean update() {
+    if (_newColor != _currentColor) {
+      DrJava.CONFIG.setSetting(_option, _newColor);
+    }
+    return true;
   } 
   
   public void reset() {
-    _jtf.setBackground(DrJava.CONFIG.getSetting(_option));
+    _currentColor = DrJava.CONFIG.getSetting(_option);
+    _newColor = _currentColor;
+    _updateButton(_currentColor);
   }
+  
+  private void _updateButton(Color c) {
+    _button.setForeground(c);
+    _button.setText(getLabelText() + " ("+_option.format(c)+")");
+  }
+  
+  public void chooseColor() {
+
+    Color c = JColorChooser.showDialog(
+                                       _parent,
+                                       "Choose '" + getLabelText() + "'",
+                                       _newColor);
+    if (c != null) {
+      _newColor = c;
+      _updateButton(_newColor);
+    }
+    
+  }
+    
+  /**
+  private class ColorDialog extend JDialog {
+    
+    private JLabel _title;
+    private JColorChooser _chooser;
+    
+    public ColorDialog() {
+      super(_parent, "Choose Color", true);
+      this.setLayout(new BorderLayout());
+      
+      _title = new JLabel("Choose Color");
+      this.add(_title, BorderLayout.NORTH);
+      
+      _chooser = new JColorChooser();
+      this.add(_chooser, BorderLayout.CENTER);
+    }
+    
+  }
+  */
+  
 }

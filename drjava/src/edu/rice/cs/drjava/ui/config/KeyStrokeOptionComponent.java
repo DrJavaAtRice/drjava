@@ -51,8 +51,8 @@ import java.awt.*;
 public class KeyStrokeOptionComponent extends OptionComponent<KeyStrokeOption> {
   private JTextField _jtf;
   
-  public KeyStrokeOptionComponent (KeyStrokeOption opt, String text) {
-    super(opt, text);
+  public KeyStrokeOptionComponent (KeyStrokeOption opt, String text, Frame parent) {
+    super(opt, text, parent);
     _jtf = new JTextField();
     _jtf.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
     this.setLayout(new GridLayout(1,0));
@@ -60,9 +60,12 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStrokeOption> {
     this.add(_jtf);//, BorderLayout.CENTER);
   }
   
-  public void update() {
+  public boolean update() {
     DrJava.CONFIG.setSetting(_option, _option.parse(_jtf.getText()));
     _jtf.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
+
+    
+    return true;
   } 
   
   public void reset() {

@@ -46,9 +46,9 @@ package edu.rice.cs.drjava.config;
  */
 public class OptionParseException extends IllegalArgumentException {
   
-  private String _key;
-  private String _value;
-  private String _message;
+  public String key;
+  public String value;
+  public String message;
   
   /**
    * Exception indicating that an OptionParser could not parse the specified
@@ -58,9 +58,9 @@ public class OptionParseException extends IllegalArgumentException {
    * @param message Some helpful message explaining the parse error
    */
   public OptionParseException(String key, String value, String message) {
-    _key = key;
-    _value = value;
-    _message = message;
+    this.key = key;
+    this.value = value;
+    this.message = message;
   }
   
   /**
@@ -69,11 +69,12 @@ public class OptionParseException extends IllegalArgumentException {
   public String toString() {
     StringBuffer sb = new StringBuffer();
     sb.append("Could not parse configuration option.\nOption: ");
-    sb.append(_key);
+    sb.append(key);
     sb.append("\nGiven value: \"");
-    sb.append(_value);
+    sb.append(value);
     sb.append("\"\n");
-    sb.append(_message);
+    sb.append(message);
     return sb.toString();
   }
+  
 }

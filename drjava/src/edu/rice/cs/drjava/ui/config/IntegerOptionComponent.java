@@ -51,8 +51,8 @@ import java.awt.*;
 public class IntegerOptionComponent extends OptionComponent<IntegerOption> {
   private JTextField _jtf;
   
-  public IntegerOptionComponent (IntegerOption opt, String text) {
-    super(opt, text);
+  public IntegerOptionComponent (IntegerOption opt, String text, Frame parent) {
+    super(opt, text, parent);
     _jtf = new JTextField();
     _jtf.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
     this.setLayout(new GridLayout(1,0));
@@ -60,12 +60,34 @@ public class IntegerOptionComponent extends OptionComponent<IntegerOption> {
     this.add(_jtf);//, BorderLayout.CENTER);
   }
   
-  public void update() {
-    DrJava.CONFIG.setSetting(_option, _option.parse(_jtf.getText()));
-    _jtf.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
+  /**
+   * Checks to see if value has changed, is valid and, if so, applies the new setting.
+   * @return false, if value is invalid; otherwise true.
+   */ 
+  public boolean update() {
+  
+    Integer currentValue = DrJava.CONFIG.getSetting(_option);
+    String enteredString = _jtf.getText().trim();
+    //If the current value is the same as the enterd value, there is nothing to do.
+    if (currentValue.toString().equals(enteredString)) {
+      return true;
+    }
+    
+    Integer enteredValue;
+    try {
+      enteredValue = _option.parse(enteredString);
+    }
+    catch (OptionParseException ope) {
+      showErrorMessage("Invalid Integer!", ope);
+      return false;
+    }
+    
+    DrJava.CONFIG.setSetting(_option, enteredValue);
+    return true;
   } 
   
   public void reset() {
     _jtf.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
   }
+    
 }
