@@ -123,8 +123,68 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
    *  <li> between two braces: insert new gap
    * @param length the length of the inserted text
    */
-  public abstract void _insertGap(int length);
+//  public abstract void _insertGap(int length);
+  /**
+   * Inserts a block of non-brace text into the reduced model.
+   * <OL>
+   *  <li> atStart: if gap to right, augment first gap, else insert
+   *  <li> atEnd: if gap to left, augment left gap, else insert
+   *  <li> inside a gap: grow current gap, move offset by length
+   *  <li> inside a multiple character brace:
+   *   <ol>
+   *    <li> break current brace
+   *    <li> insert new gap
+   *   </ol>
+   *  <li> gap to left: grow that gap and set offset to zero
+   *  <li> gap to right: this case handled by inside gap (offset invariant)
+   *  <li> between two braces: insert new gap
+   * @param length the length of the inserted text
+   */
+  public void _insertGap( int length ) {
+    //0 - a
+    if (_cursor.atStart()) {
+      if (_gapToRight()) {
+        _cursor.next();
+        _augmentCurrentGap(length); //increases gap and moves offset
+      }
+      else {
+        _insertNewGap(length);//inserts gap and goes to next item
+      }
+    }
+    //0 - b
+    else if (_cursor.atEnd()) {
+      if (_gapToLeft()) {
+        _augmentGapToLeft(length);
+        //increases the gap to the left and
+        //cursor to next item in list leaving offset 0
+      }
+      else {
+        _insertNewGap(length); //inserts gap and moves to next item
+      }
+    }
+    else if ((_cursor.getBlockOffset() > 0) && _cursor.current().isMultipleCharBrace()) {
+      insertGapBetweenMultiCharBrace(length);
+    }
+    else if (_cursor.current().isGap()) {
+      _cursor.current().grow(length);
+      _cursor.setBlockOffset(_cursor.getBlockOffset() + length);
+    }
+    //2
+    else if (!_cursor.atFirstItem() &&
+             _cursor.prevItem().isGap())
+             {
+               //already pointing to next item
+               _cursor.prevItem().grow(length);
+             }
+    //4
+    else { //between two braces
+      _insertNewGap(length); //inserts a gap and goes to the next item
+    }
+    return;
+  }
 
+  protected abstract void insertGapBetweenMultiCharBrace(int length);
+  
   public TokenList.Iterator makeCopyCursor() {
     return _cursor.copy();
   }

@@ -32,63 +32,6 @@ public class ReducedModelBrace extends AbstractReducedModel {
     }
   }
   
-  /**
-   * Inserts a block of non-brace text into the reduced model.
-   * <OL>
-   *  <li> atStart: if gap to right, augment first gap, else insert
-   *  <li> atEnd: if gap to left, augment left gap, else insert
-   *  <li> inside a gap: grow current gap, move offset by length
-   *  <li> inside a multiple character brace:
-   *   <ol>
-   *    <li> break current brace
-   *    <li> insert new gap
-   *   </ol>
-   *  <li> gap to left: grow that gap and set offset to zero
-   *  <li> gap to right: this case handled by inside gap (offset invariant)
-   *  <li> between two braces: insert new gap
-   * @param length the length of the inserted text
-   */
-  public void _insertGap( int length ) {
-    //0 - a
-    if (_cursor.atStart()) {
-      if (_gapToRight()) {
-        _cursor.next();
-        _augmentCurrentGap(length); //increases gap and moves offset
-      }
-      else {
-        _insertNewGap(length);//inserts gap and goes to next item
-      }
-    }
-    //0 - b
-    else if (_cursor.atEnd()) {
-      if (_gapToLeft()) {
-        _augmentGapToLeft(length);
-        //increases the gap to the left and
-        //cursor to next item in list leaving offset 0
-      }
-      else {
-        _insertNewGap(length); //inserts gap and moves to next item
-      }
-    }
-    
-    //1
-    else if (_cursor.current().isGap()) {
-      _cursor.current().grow(length);
-      _cursor.setBlockOffset(_cursor.getBlockOffset() + length);
-    }
-    //2
-    else if (!_cursor.atFirstItem() &&
-             _cursor.prevItem().isGap())
-             {
-               //already pointing to next item
-               _cursor.prevItem().grow(length);
-             }
-    //4
-    else { //between two braces
-      _insertNewGap(length); //inserts a gap and goes to the next item
-    }
-    return;
-  }
 
   /**
    * Helper function for top level brace insert functions.
@@ -131,7 +74,16 @@ public class ReducedModelBrace extends AbstractReducedModel {
     }
   }
   
-  
+  /**
+   * Inserts a gap between the characters in a multiple character brace.
+   * However, since ReducedModelBrace doesn't keep track of the comment
+   * braces and escape sequences, we just throw an exception since the
+   * condition in insertGap that spawns this method doesn't arise.
+   */
+  protected void insertGapBetweenMultiCharBrace(int length) {
+    throw new RuntimeException("ReducedModelBrace does not keep " +
+                               "track of multi-character braces.");
+  }
   
   
   /**
@@ -162,26 +114,18 @@ public class ReducedModelBrace extends AbstractReducedModel {
   *  This means it is ignored on balancing and on next/prev brace finding.
   *  All other braces are matchable.
   */
-  private boolean _isCurrentBraceMatchable
-    (TokenList.Iterator copyCursor)
+  private boolean _isCurrentBraceMatchable()
   {
-    return _isBraceMatchable(copyCursor.current());
+    String type = _cursor.current().getType();
+    return (((type.equals("{")) ||
+             (type.equals("}")) ||
+             (type.equals("(")) ||
+             (type.equals(")")) ||
+             (type.equals("[")) ||
+             (type.equals("]"))) &&
+            (_parent.getStateAtCurrent() == FREE));
   }
-  
-  private boolean _isBraceMatchable(ReducedToken token) {
-    String type = token.getType();
     
-    return (!token.isGap() &&
-            !(type.equals("/")    ||
-              type.equals("*")    ||
-              type.equals("\n")   ||
-              type.equals("//")   ||
-              type.equals("\\")   ||
-              type.equals("\\\\") ||
-              type.equals("\\\"")) &&
-            !token.isShadowed());
-  }
-  
   /**
    *Returns distance from current location of cursor to the location of the
    *previous significant brace.
@@ -348,13 +292,26 @@ public class ReducedModelBrace extends AbstractReducedModel {
   }
   
   public boolean openBraceImmediatelyRight() {
-    return ((_cursor.getBlockOffset() == 0) && _cursor.current().isOpen() &&
-            _isBraceMatchable(_cursor.current()));
+    if (_cursor.atEnd()) {
+      return false;
+    }
+    else {
+      return ((_cursor.getBlockOffset() == 0) && _cursor.current().isOpen() &&
+              _isCurrentBraceMatchable());
+    }
   }
   
   public boolean closedBraceImmediatelyLeft() {
-    return ((_cursor.getBlockOffset() == 0) && _cursor.prevItem().isClosed() &&
-            _isBraceMatchable(_cursor.prevItem()));
+    if (_cursor.atStart() || _cursor.atFirstItem()) {
+      return false;
+    }
+    else {
+      _cursor.prev();
+      boolean isLeft = ((_cursor.getBlockOffset() == 0) && _cursor.current().isClosed() &&
+                        _isCurrentBraceMatchable());
+      _cursor.next();
+      return isLeft;
+    }
   }
   
   /* 

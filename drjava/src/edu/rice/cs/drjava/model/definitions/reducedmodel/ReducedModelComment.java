@@ -343,84 +343,35 @@ public class ReducedModelComment extends AbstractReducedModel {
       return quote;
     }
   }  
-
+  
   /**
-  * Inserts a block of non-brace text into the reduced model.
-  * <OL>
-  *  <li> atStart: if gap to right, augment first gap, else insert
-  *  <li> atEnd: if gap to left, augment left gap, else insert
-  *  <li> inside a gap: grow current gap, move offset by length
-  *  <li> inside a multiple character brace:
-  *   <ol>
-  *    <li> break current brace
-  *    <li> insert new gap
-  *   </ol>
-  *  <li> gap to left: grow that gap and set offset to zero
-  *  <li> gap to right: this case handled by inside gap (offset invariant)
-  *  <li> between two braces: insert new gap
-  * @param length the length of the inserted text
-  */
-  public void _insertGap(int length) {
-    if (_cursor.atStart()) {
-      if (_gapToRight()) {
-        _cursor.next();
-        _augmentCurrentGap(length); //increases gap and moves offset
-      }
-      else {
-        _insertNewGap(length);//inserts gap and goes to next item
-      }
-    }
-    else if (_cursor.atEnd()) {
-      if (_gapToLeft()) {
-        _augmentGapToLeft(length);
-        //increases the gap to the left and
-        //cursor to next item in list leaving offset 0              
-      }
-      else {
-        _insertNewGap(length); //inserts gap and moves to next item
-      }
-    }
-    //offset should never be greater than 1 here because JAVA only has 2
-    //char comments  
-    else if (_cursor.current().isMultipleCharBrace() && (_cursor.getBlockOffset() > 0)) {    
-      if (_cursor.getBlockOffset() > 1) {      
-        throw new IllegalArgumentException("OFFSET TOO BIG:  " + _cursor.getBlockOffset());  
-      }    
-      _cursor._splitCurrentIfCommentBlock(true, true);      
-      _cursor.next();
-      _insertNewGap(length);  //inserts gap and goes to next item  
-      // we have to go back two tokens; we don't want to use move because it could
-      // throw us past start if there was only one character before us and we went
-      // the usual 2 spaces before.  There would have to be a check and a branch
-      // depending on conditions that way.
-      _cursor.prev();
-      _cursor.prev();
-      _updateBasedOnCurrentState();   
-      // restore cursor state
-      _cursor.next();
-      _cursor.next();
-      return;
-    }
-    
-    //1
-    else if (_cursor.current().isGap()) {
-      _cursor.current().grow(length);
-      _cursor.setBlockOffset(_cursor.getBlockOffset() + length);
-    }
-    //2
-    else if (!_cursor.atFirstItem() &&
-             _cursor.prevItem().isGap())
-    {
-      //already pointing to next item
-      _cursor.prevItem().grow(length);
-    }
-    //4
-    else { //between two braces
-      _insertNewGap(length); //inserts a gap and goes to the next item
-    }
+   * Inserts a gap between the characters in a multiple character brace.
+   * This function is called by AbstractReducedModel's method insertGap
+   * when a Gap is inserted between the characters in a comment brace
+   * or an escape sequence.  It splits up the multiple character brace
+   * into its component parts and inserts a Gap of size length in
+   * between the resulting split parts.
+   * @param length the size of the Gap to be inserted in characters
+   */
+  protected void insertGapBetweenMultiCharBrace(int length) {
+    if (_cursor.getBlockOffset() > 1) {      
+      throw new IllegalArgumentException("OFFSET TOO BIG:  " + _cursor.getBlockOffset());  
+    }    
+    _cursor._splitCurrentIfCommentBlock(true, true);      
+    _cursor.next();
+    _insertNewGap(length);  //inserts gap and goes to next item  
+    // we have to go back two tokens; we don't want to use move because it could
+    // throw us past start if there was only one character before us and we went
+    // the usual 2 spaces before.  There would have to be a check and a branch
+    // depending on conditions that way.
+    _cursor.prev();
+    _cursor.prev();
+    _updateBasedOnCurrentState();   
+    // restore cursor state
+    _cursor.next();
+    _cursor.next();
     return;
   }
-
   /**
   * USE RULES:
   * Inserting between braces: This should be called from between the two
