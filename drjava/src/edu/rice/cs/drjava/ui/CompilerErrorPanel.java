@@ -677,7 +677,7 @@ public class CompilerErrorPanel extends JPanel {
       // move caret to that position
       DefinitionsPane defPane = _frame.getCurrentDefPane();
       defPane.setCaretPosition(errPos);
-      defPane.grabFocus();
+      defPane.requestFocus();
     }
 
   }

@@ -285,6 +285,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
       OpenDefinitionsDocument openDoc = _getOpenDocument(file);
       if (openDoc != null) {
+        //System.err.println("This file is already open!");
         throw new AlreadyOpenException(openDoc);
       }
 
@@ -1470,6 +1471,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       }
       catch (IllegalStateException ise) {
         // No file in thisDoc
+        //throw new UnexpectedException(ise, "Exception on doc #" + i);
       }
     }
 

@@ -307,7 +307,7 @@ class FindReplaceDialog extends JDialog {
    */
   public void show() {
     super.show();
-    _findField.grabFocus();
+    _findField.requestFocus();
     _findField.selectAll();
   }
 
@@ -365,7 +365,7 @@ class FindReplaceDialog extends JDialog {
     else {
       _defPane.setCaretPosition(_machine.getCurrentOffset());
     }
-    _defPane.grabFocus();
+    _defPane.requestFocus();
     _defPane.getHighlighter().removeAllHighlights();
     setVisible(false);
   }  

@@ -136,6 +136,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   public void testInteractionAbort()
     throws BadLocationException, InterruptedException, IOException
   {
+    //System.err.println("Entering testInteractionAbort");
     _doCompile(setupDocument(FOO_TEXT), tempFile());
     final String beforeAbort = interpret("Foo.class.getName()");
     assertEquals("Foo", beforeAbort);
@@ -154,6 +155,11 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
 
       public void interactionsExited(int status) {
         //System.err.println("exit notice");
+        try {
+          Thread.currentThread().sleep(1000);
+        } catch (InterruptedException e) {
+          //System.err.println("Interrupted!");
+        }
         assertInteractionStartCount(1);
         interactionsExitedCount++;
       }
@@ -181,17 +187,20 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
 
     //System.err.println("waiting done");
     listener.assertInteractionsResetCount(1);
+    //System.err.println("after wait");
     listener.assertInteractionsExitedCount(1);
+    //System.err.println("after wait");
     _model.removeListener(listener);
 
     // now make sure it still works!
+    //System.err.println("after wait");
     assertEquals("5", interpret("5"));
 
     // make sure we can still see class foo
     //System.err.println("about to check Foo");
     final String afterAbort = interpret("Foo.class.getName()");
     assertEquals("Foo", afterAbort);
-    //System.err.println("done check Foo: " + afterAbort);
+    System.err.println("done check Foo: " + afterAbort);
   }
 
   /**
@@ -200,6 +209,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   public void testResetConsole()
     throws BadLocationException, InterruptedException
   {
+    //System.err.println("Entering testResetConsole");
     TestListener listener = new TestListener() {
       public void interactionStarted() {}
       public void interactionEnded() {}

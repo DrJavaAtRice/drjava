@@ -637,7 +637,13 @@ public class MainFrame extends JFrame {
    * document has been modified) before opening.
    */
   public File getOpenFile() throws OperationCanceledException {
-    _openChooser.setSelectedFile(null);
+    // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
+    File selection = _openChooser.getSelectedFile();
+    if (selection != null) {
+        _openChooser.setSelectedFile(selection.getParentFile());
+	_openChooser.setSelectedFile(selection);
+	_openChooser.setSelectedFile(null);
+    }
     int rc = _openChooser.showOpenDialog(this);
     return getChosenFile(_openChooser, rc);
   }
@@ -646,7 +652,13 @@ public class MainFrame extends JFrame {
    * Prompt the user to select a place to save the current document.
    */
   public File getSaveFile() throws OperationCanceledException {
-    _saveChooser.setSelectedFile(null);
+    // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
+    File selection = _saveChooser.getSelectedFile();
+    if (selection != null) {
+        _saveChooser.setSelectedFile(selection.getParentFile());
+	_saveChooser.setSelectedFile(selection);
+	_saveChooser.setSelectedFile(null);
+    }
     int rc = _saveChooser.showSaveDialog(this);
     return getChosenFile(_saveChooser, rc);
   }
@@ -966,7 +978,7 @@ public class MainFrame extends JFrame {
         int lineNum = Integer.parseInt(lineStr);
         int pos = _model.getActiveDocument().gotoLine(lineNum);
         _currentDefPane.setPositionAndScroll(pos);
-        _currentDefPane.grabFocus();
+        _currentDefPane.requestFocus();
       }
     } catch (NumberFormatException nfe) {
       // invalid input for line number
@@ -1469,7 +1481,7 @@ public class MainFrame extends JFrame {
     _tabbedPane.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
       if (_tabbedPane.getSelectedIndex() == INTERACTIONS_TAB) {
-        _interactionsPane.grabFocus();
+        _interactionsPane.requestFocus();
       }
     }
     });
@@ -1525,7 +1537,7 @@ public class MainFrame extends JFrame {
     JScrollPane scroll = new BorderlessScrollPane(pane,
                                                   JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                                                   JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-    scroll.setBorder(null); // removes all default borders (MacOS X installs default borders)
+    //scroll.setBorder(null); // removes all default borders (MacOS X installs default borders)
     _defScrollPanes.put(doc, scroll);
     return scroll;
   }
@@ -1588,7 +1600,6 @@ public class MainFrame extends JFrame {
     // reset the undo/redo menu items
     _undoAction.setDelegatee(_currentDefPane.getUndoAction());
     _redoAction.setDelegatee(_currentDefPane.getRedoAction());
-
   }
 
   /**
@@ -1640,7 +1651,7 @@ public class MainFrame extends JFrame {
       _saveAction.setEnabled(false);
       //_compileAction.setEnabled(true);
       updateFileTitle();
-      _currentDefPane.grabFocus();
+      _currentDefPane.requestFocus();
     }
 
     public void fileOpened(OpenDefinitionsDocument doc) {
@@ -1669,7 +1680,7 @@ public class MainFrame extends JFrame {
 
       updateFileTitle();
       _posListener.updateLocation();
-      _currentDefPane.grabFocus();
+      _currentDefPane.requestFocus();
     }
 
     public void interactionStarted() {
