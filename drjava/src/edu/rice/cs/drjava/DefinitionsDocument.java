@@ -38,7 +38,8 @@ public class DefinitionsDocument extends DefaultStyledDocument
     throws BadLocationException
   {
     super.insertString(offset, str, a);
-
+		//System.out.println("STRING: "+str+"      "+str.length()+" "+
+		//	offset);
 		//variables
     int locationChange = offset - _currentLocation;
 		int strLength = str.length();
@@ -87,9 +88,10 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		if (hasHighlightChanged()) {
 			SimpleAttributeSet attributes = new SimpleAttributeSet();
 			Vector<StateBlock> changedStates = getHighLightInformation();
-
 			for (int i = 0; i < changedStates.size(); i++){
 				StateBlock currentSB = changedStates.elementAt(i);
+				//	System.out.println("start: "+currentSB.location+", "+
+				//									 currentSB.size);
 				StyleConstants.setForeground(attributes, currentSB.state);
 				setCharacterAttributes(currentSB.location,
 															 currentSB.location+currentSB.size,

@@ -20,13 +20,7 @@ public class StyleUpdateTest extends TestCase {
 	
 	protected void setUp()
 		{
-			try{
-				defModel = new DefinitionsDocument();
-				this.defModel.insertString(0, "class C { /* comment */ }", null);
-			}
-			catch (BadLocationException ex) {
-				throw new RuntimeException(ex.toString());
-			}
+			defModel = new DefinitionsDocument();
 		}
 	
 	public static Test suite()
@@ -37,7 +31,7 @@ public class StyleUpdateTest extends TestCase {
 	public void testInsertStringUpdate()
 		{
 			try {
-				
+				this.defModel.insertString(0, "class C { /* comment */ }", null);
 				AttributeSet attributes = defModel.getCharacterElement(0).getAttributes();
 				assertEquals(Color.black, attributes.getAttribute(FOREGROUND));
 				this.defModel.insertString(0, "//", null);
@@ -49,9 +43,27 @@ public class StyleUpdateTest extends TestCase {
 			}
 		}
 
+	public void testInsertStringUpdate2()
+		{
+			try {
+				this.defModel.insertString(0, "/", null);
+				this.defModel.insertString(1, "*", null);
+				this.defModel.insertString(2, "h", null);
+				this.defModel.insertString(3, "e", null);
+				this.defModel.insertString(4, "r", null);
+				this.defModel.insertString(5, "e", null);
+				this.defModel.insertString(6, "*", null);
+				this.defModel.insertString(7, "/",null);
+			}
+			catch (BadLocationException ex) {
+				throw new RuntimeException(ex.toString());
+			}
+		}
+
 	public void testRemoveStringUpdate()
 		{
 			try{
+				this.defModel.insertString(0, "class C { /* comment */ }", null);
 				AttributeSet attributes;
 				this.defModel.remove(10,2);
 				attributes = defModel.getCharacterElement(13).getAttributes();
