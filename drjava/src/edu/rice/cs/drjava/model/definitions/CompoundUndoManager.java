@@ -104,7 +104,12 @@ public class CompoundUndoManager extends UndoManager {
   public int startCompoundEdit() {
     _compoundEdits.insertElementAt(new CompoundEdit(), 0);
     _keys.insertElementAt(new Integer(_nextKey), 0);
-    _nextKey++;
+    if(_nextKey < Integer.MAX_VALUE) {
+      _nextKey++;
+    }
+    else {
+      _nextKey = Integer.MIN_VALUE;
+    }
     return _keys.elementAt(0).intValue();
   }
   

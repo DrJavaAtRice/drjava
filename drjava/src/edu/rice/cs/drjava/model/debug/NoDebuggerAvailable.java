@@ -117,6 +117,14 @@ public class NoDebuggerAvailable implements Debugger {
     throw new IllegalStateException("No debugger is available");
   }
     
+  /**
+   * Resumes execution of the given thread.
+   * @param data the DebugThreadData representing the thread to resume
+   */
+  public void resume(DebugThreadData data) {
+    throw new IllegalStateException("No debugger is available");
+  }
+
   /** 
    * Steps into the execution of the currently loaded document.
    * @flag The flag denotes what kind of step to take. The following mark valid options:
@@ -268,6 +276,14 @@ public class NoDebuggerAvailable implements Debugger {
    * debugged which have been suspended (by the user or by hitting a breakpoint).
    */
   public boolean hasSuspendedThreads(){
+    throw new IllegalStateException("No debugger is available");
+  }
+
+  /**
+   * scrolls to the source indicated by the given DebugStackData
+   * @param data the DebugStackData representing the source location
+   */
+  public void scrollToSource(DebugStackData data) {
     throw new IllegalStateException("No debugger is available");
   }
 }

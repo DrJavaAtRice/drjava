@@ -82,13 +82,10 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private JTable _stackTable;
   private JTable _threadTable;
   private long _currentThreadID;
-  private String _currentStackMethod;
-  private int _currentStackLine;
   
-  private JPopupMenu _threadPopupMenu;
-  private JMenuItem _threadMenuItem;
+  private JPopupMenu _threadRunningPopupMenu;
+  private JPopupMenu _threadSuspendedPopupMenu;
   private JPopupMenu _stackPopupMenu;
-  private JMenuItem _stackMenuItem;
   
   private final SingleDisplayModel _model;
   private final MainFrame _frame;
@@ -124,7 +121,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _leftPane = new JTabbedPane();
     _rightPane = new JTabbedPane();
 
-    _initPopup();
     _setupTabPanes();
     
     _tabsPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
@@ -205,9 +201,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     
     // Stack table
     _stackTable = new JTable( new StackTableModel());
-    _currentStackMethod = "";
-    _currentStackLine = 1;
-//    _stackTable.addMouseListener(new StackMouseAdapter());
+    _stackTable.addMouseListener(new StackMouseAdapter());
 
     _rightPane.addTab("Stack", new JScrollPane(_stackTable));
     
@@ -266,6 +260,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     };
     _threadTable.getColumnModel().getColumn(0).setCellRenderer(threadTableRenderer);
     _threadTable.getColumnModel().getColumn(1).setCellRenderer(threadTableRenderer);
+    _initPopup();
   }
   
   /**
@@ -456,12 +451,40 @@ public class DebugPanel extends JPanel implements OptionConstants {
    * right-clicks on a row in the thread table or stack table.
    */
   private void _initPopup() {
-    _threadPopupMenu = new JPopupMenu("Thread Selection");
-    _threadMenuItem = new JMenuItem();
-    _threadPopupMenu.add(_threadMenuItem);
+    _threadRunningPopupMenu = new JPopupMenu("Thread Selection");
+    JMenuItem threadRunningSuspend = new JMenuItem();
+    Action suspendAction = new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        _debugger.suspend(getSelectedThread());
+      }
+    };
+    threadRunningSuspend.setAction(suspendAction);
+    _threadRunningPopupMenu.add(threadRunningSuspend);
+    threadRunningSuspend.setText("Suspend and Select Thread");
+    
+    _threadSuspendedPopupMenu = new JPopupMenu("Thread Selection");
+    JMenuItem threadSuspendedSelect = new JMenuItem();
+    threadSuspendedSelect.setAction(suspendAction);
+    JMenuItem threadSuspendedResume = new JMenuItem();
+    threadSuspendedResume.setAction(new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        _debugger.resume(getSelectedThread());
+      }
+    });
+    _threadSuspendedPopupMenu.add(threadSuspendedSelect);
+    _threadSuspendedPopupMenu.add(threadSuspendedResume);
+    threadSuspendedSelect.setText("Select Thread");
+    threadSuspendedResume.setText("Resume Thread");
+    
     _stackPopupMenu = new JPopupMenu("Stack Selection");
-    _stackMenuItem = new JMenuItem();
-    _stackPopupMenu.add(_stackMenuItem);
+    JMenuItem stackMenuItem = new JMenuItem();
+    stackMenuItem.setAction(new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        _debugger.scrollToSource(getSelectedStackItem());
+      }
+    });
+    _stackPopupMenu.add(stackMenuItem);
+    stackMenuItem.setText("Scroll to Source");
   }
   
   /**
@@ -474,20 +497,23 @@ public class DebugPanel extends JPanel implements OptionConstants {
       renderer.setFont(getFont().deriveFont(Font.BOLD));
     }
   }
-  
+
   /**
-   * Sets the font for a cell in the stack table.
-   * @param renderer the renderer
-   * @param row the current row
+   * gets the thread that is currently selected in the thread table
+   * @return the highlighted thread
    */
-  private void _setStackCellFont(Component renderer, int row) {
-    DebugStackData stackData = _stackFrames.elementAt(row);
-    if (stackData.getMethod().equals(_currentStackMethod) && 
-        stackData.getLine() == _currentStackLine) {
-      renderer.setFont(getFont().deriveFont(Font.BOLD));
-    }
+  public DebugThreadData getSelectedThread() {
+    return _threads.elementAt(_threadTable.getSelectedRow());
   }
-  
+
+  /**
+   * gets the DebugStackData that is currently selected in the stack table
+   * @return the highlighted stack element
+   */
+  public DebugStackData getSelectedStackItem() {
+    return _stackFrames.elementAt(_stackTable.getSelectedRow());
+  }
+
   /**
    * Listens to events from the debug manager to keep the panel updated.
    */
@@ -760,20 +786,20 @@ public class DebugPanel extends JPanel implements OptionConstants {
    */
   private class ThreadMouseAdapter extends DebugMouseAdapter {
     public ThreadMouseAdapter() {
-      super(_threadTable, _threadMenuItem, _threadPopupMenu);
+      super(_threadTable);
+    }
+
+    public void _showPopup(MouseEvent e) {
+      if (getSelectedThread().isSuspended()) {
+         _threadSuspendedPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+      }
+      else {
+         _threadRunningPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+      }
     }
 
     public void _action() {
-      _debugger.setCurrentThread(_threads.elementAt(_table.getSelectedRow()));
-    }
-
-    public String _popupMenuText() {
-      if (_threads.elementAt(_table.getSelectedRow()).isSuspended()) {
-        return "Select Thread";
-      }
-      else {
-        return "Suspend & Select Thread";
-      }
+      _debugger.suspend(getSelectedThread());
     }
   }
   
@@ -782,14 +808,15 @@ public class DebugPanel extends JPanel implements OptionConstants {
    */
   private class StackMouseAdapter extends DebugMouseAdapter {
     public StackMouseAdapter() {
-      super(_stackTable, _stackMenuItem, _stackPopupMenu);
-    }
-    
-    public void _action() {
+      super(_stackTable);
     }
 
-    public String _popupMenuText() {
-      return "Scroll to Source";
+    protected void _showPopup(MouseEvent e) {
+      _stackPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+    }
+
+    protected void _action() {
+      _debugger.scrollToSource(getSelectedStackItem());
     }
   }
   
@@ -798,38 +825,31 @@ public class DebugPanel extends JPanel implements OptionConstants {
    * bringing up a right-click menu.
    */
   private abstract class DebugMouseAdapter extends MouseAdapter {
-    protected JTable _table;
-    protected JMenuItem _menuItem;
-    protected JPopupMenu _popupMenu;
-    
-    public DebugMouseAdapter(JTable table, JMenuItem menuItem, 
-                             JPopupMenu popupMenu) {
+    private JTable _table;
+
+    public DebugMouseAdapter(JTable table) {
       _table = table;
-      _menuItem = menuItem;
-      _popupMenu = popupMenu;
     }
-    
-    public abstract void _action();
-    
-    public abstract String _popupMenuText();
-    
+
+    protected abstract void _showPopup(MouseEvent e);
+    protected abstract void _action();
+
     public void mousePressed(MouseEvent e) {
       if (e.isPopupTrigger()) {
         int row = _table.rowAtPoint(e.getPoint());
-
         _table.setRowSelectionInterval(row, row);
-
-        _menuItem.setAction(new AbstractAction() {
-          public void actionPerformed(ActionEvent e) {
-            _action();
-          }
-        });
-        
-        _menuItem.setText(_popupMenuText());
-        _popupMenu.show(e.getComponent(), e.getX(), e.getY());
+        _showPopup(e);
       }
       else if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
         _action();
+      }
+    }
+    
+    public void mouseReleased(MouseEvent e) {
+      if (e.isPopupTrigger()) {
+        int row = _table.rowAtPoint(e.getPoint());
+        _table.setRowSelectionInterval(row, row);
+        _showPopup(e);
       }
     }
   }

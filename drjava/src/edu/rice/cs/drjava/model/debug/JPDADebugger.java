@@ -324,7 +324,8 @@ public class JPDADebugger implements Debugger {
         return;
       }
       scrollToSource(thread_ref.frame(0).location());
-    }catch(IncompatibleThreadStateException e){
+    }
+    catch(IncompatibleThreadStateException e){
       throw new UnexpectedException(e);
     }
     
@@ -907,6 +908,39 @@ public class JPDADebugger implements Debugger {
     
     openAndScroll(doc, location);
   }
+
+  /**
+   * Scrolls to the source location specified by the the debug stack data.
+   */
+  synchronized public void scrollToSource(DebugStackData stackData) {
+    if (_runningThread != null) {
+      throw new UnexpectedException(new DebugException("Cannot scroll to source unless thread is suspended."));
+    }
+    
+    ThreadReference threadRef = _suspendedThreads.peek();
+    Iterator i = null;
+
+    try {
+      if (threadRef.frameCount() <= 0 ) {
+        printMessage("Could not scroll to source. The current thread had no stackframes.");
+        return;
+      }
+      i = threadRef.frames().iterator();
+    }
+    catch (IncompatibleThreadStateException e) {
+      throw new UnexpectedException(e);
+    }
+    
+    while (i.hasNext()) {
+      StackFrame frame = (StackFrame) i.next();
+
+      if (frame.location().lineNumber() == stackData.getLine() && 
+          stackData.getMethod().equals(frame.location().declaringType().name() + "." + 
+                                       frame.location().method().name())) {
+        scrollToSource(frame.location());
+      }
+    }
+  }
   
   /** 
    * Opens a document and scrolls to the appropriate location specified by location
@@ -1210,7 +1244,8 @@ public class JPDADebugger implements Debugger {
         else {
           scrollToSource(thread.frame(0).location());
         }
-      }catch(IncompatibleThreadStateException e){
+      }
+      catch(IncompatibleThreadStateException e){
         throw new UnexpectedException(e);
       }
     
@@ -1225,21 +1260,21 @@ public class JPDADebugger implements Debugger {
     });
   }
   
+  synchronized void currThreadSet(final DebugThreadData thread) {
+    _model.printDebugMessage("The current thread has been set.");
+    notifyListeners(new EventNotifier() {
+      public void notifyListener(DebugListener l) {
+        l.currThreadSet(thread);
+      }
+    });
+  }
+    
   synchronized void nonCurrThreadDied(DebugThreadData threadRef) {
     _deadThreads.add(threadRef);
     
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
         l.nonCurrThreadDied();
-      }
-    });
-  }
-  
-  synchronized void currThreadSet(final DebugThreadData thread) {
-    _model.printDebugMessage("The current thread is now " + thread.getName() + ".");
-    notifyListeners(new EventNotifier() {
-      public void notifyListener(DebugListener l) {
-        l.currThreadSet(thread);
       }
     });
   }
