@@ -198,6 +198,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenuItem _toggleBreakpointMenuItem;
   private JMenuItem _printBreakpointsMenuItem;
   private JMenuItem _clearAllBreakpointsMenuItem;
+
+  // Popup menus
+  private JPopupMenu _docPanePopupMenu;
+  private JPopupMenu _interactionsPanePopupMenu;
+  private JPopupMenu _consolePanePopupMenu;
   
   // Cached frames and dialogs
   private ConfigFrame _configFrame;
@@ -1268,11 +1273,11 @@ public class MainFrame extends JFrame implements OptionConstants {
         try {
           UIManager.setLookAndFeel(oe.value);
           SwingUtilities.updateComponentTreeUI(MainFrame.this);
+          if (_debugPanel != null) {
+            SwingUtilities.updateComponentTreeUI(_debugPanel);
+          }
           if (_configFrame != null) {
             SwingUtilities.updateComponentTreeUI(_configFrame);
-          }
-          if (_javadocFrame != null) {
-            SwingUtilities.updateComponentTreeUI(_javadocFrame);
           }
           if (_helpFrame != null) {
             SwingUtilities.updateComponentTreeUI(_helpFrame);
@@ -1280,11 +1285,22 @@ public class MainFrame extends JFrame implements OptionConstants {
           if (_aboutDialog != null) {
             SwingUtilities.updateComponentTreeUI(_aboutDialog);
           }
+          SwingUtilities.updateComponentTreeUI(_docPanePopupMenu);
+          SwingUtilities.updateComponentTreeUI(_interactionsPanePopupMenu);
+          SwingUtilities.updateComponentTreeUI(_consolePanePopupMenu);
+          SwingUtilities.updateComponentTreeUI(_openChooser);
+          SwingUtilities.updateComponentTreeUI(_saveChooser);
+          SwingUtilities.updateComponentTreeUI(_javadocChooser);
+          Iterator<TabbedPanel> it = _tabs.iterator();
+          while (it.hasNext()) {
+            SwingUtilities.updateComponentTreeUI(it.next());
+          }
         }
         catch (Exception ex) {
           _showError(ex, "Could Not Set Look and Feel",
                      "An error occurred while trying to set the look and feel.");
-        }*/
+        }
+        */
         String title = "Apply Look and Feel";
         String msg = "Look and feel changes will take effect when you restart DrJava.";
         if (DrJava.getConfig().getSetting(OptionConstants.WARN_CHANGE_LAF).booleanValue()) {
@@ -2912,54 +2928,54 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _setUpContextMenus() {
     // DocPane menu
-    final JPopupMenu docPanePopupMenu = new JPopupMenu();
-    docPanePopupMenu.add(_saveAction);
-    docPanePopupMenu.add(_saveAsAction);
-    docPanePopupMenu.add(_revertAction);
-    docPanePopupMenu.addSeparator();
-    docPanePopupMenu.add(_closeAction);
-    docPanePopupMenu.addSeparator();
-    docPanePopupMenu.add(_printAction);
-    docPanePopupMenu.add(_printPreviewAction);
-    docPanePopupMenu.addSeparator();
-    docPanePopupMenu.add(_compileAction);
+    _docPanePopupMenu = new JPopupMenu();
+    _docPanePopupMenu.add(_saveAction);
+    _docPanePopupMenu.add(_saveAsAction);
+    _docPanePopupMenu.add(_revertAction);
+    _docPanePopupMenu.addSeparator();
+    _docPanePopupMenu.add(_closeAction);
+    _docPanePopupMenu.addSeparator();
+    _docPanePopupMenu.add(_printAction);
+    _docPanePopupMenu.add(_printPreviewAction);
+    _docPanePopupMenu.addSeparator();
+    _docPanePopupMenu.add(_compileAction);
     if (CodeStatus.DEVELOPMENT) {
-      docPanePopupMenu.add(_runAction);
+      _docPanePopupMenu.add(_runAction);
     }
-    docPanePopupMenu.add(_junitAction);
+    _docPanePopupMenu.add(_junitAction);
     _docList.addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
         _docList.setSelectedIndex(_docList.locationToIndex(e.getPoint()));
-        docPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+        _docPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
       }
     });
 
     // Interactions pane menu
-    final JPopupMenu interactionsPanePopupMenu = new JPopupMenu();
-    interactionsPanePopupMenu.add(cutAction);
-    interactionsPanePopupMenu.add(copyAction);
-    interactionsPanePopupMenu.add(pasteAction);
-    interactionsPanePopupMenu.addSeparator();
-    interactionsPanePopupMenu.add(_loadHistoryAction);
-    interactionsPanePopupMenu.add(_saveHistoryAction);
-    interactionsPanePopupMenu.add(_clearHistoryAction);
-    interactionsPanePopupMenu.addSeparator();
-    interactionsPanePopupMenu.add(_resetInteractionsAction);
-    interactionsPanePopupMenu.add(_viewInteractionsClasspathAction);
-    interactionsPanePopupMenu.add(_copyInteractionToDefinitionsAction);
+    _interactionsPanePopupMenu = new JPopupMenu();
+    _interactionsPanePopupMenu.add(cutAction);
+    _interactionsPanePopupMenu.add(copyAction);
+    _interactionsPanePopupMenu.add(pasteAction);
+    _interactionsPanePopupMenu.addSeparator();
+    _interactionsPanePopupMenu.add(_loadHistoryAction);
+    _interactionsPanePopupMenu.add(_saveHistoryAction);
+    _interactionsPanePopupMenu.add(_clearHistoryAction);
+    _interactionsPanePopupMenu.addSeparator();
+    _interactionsPanePopupMenu.add(_resetInteractionsAction);
+    _interactionsPanePopupMenu.add(_viewInteractionsClasspathAction);
+    _interactionsPanePopupMenu.add(_copyInteractionToDefinitionsAction);
     _interactionsPane.addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
         _interactionsPane.requestFocus();
-        interactionsPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+        _interactionsPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
       }
     });
 
-    final JPopupMenu consolePanePopupMenu = new JPopupMenu();
-    consolePanePopupMenu.add(_clearConsoleAction);
+    _consolePanePopupMenu = new JPopupMenu();
+    _consolePanePopupMenu.add(_clearConsoleAction);
     _consolePane.addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
         _consolePane.requestFocus();
-        consolePanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+        _consolePanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
       }
     });
   }

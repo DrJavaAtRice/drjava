@@ -411,11 +411,24 @@ public class JUnitPanel extends ErrorPanel{
       _stackFrame.show();
     }
 
-    private class PopupAdapter extends MouseAdapter {
+    /**
+     * Updates the UI to a new look and feel.
+     * Need to update the contained popup menu as well.
+     * 
+     * Currently, we don't support changing the look and feel
+     * on the fly, so this is disabled.
+     *
+    public void updateUI() {
+      super.updateUI();
+      if (_popMenu != null) {
+        SwingUtilities.updateComponentTreeUI(_popMenu);
+      }
+    }*/
 
+    private class PopupAdapter extends RightClickMouseAdapter {
       private JUnitError _error = null;
 
-      public PopupAdapter (){
+      public PopupAdapter() {
         _popMenu = new JPopupMenu();
         JMenuItem stackTraceItem = new JMenuItem("Show Stack Trace");
         stackTraceItem.addActionListener ( new AbstractAction() {
@@ -434,8 +447,7 @@ public class JUnitPanel extends ErrorPanel{
 
       public void mousePressed(MouseEvent e) {
         selectNothing();
-
-        maybeShowPopup(e);
+        super.mousePressed(e);
       }
 
       public void mouseReleased(MouseEvent e) {
@@ -448,24 +460,17 @@ public class JUnitPanel extends ErrorPanel{
         else {
           selectNothing();
         }
-        maybeShowPopup(e);
+        super.mouseReleased(e);
       }
 
-      private void maybeShowPopup(MouseEvent e) {
-        //Ask if the popuptrigger was pressed, rather than if the
-        //right mouse button was pressed
-        if (e.isPopupTrigger()) {
-          _popMenu.show(e.getComponent(),
-                        e.getX(), e.getY());
-        }
+      protected void _popupAction(MouseEvent e) {
+        _popMenu.show(e.getComponent(), e.getX(), e.getY());
       }
 
       public JUnitError getError() {
         return _error;
       }
-
     }
-
   }
 
   /**
@@ -509,5 +514,4 @@ public class JUnitPanel extends ErrorPanel{
       }
     }
   }
-
 }

@@ -915,6 +915,29 @@ public class DebugPanel extends JPanel implements OptionConstants {
   }
 
   /**
+   * Updates the UI to a new look and feel.
+   * Need to update the contained popup menus as well.
+   * 
+   * Currently, we don't support changing the look and feel
+   * on the fly, so this is disabled.
+   *
+  public void updateUI() {
+    super.updateUI();
+    if (_threadSuspendedPopupMenu != null) {
+      SwingUtilities.updateComponentTreeUI(_threadSuspendedPopupMenu);
+    }
+    if (_stackPopupMenu != null) {
+      SwingUtilities.updateComponentTreeUI(_stackPopupMenu);
+    }
+    if (_breakpointPopupMenu != null) {
+      SwingUtilities.updateComponentTreeUI(_breakpointPopupMenu);
+    }
+    if (_watchPopupMenu != null) {
+      SwingUtilities.updateComponentTreeUI(_watchPopupMenu);
+    }
+  }*/
+
+  /**
    * Mouse adapter for the breakpoint tree.
    */
   private class BreakpointMouseAdapter extends RightClickMouseAdapter {

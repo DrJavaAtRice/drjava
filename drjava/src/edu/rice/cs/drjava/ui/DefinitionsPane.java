@@ -1113,6 +1113,20 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   }
 
   /**
+   * Updates the UI to a new look and feel.
+   * Need to update the contained popup menu as well.
+   * 
+   * Currently, we don't support changing the look and feel
+   * on the fly, so this is disabled.
+   *
+  public void updateUI() {
+    super.updateUI();
+    if (_popMenu != null) {
+      SwingUtilities.updateComponentTreeUI(_popMenu);
+    }
+  }*/
+
+  /**
    * The undo action.
    */
   private class UndoAction extends AbstractAction {
