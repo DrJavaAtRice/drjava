@@ -39,14 +39,17 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
+import edu.rice.cs.drjava.Version;
 import javax.swing.*;
 import javax.swing.text.*;
+import javax.swing.border.*;
 import javax.swing.event.*;
 import java.awt.event.*;
 import java.awt.*;
 
-import java.io.File;
-import java.io.IOException;
+
+import java.net.URL;
+import java.io.*;
 import java.util.Hashtable;
 
 /**
@@ -54,41 +57,195 @@ import java.util.Hashtable;
  *
  * @version $Id$
  */
-public class AboutDialog extends JDialog {
+public class AboutDialog extends JDialog implements ActionListener {
+  
+  private static ImageInfo CSLOGO = new ImageInfo("RiceCS.gif",new Color(0x423585)),
+    SF = new ImageInfo("SourceForge.gif",Color.black),
+    DRJAVA = new ImageInfo("DrJava.gif",new Color(0xCCCCFF));
+  
+  
   public AboutDialog(JFrame owner, String text) {
+    this(owner);
+  }
+  
+  public AboutDialog(JFrame owner) {
     super(owner, "About DrJava", true);
-    Insets ins = new Insets(20,20,20,20);
 
-    JTextArea textArea = new JTextArea(text);
-    textArea.setEditable(false);
-    textArea.setLineWrap(true);
-    textArea.setWrapStyleWord(true);
-    textArea.setMargin(ins);
-    Container cp = getContentPane();
-    cp.add(new BorderlessScrollPane(textArea),BorderLayout.CENTER);
-
-    JButton button = new JButton("OK");
-    button.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        AboutDialog.this.hide();
-      }
-    });
-
-    JPanel bottom = new JPanel();
-    bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
-    bottom.add(Box.createHorizontalGlue());
-    bottom.add(button);
-    bottom.add(Box.createHorizontalGlue());
-
-    cp.add(bottom, BorderLayout.SOUTH);
-
-    //pack();
-    setSize((int) (owner.getWidth() * (4f/5f)),
-            (int) (owner.getHeight() * (4f/5f)));
+    buildGUI(getContentPane());
+    
+    pack();
+    // setSize((int) (owner.getWidth() * (.8f)),(int) (owner.getHeight() * (.8f)));
     // suggested from zaq@nosi.com, to keep the frame on the screen!
+    System.out.println("Dialog created...");
+  }
+  
+  public void show() {
+    System.out.println("Showing dialog...");
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = this.getSize();
     this.setLocation((screenSize.width - frameSize.width) / 2,
                      (screenSize.height - frameSize.height) / 2);
+    super.show();
+  }
+  
+  public void buildGUI(Container cp) {
+    JLabel drjava = createImageLabel(DRJAVA,JLabel.LEFT);
+    if(drjava != null)
+      cp.add(drjava,BorderLayout.NORTH);
+    cp.setLayout(new BorderLayout());
+    JTabbedPane tabs = new JTabbedPane();
+    tabs.addTab("About",createCopyrightTab());
+    tabs.addTab("GNU Public License",createTextScroller(GPL));
+    tabs.addTab("DynamicJava License",createTextScroller(DYADE_LICENSE));
+    cp.add(createBottomBar(),BorderLayout.SOUTH);
+    cp.add(tabs,BorderLayout.CENTER);
+  }
+  
+  public static JPanel createCopyrightTab() {
+    JComponent copy = createTextScroller(COPYRIGHT);
+    JPanel panel = new JPanel(new BorderLayout());
+    LogoList logos = new LogoList();
+    logos.addLogo(createBorderedLabel(CSLOGO));
+    logos.addLogo(createBorderedLabel(SF));
+    logos.resizeLogos();
+    panel.add(new JLabel("DrJava Version: "+Version.getBuildTimeString()),BorderLayout.NORTH);
+    JPanel logoPanel = new JPanel();
+    logoPanel.setLayout(new BoxLayout(logoPanel,BoxLayout.X_AXIS));
+    logoPanel.add(Box.createHorizontalGlue());
+    java.util.Iterator it = logos.iterator();
+    while(it.hasNext()) {
+      logoPanel.add((JComponent) it.next());
+      logoPanel.add(Box.createHorizontalGlue());
+    }
+    panel.add(logoPanel,BorderLayout.SOUTH);
+    panel.add(copy,BorderLayout.CENTER);
+    return panel;
+  }
+  
+  private static class LogoList extends java.util.LinkedList {
+    private int width = Integer.MIN_VALUE;
+    private int height = Integer.MIN_VALUE;
+    private void addLogo(JPanel logo) {
+      if(logo == null) return;
+      Dimension d = logo.getMinimumSize();
+      width = (int) Math.max(width,d.width);
+      height = (int) Math.max(height,d.height);
+      add(logo);
+    }
+    
+    private void resizeLogos() {
+      java.util.Iterator it = iterator();
+      Dimension d = new Dimension(width,height);
+      System.out.println("resizing logos to "+d);
+      System.out.flush();
+      while(it.hasNext()) {
+        JComponent i = (JComponent) it.next();
+        i.setMinimumSize(d);
+        i.setMaximumSize(d);
+        i.setPreferredSize(d);
+      }
+    }
+  }
+  
+  public static JPanel createBorderedLabel(ImageInfo info) {
+    JLabel label = createImageLabel(info,JLabel.CENTER);
+    if(label == null) return null;
+    JPanel panel = new JPanel(new GridLayout(1,1));
+    panel.setBorder(new CompoundBorder(new EmptyBorder(0,10,10,10),new EtchedBorder()));
+    panel.add(label);
+    return panel;
+  }
+      
+  public static JLabel createImageLabel(ImageInfo info, int align) {
+    ImageIcon icon = MainFrame.getIcon(info.name);
+    if(icon==null) return null;
+    JLabel label = new JLabel(icon,align);
+    label.setOpaque(true);
+    label.setBackground(info.color);
+    return label;
+  }
+  
+  public static JTextArea createTextArea(String text) {
+    JTextArea textArea = new JTextArea(text);
+    textArea.setEditable(false);
+    textArea.setLineWrap(true);
+    textArea.setWrapStyleWord(true);
+    return textArea;
+  }
+  
+  public static JScrollPane createTextScroller(String text) {
+    return new BorderlessScrollPane(createTextArea(text));
+  }
+  
+  public JPanel createBottomBar() {
+    JButton button = new JButton("OK");
+    JPanel panel = new JPanel(new BorderLayout());
+    button.addActionListener(this);
+    panel.add(button,BorderLayout.EAST);
+    return panel;
+  }
+  
+  public void actionPerformed(ActionEvent e) {
+    hide();
+  }
+  
+  public static final String COPYRIGHT = "Copyright \u00a9 2001-2002 JavaPLT group"+
+    " at Rice University (javaplt@rice.edu)\n\nSee http://drjava.sourceforge.net for"+
+    " more information on DrJava or to obtain the latest version of the program or its source code.\n\n"+
+    "DrJava is free software; you can redistribute it and/or modify it under the terms"+
+    " of the GNU General Public License as published by the Free Software Foundation;"+
+    " either version 2 of the License, or (at your option) any later version.\n\n"+
+    "DrJava is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;"+
+    " without even the implied warranty of MERCHANTABILITY or FITNESS FOR A"+
+    " PARTICULAR PURPOSE.  See the GNU General Public License for more details.";
+  public static final String GPL;
+  public static final String DYADE_LICENSE = 
+    "DynamicJava - Copyright \u00a9 1999 Dyade\n\nPermission is hereby granted,"+
+    " free of charge, to any person obtaining a copy of this software and associated"+
+    " documentation files (the \"Software\"), to deal in the Software without restriction,"+
+    " including without limitation the rights to use, copy, modify, merge, publish, distribute,"+
+    " sublicense, and/or sell copies of the Software, and to permit persons to whom the Software"+
+    " is furnished to do so, subject to the following conditions:\n\n"+
+    "The above copyright notice and this permission notice shall be included in all copies or"+
+    " substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY"+
+    " OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"+
+    " FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL DYADE BE LIABLE FOR ANY CLAIM,"+
+    " DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT"+
+    " OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n"+
+    "Except as contained in this notice, the name of Dyade shall not be used in advertising or otherwise"+
+    " to promote the sale, use or other dealings in this Software without prior written authorization from Dyade.";
+  public static final String INTRODUCTION = 
+    "DrJava is a pedagogic programming environment for Java, intended to help students focus more on program"+
+    " design than on the features of a complicated development environment. It provides an Interactions"+
+    " window based on a \"read-eval-print loop\", which allows programmers to develop, test, and debug"+
+    " Java programs in an interactive, incremental fashion.\n\n"+
+    "Home Page: http://drjava.sourceforge.net\nPaper: http://drjava.sf.net/papers/drjava-paper.shtml";
+  
+  static {
+    String gpl = null;
+    try {
+      InputStream is = AboutDialog.class.getResourceAsStream("/edu/rice/cs/LICENSE");
+      if(is!=null) {
+        BufferedReader r = new BufferedReader(new InputStreamReader(is));
+        StringBuffer sb = new StringBuffer();
+        char[] buf = new char[0x1000];
+        for(int c = r.read(buf); c > 0; c = r.read(buf))
+          sb.append(buf,0,c);
+        r.close();
+        gpl = sb.toString();
+      }
+    } catch(Exception e) {
+    }
+    GPL = gpl;
+  }
+  
+  public static class ImageInfo {
+    private final String name;
+    private final Color color;
+    public ImageInfo(String name, Color color) {
+      this.name = name;
+      this.color = color;
+    }
   }
 }
+  

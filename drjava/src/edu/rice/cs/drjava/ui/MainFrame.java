@@ -1659,7 +1659,11 @@ public class MainFrame extends JFrame implements OptionConstants {
    * @return ImageIcon object constructed from the file
    */
   private ImageIcon _getIcon(String name) {
-    URL url = this.getClass().getResource(ICON_PATH + name);
+    return getIcon(name);
+  }
+  
+  public static ImageIcon getIcon(String name) {
+    URL url = MainFrame.class.getResource(ICON_PATH + name);
     if (url != null) {
       return new ImageIcon(url);
     }

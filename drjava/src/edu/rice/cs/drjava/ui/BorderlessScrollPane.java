@@ -40,28 +40,30 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.ui;
 
 import javax.swing.*;
+import javax.swing.border.*;
 import java.awt.*;
 /**
- * DrJava's version of a JScrollPane, which initializes the border to null.
+ * DrJava's version of a JScrollPane, which initializes the border to DEFAULT.
  * @version $Id$
  */
 public class BorderlessScrollPane extends JScrollPane {
   // note, I can't think of a way to guarantee superclass behavior without
   // overriding each superclass constructor and then calling setBorder().
+  private static final Border DEFAULT = null; // new LineBorder(Color.black);
   public BorderlessScrollPane() {
     super();
-    setBorder(null);
+    setBorder(DEFAULT);
   }
   public BorderlessScrollPane(Component view) {
     super(view);
-    setBorder(null);
+    setBorder(DEFAULT);
   }
   public BorderlessScrollPane(Component view, int vsbPolicy, int hsbPolicy) {
     super(view,vsbPolicy,hsbPolicy);
-    setBorder(null);
+    setBorder(DEFAULT);
   }
   public BorderlessScrollPane(int vsbPolicy, int hsbPolicy) {
     super(vsbPolicy,hsbPolicy);
-    setBorder(null);
+    setBorder(DEFAULT);
   }
 }
