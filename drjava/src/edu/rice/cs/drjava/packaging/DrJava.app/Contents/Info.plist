@@ -25,8 +25,7 @@
 	<key>Java</key>
 	<dict>
 		<key>ClassPath</key>
-		<string>$JAVAROOT/DrJava.jar:/Users/centgraf/Documents/Rice/Comp312/cvs/built:/Users/centgraf/Documents/Rice/Comp312/cvs/src/edu/rice/cs/lib/jsr14.jar:/Users/centgraf/Documents/Rice/Comp312/cvs/src/edu/rice/cs/lib/junit.jar:/Users/centgraf/Documents/Ric
-e/Comp312/cvs/src/edu/rice/cs/lib/GJv6.jar:/Users/centgraf/Documents/Rice/Comp312/cvs/src/edu/rice/cs/lib/gj-util.jar:/Users/centgraf/Documents/Rice/Comp312/cvs/src/edu/rice/cs/lib/dynamicjava.jar:/Developer/Applications/jakarta-ant-1.4.1</string>
+		<string>$JAVAROOT/DrJava.jar</string>
 		<key>MainClass</key>
 		<string>edu.rice.cs.drjava.DrJava</string>
 		<key>Properties</key>
