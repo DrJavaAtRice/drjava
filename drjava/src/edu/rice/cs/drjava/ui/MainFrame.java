@@ -311,6 +311,19 @@ public class MainFrame extends JFrame implements OptionConstants {
       //_openChooser.removeChoosableFileFilter(_projectFilter);
       _openChooser.resetChoosableFileFilters();
       
+      _openChooser.setFileFilter(_javaSourceFilter);
+      return getOpenFiles(_openChooser);
+    }
+  };
+  
+  /**
+   * Returns the files to open to the model (command pattern).
+   */
+  private FileOpenSelector _openFileOrProjectSelector = new FileOpenSelector() {
+    public File[] getFiles() throws OperationCanceledException {
+      //_openChooser.removeChoosableFileFilter(_projectFilter);
+      _openChooser.resetChoosableFileFilters();
+      
       _openChooser.addChoosableFileFilter(_projectFilter);
       _openChooser.setFileFilter(_javaSourceFilter);
       return getOpenFiles(_openChooser);
@@ -401,6 +414,16 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _openAction = new AbstractAction("Open...") {
     public void actionPerformed(ActionEvent ae) {
       _open();
+    }
+  };
+  
+  /**
+   * Asks user for file name and and reads that file into
+   * the definitions pane.
+   */
+  private Action _openFileOrProjectAction = new AbstractAction("Open...") {
+    public void actionPerformed(ActionEvent ae) {
+      _openFileOrProject();
     }
   };
   
@@ -1974,8 +1997,12 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private void _open() {
+    open(_openSelector);
+  }
+  
+  private void _openFileOrProject() {
     try {
-      final File[] fileList = _openSelector.getFiles();
+      final File[] fileList = _openFileOrProjectSelector.getFiles();
       
       FileOpenSelector fos = new FileOpenSelector() {
         public File[] getFiles(){
@@ -2173,7 +2200,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     new ForegroundColorListener(renderer);
     new BackgroundColorListener(renderer);
     _resetNavigatorPane();
-    _close();
+    if(_model.getDocumentCount() == 1)
+      _model.setActiveFirstDocument();
     _closeProjectAction.setEnabled(false);
     _saveProjectAction.setEnabled(false);
     _projectPropertiesAction.setEnabled(false);
@@ -3052,6 +3080,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_newJUnitTestAction, "New", "Create a new JUnit test case class");
     _setUpAction(_newProjectAction, "New", "Make a new project");
     _setUpAction(_openAction, "Open", "Open an existing file");
+    _setUpAction(_openFileOrProjectAction, "Open", "Open an existing file or project");
     _setUpAction(_openProjectAction, "Open", "Open an existing project");
     _setUpAction(_saveAction, "Save", "Save the current document");
     _setUpAction(_saveAsAction, "Save As", "SaveAs",
@@ -3597,7 +3626,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // New, open, save, close
     _toolBar.add(_createToolbarButton(_newAction));
-    _toolBar.add(_createToolbarButton(_openAction));
+    _toolBar.add(_createToolbarButton(_openFileOrProjectAction));
     _toolBar.add(_createToolbarButton(_saveAction));
     _closeButton = _createToolbarButton(_closeAction);
     _toolBar.add(_closeButton);
