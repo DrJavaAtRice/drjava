@@ -131,15 +131,31 @@ public class CompilerRegistry {
 
     while (itor.hasNext()) {
       String name = (String) itor.next();
+      //System.err.print("compiler " + name + " check: ");
 
       try {
         CompilerInterface compiler = _instantiateCompiler(name);
         if (compiler.isAvailable()) {
+          //System.err.println("ok.");
+
+          // can't use getActiveCompiler() because it will call back to
+          // getAvailableCompiler, forming an infinite recursion!!
+          if (_activeCompiler == NoCompilerAvailable.ONLY) {
+            //System.err.println("\tset to active.");
+            _activeCompiler = compiler;
+          }
+
           availableCompilers.add(compiler);
+        }
+        else {
+          //System.err.println("! .isAvailable.");
         }
       }
       catch (Throwable t) {
         // This compiler didn't load. Keep on going.
+        //System.err.println("failed to load:");
+        //t.printStackTrace();
+        //System.err.println();
       }
     }
 
@@ -176,7 +192,7 @@ public class CompilerRegistry {
   public CompilerInterface getActiveCompiler() {
     // If no compiler is available now, try to see if we can get one
     if (_activeCompiler == NoCompilerAvailable.ONLY) {
-      _setFirstAvailableCompilerActive();
+      getAvailableCompilers();
     }
 
     //DrJava.consoleErr().println("active compiler: " + _activeCompiler);
@@ -199,6 +215,7 @@ public class CompilerRegistry {
    * Sets as active the first compiler that's available.
    * If no compiler is available, the active compiler will not be changed.
    */
+  /*
   private void _setFirstAvailableCompilerActive() {
     ListIterator itor = _registeredCompilers.listIterator();
 
@@ -215,6 +232,7 @@ public class CompilerRegistry {
       }
     }
   }
+  */
 
   /**
    * Instantiate the given compiler.
