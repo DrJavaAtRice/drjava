@@ -38,10 +38,14 @@ public class OutputView extends JTextPane
   }
 
   public OutputView() {
-    getDocument().addDocumentListener(new ScrollToEndDocumentListener());
-
     // user can't edit this thing!
     setEditable(false);
+
+    // when we make the view uneditable, it no longer scrolls when text is
+    // added. To get around this we wrote this listener to scroll on output.
+    // Unfortunately it slows the output window down. Maybe there's a better
+    // way?
+    getDocument().addDocumentListener(new ScrollToEndDocumentListener());
 
     StyleContext defaultStyle = StyleContext.getDefaultStyleContext();
 
