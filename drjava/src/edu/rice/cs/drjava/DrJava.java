@@ -150,9 +150,12 @@ public class DrJava implements OptionConstants {
         
     // Schedule a job for the event-dispatching thread:
     // creating and showing this application's GUI.
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() { createAndShowGUI(args, splash); }
-    });
+    // ** invokeLater commented out in order to allow the splash screen to paint itself
+//    SwingUtilities.invokeLater(new Runnable() {
+//      public void run() { 
+        createAndShowGUI(args, splash); 
+//      }
+//    });
   }  
       
   private static void createAndShowGUI(final String[] args, SplashScreen splash) {

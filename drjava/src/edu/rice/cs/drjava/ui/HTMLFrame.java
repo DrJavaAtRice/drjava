@@ -221,7 +221,7 @@ public class HTMLFrame extends JFrame {
     _navPane.add(Box.createHorizontalStrut(8));
     _navPane.add(_forwardButton);
     _navPane.add(Box.createHorizontalStrut(3));
-    _navPane.setBorder(new EmptyBorder(5,5,5,5));
+    _navPane.setBorder(new EmptyBorder(0,0,0,5));
     JPanel navContainer = new JPanel(new GridLayout(1,1));
     navContainer.setBorder(new CompoundBorder(new EmptyBorder(5,5,5,5),
                                               new EtchedBorder()));

@@ -1290,7 +1290,6 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     }
     
     
-    
 //        SHOW_GETDOC = false;
     for(File f: filesNotFound){
       _notifier.fileNotFound(f);
@@ -4125,12 +4124,16 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    * "extra classpath" config option to the interpreter's classpath.
    */
   public void resetInteractionsClasspath() {
-    // Ideally, we'd like to put the open docs before the config option,
+    //  Ideally, we'd like to put the open docs before the config option,
     //  but this is inconsistent with how the classpath was defined
     //  as it was built up.  (The config option is inserted on startup,
     //  and docs are added as they are opened.  It shouldn't switch after
     //  a reset.)
 
+    // switch the order of the two code segments
+    // also put build directory
+    
+    
     Vector<File> cp = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
     if(cp!=null) {
       Enumeration<File> en = cp.elements();

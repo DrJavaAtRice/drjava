@@ -552,12 +552,14 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _saveProjectAction = new AbstractAction("Save") {
     public void actionPerformed(ActionEvent ae) {
       _saveProject();
+      _saveAll();
     }
   };
   
   private Action _saveProjectAsAction = new AbstractAction("Save As...") {
     public void actionPerformed(ActionEvent ae) {
       _saveProjectAs();
+      _saveAll();
     }
   };
 

@@ -63,7 +63,7 @@ public class HelpFrame extends HTMLFrame {
   private static final String HOME_PAGE = "intro.html";
   private static final URL INTRO_URL =
     HTMLFrame.class.getResource(HELP_PATH + HOME_PAGE);
-  private static final String ICON = "DrJavaHelp.gif";
+  private static final String ICON = "DrJavaHelp.png";
 
   public HelpFrame() {
     super("Help on using DrJava", INTRO_URL,
