@@ -134,7 +134,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		
     super.remove(offset, len);
     _modifiedSinceSave = true;
-		_modifiedHighlights = true;
+		_modifiedHighlights = _reduced.hasHighlightChanged();
 		
 		newStates = _reduced.generateHighlights(offset,0);		
 		updateCurrentHighlights(newStates);

@@ -502,16 +502,24 @@ public class ReducedModelComment
 					_cursor.next();
 					_cursor.next();
 					_offset = 0;
+					_highlightChanged = true;
 				}
 			else if ((_offset > 0) && _cursor.current().isGap())
 				{
+					_highlightChanged =
+						(_cursor.current().getState() == ReducedToken.INSIDE_QUOTE) ||
+						(_cursor.current().getState() == ReducedToken.INSIDE_LINE_COMMENT);
+						
 					_insertBraceToGap("\n", _cursor);
 				}
 			else
 				{
+					_highlightChanged =
+						(_cursor.current().getState() == ReducedToken.INSIDE_QUOTE) ||
+						(_cursor.current().getState() == ReducedToken.INSIDE_LINE_COMMENT);
+
 					_insertNewEndOfLine();
 				}
-			_highlightChanged = true;
 			return;
 		}
 
@@ -1645,24 +1653,35 @@ public class ReducedModelComment
 													 ModelList<ReducedToken>.Iterator delFrom,
 													 ModelList<ReducedToken>.Iterator delTo)
 		{
-			_highlightChanged = false;
-
+			_highlightChanged = !((delFrom.atStart() &&
+														 delTo.current().isGap() &&
+														 (delFrom.nextItem() == delTo.current())) ||
+														
+														(delFrom.current().isGap() &&
+														 delTo.atEnd() &&
+														 (delTo.prevItem() == delFrom.current())) ||
+														
+														(delFrom.current().isGap() &&
+														 (endOffset == 0) &&
+														 (delFrom.nextItem() == delTo.current())));			
 			delFrom.collapse(delTo);
 						
 			// if both pointing to same item, and it's a gap
 			if (delFrom.eq(delTo) && delFrom.current().isGap()){
 				// inside gap
 				delFrom.current().shrink(endOffset-offset);
+				_highlightChanged = false;
 				return offset;
 			}
 
+														
 			//if brace is multiple char it must be a comment because the above if
  			//test gaurentees it can't be a gap.
 			if (!delFrom.eq(delTo))
 				_clipLeft(offset, delFrom);
 
 			_clipRight(endOffset, delTo);			
-
+			
 			if (!delFrom.atStart())
 				delFrom.prev();
 					
@@ -1673,7 +1692,6 @@ public class ReducedModelComment
 			if (delTo.atEnd()){
 				_updateBasedOnCurrentState();
 				delFrom.setTo(delTo);
-				_highlightChanged = true;
 				return 0;
 			}
 			else{
@@ -1690,7 +1708,6 @@ public class ReducedModelComment
 				delTo.next();
 				_updateBasedOnCurrentStateHelper(delFrom);
 				delFrom.setTo(delTo);
-				_highlightChanged = true;
 				return 0;
 			}
 			else{
@@ -1707,7 +1724,6 @@ public class ReducedModelComment
 												 delToSizeCurr, delToTypeCurr,
 												 delTo);
 			delFrom.setTo(delTo);
-			_highlightChanged = true;
 			return temp;
 		}
 	
