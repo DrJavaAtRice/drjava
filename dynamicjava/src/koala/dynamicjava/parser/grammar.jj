@@ -111,9 +111,12 @@ public class Parser {
   }
    
    private void _throwParseException(ParseException pe, String message) throws ParseException {
-     // Use the embedded error message if thrown from our code
+     // Use the embedded error message if thrown from our code, or if ends in EOF
      if (pe.customConstructor) {
        message = pe.getMessage();
+     }
+     if(pe.getMessage().indexOf("<EOF>\"") != -1) {
+       message = "Encountered Unexpected \"<EOF>\"";
      }
      _throwParseException(message);
    }
@@ -1060,77 +1063,60 @@ PARSER_END(Parser)
   List/*<Node>*/ parseStream() :
   {
     List/*<Node>*/ list = new LinkedList/*<Node>*/();
-    List/*<Node>*/ l = null;
+    List/*<Node>*/ l = new LinkedList/*<Node>*/();
     Node root = null;
   }
   {
     (
-     LOOKAHEAD(StreamItem())
-       l = StreamItem() { list.addAll(l); }
+     
+//     LOOKAHEAD(StreamItem())
+//       l = StreamItem()
+//       
+//       {  
+//      list.addAll(l); 
+//      }  
+     
+     LOOKAHEAD(topLevelStatementLookahead())
+       l = topLevelStatement()
+       
+       { list.addAll(l);  l.clear(); }
+     
     )*
-      
+       
       [ root = expression() [";"] { list.add(root); } ]
-        <EOF>
-      {
-        return list;
-      }
+         <EOF>
+       {
+         return list;
+       }
   }
-  
-//  List/*<Node>*/ parseStream() :
-//  {
-//    List/*<Node>*/ list = new LinkedList/*<Node>*/();
-//    List/*<Node>*/ l;
-//    Node root = null;
-//  }
-//  {
-//    ( ( root=packageDeclaration()
-//         | root=importDeclaration()
-//         | LOOKAHEAD( methodDeclarationLookahead() )
-//         root=methodDeclaration()
-//         | LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
-//         l=localVariableDeclaration() ";"
-//         {
-//      list.addAll(l);
-//    }
-//       | LOOKAHEAD(2)
-//         root=topLevelStatement()
-//         | root=typeDeclaration()
-//         )
-//       {
-//         if (root != null) {
-//           list.add(root);
-//           root = null;
-//         }
-//       }
-//       )*
-//       <EOF>
-//       {
-//         return list;
-//       }
-//  }
-    
+   
   /**
    * Parses an item of the input stream. This production is
    * not a Java language rule. It is used by DynamicJava.
    * @return a list of nodes (possibly empty)
    * @see koala.dynamicjava.tree.Node
    */
-  List/*<Node>*/ StreamItem() :
+  List/*<Node>*/ topLevelStatement() :
   {
     Node root = null;
     List/*<Node>*/ l = new LinkedList/*<Node>*/();
   }
   {
     try {
-      (    root=packageDeclaration()
-         | root=importDeclaration()
+      (   
+           root = singleLookaheadStatement()
+         | LOOKAHEAD(2)
+           root=synchronizedStatement()         
+         | LOOKAHEAD(2)
+           root=labeledStatement() 
          | LOOKAHEAD( methodDeclarationLookahead() )
-         root=methodDeclaration()
+           root=methodDeclaration()
          | LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
-         l=localVariableDeclaration() (";" | <EOF>)
-         | LOOKAHEAD(topLevelStatement())
-         root=topLevelStatement()
-         | root=typeDeclaration()
+           l=localVariableDeclaration() (";" | <EOF>)
+         | LOOKAHEAD(typeDeclarationLookahead())
+           root=typeDeclaration()
+         | LOOKAHEAD(expression())
+           root=expression() ";"
          )
       {
         if (root != null) {
@@ -1143,26 +1129,42 @@ PARSER_END(Parser)
       _throwParseException(pe, "Invalid Stream Item");
     }
   }
+  
+  
+  /**
+   * Looks ahead for one top level statement
+   */
+  void topLevelStatementLookahead() :
+  {
+  }
+  {
+    "package" | "import" | "{" | ";" | "if" | "while" | "do" | "switch" | "for" | "break" | "continue" | "return" | "throw" | "try"
+      |  LOOKAHEAD(2) ("synchronized" "(") | LOOKAHEAD(2) (<IDENTIFIER> ":") | LOOKAHEAD(methodDeclarationLookahead()) methodDeclarationLookahead()
+      | LOOKAHEAD(["final"] typeLookahead() <IDENTIFIER>) (["final"] typeLookahead() <IDENTIFIER>) 
+      | LOOKAHEAD(typeDeclarationLookahead())  typeDeclarationLookahead()      
+      | LOOKAHEAD(expression() ";") (expression() ";")
+  }
 
   
   /**
-   * Parses one top level statement. This production is
+   * Parses one single lookahead top level statement. This production is
    * not a Java language rule. It is used by DynamicJava.
    *
    * @return a node
    * @see koala.dynamicjava.tree.Node
    */
-  Node topLevelStatement() :
+  Node singleLookaheadStatement() :
   {
     Node node;
   }
   {
     try {
-      (    LOOKAHEAD(2)
-         node=labeledStatement()
+      (    
+           /** Originally separate, added as they are top level statements that require lookahead of one */
+           node=packageDeclaration()
+         | node=importDeclaration()
          | node=block()
          | node=emptyStatement()
-         | node=expression() ";"
          | node=ifStatement()
          | node=whileStatement()
          | node=doStatement()
@@ -1172,15 +1174,14 @@ PARSER_END(Parser)
          | node=continueStatement()
          | node=returnStatement()
          | node=throwStatement()
-         | node=synchronizedStatement()
-         | node=tryStatement()
+         | node=tryStatement()         
          )
       {
         return node;
       }
     }
     catch (ParseException pe) {
-      _throwParseException(pe, "Invalid top level statement");
+      _throwParseException(pe, "Invalid statement");
     }
   }
   
@@ -1218,7 +1219,7 @@ PARSER_END(Parser)
             return list;
           }
   }
-  
+ 
   /**
    * Parses a package declaration
    * @see koala.dynamicjava.tree.PackageDeclaration
@@ -1262,18 +1263,14 @@ PARSER_END(Parser)
   }
   {
     try {
-      t1="import" [sttic=<STATIC>] [name=ReferenceTypeName()] ["." star="*"] (t2=";" | t2=<EOF>)
+      t1="import" [sttic="static"] [name=ReferenceTypeName()] ["." star="*"] (t2=";" | t2=<EOF>)
       {
         if(name instanceof GenericReferenceType){
           _throwParseException("Import names cannot be parameterized.");
         }
         if(name == null) {
-            _throwParseException("missing name; cannot import");
+            _throwParseException("Missing name - Cannot import");
         }
-        
-//        if((dot == null) != (star==null))
-//          _throwParseException("Invalid Import Declaration");
-//        
         return new ImportDeclaration(name.getRepresentation(), star != null, sttic != null,
                                      filename,
                                      t1.beginLine, t1.beginColumn,
@@ -1295,12 +1292,10 @@ PARSER_END(Parser)
   }
   {
     try {
-    (    //LOOKAHEAD( ( "abstract" | "final" | "public" )* "class" )
-         LOOKAHEAD(classDeclarationLookahead())
+    (    LOOKAHEAD(classDeclarationLookahead())
          node=classDeclaration()
          | LOOKAHEAD(enumDeclarationLookahead())
          node=enumDeclaration()
-//       | LOOKAHEAD( ( <STATIC> | <ABSTRACT> | <FINAL> | <PUBLIC> | <PROTECTED> | <PRIVATE> )* <INTERFACE> )
          | LOOKAHEAD(interfaceDeclarationLookahead())
          node=interfaceDeclaration()
          )
@@ -1312,6 +1307,20 @@ PARSER_END(Parser)
       _throwParseException(pe,"invalid declaration");
     }
   }
+  
+  
+  /**
+   * Looks ahead for a type declatarion
+   */
+  void typeDeclarationLookahead() :
+  {
+  }
+  {
+    LOOKAHEAD(classDeclarationLookahead()) classDeclarationLookahead() 
+      | LOOKAHEAD(enumDeclarationLookahead()) enumDeclarationLookahead()
+      | LOOKAHEAD(interfaceDeclarationLookahead()) interfaceDeclarationLookahead()
+  }
+      
   
   // Productions for Names ////////////////////////////////////////////////////////
   
@@ -2518,18 +2527,23 @@ PARSER_END(Parser)
     List/*<Node>*/ list = new LinkedList/*<Node>*/();
   }
   {
-    p1="{"
-      ( nodes=blockStatement()
-         {
-           list.addAll(nodes);
-         }
+    try {
+      p1="{"
+        ( nodes=blockStatement()
+           {
+        list.addAll(nodes);
+      }
       )*
-    p2="}"
-    {
-      return new BlockStatement(list,
-                                filename,
-                                p1.beginLine, p1.beginColumn,
-                                p2.endLine,   p2.endColumn);
+        p2="}"
+      {
+        return new BlockStatement(list,
+                                  filename,
+                                  p1.beginLine, p1.beginColumn,
+                                  p2.endLine,   p2.endColumn);
+      }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe,"Invalid block statement");
     }
   }
   
@@ -2545,12 +2559,13 @@ PARSER_END(Parser)
     List/*<Node>*/ list = new LinkedList/*<Node>*/();
   }
   {
-    (    LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
+    try {
+      (    LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
          list=localVariableDeclaration() ";"
-       | node=statement()
+         | node=statement()
          {
-           list.add(node);
-         }
+        list.add(node);
+      }
        | node=unmodifiedClassDeclaration(null)
          {
            list.add(node);
@@ -2561,12 +2576,16 @@ PARSER_END(Parser)
          }
        | node=unmodifiedInterfaceDeclaration(null)
          {
-           list.add(node);
-         }
-     )
-     {
-       return list;
-     }
+         list.add(node);
+       }
+       )
+       {
+         return list;
+       }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe,"Invalid block statement");
+    }
   }
   
   /**
@@ -2687,21 +2706,26 @@ PARSER_END(Parser)
     Node       stat2 = null;
   }
   {
-    t="if" "(" exp=expression() ")"
-      stat1=statement()
-      [ LOOKAHEAD(1) "else" stat2=statement() ]
-    {
-      if (stat2 == null) {
-        return new IfThenStatement(exp, stat1,
-                                   filename,
-                                   t.beginLine,       t.beginColumn,
-                                   stat1.getEndLine(), stat1.getEndColumn());
-      } else {
-        return new IfThenElseStatement(exp, stat1, stat2,
-                                       filename,
-                                       t.beginLine,       t.beginColumn,
-                                       stat2.getEndLine(), stat2.getEndColumn());
+    try { 
+      t="if" "(" exp=expression() ")"
+        stat1=statement()
+        [ LOOKAHEAD(1) "else" stat2=statement() ]
+      {               
+        if (stat2 == null) {
+          return new IfThenStatement(exp, stat1,
+                                     filename,
+                                     t.beginLine,       t.beginColumn,
+                                     stat1.getEndLine(), stat1.getEndColumn());
+        } else {
+          return new IfThenElseStatement(exp, stat1, stat2,
+                                         filename,
+                                         t.beginLine,       t.beginColumn,
+                                         stat2.getEndLine(), stat2.getEndColumn());
+        }
       }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe,"Invalid if statement");
     }
   }
   
@@ -2716,12 +2740,17 @@ PARSER_END(Parser)
     Node       stat;
   }
   {
-    t="while" "(" exp=expression() ")" stat=statement()
-    {
-      return new WhileStatement(exp, stat,
-                                filename,
-                                t.beginLine,       t.beginColumn,
-                                stat.getEndLine(), stat.getEndColumn());
+    try{
+      t="while" "(" exp=expression() ")" stat=statement()
+      {
+        return new WhileStatement(exp, stat,
+                                  filename,
+                                  t.beginLine,       t.beginColumn,
+                                  stat.getEndLine(), stat.getEndColumn());
+      }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe,"Invalid while statement");
     }
   }
   
@@ -2736,14 +2765,20 @@ PARSER_END(Parser)
     Node       stat;
   }
   {
-    t1="do" stat=statement() "while" "(" exp=expression() ")" t2=";"
-    {
-      return new DoStatement(exp, stat,
-                             filename,
-                             t1.beginLine, t1.beginColumn,
-                             t2.endLine,   t2.endColumn);
+    try {
+      t1="do" stat=statement() "while" "(" exp=expression() ")" t2=";"
+      {
+        return new DoStatement(exp, stat,
+                               filename,
+                               t1.beginLine, t1.beginColumn,
+                               t2.endLine,   t2.endColumn);
+      }
+    }  
+    catch(ParseException pe) {
+      _throwParseException(pe,"Invalid do statement");
     }
   }
+      
   
   /**
    * Parses a switch statement
@@ -2760,49 +2795,54 @@ PARSER_END(Parser)
     Token      t           = null;
   }
   {
-    b="switch" "(" sel=expression() ")" "{"
-      ( ( "case" val=expression() | t="default" ) ":"
-         ( stat=blockStatement()
-            {
-      list.addAll(stat);
+    try {
+      b="switch" "(" sel=expression() ")" "{"
+        ( ( "case" val=expression() | t="default" ) ":"
+           ( stat=blockStatement()
+              {
+        list.addAll(stat);
+      }
+      )*
+         {
+        int bl, bc, el, ec;
+        if (t != null) {
+          bl = t.beginLine;
+          bc = t.beginColumn;
+          el = t.endLine;
+          ec = t.endColumn;
+        } else {
+          bl = val.getBeginLine();
+          bc = val.getBeginColumn();
+          el = val.getEndLine();
+          ec = val.getEndColumn();
+        }
+        
+        if (list.size() != 0) {
+          Node n = (Node)list.get(list.size() - 1);
+          el = n.getEndLine();
+          ec = n.getEndColumn();
+        }
+        
+        cases.add(new SwitchBlock(val, (list.size() != 0) ? list : null,
+                                  filename,
+                                  bl, bc, el, ec));
+        val = null;
+        t   = null;
+        if (list.size() != 0) {
+          list = new LinkedList/*<Node>*/();
+        }
+      }
+      )*
+        e="}"
+      {
+        return new SwitchStatement(sel, cases,
+                                   filename,
+                                   b.beginLine, b.beginColumn,
+                                   e.endLine,   e.endColumn);
+      }
     }
-    )*
-       {
-      int bl, bc, el, ec;
-      if (t != null) {
-        bl = t.beginLine;
-        bc = t.beginColumn;
-        el = t.endLine;
-        ec = t.endColumn;
-      } else {
-        bl = val.getBeginLine();
-        bc = val.getBeginColumn();
-        el = val.getEndLine();
-        ec = val.getEndColumn();
-      }
-      
-      if (list.size() != 0) {
-        Node n = (Node)list.get(list.size() - 1);
-        el = n.getEndLine();
-        ec = n.getEndColumn();
-      }
-      
-      cases.add(new SwitchBlock(val, (list.size() != 0) ? list : null,
-                                filename,
-                                bl, bc, el, ec));
-      val = null;
-      t   = null;
-      if (list.size() != 0) {
-        list = new LinkedList/*<Node>*/();
-      }
-    }
-    )*
-      e="}"
-    {
-      return new SwitchStatement(sel, cases,
-                                 filename,
-                                 b.beginLine, b.beginColumn,
-                                 e.endLine,   e.endColumn);
+    catch(ParseException pe) {
+      _throwParseException(pe,"Invalid switch statement");
     }
   }
   
@@ -2825,31 +2865,36 @@ ForSlashEachStatement forStatement() :
     Token      colon  = null;
 }
 {
+  try {
     t="for" "("  
-               (
-                LOOKAHEAD(formalParameterLookahead() ":")
-                  forEachInit=formalParameter() colon=":" exp=expression()
-                  |
-                [ init=forInit()] ";"
-                [ exp=expression() ] ";"
-                [ update=statementExpressionList() ]
+      (
+       LOOKAHEAD(formalParameterLookahead() ":")
+         forEachInit=formalParameter() colon=":" exp=expression()
+         |
+       [ init=forInit()] ";"
+         [ exp=expression() ] ";"
+         [ update=statementExpressionList() ]
          )
       ")" stmt=statement()
-     
+      
     {
-        if(colon != null){
-          return new ForEachStatement(forEachInit, exp, stmt,
-                                  filename,
-                                  t.beginLine, t.beginColumn,
-                                  stmt.getEndLine(), stmt.getEndColumn());
-        }else{
-          return new ForStatement(init, exp, update, stmt,
-                                  filename,
-                                  t.beginLine, t.beginColumn,
-                                  stmt.getEndLine(), stmt.getEndColumn());
-          
-        }
+      if(colon != null){
+        return new ForEachStatement(forEachInit, exp, stmt,
+                                    filename,
+                                    t.beginLine, t.beginColumn,
+                                    stmt.getEndLine(), stmt.getEndColumn());
+      }else{
+        return new ForStatement(init, exp, update, stmt,
+                                filename,
+                                t.beginLine, t.beginColumn,
+                                stmt.getEndLine(), stmt.getEndColumn());
+        
       }
+    }
+  }
+  catch(ParseException pe) {
+    _throwParseException(pe,"Invalid for statement");
+  }
 }
 
   /**
@@ -2903,12 +2948,17 @@ ForSlashEachStatement forStatement() :
     Token id = null;
   }
   {
-    b="break" [ id=<IDENTIFIER> ] e=";"
-    {
-      return new BreakStatement((id != null) ? id.image : null,
-                                filename,
-                                b.beginLine, b.beginColumn,
-                                e.endLine,   e.endColumn);
+    try {
+      b="break" [ id=<IDENTIFIER> ] e=";"
+      {
+        return new BreakStatement((id != null) ? id.image : null,
+                                  filename,
+                                  b.beginLine, b.beginColumn,
+                                  e.endLine,   e.endColumn);
+      }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe,"Invalid break statement");
     }
   }
   
@@ -2922,12 +2972,17 @@ ForSlashEachStatement forStatement() :
     Token id = null;
   }
   {
-    b="continue" [ id=<IDENTIFIER> ] e=";"
-    {
-      return new ContinueStatement((id != null) ? id.image : null,
-                                   filename,
-                                   b.beginLine, b.beginColumn,
-                                   e.endLine,   e.endColumn);
+    try {
+      b="continue" [ id=<IDENTIFIER> ] e=";"
+      {
+        return new ContinueStatement((id != null) ? id.image : null,
+                                     filename,
+                                     b.beginLine, b.beginColumn,
+                                     e.endLine,   e.endColumn);
+      }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe,"Invalid continue statement");
     }
   }
   
@@ -2941,12 +2996,17 @@ ForSlashEachStatement forStatement() :
     Expression exp = null;
   }
   {
-    b="return" [ exp=expression() ] e=";"
-    {
-      return new ReturnStatement(exp,
-                                 filename,
-                                 b.beginLine, b.beginColumn,
-                                 e.endLine,   e.endColumn);
+    try {
+      b="return" [ exp=expression() ] e=";"
+      {
+        return new ReturnStatement(exp,
+                                   filename,
+                                   b.beginLine, b.beginColumn,
+                                   e.endLine,   e.endColumn);
+      }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe,"Invalid return statement");
     }
   }
   
@@ -2960,12 +3020,17 @@ ForSlashEachStatement forStatement() :
     Expression exp;
   }
   {
-    b="throw" exp=expression() e=";"
-    {
-      return new ThrowStatement(exp,
-                                filename,
-                                b.beginLine, b.beginColumn,
-                                e.endLine,   e.endColumn);
+    try {
+      b="throw" exp=expression() e=";"
+      {
+        return new ThrowStatement(exp,
+                                  filename,
+                                  b.beginLine, b.beginColumn,
+                                  e.endLine,   e.endColumn);
+      }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe,"Invalid throw statement");
     }
   }
   
@@ -2980,12 +3045,17 @@ ForSlashEachStatement forStatement() :
     Node       stmt;
   }
   {
-    t="synchronized" "(" exp=expression() ")" stmt=block()
-    {
-      return new SynchronizedStatement(exp, stmt,
-                                       filename,
-                                       t.beginLine, t.beginColumn,
-                                       stmt.getEndLine(), stmt.getEndColumn());
+    try {
+      t="synchronized" "(" exp=expression() ")" stmt=block()
+      {
+        return new SynchronizedStatement(exp, stmt,
+                                         filename,
+                                         t.beginLine, t.beginColumn,
+                                         stmt.getEndLine(), stmt.getEndColumn());
+      }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe,"Invalid synchronized statement");
     }
   }
   
@@ -3004,35 +3074,41 @@ ForSlashEachStatement forStatement() :
     int             el = 0, ec = 0;
   }
   {
-    t="try" tryBlock=block()
-      ( u="catch" "(" formal=formalParameter() ")" catchBlock=block()
+    try{
+      t="try" tryBlock=block()
+        ( u="catch" "(" formal=formalParameter() ")" catchBlock=block()
+           {
+        el = catchBlock.getEndLine();
+        ec = catchBlock.getEndColumn();
+        catches.add(new CatchStatement(formal, catchBlock,
+                                       filename,
+                                       u.beginLine, u.beginColumn,
+                                       el, ec));
+      }
+      )*
+        [ "finally" finallyBlock=block()
+           {
+        el = finallyBlock.getEndLine();
+        ec = finallyBlock.getEndColumn();
+      }
+         ]
          {
-      el = catchBlock.getEndLine();
-      ec = catchBlock.getEndColumn();
-      catches.add(new CatchStatement(formal, catchBlock,
-                                     filename,
-                                     u.beginLine, u.beginColumn,
-                                     el, ec));
-    }
-    )*
-      [ "finally" finallyBlock=block()
-         {
-      el = finallyBlock.getEndLine();
-      ec = finallyBlock.getEndColumn();
-    }
-       ]
-       {
-         if (finallyBlock == null && catches.size() == 0) {
-           throw new ParseError(reader.getMessage("try.without.catch", null),
-                                filename,
-                                t.beginLine, t.beginColumn);
+           if (finallyBlock == null && catches.size() == 0) {
+             throw new ParseError(reader.getMessage("try.without.catch", null),
+                                  filename,
+                                  t.beginLine, t.beginColumn);
+           }
+           return new TryStatement(tryBlock, catches, finallyBlock,
+                                   filename,
+                                   t.beginLine, t.beginColumn,
+                                   el, ec);
          }
-         return new TryStatement(tryBlock, catches, finallyBlock,
-                                 filename,
-                                 t.beginLine, t.beginColumn,
-                                 el, ec);
-       }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe,"Invalid try statement");
+    }
   }
+  
   
   /**
    * Parses one statement expression
@@ -3099,7 +3175,7 @@ ForSlashEachStatement forStatement() :
     Expression exp;
   }
   {
-    exp=conditionalExpression() [ exp=expressionSuffix(exp) ]
+    exp=conditionalExpression() [ exp=expressionSuffix(exp) ] 
     {
       return exp;
     }
@@ -4266,39 +4342,8 @@ ForSlashEachStatement forStatement() :
     }
   }
   
-  
-  
-  Token consumeReservedWord() :
-  {
-    Token t; 
-  }
-  {
-   ( t = "abstract" | t = "assert" | t = "boolean" | t = "break" | t = "byte" | t = "case" | t = "catch" | t = "char" | t = "class" 
-      | t = "const" | t = "continue" | t = "default" | t = "do" | t = "double" | t = "else" | t = "enum" | t = "extends" | t = "false" 
-      | t = "final" | t = "finally" | t = "float" | t = "for" | t = "goto" | t = "if" | t = "implements" | t = "import" | t = "instanceof" 
-      | t = "int" | t = "interface" | t = "long" | t = "native" | t = "new" | t = "null" | t = "package" | t = "private" | t = "protected"
-      | t = "public" | t = "return" | t = "short" | t = "static" | t = "super" | t = "switch" | t = "synchronized" | t = "this" 
-      | t = "throw" | t = "throws" | t = "transient" | t = "true" | t = "try" | t = "void" | t = "volatile" | t = "while" )
-   { return t; }
-  }
-  
+
   // Lookahead productions ////////////////////////////////////////////////////////
-  
-  
-  /**
-   * Used internally for reserved word lookahead
-   * Added to improve error diagnostics
-   */
-  void reservedWordLookahead() :
-  {}
-  {
-    "abstract" | "assert" | "boolean" | "break" | "byte" | "case" | "catch" | "char" | "class" | "const" | "continue" 
-      | "default" | "do" | "double" | "else" | "enum" | "extends" | "false" | "final" | "finally" | "float" | "for" 
-      | "goto" | "if" | "implements" | "import" | "instanceof" | "int" | "interface" | "long" | "native" | "new" | "null" 
-      | "package" | "private" | "protected" | "public" | "return" | "short" | "static" | "super" | "switch" | "synchronized" 
-      | "this" | "throw" | "throws" | "transient" | "true" | "try" | "void" | "volatile" | "while" 
-  }
-    
   
   /**
    * Used internally for lookahead
@@ -5274,7 +5319,7 @@ ForSlashEachStatement forStatement() :
   {
     name = name()
       [
-       <EXTENDS>
+       "extends"
        bound = type()
          ]
     {
@@ -5299,7 +5344,7 @@ List/*<Type>*/ TypeArguments() :
   {
    <LESS>   
       (LOOKAHEAD("?") hook="?" 
-        [(<EXTENDS>|<SUPER>) hookedType = ReferenceTypeName()]
+        [("extends"|"super") hookedType = ReferenceTypeName()]
           // added to support wildcards
     | 
       ( temp = type()) // should be modified to not allow primitives
@@ -5314,7 +5359,7 @@ List/*<Type>*/ TypeArguments() :
     (
      <COMMA>
      (LOOKAHEAD("?") hook="?" 
-        [(<EXTENDS> | <SUPER>) hookedType = ReferenceTypeName()]    
+        [("extends"|"super") hookedType = ReferenceTypeName()]    
         | 
       (temp = type() ) // should be modified to not allow primitives
      )

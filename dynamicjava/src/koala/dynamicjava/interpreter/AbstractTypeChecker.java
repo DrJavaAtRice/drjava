@@ -853,7 +853,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
         context.define(var, (rc == null) ? Object.class : rc);
       }
     }
-
+    
     // Get the type of the left hand side
     Class lc = left.acceptVisitor(this);
 
