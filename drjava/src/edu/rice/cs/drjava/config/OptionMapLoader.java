@@ -38,13 +38,11 @@
  END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
-
-import java.util.Properties;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.File;
+import java.util.Properties; // don't import all of java.util, or gj.util to prevent name collisions
 import gj.util.Vector;
 import gj.util.Enumeration;
+import java.io.*;
+import java.lang.reflect.*;
 public class OptionMapLoader implements OptionConstants {
 
     /** bag of default options (programmatically defined, instead of in an options file) */
@@ -52,19 +50,29 @@ public class OptionMapLoader implements OptionConstants {
     private static Properties DEFAULT_STRINGS = new Properties();
 
     static {
-	// initialize DEFAULTS object.
-	initOption(INDENT_LEVEL,new Integer(2));
-	initOption(JAVAC_LOCATION,"");
-	initOption(JSR14_LOCATION,"");
-	initOption(JSR14_COLLECTIONSPATH,"");
-	initOption(EXTRA_CLASSPATH,new Vector<String>());
-    }
-
-    /** might as well have been a macro if Java had them */
-    private static <T> void initOption(Option<T> option, T value) {
-	String sval = option.format(value);
-	DEFAULT_STRINGS.setProperty(option.name,sval);
-	DEFAULTS.setOption(option,value);
+	// initialize DEFAULTS objects, based on OptionConstants using reflection.
+        Field[] fields = OptionConstants.class.getDeclaredFields();
+        for(int i = 0; i < fields.length; i++) {
+            Field field = fields[i];
+            int mods = field.getModifiers();
+            if(Modifier.isStatic(mods) && Modifier.isPublic(mods) && Modifier.isFinal(mods)) {
+                // field is public static and final.
+                Option option = null;
+                try {
+                    Object o = field.get(null); // we should be able to pass in null as the 'receiver', since it's static.
+                    if(!( o instanceof Option)) continue;
+                    
+                    option = (Option) o;
+                } catch(IllegalAccessException e) {
+                    // this cannot happen, since we don't get in here unless the field is public.
+                    throw new RuntimeException("IllegalAccessException happened on a public field.");
+                }
+                
+                String sval = option.getDefaultString();
+                DEFAULT_STRINGS.setProperty(option.name,sval);
+                DEFAULTS.setString(option,sval);
+            }
+        }
     }
 
     public static OptionMapLoader DEFAULT = new OptionMapLoader(DEFAULT_STRINGS);

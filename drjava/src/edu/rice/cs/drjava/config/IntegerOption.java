@@ -48,7 +48,7 @@ public class IntegerOption extends Option<Integer>
   /**
    * @param key The name of this Option.
    */
-  public IntegerOption(String key) { super(key); }
+  public IntegerOption(String key, Integer def) { super(key,def); }
   
   /**
    * @param s The String to be parsed.

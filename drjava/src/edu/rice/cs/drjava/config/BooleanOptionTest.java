@@ -54,8 +54,8 @@ public class BooleanOptionTest extends TestCase
   
   public void testGetName()
   {
-    BooleanOption bo1 = new BooleanOption("enable JUnit");
-    BooleanOption bo2 = new BooleanOption("use menu icons");
+    BooleanOption bo1 = new BooleanOption("enable JUnit",null);
+    BooleanOption bo2 = new BooleanOption("use menu icons",null);
 
     assertEquals("enable JUnit", bo1.getName());
     assertEquals("use menu icons",   bo2.getName());
@@ -63,7 +63,7 @@ public class BooleanOptionTest extends TestCase
   
   public void testParse()
   {
-    BooleanOption bo = new BooleanOption("enable JUnit");
+    BooleanOption bo = new BooleanOption("enable JUnit",null);
     
     assertEquals(Boolean.TRUE, bo.parse("true"));
     assertEquals(Boolean.FALSE, bo.parse("false"));
@@ -77,8 +77,8 @@ public class BooleanOptionTest extends TestCase
   
   public void testFormat()
   {
-    BooleanOption bo1 = new BooleanOption("max_files");
-    BooleanOption bo2 = new BooleanOption("indent_size");
+    BooleanOption bo1 = new BooleanOption("max_files",null);
+    BooleanOption bo2 = new BooleanOption("indent_size",null);
     
     assertEquals("true",  bo1.format(Boolean.TRUE));
     assertEquals("true",  bo2.format(Boolean.TRUE));

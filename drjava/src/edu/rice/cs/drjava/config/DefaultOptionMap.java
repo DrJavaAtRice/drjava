@@ -38,18 +38,25 @@
  END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
-import gj.util.Hashtable;
+import gj.util.Vector;
+import gj.util.Enumeration;
 
-public class DefaultOptionMap 
-    extends Hashtable<OptionParser,Object> implements OptionMap {    
+public class DefaultOptionMap implements OptionMap {    
+    
+    private final Vector<OptionParser> keys = new Vector();
 
     public <T> T getOption(OptionParser<T> o) {
 	return o.getOption(this);
     }
   
     public <T> T setOption(Option<T> o, T val) {
-	super.put(o,val); // jsr14 is dumb.  we have to cast.  Every OptionParser<T> is OptionParser<Object>
+        setOption(o);
 	return o.setOption(this,val); 
+    }
+
+    private <T> void setOption(OptionParser<T> o) {
+        if(keys.indexOf(o)==-1)
+            keys.addElement(o);
     }
   
     public <T> String getString(OptionParser<T> o) {
@@ -57,23 +64,16 @@ public class DefaultOptionMap
     }
   
     public <T> T setString(OptionParser<T> o, String s) {
+        setOption(o);
 	return o.setString(this,s);
     }
   
-    public Object remove(OptionParser o) {
-	super.remove(o);
-	return o.remove(this);
-    }
-  
     public <T> T removeOption(OptionParser<T> o) {
-	super.remove(o); // jsr14 is dumb.  we have to cast.
+	keys.removeElement(o);
 	return o.remove(this);
     }
   
-    public Object put(OptionParser o, Object val) {
-	super.put(o,val); 
-	return o.setOption(this,val);
+    public Enumeration<OptionParser> keys() {
+        return keys.elements();
     }
-
-    
 }

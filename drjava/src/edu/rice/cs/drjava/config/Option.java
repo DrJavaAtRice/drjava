@@ -49,7 +49,7 @@ import gj.util.Vector;
  * that handled options of static type Integer, with the name "indent.level", you use the
  * following code:
  * <pre>
- * Option&lt;Integer&gt; indentParser = new Option&lt;Integer&gt;("indent.level") {
+ * Option&lt;Integer&gt; INDENT_LEVEL = new Option&lt;Integer&gt;("indent.level") {
  *         public Integer parse(String s) {
  *             return new Integer(s);
  *         }
@@ -72,7 +72,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
      * constructor that takes in a name
      * @param name the name of this option (i.e. "indent.level");
      */
-    public <T> Option(String name) { super(name); }
+    public Option(String name, T def) { super(name,def); }
     
     /**
      * the ability to format a statically typed T value to a String.  Since T is an Object,
@@ -82,6 +82,8 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
      */
     public String format(T value) { return value.toString(); }
     
+    public String getDefaultString() { return format(getDefault()); }
+
     // PACKAGE PRIVATE MAGIC STUFF
     // this package-private magic stuff makes all of the config "magic" types work.
     // basically, it's achieved via a double-dispatch stunt, so that the type information
@@ -92,6 +94,8 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
      * be applied to getString().
      */
     String getString(DefaultOptionMap om) { return format(getOption(om)); }
+
+    
 
     void notifyListeners(Configuration config, T val) {
 	Vector<OptionListener<T>> v = listeners.get(config);

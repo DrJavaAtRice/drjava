@@ -50,7 +50,8 @@ public abstract class OptionParser<T> implements ParseStrategy<T> {
      * public because it's final, and a String is immutable.
      */
     public final String name;
-    
+    private final T defaultValue;
+
     /** 
      * an inner hashtable that maps DefaultOptionMaps to value T's.
      * part of the magic inner workings of this package.
@@ -62,13 +63,23 @@ public abstract class OptionParser<T> implements ParseStrategy<T> {
      * constructor that takes in a name
      * @param name the name of this option (i.e. "indent.level");
      */
-    public <T> OptionParser(String name) { this.name = name; }
+    public OptionParser(String name, T def) { this.name = name; defaultValue = def; }
     
     /**
      * accessor for name option
      * @return name of this option (i.e. "indent.level")
      */
     public String getName() { return name; }
+
+    /**
+     * @return the default value
+     */
+    public T getDefault() { return defaultValue; }
+
+    /**
+     * @return the default value as a string
+     */
+    public abstract String getDefaultString();
   
     /**
      * the ability to parse a string to an object of type T.  All concrete versions of this

@@ -39,20 +39,21 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 import java.io.File;
+import gj.util.Vector;
 public interface OptionConstants {
 
     // STATIC VARIABLES    
     public static final IntegerOption INDENT_LEVEL =
-	new IntegerOption("indent.level");
+	new IntegerOption("indent.level",new Integer(2));
 
     public static final StringOption JAVAC_LOCATION = 
-	new StringOption("javac.location");
+	new StringOption("javac.location","");
 	
     public static final StringOption JSR14_LOCATION =
-	new StringOption("jsr14.location");
+	new StringOption("jsr14.location","");
     
     public static final StringOption JSR14_COLLECTIONSPATH = 
-	new StringOption("jsr14.collectionspath");
+	new StringOption("jsr14.collectionspath","");
     
     public static final VectorOption<String> EXTRA_CLASSPATH = 
 	(new Begin<VectorOption<String>>() {
@@ -68,10 +69,10 @@ public interface OptionConstants {
 		    System.err.println("using '"+ps.charAt(0)+
 				       "' for delimiter.");
 		}
-		StringOption sop = new StringOption("");
+		StringOption sop = new StringOption("","");
 		String name = "extra.classpath";
 		char delim = ps.charAt(0);
-		return new VectorOption<String>(name,sop,"",delim,"");
+		return new VectorOption<String>(name,sop,"",delim,"",new Vector<String>());
 	    }
 	}).evaluate();
 

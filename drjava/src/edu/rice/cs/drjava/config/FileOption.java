@@ -49,7 +49,7 @@ public class FileOption extends Option<File> {
   /**
    * @param key The name of this option.
    */
-  public FileOption(String key) { super(key); }
+  public FileOption(String key, File def) { super(key,def); }
   
   /**
    * @param s The String to be parsed, must represent

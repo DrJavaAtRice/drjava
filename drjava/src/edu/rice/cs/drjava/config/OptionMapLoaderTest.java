@@ -63,15 +63,27 @@ public class OptionMapLoaderTest extends TestCase implements OptionConstants {
 	"extra.classpath = bam\n\n";
     
     public void testProperConfigSet() throws IOException {
-	InputStream is = new StringInputStream(OPTION_DOC);
+	checkSet(OPTION_DOC,new Integer(-1),"foo","bar","baz",1);
+    }
+
+    private void checkSet(String set, Integer indent, String javac, String jsr, String col, int size) throws IOException {
+        StringInputStream is = new StringInputStream(set);
 	OptionMapLoader loader = new OptionMapLoader(is);
 	DefaultOptionMap map = new DefaultOptionMap();
 	loader.loadInto(map);
 	assertEquals("indent (integer) option",
-		     map.getOption(INDENT_LEVEL),new Integer(-1));
-	assertEquals(map.getOption(JAVAC_LOCATION),"foo");
-	assertEquals(map.getOption(JSR14_LOCATION),"bar");
-	assertEquals(map.getOption(JSR14_COLLECTIONSPATH),"baz");
-	assertEquals(map.getOption(EXTRA_CLASSPATH).elementAt(0),"bam");
+		     map.getOption(INDENT_LEVEL),indent);
+	assertEquals(map.getOption(JAVAC_LOCATION),javac);
+	assertEquals(map.getOption(JSR14_LOCATION),jsr);
+	assertEquals(map.getOption(JSR14_COLLECTIONSPATH),col);
+	assertEquals("size of extra-classpath vector",
+                     new Integer(size),new Integer(map.getOption(EXTRA_CLASSPATH).size()));
+    }
+
+    public void testEmptyConfigSet() throws IOException {
+        checkSet("",INDENT_LEVEL.getDefault(),JAVAC_LOCATION.getDefault(),
+                 JSR14_LOCATION.getDefault(),JSR14_COLLECTIONSPATH.getDefault(),
+                 EXTRA_CLASSPATH.getDefault().size());
+        
     }
 }

@@ -42,7 +42,7 @@ import java.awt.*;
 
 public class ColorOption extends Option<Color>{
   
-  public ColorOption(String key) { super(key); }
+  public ColorOption(String key, Color def) { super(key,def); }
   
   public Color parse(String s) { return Color.decode(s); }
   

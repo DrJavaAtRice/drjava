@@ -56,14 +56,14 @@ public class StringOptionTest extends TestCase
   
   public void testGetName()
   {
-    StringOption so = new StringOption("classpath");
+    StringOption so = new StringOption("classpath",null);
 
     assertEquals("classpath", so.getName());
   }
   
   public void testParse()
   {
-    StringOption so = new StringOption("classpath");
+    StringOption so = new StringOption("classpath",null);
     
     assertEquals("3", so.parse("3"));
     assertEquals(".:..", so.parse(".:.."));
@@ -71,7 +71,7 @@ public class StringOptionTest extends TestCase
   
   public void testFormat()
   {
-    StringOption so = new StringOption("classpath");
+    StringOption so = new StringOption("classpath",null);
     
     assertEquals("3", so.format("3"));
     assertEquals(".:..", so.format(".:.."));
