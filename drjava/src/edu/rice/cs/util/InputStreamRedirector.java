@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -49,15 +49,16 @@ import java.util.ArrayList;
 public abstract class InputStreamRedirector extends InputStream {
   /**
    * Buffer that stores the current set of bytes.
+   * TODO: perhaps this should use an array for efficiency
    */
-  protected ArrayList _buffer;
+  protected ArrayList<Character> _buffer;
 
   /**
    * constructs a new InputStreamRedirector.
    * @throws IOException if an I/O error occurs
    */
   public InputStreamRedirector() throws IOException {
-    _buffer = new ArrayList();
+    _buffer = new ArrayList<Character>(60);
   }
 
   /**
@@ -139,3 +140,4 @@ public abstract class InputStreamRedirector extends InputStream {
     return _buffer.size();
   }
 }
+

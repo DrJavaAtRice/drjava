@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -127,7 +127,7 @@ public abstract class FileOps {
 
   /**
    * Creates a new temporary file and writes the given text to it.
-   * 
+   *
    * @param prefix Beginning part of file name, before unique number
    * @param suffix Ending part of file name, after unique number
    * @param text Text to write to file
@@ -194,7 +194,7 @@ public abstract class FileOps {
    *
    * @return true if there were no problems in deleting. If it returns
    *         false, something failed and the directory contents likely at least
-   *         partially still exist.         
+   *         partially still exist.
    */
   public static boolean deleteDirectory(final File dir) {
     if (! dir.isDirectory()) {
@@ -219,7 +219,7 @@ public abstract class FileOps {
    * @param root the directory to start exploring from
    * @return a list of valid packages, excluding the root ("") package
    */
-  public static LinkedList packageExplore(String prefix, File root) {
+  public static LinkedList<String> packageExplore(String prefix, File root) {
     /* Inner holder class. */
     class PrefixAndFile {
       public String prefix;
@@ -232,9 +232,9 @@ public abstract class FileOps {
     
     //This set makes sure we don't get caught in a loop if the filesystem has symbolic links
     //that form a circle by tracking the directories we have already explored
-    final Set exploredDirectories = new HashSet();
+    final Set<File> exploredDirectories = new HashSet<File>();
 
-    LinkedList output = new LinkedList();
+    LinkedList<String> output = new LinkedList<String>();
     Stack<PrefixAndFile> working = new Stack<PrefixAndFile>();
     working.push(new PrefixAndFile(prefix, root));
     exploredDirectories.add(root);
@@ -315,7 +315,7 @@ public abstract class FileOps {
       backup = fileSaver.getBackupFile();
       if (!renameFile(file, backup)){
         throw new IOException("Save failed: Could not create backup file "
-                                + backup.getAbsolutePath() + 
+                                + backup.getAbsolutePath() +
                               "\nIt may be possible to save by disabling file backups\n");
       }
       fileSaver.backupDone();
@@ -381,13 +381,13 @@ public abstract class FileOps {
     public abstract File getBackupFile() throws IOException;
     
     /**
-     * This method indicates whether or not a backup of the file should be made.  It 
+     * This method indicates whether or not a backup of the file should be made.  It
      * may depend on getTargetFile(), so it can throw an IOException
      */
     public abstract boolean shouldBackup() throws IOException;
 
     /**
-     * This method specifies if the saving process should continue trying to save 
+     * This method specifies if the saving process should continue trying to save
      * if it can not create the temp file that is written initially.  If you do
      * continue saving in this case, the original file may be lost if saving fails.
      */
@@ -424,7 +424,7 @@ public abstract class FileOps {
   public abstract static class DefaultFileSaver implements FileSaver{
 
     private File outputFile = null;
-    private static Set filesNotNeedingBackup = new HashSet();
+    private static Set<File> filesNotNeedingBackup = new HashSet<File>();
     private static boolean backupsEnabled = true;
 
     /**

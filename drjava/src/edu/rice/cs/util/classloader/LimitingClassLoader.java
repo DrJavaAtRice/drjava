@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -49,7 +49,7 @@ import java.util.*;
  * @version $Id$
  */
 public class LimitingClassLoader extends ClassLoader {
-  private List _restrictedList = new LinkedList();
+  private List<String> _restrictedList = new LinkedList<String>();
 
   /**
    * Creates a LimitingClassLoader.
@@ -71,7 +71,7 @@ public class LimitingClassLoader extends ClassLoader {
   /**
    * Overrides {@link ClassLoader#loadClass(String,boolean)} to
    * reject classes whose names are on the restricted list.
-   * 
+   *
    * @param name Name of class to load
    * @param resolve If true then resolve the class
    *

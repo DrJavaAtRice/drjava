@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -35,7 +35,7 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.newjvm;
 
@@ -50,12 +50,12 @@ import java.util.*;
 public final class ExecJVM {
   private static final String PATH_SEPARATOR = System.getProperty("path.separator");
   private static final String OS_NAME = System.getProperty("os.name").toLowerCase(Locale.US);
-
+  
   private ExecJVM() {}
   
   /**
    * Runs a new JVM.
-   * 
+   *
    * @param mainClass Class to run
    * @param classParams Parameters to pass to the main class
    * @param classPath Array of items to put in classpath of new JVM
@@ -66,8 +66,7 @@ public final class ExecJVM {
   public static Process runJVM(String mainClass,
                                String[] classParams,
                                String[] classPath,
-                               String[] jvmParams) throws IOException
-  {
+                               String[] jvmParams) throws IOException {
     StringBuffer buf = new StringBuffer();
     for (int i = 0; i < classPath.length; i++) {
       if (i != 0) {
@@ -76,13 +75,13 @@ public final class ExecJVM {
       
       buf.append(classPath[i]);
     }
-
+    
     return runJVM(mainClass, classParams, buf.toString(), jvmParams);
   }
-
+  
   /**
    * Runs a new JVM.
-   * 
+   *
    * @param mainClass Class to run
    * @param classParams Parameters to pass to the main class
    * @param classPath Pre-formatted classpath parameter
@@ -93,20 +92,19 @@ public final class ExecJVM {
   public static Process runJVM(String mainClass,
                                String[] classParams,
                                String classPath,
-                               String[] jvmParams) throws IOException
-  {
-    LinkedList args = new LinkedList();
+                               String[] jvmParams) throws IOException {
+    LinkedList<String> args = new LinkedList<String>();
     args.add("-classpath");
     args.add(classPath);
-    _addArray(args, jvmParams);    
+    _addArray(args, jvmParams);
     String[] jvmWithCP = (String[]) args.toArray(new String[0]);
     
     return runJVM(mainClass, classParams, jvmWithCP);
   }
-
+  
   /**
    * Runs a new JVM, propogating the present classpath.
-   * 
+   *
    * @param mainClass Class to run
    * @param classParams Parameters to pass to the main class
    * @param jvmParams Array of additional command-line parameters to pass to JVM
@@ -116,15 +114,14 @@ public final class ExecJVM {
   public static Process runJVMPropogateClassPath(String mainClass,
                                                  String[] classParams,
                                                  String[] jvmParams)
-    throws IOException
-  {
+    throws IOException {
     String cp = System.getProperty("java.class.path");
     return runJVM(mainClass, classParams, cp, jvmParams);
   }
   
   /**
    * Runs a new JVM, propogating the present classpath.
-   * 
+   *
    * @param mainClass Class to run
    * @param classParams Parameters to pass to the main class
    *
@@ -132,14 +129,13 @@ public final class ExecJVM {
    */
   public static Process runJVMPropogateClassPath(String mainClass,
                                                  String[] classParams)
-    throws IOException
-  {
+    throws IOException {
     return runJVMPropogateClassPath(mainClass, classParams, new String[0]);
   }
   
   /**
    * Runs a new JVM.
-   * 
+   *
    * @param mainClass Class to run
    * @param classParams Parameters to pass to the main class
    * @param jvmParams Array of additional command-line parameters to pass to JVM
@@ -148,20 +144,19 @@ public final class ExecJVM {
    */
   public static Process runJVM(String mainClass,
                                String[] classParams,
-                               String[] jvmParams) throws IOException
-  {
-    LinkedList args = new LinkedList();
+                               String[] jvmParams) throws IOException {
+    LinkedList<String> args = new LinkedList<String>();
     args.add(_getExecutable());
     _addArray(args, jvmParams);
     args.add(mainClass);
     _addArray(args, classParams);
-
+    
     String[] argArray = (String[]) args.toArray(new String[0]);
-
+    
     //for (int i = 0; i < argArray.length; i++) {
-      //System.err.println("arg #" + i + ": " + argArray[i]);
+    //System.err.println("arg #" + i + ": " + argArray[i]);
     //}
-
+    
     return Runtime.getRuntime().exec(argArray);
   }
   
@@ -173,8 +168,9 @@ public final class ExecJVM {
    * @param outLines the LinkedList of Strings to be filled with the lines read from outBuf
    * @param errLines the LinkedList of Strings to be filled with the lines read from errBuf
    */
-  public static void ventBuffers(Process theProc, LinkedList outLines,
-                          LinkedList errLines) throws IOException {
+  public static void ventBuffers(Process theProc, LinkedList<String> outLines,
+                                 LinkedList<String> errLines) throws IOException {
+    // getInputStream actually gives us the stdout from the Process.
     BufferedReader outBuf = new BufferedReader(new InputStreamReader(theProc.getInputStream()));
     BufferedReader errBuf = new BufferedReader(new InputStreamReader(theProc.getErrorStream()));
     String output;
@@ -183,7 +179,7 @@ public final class ExecJVM {
       output = outBuf.readLine();
       
       while (output != null) {
-//        System.out.println("[stdout]: " + output);
+        //        System.out.println("[stdout]: " + output);
         outLines.add(output);
         if (outBuf.ready()) {
           output = outBuf.readLine();
@@ -197,7 +193,7 @@ public final class ExecJVM {
     if (errBuf.ready()) {
       output = errBuf.readLine();
       while (output != null) {
-//        System.out.println("[stderr] " + output);
+        //        System.out.println("[stderr] " + output);
         errLines.add(output);
         if (errBuf.ready()) {
           output = errBuf.readLine();
@@ -224,28 +220,28 @@ public final class ExecJVM {
     // First, write out our opening message.
     System.err.println(msg);
     
-    LinkedList outLines = new LinkedList();
-    LinkedList errLines = new LinkedList();
+    LinkedList<String> outLines = new LinkedList<String>();
+    LinkedList<String> errLines = new LinkedList<String>();
     
     ventBuffers(theProc, outLines, errLines);
     
-    Iterator it = outLines.iterator();
+    Iterator<String> it = outLines.iterator();
     String output;
     while (it.hasNext()) {
-      output = (String) it.next();
+      output = it.next();
       System.err.println("    [" +sourceName + " stdout]: " + output);
     }
     
     it = errLines.iterator();
     while (it.hasNext()) {
-      output = (String) it.next();
+      output = it.next();
       System.err.println("    [" +sourceName + " stderr]: " + output);
     }
   }
-    
-  private static void _addArray(LinkedList list, Object[] array) {
+  
+  private static void _addArray(LinkedList<String> list, String[] array) {
     if (array != null) {
-      for (int i = 0; i < array.length; i++) {  
+      for (int i = 0; i < array.length; i++) {
         list.add(array[i]);
       }
     }
@@ -259,7 +255,7 @@ public final class ExecJVM {
   private static boolean _isNetware() {
     return OS_NAME.indexOf("netware") != -1;
   }
-
+  
   /**
    * Find the java executable.
    * This logic comes from Ant.
@@ -271,19 +267,19 @@ public final class ExecJVM {
     }
     
     File executable;
-
+    
     String java_home = System.getProperty("java.home") + "/";
     
     String[] candidates = {
       java_home + "../bin/java",
-      java_home + "bin/java",
-      java_home + "java",
+        java_home + "bin/java",
+        java_home + "java",
     };
-
+    
     // search all the candidates to find java
     for (int i = 0; i < candidates.length; i++) {
       String current = candidates[i];
-
+      
       // try javaw.exe first for dos, otherwise try java.exe for dos
       if (_isDOS()) {
         executable = new File(current + "w.exe");
@@ -294,18 +290,18 @@ public final class ExecJVM {
       else {
         executable = new File(current);
       }
-
+      
       //System.err.println("checking: " + executable);
-
+      
       if (executable.exists()) {
         //System.err.println("JVM executable found: " + executable.getAbsolutePath());
         return executable.getAbsolutePath();
       }
     }
-
+    
     // hope for the best using the system's path!
     //System.err.println("Could not find java executable, using 'java'!");
     return "java";
   }
 }
-  
+

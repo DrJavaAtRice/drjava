@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -46,7 +46,7 @@ import javax.swing.event.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.util.Vector;
-/** 
+/**
  * Common TableModel for Uneditable tables
  * @version $Id$
  */
@@ -66,7 +66,7 @@ public class UneditableTableModel extends DefaultTableModel {
   public UneditableTableModel(Vector data, Vector columnNames) {
     super(data,columnNames);
   }
-  public boolean isCellEditable(int row, int col) { 
-    return false; 
+  public boolean isCellEditable(int row, int col) {
+    return false;
   }
 }

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -61,15 +61,19 @@ public class DelegatingAction implements Action {
     //ACCELERATOR_KEY,
     //MNEMONIC_KEY,
   };
-
-  private HashMap _localProperties = new HashMap();
+  
+  /**
+   * TODO: Should this use a more specific type parameter?
+   */
+  private HashMap<String, Object> _localProperties = new HashMap<String, Object>();
   
   /**
    * The action to delegate to. If it's null, this action is
    * disabled and all method calls will result in IllegalStateExceptions.
    */
   private Action _delegatee;
-  private final LinkedList _listenerList = new LinkedList();
+  private final LinkedList<PropertyChangeListener> _listenerList =
+    new LinkedList<PropertyChangeListener>();
 
   /**
    * Returns value of the key, from delegatee is it's in {@link #KEYS_TO_DELEGATE}
