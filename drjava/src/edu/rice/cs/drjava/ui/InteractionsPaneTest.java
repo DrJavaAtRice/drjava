@@ -48,6 +48,7 @@ import  junit.extensions.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.text.*;
+import java.rmi.registry.Registry;
 
 /**
  * Test functions of InteractionsPane.
@@ -81,7 +82,7 @@ public class InteractionsPaneTest extends TestCase {
    * Setup method for each JUnit test case.
    */
   public void setUp() {
-    _model = new DefaultGlobalModel();
+    _model = new DefaultGlobalModel(Registry.REGISTRY_PORT);
     _interactions = (InteractionsDocument)_model.getInteractionsDocument();
     _pane = new InteractionsPane(_model);
     _pane.setCaretPosition(_model.getInteractionsFrozenPos());

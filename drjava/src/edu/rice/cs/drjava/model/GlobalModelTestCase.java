@@ -47,6 +47,7 @@ import junit.extensions.*;
 import java.util.LinkedList;
 import javax.swing.text.*;
 import javax.swing.*;
+import java.rmi.registry.Registry;
 
 import edu.rice.cs.util.*;
 import edu.rice.cs.drjava.DrJava;
@@ -70,7 +71,8 @@ public abstract class GlobalModelTestCase extends TestCase {
    * the prototype global model to hold the interpreter. This prevents
    * us from having to re-invoke the interpreter every time!
    */
-  protected static final DefaultGlobalModel _originalModel = new DefaultGlobalModel();
+  protected static final DefaultGlobalModel _originalModel = 
+    new DefaultGlobalModel(Registry.REGISTRY_PORT);
 
   protected DefaultGlobalModel _model;
   protected File _tempDir;

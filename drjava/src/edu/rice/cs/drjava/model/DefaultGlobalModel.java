@@ -267,15 +267,22 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     return s;
   }
   
-  
   /**
    * Constructs a new GlobalModel.
    */
   public DefaultGlobalModel() {
+    this(-1);
+  }
+  
+  /**
+   * Constructs a new GlobalModel, using the given port for the RMI registry.
+   * If port is -1, uses a unique port.
+   */
+  public DefaultGlobalModel(int rmiPort) {
     // Create the interpreter
     try {
       _waitingForFirstInterpreter = true;
-      _interpreterControl = new MainJVM(this);
+      _interpreterControl = new MainJVM(this, rmiPort);
       _resetInteractionsClasspath();
     }
     catch (java.rmi.RemoteException re) {

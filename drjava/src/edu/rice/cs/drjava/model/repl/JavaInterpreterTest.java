@@ -250,45 +250,6 @@ public class JavaInterpreterTest extends TestCase {
     };
     tester(cases);
   }
-  
-  /**
-   * Can't use this test case because you need 1.4 to compile it and 1.3 to
-   * run it.
-   */
-  /**
-   public void testRunAsProgram() throws ExceptionReturnedException
-   {
-   MainFrame _m = new MainFrame();
-   DefinitionsView v = _m.getDefView();
-   DefinitionsDocument d = v._doc();
-   _m.show();
-   try {
-   d.insertString(0,"public class C{public static boolean t = false;public static void main(String[] args){ t=true;}}",null);
-   assertTrue(_m.saveToFile("C.java"));
-   
-   _m.compile();
-   
-   InteractionsDocument id = _m._interactionsView.getInteractionsDocument();
-   id.insertString(id.frozenPos,"java C", null);
-   id.eval();
-   id.insertString(id.frozenPos,"C.t", null);
-   int length = id.getLength();
-   id.eval();
-   String text = id.getText(length+1,4);
-   assertEquals("0.0","true",text);
-   
-   }
-   
-   catch (Exception ex) {
-   ex.printStackTrace();
-   throw new RuntimeException(ex.toString());
-   }
-   finally{
-   new File("C.java").delete();
-   new File("C.class").delete();
-   }
-   }
-   */
 
 }
 

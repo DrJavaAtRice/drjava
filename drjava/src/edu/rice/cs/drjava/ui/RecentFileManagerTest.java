@@ -47,6 +47,7 @@ import javax.swing.*;
 import javax.swing.text.*;
 import java.io.File;
 import java.io.IOException;
+import java.rmi.registry.Registry;
 
 import gj.util.Vector;
 
@@ -65,7 +66,7 @@ public class RecentFileManagerTest extends TestCase {
   protected static final String BAR_TEXT = "class DrJavaTestBar {}";
   private RecentFileManager _rfm;
   private JMenu _menu;
-  private DefaultGlobalModel _model = new DefaultGlobalModel();
+  private DefaultGlobalModel _model = new DefaultGlobalModel(Registry.REGISTRY_PORT);
   protected File _tempDir;
   
   /**

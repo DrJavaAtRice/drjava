@@ -149,9 +149,11 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    *   <li>A new document is created to satisfy the invariant.
    *   <li>The first document in the list is set as the active document.
    * </ol>
+   * @param rmiPort The port on which to run the RMI registry,
+   * or -1 for a unique port.
    */
-  public SingleDisplayModel() {
-    super();
+  public SingleDisplayModel(int rmiPort) {
+    super(rmiPort);
     _init();
   }
 

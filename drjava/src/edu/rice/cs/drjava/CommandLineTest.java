@@ -44,6 +44,8 @@ import java.io.*;
 import javax.swing.ListModel;
 import javax.swing.DefaultListModel;
 import javax.swing.text.BadLocationException;
+import java.rmi.registry.Registry;
+
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.ui.MainFrame;
@@ -127,7 +129,7 @@ public class CommandLineTest extends TestCase {
   }
 
   public void setUp() {
-    _mf = new MainFrame();
+    _mf = new MainFrame(Registry.REGISTRY_PORT);
   }
   
   /**

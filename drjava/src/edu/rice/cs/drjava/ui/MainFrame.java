@@ -863,12 +863,20 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** Creates the main window, and shows it. */
   public MainFrame() {
+    this(-1);
+  }
+  /**
+   * Creates the main window and shows it.  The underlying model will
+   * be told to use the given port for the RMI registry.  If the
+   * port is -1, it will use a unique port.
+   */
+  public MainFrame(int rmiPort) {
     // create position listener for line numbers in status bar
     _posListener = new PositionListener();
     _setUpStatusBar();
 
     // create our model
-    _model = new SingleDisplayModel();
+    _model = new SingleDisplayModel(rmiPort);
     
     if (_model.getDebugManager() != null) {
       // add listener to debug manager

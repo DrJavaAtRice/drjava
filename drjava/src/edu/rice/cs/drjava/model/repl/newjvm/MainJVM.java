@@ -75,8 +75,16 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
    */
   private final static int RESET_TIME_OUT = 60;
 
-  /** Port on which RMI registry is running. */
-  private int _rmiPort = Registry.REGISTRY_PORT;
+  /** 
+   * Port on which RMI registry is running.
+   * Static because we only need one RMI registry port per JVM.
+   * Starts at a unique port, but defaults to the default RMI
+   * port (1099) if one cannot be found.
+   */
+  private static int _rmiPort = Registry.REGISTRY_PORT;
+  static {
+    _rmiPort = _generateSafeRMIPort();
+  }
 
   /**
    * The global model.
@@ -122,10 +130,31 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
    */
   private Process _interpreterProcess = null;
 
+  /**
+   * Creates a new MainJVM to handle communication with the Interpreter
+   * JVM, and instantiates the Interpreter JVM.  Uses RMI over a
+   * unique port to communicate.
+   * @param model GlobalModel wishing to communicate with the Interpreter.
+   */
   public MainJVM(final GlobalModel model) throws RemoteException {
+    this(model, -1);
+  }
+  
+  /**
+   * Creates a new MainJVM to handle communication with the Interpreter
+   * JVM, and instantiates the Interpreter JVM.  Uses RMI over the
+   * given port to communicate.
+   * @param model GlobalModel wishing to communicate with the Interpreter.
+   * @param rmiPort Port on which to start the RMI registry.  If -1,
+   * then a unique port will be used.
+   */
+  public MainJVM(final GlobalModel model, int rmiPort) throws RemoteException {
     super();
 
     _model = model;
+    if (rmiPort > -1) {
+      _rmiPort = rmiPort;
+    }
     _startNameServiceIfNeeded();
     _identifier = _createIdentifier();
 
@@ -141,9 +170,10 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
   
   /**
    * Creates a MainJVM without a model.
+   * @param port on which to run the RMI registry, or -1 for a unique port.
    */
-  public MainJVM() throws RemoteException {
-    this(null);
+  public MainJVM(int rmiPort) throws RemoteException {
+    this(null, rmiPort);
   }
 
   /**
@@ -173,16 +203,12 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     _ensureInterpreterConnected();
 
     try {
-      //DrJava.consoleOut().println("addclasspath to " + _interpreterJVM + ": " + path);
-      //DrJava.consoleOut().println("ADD CLASSPATH: " + path);
       _interpreterJVM.addClassPath(path);
-      //DrJava.consoleOut().println("DONE ADDING.");
     }
     catch (RemoteException re) {
       //DrJava.consoleOut().println("EXCEPTION in addClassPath:\n" + re);
       //re.printStackTrace();
       _threwException(re);
-      //throw new edu.rice.cs.util.UnexpectedException(re);
     }
   }
 
@@ -350,11 +376,6 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
       jvmArgsArray[i] = jvmArgs.elementAt(i);
     }
     
-    //System.out.println("starting interpreter... " + jvmargs[1]);
-    /*String classpath = _model.getClasspath() +
-     System.getProperty("path.separator") +
-     System.getProperty("java.class.path");
-     */
     try {
       //DrJava.consoleOut().println("In MainJVM: starting interpreter jvm");
       _interpreterProcess = ExecJVM.
@@ -492,6 +513,10 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     }
   }
 
+  /**
+   * If an interpreter has not registered itself, this method will
+   * block until one does.
+   */
   private void _ensureInterpreterConnected() {
     try {
       synchronized(this) {
@@ -504,31 +529,58 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
       throw new edu.rice.cs.util.UnexpectedException(ie);
     }
   }
-
+  
   /**
-   * Checks if an RMI registry is available, and if not, tries to create one
-   * on a new port.
+   * Returns a unique port to be safely used for RMI.
    */
-  private void _startNameServiceIfNeeded() {
+  private static int _generateSafeRMIPort() {
+    // Get a safe port to use.
+    //  If each copy of DrJava used the same port (or the same port as
+    //  another program's rmiregistry), then when the previous copy/program
+    //  quit, we would lose our registry and not be able to reset!
     try {
-      Naming.list("");
+      ServerSocket socket = new ServerSocket(0);
+      int rmiPort = socket.getLocalPort();
+      socket.close();
+      return rmiPort;
     }
-    catch (Exception e) {
-      // Get a safe port to use.
-      //  If each copy of DrJava used the same port (or the same port as
-      //  another program's rmiregistry), then when the previous copy/program
-      //  quit, we would lose our registry and not be able to reset!
+    catch (IOException ioe) {
+      return Registry.REGISTRY_PORT;
+    }
+  }
+  
+  /**
+   * Creates a new RMI registry for this copy on the current rmi port,
+   * if it is not already running.
+   */
+  private synchronized void _startNameServiceIfNeeded() {
+    Exception exception = null;
+    boolean success = false;
+    for (int i=0; i < 2; i++) {
       try {
-        ServerSocket socket = new ServerSocket(0);
-        _rmiPort = socket.getLocalPort();
-        socket.close();
-        LocateRegistry.createRegistry(_rmiPort);
+        // See if our registry already exists
+        Naming.list("//127.0.0.1:" + _rmiPort);
+        //DrJava.consoleOut().println("registry exists");
+        success = true;
+        break;
       }
-      catch (Exception e2) {
-        throw new UnexpectedException(new RuntimeException(
-          "Could not find a usable RMI Port: " + e2.toString()));
+      catch (Exception e) {
+        // Didn't already exist, so try to create it
+        //e.printStackTrace(DrJava.consoleOut());
+        try {
+          //DrJava.consoleOut().println("trying to create registry on port: " + _rmiPort);
+          LocateRegistry.createRegistry(_rmiPort);
+        }
+        catch (Exception e2) {
+          // Failed to create.  Try again on another port
+          _rmiPort = _generateSafeRMIPort();
+          exception = e2;
+        }
       }
-      //DrJava.consoleOut().println("Created rmiregistry on port: " + _rmiPort);
+    }
+    if (!success) {
+      throw new UnexpectedException(new RuntimeException(
+          "Could not find a usable RMI Port: " + exception.toString()));
     }
   }
 

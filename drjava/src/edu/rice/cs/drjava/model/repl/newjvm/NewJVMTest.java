@@ -43,6 +43,7 @@ import junit.framework.*;
 import junit.extensions.*;
 
 import java.rmi.*;
+import java.rmi.registry.Registry;
 
 import edu.rice.cs.drjava.model.*;
 
@@ -165,7 +166,7 @@ public class NewJVMTest extends TestCase {
     public boolean voidReturnFlag;
 
     public TestJVMExtension() throws RemoteException { 
-      super();
+      super(Registry.REGISTRY_PORT);
     }
 
     public void resetFlags() {

@@ -45,6 +45,7 @@ import  junit.extensions.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.text.*;
+import java.rmi.registry.Registry;
 
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.*;
@@ -78,7 +79,7 @@ public class MainFrameTest extends TestCase {
    * Setup method for each JUnit test case.
    */
   public void setUp() {
-    _frame = new MainFrame();
+    _frame = new MainFrame(Registry.REGISTRY_PORT);
   }
   
   /**
