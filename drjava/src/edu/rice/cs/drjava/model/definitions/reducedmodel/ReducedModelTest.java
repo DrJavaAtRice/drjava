@@ -1,3 +1,16 @@
+/* $Id$
+ *
+ * File history:
+ *
+ * $Log$
+ * Revision 1.2  2001/06/19 16:26:55  javaplt
+ * Added CVS tags to comments (Id and Log).
+ * Changed all uses of assert() in JUnit tests to assertTrue(). assert() has been
+ * deprecated because it is a builtin keyword in Java 1.4.
+ * Fixed build.xml to test correctly after compile and to add CVS targets.
+ *
+ */
+
 package edu.rice.cs.drjava;
 
 import junit.framework.*;
@@ -27,65 +40,65 @@ public class ReducedModelTest extends TestCase {
 	public void testInsertGap()
 		{
 			model1.insertGap(4);
-			assert("#0.0", model1._cursor.prevItem().isGap());
-			assert("#0.1", model1._cursor.atEnd());
+			assertTrue("#0.0", model1._cursor.prevItem().isGap());
+			assertTrue("#0.1", model1._cursor.atEnd());
 			assertEquals("#0.2", 4, model1._cursor.prevItem().getSize());
 			model2._cursor.next();
 			model2.insertGap(5);
-			assert("#1.0", model2._cursor.prevItem().isGap());
-			assert("#1.1", model2._cursor.atEnd());
+			assertTrue("#1.0", model2._cursor.prevItem().isGap());
+			assertTrue("#1.1", model2._cursor.atEnd());
 			assertEquals("#1.2", 5, model2._cursor.prevItem().getSize());
 		}
 
 	public void testInsertGapBeforeGap()
 		{
 			model1.insertGap(3);
-			assert("#0.0.0", model1._cursor.atEnd());
+			assertTrue("#0.0.0", model1._cursor.atEnd());
 			model1._cursor.prev();
 			model1.insertGap(3);
-			assert("#0.0", model1._cursor.current().isGap());
+			assertTrue("#0.0", model1._cursor.current().isGap());
 			assertEquals("#0.1", 3, model1._offset);
 			assertEquals("#0.2", 6, model1._cursor.current().getSize());
-			assert("#0.3", model1._cursor.atFirstItem());
-			assert("#0.4", model1._cursor.atLastItem());
+			assertTrue("#0.3", model1._cursor.atFirstItem());
+			assertTrue("#0.4", model1._cursor.atLastItem());
 			model1._cursor.prev();
 			model1._offset = 0; // now pointing to head.  move(int) will take
                      			// care of this in the future
 			model1.insertGap(2);
-			assert("#1.0", model1._cursor.current().isGap());
+			assertTrue("#1.0", model1._cursor.current().isGap());
 			assertEquals("#1.1", 2, model1._offset);
 			assertEquals("#1.2", 8, model1._cursor.current().getSize());
-			assert("#1.3", model1._cursor.atFirstItem());
-			assert("#1.4", model1._cursor.atLastItem());			
+			assertTrue("#1.3", model1._cursor.atFirstItem());
+			assertTrue("#1.4", model1._cursor.atLastItem());			
 		}
 
 	public void testInsertGapAfterGap()
 		{
 			model1.insertGap(3);
-			assert("#0.0", model1._cursor.atEnd());
-			assert("#0.1", model1._cursor.prevItem().isGap());
+			assertTrue("#0.0", model1._cursor.atEnd());
+			assertTrue("#0.1", model1._cursor.prevItem().isGap());
 			assertEquals("#0.2", 3, model1._cursor.prevItem().getSize());	
 			model1.insertGap(4);
-			assert("#1.0", model1._cursor.atEnd());
-			assert("#1.1", model1._cursor.prevItem().isGap());
+			assertTrue("#1.0", model1._cursor.atEnd());
+			assertTrue("#1.1", model1._cursor.prevItem().isGap());
 			assertEquals("#1.2", 7, model1._cursor.prevItem().getSize());
 		}
 
 	public void testInsertGapInsideGap()
 		{
 			model1.insertGap(3);
-			assert("#0.0", model1._cursor.atEnd());
-			assert("#0.1", model1._cursor.prevItem().isGap());
+			assertTrue("#0.0", model1._cursor.atEnd());
+			assertTrue("#0.1", model1._cursor.prevItem().isGap());
 			assertEquals("#0.2", 3, model1._cursor.prevItem().getSize());			
 			model1._cursor.prev();
 			model1.insertGap(3);
-			assert("#1.0", model1._cursor.atLastItem());
-			assert("#1.1", model1._cursor.current().isGap());
+			assertTrue("#1.0", model1._cursor.atLastItem());
+			assertTrue("#1.1", model1._cursor.current().isGap());
 			assertEquals("#1.2", 6, model1._cursor.current().getSize());
 			assertEquals("#1.3", 3, model1._offset);
 			model1.insertGap(3);
-			assert("#1.0", model1._cursor.atLastItem());
-			assert("#1.1", model1._cursor.current().isGap());
+			assertTrue("#1.0", model1._cursor.atLastItem());
+			assertTrue("#1.1", model1._cursor.current().isGap());
 			assertEquals("#1.2", 9, model1._cursor.current().getSize());
 			assertEquals("#1.3", 6, model1._offset);			
 		}
@@ -93,13 +106,13 @@ public class ReducedModelTest extends TestCase {
 	public void testInsertBraceAtStartAndEnd()
 		{
 			model1.insertOpenParen();
-			assert("#0.0", model1._cursor.atEnd());
+			assertTrue("#0.0", model1._cursor.atEnd());
 			assertEquals("#0.1","(", model1._cursor.prevItem().getType());
 			assertEquals("#0.2", 1, model1._cursor.prevItem().getSize());
 
 			model2._cursor.next();
 			model2.insertClosedParen();
-			assert("#1.0", model2._cursor.atEnd());
+			assertTrue("#1.0", model2._cursor.atEnd());
 			assertEquals("#1.1",")", model2._cursor.prevItem().getType());
 			assertEquals("#1.2", 1, model2._cursor.prevItem().getSize());
 		}
@@ -114,20 +127,20 @@ public class ReducedModelTest extends TestCase {
 			model1.insertOpenSquiggly();
 			assertEquals("#1.0", 0, model1._offset);
 			assertEquals("#1.1", 4, model1._cursor.current().getSize());
-			assert("#1.2", model1._cursor.current().isGap());
+			assertTrue("#1.2", model1._cursor.current().isGap());
 			model1._cursor.prev();
 			assertEquals("#2.0", 1, model1._cursor.current().getSize());
 			assertEquals("#2.1", "{", model1._cursor.current().getType());
 			model1._cursor.prev();
 			assertEquals("#3.0", 0, model1._offset);
 			assertEquals("#3.1", 3, model1._cursor.current().getSize());
-			assert("#3.2", model1._cursor.current().isGap());
+			assertTrue("#3.2", model1._cursor.current().isGap());
 		}
 
 	public void testInsertBrace()
 		{
 			model1.insertOpenSquiggly();
-			assert("#0.0", model1._cursor.atEnd());
+			assertTrue("#0.0", model1._cursor.atEnd());
 			model1._cursor.prev();
 			assertEquals("#1.0", 1, model1._cursor.current().getSize());
 			assertEquals("#1.1", "{", model1._cursor.current().getType());
@@ -583,7 +596,7 @@ public class ReducedModelTest extends TestCase {
 			assertEquals("#4.4", "*", model1._cursor.nextItem().getType());
 			assertEquals("#4.5", ReducedToken.FREE,
 									 model1._cursor.nextItem().getState());
-			assert("#4.6", model1._cursor.current().isClosed());
+			assertTrue("#4.6", model1._cursor.current().isClosed());
 			model1._cursor.next();
 			// "/*"#*/
 			assertEquals("#5.0", ReducedToken.FREE,
@@ -634,7 +647,7 @@ public class ReducedModelTest extends TestCase {
 			model1.insertNewline();
 			// //___\n#__
 			assertEquals("#0.0", ReducedToken.FREE, model1.getStateAtCurrent());
-			assert("#0.1", model1._cursor.current().isGap());
+			assertTrue("#0.1", model1._cursor.current().isGap());
 			assertEquals("#0.2", "\n", model1._cursor.prevItem().getType());
 			assertEquals("#0.3", 2, model1._cursor.current().getSize());
 			assertEquals("#0.4", ReducedToken.FREE,
@@ -646,7 +659,7 @@ public class ReducedModelTest extends TestCase {
 			// //___#\n__
 			assertEquals("#1.0", ReducedToken.INSIDE_LINE_COMMENT,
 									 model1.getStateAtCurrent());
-			assert("#1.1", model1._cursor.prevItem().isGap());
+			assertTrue("#1.1", model1._cursor.prevItem().isGap());
 			assertEquals("#1.2", "\n", model1._cursor.current().getType());
 			assertEquals("#1.3", 3, model1._cursor.prevItem().getSize());
 			assertEquals("#1.4", ReducedToken.INSIDE_LINE_COMMENT,
@@ -665,7 +678,7 @@ public class ReducedModelTest extends TestCase {
 			model1.insertNewline();
 			// "___\n#__
 			assertEquals("#0.0", ReducedToken.FREE, model1.getStateAtCurrent());
-			assert("#0.1", model1._cursor.current().isGap());
+			assertTrue("#0.1", model1._cursor.current().isGap());
 			assertEquals("#0.2", "\n", model1._cursor.prevItem().getType());
 			assertEquals("#0.3", 2, model1._cursor.current().getSize());
 			assertEquals("#0.4", ReducedToken.FREE,
@@ -677,7 +690,7 @@ public class ReducedModelTest extends TestCase {
 			// "___#\n__
 			assertEquals("#1.0", ReducedToken.INSIDE_QUOTE,
 									 model1.getStateAtCurrent());
-			assert("#1.1", model1._cursor.prevItem().isGap());
+			assertTrue("#1.1", model1._cursor.prevItem().isGap());
 			assertEquals("#1.2", "\n", model1._cursor.current().getType());
 			assertEquals("#1.3", 3, model1._cursor.prevItem().getSize());
 			assertEquals("#1.4", ReducedToken.INSIDE_QUOTE,
@@ -766,46 +779,46 @@ public class ReducedModelTest extends TestCase {
 	public void testMoveWithinToken()
 		{
 			model1.insertGap(10);
-			assert("#0.0", model1._cursor.atEnd());
+			assertTrue("#0.0", model1._cursor.atEnd());
 			assertEquals("#0.1", 0, model1._offset);
 
 
 			model1.move(-5);
 			
-			assert("#1.0", model1._cursor.current().isGap());
+			assertTrue("#1.0", model1._cursor.current().isGap());
 			assertEquals("#1.1", 5, model1._offset);
 
 			model1.move(2);
-			assert("#2.0", model1._cursor.current().isGap());
+			assertTrue("#2.0", model1._cursor.current().isGap());
 			assertEquals("#2.1", 7, model1._offset);
 
 			model1.move(-4);
-			assert("#3.0", model1._cursor.current().isGap());
+			assertTrue("#3.0", model1._cursor.current().isGap());
 			assertEquals("#3.1", 3, model1._offset);
 
 			model1.move(-3);
-			assert("#4.0", model1._cursor.current().isGap());
+			assertTrue("#4.0", model1._cursor.current().isGap());
 			assertEquals("#4.1", 0, model1._offset);
 
 			model1.move(10);
-			assert("#5.0", model1._cursor.atEnd());
+			assertTrue("#5.0", model1._cursor.atEnd());
 			assertEquals("#5.1", 0, model1._offset);
 		}
 
 	public void testMoveOnEmpty()
 		{
 			model1.move(0);
-			assert("#0.0", model1._cursor.atStart());
+			assertTrue("#0.0", model1._cursor.atStart());
 			try {
 				model1.move(-1);
-				assert("#0.1", false);
+				assertTrue("#0.1", false);
 			}
 			catch (Exception e) {
 			}
 
 			try {
 				model1.move(1);
-				assert("#0.2", false);
+				assertTrue("#0.2", false);
 			}
 			catch (Exception e) {
 			}			
@@ -822,7 +835,7 @@ public class ReducedModelTest extends TestCase {
 			model1.insertGap(3);
 			model1.insertNewline();
 			// /*____{"___#\n			
-			assert("#0.0", model1._cursor.atEnd());
+			assertTrue("#0.0", model1._cursor.atEnd());
 			assertEquals("#0.1", 0, model1._offset);
 
 			model1.move(-12);
@@ -837,30 +850,30 @@ public class ReducedModelTest extends TestCase {
 
 			model1.move(-1);
 			// /*____{"__#_\n
-			assert("#3.0", model1._cursor.current().isGap());
+			assertTrue("#3.0", model1._cursor.current().isGap());
 			assertEquals("#3.1", 2, model1._offset);
 
 			model1.move(-6);
 			// /*___#_{"___\n			
-			assert("#4.0", model1._cursor.current().isGap());
+			assertTrue("#4.0", model1._cursor.current().isGap());
 			assertEquals("#4.1", 3, model1._offset);
 
 			try {
 				model1.move(-8);
-				assert("#5.0", false);
+				assertTrue("#5.0", false);
 			}
 			catch (Exception e) {
 			}
-			assert("#5.1", model1._cursor.current().isGap());
+			assertTrue("#5.1", model1._cursor.current().isGap());
 			assertEquals("#5.2", 3, model1._offset);
 
 			try {
 				model1.move(20);
-				assert("#6.0", false);
+				assertTrue("#6.0", false);
 			}
 			catch (Exception e) {
 			}
-			assert("#6.1", model1._cursor.current().isGap());
+			assertTrue("#6.1", model1._cursor.current().isGap());
 			assertEquals("#6.2", 3, model1._offset);
 			
 		}

@@ -1,3 +1,6 @@
+<!--
+  $Id$
+-->
 <project name="drjava" default="test">
   <!-- This makes the javac task use the GJ compiler. -->
   <property name="build.compiler" value="edu.rice.cs.misc.GJv6CompilerAdapter" />
@@ -6,6 +9,9 @@
   <property name="srcroot" value="../../../../" />
   <!-- built is where the compiled classes go -->
   <property name="built" value="${srcroot}/../built/" />
+  <!-- projpath is the path from srcroot to the root directory of this project
+  -->
+  <property name="projpath" value="edu/rice/cs/drjava" />
 
   <property name="jarfile" value="${srcroot}/../drjava2.jar" />
   <property name="manifest" value="manifest" />
@@ -17,11 +23,18 @@
     <mkdir dir="${built}" /> <!-- Make the built directory -->
   </target>
 
-  <!-- Check out source -->
-  <target name="checkout" depends="init">
-    <!-- 
-    <cvs command="checkout" cvsRoot="${cvsroot}" package="{ant.project.name}">
-    -->
+  <!-- Reconcile source with CVS archive -->
+  <target name="update" depends="init">
+    <cvs command="update -d" cvsRoot="${cvsroot}" />
+  </target>
+
+  <!-- Commit source to CVS archive
+       Before doing do, we update our copy with the CVS copy. This ensures that
+       if there were any clashes, we have to resolve them now. Then we
+       recompile (from scratch) and retest. If this all succeeds, we can commit.
+  -->
+  <target name="commit" depends="clean, update, test">
+    <cvs command="commit" cvsRoot="${cvsroot}" />
   </target>
 
   <!-- Compile -->
@@ -34,12 +47,24 @@
 
   <!-- Unit test -->
   <target name="test" depends="compile">
-    <junit printsummary="yes" haltonerror="yes" haltonfailure="yes">
+    <junit printsummary="yes" haltonerror="yes" haltonfailure="yes" fork="no">
+      <!-- propogate the same classpath. not sure why it doesn't
+           happen by default!
+      -->
+      <classpath path="${java.class.path}" />
+
       <!-- Uncomment below to generate more text on console for tests -->
       <!-- <formatter type="plain" usefile="no" /> -->
+
+      <!-- This makes JUnit run all test classes. It figures out which ones
+           automatically, without needing AllTests classes.
+      -->
       <batchtest>
+        <!-- The root of the fileset must be where edu/ is. -->
         <fileset dir="${srcroot}">
-          <include name="**/*Test.java" />
+          <!-- Include only from projpath to only get classes in this project!
+          -->
+          <include name="${projpath}/**/*Test.java" />
           <exclude name="**/AllTests.java" />
           <exclude name="**/Test.java" />
         </fileset>

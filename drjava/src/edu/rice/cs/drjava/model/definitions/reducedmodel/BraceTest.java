@@ -1,3 +1,16 @@
+/* $Id$
+ *
+ * File history:
+ *
+ * $Log$
+ * Revision 1.2  2001/06/19 16:26:54  javaplt
+ * Added CVS tags to comments (Id and Log).
+ * Changed all uses of assert() in JUnit tests to assertTrue(). assert() has been
+ * deprecated because it is a builtin keyword in Java 1.4.
+ * Fixed build.xml to test correctly after compile and to add CVS targets.
+ *
+ */
+
 package edu.rice.cs.drjava;
 
 import junit.framework.*;
@@ -54,32 +67,32 @@ public class BraceTest extends TestCase
 
 	public void testIsShadowed()
 		{
-			assert("#0.0", !lparen.isShadowed());
+			assertTrue("#0.0", !lparen.isShadowed());
 			lparen.setState(ReducedToken.INSIDE_QUOTE);
 			assertEquals("#0.0.1", ReducedToken.INSIDE_QUOTE, lparen.getState());
-			assert("#0.1", lparen.isShadowed());
+			assertTrue("#0.1", lparen.isShadowed());
 			rparen.setState(ReducedToken.INSIDE_BLOCK_COMMENT);
-			assert("#0.2", rparen.isShadowed());
+			assertTrue("#0.2", rparen.isShadowed());
 			rparen.setState(ReducedToken.FREE);
-			assert("#0.3", !rparen.isShadowed());
+			assertTrue("#0.3", !rparen.isShadowed());
 		}
 
 	public void testIsQuoted()
 		{
-			assert("#0.0", !lparen.isQuoted());
+			assertTrue("#0.0", !lparen.isQuoted());
 			lparen.setState(ReducedToken.INSIDE_QUOTE);
-			assert("#0.1", lparen.isQuoted());
+			assertTrue("#0.1", lparen.isQuoted());
 			lparen.setState(ReducedToken.INSIDE_BLOCK_COMMENT);
-			assert("#0.2", !lparen.isQuoted());
+			assertTrue("#0.2", !lparen.isQuoted());
 		}
 
 	public void testIsCommented()
 		{
-			assert("#0.0", !lparen.isCommented());
+			assertTrue("#0.0", !lparen.isCommented());
 			lparen.setState(ReducedToken.INSIDE_BLOCK_COMMENT);
-			assert("#0.1", lparen.isCommented());
+			assertTrue("#0.1", lparen.isCommented());
 			lparen.setState(ReducedToken.INSIDE_QUOTE);
-			assert("#0.2", !lparen.isCommented());
+			assertTrue("#0.2", !lparen.isCommented());
 		}
 
 	public void testToString()
@@ -98,17 +111,17 @@ public class BraceTest extends TestCase
 
 	public void testOpenClosed()
 		{
-			assert(lparen.isOpen());
-			assert(rparen.isClosed());
+			assertTrue(lparen.isOpen());
+			assertTrue(rparen.isClosed());
 		}
 
 	public void testIsMatch()
 		{
 			Brace bracket = Brace.MakeBrace("]", ReducedToken.FREE);
 			Brace dummy = Brace.MakeBrace("", ReducedToken.FREE);			
-			assert(lparen.isMatch(rparen));
-			assert(!lparen.isMatch(bracket));
-			assert(!lparen.isMatch(dummy));
-			assert(!dummy.isMatch(lparen));
+			assertTrue(lparen.isMatch(rparen));
+			assertTrue(!lparen.isMatch(bracket));
+			assertTrue(!lparen.isMatch(dummy));
+			assertTrue(!dummy.isMatch(lparen));
 		}
 }

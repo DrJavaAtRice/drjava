@@ -1,3 +1,16 @@
+/* $Id$
+ *
+ * File history:
+ *
+ * $Log$
+ * Revision 1.2  2001/06/19 16:26:55  javaplt
+ * Added CVS tags to comments (Id and Log).
+ * Changed all uses of assert() in JUnit tests to assertTrue(). assert() has been
+ * deprecated because it is a builtin keyword in Java 1.4.
+ * Fixed build.xml to test correctly after compile and to add CVS targets.
+ *
+ */
+
 package edu.rice.cs.drjava;
 
 import junit.framework.*;
@@ -28,45 +41,45 @@ public class ModelListTest extends TestCase {
 		{
 			ModelList<Integer>.Iterator itFull = fFull.getIterator();
 			ModelList<Integer>.Iterator itEmpty = fEmpty.getIterator();
-			assert("#0.0", fEmpty.isEmpty());
-			assert("#0.1", fFull.isEmpty());
+			assertTrue("#0.0", fEmpty.isEmpty());
+			assertTrue("#0.1", fFull.isEmpty());
 			assertEquals("#0.2", 0, fEmpty.length());
 			assertEquals("#0.3", 0, fFull.length());
-			assert("#0.4", itEmpty.atStart());
-			assert("#0.5", itFull.atStart());
+			assertTrue("#0.4", itEmpty.atStart());
+			assertTrue("#0.5", itFull.atStart());
 			itFull.insert(new Integer(5));
-			assert("#1.0", !itFull.atStart());
+			assertTrue("#1.0", !itFull.atStart());
 			assertEquals("#1.1", 1, fFull.length());
 			assertEquals("#1.2", new Integer(5), itFull.current());
-			assert("#2.0", fEmpty.isEmpty());
-			assert("#2.1", !fFull.isEmpty());
+			assertTrue("#2.0", fEmpty.isEmpty());
+			assertTrue("#2.1", !fFull.isEmpty());
 			itFull.insert(new Integer(4));
 			assertEquals("#2.2", 2, fFull.length());
 			assertEquals("#2.3", new Integer(4), itFull.current());
-			assert("#2.4", !fFull.isEmpty());
+			assertTrue("#2.4", !fFull.isEmpty());
 		}
 
 	public void testRemove()
 		{
 			ModelList<Integer>.Iterator itFull = fFull.getIterator();
 			ModelList<Integer>.Iterator itEmpty = fEmpty.getIterator();
-			assert("#0.0", fEmpty.isEmpty());
+			assertTrue("#0.0", fEmpty.isEmpty());
 			assertEquals("#0.1", 0, fEmpty.length());
 			assertEquals("#0.2", 0, fFull.length());
 			try
 				{
 					itEmpty.remove();
-					assert("#1.0", false);
+					assertTrue("#1.0", false);
 				}
 			catch (Exception e)
 				{					
 				}
 
 			itFull.insert(new Integer(5));
-			assert("#2.0", !fFull.isEmpty());
+			assertTrue("#2.0", !fFull.isEmpty());
 			assertEquals("#2.1", 1, fFull.length());
 			itFull.remove();
-			assert("#3.0", fFull.isEmpty());
+			assertTrue("#3.0", fFull.isEmpty());
 			assertEquals("#3.1", 0, fFull.length());
 		}
 
@@ -80,7 +93,7 @@ public class ModelListTest extends TestCase {
 				{
 					itEmpty.next();
 					itEmpty.next();
-					assert("#0.0", false);
+					assertTrue("#0.0", false);
 				}
 			catch (Exception e)
 				{
@@ -99,7 +112,7 @@ public class ModelListTest extends TestCase {
 			try
 				{
 					itFull.next();
-					assert("#1.4", false);
+					assertTrue("#1.4", false);
 				}
 			catch (Exception f)
 				{
@@ -114,7 +127,7 @@ public class ModelListTest extends TestCase {
 			try
 				{
 					itEmpty.prev();
-					assert("#0.0", false);
+					assertTrue("#0.0", false);
 				}
 			catch (Exception e)
 				{
@@ -138,7 +151,7 @@ public class ModelListTest extends TestCase {
 			try
 				{
 					itFull.prev();
-					assert("#1.5", false);
+					assertTrue("#1.5", false);
 				}
 			catch (Exception f)
 				{
@@ -165,7 +178,7 @@ public class ModelListTest extends TestCase {
 			try
 				{
 					itFull.prevItem();
-					assert(false);
+					assertTrue(false);
 				}
 			catch (Exception e)
 				{
@@ -176,7 +189,7 @@ public class ModelListTest extends TestCase {
 			try
 				{
 					itFull.prevItem();
-					assert(false);
+					assertTrue(false);
 				}
 			catch (Exception e)
 				{
@@ -192,7 +205,7 @@ public class ModelListTest extends TestCase {
 			try
 				{
 					itFull.nextItem();
-					assert(false);
+					assertTrue(false);
 				}
 			catch (Exception e)
 				{
@@ -202,7 +215,7 @@ public class ModelListTest extends TestCase {
 			try
 				{
 					itFull.nextItem();
-					assert(false);
+					assertTrue(false);
 				}
 			catch (Exception e)
 				{
@@ -275,7 +288,7 @@ public class ModelListTest extends TestCase {
 			itFull2.insert(new Integer(3));
 			itFull2.insert(new Integer(4));
 
-			assert("#0.0.0",itFull.atStart());
+			assertTrue("#0.0.0",itFull.atStart());
 			// we have (4 3 2 1 0), itFull2 points at 4, itFull and itFull3
 			// point at 0.  We want to move itFull back to point at 2 to show
 			// notifyCollapse works
