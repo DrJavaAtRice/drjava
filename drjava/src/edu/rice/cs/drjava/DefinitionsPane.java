@@ -125,8 +125,14 @@ public class DefinitionsView extends JEditorPane
 			int selStart = getSelectionStart();
 			int selEnd = getSelectionEnd();
 			
-			if(selStart == selEnd)
+			if(selStart == selEnd){
 				_doc().indentLine();
+				int caretPos = getCaretPosition();
+				_doc().setCurrentLocation(caretPos);
+				int space = _doc().getWhiteSpace();
+				_doc().move(space);
+				setCaretPosition(caretPos + space);
+			}
 			else
 				_doc().indentBlock(selStart, selEnd);
 		}

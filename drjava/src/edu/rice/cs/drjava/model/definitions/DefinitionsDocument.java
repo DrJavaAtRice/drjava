@@ -291,6 +291,7 @@ public class DefinitionsDocument extends PlainDocument
       e.printStackTrace();
       throw new IllegalArgumentException(e.getMessage());
     }
+		System.out.println(tab +"  "+_currentLocation+"   "+distToPrevNewline);
   }
 
   /**
@@ -364,17 +365,27 @@ public class DefinitionsDocument extends PlainDocument
     return (rt.isCommented() || type.equals("//") || type.equals("/*") ||
             type.equals("*/") || (text.charAt(i) == ' '));
   }
-  
+
+	public int getWhiteSpace()
+		{
+			try{
+				return getWhiteSpaceBetween(0,getLength()-_currentLocation);
+			}
+			catch (BadLocationException e){e.printStackTrace();}
+			return -1;
+		}
   /**
    *Starts at start and gets whitespace starting at relStart and either
    *stopping at relEnd or at the first non-white space char.
+	 *NOTE: relStart and relEnd are relative to where we are in the document
+	 *relStart must be <= _currentLocation
    */
   private int getWhiteSpaceBetween(int relStart, int relEnd)
     throws BadLocationException
   {
 
     String text = this.getText(_currentLocation - relStart,
-                               relStart - relEnd);
+                               Math.abs(relStart - relEnd));
     int i = 0;
     int length = text.length();
     while ((i < length) && (text.charAt(i) == ' '))

@@ -36,3 +36,11 @@ public class DrJava {
   public static PrintStream consoleErr() { return _consoleErr; }
   public static PrintStream consoleOut() { return _consoleOut; }
 }
+
+
+
+
+
+
+
+

@@ -18,11 +18,29 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   }
 
   public Object interpret(String s) {
-    StringReader reader = new StringReader(s);
+
+		boolean print = false;
+		
+		/**
+		 * trims the whitespace from beginning and end of string
+		 * checks the end to see if it is a semicolon
+		 * adds a semicolon if necessary
+		 */
+		s = s.trim();
+
+		if(!s.endsWith(";")) {
+			s += ";";
+			print = true;
+		}
+		
+		StringReader reader = new StringReader(s);
 
     try {
-      Object result = _djInterpreter.interpret(reader, "DrJava");
-      return result;
+			Object result = _djInterpreter.interpret(reader, "DrJava");
+			if(print)
+				return result;
+			else
+				return JavaInterpreter.NO_RESULT;
     }
     catch (InterpreterException ie) {
       throw new RuntimeException(ie.getMessage());
@@ -32,4 +50,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   public void addClassPath(String path) {
     _djInterpreter.addClassPath(path);
   }
+
 }
+
+
+

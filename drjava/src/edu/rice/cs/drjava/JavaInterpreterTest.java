@@ -47,25 +47,23 @@ public class JavaInterpreterTest extends TestCase
 	return new TestSuite(JavaInterpreterTest.class);
     }
 
-
-    private void tester(Pair[] cases)
+	private void tester(Pair[] cases)
     {
-	for (int i = 0; i < cases.length; i++)
-	    {
-		Object out = _interpreter.interpret(cases[i].first() + ";");
-		assertEquals(cases[i].first() + " interpretation wrong!",
-			     cases[i].second(),
-			     out);
-	    }
+			for (int i = 0; i < cases.length; i++)
+				{
+					Object out = _interpreter.interpret(cases[i].first());
+					assertEquals(cases[i].first() + " interpretation wrong!",
+											 cases[i].second(),
+											 out);					
+				}
     }
 
-
-
-    /** Make sure interpreting simple constants works. */
-    public void testConstants()
+	
+	/** Make sure interpreting simple constants works. */
+	public void testConstants()
     {
-	Pair[] cases = new Pair[] {	
-	    Pair.make("5", new Integer(5)),
+			Pair[] cases = new Pair[] {	
+				Pair.make("5", new Integer(5)),
 		Pair.make("1356", new Integer(1356)),
 		Pair.make("true", Boolean.TRUE),
 		Pair.make("false", Boolean.FALSE),
@@ -188,23 +186,41 @@ public class JavaInterpreterTest extends TestCase
 	tester(cases);
     }
 
-    public void testStringOps()
+	public void testStringOps()
     {
-	Pair[] cases = new Pair[] {
-	    // concatenation
-	    Pair.make("\"yeah\" + \"and\"", new String("yeah" + "and")),
-		// equals
-		Pair.make("\"yeah\".equals(\"yeah\")", new Boolean("yeah".equals("yeah"))),
-	};
-	tester(cases);
+			Pair[] cases = new Pair[] {
+				// concatenation
+				Pair.make("\"yeah\" + \"and\"", new String("yeah" + "and")),
+				// equals
+				Pair.make("\"yeah\".equals(\"yeah\")", new Boolean("yeah".equals("yeah"))),
+			};
+			tester(cases);
     }
-
-    public void testCharacterOps()
+	
+	public void testCharacterOps()
     {
-	Pair[] cases = new Pair[] {
-		// equals
-		Pair.make("'c' == 'c'", new Boolean('c' == 'c'))		
-		};
-	tester(cases);
+			Pair[] cases = new Pair[] {
+				// equals
+				Pair.make("'c' == 'c'", new Boolean('c' == 'c'))		
+			};
+			tester(cases);
+    }
+	
+	public void testSemicolon()
+    {
+			Pair[] cases = new Pair[] {
+				Pair.make("'c' == 'c'", new Boolean('c' == 'c')),		
+				Pair.make("'c' == 'c';", JavaInterpreter.NO_RESULT),
+				Pair.make("String s = \"hello\"", null),
+				Pair.make("String x = \"hello\";", JavaInterpreter.NO_RESULT),
+				Pair.make("s", "hello"),
+				Pair.make("s;", JavaInterpreter.NO_RESULT),
+				Pair.make("x", "hello"),
+				Pair.make("x;", JavaInterpreter.NO_RESULT)
+			};
+			tester(cases);
     }
 }
+
+
+

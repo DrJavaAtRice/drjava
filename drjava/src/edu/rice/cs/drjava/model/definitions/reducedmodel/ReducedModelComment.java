@@ -1909,8 +1909,8 @@ public class ReducedModelComment
 				copyCursor.prev();
 			
 			while ((!copyCursor.atStart()) &&
-						 (!(copyCursor.current().getType().equals("\n") &&
-								copyCursor.current().getState() == ReducedToken.FREE))){
+						 (!(copyCursor.current().getType().equals("\n")))){
+								//	copyCursor.current().getState() == ReducedToken.FREE))){
 				walkcount += copyCursor.current().getSize();
 				copyCursor.prev();
 			}
@@ -1976,14 +1976,15 @@ public class ReducedModelComment
 			copyCursor.next();
 			
 			while ((!copyCursor.atEnd()) &&
-						 (!(copyCursor.current().getType().equals("\n") &&
-								copyCursor.current().getState() == ReducedToken.FREE))){
+						 (!(copyCursor.current().getType().equals("\n")))){
+								//copyCursor.current().getState() == ReducedToken.FREE))){
 				walkcount += copyCursor.current().getSize();
 				copyCursor.next();
 			}
 			return walkcount;
 		}
 }
+
 
 
 

@@ -37,6 +37,7 @@ public class IndentTest extends TestCase
 			assertEquals("1.0", noBrace, ii.braceType);
 			assertEquals("1.1", -1, ii.distToNewline);
 			assertEquals("1.2", -1, ii.distToBrace);
+			assertEquals("1.3", -1, ii.distToPrevNewline);
 
 			//single newline
 			doc.insertString(0, "\n", null);
@@ -45,6 +46,7 @@ public class IndentTest extends TestCase
 			assertEquals("2.0", noBrace, ii.braceType);
 			assertEquals("2.1", -1, ii.distToNewline);
 			assertEquals("2.2", -1, ii.distToBrace);
+			assertEquals("2.3", 0, ii.distToPrevNewline);
 
 			//single layer brace
 			doc.insertString(0, "{\n\n", null);
@@ -54,6 +56,7 @@ public class IndentTest extends TestCase
 			assertEquals("3.0", openSquiggly, ii.braceType);
 			assertEquals("3.2", 3, ii.distToBrace);
 			assertEquals("3.1", -1, ii.distToNewline);
+			assertEquals("3.3", 0, ii.distToPrevNewline);
 			
 
 			//another squiggly
@@ -64,6 +67,7 @@ public class IndentTest extends TestCase
 			assertEquals("4.0", openSquiggly, ii.braceType);
 			assertEquals("4.1", 3, ii.distToNewline);
 			assertEquals("4.2", 3, ii.distToBrace);
+			assertEquals("4.3", 0, ii.distToPrevNewline);
 
 			//brace with whitespace
 			doc.insertString(6, "  {\n\n", null);
@@ -73,6 +77,7 @@ public class IndentTest extends TestCase
 			assertEquals("5.0", openSquiggly, ii.braceType);
 			assertEquals("5.1", 5, ii.distToNewline);
 			assertEquals("5.2", 3, ii.distToBrace);
+			assertEquals("5.3", 0, ii.distToPrevNewline);
 		}
 		catch( javax.swing.text.BadLocationException e)
 			{
@@ -89,7 +94,7 @@ public class IndentTest extends TestCase
 			assertEquals("1.0", openParen, ii.braceType);
 			assertEquals("1.2", 2, ii.distToBrace);
 			assertEquals("1.1", 2, ii.distToNewline);
-			
+			assertEquals("1.3", 0, ii.distToPrevNewline);
 
 			// paren with stuff in front
 			doc.insertString(1, "  helo ", null);
@@ -154,7 +159,172 @@ public class IndentTest extends TestCase
 			{
 				System.out.println(e.toString());
 			}
-	} 
+	}
+
+	public void testIndentInfoPrevNewline () {
+		try {
+			BraceReduction rm = doc._reduced;
+			doc.insertString(0, "{\n  {\nhello", null);
+			// {\n  {\nhello#
+
+			IndentInfo ii = rm.getIndentInformation();
+			assertEquals("1.0", openSquiggly, ii.braceType);
+			assertEquals("1.1", 9, ii.distToNewline);
+			assertEquals("1.2", 7, ii.distToBrace);
+			assertEquals("1.2", 5, ii.distToPrevNewline);
+		}
+		catch( javax.swing.text.BadLocationException e)
+			{
+				System.out.println(e.toString());
+			}
+	}
+
+	public void testEndOfBlockComment()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "\n{\n  hello;\n /*\n hello\n */", null);
+				doc.indentLine();
+				assertEquals("0.1", "\n{\n  hello;\n /*\n hello\n  */", doc.getText(0, doc.getLength()));
+			}
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}
+		}
+	
+	public void testAfterBlockComment()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "\n{\n  hello;\n  /*\n  hello\n  */\nhello", null);
+				doc.indentLine();
+				assertEquals("0.1", "\n{\n  hello;\n  /*\n  hello\n  */\n  hello", doc.getText(0, doc.getLength()));
+			}
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}
+		}
+	
+	public void testAfterBlockComment3()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "\n{\n  hello;\n  /*\n  hello\n  grr*/\nhello", null);
+				doc.indentLine();
+				assertEquals("0.1", "\n{\n  hello;\n  /*\n  hello\n  grr*/\n  hello", doc.getText(0, doc.getLength()));
+			}
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}
+		}
+
+	public void testAfterBlockComment4()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "\n{\n  hello;\n /*\n  hello\n */ hello", null);
+				doc.indentLine();
+				assertEquals("0.1", "\n{\n  hello;\n /*\n  hello\n  */ hello", doc.getText(0, doc.getLength()));
+			}
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}
+		}
+
+	public void testAfterBlockComment2()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "\n{\n  hello;\n  /*\n  hello\n  */ (\nhello", null);
+				doc.indentLine();
+				assertEquals("0.1", "\n{\n  hello;\n  /*\n  hello\n  */ (\n      hello", doc.getText(0, doc.getLength()));
+			}
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}
+		}
+	
+	public void testIndentInfoBlockComments () {
+		try {
+			BraceReduction rm = doc._reduced;
+			doc.insertString(0, "(\n /*\n*\n", null);
+			// (\n/*\n*#\n
+			rm.move(-1);
+			IndentInfo ii = rm.getIndentInformation();
+			assertEquals("1.0", openParen, ii.braceType);
+			assertEquals("1.1", -1, ii.distToNewline);
+			assertEquals("1.2", 7, ii.distToBrace);
+			assertEquals("1.2", 1, ii.distToPrevNewline);
+		}
+		catch( javax.swing.text.BadLocationException e)
+			{
+				System.out.println(e.toString());
+			}
+	}
+	
+	public void testIndentInfoBlockComments2 () {
+		try {
+			BraceReduction rm = doc._reduced;
+			doc.insertString(0, "\n(\n /*\n*\n", null);
+			// \n(\n/*\n*#\n
+			rm.move(-1);
+			IndentInfo ii = rm.getIndentInformation();
+			assertEquals("1.0", openParen, ii.braceType);
+			assertEquals("1.1", 7, ii.distToNewline);
+			assertEquals("1.2", 7, ii.distToBrace);
+			assertEquals("1.2", 1, ii.distToPrevNewline);
+		}
+		catch( javax.swing.text.BadLocationException e)
+			{
+				System.out.println(e.toString());
+			}
+	}
+	
+	public void testIndentInfoBlockComments3 () {
+		try {
+			BraceReduction rm = doc._reduced;
+			doc.insertString(0, "{\n  /*\n*\n", null);
+			// (\n/*\n*#\n
+			rm.move(-1);
+			IndentInfo ii = rm.getIndentInformation();
+			assertEquals("1.0", openSquiggly, ii.braceType);
+			assertEquals("1.1", -1, ii.distToNewline);
+			assertEquals("1.2", 8, ii.distToBrace);
+			assertEquals("1.2", 1, ii.distToPrevNewline);
+		} 
+		catch( javax.swing.text.BadLocationException e)
+			{
+				System.out.println(e.toString());
+			}
+	}
+	
+	public void testIndentInfoBlockComments4 () {
+		try {
+			BraceReduction rm = doc._reduced;
+			doc.insertString(0, "\n{\n  /*\n*\n", null);
+			// \n(\n/*\n*#\n
+			rm.move(-1);
+			IndentInfo ii = rm.getIndentInformation();
+			assertEquals("1.0", openSquiggly, ii.braceType);
+			assertEquals("1.1", 8, ii.distToNewline);
+			assertEquals("1.2", 8, ii.distToBrace);
+			assertEquals("1.2", 1, ii.distToPrevNewline);
+		}
+		catch( javax.swing.text.BadLocationException e)
+			{
+				System.out.println(e.toString());
+			}
+	}
 	
 	public void testSkippingBraces () {
 		try {
@@ -171,24 +341,8 @@ public class IndentTest extends TestCase
 			 	System.out.println(e.toString());
 			} 
 	}
-
-	public void testSkippingBraces2 () {
-		try {
-			// just paren
-			BraceReduction rm = doc._reduced;
-			doc.insertString(0, "\n{\n   { ()\n}", null);
-			IndentInfo ii = rm.getIndentInformation();
-			assertEquals("1.0", openSquiggly, ii.braceType);
-			assertEquals("1.2", 6, ii.distToBrace);
-			assertEquals("1.1", 9, ii.distToNewline);
-		}
-		catch( javax.swing.text.BadLocationException e)
-			{ 
-			 	System.out.println(e.toString());
-			} 
-	}
-
-		public void testSkippingComments () {
+	
+	public void testSkippingComments () {
 		try {
 			// just paren
 			BraceReduction rm = doc._reduced;
@@ -641,19 +795,63 @@ public class IndentTest extends TestCase
 				}  
 		}
 
-		public void testBlockIndent2()
+		public void testIndentInsideCommentBlock()
 		{
 			try {
-				// just paren
 				BraceReduction rm = doc._reduced;
-				doc.insertString(0, "hello\n{\n{\n  {", null);
-				doc.indentBlock(0, 13);
-				assertEquals("0.1", "hello\n{\n  {\n    {", doc.getText(0, doc.getLength()));
+				doc.insertString(0, "hello\n{\n/*{\n{\n*/\nhehe", null);
+				doc.indentBlock(0, 21);
+				assertEquals("0.1", "hello\n{\n  /*{\n  {\n  */\n  hehe", doc.getText(0, doc.getLength()));
 			}
 			catch( javax.swing.text.BadLocationException e)
 				{ 
 				 	System.out.println(e.toString());
 				}  
+		}
+
+		public void testSecondLineProblem()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "\n", null);
+				doc.indentLine();
+				assertEquals("0.1", "\n", doc.getText(0, doc.getLength()));
+			}
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}  
+		}
+
+	public void testSecondLineProblem2()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "a\n", null);
+				doc.indentLine();
+				assertEquals("0.1", "a\n  ", doc.getText(0, doc.getLength()));
+			}
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}
+		}
+
+	public void testSmallFileProblem()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "\n\n", null);
+				doc.indentLine();
+				assertEquals("0.1", "\n\n", doc.getText(0, doc.getLength()));
+			}
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}
 		}
 }
 

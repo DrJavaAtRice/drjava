@@ -12,7 +12,7 @@ import java.awt.Toolkit;
 class InteractionsDocument extends PlainDocument {
   /** Index in the document of the first place that is editable. */
   private int frozenPos = 0;
-  private final String banner = "Welcome to DrJava.";
+  private final String banner = "Welcome to DrJava.\n";
 
   private JavaInterpreter _interpreter;
 
@@ -61,7 +61,7 @@ class InteractionsDocument extends PlainDocument {
 
   public void prompt() {
     try {
-      super.insertString(getLength(), "\n> ", null);
+      super.insertString(getLength(), "> ", null);
       frozenPos = getLength();
     } catch (BadLocationException e) {
       throw new InternalError("printing prompt failed");
@@ -73,7 +73,8 @@ class InteractionsDocument extends PlainDocument {
       String toEval = getText(frozenPos, getLength()-frozenPos).trim();
 
       Object result = _interpreter.interpret(toEval);
-      super.insertString(getLength(), String.valueOf(result), null);
+			if(result != JavaInterpreter.NO_RESULT)
+				 super.insertString(getLength(), String.valueOf(result) + "\n", null);
 
       prompt();
     }
@@ -82,10 +83,17 @@ class InteractionsDocument extends PlainDocument {
     }
     catch (Exception e) {
       try {
-        super.insertString(getLength(), "Error in evaluation: " + e, null);
+				if(e.toString().startsWith("java.lang.RuntimeException: Encountered"))
+					{
+						int end = e.toString().indexOf('\n');
+						super.insertString(getLength(), "Error in evaluation: " +
+															 "Invalid Expression (Bad Syntax)\n", null);
+					} else
+						super.insertString(getLength(), "Error in evaluation: " + e + "\n", null);
         prompt();
       }
       catch (BadLocationException willNeverHappen) {}
     }
   }
 }
+
