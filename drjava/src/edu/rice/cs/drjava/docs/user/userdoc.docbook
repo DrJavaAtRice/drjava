@@ -226,10 +226,10 @@ OTHER DEALINGS WITH THE SOFTWARE.
   <!-- Chapter: Project Facility -->
   <chapter id="projects">
   <title>Project Facility</title>
-  <para>DrJava includes a project facility for managing many files. The project facility allows the user to save their open Java files in a project file, and reopen the project file at a later time to work on some or all of the project Java files. Project files are saved as ".pjt" files.</para>
+  <para>DrJava includes a project facility for managing many files. The project facility allows you to save your open files in a project file, and reopen the project file at a later time to work on some or all of the project files.</para>
   <formalpara>
   <title>Tree View</title>
-  <para>When using the project facility, the navigator pane on the left hand side of the DrJava window displays the files in a tree view, giving the user a graphical representation of where the project files are located in the project directories.</para>
+  <para>When using the project facility, the navigator pane on the left hand side of the DrJava window displays the files in a tree view, giving you a graphical representation of where the project files are located in the project directories.</para>
   </formalpara>
   <para>Note that when using the project facility, all project files must be in the directory where the project file is saved or in subdirectories of this directory.</para>
   <formalpara>
@@ -239,7 +239,7 @@ OTHER DEALINGS WITH THE SOFTWARE.
   <para>Only one project may be open at a time.</para>
   <formalpara>
   <title>Saving Project</title>
-  <para>To save a project, either select "Save" in the Project menu, or select "Save All" in the File Menu (or hitting Ctrl+Alt+S). Note that when you save the project, it only saves the list of files that are in the project, not the files themselves. Saving the project does not save the individual files that are members of the project. Use "Save All" if you wish to save all files as well as the project file to which they belong.</para>
+  <para>To save a project, either select "Save" in the Project menu, or select "Save All" in the File Menu (or Ctrl+Alt+S). Note that when you save the project, it only saves the list of files that are in the project, not the files themselves. Saving the project does not save the individual files that are members of the project. Use "Save All" if you wish to save all files as well as the project file to which they belong.</para>
   </formalpara>
   <formalpara>
   <title>Opening A Project</title>
@@ -247,7 +247,7 @@ OTHER DEALINGS WITH THE SOFTWARE.
   </formalpara>
   <formalpara>
   <title>Setting the built directory</title>
-  <para>The project facility allows the user to set a built directory where class files will be compiled. This give the user the freedom to have separate source file and built file directories. To set the project built directory, open the project, the select Project > Project Properties.</para>
+  <para>The project facility allows the user to set a built directory where class files will be compiled. This give the user the freedom to have separate source file and built file directories. To set the project built directory, open the project, then select "Project Properties" in the project menu.</para>
   </formalpara>
   </chapter>
   
