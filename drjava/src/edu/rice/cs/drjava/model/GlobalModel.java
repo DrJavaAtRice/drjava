@@ -380,6 +380,11 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
   public void quit();
   
   /**
+   * Returns the document count
+   */
+  public int getDocumentCount();
+  
+  /**
    * returns a list of OpenDefinitionsDocuments that do not belong
    * to the currently active project.<br>
    * if no project is active, all documents are returned.

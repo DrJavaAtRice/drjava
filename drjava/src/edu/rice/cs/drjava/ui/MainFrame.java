@@ -2071,10 +2071,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     /**
      * close all project files
      */
-    for(OpenDefinitionsDocument d: projDocs){
-      _model.closeFile(d);
-    }
+//    for(OpenDefinitionsDocument d: projDocs){
+//      _model.closeFile(d);
+//    }
       
+    closeFiles(projDocs);
+    
     /**
      * keep all nonproject files open
      */
@@ -2112,6 +2114,38 @@ public class MainFrame extends JFrame implements OptionConstants {
     _openProjectUpdate();
   }
   
+  private void closeFiles(List<OpenDefinitionsDocument> docList) {
+    OpenDefinitionsDocument last = null;
+    Iterator<OpenDefinitionsDocument> it = docList.iterator();
+    while(it.hasNext()) {
+      last = it.next();
+      if(it.hasNext())
+        _model.closeFile(last);      
+    }
+    if(last != null) {
+      IDocumentNavigator nav = _model.getDocumentNavigator();
+      INavigatorItem switchTo = nav.getNext(_model.getIDocGivenODD(last));
+      /** if we can't move forward, go backwards */
+      if( switchTo == _model.getIDocGivenODD(last)) {
+        switchTo = nav.getPrevious(switchTo);
+      }
+      
+      //close the last file
+      _model.closeFile(last);
+      
+      if(_model.getDocumentCount() == 1){
+        _model.setActiveFirstDocument();
+      }
+      else {
+        /* this will select the active document in the navigator, which
+         * will signal a listener to call _setActiveDoc(...)
+         */
+        nav.setActiveDoc(switchTo);
+      }
+    }
+  }
+  
+  
   
   private void _openProjectUpdate() {
     if(_model.isProjectActive()) {
@@ -2130,14 +2164,16 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _closeProject(){
     List<OpenDefinitionsDocument> projDocs = _model.getProjectDocuments();
-    for(OpenDefinitionsDocument d: projDocs){
-      _model.closeFile(d);
-    }
+//    for(OpenDefinitionsDocument d: projDocs){
+//      _model.closeFile(d);
+//    }
+    closeFiles(projDocs);
     _model.closeProject();
     Component renderer = _model.getDocumentNavigator().getRenderer();
     new ForegroundColorListener(renderer);
     new BackgroundColorListener(renderer);
     _resetNavigatorPane();
+    _close();
     _closeProjectAction.setEnabled(false);
     _saveProjectAction.setEnabled(false);
     _projectPropertiesAction.setEnabled(false);
@@ -2234,7 +2270,10 @@ public class MainFrame extends JFrame implements OptionConstants {
    * the active document
    */
   private void _close() {
-    _model.closeFile(_model.getActiveDocument());
+    LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
+    l.add(_model.getActiveDocument());
+    closeFiles(l);
+    //_model.closeFile(_model.getActiveDocument());
   }
 
   private void _print() {
@@ -2287,6 +2326,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     if(_model.isProjectActive())    
       _closeProject();
     _model.closeAllFiles();
+   // _model.setActiveFirstDocument();
   }
 
 
@@ -4152,6 +4192,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     JScrollPane scroll = _defScrollPanes.get(_model.getActiveDocument());
     if (scroll == null) {
       throw new UnexpectedException(new Exception("Current definitions scroll pane not found."));
+      
     }
 
     JScrollBar oldbar = scroll.getVerticalScrollBar();

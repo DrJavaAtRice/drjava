@@ -139,7 +139,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     
     _isClosingAllDocs = false;
     _ensureNotEmpty();
-    _setActiveFirstDocument();
+    setActiveFirstDocument();
   }
 
   /**
@@ -325,28 +325,28 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * @return true if the document was closed
    */
    public boolean closeFile(OpenDefinitionsDocument doc) {
-     INavigatorItem switchTo =_documentNavigator.getNext(getIDocGivenODD(doc));
-     /** if we can't move forward, go backwards */
-     if( switchTo == getIDocGivenODD(doc)) {
-       switchTo = _documentNavigator.getPrevious(switchTo);
-     }
+//     INavigatorItem switchTo =_documentNavigator.getNext(getIDocGivenODD(doc));
+//     /** if we can't move forward, go backwards */
+//     if( switchTo == getIDocGivenODD(doc)) {
+//       switchTo = _documentNavigator.getPrevious(switchTo);
+//     }
      
      if( super.closeFile(doc) ) {
        // Select next document if not closing all documents
        if (!_isClosingAllDocs) {
          _ensureNotEmpty();
          
-//         if( _hasOneEmptyDocument() ) {
+         // if( _hasOneEmptyDocument() ) {
          if(getDocumentCount() == 1){
-           _setActiveFirstDocument();
+           setActiveFirstDocument();
          }
-         else {
-           /* this will select the active document in the navigator, which
-            * will signal a listener to call _setActiveDoc(...)
-            */
-           _documentNavigator.setActiveDoc(switchTo);
-           //    _setActiveDoc(switchTo);
-         }
+//         else {
+//           /* this will select the active document in the navigator, which
+//            * will signal a listener to call _setActiveDoc(...)
+//            */
+//           _documentNavigator.setActiveDoc(switchTo);
+//           //_setActiveDoc(switchTo);
+//         }
        }
        return true;
      }
@@ -365,7 +365,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     _isClosingAllDocs = false;
     
     _ensureNotEmpty();
-    _setActiveFirstDocument();
+    setActiveFirstDocument();
     return success;
   }
 
@@ -392,7 +392,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     /**
      * some duplicated work, but avoids duplicated code, which is our nemesis
      */
-    private void _setActiveFirstDocument() {
+    public void setActiveFirstDocument() {
       List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
         /* this will select the active document in the navigator, which
          * will signal a listener to call _setActiveDoc(...)

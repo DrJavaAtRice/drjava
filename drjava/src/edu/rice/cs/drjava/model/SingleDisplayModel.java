@@ -114,5 +114,7 @@ public interface SingleDisplayModel extends GlobalModel {
   public OpenDefinitionsDocument getODDGivenIDoc(INavigatorItem idoc);
     
   public INavigatorItem getIDocGivenODD(OpenDefinitionsDocument odd);
+  
+  public void setActiveFirstDocument();
 
 }
