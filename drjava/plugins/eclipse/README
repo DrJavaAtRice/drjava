@@ -1,0 +1,22 @@
+DrJava Plug-in for Eclipse
+
+
+About ----
+  This plug-in for IBM's Eclipse platform integrates features from the 
+DrJava development environment.  The plug-in provides an Interactions Pane 
+and a simplified user interface for new users.
+
+
+Installation ----
+  Copy this directory into the "plugins" directory of your Eclipse 
+installation.  After you restart Eclipse, DrJava will appear in the list 
+of available Perspectives.  (Window->Open Perspective->Other...)
+
+
+Important Note, version 0.0.1 ----
+  This is a *pre-release* of the DrJava Plug-in for Eclipse, and should 
+only be used for testing.  The Java interpreter currently runs in the same 
+Java Virtual Machine as Eclipse, so typing "while (true);" will cause 
+Eclipse to become unresponsive.  The first actual release of the DrJava 
+Plug-in for Eclipse will run the Java interpreter in a separate Java 
+Virtual Machine.
