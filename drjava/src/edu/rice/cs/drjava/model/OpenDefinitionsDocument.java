@@ -52,6 +52,7 @@ import java.awt.print.*;
 import javax.swing.ProgressMonitor;
 import javax.swing.text.BadLocationException;
 
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.definitions.*;
 
@@ -337,6 +338,4 @@ public interface OpenDefinitionsDocument {
    * all related state from the debug manager.
    */
   public void removeFromDebugger();
-
-  
 }

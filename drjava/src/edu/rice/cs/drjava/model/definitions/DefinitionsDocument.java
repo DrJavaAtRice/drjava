@@ -53,6 +53,7 @@ import java.util.Vector;
 import java.util.Hashtable;
 import java.util.HashSet;
 import java.util.StringTokenizer;
+import java.io.*;
 
 import java.io.File;
 
@@ -204,7 +205,6 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    */
   public DefinitionsDocument(GlobalEventNotifier notifier) {
     super();
-
     _notifier = notifier;
 
     // Create the indenter from the config values
@@ -565,7 +565,6 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       _modifiedSinceSave = true;
       _classFileInSync = false;
     }
-
     super.insertString(offset, str, a);
   }
 
@@ -738,6 +737,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    */
   public void setModifiedSinceSave() {
     _modifiedSinceSave = _undoManager.isModified();
+//    System.out.println("DefinitionsDocument: set modified? " + _modifiedSinceSave);
   }
 
   /**
@@ -752,6 +752,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
         _timestamp = _file.lastModified();
       }
       _undoManager.documentSaved();
+//      System.out.println("DefinitionsDocument: reset modified? " + false);
     }
     finally {
       writeUnlock();

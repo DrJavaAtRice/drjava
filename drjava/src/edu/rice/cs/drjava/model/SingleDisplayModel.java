@@ -110,4 +110,9 @@ public interface SingleDisplayModel extends GlobalModel {
    * TODO: Move to DGM?  Make private?
    */
   public boolean isClosingAllFiles();
+  
+  public OpenDefinitionsDocument getODDGivenIDoc(INavigatorItem idoc);
+    
+  public INavigatorItem getIDocGivenODD(OpenDefinitionsDocument odd);
+
 }

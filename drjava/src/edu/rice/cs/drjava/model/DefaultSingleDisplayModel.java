@@ -169,7 +169,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * Sets the currently active document by updating the selection model.
    * @param doc Document to set as active
    */
-  public void setActiveDocument(OpenDefinitionsDocument doc) {    
+  public void setActiveDocument(OpenDefinitionsDocument doc) {
     _documentNavigator.setActiveDoc(getIDocGivenODD(doc));
 //    _setActiveDoc(getIDocGivenODD(doc));
   }
@@ -188,7 +188,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
         /* this will select the active document in the navigator, which
          * will signal a listener to call _setActiveDoc(...)
          */
-    _documentNavigator.setActiveDoc(nextKey);
+          _documentNavigator.setActiveDoc(nextKey);
 //   _setActiveDoc(nextKey);
       }
   }
@@ -203,7 +203,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
         /* this will select the active document in the navigator, which
          * will signal a listener to call _setActiveDoc(...)
          */
-        _documentNavigator.setActiveDoc(prevKey);
+          _documentNavigator.setActiveDoc(prevKey);
 //   _setActiveDoc(prevKey);
       }
   }
@@ -397,7 +397,8 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
         /* this will select the active document in the navigator, which
          * will signal a listener to call _setActiveDoc(...)
          */
-    _documentNavigator.setActiveDoc(getIDocGivenODD(docs.get(0)));
+      setActiveDocument(docs.get(0));
+//      _documentNavigator.setActiveDoc(getIDocGivenODD(docs.get(0)));
 //      _setActiveDoc(getIDocGivenODD(docs.get(0)));
     }
   

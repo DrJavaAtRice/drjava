@@ -63,6 +63,7 @@ import java.util.LinkedList;
 import java.util.Vector;
 import java.util.Arrays;
 import java.util.StringTokenizer;
+import java.util.Enumeration;
 import java.net.URL;
 import java.net.MalformedURLException;
 
@@ -1758,6 +1759,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Always update this field-- two files in different directories
     //  can have the same _fileTitle
     _fileNameField.setText(GlobalModelNaming.getDisplayFullPath(doc));
+//    System.out.println("setting " + doc + " to display name: " + GlobalModelNaming.getDisplayFullPath(doc));
   }
 
   /**
@@ -1928,6 +1930,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _currentProjFile = projectFile;
     final ProjectFileIR ir;
     final File[] srcFiles;
+    IDocumentNavigator new_nav;
     try
     {
       ir = ProjectFileParser.ONLY.parse(projectFile);
@@ -1938,19 +1941,61 @@ public class MainFrame extends JFrame implements OptionConstants {
       
       _model.setDocumentNavigator(AWTContainerNavigatorFactory.Singleton.makeTreeNavigator(projectFile.getName(),
                                                                                          _model.getDocumentNavigator()));
-      
+      new_nav = _model.getDocumentNavigator();
 
       File projectfile = projectFile;
       String projfilepath = projectfile.getCanonicalPath();
       String tlp = projfilepath.substring(0, projfilepath.lastIndexOf(File.separator));
       
-      _model.getDocumentNavigator().setTopLevelPath(tlp);
+      new_nav.setTopLevelPath(tlp);
     }
     catch(IOException e)
     {
       throw new UnexpectedException(e);
     }
     
+
+    
+    List<OpenDefinitionsDocument> old_lod =  _model.getDefinitionsDocuments();
+
+    /* i have to copy the list, but i can't use clone, since List is an interface
+     * so i need to manually copy the list.
+     * 
+     * i have to copy it, becase when i close all the files, i have to keep a reference to the currently open files
+     */
+    /*
+    LinkedList<OpenDefinitionsDocument> lod = new LinkedList<OpenDefinitionsDocument>();
+    for(int i=0;i<old_lod.size();i++){
+      lod.add(old_lod.get(i));
+    }
+    */
+    
+    
+    // XXX
+    _closeAll();
+
+/*    
+    OpenDefinitionsDocument odd;
+    INavigatorItem item;
+
+    System.out.println(lod.size());
+    System.out.println("-------------");
+    for(int i=0;i<lod.size();i++){
+      odd = lod.get(i);
+      item = _model.getIDocGivenODD(odd);
+      try{
+        new_nav.addDocument(item, odd.getFile().getParent());
+        System.out.println("adding " + item + " at " + odd.getFile().getParent());
+      }catch(IllegalStateException e){
+        
+      }catch(FileMovedException e){
+        
+      }
+      
+    }
+    System.out.println("-------------");
+
+  */  
     
     
     File[] projectclasspaths = ir.getClasspath();
@@ -1970,9 +2015,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
     );
+
     
-    
-    _closeAll();
     
     _docSplitPane.remove(_docSplitPane.getLeftComponent());
     _docSplitPane.setLeftComponent(new JScrollPane(_model.getDocumentNavigator().asContainer()));
@@ -2184,15 +2228,18 @@ public class MainFrame extends JFrame implements OptionConstants {
       _saveChooser.setSelectedFile(selection);
       _saveChooser.setSelectedFile(null);
     }
-
+    
     if (_currentProjFile != null) 
       _saveChooser.setSelectedFile(_currentProjFile);
-
+    
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {
       
       try{
         File file = _saveChooser.getSelectedFile();
+        if (file.getName().indexOf(".") == -1){
+          file =  new File (file.getAbsolutePath() + ".pjt");
+        }
         String filename = file.getCanonicalPath();    
         _model.saveProject(filename);
         _openProjectHelper(file);
@@ -2202,7 +2249,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
   }
-
+  
   private void _revert() {
     try {
       _model.getActiveDocument().revertFile();

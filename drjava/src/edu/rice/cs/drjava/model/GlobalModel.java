@@ -358,4 +358,5 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    * Only quits if all documents are successfully closed.
    */
   public void quit();
+  
 }
