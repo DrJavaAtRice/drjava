@@ -50,23 +50,39 @@ import java.io.File;
  * @version $Id$
  */
 public class JavadocFrame extends HTMLFrame {
-
-  private static final String INTRO_PAGE="packages.html";
-  private static final String INDEX_PAGE="allclasses-frame.html";
+  
+  private static final String[] INTRO_PAGE= {
+    "overview-summary.html",
+    "packages.html"
+  };
+  private static final String INDEX_PAGE= "allclasses-frame.html";
+  
+  private static String introPagePath(File destDir) {
+    // Iterate through possible intro pages, looking for one that exists.
+    File test = new File(destDir, INTRO_PAGE[0]);
+    int i = 0;
+    while (!test.exists() && (i < INTRO_PAGE.length)) {
+      i++;
+      test = new File(destDir, INTRO_PAGE[i]);
+    }
+    return test.getAbsolutePath();
+  }
+    
+  
   public JavadocFrame(File destDir) throws MalformedURLException {
+    // This call has to happen first!
     super("Javadoc Viewer",
-          new URL("file", "", (new File(destDir, INTRO_PAGE)).getAbsolutePath()),
+          new URL("file", "", introPagePath(destDir)),
           new URL("file", "", (new File(destDir, INDEX_PAGE)).getAbsolutePath()),
-           "DrJavadoc.png");
+           "DrJavadoc.png", destDir);
 
-    addHyperlinkListener(
-      new HyperlinkListener() {
-        public void hyperlinkUpdate(HyperlinkEvent event){
-          if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-            URL url = event.getURL();
-            jumpTo(url);
-          }
+    addHyperlinkListener(new HyperlinkListener() {
+      public void hyperlinkUpdate(HyperlinkEvent event){
+        if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+          URL url = event.getURL();
+          jumpTo(url);
         }
-      });
+      }
+    });
   }
 }

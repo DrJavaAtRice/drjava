@@ -83,6 +83,15 @@ public class CompilerErrorModel<T extends CompilerError> {
   private final int _numErrors;
   
   /**
+   * Cached result of hasOnlyWarnings.
+   * Three-state enum:
+   *  -1 => result has not been computed
+   *   0 => false
+   *   1 => true
+   */
+  private int _onlyWarnings = -1;
+  
+  /**
    * Used internally in building _positions.
    * The file used as the index *must* be a canonical file, or else
    * errors won't always be associated with the right documents.
@@ -288,6 +297,31 @@ public class CompilerErrorModel<T extends CompilerError> {
     }
     return true;
   }
+  
+  /**
+   * Checks whether all CompilerErrors contained here are actually warnings.
+   * This would indicate that there were no "real" errors, so output is valid.
+   * @return false if any error contained here is not a warning, true otherwise
+   */
+  public boolean hasOnlyWarnings() {
+    // Check for a cached value.
+    if (_onlyWarnings == 0) {
+      return false;
+    }
+    else if (_onlyWarnings == 1) {
+      return true;
+    }
+    else {
+      // If there was no cached value, compute it.
+      boolean clean = true;
+      for (int i = 0; clean && (i < _numErrors); i++) {
+        clean = !_errors[i].isWarning();
+      }
+      // Cache the value.
+      _onlyWarnings = clean? 1: 0;
+      return clean;
+    }
+  } 
 
   /**
    * Create array of positions where each error occurred.

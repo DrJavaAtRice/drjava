@@ -42,12 +42,13 @@ package edu.rice.cs.drjava.ui;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.border.*;
+import javax.swing.text.html.*;
 import java.awt.event.*;
 import java.awt.*;
-
-import java.net.URL;
+import java.net.*;
 import java.io.*;
-
+import gj.util.Vector;
+import edu.rice.cs.util.UnexpectedException;
 
 /**
  * The frame for displaying the HTML help files.
@@ -65,11 +66,23 @@ public class HTMLFrame extends JFrame {
   private JButton _closeButton;
   private JButton _backButton;
   private JButton _forwardButton;
+  protected URL _baseURL;
+  private Vector<HyperlinkListener> _hyperlinkListeners;
+  private boolean _linkError;
+  private URL _lastURL;
   
   private JPanel _navPane;
-
+  
   protected HistoryList _history;
   
+  private HyperlinkListener _resetListener = new HyperlinkListener() {
+    public void hyperlinkUpdate(HyperlinkEvent e) {
+      if (_linkError && e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+        _resetMainPane();
+      }
+    }
+  };
+
   private static class HistoryList {
     private HistoryList next = null;
     private final HistoryList prev;
@@ -145,6 +158,7 @@ public class HTMLFrame extends JFrame {
   }
 
   public void addHyperlinkListener(HyperlinkListener linkListener) {
+    _hyperlinkListeners.addElement(linkListener);
     _contentsDocPane.addHyperlinkListener(linkListener);
     _mainDocPane.addHyperlinkListener(linkListener);
   }
@@ -153,8 +167,15 @@ public class HTMLFrame extends JFrame {
    * Sets up the frame and displays it.
    */
   public HTMLFrame(String frameName, URL introUrl, URL indexUrl, String iconString) {
+    this(frameName, introUrl, indexUrl, iconString, null);
+  }
+
+  /**
+   * Sets up the frame and displays it.
+   */
+  public HTMLFrame(String frameName, URL introUrl, URL indexUrl, String iconString, File baseDir) {
     super(frameName);
-    
+
     _contentsDocPane = new JEditorPane();
     _contentsDocPane.setEditable(false);
     JScrollPane contentsScroll = new BorderlessScrollPane(_contentsDocPane);
@@ -202,28 +223,52 @@ public class HTMLFrame extends JFrame {
     cp.add(navContainer, BorderLayout.NORTH);
     cp.add(tempPanel, BorderLayout.CENTER);
     cp.add(_closePanel, BorderLayout.SOUTH);
-    
+
+    _linkError = false;
+    _hyperlinkListeners = new Vector<HyperlinkListener>();
+    _hyperlinkListeners.addElement(_resetListener);
+    _mainDocPane.addHyperlinkListener(_resetListener);
+
+    if (baseDir != null) {
+      try {
+        _baseURL = baseDir.toURL();
+      }
+      catch(MalformedURLException ex) {
+        throw new UnexpectedException(ex);
+      }
+    }
+    else {
+      _baseURL = null;
+    }
+          
     // Load contents page
     if (indexUrl != null) {
       try {
         _contentsDocPane.setPage(indexUrl);
+        if (_baseURL != null) {
+          ((HTMLDocument)_contentsDocPane.getDocument()).setBase(_baseURL);
+        }
       }
       catch (IOException ioe) {
         // Show some error page?
-        _displayContentsError(indexUrl);
+        _displayContentsError(indexUrl, ioe);
       }
-    } else {
+    }
+    else {
       _displayContentsError(indexUrl);
     }
+
     if (introUrl != null) {
       _history = new HistoryList(introUrl);
       _displayPage(introUrl);
-    } else {
+      _displayPage(introUrl);
+    }
+    else {
       _displayMainError(introUrl);
     }
-    
+
     // Set all dimensions ----
-    setSize( FRAME_WIDTH, FRAME_HEIGHT);
+    setSize(FRAME_WIDTH, FRAME_HEIGHT);
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = this.getSize();
@@ -240,19 +285,48 @@ public class HTMLFrame extends JFrame {
                      (screenSize.height - frameSize.height) / 2);
   }
 
+  private void _resetMainPane() {
+    _linkError = false;
+    
+    _mainDocPane = new JEditorPane();
+    _mainDocPane.setEditable(false);
+    for (int i = 0; i < _hyperlinkListeners.size(); i++) {
+      _mainDocPane.addHyperlinkListener(_hyperlinkListeners.elementAt(i));
+    }
+    _displayPage(_lastURL);
+
+    _splitPane.setRightComponent(new BorderlessScrollPane(_mainDocPane));
+    _splitPane.setDividerLocation(LEFT_PANEL_WIDTH);
+  }
+
   /**
    * Displays the given URL in the main pane.
    * changed to private, because of history system.
    * @param url URL to display
    */
-  public void _displayPage(URL url) {
+  private void _displayPage(URL url) {
     try {
       _mainDocPane.setPage(url);
+      if (_baseURL != null) {
+        ((HTMLDocument)_contentsDocPane.getDocument()).setBase(_baseURL);
+      }
+      _lastURL = url;
     }
     catch (IOException ioe) {
-      // Show some error page?
-      _displayMainError(url);
-      //System.err.println("couldn't find url: " + url);
+      String path = url.getPath();
+      try {
+        URL newURL = new URL(_baseURL + path);
+        _mainDocPane.setPage(newURL);
+        if (_baseURL != null) {
+          ((HTMLDocument)_contentsDocPane.getDocument()).setBase(_baseURL);
+        }
+        _lastURL = newURL;
+      }
+      catch (IOException ioe2) {
+        // Show some error page?
+        _displayMainError(url, ioe2);
+        //System.err.println("couldn't find url: " + url);
+      }
     }
   }
   
@@ -261,7 +335,27 @@ public class HTMLFrame extends JFrame {
    * could not be found
    */
   private void _displayMainError(URL url) {
-    _mainDocPane.setText(getErrorText(url));
+    if (!_linkError) {
+      _linkError = true;
+      _mainDocPane.setText(getErrorText(url));
+    }
+    else {
+      _resetMainPane();
+    }
+  }
+
+  /**
+   * Prints an error indicating that the HTML file to load in the main pane
+   * could not be found
+   */
+  private void _displayMainError(URL url, Exception ex) {
+    if (!_linkError) {
+      _linkError = true;
+      _mainDocPane.setText(getErrorText(url) + "\n" + ex);
+    }
+    else {
+      _resetMainPane();
+    }
   }
 
   /**
@@ -269,7 +363,15 @@ public class HTMLFrame extends JFrame {
    * could not be found
    */
   private void _displayContentsError(URL url) {
-    _contentsDocPane.setText(getErrorText(url));
+   _contentsDocPane.setText(getErrorText(url));
+  }
+
+  /**
+   * Prints an error indicating that the HTML file to load in the contentes pane
+   * could not be found
+   */
+  private void _displayContentsError(URL url, Exception ex) {
+    _contentsDocPane.setText(getErrorText(url) + "\n" + ex);
   }
 
   /**
@@ -288,4 +390,3 @@ public class HTMLFrame extends JFrame {
     _displayPage(url);
   }
 }
-

@@ -449,9 +449,9 @@ public class DefaultJavadocModel implements JavadocModel {
     errors.addAll(extractErrors(errLines));
   
     _javadocErrorModel = new CompilerErrorModel
-      ((CompilerError[])(errors.toArray(new CompilerError[0])), getter);
+      ((CompilerError[])(errors.toArray(new CompilerError[errors.size()])), getter);
 //    System.out.println("built javadoc error model");
-    return (errors.size() == 0);
+    return _javadocErrorModel.hasOnlyWarnings();
   }
   
   /**
