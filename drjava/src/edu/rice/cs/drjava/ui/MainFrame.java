@@ -255,7 +255,7 @@ public class MainFrame extends JFrame {
   };
 
   /** Runs JUnit on the document in the definitions pane. */
-  private Action _junitAction = new AbstractAction("Test") {
+  private Action _junitAction = new AbstractAction("Test Using JUnit") {
     public void actionPerformed(ActionEvent ae) {
       _junit();
     }
@@ -802,14 +802,16 @@ public class MainFrame extends JFrame {
     
     _setUpAction(_abortInteractionAction, "Break", "Abort the current interaction");
     _setUpAction(_resetInteractionsAction, "Reset", "Reset interactions");
+    
+    _setUpAction(_junitAction, "Test", "Run JUnit over the current document");
   }
 
-  private void _setUpAction(Action a, String shortDesc, String desc) {
+  private void _setUpAction(Action a, String _default, String shortDesc) {
     // Commented out so that the toolbar buttons use text instead of icons.
     // createManualToolbarButton was modified as well.
     // a.putValue(Action.SMALL_ICON, _getIcon(icon + "16.gif"));
-    a.putValue(Action.DEFAULT, shortDesc);
-    a.putValue(Action.SHORT_DESCRIPTION, desc);
+    a.putValue(Action.DEFAULT, _default);
+    a.putValue(Action.SHORT_DESCRIPTION, shortDesc);
   }
 
 
@@ -967,13 +969,16 @@ public class MainFrame extends JFrame {
 
     // keep track of the compile menu item
     _compileMenuItem = tmpItem;
+    
+    toolsMenu.add(_junitAction);
 
     // Abort/reset interactions, clear console
     toolsMenu.addSeparator();
 
     _abortInteractionAction.setEnabled(false);
     _abortInteractionMenuItem = toolsMenu.add(_abortInteractionAction);
-    _abortInteractionMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
+    _abortInteractionMenuItem
+      .setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
     toolsMenu.add(_resetInteractionsAction);
     toolsMenu.add(_clearOutputAction);
     
@@ -1085,8 +1090,9 @@ public class MainFrame extends JFrame {
 
     // Junit
     _toolBar.addSeparator();
-    _junitButton = _toolBar.add(_junitAction);
-
+    _junitButton = _createToolbarButton(_junitAction);
+    _toolBar.add(_junitButton);
+    
     getContentPane().add(_toolBar, BorderLayout.NORTH);
   }
 
@@ -1412,13 +1418,15 @@ public class MainFrame extends JFrame {
           "Would you like to save and then compile?";
       }
       else if(reason == JUNIT_REASON) {
- message = "To run JUnit, you must first save and compile the current " + 
-   "file. Would like to save and then compile?";
+        message = "To run JUnit, you must first save and compile the current " + 
+          "file. Would like to save and then compile?";
       }
       else {
         throw new RuntimeException("Invalid reason for forcing a save.");
       }
-      int rc = JOptionPane.showConfirmDialog(MainFrame.this, message, "Must save to continue", JOptionPane.YES_NO_OPTION);
+      int rc = JOptionPane.showConfirmDialog(MainFrame.this, message, 
+                                             "Must save to continue", 
+                                             JOptionPane.YES_NO_OPTION);
       switch (rc) {
         case JOptionPane.YES_OPTION:
           _save();
