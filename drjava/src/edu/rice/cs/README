@@ -31,6 +31,7 @@ by Brian Stoler (bstoler@rice.edu)
    * ~/sf/src/edu/rice/cs/lib/GJv6.jar
    * ~/sf/src/edu/rice/cs/lib/gj-util.jar
    * ~/sf/src/edu/rice/cs/lib/dynamicjava.jar
+   * The tools.jar file in your JDK's lib directory
 
 That should be it! Make sure all the environment variables are exported if
 you're using UNIX. Of course you'll probably want to set them from within
