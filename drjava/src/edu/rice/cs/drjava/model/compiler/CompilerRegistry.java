@@ -62,6 +62,7 @@ public class CompilerRegistry {
    * The list of compiler interfaces that are distributed with DrJava.
    */
   public static final String[] DEFAULT_COMPILERS = {
+    "edu.rice.cs.drjava.model.compiler.JSR14v20FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.JSR14v12FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.JSR14FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.Javac141FromSetLocation",
@@ -77,6 +78,7 @@ public class CompilerRegistry {
    * A subset of DEFAULT_COMPILERS which support Generic Java.
    */
   public static final String[] GENERIC_JAVA_COMPILERS = {
+    "edu.rice.cs.drjava.model.compiler.JSR14v20FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.JSR14v12FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.JSR14FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.GJv6FromClasspath"

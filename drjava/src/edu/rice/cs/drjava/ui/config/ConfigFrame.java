@@ -104,7 +104,8 @@ public class ConfigFrame extends JFrame {
     // Select the first panel by default
     if (_rootNode.getChildCount() != 0) {
       PanelTreeNode firstChild = (PanelTreeNode)_rootNode.getChildAt(0);
-      TreePath path = new TreePath(firstChild.getPath());
+      TreeNode[] firstChildPath = firstChild.getPath();
+      TreePath path = new TreePath(firstChildPath);
       _tree.expandPath(path);
       _tree.setSelectionPath(path);
     }
@@ -303,13 +304,16 @@ public class ConfigFrame extends JFrame {
    * @return this tree node
    */
   private PanelTreeNode _createPanel(String t, PanelTreeNode parent) {
-    
     PanelTreeNode ptNode = new PanelTreeNode(t);
     //parent.add(ptNode);
     _treeModel.insertNodeInto(ptNode, parent, parent.getChildCount());
     
     // Make sure tree node is visible
-    _tree.expandPath(new TreePath(ptNode.getPath()));
+    TreeNode[] pathArray = ptNode.getPath();
+    TreePath path = new TreePath(pathArray);
+//     System.out.println("path has class " + pathArray.getClass());
+//     System.out.println("last path compenent has class " + path.getLastPathComponent().getClass());
+    _tree.expandPath(path);
     
     return ptNode;
   }

@@ -37,48 +37,54 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.compiler;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.io.File;
+import java.net.URLClassLoader;
+import java.net.URL;
+import java.net.MalformedURLException;
+
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.FileOption;
+import edu.rice.cs.util.classloader.StrictURLClassLoader;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030609-1905;
+ * A compiler interface to find jsr14 v2.0 from the location
+ * specified in Configuration.
  *
  * @version $Id$
  */
-public abstract class Version {
+public class JSR14v20FromSetLocation extends CompilerProxy implements OptionConstants {
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * No longer a Singleton in order to re-determine the compiler's location multiple times.
    */
-  private static final String BUILD_TIME_STRING = "20030609-1905";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public JSR14v20FromSetLocation() {
+    super("edu.rice.cs.drjava.model.compiler.JSR14v20Compiler",
+          _getClassLoader());
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
+  
+  private static ClassLoader _getClassLoader() {
+    File loc = DrJava.getConfig().getSetting(JSR14_LOCATION);
+    if (loc == FileOption.NULL_FILE) {
+      throw new RuntimeException("jsr14 location not set");
+    }
+    
     try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+      //URL url = new File(loc).toURL();
+      URL url = loc.toURL();
+      return new StrictURLClassLoader(new URL[] { url });
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
+    catch (MalformedURLException e) {
+      throw new RuntimeException("malformed url exception");
     }
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
+  
+  /**
+   * Returns the name of this compiler, appropriate to show to the user.
+   */
+  public String getName() {
+    return super.getName() + " (user)";
   }
-} 
+}

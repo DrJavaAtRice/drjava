@@ -92,7 +92,7 @@
     <cvs dest="${dist}/${version-tag}"
          tag="HEAD"
          quiet="yes"
-         package="src/edu/rice/cs/drjava src/edu/rice/cs/util src/edu/rice/cs/lib src/edu/rice/cs/LICENSE src/edu/rice/cs/README src/edu/rice/cs/build-common.xml src/src-jsr14v1_0 src/src-jsr14v1_2 src/src-mac13 src/src-mac14 src/src-windows"
+         package="src/edu/rice/cs/drjava src/edu/rice/cs/util src/edu/rice/cs/lib src/edu/rice/cs/LICENSE src/edu/rice/cs/README src/edu/rice/cs/build-common.xml src/src-jsr14v1_0 src/src-jsr14v1_2 src/src-jsr14v2_0 src/src-mac13 src/src-mac14 src/src-windows"
          command="export -N" />
 
     <zip zipfile="${dist}/${version-tag}-src.zip">
@@ -135,8 +135,8 @@
         <include name="${projpath}/**/*.gif" />
         <include name="${projpath}/**/*.png" />
 
-	<!-- include files used for testing -->
-	<include name="${projpath}/**/testFiles/*" />
+ <!-- include files used for testing -->
+ <include name="${projpath}/**/testFiles/*" />
       </fileset>
     </copy>
 
@@ -206,6 +206,53 @@
 
     <!-- Delete the compiled classes -->
     <delete dir="${built_jsr14v1_2}" />
+  </target>
+
+  <!-- Compiles only the JSR-14 v2.0 specific classes, and adds
+       them to compilers.jar in the lib directory.
+       Deletes the compiled classes when finished.
+    -->
+  <target name="compile-jsr14v2_0">
+    <property name="projpath_jsr14v2_0" 
+              value="src-jsr14v2_0/edu/rice/cs/${ant.project.name}" />
+    <property name="built_jsr14v2_0"
+              value="${srcroot}/../built-jsr14v2_0/" />
+
+    <!-- Build the classes -->
+    <mkdir dir="${built_jsr14v2_0}" />
+    <javac srcdir="${srcroot}"
+           includes="${projpath_jsr14v2_0}/**/*java"
+           destdir="${built_jsr14v2_0}" 
+           bootclasspath="${jsr14_classpath}:${sun.boot.class.path}"
+           classpath="${classpath_text}"
+           target="1.5"
+           debug="on"
+           source="1.5"
+           fork="on"
+           optimize="off">
+       <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
+    </javac>
+<!--  commented out because the jsr14 v2.0 compiler adapter must be compiled using
+      variance, whereas the rest of DrJava should be compiled with -novariance.
+    <antcall target="do-compile">
+      <param name="projpath" value="${projpath_jsr14v2_0}" />
+      <param name="built" value="${built_jsr14v2_0}" />
+    </antcall> -->
+
+    <!-- Make a jar in the lib directory. No tests are included. -->
+    <jar jarfile="${lib_dir}/compilers.jar" update="yes">
+      <fileset dir="${built_jsr14v2_0}">
+        <exclude name="**/*Test.class" />
+        <exclude name="**/*Test$*.class" />
+        <include name="${projpath}/**" />
+
+        <!-- include the GPL -->
+        <include name="edu/rice/cs/LICENSE" />
+      </fileset>
+    </jar>
+
+    <!-- Delete the compiled classes -->
+    <delete dir="${built_jsr14v2_0}" />
   </target>
     
   <!-- Compiles only the Mac OS X JDK 1.3 specific classes, and adds

@@ -120,7 +120,8 @@ public class CompilerProxy implements CompilerInterface {
       
       String compilerClass = _realCompiler.getClass().getName();
       if ((compilerClass.equals("edu.rice.cs.drjava.model.compiler.JSR14v10Compiler") ||
-           compilerClass.equals("edu.rice.cs.drjava.model.compiler.JSR14v12Compiler")) &&
+           compilerClass.equals("edu.rice.cs.drjava.model.compiler.JSR14v12Compiler") ||
+           compilerClass.equals("edu.rice.cs.drjava.model.compiler.JSR14v20Compiler")) &&
           collectionsPath != FileOption.NULL_FILE) {
         _realCompiler.addToBootClassPath( collectionsPath );
       }
