@@ -95,10 +95,10 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		//get highlight information from mark onward
 		//numbers are off by prevSize + strLength + reducedOffset
 		//the adjustment is the absolute position that newStates started at
-			message = _reduced.generateHighlights(offset,strLength,
-																						!_modifiedHighlights);
-			updateCurrentHighlights(message);
-			updateStyles(message);
+		message = _reduced.generateHighlights(offset,strLength,
+																					!_modifiedHighlights);
+		updateCurrentHighlights(message);
+		updateStyles(message);
   }
 
 	private void _addCharToReducedView(char curChar)
@@ -169,7 +169,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		message = _reduced.generateHighlights(offset,0, !_modifiedHighlights);
 		updateCurrentHighlights(message);
 		updateStyles(message);
-  }
+	}
 
 
   /** Whenever this document has been saved, this method should be called
@@ -193,8 +193,8 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		}
 
 	private void updateStyles(StyleUpdateMessage message) {
-					_styleUpdater.sendMessage(message);
-		}
+		_styleUpdater.sendMessage(message);
+	}
 
 	public void updateCurrentHighlights(StyleUpdateMessage message)
 		{

@@ -172,15 +172,15 @@ public class DefinitionsView extends JEditorPane
 		_openChooser = new JFileChooser(System.getProperty("user.dir"));
 		_saveChooser = new JFileChooser(System.getProperty("user.dir"));
 				
-		Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
+	//  	Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
 
-		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
-																 (Action) _indentKeyActionLine);
-		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0),
-																 (Action) _indentKeyActionTab);
-		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('}'),
-																 (Action) _indentKeyActionSquiggly);
-		setKeymap(ourMap);
+//  		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+//  																 (Action) _indentKeyActionLine);
+//  		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0),
+//  																 (Action) _indentKeyActionTab);
+//  		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('}'),
+//  																 (Action) _indentKeyActionSquiggly);
+//  		setKeymap(ourMap);
 		
 		this.addCaretListener(_matchListener);
 //		this.addKeyListener(_indentKeyListener);
