@@ -141,13 +141,22 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     return false;
   }
   
+  /**
+   * Returns the fully qualified class name for "this".
+   * It will append the package name onto the class name
+   * if there is a package name.
+   */
+  private String _getFullyQualifiedClassNameForThis() {    
+    String cName = _thisClassName;
+    if (!_thisPackageName.equals("")) {
+      cName = _thisPackageName + "." + cName;
+    }
+    return cName;
+  }
+  
   private Class _loadClassForThis(Context context) {
     try {
-      String cName = _thisClassName;
-      if (!_thisPackageName.equals("")) {
-        cName = _thisPackageName + "." + cName;
-      }
-      return context.lookupClass(cName);
+      return context.lookupClass(_getFullyQualifiedClassNameForThis());
     }
     catch(ClassNotFoundException e) {
       throw new UnexpectedException(e);
@@ -275,7 +284,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     TypeChecker tc = makeTypeChecker(context);
     int numDollars = _getNumDollars(_thisClassName);
     StaticFieldAccess expr = null;
-    String currClass = _thisClassName;
+    String currClass = _getFullyQualifiedClassNameForThis();
     int index = currClass.length();
     // iterate outward trying to find the field
     for (int i = 0; i <= numDollars; i++) {
@@ -310,7 +319,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     String methodName = method.getMethodName();
     List args = method.getArguments();
     StaticMethodCall expr = null;
-    String currClass = _thisClassName;
+    String currClass = _getFullyQualifiedClassNameForThis();
     int index = currClass.length();
     // iterate outward trying to find the method
     for (int i = 0; i <= numDollars; i++) {
@@ -342,16 +351,23 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    */  
   protected ReferenceType _getReferenceTypeForField(String field, Context context) {
     TypeChecker tc = makeTypeChecker(context);
-    int index = _indexOfWithinBoundaries(_thisClassName, field);
+    int index = _indexOfWithinBoundaries(_getFullyQualifiedClassNameForThis(), field);
     if (index != -1) {
-      // field may be of form outerClass$innerClass. 
+      // field may be of form outerClass$innerClass or
+      // package.innerClass. 
       // We want to match the inner most class.
       int lastDollar = field.lastIndexOf("$");
+      int lastDot = field.lastIndexOf(".");
       if (lastDollar != -1) {
         field = field.substring(lastDollar + 1, field.length());
       }
+      else {
+        if (lastDot != -1) {
+          field = field.substring(lastDot + 1, field.length());
+        }
+      }
       LinkedList list = new LinkedList();
-      StringTokenizer st = new StringTokenizer(_thisClassName, "$");
+      StringTokenizer st = new StringTokenizer(_getFullyQualifiedClassNameForThis(), "$.");
       String currString = st.nextToken();
       while (!currString.equals(field)) {
         list.add(new Identifier(currString));
@@ -469,7 +485,8 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
             &&
           // begins at legal boundary
           ((index == 0) ||
-           (string.charAt(index-1) == '$'))) {
+           (string.charAt(index-1) == '$') ||
+           (string.charAt(index-1) == '.'))) {
         return index;
       }
       else {

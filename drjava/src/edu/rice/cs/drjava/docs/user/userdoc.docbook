@@ -227,7 +227,7 @@ Welcome to DrJava.
 
     <section id="compiling-file">
       <title>Compiling Files</title>
-      <para>To compile the documents you have open in DrJava, click on the "Compile All" button on the toolbar, or choose either "Compile All" or "Compile Current Document" from the Tools menu.  Before the compilation can begin, all open files must be saved, even if only the current document is being compiled.  This is necessary because one file can depend on other files, and it is important that no files have been modified when errors are displayed.  (Otherwise, an error could be highlighted on a line which has changed.)  Once a compilation completes successfully, the Interactions Pane is reset so that the new class files can be used.</para>
+      <para>To compile the documents you have open in DrJava, click on the "Compile All" button on the toolbar, or choose either "Compile All" or "Compile Current Document" from the Tools menu.  Before the compilation can begin, all open files must be saved, even if only the current document is being compiled.  This is necessary because one file can depend on other files, and it is important that no files have been modified when errors are displayed.  (Otherwise, an error could be highlighted on a line which has changed.)  Once a compilation completes successfully, the Interactions Pane is reset so that the new class files can be used.  The output on the Console Tab is also reset to begin the new session, unless the "Clear Console After Interactions Reset" option in the Miscellaneous Section of the Preferences.</para>
     </section>
 
     <section id="compiling-errors">
@@ -686,6 +686,13 @@ public class Student {
 	</varlistentry>
 	
 	<varlistentry>
+	  <term>Line Numbers Font (<varname>font.doclist = Monospaced-PLAIN-12</varname>)</term>
+	  <listitem>
+	    <para>This font is used for the line numbers on the left side of the Definitions Pane, if the "Show All Line Numbers" option in the Display Options section is enabled.  The actual font size will be limited by the size of the Main Font.</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
 	  <term>Document List Font (<varname>font.doclist = Monospaced-PLAIN-10</varname>)</term>
 	  <listitem>
 	    <para>This font is used in the list of all open documents on the left side of the window.</para>
@@ -1029,6 +1036,13 @@ public class Student {
 	  <term>Keep Emacs-style Backup Files (<varname>files.backup = true</varname>)</term>
 	  <listitem>
 	    <para>Whether DrJava should keep a backup copy of each file that the user modifies, saved with a "~" at the end of the filename.</para>
+	  </listitem>
+	</varlistentry>
+
+        <varlistentry>
+	  <term>Clear Console After Interactions Reset (<varname>reset.clear.console = true</varname>)</term>
+	  <listitem>
+	    <para>Whether DrJava should clear the contents of the Console Tab each time the Interactions Pane is reset.</para>
 	  </listitem>
 	</varlistentry>
 	

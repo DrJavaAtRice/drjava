@@ -778,7 +778,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
 
   /**
-   * Clears and resets the interactions pane.
+   * Clears and resets the interactions pane. Also clears the console 
+   * if the option is indicated (on by default).
    * Bug #576179 pointed out that this needs to end any threads that were
    * running in the interactions JVM, so we completely restart the JVM now.
    * Ideally, we'd like a way to end any running threads and cleanly reset
@@ -797,6 +798,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     
     _interactionsModel.resetInterpreter();
+    if (DrJava.getConfig().getSetting(OptionConstants.RESET_CLEAR_CONSOLE).booleanValue()) {
+      resetConsole();
+    }
     //_restoreInteractionsState();
     
     /* Old approach.  (Didn't kill leftover interactions threads)
@@ -1133,7 +1137,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           
           // Only clear interactions if there were no errors
           if (_numErrors == 0) {
-            //resetConsole();
             if (/*_resetAfterCompile && */
                 _interactionsModel.interpreterUsed()) {
               resetInteractions();
@@ -1632,7 +1635,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
               
               // Only clear interactions if there were no errors
               if (_numErrors == 0) {
-                //resetConsole();
                 if (/*_resetAfterCompile && */
                     _interactionsModel.interpreterUsed()) {
                   resetInteractions();

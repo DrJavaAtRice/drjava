@@ -396,6 +396,10 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
         assertJUnitEndCount(0);
         interpreterReadyCount++;
       }
+
+      public void consoleReset() {
+        consoleResetCount++;
+      }
     };
     _model.addListener(listener);
     if (printMessages) System.out.println("before compile");

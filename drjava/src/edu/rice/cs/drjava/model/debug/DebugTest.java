@@ -308,6 +308,10 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
           _notifyLock();
         }
       }
+
+      public void consoleReset() {
+        consoleResetCount++;
+      }
     };
     _model.addListener(resetListener);
     synchronized(_notifierLock) {

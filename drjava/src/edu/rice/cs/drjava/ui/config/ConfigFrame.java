@@ -482,8 +482,9 @@ public class ConfigFrame extends JFrame {
     panel.addComponent(new FontOptionComponent(OptionConstants.FONT_MAIN, "Main Font", this,
                                                "The font used for most text in DrJava."));
     panel.addComponent(new FontOptionComponent(OptionConstants.FONT_LINE_NUMBERS, "Line Numbers Font", this,
-                                               "<html>The font for displaying line numbers.<br>" +
-                                               "Cannot be displayed larger than the main font.</html>"));
+                                               "<html>The font for displaying line numbers on the left side of<br>" +
+                                               "the Definitions Pane if Show All Line Numbers is enabled.<br>" +
+                                               "Cannot be displayed larger than the Main Font.</html>"));
     panel.addComponent(new FontOptionComponent(OptionConstants.FONT_DOCLIST, "Document List Font", this,
                                                "The font used in the list of open documents."));
     panel.addComponent(new FontOptionComponent(OptionConstants.FONT_TOOLBAR, "Toolbar Font", this,
@@ -747,6 +748,8 @@ public class ConfigFrame extends JFrame {
     panel.addComponent(new IntegerOptionComponent(OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this,
                                                   "<html>The number of files to remember in<br>" +
                                                   "the recently used files list in the File menu.</html>"));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.RESET_CLEAR_CONSOLE, "Clear Console After Interactions Reset", this,
+                                                  "Whether to reset after manually resetting the interactions pane"));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.JAVAC_ALLOW_ASSERT, "Allow Assert Keyword in Java 1.4", this,
                                                   "<html>Whether to allow the <code>assert</code> keyword when compiling in Java 1.4.</html>"));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.BACKUP_FILES, "Keep Emacs-style Backup Files", this,

@@ -823,39 +823,7 @@ public interface OptionConstants {
   public static final BooleanOption JAVADOC_PROMPT_FOR_DESTINATION =
     new BooleanOption("javadoc.prompt.for.destination", Boolean.TRUE);
   
-  
-  
-  /* ---------- Misc Options ---------- */
-  
-  /**
-   * Directory to start looking for files in when DrJava starts up.
-   */
-  public static final FileOption WORKING_DIRECTORY =
-    new FileOption("working.directory", FileOption.NULL_FILE);
-  
-  /**
-   * How many spaces to use for indenting.
-   */
-  public static final NonNegativeIntegerOption INDENT_LEVEL =
-    new NonNegativeIntegerOption("indent.level",new Integer(2));
-  
-  /**
-   * Number of lines to remember in the Interactions History
-   */
-  public static final NonNegativeIntegerOption HISTORY_MAX_SIZE =
-    new NonNegativeIntegerOption("history.max.size", new Integer(500));
-  
-  /**
-   * Number of files to list in the recent file list
-   */
-  public static final NonNegativeIntegerOption RECENT_FILES_MAX_SIZE =
-    new NonNegativeIntegerOption("recent.files.max.size", new Integer(5));
-  
-  /**
-   * Whether to allow the assert keyword in Java 1.4+.
-   */
-  public static final BooleanOption JAVAC_ALLOW_ASSERT =
-    new BooleanOption("javac.allow.assert", Boolean.FALSE);
+  /* ---------- Notifications Options ---------- */
   
   /**
    * Whether to prompt when the interactions pane is unexpectedly reset.
@@ -923,7 +891,45 @@ public interface OptionConstants {
    * Whether to warn that a restart is necessary before the look and feel will change.
    */
   public static final BooleanOption WARN_CHANGE_LAF =
-    new BooleanOption("warn.change.laf", Boolean.TRUE);
+    new BooleanOption("warn.change.laf", Boolean.TRUE); 
+  
+  /* ---------- Misc Options ---------- */
+  
+  /**
+   * Directory to start looking for files in when DrJava starts up.
+   */
+  public static final FileOption WORKING_DIRECTORY =
+    new FileOption("working.directory", FileOption.NULL_FILE);
+  
+  /**
+   * How many spaces to use for indenting.
+   */
+  public static final NonNegativeIntegerOption INDENT_LEVEL =
+    new NonNegativeIntegerOption("indent.level",new Integer(2));
+  
+  /**
+   * Number of lines to remember in the Interactions History
+   */
+  public static final NonNegativeIntegerOption HISTORY_MAX_SIZE =
+    new NonNegativeIntegerOption("history.max.size", new Integer(500));
+  
+  /**
+   * Number of files to list in the recent file list
+   */
+  public static final NonNegativeIntegerOption RECENT_FILES_MAX_SIZE =
+    new NonNegativeIntegerOption("recent.files.max.size", new Integer(5));
+  
+  /**
+   * Whether to clear the console when manually resetting the interactions pane.
+   */
+  public static final BooleanOption RESET_CLEAR_CONSOLE = 
+    new BooleanOption("reset.clear.console", Boolean.TRUE);
+  
+  /**
+   * Whether to allow the assert keyword in Java 1.4+.
+   */
+  public static final BooleanOption JAVAC_ALLOW_ASSERT =
+    new BooleanOption("javac.allow.assert", Boolean.FALSE);
 
   /**
    * Whether to make emacs-style backup files.

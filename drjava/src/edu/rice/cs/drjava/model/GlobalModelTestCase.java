@@ -1024,14 +1024,13 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       }
     }
 
-    /* Note: console is no longer reset after a compile
     public void consoleReset() {
       assertConsoleResetCount(0);
       assertCompileStartCount(1);
       assertCompileEndCount(1);
       // don't care whether interactions or console are reset first
       consoleResetCount++;
-    }*/
+    }
 
     public void checkCompileOccurred() {
       assertCompileEndCount(1);

@@ -3555,6 +3555,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
           // Give the interactions pane focus so we can debug
           _interactionsPane.requestFocus();
+          showTab(_interactionsPane);
           _updateDebugStatus();
           
         }

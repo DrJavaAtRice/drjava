@@ -92,24 +92,25 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     /*21*/"}";
 
   protected static final String MONKEY_STATIC_STUFF =
-    /*1*/ "class MonkeyStaticStuff {\n" +
-    /*2*/ "  static int foo = 6;\n" +
-    /*3*/ "  static class MonkeyInner {\n" +
-    /*4*/ "    static int innerFoo = 8;\n" +
-    /*5*/ "    static public class MonkeyTwoDeep {\n" +
-    /*6*/ "      static int twoDeepFoo = 13;\n" +
-    /*7*/ "      static class MonkeyThreeDeep {\n" +
-    /*8*/ "        public static int threeDeepFoo = 18;\n" +
-    /*9*/ "        public static void threeDeepMethod() {\n" +
-    /*10*/"          System.out.println(MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.MonkeyThreeDeep.threeDeepFoo);\n" +
-    /*11*/"          System.out.println(MonkeyTwoDeep.twoDeepFoo);\n" +
-    /*12*/"          System.out.println(twoDeepFoo);\n" +
-    /*13*/"        }\n" +
-    /*14*/"      }\n" +
-    /*15*/"      static int getNegativeTwo() { return -2; }\n" +    
-    /*16*/"    }\n" +
-    /*17*/"  }\n" +
-    /*18*/"}";
+    /*1*/ "package monkey;\n" +
+    /*2*/ "public class MonkeyStaticStuff {\n" +
+    /*3*/ "  static int foo = 6;\n" +
+    /*4*/ "  static class MonkeyInner {\n" +
+    /*5*/ "    static int innerFoo = 8;\n" +
+    /*6*/ "    static public class MonkeyTwoDeep {\n" +
+    /*7*/ "      static int twoDeepFoo = 13;\n" +
+    /*8*/ "      public static class MonkeyThreeDeep {\n" +
+    /*9*/ "        public static int threeDeepFoo = 18;\n" +
+    /*10*/ "        public static void threeDeepMethod() {\n" +
+    /*11*/"          System.out.println(MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.MonkeyThreeDeep.threeDeepFoo);\n" +
+    /*12*/"          System.out.println(MonkeyTwoDeep.twoDeepFoo);\n" +
+    /*13*/"          System.out.println(twoDeepFoo);\n" +
+    /*14*/"        }\n" +
+    /*15*/"      }\n" +
+    /*16*/"      static int getNegativeTwo() { return -2; }\n" +    
+    /*17*/"    }\n" +
+    /*18*/"  }\n" +
+    /*19*/"}";
   
   protected static final String MONKEY_WITH_INNER_CLASS =
     /* 1 */    "class Monkey {\n" +
@@ -365,7 +366,9 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
    */
   public void testAccessStaticFieldsAndMethodsOfOuterClass()
     throws DebugException, BadLocationException, DocumentAdapterException, IOException, InterruptedException {
-    File file = new File(_tempDir, "MonkeyStaticStuff.java");
+    File dir = new File(_tempDir, "monkey");
+    dir.mkdir();
+    File file = new File(dir, "MonkeyStaticStuff.java");
     OpenDefinitionsDocument doc = doCompile(MONKEY_STATIC_STUFF, file);
     BreakpointTestListener debugListener = new BreakpointTestListener();
     _debugger.addListener(debugListener);
@@ -378,14 +381,15 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     
     // Set one breakpoint
     int index = MONKEY_STATIC_STUFF.indexOf("System.out.println");
-    _debugger.toggleBreakpoint(doc,index,10);
+    _debugger.toggleBreakpoint(doc,index,11);
      
     // Run the main() method, hitting both breakpoints in different threads
     synchronized(_notifierLock) {
-      interpretIgnoreResult("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.MonkeyThreeDeep.threeDeepMethod();");
-       _waitForNotifies(3); // suspended, updated, breakpointReached
-       _notifierLock.wait();
-     }
+      //interpret("package monkey;");
+      interpretIgnoreResult("monkey.MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.MonkeyThreeDeep.threeDeepMethod();");
+      _waitForNotifies(3); // suspended, updated, breakpointReached
+      _notifierLock.wait();
+    }
 
     assertEquals("should find field of static outer class",
                  "13",
@@ -401,6 +405,9 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     assertEquals("should have assigned the field of static outer class",
                  "100",
                  interpret("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.twoDeepFoo"));
+    assertEquals("should have assigned the field of static outer class",
+                 "100",
+                 interpret("monkey.MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.twoDeepFoo"));
 
     interpret("int twoDeepFoo = -10;");
     assertEquals("Should have successfully shadowed field of static outer class",

@@ -154,6 +154,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     }
     _model.removeListener(listener);
 
+    listener.assertConsoleResetCount(0);
     listener.assertInteractionStartCount(1);
     listener.assertInterpreterResettingCount(1);
     listener.assertInterpreterReadyCount(1);
@@ -183,6 +184,10 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
           this.notify();
         }
       }
+
+      public void consoleReset() {
+        consoleResetCount++;
+      }
     };
 
     // Prevent the Interactions JVM from quitting
@@ -199,6 +204,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     _model.removeListener(listener);
     interpret("edu.rice.cs.drjava.DrJava.disableSecurityManager();");
 
+    listener.assertConsoleResetCount(1);
     listener.assertInterpreterResettingCount(1);
     listener.assertInterpreterResetFailedCount(1);
     listener.assertInterpreterReadyCount(0);
@@ -262,6 +268,10 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
           this.notify();
         }
       }
+
+      public void consoleReset() {
+        consoleResetCount++;
+      }
     };
 
     _model.addListener(listener);
@@ -274,6 +284,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     listener.assertInterpreterResettingCount(1);
     listener.assertInterpreterReadyCount(1);
     listener.assertInterpreterExitedCount(0);
+
+    listener.assertConsoleResetCount(1);
 
     // now make sure it still works!
     assertEquals("5", interpret("5"));
