@@ -365,7 +365,10 @@ public class ReducedModelControl implements BraceReduction {
   }
 
   /**
-   * Gets the distance to the enclosing brace.
+   * Returns an IndentInfo containing the following information:
+   * - distance to the previous newline ( start of this line)
+   * - distance to the brace enclosing the beginning of the current line
+   * - distance to the beginning of the line containing that brace
    */
   public IndentInfo getIndentInformation() {
     IndentInfo braceInfo = new IndentInfo();
@@ -375,9 +378,13 @@ public class ReducedModelControl implements BraceReduction {
     rmb.getDistToEnclosingBrace(braceInfo);
     //get distance to newline before the previous, just mentioned, brace.
     rmc.getDistToIndentNewline(braceInfo);
+    // get distance to the brace enclosing the current location
+    rmb.getDistToEnclosingBraceCurrent(braceInfo);
+    // get distance to the beginning of that brace's line
+    rmc.getDistToCurrentBraceNewline(braceInfo);
     return braceInfo;
   }
-
+  
   /**
    * Gets distance to end of line on the line previous.
    */

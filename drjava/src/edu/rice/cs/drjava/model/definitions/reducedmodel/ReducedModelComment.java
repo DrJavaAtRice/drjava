@@ -553,6 +553,30 @@ public class ReducedModelComment extends AbstractReducedModel {
     return;
   }
   
+/**
+ * Computes the distance to the beginning of the line containing the brace enclosing
+ * the current location.  Stores this info in the IndentInfo field distToNewlineCurrent.
+ */
+  void getDistToCurrentBraceNewline(IndentInfo braceInfo) {
+    int walkcount = -1;
+    TokenList.Iterator copyCursor = _cursor._copy();
+    
+    if (braceInfo.distToBraceCurrent == -1 || copyCursor.atStart()) { // no brace
+      return;
+    }
+    
+    copyCursor.move(-braceInfo.distToBraceCurrent);    
+    walkcount = _getDistToPreviousNewline(copyCursor);
+    
+    if (walkcount == -1) {
+      braceInfo.distToNewlineCurrent = -1;
+    }
+    else {
+      braceInfo.distToNewlineCurrent = walkcount + braceInfo.distToBraceCurrent;
+    }
+    return;
+  }
+  
   /**
   * Gets distance to previous newline, relLoc is the distance
   * back from the cursor that we want to start searching.

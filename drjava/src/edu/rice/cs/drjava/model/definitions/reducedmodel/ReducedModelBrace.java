@@ -540,4 +540,75 @@ public class ReducedModelBrace extends AbstractReducedModel {
     iter.dispose();
     return;
   }
+  
+ 
+  /**
+   * Find the enclosing brace enclosing our current location.
+   */
+  protected void getDistToEnclosingBraceCurrent(IndentInfo braceInfo) {
+    Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
+    TokenList.Iterator iter = _cursor._copy();
+    resetLocation();
+    int relDistance = 0;
+    int distance = relDistance;
+
+    
+    //move to the proper location, then add the rest of the block
+    // and go to the previous.
+
+    relDistance += iter.getBlockOffset();
+    distance += iter.getBlockOffset();
+    
+    //reset the value of braceInfo signiling the necessary newline has
+    //not been found.
+    braceInfo.distToNewlineCurrent = -1;
+    
+    if (iter.atStart() || iter.atFirstItem()) {
+      iter.dispose();
+      return;
+    }
+    
+    iter.prev();
+    
+    // either we get a match and the stack is empty
+    // or we reach the start of a file and haven't found a match
+    // or we have a open brace that doesn't have a match,
+    // so we abort
+    while (!iter.atStart()) {
+      
+      distance += iter.current().getSize();
+      relDistance += iter.current().getSize();
+      
+      if (!iter.current().isGap()) {
+        
+        if (stateAtRelLocation(-relDistance) == FREE) {
+              // open
+              if (iter.current().isOpenBrace()) {
+                if (braceStack.isEmpty()) {
+		    //braceInfo.braceType = iter.current().getType();
+                  braceInfo.distToBraceCurrent = distance;
+                  iter.dispose();
+                  return;
+                }
+                ReducedToken popped = braceStack.pop();
+                if (!iter.current().isMatch(popped)){
+                  iter.dispose();
+                  return;
+                }
+              }
+              // closed
+              else {
+                braceStack.push(iter.current());
+              }
+            }
+        relDistance = 0;
+      }
+      // no matter what, we always want to increase the distance
+      // by the size of the token we have just gone over
+      iter.prev();
+    }
+    
+    iter.dispose();
+    return;
+  }
 }

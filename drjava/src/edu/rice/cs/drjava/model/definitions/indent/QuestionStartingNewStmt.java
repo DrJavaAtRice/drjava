@@ -78,22 +78,24 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
   boolean applyRule(DefinitionsDocument doc) {
     char[] delims = {';', '{', '}'};
     int lineStart = doc.getLineStartPos(doc.getCurrentLocation());
-    int prevDelimiter;
+    int prevDelimiterPos;
 
     try {
-      prevDelimiter = doc.findPrevDelimiter(lineStart, delims);
+      prevDelimiterPos = doc.findPrevDelimiter(lineStart, delims);
     } catch (BadLocationException e) {
       // Should not happen
       throw new UnexpectedException(e);
     }
 
-    if(prevDelimiter == DefinitionsDocument.ERROR_INDEX) {
-      prevDelimiter = DefinitionsDocument.DOCSTART;
+    // For DOCSTART, imaginary delimiter at position -1
+    if(prevDelimiterPos == DefinitionsDocument.ERROR_INDEX) {
+      prevDelimiterPos = -1;
     }
     
+    // Delimiter must be at the end of its line (ignoring whitespace & comments)
     int firstNonWSAfterDelimiter;
     try {
-      firstNonWSAfterDelimiter = doc.getFirstNonWSCharPos(prevDelimiter+1);
+      firstNonWSAfterDelimiter = doc.getFirstNonWSCharPos(prevDelimiterPos+1);
     } catch (BadLocationException e) {
       throw new UnexpectedException(e);
     }
