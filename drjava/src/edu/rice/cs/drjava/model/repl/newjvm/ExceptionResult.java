@@ -55,14 +55,17 @@ public class ExceptionResult implements InterpretResult {
   private final String _exceptionClass;
   private final String _exceptionMessage;
   private final String _stackTrace;
+  private final String _specialMessage;
 
   public ExceptionResult(final String exceptionClass,
                          final String exceptionMessage,
-                         final String stackTrace)
+                         final String stackTrace,
+                         final String specialMessage)
   {
     _exceptionClass = exceptionClass;
     _exceptionMessage = exceptionMessage;
     _stackTrace = stackTrace;
+    _specialMessage = specialMessage;
   }
 
   public String getExceptionClass() {
@@ -75,6 +78,10 @@ public class ExceptionResult implements InterpretResult {
 
   public String getStackTrace() {
     return _stackTrace;
+  }
+  
+  public String getSpecialMessage() {
+    return _specialMessage;
   }
 
   public <T> T apply(InterpretResultVisitor<T> v) {

@@ -65,6 +65,8 @@ import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.newjvm.*;
 
+import koala.dynamicjava.parser.wrapper.*;
+
 /**
  * Manages a remote JVM.
  *
@@ -843,8 +845,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   private void _threwException(Throwable t) {
     _interactionsModel.replThrewException(t.getClass().getName(),
                                           t.getMessage(),
-                                          StringOps.getStackTrace(t));
-  }
+                                          StringOps.getStackTrace(t),
+                                          ((t instanceof ParseError) &&  ((ParseError) t).getParseException() != null)? ((ParseError) t).getMessage() : null);
+  }                                                                                                                                   // getMessage, in this scenario, will return the same as getShortMessage
 
   /**
    * Sets the interpreter to allow access to private members.
@@ -928,8 +931,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
      */
     public Object forExceptionResult(ExceptionResult that) {
       _interactionsModel.replThrewException(that.getExceptionClass(),
-                                that.getExceptionMessage(),
-                                that.getStackTrace());
+                                            that.getExceptionMessage(),
+                                            that.getStackTrace(),
+                                            that.getSpecialMessage());
       return null;
     }
 
@@ -968,7 +972,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void replReturnedResult(String result) {}
     public void replThrewException(String exceptionClass,
                                    String message,
-                                   String stackTrace) {}
+                                   String stackTrace,
+                                   String specialMessage) {}
     public void replReturnedSyntaxError(String errorMessage,
                                         String interaction,
                                         int startRow,

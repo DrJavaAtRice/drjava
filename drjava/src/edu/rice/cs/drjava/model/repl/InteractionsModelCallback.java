@@ -122,7 +122,8 @@ public interface InteractionsModelCallback {
    */
   public void replThrewException(String exceptionClass,
                                  String message,
-                                 String stackTrace);
+                                 String stackTrace,
+                                 String specialMessage);
 
   /**
    * Signifies that the most recent interpretation was preempted

@@ -61,4 +61,5 @@ public interface Interpreter {
    *         the interpretation had no return value.
    */
   public Object interpret(String s) throws ExceptionReturnedException;
+  public Object parse(String s);
 }

@@ -57,8 +57,6 @@ import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.DocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 
-import edu.rice.cs.javaast.parser.*;
-
 /**
  * A model which can serve as the glue between an InteractionsDocument and
  * any JavaInterpreter.  This abstract class provides common functionality
@@ -123,7 +121,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   private boolean _debugPortSet;
 
   /** Interactions processor, currently a pre-processor **/
-  private InteractionsProcessorI _interactionsProcessor;
+  //private InteractionsProcessorI _interactionsProcessor;
 
   /** The input listener to listen for requests to System.in. */
   protected InputListener _inputListener;
@@ -144,7 +142,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _writerLock = new Object();
     _debugPort = -1;
     _debugPortSet = false;
-    _interactionsProcessor = new InteractionsProcessor();
+    //_interactionsProcessor = new InteractionsProcessor();
     _inputListener = NoInputListener.ONLY;
   }
 
@@ -204,34 +202,46 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         toEval = _testClassCall(toEval);
       }
 
-      try {
+//      try {
 //        _checkInteraction(text);
-        toEval = _interactionsProcessor.preProcess(toEval);
+//        toEval = _interactionsProcessor.preProcess(toEval);
 
-        _prepareToInterpret(text);
-        interpret(toEval);
-      }
-      catch (ParseException pe) {
-        // A ParseException indicates a syntax error in the input window
-        String errMsg = pe.getInteractionsMessage();
-//        javax.swing.JOptionPane.showMessageDialog(null, "ParseException:\n" + errMsg);
-        if (errMsg.endsWith("<EOF>\"")) {
-          _notifyInteractionIncomplete();
-        }
-        else {
-          _prepareToInterpret(text);
-          replReturnedSyntaxError(errMsg, text, pe.getBeginLine(),
-                                  pe.getBeginColumn(), pe.getEndLine(), pe.getEndColumn());
-        }
-      }
-      catch (TokenMgrError tme) {
-        // A TokenMgrError indicates some lexical difficulty with input.
-//        javax.swing.JOptionPane.showMessageDialog(null, "TokenMgrError:\n" + tme.getMessage());
-        _prepareToInterpret(text);
-        int row = tme.getErrorRow();
-        int col = tme.getErrorColumn() - 1;
-        replReturnedSyntaxError(tme.getMessage(), text, row, col, row, col);
-      }
+      
+////      boolean parserpassed = true;
+////      JavaInterpreter interpreter = new DynamicJavaAdapter();
+////      try {
+////        interpreter.parse(toEval);
+////      } catch(Throwable t){
+////        parserpassed = false;
+////      }
+////
+////      if(parserpassed) {
+      _prepareToInterpret(text);
+      interpret(toEval);
+////      }
+      
+//      }
+//      catch (ParseException pe) {
+//        // A ParseException indicates a syntax error in the input window
+//        String errMsg = pe.getInteractionsMessage();
+//        //javax.swing.JOptionPane.showMessageDialog(null, "ParseException:\n" + errMsg);
+//        if (errMsg.endsWith("<EOF>\"")) {
+//          _notifyInteractionIncomplete();
+//        }
+//        else {
+//          _prepareToInterpret(text);
+//          replReturnedSyntaxError(errMsg, text, pe.getBeginLine(),
+//                                  pe.getBeginColumn(), pe.getEndLine(), pe.getEndColumn());
+//        }
+//      }
+//      catch (TokenMgrError tme) {
+//        // A TokenMgrError indicates some lexical difficulty with input.
+//        //  javax.swing.JOptionPane.showMessageDialog(null, "TokenMgrError:\n" + tme.getMessage());
+//        _prepareToInterpret(text);
+//        int row = tme.getErrorRow();
+//        int col = tme.getErrorColumn() - 1;
+//        replReturnedSyntaxError(tme.getMessage(), text, row, col, row, col);
+//      }
     }
   }
 
@@ -269,28 +279,29 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * @return true iff the interaction is complete
    */
 //  protected abstract boolean _checkInteraction(String toCheck);
+  
   /**
    * Verifies that the current interaction is "complete"; i.e. the user has
    * finished typing.
    * @param toCheck the String to check
    * @return true iff the interaction is complete
    */
-  protected boolean _checkInteraction(String toCheck) {
-    try {
-      _interactionsProcessor.preProcess(toCheck);
-    }
-    catch (ParseException pe) {
-      // A ParseException indicates a syntax error in the input window
-      if (pe.getInteractionsMessage().endsWith("<EOF>\"")) {
-        _notifyInteractionIncomplete();
-        return false;
-      }
-    }
-    catch (TokenMgrError tme) {
-      // A TokenMgrError indicates some lexical difficulty with input.
-    }
-    return true;
-  }
+//  protected boolean _checkInteraction(String toCheck) {
+//    try {
+//      _interactionsProcessor.preProcess(toCheck);
+//    }
+//    catch (ParseException pe) {
+//      // A ParseException indicates a syntax error in the input window
+//      if (pe.getInteractionsMessage().endsWith("<EOF>\"")) {
+//        _notifyInteractionIncomplete();
+//        return false;
+//      }
+//    }
+//    catch (TokenMgrError tme) {
+//      // A TokenMgrError indicates some lexical difficulty with input.
+//    }
+//    return true;
+//  }
 
   /**
    * Notifies the view that the current interaction is incomplete.
@@ -681,7 +692,15 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    */
   public void replThrewException(String exceptionClass,
                                  String message,
-                                 String stackTrace) {
+                                 String stackTrace,
+                                 String shortMessage) {
+    if (shortMessage!=null) {
+      if (shortMessage.endsWith("<EOF>\"")) {
+        _document.setInProgress(false);
+        _notifyInteractionEnded();
+        return;
+      }
+    }
     _document.appendExceptionResult(exceptionClass,
                                     message,
                                     stackTrace,

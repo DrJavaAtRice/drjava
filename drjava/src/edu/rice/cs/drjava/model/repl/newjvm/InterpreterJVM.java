@@ -71,6 +71,8 @@ import edu.rice.cs.drjava.model.repl.*;
 // For Windows focus fix
 import javax.swing.JDialog;
 
+import koala.dynamicjava.parser.wrapper.*;
+
 /**
  * This is the main class for the interpreter JVM.
  * Note that this class is specific to using DynamicJava. It would need
@@ -264,13 +266,9 @@ public class InterpreterJVM extends AbstractSlaveJVM
           try {
             _dialog("to interp: " + s);
 
-//<<<<<<< InterpreterJVM.java
-//            //String s1 = _interactionsProcessor.preProcess(s);
-//            Object result = interpreter.getInterpreter().interpret(s);
-//=======
             String s1 = s;//_interactionsProcessor.preProcess(s);
             Object result = interpreter.getInterpreter().interpret(s1);
-//>>>>>>> 1.59
+
             String resultString = String.valueOf(result);
 
             if (result == Interpreter.NO_RESULT) {
@@ -296,31 +294,9 @@ public class InterpreterJVM extends AbstractSlaveJVM
             //                           getStackTrace(t));
             _mainJVM.interpretResult(new ExceptionResult(t.getClass().getName(),
                                                          t.getMessage(),
-                                                         InterpreterJVM.getStackTrace(t)));
-          }
-//<<<<<<< InterpreterJVM.java
-////          catch (InterpreterException ie) {
-////            // A ParseException indicates a syntax error in the input window
-////            //_mainJVM.interpretResult( new SyntaxErrorResult( ie, s ) );
-////          }
-////          catch (ParseException pe) {
-////             // A ParseException indicates a syntax error in the input window
-////            _mainJVM.interpretResult( new SyntaxErrorResult( pe, s ) );
-////          }
-//          catch (TokenMgrError tme) {
-//            // A TokenMgrError indicates some lexical difficulty with input.
-//           _mainJVM.interpretResult( new SyntaxErrorResult( tme, s ) );
-//          }
-//=======
-//          catch (ParseException pe) {
-//            // A ParseException indicates a syntax error in the input window
-//            _mainJVM.interpretResult(new SyntaxErrorResult(pe, s));
-//          }
-//          catch (TokenMgrError tme) {
-//            // A TokenMgrError indicates some lexical difficulty with input.
-//            _mainJVM.interpretResult(new SyntaxErrorResult(tme, s));
-//          }
-//>>>>>>> 1.59
+                                                         InterpreterJVM.getStackTrace(t),
+                                                         ((t instanceof ParseError) && ((ParseError)t).getParseException() != null) ? ((ParseError)t).getMessage() : null));
+          }                                                                                                                                        // getMessage, in this scenario, will return the same as getShortMessage
           catch (Throwable t) {
             // A user's toString method might throw anything, so we need to be careful
             //_dialog("thrown by toString: " + t);
@@ -329,8 +305,9 @@ public class InterpreterJVM extends AbstractSlaveJVM
             //                           getStackTrace(t));
             _mainJVM.interpretResult(new ExceptionResult(t.getClass().getName(),
                                                          t.getMessage(),
-                                                         InterpreterJVM.getStackTrace(t)));
-          }
+                                                         InterpreterJVM.getStackTrace(t),
+                                                         ((t instanceof ParseError) && ((ParseError)t).getParseException() != null) ? ((ParseError)t).getMessage() : null));
+          }                                                                                                                                        // getMessage, in this scenario, will return the same as getShortMessage
         }
         catch (RemoteException re) {
           // Can't communicate with MainJVM?  Nothing to do...

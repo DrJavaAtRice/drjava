@@ -580,6 +580,14 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     return Interpreter.NO_RESULT;
   }
 
+  public Object visit(ClassDeclaration node) {
+    return Interpreter.NO_RESULT;
+  }
+  
+  public Object visit(MethodDeclaration node) {
+    return Interpreter.NO_RESULT;
+  }
+  
     /**
      * Performs a dynamic cast. This method acts on primitive wrappers.
      * @param tc the target class

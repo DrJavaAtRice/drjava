@@ -45,7 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
-import edu.rice.cs.javaast.parser.*;
+//import edu.rice.cs.javaast.parser.*;
+import koala.dynamicjava.parser.*;
 
 /**
  * A syntax error to pass back to the main JVM after a call
@@ -68,7 +69,7 @@ public class SyntaxErrorResult implements InterpretResult {
     _startCol = pe.getBeginColumn();
     _endRow = pe.getEndLine();
     _endCol = pe.getEndColumn();
-    _errorMessage = pe.getInteractionsMessage();
+    _errorMessage = pe.getShortMessage();
     _interaction = s;
   }
 

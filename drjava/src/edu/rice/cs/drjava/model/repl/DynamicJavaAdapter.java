@@ -99,7 +99,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      */
     s = s.trim();
     if (!s.endsWith(";")) {
-      s += ";";
+      //s += ";";
       print = true;
     }
 
@@ -142,6 +142,10 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     }
   }
 
+  public List<Node> parse(String input) {
+    return _djInterpreter.parse(input);
+  }
+  
   /**
    * Adds a path to the current classpath.
    * @param path the path to add
@@ -500,9 +504,9 @@ public class DynamicJavaAdapter implements JavaInterpreter {
         throw new InterpreterException(e);
       }
       catch (ParseError e) {
-        throw new InteractionsException("There was a syntax error in the " +
-                                        "previous input.");
-        //throw new InterpreterException(e);
+        //throw new InteractionsException("There was a syntax error in the " +
+        //                                "previous input.");
+        throw new InterpreterException(e);
       }
     }
     
