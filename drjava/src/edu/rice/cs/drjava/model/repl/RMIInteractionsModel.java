@@ -104,4 +104,22 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   public void addDebugInterpreter(String name) {
     InterpreterJVM.ONLY.addDebugInterpreter(name, new DynamicJavaAdapter());
   }
+
+  /**
+   * Sets the active interpreter.
+   * @param name the name of the interpreter.
+   * @param prompt the prompt the interpreter should have.
+   */
+  public void setActiveInterpreter(String name, String prompt) {
+    InterpreterJVM.ONLY.setActiveInterpreter(name);
+    _document.setPrompt(prompt);
+  }
+
+  /**
+   * Sets the default interpreter to be the current one.
+   */
+  public void setDefaultInterpreter() {
+    InterpreterJVM.ONLY.setDefaultInterpreter();
+    _document.setPrompt(_document.DEFAULT_PROMPT);
+  }
 }

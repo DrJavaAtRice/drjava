@@ -35,7 +35,7 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
@@ -47,32 +47,128 @@ import gj.util.Hashtable;
  * simple test suite over InterpreterJVM
  */
 public class InterpreterJVMTest extends TestCase {
+  private InterpreterJVM jvm = InterpreterJVM.ONLY;
+  private Hashtable<String,JavaInterpreter> _debugInterpreters;
+  private JavaInterpreter _interpreter1;
+  private JavaInterpreter _interpreter2;
+  private JavaInterpreter _interpreter3;
+  
+  private void _addInterpreter(String name, JavaInterpreter interpreter) {
+    InterpreterJVM.ONLY.addDebugInterpreter(name, interpreter);
+  }
+  
+  public void setUp() {
+    _debugInterpreters = InterpreterJVM.ONLY.getDebugInterpreters();
+    _interpreter1 = new DynamicJavaAdapter();
+    _interpreter2 = new DynamicJavaAdapter();
+    _interpreter3 = new DynamicJavaAdapter();
+  }
   /**
    * ensures that our InterpreterJVM adds named debug interpreters correctly
    */
   public void testAddNamedDebugInterpreter() {
-    Hashtable<String,JavaInterpreter> debugInterpreters = InterpreterJVM.ONLY.getDebugInterpreters();
-    JavaInterpreter interpreter1 = new DynamicJavaAdapter();
-    JavaInterpreter interpreter2 = new DynamicJavaAdapter();
-    JavaInterpreter interpreter3 = new DynamicJavaAdapter();
-
-    assertTrue(debugInterpreters.isEmpty());
-    InterpreterJVM.ONLY.addDebugInterpreter("interpreter1", interpreter1);
-    assertEquals(interpreter1, debugInterpreters.get("interpreter1"));
-    assertTrue(!debugInterpreters.containsKey("interpreter2"));
-
-    InterpreterJVM.ONLY.addDebugInterpreter("interpreter2", interpreter2);
-    assertEquals(interpreter1, debugInterpreters.get("interpreter1"));
-    assertEquals(interpreter2, debugInterpreters.get("interpreter2"));
-
+    assertTrue(_debugInterpreters.isEmpty());
+    _addInterpreter("interpreter1", _interpreter1);
+    assertEquals(_interpreter1, _debugInterpreters.get("interpreter1"));
+    assertTrue(!_debugInterpreters.containsKey("interpreter2"));
+    
+    _addInterpreter("interpreter2", _interpreter2);
+    assertEquals(_interpreter1, _debugInterpreters.get("interpreter1"));
+    assertEquals(_interpreter2, _debugInterpreters.get("interpreter2"));
+    
     try {
-      InterpreterJVM.ONLY.addDebugInterpreter("interpreter1", interpreter3);
+      _addInterpreter("interpreter1", _interpreter3);
       fail();
     }
     catch (IllegalArgumentException ex) {
-      assertEquals(interpreter1, debugInterpreters.get("interpreter1"));
-      assertEquals(interpreter2, debugInterpreters.get("interpreter2"));
-      assertTrue(!debugInterpreters.contains(interpreter3));
+      assertEquals(_interpreter1, _debugInterpreters.get("interpreter1"));
+      assertEquals(_interpreter2, _debugInterpreters.get("interpreter2"));
+      assertTrue(!_debugInterpreters.contains(_interpreter3));
+    }
+  }
+  
+  /**
+   * verifies that the InterpreterJVM can switch between active interpreters.
+   */
+  public void testSwitchingActiveInterpreter() throws ExceptionReturnedException {
+    String var0 = "stuff";
+    String var1 = "junk";
+    String var2 = "raargh";
+    Object val0 = new Byte("5");
+    Object val1 = new Short("2");
+    Object val2 = new Long(2782);
+    _addInterpreter("1",_interpreter1);
+    _addInterpreter("2",_interpreter2);
+    
+    jvm.getActiveInterpreter().defineVariable(var0, val0);
+    assertEquals(val0, jvm.getActiveInterpreter().interpret(var0));
+
+    jvm.setActiveInterpreter("1");
+    try {
+      jvm.getActiveInterpreter().interpret(var0);
+      fail();
+    }
+    catch (ExceptionReturnedException ex) {
+      // correct behavior -- var0 should not be defined
+    }
+    jvm.getActiveInterpreter().defineVariable(var1,val1);
+    assertEquals(val1, jvm.getActiveInterpreter().interpret(var1));
+    
+    jvm.setActiveInterpreter("2");
+    try {
+      jvm.getActiveInterpreter().interpret(var0);
+      fail();
+    }
+    catch (ExceptionReturnedException ex) {
+    }
+    try {
+      jvm.getActiveInterpreter().interpret(var1);
+      fail();
+    }
+    catch (ExceptionReturnedException ex) {
+      // correct behavior -- var0 & var1 should not be defined
+    }
+    jvm.getActiveInterpreter().defineVariable(var2,val2);
+    assertEquals(val2, jvm.getActiveInterpreter().interpret(var2));
+
+    jvm.setDefaultInterpreter();
+    try {
+      jvm.getActiveInterpreter().interpret(var1);
+      fail();
+    }
+    catch (ExceptionReturnedException ex) {
+    }
+    try {
+      jvm.getActiveInterpreter().interpret(var2);
+      fail();
+    }
+    catch (ExceptionReturnedException ex) {
+      // correct behavior -- var1 & var2 should not be defined
+    }
+    assertEquals(val0, jvm.getActiveInterpreter().interpret(var0));
+
+    jvm.setActiveInterpreter("1");
+    try {
+      jvm.getActiveInterpreter().interpret(var0);
+      fail();
+    }
+    catch (ExceptionReturnedException ex) {
+    }
+    try {
+      jvm.getActiveInterpreter().interpret(var2);
+      fail();
+    }
+    catch (ExceptionReturnedException ex) {
+      // correct behavior -- var1 & var2 should not be defined
+    }
+    assertEquals(val1, jvm.getActiveInterpreter().interpret(var1));
+
+    try {
+      jvm.setActiveInterpreter("not an interpreter");
+      fail();
+    }
+    catch (IllegalArgumentException ex) {
+      assertEquals("Interpreter <not an interpreter> does not exist.", ex.getMessage());
     }
   }
 }

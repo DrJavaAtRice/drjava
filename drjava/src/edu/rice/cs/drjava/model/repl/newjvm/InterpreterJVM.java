@@ -77,6 +77,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
   private MainJVMRemoteI _mainJVM;
   private JavaInterpreter _interpreter;
   private Hashtable<String,JavaInterpreter> _debugInterpreters;
+  private JavaInterpreter _activeInterpreter;
   private String _classpath;
   private JUnitTestManager _junitTestManager;
   
@@ -142,7 +143,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
         try {
           try {
             _dialog("to interp: " + s);
-            Object result = _interpreter.interpret(s);
+            Object result = _activeInterpreter.interpret(s);
             
             if (result == JavaInterpreter.NO_RESULT) {
               //return new VoidResult();
@@ -279,7 +280,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
 
   public void addClassPath(String s) {
     //_dialog("add classpath: " + s);
-    _interpreter.addClassPath(s);
+    _activeInterpreter.addClassPath(s);
     _classpath += s;
     _classpath += System.getProperty("path.separator");
   }
@@ -289,7 +290,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
   }
 
   public void setPackageScope(String s) {
-    _interpreter.setPackageScope(s);
+    _activeInterpreter.setPackageScope(s);
   }
   
   /**
@@ -375,12 +376,13 @@ public class InterpreterJVM extends AbstractSlaveJVM
 
   public void reset() {
     _interpreter = new DynamicJavaAdapter();
+    _activeInterpreter = _interpreter;
     _debugInterpreters.clear();
     _classpath = "";
     
     // do an interpretation to get the interpreter loaded fully
     try {
-      _interpreter.interpret("0");
+      _activeInterpreter.interpret("0");
     }
     catch (ExceptionReturnedException e) {
       throw new edu.rice.cs.util.UnexpectedException(e);
@@ -405,5 +407,29 @@ public class InterpreterJVM extends AbstractSlaveJVM
    */
   public Hashtable<String,JavaInterpreter> getDebugInterpreters() {
     return _debugInterpreters;
+  }
+
+  /**
+   * sets the current interpreter to the one specified by name
+   * @param name the unique name of the interpreter to set active
+   */
+  public void setActiveInterpreter(String name) {
+    if (_debugInterpreters.containsKey(name)) {
+      _activeInterpreter = _debugInterpreters.get(name);
+    }
+    else {
+      throw new IllegalArgumentException("Interpreter <" + name + "> does not exist.");
+    }
+  }
+  
+  /**
+   * Sets the default interpreter to be the current one.
+   */
+  public void setDefaultInterpreter() {
+    _activeInterpreter = _interpreter;
+  }
+  
+  public JavaInterpreter getActiveInterpreter() {
+    return _activeInterpreter;
   }
 }

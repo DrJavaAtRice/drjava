@@ -54,6 +54,12 @@ import edu.rice.cs.drjava.model.FileSaveSelector;
  * @version $Id$
  */
 public class InteractionsDocument implements DocumentAdapter {
+
+  /** Default banner. */
+  public static final String DEFAULT_BANNER = "Welcome to DrJava.\n";
+  
+  /** Default prompt. */
+  public static final String DEFAULT_PROMPT = "> ";
   
   /** Default text style. */
   public static final String DEFAULT_STYLE = "default";
@@ -140,8 +146,8 @@ public class InteractionsDocument implements DocumentAdapter {
       public void run() {}
     };
     _promptPos = 0;
-    _banner = "Welcome to DrJava.\n";
-    _prompt = "> ";
+    _banner = DEFAULT_BANNER;
+    _prompt = DEFAULT_PROMPT;
     
     // Prevent any edits before the prompt!
     _document.setEditCondition(new InteractionsEditCondition());
