@@ -56,6 +56,13 @@ import java.util.Vector;
  * to invocations of java -classpath ...
  */
 public class ClasspathVector extends Vector<URL> {
+  
+  public ClasspathVector() {
+  }
+  public ClasspathVector(int capacity) {
+    super(capacity);
+  }
+  
   public String toString() {
     StringBuffer cp = new StringBuffer();
     for(URL u : this) {
@@ -83,6 +90,14 @@ public class ClasspathVector extends Vector<URL> {
       ee.initCause(e);
       throw ee;
     }
+  }
+  
+  public Vector<File> asFileVector() {
+    Vector<File> v = new Vector<File>();
+    for(URL url : this) {
+      v.add(new File(url.getFile()));
+    }
+    return v;
   }
   
   private String formatURL(URL url) {

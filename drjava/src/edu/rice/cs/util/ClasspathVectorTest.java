@@ -46,9 +46,12 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util;
 
 import junit.framework.TestCase;
+
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.io.File;
+import java.io.IOException;
+import java.util.Vector;
 
 /**
  * A JUnit test case for the ClasspathVector class.
@@ -62,11 +65,11 @@ public class ClasspathVectorTest extends TestCase {
     ClasspathVector v = new ClasspathVector();
     assertEquals("Empty classpath", "", v.toString());
     addElement(v, "file:///jsr14.jar");
-    assertEquals("One element classpath", "/jsr14.jar"+File.pathSeparator,v.toString());
+    assertEquals("One element classpath", File.separator+"jsr14.jar"+File.pathSeparator,v.toString());
     addElement(v, "file:///wherever/supercool.jar");
-    assertEquals("Multiple element classpath", "/jsr14.jar" + File.pathSeparator + "/wherever/supercool.jar" + File.pathSeparator, v.toString());
+    assertEquals("Multiple element classpath", File.separator+"jsr14.jar" + File.pathSeparator + "/wherever/supercool.jar" + File.pathSeparator, v.toString());
     addElement(v, "http://www.drjava.org/hosted.jar");
-    assertEquals("Multiple element classpath", "/jsr14.jar" + File.pathSeparator + "/wherever/supercool.jar" + File.pathSeparator + "/hosted.jar" + File.pathSeparator, v.toString());
+    assertEquals("Multiple element classpath", File.separator+"jsr14.jar" + File.pathSeparator + "/wherever/supercool.jar" + File.pathSeparator + "/hosted.jar" + File.pathSeparator, v.toString());
   }
   
   /**
@@ -84,7 +87,25 @@ public class ClasspathVectorTest extends TestCase {
     }
     
     
-  } 
+  }
+  
+  /**
+   * Tests to make sure the conversion to files is correct
+   */
+  public void test_asFileVector() throws IOException {
+    ClasspathVector vu = new ClasspathVector();
+    File[] files = new File[]{
+      new File("folder1/folder2/file1.ext"),
+      new File("folder1/folder2/file2.ext"),
+      new File("folder1/folder2/file3.ext")
+    };
+    for (File f : files) vu.add(f);
+    
+    Vector<File> vf = vu.asFileVector();
+    assertEquals("Size of vectors should agree", vu.size(), vf.size());
+    for(int i=0; i<files.length; i++)
+      assertEquals(files[i].getCanonicalFile(), vf.get(i));
+  }
   
   private void addElement(ClasspathVector v, String element) {
     try {
