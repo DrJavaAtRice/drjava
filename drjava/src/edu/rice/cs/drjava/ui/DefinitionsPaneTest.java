@@ -120,29 +120,39 @@ public class DefinitionsPaneTest extends TestCase {
    * Reveals bug 676586
    */
    public void testMetaKeyPress() {
-//     DefinitionsPane definitions = _frame.getCurrentDefPane();
-
-       /* The following is the sequence of key events that happen when the user presses Meta-a */
-//     definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(),
-// 					     InputEvent.META_MASK, KeyEvent.VK_META));
-//     definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(),
-// 					     InputEvent.META_MASK, KeyEvent.VK_A));
-//     definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_TYPED, (new Date()).getTime(),
-// 					     InputEvent.META_MASK, KeyEvent.VK_UNDEFINED, 'a'));
-//     definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_RELEASED, (new Date()).getTime(),
-// 					     InputEvent.META_MASK, KeyEvent.VK_A));
-//     definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_RELEASED, (new Date()).getTime(),
-// 				0, KeyEvent.VK_META));
-
-//     DefinitionsDocument doc = definitions.getOpenDocument().getDocument();
-//     try {
-//       assertEquals("Test if meta key inserted a character into document", "", doc.getText(0, doc.getLength()));
-//     } catch(BadLocationException ble){
-//       ble.printStackTrace();
-//       fail("BadLocationException");
-//     }
+     DefinitionsPane definitions = _frame.getCurrentDefPane();
+     DefinitionsDocument doc = definitions.getOpenDocument().getDocument();
+     _assertDocumentEmpty(doc, "point 0");
+     /* The following is the sequence of key events that happen when the user presses Meta-a */
+    definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(),
+					     InputEvent.META_MASK, KeyEvent.VK_META));
+     _assertDocumentEmpty(doc, "point 1");
+    definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(),
+					     InputEvent.META_MASK, KeyEvent.VK_W));
+     _assertDocumentEmpty(doc, "point 2");
+    definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_TYPED, (new Date()).getTime(),
+					     InputEvent.META_MASK, KeyEvent.VK_UNDEFINED, 'w'));
+     _assertDocumentEmpty(doc, "point 3");
+    definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_RELEASED, (new Date()).getTime(),
+					     InputEvent.META_MASK, KeyEvent.VK_W));
+     _assertDocumentEmpty(doc, "point 4");
+    definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_RELEASED, (new Date()).getTime(),
+					     0, KeyEvent.VK_META));
+     _assertDocumentEmpty(doc, "point 5");
    }
+
+  private void _assertDocumentEmpty(DefinitionsDocument doc, String message){
+    try {
+      assertEquals(message, "", doc.getText(0, doc.getLength()));
+    } catch(BadLocationException ble){
+      ble.printStackTrace();
+      fail("BadLocationException");
+    }
+  }
+
 }
+
+
 
   class KeyTestListener implements KeyListener {
 

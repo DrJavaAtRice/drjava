@@ -433,11 +433,15 @@ public class DefinitionsPane extends JEditorPane
       e.consume();
     }
     else {    
+      // The following conditional fixes bug 676586 by ignoring typed events when the meta key is down 
+      if (((e.getModifiers() & InputEvent.META_MASK) != 0) && e.getKeyCode() == KeyEvent.VK_UNDEFINED){
+	return;
+      }
+
       // backspace deletes twice without this check, overrides other keystrokes
       // that use the mask modifier
-      
       if (((ks.getModifiers() & mask) == 0) && ks.getKeyChar() != '\010') {
-        super.processKeyEvent(e);       
+	super.processKeyEvent(e);       
       }
     }
   }
