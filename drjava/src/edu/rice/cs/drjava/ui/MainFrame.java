@@ -2043,6 +2043,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   void openProject(FileOpenSelector projectSelector) {
+    if(_model.isProjectActive())    
+      _closeProject();    
     try {
       hourglassOn();
       final File[] file = projectSelector.getFiles();
@@ -2190,24 +2192,53 @@ public class MainFrame extends JFrame implements OptionConstants {
    * list view navigator
    */
   private void _closeProject(){
-    List<OpenDefinitionsDocument> projDocs = _model.getProjectDocuments();
-//    for(OpenDefinitionsDocument d: projDocs){
-//      _model.closeFile(d);
-//    }
-    closeFiles(projDocs);
-    _model.closeProject();
-    Component renderer = _model.getDocumentNavigator().getRenderer();
-    new ForegroundColorListener(renderer);
-    new BackgroundColorListener(renderer);
-    _resetNavigatorPane();
-    if(_model.getDocumentCount() == 1)
-      _model.setActiveFirstDocument();
-    _closeProjectAction.setEnabled(false);
-    _saveProjectAction.setEnabled(false);
-    _projectPropertiesAction.setEnabled(false);
-    _setUpContextMenus();
-    _currentProjFile = null;
+    if(_checkProjectClose()) {
+      List<OpenDefinitionsDocument> projDocs = _model.getProjectDocuments();
+      //    for(OpenDefinitionsDocument d: projDocs){
+      //      _model.closeFile(d);
+      //    }
+      closeFiles(projDocs);
+      _model.closeProject();
+      Component renderer = _model.getDocumentNavigator().getRenderer();
+      new ForegroundColorListener(renderer);
+      new BackgroundColorListener(renderer);
+      _resetNavigatorPane();
+      if(_model.getDocumentCount() == 1)
+        _model.setActiveFirstDocument();
+      _closeProjectAction.setEnabled(false);
+      _saveProjectAction.setEnabled(false);
+      _projectPropertiesAction.setEnabled(false);
+      _setUpContextMenus();
+      _currentProjFile = null;
+    }
   }
+  
+  private boolean _checkProjectClose() {
+   if(_model.isProjectActive() && _model.isProjectChanged()) {
+      String fname = _model.getProjectFile().getName();
+      String text = fname + " has been modified. Would you like to save it?";
+      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
+                                             text,
+                                             "Save " + fname + "?",
+                                             JOptionPane.YES_NO_CANCEL_OPTION);
+
+      switch (rc) {
+        case JOptionPane.YES_OPTION:
+          _saveProject();
+          return true;
+        case JOptionPane.NO_OPTION:
+          return true;
+        case JOptionPane.CLOSED_OPTION:
+        case JOptionPane.CANCEL_OPTION:
+          return false;
+        default:
+          throw new RuntimeException("Invalid rc: " + rc);
+          
+      }
+    } 
+   return true;
+  }
+  
   
   /**
    * Closes all files and makes a new project  
@@ -2525,7 +2556,10 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
     }
-
+    
+    if(! _checkProjectClose())
+      return;
+    
     _recentFileManager.saveRecentFiles();
     _recentProjectManager.saveRecentFiles();
     _storePositionInfo();
