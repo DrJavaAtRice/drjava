@@ -67,7 +67,7 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
   /**
    * @throws DebugException if the document does not have a file
    */
-  public Breakpoint( OpenDefinitionsDocument doc, int offset, int lineNumber, DebugManager manager) 
+  public Breakpoint( OpenDefinitionsDocument doc, int offset, int lineNumber, JPDADebugger manager) 
     throws DebugException {    
     
     super(manager, doc, offset);

@@ -39,68 +39,98 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.debug;
 
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import com.sun.jdi.*;
 
 /**
- * Any class which wants to listen to events fired by the Debugger should
- * implement this interface and use Debugger's addDebugListener() method.
+ * Class for keeping track of watched fields and variables.
  * @version $Id$
  */
-public interface DebugListener {
+public class DebugWatchData {
+  private String _name;
+  private String _value;
+  private Type _type;
+  private boolean _changed;
   
   /**
-   * Called when debugger mode has been enabled.
+   * Object to keep track of a watched field or variable.
+   * @param name Name of the field or variable to watch
    */
-  public void debuggerStarted();
+  public DebugWatchData(String name) {
+    _name = name;
+    _value = DebugWatchUndefinedValue.ONLY.toString();
+    _type = null;
+    _changed = false;
+  }
   
   /**
-   * Called when debugger mode has been disabled.
+   * Returns the name of this field or variable
    */
-  public void debuggerShutdown();
-
-  /**
-   * Called when the given line is reached by the current thread in the 
-   * debugger, to request that the line be displayed.
-   * @param doc Document to display
-   * @param lineNumber Line to display or highlight
-   */
-  public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber);  
+  public String getName() {
+    return _name;
+  }
   
   /**
-   * Called when a breakpoint is set in a document.
-   * @param bp the breakpoint
+   * Returns the most recently determined value for this field or variable.
    */
-  public void breakpointSet(Breakpoint bp);
+  public String getValue() {
+    return _value;
+  }
   
   /**
-   * Called when a breakpoint is reached during execution.
-   * @param bp the breakpoint
+   * Returns the type of this field or variable in the current context.
    */
-  public void breakpointReached(Breakpoint bp);
+  public Type getType() {
+    return _type;
+  }
   
   /**
-   * Called when a breakpoint is removed from a document.
-   * @param bp the breakpoint
+   * Sets a new name for this field or variable.
+   * @param name Name of the field or variable
    */
-  public void breakpointRemoved(Breakpoint bp);
+  public void setName(String name) {
+    _name = name;
+  }
   
   /**
-   * Called when a step is requested on the current thread.
+   * Sets the most recently determined value for this field or variable.
+   * @param value Value of the field or variable
    */
-  public void stepRequested();
+  public void setValue(Object value) {
+    if (value != null) {
+      if (!(value.toString()).equals(_value)) {
+        _changed = true;
+      }
+      else {
+        _changed = false;
+      }
+      _value = value.toString();
+    }
+    else {
+      // Value is null-- don't mark it as changed
+      _changed = false;
+      _value = "null";
+    }
+  }
   
   /**
-   * Called when the current thread is suspended
+   * Sets the most recently determined type of this field or variable.
+   * @param type Type of the field or variable
    */
-  public void currThreadSuspended();
+  public void setType(Type type) {
+    _type = type;
+  }
   
   /**
-   * Called when the current thread is resumed
+   * Returns whether this value has changed since the last call to setValue.
    */
-  public void currThreadResumed();
+  public boolean getChanged() {
+    return _changed;
+  }
   
   /**
-   * Called when the current thread dies
+   * Returns a legible representation of the type, name, and value.
    */
-  public void currThreadDied();
+  public String toString() {
+    return _type + " " + _name + ": " + _value;
+  }
 }

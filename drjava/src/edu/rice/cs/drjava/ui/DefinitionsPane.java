@@ -522,7 +522,7 @@ public class DefinitionsPane extends JEditorPane
     });
     _popMenu.add(indentItem);
     
-    if (_mainFrame.getModel().getDebugManager() != null) {
+    if (_mainFrame.getModel().getDebugger() != null) {
       _popMenu.addSeparator();
       
       // Breakpoint

@@ -194,11 +194,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   
   /**
    * Interface to the integrated debugger.  If the JPDA classes are not
-   * available, this is set to null.
-   * TO DO:  Would be nice to have a DebugManager interface and a
-   *   NoDebuggerAvailable class instead of using null as a value...
+   * available, this is set NoDebuggerAvailable.ONLY.
    */
-  private DebugManager _debugManager = null;
+  private Debugger _debugger = NoDebuggerAvailable.ONLY;
   
   /**
    * Port used by the debugger to connect to the Interactions JVM.
@@ -728,8 +726,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * which fires the interactionsReset() event.)
    */
   public void resetInteractions() {
-    if ((_debugManager != null) && (_debugManager.isReady())){
-      _debugManager.shutdown();
+    if ((_debugger != null) && (_debugger.isReady())){
+      _debugger.shutdown();
     }
     _interpreterControl.restartInterpreterJVM();
     //_restoreInteractionsState();
@@ -1284,10 +1282,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
 
   /**
-   * Gets the DebugManager, which interfaces with the integrated debugger.
+   * Gets the Debugger used by DrJava.
    */
-  public DebugManager getDebugManager() {
-    return _debugManager;
+  public Debugger getDebugger() {
+    return _debugger;
   }
   
   /**
@@ -2286,9 +2284,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * all related state from the debug manager.
      */
     public void removeFromDebugger() {
-      if ((_debugManager != null) && (_debugManager.isReady())) {
+      if ((_debugger != null) && (_debugger.isReady())) {
         while (_breakpoints.size() > 0) {
-          _debugManager.removeBreakpoint(_breakpoints.elementAt(0));
+          _debugger.removeBreakpoint(_breakpoints.elementAt(0));
         }
       }
       else {
@@ -2569,19 +2567,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    */
   private void _createDebugger() {
     try {
-      _debugManager = new DebugManager(this);
+      _debugger = new JPDADebugger(this);
     }
     catch( NoClassDefFoundError ncdfe ){
       // JPDA not available, so we won't use it.
-      _debugManager = null;
+      _debugger = NoDebuggerAvailable.ONLY;
     }
     catch( UnsupportedClassVersionError ucve ) {
       // Wrong version of JPDA, so we won't use it.
-      _debugManager = null;
+      _debugger = NoDebuggerAvailable.ONLY;
     }
     catch( Throwable t ) {
       // Something went wrong in initialization, don't use debugger
-      _debugManager = null;
+      _debugger = NoDebuggerAvailable.ONLY;
     }
   }
 

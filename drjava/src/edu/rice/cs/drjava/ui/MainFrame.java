@@ -65,7 +65,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
-import edu.rice.cs.drjava.model.debug.DebugManager;
+import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.drjava.model.debug.DebugListener;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
@@ -613,7 +613,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     new AbstractAction("Step Into")
   {
     public void actionPerformed(ActionEvent ae) {
-      debuggerStep(DebugManager.STEP_INTO);
+      debuggerStep(Debugger.STEP_INTO);
     }
   };
 
@@ -622,7 +622,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     new AbstractAction("Step Over")
   {
     public void actionPerformed(ActionEvent ae) {
-      debuggerStep(DebugManager.STEP_OVER);
+      debuggerStep(Debugger.STEP_OVER);
     }
   };
 
@@ -631,7 +631,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     new AbstractAction("Step Out")
   {
     public void actionPerformed(ActionEvent ae) {
-      debuggerStep(DebugManager.STEP_OUT);
+      debuggerStep(Debugger.STEP_OUT);
     }
   };
 
@@ -882,9 +882,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     // create our model
     _model = new SingleDisplayModel(rmiPort);
     
-    if (_model.getDebugManager() != null) {
+    if (_model.getDebugger() != null) {
       // add listener to debug manager
-      _model.getDebugManager().addListener(new UIDebugListener());
+      _model.getDebugger().addListener(new UIDebugListener());
     }
     // Timer to display a message if a debugging step takes a long time
     _debugStepTimer = new Timer(DEBUG_STEP_TIMER_VALUE, new ActionListener() {
@@ -1038,7 +1038,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   public void debuggerToggle() {
     // Make sure the debugger is available
-    DebugManager debugger = _model.getDebugManager();
+    Debugger debugger = _model.getDebugger();
     if (debugger == null) return;
 
     try {
@@ -1487,7 +1487,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    *
   private void debuggerSuspend() throws DebugException {
     if (inDebugMode())
-      _model.getDebugManager().suspend();
+      _model.getDebugger().suspend();
   }/
 
   /**
@@ -1495,7 +1495,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   void debuggerResume() throws DebugException {
     if (inDebugMode()) {
-      _model.getDebugManager().resume();
+      _model.getDebugger().resume();
       _removeThreadLocationHighlight();
     }
   }
@@ -1506,7 +1506,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   void debuggerStep(int flag) {
     if (inDebugMode()) {
       try {
-        _model.getDebugManager().step(flag);
+        _model.getDebugger().step(flag);
       }
       catch (DebugException de) {
         _showError(de, "Debugger Error",
@@ -1561,7 +1561,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
            
       try {
-        DebugManager debugger = _model.getDebugManager();
+        Debugger debugger = _model.getDebugger();
         debugger.toggleBreakpoint(doc, 
                                   _currentDefPane.getCaretPosition(),
                                   _currentDefPane.getCurrentLine());
@@ -1599,7 +1599,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       });
       getFieldDialog.setLocation(300,300);
       getFieldDialog.show();
-      DebugManager debugger = _model.getDebugManager();
+      Debugger debugger = _model.getDebugger();
       debugger.addWatch(_field);
     }
   }*/
@@ -1608,14 +1608,14 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Displays all breakpoints currently set in the debugger
    *
   void _printBreakpoints() {
-    _model.getDebugManager().printBreakpoints();
+    _model.getDebugger().printBreakpoints();
   }*/
 
   /**
    * Clears all breakpoints from the debugger
    */
   void debuggerClearAllBreakpoints() {
-    _model.getDebugManager().removeAllBreakpoints();
+    _model.getDebugger().removeAllBreakpoints();
   }
 
 
@@ -1944,7 +1944,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * more legible on the higher calling level, i.e., the constructor.
    */
   private void _setUpMenuBar() {
-    boolean showDebugger = (_model.getDebugManager() != null);
+    boolean showDebugger = (_model.getDebugger() != null);
 
     // Get proper cross-platform mask.
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -2537,7 +2537,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _defScrollPanes.get(_model.getActiveDocument());
 
     // Try to create debug panel (see if JSwat is around)
-    if (_model.getDebugManager() != null) {
+    if (_model.getDebugger() != null) {
       try {
         _debugPanel = new DebugPanel(this);
         _debugPanel.setPreferredSize(_debugPanel.getMinimumSize());
@@ -3122,7 +3122,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         public void run() {
           if (inDebugMode()) {
             _disableStepTimer();
-            DebugManager manager = _model.getDebugManager();
+            Debugger manager = _model.getDebugger();
             manager.clearCurrentStepRequest();
             _removeThreadLocationHighlight();
           }
@@ -3251,14 +3251,14 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          DebugManager dm = _model.getDebugManager();
+          Debugger dm = _model.getDebugger();
           if (dm != null) {
             dm.shutdown();
           }
           _resetInteractionsAction.setEnabled(false);
           _interactionsPane.setEditable(false);
           _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-          if (_model.getDebugManager() != null) {
+          if (_model.getDebugger() != null) {
             _toggleDebuggerAction.setEnabled(false);
           }
         }
@@ -3272,7 +3272,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         public void run() {
           interactionEnded();
           _resetInteractionsAction.setEnabled(true);
-          if (_model.getDebugManager() != null) {
+          if (_model.getDebugger() != null) {
             _toggleDebuggerAction.setEnabled(true);
           }
         }
@@ -3537,7 +3537,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   boolean inDebugMode() {
-    DebugManager dm = _model.getDebugManager();
+    Debugger dm = _model.getDebugger();
     if (dm != null)
       return dm.isReady() && (_debugPanel != null);
     else

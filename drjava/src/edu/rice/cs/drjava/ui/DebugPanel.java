@@ -83,7 +83,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   
   private final SingleDisplayModel _model;
   private final MainFrame _frame;
-  private final DebugManager _debugger;
+  private final Debugger _debugger;
   
   private JPanel _buttonPanel;
   private JButton _closeButton; 
@@ -93,13 +93,13 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private JButton _stepOutButton;
   private JLabel _statusBar;
   
-  private Vector<DebugManager.WatchData> _watches;
-  private Vector<DebugManager.ThreadData> _threads;
-  private Vector<DebugManager.StackData> _stackFrames;
+  private Vector<DebugWatchData> _watches;
+  private Vector<DebugThreadData> _threads;
+  private Vector<DebugStackData> _stackFrames;
   
   /**
    * Constructs a new panel to display debugging information when the
-   * DebugManager is active.
+   * Debugger is active.
    */
   public DebugPanel( MainFrame frame ) {
     
@@ -107,7 +107,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     
     _frame = frame;
     _model = frame.getModel();
-    _debugger = _model.getDebugManager();
+    _debugger = _model.getDebugger();
     
     _watches = _debugger.getWatches();
     _threads = _debugger.getCurrentThreadData();
@@ -151,15 +151,15 @@ public class DebugPanel extends JPanel implements OptionConstants {
       }
       else {
         // Empty tables (thread resumed)
-        _threads = new Vector<DebugManager.ThreadData>();
-        _stackFrames = new Vector<DebugManager.StackData>();
+        _threads = new Vector<DebugThreadData>();
+        _stackFrames = new Vector<DebugStackData>();
       }
     }
     else {
       // Clean up if debugger dies
-      _watches = new Vector<DebugManager.WatchData>();
-      _threads = new Vector<DebugManager.ThreadData>();
-      _stackFrames = new Vector<DebugManager.StackData>();
+      _watches = new Vector<DebugWatchData>();
+      _threads = new Vector<DebugThreadData>();
+      _stackFrames = new Vector<DebugStackData>();
       // also clear breakpoint tree?
     }
 
@@ -261,7 +261,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     public int getColumnCount() { return _columnNames.length; }
     public Object getValueAt(int row, int col) {
       if (row < _watches.size()) {
-        DebugManager.WatchData watch = _watches.elementAt(row);
+        DebugWatchData watch = _watches.elementAt(row);
         switch(col) {
           case 0: return watch.getName();
           case 1: return watch.getValue(); 
@@ -317,7 +317,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     public int getColumnCount() { return _columnNames.length; }
     
     public Object getValueAt(int row, int col) { 
-      DebugManager.StackData frame = _stackFrames.elementAt(row);
+      DebugStackData frame = _stackFrames.elementAt(row);
       switch(col) {
         case 0: return frame.getMethod();
         case 1: return new Integer(frame.getLine());
@@ -348,7 +348,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     public int getColumnCount() { return _columnNames.length; }
     
     public Object getValueAt(int row, int col) { 
-      DebugManager.ThreadData threadData  = _threads.elementAt(row);
+      DebugThreadData threadData  = _threads.elementAt(row);
       switch(col) {
         case 0: return threadData.getName();
         case 1: return threadData.getStatus();
@@ -384,7 +384,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     
     Action stepIntoAction = new AbstractAction( "Step Into" ) {
       public void actionPerformed(ActionEvent ae) {
-        _frame.debuggerStep(DebugManager.STEP_INTO);
+        _frame.debuggerStep(Debugger.STEP_INTO);
         _stepIntoButton.requestFocus();
       }
     };
@@ -392,7 +392,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     
     Action stepOverAction = new AbstractAction( "Step Over" ) {
       public void actionPerformed(ActionEvent ae) {
-        _frame.debuggerStep(DebugManager.STEP_OVER);
+        _frame.debuggerStep(Debugger.STEP_OVER);
         _stepOverButton.requestFocus();
       }
     };
@@ -400,7 +400,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     
     Action stepOutAction = new AbstractAction( "Step Out" ) {
       public void actionPerformed(ActionEvent ae) {
-        _frame.debuggerStep(DebugManager.STEP_OUT);
+        _frame.debuggerStep(Debugger.STEP_OUT);
         _stepOutButton.requestFocus();
       }
     };

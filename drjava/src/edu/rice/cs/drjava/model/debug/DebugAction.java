@@ -59,7 +59,7 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 public abstract class DebugAction<T extends EventRequest> {
   public static final int ANY_LINE = -1;
   
-  protected DebugManager _manager;
+  protected JPDADebugger _manager;
   
   // Request fields
   
@@ -80,10 +80,10 @@ public abstract class DebugAction<T extends EventRequest> {
    * if a ReferenceType can be found, or else adds this object to the
    * PendingRequestManager. Any subclass should automatically call 
    * _initializeRequest in its constructor.
-   * @param manager DebugManager in charge
+   * @param manager JPDADebugger in charge
    * @param doc Document this action corresponds to
    */
-  public DebugAction (DebugManager manager) 
+  public DebugAction (JPDADebugger manager) 
     throws DebugException, IllegalStateException {
     _manager = manager;
     _requests = new Vector<T>();

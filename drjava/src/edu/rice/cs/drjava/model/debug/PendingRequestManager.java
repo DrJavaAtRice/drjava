@@ -59,10 +59,10 @@ import java.util.LinkedList;
  */
 
 public class PendingRequestManager {
-  private DebugManager _manager;
+  private JPDADebugger _manager;
   private Hashtable<String, Vector<DocumentDebugAction>> _pendingActions;
   
-  public PendingRequestManager(DebugManager manager) {
+  public PendingRequestManager(JPDADebugger manager) {
     _manager = manager;
     _pendingActions = new Hashtable<String, Vector<DocumentDebugAction>>();
   }

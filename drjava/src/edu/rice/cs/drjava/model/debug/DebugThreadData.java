@@ -39,68 +39,55 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.debug;
 
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import com.sun.jdi.*;
 
 /**
- * Any class which wants to listen to events fired by the Debugger should
- * implement this interface and use Debugger's addDebugListener() method.
+ * Class for keeping track of the currently running threads.
  * @version $Id$
  */
-public interface DebugListener {
+public class DebugThreadData {
+  private ThreadReference _thread;
+  private String _name;
+  private String _status;
   
   /**
-   * Called when debugger mode has been enabled.
+   * Object for keeping track of a thread in the debuggee JVM.
+   * @param thread JPDA's reference to the thread
    */
-  public void debuggerStarted();
+  public DebugThreadData(ThreadReference thread) {
+    _thread = thread;
+    _name = _thread.name();
+    String status = "(unknown)";
+    switch (_thread.status()) {
+      case ThreadReference.THREAD_STATUS_MONITOR: 
+        status = "MONITOR"; break;
+      case ThreadReference.THREAD_STATUS_NOT_STARTED:
+        status = "NOT STARTED"; break;
+      case ThreadReference.THREAD_STATUS_RUNNING:
+        status = "RUNNING"; break;
+      case ThreadReference.THREAD_STATUS_SLEEPING:
+        status = "SLEEPING"; break;
+      case ThreadReference.THREAD_STATUS_UNKNOWN:
+        status = "UNKNOWN"; break;
+      case ThreadReference.THREAD_STATUS_WAIT:
+        status = "WAIT"; break;
+      case ThreadReference.THREAD_STATUS_ZOMBIE:
+        status = "ZOMBIE"; break;
+    }
+    _status = status;
+  }
   
   /**
-   * Called when debugger mode has been disabled.
+   * Returns the name of this thread.
    */
-  public void debuggerShutdown();
-
-  /**
-   * Called when the given line is reached by the current thread in the 
-   * debugger, to request that the line be displayed.
-   * @param doc Document to display
-   * @param lineNumber Line to display or highlight
-   */
-  public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber);  
+  public String getName() {
+    return _name;
+  }
   
   /**
-   * Called when a breakpoint is set in a document.
-   * @param bp the breakpoint
+   * Returns the status of this thread (at the time of this object's construction)
    */
-  public void breakpointSet(Breakpoint bp);
-  
-  /**
-   * Called when a breakpoint is reached during execution.
-   * @param bp the breakpoint
-   */
-  public void breakpointReached(Breakpoint bp);
-  
-  /**
-   * Called when a breakpoint is removed from a document.
-   * @param bp the breakpoint
-   */
-  public void breakpointRemoved(Breakpoint bp);
-  
-  /**
-   * Called when a step is requested on the current thread.
-   */
-  public void stepRequested();
-  
-  /**
-   * Called when the current thread is suspended
-   */
-  public void currThreadSuspended();
-  
-  /**
-   * Called when the current thread is resumed
-   */
-  public void currThreadResumed();
-  
-  /**
-   * Called when the current thread dies
-   */
-  public void currThreadDied();
+  public String getStatus() {
+    return _status;
+  }
 }

@@ -72,10 +72,7 @@ import com.sun.jdi.event.*;
  * 
  * @version $Id$
  */
-public class DebugManager {
-  public static final int STEP_INTO = StepRequest.STEP_INTO;
-  public static final int STEP_OVER = StepRequest.STEP_OVER;
-  public static final int STEP_OUT = StepRequest.STEP_OUT; 
+public class JPDADebugger implements Debugger {
   
   /**
    * Reference to DrJava's model.
@@ -100,7 +97,7 @@ public class DebugManager {
   /**
    * Vector of all current Watches
    */
-  private Vector<WatchData> _watches;
+  private Vector<DebugWatchData> _watches;
   
   /**
    * Keeps track of any DebugActions whose classes have not yet been
@@ -110,28 +107,28 @@ public class DebugManager {
   private PendingRequestManager _pendingRequestManager;
   
   /**
-   * Provides a way for the DebugManager to communicate with the view.
+   * Provides a way for the JPDADebugger to communicate with the view.
    */
   private LinkedList _listeners;
   
   /**
-   * The Thread that the DebugManager is currently analyzing.
+   * The Thread that the JPDADebugger is currently analyzing.
    */
   private ThreadReference _thread;
   
   /**
-   * Builds a new DebugManager to debug code in the Interactions JVM,
+   * Builds a new JPDADebugger to debug code in the Interactions JVM,
    * using the JPDA/JDI interfaces.
    * Does not actually connect to the InteractionsJVM until startup().
    */
-  public DebugManager(GlobalModel model) {
+  public JPDADebugger(GlobalModel model) {
     _model = model;
     _vm = null;
     _eventManager = null;
     _thread = null;
     _listeners = new LinkedList();
     _breakpoints = new Vector<Breakpoint>();
-    _watches = new Vector<WatchData>();
+    _watches = new Vector<DebugWatchData>();
     _pendingRequestManager = new PendingRequestManager(this);
   }
 
@@ -410,7 +407,7 @@ public class DebugManager {
   public synchronized void addWatch(String field) {
     if (!isReady()) return;
     
-    _watches.addElement(new WatchData(field));
+    _watches.addElement(new DebugWatchData(field));
     _updateWatches();
   }
   
@@ -422,7 +419,7 @@ public class DebugManager {
     if (!isReady()) return;
     
     for (int i=0; i < _watches.size(); i++) {
-      WatchData watch = _watches.elementAt(i);
+      DebugWatchData watch = _watches.elementAt(i);
       if (watch.getName().equals(field)) {
         _watches.removeElementAt(i);
       }
@@ -445,7 +442,7 @@ public class DebugManager {
    * Removes all watches on existing fields and variables.
    */
   public synchronized void removeAllWatches() {
-    _watches = new Vector<WatchData>();
+    _watches = new Vector<DebugWatchData>();
   }
   
 
@@ -600,30 +597,30 @@ public class DebugManager {
   /**
    * Returns all currently watched fields and variables.
    */
-  public synchronized Vector<WatchData> getWatches() {
+  public synchronized Vector<DebugWatchData> getWatches() {
     return _watches;
   }
   
   /**
-   * Returns a Vector of ThreadData or null if the vm is null
+   * Returns a Vector of DebugThreadData or null if the vm is null
    */
-  public synchronized Vector<ThreadData> getCurrentThreadData() {
+  public synchronized Vector<DebugThreadData> getCurrentThreadData() {
     if (!isReady()) return null;
 
     Iterator iter = _vm.allThreads().iterator();
-    Vector<ThreadData> threads = new Vector<ThreadData>();
+    Vector<DebugThreadData> threads = new Vector<DebugThreadData>();
     while (iter.hasNext()) {      
-      threads.addElement(new ThreadData((ThreadReference)iter.next()));                                                  
+      threads.addElement(new DebugThreadData((ThreadReference)iter.next()));                                                  
     }
     return threads;
   }
   
   /**
-   * Returns a Vector of StackData for the current thread or null if the 
+   * Returns a Vector of DebugStackData for the current thread or null if the 
    * current thread is null
    * TO DO: Config option for hiding DrJava subset of stack trace
    */
-  public synchronized Vector<StackData> getCurrentStackFrameData() {
+  public synchronized Vector<DebugStackData> getCurrentStackFrameData() {
     if (!isReady() || (_thread == null) || !_thread.isSuspended()) {
       return null;
     }
@@ -631,9 +628,9 @@ public class DebugManager {
     Iterator iter = null;
     try {
       iter = _thread.frames().iterator();
-      Vector<StackData> frames = new Vector<StackData>();
+      Vector<DebugStackData> frames = new Vector<DebugStackData>();
       while (iter.hasNext()) {
-        frames.addElement(new StackData((StackFrame)iter.next()));
+        frames.addElement(new DebugStackData((StackFrame)iter.next()));
       }
       return frames;
     }
@@ -772,7 +769,7 @@ public class DebugManager {
       Location location = currFrame.location();
       ReferenceType rt = location.declaringType();
       for (int i = 0; i < _watches.size(); i++) {
-        WatchData currWatch = _watches.elementAt(i);
+        DebugWatchData currWatch = _watches.elementAt(i);
         String currName = currWatch.getName();
         String currValue = currWatch.getValue();
         // check for "this"
@@ -783,7 +780,7 @@ public class DebugManager {
             currWatch.setType(obj.type());
           }
           else {
-            currWatch.setValue(WatchUndefinedValue.Singleton);
+            currWatch.setValue(DebugWatchUndefinedValue.ONLY);
             currWatch.setType(null);
           }
           continue;
@@ -859,13 +856,13 @@ public class DebugManager {
                 }
               }
               else {
-                currWatch.setValue(WatchUndefinedValue.Singleton);
+                currWatch.setValue(DebugWatchUndefinedValue.ONLY);
                 currWatch.setType(null);
               }
             }
           }
           else {
-            currWatch.setValue(WatchUndefinedValue.Singleton);
+            currWatch.setValue(DebugWatchUndefinedValue.ONLY);
             currWatch.setType(null);
           }
         }
@@ -912,7 +909,7 @@ public class DebugManager {
     }
     catch (IncompatibleThreadStateException itse) {
       DrJava.consoleOut().println("thread is not suspended");
-      return WatchUndefinedValue.Singleton.toString();
+      return DebugWatchUndefinedValue.ONLY.toString();
     }*/
     List toStrings = rt.methodsByName("toString");
     if (toStrings.size() == 0) {
@@ -933,11 +930,11 @@ public class DebugManager {
     }
     catch (IncompatibleThreadStateException itse) {
       DrJava.consoleOut().println("thread is not suspended");
-      return WatchUndefinedValue.Singleton.toString();
+      return DebugWatchUndefinedValue.ONLY.toString();
     }
     catch (InvocationException ie) {
       DrJava.consoleOut().println("invocation exception");
-      return WatchUndefinedValue.Singleton.toString();
+      return DebugWatchUndefinedValue.ONLY.toString();
     }
     return stringValue.toString();
   }
@@ -967,7 +964,7 @@ public class DebugManager {
   }
   
   /**
-   * Notifies all listeneres that the current thread has died.
+   * Notifies all listeners that the current thread has died.
    */
   synchronized void currThreadDied() {
     _model.printDebugMessage("The current thread has finished.");
@@ -979,7 +976,7 @@ public class DebugManager {
   }
   
   /**
-   * Notifies all listeneres that the debugger has shut down.
+   * Notifies all listeners that the debugger has shut down.
    */
   synchronized void notifyDebuggerShutdown() {
     notifyListeners(new EventNotifier() {
@@ -990,7 +987,7 @@ public class DebugManager {
   }
 
   /**
-   * Notifies all listeneres that the debugger has started.
+   * Notifies all listeners that the debugger has started.
    */
   synchronized void notifyDebuggerStarted() {
     notifyListeners(new EventNotifier() {
@@ -1001,7 +998,7 @@ public class DebugManager {
   }
   
   /**
-   * Notifies all listeneres that a step has been requested.
+   * Notifies all listeners that a step has been requested.
    */
   synchronized void notifyStepRequested() {
     notifyListeners(new EventNotifier() {
@@ -1012,13 +1009,17 @@ public class DebugManager {
   }
   
   /**
-   * Adds a listener to this DebugManager.
-   * @param listener a listener that reacts on events generated by the DebugManager
+   * Adds a listener to this JPDADebugger.
+   * @param listener a listener that reacts on events generated by the JPDADebugger
    */
   public synchronized void addListener(DebugListener listener) {
     _listeners.addLast(listener);
   }
 
+  /**
+   * Removes a listener to this JPDADebugger.
+   * @param listener listener to remove
+   */
   public synchronized void removeListener(DebugListener listener){
     _listeners.remove(listener);
   }
@@ -1045,135 +1046,4 @@ public class DebugManager {
     public abstract void notifyListener(DebugListener l);
   }
   
-  /**
-   * Class for keeping track of watched fields and variables.
-   */
-  public class WatchData {
-    private String _name;
-    private String _value;
-    private Type _type;
-    private boolean _changed;
-    
-    public WatchData(String name) {
-      _name = name;
-      _value = WatchUndefinedValue.Singleton.toString();
-      _type = null;
-      _changed = false;
-    }
-    
-    public String getName() {
-      return _name;
-    }
-    
-    public String getValue() {
-      return _value;
-    }
-    
-    public Type getType() {
-      return _type;
-    }
-    
-    public void setName(String name) {
-      _name = name;
-    }
-    
-    public void setValue(Object value) {
-      if (value != null) {
-        if (!(value.toString()).equals(_value)) {
-          _changed = true;
-        }
-        else {
-          _changed = false;
-        }
-        _value = value.toString();
-      }
-      else {
-        // Value is null-- don't mark it as changed
-        _changed = false;
-        _value = "null";
-      }
-    }
-    
-    public void setType(Type type) {
-      _type = type;
-    }
-    
-    public boolean getChanged() {
-      return _changed;
-    }
-    
-    public String toString() {
-      return _type + " " + _name + ": " + _value;
-    }
-  }
-  
-  public class ThreadData {
-    private ThreadReference _thread;
-    private String _name;
-    private String _status;
-    
-    public ThreadData(ThreadReference thread) {
-      _thread = thread;
-      _name = _thread.name();
-      String status = "(unknown)";
-      switch (_thread.status()) {
-        case ThreadReference.THREAD_STATUS_MONITOR: 
-          status = "MONITOR"; break;
-        case ThreadReference.THREAD_STATUS_NOT_STARTED:
-          status = "NOT STARTED"; break;
-        case ThreadReference.THREAD_STATUS_RUNNING:
-          status = "RUNNING"; break;
-        case ThreadReference.THREAD_STATUS_SLEEPING:
-          status = "SLEEPING"; break;
-        case ThreadReference.THREAD_STATUS_UNKNOWN:
-          status = "UNKNOWN"; break;
-        case ThreadReference.THREAD_STATUS_WAIT:
-          status = "WAIT"; break;
-        case ThreadReference.THREAD_STATUS_ZOMBIE:
-          status = "ZOMBIE"; break;
-      }
-      _status = status;
-    }
-    
-    public String getName() {
-      return _name;
-    }
-    
-    public String getStatus() {
-      return _status;
-    }
-  }
-  
-  public class StackData {
-    private String _method;
-    private int _line;
-    
-    public StackData (StackFrame frame) {
-      String method = "(unknown)";
-      String line = "(unknown)";
-      method = frame.location().declaringType().name() + "." +
-        frame.location().method().name();
-      _method = method;
-      _line = frame.location().lineNumber();
-    }
-    
-    public String getMethod() {
-      return _method;
-    }
-    
-    public int getLine() {
-      return _line;
-    }
-  }
-  
-  public static class WatchUndefinedValue{
-    public static final WatchUndefinedValue Singleton = new WatchUndefinedValue();
-    
-    private WatchUndefinedValue() {
-    }
-    
-    public String toString() {
-      return "<not in scope>";
-    }
-  }
 }

@@ -68,11 +68,11 @@ public abstract class DocumentDebugAction<T extends EventRequest>
    * EventRequest if a ReferenceType can be found, or else adds this object to the
    * PendingRequestManager. Any subclass should automatically call 
    * _initializeRequest in its constructor.
-   * @param manager DebugManager in charge
+   * @param manager JPDADebugger in charge
    * @param doc Document this action corresponds to
    * @param offset Offset into the document that the action affects
    */
-  public DocumentDebugAction (DebugManager manager, 
+  public DocumentDebugAction (JPDADebugger manager, 
                               OpenDefinitionsDocument doc,
                               int offset)
     throws DebugException 

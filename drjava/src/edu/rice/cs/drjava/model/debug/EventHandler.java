@@ -47,11 +47,11 @@ import com.sun.jdi.request.*;
 
 public class EventHandler extends Thread {
   
-  private DebugManager _manager;
+  private JPDADebugger _manager;
   private VirtualMachine _vm;
   private boolean _connected = true;  // Connected to VM
   
-  EventHandler (DebugManager manager, VirtualMachine vm) {
+  EventHandler (JPDADebugger manager, VirtualMachine vm) {
     _manager = manager;
     _vm = vm;
   }

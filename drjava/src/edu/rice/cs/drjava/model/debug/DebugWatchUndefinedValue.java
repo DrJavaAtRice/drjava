@@ -39,68 +39,28 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.debug;
 
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-
 /**
- * Any class which wants to listen to events fired by the Debugger should
- * implement this interface and use Debugger's addDebugListener() method.
+ * A value for a DebugWatch representing a field or variable that is
+ * currently undefined.  This is a singleton class.
  * @version $Id$
  */
-public interface DebugListener {
+public class DebugWatchUndefinedValue {
+  /**
+   * Singleton instance of this class.
+   */
+  public static final DebugWatchUndefinedValue ONLY = 
+    new DebugWatchUndefinedValue();
   
   /**
-   * Called when debugger mode has been enabled.
+   * Private constructor:  use the ONLY field.
    */
-  public void debuggerStarted();
+  private DebugWatchUndefinedValue() {
+  }
   
   /**
-   * Called when debugger mode has been disabled.
+   * Returns that this watched field or variable is out of scope.
    */
-  public void debuggerShutdown();
-
-  /**
-   * Called when the given line is reached by the current thread in the 
-   * debugger, to request that the line be displayed.
-   * @param doc Document to display
-   * @param lineNumber Line to display or highlight
-   */
-  public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber);  
-  
-  /**
-   * Called when a breakpoint is set in a document.
-   * @param bp the breakpoint
-   */
-  public void breakpointSet(Breakpoint bp);
-  
-  /**
-   * Called when a breakpoint is reached during execution.
-   * @param bp the breakpoint
-   */
-  public void breakpointReached(Breakpoint bp);
-  
-  /**
-   * Called when a breakpoint is removed from a document.
-   * @param bp the breakpoint
-   */
-  public void breakpointRemoved(Breakpoint bp);
-  
-  /**
-   * Called when a step is requested on the current thread.
-   */
-  public void stepRequested();
-  
-  /**
-   * Called when the current thread is suspended
-   */
-  public void currThreadSuspended();
-  
-  /**
-   * Called when the current thread is resumed
-   */
-  public void currThreadResumed();
-  
-  /**
-   * Called when the current thread dies
-   */
-  public void currThreadDied();
+  public String toString() {
+    return "<not in scope>";
+  }
 }

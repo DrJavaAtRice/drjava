@@ -66,7 +66,7 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
   /**
    * @throws IllegalStateException if the document does not have a file
    */
-  public Step(DebugManager manager, int size, int depth) 
+  public Step(JPDADebugger manager, int size, int depth) 
     throws DebugException, IllegalStateException {    
      super (manager);
     _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;

@@ -39,68 +39,40 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.debug;
 
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import com.sun.jdi.*;
 
 /**
- * Any class which wants to listen to events fired by the Debugger should
- * implement this interface and use Debugger's addDebugListener() method.
+ * Class for keeping track of a stack frame in the debugger.
  * @version $Id$
  */
-public interface DebugListener {
+public class DebugStackData {
+  private String _method;
+  private int _line;
   
   /**
-   * Called when debugger mode has been enabled.
+   * Object for keeping track of a stack frame.
+   * @param frame JPDA's reference to the stack frame
    */
-  public void debuggerStarted();
+  public DebugStackData(StackFrame frame) {
+    String method = "(unknown)";
+    String line = "(unknown)";
+    method = frame.location().declaringType().name() + "." +
+      frame.location().method().name();
+    _method = method;
+    _line = frame.location().lineNumber();
+  }
   
   /**
-   * Called when debugger mode has been disabled.
+   * Returns the name of the method at this frame of the stack.
    */
-  public void debuggerShutdown();
-
-  /**
-   * Called when the given line is reached by the current thread in the 
-   * debugger, to request that the line be displayed.
-   * @param doc Document to display
-   * @param lineNumber Line to display or highlight
-   */
-  public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber);  
+  public String getMethod() {
+    return _method;
+  }
   
   /**
-   * Called when a breakpoint is set in a document.
-   * @param bp the breakpoint
+   * Returns the line number of this frame of the stack.
    */
-  public void breakpointSet(Breakpoint bp);
-  
-  /**
-   * Called when a breakpoint is reached during execution.
-   * @param bp the breakpoint
-   */
-  public void breakpointReached(Breakpoint bp);
-  
-  /**
-   * Called when a breakpoint is removed from a document.
-   * @param bp the breakpoint
-   */
-  public void breakpointRemoved(Breakpoint bp);
-  
-  /**
-   * Called when a step is requested on the current thread.
-   */
-  public void stepRequested();
-  
-  /**
-   * Called when the current thread is suspended
-   */
-  public void currThreadSuspended();
-  
-  /**
-   * Called when the current thread is resumed
-   */
-  public void currThreadResumed();
-  
-  /**
-   * Called when the current thread dies
-   */
-  public void currThreadDied();
+  public int getLine() {
+    return _line;
+  }
 }

@@ -51,7 +51,7 @@ import edu.rice.cs.util.swing.FindReplaceMachine;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.definitions.*;
-import edu.rice.cs.drjava.model.debug.DebugManager;
+import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.compiler.*;
@@ -348,9 +348,9 @@ public interface GlobalModel {
   public File[] getSourceRootSet();
 
   /**
-   * Gets the DebugManager, which interfaces with the integrated debugger.
+   * Gets the Debugger, which interfaces with the integrated debugger.
    */
-  public DebugManager getDebugManager();
+  public Debugger getDebugger();
   
   /**
    * Returns an available port number to use for debugging the interactions JVM.

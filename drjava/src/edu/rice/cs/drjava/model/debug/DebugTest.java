@@ -103,7 +103,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     /*  6 */ "  }\n" +
     /*  7 */ "}";
   
-  protected DebugManager _debugManager;
+  protected JPDADebugger _debugger;
   
   /**
    * Constructor.
@@ -123,14 +123,14 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
 
   public void setUp() throws IOException {
     super.setUp();
-    _debugManager = _model.getDebugManager();
-    assertTrue("Debug Manager should not be null", _debugManager != null);
+    _debugger = (JPDADebugger) _model.getDebugger();
+    assertTrue("Debug Manager should not be null", _debugger != null);
   }
   
   public void tearDown() throws IOException {
     super.tearDown();
-    _debugManager = _model.getDebugManager();
-    assertTrue("Debug Manager should not be null", _debugManager != null);
+    _debugger = (JPDADebugger) _model.getDebugger();
+    assertTrue("Debug Manager should not be null", _debugger != null);
   }
   
   /**
@@ -243,19 +243,19 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Compile the class
     OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS, tempFile());
-    _debugManager.addListener(debugListener);
+    _debugger.addListener(debugListener);
     // Start debugger
     synchronized(_notifierLock) {
-      _debugManager.startup();
+      _debugger.startup();
       _waitForNotifies(1);
       _notifierLock.wait();
     }
     debugListener.assertDebuggerStartedCount(1);
     debugListener.assertDebuggerShutdownCount(0);
-    assertTrue("Debug Manager should be ready", _debugManager.isReady());
+    assertTrue("Debug Manager should be ready", _debugger.isReady());
     
    // Add breakpoint before class is loaded
-    _debugManager.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
     debugListener.assertBreakpointSetCount(1);
     
     // Run the foo() method, hitting breakpoint
@@ -279,7 +279,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     if (printMessages) System.out.println("adding another breakpoint");
     
     // Set another breakpoint (after is class loaded)
-    _debugManager.toggleBreakpoint(doc,
+    _debugger.toggleBreakpoint(doc,
        DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), 9);
     debugListener.assertBreakpointSetCount(2);
     
@@ -287,7 +287,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Resume until next breakpoint
     synchronized(_notifierLock) {
       if (printMessages) System.out.println("resuming");
-      _debugManager.resume();
+      _debugger.resume();
       _waitForNotifies(3);  // suspended, updated, breakpointReached
       _notifierLock.wait();
     }
@@ -302,7 +302,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Resume until finished
     synchronized(_notifierLock) {
-      _debugManager.resume();
+      _debugger.resume();
       _waitForNotifies(1);  // threadDied
       _notifierLock.wait();
     }
@@ -321,13 +321,13 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Remove listener at end
     if (printMessages) System.out.println("Shutting down...");
     synchronized(_notifierLock) {
-      _debugManager.shutdown();
+      _debugger.shutdown();
       _waitForNotifies(1);  // shutdown
       _notifierLock.wait();
     }
     debugListener.assertDebuggerShutdownCount(1);  //fires
     if (printMessages) System.out.println("Shut down.");
-    _debugManager.removeListener(debugListener);
+    _debugger.removeListener(debugListener);
   }
   
   /**
@@ -342,17 +342,17 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Compile the class
     OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS, tempFile());
    
-    _debugManager.addListener(debugListener); 
+    _debugger.addListener(debugListener); 
     // Start debugger
     synchronized(_notifierLock) {
-      _debugManager.startup();
+      _debugger.startup();
       _waitForNotifies(1);  // startup
       _notifierLock.wait();
     }
     debugListener.assertDebuggerStartedCount(1);
     
     // Add a breakpoint
-    _debugManager.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
     debugListener.assertBreakpointSetCount(1);
     
     // Run the foo() method, hitting breakpoint
@@ -375,7 +375,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
 
     // Step into bar() method
     synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_INTO);
+      _debugger.step(Debugger.STEP_INTO);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -389,7 +389,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Step to next line
     synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_OVER);
+      _debugger.step(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -406,7 +406,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Step to next line
     synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_OVER);
+      _debugger.step(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -421,12 +421,12 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Step twice to print last line in Foo
     synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_OVER);
+      _debugger.step(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
     synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_OVER);
+      _debugger.step(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -441,7 +441,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Step again to finish
     synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_OVER);
+      _debugger.step(Debugger.STEP_OVER);
       _waitForNotifies(1);  // threadDied
       _notifierLock.wait();
     }
@@ -451,14 +451,14 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       // Remove listener at end
     if (printMessages) System.out.println("Shutting down...");
     synchronized(_notifierLock) {
-      _debugManager.shutdown();
+      _debugger.shutdown();
       _waitForNotifies(1);  // shutdown
       _notifierLock.wait();
     }
     debugListener.assertBreakpointRemovedCount(1);  //fires once (no waiting)
     debugListener.assertDebuggerShutdownCount(1);  //fires
     if (printMessages) System.out.println("Shut down.");
-    _debugManager.removeListener(debugListener);
+    _debugger.removeListener(debugListener);
   }
   
   /**
@@ -473,17 +473,17 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Compile the class
     File file2 = new File(_tempDir, "DrJavaDebugClass.java");
     OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS, file2);
-    _debugManager.addListener(debugListener); 
+    _debugger.addListener(debugListener); 
     // Start debugger and add breakpoint
     synchronized(_notifierLock) {
-      _debugManager.startup();
+      _debugger.startup();
       _waitForNotifies(1);  // startup
       _notifierLock.wait();
     }
     
     debugListener.assertDebuggerStartedCount(1);
     
-    _debugManager.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
     debugListener.assertBreakpointSetCount(1);
     
     // Run the foo() method, hitting breakpoint
@@ -506,7 +506,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
 
     // Step into bar() method
     synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_INTO);
+      _debugger.step(Debugger.STEP_INTO);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -520,7 +520,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Step out of method
     synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_OUT);
+      _debugger.step(Debugger.STEP_OUT);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -538,7 +538,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     //Remove listener at end
     if (printMessages) System.out.println("Shutting down...");
     synchronized(_notifierLock) {
-      _debugManager.shutdown();
+      _debugger.shutdown();
       _waitForNotifies(2);  // threadDied, shutdown
       _notifierLock.wait();
     }
@@ -546,7 +546,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     debugListener.assertBreakpointRemovedCount(1);  // fires (don't wait)
     debugListener.assertDebuggerShutdownCount(1);  // fires
     if (printMessages) System.out.println("Shut down.");
-    _debugManager.removeListener(debugListener);
+    _debugger.removeListener(debugListener);
   }
   
   /**
@@ -564,17 +564,17 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     File file = new File(aDir, "DrJavaDebugClassWithPackage.java");
     OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS_WITH_PACKAGE, file);
    
-    _debugManager.addListener(debugListener); 
+    _debugger.addListener(debugListener); 
     // Start debugger
     synchronized(_notifierLock) {
-      _debugManager.startup();
+      _debugger.startup();
       _waitForNotifies(1);  // startup
       _notifierLock.wait();
     }
     debugListener.assertDebuggerStartedCount(1);
     
     // Add a breakpoint
-    _debugManager.toggleBreakpoint(doc,DEBUG_CLASS_WITH_PACKAGE.indexOf("foo line 1"), 4);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS_WITH_PACKAGE.indexOf("foo line 1"), 4);
     debugListener.assertBreakpointSetCount(1);
     
     // Run the foo() method, hitting breakpoint
@@ -596,7 +596,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
 
     // Step over once
     synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_OVER);
+      _debugger.step(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -611,7 +611,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Step over again
     synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_OVER);
+      _debugger.step(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -627,7 +627,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Resume until finished
     synchronized(_notifierLock) {
-      _debugManager.resume();
+      _debugger.resume();
       _waitForNotifies(1);  // threadDied
       _notifierLock.wait();
     }
@@ -645,13 +645,13 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Remove listener at end
     if (printMessages) System.out.println("Shutting down...");
     synchronized(_notifierLock) {
-      _debugManager.shutdown();
+      _debugger.shutdown();
       _waitForNotifies(1);  // shutdown
       _notifierLock.wait();
     }
     debugListener.assertDebuggerShutdownCount(1);  //fires
     if (printMessages) System.out.println("Shut down.");
-    _debugManager.removeListener(debugListener);
+    _debugger.removeListener(debugListener);
   }
   
   /**
@@ -670,15 +670,15 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     Vector<File> path = new Vector<File>();
     path.addElement(_tempDir);
     
-    _debugManager.addListener(debugListener); 
+    _debugger.addListener(debugListener); 
   
     // Start debugger and add breakpoint
     synchronized(_notifierLock) {
-      _debugManager.startup();
+      _debugger.startup();
       _waitForNotifies(1);  // startup
       _notifierLock.wait();
     }
-    _debugManager.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
    
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
@@ -691,7 +691,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Step into bar() method
     synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_INTO);
+      _debugger.step(Debugger.STEP_INTO);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -706,7 +706,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Step to next line
     synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_OVER);
+      _debugger.step(Debugger.STEP_OVER);
       _waitForNotifies(1);  // suspended
       _notifierLock.wait();
     }
@@ -714,14 +714,14 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(2);  // doesn't fire
    
-    synchronized(_debugManager){
+    synchronized(_debugger){
       // Add _tempDir to our sourcepath
       DrJava.getConfig().setSetting(OptionConstants.DEBUG_SOURCEPATH, path);
     }
     
     // Step to next line
     synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_OVER);
+      _debugger.step(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -733,14 +733,14 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     //Remove listener at end
     if (printMessages) System.out.println("Shutting down...");
     synchronized(_notifierLock) {
-      _debugManager.shutdown();
+      _debugger.shutdown();
       _waitForNotifies(2);  // threadDied, shutdown
       _notifierLock.wait();
     }
     debugListener.assertCurrThreadDiedCount(1);  // fires
     debugListener.assertDebuggerShutdownCount(1);  // fires
     if (printMessages) System.out.println("Shut down.");
-    _debugManager.removeListener(debugListener);
+    _debugger.removeListener(debugListener);
   }
   
   /**
@@ -754,15 +754,15 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Compile the class
     OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS, tempFile());
-    _debugManager.addListener(debugListener);
+    _debugger.addListener(debugListener);
     // Start debugger and add breakpoint (before class is loaded)
     synchronized(_notifierLock) {
-      _debugManager.startup();
+      _debugger.startup();
       _waitForNotifies(1);
       _notifierLock.wait();
     }
    
-    _debugManager.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Baz Line 1"),14);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Baz Line 1"),14);
     debugListener.assertBreakpointSetCount(1);
     
     // Run the foo() method, hitting breakpoint
@@ -785,13 +785,13 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     if (printMessages) System.out.println("adding another breakpoint");
     
     // Set another breakpoint (after is class loaded)
-    _debugManager.toggleBreakpoint(doc,
+    _debugger.toggleBreakpoint(doc,
        DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), 9);
     debugListener.assertBreakpointSetCount(2);
     
     // Step to next line
     synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_OVER);
+      _debugger.step(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
@@ -809,7 +809,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Resume until next breakpoint
     synchronized(_notifierLock) {
       if (printMessages) System.out.println("resuming");
-      _debugManager.resume();
+      _debugger.resume();
       _waitForNotifies(3);  // suspended, updated, breakpointReached
       _notifierLock.wait();
     }
@@ -824,7 +824,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Resume until finished
     synchronized(_notifierLock) {
-      _debugManager.resume();
+      _debugger.resume();
       _waitForNotifies(1);  // threadDied
       _notifierLock.wait();
     }
@@ -843,13 +843,13 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Remove listener at end
     if (printMessages) System.out.println("Shutting down...");
     synchronized(_notifierLock) {
-      _debugManager.shutdown();
+      _debugger.shutdown();
       _waitForNotifies(1);  // shutdown
       _notifierLock.wait();
     }
     debugListener.assertDebuggerShutdownCount(1);  //fires
     if (printMessages) System.out.println("Shut down.");
-    _debugManager.removeListener(debugListener);
+    _debugger.removeListener(debugListener);
   }
   
   
@@ -862,10 +862,10 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     assertEquals("package dir with package",
                  "edu/rice/cs/drjava/model/",
-                 _debugManager.getPackageDir(class1));
+                 _debugger.getPackageDir(class1));
     assertEquals("package dir without package",
                  "",
-                 _debugManager.getPackageDir(class2));
+                 _debugger.getPackageDir(class2));
   }
   
   
