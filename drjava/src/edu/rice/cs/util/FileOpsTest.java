@@ -70,7 +70,7 @@ public class FileOpsTest extends TestCase {
                  dir.getName().startsWith(PREFIX));
     }
     finally {
-      dir.delete();
+      assertTrue("delete directory", dir.delete());
     }
   }
 
@@ -86,7 +86,7 @@ public class FileOpsTest extends TestCase {
       assertEquals("contents after read", TEXT, read);
     }
     finally {
-      file.delete();
+      assertTrue("delete file", file.delete());
     }
   }
 

@@ -72,6 +72,7 @@ public abstract class FileOps {
       readVal = buffered.read();
     }
 
+    stream.close();
     return out.toByteArray();
   }
 
@@ -87,6 +88,7 @@ public abstract class FileOps {
       buf.append(c);
     }
 
+    reader.close();
     return buf.toString();
   }
 
