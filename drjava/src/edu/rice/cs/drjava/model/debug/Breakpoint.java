@@ -45,6 +45,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
+import gj.util.Vector;
 import java.util.List;
 import java.util.Iterator;
 
@@ -83,24 +84,39 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
       throw new UnexpectedException(ble);
     }
     
-    _initializeRequest(_manager.getReferenceType(_className, _lineNumber));
+    _initializeRequests(_manager.getReferenceTypes(_className, _lineNumber));
   }
   
   /**
-   * Creates an appropriate EventRequest from the EventRequestManager, using
-   * the provided ReferenceType, and stores it in the _request field.
-   * @throws DebugException if the request could not be created.
+   * Creates appropriate EventRequests from the EventRequestManager and 
+   * stores them in the _requests field.
+   * @param refTypes All (identical) ReferenceTypes to which this action
+   * applies.  (There may be multiple if a custom class loader is in use.)
+   * @throws DebugException if the requests could not be created.
    */
-  protected void _createRequest(ReferenceType rt) throws DebugException {
-    // Get locations for the line number, use the first
+  protected void _createRequests(Vector<ReferenceType> refTypes)
+    throws DebugException
+  {
     try {
-      List lines = rt.locationsOfLine(_lineNumber);
-      if (lines.size() == 0) {
-        // Can't find a location on this line
-        throw new DebugException("Could not find line number: " + _lineNumber);
+      for (int i=0; i < refTypes.size(); i++) {
+        ReferenceType rt = refTypes.elementAt(i);
+        
+        if (!rt.isPrepared()) {
+          // Not prepared, so skip this one
+          continue;
+        }
+        
+        // Get locations for the line number, use the first
+        List lines = rt.locationsOfLine(_lineNumber);
+        if (lines.size() == 0) {
+          // Can't find a location on this line
+          throw new DebugException("Could not find line number: " + _lineNumber);
+        }
+        Location loc = (Location) lines.get(0);
+        BreakpointRequest request =
+          _manager.getEventRequestManager().createBreakpointRequest(loc);
+        _requests.addElement(request);
       }
-      Location loc = (Location) lines.get(0);
-      _request = _manager.getEventRequestManager().createBreakpointRequest(loc);
     }
     catch (AbsentInformationException aie) {
       throw new DebugException("Could not find line number: " + aie);
@@ -124,14 +140,18 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
   }
   
   public String toString() {
-    if (_request != null) {
+    if (_requests.size() > 0) {
+      // All BreakpointRequests are identical-- one copy for each loaded
+      //  class.  So just print info from the first one, and how many there are.
       return "Breakpoint[class: " + getClassName() + 
         ", lineNumber: " + getLineNumber() + 
-        ", method: " + ((BreakpointRequest)_request).location().method() +
-        ", codeIndex: " + ((BreakpointRequest)_request).location().codeIndex() + "]";
+        ", method: " + _requests.elementAt(0).location().method() +
+        ", codeIndex: " + _requests.elementAt(0).location().codeIndex() +
+        ", numRefTypes: " + _requests.size() + "]";
     }
-    else
+    else {
       return "Breakpoint[class: " + getClassName() + 
         ", lineNumber: " + getLineNumber() + "]";
+    }
   }
 }

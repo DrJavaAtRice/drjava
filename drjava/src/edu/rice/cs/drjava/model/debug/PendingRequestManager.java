@@ -52,18 +52,19 @@ import java.util.List;
 import java.util.LinkedList;
 
 /**
- * Keeps track of DebugActions that are waiting to be resolved when the
- * classes they corresponed to are prepared.
+ * Keeps track of DocumentDebugActions that are waiting to be resolved when the
+ * classes they corresponed to are prepared.  (Only DocumentDebugActions have
+ * reference types which can be prepared.)
  * @version $Id$
  */
 
 public class PendingRequestManager {
   private DebugManager _manager;
-  private Hashtable<String, Vector<DebugAction>> _pendingActions;
+  private Hashtable<String, Vector<DocumentDebugAction>> _pendingActions;
   
   public PendingRequestManager(DebugManager manager) {
     _manager = manager;
-    _pendingActions = new Hashtable<String, Vector<DebugAction>>();
+    _pendingActions = new Hashtable<String, Vector<DocumentDebugAction>>();
   }
   
   /**
@@ -71,11 +72,11 @@ public class PendingRequestManager {
    * @param action The DebugAction that is pending
    */
   public void addPendingRequest (DocumentDebugAction action) {
-    Vector<DebugAction> actions = null;
+    Vector<DocumentDebugAction> actions = null;
     String className = action.getClassName();
     actions = _pendingActions.get(className);
     if (actions == null) {
-      actions = new Vector<DebugAction>();
+      actions = new Vector<DocumentDebugAction>();
       
       // only create a ClassPrepareRequest once per class
       ClassPrepareRequest request = 
@@ -94,7 +95,7 @@ public class PendingRequestManager {
    * @param action The DebugAction that was set and removed
    */
   public void removePendingRequest (DocumentDebugAction action) {
-    Vector<DebugAction> actions = null;
+    Vector<DocumentDebugAction> actions = null;
     String className = action.getClassName();
     actions = _pendingActions.get(className);
     if (actions == null) {
@@ -133,8 +134,11 @@ public class PendingRequestManager {
     if (indexOfDollar > 1) {
       className = className.substring(0, indexOfDollar);
     }
-    Vector<DebugAction> actions = _pendingActions.get(className);
-    Vector<DebugAction> failedActions = new Vector<DebugAction>();
+    
+    // Get the pending actions for this class (and inner classes)
+    Vector<DocumentDebugAction> actions = _pendingActions.get(className);
+    Vector<DocumentDebugAction> failedActions = 
+      new Vector<DocumentDebugAction>();
     //DrJava.consoleOut().println("pending actions: " + actions);
     if (actions == null) {
       // any actions that were waiting for this class to be prepared have been
@@ -142,34 +146,36 @@ public class PendingRequestManager {
       _manager.getEventRequestManager().deleteEventRequest(event.request());
       return;
     }
-    for (int i = 0; i < actions.size();) {
+    for (int i = 0; i < actions.size(); i++) {
       int lineNumber = actions.elementAt(i).getLineNumber();
-      /*
-      System.out.println("i: "+i+" actions.size(): " + actions.size() + 
-                         " actions.elementAt(i): " + actions.elementAt(i) +
-                         " actions.elementAt(i).getLineNumber(): " + 
-                         actions.elementAt(i).getLineNumber());
-                         */
       if (lineNumber != DebugAction.ANY_LINE) {
-        List lines = new LinkedList();
         try {
-          lines = rt.locationsOfLine(lineNumber);
+          List lines = rt.locationsOfLine(lineNumber);
+          if (lines.size() == 0) {
+            // Requested line number not in reference type, skip this action
+            //i++;
+            continue;
+          }
         }
         catch (AbsentInformationException aie) {
           // outer class has no line number info, skip this action
-        }
-        if (lines.size() == 0) {
-          i++;
           continue;
         }
       }
       // check if the action was successfully created
       try {
-        if (!actions.elementAt(i).createRequest(rt)) {
+        Vector<ReferenceType> refTypes = new Vector<ReferenceType>();
+        refTypes.addElement(rt);
+        if (!actions.elementAt(i).createRequests(refTypes)) {
           // if no request created, skip this action
-          i++;
+          //i++;
         }
         else {
+          // Experiment: try never removing the action or event request.
+          //  This way, multiple classloads of this class will always have
+          //  the DebugActions set properly
+          /*
+            
           // if request created, remove the current action and keep i here
           actions.removeElementAt(i);
           // check if the vector is empty
@@ -177,11 +183,12 @@ public class PendingRequestManager {
             _pendingActions.remove(className);
             _manager.getEventRequestManager().deleteEventRequest(event.request());
           }
+        */
         }
       }
       catch (DebugException e) {
         failedActions.addElement(actions.elementAt(i));
-        i++;
+        //i++;
        // DrJava.consoleOut().println("Exception preparing request!! " + e);
       }
     }

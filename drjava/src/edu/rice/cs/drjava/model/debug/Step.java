@@ -44,6 +44,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
+import gj.util.Vector;
 import java.util.List;
 import java.util.Iterator;
 
@@ -60,8 +61,7 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
   private int _depth;
   
   // Java class patterns for which we may not want events
-  private String[] excludes = {"java.*", "javax.*", "sun.*", 
-    "com.sun.*"};
+  private String[] javaExcludes = {"java.*", "javax.*", "sun.*", "com.sun.*"};
    
   /**
    * @throws IllegalStateException if the document does not have a file
@@ -74,37 +74,40 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
     _size = size;
     _depth = depth;
     _countFilter = 1; //only step once.
-    _initializeRequest();
+    _initializeRequests();
   }
   
-  public boolean createRequest(ReferenceType rt) throws DebugException {
-    return false;
-  }
+  //public boolean createRequest(ReferenceType rt) throws DebugException {
+  //  return false;
+  //}
   
   /**
    * Creates an appropriate EventRequest from the EventRequestManager and 
    * stores it in the _request field.
    * @throws DebugException if the request could not be created.
    */
-  protected void _createRequest() throws DebugException {
+  protected void _createRequests() throws DebugException {
     boolean stepJava = DrJava.CONFIG.getSetting(DEBUG_STEP_JAVA).booleanValue();  
     boolean stepInterpreter = DrJava.CONFIG.getSetting(DEBUG_STEP_INTERPRETER).booleanValue();  
     boolean stepDrJava = DrJava.CONFIG.getSetting(DEBUG_STEP_DRJAVA).booleanValue();  
     
-    _request = _manager.getEventRequestManager().
+    StepRequest request = _manager.getEventRequestManager().
       createStepRequest(_thread, _size, _depth);
     if (!stepJava) {
-      for (int i=0; i<excludes.length; ++i) {
-        _request.addClassExclusionFilter(excludes[i]);
+      for (int i=0; i < javaExcludes.length; i++) {
+        request.addClassExclusionFilter(javaExcludes[i]);
       }
     }
     if (!stepInterpreter) {
-      _request.addClassExclusionFilter("koala.*");
+      request.addClassExclusionFilter("koala.*");
     }
     if (!stepDrJava) {
-      _request.addClassExclusionFilter("edu.rice.cs.drjava.*");
-      _request.addClassExclusionFilter("edu.rice.cs.util.*");
+      request.addClassExclusionFilter("edu.rice.cs.drjava.*");
+      request.addClassExclusionFilter("edu.rice.cs.util.*");
     }
+    
+    // Add this request (the only one) to the list
+    _requests.addElement(request);
   }
   
   public String toString() {

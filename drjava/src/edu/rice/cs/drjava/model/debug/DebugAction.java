@@ -42,6 +42,7 @@ package edu.rice.cs.drjava.model.debug;
 import com.sun.jdi.*;
 import com.sun.jdi.request.*;
 
+import gj.util.Vector;
 import java.io.File;
 
 import javax.swing.text.*;
@@ -61,7 +62,14 @@ public abstract class DebugAction<T extends EventRequest> {
   protected DebugManager _manager;
   
   // Request fields
-  protected T _request = null;
+  
+  /**
+   * Vector of EventRequests.  There might be more than one, since
+   * there can be multiple reference types for one class.  They all
+   * share the same attributes, though, so the other fields don't
+   * need to be vectors.
+   */
+  protected Vector<T> _requests;
   protected int _suspendPolicy = EventRequest.SUSPEND_NONE;
   protected boolean _enabled = true;
   protected int _countFilter = -1;
@@ -78,14 +86,15 @@ public abstract class DebugAction<T extends EventRequest> {
   public DebugAction (DebugManager manager) 
     throws DebugException, IllegalStateException {
     _manager = manager;
+    _requests = new Vector<T>();
   }
   
   /**
    * Returns the EventRequest corresponding to this DebugAction, if it has
    * been created, null otherwise.
    */
-  public T getRequest() {
-    return _request;
+  public Vector<T> getRequests() {
+    return _requests;
   }
   
   /**
@@ -104,13 +113,13 @@ public abstract class DebugAction<T extends EventRequest> {
    * used.
    * @return true if the EventRequest is successfully created
    */
-  public abstract boolean createRequest(ReferenceType rt) throws DebugException;
+  //public abstract boolean createRequests(ReferenceType rt) throws DebugException;
   
-  public boolean createRequest() throws DebugException
+  public boolean createRequests() throws DebugException
   {    
-    _createRequest();
-    if (_request != null) {
-      _prepareRequest(_request);
+    _createRequests();
+    if (_requests.size() > 0) {
+      _prepareRequests(_requests);
       return true;
     }
     else {
@@ -120,13 +129,12 @@ public abstract class DebugAction<T extends EventRequest> {
  
   /**
    * This should always be called from the constructor of the subclass. Tries
-   * to create the request, but if unable, will add the request to the
-   * pendingRequestManager
+   * to create all applicable EventRequests for this DebugAction.
    */
-  protected void _initializeRequest() throws DebugException {
-    createRequest();  
-    if (_request == null) {
-      throw new DebugException("No ref, and can't add to pendingrequestmanage!");
+  protected void _initializeRequests() throws DebugException {
+    createRequests();  
+    if (_requests.size() == 0) {
+      throw new DebugException("Could not create EventRequests for this action!");
     }
   }
   
@@ -136,14 +144,23 @@ public abstract class DebugAction<T extends EventRequest> {
    * @param rt ReferenceType used to try to create the request
    * @throws DebugException if the request could not be created.
    */
-  protected void _createRequest() throws DebugException
-  {}
+  protected void _createRequests() throws DebugException {}
   
   /**
-   * Prepares an EventRequest with the current stored values.
+   * Prepares all relevant EventRequests with the current stored values.
+   * @param requests the EventRequests to prepare
+   */
+  protected void _prepareRequests(Vector<T> requests) {
+    for (int i=0; i < requests.size(); i++) {
+      _prepareRequest(requests.elementAt(i));
+    }
+  }
+  
+  /**
+   * Prepares this EventRequest with the current stored values.
    * @param request the EventRequest to prepare
    */
-  protected void _prepareRequest(EventRequest request) {
+  protected void _prepareRequest(T request) {
     // the request must be disabled to be edited
     request.setEnabled(false);
     

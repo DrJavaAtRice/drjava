@@ -42,6 +42,7 @@ package edu.rice.cs.drjava.model.debug;
 import com.sun.jdi.*;
 import com.sun.jdi.request.*;
 
+import gj.util.Vector;
 import java.io.File;
 
 import edu.rice.cs.drjava.DrJava;
@@ -54,7 +55,7 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
  * @version $Id$
  */
 public abstract class DocumentDebugAction<T extends EventRequest> 
-  extends DebugAction {  
+  extends DebugAction<T> {  
   
   protected String _className;
   protected File _file;
@@ -109,21 +110,19 @@ public abstract class DocumentDebugAction<T extends EventRequest>
   }
   
   /**
-   * Creates an EventRequest corresponding to this DebugAction, using the
-   * given ReferenceType.  This is called either from the DebugAction
+   * Creates EventRequests corresponding to this DebugAction, using the
+   * given ReferenceTypes.  This is called either from the DebugAction
    * constructor or the PendingRequestManager, depending on when the
-   * ReferenceType becomes available.
+   * ReferenceTypes become available.  (There may be multiple reference
+   * types for the same class if a custom class loader is used.)
    * @return true if the EventRequest is successfully created
    */
-  public boolean createRequest(ReferenceType rt) throws DebugException {
-    if (!rt.isPrepared()) {
-      // Can't create a request if class not prepared
-      return false;
-    }
-    
-    _createRequest(rt);
-    if (_request != null) {
-      _prepareRequest(_request);
+  public boolean createRequests(Vector<ReferenceType> refTypes) 
+    throws DebugException
+  {
+    _createRequests(refTypes);
+    if (_requests.size() > 0) {
+      _prepareRequests(_requests);
       return true;
     }
     else {
@@ -132,33 +131,40 @@ public abstract class DocumentDebugAction<T extends EventRequest>
   }
  
   /**
-   * This should always be called from the constructor of the subclass. Tries
-   * to create the request, but if unable, will add the request to the
-   * pendingRequestManager
+   * This should always be called from the constructor of the subclass.
+   * Attempts to create EventRequests on the given ReferenceTypes, and
+   * also adds this action to the pending request manager (so identical 
+   * classes loaded in the future will also have this action).
    */
-  protected void _initializeRequest(ReferenceType ref) throws DebugException {
-    if (ref != null) {
-      createRequest(ref);
+  protected void _initializeRequests(Vector<ReferenceType> refTypes)
+    throws DebugException
+  {
+    if (refTypes.size() > 0) {
+      createRequests(refTypes);
     }
-    if (_request == null) {
+    //if (_request == null) {
       // couldn't create the request yet, add to the pending request manager
-      _manager.getPendingRequestManager().addPendingRequest(this);
-    }
+    
+    // Experiment: always add to pending request, to deal with multpile class loads
+    _manager.getPendingRequestManager().addPendingRequest(this);
+    //}
   }
   
   /**
-   * Creates an appropriate EventRequest from the EventRequestManager and 
-   * stores it in the _request field.
-   * @param rt ReferenceType used to try to create the request
-   * @throws DebugException if the request could not be created.
+   * Creates appropriate EventRequests from the EventRequestManager and 
+   * stores them in the _requests field.
+   * @param refTypes All (identical) ReferenceTypes to which this action
+   * applies.  (There may be multiple if a custom class loader is in use.)
+   * @throws DebugException if the requests could not be created.
    */
-  protected abstract void _createRequest(ReferenceType ref) throws DebugException;
+  protected abstract void _createRequests(Vector<ReferenceType> refTypes)
+    throws DebugException;
   
   /**
-   * Prepares an EventRequest with the current stored values.
+   * Prepares this EventRequest with the current stored values.
    * @param request the EventRequest to prepare
    */
-  protected void _prepareRequest(EventRequest request) {
+  protected void _prepareRequest(T request) {
     super._prepareRequest(request);
     request.putProperty("document", _doc);
   }

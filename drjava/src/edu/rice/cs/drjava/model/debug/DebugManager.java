@@ -250,30 +250,41 @@ public class DebugManager {
   }
   
   /**
-   * Returns the loaded ReferenceType for the given class name, or null
+   * Returns the loaded ReferenceTypes for the given class name, or null
    * if the class could not be found.  Makes no attempt to load the class
    * if it is not already loaded.
+   * <p>
+   * If custom class loaders are in use, multiple copies of the class may
+   * be loaded, so all are returned.
    */
-  synchronized ReferenceType getReferenceType(String className) {
-    return getReferenceType(className, -1);
+  synchronized Vector<ReferenceType> getReferenceTypes(String className) {
+    return getReferenceTypes(className, DebugAction.ANY_LINE);
   }
   
   /**
-   * Returns the loaded ReferenceType for the given class name, or null
+   * Returns the loaded ReferenceTypes for the given class name, or null
    * if the class could not be found.  Makes no attempt to load the class
-   * if it is not already loaded.  If the lineNumber is greater than -1,
-   * ensures that the returned ReferenceType contains the given lineNumber,
+   * if it is not already loaded.  If the lineNumber is not DebugAction.ANY_LINE,
+   * ensures that the returned ReferenceTypes contain the given lineNumber,
    * searching through inner classes if necessary.  If no inner classes
    * contain the line number, null is returned.
+   * <p>
+   * If custom class loaders are in use, multiple copies of the class
+   * may be loaded, so all are returned.
    */
-  synchronized ReferenceType getReferenceType(String className, int lineNumber) {
+  synchronized Vector<ReferenceType> getReferenceTypes(String className, 
+                                                       int lineNumber) {
     // Get all classes that match this name
     List classes = _vm.classesByName(className);
-    ReferenceType ref = null;
     
     // Assume first one is correct, for now
-    if (classes.size() > 0) {
-      ref = (ReferenceType) classes.get(0);
+    //if (classes.size() > 0) {
+    
+    // Return each valid reference type
+    Vector<ReferenceType> refTypes = new Vector<ReferenceType>();
+    ReferenceType ref = null;
+    for (int i=0; i < classes.size(); i++) {
+      ref = (ReferenceType) classes.get(i);
       
       if (lineNumber > DebugAction.ANY_LINE) {
         List lines = new LinkedList();
@@ -287,9 +298,9 @@ public class DebugManager {
           // The ReferenceType might be in an inner class
           List innerRefs = ref.nestedTypes();
           ref = null;
-          for (int i = 0; i < innerRefs.size(); i++) {
+          for (int j = 0; j < innerRefs.size(); j++) {
             try {
-              ReferenceType currRef = (ReferenceType) innerRefs.get(i);
+              ReferenceType currRef = (ReferenceType) innerRefs.get(j);
               lines = currRef.locationsOfLine(lineNumber);
               if (lines.size() > 0) {
                 ref =currRef;
@@ -305,11 +316,14 @@ public class DebugManager {
           }
         }
       }
-      if (ref != null && !ref.isPrepared()) {
-         return null;
+      if ((ref != null) && ref.isPrepared()) {
+        refTypes.addElement(ref);
       }
+      //if (ref != null && !ref.isPrepared()) {
+      //   return null;
+      //}
     }
-    return ref;
+    return refTypes;
   }
   
   
@@ -487,18 +501,22 @@ public class DebugManager {
     
     _breakpoints.removeElement(breakpoint);
     
-    if ( breakpoint.getRequest() != null && _eventManager != null) {
+    Vector<BreakpointRequest> requests = breakpoint.getRequests();
+    if ( requests.size() > 0 && _eventManager != null) {
       try {
-        _eventManager.deleteEventRequest(breakpoint.getRequest());
+        for (int i=0; i < requests.size(); i++) {
+          _eventManager.deleteEventRequest(requests.elementAt(i));
+        }
       }
       catch (VMMismatchException vme) {
         // Not associated with this VM; probably from a previous session.
         // Ignore and make sure it gets removed from the document.
       }
     }
-    else {
-      _pendingRequestManager.removePendingRequest(breakpoint);
-    }
+    //else {
+    // Now always remove from pending request, since it's always there
+    _pendingRequestManager.removePendingRequest(breakpoint);
+    //}
     breakpoint.getDocument().removeBreakpoint(breakpoint);
     
     notifyListeners(new EventNotifier() {

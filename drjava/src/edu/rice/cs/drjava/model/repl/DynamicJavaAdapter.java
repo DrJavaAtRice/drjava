@@ -144,7 +144,12 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   /**
    * An extension of DynamicJava's interpreter that makes sure classes are
    * not loaded by the system class loader (when possible) so that future
-   * interpreters will be able to reload the classes.
+   * interpreters will be able to reload the classes.  This extension also
+   * ensures that classes on "extra.classpath" will be loaded if referenced
+   * by user defined classes.  (Without this, classes on "extra.classpath"
+   * can only be referred to directly, and cannot be extended, etc.)
+   * <p>
+   * 
    * We also override the evaluation visitor to allow the interpreter to be
    * interrupted and to return NO_RESULT if there was no result.
    */
@@ -156,20 +161,6 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     public InterpreterExtension() {
       super(new JavaCCParserFactory());
       
-      /** 
-       * The following block was commented out because we are no longer using
-       * the StickyClassLoader because 1) since we restart the InteractionsJVM
-       * every time we reset or compile, the StickyClassLoader is unnecessary
-       * and 2) the DebugManager will not work in its present form with the 
-       * StickyClassLoader. In the future, an optimization can be made by
-       * reenabling the StickyClassLoader and changing the DebugManager to 
-       * use it (changes will have to be made in many places starting in 
-       * getReferenceType since it just grabs the first class that 
-       * classesByName returns right now) such that if no threads are still
-       * running, only the StickyClassLoader has to be replaced.
-       */
-      
-      /*
        classLoader = new ClassLoaderExtension(this);
       // We have to reinitialize these variables because they automatically
       // fetch pointers to classLoader in their constructors.
@@ -180,7 +171,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       evalVisitorContext = new GlobalContext(this);
       evalVisitorContext.setAdditionalClassLoaderContainer(classLoader);
       //System.err.println("set loader: " + classLoader);
-      */
+      
     }
 
     /**
