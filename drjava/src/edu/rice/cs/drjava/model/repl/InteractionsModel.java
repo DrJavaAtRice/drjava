@@ -195,6 +195,18 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected abstract void _notifyInteractionStarted();
   
   /**
+   * Gets the string representation of the value of a variable in the current interpreter.
+   * @param var the name of the variable
+   */
+  public abstract String getVariableToString(String var);
+  
+  /**
+   * Gets the class name of a variable in the current interpreter.
+   * @param var the name of the variable
+   */
+  public abstract String getVariableClassName(String var);
+  
+  /**
    * Resets the Java interpreter, resetting the flag to indicate whether
    * the interpreter has been used since the last reset.
    */

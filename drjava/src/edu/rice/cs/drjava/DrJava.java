@@ -716,9 +716,9 @@ public class DrJava implements OptionConstants {
           _debugConsole = null;
         }
       };
-      _debugConsole.defineVariable("mainFrame", mf);
-      _debugConsole.defineVariable("model", mf.getModel());
-      _debugConsole.defineVariable("config", _config);
+      _debugConsole.defineConstant("mainFrame", mf);
+      _debugConsole.defineConstant("model", mf.getModel());
+      _debugConsole.defineConstant("config", _config);
       _debugConsole.setInterpreterPrivateAccessible(true);
       _debugConsole.show();
     }

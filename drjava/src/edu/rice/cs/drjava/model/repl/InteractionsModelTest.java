@@ -272,6 +272,14 @@ public final class InteractionsModelTest extends TestCase {
     protected void _interpret(String toEval) {
       this.toEval = toEval;
     }
+    public String getVariableToString(String var) {
+      fail("cannot getVariableToString in a test");
+      return null;
+    }  
+    public String getVariableClassName(String var) {
+      fail("cannot getVariableClassName in a test");
+      return null;
+    }
     public void addToClassPath(String path) {
       fail("cannot add to classpath in a test");
     }

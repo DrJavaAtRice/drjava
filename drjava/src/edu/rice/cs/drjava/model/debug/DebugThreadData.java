@@ -46,9 +46,10 @@ import com.sun.jdi.*;
  * @version $Id$
  */
 public class DebugThreadData {
-  private ThreadReference _thread;
-  private String _name;
-  private String _status;
+  private final ThreadReference _thread;
+  private final String _name;
+  private final String _status;
+  private final long _uniqueID;
   
   /**
    * Object for keeping track of a thread in the debuggee JVM.
@@ -74,14 +75,14 @@ public class DebugThreadData {
       case ThreadReference.THREAD_STATUS_ZOMBIE:
         status = "ZOMBIE"; break;
     }
-    if( thread.isSuspended() && status.equals("RUNNING") ){
+    if( isSuspended() && status.equals("RUNNING") ){
       _status = "SUSPENDED";
     }
     else{
       _status = status;
     }
     
-    
+    _uniqueID = _thread.uniqueID();
   }
   
   /**
@@ -99,7 +100,7 @@ public class DebugThreadData {
   }
   
   public long getUniqueID() {
-    return _thread.uniqueID();
+    return _uniqueID;
   }
   
   /**
@@ -111,6 +112,9 @@ public class DebugThreadData {
       return _thread.isSuspended();
     }
     catch (ObjectCollectedException oce) {
+      return false;
+    }
+    catch (VMDisconnectedException vmde) {
       return false;
     }
   }

@@ -268,6 +268,17 @@ public final class JavaInterpreterTest extends TestCase {
   }
   
   /**
+   * Tests that null can be used in instanceof expressions.
+   */
+  public void testNullInstanceOf() throws ExceptionReturnedException {
+    Pair[] cases = new Pair[] {
+      Pair.make("null instanceof Object", new Boolean(null instanceof Object)),
+      Pair.make("null instanceof String", new Boolean(null instanceof String))
+    };
+    tester(cases);
+  }
+  
+  /**
    * Tests simple variable definitions which broke the initial implementation
    * of variable redefinition (tested by testVariableRedefinition).
    */

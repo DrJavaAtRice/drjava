@@ -188,8 +188,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   public void _setupTabPanes() {
     
     // Watches table
-    _watchTable = new JTable( new WatchTableModel());
-    _leftPane.addTab("Watches", new JScrollPane(_watchTable));
+    _initWatchTable();
     
     // Breakpoint tree
     _breakpointRootNode = new DefaultMutableTreeNode("Breakpoints");
@@ -229,6 +228,40 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _initPopup();
   }
   
+  private void _initWatchTable() {    
+    _watchTable = new JTable( new WatchTableModel());
+    // Adds a cell renderer to the watch table
+    TableCellRenderer watchTableRenderer = new DefaultTableCellRenderer() {
+      public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                                                     boolean hasFocus, int row, int column) {
+        Component renderer =
+          super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);        
+        
+        _setWatchCellFont(row);
+        
+        return renderer;
+      }
+  
+      /**
+       * Sets the font for a cell in the watch table.
+       * @param row the current row
+       */
+      private void _setWatchCellFont(int row) {
+        int numWatches = _watches.size();
+        if (row < numWatches) {
+          DebugWatchData currWatch = _watches.elementAt(row);
+          if (currWatch.isChanged()) {
+            setFont(getFont().deriveFont(Font.BOLD));
+          }
+        }
+      }
+    };
+    _watchTable.getColumnModel().getColumn(0).setCellRenderer(watchTableRenderer);
+    _watchTable.getColumnModel().getColumn(1).setCellRenderer(watchTableRenderer);
+    _watchTable.getColumnModel().getColumn(2).setCellRenderer(watchTableRenderer);
+    _leftPane.addTab("Watches", new JScrollPane(_watchTable));
+  }    
+  
   private void _initThreadTable() {
     _threadTable = new JTable(new ThreadTableModel());
     _threadTable.addMouseListener(new ThreadMouseAdapter());
@@ -248,9 +281,21 @@ public class DebugPanel extends JPanel implements OptionConstants {
         Component renderer =
           super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         
-        _setThreadCellFont(renderer, row);
+        _setThreadCellFont(row);
         
         return renderer;
+      }
+      
+      /**
+       * Sets the font for a cell in the thread table.
+       * @param row the current row
+       */
+      private void _setThreadCellFont(int row) {
+        DebugThreadData currThread = _threads.elementAt(row);
+        if (currThread.getUniqueID() == _currentThreadID &&
+            currThread.isSuspended()) {
+          setFont(getFont().deriveFont(Font.BOLD));
+        }
       }
     };
     _threadTable.getColumnModel().getColumn(0).setCellRenderer(threadTableRenderer);
@@ -277,9 +322,11 @@ public class DebugPanel extends JPanel implements OptionConstants {
           case 1: return watch.getValue();
           case 2: return watch.getType();
         }
+        fireTableRowsUpdated(row, _watches.size()-1);
         return null;
       }
       else {
+        fireTableRowsUpdated(row, _watches.size()-1);
         // Last row blank
         return "";
       }
@@ -587,18 +634,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
     catch (DebugException de) {
       _frame._showDebugError(de);
-    }
-  }
-  /**
-   * Sets the font for a cell in the thread table.
-   * @param renderer the renderer
-   * @param row the current row
-   */
-  private void _setThreadCellFont(Component renderer, int row) {
-    DebugThreadData currThread = _threads.elementAt(row);
-    if (currThread.getUniqueID() == _currentThreadID &&
-        currThread.isSuspended()) {
-      renderer.setFont(getFont().deriveFont(Font.BOLD));
     }
   }
 

@@ -1326,13 +1326,13 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Step over once
     synchronized(_notifierLock){
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(4);  // suspended x 2, updated x 2
+      _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
-    debugListener.assertThreadLocationUpdatedCount(4);  // fires
-    debugListener.assertCurrThreadSuspendedCount(4);  // fires
+    debugListener.assertThreadLocationUpdatedCount(3);  // fires
+    debugListener.assertCurrThreadSuspendedCount(3);  // fires
     debugListener.assertBreakpointReachedCount(2);
     debugListener.assertCurrThreadDiedCount(0);
     assertInteractionsContains("x == 5");
@@ -1342,7 +1342,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Step over again
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(4);  // (suspended, updated) x2
+      _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
     if (printMessages) {
@@ -1350,10 +1350,10 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     }
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
-    debugListener.assertThreadLocationUpdatedCount(6);  // fires
-    debugListener.assertCurrThreadDiedCount(0);
-    debugListener.assertCurrThreadSuspendedCount(6);  // fires
+    debugListener.assertThreadLocationUpdatedCount(4);  // fires
+    debugListener.assertCurrThreadSuspendedCount(4);  // fires
     debugListener.assertBreakpointReachedCount(2);
+    debugListener.assertCurrThreadDiedCount(0);
     assertEquals("x has correct value after increment", "6", interpret("DrJavaDebugStaticField.x"));
     assertEquals("this has correct value for x after increment", "6", interpret("this.x"));
 
@@ -1362,6 +1362,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
+    interpret("");
+    assertInteractionsContains("The current thread has changed.");
     assertEquals("x has correct value in other thread", "6", interpret("DrJavaDebugStaticField.x"));
     assertEquals("this has correct value for x in other thread", "6", interpret("this.x"));
 

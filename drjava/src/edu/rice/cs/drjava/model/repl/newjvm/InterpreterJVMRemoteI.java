@@ -106,6 +106,18 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    * Returns a copy of the list of unique entries on the classpath.
    */
   public Vector<String> getAugmentedClasspath() throws RemoteException;
+  
+  /**
+   * Gets the string representation of the value of a variable in the current interpreter.
+   * @param var the name of the variable
+   */
+  public String getVariableToString(String var) throws RemoteException;
+  
+  /**
+   * Gets the class name of a variable in the current interpreter.
+   * @param var the name of the variable
+   */
+  public String getVariableClassName(String var) throws RemoteException;
 
   /**
    * Gets the classpath as a string.

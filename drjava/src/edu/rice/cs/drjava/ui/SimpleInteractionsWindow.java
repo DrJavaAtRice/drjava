@@ -137,6 +137,13 @@ public class SimpleInteractionsWindow extends JFrame {
   public void defineVariable(String name, Object value) {
     _model.defineVariable(name, value);
   }
+  
+  /**
+   * Defines a final variable in this window to the given value.
+   */
+  public void defineConstant(String name, Object value) {
+    _model.defineConstant(name, value);
+  }
 
   /**
    * Sets whether protected and private variables and methods can be accessed 

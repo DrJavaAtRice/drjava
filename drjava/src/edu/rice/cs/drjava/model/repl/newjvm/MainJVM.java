@@ -205,6 +205,44 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   /**
+   * Gets the string representation of the value of a variable in the current interpreter.
+   * @param var the name of the variable
+   */
+  public String getVariableToString(String var) {
+    // silently fail if disabled. see killInterpreter docs for details.
+    if (! _enabled) return null;
+
+    ensureInterpreterConnected();
+
+    try {
+      return _interpreterJVM().getVariableToString(var);
+    }
+    catch (RemoteException re) {
+      _threwException(re);
+      return null;
+    }
+  }
+  
+  /**
+   * Gets the class name of a variable in the current interpreter.
+   * @param var the name of the variable
+   */
+  public String getVariableClassName(String var) {
+    // silently fail if disabled. see killInterpreter docs for details.
+    if (! _enabled) return null;
+
+    ensureInterpreterConnected();
+
+    try {
+      return _interpreterJVM().getVariableClassName(var);
+    }
+    catch (RemoteException re) {
+      _threwException(re);
+      return null;
+    }
+  }
+  
+  /**
    * Called when a call to interpret has completed.
    * @param result The result of the interpretation
    */

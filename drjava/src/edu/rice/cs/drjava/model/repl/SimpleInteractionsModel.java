@@ -120,6 +120,24 @@ public class SimpleInteractionsModel extends InteractionsModel {
   }
   
   /**
+   * Gets the string representation of the value of a variable in the current interpreter.
+   * @param var the name of the variable
+   */
+  public String getVariableToString(String var) {
+    Object value = _interpreter.getVariable(var);
+    return value.toString();
+  }
+  
+  /**
+   * Gets the class name of a variable in the current interpreter.
+   * @param var the name of the variable
+   */
+  public String getVariableClassName(String var) {
+    Class c = _interpreter.getVariableClass(var);
+    return c.getName();
+  }
+  
+  /**
    * Adds the given path to the interpreter's classpath.
    * @param path Path to add
    */
@@ -132,6 +150,13 @@ public class SimpleInteractionsModel extends InteractionsModel {
    */
   public void defineVariable(String name, Object value) {
     _interpreter.defineVariable(name, value);
+  }
+  
+  /**
+   * Defines a final variable in the interpreter to the given value.
+   */
+  public void defineConstant(String name, Object value) {
+    _interpreter.defineConstant(name, value);
   }
   
   /**

@@ -141,6 +141,7 @@ public class DebugWatchData {
   void setNoValue() {
     _showValue = true;
     _value = NO_VALUE;
+    _changed = false;
   }
   
   /**

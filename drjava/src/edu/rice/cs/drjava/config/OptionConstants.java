@@ -435,7 +435,7 @@ public interface OptionConstants {
    * The key binding for openning the preferences dialog
    */
   public static final KeyStrokeOption KEY_RUN =
-    new KeyStrokeOption("key.run", KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0));
+    new KeyStrokeOption("key.run", KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0));
   
   /**
    * The key binding for testing the current document
@@ -948,4 +948,12 @@ public interface OptionConstants {
    */
   public static final StringOption BROWSER_STRING =
     new StringOption("browser.string", "");
+  
+  /* ---------- Undisplayed Options ---------- */
+  
+  /**
+   * Whether to enabled the Show Debug Console menu item in the Tools menu.
+   */
+  public static final BooleanOption SHOW_DEBUG_CONSOLE =
+    new BooleanOption("show.debug.console", Boolean.FALSE);
 }

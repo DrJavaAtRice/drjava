@@ -65,6 +65,14 @@ public interface JavaInterpreter extends Interpreter {
    */
   public Object getVariable(String name);
   
+  /**
+   * Returns the class of the variable with the given name in
+   * the interpreter.
+   * @param name Name of the variable
+   * @return class of the variable
+   */
+  public Class getVariableClass(String name);
+  
     /**
    * Assigns the given value to the given name in the interpreter.
    * @param name Name of the variable

@@ -2316,6 +2316,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_printAction, "Print", "Print the current document");
     _setUpAction(_pageSetupAction, "Page Setup", "PageSetup", "Page Setup");
     _setUpAction(_printPreviewAction, "Print Preview", "PrintPreview", "Print Preview");
+    
+    _setUpAction(_quitAction, "Quit", "Quit", "Exit DrJava");
+
+    _setUpAction(_undoAction, "Undo", "Undo previous command");
+    _setUpAction(_redoAction, "Redo", "Redo last undo");
+    _undoAction.putValue(Action.NAME, "Undo Previous Command");
+    _redoAction.putValue(Action.NAME, "Redo Last Undo");
 
     _setUpAction(cutAction, "Cut", "Cut selected text to the clipboard");
     _setUpAction(copyAction, "Copy", "Copy selected text to the clipboard");
@@ -2325,28 +2332,42 @@ public class MainFrame extends JFrame implements OptionConstants {
     cutAction.putValue(Action.NAME, "Cut");
     copyAction.putValue(Action.NAME, "Copy");
     pasteAction.putValue(Action.NAME, "Paste");
+    
+    _setUpAction(_indentLinesAction, "Indent Lines", "Indent all selected lines");
+    _setUpAction(_commentLinesAction, "Comment Lines", "Comment all selected lines");
+    _setUpAction(_uncommentLinesAction, "Uncomment Lines", "Uncomment all selected lines");
 
-    _setUpAction(_switchToPrevAction, "Back", "Previous Document");
-    _setUpAction(_switchToNextAction, "Forward", "Next Document");
+    _setUpAction(_switchToPrevAction, "Back", "Switch to the previous document");
+    _setUpAction(_switchToNextAction, "Forward", "Switch to the next document");
+    _setUpAction(_switchToPreviousPaneAction, "Previous Pane", "Switch the focus to the previous pane");
+    _setUpAction(_switchToNextPaneAction, "Next Pane", "Switch the focus to the next pane");
     
     _setUpAction(_findReplaceAction, "Find", "Find/Replace");
+    _setUpAction(_gotoLineAction, "Goto line", "Jump to a line in the document");
     _setUpAction(_editPreferencesAction, "Preferences", "Edit DrJava Preferences");
-    _setUpAction(_helpAction, "Help", "Show the User Documentation");
-    _setUpAction(_aboutAction, "About", "About DrJava");
-
-    _setUpAction(_undoAction, "Undo", "Undo previous command");
-    _setUpAction(_redoAction, "Redo", "Redo last undo");
-
-    _undoAction.putValue(Action.NAME, "Undo Previous Command");
-    _redoAction.putValue(Action.NAME, "Redo Last Undo");
-
-    //_setUpAction(_abortInteractionAction, "Break", "Abort the current interaction");
-    _setUpAction(_resetInteractionsAction, "Reset", "Reset interactions");
 
     _setUpAction(_junitAction, "Test Current", "Run JUnit over the current document");
     _setUpAction(_junitAllAction, "Test", "Run JUnit over all open JUnit tests");
     _setUpAction(_javadocAllAction, "Javadoc", "Create Javadoc for the packages of all open documents");
     _setUpAction(_javadocCurrentAction, "Javadoc Current", "Create Javadoc for the current document");
+    _setUpAction(_runAction, "Run Document", "Run the main method of the current document");
+    
+    _setUpAction(_loadHistoryAction, "Load History", "Load a history of interactions from a file");
+    _setUpAction(_saveHistoryAction, "Save History", "Save the history of interactions to a file");
+    _setUpAction(_clearHistoryAction, "Clear History", "Clear the current history of interactions");
+    
+    //_setUpAction(_abortInteractionAction, "Break", "Abort the current interaction");
+    _setUpAction(_resetInteractionsAction, "Reset", "Reset the Interactions Pane");
+    _setUpAction(_viewInteractionsClasspathAction, "View Interactions Classpath", "Display the classpath in use by the Interactions Pane");
+    _setUpAction(_copyInteractionToDefinitionsAction, "Lift Current Interaction", "Copy the current interaction into the Definitions Pane");
+    
+    _setUpAction(_clearConsoleAction, "Clear Console", "Clear all text in the Console Pane");
+    _setUpAction(_showDebugConsoleAction, "Show DrJava Debug Console", "Show a console for debugging DrJava " +
+                 "that defines \"mainFrame\", \"model\", and \"config\".");
+    
+    _setUpAction(_helpAction, "Help", "Show the User Documentation");
+    _setUpAction(_aboutAction, "About", "About DrJava");
+    
   }
 
   private void _setUpAction(Action a, String name, String icon, String shortDesc) {
@@ -2559,7 +2580,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     toolsMenu.addSeparator();
 
     _addMenuItem(toolsMenu, _clearConsoleAction, KEY_CLEAR_CONSOLE);
-    if (CodeStatus.DEVELOPMENT) {
+    if (DrJava.getConfig().getSetting(OptionConstants.SHOW_DEBUG_CONSOLE).booleanValue()) {
       toolsMenu.add(_showDebugConsoleAction);
     }
 

@@ -328,6 +328,77 @@ public class InterpreterJVM extends AbstractSlaveJVM
     thread.start();
   }
   
+  private String _processReturnValue(Object o) {    
+    if (o instanceof String) {
+      return "\"" + o + "\"";
+    }
+    else if (o instanceof Character) {
+      return "'" + o + "'";
+    }
+    else {
+      return o.toString();
+    }
+  }
+    
+    /**
+   * Gets the string representation of the value of a variable in the current interpreter.
+   * @param var the name of the variable
+   * @return null if the variable is not defined, "null" if the value is null, or else
+   * the string representation of the value
+   */
+  public String getVariableToString(String var) throws RemoteException {
+    // Add to the default interpreter, if it is a JavaInterpreter
+    Interpreter i = _activeInterpreter.getInterpreter();
+    if (i instanceof JavaInterpreter) {
+      try {
+        Object value = ((JavaInterpreter)i).getVariable(var);
+        if (value == null) {
+          return "null";
+        }
+        else if (value instanceof koala.dynamicjava.interpreter.UninitializedObject) {
+          return null;
+        }
+        else {          
+          return _processReturnValue(value);   
+        }
+      }
+      catch (IllegalStateException e) {
+        // variable was not defined
+        return null;
+      }   
+    }
+    else {
+      return null;
+    }
+  }
+  
+  /**
+   * Gets the class name of a variable in the current interpreter.
+   * @param var the name of the variable
+   */
+  public String getVariableClassName(String var) throws RemoteException {
+    // Add to the default interpreter, if it is a JavaInterpreter
+    Interpreter i = _activeInterpreter.getInterpreter();
+    if (i instanceof JavaInterpreter) {
+      try {
+        Class c = ((JavaInterpreter)i).getVariableClass(var);
+        if (c == null) {
+          return "null";
+        }
+        else {
+          return c.getName(); 
+        }
+      }
+      catch (IllegalStateException e) {
+        // variable was not defined
+        return null;
+      }    
+    }
+    else {
+      return null;
+    }
+  }
+  
   /**
    * Notifies that an assignment has been made in the given interpreter.
    * Does not notify on declarations.

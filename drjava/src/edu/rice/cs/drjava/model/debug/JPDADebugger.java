@@ -387,6 +387,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     _model.removeListener(_watchListener);
 
     try {
+      _removeAllDebugInterpreters();
       removeAllBreakpoints();
       removeAllWatches();
     }
@@ -404,8 +405,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     finally {
       ((DefaultInteractionsModel)_model.getInteractionsModel()).setToDefaultInterpreter();
       _vm = null;
-      _eventManager = null;
       _suspendedThreads = new RandomAccessStack();
+      _eventManager = null;
       _runningThread = null;
     }
   }
@@ -449,6 +450,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
            !_suspendedThreads.contains(thread.uniqueID()))
             && (thread.frameCount() > 0)) {
         _suspendedThreads.push(thread);
+        
         return true;
       }
       else {
@@ -539,6 +541,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     // Activate the debug interpreter for interacting with this thread
     _switchToInterpreterForThreadReference(threadRef);
     _switchToSuspendedThread();
+    printMessage("The current thread has changed.");
   }
   
   /**
@@ -725,12 +728,13 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   
   /**
    * Resumes the thread currently being debugged without
-   * copying back any of the variables from the debug interpreter
+   * removing the debug interpreter or switching to the
+   * next suspended thread.
    */
-  protected synchronized void _resumeWithoutCopyingVariables()
+  protected synchronized void _resumeFromStep()
     throws DebugException
   {
-    _resumeHelper(false);
+    _resumeHelper(true);
   }
   
   /**
@@ -739,15 +743,16 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    */
   public synchronized void resume() throws DebugException {
     _ensureReady();
-    _resumeHelper(true);
+    _resumeHelper(false);
   }
   
   /**
    * Resumes execution of the currently suspended thread.
-   * @param shouldCopyBack Whether to copy back the variables from
-   * the current debug interpreter
+   * @param fromStep Whether to copy back the variables from
+   * the current debug interpreter and switch to the next
+   * suspended thread.
    */
-  protected synchronized void _resumeHelper(boolean shouldCopyBack)
+  protected synchronized void _resumeHelper(boolean fromStep)
     throws DebugException
   {
     try {
@@ -756,7 +761,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       if (printMessages) { 
         System.out.println("In resumeThread()");
       }
-      _resumeThread(thread, shouldCopyBack);
+      _resumeThread(thread, fromStep);
     }
     catch (NoSuchElementException e) {
       throw new DebugException("No thread to resume.");
@@ -773,18 +778,19 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   {
     _ensureReady();
     ThreadReference thread = _suspendedThreads.remove(threadData.getUniqueID());
-    _resumeThread(thread, true);
+    _resumeThread(thread, false);
   }
 
   /**
    * Resumes the given thread, only copying variables from its debug interpreter
    * if shouldCopyBack is true.
    * @param thread Thread to resume
-   * @param shouldCopyBack Whether to copy variable values back from the
-   * associated debug interpreter
+   * @param fromStep Whether to copy back the variables from
+   * the current debug interpreter and switch to the next
+   * suspended thread.
    * @throws IllegalArgumentException if thread is null
    */
-  private void _resumeThread(ThreadReference thread, boolean shouldCopyBack)
+  private void _resumeThread(ThreadReference thread, boolean fromStep)
     throws DebugException
   {
     if (thread == null) {
@@ -797,13 +803,13 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
 
     _runningThread = thread;
-    if (shouldCopyBack) {
+    if (!fromStep) {
       // Copy variables back into the thread
       _copyVariablesFromInterpreter();
+      _updateWatches();
     }
     try {
-      removeCurrentDebugInterpreter();
-      _updateWatches();
+      _removeCurrentDebugInterpreter(fromStep);
       currThreadResumed();
     }
     catch(DebugException e) {  //??
@@ -818,9 +824,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     // Notify listeners of a resume
     
     // Switch to next suspended thread, if any
-    if (!_suspendedThreads.isEmpty()) {
+    if (!fromStep && !_suspendedThreads.isEmpty()) {
       _switchToSuspendedThread();
-    }
+    }    
   }
   
   /**
@@ -886,7 +892,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       notifyStepRequested();
     }
     if (printMessages) System.out.println("About to resume");
-    _resumeWithoutCopyingVariables();
+    _resumeFromStep();
   }
   
   
@@ -1405,6 +1411,32 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
     return false;
   }
+  
+  private boolean _getWatchFromInterpreter(DebugWatchData currWatch) {  
+    String currName = currWatch.getName();     
+    // get the value and type from the interactions model
+    String value = _model.getInteractionsModel().getVariableToString(currName);
+    if (value != null) {
+      String type = _model.getInteractionsModel().getVariableClassName(currName);
+      currWatch.setValue(value);
+      currWatch.setType(type);
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+  
+  /**
+   * Hides all of the values of the watches and their types. Called
+   * when there is no debug information.
+   */
+  private synchronized void _hideWatches() {
+    for (int i = 0; i < _watches.size(); i++) {
+      DebugWatchData currWatch = _watches.elementAt(i);
+      currWatch.hideValueAndType();
+    }    
+  }
 
   /**
    * Updates the stored value of each watched field and variable.
@@ -1412,12 +1444,19 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   private synchronized void _updateWatches() throws DebugException {
     _ensureReady();
     if (_suspendedThreads.size() <= 0) {
-      // Not suspended, so all watches are blank
+      // Not suspended, get values in interpreter
       for (int i = 0; i < _watches.size(); i++) {
         DebugWatchData currWatch = _watches.elementAt(i);
-        currWatch.hideValueAndType();
+        if (!_getWatchFromInterpreter(currWatch)) {
+          currWatch.hideValueAndType();
+        }
       }
       return;
+//      for (int i = 0; i < _watches.size(); i++) {
+//        DebugWatchData currWatch = _watches.elementAt(i);
+//        currWatch.hideValueAndType();
+//      }
+//      return;
     }
     
     try {
@@ -1449,183 +1488,183 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       for (int i = 0; i < _watches.size(); i++) {
         DebugWatchData currWatch = _watches.elementAt(i);
         String currName = currWatch.getName();
-        String currValue = currWatch.getValue();
-        
-        // check for "this"
-        if (currName.equals("this")) {
-          if (obj != null) {
-            currWatch.setValue(_getValue(obj));
-            currWatch.setType(String.valueOf(obj.type()));
-          }
-          else {
-            // "this" is not defined in a static context
-            currWatch.setNoValue();
-            currWatch.setNoType();
-          }
+        if (_getWatchFromInterpreter(currWatch)) {
           continue;
         }
+//        // check for "this"
+//        if (currName.equals("this")) {
+//          if (obj != null) {
+//            currWatch.setValue(_getValue(obj));
+//            currWatch.setType(String.valueOf(obj.type()));
+//          }
+//          else {
+//            // "this" is not defined in a static context
+//            currWatch.setNoValue();
+//            currWatch.setNoType();
+//          }
+//          continue;
+//        }
 
-        // Look for a variable with this name
-        LocalVariable localVar = null;
-        try {
-          frames = thread.frames();
-          currFrame = (StackFrame) frames.get(0);
-          localVar = currFrame.visibleVariableByName(currName);
-        }
-        catch (AbsentInformationException aie) {
-          // Not compiled with debug flag.... ignore
-        }
-        catch (InvalidStackFrameException isfe) {
-          currWatch.setNoValue();
-          currWatch.setNoType();
-          _log("Failed to get local var from stack frame", isfe);
-          continue;
-        }
-
-        if (localVar != null) {
-          // currWatch.setValue(_getValue(currFrame.getValue(localVar)));
-          try {
-            Value v = _getValueOfLocalVariable(localVar, thread);
-            if (v == null) {
-              currWatch.setValue(_getValue(null));
-              try {
-                currWatch.setType(localVar.type().name());
-              }
-              catch (ClassNotLoadedException cnle) {
-                List classes = _vm.classesByName(localVar.typeName());
-                if (!classes.isEmpty()) {
-                  currWatch.setType(((Type)classes.get(0)).name());
-                }
-                else {
-                  currWatch.setTypeNotLoaded();
-                }
-              }
-            }
-            else {              
-              currWatch.setValue(_getValue(v));
-              currWatch.setType(v.type().name());
-            }
-          }
-          catch (Exception ex) {
-            _log("Exception when getting the value of a local variable", ex);
-            currWatch.setNoValue();
-            currWatch.setNoType();
-          }
-        }
+//        // Look for a variable with this name
+//        LocalVariable localVar = null;
+//        try {
+//          frames = thread.frames();
+//          currFrame = (StackFrame) frames.get(0);
+//          localVar = currFrame.visibleVariableByName(currName);
+//        }
+//        catch (AbsentInformationException aie) {
+//          // Not compiled with debug flag.... ignore
+//        }
+//        catch (InvalidStackFrameException isfe) {
+//          currWatch.setNoValue();
+//          currWatch.setNoType();
+//          _log("Failed to get local var from stack frame", isfe);
+//          continue;
+//        }
+//
+//        if (localVar != null) {
+//          // currWatch.setValue(_getValue(currFrame.getValue(localVar)));
+//          try {
+//            Value v = _getValueOfLocalVariable(localVar, thread);
+//            if (v == null) {
+//              currWatch.setValue(_getValue(null));
+//              try {
+//                currWatch.setType(localVar.type().name());
+//              }
+//              catch (ClassNotLoadedException cnle) {
+//                List classes = _vm.classesByName(localVar.typeName());
+//                if (!classes.isEmpty()) {
+//                  currWatch.setType(((Type)classes.get(0)).name());
+//                }
+//                else {
+//                  currWatch.setTypeNotLoaded();
+//                }
+//              }
+//            }
+//            else {              
+//              currWatch.setValue(_getValue(v));
+//              currWatch.setType(v.type().name());
+//            }
+//          }
+//          catch (Exception ex) {
+//            _log("Exception when getting the value of a local variable", ex);
+//            currWatch.setNoValue();
+//            currWatch.setNoType();
+//          }
+//        }
         // if the variable being watched is not a local variable,
         //  check if it's a field
-        else {
-          ReferenceType outerRt = rt;
-          ObjectReference outer = obj;  // (null if static context)
-          Field field = outerRt.fieldByName(currName);
+        ReferenceType outerRt = rt;
+        ObjectReference outer = obj;  // (null if static context)
+        Field field = outerRt.fieldByName(currName);
+        
+        if (obj != null) {
+          // We're not in a static context
           
-          if (obj != null) {
-            // We're not in a static context
-            
-            // If we don't find it in this class, loop through any enclosing 
-            // classes. Start at this$N, where N is the number of dollar signs in
-            // the reference type's name, minus one.
-            int outerIndex = numDollars - 1;
-            if (hasAnonymous(outerRt)) {
-              // We don't know the appropriate this$N to look for so we have to
-              // search for a field that begins with this$.
-              List fields = outerRt.allFields();
-              Iterator iter = fields.iterator();
-              while (iter.hasNext()) {
-                Field f = (Field)iter.next();
-                String name = f.name();
-                if (name.startsWith("this$")) {
-                  int lastIndex = name.lastIndexOf("$");
-                  outerIndex = Integer.valueOf(name.substring(lastIndex+1, name.length())).intValue();
-                  break;
-                }
+          // If we don't find it in this class, loop through any enclosing 
+          // classes. Start at this$N, where N is the number of dollar signs in
+          // the reference type's name, minus one.
+          int outerIndex = numDollars - 1;
+          if (hasAnonymous(outerRt)) {
+            // We don't know the appropriate this$N to look for so we have to
+            // search for a field that begins with this$.
+            List fields = outerRt.allFields();
+            Iterator iter = fields.iterator();
+            while (iter.hasNext()) {
+              Field f = (Field)iter.next();
+              String name = f.name();
+              if (name.startsWith("this$")) {
+                int lastIndex = name.lastIndexOf("$");
+                outerIndex = Integer.valueOf(name.substring(lastIndex+1, name.length())).intValue();
+                break;
               }
             }
-            Field outerThis = outerRt.fieldByName("this$" + outerIndex);
-            if (field == null) {
+          }
+          Field outerThis = outerRt.fieldByName("this$" + outerIndex);
+          if (field == null) {
+            // Try concatenating "val$" to the beginning of the field in
+            // case it's a final local variable of the outer class
+            field = outerRt.fieldByName("val$" + currName);
+          }
+          
+          while ((field == null) && (outerThis != null)) {
+            outer = (ObjectReference) outer.getValue(outerThis);
+            if (outer == null) {
+              // We're probably in the constructor and this$N has
+              // not yet been initialized. We can't do anything, so just
+              // break display no value.
+              break;
+            }
+            outerRt = outer.referenceType();
+            field = outerRt.fieldByName(currName);
+            
+            if (field == null) {  
               // Try concatenating "val$" to the beginning of the field in
               // case it's a final local variable of the outer class
               field = outerRt.fieldByName("val$" + currName);
-            }
-            
-            while ((field == null) && (outerThis != null)) {
-              outer = (ObjectReference) outer.getValue(outerThis);
-              if (outer == null) {
-                // We're probably in the constructor and this$N has
-                // not yet been initialized. We can't do anything, so just
-                // break display no value.
-                break;
-              }
-              outerRt = outer.referenceType();
-              field = outerRt.fieldByName(currName);
-              
-              if (field == null) {  
-                // Try concatenating "val$" to the beginning of the field in
-                // case it's a final local variable of the outer class
-                field = outerRt.fieldByName("val$" + currName);
-                
-                if (field == null) {
-                  // Enter the loop again with the next outer enclosing class
-                  outerIndex--;
-                  outerThis = outerRt.fieldByName("this$" + outerIndex);                  
-                }
-              }
-            }
-          }
-          else {
-            // We're in a static context
-            
-            // If we don't find it in this class, loop through any enclosing
-            // classes. Do this by loading any outer classes by invoking the 
-            // method on the class loader that loaded this class and passing
-            // it the class name with the last class removed each time.
-            String rtClassName = outerRt.name();
-            int index = rtClassName.lastIndexOf("$");
-            while ((field == null) && (index != -1)) {
-              rtClassName = rtClassName.substring(0, index);
-              List l = _vm.classesByName(rtClassName);
-              if (l.isEmpty()) {
-                // field is null, we will end up setting
-                // the value to no value
-                break;
-              }
-              outerRt = (ReferenceType)l.get(0);
-              field = outerRt.fieldByName(currName);
               
               if (field == null) {
                 // Enter the loop again with the next outer enclosing class
-                index = rtClassName.lastIndexOf("$");
+                outerIndex--;
+                outerThis = outerRt.fieldByName("this$" + outerIndex);                  
               }
             }
-          }
-          
-          // Try to set the value and type of the field.
-          //  If the field is not static and we are in a static context
-          //  (outer==null), we have to setNoValue.
-          if ((field != null) &&
-              (field.isStatic() || (outer != null))) {
-            Value v = (field.isStatic()) ?
-              outerRt.getValue(field) :
-              outer.getValue(field);
-            currWatch.setValue(_getValue(v));
-            try {
-              currWatch.setType(field.type().name());
-            }
-            catch (ClassNotLoadedException cnle) {
-              List classes = _vm.classesByName(field.typeName());
-              if (!classes.isEmpty()) {
-                currWatch.setType(((Type)classes.get(0)).name());
-              }
-              else {
-                currWatch.setTypeNotLoaded();
-              }
-            }
-          }
-          else {
-            currWatch.setNoValue();
-            currWatch.setNoType();
           }
         }
+        else {
+          // We're in a static context
+          
+          // If we don't find it in this class, loop through any enclosing
+          // classes. Do this by loading any outer classes by invoking the 
+          // method on the class loader that loaded this class and passing
+          // it the class name with the last class removed each time.
+          String rtClassName = outerRt.name();
+          int index = rtClassName.lastIndexOf("$");
+          while ((field == null) && (index != -1)) {
+            rtClassName = rtClassName.substring(0, index);
+            List l = _vm.classesByName(rtClassName);
+            if (l.isEmpty()) {
+              // field is null, we will end up setting
+              // the value to no value
+              break;
+            }
+            outerRt = (ReferenceType)l.get(0);
+            field = outerRt.fieldByName(currName);
+            
+            if (field == null) {
+              // Enter the loop again with the next outer enclosing class
+              index = rtClassName.lastIndexOf("$");
+            }
+          }
+        }
+        
+        // Try to set the value and type of the field.
+        //  If the field is not static and we are in a static context
+        //  (outer==null), we have to setNoValue.
+        if ((field != null) &&
+            (field.isStatic() || (outer != null))) {
+          Value v = (field.isStatic()) ?
+            outerRt.getValue(field) :
+            outer.getValue(field);
+          currWatch.setValue(_getValue(v));
+          try {
+            currWatch.setType(field.type().name());
+          }
+          catch (ClassNotLoadedException cnle) {
+            List classes = _vm.classesByName(field.typeName());
+            if (!classes.isEmpty()) {
+              currWatch.setType(((Type)classes.get(0)).name());
+            }
+            else {
+              currWatch.setTypeNotLoaded();
+            }
+          }
+        }
+        else {
+          currWatch.setNoValue();
+          currWatch.setNoType();
+        }
+        
       }
     }
     catch (IncompatibleThreadStateException itse) {
@@ -1750,13 +1789,13 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   /**
    * Assumes that this method is only called immedeately after suspending
    * a thread.
-   * @param interpreterName Name of the interpreter in the InterpreterJVM
    */
-  private ObjectReference _getDebugInterpreter(String interpreterName)
+  private ObjectReference _getDebugInterpreter()
     throws InvalidTypeException, ClassNotLoadedException,
     IncompatibleThreadStateException, InvocationException, DebugException
   {
     ThreadReference threadRef = _suspendedThreads.peek();
+    String interpreterName = _getUniqueThreadName(threadRef);
     return _getDebugInterpreter(interpreterName, threadRef);
   }
 
@@ -1841,7 +1880,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       // Name the new interpreter based on this thread
       String interpreterName = _getUniqueThreadName(suspendedThreadRef);
       _model.getInteractionsModel().addDebugInterpreter(interpreterName, className);
-      ObjectReference debugInterpreter = _getDebugInterpreter(interpreterName);
+      ObjectReference debugInterpreter = _getDebugInterpreter();
       if (printMessages) {
         System.out.println("frame = suspendedThreadRef.frame(0);");
       }
@@ -1989,29 +2028,45 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       // copy the variables in scope into an interpreter
       // and switch the current interpreter to that interpreter
         _dumpVariablesIntoInterpreterAndSwitch();
+        _switchToSuspendedThread();
       }
       catch(AbsentInformationException aie){
         // an AbsentInformationException can be thrown if the user does not
         // compile the classes to be debugged with the -g flag
         printMessage("No debug information available for this class.\nMake sure to compile classes to be debugged with the -g flag.");
+        _hideWatches();
+        // don't updateWatches in _switchToSuspendedThread since it will display the default
+        // interpreter's watch information.
+        _switchToSuspendedThread(false);
       }
-      _switchToSuspendedThread();
     }
     catch(DebugException de) {
       throw new UnexpectedException(de);
     }
   }
+  
+  /**
+   * Calls the real switchToSuspendedThread, telling it to updateWatches.
+   * This is what is usually called.
+   */
+  private void _switchToSuspendedThread() throws DebugException {
+    _switchToSuspendedThread(true);
+  }
 
   /**
    * Performs the bookkeeping to switch to the suspened thread on the
    * top of the _suspendedThreads stack.
+   * @param updateWatches this is false if the current file does not have
+   * debug information. This prevents the default interpreter's watch values
+   * from being shown.
    */
-  private void _switchToSuspendedThread() throws DebugException {
+  private void _switchToSuspendedThread(boolean updateWatches) throws DebugException {
     if (printMessages) {
       System.out.println("_switchToSuspendedThread()");
     }
     _runningThread = null;
-    _updateWatches();
+    if (updateWatches)
+      _updateWatches();
     final ThreadReference currThread = _suspendedThreads.peek();
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
@@ -2274,14 +2329,37 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   }
   
   /**
+   * This method is called to remove all of the debug interpreters upon shutting
+   * down.
+   */
+  private void _removeAllDebugInterpreters() throws DebugException {
+    DefaultInteractionsModel interactionsModel =
+      ((DefaultInteractionsModel)_model.getInteractionsModel());
+    String oldInterpreterName;
+    if (_runningThread != null) {
+      oldInterpreterName = _getUniqueThreadName(_runningThread);
+      interactionsModel.removeInterpreter(oldInterpreterName);
+    }
+    while (!_suspendedThreads.isEmpty()) {
+      ThreadReference threadRef = _suspendedThreads.pop();
+      oldInterpreterName = _getUniqueThreadName(threadRef);
+      interactionsModel.removeInterpreter(oldInterpreterName);
+    }
+  }
+  
+  /**
    * This method is called to remove the current debug interpreter upon resuming
    * the current thread.
+   * @param fromStep If true, switch to the default interpreter since we don't want
+   * to switch to the next debug interpreter and display its watch data. We would like
+   * to just not have an active interpreter and put up an hourglass over the
+   * interactions pane, but the interpreterJVM must have an active interpreter.   
    */
-  private void removeCurrentDebugInterpreter() throws DebugException {
+  private void _removeCurrentDebugInterpreter(boolean fromStep) throws DebugException {
     DefaultInteractionsModel interactionsModel =
       ((DefaultInteractionsModel)_model.getInteractionsModel());
     // switch to next interpreter on the stack
-    if (_suspendedThreads.isEmpty()) {
+    if (fromStep || _suspendedThreads.isEmpty()) {
       interactionsModel.setToDefaultInterpreter();
     }
     else {
@@ -2339,6 +2417,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
        
     if (_suspendedThreads.size() > 0) {
       ThreadReference thread = _suspendedThreads.peek();
+      _switchToInterpreterForThreadReference(thread);
       
       try{
         if (thread.frameCount() <= 0) {
@@ -2363,14 +2442,14 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     });
   }
   
-  synchronized void currThreadSet(final DebugThreadData thread) {
-    printMessage("The current thread has been set.");
-    notifyListeners(new EventNotifier() {
-      public void notifyListener(DebugListener l) {
-        l.currThreadSet(thread);
-      }
-    });
-  }
+//  synchronized void currThreadSet(final DebugThreadData thread) {
+//    printMessage("The current thread has been set.");
+//    notifyListeners(new EventNotifier() {
+//      public void notifyListener(DebugListener l) {
+//        l.currThreadSet(thread);
+//      }
+//    });
+//  }
     
   synchronized void nonCurrThreadDied() {    
     notifyListeners(new EventNotifier() {

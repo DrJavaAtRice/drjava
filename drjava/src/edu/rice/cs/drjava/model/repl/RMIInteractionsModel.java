@@ -83,6 +83,22 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   }
   
   /**
+   * Gets the string representation of the value of a variable in the current interpreter.
+   * @param var the name of the variable
+   */
+  public String getVariableToString(String var) {
+    return _interpreterControl.getVariableToString(var);
+  }
+  
+  /**
+   * Gets the class name of a variable in the current interpreter.
+   * @param var the name of the variable
+   */
+  public String getVariableClassName(String var) {
+    return _interpreterControl.getVariableClassName(var);
+  }
+  
+  /**
    * Adds the given path to the interpreter's classpath.
    * @param path Path to add
    */

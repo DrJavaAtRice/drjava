@@ -159,6 +159,16 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   }
   
   /**
+   * Returns the class of the variable with the given name in
+   * the interpreter.
+   * @param name Name of the variable
+   * @return class of the variable
+   */
+  public Class getVariableClass(String name) {
+    return _djInterpreter.getVariableClass(name);
+  }
+  
+  /**
    * Assigns the given value to the given name in the interpreter.
    * If type == null, we assume that the type of this variable
    * has not been loaded so we set it to Object.
@@ -363,7 +373,27 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @return visitor the visitor
    */
   public TypeChecker makeTypeChecker(Context context) {
-    return new TypeChecker(context);
+    // TO DO: move this into its own class if more methods need to be added
+    return new TypeChecker(context) {
+      /**
+       * Overrides TypeChecker's default behavior on an InstanceOfExpression,
+       * since it caused a NullPointerException on "null instanceof Object"
+       * @param node the node to visit
+       */
+      public Object visit(InstanceOfExpression node) {
+        node.getReferenceType().acceptVisitor(this);
+        
+        // The expression must not have a primitive type
+        Class c = (Class) node.getExpression().acceptVisitor(this);
+        if ((c != null) && c.isPrimitive()) {
+          throw new ExecutionError("left.expression", node);
+        }
+        
+        // Set the type property
+        node.setProperty(NodeProperties.TYPE, boolean.class);
+        return boolean.class;
+      }
+    };
   }
   
   /**
