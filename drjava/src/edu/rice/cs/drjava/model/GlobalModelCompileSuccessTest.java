@@ -162,7 +162,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
    * Doesn't reset interactions because no interpretations are performed.
    */
   public void testCompileClasspathOKDifferentPackages()
-    throws BadLocationException, IOException, InterruptedException
+    throws BadLocationException, IOException, InterruptedException, edu.rice.cs.drjava.model.definitions.InvalidPackageException
   {
 //    System.out.println("testCompileClasspathOKDifferentPackages()");
     File aDir = new File(_tempDir, "a");
@@ -178,6 +178,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     doc1.saveFile(new FileSelector(fooFile));
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
+    
     doc1.startCompile();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
@@ -192,6 +193,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
 
     CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
     _model.addListener(listener2);
+    
     doc2.startCompile();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());

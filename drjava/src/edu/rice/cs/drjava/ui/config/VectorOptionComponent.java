@@ -160,7 +160,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   public boolean updateConfig() {
     Vector<T> current = new Vector<T>();
     for (int i = 0; i < _listModel.getSize(); i++) {
-      current.add((T) _listModel.getElementAt(i));  /* DefaultListModel should be generified! */
+      current.add((T) _listModel.getElementAt(i));  /* javax.swing.DefaultListModel should be generified! */
     }
     DrJava.getConfig().setSetting(_option, current);
     resetToCurrent();

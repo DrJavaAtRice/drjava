@@ -58,6 +58,7 @@ import java.util.*;
 import java.util.Vector;
 import java.util.Enumeration;
 import edu.rice.cs.util.*;
+import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
@@ -76,7 +77,6 @@ import edu.rice.cs.drjava.model.junit.*;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.project.*;
 import edu.rice.cs.drjava.platform.PlatformFactory;
-import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.drjava.model.cache.*;
 
 /**
@@ -94,7 +94,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   /**
    * a document cache that manages how many unmodified documents are open at once
    */
-  private DocumentCache _cache;
+  private DocumentCache _cache;  
   
   static final String DOCUMENT_OUT_OF_SYNC_MSG =
     "Current document is out of sync with the Interactions Pane and should be recompiled!\n";
@@ -459,8 +459,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   /**
    * @return the class with the project's main method
    */
-  public File getJarMainClass(){
-    return _state.getJarMainClass();
+  public File getMainClass(){
+    return _state.getMainClass();
   }
 
    /**
@@ -556,7 +556,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         _builtDir = f;
       }
       
-      public File getJarMainClass(){
+      public File getMainClass(){
         return _mainFile;
       }
       
@@ -600,7 +600,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return false;
       }
       
-      public File getJarMainClass(){
+      public File getMainClass(){
         return null;
       }
       
@@ -925,20 +925,26 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * Writes the project file to disk
    * @param filename where to save the project
    */
-  public void saveProject(String filename) throws IOException {
+  public void saveProject(String filename, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> info) 
+    throws IOException {
     
     String base = filename.substring(0, filename.lastIndexOf(File.separator) + 1);
     ProjectFileBuilder builder = new ProjectFileBuilder(base);
     
     // add opendefinitionsdocument
+    Vector<File> srcFileVector = new Vector<File>();
     Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
     while(odds.hasNext()){
       OpenDefinitionsDocument doc = odds.next();
       if (!doc.isUntitled()) {
-        builder.addSourceFile(doc.getFile());
+        DocumentInfoGetter g = info.get(doc); 
+        builder.addSourceFile(g);
+        srcFileVector.add(g.getFile());
       }
     }
-          
+
+    // TODO: add all the auxiliary files to the builder.  The aux files should be in the info map too
+    
     // add classpath info
     Vector<File> currentclasspaths = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
     for(int i = 0; i<currentclasspaths.size(); i++){
@@ -949,27 +955,20 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     File f = getBuildDirectory();
     //System.out.println(f);
     if(f != null)
-      builder.setBuildDir(f);
+      builder.setBuildDirectory(f);
     
     // add jar main class
-    File mainClass = getJarMainClass();
+    File mainClass = getMainClass();
     //System.out.println(f);
     if(mainClass != null){
-      builder.setJarMainClass(mainClass);
+      builder.setMainClass(mainClass);
     }
     
-    //Tried to use .toArray and a cast but always seemed to throw a class cast exception
-    Vector<File> srcFileVector = builder.getSourceFiles();
-    File [] srcFiles = new File[srcFileVector.size()];
-    for(int i = 0; i<srcFileVector.size(); i++)
-      srcFiles[i] = srcFileVector.elementAt(i);
-    
+    File[] srcFiles = srcFileVector.toArray(new File[0]);
     setFileGroupingState(_makeProjectFileGroupingState(mainClass, f, new File(filename), srcFiles));
     
     // write to disk
-    FileWriter fw = new FileWriter(filename);
-    fw.write(builder.makeProjectFile());
-    fw.close();
+    builder.write();
   }
 
   /**
@@ -978,7 +977,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @param file The project file to parse
    * @return an array of document's files to open
    */
-  public File[] openProject(File projectFile) throws IOException {
+  public File[] openProject(File projectFile) throws IOException, MalformedProjectFileException {
     final ProjectFileIR ir;
     final File[] srcFiles;
     
@@ -990,10 +989,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
                                                                getDocumentNavigator());
     setDocumentNavigator(newNav);
     
-    File buildDir = (ir.getBuildDirectory().length > 0) ? ir.getBuildDirectory()[0] : null;
+    File buildDir = ir.getBuildDirectory();
     File mainClass;
     try{
-      mainClass = ir.getJarMainClass();
+      mainClass = ir.getMainClass();
       if(mainClass != null){
         mainClass = new File(projectFile.getParentFile().getPath(), mainClass.getPath()).getCanonicalFile();
       }
@@ -1008,7 +1007,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     String tlp = projfilepath.substring(0, projfilepath.lastIndexOf(File.separator));
     newNav.setTopLevelPath(tlp);
     
-    File[] projectclasspaths = ir.getClasspath();
+    File[] projectclasspaths = ir.getClasspaths();
     Vector<File> currentclasspaths = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
     for(int i = 0; i<projectclasspaths.length; i++){
       currentclasspaths.add(projectclasspaths[i].getAbsoluteFile());
@@ -1119,6 +1118,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       
   }
 
+  
   //----------------------- Specified by IGetDocuments -----------------------//
 
   public OpenDefinitionsDocument getDocumentForFile(File file)
@@ -1906,9 +1906,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       try{
         return _cache.get(this);
       }catch(FileMovedException e){
-        System.out.println("DefaultGlobalModel: 1430: FileMovedException should be handled by box that fixes everything.");
+        System.out.println("DefaultGlobalModel: 1430: FileMovedException should be handled by something.");
       }catch(IOException e){
-        System.out.println("DefaultGlobalModel: 1432: IOException should be handled by box that fixes everything.");
+        System.out.println("DefaultGlobalModel: 1432: IOException should be handled by something.");
       }
       
       
@@ -1918,14 +1918,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         _cache.update(this, makeReconstructor());
         _cache.get(this).insertString(0, "\"Error loading document from file: " + tempFile + "\"", null);
         return _cache.get(this);
-      }catch(FileMovedException e){
-        System.out.println("DefaultGlobalModel: 1440: this should NEVER happen");
-      }catch(IOException e){
-        System.out.println("DefaultGlobalModel: 1442: this should NEVER happen");
-      }catch(BadLocationException e){
-        System.out.println("DefaultGlobalModel: 1442: this should NEVER happen");
+      }catch(Exception e){
+        throw new UnexpectedException(e);
       }
-      return null;
     }
 
     /** 
@@ -2103,6 +2098,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           resetModification();
           setFile(file);
           try {
+            // This calls getDocument().getPackageName() because
+            // this may be untitled and this.getPackageName() returns
+            // "" if it's untitled.  Right here we are interested in
+            // parsing the DefinitionsDocument's text
             _packageName = getDocument().getPackageName();
           } catch(InvalidPackageException e) {
             _packageName = null;

@@ -76,6 +76,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DocumentUIListener;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
+import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
@@ -92,6 +93,7 @@ import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.drjava.project.*;
 import edu.rice.cs.util.swing.*;
+import edu.rice.cs.util.*;
 
 /**
  * DrJava's main window.
@@ -2061,16 +2063,17 @@ public class MainFrame extends JFrame implements OptionConstants {
     openProject(_openProjectSelector);
   }
   
-  void openProject(FileOpenSelector projectSelector) {
+  public void openProject(FileOpenSelector projectSelector) {
     try {
       hourglassOn();
       final File[] file = projectSelector.getFiles();
       if( file.length < 1 ) {
         throw new IllegalStateException("Open project file selection not canceled but no project file was selected.");
       }
-      if(!_model.isProjectActive() ||
-          _model.isProjectActive() && _closeProject())    
+      if(!_model.isProjectActive() || _model.isProjectActive() && _closeProject()) {
         _openProjectHelper(file[0]);
+      }
+      
     }
     catch(OperationCanceledException oce) {
       // do nothing, we just won't open anything
@@ -2507,8 +2510,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (file.getName().indexOf(".") == -1){
         file =  new File (file.getAbsolutePath() + ".pjt");
       }
-      String filename = file.getCanonicalPath();    
-      _model.saveProject(filename);
+      String filename = file.getCanonicalPath();
+      _model.saveProject(filename, _gatherDocInfo());
       if(!(_model.getDocumentNavigator() instanceof JTreeSortNavigator)){
         _openProjectHelper(file);
       }    
@@ -2521,6 +2524,67 @@ public class MainFrame extends JFrame implements OptionConstants {
     _model.setProjectChanged(false);
   }
   
+  private Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> _gatherDocInfo() {
+    Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> map =
+      new Hashtable<OpenDefinitionsDocument,DocumentInfoGetter>();
+    List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
+    for(OpenDefinitionsDocument doc: docs) {
+      map.put(doc, _makeInfoGetter(doc));
+    }
+    return map;
+  }
+  /**
+   * Implementation may change if the scroll/selection information is later
+   * stored in a place other than the definitions pane.  Hopefully this info
+   * will eventually be backed up in the OpenDefinitionsDocument in which case
+   * all this code should be refactored into the model's _saveProject method
+   */
+  private DocumentInfoGetter _makeInfoGetter(final OpenDefinitionsDocument doc) {
+    final JScrollPane scroller = _defScrollPanes.get(doc);
+    final DefinitionsPane pane = (DefinitionsPane)scroller.getViewport().getView();
+    
+    return new DocumentInfoGetter() {
+      public Pair<Integer,Integer> getSelection() {
+        int selStart = pane.getSelectionStart();
+        int selEnd = pane.getSelectionEnd();
+        if(pane.getCaretPosition() == selStart){
+          return new Pair<Integer,Integer>(selEnd,selStart);
+        }else{
+          return new Pair<Integer,Integer>(selStart,selEnd);
+        }
+      }
+      public Pair<Integer,Integer> getScroll() {
+        int scrollv = scroller.getVerticalScrollBar().getValue();
+        int scrollh = scroller.getHorizontalScrollBar().getValue();
+        return new Pair<Integer,Integer>(scrollv,scrollh); 
+      }
+      public File getFile(){
+        if (doc.isUntitled()) {
+          return null;
+        }
+        else{
+          try {
+            return doc.getFile();
+          }catch(Exception e) {
+            throw new UnexpectedException(e);
+          }
+        }
+      }
+      public String getPackage(){
+        try {
+          return doc.getPackageName(); 
+        }catch(InvalidPackageException e) {
+          return null;
+        }
+      }
+      public boolean isActive() { 
+        return _model.getActiveDocument() == doc;
+      }
+      public boolean isUntitled() { 
+        return doc.isUntitled(); 
+      }
+    };
+  }
   
   private void _revert() {
     try {
@@ -2690,7 +2754,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   private void _runProject(){
     try {
-      final File f = _model.getJarMainClass();
+      final File f = _model.getMainClass();
       if(f != null){
         open(new FileOpenSelector(){
           public File[] getFiles() {
@@ -5689,7 +5753,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void projectRunnableChanged(){
-      if(_model.getJarMainClass() != null && _model.getJarMainClass().exists()){
+      if(_model.getMainClass() != null && _model.getMainClass().exists()){
         _runProjectAction.setEnabled(true);
       }else{
         _runProjectAction.setEnabled(false);

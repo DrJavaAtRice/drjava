@@ -57,6 +57,8 @@ import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
+import edu.rice.cs.drjava.project.MalformedProjectFileException;
+import edu.rice.cs.drjava.project.DocumentInfoGetter;
 import edu.rice.cs.util.docnavigation.*;
 
 /**
@@ -172,7 +174,9 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    * Writes the project file to disk
    * @param filename where to save the project
    */
-  public void saveProject(String filename) throws IOException;
+  public void saveProject(String filename, 
+                          Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> info) 
+    throws IOException;
   
   /**
    * Parses out the given project file, sets up the state and other configurations
@@ -180,7 +184,7 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    * @param file The project file to parse
    * @return an array of document's files to open
    */
-  public File[] openProject(File fine) throws IOException;
+  public File[] openProject(File fine) throws IOException, MalformedProjectFileException;
 
   /**
    * Performs any needed operations on the model before closing the
@@ -432,7 +436,7 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    * Return the main file for the project
    * If not in project mode, returns null
    */
-  public File getJarMainClass();
+  public File getMainClass();
   
   /**
    * Returns true the given file is in the current project file.

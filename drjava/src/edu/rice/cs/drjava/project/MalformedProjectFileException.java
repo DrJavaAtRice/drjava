@@ -49,7 +49,7 @@ package edu.rice.cs.drjava.project;
  * The exception thrown when a project file which was being parsed did not conform to the expected structure.
  * This is not a checked exception because future implementations of a project file parser might never raise it.
  */
-public class MalformedProjectFileException extends RuntimeException {
+public class MalformedProjectFileException extends Exception {
   public MalformedProjectFileException(String msg) {
     super(msg);
   }

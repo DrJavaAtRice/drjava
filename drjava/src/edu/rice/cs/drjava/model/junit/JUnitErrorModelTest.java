@@ -107,6 +107,9 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     doc.startCompile();
+    if (_model.getCompilerModel().getNumErrors() > 0) {
+      fail("compile failed: " + getCompilerErrorString());
+    }
     listener.checkCompileOccurred();
     synchronized(listener) {
       doc.startJUnit();
@@ -169,6 +172,9 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     // Compile the incorrect ABC
 //      System.out.println("compiling doc3");
     doc3.startCompile();
+    if (_model.getCompilerModel().getNumErrors() > 0) {
+      fail("compile failed: " + getCompilerErrorString());
+    }
     _model.addListener(listener);
     // Run the test: a VerifyError will be thrown.
     JUnitTestListener listener2 = new JUnitTestListener();
@@ -185,7 +191,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
   }
   
   private static final String LANGUAGE_LEVEL_TEST = 
-    "class MyTest extends TestCase {\n"+
+    "class MyTest extends junit.framework.TestCase {\n"+
     "  void testMyMethod() {\n"+ 
     "    assertEquals(\"OneString\", \"TwoStrings\");\n"+
     "  }\n"+
@@ -206,12 +212,16 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     doc.startCompile();
+    if (_model.getCompilerModel().getNumErrors() > 0) {
+      fail("compile failed: " + getCompilerErrorString());
+    }
     listener.checkCompileOccurred();
     synchronized(listener) {
       doc.startJUnit();
       listener.assertJUnitStartCount(1);
       listener.wait();
     }
+    
     // Clear document so we can make sure it's written to after startJUnit
     _model.getJUnitModel().getJUnitDocument().remove
       (0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);

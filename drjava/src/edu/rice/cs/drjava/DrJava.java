@@ -212,7 +212,7 @@ public class DrJava implements OptionConstants {
     catch (Throwable t) {
       // Show any errors to the real System.err and in an AWTExceptionHandler
       _consoleErr.println(t.getClass().getName() + ": " + t.getMessage());
-      t.printStackTrace(_consoleErr);
+      t.printStackTrace(_consoleErr);System.out.println("error thrown");
       new AWTExceptionHandler().handle(t);
     }
   }
@@ -338,7 +338,9 @@ public class DrJava implements OptionConstants {
    */
   static void openCommandLineFiles(MainFrame mf, String[] filesToOpen) {  
     for(int i = 0; i < filesToOpen.length; i++) {
-      final File file = new File(filesToOpen[i]);
+      String currFileName = filesToOpen[i];
+      boolean isProjectFile = currFileName.endsWith(".pjt");
+      final File file = new File(currFileName);
       FileOpenSelector command = new FileOpenSelector() {
         public File getFile() {
           return file;
@@ -349,7 +351,12 @@ public class DrJava implements OptionConstants {
       };
       try {
         //OpenDefinitionsDocument doc =
-        mf.getModel().openFile(command);
+        if (isProjectFile) {
+          mf.openProject(command);
+        }
+        else {
+          mf.getModel().openFile(command);
+        }
       }
       catch (FileNotFoundException ex) {
         // TODO: show a dialog? (file not found)

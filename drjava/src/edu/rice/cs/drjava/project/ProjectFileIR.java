@@ -51,25 +51,34 @@ public interface ProjectFileIR {
   /**
    * @return an array full of all the source files in this project file
    */
-  public File[] getSourceFiles();
-  
+  public DocFile[] getSourceFiles();
+    
   /**
-   * @return an array full of all the resource files in this project file
+   * These files are the external files that are saved in the project
+   * file so that they are opened as well as the project files.
+   * @return an array full of all the aux files in this project file
    */
-  public File[] getResourceFiles();
-  
+  public DocFile[] getAuxiliaryFiles();
+    
   /**
    * @return an array full of all the build directory in this project file
    */
-  public File[] getBuildDirectory();
+  public File getBuildDirectory();
   
+  /**
+   * @return an array of Files whose paths correspond to which folders in
+   * the tree should not be shown.  Any paths not in this list will be 
+   * expanded when the project is opened.
+   */
+  public File[] getCollapsedPaths();
+    
   /**
    * @return an array full of all the classpath path elements in the classpath for this project file
    */
-  public File[] getClasspath();
+  public File[] getClasspaths();
   
   /**
    * @return an the name of the file that holds the Jar main class associated with this project
    */
-  public File getJarMainClass();
+  public File getMainClass();
 }

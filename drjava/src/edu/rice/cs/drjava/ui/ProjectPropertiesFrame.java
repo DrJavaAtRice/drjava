@@ -194,7 +194,7 @@ public class ProjectPropertiesFrame extends JFrame {
     else
       _builtDirSelector.setFileField(f);
 
-    f = _mainFrame.getModel().getJarMainClass();
+    f = _mainFrame.getModel().getMainClass();
     
     textField = _jarMainClassSelector.getFileField();
     if(f == null)

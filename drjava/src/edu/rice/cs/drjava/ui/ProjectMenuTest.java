@@ -50,6 +50,7 @@ import java.util.*;
 
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.ui.*;
+import edu.rice.cs.drjava.project.MalformedProjectFileException;
 /**
  * Test functions of Project Facility working through the main frame and model.
  *
@@ -61,37 +62,43 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   private SingleDisplayModel _model;
   
   /**
-   * A temporary file
+   * temporary files
    */
-  private File _testFile = null;
+  private File _projFile;
+  private File _file1;
+  private File _file2;
+  
+  private String _file1RelName;
+  private String _file2RelName;
   
    /* the reader which reads the test project file */
   BufferedReader reader = null;
   
-  private static final String TEST_FILE_TEXT =
-    "(Source\n" +
-    " (/foo/subfoo/bar)\n"+
-    " (/foo2/subfoo/bar)\n"+
-    ")\n" +
-    "(Resources\n" +
-    ")\n" +
-    "(BuildDir\n" +
-    ")\n" + 
-    "(Classpath\n" +
-    ")\n" + 
-    "(Jar\n" +
-    ")\n";
-  
+  private String _projFileText = null;
   
   /**
    * Setup method for each JUnit test case.
    */
   public void setUp() throws IOException {
-    _testFile = File.createTempFile("_test", "pjt");
+    _projFile = File.createTempFile("test", ".pjt");
+    _file1 = File.createTempFile("test1",".java");
+    _file2 = File.createTempFile("test2",".java");
     
-    reader = new BufferedReader(new FileReader(_testFile));
-    BufferedWriter w = new BufferedWriter(new FileWriter(_testFile));
-    w.write(TEST_FILE_TEXT);
+    // generate the relative path names for the files in the project file
+    String temp = _file1.getParentFile().getCanonicalPath();
+    _file1RelName = _file1.getCanonicalPath().substring(temp.length()+1); 
+    temp = _file2.getParentFile().getCanonicalPath();
+    _file2RelName = _file2.getCanonicalPath().substring(temp.length()+1);
+    
+    _projFileText = 
+      ";; DrJava project file.  Written with build: 20040623-1933\n" +
+      "(source ;; comment\n" +
+      "   (file (name \""+ _file1RelName +"\")(select 32 32))\n" +
+      "   (file (name \""+ _file2RelName +"\")(select 0 0)))\n";
+    
+    reader = new BufferedReader(new FileReader(_projFile));
+    BufferedWriter w = new BufferedWriter(new FileWriter(_projFile));
+    w.write(_projFileText);
     w.close();
     
     _frame = new MainFrame();
@@ -103,26 +110,21 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
 
   public void tearDown() throws IOException {
     super.tearDown();
-    _testFile.delete();
+    _projFile.delete();
     _frame.dispose();
-    _testFile = null;
+    _projFile = null;
     _model = null;
     _frame = null;
     System.gc();
   }
   
-  public void testSetBuildDirectory() {
+  public void testSetBuildDirectory() throws MalformedProjectFileException, IOException {
     //test set build directory when not in project mode
     File f = new File("");
     _model.setBuildDirectory(f);
     assertEquals("Build directory should not have been set",null,_model.getBuildDirectory());
     
-    try {
-      _model.openProject(_testFile);
-    }
-    catch(IOException ioe) {
-      fail("Should not have thrown an IOException when opening a temporary file");
-    }
+    _model.openProject(_projFile);
     
     assertEquals("Build directory should not have been set",null,_model.getBuildDirectory());
     
@@ -131,13 +133,9 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     
   }
   
-  public void testCloseAllClosesProject() {
-    try {
-      _model.openProject(_testFile);
-    }
-    catch(IOException ioe) {
-      fail("Should not have thrown an IOException when opening a temporary file");
-    }
+  public void testCloseAllClosesProject()  throws MalformedProjectFileException, IOException {
+    _model.openProject(_projFile);
+    
     assertTrue("Project should have been opened",_model.isProjectActive());
     _frame.closeAll();
     assertFalse("Project should have been closed",_model.isProjectActive());

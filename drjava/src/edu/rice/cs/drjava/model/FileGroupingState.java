@@ -90,7 +90,7 @@ public interface FileGroupingState {
    * Returns the source file that has the main method of the project
    * @return null if no build directory is specified
    */
-  public File getJarMainClass();
+  public File getMainClass();
   
   /**
    * Sets the file that has the main method of the project

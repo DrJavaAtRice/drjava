@@ -198,7 +198,6 @@ public class JUnitTestManager {
     String testString = failedTest.toString();
     int firstIndex = testString.indexOf('(') + 1;
     int secondIndex = testString.indexOf(')');
-    
     String className1 = testString.substring(firstIndex, secondIndex);
     String className2 = testString.substring(0, firstIndex-1);
     String className;

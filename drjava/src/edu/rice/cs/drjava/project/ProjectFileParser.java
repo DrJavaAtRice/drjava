@@ -1,4 +1,4 @@
- /*BEGIN_COPYRIGHT_BLOCK
+/*BEGIN_COPYRIGHT_BLOCK
  *
  * This file is part of DrJava.  Download the current version of this project:
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
@@ -45,81 +45,394 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.project;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.ArrayList;
 
+import edu.rice.cs.util.Pair;
+import edu.rice.cs.util.sexp.*;
+
+/**
+ * this parser uses the s-expression parser defined in 
+ * the util pacakge.  The SExp tree given by the parser
+ * is then interpreted into a ProjectFileIR that is given
+ * to the user.  This class must also deal with different
+ * versions of the project file.
+ * 
+ * <p> If at some point new information is to be stored in
+ * the project file, the places in the code that need to change
+ * are as follows: <p> if the new information pertains to a
+ * document, the DocFile class should be augmented to
+ * store the new info.  After that, the interface for the 
+ * DocumentInfoGetter should be expanded to allow for the new
+ * data to be retrieved.  After that, add a new clause to the
+ * else-if ladder in the FilePropertyVisitor.  After that, 
+ * be sure to add the new information to the DocFile form the
+ * DocumentInfoGetter in the ProjectFileBuilder's addSourceDocument
+ * method.</p>
+ * 
+ * <p> If the change is at the top level, you must modify the
+ * evaluateExpression method in this parser and add the corresponding
+ * methods to the ProjectFileIR, ProjectFileIRImpl, and 
+ * ProjectFileBuilder</p>
+ */
 public class ProjectFileParser {
   /* singleton instance of ProjectFileParser */
   public static ProjectFileParser ONLY = new ProjectFileParser();
   
   private ProjectFileParser(){}
   
-  public ProjectFileIR parse(File projFile) throws IOException, FileNotFoundException {
-    BufferedReader r = new BufferedReader(new FileReader(projFile));
-    /* we actually want the path to the project file, not the file itself */
-    if( projFile.isFile() ) {
-      projFile = projFile.getParentFile();
+  ///////////////////// Visitors ///////////////////////
+  
+  /**
+   * Retrieves the name of a node.  The node should either be a list
+   * with its first element being a text atom, or a text atom itself.
+   */
+  private SExpVisitor<String> _nameVisitor = new SExpVisitor<String>() {
+    public String forEmpty(Empty e){
+      throw new PrivateProjectException("Found an empty node, expected a labeled node");
     }
-    SourceTag st = TagFactory.makeSourceTag(projFile, r);
-    ResourceTag rt = TagFactory.makeResourceTag(projFile, r);
-    BuildDirTag mt = TagFactory.makeBuildDirTag(projFile, r);
-    ClasspathTag ct = TagFactory.makeClasspathTag(projFile, r);
-    JarTag jt = TagFactory.makeJarTag(projFile, r);
+    public String forCons(Cons c){
+      return c.getFirst().accept(this);
+    }
+    public String forBoolAtom(BoolAtom b){
+      throw new PrivateProjectException("Found a boolean, expected a label");
+    }
+    public String forNumberAtom(NumberAtom n){
+      throw new PrivateProjectException("Found a number, expected a label");
+    }
+    public String forTextAtom(TextAtom t){
+      return t.getText();
+    }
+  };
+  
+  
+  /**
+   * Parses out a list of file nodes.
+   */
+  private SEListVisitor<List<DocFile>> _fileListVisitor = new SEListVisitor<List<DocFile>>() {
+    public List<DocFile> forEmpty(Empty e) {
+      return new ArrayList<DocFile>();
+    }
+    public List<DocFile> forCons(Cons c) {
+      List<DocFile> list = c.getRest().accept(this);
+      list.add(0,parseFile(c.getFirst()));
+      return list;
+    }
+  };
+  
+  ///////////////// methods //////////////////
+  
+  /**
+   * @param projFile the file to parse
+   * @return the project file IR
+   */
+  public ProjectFileIR parse(File projFile) 
+    throws IOException, FileNotFoundException, MalformedProjectFileException{
+    List<SEList> forest = null;
+    try {
+      forest = SExpParser.parse(projFile);
+    }
+    catch(SExpParseException e) {
+      throw new MalformedProjectFileException("Parse Error: " + e.getMessage());
+    }
     
-    return new ProjectFileIRImpl(st, rt, mt, ct, jt);
+    ProjectFileIRImpl pfir = new ProjectFileIRImpl();
+    
+    try{
+      for(SEList exp : forest) {
+        evaluateExpression(exp, pfir);
+      }
+    }catch(PrivateProjectException e){
+      throw new MalformedProjectFileException("Parse Error: " + e.getMessage());
+    }
+    
+    return pfir;
+  }
+  
+  /**
+   * Given a top-level s-expression, this method checks the name
+   * of the node and configures the given pfir appropriately.
+   * If the expression is empty, this overlooks it.
+   * @param e the top-level s-expression to check
+   * @param pfir the ProjectFileIR to update
+   */
+  private void evaluateExpression(SEList e, ProjectFileIRImpl pfir) {
+    if (e == Empty.ONLY) return;
+    Cons exp = (Cons)e; // If it's not empty, it's a cons
+      
+    String name = exp.accept(_nameVisitor);
+    if (name.compareToIgnoreCase("source") == 0) {
+      List<DocFile> fList = exp.getRest().accept(_fileListVisitor);
+      pfir.setSourceFiles(fList);
+    }
+    else if (name.compareToIgnoreCase("auxiliary") == 0) {
+      List<DocFile> fList = exp.getRest().accept(_fileListVisitor);
+      pfir.setAuxiliaryFiles(fList);
+    }
+    else if (name.compareToIgnoreCase("collapsed") == 0) {
+      List<DocFile> fList = exp.getRest().accept(_fileListVisitor);
+      pfir.setCollapsedPaths(fList);
+    }
+    else if (name.compareToIgnoreCase("build-dir") == 0) {
+      List<DocFile> fList = exp.getRest().accept(_fileListVisitor);
+      if (fList.size() > 1) {
+        throw new PrivateProjectException("Cannot have multiple build directories");
+      }
+      else if (fList.size() == 0) {
+        pfir.setBuildDirectory(null);
+      }
+      else {
+        pfir.setBuildDirectory(fList.get(0));
+      }
+    }
+    else if (name.compareToIgnoreCase("classpaths") == 0) {
+      List<DocFile> fList = exp.getRest().accept(_fileListVisitor);
+      pfir.setClasspaths(fList);
+    }
+    else if (name.compareToIgnoreCase("main-class") == 0) {
+      List<DocFile> fList = exp.getRest().accept(_fileListVisitor);
+      if (fList.size() > 1) {
+        throw new PrivateProjectException("Cannot have multiple main classes");
+      }
+      else if (fList.size() == 0) {
+        pfir.setMainClass(null);
+      }
+      else {
+        pfir.setMainClass(fList.get(0));
+      }
+    }
+  }
+  
+  
+  /**
+   * Parses out the labeled node (a non-empty list) into a DocFile.
+   * The node must have the "file" label on it.
+   * @param s the non-empty list expression
+   * @return the DocFile described by this s-expression
+   */
+  DocFile parseFile(SExp s) {
+    String name = s.accept(_nameVisitor);
+    if (name.compareToIgnoreCase("file") != 0) {
+      throw new PrivateProjectException("Expected a file tag, found: " + name);
+    }
+    if (! (s instanceof Cons)) {
+      throw new PrivateProjectException("Expected a labeled node, found a label: " + name);
+    }
+    SEList c = ((Cons)s).getRest(); // get parameter list
+    
+    FilePropertyVisitor v = new FilePropertyVisitor();
+    return c.accept(v);
+  }
+  
+  private String parseFileName(SExp s) {
+    if(s instanceof Cons){
+      SEList l = ((Cons)s).getRest();
+      if(l == Empty.ONLY){
+        throw new PrivateProjectException("expected filename, but nothing found");
+      }else{
+        return l.accept(_nameVisitor);
+      }
+    }
+    else{
+      throw new PrivateProjectException("expected name tag, found string");
+    }
+  }
+  
+  private Pair<Integer,Integer> parseIntPair(SExp s){
+    int row;
+    int col;
+    /**
+     * we're getting in a "(select # #)"
+     */
+    if(!(s instanceof Cons)){
+      throw new PrivateProjectException("expected name tag, found string");
+    }
+    
+    // get rid of "select"
+    final List<Integer> intList = new ArrayList<Integer>();
+    SEList l = ((Cons)s).getRest();
+    List<Integer> li = l.accept(new SExpVisitor<List<Integer>>() {
+      public List<Integer> forEmpty(Empty e){
+        return intList;
+      }
+  
+      public List<Integer> forCons(Cons c){
+        c.getFirst().accept(this);
+        return c.getRest().accept(this);
+      }
+  
+      public List<Integer> forBoolAtom(BoolAtom b){
+        throw new PrivateProjectException("unexpected boolean found, int expected");
+      }
+      
+      public List<Integer> forNumberAtom(NumberAtom n){
+        intList.add(n.intValue());
+        return intList;
+      }
+      
+      public List<Integer> forTextAtom(TextAtom t){
+        throw new PrivateProjectException("unexpected string found where number expected: " + t.getText());
+      }
+      
+    });
+    
+    if(li.size() == 2){
+      return new Pair<Integer, Integer>(li.get(0), li.get(1));
+    }else{
+      throw new PrivateProjectException("expected a list of 2 ints for select, found list of size " + li.size());
+    }
+  }
+
+    /**
+     * takes input of form "(str str)" and returns the second string
+     */
+    private String parseStringNode(SExp n){
+      if(n instanceof Cons){
+        return ((Cons)n).getRest().accept(_nameVisitor);
+      }else{
+        throw new PrivateProjectException("List expected, but found text instead");
+      }
+      
+    }
+  
+
+  
+  
+  //////////////// nested/inner classes ////////////////////////
+  
+  /**
+   * Traverses the list of expressions found after the "file" tag
+   * and returns the DocFile described by those properties
+   */
+  private class FilePropertyVisitor implements SEListVisitor<DocFile>{
+    String fname = "";
+    Pair<Integer,Integer> select = new Pair<Integer,Integer>(0,0);
+    Pair<Integer,Integer> scroll = new Pair<Integer,Integer>(0,0);
+    boolean active = false;
+    String pack = "";
+    
+    public DocFile forCons(Cons c){
+      String name = c.getFirst().accept(_nameVisitor); 
+      if (name.compareToIgnoreCase("name") == 0) {
+        fname = parseFileName(c.getFirst());
+      }
+      else if (name.compareToIgnoreCase("select") == 0) {
+        select = parseIntPair(c.getFirst());
+      }
+      else if (name.compareToIgnoreCase("scroll") == 0) {
+        scroll = parseIntPair(c.getFirst());
+      }
+      else if (name.compareToIgnoreCase("active") == 0) {
+        active = true;
+      }
+      else if (name.compareToIgnoreCase("package") == 0) {
+        pack = parseStringNode(c.getFirst());
+      }
+      return c.getRest().accept(this);
+    }
+    
+    public DocFile forEmpty(Empty c){
+      return new DocFile(fname, select, scroll, active, pack);
+    }
   }
   
   /**
    * concrete implementation of the ProjectFileIR which is the intreface through which DrJava
    * access info stored in a project file
    */
-  class ProjectFileIRImpl implements ProjectFileIR {
-    private SourceTag    _source = null;
-    private ResourceTag  _resource = null;
-    private BuildDirTag  _builddir = null;
-    private ClasspathTag _classpath = null;
-    private JarTag       _jar = null;
+  private static class ProjectFileIRImpl implements ProjectFileIR {
+    List<DocFile> _src;
+    List<DocFile> _aux;
+    List<? extends File> _collapsed;
+    File _buildDir;
+    List<? extends File> _classpaths;
+    File _mainClass;
     
-    public ProjectFileIRImpl(SourceTag st, ResourceTag rt, BuildDirTag bt, ClasspathTag ct, JarTag jt) {
-      _source = st;
-      _resource = rt;
-      _builddir = bt;
-      _classpath = ct;
-      _jar = jt;
+    /**
+     * Starts the project file IR off with all its
+     * default values
+     */
+    public ProjectFileIRImpl() {
+      _src = new ArrayList<DocFile>();
+      _aux = new ArrayList<DocFile>();
+      _collapsed = new ArrayList<DocFile>();
+      _classpaths = new ArrayList<DocFile>();
+      _buildDir = null;
+      _mainClass = null;
     }
     
     /**
      * @return an array full of all the source files in this project file
      */
-    public File[] getSourceFiles() {
-      return _source.entries();
+    public DocFile[] getSourceFiles() {
+      return _src.toArray(new DocFile[0]);
     }
     
     /**
      * @return an array full of all the resource files in this project file
      */
-    public File[] getResourceFiles() {
-      return _resource.entries();
+    public DocFile[] getAuxiliaryFiles() {
+      return _aux.toArray(new DocFile[0]);
     }
-
+    
     /**
-     * @return an array of the single build directory for this project file
+     * @return an array full of all the resource files in this project file
      */
-    public File[] getBuildDirectory() {
-      return _builddir.entries();
+    public File[] getCollapsedPaths() {
+      return _collapsed.toArray(new File[0]);
     }
     
     /**
      * @return an array full of all the classpath path elements in the classpath for this project file
      */
-    public File[] getClasspath() {
-      return _classpath.entries();
+    public File[] getClasspaths() {
+      return _classpaths.toArray(new File[0]);
+    }
+
+    /**
+     * @return an array of the single build directory for this project file
+     */
+    public File getBuildDirectory() {
+      return _buildDir;
     }
     
     /**
-     * @return an the name of the Jar main class associated with this project
+     * @return the file of the class whose main method should be run when
+     * running the project in DrJava
      */
-    public File getJarMainClass() {
-      return (_jar.entries().length > 0) ? _jar.entries()[0] : null;
+    public File getMainClass() {
+      return _mainClass;
+    }
+    
+    //////////// Package Protected Setter Methods //////////
+    
+    void setSourceFiles(List<DocFile> src) {
+      _src = src;
+    }
+    void setAuxiliaryFiles(List<DocFile> aux) {
+      _aux = aux;
+    }
+    void setCollapsedPaths(List<DocFile> path) {
+      _collapsed = path;
+    }
+    void setClasspaths(List<DocFile> cp) {
+      _classpaths = cp;
+    }
+    void setBuildDirectory(File dir) {
+      _buildDir = dir;
+    }
+    void setMainClass(File main) {
+      _mainClass = main;
+    }
+  } // end ProjectFileIRImpl class
+
+  
+  private class PrivateProjectException extends RuntimeException{
+    public PrivateProjectException(String message){
+      super(message);
     }
   }
 }
