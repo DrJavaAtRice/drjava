@@ -218,6 +218,72 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   }
 
   /**
+   * Creates a JUnit test suite over all currently open documents and runs it.
+   * If the class file associated with a file is not a test case, it will be
+   * ignored.  Synchronized against the compiler model to prevent testing and
+   * compiling at the same time, which would create invalid results.
+   */
+  public void junitProject() {
+    synchronized (_compilerModel) {
+//      File d = getProjectFile();
+//      if(d == null) return;
+//      d = d.getParentFile();
+//      File[] files = FileOps.getFilesInDir(d, true);
+//      for(File f: files){
+//        try{
+//          if(_getter.isAlreadyOpen(f)){
+//            _getter.getDocumentForFile(f);
+//          }else{
+//            // assume the 
+//          }
+//        }catch(IOException e){
+//          // error opening the file, so don't inlcude it in testing
+//        }
+//      }
+      
+      //reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
+      _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
+      Iterator<OpenDefinitionsDocument> it =
+        _getter.getDefinitionsDocuments().iterator();
+      HashMap<String,OpenDefinitionsDocument> classNamesToODDs =
+        new HashMap<String,OpenDefinitionsDocument>();
+      ArrayList<String> classNames = new ArrayList<String>();
+      ArrayList<File> files = new ArrayList<File>();
+      while (it.hasNext()) {
+        try {
+          OpenDefinitionsDocument doc = it.next();
+          if (!doc.isUntitled()) {
+            String cn = doc.getQualifiedClassName();
+            classNames.add(cn);
+            File f;
+            try {
+              f = doc.getFile();
+            }
+            catch (FileMovedException fme) {
+              f = fme.getFile();
+            }
+            files.add(f);
+            classNamesToODDs.put(cn, doc);
+          }
+        }
+        catch (ClassNameNotFoundException cnnfe) {
+          // don't add it to the test suite
+        }
+      }
+      List<String> tests = _jvm.runTestSuite(classNames, files, true);
+      ArrayList<OpenDefinitionsDocument> odds =
+        new ArrayList<OpenDefinitionsDocument>();
+      Iterator<String> it2 = tests.iterator();
+      while (it2.hasNext()) {
+        odds.add(classNamesToODDs.get(it2.next()));
+      }
+      _notifier.junitStarted(odds);
+      _isTestInProgress = true;
+    }
+  }
+
+  
+  /**
    * Runs JUnit on the current document. Used to compile all open documents
    * before testing but have removed that requirement in order to allow the
    * debugging of test cases. If the classes being tested are out of

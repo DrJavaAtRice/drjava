@@ -56,6 +56,8 @@ import java.beans.*;
 import java.lang.reflect.InvocationTargetException;
 
 import java.io.*;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -2326,28 +2328,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   
-  private void getFilesInDir(File d, List<File> acc, boolean recur){
-    if(d.isDirectory()){
-      File[] fa = d.listFiles();
-      for(File f: fa){
-        if(f.isDirectory() && recur){ 
-          getFilesInDir(f, acc, recur);
-        }else if(f.isFile()){
-          acc.add(f);
-        }
-      }      
-    }else{
-      acc.add(d);
-    }
-  }
-  
-  private File[] getFilesInDir(File d, boolean recur){
-    ArrayList<File> l = new ArrayList<File>();
-    getFilesInDir(d, l, recur);
-    return l.toArray(new File[0]);    
-  }
-  
-  
   /**
    * Opens all the files in the directory returned by the FolderSelector prompting
    * the user to handle the cases where files are already open,
@@ -2365,11 +2345,41 @@ public class MainFrame extends JFrame implements OptionConstants {
       
       
       File dir = openSelector.getDirectory(opendir);
+      ArrayList<File> files;
       if(dir != null && dir.isDirectory()){
-        final File[] files = getFilesInDir(dir, openSelector.isRecursive());
+        files = FileOps.getFilesInDir(dir, openSelector.isRecursive(), new FileFilter(){
+          public boolean accept(File f){ 
+            return f.isDirectory() ||
+              f.isFile() && 
+              f.getName().endsWith(DrJava.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
+          }
+        });
+        
+        if(_model.isProjectActive()){
+          Collections.sort(files, new Comparator<File>(){
+            public int compare(File o1,File o2){
+              return - o1.getAbsolutePath().compareTo(o2.getAbsolutePath());
+            }
+            public boolean equals(Object o){
+              return false;
+            }
+          });
+        }else{
+          Collections.sort(files, new Comparator<File>(){
+            public int compare(File o1,File o2){
+              return - o1.getName().compareTo(o2.getName());
+            }
+            public boolean equals(Object o){
+              return false;
+            }
+          });
+        }
+        
+        final File[] sfiles = files.toArray(new File[0]);
+        
         open(new FileOpenSelector(){
           public File[] getFiles() {
-            return files;
+            return sfiles;
           }
         });
       }
