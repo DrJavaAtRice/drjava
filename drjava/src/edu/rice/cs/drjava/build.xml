@@ -164,7 +164,7 @@
   </target>
 
   <!-- Compiles only the JSR-14 v1.0 specific classes, and adds
-       them to compilers-jsr14v1_0.jar in the lib directory.
+       them to compilers.jar in the lib directory.
        Deletes the compiled classes when finished.
     -->
   <target name="compile-jsr14v1_0">
@@ -181,8 +181,7 @@
     </antcall>
 
     <!-- Make a jar in the lib directory. No tests are included. -->
-    <delete file="${lib_dir}/compilers-jsr14v1_0.jar" />
-    <jar jarfile="${lib_dir}/compilers-jsr14v1_0.jar" >
+    <jar jarfile="${lib_dir}/compilers.jar" update="yes">
       <fileset dir="${built_jsr14v1_0}" excludes="**/*Test.class">
         <include name="${projpath}/**" />
 
@@ -196,7 +195,7 @@
   </target>
 
   <!-- Compiles only the JSR-14 v1.2 specific classes, and adds
-       them to compilers-jsr14v1_2.jar in the lib directory.
+       them to compilers.jar in the lib directory.
        Deletes the compiled classes when finished.
     -->
   <target name="compile-jsr14v1_2">
@@ -213,8 +212,7 @@
     </antcall>
 
     <!-- Make a jar in the lib directory. No tests are included. -->
-    <delete file="${lib_dir}/compilers-jsr14v1_2.jar" />
-    <jar jarfile="${lib_dir}/compilers-jsr14v1_2.jar" >
+    <jar jarfile="${lib_dir}/compilers.jar" update="yes">
       <fileset dir="${built_jsr14v1_2}" excludes="**/*Test.class">
         <include name="${projpath}/**" />
 
@@ -228,7 +226,7 @@
   </target>
     
   <!-- Compiles only the Mac OS X JDK 1.3 specific classes, and adds
-       them to platform-mac13.jar in the lib directory.
+       them to platform.jar in the lib directory.
        Deletes the compiled classes when finished.
     -->
   <target name="compile-mac13">
@@ -245,8 +243,7 @@
     </antcall>
 
     <!-- Make a jar in the lib directory. No tests are included. -->
-    <delete file="${lib_dir}/platform-mac13.jar" />
-    <jar jarfile="${lib_dir}/platform-mac13.jar" >
+    <jar jarfile="${lib_dir}/platform.jar" update="yes">
       <fileset dir="${built_mac13}" excludes="**/*Test.class">
         <include name="${projpath}/**" />
 
@@ -306,7 +303,7 @@
   </target>
     
   <!-- Compiles only the Mac OS X JDK 1.4 specific classes, and adds
-       them to platform-mac13.jar in the lib directory.
+       them to platform.jar in the lib directory.
        Deletes the compiled classes when finished.
     -->
   <target name="compile-mac14">
@@ -323,8 +320,7 @@
     </antcall>
 
     <!-- Make a jar in the lib directory. No tests are included. -->
-    <delete file="${lib_dir}/platform-mac14.jar" />
-    <jar jarfile="${lib_dir}/platform-mac14.jar" >
+    <jar jarfile="${lib_dir}/platform.jar" update="yes">
       <fileset dir="${built_mac14}" excludes="**/*Test.class">
         <include name="${projpath}/**" />
 
@@ -384,7 +380,7 @@
   </target>
     
   <!-- Compiles only the Windows specific classes, and adds
-       them to platform-mac13.jar in the lib directory.
+       them to platform.jar in the lib directory.
        Deletes the compiled classes when finished.
     -->
   <target name="compile-windows">
@@ -401,8 +397,7 @@
     </antcall>
 
     <!-- Make a jar in the lib directory. No tests are included. -->
-    <delete file="${lib_dir}/platform-windows.jar" />
-    <jar jarfile="${lib_dir}/platform-windows.jar" >
+    <jar jarfile="${lib_dir}/platform.jar" update="yes">
       <fileset dir="${built_windows}" excludes="**/*Test.class">
         <include name="${projpath}/**" />
 
@@ -502,9 +497,9 @@
                   excludes="META-INF/MANIFEST.MF" />
       <zipfileset src="${lib_dir}/junit.jar"
                   excludes="META-INF/MANIFEST.MF" />
-      <zipfileset src="${lib_dir}/compilers-jsr14v1_0.jar"
+      <zipfileset src="${lib_dir}/compilers.jar"
                   excludes="META-INF/MANIFEST.MF" />
-      <zipfileset src="${lib_dir}/compilers-jsr14v1_2.jar"
+      <zipfileset src="${lib_dir}/platform.jar"
                   excludes="META-INF/MANIFEST.MF" />
 
       <!-- Include DrJava classes -->
