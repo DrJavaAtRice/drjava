@@ -164,6 +164,84 @@ public final class ExecJVM {
 
     return Runtime.getRuntime().exec(argArray);
   }
+  
+  /**
+   * Empties BufferedReaders by copying lines into LinkedLists.
+   * This is intended for use with the output streams from an ExecJVM process.
+   * Source and destination objects are specified for stdout and for stderr.
+   * @param theProc a Process object whose output will be handled
+   * @param outLines the LinkedList of Strings to be filled with the lines read from outBuf
+   * @param errLines the LinkedList of Strings to be filled with the lines read from errBuf
+   */
+  public static void ventBuffers(Process theProc, LinkedList outLines,
+                          LinkedList errLines) throws IOException {
+    BufferedReader outBuf = new BufferedReader(new InputStreamReader(theProc.getInputStream()));
+    BufferedReader errBuf = new BufferedReader(new InputStreamReader(theProc.getErrorStream()));
+    String output;
+    
+    if (outBuf.ready()) {
+      output = outBuf.readLine();
+      
+      while (output != null) {
+//        System.out.println("[stdout]: " + output);
+        outLines.add(output);
+        if (outBuf.ready()) {
+          output = outBuf.readLine();
+        }
+        else {
+          output = null;
+        }
+      }
+    }
+    
+    if (errBuf.ready()) {
+      output = errBuf.readLine();
+      while (output != null) {
+//        System.out.println("[stderr] " + output);
+        errLines.add(output);
+        if (errBuf.ready()) {
+          output = errBuf.readLine();
+        }
+        else {
+          output = null;
+        }
+      }
+    }
+  }
+  
+  /**
+   * Prints the stdout and stderr of the given process, line by line.  Adds a
+   * message and tag to identify the source of the output.  Note that this code
+   * will print all available stdout before all stderr, since it is impossible
+   * to determine in which order lines were added to the respective buffers.
+   * @param theProc a Process object whose output will be handled
+   * @param msg an initial message to print before output
+   * @param sourceName a short string to identify the process
+   * @throws IOException if there is a problem with the streams
+   */
+  public static void printOutput(Process theProc, String msg, String sourceName)
+    throws IOException {
+    // First, write out our opening message.
+    System.err.println(msg);
+    
+    LinkedList outLines = new LinkedList();
+    LinkedList errLines = new LinkedList();
+    
+    ventBuffers(theProc, outLines, errLines);
+    
+    Iterator it = outLines.iterator();
+    String output;
+    while (it.hasNext()) {
+      output = (String) it.next();
+      System.err.println("    [" +sourceName + " stdout]: " + output);
+    }
+    
+    it = errLines.iterator();
+    while (it.hasNext()) {
+      output = (String) it.next();
+      System.err.println("    [" +sourceName + " stderr]: " + output);
+    }
+  }
     
   private static void _addArray(LinkedList list, Object[] array) {
     if (array != null) {
