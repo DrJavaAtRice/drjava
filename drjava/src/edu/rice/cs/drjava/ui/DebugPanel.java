@@ -83,9 +83,10 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private JTable _threadTable;
   private long _currentThreadID;
   
-  private JPopupMenu _threadRunningPopupMenu;
+  // private JPopupMenu _threadRunningPopupMenu;
   private JPopupMenu _threadSuspendedPopupMenu;
   private JPopupMenu _stackPopupMenu;
+  private JPopupMenu _breakpointPopupMenu;
   
   private final SingleDisplayModel _model;
   private final MainFrame _frame;
@@ -404,7 +405,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     JPanel closeButtonPanel = new JPanel(new BorderLayout());
     mainButtons.setLayout( new GridLayout(0,1));
     
-    Action resumeAction = new AbstractAction( "Resume" ) {
+    Action resumeAction = new AbstractAction("Resume") {
       public void actionPerformed(ActionEvent ae) {
         try {
           _frame.debuggerResume();
@@ -416,14 +417,14 @@ public class DebugPanel extends JPanel implements OptionConstants {
     };
     _resumeButton = new JButton(resumeAction);
     
-    Action stepIntoAction = new AbstractAction( "Step Into" ) {
+    Action stepIntoAction = new AbstractAction("Step Into") {
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerStep(Debugger.STEP_INTO);
       }
     };
     _stepIntoButton = new JButton(stepIntoAction);
     
-    Action stepOverAction = new AbstractAction( "Step Over" ) {
+    Action stepOverAction = new AbstractAction("Step Over") {
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerStep(Debugger.STEP_OVER);
       }
@@ -491,10 +492,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
     };
 
     _threadSuspendedPopupMenu = new JPopupMenu("Thread Selection");
-    JMenuItem threadSuspendedSelect = new JMenuItem();
-    threadSuspendedSelect.setAction(selectAction);
-    JMenuItem threadSuspendedResume = new JMenuItem();
-    threadSuspendedResume.setAction(new AbstractAction() {
+    _threadSuspendedPopupMenu.add(selectAction);
+    _threadSuspendedPopupMenu.add(new AbstractAction("Resume Thread") {
       public void actionPerformed(ActionEvent e) {
         try {
           _debugger.resume(getSelectedThread());
@@ -504,14 +503,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
         }
       }
     });
-    _threadSuspendedPopupMenu.add(threadSuspendedSelect);
-    _threadSuspendedPopupMenu.add(threadSuspendedResume);
-    threadSuspendedSelect.setText("Select Thread");
-    threadSuspendedResume.setText("Resume Thread");
     
     _stackPopupMenu = new JPopupMenu("Stack Selection");
-    JMenuItem stackMenuItem = new JMenuItem();
-    stackMenuItem.setAction(new AbstractAction() {
+    _stackPopupMenu.add(new AbstractAction("Scroll to Source") {
       public void actionPerformed(ActionEvent e) {
         try {
           _debugger.scrollToSource(getSelectedStackItem());
@@ -521,10 +515,59 @@ public class DebugPanel extends JPanel implements OptionConstants {
         }
       }
     });
-    _stackPopupMenu.add(stackMenuItem);
-    stackMenuItem.setText("Scroll to Source");
+
+    _breakpointPopupMenu = new JPopupMenu("Breakpoint");
+    _breakpointPopupMenu.add(new AbstractAction("Scroll to Source") {
+      public void actionPerformed(ActionEvent e) {
+        _scrollToSourceIfBreakpoint();
+      }
+    });
+    _breakpointPopupMenu.add(new AbstractAction("Remove Breakpoint") {
+      public void actionPerformed(ActionEvent e) {
+        try {
+          _debugger.removeBreakpoint(_getSelectedBreakpoint());
+        }
+        catch (DebugException de) {
+          _frame._showDebugError(de);
+        }
+      }
+    });
+    _bpTree.addMouseListener(new BreakpointMouseAdapter());
   }
-  
+
+  /**
+   * Gets the currently selected breakpoint in the breakpoint tree,
+   * or null if the selected node is a classname and not a breakpoint.
+   * @return the current breakpoint in the tree
+   * @throws DebugException if the node is not a valid breakpoint
+   */
+  private Breakpoint _getSelectedBreakpoint() throws DebugException {
+    TreePath path = _bpTree.getSelectionPath();
+    if (path.getPathCount() == 3) {
+      DefaultMutableTreeNode lineNode =
+        (DefaultMutableTreeNode)path.getLastPathComponent();
+      int line = ((Integer) lineNode.getUserObject()).intValue();
+      DefaultMutableTreeNode classNameNode =
+        (DefaultMutableTreeNode) path.getPathComponent(1);
+      String className = (String) classNameNode.getUserObject();
+      return _debugger.getBreakpoint(line, className);
+    }
+    else {
+      return null;
+    }
+  }
+
+  private void _scrollToSourceIfBreakpoint() {
+    try {
+      Breakpoint bp = _getSelectedBreakpoint();
+      if (bp != null) {
+        _debugger.scrollToSource(bp);
+      }
+    }
+    catch (DebugException de) {
+      _frame._showDebugError(de);
+    }
+  }
   /**
    * Sets the font for a cell in the thread table.
    * @param renderer the renderer
@@ -575,8 +618,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
      * debugger, to request that the line be displayed.
      * @param doc Document to display
      * @param lineNumber Line to display or highlight
+     * @param shouldHighlight true iff the line should be highlighted.
      */
-    public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber) {}
+    public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) {}
     
     /**
      * Called when a breakpoint is set in a document.
@@ -830,9 +874,31 @@ public class DebugPanel extends JPanel implements OptionConstants {
   }
 
   /**
-   * Concrete DebugMouseAdapter for the thread table.
+   * Mouse adapter for the breakpoint tree.
    */
-  private class ThreadMouseAdapter extends DebugMouseAdapter {
+  private class BreakpointMouseAdapter extends RightClickMouseAdapter {
+    protected void _popupAction(MouseEvent e) {
+      int x = e.getX();
+      int y = e.getY();
+      TreePath path = _bpTree.getPathForLocation(x, y);
+      if (path != null && path.getPathCount() == 3) {
+        _bpTree.setSelectionRow(_bpTree.getRowForLocation(x, y));
+        _breakpointPopupMenu.show(e.getComponent(), x, y);
+      }
+    }
+
+    public void mousePressed(MouseEvent e) {
+      super.mousePressed(e);
+      if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
+        _scrollToSourceIfBreakpoint();
+      }
+    }
+  }
+
+  /**
+   * Concrete DebugTableMouseAdapter for the thread table.
+   */
+  private class ThreadMouseAdapter extends DebugTableMouseAdapter {
     public ThreadMouseAdapter() {
       super(_threadTable);
     }
@@ -860,11 +926,11 @@ public class DebugPanel extends JPanel implements OptionConstants {
       }
     }
   }
-  
+
   /**
-   * Concrete DebugMouseAdapter for the stack table.
+   * Concrete DebugTableMouseAdapter for the stack table.
    */
-  private class StackMouseAdapter extends DebugMouseAdapter {
+  private class StackMouseAdapter extends DebugTableMouseAdapter {
     public StackMouseAdapter() {
       super(_stackTable);
     }
@@ -887,11 +953,11 @@ public class DebugPanel extends JPanel implements OptionConstants {
    * A mouse adapter that allows for double-clicking and
    * bringing up a right-click menu.
    */
-  private abstract class DebugMouseAdapter extends RightClickMouseAdapter {
+  private abstract class DebugTableMouseAdapter extends RightClickMouseAdapter {
     protected JTable _table;
     protected int _lastRow;
 
-    public DebugMouseAdapter(JTable table) {
+    public DebugTableMouseAdapter(JTable table) {
       _table = table;
       _lastRow = -1;
     }

@@ -63,8 +63,9 @@ public interface DebugListener {
    * debugger, to request that the line be displayed.
    * @param doc Document to display
    * @param lineNumber Line to display or highlight
+   * @param shouldHighlight whether to highlight the given line or not
    */
-  public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber);  
+  public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight);  
   
   /**
    * Called when a breakpoint is set in a document.

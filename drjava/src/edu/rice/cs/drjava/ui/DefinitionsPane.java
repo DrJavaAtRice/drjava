@@ -974,6 +974,8 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       
       this.scrollRectToVisible(startRect);
       removeSetSizeListener();
+      
+      setCaretPosition(offset);
     }
     
     catch (BadLocationException e) {

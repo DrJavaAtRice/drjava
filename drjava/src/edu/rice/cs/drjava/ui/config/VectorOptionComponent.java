@@ -179,6 +179,21 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
   }
   
   /**
+   * Constructor that allows for a tooltip description.
+   */
+  public VectorOptionComponent (VectorOption<File> opt, String text,
+                                Frame parent, String description) {
+    this(opt, text, parent);
+    setDescription(description);
+  }
+
+  public void setDescription(String description) {
+    _listScrollPane.setToolTipText(description);
+    _list.setToolTipText(description);
+    _label.setToolTipText(description);
+  }
+
+  /**
    * Updates the config object with the new setting.
    * @return true if the new value is set successfully
    */

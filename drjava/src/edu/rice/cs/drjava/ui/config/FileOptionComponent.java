@@ -101,6 +101,22 @@ public class FileOptionComponent extends OptionComponent<File>
   }
   
   /**
+   * Constructor that allows for a tooltip description.
+   */
+  public FileOptionComponent (FileOption opt, String text, Frame parent,
+                              String description, JFileChooser jfc) {
+    this(opt, text, parent, jfc);
+    setDescription(description);
+  }
+
+  public void setDescription(String description) {
+    _panel.setToolTipText(description);
+    _button.setToolTipText(description);
+    _jtf.setToolTipText(description);
+    _label.setToolTipText(description);
+  }
+
+  /**
    * Updates the config object with the new setting.
    * @return true if the new value is set successfully
    */
@@ -210,5 +226,4 @@ public class FileOptionComponent extends OptionComponent<File>
      
    return true;
   }
-  
 }

@@ -1779,7 +1779,7 @@ public final class DebugTest extends GlobalModelTestCase
       fail("debuggerShutdown fired unexpectedly");
     }
 
-    public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber) {
+    public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) {
       fail("threadLocationUpdated fired unexpectedly");
     }
   
@@ -1903,7 +1903,7 @@ public final class DebugTest extends GlobalModelTestCase
       }
     }
     public void threadLocationUpdated(OpenDefinitionsDocument doc, 
-                                      int lineNumber) {
+                                      int lineNumber, boolean shouldHighlight) {
       // EventHandler's thread: test should wait
       synchronized(_notifierLock) {
         threadLocationUpdatedCount++;

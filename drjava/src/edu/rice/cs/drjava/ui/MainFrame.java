@@ -3216,7 +3216,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     }    
        
     public void threadLocationUpdated(final OpenDefinitionsDocument doc, 
-                                      final int lineNumber) {
+                                      final int lineNumber,
+                                      final boolean shouldHighlight) {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
@@ -3240,21 +3241,24 @@ public class MainFrame extends JFrame implements OptionConstants {
           // has a positive size
           if (_currentDefPane.getSize().getWidth() > 0 &&
               _currentDefPane.getSize().getHeight() > 0) {
-            _currentDefPane.centerViewOnLine(lineNumber); 
+            _currentDefPane.centerViewOnLine(lineNumber);
+            _currentDefPane.requestFocus();
           }
-          
-          _removeThreadLocationHighlight();
-          DefinitionsDocument defDoc = doc.getDocument();
-          int startOffset = defDoc.getOffset(lineNumber);
-          if (startOffset > -1) {
-            int endOffset = defDoc.getLineEndPos(startOffset);
-            if (endOffset > -1) {
-              _currentThreadLocationHighlight = 
-                _currentDefPane.getHighlightManager().addHighlight(startOffset,
-                                                                   endOffset,
-                                                                   DefinitionsPane.THREAD_PAINTER);
+
+          if (shouldHighlight) {
+            _removeThreadLocationHighlight();
+            DefinitionsDocument defDoc = doc.getDocument();
+            int startOffset = defDoc.getOffset(lineNumber);
+            if (startOffset > -1) {
+              int endOffset = defDoc.getLineEndPos(startOffset);
+              if (endOffset > -1) {
+                _currentThreadLocationHighlight = 
+                  _currentDefPane.getHighlightManager().addHighlight(startOffset, endOffset,
+                                                                     DefinitionsPane.THREAD_PAINTER);
+              }
             }
           }
+
           if (doc.isModifiedSinceSave() && 
               !_currentDefPane.hasWarnedAboutModified()) {
             

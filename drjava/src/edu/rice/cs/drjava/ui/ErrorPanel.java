@@ -462,7 +462,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
             if (pos != null) {
               int errPos = pos.getOffset();
               if (errPos >= 0 && errPos <= defPane.getText().length()) {
-                defPane.setCaretPosition(errPos);
+                defPane.centerViewOnOffset(errPos);
               }
             }
             defPane.requestFocus();

@@ -300,4 +300,24 @@ public class NoDebuggerAvailable implements Debugger {
   public void scrollToSource(DebugStackData data) {
     throw new IllegalStateException("No debugger is available");
   }
+
+  /**
+   * scrolls to the source indicated by the given Breakpoint
+   * @param bp the Breakpoint representing the source location
+   */
+  public void scrollToSource(Breakpoint bp) {
+    throw new IllegalStateException("No debugger is available");
+  }
+
+  /**
+   * Gets the Breakpoint object at the specified line in the given class.
+   * If the given data do not correspond to an actual breakpoint, null is returned.
+   * @param line the line number of the breakpoint
+   * @param className the name of the class the breakpoint's in
+   * @return the Breakpoint corresponding to the line and className, or null if
+   *         there is no such breakpoint.
+   */
+  public Breakpoint getBreakpoint(int line, String className) {
+    throw new IllegalStateException("No debugger is available");
+  }
 }

@@ -51,7 +51,7 @@ import java.awt.*;
  */
 public class BooleanOptionComponent extends OptionComponent<Boolean> {
   private JCheckBox _jcb;
-  
+
   public BooleanOptionComponent (BooleanOption opt, String text, Frame parent) {
     super(opt, "", parent);
     _jcb = new JCheckBox();
@@ -59,7 +59,25 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
     
     _jcb.setSelected(DrJava.getConfig().getSetting(_option).booleanValue());
   }
-  
+
+  /**
+   * Constructor that allows for a tooltip description.
+   */
+  public BooleanOptionComponent (BooleanOption opt, String text,
+                                 Frame parent, String description) {
+    this(opt, "", parent);
+    setDescription(description);
+    _jcb.setText(text);
+  }
+
+  public void setDescription(String description) {
+    String text = _jcb.getText();
+    _jcb.setToolTipText(description);
+    _jcb.setText(text);
+    // need to do this since setting the tooltip erases the text of a JCheckBox.
+    _label.setToolTipText(description);
+  }
+
   /**
    * Updates the config object with the new setting.
    * @return true if the new value is set successfully

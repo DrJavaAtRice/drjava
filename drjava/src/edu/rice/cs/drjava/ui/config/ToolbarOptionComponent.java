@@ -102,6 +102,22 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
   }
   
   /**
+   * Constructor that allows for a tooltip description.
+   */
+  public ToolbarOptionComponent(String title, Frame parent, String description) {
+    this(title, parent);
+    setDescription(description);
+  }
+
+  public void setDescription(String description) {
+    _buttonPanel.setToolTipText(description);
+    _textButton.setToolTipText(description);
+    _iconsButton.setToolTipText(description);
+    _textAndIconsButton.setToolTipText(description);
+    _label.setToolTipText(description);
+  }
+  
+  /**
    * Selects the radio button corresponding to the current config options.
    */ 
   public void resetToCurrent() {

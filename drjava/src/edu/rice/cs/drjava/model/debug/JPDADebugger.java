@@ -1003,9 +1003,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   /**
    * Removes all the breakpoints from the manager's vector of breakpoints.
    */
-  public synchronized void removeAllBreakpoints() 
-    throws DebugException
-  {
+  public synchronized void removeAllBreakpoints() throws DebugException {
     _ensureReady();
     
     while (_breakpoints.size() > 0) {
@@ -1155,7 +1153,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     Object docProp = request.getProperty("document");
     if ((docProp != null) && (docProp instanceof OpenDefinitionsDocument)) {
       doc = (OpenDefinitionsDocument) docProp;
-      openAndScroll(doc, location);
+      openAndScroll(doc, location, true);
     }
     else {
       scrollToSource(location);
@@ -1166,6 +1164,13 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Scroll to the location specified by location
    */
   synchronized void scrollToSource(Location location) {
+    scrollToSource(location, true);
+  }
+
+  /**
+   * Scroll to the location specified by location
+   */
+  synchronized void scrollToSource(Location location, boolean shouldHighlight) {
     OpenDefinitionsDocument doc = null;
     
     // No stored doc, look on the source root set (later, also the sourcepath)
@@ -1215,7 +1220,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       }
     }
     
-    openAndScroll(doc, location);
+    openAndScroll(doc, location, shouldHighlight);
   }
 
   /**
@@ -1252,11 +1257,38 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
           stackData.getMethod().equals(frame.location().declaringType().name() + "." + 
                                        frame.location().method().name()))
       {
-        scrollToSource(frame.location());
+        scrollToSource(frame.location(), false);
       }
     }
   }
-  
+
+  /**
+   * Scrolls to the source of the given breakpoint.
+   * @param bp the breakpoint
+   */
+  public synchronized void scrollToSource(Breakpoint bp) {
+    openAndScroll(bp.getDocument(), bp.getLineNumber(), bp.getClassName(), false);
+  }
+
+  /**
+   * Gets the Breakpoint object at the specified line in the given class.
+   * If the given data do not correspond to an actual breakpoint, null is returned.
+   * @param line the line number of the breakpoint
+   * @param className the name of the class the breakpoint's in
+   * @return the Breakpoint corresponding to the line and className, or null if
+   *         there is no such breakpoint.
+   */
+  public Breakpoint getBreakpoint(int line, String className) {
+    for (int i = 0; i < _breakpoints.size(); i++) {
+      Breakpoint bp = _breakpoints.elementAt(i);
+      if ((bp.getLineNumber() == line) && (bp.getClassName().equals(className))) {
+        return bp;
+      }
+    }
+    // bp not found in the list of breakpoints
+    return null;
+  }
+
   /** 
    * Opens a document and scrolls to the appropriate location.  If
    * doc is null, a message is printed indicating the source file
@@ -1264,23 +1296,34 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * @param doc Document to open
    * @param location Location to display
    */
-  synchronized void openAndScroll(OpenDefinitionsDocument doc, Location location) {
+  synchronized void openAndScroll(OpenDefinitionsDocument doc,
+                                  Location location,
+                                  boolean shouldHighlight) {
+    openAndScroll(doc, location.lineNumber(), location.declaringType().name(), shouldHighlight);
+  }
+  
+  /** 
+   * Opens a document and scrolls to the appropriate location.  If
+   * doc is null, a message is printed indicating the source file
+   * could not be found.
+   * @param doc Document to open
+   * @param line the line number to display
+   * @param className the name of the appropriate class
+   */
+  synchronized void openAndScroll(final OpenDefinitionsDocument doc, final int line,
+                                  String className, final boolean shouldHighlight) {
     // Open and scroll if doc was found
     if (doc != null) {
       doc.checkIfClassFileInSync();
       // change UI if in sync in MainFrame listener
       
-      final OpenDefinitionsDocument docF = doc;
-      final Location locationF = location;
-      
       notifyListeners(new EventNotifier() {
         public void notifyListener(DebugListener l) {
-          l.threadLocationUpdated(docF, locationF.lineNumber());
+          l.threadLocationUpdated(doc, line, shouldHighlight);
         }
       });
     }
     else {
-      String className = location.declaringType().name();
       printMessage("  (Source for " + className + " not found.)");
     }
   }

@@ -58,6 +58,20 @@ public class IntegerOptionComponent extends OptionComponent<Integer> {
   }
   
   /**
+   * Constructor that allows for a tooltip description.
+   */
+  public IntegerOptionComponent (IntegerOption opt, String text,
+                                 Frame parent, String description) {
+    this(opt, text, parent);
+    setDescription(description);
+  }
+
+  public void setDescription(String description) {
+    _jtf.setToolTipText(description);
+    _label.setToolTipText(description);
+  }
+
+  /**
    * Updates the config object with the new setting.
    * @return true if the new value is set successfully
    */

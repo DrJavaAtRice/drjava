@@ -76,9 +76,21 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
     }
       
     resetToCurrent(DrJava.getConfig().getSetting(_option));
-    
   }
   
+  /**
+   * Constructor that allows for a tooltip description.
+   */
+  public ForcedChoiceOptionComponent(ForcedChoiceOption option, String labelText,
+                                     Frame parent, String description) {
+    this(option, labelText, parent);
+    setDescription(description);
+  }
+
+  public void setDescription(String description) {
+    _comboBox.setToolTipText(description);
+  }
+
   /**
    * Selects the radio button corresponding to the current config options.
    */ 

@@ -59,6 +59,16 @@ public class LabelComponent extends OptionComponent<Object> {
     _text.setBackground(new Color(204,204,204));
   }
   
+  public LabelComponent(String text, Frame parent, String description) {
+    this(text, parent);
+    setDescription(description);
+  }
+
+  public void setDescription(String description) {
+    _text.setToolTipText(description);
+    _label.setToolTipText(description);
+  }
+
   /**
    * Updates the config object with the new setting.  (Does nothing.)
    * @return true if the new value is set successfully

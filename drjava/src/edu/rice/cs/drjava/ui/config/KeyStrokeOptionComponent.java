@@ -105,6 +105,22 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
   }
   
   /**
+   * Constructor that allows for a tooltip description.
+   */
+  public KeyStrokeOptionComponent(KeyStrokeOption opt, String text,
+                                  Frame parent, String description) {
+    this(opt, text, parent);
+    setDescription(description);
+  }
+
+  public void setDescription(String description) {
+    _panel.setToolTipText(description);
+    _button.setToolTipText(description);
+    _keyField.setToolTipText(description);
+    _label.setToolTipText(description);
+  }
+
+  /**
    * Returns a custom string representation of this option component.
    */
   public String toString() { 

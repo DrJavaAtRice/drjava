@@ -82,9 +82,23 @@ public class FontOptionComponent extends OptionComponent<Font> {
     _currentFont = DrJava.getConfig().getSetting(_option);
     _newFont = _currentFont;
     _updateField(_currentFont);
-    
   }
   
+  /**
+   * Constructor that allows for a tooltip description.
+   */
+  public FontOptionComponent(FontOption opt, String text,
+                             Frame parent, String description) {
+    this(opt, text, parent);
+    setDescription(description);
+  }
+
+  public void setDescription(String description) {
+    _panel.setToolTipText(description);
+    _fontField.setToolTipText(description);
+    _label.setToolTipText(description);
+  }
+
   /**
    * Updates the font field to display the given font.
    */

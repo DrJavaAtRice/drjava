@@ -107,6 +107,32 @@ public class ColorOptionComponent extends OptionComponent<Color> {
   }
   
   /**
+   * Constructor that allows for a tooltip description.
+   */
+  public ColorOptionComponent (ColorOption opt, String text,
+                               Frame parent, String description) {
+    this(opt, text, parent, description, false);
+  }
+
+  /**
+   * Constructor that allows for a tooltip description as well as whether
+   * or not this is a background color.
+   */
+  public ColorOptionComponent(ColorOption opt, String text, Frame parent,
+                              String description, boolean isBackgroundColor)
+  {
+    this(opt, text, parent, isBackgroundColor);
+    setDescription(description);
+  }
+
+  public void setDescription(String description) {
+    _panel.setToolTipText(description);
+    _button.setToolTipText(description);
+    _colorField.setToolTipText(description);
+    _label.setToolTipText(description);
+  }
+    
+  /**
    * Updates the config object with the new setting.
    * @return true if the new value is set successfully
    */

@@ -82,7 +82,14 @@ public abstract class OptionComponent<T> {
   public JLabel getLabel() { return _label; } 
   
   public abstract JComponent getComponent();
-  
+
+  /**
+   * Sets the detailed description text for all components in this OptionComponent.
+   * Should be called by subclasses that wish to display a description.
+   * @param description the description of the component
+   */
+  public abstract void setDescription(String description);
+
   /**
    * Updates the appropriate configuration option with the new value 
    * if different from the old value and legal. Any changes should be 
