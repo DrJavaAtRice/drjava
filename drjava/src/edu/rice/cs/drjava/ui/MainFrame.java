@@ -217,7 +217,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 //  private JMenuItem _clearAllBreakpointsMenuItem;
 
   // Popup menus
-  private JPopupMenu _docPanePopupMenu;
+  private JPopupMenu _navPanePopupMenu;
   private JPopupMenu _interactionsPanePopupMenu;
   private JPopupMenu _consolePanePopupMenu;
 
@@ -1649,7 +1649,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 //          if (_aboutDialog != null) {
 //            SwingUtilities.updateComponentTreeUI(_aboutDialog);
 //          }
-//          SwingUtilities.updateComponentTreeUI(_docPanePopupMenu);
+//          SwingUtilities.updateComponentTreeUI(_navPanePopupMenu);
 //          SwingUtilities.updateComponentTreeUI(_interactionsPanePopupMenu);
 //          SwingUtilities.updateComponentTreeUI(_consolePanePopupMenu);
 //          SwingUtilities.updateComponentTreeUI(_openChooser);
@@ -2512,9 +2512,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       String filename = file.getCanonicalPath();
       _model.saveProject(filename, _gatherDocInfo());
-      if(!(_model.getDocumentNavigator() instanceof JTreeSortNavigator)){
-        _openProjectHelper(file);
-      }    
+//      if(!(_model.getDocumentNavigator() instanceof JTreeSortNavigator)){
+//        _openProjectHelper(file);
+//      }    
     }
     catch(IOException ioe) {
       _showIOError(ioe);
@@ -4175,25 +4175,25 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Sets up the context menu to show in the document pane.
    */
   private void _setUpContextMenus() {
-    // DocPane menu
-    _docPanePopupMenu = new JPopupMenu();
-    _docPanePopupMenu.add(_saveAction);
-    _docPanePopupMenu.add(_saveAsAction);
-    _docPanePopupMenu.add(_revertAction);
-    _docPanePopupMenu.addSeparator();
-    _docPanePopupMenu.add(_closeAction);
-    _docPanePopupMenu.addSeparator();
-    _docPanePopupMenu.add(_printAction);
-    _docPanePopupMenu.add(_printPreviewAction);
-    _docPanePopupMenu.addSeparator();
-    _docPanePopupMenu.add(_compileAction);
-    _docPanePopupMenu.add(_junitAction);
-    _docPanePopupMenu.add(_javadocCurrentAction);
-    _docPanePopupMenu.add(_runAction);
+    // NavPane menu
+    _navPanePopupMenu = new JPopupMenu();
+    _navPanePopupMenu.add(_saveAction);
+    _navPanePopupMenu.add(_saveAsAction);
+    _navPanePopupMenu.add(_revertAction);
+    _navPanePopupMenu.addSeparator();
+    _navPanePopupMenu.add(_closeAction);
+    _navPanePopupMenu.addSeparator();
+    _navPanePopupMenu.add(_printAction);
+    _navPanePopupMenu.add(_printPreviewAction);
+    _navPanePopupMenu.addSeparator();
+    _navPanePopupMenu.add(_compileAction);
+    _navPanePopupMenu.add(_junitAction);
+    _navPanePopupMenu.add(_javadocCurrentAction);
+    _navPanePopupMenu.add(_runAction);
     _model.getDocCollectionWidget().addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
         if(_model.getDocumentNavigator().selectDocumentAt(e.getX(), e.getY())){
-          _docPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+          _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
         }
       }
     });

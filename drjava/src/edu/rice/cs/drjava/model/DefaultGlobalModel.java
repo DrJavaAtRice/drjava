@@ -964,12 +964,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       builder.setMainClass(mainClass);
     }
     
-    File[] srcFiles = srcFileVector.toArray(new File[0]);
-    setFileGroupingState(_makeProjectFileGroupingState(mainClass, f, new File(filename), srcFiles));
-    
     // write to disk
     builder.write();
-  }
+
+  
+    // set the state if all went well
+    File[] srcFiles = srcFileVector.toArray(new File[0]);
+    setFileGroupingState(_makeProjectFileGroupingState(mainClass, f, new File(filename), srcFiles));
+}
 
   /**
    * Parses out the given project file, sets up the state and other configurations
