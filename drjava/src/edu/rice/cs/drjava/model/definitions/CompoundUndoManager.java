@@ -117,8 +117,7 @@ public class CompoundUndoManager extends UndoManager {
    */
   public void endCompoundEdit(int key) {
     if(_keys.get(0).intValue() == key) {
-      CompoundEdit compoundEdit = _compoundEdits.get(0);
-      _compoundEdits.remove(0);
+      CompoundEdit compoundEdit = _compoundEdits.remove(0);
       compoundEdit.end();
 
       if (compoundEdit.canUndo()) {
@@ -212,26 +211,25 @@ public class CompoundUndoManager extends UndoManager {
   }
 
   /**
-   * overrides the inherited undo method so that an exception will
-   * be thrown if undo is attempted while in the compound undo state
+   * Undoes the last undoable edit, or compound edit created by the user.
+   * Since addition of granular undo, undoing is allowed while in the compound
+   * edit state.  In this case, the edit is ended cleanly and then begun.
    */
   public void undo() {
-    if(_compoundEditInProgress()) {
+    if (_compoundEditInProgress()) {
       while (_keys.size() > 0) {
         endCompoundEdit(_keys.get(0).intValue());
       }
-      super.undo();
 //      throw new CannotUndoException();
     }
-    else {
-      super.undo();
-    }
+    super.undo();
   }
 
   /**
    * Overload for undo which allows the initiator of a CompoundEdit to abondon it.
    * XXX: This has not been properly tested and very possibly may not work.
    * @param key the key returned by the last call to startCompoundEdit
+   * @throws IllegalArgumentException if the key is incorrect
    */
   public void undo(int key) {
     if(_keys.get(0).intValue() == key) {
@@ -242,6 +240,9 @@ public class CompoundUndoManager extends UndoManager {
       compoundEdit.end();
       compoundEdit.undo();
       compoundEdit.die();
+    }
+    else {
+      throw new IllegalArgumentException("Bad undo key " + key + "!");
     }
   }
 

@@ -223,11 +223,15 @@ public class InteractionsController extends AbstractConsoleController {
 
   /**
    * Gets the input listener for console input requests.
-   *
+   */
   public InputListener getInputListener() {
     return _inputListener;
-  }*/
+  }
 
+  /**
+   * Notifies the inputEnteredAction. Called by DefaultGlobalModel when reset is called so
+   * that this lock is released.
+   */
   public void notifyInputEnteredAction() {
     synchronized(_inputEnteredAction) {
       _inputEnteredAction.notify();
@@ -255,14 +259,6 @@ public class InteractionsController extends AbstractConsoleController {
   public InteractionsDocument getDocument() {
     return _doc;
   }
-
-  /**
-   * Notifies the inputEnteredAction. Called by DefaultGlobalModel when reset is called so
-   * that this lock is released.
-   */
-//  public void notifyInputEnteredAction() {
-// _inputEnteredAction.notify();
-//}
 
   /**
    * Adds AttributeSets as named styles to the document adapter.

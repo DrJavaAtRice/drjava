@@ -69,14 +69,6 @@ public final class JavaInterpreterTest extends TestCase {
   }
 
   /**
-   * Creates a TestSuite of tests to be run.
-   * @return the new TestSuite
-   */
-  public static Test suite() {
-    return  new TestSuite(JavaInterpreterTest.class);
-  }
-
-  /**
    * Asserts that the results of interpreting the first of each
    * Pair is equal to the second.
    * @param cases an array of Pairs
@@ -94,11 +86,15 @@ public final class JavaInterpreterTest extends TestCase {
    */
   public void testConstants() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
-      Pair.make("5", new Integer(5)), Pair.make("1356", new Integer(1356)), Pair.make("true",
-          Boolean.TRUE), Pair.make("false", Boolean.FALSE), Pair.make("\'c\'", "'" + new Character('c') + "'"),
-          Pair.make("1.345", new Double(1.345)), Pair.make("\"buwahahahaha!\"",
-          new String("\"buwahahahaha!\"")), Pair.make("\"yah\\\"eh\\\"\"", new String("\"yah\"eh\"\"")),
-          Pair.make("'\\''", "'" + new Character('\'') + "'"),
+      Pair.make("5", new Integer(5)),
+        Pair.make("1356", new Integer(1356)),
+        Pair.make("true", Boolean.TRUE),
+        Pair.make("false", Boolean.FALSE),
+        Pair.make("\'c\'", "'" + new Character('c') + "'"),
+        Pair.make("1.345", new Double(1.345)),
+        Pair.make("\"buwahahahaha!\"", new String("\"buwahahahaha!\"")),
+        Pair.make("\"yah\\\"eh\\\"\"", new String("\"yah\"eh\"\"")),
+        Pair.make("'\\''", "'" + new Character('\'') + "'")
     };
     tester(cases);
   }
@@ -128,7 +124,7 @@ public final class JavaInterpreterTest extends TestCase {
   public void testShortCircuit() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       Pair.make("false && (3 == 1/0)", Boolean.FALSE),
-        Pair.make("true || (1/0 != 43)", Boolean.TRUE)
+      Pair.make("true || (1/0 != 43)", Boolean.TRUE)
     };
     tester(cases);
   }

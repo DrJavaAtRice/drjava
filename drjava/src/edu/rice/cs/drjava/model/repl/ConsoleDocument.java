@@ -70,6 +70,11 @@ public class ConsoleDocument implements DocumentAdapter {
   public static final String SYSTEM_ERR_STYLE = "System.err";
 
   /**
+   * Style for System.in
+   */
+  public static final String SYSTEM_IN_STYLE = "System.in";
+
+  /**
    * The default prompt to use in the console.
    */
   public static final String DEFAULT_CONSOLE_PROMPT = "";

@@ -48,6 +48,8 @@ package edu.rice.cs.drjava.model.repl;
 import edu.rice.cs.drjava.model.repl.newjvm.*;
 import edu.rice.cs.util.text.DocumentAdapter;
 
+import java.util.Vector;
+
 /**
  * An InteractionsModel which can serve as the glue between a local
  * InteractionsDocument and a remote JavaInterpreter in another JVM.
@@ -167,7 +169,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
 
     boolean inProgress = _interpreterControl.setToDefaultInterpreter();
 
-    _updateDocument(_document.DEFAULT_PROMPT, inProgress, printPrompt);
+    _updateDocument(InteractionsDocument.DEFAULT_PROMPT, inProgress, printPrompt);
     _notifyInterpreterChanged(inProgress);
   }
 
@@ -199,5 +201,13 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    */
   public void setPrivateAccessible(boolean allow) {
     _interpreterControl.setPrivateAccessible(allow);
+  }
+
+  /**
+   * Gets the interpreter classpath from the interpreter jvm.
+   * @return a vector of classpath elements
+   */
+  public Vector<String> getClasspath() {
+    return _interpreterControl.getClasspath();
   }
 }

@@ -73,7 +73,6 @@ import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
-import edu.rice.cs.drjava.ui.config.*;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.ExitingNotAllowedException;
@@ -756,14 +755,18 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private Action _viewInteractionsClasspathAction = new AbstractAction("View Interactions Classpath") {
     public void actionPerformed(ActionEvent e) {
-      String classpath = "";
+//      String classpath = "";
+      StringBuffer cpBuf = new StringBuffer();
       Vector<String> classpathElements = _model.getClasspath();
       for(int i = 0; i < classpathElements.size(); i++) {
-        classpath += classpathElements.get(i);
+//        classpath += classpathElements.get(i);
+        cpBuf.append(classpathElements.get(i));
         if (i + 1 < classpathElements.size()) {
-          classpath += "\n";
+//          classpath += "\n";
+          cpBuf.append("\n");
         }
       }
+      String classpath = cpBuf.toString();
 
       new DrJavaScrollableDialog(MainFrame.this, "Interactions Classpath",
                                  "Current Interpreter Classpath", classpath).show();
@@ -3405,11 +3408,9 @@ public class MainFrame extends JFrame implements OptionConstants {
    *       Answer: no! The cast here is a hack until we refactor DGM.
    */
   private void _setUpDocumentSelector() {
-    _docList = new JList
-      (((DefaultSingleDisplayModel) _model).getDefinitionsDocs());
+    _docList = new JList(((DefaultGlobalModel) _model).getDefinitionsDocs());
     _docList.setSelectionModel(_model.getDocumentSelectionModel());
     _docList.setCellRenderer(new DocCellRenderer());
-
   }
 
   /**

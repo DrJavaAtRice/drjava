@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,26 +32,25 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 
-import javax.swing.KeyStroke; 
+import javax.swing.KeyStroke;
 import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
 import java.io.IOException;
 import java.util.Locale;
 import junit.framework.*;
-import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.util.newjvm.ExecJVM;
 
 /**
@@ -65,18 +64,18 @@ public final class KeyStrokeOptionTest extends TestCase
    * @param name The name of this test case.
    */
   public KeyStrokeOptionTest(String name) { super(name); }
-  
+
   public void setUp() {}
-  
+
   public void testGetName()
   {
     KeyStrokeOption io1 = new KeyStrokeOption("indent_size",null);
     KeyStrokeOption io2 = new KeyStrokeOption("max_files",null);
-    
+
     assertEquals("indent_size", io1.getName());
     assertEquals("max_files",   io2.getName());
   }
-  
+
   public void testParse()
   {
     KeyStrokeOption io = new KeyStrokeOption("max_files",null);
@@ -99,21 +98,21 @@ public final class KeyStrokeOptionTest extends TestCase
     /*assertEquals(KeyStroke.getKeyStroke(new Character('%'),
      InputEvent.ALT_MASK | InputEvent.CTRL_MASK),
      io.parse("ctrl alt typed %"));*/
-    
+
     try { io.parse("true"); fail(); }
     catch (IllegalArgumentException e) {}
-    
+
     try { io.parse(".33"); fail(); }
     catch (IllegalArgumentException e) {}
-    
+
     try { io.parse("Alt Z"); fail(); }
     catch (IllegalArgumentException e) {}
-    
+
     try { io.parse("ctrl alt shift typed F1"); fail(); }
     catch (IllegalArgumentException e) {}
   }
-  
-  /** 
+
+  /**
    * Test the format method by comparing a KeyStroke object to itself after it
    * has been formatted to a string and parsed back into a KeyStroke object.
    * We cannot compare strings because format always puts the modifiers in the
@@ -139,7 +138,7 @@ public final class KeyStrokeOptionTest extends TestCase
                                 true);
     assertEquals(ks, io.parse(io.format(ks)));
   }
-  
+
   /**
    * Tests that key strokes are output in a parseable format
    * even in foreign locales.
@@ -147,19 +146,19 @@ public final class KeyStrokeOptionTest extends TestCase
    * is set, it cannot be set back.  (If someone can figure out how
    * to effectively set it back, feel free to remove this hack!)
    */
-  public void testLocaleSpecificFormat() 
+  public void testLocaleSpecificFormat()
     throws IOException, InterruptedException
   {
     String className = "edu.rice.cs.drjava.config.KeyStrokeOptionTest";
     String[] args = new String[0];
-    
+
     Process process = ExecJVM.
       runJVMPropogateClassPath(className, args);
     int status = process.waitFor();
     assertEquals("Local specific keystroke test failed!",
                  0, status);
   }
-  
+
   /**
    * Main method to be called by testLocalSpecificFormat.  Runs in
    * a new JVM so as not to affect the locale of other tests.
@@ -170,9 +169,9 @@ public final class KeyStrokeOptionTest extends TestCase
 
     KeyStrokeOption io = new KeyStrokeOption("test",null);
     KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_A,
-                                          InputEvent.ALT_MASK | 
+                                          InputEvent.ALT_MASK |
                                           InputEvent.CTRL_MASK |
-                                          InputEvent.SHIFT_MASK | 
+                                          InputEvent.SHIFT_MASK |
                                           InputEvent.META_MASK);
     String s = io.format(ks);
     // Test alt/option
@@ -191,9 +190,9 @@ public final class KeyStrokeOptionTest extends TestCase
     if ((s.indexOf("meta") == -1) && (s.indexOf("command") == -1)) {
       System.exit(4);
     }
-    
+
     // Ok, so exit cleanly
     System.exit(0);
   }
-  
+
 }
