@@ -61,10 +61,7 @@ class FindReplaceDialog extends JDialog {
     public void windowDeactivated(WindowEvent ev) {}
     public void windowDeiconified(WindowEvent ev) {}
     public void windowIconified(WindowEvent ev) {}
-    public void windowOpened(WindowEvent ev) {
-      _findField.grabFocus();
-      _findField.setCaretPosition(0);
-    }
+    public void windowOpened(WindowEvent ev) {}
   };
 
   private Action _findNextAction = new AbstractAction("Find Next") {
@@ -175,6 +172,9 @@ class FindReplaceDialog extends JDialog {
         }
       }
       public void keyReleased(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+          _close();
+        }
       }
       public void keyTyped(KeyEvent e) {
       }      

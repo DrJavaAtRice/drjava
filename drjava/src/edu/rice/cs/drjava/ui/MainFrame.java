@@ -12,9 +12,6 @@ import java.io.IOException;
 /** 
  * DrJava's main window.
  * @version $Id$
- * Main DrJava window.
- * It has a menu and then a scroll pane with three components:
- *   Definitions, Output and Interactions. 
  */
 public class MainFrame extends JFrame {
   private static final int INTERACTIONS_TAB = 0;
@@ -23,7 +20,7 @@ public class MainFrame extends JFrame {
   private CompilerErrorPanel _errorPanel;
   private DefinitionsPane _definitionsPane;
   private OutputPane _outputPane;
-  InteractionsPane _interactionsPane;
+  private InteractionsPane _interactionsPane;
   private JTextField _fileNameField;
   private JTabbedPane _tabbedPane;
   private JMenuBar _menuBar;
@@ -32,10 +29,10 @@ public class MainFrame extends JFrame {
   private JMenu _helpMenu;
   private GlobalModel _model;
   private FindReplaceDialog _findReplace;
-  JButton _saveButton;
-  JButton _compileButton;
-  JMenuItem _saveMenuItem;
-  JMenuItem _compileMenuItem;
+  private JButton _saveButton;
+  private JButton _compileButton;
+  private JMenuItem _saveMenuItem;
+  private JMenuItem _compileMenuItem;
   
   /** 
    * For opening files.
@@ -171,6 +168,74 @@ public class MainFrame extends JFrame {
     }
   };
 
+  /** Creates the main window, and shows it. */
+  public MainFrame() {
+    _model = new GlobalModel();
+    _openChooser = new JFileChooser(System.getProperty("user.dir"));
+    _openChooser.setFileFilter(new JavaSourceFilter());
+    _saveChooser = new JFileChooser(System.getProperty("user.dir"));
+    //set up the hourglass cursor
+    setGlassPane(new GlassPane());
+    _definitionsPane = new DefinitionsPane(this, _model);
+    this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+    this.addWindowListener(_windowCloseListener);
+    _model.addListener(new ModelListener());
+    // Make the menu bar
+    _setUpMenuBar();
+    _setUpTabs();
+    setBounds(0, 0, 700, 700);
+    setSize(700, 700);
+    _setUpPanes();
+    updateFileTitle("Untitled");
+    _setAllFonts(new Font("Monospaced", 0, 12));
+    _findReplace = new FindReplaceDialog(this, _definitionsPane);
+  }
+
+  /**
+   * Make the cursor an hourglass.
+   */
+  public void hourglassOn() {
+    getGlassPane().setVisible(true);
+  }
+
+  /**
+   * Return the cursor to normal.
+   */
+  public void hourglassOff() {
+    getGlassPane().setVisible(false);
+  }
+
+
+  /**
+   * put your documentation comment here
+   * @param filename
+   */
+  public void updateFileTitle(String filename) {
+    setTitle(filename + " - DrJava");
+    _fileNameField.setText(filename);
+  }
+
+  /** 
+   * Prompt the user to select a place to open a file from, then load it.
+   * Ask the user if they'd like to save previous changes (if the current
+   * document has been modified) before opening.
+   */
+  public File getOpenFile() throws OperationCanceledException {
+    _openChooser.setSelectedFile(null);
+    int rc = _openChooser.showOpenDialog(this);
+    return getFileName(_openChooser, rc);
+  }
+
+  /** 
+   * Prompt the user to select a place to save the current document.
+   */
+  public File getSaveFile() throws OperationCanceledException {
+    _saveChooser.setSelectedFile(null);
+    int rc = _saveChooser.showSaveDialog(this);
+    return getFileName(_saveChooser, rc);
+  }
+
+  
   /** 
    * Makes sure save and compile buttons and menu items
    * are enabled and disabled appropriately after document
@@ -198,222 +263,7 @@ public class MainFrame extends JFrame {
       }
     });
   }
-
-  /**
-   * put your documentation comment here
-   */
-  private class GlassPane extends JComponent {
-
-    /**
-     * put your documentation comment here
-     */
-    public GlassPane() {
-      addKeyListener(new KeyAdapter() {});
-      addMouseListener(new MouseAdapter() {});
-      super.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    }
-  }
-
-  /**
-   * put your documentation comment here
-   */
-  public void hourglassOn() {
-    getGlassPane().setVisible(true);
-  }
-
-  /**
-   * put your documentation comment here
-   */
-  public void hourglassOff() {
-    getGlassPane().setVisible(false);
-  }
-
-  /** Creates the main window, and shows it. */
-  public MainFrame() {
-    _model = new GlobalModel();
-    _openChooser = new JFileChooser(System.getProperty("user.dir"));
-    _openChooser.setFileFilter(new JavaSourceFilter());
-    _saveChooser = new JFileChooser(System.getProperty("user.dir"));
-    //set up the hourglass cursor
-    setGlassPane(new GlassPane());
-    _fileNameField = new JTextField();
-    _fileNameField.setEditable(false);
-    _definitionsPane = new DefinitionsPane(this, _model);
-    _outputPane = new OutputPane();
-    _errorPanel = new CompilerErrorPanel(_definitionsPane);
-    this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-    this.addWindowListener(_windowCloseListener);
-    _model.addListener(new ModelListener());
-    // Make the menu bar
-    _menuBar = new JMenuBar();
-    _fileMenu = new JMenu("File");
-    _editMenu = new JMenu("Edit");
-    _helpMenu = new JMenu("Help");
-    // Add items to menus
-    _helpMenu.add(_aboutAction);
-    JMenuItem tmpItem = _fileMenu.add(_newAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
-    tmpItem = _fileMenu.add(_openAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
-    tmpItem = _fileMenu.add(_saveAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
-    
-    // keep track of the save menu item
-    _saveMenuItem = tmpItem;
-    
-    tmpItem = _fileMenu.add(_saveAsAction);
-    _fileMenu.addSeparator();
-    tmpItem = _fileMenu.add(_compileAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
-
-    // keep track of the compile menu item
-    _compileMenuItem = tmpItem;
-        
-    _fileMenu.addSeparator();
-    tmpItem = _fileMenu.add(_quitAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
-    Action cutAction = new DefaultEditorKit.CutAction();
-    cutAction.putValue(Action.NAME, "Cut");
-    Action copyAction = new DefaultEditorKit.CopyAction();
-    copyAction.putValue(Action.NAME, "Copy");
-    Action pasteAction = new DefaultEditorKit.PasteAction();
-    pasteAction.putValue(Action.NAME, "Paste");
-    /*The undo/redo menus and key action
-     //tmpItem = _editMenu.add(_definitionsPane.getUndoAction());
-     //tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
-     //                                             ActionEvent.CTRL_MASK));    
-     //tmpItem = _editMenu.add(_definitionsPane.getRedoAction());
-     //tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
-     //                                             ActionEvent.CTRL_MASK));
-     _editMenu.addSeparator();
-     */
-    tmpItem = _editMenu.add(cutAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.CTRL_MASK));
-    tmpItem = _editMenu.add(copyAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
-    tmpItem = _editMenu.add(pasteAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK));
-    _editMenu.addSeparator();
-    tmpItem = _editMenu.add(_findReplaceAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK));
-    tmpItem = _editMenu.add(_gotoLineAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, ActionEvent.CTRL_MASK));
-    _editMenu.add(_clearOutputAction);
-    _editMenu.add(_resetInteractionsAction);
-    // Add the menus to the menu bar
-    _menuBar.add(_fileMenu);
-    _menuBar.add(_editMenu);
-    _menuBar.add(_helpMenu);
-    // Menu bars can actually hold anything!
-    _menuBar.add(_fileNameField);
-    // Add buttons.
-    _saveButton = new JButton(_saveAction);
-    _saveButton.setEnabled(false);
-    _menuBar.add(_saveButton);
-    _compileButton = new JButton(_compileAction);
-    _menuBar.add(_compileButton);
-    _compileButton.setEnabled(false);
-    setJMenuBar(_menuBar);
-    // Make the output view the active one
-    _outputPane.makeActive();
-    _interactionsPane = new InteractionsPane(_model);
-    _tabbedPane = new JTabbedPane();
-    _tabbedPane.add("Interactions", new JScrollPane(_interactionsPane));
-    _tabbedPane.add("Compiler output", _errorPanel);
-    _tabbedPane.add("Console", new JScrollPane(_outputPane));
-    // Select interactions pane when interactions tab is selected
-    _tabbedPane.addChangeListener(new ChangeListener() {
-
-      /**
-       * put your documentation comment here
-       * @param e
-       */
-      public void stateChanged(ChangeEvent e) {
-        if (_tabbedPane.getSelectedIndex() == INTERACTIONS_TAB) {
-          _interactionsPane.grabFocus();
-        }
-      }
-    });
-    JScrollPane defScroll = new JScrollPane(_definitionsPane,
-                                            JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, 
-                                            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-    JSplitPane split1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, defScroll, 
-        _tabbedPane);
-    setBounds(0, 0, 700, 700);
-    getContentPane().add(split1, BorderLayout.CENTER);
-    setSize(700, 700);
-    // This is annoyingly order-dependent. Since split2 contains split1,
-    // we need to get split2's divider set up first to give split1 an overall
-    // size. Then we can set split1's divider. Ahh, Swing.
-    // Also, according to the Swing docs, we need to set these dividers AFTER
-    // we have shown the window. How annoying.
-    split1.setDividerLocation(2*getHeight()/3);
-    //split2.setDividerLocation(50);
-    updateFileTitle("Untitled");
-    _setAllFonts(new Font("Monospaced", 0, 12));
-    _findReplace = new FindReplaceDialog(this, _definitionsPane);
-  }
-
-
-  GlobalModel getGlobalModel() {
-    return _model;
-  }
   
-
-  /**
-   * put your documentation comment here
-   * @param f
-   */
-  private void _setAllFonts(Font f) {
-    _definitionsPane.setFont(f);
-    _interactionsPane.setFont(f);
-    _outputPane.setFont(f);
-    _errorPanel.setListFont(f);
-  }
-
-  /**
-   * put your documentation comment here
-   * @param filename
-   */
-  public void updateFileTitle(String filename) {
-    setTitle(filename + " - DrJava");
-    _fileNameField.setText(filename);
-  }
-
-  /**
-   * put your documentation comment here
-   * @return 
-   */
-  DefinitionsPane getDefPane() {
-    return  _definitionsPane;
-  }
-
-  /**
-   * put your documentation comment here
-   * @return 
-   */
-  OutputPane getOutPane() {
-    return  _outputPane;
-  }
-  
-  /** Prompt the user to select a place to open a file from, then load it.
-   *  Ask the user if they'd like to save previous changes (if the current
-   *  document has been modified) before opening.
-   */
-  public File getOpenFile() throws OperationCanceledException {
-    _openChooser.setSelectedFile(null);
-    int rc = _openChooser.showOpenDialog(this);
-    return getFileName(_openChooser, rc);
-  }
-
-  /** 
-   * Prompt the user to select a place to save the current document.
-   */
-  public File getSaveFile() throws OperationCanceledException {
-    _saveChooser.setSelectedFile(null);
-    int rc = _saveChooser.showSaveDialog(this);
-    return getFileName(_saveChooser, rc);
-  }
   
   private void _open() {
     try {
@@ -450,7 +300,9 @@ public class MainFrame extends JFrame {
                                   JOptionPane.ERROR_MESSAGE);
   }
 
-  public File getFileName(JFileChooser fc, int choice) throws OperationCanceledException {
+  public File getFileName(JFileChooser fc, int choice) 
+    throws OperationCanceledException 
+  {
     switch (choice) {
       case JFileChooser.CANCEL_OPTION:case JFileChooser.ERROR_OPTION:
         throw new OperationCanceledException();
@@ -486,7 +338,199 @@ public class MainFrame extends JFrame {
       // Do nothing.
     }
   }
+  
+  /**
+   * Sets up the components of the menu bar and links them to the private
+   * fields within MainFrame.  This method serves to make the code
+   * more legible on the higher calling level, i.e., the constructor.
+   */
+  private void _setUpMenuBar() {    
+    _menuBar = new JMenuBar();
+    _fileMenu = _setUpFileMenu();
+    _editMenu = _setUpEditMenu();
+    _helpMenu = _setUpHelpMenu();
+    // Menu bars can actually hold anything!
+    _fileNameField = new JTextField();
+    _fileNameField.setEditable(false);
+    _menuBar.add(_fileMenu);
+    _menuBar.add(_editMenu);
+    _menuBar.add(_helpMenu);
+    _menuBar.add(_fileNameField);
+    _setUpMenuBarButtons();
+    setJMenuBar(_menuBar);
+  }
 
+  
+  /**
+   * Creates and returns a file menu.  Side effects: sets values for
+   * _saveMenuItem and _compileMenuItem.
+   */
+  private JMenu _setUpFileMenu() {
+    JMenuItem tmpItem;
+    JMenu fileMenu = new JMenu("File");
+    tmpItem = fileMenu.add(_newAction);
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, 
+                                                  ActionEvent.CTRL_MASK));
+    tmpItem = fileMenu.add(_openAction);
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, 
+                                                  ActionEvent.CTRL_MASK));
+    tmpItem = fileMenu.add(_saveAction);
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, 
+                                                  ActionEvent.CTRL_MASK));
+    
+    // keep track of the save menu item
+    _saveMenuItem = tmpItem;
+    
+    tmpItem = fileMenu.add(_saveAsAction);
+    fileMenu.addSeparator();
+    tmpItem = fileMenu.add(_compileAction);
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
+
+    // keep track of the compile menu item
+    _compileMenuItem = tmpItem;
+        
+    fileMenu.addSeparator();
+    tmpItem = fileMenu.add(_quitAction);
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, 
+                                                  ActionEvent.CTRL_MASK));
+    return fileMenu;
+  }
+
+  /**
+   * Creates and returns a edit menu.
+   */
+  private JMenu _setUpEditMenu() {
+    JMenuItem tmpItem;
+    JMenu editMenu = new JMenu("Edit");
+    /*The undo/redo menus and key action
+     //tmpItem = editMenu.add(_definitionsPane.getUndoAction());
+     //tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
+     //                                             ActionEvent.CTRL_MASK));    
+     //tmpItem = editMenu.add(_definitionsPane.getRedoAction());
+     //tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
+     //                                             ActionEvent.CTRL_MASK));
+     editMenu.addSeparator();
+     */
+
+    // set up the actions for cut/copy/paste with regards to menu
+    // items and keystrokers.
+    Action cutAction = new DefaultEditorKit.CutAction();
+    cutAction.putValue(Action.NAME, "Cut");
+    Action copyAction = new DefaultEditorKit.CopyAction();
+    copyAction.putValue(Action.NAME, "Copy");
+    Action pasteAction = new DefaultEditorKit.PasteAction();
+    pasteAction.putValue(Action.NAME, "Paste");
+
+    tmpItem = editMenu.add(cutAction);
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, 
+                                                  ActionEvent.CTRL_MASK));
+    tmpItem = editMenu.add(copyAction);
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, 
+                                                  ActionEvent.CTRL_MASK));
+    tmpItem = editMenu.add(pasteAction);
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, 
+                                                  ActionEvent.CTRL_MASK));
+    editMenu.addSeparator();
+    tmpItem = editMenu.add(_findReplaceAction);
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, 
+                                                  ActionEvent.CTRL_MASK));
+    tmpItem = editMenu.add(_gotoLineAction);
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, 
+                                                  ActionEvent.CTRL_MASK));
+    editMenu.add(_clearOutputAction);
+    editMenu.add(_resetInteractionsAction);
+    // Add the menus to the menu bar
+    return editMenu;
+  }  
+  
+  /**
+   * Creates and returns a help menu.
+   */
+  private JMenu _setUpHelpMenu() {
+    JMenu helpMenu = new JMenu("Help");
+    helpMenu.add(_aboutAction);
+    return helpMenu;
+  }
+  
+  /**
+   * Sets up the save and compile buttons on the menu bar.
+   */
+  private void _setUpMenuBarButtons() {
+    // Add buttons.
+    _saveButton = new JButton(_saveAction);
+    _saveButton.setEnabled(false);
+    _menuBar.add(_saveButton);
+    _compileButton = new JButton(_compileAction);
+    _menuBar.add(_compileButton);
+    _compileButton.setEnabled(false);
+  }
+
+  private void _setUpTabs() {
+    _outputPane = new OutputPane();
+    _errorPanel = new CompilerErrorPanel(_definitionsPane);
+    // Make the output view the active one
+    _outputPane.makeActive();
+    _interactionsPane = new InteractionsPane(_model);
+    _tabbedPane = new JTabbedPane();
+    _tabbedPane.add("Interactions", new JScrollPane(_interactionsPane));
+    _tabbedPane.add("Compiler output", _errorPanel);
+    _tabbedPane.add("Console", new JScrollPane(_outputPane));
+    // Select interactions pane when interactions tab is selected
+    _tabbedPane.addChangeListener(new ChangeListener() {
+
+      /**
+       * put your documentation comment here
+       * @param e
+       */
+      public void stateChanged(ChangeEvent e) {
+        if (_tabbedPane.getSelectedIndex() == INTERACTIONS_TAB) {
+          _interactionsPane.grabFocus();
+        }
+      }
+    });
+  }
+
+  private void _setUpPanes() {
+    JScrollPane defScroll = new JScrollPane(_definitionsPane,
+                                            JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, 
+                                            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    JSplitPane split1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, defScroll, 
+        _tabbedPane);
+    getContentPane().add(split1, BorderLayout.CENTER);
+    // This is annoyingly order-dependent. Since split2 contains split1,
+    // we need to get split2's divider set up first to give split1 an overall
+    // size. Then we can set split1's divider. Ahh, Swing.
+    // Also, according to the Swing docs, we need to set these dividers AFTER
+    // we have shown the window. How annoying.
+    split1.setDividerLocation(2*getHeight()/3);
+    //split2.setDividerLocation(50);
+  }
+  
+  /**
+   * put your documentation comment here
+   * @param f
+   */
+  private void _setAllFonts(Font f) {
+    _definitionsPane.setFont(f);
+    _interactionsPane.setFont(f);
+    _outputPane.setFont(f);
+    _errorPanel.setListFont(f);
+  }
+  /**
+   * put your documentation comment here
+   */
+  private class GlassPane extends JComponent {
+
+    /**
+     * put your documentation comment here
+     */
+    public GlassPane() {
+      addKeyListener(new KeyAdapter() {});
+      addMouseListener(new MouseAdapter() {});
+      super.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    }
+  }
+  
   private class ModelListener implements GlobalModelListener {
     public void newFileCreated() { 
       _definitionsPane.setDocument(_model.getDefinitionsDocument());

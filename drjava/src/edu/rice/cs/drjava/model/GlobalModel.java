@@ -10,6 +10,7 @@ import java.util.Stack;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.StringTokenizer;
+
 /**
  * Handles the bulk of DrJava's program logic.
  * The UI components interface with the GlobalModel through its public methods,
@@ -27,8 +28,9 @@ public class GlobalModel {
   private CompilerError[] _compileErrors;
   private LinkedList _listeners;
   private JavaInterpreter _interpreter;
+
   /**
-   * Constructor.
+   * Constructor.  Initializes all the documents and the interpreter.
    */
   public GlobalModel() 
   {
@@ -57,6 +59,8 @@ public class GlobalModel {
     _listeners.remove(listener);
   }
   
+  // getter methods for the private fields
+  
   public DefinitionsEditorKit getEditorKit() {
     return _editorKit;
   }
@@ -76,7 +80,8 @@ public class GlobalModel {
   
   
   /**
-   * Determines if the document has changed since the last save.
+   * Determines if the definitions document has changed since the 
+   * last save.
    * @return true if the document has been modified
    */
   public boolean isModifiedSinceSave() {
@@ -152,13 +157,10 @@ public class GlobalModel {
   }
   
   /**
-   * Open a new document and read from the Reader encapsulated in the
-   * ReaderCommand. Warning! This method does not check whether the
-   * user wants to save changes.  Listeners must check themselves before 
-   * they call this method.  Why?  Because the testing architecture asks
-   * to use different Writers to expedite testing. Furthermore
-   * @param com a command containing the Reader and name of
-   * the file to open from. 
+   * Open a file and read it into the definitions.
+   * Checks first to see if we can abandon the current file.
+   * @param com a command pattern command that selects what file
+   *            to open
    */
   public void openFile(FileOpenSelector com) throws IOException {
     boolean canOpen = canAbandonFile();
@@ -187,7 +189,8 @@ public class GlobalModel {
   }
   
   /**
-   * Starts compiling the source.
+   * Starts compiling the source.  Demands that the definitions be
+   * saved before proceeding with the compile.
    */
   public void startCompile() {
     saveBeforeProceeding(GlobalModelListener.COMPILE_REASON);
@@ -234,6 +237,7 @@ public class GlobalModel {
   }
   
   /**
+   * Exits the program.
    * Make sure the user has a chance to save before quitting.
    */
   public void quit() {
@@ -372,26 +376,6 @@ public class GlobalModel {
     }
   }
   
-  /**
-   * Private method to keep outsiders from resetting the interactions
-   * pane without the GlobalModel's permission.
-   */
-  private void _resetInteractions(String packageName, File sourceRoot) {
-    _interactionsDoc.reset();
-    _interpreter = new DynamicJavaAdapter();
-
-    if (sourceRoot != null) {
-      _interpreter.addClassPath(sourceRoot.getAbsolutePath());
-    }
-
-    _interpreter.setPackageScope(packageName);
-
-    _notifyListeners(new EventNotifier() {
-      public void notifyListener(GlobalModelListener l) {
-        l.interactionsReset();
-      }
-    });
-  }
 
   /**
    * Forwarding method to remove logical dependency of InteractionsPane on
@@ -461,9 +445,11 @@ public class GlobalModel {
         _interactionsDoc.insertString(_interactionsDoc.getLength(), "\n", null);
       }
       _interactionsDoc.prompt();
-    } catch (BadLocationException e) {
+    }
+    catch (BadLocationException e) {
       throw  new InternalError("getting repl text failed");
-    } catch (Throwable e) {
+    } 
+    catch (Throwable e) {
       String message = e.getMessage();
       // Don't let message be null. Java sadly makes getMessage() return
       // null if you construct an exception without a message.
@@ -593,6 +579,28 @@ public class GlobalModel {
     return  argument;
   }
 
+  
+  /**
+   * Private method to keep outsiders from resetting the interactions
+   * pane without the GlobalModel's permission.
+   */
+  private void _resetInteractions(String packageName, File sourceRoot) {
+    _interactionsDoc.reset();
+    _interpreter = new DynamicJavaAdapter();
+
+    if (sourceRoot != null) {
+      _interpreter.addClassPath(sourceRoot.getAbsolutePath());
+    }
+
+    _interpreter.setPackageScope(packageName);
+
+    _notifyListeners(new EventNotifier() {
+      public void notifyListener(GlobalModelListener l) {
+        l.interactionsReset();
+      }
+    });
+  }
+  
   /**
    * Deletes the last character of a string.  Assumes semicolon at the
    * end, but does not check.  Helper for _testClassCall(String).
