@@ -856,7 +856,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     if ((version != null) && ("1.4.0".compareTo(version) <= 0)) {
       // Turn on assert support
       DrJava.getConfig().setSetting(OptionConstants.JAVAC_ALLOW_ASSERT,
-                                    new Boolean(true));
+                                    Boolean.valueOf(true));
       
       CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
       _model.addListener(listener2); 

@@ -1191,12 +1191,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     String output;
     output = jdOut.readLine();
     while (jdOut.ready() && (output != null)) {
+      System.out.println("[stdout]: " + output);
       outLines.add(output);
       output = jdOut.readLine();
     }
       
     output = jdErr.readLine();
     while (jdErr.ready() && (output != null)) {
+      System.out.println("[stderr] " + output);
       errLines.add(output);
       output = jdErr.readLine();
     }
@@ -1440,7 +1442,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       // Otherwise, try to recover by just using everything after ERR_INDICATOR as the error message
       if (line.charAt(pos) == ':') {
         try {
-          lineno = Integer.valueOf(linenoString.toString()).intValue();
+          // Adjust Javadoc's one-based line numbers to our zero-based indeces.
+          lineno = Integer.valueOf(linenoString.toString()).intValue() -1;
         } catch (NumberFormatException e) {
         }
       } else {
@@ -1727,7 +1730,25 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public String getFilename() {
       return _doc.getFilename();
     }
-
+    
+    // TODO: Move this to where it can be static.
+    private class TrivialFSS implements FileSaveSelector {
+      private File _file;
+      private TrivialFSS(File file) {
+        _file = file;
+      }
+      public File getFile() throws OperationCanceledException {
+        return _file;
+      }
+      public void warnFileOpen() {}
+      public boolean verifyOverwrite() {
+        return true;
+      }
+      public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc,
+                                              File oldFile) {
+        return true;
+      }
+    }
 
     /**
      * Saves the document with a FileWriter.  If the file name is already
@@ -1748,19 +1769,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         else {
           try {
             file = _doc.getFile();
-            realCommand = new FileSaveSelector() {
-              public File getFile() throws OperationCanceledException {
-                return file;
-              }
-              public void warnFileOpen() {}
-              public boolean verifyOverwrite() {
-                return true;
-              }
-              public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc,
-                                                      File oldFile) {
-                return true;
-              }
-            };
+            realCommand = new TrivialFSS(file);
           }
           catch (FileMovedException fme) {
             // getFile() failed, prompt the user if a new one should be selected

@@ -316,8 +316,8 @@ public class CompilerErrorModel<T extends CompilerError> {
         int curLine = 0;
         int offset = 0; // offset is number of chars from beginning of file
 
-        // offset is always pointing to the first character in a line
-        // at the top of this loop
+        // offset is always pointing to the first character in the line
+        // containing an error (or the last line of the previous file) at the top of this loop
         while ((curError < _numErrors) && // we still have errors to find
                file.equals(_errors[curError].file()) &&  // the next error is in this file
                (offset <= defsLength)) { // we haven't gone past the end of the file

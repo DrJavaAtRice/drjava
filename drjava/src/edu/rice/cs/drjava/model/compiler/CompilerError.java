@@ -134,8 +134,10 @@ public class CompilerError implements Comparable, Serializable {
   }
 
   /**
-   * Gets the line number of the error.
-   * @return the line number
+   * Gets the zero-based line number of the error.
+   * NOTE: javac/javadoc produces zero-based line numbers internally, but
+   * prints one-based line numbers to the command line.
+   * @return the zero-based line number
    */
   public int lineNumber() {
     return  _lineNumber;
@@ -172,8 +174,9 @@ public class CompilerError implements Comparable, Serializable {
 
   /**
    * This function returns a message telling the line this error is from
-   * appropriate to display to a user, inidicating if there is no file
-   * associated with this error
+   * appropriate to display to a user, indicating if there is no file
+   * associated with this error.  This is adjusted to show one-based numbers,
+   * since internally we store a zero-based index.
    */
   public String getLineMessage(){
     if (_file == null || this._lineNumber < 0){

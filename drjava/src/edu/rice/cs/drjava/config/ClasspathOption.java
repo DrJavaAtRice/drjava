@@ -37,48 +37,40 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.config;
+import java.io.File;
+import gj.util.Vector;
+import java.awt.Color;
+import java.awt.Font;
+import edu.rice.cs.drjava.DrJava;
+import javax.swing.KeyStroke;
+import java.awt.event.KeyEvent;
+import java.awt.event.InputEvent;
+import java.awt.Toolkit;
+import edu.rice.cs.drjava.CodeStatus;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030612-2217;
- *
- * @version $Id$
+ * Generate vector options separately to appease javadoc.
+ * (It didn't like anonymous inner classes with generics in interfaces in Java 1.3.)
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20030612-2217";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+class ClasspathOption {
+  private String warning =
+    "WARNING: Configurability interface only supports path separators"+
+    " of maximum length 1 character as of this moment.";
+  
+  public VectorOption<File> evaluate(String optionName) {
+    // system path separator
+    String ps = System.getProperty("path.separator");
+    if(ps.length() > 1) { 
+      // spit out warning if it's more than one character.
+      System.err.println(warning);
+      System.err.println("using '"+ps.charAt(0)+
+                         "' for delimiter.");
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+    FileOption fop = new FileOption("",FileOption.NULL_FILE);
+    //String name = "extra.classpath";
+    char delim = ps.charAt(0);
+    return new VectorOption<File>(optionName,fop,"",delim,"",new Vector<File>());
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

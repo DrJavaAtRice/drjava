@@ -588,29 +588,3 @@ public interface OptionConstants {
 }
 
 
-/**
- * Generate vector options separately to appease javadoc.
- * (It didn't like anonymous inner classes with generics in interfaces in Java 1.3.)
- */
-class ClasspathOption {
-  private String warning =
-    "WARNING: Configurability interface only supports path separators"+
-    " of maximum length 1 character as of this moment.";
-  
-  public VectorOption<File> evaluate(String optionName) {
-    // system path separator
-    String ps = System.getProperty("path.separator");
-    if(ps.length() > 1) { 
-      // spit out warning if it's more than one character.
-      System.err.println(warning);
-      System.err.println("using '"+ps.charAt(0)+
-                         "' for delimiter.");
-    }
-    FileOption fop = new FileOption("",FileOption.NULL_FILE);
-    //String name = "extra.classpath";
-    char delim = ps.charAt(0);
-    return new VectorOption<File>(optionName,fop,"",delim,"",new Vector<File>());
-  }
-}
-
-
