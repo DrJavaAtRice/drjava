@@ -3030,7 +3030,11 @@ public class MainFrame extends JFrame implements OptionConstants {
    * all this code should be refactored into the model's _saveProject method
    */
   private DocumentInfoGetter _makeInfoGetter(final OpenDefinitionsDocument doc) {
-    final JScrollPane scroller = _defScrollPanes.get(doc);
+    JScrollPane s = _defScrollPanes.get(doc);
+    if (s == null) {
+      s = _createDefScrollPane(doc);
+    }
+    final JScrollPane scroller = s;
     final DefinitionsPane pane = (DefinitionsPane)scroller.getViewport().getView();
     
     return new DocumentInfoGetter() {
@@ -5151,11 +5155,17 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Added 2004-May-27
     // Notify the definitions pane that is being replaced (becoming inactive)
     _currentDefPane.notifyInactive();
-    
+
+
     JScrollPane scroll = _defScrollPanes.get(_model.getActiveDocument());
     if (scroll == null) {
-      throw new UnexpectedException(new Exception("Current definitions scroll pane not found."));
+
+        scroll = _createDefScrollPane(_model.getActiveDocument());
+
+      //throw new UnexpectedException(new Exception("Current definitions scroll pane not found."));
     }
+    // Fix OS X scrollbar bug before switching
+    _reenableScrollBar();
 
     int oldLocation = _docSplitPane.getDividerLocation();
     
@@ -5853,9 +5863,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     
     private void _fileOpened(final OpenDefinitionsDocument doc){
-      // Fix OS X scrollbar bug before switching
-      _reenableScrollBar();
-      _createDefScrollPane(doc);
+
+
+
       try {
         File f = doc.getFile();
         if(! _model.isProjectFile(f))
@@ -5924,8 +5934,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     private void _fileClosed(OpenDefinitionsDocument doc){
       _recentDocFrame.closeDocument(doc);
       _removeErrorListener(doc);
-      ((DefinitionsPane)_defScrollPanes.get(doc).getViewport().getView()).close();
-      _defScrollPanes.remove(doc);
+      JScrollPane jsp = _defScrollPanes.get(doc);
+      if (jsp != null) {
+        ((DefinitionsPane)jsp.getViewport().getView()).close();
+        _defScrollPanes.remove(doc);
+      }
     }
 
     public void fileReverted(OpenDefinitionsDocument doc) {
