@@ -58,11 +58,11 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory
 
 
     public IAWTContainerNavigatorActor makeListNavigator() {
-        return new JListNavigator();
+        return new JListSortNavigator();
     }
 
     public IAWTContainerNavigatorActor makeTreeNavigator(String name) {
-        return new JTreeNavigator(name);
+        return new JTreeSortNavigator(name);
     }
     
     public IAWTContainerNavigatorActor makeListNavigator(IDocumentNavigator parent)

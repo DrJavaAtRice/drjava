@@ -241,6 +241,19 @@ public class JTreeNavigator extends JTree implements IAWTContainerNavigatorActor
     return doc;
   }
   
+  /* sets the input document to be active */
+  public void setActiveDoc(INavigatorItem doc){
+    DefaultMutableTreeNode node = _doc2node.get(doc);
+    if(this.contains(doc)){
+      TreeNode[] nodes = node.getPath();
+      TreePath path = new TreePath(nodes);
+      this.expandPath(path);
+      this.setSelectionPath(path);
+    }
+  }
+
+  
+  
   /**
    * Impose some ordering on the documents in the navigator, to facilitate
    * MainFrame's setActiveNextDocument()

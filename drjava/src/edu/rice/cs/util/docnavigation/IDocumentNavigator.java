@@ -91,6 +91,15 @@ public interface IDocumentNavigator {
      */
     public INavigatorItem removeDocument(INavigatorItem doc) throws IllegalArgumentException;
 
+    
+    /**
+     * sets the input document as selected
+     * @param doc the document to select
+     * @return void
+     */
+    public void setActiveDoc(INavigatorItem doc);
+    
+    
     /**
      * Impose some ordering on the documents in the navigator, to facilitate
      * MainFrame's setActiveNextDocument()

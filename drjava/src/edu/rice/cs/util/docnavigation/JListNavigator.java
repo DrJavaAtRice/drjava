@@ -56,12 +56,12 @@ import java.awt.event.*;
 class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListSelectionListener {
   //private final DefaultListModel _docs = new DefaultListModel();
   
-  private Vector<INavigatorItem> _docs = new Vector<INavigatorItem>();
+  protected Vector<INavigatorItem> _docs = new Vector<INavigatorItem>();
   
-  private INavigatorItem currentselected = null;
+  protected INavigatorItem currentselected = null;
   
   /** the collection of INavigationListeners listening to this JListNavigator */
-  private Vector<INavigationListener> navListeners = new Vector<INavigationListener>();
+  protected Vector<INavigationListener> navListeners = new Vector<INavigationListener>();
   
   public JListNavigator() 
   {
@@ -197,6 +197,14 @@ class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListS
       return tbr;
     }
   }
+  
+  public void setActiveDoc(INavigatorItem doc){
+    if(this.contains(doc)){
+        this.setSelectedValue(doc, true);
+    }
+  }
+  
+
   
   public void setTopLevelPath(String path)
   {
