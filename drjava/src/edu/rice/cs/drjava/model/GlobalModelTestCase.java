@@ -582,6 +582,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected int interpreterResettingCount;
     protected int interpreterReadyCount;
     protected int interpreterExitedCount;
+    protected int interpreterResetFailedCount;
     protected int interpreterChangedCount;
     //protected int interactionCaretPositionChangedCount;
     protected int consoleResetCount;
@@ -617,6 +618,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       consoleResetCount = 0;
       interpreterResettingCount = 0;
       interpreterReadyCount = 0;
+      interpreterExitedCount = 0;
+      interpreterResetFailedCount = 0;
       saveAllBeforeProceedingCount = 0;
       nonTestCaseCount = 0;
       lastExitStatus = 0;
@@ -704,6 +707,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("number of times interactionsReset fired",
                    i,
                    interpreterReadyCount);
+    }
+    
+    public void assertInteractionsResetFailedCount(int i) {
+      assertEquals("number of times interactionsResetFailed fired",
+                   i,
+                   interpreterResetFailedCount);
     }
 
     public void assertInteractionsExitedCount(int i) {
@@ -846,6 +855,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     public void interpreterExited(int status) {
       listenerFail("interpreterExited(" + status + ") fired unexpectedly");
+    }
+    
+    public void interpreterResetFailed() {
+      listenerFail("interpreterResetFailed fired unexpectedly");
     }
 
     public void consoleReset() {

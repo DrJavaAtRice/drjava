@@ -50,6 +50,9 @@ import edu.rice.cs.drjava.model.repl.History.HistorySizeOptionListener;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.util.text.*;
 
+import java.io.StringWriter;
+import java.io.PrintWriter;
+
 /**
  * Interactions model which can notify GlobalModelListeners on events.
  * @version $Id$
@@ -230,5 +233,23 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
         l.interpreterExited(status);
       }
     });
+  }
+  
+  /**
+   * Notifies listeners that the interpreter reset failed.
+   * @param t Throwable causing the failure
+   */
+  protected void _notifyInterpreterResetFailed(Throwable t) {
+    // Print the exception to the console
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    t.printStackTrace(pw);
+    _model.systemErrPrint(sw.toString());
+    
+    _notifier.notifyListeners(new EventNotifier.Notifier() {
+      public void notifyListener(GlobalModelListener l) {
+        l.interpreterResetFailed();
+      }
+    });    
   }
 }

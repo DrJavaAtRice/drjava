@@ -1968,6 +1968,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private void _showError(Throwable e, String title, String message) {
+    System.out.println(e);
     JOptionPane.showMessageDialog(this,
                                   message + "\n" + e,
                                   title,
@@ -3793,6 +3794,10 @@ public class MainFrame extends JFrame implements OptionConstants {
         };
         SwingUtilities.invokeLater(doCommand);
       }
+    }
+    
+    public void interpreterResetFailed() {
+      interpreterReady();
     }
     
     public void interpreterResetting() {

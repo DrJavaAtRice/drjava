@@ -61,6 +61,14 @@ public interface MainJVMRemoteI extends MasterRemote {
   public void interpretResult(InterpretResult result) throws RemoteException;
   
   /**
+   * This method is called by the interpreter JVM if it cannot
+   * be exited (likely because of its having a
+   * security manager)
+   * @param th The Throwable thrown by System.exit
+   */
+  public void quitFailed(Throwable th) throws RemoteException;
+  
+  /**
    * Called if JUnit is invoked on a non TestCase class.
    */
   public void nonTestCase() throws RemoteException;

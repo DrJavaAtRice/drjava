@@ -197,6 +197,12 @@ public interface GlobalModelListener extends InteractionsListener {
   public void interpreterExited(int status);
   
   /**
+   * Called if the interpreter reset failed.
+   * (Subclasses must maintain listeners.)
+   */
+  public void interpreterResetFailed();
+  
+  /**
    * Called when the active interpreter is changed.
    * @param inProgress Whether the new interpreter is currently in progress
    * with an interaction (ie. whether an interactionEnded event will be fired)

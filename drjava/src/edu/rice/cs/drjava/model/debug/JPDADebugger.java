@@ -1951,8 +1951,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         }        
         catch (ClassNotLoadedException cnle) {
           printMessage("Could not update the value of '" + localVar.name() + "' (class not loaded)");
-          break;
+          break;          
         }
+        catch (InvalidTypeException ite) {
+          printMessage("Could not update the value of '" + localVar.name() + "' (invalid type exception)");
+          break;          
+        }  
       }
       if (tries >= MAXINVOKETRIES)
         throw new DebugException("The value of the variable: " + localVar.name() + " could not be obtained from interpreterJVM");

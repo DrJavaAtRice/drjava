@@ -221,6 +221,13 @@ public class SimpleInteractionsModel extends InteractionsModel {
   protected void _notifyInterpreterExited(final int status) {
     // Won't happen in a single JVM
   }
+  
+  /**
+   * Notifies listeners that the interpreter reset failed.
+   */
+  protected void _notifyInterpreterResetFailed(Throwable t) {
+    // Won't happen in a single JVM
+  }
 
   /**
    * Does not allow input from System.in.

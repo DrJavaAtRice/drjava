@@ -490,6 +490,18 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   }
   
   /**
+   * This method is called by the Main JVM if the Interpreter JVM cannot
+   * be exited (likely because of its having a security manager)
+   * @param th The Throwable thrown by System.exit
+   */
+  public void interpreterResetFailed(Throwable th) {    
+    _document.insertBeforeLastPrompt("Reset Failed! See the console tab for details.\n",
+                                     InteractionsDocument.ERROR_STYLE);
+    _document.setInProgress(false);
+    _notifyInterpreterResetFailed(th);
+  }
+  
+  /**
    * Notifies listeners that the interpreter has exited unexpectedly.
    * @param status Status code of the dead process
    * (Subclasses must maintain listeners.)
@@ -513,6 +525,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * (Subclasses must maintain listeners.)
    */
   protected abstract void _notifyInterpreterResetting();
+  
+  /**
+   * Notifies listeners that the interpreter reset failed.
+   * (Subclasses must maintain listeners.)
+   */
+  protected abstract void _notifyInterpreterResetFailed(Throwable t);
   
   /**
    * Called when a new Java interpreter has registered and is ready for use.

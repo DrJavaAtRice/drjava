@@ -160,6 +160,50 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     listener.assertInteractionsExitedCount(1);
     assertEquals("exit status", 23, listener.lastExitStatus);
   }
+  
+  /**
+   * Checks that System.exit is handled appropriately from
+   * interactions frame when there is a security manager in
+   * the interpreter JVM.
+   */
+  public void testInteractionResetFailed()
+    throws DocumentAdapterException, InterruptedException
+  {
+    TestListener listener = new TestListener() {
+      
+      public void interpreterResetting() {
+        assertInteractionsResetFailedCount(0);
+        interpreterResettingCount++;
+      }
+      
+      public void interpreterResetFailed() {
+        synchronized(this) {
+          assertInteractionsResettingCount(1);
+          interpreterResetFailedCount++;
+          this.notify();
+        }
+      }
+    };
+
+    // Prevent the Interactions JVM from quitting
+    interpret("edu.rice.cs.drjava.DrJava.enableSecurityManager();");
+    
+    // Don't show the pop-up message
+    _model._interpreterControl.setShowMessageOnResetFailure(false);
+    
+    _model.addListener(listener);
+    synchronized(listener) {
+      _model.resetInteractions();
+      listener.wait();
+    }
+    _model.removeListener(listener);
+    interpretIgnoreResult("edu.rice.cs.drjava.DrJava.disableSecurityManager();");
+
+    listener.assertInteractionsResettingCount(1);
+    listener.assertInteractionsResetFailedCount(1);
+    listener.assertInteractionsResetCount(0);
+    listener.assertInteractionsExitedCount(0);
+  }
 
   /**
    * Checks that the interpreter can be aborted and then work

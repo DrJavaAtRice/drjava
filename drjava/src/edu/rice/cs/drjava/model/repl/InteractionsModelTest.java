@@ -166,6 +166,7 @@ public final class InteractionsModelTest extends TestCase {
     protected void _notifySyntaxErrorOccurred(int offset, int length) {}
     protected void _notifyInterpreterExited(int status) {}
     protected void _notifyInterpreterResetting() {}
+    protected void _notifyInterpreterResetFailed(Throwable t) {}
     protected void _notifyInterpreterReady() {}
     public String getConsoleInput() {
       fail("cannot get input from System.in in a test");

@@ -293,6 +293,23 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
 
   /**
+   * @param show Whether to show a message if a reset operation fails.
+   */
+  public void setShowMessageOnResetFailure(boolean show) {
+    // silently fail if disabled. see killInterpreter docs for details.
+    if (! _enabled) return;
+
+    ensureInterpreterConnected();
+
+    try {
+      _interpreterJVM().setShowMessageOnResetFailure(show);
+    }
+    catch (RemoteException re) {
+      _threwException(re);
+    }
+  }
+  
+  /**
    * Forwards a call to System.err from InterpreterJVM to the 
    * local InteractionsModel.
    * @param s String that was printed in the other JVM
@@ -515,6 +532,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     try {
       _enabled = shouldRestart;
       _cleanlyRestarting = true;
+      if (shouldRestart) {
+        _interactionsModel.interpreterResetting();
+      }
       quitSlave();
     }
     catch (RemoteException re) {
@@ -583,8 +603,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   protected void handleSlaveQuit(int status) {
     // Only restart the slave if _enabled is true
     if (_enabled) {
-      _interactionsModel.interpreterResetting();
-
+      // We have already fired this event if we are cleanly restarting
+      if (!_cleanlyRestarting) {
+        _interactionsModel.interpreterResetting();
+      }
       startInterpreterJVM();
     }
 
@@ -593,6 +615,18 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
     _cleanlyRestarting = false;
   }
+  
+  /**
+   * This method is called by the interpreter JVM if it cannot
+   * be exited (likely because of its having a
+   * security manager)
+   * @param th The Throwable thrown by System.exit
+   */
+  public void quitFailed(Throwable th) throws RemoteException {
+    _interactionsModel.interpreterResetFailed(th);
+    _cleanlyRestarting = false;
+  }
+  
 
   /**
    * Returns whether a JVM is currently starting.
@@ -776,6 +810,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
                                         int endCol ) {}
     public void replCalledSystemExit(int status) {}
     public void interpreterResetting() {}
+    public void interpreterResetFailed(Throwable th) {}
     public void interpreterReady() {}
   }
   

@@ -127,6 +127,13 @@ public interface InteractionsModelCallback {
   public void replCalledSystemExit(int status);
   
   /**
+   * This method is called by the Main JVM if the Interpreter JVM cannot
+   * be exited (likely because of its having a security manager)
+   * @param th The Throwable thrown by System.exit
+   */
+  public void interpreterResetFailed(Throwable th);
+  
+  /**
    * Called when the interpreter starts to reset.
    */
   public void interpreterResetting();

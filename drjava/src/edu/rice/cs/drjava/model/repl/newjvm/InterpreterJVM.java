@@ -111,11 +111,17 @@ public class InterpreterJVM extends AbstractSlaveJVM
   private InteractionsProcessorI _interactionsProcessor;
   
   /**
+   * Whether to display an error message if a reset fails.
+   */
+  private boolean _messageOnResetFailure;
+  
+  /**
    * Private constructor; use the singleton ONLY instance.
    */
   private InterpreterJVM() {
     reset();
     _interactionsProcessor = new InteractionsProcessor();
+    _messageOnResetFailure = true;
   }
   
   /**
@@ -614,13 +620,30 @@ public class InterpreterJVM extends AbstractSlaveJVM
   }
   
   /**
+   * @param show Whether to show a message if a reset operation fails.
+   */
+  public void setShowMessageOnResetFailure(boolean show) {
+    _messageOnResetFailure = show;
+  }
+  
+  /**
    * This method is called if the interpreterJVM cannot
    * be exited (likely because of its having a
    * security manager)
    */
-  protected void quitFailed(Exception e) {    
-    javax.swing.JOptionPane.showMessageDialog(null, 
-                                              "DrJava's interpreterJVM could not be exited:\n" + e);
+  protected void quitFailed(Throwable th) {
+    if (_messageOnResetFailure) {
+      String msg = "The interactions pane could not be reset:\n" + th;
+      javax.swing.JOptionPane.showMessageDialog(null, msg);
+    }
+    
+    try {
+      _mainJVM.quitFailed(th);
+    }
+    catch (RemoteException re) {
+      // nothing to do
+      _log.logTime("quitFailed: " + re.toString());
+    }
   }
   
   

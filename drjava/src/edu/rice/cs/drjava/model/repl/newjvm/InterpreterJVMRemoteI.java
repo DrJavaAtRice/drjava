@@ -58,6 +58,11 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   public void reset() throws RemoteException;
   
   /**
+   * @param show Whether to show a message if a reset operation fails.
+   */
+  public void setShowMessageOnResetFailure(boolean show) throws RemoteException;
+  
+  /**
    * Adds a named DynamicJavaAdapter to the list of interpreters.
    * @param name the unique name for the interpreter
    * @throws IllegalArgumentException if the name is not unique
