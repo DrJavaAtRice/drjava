@@ -44,6 +44,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.CodeStatus;
+import edu.rice.cs.drjava.ui.InteractionsHistoryFilter;
 import java.io.*;
 import javax.swing.*;
 
@@ -56,6 +57,12 @@ public class History implements OptionConstants {
   // Not final because it may be updated by config
   private static int MAX_SIZE = DrJava.getConfig().getSetting(HISTORY_MAX_SIZE).intValue();
   
+  /**
+   * Version flag at the beginning of saved history file format
+   * If this is not present in a saved history, it is assumed to be the original format.
+   */
+  public static final String HISTORY_FORMAT_VERSION_2 = "// DrJava saved history v2\n";
+    
   private Vector<String> _vector = new Vector<String>();
   private int _cursor = -1;
  
@@ -158,52 +165,65 @@ public class History implements OptionConstants {
   
   /**
    * Returns the history as a string by concatenating each string in the vector
+   * separated by the delimiting character.
+   * A semicolon is added to the end of every statement that didn't already
+   * end with one.
+   */
+  public String getHistoryAsStringWithSemicolons() {
+    String s = "";
+    char delimiter = '\n';
+    for (int i = 0; i < _vector.size(); i++) {
+      String nextLine = _vector.elementAt(i);
+      int nextLength = nextLine.length();
+      if ((nextLength > 0) && (nextLine.charAt(nextLength-1) != ';')) {
+        nextLine += ";";
+      }
+      s += nextLine + delimiter;
+    }
+    return s;
+  }
+  
+  /**
+   * Returns the history as a string by concatenating each string in the vector
    * separated by the delimiting character
    */
   public String getHistoryAsString() {
     String s = "";
     char delimiter = '\n';
     for (int i = 0; i < _vector.size(); i++) {
-      s += _vector.elementAt(i) + delimiter;
+      s +=_vector.elementAt(i) + delimiter;
     }
     return s;
   }
   
   /**
    * Writes this History to a the file selected in the FileSaveSelector
+   * @param selector File to save to
+   * @param editedVersion If this string is non-null, it will be saved to file
+   * instead of the lines saved in the history. The saved file will still include
+   * any tags or extensions needed to recognize it as a saved interactions file.
    */
-  public void writeToFile(FileSaveSelector selector) throws IOException {
+  public void writeToFile(FileSaveSelector selector, String editedVersion) throws IOException {
     
     File c = null;
+    
     try {
       c = selector.getFile();
     }
     catch (OperationCanceledException oce) {
-      return;
-      // don't need to do anything
+      return; // don't need to do anything
     }
     if (c != null) {
-      if (c.getName().indexOf('.') == -1)
-        c = new File(c.getAbsolutePath() + ".hist");
-      try {
+	if (c.getName().indexOf('.') == -1)
+	    c = new File(c.getAbsolutePath() + "." +
+			 InteractionsHistoryFilter.HIST_EXTENSION);
         FileOutputStream fos = new FileOutputStream(c);
         OutputStreamWriter osw = new OutputStreamWriter(fos);
         BufferedWriter bw = new BufferedWriter(osw);
-        String currString;
-        for (int i = 0; i < size(); i++) {
-          currString = _vector.elementAt(i);
-          currString.trim();
-          bw.write(currString, 0, currString.length());
-          bw.newLine();
-        }
+	if (editedVersion == null)
+	    editedVersion = getHistoryAsStringWithSemicolons();
+ 	bw.write(HISTORY_FORMAT_VERSION_2 + editedVersion, 0, HISTORY_FORMAT_VERSION_2.length() + editedVersion.length());
         bw.close();
-      }
-      catch (IOException ioe) {/*JOptionPane.showMessageDialog(null,
-                                  "An IOException has occured" + "\n" + ioe,
-                                  "IOException",
-                                  JOptionPane.ERROR_MESSAGE);}*/
-        throw new IOException("An error occured writing the history to a file");
-      }
     }
   }
   

@@ -126,10 +126,18 @@ public interface InteractionsDocument extends StyledDocument {
   public void addToHistory(String text);
   
   /**
-   * Saves the interactions history with the given file selector.
+   * Saves the interactions history (or an edited history) with the given
+   * file selector.
    */
-  public void saveHistory(FileSaveSelector selector) throws IOException;
-  
+  public void saveHistory(FileSaveSelector selector, String editedVersion) throws IOException;
+
+  /**
+   * Returns the entire history as a single string.  Commands should
+   * be separated by semicolons. If an entire command does not end in a
+   * semicolon, one is added.
+   */
+  public String getHistoryAsStringWithSemicolons();
+
   /**
    * Returns the entire history as a single string.  Commands should
    * be separated by semicolons.

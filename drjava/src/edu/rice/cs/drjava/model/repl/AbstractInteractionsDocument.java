@@ -248,12 +248,22 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
   }
   
   /**
-   * Saves the interactions history with the given file selector.
+   * Saves the interactions history (or an edited history) with the given
+   * file selector.
    */
-  public void saveHistory(FileSaveSelector selector) throws IOException {
-    _history.writeToFile(selector);
+  public void saveHistory(FileSaveSelector selector, String editedVersion) throws IOException {
+    _history.writeToFile(selector, editedVersion);
   }
-  
+
+  /**
+   * Returns the entire history as a single string.  Commands should
+   * be separated by semicolons. If an entire command does not end in a
+   * semicolon, one is added.
+   */
+  public String getHistoryAsStringWithSemicolons() {
+      return _history.getHistoryAsStringWithSemicolons();
+  }
+
   /**
    * Returns the entire history as a single string.  Commands should
    * be separated by semicolons.

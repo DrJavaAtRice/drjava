@@ -840,29 +840,43 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       });
       String text = "";
       String currString;
+      boolean firstLine = true;
+      int formatVersion = 1;
       for (int j = 0; j < strings.size(); j++) {
         currString = strings.elementAt(j);
         if (currString.length() > 0) {
-          if (currString.charAt(currString.length() - 1) == ';')
-            //currString += "\n";
-            text += currString + "\n";
-          else
-            //currString += ";\n";
-            text += currString + ";\n";
-        }
+	    // check for file format version string.
+            // NOTE: the original file format did not have a version string
+	    if (firstLine && (currString.trim().equals(History.HISTORY_FORMAT_VERSION_2.trim()))) {
+		formatVersion = 2;
+	    }
+	    switch (formatVersion) {
+	    case (1):
+                // When reading this format, we need to make sure each line ends in a semicolon.
+                // This behavior can be buggy; that's why the format was changed.
+		if (currString.charAt(currString.length() - 1) == ';') {
+		    text += currString + "\n";
+		} else {
+		    text += currString + ";\n";
+		}
+		break;
+	    case(2):
+		if (!firstLine) // don't include format version string in output
+		    text += currString + "\n";
+		break;
+	    }
+	    firstLine = false;
+	}
       }
       _interactionsDoc.clearCurrentInteraction();
       _docAppend(_interactionsDoc, text, null);
-      //  _docAppend(_interactionsDoc, currString, null);
       _interactionsDoc.setInProgress(true);
       _interactionsDoc.addToHistory(text);
-      
-      // there is no return at the end of the last line
+            // there is no return at the end of the last line
       // better to put it on now and not later.
       //_docAppend(_interactionsDoc, "\n", null);
       
       String toEval = text.trim();
-      //String toEval = currString.trim();
       if (toEval.startsWith("java ")) {
         toEval = _testClassCall(toEval);
       }
@@ -889,9 +903,20 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   
   /**
    * Saves the current history to a file
+   * @param selector File to save to
+   * @param editedVersion If this string is non-null, it will be saved to file
+   * instead of the lines saved in the history. The saved file will still include
+   * any tags needed to recognize it as a saved interactions file.
    */
-  public void saveHistory(FileSaveSelector selector) throws IOException{
-    _interactionsDoc.saveHistory(selector);
+  public void saveHistory(FileSaveSelector selector, String editedVersion) throws IOException{
+      _interactionsDoc.saveHistory(selector, editedVersion);
+  }
+ 
+  /**
+   * Returns the entire history as a Vector<String> with semicolons as needed
+   */
+  public String getHistoryAsStringWithSemicolons() {
+    return _interactionsDoc.getHistoryAsStringWithSemicolons();
   }
   
   /**
