@@ -259,7 +259,11 @@ public class JUnitTestManager {
 //    }catch(IOException e){
 //      
 //    }
-    return new JUnitError(file, lineNum, 0, exception, !isFailure, testName, className, stackTrace);
+    //The conditional has been added because of the augmented code in the .dj0 files - it causes the error to be highlighted on the wrong line
+    //At the elementary level it should always be off by one
+    //NOTE: this presupposes that 
+    return new JUnitError(file, (file.getName().endsWith(".dj0") ? lineNum-1 : lineNum),  //lineNum, 
+                          0, exception, !isFailure, testName, className, stackTrace);
   }
 
   /**

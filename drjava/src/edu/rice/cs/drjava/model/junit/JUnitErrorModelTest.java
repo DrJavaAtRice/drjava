@@ -183,5 +183,48 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
                  _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     _model.removeListener(listener2);
   }
+  
+  private static final String LANGUAGE_LEVEL_TEST = 
+    "class MyTest extends TestCase {\n"+
+    "  void testMyMethod() {\n"+ 
+    "    assertEquals(\"OneString\", \"TwoStrings\");\n"+
+    "  }\n"+
+    "}\n";
+    
+  
+  /**
+   * Tests that an elementary level file has the previous line of the actual error reported as the line of its error.
+   * Necessitated by the added code in the .java file associated with the .dj0 file (the import statement added by the 
+   * language level compiler)
+   */
+  public void testLanguageLevelJUnitErrorLine() throws Exception {
+    _m = new JUnitErrorModel(new JUnitError[0], _model, false);
+    OpenDefinitionsDocument doc = setupDocument(LANGUAGE_LEVEL_TEST);
+    final File file = new File(_tempDir, "MyTest.dj0");
+    doc.saveFile(new FileSelector(file));
+    
+    JUnitTestListener listener = new JUnitTestListener();
+    _model.addListener(listener);
+    doc.startCompile();
+    listener.checkCompileOccurred();
+    synchronized(listener) {
+      doc.startJUnit();
+      listener.assertJUnitStartCount(1);
+      listener.wait();
+    }
+    // Clear document so we can make sure it's written to after startJUnit
+    _model.getJUnitModel().getJUnitDocument().remove
+      (0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);
+    
+    _m = _model.getJUnitModel().getJUnitErrorModel();
+    
+    assertEquals("the test results should have one failure "+_m.getNumErrors(),
+                 1,
+                 _m.getNumErrors());
+    
+    assertEquals("the error line should be line number 2", 2, _m.getError(0).lineNumber());
+    
+    
+  }
 }
 

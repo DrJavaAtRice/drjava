@@ -270,8 +270,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           }
 
           String testFilename = testFile.getName();
-          if (testFilename.toLowerCase().endsWith(".java")) {
+          String lowerCaseName = testFilename.toLowerCase();
+          if (lowerCaseName.endsWith(".java")) {
             testFilename = testFilename.substring(0, testFilename.length() - 5);
+          }
+          else if (lowerCaseName.endsWith(".dj0") || lowerCaseName.endsWith(".dj1") || lowerCaseName.endsWith(".dj2")) {
+            testFilename = testFilename.substring(0, testFilename.length() - 4);
           }
           else {
             nonTestCase(false);
