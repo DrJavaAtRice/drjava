@@ -41,57 +41,57 @@ import java.util.*;
  */
 
 public class LocalizedMessageReader {
-    /**
-     * The escape character
-     */
-    private final static char ESCAPE_CHAR = '%';
-
-    /**
-     * The resource bundle
-     */
-    private ResourceBundle bundle;
-
-    /**
-     * Creates a new message reader
-     * @param name the name of the resource
-     */
-    public LocalizedMessageReader(String name) {
-	bundle = ResourceBundle.getBundle(name, Locale.getDefault());
+  /**
+   * The escape character
+   */
+  private final static char ESCAPE_CHAR = '%';
+  
+  /**
+   * The resource bundle
+   */
+  private ResourceBundle bundle;
+  
+  /**
+   * Creates a new message reader
+   * @param name the name of the resource
+   */
+  public LocalizedMessageReader(String name) {
+    bundle = ResourceBundle.getBundle(name, Locale.getDefault());
+  }
+  
+  /**
+   * Gets a message
+   * @param key the message key
+   * @param strings the strings to insert in the message
+   */
+  public String getMessage(String key, String[] strings) {
+    String rawMessage = bundle.getString(key);
+    String result = "";
+    
+    if (rawMessage != null) {
+      for (int i = 0; i < rawMessage.length(); i++) {
+        char c = rawMessage.charAt(i);
+        if (c == ESCAPE_CHAR) {
+          c = rawMessage.charAt(++i);
+          if (c == ESCAPE_CHAR) {
+            result += c;
+          } else {
+            String numb = "";
+            do {
+              if (!Character.isDigit(c = rawMessage.charAt(i))) {
+                i--;
+                break;
+              }
+              numb += c;
+            } while (++i < rawMessage.length());
+            int n = Integer.parseInt(numb);
+            result += strings[n];
+          }
+        } else {
+          result += c;
+        }
+      }
     }
-
-    /**
-     * Gets a message
-     * @param key the message key
-     * @param strings the strings to insert in the message
-     */
-    public String getMessage(String key, String[] strings) {
-	String rawMessage = bundle.getString(key);
-	String result = "";
-
-	if (rawMessage != null) {
-	    for (int i = 0; i < rawMessage.length(); i++) {
-		char c = rawMessage.charAt(i);
-		if (c == ESCAPE_CHAR) {
-		    c = rawMessage.charAt(++i);
-		    if (c == ESCAPE_CHAR) {
-			result += c;
-		    } else {
-			String numb = "";
-			do {
-			    if (!Character.isDigit(c = rawMessage.charAt(i))) {
-				i--;
-				break;
-			    }
-			    numb += c;
-			} while (++i < rawMessage.length());
-			int n = Integer.parseInt(numb);
-			result += strings[n];
-		    }
-		} else {
-		    result += c;
-		}
-	    }
-	}
-	return result;
-    }
+    return result;
+  }
 }

@@ -40,41 +40,41 @@ import java.util.*;
  */
 
 public class FileFinder {
-    /**
-     * The paths
-     */
-    private List paths;
-
-    /**
-     * Creates a new file finder
-     */
-    public FileFinder() {
-	paths = new LinkedList();
+  /**
+   * The paths
+   */
+  private List paths;
+  
+  /**
+   * Creates a new file finder
+   */
+  public FileFinder() {
+    paths = new LinkedList();
+  }
+  
+  /**
+   * Adds a search path. This path becomes the one with the highest priority.
+   * @param path the path to add
+   */
+  public void addPath(String path) {
+    String s = (path.endsWith("/")) ? path : path + "/";
+    paths.remove(s);
+    paths.add(0, s);
+  }
+  
+  /**
+   * Searches and returns a file.
+   * @param name the base name of the file to find
+   * @throws IOException if no file was found
+   */
+  public File findFile(String name) throws IOException {
+    Iterator it = paths.iterator();
+    while (it.hasNext()) {
+      File f = new File((String)it.next() + name);
+      if (f.exists()) {
+        return f;
+      }
     }
-
-    /**
-     * Adds a search path. This path becomes the one with the highest priority.
-     * @param path the path to add
-     */
-    public void addPath(String path) {
-	String s = (path.endsWith("/")) ? path : path + "/";
-	paths.remove(s);
-	paths.add(0, s);
-    }
-
-    /**
-     * Searches and returns a file.
-     * @param name the base name of the file to find
-     * @throws IOException if no file was found
-     */
-    public File findFile(String name) throws IOException {
-	Iterator it = paths.iterator();
-	while (it.hasNext()) {
-	    File f = new File((String)it.next() + name);
-	    if (f.exists()) {
-		return f;
-	    }
-	}
-	throw new IOException("File Not Found: " + name);
-    }
+    throw new IOException("File Not Found: " + name);
+  }
 }

@@ -40,79 +40,79 @@ import java.util.*;
  */
 
 public class LibraryFinder extends FileFinder {
-    /**
-     * The file suffixes
-     */
-    private List suffixes;
-
-    /**
-     * Creates a new library finder
-     * @param suffix the suffix of the source files
-     */
-    public LibraryFinder() {
-	suffixes = new LinkedList();
+  /**
+   * The file suffixes
+   */
+  private List suffixes;
+  
+  /**
+   * Creates a new library finder
+   * @param suffix the suffix of the source files
+   */
+  public LibraryFinder() {
+    suffixes = new LinkedList();
+  }
+  
+  /**
+   * Adds a file suffix, for example ".java"
+   */
+  public void addSuffix(String s) {
+    suffixes.add(s);
+  }
+  
+  /**
+   * Looks for the dynamic class with the given name
+   * @param cname the fully qualified name of the class to find
+   * @return the file that contains the class
+   * @exception ClassNotFoundException if the class cannot be loaded
+   */
+  public File findCompilationUnit(String cname) throws ClassNotFoundException {
+    Iterator it = suffixes.iterator();
+    while (it.hasNext()) {
+      String fname = cname.replace('.', '/') + it.next();
+      try {
+        return findFile(fname);
+      } catch (IOException e) {
+      }
+      int    n;
+      while ((n = fname.lastIndexOf('$')) != - 1) {
+        fname = fname.substring(0, n)
+          + fname.substring(fname.lastIndexOf('.'), fname.length());
+        try {
+          return findFile(fname);
+        } catch (IOException e) {
+        }
+      }
     }
-
-    /**
-     * Adds a file suffix, for example ".java"
-     */
-    public void addSuffix(String s) {
-	suffixes.add(s);
+    throw new ClassNotFoundException(cname);
+  }
+  
+  /**
+   * Finds the path where the given class is possibly stored
+   * @param cname the fully qualified name of the class to find
+   * @return the name of the root class
+   */
+  public String findCompilationUnitName(String cname) throws ClassNotFoundException {
+    Iterator it = suffixes.iterator();
+    while (it.hasNext()) {
+      String fname = cname.replace('.', '/') + it.next();
+      try {
+        findFile(fname);
+        return cname;
+      } catch (IOException e) {
+      }
+      int    n;
+      while ((n = fname.lastIndexOf('$')) != - 1) {
+        fname = fname.substring(0, n)
+          + fname.substring(fname.lastIndexOf('.'), fname.length());
+        try {
+          findFile(fname);
+          String result = fname.substring(0, fname.indexOf('.'));
+          return result.replace('/', '.');
+        } catch (IOException e) {
+        }
+      }
     }
-
-    /**
-     * Looks for the dynamic class with the given name
-     * @param cname the fully qualified name of the class to find
-     * @return the file that contains the class
-     * @exception ClassNotFoundException if the class cannot be loaded
-     */
-    public File findCompilationUnit(String cname) throws ClassNotFoundException {
-	Iterator it = suffixes.iterator();
-	while (it.hasNext()) {
-	    String fname = cname.replace('.', '/') + it.next();
-	    try {
-		return findFile(fname);
-	    } catch (IOException e) {
-	    }
-	    int    n;
-	    while ((n = fname.lastIndexOf('$')) != - 1) {
-		fname = fname.substring(0, n)
-		      + fname.substring(fname.lastIndexOf('.'), fname.length());
-		try {
-		    return findFile(fname);
-		} catch (IOException e) {
-		}
-	    }
-	}
-	throw new ClassNotFoundException(cname);
-    }
-
-    /**
-     * Finds the path where the given class is possibly stored
-     * @param cname the fully qualified name of the class to find
-     * @return the name of the root class
-     */
-    public String findCompilationUnitName(String cname) throws ClassNotFoundException {
-	Iterator it = suffixes.iterator();
-	while (it.hasNext()) {
-	    String fname = cname.replace('.', '/') + it.next();
-	    try {
-		findFile(fname);
-		return cname;
-	    } catch (IOException e) {
-	    }
-	    int    n;
-	    while ((n = fname.lastIndexOf('$')) != - 1) {
-		fname = fname.substring(0, n)
-		      + fname.substring(fname.lastIndexOf('.'), fname.length());
-		try {
-		    findFile(fname);
-		    String result = fname.substring(0, fname.indexOf('.'));
-		    return result.replace('/', '.');
-		} catch (IOException e) {
-		}
-	    }
-	}
-	throw new ClassNotFoundException(cname);
-    }
+    throw new ClassNotFoundException(cname);
+  }
 }
