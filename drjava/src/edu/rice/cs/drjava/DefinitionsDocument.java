@@ -35,6 +35,8 @@ public class DefinitionsDocument extends DefaultStyledDocument
 
 	Semaphore _taskCounter;
 
+	private static int _indent = 2;
+	
 	public DefinitionsDocument()
 		{
 			super();
@@ -227,6 +229,11 @@ public class DefinitionsDocument extends DefaultStyledDocument
 			_reduced.move(dist);
 		}
 
+	public void setIndent(int indent)
+		{
+			this._indent = indent;
+		}
+	
 	public void indentLine() 
 		{
 			// moves us to the end of the line
@@ -239,6 +246,8 @@ public class DefinitionsDocument extends DefaultStyledDocument
 			int distToPrevNewline = ii.distToPrevNewline;
 			int tab = 0;
 			
+			if (distToNewline == -1)
+				distToNewline = _currentLocation;
 			
 			try{
 				if ((distToNewline == -1) || (distToBrace == -1))
@@ -246,13 +255,12 @@ public class DefinitionsDocument extends DefaultStyledDocument
 				else if (braceType.equals("("))
 					tab = distToNewline - distToBrace + 1;
 				else if (braceType.equals("{")) {
-					tab = getWhiteSpaceBetween(distToNewline, distToBrace) + 2;
+					tab = getWhiteSpaceBetween(distToNewline, distToBrace) + _indent;
 					tab = _indentSpecialCases(tab, distToPrevNewline);
 				}
 				else if (braceType.equals("["))
 					tab = distToNewline - distToBrace + 1;
-				
-				
+						
 				tab(tab, distToPrevNewline);
 			}
 			catch (BadLocationException e){
@@ -286,7 +294,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 			while (k < length && text.charAt(k) == ' ')
 				k++;
 			if(k < length && text.charAt(k) == '}')
-				tab -= 2;
+				tab -= _indent;
 			// if no matching { then let offset be 0.
 			if(tab < 0)
 				tab = 0;
@@ -310,9 +318,9 @@ public class DefinitionsDocument extends DefaultStyledDocument
 				while ((j < length) && (text.charAt(j) == ' '))
 					j++;
 				if ((k < length) && (text.charAt(k) != '{'))
-					tab = j + 2;
+					tab = j + _indent;
 				else if (k == text.length())
-					tab = j + 2;
+					tab = j + _indent;
 			}
 				
       //return tab

@@ -53,7 +53,7 @@ public class IndentTest extends TestCase
 			ii = rm.getIndentInformation();
 			assertEquals("3.0", openSquiggly, ii.braceType);
 			assertEquals("3.2", 3, ii.distToBrace);
-			assertEquals("3.1", 3, ii.distToNewline);
+			assertEquals("3.1", -1, ii.distToNewline);
 			
 
 			//another squiggly
@@ -212,7 +212,7 @@ public class IndentTest extends TestCase
 			IndentInfo ii = rm.getIndentInformation();
 			assertEquals("1.0", openSquiggly, ii.braceType);
 			assertEquals("1.2", 13, ii.distToBrace);
-			assertEquals("1.1", 13, ii.distToNewline);
+			assertEquals("1.1", -1, ii.distToNewline);
 		}
 		catch( javax.swing.text.BadLocationException e)
 			{ 
@@ -359,7 +359,7 @@ public class IndentTest extends TestCase
 				}  
 		}
 
-	public void testWierdFuckup()
+	public void testWierd()
 		{
 			try {
 				// just paren
@@ -374,7 +374,7 @@ public class IndentTest extends TestCase
 				}  
 		}
 
-	public void testWierdFuckup2()
+	public void testWierd2()
 		{
 			try {
 				// just paren
@@ -422,6 +422,112 @@ public class IndentTest extends TestCase
 				doc.indentLine();
 				// hes{\n  {abcde#\n{
 				assertEquals("0.1", "hes{\n  {abcde\n{", doc.getText(0, doc.getLength()));
+			} 
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}  
+		}
+
+	public void testFor()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "for(;;)\n", null);
+				doc.indentLine();
+				assertEquals("0.1", "for(;;)\n  ", doc.getText(0, doc.getLength()));			
+			} 
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}  
+		}
+
+	public void testFor2()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "{\n  for(;;)\n", null);
+				doc.indentLine();
+				assertEquals("0.1", "{\n  for(;;)\n    ", doc.getText(0, doc.getLength()));			
+			} 
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}  
+		}
+
+	public void testOpenParen()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "hello(\n", null);
+				doc.indentLine();
+				assertEquals("0.1", "hello(\n      ", doc.getText(0, doc.getLength()));			
+			} 
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}  
+		}
+
+	public void testPrintString()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "Sys.out(\"hello\"\n", null);
+				doc.indentLine();
+				assertEquals("0.1", "Sys.out(\"hello\"\n        ",
+										 doc.getText(0, doc.getLength()));			
+			} 
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}  
+		}
+	
+	public void testOpenBracket()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "hello[\n", null);
+				doc.indentLine();
+				assertEquals("0.1", "hello[\n      ", doc.getText(0, doc.getLength()));			
+			} 
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}  
+		}
+
+	public void testSquigglyAlignment()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "{\n  }", null);
+				doc.indentLine();
+				assertEquals("0.1", "{\n}", doc.getText(0, doc.getLength()));			
+			} 
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}  
+		}
+
+	public void testSpaceBrace()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "   {\n", null);
+				doc.indentLine();
+				assertEquals("0.1", "   {\n     ", doc.getText(0, doc.getLength()));			
 			} 
 			catch( javax.swing.text.BadLocationException e)
 				{ 

@@ -2025,7 +2025,7 @@ public class ReducedModelComment
 
 
 			if(walkcount == -1)
-				braceInfo.distToNewline = braceInfo.distToBrace;
+				braceInfo.distToNewline = -1;
 			else
 				braceInfo.distToNewline = walkcount + braceInfo.distToBrace;
 
