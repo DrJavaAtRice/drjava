@@ -72,6 +72,11 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
      */
     public void addDocument(INavigatorItem doc, String path);
     
+    /**
+     * returns the currently selected navigator item, or null
+     * if no navigator item is selected
+     */
+    public INavigatorItem getCurrentSelectedLeaf();
 
     /**
      * Removes a given <code>INavigatorItem<code> from this navigator. Removes all
@@ -205,7 +210,21 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
      * @return true if the INavigatorItem is in the selected group, if a group is selected
      */
     public boolean isSelectedInGroup(INavigatorItem i);
-      
+
+    /**
+     * adds the top level group with the specified name and filter
+     */
     public void addTopLevelGroup(String name, INavigatorItemFilter f);
-     
+
+    /**
+     * returns true if a top level group is selected, false otherwise
+     */
+    public boolean isTopLevelGroupSelected();
+  
+    /**
+     * returns the name of the top level group that is selected, throws
+     * a GroupNotSelectedException if a top level group is not selected
+     */
+    public String getNameOfSelectedTopLevelGroup() throws GroupNotSelectedException;
+    
 }

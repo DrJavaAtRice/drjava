@@ -340,8 +340,14 @@ class JListNavigator extends JList implements IDocumentNavigator, ListSelectionL
     }
   }
 
-
-
+  /**
+   * returns the currently selected item, or null if none
+   */
+  public INavigatorItem getCurrentSelectedLeaf(){
+    return currentselected;
+  }
+  
+  
   /**
    * returns a renderer for this object
    */
@@ -366,5 +372,14 @@ class JListNavigator extends JList implements IDocumentNavigator, ListSelectionL
   public void addTopLevelGroup(String name, INavigatorItemFilter f){
     // noop
   }
+  
+    public boolean isTopLevelGroupSelected(){
+      return false;
+  }
+  
+  public String getNameOfSelectedTopLevelGroup() throws GroupNotSelectedException{
+      throw new GroupNotSelectedException("A top level group is not selected");
+  }
+
 
 }

@@ -251,6 +251,19 @@ public class JTreeSortNavigator extends JTree implements IDocumentNavigator, Tre
   }
   
   
+  private void addTopLevelGroupToRoot(InnerNode parent){
+    int i;
+    int indexInRoots = _roots.indexOf(parent);
+    int num = _model.getChildCount(_model.getRoot());
+    for(i=0;i<num;i++){
+      TreeNode n = (TreeNode)_model.getChild(_model.getRoot(), i);
+      if(_roots.indexOf(n) > indexInRoots){
+        break;
+      }
+    }
+    _model.insertNodeInto(parent, (MutableTreeNode)_model.getRoot(), i);
+  }
+  
   /**
    * inserts the child node (INavigatorItem) into the sorted position as a parent node's child
    * @param child the node to add
@@ -259,14 +272,17 @@ public class JTreeSortNavigator extends JTree implements IDocumentNavigator, Tre
   private void insertNodeSortedInto(LeafNode child, InnerNode parent){
     int numChildren = parent.getChildCount();
     int i=0;
-    int indexToAdd = i;
     String newName = child.toString();
     String oldName = parent.getUserObject().toString();
     DefaultMutableTreeNode parentsKid;
 
+    /**
+     * check to make sure that the parent, if a top level group, is
+     * added to the tree model group
+     */
     if(((DefaultMutableTreeNode)_model.getRoot()).getIndex(parent) == -1 && 
        _roots.contains(parent)){
-      _model.insertNodeInto(parent, (MutableTreeNode)_model.getRoot(), _model.getChildCount(_model.getRoot()));
+      addTopLevelGroupToRoot(parent);
     }
 
     
@@ -297,14 +313,13 @@ public class JTreeSortNavigator extends JTree implements IDocumentNavigator, Tre
   private void insertFolderSortedInto(InnerNode child, InnerNode parent){
     int numChildren = parent.getChildCount();
     int i=0;
-    int indexToAdd = i;
     String newName = child.toString();
     String oldName = parent.getUserObject().toString();
     DefaultMutableTreeNode parentsKid;
 
     if(((DefaultMutableTreeNode)_model.getRoot()).getIndex(parent) == -1 && 
        _roots.contains(parent)){
-      _model.insertNodeInto(parent, (MutableTreeNode)_model.getRoot(), _model.getChildCount(_model.getRoot()));
+      addTopLevelGroupToRoot(parent);
     }
 
     int countFolders = 0;
@@ -751,6 +766,47 @@ public class JTreeSortNavigator extends JTree implements IDocumentNavigator, Tre
     }
   }
   
+  
+  /**
+   * returns true if a top level group is selected
+   */
+  public boolean isTopLevelGroupSelected(){
+    TreePath p = getSelectionPath();
+    TreeNode n = (TreeNode) p.getLastPathComponent();
+    if(n instanceof GroupNode){
+      return true;
+    }else{
+      return false;
+    }
+  }
+  
+  /**
+   * returns the name of the top level group that the selected item is a
+   * child or grandchild or grand...child of
+   */
+  public String getNameOfSelectedTopLevelGroup() throws GroupNotSelectedException{
+    TreePath p = getSelectionPath();
+    TreeNode n = (TreeNode) p.getLastPathComponent();
+    
+    if(n == _model.getRoot()){
+      throw new GroupNotSelectedException("there is no top level group for the root of the tree");
+    }
+    
+    while(!_roots.contains(n)){
+      n = n.getParent();
+    }
+    
+    return ((GroupNode)n).getData();
+  }
+  
+  /**
+   * returns the currently selected leaf node, or null
+   * if the selected node is not a leaf
+   */
+  public INavigatorItem getCurrentSelectedLeaf(){
+    return _currSelected;
+  }
+  
   /**
    * @return true if the INavigatorItem is in the selected group, if a group is selected
    */
@@ -773,6 +829,9 @@ public class JTreeSortNavigator extends JTree implements IDocumentNavigator, Tre
     return false;
   }
   
+  /**
+   * adds a top level group to the navigator
+   */
   public void addTopLevelGroup(String name, INavigatorItemFilter f){
     if(f == null){
       throw new IllegalArgumentException("parameter 'f' is not allowed to be null");
