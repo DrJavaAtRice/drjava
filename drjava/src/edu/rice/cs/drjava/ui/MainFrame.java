@@ -341,6 +341,13 @@ public class MainFrame extends JFrame {
     }
   };
 
+  /** Selects all text in window*/
+  private Action _selectAllAction = new AbstractAction("Select All") {
+    public void actionPerformed(ActionEvent ae) {
+      _selectAll();
+    }
+  };
+
   /** Opens the find/replace dialog. */
   private Action _findReplaceAction = new AbstractAction("Find/Replace") {
     public void actionPerformed(ActionEvent ae) {
@@ -999,6 +1006,10 @@ public class MainFrame extends JFrame {
     }
   }
 
+  private void _selectAll() {
+    _currentDefPane.selectAll();
+  }
+
   /**
    * Ask the user what line they'd like to jump to, then go there.
    */
@@ -1083,6 +1094,7 @@ public class MainFrame extends JFrame {
     _setUpAction(_cutAction, "Cut", "Cut selected text to the clipboard");
     _setUpAction(_copyAction, "Copy", "Copy selected text to the clipboard");
     _setUpAction(_pasteAction, "Paste", "Paste text from the clipboard");
+    _setUpAction(_selectAllAction, "Select All", "Select all text");
 
     _cutAction.putValue(Action.NAME, "Cut");
     _copyAction.putValue(Action.NAME, "Copy");
@@ -1243,6 +1255,11 @@ public class MainFrame extends JFrame {
                                                   ActionEvent.CTRL_MASK));
     tmpItem = editMenu.add(_pasteAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,
+                                                  ActionEvent.CTRL_MASK));
+
+    // Select All
+    tmpItem = editMenu.add(_selectAllAction);
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,
                                                   ActionEvent.CTRL_MASK));
 
     // Find/replace, goto
