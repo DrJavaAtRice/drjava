@@ -125,7 +125,6 @@ public class GlobalModel {
    */
   public void saveFileAs(FileSaveSelector com) throws IOException {
     try {
-      DrJava.consoleErr().println("Write doc: " + _definitionsDoc);
       final File file = com.getFile();
       FileWriter writer = new FileWriter(file);
       _editorKit.write(writer, _definitionsDoc, 0, _definitionsDoc.getLength());
@@ -140,7 +139,6 @@ public class GlobalModel {
     }
     catch (OperationCanceledException oce) {
       // OK, do nothing as the user wishes.
-      DrJava.consoleErr().println("You canceled!");
     }
     catch (BadLocationException docFailed) {
       throw new UnexpectedException(docFailed);
@@ -314,7 +312,18 @@ public class GlobalModel {
     _definitionsDoc.gotoLine(line);
     return _definitionsDoc.getCurrentLocation();
   }
-                  
+
+
+  public FindReplaceMachine createFindReplaceMachine() {
+    try {
+      return new FindReplaceMachine(_definitionsDoc,
+                                    _definitionsDoc.getCurrentLocation());
+    }
+    catch (BadLocationException e) {
+      throw new UnexpectedException(e);
+    }
+  }
+  
   private void _resetInteractions(String packageName, File sourceRoot) {
     _interactionsDoc.reset();
 

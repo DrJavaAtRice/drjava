@@ -23,11 +23,6 @@ public class DefinitionsPane extends JEditorPane {
   private UndoManager _undoManager;
   private UndoAction _undoAction;
   private RedoAction _redoAction;
-  /** 
-   * For find and replace. 
-   * We have a persistent dialog so it keeps track of our last find criterion.
-   */
-  private FindReplaceDialog _findReplace;
   /**
    * Our current paren/brace/bracket matching highlight.
    */
@@ -198,7 +193,6 @@ public class DefinitionsPane extends JEditorPane {
     _model = model;
 //    _resetDocument("");
     _resetUndo();
-    _findReplace = new FindReplaceDialog(mf, this);
     setContentType("text/java");
     setBackground(Color.white);
     setFont(new Font("Courier", 0, 12));
@@ -381,13 +375,6 @@ public class DefinitionsPane extends JEditorPane {
         putValue(Action.NAME, "Redo");
       }
     }
-  }
-
-  /**
-   * Opens up the find/replace dialog.
-   */
-  public void findReplace() {
-    _findReplace.show();
   }
 
   /**

@@ -31,10 +31,13 @@ public class MainFrame extends JFrame {
   private JMenu _editMenu;
   private JMenu _helpMenu;
   private GlobalModel _model;
+  private FindReplaceDialog _findReplace;
   JButton _saveButton;
   JButton _compileButton;
+  JMenuItem _saveMenuItem;
+  JMenuItem _compileMenuItem;
   
-    /** 
+  /** 
    * For opening files.
    * We have a persistent dialog to keep track of the last directory
    * from which we opened.
@@ -58,14 +61,90 @@ public class MainFrame extends JFrame {
       return getSaveFile();
     }
   };
+
+  /** Resets the document in the definitions pane to a blank one. */
+  private Action _newAction = new AbstractAction("New") {
+    public void actionPerformed(ActionEvent ae) {
+      _model.newFile();
+    }
+  };
+
+  /** 
+   * Asks user for file name and and reads that file into
+   * the definitions pane.
+   */
+  private Action _openAction = new AbstractAction("Open") {
+    public void actionPerformed(ActionEvent ae) {
+      _open();
+    }
+  };    
+ 
+  /** Saves the current document. */
+  private Action _saveAction = new AbstractAction("Save") {
+    public void actionPerformed(ActionEvent ae) {
+      _save();
+    }
+  };
+    
+  /** 
+   * Asks the user for a file name and saves the document
+   * currently in the definitions pane to that file.
+   */
+  private Action _saveAsAction = new AbstractAction("Save as") {
+    public void actionPerformed(ActionEvent ae) {
+      _saveAs();
+    }
+  };
+
+  /** Compiles the document in the definitions pane. */
+  private Action _compileAction = new AbstractAction("Compile") {
+    public void actionPerformed(ActionEvent ae) {
+      _model.startCompile();
+    }
+  };
+
+  /** Closes the program. */
+  private Action _quitAction = new AbstractAction("Quit") {
+    public void actionPerformed(ActionEvent ae) {
+      _model.quit();
+    }
+  };
+
+  /** Opens the find/replace dialog. */
+  private Action _findReplaceAction = new AbstractAction("Find/Replace") {
+    public void actionPerformed(ActionEvent ae) {
+      Document doc = _model.getDefinitionsDocument();
+      _findReplace.setMachine(_model.createFindReplaceMachine());
+      _findReplace.show();
+    }
+  };
+
+  /** Asks the user for a line number and goes there. */
+  private Action _gotoLineAction = new AbstractAction("Goto line") {
+    public void actionPerformed(ActionEvent ae) {
+      _gotoLine();
+    }
+  };
   
-  // Make some actions for menus
+  /** Clears DrJava's output console. */
+  private Action _clearOutputAction = new AbstractAction("Clear Output") {
+    public void actionPerformed(ActionEvent ae) {
+      _model.resetConsole();
+    }
+  };
+
+  /** Clears the interactions console. */
+  private Action _resetInteractionsAction = 
+    new AbstractAction("Reset interactions")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      _model.resetInteractions();
+    }
+  };
+  
+  /** Pops up an info dialog. */
   private Action _aboutAction = new AbstractAction("About") {
 
-    /**
-     * put your documentation comment here
-     * @param ae
-     */
     public void actionPerformed(ActionEvent ae) {
       final String message = "DrJava, brought to you by the Java PLT "
                            + "research group at Rice University.\n"
@@ -76,70 +155,8 @@ public class MainFrame extends JFrame {
     }
   };
   
-  private Action _quitAction = new AbstractAction("Quit") {
-    public void actionPerformed(ActionEvent ae) {
-      _model.quit();
-    }
-  };
-  
-  private Action _openAction = new AbstractAction("Open") {
-    public void actionPerformed(ActionEvent ae) {
-      _open();
-    }
-  };  
-  
-  private Action _newAction = new AbstractAction("New") {
-    public void actionPerformed(ActionEvent ae) {
-      _model.newFile();
-    }
-  };
 
-  private Action _gotoLineAction = new AbstractAction("Goto line") {
-    public void actionPerformed(ActionEvent ae) {
-      _gotoLine();
-    }
-  };
- 
-  private Action _saveAction = new AbstractAction("Save") {
-    public void actionPerformed(ActionEvent ae) {
-      _save();
-    }
-  };
-    
-  private Action _saveAsAction = new AbstractAction("Save as") {
-    public void actionPerformed(ActionEvent ae) {
-      _saveAs();
-    }
-  };
-
-  private Action _compileAction = new AbstractAction("Compile") {
-    public void actionPerformed(ActionEvent ae) {
-      _model.startCompile();
-    }
-  };
-  
-  private Action _findReplaceAction = new AbstractAction("Find/Replace") {
-    /**
-     * put your documentation comment here
-     * @param ae
-     */
-    public void actionPerformed(ActionEvent ae) {
-      _definitionsPane.findReplace();
-    }
-  };
-  
-  private Action _clearOutputAction = new AbstractAction("Clear Output") {
-    public void actionPerformed(ActionEvent ae) {
-      _model.resetConsole();
-    }
-  };
-
-  private Action _resetInteractionsAction = new AbstractAction("Reset interactions") {
-    public void actionPerformed(ActionEvent ae) {
-      _model.resetInteractions();
-    }
-  };
-
+  /** How DrJava responds to window events. */
   private WindowListener _windowCloseListener = new WindowListener() {
     public void windowActivated(WindowEvent ev) {}
     public void windowClosed(WindowEvent ev) {}
@@ -154,19 +171,30 @@ public class MainFrame extends JFrame {
     }
   };
 
+  /** 
+   * Makes sure save and compile buttons and menu items
+   * are enabled and disabled appropriately after document
+   * modifications.
+   */
   void installNewDocumentListener(DefinitionsDocument d) {
     d.addDocumentListener(new DocumentListener() {
       public void changedUpdate(DocumentEvent e) {
         _saveButton.setEnabled(true);
         _compileButton.setEnabled(false);
+        _saveMenuItem.setEnabled(true);
+        _compileMenuItem.setEnabled(false);
       }
-      public void insertUpdate(DocumentEvent e) {
+      public void insertUpdate(DocumentEvent e) {        
         _saveButton.setEnabled(true);
         _compileButton.setEnabled(false);
+        _saveMenuItem.setEnabled(true);
+        _compileMenuItem.setEnabled(false);
       }
       public void removeUpdate(DocumentEvent e) {
         _saveButton.setEnabled(true);
         _compileButton.setEnabled(false);
+        _saveMenuItem.setEnabled(true);
+        _compileMenuItem.setEnabled(false);
       }
     });
   }
@@ -229,10 +257,18 @@ public class MainFrame extends JFrame {
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
     tmpItem = _fileMenu.add(_saveAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+    
+    // keep track of the save menu item
+    _saveMenuItem = tmpItem;
+    
     tmpItem = _fileMenu.add(_saveAsAction);
     _fileMenu.addSeparator();
     tmpItem = _fileMenu.add(_compileAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
+
+    // keep track of the compile menu item
+    _compileMenuItem = tmpItem;
+        
     _fileMenu.addSeparator();
     tmpItem = _fileMenu.add(_quitAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
@@ -315,6 +351,7 @@ public class MainFrame extends JFrame {
     //split2.setDividerLocation(50);
     updateFileTitle("Untitled");
     _setAllFonts(new Font("Monospaced", 0, 12));
+    _findReplace = new FindReplaceDialog(this, _definitionsPane);
   }
 
 
@@ -455,14 +492,19 @@ public class MainFrame extends JFrame {
       _definitionsPane.setDocument(_model.getDefinitionsDocument());
       _saveButton.setEnabled(false);
       _compileButton.setEnabled(false);
+      _saveMenuItem.setEnabled(false);
+      _compileMenuItem.setEnabled(false);
       _fileNameField.setText("Untitled");
       installNewDocumentListener((DefinitionsDocument)_model.getDefinitionsDocument());
       _definitionsPane.grabFocus();
+      _definitionsPane.getHighlighter().removeAllHighlights();
     }
     
     public void fileSaved(File file) { 
       _saveButton.setEnabled(false);
       _compileButton.setEnabled(true);
+      _saveMenuItem.setEnabled(false);
+      _compileMenuItem.setEnabled(true);
       _fileNameField.setText(file.getName());
     }
     
@@ -470,15 +512,20 @@ public class MainFrame extends JFrame {
       _definitionsPane.setDocument(_model.getDefinitionsDocument());
       _saveButton.setEnabled(false);
       _compileButton.setEnabled(true);
+      _saveMenuItem.setEnabled(false);
+      _compileMenuItem.setEnabled(true);
       _fileNameField.setText(file.getName());
       installNewDocumentListener((DefinitionsDocument)_model.getDefinitionsDocument());
       _definitionsPane.grabFocus();
+      _definitionsPane.getHighlighter().removeAllHighlights();
     }
     
     public void compileStarted() { 
       _tabbedPane.setSelectedIndex(COMPILE_TAB);
       _saveButton.setEnabled(false);
       _compileButton.setEnabled(false);
+      _saveMenuItem.setEnabled(false);
+      _compileMenuItem.setEnabled(false);
       hourglassOn();
     }
     
@@ -553,4 +600,7 @@ public class MainFrame extends JFrame {
       }
     } 
   }
+  
+  
+  
 }
