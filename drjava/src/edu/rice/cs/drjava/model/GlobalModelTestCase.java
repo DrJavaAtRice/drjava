@@ -93,7 +93,7 @@ public abstract class GlobalModelTestCase extends TestCase {
     return FileOps.createTempDirectory("DrJava-test", _tempDir);
   }
 
-  protected File createFile(String name) { 
+  protected File createFile(String name) {
     return new File(_tempDir, name);
   }
 
@@ -137,7 +137,7 @@ public abstract class GlobalModelTestCase extends TestCase {
     _model.addListener(listener);
 
     // Open a new document
-    int numOpen = _model.getDefinitionsDocuments().length;
+    int numOpen = _model.getDefinitionsDocuments().getSize();
     OpenDefinitionsDocument doc = _model.newFile();
     assertNumOpenDocs(numOpen + 1);
 
@@ -179,7 +179,7 @@ public abstract class GlobalModelTestCase extends TestCase {
   protected void assertNumOpenDocs(int num) {
     assertEquals("number of open documents",
                  num,
-                 _model.getDefinitionsDocuments().length);
+                 _model.getDefinitionsDocuments().getSize());
   }
 
   protected void assertModified(boolean b, OpenDefinitionsDocument doc) {

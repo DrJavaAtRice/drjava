@@ -4,6 +4,7 @@ import  junit.framework.*;
 import  junit.extensions.*;
 import  javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import javax.swing.ListModel;
 
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
@@ -285,15 +286,15 @@ public class GlobalIndentTest extends GlobalModelTestCase {
     _assertNumOpenDocs(0);
     OpenDefinitionsDocument doc = _model.newFile();
     doc.setDefinitionsIndent(2);
-    OpenDefinitionsDocument[] docs = _model.getDefinitionsDocuments();
+    ListModel docs = _model.getDefinitionsDocuments();
     _assertNumOpenDocs(1);
-    return docs[0];
+    return (OpenDefinitionsDocument) docs.getElementAt(0);
   }
 
   private void _assertNumOpenDocs(int num) {
     assertEquals("number of open documents",
                  num,
-                 _model.getDefinitionsDocuments().length);
+                 _model.getDefinitionsDocuments().getSize());
   }
 
   private void _assertContents(String expected, Document document)

@@ -1,6 +1,8 @@
 package edu.rice.cs.drjava.model;
 
 import javax.swing.text.*;
+import javax.swing.ListModel;
+import javax.swing.DefaultListModel;
 import java.io.*;
 import java.util.*;
 
@@ -24,12 +26,12 @@ import edu.rice.cs.drjava.model.compiler.*;
  */
 public class DefaultGlobalModel implements GlobalModel {
   private DefinitionsEditorKit _editorKit;
-  private LinkedList _definitionsDocs;
+  private DefaultListModel _definitionsDocs;
   private InteractionsDocument _interactionsDoc;
   private Document _consoleDoc;
   private CompilerError[] _compileErrors;
-  private LinkedList _listeners;
   private JavaInterpreter _interpreter;
+  private LinkedList _listeners;
 
   /**
    * Constructor.  Initializes all the documents and the interpreter.
@@ -37,12 +39,12 @@ public class DefaultGlobalModel implements GlobalModel {
   public DefaultGlobalModel()
   {
     _editorKit = new DefinitionsEditorKit();
-    _definitionsDocs = new LinkedList();
+    _definitionsDocs = new DefaultListModel();
     _interactionsDoc = new InteractionsDocument();
     _consoleDoc = new DefaultStyledDocument();
     _compileErrors = new CompilerError[0];
-    _listeners = new LinkedList();
     _interpreter = new DynamicJavaAdapter();
+    _listeners = new LinkedList();
   }
 
 
@@ -68,12 +70,10 @@ public class DefaultGlobalModel implements GlobalModel {
     return _editorKit;
   }
 
-  public OpenDefinitionsDocument[] getDefinitionsDocuments() {
-    // Ensure array has correct type
-    OpenDefinitionsDocument[] docs = (OpenDefinitionsDocument[])
-      _definitionsDocs.toArray(new OpenDefinitionsDocument[0]);
-    return docs;
+  public ListModel getDefinitionsDocuments() {
+    return _definitionsDocs;
   }
+
   public Document getInteractionsDocument() {
     return _interactionsDoc;
   }
@@ -93,8 +93,8 @@ public class DefaultGlobalModel implements GlobalModel {
   public OpenDefinitionsDocument newFile() {
     final OpenDefinitionsDocument doc = _createOpenDefinitionsDocument();
     doc.getDocument().setFile(null);
-    _definitionsDocs.add(doc);
-    _notifyListeners(new EventNotifier() {
+    _definitionsDocs.addElement(doc);
+    notifyListeners(new EventNotifier() {
       public void notifyListener(GlobalModelListener l) {
         l.newFileCreated(doc);
       }
@@ -132,9 +132,9 @@ public class DefaultGlobalModel implements GlobalModel {
 
       final OpenDefinitionsDocument doc =
         new DefinitionsDocumentHandler(tempDoc);
-      _definitionsDocs.add(doc);
+      _definitionsDocs.addElement(doc);
 
-      _notifyListeners(new EventNotifier() {
+      notifyListeners(new EventNotifier() {
         public void notifyListener(GlobalModelListener l) {
           l.fileOpened(doc);
         }
@@ -158,8 +158,8 @@ public class DefaultGlobalModel implements GlobalModel {
     final OpenDefinitionsDocument closedDoc = doc;
     if (canClose) {
       // Only fire event if doc exists and was removed from list
-      if (_definitionsDocs.remove(doc)) {
-        _notifyListeners(new EventNotifier() {
+      if (_definitionsDocs.removeElement(doc)) {
+        notifyListeners(new EventNotifier() {
           public void notifyListener(GlobalModelListener l) {
             l.fileClosed(closedDoc);
           }
@@ -175,13 +175,13 @@ public class DefaultGlobalModel implements GlobalModel {
    * @return true if all documents were closed
    */
   public boolean closeAllFiles() {
-    boolean closeAll = true;
-    while (!_definitionsDocs.isEmpty() && closeAll) {
+    boolean keepClosing = true;
+    while (!_definitionsDocs.isEmpty() && keepClosing) {
       OpenDefinitionsDocument openDoc = (OpenDefinitionsDocument)
-        _definitionsDocs.getFirst();
-      closeAll = closeFile(openDoc);
+        _definitionsDocs.get(0);
+      keepClosing = closeFile(openDoc);
     }
-    return closeAll;
+    return keepClosing;
   }
 
   /**
@@ -241,7 +241,7 @@ public class DefaultGlobalModel implements GlobalModel {
       throw new UnexpectedException(ble);
     }
 
-    _notifyListeners(new EventNotifier() {
+    notifyListeners(new EventNotifier() {
       public void notifyListener(GlobalModelListener l) {
         l.consoleReset();
       }
@@ -502,7 +502,7 @@ public class DefaultGlobalModel implements GlobalModel {
         writer.close();
         _doc.resetModification();
         _doc.setFile(file);
-        _notifyListeners(new EventNotifier() {
+        notifyListeners(new EventNotifier() {
           public void notifyListener(GlobalModelListener l) {
             l.fileSaved(openDoc);
           }
@@ -526,7 +526,7 @@ public class DefaultGlobalModel implements GlobalModel {
     public void saveBeforeProceeding(final GlobalModelListener.SaveReason reason)
     {
       if (isModifiedSinceSave()) {
-        _notifyListeners(new EventNotifier() {
+        notifyListeners(new EventNotifier() {
           public void notifyListener(GlobalModelListener l) {
             l.saveBeforeProceeding(reason);
           }
@@ -565,7 +565,7 @@ public class DefaultGlobalModel implements GlobalModel {
           File sourceRoot = null;
 
           try {
-            _notifyListeners(new EventNotifier() {
+            notifyListeners(new EventNotifier() {
               public void notifyListener(GlobalModelListener l) {
                 l.compileStarted();
               }
@@ -589,7 +589,7 @@ public class DefaultGlobalModel implements GlobalModel {
             _compileErrors = new CompilerError[] { err };
           }
           finally {
-            _notifyListeners(new EventNotifier() {
+            notifyListeners(new EventNotifier() {
               public void notifyListener(GlobalModelListener l) {
                 l.compileEnded();
               }
@@ -627,7 +627,7 @@ public class DefaultGlobalModel implements GlobalModel {
     public boolean canAbandonFile() {
       final OpenDefinitionsDocument doc = this;
       if (isModifiedSinceSave()) {
-        return _pollListeners(new EventPoller() {
+        return pollListeners(new EventPoller() {
           public boolean poll(GlobalModelListener l) {
             return l.canAbandonFile(doc);
           }
@@ -789,7 +789,6 @@ public class DefaultGlobalModel implements GlobalModel {
 
   }
 
-
   /**
    * Creates a DefinitionsDocumentHandler for a new DefinitionsDocument,
    * using the DefinitionsEditorKit.
@@ -869,7 +868,7 @@ public class DefaultGlobalModel implements GlobalModel {
 
     //_interpreter.setPackageScope("");
 
-    _notifyListeners(new EventNotifier() {
+    notifyListeners(new EventNotifier() {
       public void notifyListener(GlobalModelListener l) {
         l.interactionsReset();
       }
@@ -894,7 +893,7 @@ public class DefaultGlobalModel implements GlobalModel {
    * @return the listeners' responses ANDed together, true if they all
    * agree, false if some disagree
    */
-  private boolean _pollListeners(EventPoller p) {
+  protected boolean pollListeners(EventPoller p) {
     ListIterator i = _listeners.listIterator();
     boolean poll = true;
 
@@ -909,7 +908,7 @@ public class DefaultGlobalModel implements GlobalModel {
    * Lets the listeners know some event has taken place.
    * @param EventNotifier n tells the listener what happened
    */
-  private void _notifyListeners(EventNotifier n) {
+  protected void notifyListeners(EventNotifier n) {
     ListIterator i = _listeners.listIterator();
 
     while(i.hasNext()) {
@@ -921,14 +920,14 @@ public class DefaultGlobalModel implements GlobalModel {
   /**
    * Class model for notifying listeners of an event.
    */
-  private abstract class EventNotifier {
+  protected abstract class EventNotifier {
     public abstract void notifyListener(GlobalModelListener l);
   }
 
   /**
    * Class model for asking listeners a yes/no question.
    */
-  private abstract class EventPoller {
+  protected abstract class EventPoller {
     public abstract boolean poll(GlobalModelListener l);
   }
 }

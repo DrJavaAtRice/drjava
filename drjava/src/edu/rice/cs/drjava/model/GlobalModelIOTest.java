@@ -10,6 +10,7 @@ import  junit.extensions.*;
 import java.util.LinkedList;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
+import javax.swing.ListModel;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.model.definitions.*;
@@ -74,12 +75,12 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     doc3 = setupDocument(FOO_TEXT);
     assertNumOpenDocs(3);
 
-    OpenDefinitionsDocument[] docs = _model.getDefinitionsDocuments();
-    assertEquals("size of document array", 3, docs.length);
+    ListModel docs = _model.getDefinitionsDocuments();
+    assertEquals("size of document array", 3, docs.getSize());
 
-    assertEquals("document 1", doc1, docs[0]);
-    assertEquals("document 2", doc2, docs[1]);
-    assertEquals("document 3", doc3, docs[2]);
+    assertEquals("document 1", doc1, docs.getElementAt(0));
+    assertEquals("document 2", doc2, docs.getElementAt(1));
+    assertEquals("document 3", doc3, docs.getElementAt(2));
   }
 
 
@@ -96,14 +97,14 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     _model.closeFile(doc1);
     assertNumOpenDocs(1);
 
-    OpenDefinitionsDocument[] docs = _model.getDefinitionsDocuments();
-    assertEquals("size of document array", 1, docs.length);
-    assertContents(BAR_TEXT, docs[0]);
+    ListModel docs = _model.getDefinitionsDocuments();
+    assertEquals("size of document array", 1, docs.getSize());
+    assertContents(BAR_TEXT, (OpenDefinitionsDocument) docs.getElementAt(0));
 
     _model.closeFile(doc2);
     assertNumOpenDocs(0);
     docs = _model.getDefinitionsDocuments();
-    assertEquals("size of document array", 0, docs.length);
+    assertEquals("size of document array", 0, docs.getSize());
   }
 
 
@@ -233,8 +234,8 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
       assertNumOpenDocs(1);
       listener.assertOpenCount(0);
 
-      OpenDefinitionsDocument[] docs = _model.getDefinitionsDocuments();
-      doc = docs[0];
+      ListModel docs = _model.getDefinitionsDocuments();
+      doc = (OpenDefinitionsDocument) docs.getElementAt(0);
       assertModified(true, doc);
       assertContents(FOO_TEXT, doc);
     }

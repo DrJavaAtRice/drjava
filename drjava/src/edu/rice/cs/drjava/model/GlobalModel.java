@@ -1,6 +1,7 @@
 package edu.rice.cs.drjava.model;
 
 import javax.swing.text.*;
+import javax.swing.ListModel;
 import java.io.*;
 import java.util.*;
 
@@ -42,9 +43,9 @@ public interface GlobalModel {
   public DefinitionsEditorKit getEditorKit();
 
   /**
-   * Gets list of open definitions documents.
+   * Gets a ListModel of the open definitions documents.
    */
-  public OpenDefinitionsDocument[] getDefinitionsDocuments();
+  public ListModel getDefinitionsDocuments();
 
   /**
    * Gets the interactions document.
