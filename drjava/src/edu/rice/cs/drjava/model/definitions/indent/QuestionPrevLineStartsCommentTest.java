@@ -36,12 +36,6 @@
  * remove the dependency first!)
  *
 END_COPYRIGHT_BLOCK*/
-/**
- * @version $Id$
- *
- * Tests Rule #2: Does the previous line start the comment?
- * (see http://www.owlnet.rice.edu/~creis/comp312/indentrules.html)
- */
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
@@ -49,15 +43,18 @@ import junit.framework.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
-// Rule #2: Does the previous line start the comment?
+/**
+ * Tests whether the previous line start the comment?
+ * 
+ * @version $Id$
+ */
 public class QuestionPrevLineStartsCommentTest extends IndentRulesTestCase {
   public QuestionPrevLineStartsCommentTest(String name) {
     super(name);
   }
-  // generic rule always returns false...
-  // to use until we get the actual implementation
+
   static IndentRuleQuestion rule2 = new QuestionPrevLineStartsComment(null,
-								      null);
+              null);
   private static String example1 = "/*\nfoo\nbar\n*/";
   //                                    .    .
   // /* 
@@ -90,27 +87,22 @@ public class QuestionPrevLineStartsCommentTest extends IndentRulesTestCase {
   
   public void testSlashStarMidLineFirstLine() throws javax.swing.text.BadLocationException {
     _setDocText(example2);
-    //_doc.setCurrentLocation(11);
     assertEquals(true, rule2.applyRule(_doc, 11));
   }
   public void testSlashStarMidLineSecondLine() throws javax.swing.text.BadLocationException {
     _setDocText(example2);
-    //_doc.setCurrentLocation(16);
     assertEquals(false, rule2.applyRule(_doc, 16));
   }
   public void testCommentedOutSlashStarBefore() throws javax.swing.text.BadLocationException {
     _setDocText(example3);
-    //_doc.setCurrentLocation(3);
     assertEquals(true, rule2.applyRule(_doc, 3));
   }
   public void testCommentedOutSlashStarAt() throws javax.swing.text.BadLocationException {
     _setDocText(example3);
-    //_doc.setCurrentLocation(7);
     assertEquals(false, rule2.applyRule(_doc, 7));
   }
   public void testCommentedOutSlashStarAfter() throws javax.swing.text.BadLocationException {
     _setDocText(example3);
-    //_doc.setCurrentLocation(13);
     assertEquals(false, rule2.applyRule(_doc, 13));
   }
 }

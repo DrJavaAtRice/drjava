@@ -36,12 +36,6 @@
  * remove the dependency first!)
  *
 END_COPYRIGHT_BLOCK*/
-/**
- * @version $Id$
- *
- * Tests Rule #3: Is the current line empty?
- * (see http://www.owlnet.rice.edu/~creis/comp312/indentrules.html)
- */
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
@@ -49,7 +43,11 @@ import junit.framework.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
-// Rule #3: Is the current line empty?
+/**
+ * Tests whether the current line is empty.
+ * 
+ * @version $Id$
+ */
 public class QuestionCurrLineEmptyTest extends IndentRulesTestCase {
   public QuestionCurrLineEmptyTest(String name) {
     super(name);

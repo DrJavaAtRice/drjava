@@ -43,10 +43,10 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
- * @version $Id$
- * 
  * Given the start of the current line is inside a C-style comment, asks
  * whether the comment begins on the "previous line," ignoring white space.
+ * 
+ * @version $Id$
  */
 class QuestionPrevLineStartsComment extends IndentRuleQuestion {
   
@@ -95,7 +95,7 @@ class QuestionPrevLineStartsComment extends IndentRuleQuestion {
       BraceReduction reduced = doc.getReduced();
       reduced.resetLocation();
       ReducedModelState state = reduced.stateAtRelLocation(cursor -
-							   reduced.absOffset());
+          reduced.absOffset());
       return !state.equals(ReducedModelState.INSIDE_BLOCK_COMMENT);
     }
   }

@@ -1,5 +1,3 @@
-
-
 /*BEGIN_COPYRIGHT_BLOCK
  *
  * This file is a part of DrJava. Current versions of this project are available
@@ -59,7 +57,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 public class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase 
 {
     // PRE: We are not inside a multiline comment.
-	
+ 
     private String _text;
 
     private final IndentRuleQuestion _rule = new QuestionBraceIsParenOrBracket(null, null);
@@ -73,173 +71,173 @@ public class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
     
     public void testParen() throws BadLocationException 
     {
-	int i;
-
-	/* (1) */ 
-	
-	_text = "boolean method(int[] a, String b)";
-	_setDocText(_text);
-
-	for (i = 0; i < _text.length(); i++)
-	    assertTrue("START has no brace.", !_rule.applyRule(_doc, i));
-
-	/* (2) */ 
-
-	_text = 
-	    "boolean method\n" +
-	    "    (int[] a, String b)";
-
-	_setDocText(_text);
-
-	for (i = 0; i < _text.length(); i++)
-	    assertTrue("START has no brace.", !_rule.applyRule(_doc, i));
-
-	/* (3) */ 
-
-	_text = 
-	    "boolean method(\n" +
-	    "    int[] a, String b)";
-
-	_setDocText(_text);
-
-	for (i = 0; i < 16; i++)
-	    assertTrue("START has no brace.", !_rule.applyRule(_doc, i));
-	
-	// For any position past the '\n' character, the rule applies:
- 
-	for (i = 16; i < _text.length(); i++)
-	    assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, i));	    
-
-	/* (4) */ 
-
-	_text = 
-	    "if (<cond>) {\n" +
-	    "    if (\n" +
-	    "        <cond>) { ... }}";
-
-	_setDocText(_text);
-
-	for (i = 0; i < 23; i++)
-	    assertTrue("START has no brace.", !_rule.applyRule(_doc, i));	    
-
-	// For any position past the second '\n' character, the rule applies:
-
-	for (i = 23; i < _text.length(); i++)
-	    assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, i));	    
-
-	/* (5) */ 
-
-	_text = 
-	    "method(\n" +
-	    "       array1, foo(array1[x]))\n" +
-	    " <other stuff>";
-
-	_setDocText(_text);
-
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));	    
-	assertTrue("START has no brace", !_rule.applyRule(_doc, 7));	    
-	assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, 8));	    
-	assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, 30));	    
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, _text.length() - 1));	    
+      int i;
+      
+      /* (1) */ 
+      
+      _text = "boolean method(int[] a, String b)";
+      _setDocText(_text);
+      
+      for (i = 0; i < _text.length(); i++)
+        assertTrue("START has no brace.", !_rule.applyRule(_doc, i));
+      
+      /* (2) */ 
+      
+      _text = 
+        "boolean method\n" +
+        "    (int[] a, String b)";
+      
+      _setDocText(_text);
+      
+      for (i = 0; i < _text.length(); i++)
+        assertTrue("START has no brace.", !_rule.applyRule(_doc, i));
+      
+      /* (3) */ 
+      
+      _text = 
+        "boolean method(\n" +
+        "    int[] a, String b)";
+      
+      _setDocText(_text);
+      
+      for (i = 0; i < 16; i++)
+        assertTrue("START has no brace.", !_rule.applyRule(_doc, i));
+      
+      // For any position past the '\n' character, the rule applies:
+      
+      for (i = 16; i < _text.length(); i++)
+        assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, i));     
+      
+      /* (4) */ 
+      
+      _text = 
+        "if (<cond>) {\n" +
+        "    if (\n" +
+        "        <cond>) { ... }}";
+      
+      _setDocText(_text);
+      
+      for (i = 0; i < 23; i++)
+        assertTrue("START has no brace.", !_rule.applyRule(_doc, i));     
+      
+      // For any position past the second '\n' character, the rule applies:
+      
+      for (i = 23; i < _text.length(); i++)
+        assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, i));     
+      
+      /* (5) */ 
+      
+      _text = 
+        "method(\n" +
+        "       array1, foo(array1[x]))\n" +
+        " <other stuff>";
+      
+      _setDocText(_text);
+      
+      assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));     
+      assertTrue("START has no brace", !_rule.applyRule(_doc, 7));     
+      assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, 8));     
+      assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, 30));     
+      assertTrue("START has no brace.", !_rule.applyRule(_doc, _text.length() - 1));     
     }
 
     public void testBracket() throws BadLocationException
     {
-	int i;
-
-	/* (1) */ 
-
-	_text = 
-	    "boolean method(int[\n" +
-	    "                   ELTS]\n" +
-	    "               a, String b)";
-
-	_setDocText(_text);
-
-	for (i = 0; i < 20; i++)
-	    assertTrue("START has no brace.", !_rule.applyRule(_doc, i));
-	
-	// For any position past the first '\n' character, the rule applies:
- 
-	for (i = 20; i < 29; i++)
-	    assertTrue("START's brace is an open bracket.", _rule.applyRule(_doc, i));	    
-
-	for (i = 29; i < _text.length(); i++)
-	    assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, i));	    
-
-	/* (2) */ 
-
-	_text = "array1[i]\n" +
-	    "       [j]";
-	
-	_setDocText(_text);
-
-	for (i = 0; i < _text.length(); i++)
-	    assertTrue("START has no brace.", !_rule.applyRule(_doc, i));
-
-	/* (3) */ 
-
-	_text = 
-	    "array1[\n" +
-	    "           i][\n" +
-	    "              j]";
-
-	_setDocText(_text);	
-
-	assertTrue("START's paren is an open bracket.", _rule.applyRule(_doc, 8));
-	assertTrue("START's paren is an open bracket.", _rule.applyRule(_doc, 22));
-	assertTrue("START's paren is an open bracket.", _rule.applyRule(_doc, 23));
+      int i;
+      
+      /* (1) */ 
+      
+      _text = 
+        "boolean method(int[\n" +
+        "                   ELTS]\n" +
+        "               a, String b)";
+      
+      _setDocText(_text);
+      
+      for (i = 0; i < 20; i++)
+        assertTrue("START has no brace.", !_rule.applyRule(_doc, i));
+      
+      // For any position past the first '\n' character, the rule applies:
+      
+      for (i = 20; i < 29; i++)
+        assertTrue("START's brace is an open bracket.", _rule.applyRule(_doc, i));     
+      
+      for (i = 29; i < _text.length(); i++)
+        assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, i));     
+      
+      /* (2) */ 
+      
+      _text = "array1[i]\n" +
+        "       [j]";
+      
+      _setDocText(_text);
+      
+      for (i = 0; i < _text.length(); i++)
+        assertTrue("START has no brace.", !_rule.applyRule(_doc, i));
+      
+      /* (3) */ 
+      
+      _text = 
+        "array1[\n" +
+        "           i][\n" +
+        "              j]";
+      
+      _setDocText(_text); 
+      
+      assertTrue("START's paren is an open bracket.", _rule.applyRule(_doc, 8));
+      assertTrue("START's paren is an open bracket.", _rule.applyRule(_doc, 22));
+      assertTrue("START's paren is an open bracket.", _rule.applyRule(_doc, 23));
     }
 
     public void testCurly() throws BadLocationException
     {
-	int i;
-
-	/* (1) */ 
-	
-	_text = 
-	    "class X extends Base\n" +
-	    "{\n" +
-	    "}";
-
-	_setDocText(_text);
-
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 20));
-	assertTrue("START is curly brace.", !_rule.applyRule(_doc, 21));
-	assertTrue("START is close brace.", !_rule.applyRule(_doc, 23));
-	
-	/* (2) */ 
-	
-	_text = 
-	    "class X extends Base\n" +
-	    "{\n" +
-	    "    int bla() { return 44; }\n" +
-	    "}";
-
-	_setDocText(_text);
-
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 20));
-	assertTrue("START is curly brace.", !_rule.applyRule(_doc, 21));
-	assertTrue("START's brace is curly brace.", !_rule.applyRule(_doc, 23));
-	assertTrue("START is close curly brace.", !_rule.applyRule(_doc, _text.length() - 1));
-
-	/* (3) */ 
-	
-	_text = 
-	    "class X extends Base\n" +
-	    "{}\n" +
-	    "class Y extends Base\n" +
-	    "{}";
-
-	_setDocText(_text);
-
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 20));
-	assertTrue("START is open curly brace.", !_rule.applyRule(_doc, 21));
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 24));
-	assertTrue("START's brace is open curly brace.", !_rule.applyRule(_doc, _text.length() - 1));	
+      int i;
+      
+      /* (1) */ 
+      
+      _text = 
+        "class X extends Base\n" +
+        "{\n" +
+        "}";
+      
+      _setDocText(_text);
+      
+      assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));
+      assertTrue("START has no brace.", !_rule.applyRule(_doc, 20));
+      assertTrue("START is curly brace.", !_rule.applyRule(_doc, 21));
+      assertTrue("START is close brace.", !_rule.applyRule(_doc, 23));
+      
+      /* (2) */ 
+      
+      _text = 
+        "class X extends Base\n" +
+        "{\n" +
+        "    int bla() { return 44; }\n" +
+        "}";
+      
+      _setDocText(_text);
+      
+      assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));
+      assertTrue("START has no brace.", !_rule.applyRule(_doc, 20));
+      assertTrue("START is curly brace.", !_rule.applyRule(_doc, 21));
+      assertTrue("START's brace is curly brace.", !_rule.applyRule(_doc, 23));
+      assertTrue("START is close curly brace.", !_rule.applyRule(_doc, _text.length() - 1));
+      
+      /* (3) */ 
+      
+      _text = 
+        "class X extends Base\n" +
+        "{}\n" +
+        "class Y extends Base\n" +
+        "{}";
+      
+      _setDocText(_text);
+      
+      assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));
+      assertTrue("START has no brace.", !_rule.applyRule(_doc, 20));
+      assertTrue("START is open curly brace.", !_rule.applyRule(_doc, 21));
+      assertTrue("START has no brace.", !_rule.applyRule(_doc, 24));
+      assertTrue("START's brace is open curly brace.", !_rule.applyRule(_doc, _text.length() - 1)); 
     }
 }
 

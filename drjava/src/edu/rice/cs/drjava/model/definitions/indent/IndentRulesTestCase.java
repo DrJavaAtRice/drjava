@@ -68,7 +68,6 @@ public abstract class IndentRulesTestCase extends TestCase {
    */
   public void setUp() {
     _doc = new DefinitionsDocument();
-    _setIndentSize(2);
   }
   
   /**
@@ -84,33 +83,33 @@ public abstract class IndentRulesTestCase extends TestCase {
   
   /**
    * Sets the number of spaces to include in the indent string.
-   */
+   *
   protected final void _setIndentSize(int size) {
     _indent = "";
     for (int i=0; i < size; i++) {
       _indent = _indent + " ";
     }
-  }
+  }*/
   
   /**
    * Gets the length of the indent string.
    * @return Number of spaces in the indent string.
-   */
+   *
   protected final int _getIndentSize() {
     return _indent.length();
-  }
+  }*/
   
   /**
    * Get a string containing the specified number of indents.
    * @param numLevels Number of indent strings to return
-   */
+   *
   protected String _getIndentString(int numLevels) {
     String indent = "";
     for (int i=0; i < numLevels; i++) {
       indent += _indent;
     }
     return indent;
-  }
+  }*/
 
   /**
    * Inserts an indent of the specificed number of levels at the given
@@ -118,13 +117,13 @@ public abstract class IndentRulesTestCase extends TestCase {
    * @param text String to insert indent into
    * @param index Position in string to add indent
    * @param numLevels Number of indents to insert
-   */
+   *
   protected String _addIndent(String text, int index, int numLevels) {
     String start = text.substring(0, index);
     String end = text.substring(index);
     String indent = _getIndentString(numLevels);
     return start.concat(indent).concat(end);
-  }
+  }*/
   
   /**
    * Asserts that the document contains the expected text.

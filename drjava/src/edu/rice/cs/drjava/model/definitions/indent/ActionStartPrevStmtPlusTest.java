@@ -71,14 +71,14 @@ public class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
     _setDocText("foo();\n");
     rule1.indentLine(_doc, 2);
     assertEquals("no prev stmt, no suffix",
-		 "foo();\n",
-		 _doc.getText(0, _doc.getLength()));
+                 "foo();\n",
+                 _doc.getText(0, _doc.getLength()));
     
     _setDocText("foo();\n");
     rule2.indentLine(_doc, 2);
     assertEquals("no prev stmt, suffix two spaces",
-		 "  foo();\n",
-		 _doc.getText(0, _doc.getLength()));
+                 "  foo();\n",
+                 _doc.getText(0, _doc.getLength()));
   }
   
   public void testPrevStmtPrevLine() throws BadLocationException {
@@ -88,31 +88,31 @@ public class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
     _setDocText("  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\nbiz();\n");
     rule1.indentLine(_doc, 44);
     assertEquals("prev stmt on prev line, no suffix",
-	   "  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\n  biz();\n",
-	   _doc.getText(0, _doc.getLength()));
-
+                 "  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\n  biz();\n",
+                 _doc.getText(0, _doc.getLength()));
+    
     _setDocText("  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\nbiz();\n");
     rule2.indentLine(_doc, 44);
     assertEquals("prev stmt on prev line, suffix two spaces",
-	   "  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\n    biz();\n",
-	   _doc.getText(0, _doc.getLength()));
+                 "  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\n    biz();\n",
+                 _doc.getText(0, _doc.getLength()));
   }
 
   public void testPrevStmtSeveralLinesBeforeCurrLocation() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartPrevStmtPlus("");
     IndentRuleAction rule2 = new ActionStartPrevStmtPlus("  ");
-
+    
     _setDocText("  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\nx;\n");
     rule1.indentLine(_doc, 56);
     assertEquals("prev stmt serveral lines before, no suffix",
-		 "  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\n  x;\n",
-    		 _doc.getText(0, _doc.getLength()));
-
+                 "  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\n  x;\n",
+                 _doc.getText(0, _doc.getLength()));
+    
     _setDocText("  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\nx;\n");
     rule2.indentLine(_doc, 56);
     assertEquals("prev stmt serveral lines before, suffix two spaces", 
-		 "  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\n    x;\n",
-    		 _doc.getText(0, _doc.getLength()));
+                 "  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\n    x;\n",
+                 _doc.getText(0, _doc.getLength()));
   }
 }
 

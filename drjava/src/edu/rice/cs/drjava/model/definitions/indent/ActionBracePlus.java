@@ -1,5 +1,3 @@
-
-
 /*BEGIN_COPYRIGHT_BLOCK
  *
  * This file is a part of DrJava. Current versions of this project are available

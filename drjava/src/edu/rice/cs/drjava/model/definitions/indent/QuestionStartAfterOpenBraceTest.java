@@ -69,19 +69,17 @@ public class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase
   
   public void setUp() { super.setUp(); }    
   
-  public void testWithFree() throws BadLocationException 
+  public void testNoBrace() throws BadLocationException 
   {
-    int i;
-    
-    /* (1) */
-    
     _text = "method(\nint[] a, String b) {}";
     _setDocText(_text);
     assertTrue("START has no preceding brace.", !_rule.applyRule(_doc, 0));
     assertTrue("START immediately follows an open paren, not a brace.", !_rule.applyRule(_doc, 8));
     assertTrue("START immediately follows an open paren, not a brace.", !_rule.applyRule(_doc, _text.length()-1));
-    
-    /* (2) */
+  }
+  
+  public void testRightAfterBrace() throws BadLocationException 
+  {
     
     _text = 
       "boolean method() {\n" +
@@ -90,7 +88,6 @@ public class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase
     _setDocText(_text);
     assertTrue("START immediately follows an open brace.", _rule.applyRule(_doc, 19));
     
-    /* (3) */
     
     _text = 
       "boolean method(\n" +
@@ -102,7 +99,10 @@ public class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase
     assertTrue("START immediately follows an open paren.", !_rule.applyRule(_doc, 40));
     assertTrue("START immediately follows an open brace.", _rule.applyRule(_doc, 41));
     
-    /* (5) */
+  }
+  
+  public void testWSAfterBrace() throws BadLocationException 
+  {
     
     _text = 
       "if (<cond>) {\n" +
@@ -117,7 +117,10 @@ public class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase
     assertTrue("Only WS between open brace and START.", _rule.applyRule(_doc, 23));     
     assertTrue("START immediatly follows an open paren.", !_rule.applyRule(_doc, 25));     
     
-    /* (6) */
+  }
+  
+  public void testCommentsAfterBrace() throws BadLocationException 
+  {
     
     _text = 
       "class Foo {   \n" +

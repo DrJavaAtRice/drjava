@@ -1,5 +1,3 @@
-
-
 /*BEGIN_COPYRIGHT_BLOCK
  *
  * This file is a part of DrJava. Current versions of this project are available
@@ -58,141 +56,141 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
  */
 public class QuestionBraceIsCurlyTest extends IndentRulesTestCase 
 {
-    // PRE: we are not inside a multiline comment
-    // PRE: the current block or expression list was *not* 
-    //      opened by '[' or '('.
-    
-    private String _text;
-
-    private final IndentRuleQuestion _rule = new QuestionBraceIsCurly(null, null);
-
-    /**
-     * @param name The name of this test case.
-     */
-    public QuestionBraceIsCurlyTest(String name) { super(name); }
-
-    public void setUp() { super.setUp(); }
-
-    public void testWithParen() throws BadLocationException 
-    {
-	int i;
-
-	/* (1) */
-	
-	_text = "boolean method(int[] a, String b) {}";
-	_setDocText(_text);
-
-	for (i = 0; i < _text.length(); i++)
-	    assertTrue("START has no brace.", !_rule.applyRule(_doc, i));
-
-	/* (2) */
-
-	_text = 
-	    "boolean method() {\n" +
-	    "}";
-
-	_setDocText(_text);
-
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 18));	
-	assertTrue("START's brace is curly brace.", _rule.applyRule(_doc, 19));
-
-	/* (3) */
-
-	_text = 
-	    "boolean method(\n" +
-	    "    int[] a, String b)\n" +
-	    "{}";
-
-	_setDocText(_text);
-	
-	assertTrue("START is open curly brace.", !_rule.applyRule(_doc, _text.length() - 2));
-	assertTrue("START is open curly brace.", !_rule.applyRule(_doc, _text.length() - 1));
-
-	/* (4) */
-
-	_text = 
-	    "if (<cond>) {\n" +
-	    "    if (\n" +
-	    "        <cond>) { ... }}";
-
-	_setDocText(_text);
-
-	assertTrue("START's brace is open curly brace.", _rule.applyRule(_doc, 14));	    
-	assertTrue("START's brace is open curly brace.", _rule.applyRule(_doc, 22));	    
-	assertTrue("START's brace is an open paren.", !_rule.applyRule(_doc, 23));	    
-	
-	/* (5) */
-
-	_text = 
-	    "array[\n" +
-	    "    new Listener() {\n" +
-	    "        method() {\n" +
-	    "        }\n" +
-	    "    }]";
-
-	_setDocText(_text);
-
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));	    
-	assertTrue("START's brace is open bracket.", !_rule.applyRule(_doc, 7));	    
-	assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 28));	    
-	assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 30));	    
-	assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, _text.length() - 1));	    
-    }
-
-    public void testOnlyCurly() throws BadLocationException
-    {
-	/* (1) */
-
-	_text =
-	    "{ /* block1 */ }\n" +
-	    "{ /* block2 */ }\n" +
-	    "{ /* block3 */ }";
-	
-	_setDocText(_text);
-
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));	    
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 7));	    
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 28));	    
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 30));	    
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, _text.length() - 1));	    
-
-	/* (2) */
-
-	_text =
-	    "{\n" +
-	    "    {\n" +
-	    "        {}\n" +
-	    "    }\n" +
-	    "}";
-	
-	_setDocText(_text);
-
-	assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));	    
-	assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 7));	    
-	assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 18));	    
-	assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 19));	    
-	assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, _text.length() - 1));
-
-	/* (3) */
-
-	_text =
-	    "class Foo {\n" +
-	    "}";
-	_setDocText(_text);
-
-	assertTrue("Close brace immediately after open brace.", _rule.applyRule(_doc, 12));
-
-	/* (4) */
-	
-	_text =
-	    "class Foo {\n" +
-	    "  method m()\n" +
-	    "  {\n" +
-	    "  }\n" +
-	    "}";
-	_setDocText(_text);
-
-	assertTrue("Close brace immediately after open brace.", _rule.applyRule(_doc, 29));
-    }
-}
+  // PRE: we are not inside a multiline comment
+  // PRE: the current block or expression list was *not* 
+  //      opened by '[' or '('.
   
+  private String _text;
+  
+  private final IndentRuleQuestion _rule = new QuestionBraceIsCurly(null, null);
+
+  /**
+   * @param name The name of this test case.
+   */
+  public QuestionBraceIsCurlyTest(String name) { super(name); }
+  
+  public void setUp() { super.setUp(); }
+  
+  public void testWithParen() throws BadLocationException 
+  {
+    int i;
+    
+    /* (1) */
+    
+    _text = "boolean method(int[] a, String b) {}";
+    _setDocText(_text);
+    
+    for (i = 0; i < _text.length(); i++)
+      assertTrue("START has no brace.", !_rule.applyRule(_doc, i));
+      
+    /* (2) */
+    
+    _text = 
+      "boolean method() {\n" +
+      "}";
+    
+    _setDocText(_text);
+    
+    assertTrue("START has no brace.", !_rule.applyRule(_doc, 18)); 
+    assertTrue("START's brace is curly brace.", _rule.applyRule(_doc, 19));
+    
+    /* (3) */
+    
+    _text = 
+      "boolean method(\n" +
+      "    int[] a, String b)\n" +
+      "{}";
+    
+    _setDocText(_text);
+    
+    assertTrue("START is open curly brace.", !_rule.applyRule(_doc, _text.length() - 2));
+    assertTrue("START is open curly brace.", !_rule.applyRule(_doc, _text.length() - 1));
+    
+    /* (4) */
+    
+    _text = 
+      "if (<cond>) {\n" +
+      "    if (\n" +
+      "        <cond>) { ... }}";
+    
+    _setDocText(_text);
+    
+    assertTrue("START's brace is open curly brace.", _rule.applyRule(_doc, 14));     
+    assertTrue("START's brace is open curly brace.", _rule.applyRule(_doc, 22));     
+    assertTrue("START's brace is an open paren.", !_rule.applyRule(_doc, 23));     
+    
+    /* (5) */
+    
+    _text = 
+      "array[\n" +
+      "    new Listener() {\n" +
+      "        method() {\n" +
+      "        }\n" +
+      "    }]";
+    
+    _setDocText(_text);
+    
+    assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));     
+    assertTrue("START's brace is open bracket.", !_rule.applyRule(_doc, 7));     
+    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 28));     
+    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 30));     
+    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, _text.length() - 1));     
+  }
+  
+  public void testOnlyCurly() throws BadLocationException
+  {
+    /* (1) */
+    
+    _text =
+      "{ /* block1 */ }\n" +
+      "{ /* block2 */ }\n" +
+      "{ /* block3 */ }";
+    
+    _setDocText(_text);
+    
+    assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));     
+    assertTrue("START has no brace.", !_rule.applyRule(_doc, 7));     
+    assertTrue("START has no brace.", !_rule.applyRule(_doc, 28));     
+    assertTrue("START has no brace.", !_rule.applyRule(_doc, 30));     
+    assertTrue("START has no brace.", !_rule.applyRule(_doc, _text.length() - 1));     
+    
+    /* (2) */
+    
+    _text =
+      "{\n" +
+      "    {\n" +
+      "        {}\n" +
+      "    }\n" +
+      "}";
+    
+    _setDocText(_text);
+    
+    assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));     
+    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 7));     
+    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 18));     
+    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 19));     
+    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, _text.length() - 1));
+    
+    /* (3) */
+    
+    _text =
+      "class Foo {\n" +
+      "}";
+    _setDocText(_text);
+    
+    assertTrue("Close brace immediately after open brace.", _rule.applyRule(_doc, 12));
+    
+    /* (4) */
+    
+    _text =
+      "class Foo {\n" +
+      "  method m()\n" +
+      "  {\n" +
+      "  }\n" +
+      "}";
+    _setDocText(_text);
+    
+    assertTrue("Close brace immediately after open brace.", _rule.applyRule(_doc, 29));
+  }
+}
+

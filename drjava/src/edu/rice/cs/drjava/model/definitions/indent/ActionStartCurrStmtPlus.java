@@ -78,6 +78,7 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
      * fully tested in IndentHelperTest, so no additional tests are
      * provided for this class.
      */
+    
     String indent = "";
     
     try {

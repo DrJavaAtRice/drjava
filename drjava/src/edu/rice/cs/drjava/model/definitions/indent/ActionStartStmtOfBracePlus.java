@@ -82,8 +82,6 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
     if (distToBrace == -1) {
       doc.setTab(_suffix, pos);
       return;
-//      throw new UnexpectedException(new RuntimeException("Precondition for ActionStartStmtOfBracePlus " +
-//        "not met: there is no brace."));
     }
 
     // Get the absolute position of the brace

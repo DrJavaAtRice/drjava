@@ -36,13 +36,6 @@
  * remove the dependency first!)
  *
 END_COPYRIGHT_BLOCK*/
-/**
- * @version $Id$
- *
- * Tests Rule #1: Is START within a multiline comment?
- * (see http://www.owlnet.rice.edu/~creis/comp312/indentrules.html)
- *
- */
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
@@ -50,6 +43,11 @@ import junit.framework.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
+/**
+ * Tests whether start of line is within a multiline comment.
+ *
+ * @version $Id$
+ */
 public class QuestionInsideCommentTest extends IndentRulesTestCase {
   public QuestionInsideCommentTest(String name) {
     super(name);
@@ -77,51 +75,38 @@ public class QuestionInsideCommentTest extends IndentRulesTestCase {
     }
   }
       
-  //public void testDummy() {}
-  
   
   public void testDocStart() throws javax.swing.text.BadLocationException {      
-    //_doc.setCurrentLocation(0);
     assertEquals(false, _rule.applyRule(_doc, 0));
   }
   public void testLineBeginsComment() throws javax.swing.text.BadLocationException {
-    //_doc.setCurrentLocation(3);
     assertEquals(false, _rule.applyRule(_doc, 3));
   }
   public void testFooLine() throws javax.swing.text.BadLocationException {
-    //_doc.setCurrentLocation(6);
     assertEquals(true, _rule.applyRule(_doc, 6));
   }
   public void testLineEndsComment() throws javax.swing.text.BadLocationException {
-    //_doc.setCurrentLocation(9);
     assertEquals(true, _rule.applyRule(_doc, 9));
   }
   public void testBarLine() throws javax.swing.text.BadLocationException {
-    //_doc.setCurrentLocation(13);
     assertEquals(false, _rule.applyRule(_doc, 13));
   }
   public void testSlashStarMidLineBefore() throws javax.swing.text.BadLocationException {
-    //_doc.setCurrentLocation(16);
     assertEquals(false, _rule.applyRule(_doc, 16));
   }
   public void testSlashStarMidLineAfter() throws javax.swing.text.BadLocationException {
-    //_doc.setCurrentLocation(24);
     assertEquals(false, _rule.applyRule(_doc, 24));
   }
   public void testCommentedOutSlashStar() throws javax.swing.text.BadLocationException {
-    //_doc.setCurrentLocation(30);
     assertEquals(true, _rule.applyRule(_doc, 30));
   }
   public void testStarSlashMidLineBefore() throws javax.swing.text.BadLocationException {
-    //_doc.setCurrentLocation(33);
     assertEquals(true, _rule.applyRule(_doc, 33));
   }
   public void testStarSlashMidLineAfter() throws javax.swing.text.BadLocationException {
-    //_doc.setCurrentLocation(41);
     assertEquals(true, _rule.applyRule(_doc, 41));
   }
   public void testAfterCommentedOutSlashStar() throws javax.swing.text.BadLocationException {
-    //_doc.setCurrentLocation(49);
     assertEquals(false, _rule.applyRule(_doc, 49));
   }
   

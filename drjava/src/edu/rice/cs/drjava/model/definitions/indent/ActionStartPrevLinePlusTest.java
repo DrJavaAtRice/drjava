@@ -37,18 +37,16 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-/**
- * @version $Id$
- *
- * Tests ActionStartPrevLinePlus(String)
- * (see http://www.owlnet.rice.edu/~creis/comp312/indentrules2.html)
- */
-
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import junit.framework.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
+/**
+ * Tests ActionStartPrevLinePlus(String)
+ *
+ * @version $Id$
+ */
 public class ActionStartPrevLinePlusTest extends IndentRulesTestCase {
   private String _suffix;
   public ActionStartPrevLinePlusTest(String name) {
