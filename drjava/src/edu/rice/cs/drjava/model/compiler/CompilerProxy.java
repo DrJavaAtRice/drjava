@@ -55,6 +55,7 @@ public class CompilerProxy implements CompilerInterface {
    * their values can be freely passed about the program.
    */
   private static final String[] _useOldLoader = {
+    "edu.rice.cs.drjava.model.Configuration",
     "edu.rice.cs.drjava.model.compiler.CompilerInterface",
     "edu.rice.cs.drjava.model.compiler.CompilerError"
   };

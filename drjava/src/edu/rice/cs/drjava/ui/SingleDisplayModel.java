@@ -83,7 +83,7 @@ import edu.rice.cs.drjava.model.compiler.*;
  */
 public class SingleDisplayModel extends DefaultGlobalModel {
   public static final String ABOUT_TEXT =
-    "DrJava " + Version.BUILD_TIME_STRING + "\n" +
+    "DrJava\n" + 
     "Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)\n" +
     "See http://drjava.sourceforge.net for more information on DrJava or\n" +
     "to obtain the latest version of the program or its source code.\n" +
@@ -101,7 +101,12 @@ public class SingleDisplayModel extends DefaultGlobalModel {
     "You should have received a copy of the GNU General Public License\n" +
     "along with this program; if not, write to the Free Software\n" +
     "Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA\n" +
-    "or see http://www.gnu.org/licenses/gpl.html\n";
+    "or see http://www.gnu.org/licenses/gpl.html\n\n" + 
+    "DrJava version: " + Version.BUILD_TIME_STRING + "\n" +
+    "Configuration file: " + Configuration.PROPERTIES_FILE +
+      " (exists = " + Configuration.PROPERTIES_FILE.exists() + ")\n" +
+     "JVM: " + System.getProperty("java.vm.vendor") + " " +
+     System.getProperty("java.vm.version");
 
   /**
    * The active document pointer, which will never be null once

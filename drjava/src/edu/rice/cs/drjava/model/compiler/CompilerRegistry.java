@@ -56,10 +56,11 @@ public class CompilerRegistry {
    * The list of compiler interfaces that are distributed with DrJava.
    */
   public static final String[] DEFAULT_COMPILERS = {
+    "edu.rice.cs.drjava.model.compiler.JSR14FromSetLocation",
+    "edu.rice.cs.drjava.model.compiler.JavacFromSetLocation",
     "edu.rice.cs.drjava.model.compiler.JavacGJCompiler",
     "edu.rice.cs.drjava.model.compiler.JavacFromToolsJar",
-    // gj doesn't work on 1.4, and it sucks anyhow. let's drop it.
-    //"edu.rice.cs.drjava.model.compiler.GJv6Compiler"
+    "edu.rice.cs.drjava.model.compiler.GJv6Compiler",
   };
 
   /** Singleton instance. */
@@ -127,7 +128,9 @@ public class CompilerRegistry {
 
       try {
         CompilerInterface compiler = _instantiateCompiler(name);
-        availableCompilers.add(compiler);
+        if (compiler.isAvailable()) {
+          availableCompilers.add(compiler);
+        }
       }
       catch (Throwable t) {
         // This compiler didn't load. Keep on going.

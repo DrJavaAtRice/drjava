@@ -105,6 +105,7 @@ public class DefaultGlobalModel implements GlobalModel {
 
     try {
       _interpreterControl = new MainJVM(this);
+      _resetInteractionsClasspath();
     }
     catch (java.rmi.RemoteException re) {
       throw new UnexpectedException(re);
@@ -281,7 +282,10 @@ public class DefaultGlobalModel implements GlobalModel {
    */
   public void quit() {
     if (closeAllFiles()) {
-      _interpreterControl.killInterpreter();
+      // Don't kill the interpreter. It'll die in a minute on its own,
+      // and if we kill it using killInterpreter, we'll just start
+      // another one!
+      //_interpreterControl.killInterpreter();
       DrJava.getSecurityManager().exitVM(0);
     }
   }
@@ -1127,6 +1131,18 @@ public class DefaultGlobalModel implements GlobalModel {
     return  argument;
   }
 
+  private void _resetInteractionsClasspath() {
+    File[] sourceRoots = getSourceRootSet();
+    for (int i = 0; i < sourceRoots.length; i++) {
+      _interpreterControl.addClassPath(sourceRoots[i].getAbsolutePath());
+    }
+
+    String[] cp = Configuration.ONLY.getExtraClasspath();
+    for (int i = 0; i < cp.length; i++) {
+      _interpreterControl.addClassPath(cp[i]);
+    }
+  }
+
 
   /**
    * Sets up a new interpreter to clear out the interpreter's environment.
@@ -1134,13 +1150,8 @@ public class DefaultGlobalModel implements GlobalModel {
    * interactionsReset() is fired.
    */
   private void _restoreInteractionsState() {
-    File[] sourceRoots = getSourceRootSet();
-
+    _resetInteractionsClasspath();
     _interactionsDoc.reset();
-
-    for (int i = 0; i < sourceRoots.length; i++) {
-      _interpreterControl.addClassPath(sourceRoots[i].getAbsolutePath());
-    }
 
     //_interpreterControl.setPackageScope("");
 

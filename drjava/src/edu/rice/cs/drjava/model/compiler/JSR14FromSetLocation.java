@@ -38,25 +38,43 @@ import java.net.URLClassLoader;
 import java.net.URL;
 import java.net.MalformedURLException;
 
+import edu.rice.cs.drjava.model.Configuration;
 import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 
 /**
- * A compiler interface to search a given 
+ * A compiler interface to find jsr14 from the location
+ * specified in Configuration.
+ *
  * @version $Id$
  */
-public class JavacFromToolsJar extends CompilerProxy {
-  public static final CompilerInterface ONLY = new JavacFromToolsJar();
+public class JSR14FromSetLocation extends CompilerProxy {
+  public static final CompilerInterface ONLY = new JSR14FromSetLocation();
 
   /** Private constructor due to singleton. */
-  private JavacFromToolsJar() {
-    super("edu.rice.cs.drjava.model.compiler.JavacGJCompiler",
-          new ToolsJarClassLoader());
+  private JSR14FromSetLocation() {
+    super("edu.rice.cs.drjava.model.compiler.JSR14Compiler",
+          _getClassLoader());
+  }
+
+  private static ClassLoader _getClassLoader() {
+    String loc = Configuration.ONLY.getJSR14Location();
+    if (loc == null) {
+      throw new RuntimeException("jsr14 location not set");
+    }
+
+    try {
+      URL url = new File(loc).toURL();
+      return new URLClassLoader(new URL[] { url });
+    }
+    catch (MalformedURLException e) {
+      throw new RuntimeException("malformed url exception");
+    }
   }
 
   /**
    * Returns the name of this compiler, appropriate to show to the user.
    */
   public String getName() {
-    return super.getName() + " (tools.jar)";
+    return super.getName() + " (user)";
   }
 }

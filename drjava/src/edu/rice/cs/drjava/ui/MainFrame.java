@@ -961,10 +961,12 @@ public class MainFrame extends JFrame {
                                     title,
                                     JOptionPane.INFORMATION_MESSAGE);
 
-      interactionEnded();
+      // we don't restore the interactions pane to life, since
+      // the interactionsReset event will do it.
     }
 
     public void interactionsReset() {
+      interactionEnded();
     }
 
     public void consoleReset() {

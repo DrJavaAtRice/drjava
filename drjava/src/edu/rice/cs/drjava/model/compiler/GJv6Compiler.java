@@ -33,15 +33,16 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.compiler;
 
-import  java.io.File;
-import  java.util.LinkedList;
-import  gjc.v6.JavaCompiler;
-import  gjc.v6.util.Name;
-import  gjc.v6.util.Position;
-import  gjc.v6.util.Hashtable;
-import  gjc.v6.util.List;
-import  gjc.v6.util.Log;
+import java.io.File;
+import java.util.LinkedList;
+import gjc.v6.JavaCompiler;
+import gjc.v6.util.Name;
+import gjc.v6.util.Position;
+import gjc.v6.util.Hashtable;
+import gjc.v6.util.List;
+import gjc.v6.util.Log;
 
+import edu.rice.cs.drjava.model.*;
 
 /**
  * The GJ compiler used by DrJava.
@@ -64,8 +65,13 @@ public class GJv6Compiler implements CompilerInterface {
 
   /**
    * Create the compiler. Private because of singleton.
+   * Fail if we are on a JDK that won't work with GJv6!
    */
   private GJv6Compiler () {
+    float javaVersion = Float.parseFloat(System.getProperty("java.specification.version"));
+    if (javaVersion > 1.3f) {
+      throw new RuntimeException("GJv6 can't work with java version > 1.3!");
+    }
   }
 
   /**
@@ -86,6 +92,11 @@ public class GJv6Compiler implements CompilerInterface {
     if (oldclasspath.length() > 0) {
       newclasspath += File.pathSeparator;
       newclasspath += oldclasspath;
+    }
+
+    String[] cp = Configuration.ONLY.getExtraClasspath();
+    for (int i = 0; i < cp.length; i++) {
+      newclasspath += System.getProperty("path.separator") + cp[i];
     }
 
     options.put("-classpath", newclasspath);

@@ -34,29 +34,56 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.compiler;
 
 import java.io.File;
-import java.net.URLClassLoader;
-import java.net.URL;
-import java.net.MalformedURLException;
+import java.io.Writer;
+import java.io.PrintWriter;
+import java.io.IOException;
 
-import edu.rice.cs.util.classloader.ToolsJarClassLoader;
+import java.lang.reflect.Field;
+
+import java.util.LinkedList;
+
+import com.sun.tools.javac.v8.JavaCompiler;
+
+import com.sun.tools.javac.v8.util.Name;
+import com.sun.tools.javac.v8.util.Position;
+import com.sun.tools.javac.v8.util.Hashtable;
+import com.sun.tools.javac.v8.util.List;
+import com.sun.tools.javac.v8.util.Log;
+
+import edu.rice.cs.drjava.model.Configuration;
+import edu.rice.cs.util.FileOps;
 
 /**
- * A compiler interface to search a given 
+ * An implementation of the CompilerInterface that supports compiling with
+ * the JSR-14 prototype compiler.
+ * It adds the collections classes signature to the bootclasspath
+ * as requested by {@link Configuration}.
+ *
  * @version $Id$
  */
-public class JavacFromToolsJar extends CompilerProxy {
-  public static final CompilerInterface ONLY = new JavacFromToolsJar();
+public class JSR14Compiler extends JavacGJCompiler {
+  /** Singleton instance. */
+  public static final CompilerInterface ONLY = new JSR14Compiler();
 
-  /** Private constructor due to singleton. */
-  private JavacFromToolsJar() {
-    super("edu.rice.cs.drjava.model.compiler.JavacGJCompiler",
-          new ToolsJarClassLoader());
+  protected JSR14Compiler() {
+    super();
   }
 
-  /**
-   * Returns the name of this compiler, appropriate to show to the user.
-   */
-  public String getName() {
-    return super.getName() + " (tools.jar)";
+  protected void initCompiler(File sourceRoot) {
+    super.initCompiler(sourceRoot);
+
+    // add collections path to the bootclasspath
+    // Yes, we are mutating some other class's public variable.
+    // But the docs for ClassReader say it's OK for others to mutate it!
+    // And this way, we don't need to specify the entire bootclasspath,
+    // just what we want to add on to it.
+    String ccp = Configuration.ONLY.getJSR14CollectionsPath();
+    if (ccp != null) {
+      compiler.syms.reader.bootClassPath = ccp +
+                                           System.getProperty("path.separator")+
+                                           compiler.syms.reader.bootClassPath;
+    }
   }
+
+  public String getName() { return "JSR-14"; }
 }
