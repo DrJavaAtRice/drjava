@@ -127,14 +127,15 @@ public final class HistoryTest extends TestCase implements OptionConstants{
   }
   
   public void testCanMoveToEmptyAtEnd() {
-    _history.add("some text");
+    String entry = "some text";
+    _history.add(entry);
     
-    _history.movePrevious();
+    _history.movePrevious("");
     assertEquals("Prev did not move to correct item", 
-                 "some text", 
+                 entry, 
                  _history.getCurrent());
     
-    _history.moveNext();
+    _history.moveNext(entry);
     assertEquals("Can't move to blank line at end",
                  "",
                  _history.getCurrent());
@@ -148,13 +149,14 @@ public final class HistoryTest extends TestCase implements OptionConstants{
     int maxLength = 500;
     DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(maxLength));
     
-    for (int i = 0; i < maxLength + 100; i++) {
+    int i;
+    for (i = 0; i < maxLength + 100; i++) {
       _history.add("testing " + i);
     }
-    while(_history.hasPrevious()) {
-      _history.movePrevious();
+    for (; _history.hasPrevious(); i--) {
+      _history.movePrevious("testing " + i);
     }
-    
+
     assertEquals("History length is not bound to " + maxLength,
                  maxLength,
                  _history.size());
@@ -219,7 +221,128 @@ public final class HistoryTest extends TestCase implements OptionConstants{
                  "some text followed by a newline" + newLine + newLine,
                  _history.getHistoryAsString());
   }
+  
+  /**
+   * Tests that the history remembers one edited entry for the given command.
+   */
+  public void testRemembersOneEditedEntry() {
+    _history.add("some text");
+    _history.movePrevious("");
+    
+    String newEntry = "some different text";
+   
+    _history.moveNext(newEntry);
+    _history.movePrevious("");
+    
+    assertEquals("Did not remember the edited entry correctly.", 
+                 newEntry, 
+                 _history.getCurrent());
+  }
+  
+  /**
+   * Tests that the history remembers multiple edited entries for the given command.
+   */
+  public void testRemembersMultipleEditedEntries() {
+    _history.add("some text");
+    _history.add("some more text");
+    _history.movePrevious("");
+    
+    String newEntry1 = "some more different text";
+    String newEntry2 = "some different text";
+   
+    _history.movePrevious(newEntry1);
+    _history.moveNext(newEntry2);
+    
+    assertEquals("Did not remember the edited entry correctly.", 
+                 newEntry1, 
+                 _history.getCurrent());
+    
+    _history.movePrevious(newEntry1);
+    assertEquals("Did not remember the edited entry correctly.",
+                 newEntry2,
+                 _history.getCurrent());
+  }
+  
+  /**
+   * Tests that the original copy of an edited entry remains in the history.
+   */
+  public void testOriginalCopyRemains() {
+    String entry = "some text";
+    String newEntry = "some different text";
+
+    _history.add(entry);
+    _history.movePrevious("");
+    _history.moveNext(newEntry);
+    _history.movePrevious("");
+    _history.add(newEntry);
+    
+    _history.movePrevious("");
+    assertEquals("Did not add edited entry to end of history.",
+                 newEntry,
+                 _history.getCurrent());
+    
+    _history.movePrevious(newEntry);
+    assertEquals("Did not keep a copy of the original entry.",
+                 entry,
+                 _history.getCurrent());
+  }
+  
+  /**
+   * Tests that the tab completion of the most recent entry is correct.
+   */
+  public void testSearchHistory() {
+    String entry1 = "some text";
+    String entry2 = "blah";
+    
+    _history.add(entry1);
+    _history.add(entry2);
+    
+    _history.reverseSearch("s");
+    assertEquals("Did not find the correct entry in history.",
+                 entry1,
+                 _history.getCurrent());
+    
+    _history.forwardSearch("b");
+    assertEquals("Did not find the correct entry in history.",
+                 entry2,
+                 _history.getCurrent());
+  }
+  
+  /**
+   * Tests that if "tab completion" does not find a match, then cursor goes back to "end".
+   */
+  public void testNoMatch() {
+    String entry1 = "some text";
+    String entry2 = "blah";
+    
+    _history.add(entry1);
+    _history.add(entry2);
+    
+    _history.reverseSearch("a");
+    
+    assertEquals("Did not reset cursor correctly.",
+                 "a",
+                 _history.getCurrent());    
+  }
+  
+  /**
+   * Tests reverse searching twice.
+   */
+  public void testReverseSearchTwice() {
+    String entry1 = "same";
+    String entry2 = "some";
+    
+    _history.add(entry1);
+    _history.add(entry2);
+    
+    _history.reverseSearch("s");
+    assertEquals("Did not reset cursor correctly.",
+                 entry2,
+                 _history.getCurrent());    
+
+    _history.reverseSearch(_history.getCurrent());
+    assertEquals("Did not reset cursor correctly.",
+                 entry1,
+                 _history.getCurrent());    
+  }
 }
-
-
-

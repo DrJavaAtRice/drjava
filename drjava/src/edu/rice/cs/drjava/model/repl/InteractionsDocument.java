@@ -242,18 +242,20 @@ public class InteractionsDocument extends ConsoleDocument {
   /**
    * Puts the previous line from the history on the current line
    * and moves the history back one line.
+   * @param entry the current entry (perhaps edited from what is in history)
    */
-  public void moveHistoryPrevious() {
-    _history.movePrevious();
+  public void moveHistoryPrevious(String entry) {
+    _history.movePrevious(entry);
     _replaceCurrentLineFromHistory();
   }
 
   /**
    * Puts the next line from the history on the current line
    * and moves the history forward one line.
+   * @param entry the current entry (perhaps edited from what is in history)
    */
-  public void moveHistoryNext() {
-    _history.moveNext();
+  public void moveHistoryNext(String entry) {
+    _history.moveNext(entry);
     _replaceCurrentLineFromHistory();
   }
 
@@ -270,6 +272,24 @@ public class InteractionsDocument extends ConsoleDocument {
   public boolean hasHistoryNext() {
     return _history.hasNext();
   }
+  
+  /**
+   * Reverse searches the history for the given string.
+   * @param searchString the string to search for
+   */
+  public void reverseHistorySearch(String searchString) {
+    _history.reverseSearch(searchString);
+    _replaceCurrentLineFromHistory();
+  }
+
+  /**
+   * Forward searches the history for the given string.
+   * @param searchString the string to search for
+   */
+  public void forwardHistorySearch(String searchString) {
+    _history.forwardSearch(searchString);
+    _replaceCurrentLineFromHistory();
+  }
 
   /**
    * Gets the previous interaction in the history and
@@ -278,7 +298,7 @@ public class InteractionsDocument extends ConsoleDocument {
    */
   public void recallPreviousInteractionInHistory() {
     if (hasHistoryPrevious()) {
-      moveHistoryPrevious();
+      moveHistoryPrevious(getCurrentInteraction());
     }
     else {
       _beep.run();
@@ -292,7 +312,33 @@ public class InteractionsDocument extends ConsoleDocument {
    */
   public void recallNextInteractionInHistory() {
     if (hasHistoryNext()) {
-      moveHistoryNext();
+      moveHistoryNext(getCurrentInteraction());
+    }
+    else {
+      _beep.run();
+    }
+  }
+  
+  /**
+   * Reverse searches the history for interactions that started with the
+   * current interaction.
+   */
+  public void reverseSearchInteractionsInHistory() {
+    if (hasHistoryPrevious()) {
+      reverseHistorySearch(getCurrentInteraction());
+    }
+    else {
+      _beep.run();
+    }
+  }
+
+  /**
+   * Forward searches the history for interactions that started with the
+   * current interaction.
+   */
+  public void forwardSearchInteractionsInHistory() {
+    if (hasHistoryNext()) {
+      forwardHistorySearch(getCurrentInteraction());
     }
     else {
       _beep.run();

@@ -47,6 +47,7 @@ package edu.rice.cs.drjava.model.repl;
 
 // TODO: Is synchronization used properly here?
 import java.util.Vector;
+import java.util.HashMap;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
@@ -77,13 +78,24 @@ public class History implements OptionConstants {
     
   private Vector<String> _vector = new Vector<String>();
   private int _cursor = -1;
- 
+  
+  /**
+   * A hashmap for edited entries in the history.
+   */
+  private HashMap<Integer, String> _editedEntries = new HashMap<Integer, String>();
+  
+  /**
+   * A placeholder for the current search string.
+   */
+  private String _currentSearchString = "";
+  
   /**
    * Constructor, so we can add a listener to the Config item being used.
    */ 
   public History() {
     this(DrJava.getConfig().getSetting(HISTORY_MAX_SIZE).intValue());
-    DrJava.getConfig().addOptionListener(HISTORY_MAX_SIZE, new HistorySizeOptionListener());
+    DrJava.getConfig().addOptionListener(HISTORY_MAX_SIZE, 
+                                         new HistorySizeOptionListener());
   }
   
   /**
@@ -120,6 +132,7 @@ public class History implements OptionConstants {
         }
       //}
       moveEnd();
+      _editedEntries.clear();
     }
   }
 
@@ -131,19 +144,27 @@ public class History implements OptionConstants {
     _cursor = _vector.size();
   }
 
-  /** Moves cursor back 1, or throws exception if there is none. */
-  public void movePrevious() {
+  /** 
+   * Moves cursor back 1, or throws exception if there is none.
+   * @param entry the current entry (perhaps edited from what is in history)
+   */
+  public void movePrevious(String entry) {
     if (!hasPrevious()) {
       throw  new ArrayIndexOutOfBoundsException();
     }
+    setEditedEntry(entry);
     _cursor--;
   }
 
-  /** Moves cursor forward 1, or throws exception if there is none. */
-  public void moveNext() {
+  /** 
+   * Moves cursor forward 1, or throws exception if there is none. 
+   * @param entry the current entry (perhaps edited from what is in history)
+   */
+  public void moveNext(String entry) {
     if (!hasNext()) {
       throw  new ArrayIndexOutOfBoundsException();
     }
+    setEditedEntry(entry);
     _cursor++;
   }
 
@@ -161,6 +182,11 @@ public class History implements OptionConstants {
    * Returns item in history at current position, or throws exception if none.
    */
   public String getCurrent() {
+    Integer cursor = new Integer(_cursor);
+    if (_editedEntries.containsKey(cursor)) {
+      return _editedEntries.get(cursor);
+    }
+
     if (hasNext()) {
       return  _vector.get(_cursor);
     }
@@ -305,10 +331,65 @@ public class History implements OptionConstants {
    * The OptionListener for HISTORY_MAX_SIZE
    */
   public class HistorySizeOptionListener implements OptionListener<Integer> {
-   
     public void optionChanged (OptionEvent<Integer> oce) {
       int newSize = oce.value.intValue();
       setMaxSize(newSize);
+    }
+  }
+  
+  /**
+   * Sets the edited entry to the given value.
+   * @param entry the string to set
+   */
+  public void setEditedEntry(String entry) {
+    if (!entry.equals(getCurrent())) {
+      _editedEntries.put(new Integer(_cursor), entry);
+    }
+  }
+  
+  /**
+   * Reverse-searches the history for the previous matching string.
+   * @param currentInteraction the current interaction
+   */
+  public void reverseSearch(String currentInteraction) {
+    if (_currentSearchString.equals("") || 
+        !currentInteraction.startsWith(_currentSearchString)) {
+      _currentSearchString = currentInteraction;
+    }
+    
+    setEditedEntry(currentInteraction);
+    while (hasPrevious()) {
+      movePrevious(getCurrent());
+      
+      if (getCurrent().startsWith(_currentSearchString, 0)) {
+        break;
+      }
+    }
+    if (!getCurrent().startsWith(_currentSearchString, 0)) {
+      moveEnd();
+    }
+  }
+  
+  /**
+   * Forward-searches the history for the next matching string.
+   * @param currentInteraction the current interaction
+   */
+  public void forwardSearch(String currentInteraction) {
+    if (_currentSearchString.equals("") || 
+        !currentInteraction.startsWith(_currentSearchString)) {
+      _currentSearchString = currentInteraction;
+    }
+    
+    setEditedEntry(currentInteraction);
+    while (hasNext()) {
+      moveNext(getCurrent());
+      
+      if (getCurrent().startsWith(_currentSearchString, 0)) {
+        break;
+      }
+    }
+    if (!getCurrent().startsWith(_currentSearchString, 0)) {
+      moveEnd();
     }
   }
 }

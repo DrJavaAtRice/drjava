@@ -350,6 +350,12 @@ public class InteractionsController extends AbstractConsoleController {
                                 historyNextAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), 
                                 historyNextAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), 
+                                historyReverseSearchAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 
+                                                       java.awt.Event.SHIFT_MASK), 
+                                historyForwardSearchAction);
+    
 
     // Left needs to be prevented from rolling cursor back before the prompt.
     // Both left and right should lock when caret is before the prompt.
@@ -421,6 +427,30 @@ public class InteractionsController extends AbstractConsoleController {
     public void actionPerformed(ActionEvent e) {
       if (!_busy()) {
         _doc.recallNextInteractionInHistory();
+        moveToEnd();
+      }
+    }
+  };
+
+  /**
+   * Reverse searches in the history.
+   */
+  AbstractAction historyReverseSearchAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      if (!_busy()) {
+        _doc.reverseSearchInteractionsInHistory();
+        moveToEnd();
+      }
+    }
+  };
+
+  /**
+   * Forward searches in the history.
+   */
+  AbstractAction historyForwardSearchAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      if (!_busy()) {
+        _doc.forwardSearchInteractionsInHistory();
         moveToEnd();
       }
     }
