@@ -71,4 +71,26 @@ public abstract class StringOps {
     }
     return fullString;
   }
+  
+  public static Pair<Integer,Integer> getOffsetAndLength( String fullString, 
+                                                          int startRow,
+                                                          int startCol,
+                                                          int endRow,
+                                                          int endCol )
+  {
+    int currentChar = 0;
+    int linesSeen = 1;
+    while( startRow > linesSeen ){
+      currentChar = fullString.indexOf("\n",currentChar);
+      linesSeen++;
+    }
+    int offset = currentChar + startCol - 1; // col is 0 based
+    while( endRow > linesSeen ){
+      currentChar = fullString.indexOf("\n",currentChar);
+      linesSeen++;
+    }
+    int length = currentChar + endCol - offset;
+    return new Pair<Integer,Integer>( new Integer(offset), new Integer(length) );
+  }
+  
 }

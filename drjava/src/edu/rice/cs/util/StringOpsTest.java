@@ -73,4 +73,25 @@ public class StringOpsTest extends TestCase {
     test = "cabcabc";
     assertEquals("testReplace:", "cabc", StringOps.replace(test, "cabc", "c"));
   }
+  
+  public void testGetOffsetAndLength()
+  {
+    String test = "123456789\n123456789\n123456789\n";
+    Pair<Integer,Integer> oAndL = StringOps.getOffsetAndLength( test, 1, 1, 1, 9 );
+    assertEquals("testGetOffsetAndLength- offSet:", new Integer(0), oAndL.getFirst() );
+    assertEquals("testGetOffsetAndLength- length:", new Integer(9), oAndL.getSecond() );
+   
+    oAndL = StringOps.getOffsetAndLength( test, 1, 1, 2, 3 );
+    assertEquals("testGetOffsetAndLength- offSet:", new Integer(0), oAndL.getFirst() );
+    assertEquals("testGetOffsetAndLength- length:", new Integer(12), oAndL.getSecond() );
+    
+    oAndL = StringOps.getOffsetAndLength( test, 1, 5, 2, 3 );
+    assertEquals("testGetOffsetAndLength- offSet:", new Integer(4), oAndL.getFirst() );
+    assertEquals("testGetOffsetAndLength- length:", new Integer(8), oAndL.getSecond() );
+
+    oAndL = StringOps.getOffsetAndLength( test, 1, 1, 1, 1 );
+    assertEquals("testGetOffsetAndLength- offSet:", new Integer(0), oAndL.getFirst() );
+    assertEquals("testGetOffsetAndLength- length:", new Integer(1), oAndL.getSecond() );
+
+  }
 }
