@@ -285,7 +285,10 @@ public abstract class GlobalModelTestCase extends TestCase {
                                    InteractionsDocument.PROMPT.length();
 
     final int resultsLen = resultsEndLocation - resultsStartLocation;
-
+    //System.out.println("resultsStartLoc = " + resultsStartLocation + " resultsEndLocation = " + resultsEndLocation);
+    // There was no output from this interaction
+    if (resultsLen <= 0)
+      return "";    
     return interactionsDoc.getText(resultsStartLocation, resultsLen);
   }
 
@@ -446,6 +449,7 @@ public abstract class GlobalModelTestCase extends TestCase {
     protected int junitEndCount;
     protected int interactionStartCount;
     protected int interactionEndCount;
+    //protected int interactionCaretPositionChangedCount;
     protected int consoleResetCount;
     protected int interactionsResetCount;
     protected int interactionsExitedCount;
@@ -470,6 +474,7 @@ public abstract class GlobalModelTestCase extends TestCase {
       compileErrorDuringJUnitCount = 0;
       interactionStartCount = 0;
       interactionEndCount = 0;
+      //interactionCaretPositionChangedCount = 0;
       consoleResetCount = 0;
       interactionsResetCount = 0;
       saveAllBeforeProceedingCount = 0;
@@ -520,7 +525,11 @@ public abstract class GlobalModelTestCase extends TestCase {
     public void assertInteractionEndCount(int i) {
       assertEquals("number of times interactionEnded fired", i, interactionEndCount);
     }
-
+    /*
+    public void assertInteractionCaretPositionChangedCount(int i) {
+      assertEquals("number of times interactionCaretPositionChanged fired", i, interactionCaretPositionChangedCount);
+    }
+    */
     public void assertCompileStartCount(int i) {
       assertEquals("number of times compileStarted fired", i, compileStartCount);
     }
@@ -611,6 +620,10 @@ public abstract class GlobalModelTestCase extends TestCase {
     public void interactionEnded() {
       fail("interactionEnded fired unexpectedly");
     }
+    /*
+    public void interactionCaretPositionChanged(int pos) {
+      fail("interactionCaretPosition fired unexpectedly");
+    }*/
 
     public void compileStarted() {
       fail("compileStarted fired unexpectedly");

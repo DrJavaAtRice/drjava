@@ -680,11 +680,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
 
   /**
-   * Interprets the given String array. Assumes all strings have no 
-   * trailing whitespace. Interprets the array all at once so if there are 
+   * Interprets the file selected in the FileOpenSelector. Assumes all strings 
+   * have no trailing whitespace. Interprets the array all at once so if there are 
    * any errors, none of the statements after the first erroneous one are processed.
    */
-  public void interpretHistory(FileOpenSelector selector) 
+  public void loadHistory(FileOpenSelector selector) 
     throws IOException {//Vector<String> interactions) {
     
     File[] files = null;
@@ -730,27 +730,40 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       for (int j = 0; j < strings.size(); j++) {
         currString = strings.elementAt(j);
         if (currString.length() > 0) {
-          if (currString.charAt(currString.length() - 1) == ';') 
+          if (currString.charAt(currString.length() - 1) == ';')
+            //currString += "\n";
             text += currString + "\n";
           else
+            //currString += ";\n";
             text += currString + ";\n";
         }
       }
       _docAppend(_interactionsDoc, text, null);
+      //  _docAppend(_interactionsDoc, currString, null);
       _interactionsDoc.setInProgress(true);
       _interactionsDoc.addToHistory(text);
       
       // there is no return at the end of the last line
       // better to put it on now and not later.
-      _docAppend(_interactionsDoc, "\n", null);
+      //_docAppend(_interactionsDoc, "\n", null);
       
       String toEval = text.trim();
+      //String toEval = currString.trim();
       if (toEval.startsWith("java ")) {
         toEval = _testClassCall(toEval);
       }
       
       //System.out.println("Interpreting "+toEval);
       _interpreterControl.interpret(toEval);
+      
+      // Might need this if trying to implement line-by-line interpretation
+      /*
+       notifyListeners(new EventNotifier() {
+       public void notifyListener(GlobalModelListener l) {
+       l.interactionCaretPositionChanged(getInteractionsFrozenPos());
+       }
+       });
+       */
     }
   }
   
@@ -764,8 +777,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   /**
    * Saves the current history to a file
    */
-  public void saveHistory(FileSaveSelector selector) {
+  public void saveHistory(FileSaveSelector selector) throws IOException{
     _interactionsDoc.saveHistory(selector);
+  }
+  
+  /**
+   * Returns the entire history as a Vector<String>
+   */
+  public String getHistoryAsString() {
+    return _interactionsDoc.getHistoryAsString();
   }
   
   private void _docAppend(Document doc, String s, AttributeSet set) {

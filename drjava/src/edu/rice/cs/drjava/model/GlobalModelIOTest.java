@@ -52,6 +52,7 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.ListModel;
 
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
@@ -934,7 +935,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
         openCount++;
       }
       public void fileReverted(OpenDefinitionsDocument doc) {
-					fileRevertedCount++;
+     fileRevertedCount++;
       }
     };
 
@@ -945,32 +946,32 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
 
-		
-		assertEquals("original doc unmodified",doc.isModifiedSinceSave(), false);
-		changeDocumentText(BAR_TEXT, doc);
-		assertEquals("doc now modified",doc.isModifiedSinceSave(), true);
-		doc.revertFile();
-		assertEquals("doc reverted",doc.isModifiedSinceSave(), false);
-		assertContents(FOO_TEXT, doc);
+  
+  assertEquals("original doc unmodified",doc.isModifiedSinceSave(), false);
+  changeDocumentText(BAR_TEXT, doc);
+  assertEquals("doc now modified",doc.isModifiedSinceSave(), true);
+  doc.revertFile();
+  assertEquals("doc reverted",doc.isModifiedSinceSave(), false);
+  assertContents(FOO_TEXT, doc);
   }
 
 
-		public void testModifiedByOther()
+  public void testModifiedByOther()
     throws BadLocationException, IOException, OperationCanceledException,
-					 AlreadyOpenException, InterruptedException
+      AlreadyOpenException, InterruptedException
   {
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
 // don't catch and fail!
     
     TestListener listener = new TestListener() {
-						public void fileOpened(OpenDefinitionsDocument doc) { }
+      public void fileOpened(OpenDefinitionsDocument doc) { }
       public void fileReverted(OpenDefinitionsDocument doc) {
         fileRevertedCount++;
       }
-			public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
-					shouldRevertFileCount++;
-					return true;
-	 		}
+   public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
+     shouldRevertFileCount++;
+     return true;
+    }
     };
 
     _model.addListener(listener);
@@ -980,50 +981,50 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     listener.assertFileRevertedCount(0);
     assertModified(false, doc);
 
-		doc.revertIfModifiedOnDisk();		
+  doc.revertIfModifiedOnDisk();  
 
 
     listener.assertShouldRevertFileCount(0);
     listener.assertFileRevertedCount(0);
-		synchronized(tempFile1) { 
-				tempFile1.wait(1000);
-		}
+  synchronized(tempFile1) { 
+    tempFile1.wait(1000);
+  }
 
-		String s = "THIS IS ONLY A TEST";
-		FileOps.writeStringToFile(tempFile1, s);
+  String s = "THIS IS ONLY A TEST";
+  FileOps.writeStringToFile(tempFile1, s);
     assertEquals("contents of saved file",
                  s,
                  FileOps.readFileAsString(tempFile1));
 
-		tempFile1.setLastModified((new java.util.Date()).getTime());
+  tempFile1.setLastModified((new java.util.Date()).getTime());
 
-		assertTrue("modified on disk1", doc.isModifiedOnDisk());
-		boolean res = doc.revertIfModifiedOnDisk();
-		assertTrue("file reverted", res);
+  assertTrue("modified on disk1", doc.isModifiedOnDisk());
+  boolean res = doc.revertIfModifiedOnDisk();
+  assertTrue("file reverted", res);
 
 
-		listener.assertShouldRevertFileCount(1);
+  listener.assertShouldRevertFileCount(1);
     listener.assertFileRevertedCount(1);
-		assertContents(s,doc);
+  assertContents(s,doc);
   }
 
-		public void testModifiedByOtherFalse()
+  public void testModifiedByOtherFalse()
     throws BadLocationException, IOException, OperationCanceledException,
-					 AlreadyOpenException, InterruptedException
+      AlreadyOpenException, InterruptedException
   {
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
 // don't catch and fail!
     
     TestListener listener = new TestListener() { 
-						public void fileOpened(OpenDefinitionsDocument doc) { }
+      public void fileOpened(OpenDefinitionsDocument doc) { }
 
-			public void fileReverted(OpenDefinitionsDocument doc) {
+   public void fileReverted(OpenDefinitionsDocument doc) {
         fileRevertedCount++;
       }
       public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
-					shouldRevertFileCount++;
-					return false;
-	 		}
+     shouldRevertFileCount++;
+     return false;
+    }
     };
 
     _model.addListener(listener);
@@ -1033,26 +1034,118 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     listener.assertFileRevertedCount(0);
     assertModified(false, doc);
 
-		doc.revertIfModifiedOnDisk();
+  doc.revertIfModifiedOnDisk();
     listener.assertShouldRevertFileCount(0);
     listener.assertFileRevertedCount(0);
 
-		synchronized(tempFile1) { 
-				tempFile1.wait(1000);
-		}
+  synchronized(tempFile1) { 
+    tempFile1.wait(1000);
+  }
 
-		String s = "THIS IS ONLY A TEST";
-		FileOps.writeStringToFile(tempFile1, s);
+  String s = "THIS IS ONLY A TEST";
+  FileOps.writeStringToFile(tempFile1, s);
     assertEquals("contents of saved file",
                  s,
                  FileOps.readFileAsString(tempFile1));
 
-		assertTrue("modified on disk1", doc.isModifiedOnDisk());
-		boolean reverted = doc.revertIfModifiedOnDisk();
-		assertTrue("modified on disk", reverted == false);
-		listener.assertShouldRevertFileCount(1);
+  assertTrue("modified on disk1", doc.isModifiedOnDisk());
+  boolean reverted = doc.revertIfModifiedOnDisk();
+  assertTrue("modified on disk", reverted == false);
+  listener.assertShouldRevertFileCount(1);
     listener.assertFileRevertedCount(0);
-		assertContents(FOO_TEXT, doc);
+  assertContents(FOO_TEXT, doc);
   }
+  
+  /**
+   * Interprets some statements, saves the history, clears the history, then loads
+   * the history.
+   */
+  public void testSaveClearAndLoadHistory() throws BadLocationException, 
+    InterruptedException, IOException
+  {
+    TestListener listener = new TestListener() {
+      public void interactionStarted() {
+        synchronized(this) {
+          interactionStartCount++;
+        }
+      }
+      public void interactionEnded() {
+        synchronized(this) {
+          interactionEndCount++;
+          // stops threads from waiting
+          this.notify();
+        }
+      }
+    };
 
+    _model.addListener(listener);
+    File f = tempFile();
+    FileSelector fs = new FileSelector(f);
+    String s1 = "int x = 5";
+    String s2 = "System.out.println(\"x = \" + x)";
+    listener.assertInteractionStartCount(0);
+    listener.assertInteractionEndCount(0);
+    interpretIgnoreResult(s1);
+    // wait for interpret to finish
+    while (listener.interactionEndCount == 0) {
+      synchronized(listener) {
+        try {
+          listener.wait();
+        }
+        catch (InterruptedException ie) {
+          throw new UnexpectedException(ie);
+        }
+      }
+    }
+    listener.assertInteractionEndCount(1);
+    listener.assertInteractionStartCount(1);
+    interpretIgnoreResult(s2);
+    while (listener.interactionEndCount == 1) {
+      synchronized(listener) {
+        try {
+          listener.wait();
+        }
+        catch (InterruptedException ie) {
+          throw new UnexpectedException(ie);
+        }
+      }
+    }
+    // check that the history contains the correct value
+    assertEquals("History or getHistoryAsString don't work",
+                 s1+'\n'+s2+'\n',
+                 _model.getHistoryAsString());
+    listener.assertInteractionEndCount(2);
+    listener.assertInteractionStartCount(2);
+    _model.saveHistory(fs);
+    
+    // check that the file contains the correct value
+    assertEquals("contents of saved file",
+                 s1+'\n'+s2+'\n',
+                 FileOps.readFileAsString(f));
+    
+    _model.clearHistory();
+    // check that the history is clear
+    assertEquals("History is not clear",
+                 "",
+                 _model.getHistoryAsString());
+    _model.loadHistory(fs);
+    while (listener.interactionEndCount == 2) {
+      synchronized(listener) {
+        try {
+          listener.wait();
+        }
+        catch (InterruptedException ie) {
+          throw new UnexpectedException(ie);
+        }
+      }
+    }
+    // check that output of loaded history is correct
+    DefaultStyledDocument con = (DefaultStyledDocument)_model.getConsoleDocument();
+    assertEquals("Output of loaded history is not correct",
+                 "x = 5\n",
+                 con.getText(0, con.getLength()));
+    listener.assertInteractionStartCount(3);
+    listener.assertInteractionEndCount(3);
+    _model.removeListener(listener);
+  }
 }

@@ -153,14 +153,27 @@ public class History implements OptionConstants {
    * Clears the vector
    */
   public void clear() {
-    // apparently gj Vector's don't have the clear() method
+    // apparently gj's Vector doesn't have the clear() method
     _vector.setSize(0);
+  }
+  
+  /**
+   * Returns the history as a string by concatenating each string in the vector
+   * separated by the delimiting character
+   */
+  public String getHistoryAsString() {
+    String s = "";
+    char delimiter = '\n';
+    for (int i = 0; i < _vector.size(); i++) {
+      s += _vector.elementAt(i) + delimiter;
+    }
+    return s;
   }
   
   /**
    * Writes this History to a the file selected in the FileSaveSelector
    */
-  public void writeToFile(FileSaveSelector selector) {
+  public void writeToFile(FileSaveSelector selector) throws IOException {
     
     File c = null;
     try {
@@ -186,10 +199,12 @@ public class History implements OptionConstants {
         }
         bw.close();
       }
-      catch (IOException ioe) {JOptionPane.showMessageDialog(null,
+      catch (IOException ioe) {/*JOptionPane.showMessageDialog(null,
                                   "An IOException has occured" + "\n" + ioe,
                                   "IOException",
-                                  JOptionPane.ERROR_MESSAGE);}
+                                  JOptionPane.ERROR_MESSAGE);}*/
+        throw new IOException("An error occured writing the history to a file");
+      }
     }
   }
   

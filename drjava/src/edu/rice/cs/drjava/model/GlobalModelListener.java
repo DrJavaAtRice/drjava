@@ -128,6 +128,11 @@ public interface GlobalModelListener {
    * Called when an interaction has finished running.
    */
   public void interactionEnded();
+  
+  /**
+   * Called when the caret position in the interactions pane is changed
+   */
+  //public void interactionCaretPositionChanged(int pos);
 
   /**
    * Called when the interactions window is reset.

@@ -632,7 +632,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
         };
         try {
-          _model.interpretHistory(selector);
+          _model.loadHistory(selector);
         }
         catch (IOException ioe) {
           _showIOError(ioe);
@@ -670,7 +670,12 @@ public class MainFrame extends JFrame implements OptionConstants {
             return _verifyOverwrite();
           }
         };
-        _model.saveHistory(selector);
+        try {
+          _model.saveHistory(selector);
+        }
+        catch (IOException ioe) {
+          _showIOError(ioe);
+        }
         _interactionsPane.requestFocus();
       }
     }
@@ -2409,6 +2414,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       _interactionsPane.setCursor(null);
       _interactionsPane.setEditable(true);
       int pos = _interactionsPane.getDocument().getLength();
+      _interactionsPane.setCaretPosition(pos);
+    }
+    
+    public void interactionCaretPositionChanged(int pos) {
       _interactionsPane.setCaretPosition(pos);
     }
 

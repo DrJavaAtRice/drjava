@@ -349,8 +349,12 @@ public class InteractionsDocument extends DefaultStyledDocument {
     }
   }
   
-  public void saveHistory(FileSaveSelector selector) {
+  public void saveHistory(FileSaveSelector selector) throws IOException {
     _history.writeToFile(selector);
+  }
+  
+  public String getHistoryAsString() {
+    return _history.getHistoryAsString();
   }
 
   private class ExceptionButtonListener implements ActionListener {
