@@ -16,7 +16,9 @@
       <import plugin="org.eclipse.debug.ui"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.eclipse.console.ui"/>
+      <import plugin="org.eclipse.ui.console"/>
+      <import plugin="org.eclipse.core.runtime.compatibility"/>
+      <import plugin="org.eclipse.search"/>
    </requires>
 
 
