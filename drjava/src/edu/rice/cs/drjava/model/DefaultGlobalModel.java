@@ -1014,10 +1014,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
           com.warnFileOpen();
           throw new OperationCanceledException();
         }
-        else if (file.exists())
-          if (!com.verifyOverwrite())
-          throw new OperationCanceledException();
-
+        else if (file.exists()) {
+          if (com.verifyOverwrite()) {
+            if (! file.getCanonicalFile().getName().equals(file.getName())) {
+              //need filename case switching (on windows)
+              file.renameTo(file);
+            }
+          } else {
+            throw new OperationCanceledException();
+          }
+        }
         FileWriter writer = new FileWriter(file);
         _editorKit.write(writer, _doc, 0, _doc.getLength());
         writer.close();
