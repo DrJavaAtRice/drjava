@@ -2233,7 +2233,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _openProjectHelper(File projectFile) {
     _currentProjFile = projectFile;
-    DocFile[] srcFiles = null;
+    File[] srcFiles = null;
     try{
       srcFiles = _model.openProject(projectFile);
       _setUpContextMenus();
@@ -2281,7 +2281,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     _model.closeFiles(docsToClose);
     
-    final DocFile[] files = srcFiles;
+    final File[] files = srcFiles;
     // project could be empty
     if(srcFiles.length > 0){
       open(new FileOpenSelector(){

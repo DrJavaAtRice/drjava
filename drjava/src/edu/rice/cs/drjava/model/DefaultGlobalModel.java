@@ -954,7 +954,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   // print out a small stack trace every time getDocument() is called
 
 //    static boolean SHOW_GETDOC = false; 
-    
+
+  /**
+   * opens all the files in the list, and notifies about the last file opened
+   */
   private OpenDefinitionsDocument _openFiles(File[] files) 
     throws IOException, OperationCanceledException, AlreadyOpenException {
     
@@ -987,6 +990,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     for(File f: lof){
       _notifier.fileNotFound(f);
     }
+
     
     
     
@@ -1100,7 +1104,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @param projectFile The project file to parse
    * @return an array of document's files to open
    */
-  public DocFile[] openProject(File projectFile) throws IOException, MalformedProjectFileException {
+  public File[] openProject(File projectFile) throws IOException, MalformedProjectFileException {
     final ProjectFileIR ir;
     final DocFile[] srcFiles;
     final DocFile[] auxFiles;
@@ -1166,25 +1170,33 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     
     setProjectChanged(false);
     
-    ArrayList<DocFile> al = new ArrayList<DocFile>();
+    ArrayList<File> al = new ArrayList<File>();
     for(DocFile f: srcFiles){
+      File file = f;
+      if(f.lastModified() > f.getSavedModDate()){
+        file = new File(f.getPath());
+      }
       if (f.isActive()) {
-        al.add(f); // add to end
+        al.add(file); // add to end
       }
       else {
-        al.add(0,f); // add to beginning
+        al.add(0,file); // add to beginning
       }
     }
     for(DocFile f: auxFiles){
+      File file = f;
+      if(f.lastModified() > f.getSavedModDate()){
+        file = new File(f.getPath());
+      }
       if (f.isActive()) {
-        al.add(f); // add to end
+        al.add(file); // add to end
       }
       else {
-        al.add(0,f); // add to beginning
+        al.add(0,file); // add to beginning
       }
     }
     
-    return al.toArray(new DocFile[0]);
+    return al.toArray(new File[0]);
   }
   
   /**
@@ -3692,12 +3704,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       catch (InvalidPackageException e) {
         // Invalid package-- don't add it to classpath
       }
-
-      _notifier.fileOpened(doc);
-
-      return doc;
+    _notifier.fileOpened(doc);
+    return doc;
   }
-
+  
   /**
    * Instantiates the integrated debugger if the "debugger.enabled"
    * config option is set to true.  Leaves it at null if not.
