@@ -1334,7 +1334,7 @@ public class MainFrame extends JFrame {
     // keep track of the compile menu item
     _compileMenuItem = tmpItem;
 
-    toolsMenu.add(_junitAction);
+    //toolsMenu.add(_junitAction);
 
     // Abort/reset interactions, clear console
     toolsMenu.addSeparator();
