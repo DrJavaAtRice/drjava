@@ -52,4 +52,9 @@ public interface MasterRemote/*<SlaveType extends SlaveRemote>*/ extends Remote 
    * This method is called by the slave JVM after a connection is made.
    */
   public void registerSlave(SlaveRemote slave) throws RemoteException;
+
+  /**
+   * No-op to prove that the master is still alive.
+   */
+  public void checkStillAlive() throws RemoteException;
 }

@@ -85,23 +85,14 @@ public final class SlaveJVMRunner {
         // Must export slave object to RMI so we can pass stub to the master
         SlaveRemote stub= (SlaveRemote) UnicastRemoteObject.exportObject(slave);
 
-        // Note that both of these calls result in unchecked warnings
-        // from GJ, since they have lost the parametric typing information.
-        // The warnings, if you're curious, are:
-        //
-        // warning: unchecked call to registerSlave(SlaveType) as a member
-        // of the raw type edu.rice.cs.util.newjvm.MasterRemote
-        // warning: unchecked method invocation:
-        // start(edu.rice.cs.util.newjvm.MasterRemote<SlaveType>) in 
-        // edu.rice.cs.util.newjvm.SlaveRemote is applied to
-        // (edu.rice.cs.util.newjvm.MasterRemote)
+        // start the slave before notifying the master
         remote.registerSlave(slave);
         slave.start(remote);
       }
       catch (Exception e) {
         System.err.println("Exception while instantiation slave " + args[1]);
         e.printStackTrace();
-        javax.swing.JOptionPane.showMessageDialog(null, e);
+        //javax.swing.JOptionPane.showMessageDialog(null, e);
         System.exit(3);
       }
     }

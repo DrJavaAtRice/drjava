@@ -46,7 +46,7 @@ import java.rmi.*;
  * All instances must also provide a no-arg constructor,
  * which is reflectively invoked in {@link SlaveJVMRunner}.
  */
-interface SlaveRemote extends Remote {
+public interface SlaveRemote extends Remote {
   /**
    * Quits the slave JVM.
    */

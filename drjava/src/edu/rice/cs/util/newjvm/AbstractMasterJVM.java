@@ -164,7 +164,12 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
     thread.start();
   }
 
-  public synchronized void registerSlave(SlaveRemote slave) throws RemoteException
+  /**
+   * No-op to prove that the master is still alive.
+   */
+  public void checkStillAlive() {}
+
+  public synchronized void registerSlave(SlaveRemote slave) 
   {
     _slave = slave;
     _startupInProgress = false;

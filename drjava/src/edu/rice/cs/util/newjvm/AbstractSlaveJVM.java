@@ -43,9 +43,12 @@ import java.rmi.*;
 
 /**
  * A partial implementation of a {@link SlaveRemote} that provides
- * the quit functionality.
+ * the quit functionality and that also periodically checks if the master is
+ * still alive and automatically quits if not.
  */
 public abstract class AbstractSlaveJVM implements SlaveRemote {
+  public static final int CHECK_MAIN_VM_ALIVE_MINUTES = 1;
+
   /**
    * Quits the slave JVM, calling {@link #beforeQuit} before it does.
    */
@@ -73,5 +76,37 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
    */
   protected void beforeQuit() {}
   
-  public abstract void start(MasterRemote master) throws RemoteException;
+  /**
+   * Starts background thread to periodically poll the master JVM and
+   * automatically quit if it's dead.
+   * It delegates the actual start to {@link #handleStart}.
+   */
+  public final void start(final MasterRemote master) throws RemoteException {
+    Thread thread = new Thread() {
+      public void run() {
+        while (true) {
+          try {
+            Thread.currentThread().sleep(CHECK_MAIN_VM_ALIVE_MINUTES*60*1000);
+          }
+          catch (InterruptedException ie) {
+          }
+
+          try {
+            master.checkStillAlive();
+          }
+          catch (RemoteException re) {
+            // not there anymore. quit!
+            quit();
+          }
+        }
+      }
+    };
+
+    thread.setDaemon(true);
+    thread.start();
+
+    handleStart(master);
+  }
+
+  protected abstract void handleStart(MasterRemote master);
 }

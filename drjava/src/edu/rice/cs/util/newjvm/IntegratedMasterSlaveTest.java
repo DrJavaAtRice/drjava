@@ -170,7 +170,7 @@ public class IntegratedMasterSlaveTest extends TestCase {
       return _counter++;
     }
     
-    public void start(MasterRemote m) {
+    protected void handleStart(MasterRemote m) {
       try {
         MasterI master = (MasterI) m;
         for (char c = 'a'; c <= 'e'; c++) {
