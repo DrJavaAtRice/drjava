@@ -514,6 +514,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     try {
       return _interpreterJVM().setToDefaultInterpreter();
     }
+    catch (ConnectIOException ce) {
+      _log.logTime("Could not connect to the interpreterJVM after killing it", ce);
+      return false;
+    }
     catch (RemoteException re) {
       _threwException(re);
       return false;
@@ -539,6 +543,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
         _interactionsModel.interpreterResetting();
       }
       quitSlave();
+    }
+    catch (ConnectException ce) {
+      _log.logTime("Could not connect to the interpreterJVM while trying to kill it", ce);
     }
     catch (RemoteException re) {
       _threwException(re);

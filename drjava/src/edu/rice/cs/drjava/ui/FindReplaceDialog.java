@@ -89,6 +89,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     public void caretUpdate(CaretEvent e) {
       _replaceAction.setEnabled(false);
       _replaceFindAction.setEnabled(false);
+      _machine.positionChanged();
       _caretChanged = true;
     }
   };
@@ -129,6 +130,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       else {
         _replaceAction.setEnabled(true);
         _replaceFindAction.setEnabled(true);
+        _machine.setLastFindWord();
       }
       
       if (_findField.getText().equals("")) {
@@ -192,6 +194,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       _selectFoundItem();
       _replaceAction.setEnabled(true);
       _replaceFindAction.setEnabled(true);
+      _machine.setLastFindWord();
     } 
     // else the entire document was searched and no instance of the string
     // was found
@@ -403,6 +406,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         _machine.makeCurrentOffsetStart();
         _replaceAction.setEnabled(false);
         _replaceFindAction.setEnabled(false);
+        _machine.positionChanged();
         if (_findField.getText().equals(""))
           _replaceAllAction.setEnabled(false);
         else
@@ -418,6 +422,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         _machine.makeCurrentOffsetStart();
         _replaceAction.setEnabled(false);
         _replaceFindAction.setEnabled(false);
+        _machine.positionChanged();
         if (_findField.getText().equals(""))
           _replaceAllAction.setEnabled(false);
         else
@@ -433,6 +438,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         _machine.makeCurrentOffsetStart();
         _replaceAction.setEnabled(false);
         _replaceFindAction.setEnabled(false);
+        _machine.positionChanged();
         if (_findField.getText().equals(""))
           _replaceAllAction.setEnabled(false);
         else
