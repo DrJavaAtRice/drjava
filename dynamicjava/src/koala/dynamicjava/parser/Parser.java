@@ -179,32 +179,32 @@ public class Parser implements ParserConstants {
 
     abstract class ExpressionSuffix {
         /**
-	 * Creates an expression node
-	 * @param prefix the prefix expression
-	 * @param it     an iterator over the suffixes
-	 */
+  * Creates an expression node
+  * @param prefix the prefix expression
+  * @param it     an iterator over the suffixes
+  */
         public abstract Expression createExpression(Expression prefix, Iterator it);
     }
 
     class DotAllocationSuffix extends ExpressionSuffix {
         /**
-	 * The allocation expression
-	 */
+  * The allocation expression
+  */
         public Allocation expression;
 
         /**
-	 * Creates a new suffix
-	 * @param exp the expression
-	 */
+  * Creates a new suffix
+  * @param exp the expression
+  */
         public DotAllocationSuffix(Allocation exp) {
             expression = exp;
         }
 
         /**
-	 * Creates an expression node
-	 * @param prefix the prefix expression
-	 * @param it     an iterator over the suffixes
-	 */
+  * Creates an expression node
+  * @param prefix the prefix expression
+  * @param it     an iterator over the suffixes
+  */
         public Expression createExpression(Expression prefix, Iterator it) {
             Expression exp = prefix;
             if (it.hasNext()) {
@@ -234,23 +234,23 @@ public class Parser implements ParserConstants {
 
     class DotIdentifierSuffix extends ExpressionSuffix {
         /**
-	 * The identifier
-	 */
+  * The identifier
+  */
         public Token identifier;
 
         /**
-	 * Creates a new suffix
-	 * @param ident the identifier
-	 */
+  * Creates a new suffix
+  * @param ident the identifier
+  */
         public DotIdentifierSuffix(Token ident) {
             identifier = ident;
         }
 
         /**
-	 * Creates an expression node
-	 * @param prefix the prefix expression
-	 * @param it     an iterator over the suffixes
-	 */
+  * Creates an expression node
+  * @param prefix the prefix expression
+  * @param it     an iterator over the suffixes
+  */
         public Expression createExpression(Expression prefix, Iterator it) {
             Expression exp = prefix;
             if (it.hasNext()) {
@@ -270,26 +270,26 @@ public class Parser implements ParserConstants {
 
     class ArrayReferenceSuffix extends ExpressionSuffix {
         /**
-	 * The expression
-	 */
+  * The expression
+  */
         public Expression expression;
 
         /**
-	 * The end line
-	 */
+  * The end line
+  */
         public int endLine;
 
         /**
-	 * The end column
-	 */
+  * The end column
+  */
         public int endColumn;
 
         /**
-	 * Creates a new suffix
-	 * @param exp the expression
-	 * @param el  the end line
-	 * @param ec  the end column
-	 */
+  * Creates a new suffix
+  * @param exp the expression
+  * @param el  the end line
+  * @param ec  the end column
+  */
         public ArrayReferenceSuffix(Expression exp, int el, int ec) {
             expression = exp;
             endLine    = el;
@@ -297,10 +297,10 @@ public class Parser implements ParserConstants {
         }
 
         /**
-	 * Creates an expression node
-	 * @param prefix the prefix expression
-	 * @param it     an iterator over the suffixes
-	 */
+  * Creates an expression node
+  * @param prefix the prefix expression
+  * @param it     an iterator over the suffixes
+  */
         public Expression createExpression(Expression prefix, Iterator it) {
             Expression exp = prefix;
             if (it.hasNext()) {
@@ -320,31 +320,31 @@ public class Parser implements ParserConstants {
 
     class DotThisSuffix extends ExpressionSuffix {
         /**
-	 * The end line
-	 */
+  * The end line
+  */
         public int endLine;
 
         /**
-	 * The end column
-	 */
+  * The end column
+  */
         public int endColumn;
 
         /**
-	 * Creates a new suffix
-	 * @param el  the end line
-	 * @param ec  the end column
-	 * @param fn  the file name
-	 */
+  * Creates a new suffix
+  * @param el  the end line
+  * @param ec  the end column
+  * @param fn  the file name
+  */
         public DotThisSuffix(int el, int ec) {
             endLine    = el;
             endColumn  = ec;
         }
 
         /**
-	 * Creates an expression node
-	 * @param prefix the prefix expression
-	 * @param it     an iterator over the suffixes
-	 */
+  * Creates an expression node
+  * @param prefix the prefix expression
+  * @param it     an iterator over the suffixes
+  */
         public Expression createExpression(Expression prefix, Iterator it) {
             Expression exp = prefix;
             if (it.hasNext()) {
@@ -370,26 +370,26 @@ public class Parser implements ParserConstants {
 
     class ArgumentsSuffix extends ExpressionSuffix {
         /**
-	 * The arguments
-	 */
+  * The arguments
+  */
         public List arguments;
 
         /**
-	 * The end line
-	 */
+  * The end line
+  */
         public int endLine;
 
         /**
-	 * The end column
-	 */
+  * The end column
+  */
         public int endColumn;
 
         /**
-	 * Creates a new argument suffix
-	 * @param args  the list of argument
-	 * @param el    the end line
-	 * @param ec    the end column
-	 */
+  * Creates a new argument suffix
+  * @param args  the list of argument
+  * @param el    the end line
+  * @param ec    the end column
+  */
         public ArgumentsSuffix(List args, int el, int ec) {
             arguments = args;
             endLine   = el;
@@ -397,10 +397,10 @@ public class Parser implements ParserConstants {
         }
 
         /**
-	 * Creates an expression node
-	 * @param prefix the prefix expression
-	 * @param it     an iterator over the suffixes
-	 */
+  * Creates an expression node
+  * @param prefix the prefix expression
+  * @param it     an iterator over the suffixes
+  */
         public Expression createExpression(Expression prefix, Iterator it) {
             if (it.hasNext()) {
                 ExpressionSuffix es = (ExpressionSuffix)it.next();
@@ -455,9 +455,9 @@ public class Parser implements ParserConstants {
 
     interface CompileTimeExpression {
         /**
-	 * Builds a runtime expression from this compile-time one.
-	 * This method must only be called when the expression has no suffix.
-	 */
+  * Builds a runtime expression from this compile-time one.
+  * This method must only be called when the expression has no suffix.
+  */
         Expression createRuntimeExpression();
 
     }
@@ -465,27 +465,27 @@ public class Parser implements ParserConstants {
     class CompileTimeSuperExpression
         extends Expression implements CompileTimeExpression {
         /**
-	 * The identifier from the superclass
-	 */
+  * The identifier from the superclass
+  */
         public String identifier;
 
         /**
-	 * Initializes the expression
-	 * @param ident the identifier from the super class
-	 * @param bl    the begin line
-	 * @param bc    the begin column
-	 * @param el    the end line
-	 * @param ec    the end column
-	 */
+  * Initializes the expression
+  * @param ident the identifier from the super class
+  * @param bl    the begin line
+  * @param bc    the begin column
+  * @param el    the end line
+  * @param ec    the end column
+  */
         public CompileTimeSuperExpression(String ident, int bl, int bc, int el, int ec) {
             super("", bl, bc, el, ec);
             identifier = ident;
         }
 
         /**
-	 * Builds a runtime expression from this compile-time one.
-	 * This method must be called when the expression has no suffix
-	 */
+  * Builds a runtime expression from this compile-time one.
+  * This method must be called when the expression has no suffix
+  */
         public Expression createRuntimeExpression() {
             return new SuperFieldAccess(identifier,
                                         filename,
@@ -494,8 +494,8 @@ public class Parser implements ParserConstants {
         }
 
         /**
-	 * Not used
-	 */
+  * Not used
+  */
         public Object acceptVisitor(Visitor visitor) {
             return null;
         }
@@ -503,22 +503,22 @@ public class Parser implements ParserConstants {
 
     class CompileTimeQualifiedName extends Expression implements CompileTimeExpression {
         /**
-	 * The identifiers (tokens)
-	 */
+  * The identifiers (tokens)
+  */
         public List identifiers;
 
         /**
-	 * Initializes the expression
-	 * @param ids a list of token
-	 */
+  * Initializes the expression
+  * @param ids a list of token
+  */
         public CompileTimeQualifiedName(List ids) {
             super("", 0, 0, 0, 0);
             identifiers = ids;
         }
 
         /**
-	 * Creates a runtime qualified name
-	 */
+  * Creates a runtime qualified name
+  */
         public Expression createFieldAccess() {
             if (identifiers.size() == 1) {
                 Token t = ((TreeToken)identifiers.get(0)).getToken();
@@ -545,9 +545,9 @@ public class Parser implements ParserConstants {
         }
 
         /**
-	 * Builds a runtime expression from this compile-time one.
-	 * This method must be called when the expression has no suffix
-	 */
+  * Builds a runtime expression from this compile-time one.
+  * This method must be called when the expression has no suffix
+  */
         public Expression createRuntimeExpression() {
             Token first = ((TreeToken)identifiers.get(0)).getToken();
             Token last  = ((TreeToken)identifiers.get(identifiers.size()-1)).getToken();
@@ -558,8 +558,8 @@ public class Parser implements ParserConstants {
         }
 
         /**
-	 * Not used
-	 */
+  * Not used
+  */
         public Object acceptVisitor(Visitor visitor) {
             return null;
         }
@@ -13828,8 +13828,8 @@ public class Parser implements ParserConstants {
         jj_expentry[i] = jj_lasttokens[i];
       }
       boolean exists = false;
-      for (java.util.Enumeration enum = jj_expentries.elements(); enum.hasMoreElements();) {
-        int[] oldentry = (int[])(enum.nextElement());
+      for (java.util.Enumeration new_enum = jj_expentries.elements(); new_enum.hasMoreElements();) {
+        int[] oldentry = (int[])(new_enum.nextElement());
         if (oldentry.length == jj_expentry.length) {
           exists = true;
           for (int i = 0; i < jj_expentry.length; i++) {
