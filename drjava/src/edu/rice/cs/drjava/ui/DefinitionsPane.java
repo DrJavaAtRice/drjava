@@ -104,6 +104,9 @@ public class DefinitionsPane extends JEditorPane
     _errorHighlightPainter =
       new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
 
+  private JMenuItem _toggleBreakpointMenuItem;
+  private JPopupMenu _popMenu;
+  
   /**
    * Listens to caret to highlight errors as appropriate.
    */
@@ -354,6 +357,42 @@ public class DefinitionsPane extends JEditorPane
     if (CodeStatus.DEVELOPMENT) {
       DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_MATCH_COLOR, new MatchColorOptionListener());
     }
+    
+    //Create the popup menu.
+    _popMenu = new JPopupMenu();
+    
+    _popMenu.add(_mainFrame.cutAction);
+    _popMenu.add(_mainFrame.copyAction);
+    _popMenu.add(_mainFrame.pasteAction);
+    //don't forget to remove this, or at least make it more intelligent
+    if (_mainFrame.getModel().getDebugManager() != null) {
+      _popMenu.addSeparator();
+      _toggleBreakpointMenuItem = _popMenu.add(_mainFrame._toggleBreakpointAction);
+      _toggleBreakpointMenuItem.setEnabled(false);
+    }
+    
+    //Add listener to components that can bring up popup menus.
+    this.addMouseListener( new MouseAdapter() {
+      public void mousePressed(MouseEvent e) {
+        setCaretPosition(viewToModel(e.getPoint()));
+        maybeShowPopup(e);
+        if (_toggleBreakpointMenuItem != null) {
+          _toggleBreakpointMenuItem.setEnabled(_mainFrame.inDebugMode());
+        }
+      }
+      
+      public void mouseReleased(MouseEvent e) {
+        maybeShowPopup(e);
+      }
+      
+      private void maybeShowPopup(MouseEvent e) {
+        if (e.isPopupTrigger()) {
+          _popMenu.show(e.getComponent(),
+                        e.getX(), e.getY());
+        }
+      }
+    });
+
   }
   
   /**

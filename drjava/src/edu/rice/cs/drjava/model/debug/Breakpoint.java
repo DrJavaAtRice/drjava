@@ -73,7 +73,7 @@ public class Breakpoint {
 
     String packageName = "";
     try {
-      _doc.getDocument().getPackageName();
+      packageName = _doc.getDocument().getPackageName();
     }
     catch (InvalidPackageException e) {
       // Couldn't find package, pretend there's none

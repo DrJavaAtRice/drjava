@@ -39,6 +39,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.debug;
 
+import edu.rice.cs.drjava.DrJava;
+
 import com.sun.jdi.*;
 import com.sun.jdi.event.*;
 //import com.sun.jdi.connect.*;
@@ -111,6 +113,7 @@ public class EventHandler extends Thread {
   
   private void _handleVMDisconnectEvent(VMDisconnectEvent e) {
     System.out.println("VM disconnected");
+    DrJava.consoleOut().println("event: "+e);
     _connected = false;
     _debugManager.shutdown();
   }

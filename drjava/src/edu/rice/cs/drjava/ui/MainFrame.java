@@ -343,7 +343,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** Default cut action.  Returns focus to def pane. */
-  private Action _cutAction = new DefaultEditorKit.CutAction() {
+  Action cutAction = new DefaultEditorKit.CutAction() {
     public void actionPerformed(ActionEvent e) {
       super.actionPerformed(e);
       _currentDefPane.requestFocus();
@@ -351,7 +351,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** Default copy action.  Returns focus to def pane. */
-  private Action _copyAction = new DefaultEditorKit.CopyAction() {
+  Action copyAction = new DefaultEditorKit.CopyAction() {
     public void actionPerformed(ActionEvent e) {
       super.actionPerformed(e);
       _currentDefPane.requestFocus();
@@ -359,7 +359,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** Default paste action.  Returns focus to def pane. */
-  private Action _pasteAction = new DefaultEditorKit.PasteAction() {
+  Action pasteAction = new DefaultEditorKit.PasteAction() {
     public void actionPerformed(ActionEvent e) {
       super.actionPerformed(e);
       _currentDefPane.requestFocus();
@@ -583,7 +583,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** Toggles a breakpoint on the current line */
-  private Action _toggleBreakpointAction =
+  Action _toggleBreakpointAction =
     new AbstractAction("Set Breakpoint on Current Line")
   {
     public void actionPerformed(ActionEvent ae) {
@@ -623,7 +623,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         if (oldCol == _model.getActiveDocument().getDocument().getCurrentCol())
           _actionMap.get(DefaultEditorKit.deleteNextCharAction).actionPerformed(ae);
         else
-          _cutAction.actionPerformed(ae);
+          cutAction.actionPerformed(ae);
       }
     }
   };
@@ -877,7 +877,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (debugger == null) return;
 
     try {
-      if (_inDebugMode()) {//debugger.isReady()) {
+      if (inDebugMode()) {//debugger.isReady()) {
         // Turn off debugger        
         debugger.shutdown();
         hideDebugger();
@@ -1254,12 +1254,13 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _toggleBreakpoint() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
     try {
-      _model.getDebugManager().setBreakpoint(doc, _currentDefPane.getCurrentLine());
+      _model.getDebugManager().toggleBreakpoint(doc, _currentDefPane.getCurrentLine());
     }
     catch (DebugException de) {
       _showError(de, "Debugger Error",
                  "Could not set a breakpoint at the current line.");
     }
+    
     /**
     try {
       _model.getDebugManager().
@@ -1509,14 +1510,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_pageSetupAction, "PageSetup", "Page Setup");
     _setUpAction(_printPreviewAction, "PrintPreview", "Print Preview");
 
-    _setUpAction(_cutAction, "Cut", "Cut selected text to the clipboard");
-    _setUpAction(_copyAction, "Copy", "Copy selected text to the clipboard");
-    _setUpAction(_pasteAction, "Paste", "Paste text from the clipboard");
+    _setUpAction(cutAction, "Cut", "Cut selected text to the clipboard");
+    _setUpAction(copyAction, "Copy", "Copy selected text to the clipboard");
+    _setUpAction(pasteAction, "Paste", "Paste text from the clipboard");
     _setUpAction(_selectAllAction, "Select All", "Select all text");
 
-    _cutAction.putValue(Action.NAME, "Cut");
-    _copyAction.putValue(Action.NAME, "Copy");
-    _pasteAction.putValue(Action.NAME, "Paste");
+    cutAction.putValue(Action.NAME, "Cut");
+    copyAction.putValue(Action.NAME, "Copy");
+    pasteAction.putValue(Action.NAME, "Paste");
 
     _setUpAction(_switchToPrevAction, "Back", "Previous Document");
     _setUpAction(_switchToNextAction, "Forward", "Next Document");
@@ -1712,19 +1713,19 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Cut, copy, paste, select all
     editMenu.addSeparator();
     if (!CodeStatus.DEVELOPMENT) {
-      tmpItem = editMenu.add(_cutAction);
+      tmpItem = editMenu.add(cutAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, mask));
-      tmpItem = editMenu.add(_copyAction);
+      tmpItem = editMenu.add(copyAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, mask));
-      tmpItem = editMenu.add(_pasteAction);
+      tmpItem = editMenu.add(pasteAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, mask));
       tmpItem = editMenu.add(_selectAllAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, mask));
     }
     else {
-      _addMenuItem(editMenu, _cutAction, KEY_CUT);
-      _addMenuItem(editMenu, _copyAction, KEY_COPY);
-      _addMenuItem(editMenu, _pasteAction, KEY_PASTE);
+      _addMenuItem(editMenu, cutAction, KEY_CUT);
+      _addMenuItem(editMenu, copyAction, KEY_COPY);
+      _addMenuItem(editMenu, pasteAction, KEY_PASTE);
       _addMenuItem(editMenu, _selectAllAction, KEY_SELECT_ALL);
     }
 
@@ -1816,9 +1817,20 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // Enable debugging item
     _debuggerEnabledMenuItem = new JCheckBoxMenuItem(_toggleDebuggerAction);
-    _debuggerEnabledMenuItem.setState(false);
+    _debuggerEnabledMenuItem.setSelected(false);
     debugMenu.add(_debuggerEnabledMenuItem);
 
+    /*debugMenu.add(new AbstractAction( "Turn on debugger") {
+      public void actionPerformed(ActionEvent ae) {
+        try {
+        _model.getDebugManager().startup();
+        }
+        catch (DebugException de) {
+          // couldn't load DM
+        }
+      }
+    });*/
+    
     debugMenu.addSeparator();
 
     // TO DO: Add accelerators?
@@ -1845,7 +1857,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Enables and disables the debug menu items.
    */
   private void _setDebugMenuItemsEnabled(boolean enabled) {
-    _debuggerEnabledMenuItem.setState(enabled);
+    _debuggerEnabledMenuItem.setSelected(enabled);
     //_runDebuggerMenuItem.setEnabled(enabled);
     _suspendDebugMenuItem.setEnabled(enabled);
     _resumeDebugMenuItem.setEnabled(enabled);
@@ -1944,9 +1956,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     // Cut, copy, paste
     _toolBar.addSeparator();
-    _toolBar.add(_createToolbarButton(_cutAction));
-    _toolBar.add(_createToolbarButton(_copyAction));
-    _toolBar.add(_createToolbarButton(_pasteAction));
+    _toolBar.add(_createToolbarButton(cutAction));
+    _toolBar.add(_createToolbarButton(copyAction));
+    _toolBar.add(_createToolbarButton(pasteAction));
     
     // Undo, redo
     // Simple workaround, for now, for bug # 520742:
@@ -2776,7 +2788,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
   }
   
-  private boolean _inDebugMode() {
+  boolean inDebugMode() {
     DebugManager dm = _model.getDebugManager();
     if (dm != null)
       return dm.isReady();

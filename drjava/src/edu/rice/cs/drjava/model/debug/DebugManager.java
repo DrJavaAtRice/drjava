@@ -151,6 +151,7 @@ public class DebugManager {
       port.setValue("" + debugPort);
       _vm = connector.attach(args);
       _eventManager = _vm.eventRequestManager();
+      DrJava.consoleOut().println("Connected to VM @ port "+debugPort);
     }
     catch (IOException ioe) {
       throw new DebugException("Could not connect to VM: " + ioe);
@@ -162,9 +163,13 @@ public class DebugManager {
   
   public synchronized void startup() throws DebugException {
     if (!isReady()) {
+      DrJava.consoleOut().println("Starting up...");
       _attachToVM();
+      DrJava.consoleOut().println("Attached. VM = " +_vm);
+      
       EventHandler eventHandler = new EventHandler(this, _vm);
       eventHandler.start();
+      DrJava.consoleOut().println("EventHandler started...");
       
       //_vm.setDebugTraceMode(0);
       //String[] excludes = {"java.*", "javax.*", "sun.*", "com.sun.*", "koala.*"};
@@ -177,6 +182,7 @@ public class DebugManager {
   
   public synchronized void shutdown() {
     if (isReady()) {
+      DrJava.consoleOut().println("Shutting down...");
       try {
       _vm.dispose();
       }
@@ -353,7 +359,7 @@ public class DebugManager {
    * @param lineNumber Line on which to set or remove the breakpoint
    */
   public void toggleBreakpoint(OpenDefinitionsDocument doc, int lineNumber)
-    throws IOException, ClassNotFoundException, DebugException {  
+    throws DebugException {  
     
     Breakpoint breakpoint = doc.getBreakpointAt(lineNumber);
         
