@@ -320,6 +320,10 @@ public class FileOpsTest extends TestCase {
                java.util.Arrays.equals(parts,res));
   }
 
+  private String fixPathFormat(String s){
+    return s.replace('\\', '/');
+  }
+  
   public void testMakeRelativeTo() throws IOException, SecurityException {
     File base, abs;
     
@@ -327,25 +331,25 @@ public class FileOpsTest extends TestCase {
     abs = new File("built/test1/test2/file.txt");
     assertEquals("Wrong Relative Path 1", 
                  "../../../built/test1/test2/file.txt",
-                 FileOps.makeRelativeTo(abs,base).getPath());
+                 fixPathFormat(FileOps.makeRelativeTo(abs,base).getPath()));
     
     base = new File("file.txt");
     abs = new File("built/test1/test2/file.txt");
     assertEquals("Wrong Relative Path 2", 
                  "built/test1/test2/file.txt",
-                 FileOps.makeRelativeTo(abs,base).getPath());
+                 fixPathFormat(FileOps.makeRelativeTo(abs,base).getPath()));
     
     base = new File("built/test1/test2test/file.txt");
     abs = new File("built/test1/test2/file.txt");
     assertEquals("Wrong Relative Path 3", 
                  "../test2/file.txt",
-                 FileOps.makeRelativeTo(abs,base).getPath());
+                 fixPathFormat(FileOps.makeRelativeTo(abs,base).getPath()));
     
     base = new File("file.txt");
     abs = new File("test.txt"); 
     assertEquals("Wrong Relative Path 4", 
                  "test.txt",
-                 FileOps.makeRelativeTo(abs,base).getPath());
+                 fixPathFormat(FileOps.makeRelativeTo(abs,base).getPath()));
   }
   
   /**
