@@ -39,14 +39,18 @@
     <antcall target="jar">
       <param name="jarfile" value="${jars_dir}/${version-tag}.jar" />
     </antcall>
+    -->
 
     <!-- generate javadoc for the committed version! -->
+    <!--
     <antcall target="generate_javadoc">
       <param name="javadoc_dir" value="${public_javadoc_dir}" />
       <param name="javadoc_title" value="${version-tag}" />
     </antcall>
+    -->
 
     <!-- give group permissions to write over the javadoc -->
+    <!--
     <chmod perm="g+w,a+rX" dir="${public_javadoc_dir}" type="both" includes="**" />
     -->
   </target>
