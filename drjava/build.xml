@@ -142,7 +142,7 @@
 
   <!-- Initializes properties used in all Eclipse tasks -->
   <target name="eclipse">
-    <property name="eclipse_plugin_version" value="0.9.1" />
+    <property name="eclipse_plugin_version" value="0.9.2" />
     <property name="eclipse_dir" value="${plugins_dir}/eclipse" />
     <property name="eclipse_srcroot" value="${eclipse_dir}/src" />
     <property name="eclipse_built" value="${eclipse_dir}/bin" />
@@ -201,7 +201,25 @@
       </fileset>
     </zip>
   </target>
+    
+  <target name="eclipse-src-zip" depends="eclipse">
+    <property name="eclipse_src_zip_dir" value="${eclipse_package_dir}/src/drjava-eclipse-${eclipse_plugin_version}" />
+    <delete dir="${eclipse_src_zip_dir}" />
+    <mkdir dir="${eclipse_src_zip_dir}" />
 
+    <cvs dest="${eclipse_src_zip_dir}"
+         tag="HEAD"
+         quiet="yes"
+         package="src/edu/rice/cs/drjava src/edu/rice/cs/util src/edu/rice/cs/lib src/edu/rice/cs/LICENSE src/edu/rice/cs/README src/edu/rice/cs/build-common.xml src/src-jsr14v1_0 src/src-jsr14v1_2 src/src-jsr14v2_0 src/src-mac13 src/src-mac14 src/src-windows drjava/"
+         command="export -N" />
+
+    <zip zipfile="${eclipse_dir}/package/drjava-eclipse-${eclipse_plugin_version}-src.zip">
+      <fileset dir="${eclipse_package_dir}/src">
+        <include name="drjava-eclipse-${eclipse_plugin_version}/**" />
+      </fileset>
+    </zip>
+    <delete dir="${eclipse_src_zip_dir}" />
+  </target>
 
   <!-- Initializes properties used in all jEdit tasks -->
   <target name="jedit">

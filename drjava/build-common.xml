@@ -168,10 +168,12 @@ optimize="off"/>
  
 
 <!-- By default, commit uses the development version -->
+<!-- Don't do this at top-level!
 <target name="commit" depends="development">
   <echo message="Committing the development version"/>
   <antcall target="do-commit" />
 </target>
+-->
 
 <target name="commit-stable" depends="stable">
   <echo message="Committing the stable version"/>
@@ -179,8 +181,10 @@ optimize="off"/>
 </target>
 
 <!-- commit this version and then release it. -->
+<!-- Don't do this at top-level!
 <target name="commit-and-release" depends="commit, release">
 </target>
+-->
 
 
 <!-- Compile. We have to start at srcroot and then selectively include
@@ -190,20 +194,43 @@ optimize="off"/>
      This is currently set to compile with JDK 1.4.1 and JSR-14 v1.3.
      To compile with older versions of the JDK or JSR-14, remove
      source=1.5, change target to 1.1, and uncomment the compilerarg line.
--->
+
 <target name="do-compile" depends="init">
   <javac srcdir="${srcroot}"
          includes="${projpath}/**/*.java"
          destdir="${built}" 
          bootclasspath="${jsr14_classpath}:${sun.boot.class.path}"
-	 classpath="${classpath_text}"
+  classpath="${classpath_text}"
          target="1.1"
          debug="on"
          optimize="off">
     <compilerarg value="-gj" />
   </javac>
 </target>
+-->
 
+
+<!-- Compile. We have to start at srcroot and then selectively include
+     just this project in order for it to realize what files have already
+     been compiled (preventing needless recompilation).
+
+     This version works with JDK 1.4.2 and JSR-14 v2.2.
+     (Be sure to have the right version of tools.jar on your classpath.)
+-->
+<target name="do-compile" depends="init">
+  <mkdir dir="${built}"/>
+  <javac srcdir="${srcroot}"
+         includes="${projpath}/**/*java"
+         destdir="${built}"
+         bootclasspath="${jsr14_collect_classpath}:${sun.boot.class.path}" 
+  classpath="${classpath_text}"
+         source="1.5"
+         debug="on"
+         fork="on"
+         optimize="off">
+    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
+  </javac>
+</target>
 
 <!-- Now you can run a subset of tests by doing:
      ant -Dtest-spec=XXX run-tests

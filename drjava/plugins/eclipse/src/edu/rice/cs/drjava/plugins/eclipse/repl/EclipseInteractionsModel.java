@@ -156,7 +156,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
    */
   public String getConsoleInput() {
     // TODO: Read input from a console?
-    _document.insertBeforeLastPrompt("System.in is not yet supported." + _newLine,
+    _document.insertBeforeLastPrompt("System.in is not yet supported!" + _newLine,
                                      InteractionsDocument.ERROR_STYLE);
     return "\n";
   }
@@ -281,79 +281,94 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
       // For each of the projects...
       for(int i = 0; i < jProjects.length; i++) {
         IJavaProject jProj = jProjects[i];
-        
-        // Get the project's location on disk
-        IProject proj = jProj.getProject();
-        IPath projRoot = proj.getDescription().getLocation();
-        // Note: getLocation returns null if the default location is used
-        //  (brilliant...)
-        
-        // Get the resolved classpath entries - this should filter out
-        //   all CPE_VARIABLE and CPE_CONTAINER entries.
-        IClasspathEntry entries[] = jProj.getResolvedClasspath(true);
-        
-        // For each of the classpath entries...
-        for(int j = 0; j < entries.length; j++) {
-          IClasspathEntry entry = entries[j];
-          
-          // Check what kind of entry it is...
-          int kind = entry.getEntryKind();
-          
-          // And get the appropriate path.
-          IPath path;
-          switch (kind) {
-            case IClasspathEntry.CPE_LIBRARY:
-              // The raw location of a JAR.
-              path = entry.getPath();
-              //System.out.println("Adding library: " + path.toOSString());
-              addToClassPath(path.toOSString());
-              break;
-            case IClasspathEntry.CPE_SOURCE:
-              // The output location of source.
-              // Need to append it to the user's workspace directory.
-              path = entry.getOutputLocation();
-              if (path == null) {
-                path = jProj.getOutputLocation();
-                //System.out.println(" output location from proj: " + path);
-              }
-              
-              // At this point, the output location contains the project
-              //  name followed by the actual output folder name
-              
-              if (projRoot != null) {
-                // We have a custom project location, so the project name
-                //  is not part of the *actual* output directory.  We need
-                //  to remove the project name (first segment) and then
-                //  append the rest of the output location to projRoot.
-                path = path.removeFirstSegments(1);
-                path = projRoot.append(path);
-              }
-              else {
-                // A null projRoot means use the default location, which
-                //  *does* include the project name in the output directory.
-                path = root.getLocation().append(path);
-              }
-              
-              //System.out.println("Adding source: " + path.toOSString());
-              addToClassPath(path.toOSString());
-              break;
-            case IClasspathEntry.CPE_PROJECT:
-              // In this case, just the project name is given.
-              // We don't actually need to add anything to the classpath,
-              //  since the project is open and we will get its classpath
-              //  on another pass.
-              break;
-            default:
-              // This should never happen.
-              throw new RuntimeException("Unsupported classpath entry type.");
-          }
-        }
+        _addProjectToClasspath(jProj, jModel, root);
       }
     }
     catch (CoreException ce) {
       // Only happens if the project doesn't exist or isn't open.
       //  We shouldn't be seeing the project if this is the case.
       throw new UnexpectedException(ce);
+    }
+  }
+  
+  private void _addProjectToClasspath(IJavaProject jProj) throws CoreException {
+    // Get the workspace root, home of random global data.
+    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+    
+    // Get the IJavaModel, which corresponds to all open Java projects.
+    IJavaModel jModel = JavaCore.create(root);
+    
+    _addProjectToClasspath(jProj, jModel, root);
+  }
+  
+  private void _addProjectToClasspath(IJavaProject jProj, IJavaModel jModel, IWorkspaceRoot root) 
+    throws CoreException 
+  {
+    // Get the project's location on disk
+    IProject proj = jProj.getProject();
+    IPath projRoot = proj.getDescription().getLocation();
+    // Note: getLocation returns null if the default location is used
+    //  (brilliant...)
+    
+    // Get the resolved classpath entries - this should filter out
+    //   all CPE_VARIABLE and CPE_CONTAINER entries.
+    IClasspathEntry entries[] = jProj.getResolvedClasspath(true);
+    
+    // For each of the classpath entries...
+    for(int j = 0; j < entries.length; j++) {
+      IClasspathEntry entry = entries[j];
+      
+      // Check what kind of entry it is...
+      int kind = entry.getEntryKind();
+      
+      // And get the appropriate path.
+      IPath path;
+      switch (kind) {
+        case IClasspathEntry.CPE_LIBRARY:
+          // The raw location of a JAR.
+          path = entry.getPath();
+          //System.out.println("Adding library: " + path.toOSString());
+          addToClassPath(path.toOSString());
+          break;
+        case IClasspathEntry.CPE_SOURCE:
+          // The output location of source.
+          // Need to append it to the user's workspace directory.
+          path = entry.getOutputLocation();
+          if (path == null) {
+            path = jProj.getOutputLocation();
+            //System.out.println(" output location from proj: " + path);
+          }
+          
+          // At this point, the output location contains the project
+          //  name followed by the actual output folder name
+          
+          if (projRoot != null) {
+            // We have a custom project location, so the project name
+            //  is not part of the *actual* output directory.  We need
+            //  to remove the project name (first segment) and then
+            //  append the rest of the output location to projRoot.
+            path = path.removeFirstSegments(1);
+            path = projRoot.append(path);
+          }
+          else {
+            // A null projRoot means use the default location, which
+            //  *does* include the project name in the output directory.
+            path = root.getLocation().append(path);
+          }
+          
+          //System.out.println("Adding source: " + path.toOSString());
+          addToClassPath(path.toOSString());
+          break;
+        case IClasspathEntry.CPE_PROJECT:
+          // In this case, just the project name is given.
+          // We don't actually need to add anything to the classpath,
+          //  since the project is open and we will get its classpath
+          //  on another pass.
+          break;
+        default:
+          // This should never happen.
+          throw new RuntimeException("Unsupported classpath entry type.");
+      }
     }
   }
   
@@ -431,6 +446,18 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
       //System.out.println("visiting " + children.length + " children...");
       for (int i=0; i < children.length; i++) {
         _visitDelta(children[i], depth + 1);
+      }
+    }
+    
+    // Case: project opened
+    else if (kind == IJavaElementDelta.ADDED) {
+      if (element instanceof IJavaProject) {
+        try {
+          _addProjectToClasspath((IJavaProject)element);
+        }
+        catch(CoreException e) {
+          throw new UnexpectedException(e);
+        }
       }
     }
 

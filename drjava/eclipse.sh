@@ -1,10 +1,10 @@
 #!/bin/sh
 
 # Directory where Eclipse is installed
-ECLIPSE=$HOME/eclipse
+ECLIPSE=$HOME/eclipse-2.1.1
 
 # Version of core Eclipse plugins
-ECLIPSE_VERSION=2.1.0
+ECLIPSE_VERSION=2.1.1
 
 # Platform used by Eclipse's SWT plugin
 #ECLIPSE_PLATFORM=carbon
