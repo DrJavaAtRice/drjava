@@ -68,10 +68,16 @@ class WindowsPlatform extends DefaultPlatform {
     }
     else {
       try {
+        // Windows doesn't like how Java formats URLs:
+        //  "file:/C:/dir/file.html" isn't legal.
+        // Instead, we need to put another slash in the protocol:
+        //  "file://C:/dir/file.html"
+        String addressString = address.getProtocol() + "://" + address.getPath();
+        
         // If there is no command specified, or it won't work, try using "rundll32".
         //Process proc = 
         Runtime.getRuntime().exec(new String[] {
-          "rundll32", "url.dll,FileProtocolHandler", address.toString() });
+          "rundll32", "url.dll,FileProtocolHandler", addressString });
         
         // TODO: This may cause a memory leak on Windows, if we don't check the exit code.scp
       }
