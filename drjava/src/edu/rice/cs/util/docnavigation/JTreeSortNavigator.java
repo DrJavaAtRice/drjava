@@ -893,7 +893,8 @@ public class JTreeSortNavigator extends JTree
     collapsePaths(set);
   }
   void collapsePaths(HashSet<String> paths) {
-    Enumeration<TreeNode> nodes = ((DefaultMutableTreeNode)_model.getRoot()).depthFirstEnumeration();
+    DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)_model.getRoot();
+    Enumeration<TreeNode> nodes = rootNode.depthFirstEnumeration(); /** This warning is expected **/
     ArrayList<String> list = new ArrayList<String>();
     while (nodes.hasMoreElements()) {
       DefaultMutableTreeNode tn = (DefaultMutableTreeNode)nodes.nextElement();
@@ -914,7 +915,8 @@ public class JTreeSortNavigator extends JTree
    * for information on the format of the path strings.
    */
   public String[] getCollapsedPaths() {
-    Enumeration<TreeNode> nodes = ((DefaultMutableTreeNode)_model.getRoot()).depthFirstEnumeration();
+    DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)_model.getRoot();
+    Enumeration<TreeNode> nodes = rootNode.depthFirstEnumeration(); /** This warning is expected **/
     ArrayList<String> list = new ArrayList<String>();
     while (nodes.hasMoreElements()) {
       DefaultMutableTreeNode tn = (DefaultMutableTreeNode)nodes.nextElement();

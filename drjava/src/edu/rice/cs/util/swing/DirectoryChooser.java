@@ -1317,7 +1317,7 @@ public class DirectoryChooser extends JPanel {
       return; // children are not generated yet
     }
     File parentFile = ((FileDisplay)parent.getUserObject()).getFile();
-    Enumeration<TreeNode> e = parent.children();
+    Enumeration<TreeNode> e = parent.children(); /** This warning is expected **/
     while (e.hasMoreElements()) {
       DefaultMutableTreeNode child = (DefaultMutableTreeNode)e.nextElement();
       File oldFile = getFileForTreeNode(child);
@@ -1332,7 +1332,7 @@ public class DirectoryChooser extends JPanel {
     if (!_treeIsGenerated) return;
     DefaultMutableTreeNode parent = (DefaultMutableTreeNode)node.getParent();
     node.removeFromParent();
-    Enumeration<TreeNode> e = parent.children();
+    Enumeration<TreeNode> e = parent.children(); /** This warning is expected **/
     while (e.hasMoreElements()) {
       DefaultMutableTreeNode child = (DefaultMutableTreeNode)e.nextElement();
       if (node.toString().compareTo(child.toString()) < 0) {
