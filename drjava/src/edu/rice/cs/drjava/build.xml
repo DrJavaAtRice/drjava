@@ -541,6 +541,7 @@
 
     <!-- Include Language Level chart -->
     <copy todir="${doc_dir}/user" file="${srcroot}/${projpath}/docs/user/LanguageLevelFeatures.jpg" />
+    <copy todir="${doc_dir}/user" file="${srcroot}/${projpath}/docs/user/LanguageLevelAugmentation.jpg" />
   </target>
 
   <!-- Create the user documentation as a PDF -->
