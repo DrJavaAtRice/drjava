@@ -50,6 +50,8 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusListener;
+import java.awt.event.FocusEvent;
 import java.io.*;
 
 /**
@@ -96,6 +98,11 @@ public class FileSelectorComponent extends JPanel {
    * File filter to use in the chooser.
    */
   protected FileFilter _fileFilter;
+  
+  /**
+   * The current file
+   */
+  protected File _file;
 
   /**
    * Creates a new FileSelectorComponent with default dimensions.
@@ -120,6 +127,7 @@ public class FileSelectorComponent extends JPanel {
     _parent = parent;
     _chooser = chooser;
     _fileFilter = null;
+    _file = null;
     
     _fileField = new JTextField(numCols) {
       public Dimension getMaximumSize() {
@@ -128,6 +136,19 @@ public class FileSelectorComponent extends JPanel {
     };
     _fileField.setFont(_fileField.getFont().deriveFont(fontSize));
     _fileField.setPreferredSize(new Dimension(22,22));
+    _fileField.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        validateTextField();
+      }
+    });
+    _fileField.addFocusListener(new FocusListener() {
+      public void focusGained(FocusEvent e) {
+        validateTextField();
+      }
+      public void focusLost(FocusEvent e) {
+        validateTextField();
+      }
+    });
     
     _chooserButton = new JButton("...");
     _chooserButton.addActionListener(new ActionListener() {
@@ -168,7 +189,13 @@ public class FileSelectorComponent extends JPanel {
    * Returns the file currently typed into the file field.
    */
   public File getFileFromField() {
-    return new File(_fileField.getText());
+    String txt = _fileField.getText().trim();
+    if (txt.equals(""))
+      _file = null;
+    else 
+      _file = new File(txt);
+    
+    return _file;
   }
 
   /**
@@ -177,21 +204,28 @@ public class FileSelectorComponent extends JPanel {
    * @param file File to display in the file field.
    */
   public void setFileField(File file) {
-    try {
-    _fileField.setText(file.getCanonicalPath());
-    }
-    catch(IOException e) {
-      //handle it gracefully
-      _fileField.setText(file.getAbsolutePath());      
-    }
-    _fileField.setCaretPosition(_fileField.getText().length());
-    if (file.exists()) {
-      _chooser.setCurrentDirectory(file);
-      _chooser.setSelectedFile(file);
+    if (file != null && file.exists()) {
+      try {
+        _file = file.getCanonicalFile();
+      }
+      catch(IOException e) {
+        //handle it gracefully
+        _file = file.getAbsoluteFile();
+      }
+      resetFileField();
     }
   }
 
-
+  public void resetFileField() {
+    if (_file == null) {
+      _fileField.setText("");
+    }
+    else {
+      _fileField.setText(_file.toString());
+      _fileField.setCaretPosition(_fileField.getText().length());
+    }
+  }
+  
   /**
    * Sets the file filter to use.
    */
@@ -199,17 +233,21 @@ public class FileSelectorComponent extends JPanel {
     _fileFilter = filter;
   }
 
-
+  public void setToolTipText(String text) {
+    super.setToolTipText(text);
+    _fileField.setToolTipText(text);
+    _chooser.setToolTipText(text);
+  }
+  
   /**
    * Opens the file chooser to select a file, putting the result
    * in the file field.
    */
   private void _chooseFile() {
-    File file = getFileFromField();
     // Set the chooser to be in the right directory
-    if (file.exists()) {
-      _chooser.setCurrentDirectory(file);
-      _chooser.setSelectedFile(file);
+    if (_file != null && _file.exists()) {
+      _chooser.setCurrentDirectory(_file);
+      _chooser.setSelectedFile(_file);
     }
 
     // Apply the filter
@@ -226,6 +264,41 @@ public class FileSelectorComponent extends JPanel {
       }
     }
   }
-
-
+   
+  // used so that the focus listener and the action listener do not
+  // both validate the incorrect text.  This ensures that only the first
+  // one gets it.
+  private boolean _validationInProgress = false;
+  
+  /**
+   *  The chooser method for the validation of filenames that are manually entered
+   *  into the text field.
+   *  @return False, if file does not exist. True, otherwise.
+   */
+  public boolean validateTextField() {
+    if (_validationInProgress) return true;
+    _validationInProgress = true;
+    
+    String newValue = _fileField.getText().trim();
+    
+    File newFile = null;
+    if (!newValue.equals(""))
+      newFile = new File(newValue);
+    
+    if (newFile != null && !newFile.exists()) {
+      JOptionPane.showMessageDialog(_parent,
+                                    "The file '"+ newValue + "'\n" +
+                                    "is invalid because it does not exist.",
+                                    "Invalid File Name",
+                                    JOptionPane.ERROR_MESSAGE);
+      resetFileField(); // revert if not valid
+      _validationInProgress = false;
+      return false;
+    }
+    else {
+      setFileField(newFile);
+      _validationInProgress = false;
+      return true;
+    }
+  }
 }

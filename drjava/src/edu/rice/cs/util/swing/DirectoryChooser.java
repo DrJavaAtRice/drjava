@@ -66,6 +66,14 @@
  * x roots should not be editable
  * x null pointer when right-click in empty space
  * x add accept enable filter
+ * x add icon override
+ * x change warning for delete (different for files)
+ * x add external selection listeners (gives file selected?)
+ * - make into JComponent that can be imbeded into other components
+ * - make drjava icons correct size & resize programatically for recent doc frame
+ *   - or make two copies of the folder find a way to select which
+ * - request that when a main file is selected, it is brought into the project tree
+ *   if not there already.
  */
 
 package edu.rice.cs.util.swing;
@@ -95,10 +103,12 @@ public class DirectoryChooser extends JDialog {
   public static int ERROR_OPTION = JFileChooser.ERROR_OPTION;
     
   protected JTree _tree;
-  protected static JFileChooser _jfc;
+  protected FileDisplayManager _fdManager;
+//  protected static JFileChooser _jfc;
   
   protected DefaultMutableTreeNode _root;
   protected File    _rootFile;
+  protected File    _defaultSelectedFile;
   protected boolean _allowMultiple;
   protected boolean _showHidden;
   protected boolean _showFiles;
@@ -107,9 +117,12 @@ public class DirectoryChooser extends JDialog {
   protected Set<File> _offLimits;
   
   private TreeExpansionListener _expansionListener;
+  private Hashtable<FileSelectionListener, TreeSelectionListener> _fileSelectionListeners;
   private LinkedList<FileFilter> _choosableDirs;
   private LinkedList<FileFilter> _normalFileFilters;
   private Action _cancelAction;
+  private boolean _treeIsGenerated;
+  private boolean _forceTreeGenerate;
   
   private JScrollPane _scroller;
   private JPanel   _topComponentPanel;
@@ -137,8 +150,6 @@ public class DirectoryChooser extends JDialog {
   protected String _cancelText   = "Cancel";
   protected String _topLabelText = "Select a directory:";
   
-  protected Icon _newFolderIcon = UIManager.getIcon("FileChooser.newFolderIcon");
-    
   /**
    * Creates a DirectoryChooser whose root starts at the root of the 
    * file system and that allows only one selection at a time.
@@ -231,20 +242,25 @@ public class DirectoryChooser extends JDialog {
     if (root != null && !root.isDirectory()) {
       root = root.getAbsoluteFile().getParentFile();
     }
-        
+    
+    _treeIsGenerated = false;
+    _forceTreeGenerate = true;
     _rootFile = root;
+    _defaultSelectedFile = null;
     _allowMultiple = allowMultiple;
     _showHidden = showHidden;
     _finalResult = ERROR_OPTION;
     _choosableDirs = new LinkedList<FileFilter>();
     _normalFileFilters = new LinkedList<FileFilter>();
-    _jfc = new JFileChooser();
+    _fileSelectionListeners = new Hashtable<FileSelectionListener, TreeSelectionListener>();
+    _fdManager = new DefaultFileDisplayManager();
   
     _offLimits = new HashSet<File>();
     File[] shellRoots = (File[])ShellFolder.get("fileChooserComboBoxFolders");
     for(File f : shellRoots) {
       _offLimits.add(f);
     }
+    
     
     Container cp = getContentPane();
     cp.setLayout(new BorderLayout());
@@ -330,14 +346,15 @@ public class DirectoryChooser extends JDialog {
     _southPanel.add(_buttonPanel, BorderLayout.SOUTH);
     cp.add(_southPanel, BorderLayout.SOUTH);
     
-    // This sets the root file and generates the tree
-    setRootFile(_rootFile);
     
     this.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
         _finalResult = CANCEL_OPTION;
       }
     });
+    
+    // This sets the root file and generates the tree
+    setRootFile(_rootFile);
     
     _treePopup = new JPopupMenu();
     
@@ -382,7 +399,7 @@ public class DirectoryChooser extends JDialog {
     });
         
     setEditable(false);
-    setLocationByPlatform(true);
+    setLocationRelativeTo(null);
     setSize(330, 400);
   }
   
@@ -418,17 +435,6 @@ public class DirectoryChooser extends JDialog {
     _root = makeFileNode(_rootFile);
     _tree = new CustomJTree(_root);
     
-    _expansionListener = new TreeExpansionListener() {
-      public void  treeCollapsed(TreeExpansionEvent event) {
-        // do nothing for now
-      }
-      public void  treeExpanded(TreeExpansionEvent event) {
-        TreePath path = event.getPath();
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
-        ensureHasChildren(node);
-      }
-    };
-    
     // dissable the accept button when no directories are selected
     _tree.addTreeSelectionListener(new TreeSelectionListener() {
       public void valueChanged(TreeSelectionEvent e) {
@@ -444,25 +450,22 @@ public class DirectoryChooser extends JDialog {
       }
     });
     
+    // add any external file listeners to the tree
+    for (TreeSelectionListener tsl : _fileSelectionListeners.values()) {
+      _tree.addTreeSelectionListener(tsl);
+    }
+    
+    _expansionListener = new TreeExpansionListener() {
+      public void  treeCollapsed(TreeExpansionEvent event) {
+        // do nothing for now
+      }
+      public void  treeExpanded(TreeExpansionEvent event) {
+        TreePath path = event.getPath();
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
+        ensureHasChildren(node);
+      }
+    };
     _tree.addTreeExpansionListener(_expansionListener);
-    CustomTreeCellRenderer _cellRenderer = new CustomTreeCellRenderer();
-    _tree.setCellRenderer(_cellRenderer);
-    
-    // This should be optional.
-    FileTextField textField = new FileTextField();
-    CustomCellEditor cce =  new CustomCellEditor(textField);
-    DefaultTreeCellEditor _cellEditor = new CustomTreeCellEditor(_tree, _cellRenderer,cce);
-    
-    cce.addCellEditorListener(_cellEditorListener);
-    _tree.setCellEditor(_cellEditor);
-    _tree.setEditable(_isEditable);
-    
-    if (_allowMultiple) {
-      _tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
-    }
-    else {
-      _tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION); 
-    }
     
     // Context menu setup
     _tree.addMouseListener(new RightClickMouseAdapter() {
@@ -492,11 +495,33 @@ public class DirectoryChooser extends JDialog {
       }
     });
     
+    
+    CustomTreeCellRenderer _cellRenderer = new CustomTreeCellRenderer();
+    _tree.setCellRenderer(_cellRenderer);
+    
+    // This should be optional.
+    FileTextField textField = new FileTextField();
+    CustomCellEditor cce =  new CustomCellEditor(textField);
+    DefaultTreeCellEditor _cellEditor = new CustomTreeCellEditor(_tree, _cellRenderer,cce);
+    
+    cce.addCellEditorListener(_cellEditorListener);
+    _tree.setCellEditor(_cellEditor);
+    _tree.setEditable(_isEditable);
+    
+    if (_allowMultiple) {
+      _tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+    }
+    else {
+      _tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION); 
+    }
     _tree.collapseRow(0);
     _tree.expandRow(0);
     
     _scroller.setViewportView(_tree);
+    _treeIsGenerated = true;
+    _forceTreeGenerate = false;
     
+    updateTreeSelectionPath();
   }
   
   ////////////////////// PUBLIC METHODS //////////////////////
@@ -537,6 +562,56 @@ public class DirectoryChooser extends JDialog {
     _normalFileFilters.clear();
   }
   
+  public void addFileSelectionListener(final FileSelectionListener l) {
+    TreeSelectionListener tsl = new TreeSelectionListener() {
+      public void valueChanged(TreeSelectionEvent e) {
+        int n = e.getPaths().length;
+        File[] changed = new File[n];
+        boolean[] areNew = new boolean[n];
+        for (int i=0; i < n; i++) {
+          changed[i] = getFileForTreePath(e.getPaths()[i]);
+          areNew[i] = e.isAddedPath(i);
+        }
+        File newLead = getFileForTreePath(e.getNewLeadSelectionPath());
+        File oldLead = getFileForTreePath(e.getOldLeadSelectionPath());
+        FileSelectionEvent fse = new FileSelectionEvent(DirectoryChooser.this,
+                                                        changed, areNew,
+                                                        newLead, oldLead);
+        //File[] changed, boolean[] areNew, File newLead, File oldLead
+        l.valueChanged(fse);
+      }
+    };
+    if (_treeIsGenerated) 
+      _tree.addTreeSelectionListener(tsl);
+    else 
+      _forceTreeGenerate = true;
+    
+    _fileSelectionListeners.put(l, tsl);
+  }
+  
+  public void removeFileSelectionListener(FileSelectionListener l) {
+    if (_treeIsGenerated) {
+      TreeSelectionListener tsl = _fileSelectionListeners.get(l);
+      _tree.removeTreeSelectionListener(tsl);
+    }
+    else {
+      _forceTreeGenerate = true;
+    }
+    _fileSelectionListeners.remove(l);
+  }
+  
+  public void clearFileSelectionListener() {
+    if (_treeIsGenerated) {
+      for (TreeSelectionListener tsl : _fileSelectionListeners.values()) {
+        _tree.removeTreeSelectionListener(tsl);
+      }
+    }
+    else {
+      _forceTreeGenerate = true;
+    }
+    _fileSelectionListeners.clear();
+  }
+  
   /**
    * returns the directory at the root of the tree
    * @return the file denoting the root directory of the directory tree
@@ -552,14 +627,24 @@ public class DirectoryChooser extends JDialog {
    */
   public void setAllowMultipleSelection(boolean allow) {
     _allowMultiple = allow;
-    if (_allowMultiple) {
-      _tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+    if (_treeIsGenerated){
+      if (_allowMultiple) {
+        _tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+      }
+      else {
+        _tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION); 
+      }  
     }
-    else {
-      _tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION); 
-    }  
   }
   
+  /**
+   * Does the same thing as setAllowMultipleSelection.  This was added because this is 
+   * the name used by JFileChooser to do the same thing.
+   */
+  public void setMultiSelectionEnabled(boolean allow) {
+    setAllowMultipleSelection(allow);
+  }
+    
   /**
    * Sets the root directory of the tree. No nodes below the root are selectable since
    * they are not ever displayed in the tree at all
@@ -580,39 +665,8 @@ public class DirectoryChooser extends JDialog {
         throw new IllegalArgumentException("The proposed root does not exist");
       }
     }
-    generateDirTree();
-  }
-  
-  /**
-   * Sets whether to show hidden directories in the tree
-   */
-  public void setShowHiddenDirectories(boolean show) {
-    if (_showHidden != show) {
-      generateDirTree();
-      _showHidden = show;
-    }
-  }
-  
-  public void setShowFiles(boolean show) {
-    if (_showFiles != show) {
-      generateDirTree();
-      _showFiles = show;
-    }
-  }
-  
-  /**
-   * Sets whether to allow the creation of new directories and
-   * the renaming of old ones.
-   */
-  public void setEditable(boolean editable) {
-    _isEditable = editable;
-    _tree.setEditable(editable);
     
-    _newButtonPanel.setVisible(editable);
-    _popSep.setVisible(editable); // separator
-    _newFolderItem.setVisible(editable);
-    _deleteItem.setVisible(editable);
-    _renameItem.setVisible(editable);
+    _forceTreeGenerate = true;
   }
   
   /**
@@ -622,56 +676,66 @@ public class DirectoryChooser extends JDialog {
    */
   public boolean setSelectedDirectory(File dir) {
     if (dir == null) return false;
-    
-    LinkedList<File> path = new LinkedList<File>();
-    File tmp = formatFile(dir);
-    do {
-      path.addFirst(tmp);
-    } while ((tmp = tmp.getParentFile()) != null);
-    
-    HashSet<File> rootSet = new HashSet<File>();
-    tmp = _rootFile;
-    do {
-      rootSet.add(tmp);
-    } while ((tmp = tmp.getParentFile()) != null);
-    
-    // remove the root from the path
-    ListIterator<File> it = path.listIterator();
-    while (it.hasNext()) {
-      tmp = it.next();
-      if (rootSet.contains(tmp)) {
-        it.remove();
-      }
+    _defaultSelectedFile = dir;
+    return updateTreeSelectionPath();
+  }
+  
+  /**
+   * Does the same thing as setSelectedDirectory
+   * @param f the file to select
+   * @return true if the file was successfully selected
+   */
+  public boolean setSelectedFile(File f) {
+    if (f == null) return false;
+    _defaultSelectedFile = f;
+    return updateTreeSelectionPath();
+  }
+  
+  /**
+   * Sets the manager that chooses the file display icons and names
+   */
+  public void setFileDisplayManager(FileDisplayManager fdm) {
+    if (fdm != _fdManager) {
+      _forceTreeGenerate = true;
+      _fdManager = fdm;
     }
-    
-    DefaultMutableTreeNode currNode = _root;
-    for (File currFile : path) {
-      DefaultMutableTreeNode n = findMatchingChild(currNode, currFile);
-      if (n == null) {
-        ensureHasChildren(currNode);
-      }
-      n = findMatchingChild(currNode, currFile); // search again
-      if (n == null) {
-        return false; // not found
-      }
-      else {
-        currNode = n;
-      }
+  }
+  
+  /**
+   * Sets whether to show hidden directories in the tree
+   */
+  public void setShowHiddenDirectories(boolean show) {
+    if (_showHidden != show) {
+      _forceTreeGenerate = true;
+      _showHidden = show;
     }
-    TreePath tp = new TreePath(currNode.getPath());
-    _tree.setSelectionPath(tp);
-    // expand the tree bounds out so it doesn't
-    // get placed on the bottom of the tree.
-    Rectangle bounds = _tree.getPathBounds(tp);
-    int x = 0;
-    int y = bounds.y - 100;
-    int w = bounds.width + bounds.x;
-    int h = bounds.height + 200;
-    Rectangle scrollBounds = new Rectangle(x,y,w,h);
-    _tree.makeVisible(tp);
-    _tree.scrollRectToVisible(scrollBounds);
-    _tree.repaint();
-    return true;
+  }
+  
+  public void setShowFiles(boolean show) {
+    if (_showFiles != show) {
+      _forceTreeGenerate = true;
+      _showFiles = show;
+    }
+  }
+  
+  public boolean getShowFiles() {
+    return _showFiles;
+  }
+  
+  /**
+   * Sets whether to allow the creation of new directories and
+   * the renaming of old ones.
+   */
+  public void setEditable(boolean editable) {
+    _isEditable = editable;
+    if (_treeIsGenerated) {
+      _tree.setEditable(editable);
+    }
+    _newButtonPanel.setVisible(editable);
+    _popSep.setVisible(editable); // separator
+    _newFolderItem.setVisible(editable);
+    _deleteItem.setVisible(editable);
+    _renameItem.setVisible(editable);
   }
   
   /**
@@ -735,8 +799,14 @@ public class DirectoryChooser extends JDialog {
    */
   public int showDialog(File initialSelection) {
     if (initialSelection != null) {
+      _defaultSelectedFile = initialSelection;
+    }
+    if (!_treeIsGenerated || _forceTreeGenerate) {
       generateDirTree();
-      setSelectedDirectory(initialSelection);
+    }
+    else {
+      collapseAll();
+      updateTreeSelectionPath();
     }
     boolean enable = _tree.getSelectionCount() > 0;
     _approveButton.setEnabled(enable);
@@ -744,9 +814,6 @@ public class DirectoryChooser extends JDialog {
     this.setVisible(true);
     int res = _finalResult;
     _finalResult = ERROR_OPTION;
-    try {
-      setAlwaysOnTop(true);
-    } catch(SecurityException se) { }
     return res;
   }
   
@@ -763,6 +830,7 @@ public class DirectoryChooser extends JDialog {
    * @return an array of files for the selected directories
    */
   public File[] getSelectedDirectories() {
+    if (!_treeIsGenerated) return new File[0];
     TreePath[] sels = _tree.getSelectionPaths();
     if (sels == null) {
       return new File[0];
@@ -781,6 +849,7 @@ public class DirectoryChooser extends JDialog {
    * @return the file for the selected directory, null if none selected
    */
   public File getSelectedDirectory() {
+    if (!_treeIsGenerated) return null;
     return getFileForTreePath(_tree.getSelectionPath());
   }
   
@@ -791,13 +860,17 @@ public class DirectoryChooser extends JDialog {
    * @param tp the path in the tree whose file to delete
    */
   public void tryToDeletePath(TreePath tp) {
-    String msg = "Are you sure you want to delete this directory?";
+    if (!_treeIsGenerated) return;
+    
+    File f = getFileForTreePath(tp);
+    
+    String type = (f.isDirectory() ? "directory" : "file");
+    String msg = "Are you sure you want to delete this "+type+"?";
     int res = JOptionPane.showConfirmDialog(DirectoryChooser.this,
-                                            msg, "Delete Directory?", 
+                                            msg, "Delete "+type+"?", 
                                             JOptionPane.YES_NO_OPTION);
     if (res != JOptionPane.YES_OPTION) return;
     
-    File f = getFileForTreePath(tp);
     boolean couldDelete = false;
     try {
       couldDelete = f.delete();
@@ -811,11 +884,19 @@ public class DirectoryChooser extends JDialog {
       ((DefaultTreeModel)_tree.getModel()).nodeStructureChanged(parent);
     }
     else {
-      String errMsg = 
-        "The directory was unable to be deleted.\n"+
-        "Directories may only be deleted if they are\n"+
-        "empty and if there is sufficient access to\n"+
-        "to the directory.";
+      String errMsg;
+      if (f.isDirectory()) {
+        errMsg = 
+          "The directory was unable to be deleted.\n"+
+          "Directories may only be deleted if they are\n"+
+          "empty and if there is sufficient access to\n"+
+          "to the directory.";
+      }
+      else {
+        errMsg = 
+          "The file was unable to be deleted.\n"+
+          "Make sure you have sufficient permissions.";
+      }
       JOptionPane.showMessageDialog(DirectoryChooser.this, errMsg, "Unable to delete",
                                     JOptionPane.WARNING_MESSAGE);
     }
@@ -828,9 +909,11 @@ public class DirectoryChooser extends JDialog {
    * @param tp The path under which to create the new directory
    */
   public void launchCreateNewDirectory(TreePath tp) {
+    if (!_treeIsGenerated) return;
+    
     DefaultMutableTreeNode parent = (DefaultMutableTreeNode)tp.getLastPathComponent();
     File f = getFileForTreeNode(parent);
-    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(FileDisplay.newFile(f));
+    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(_fdManager.makeNewFolderDisplay(f));
     ensureHasChildren(parent);
     parent.insert(newNode, 0);
     ((DefaultTreeModel)_tree.getModel()).nodeStructureChanged(parent);
@@ -843,10 +926,16 @@ public class DirectoryChooser extends JDialog {
    * If no nodes are selected, nothing happens.
    */
   public void launchCreateNewDirectory() {
+    if (!_treeIsGenerated) return;
     TreePath tp = _tree.getSelectionPath();
     if (tp != null) {
       launchCreateNewDirectory(tp);
     }
+  }
+  
+  public void addNotify() {
+    super.addNotify();
+    generateDirTree();
   }
   
   //////////////////// PROTECTED UTILITY METHODS /////////////////
@@ -890,6 +979,17 @@ public class DirectoryChooser extends JDialog {
   }
   
   /**
+   * Collapses all nodes of the tree
+   */
+  protected void collapseAll() {
+    if (!_treeIsGenerated) return;
+    int n = _tree.getRowCount();
+    for (int i=0; i < n; i++) {
+      _tree.collapseRow(n);
+    }
+  }
+  
+  /**
    * @param node the node whose children to search
    * @param theFile the file to search for
    * @return the child that has the given file as its user data
@@ -908,6 +1008,64 @@ public class DirectoryChooser extends JDialog {
     return null; // not found
   }
   
+  protected boolean updateTreeSelectionPath() {
+    if (!_treeIsGenerated || _defaultSelectedFile == null) return false;
+    
+    File dir = _defaultSelectedFile;
+    LinkedList<File> path = new LinkedList<File>();
+    File tmp = formatFile(dir);
+    do {
+      path.addFirst(tmp);
+    } while ((tmp = tmp.getParentFile()) != null);
+    
+    HashSet<File> rootSet = new HashSet<File>();
+    tmp = _rootFile;
+    do {
+      rootSet.add(tmp);
+    } while ((tmp = tmp.getParentFile()) != null);
+    
+    // remove the root from the path
+    ListIterator<File> it = path.listIterator();
+    while (it.hasNext()) {
+      tmp = it.next();
+      if (rootSet.contains(tmp)) {
+        it.remove();
+      }
+    }
+    
+    DefaultMutableTreeNode currNode = _root;
+    for (File currFile : path) {
+      DefaultMutableTreeNode n = findMatchingChild(currNode, currFile);
+      if (n == null) {
+        ensureHasChildren(currNode);
+      }
+      n = findMatchingChild(currNode, currFile); // search again
+      if (n == null) {
+        return false; // not found
+      }
+      else {
+        currNode = n;
+      }
+    }
+    TreePath tp = new TreePath(currNode.getPath());
+    
+    _tree.setSelectionPath(tp);
+    
+    // expand the tree bounds out so it doesn't
+    // get placed on the bottom of the tree.
+    Rectangle bounds = _tree.getPathBounds(tp);
+    int x = 0;
+    int y = bounds.y - 100;
+    int w = bounds.width + bounds.x;
+    int h = bounds.height + 200;
+    Rectangle scrollBounds = new Rectangle(x,y,w,h);
+    _tree.makeVisible(tp);
+    _tree.scrollRectToVisible(scrollBounds);
+    _tree.repaint();
+    
+    return true;
+  }
+  
   /**
    * If the node has exactly one EmptyTreeNode (meaning its children have not been
    * looked up yet), then this method adds the correct children to the node according
@@ -915,6 +1073,7 @@ public class DirectoryChooser extends JDialog {
    * @param node the node to set up
    */
   protected void  ensureHasChildren(DefaultMutableTreeNode node) {
+    if (!_treeIsGenerated) return;
     if (node.getChildCount() == 1 && node.getChildAt(0) instanceof EmptyTreeNode) {
       
       File parentFile = getFileForTreeNode(node);
@@ -985,19 +1144,23 @@ public class DirectoryChooser extends JDialog {
       return;
     }
     else if (f.equals(prev.getParentFile())) {
-      top.setUserObject(new FileDisplay(prev)); // undo changes if not renamable
+      top.setUserObject(_fdManager.makeFileDisplay(prev)); // undo changes if not renamable
     }
     else {
       try {
         prev.renameTo(f);
       }
       catch (SecurityException se) {
-        top.setUserObject(new FileDisplay(prev)); // undo changes if not renamable
+        top.setUserObject(_fdManager.makeFileDisplay(prev)); // undo changes if not renamable
       }
     }
     // resort into tree
     resortNode(top);
-    _jfc.updateUI(); // so that the icons will paint correctly
+//    _jfc.updateUI(); // so that the icons will paint correctly
+    // if (_fdManager instanceof DefaultFileDisplayManager) {
+    //   ((DefaultFileDisplayManager)_fdManager).update();
+    // }
+    
     // propagate to children.
     updateChildFiles(top);
   }
@@ -1012,13 +1175,14 @@ public class DirectoryChooser extends JDialog {
       DefaultMutableTreeNode child = (DefaultMutableTreeNode)e.nextElement();
       File oldFile = getFileForTreeNode(child);
       File newFile = new File(parentFile, oldFile.getName());
-      child.setUserObject(new FileDisplay(newFile));
+      child.setUserObject(_fdManager.makeFileDisplay(newFile));
       updateChildFiles(child);
     }
   }
   
   
   protected void resortNode(DefaultMutableTreeNode node) {
+    if (!_treeIsGenerated) return;
     DefaultMutableTreeNode parent = (DefaultMutableTreeNode)node.getParent();
     node.removeFromParent();
     Enumeration<TreeNode> e = parent.children();
@@ -1036,7 +1200,7 @@ public class DirectoryChooser extends JDialog {
   }
   
   protected DefaultMutableTreeNode makeFileNode(File f) {
-    DefaultMutableTreeNode n = new DefaultMutableTreeNode(new FileDisplay(f));
+    DefaultMutableTreeNode n = new DefaultMutableTreeNode(_fdManager.makeFileDisplay(f));
     if (f.isDirectory()) n.add(new EmptyTreeNode()); // dummy node so it's not a leaf
     return n;
   }
@@ -1069,7 +1233,7 @@ public class DirectoryChooser extends JDialog {
       DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
       try {
         File f = getFileForTreeNode(node);
-        Icon ico = _jfc.getIcon(f);
+        Icon ico = _fdManager.getIcon(f); //_jfc.getIcon(f);
         setIcon(ico);
       }
       catch(IllegalArgumentException e) {
@@ -1111,7 +1275,7 @@ public class DirectoryChooser extends JDialog {
       
       if(renderer != null) {
         if (f != null){
-          editingIcon = _jfc.getIcon(f);
+          editingIcon = _fdManager.getIcon(f); //_jfc.getIcon(f);
         }
         else
           editingIcon = renderer.getOpenIcon();
@@ -1165,7 +1329,7 @@ public class DirectoryChooser extends JDialog {
           if (f == null)
             return textField.getText();
           else
-            return new FileDisplay(f);
+            return _fdManager.makeFileDisplay(f);
         }
       };
       textField.addActionListener(delegate);
@@ -1254,42 +1418,7 @@ public class DirectoryChooser extends JDialog {
         return new File(_parent, getText());
     }
   }
-  
-  /**
-   * This class is a wrapper for a file whose <code>toString</code> method
-   * outputs only the last element in the file path.  If it's a file, then
-   * it outputs the file name without its parent directories.  If it's a 
-   * directory, then it outputs the name of that directory only
-   */
-  static class FileDisplay {
-    private File _file;
-    private String _rep;
-    private boolean _isNew;
     
-    public FileDisplay(File f) { setFile(f); }
-    
-    public static FileDisplay newFile(File parent) {
-      FileDisplay fd = new FileDisplay(parent);
-      fd._rep = "New Folder";
-      fd._isNew = true;
-      return fd;
-    }
-    
-    public void setFile(File f) {
-      _isNew = false;
-      _file = f;
-      _rep = _jfc.getName(f);
-    }
-    
-    public File getFile() { return _file; }
-    
-    public boolean isEditable() { return _file.canWrite() || _isNew; }
-    
-    public boolean isNew() { return _isNew; }
-    
-    public String toString() { return _rep; }
-  }
-  
   /**
    * Allows the DirectoryChooser to recongnize any of the 
    * temporary leaves put on the directories in order to 
@@ -1328,7 +1457,7 @@ public class DirectoryChooser extends JDialog {
       }
     });
     d.setAccessory(cb);
-    d.setTopComponent(new JLabel("Select a folder so open", UIManager.getIcon("OptionPane.informationIcon"), JLabel.LEFT));
+    d.setTopComponent(new JLabel("Select a folder", UIManager.getIcon("OptionPane.informationIcon"), JLabel.LEFT));
     d.addChoosableFileFilter(new FileFilter() {
       public boolean accept(File f) {
         try {
@@ -1349,7 +1478,10 @@ public class DirectoryChooser extends JDialog {
       }
       public String getDescription() { return "Only allow java files"; };
     });
+    d.setSelectedDirectory(new File("/home/jlugo/junk"));
+    d.setFileDisplayManager(edu.rice.cs.drjava.ui.MainFrame.getFileDisplayManager());
     int res = d.showDialog();
+    
     System.out.println("done with success: " + res);
     File f = d.getSelectedDirectory();
     System.out.println("directory: " + f);
