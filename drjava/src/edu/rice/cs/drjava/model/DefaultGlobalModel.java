@@ -187,6 +187,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * being tested.  Otherwise this is null.
    */
   private OpenDefinitionsDocument _docBeingTested = null;
+  
+  /**
+   * Flag to indicate DrJava is first starting up, and that the interpreter
+   * JVM is connecting for the first time.
+   */
+  private boolean _waitingForFirstInterpreter;
 
   /**
    * The instance of the indent decision tree used by Definitions documents.
@@ -268,6 +274,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   public DefaultGlobalModel() {
     // Create the interpreter
     try {
+      _waitingForFirstInterpreter = true;
       _interpreterControl = new MainJVM(this);
       _resetInteractionsClasspath();
     }
@@ -292,6 +299,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    */
   public DefaultGlobalModel(DefaultGlobalModel other) {
     // Take interpreter from old model
+    _waitingForFirstInterpreter = false;
     _interpreterControl = other._interpreterControl;
     _interpreterControl.setModel(this);
     _interpreterControl.reset();
@@ -487,9 +495,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     
     if (retDoc != null) {
       return retDoc;
-    } else {
+    }
+    else {
       //if no OperationCanceledException, then getFiles should
-      //have atleast one file. 
+      //have at least one file. 
       throw new IOException("No Files returned from FileChooser");
     }
     
@@ -678,14 +687,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * which fires the interactionsReset() event.)
    */
   public void resetInteractions() {
-    // Keep a note that we're resetting so that the exit message is not displayed
-    //_interpreterControl.setIsResetting(true);
     if ((_debugManager != null) && (_debugManager.isReady())){
       _debugManager.shutdown();
     }
     _interpreterControl.restartInterpreterJVM();
     //_restoreInteractionsState();
-    //_interpreterControl.setIsResetting(false);
     
     /* Old approach.  (Didn't kill leftover interactions threads)
     _interpreterControl.reset();
@@ -708,8 +714,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
     notifyListeners(new EventNotifier() {
       public void notifyListener(GlobalModelListener l) {
-      l.consoleReset();
-    }
+        l.consoleReset();
+      }
     });
   }
 
@@ -765,6 +771,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    */
   public void interpretCurrentInteraction() {
     synchronized(_interpreterLock) {
+      // Don't start a new interaction while one is in progress
+      if (_interactionsDoc.inProgress()) {
+        return;
+      }
+      
       notifyListeners(new EventNotifier() {
         public void notifyListener(GlobalModelListener l) {
           l.interactionStarted();
@@ -1315,13 +1326,17 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
   }
   
+  /**
+   * Returns the document currently being tested (with JUnit) if there is
+   * one, otherwise null.
+   */
   public OpenDefinitionsDocument getDocBeingTested() {
     return _docBeingTested;
   }
     
-    // ---------- DefinitionsDocumentHandler inner class ----------
-    
-    /**
+  // ---------- DefinitionsDocumentHandler inner class ----------
+  
+  /**
    * Inner class to handle operations on each of the open
    * DefinitionsDocuments by the GlobalModel.
    */
@@ -2455,13 +2470,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * reset and make the interactions pane uneditable.
    */
   public void interactionsResetting() {
-    _interactionsDoc.insertBeforeLastPrompt("Resetting Interactions...\n",
-                                            INTERACTIONS_ERR_STYLE);
-    notifyListeners(new EventNotifier() {
-      public void notifyListener(GlobalModelListener l) {
-      l.interactionsResetting();
+    if (!_waitingForFirstInterpreter) {
+      _interactionsDoc.insertBeforeLastPrompt("Resetting Interactions...\n",
+                                              INTERACTIONS_ERR_STYLE);
+      notifyListeners(new EventNotifier() {
+        public void notifyListener(GlobalModelListener l) {
+          l.interactionsResetting();
+        }
+      });
     }
-    });
   }
 
   /**
@@ -2470,39 +2487,39 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * interactionsReset() is fired.
    */
   public void interactionsReady() {
-    _resetInteractionsClasspath();
-    _interactionsDoc.reset();
+    if (!_waitingForFirstInterpreter) {
+      _resetInteractionsClasspath();
+      _interactionsDoc.reset();
 
-    notifyListeners(new EventNotifier() {
-      public void notifyListener(GlobalModelListener l) {
-      l.interactionsReset();
-    }
-    });
-    
-    if (_docBeingTested != null) {
-      JUnitError[] errors = new JUnitError[1];
-      String fileName = null;
-      try {
-        fileName = _docBeingTested.getDocument().getFile().getAbsolutePath();
-      }
-      catch (IllegalStateException ise) {
-      }
-      catch (FileMovedException fme) {
-        fileName = fme.getFile().getAbsolutePath();
-      }
-      errors[0] = new JUnitError(fileName, -1, -1, "Previous test was interrupted", true, 
-                                     "", "No associated stack trace");
-      _docBeingTested.setJUnitErrorModel(new JUnitErrorModel(_docBeingTested.getDocument(), errors));
-      _docBeingTested = null;
       notifyListeners(new EventNotifier() {
         public void notifyListener(GlobalModelListener l) {
-          l.junitEnded();
+          l.interactionsReset();
         }
       });
-    };
       
-
-    //_interpreterControl.setPackageScope("");
+      if (_docBeingTested != null) {
+        JUnitError[] errors = new JUnitError[1];
+        String fileName = null;
+        try {
+          fileName = _docBeingTested.getDocument().getFile().getAbsolutePath();
+        }
+        catch (IllegalStateException ise) {
+        }
+        catch (FileMovedException fme) {
+          fileName = fme.getFile().getAbsolutePath();
+        }
+        errors[0] = new JUnitError(fileName, -1, -1, "Previous test was interrupted", true, 
+                                   "", "No associated stack trace");
+        _docBeingTested.setJUnitErrorModel(new JUnitErrorModel(_docBeingTested.getDocument(), errors));
+        _docBeingTested = null;
+        notifyListeners(new EventNotifier() {
+          public void notifyListener(GlobalModelListener l) {
+            l.junitEnded();
+          }
+        });
+      }
+    }
+    _waitingForFirstInterpreter = false;
   }
 
   /**

@@ -49,8 +49,10 @@ import gj.util.Vector;
 import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.net.ServerSocket;
 
 import edu.rice.cs.util.newjvm.ExecJVM;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -67,7 +69,14 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
   /** The name of the RMI object for the present JVM. */
   private final String _identifier;
   
+  /** 
+   * How long to wait for an interpreter to register itself before 
+   * starting another attempt.
+   */
   private final static int RESET_TIME_OUT = 60;
+
+  /** Port on which RMI registry is running. */
+  private int _rmiPort = Registry.REGISTRY_PORT;
 
   /**
    * The global model.
@@ -496,25 +505,43 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     }
   }
 
+  /**
+   * Checks if an RMI registry is available, and if not, tries to create one
+   * on a new port.
+   */
   private void _startNameServiceIfNeeded() {
     try {
       Naming.list("");
     }
     catch (Exception e) {
+      // Get a safe port to use.
+      //  If each copy of DrJava used the same port (or the same port as
+      //  another program's rmiregistry), then when the previous copy/program
+      //  quit, we would lose our registry and not be able to reset!
       try {
-        LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
+        ServerSocket socket = new ServerSocket(0);
+        _rmiPort = socket.getLocalPort();
+        socket.close();
+        LocateRegistry.createRegistry(_rmiPort);
       }
-      catch (RemoteException re) {
-        throw new edu.rice.cs.util.UnexpectedException(re);
+      catch (Exception e2) {
+        throw new UnexpectedException(new RuntimeException(
+          "Could not find a usable RMI Port: " + e2.toString()));
       }
+      //DrJava.consoleOut().println("Created rmiregistry on port: " + _rmiPort);
     }
   }
 
+  /**
+   * Returns a unique identifier to name this Main JVM.
+   */
   private String _createIdentifier() {
     try {
       File file = File.createTempFile("drjava", "");
       file.deleteOnExit();
-      return file.getName();
+      String id = "//127.0.0.1:" + _rmiPort + "/" + file.getName();
+      //DrJava.consoleOut().println("Identifier: " + id);
+      return id;
     }
     catch (IOException ioe) { 
       throw new edu.rice.cs.util.UnexpectedException(ioe);

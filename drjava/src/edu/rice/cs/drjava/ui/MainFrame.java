@@ -3071,7 +3071,9 @@ public class MainFrame extends JFrame implements OptionConstants {
           _interactionsPane.setEditable(true);
           int pos = _interactionsPane.getDocument().getLength();
           _interactionsPane.setCaretPosition(pos);
-          //_interactionsPane.getCaret().setVisible(true);
+          if (_interactionsPane.hasFocus()) {
+            _interactionsPane.getCaret().setVisible(true);
+          }
         }
       };
       SwingUtilities.invokeLater(doCommand);
