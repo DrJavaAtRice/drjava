@@ -427,25 +427,38 @@ public class JTreeSortNavigator extends JTree
      * Note: this solved the bug where compile all with modified documents would throw an array
      * index out of bounds exception when painting.
      */
-    Object lock = new Object();
     LeafNode node = getNodeForDoc(doc);
-    // Check to see if it's already in the correct path.
-    InnerNode parent = _path2node.getValue(path);
-    String oldPath = _path2node.getKey(null);
-    if (path.equals(oldPath)) {
-      node.removeFromParent(); // doesn't cause a repaint.
-      insertNodeSortedInto(node, parent); // causes a repaint.
-    }
-    
-    //System.out.println("refresh -> remove");
-    synchronized(lock) {
-      removeNode(node);
-    }
-    //System.out.println("refresh -> add");
-    synchronized(lock) {
+    if (node == null) {
       addDocument(doc, path);
     }
-    //System.out.println("refresh done");
+    
+    InnerNode oldParent = (InnerNode)node.getParent();
+    // Check to see if the new parent (could be same) exists already
+    String newPath = path;
+    if (newPath.length() > 0) {
+      if (newPath.substring(0,1).equals("/")) newPath = newPath.substring(1);
+      if (!newPath.substring(newPath.length()-1).equals("/")) newPath = newPath + "/";
+    }
+    InnerNode newParent = _path2node.getValue(newPath); // node that should be parent
+    
+    if (newParent == oldParent) { 
+      if (!node.toString().equals(doc.getName())) {
+        removeNode(node);
+        LeafNode newLeaf= new LeafNode(doc);
+        _doc2node.put(doc,newLeaf);
+        insertNodeSortedInto(newLeaf, newParent);
+      }
+      // don't do anything if its name or parents haven't changed
+    }
+    else {
+      Object lock = new Object();
+      synchronized(lock) {
+        removeNode(node);
+      }
+      synchronized(lock) {
+        addDocument(doc, path);
+      }
+    }
   }
   
   public void paint(Graphics g){

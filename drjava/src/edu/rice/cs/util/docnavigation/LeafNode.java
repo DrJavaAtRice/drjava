@@ -60,8 +60,10 @@ import java.io.FileFilter;
 import edu.rice.cs.util.*;
 
 public class LeafNode extends DefaultMutableTreeNode implements NodeData {
+  public String _rep;
   public LeafNode(INavigatorItem i){
     super(i);
+    _rep = i.getName();
   }
   public void setData(INavigatorItem i){
     super.setUserObject(i);
@@ -76,6 +78,6 @@ public class LeafNode extends DefaultMutableTreeNode implements NodeData {
   }
   
   public String toString(){
-    return getData().getName();
+    return _rep;
   }
 }
