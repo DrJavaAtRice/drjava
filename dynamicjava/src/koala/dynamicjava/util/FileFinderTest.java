@@ -58,8 +58,7 @@ public class FileFinderTest extends TestCase
   
   public FileFinderTest(){}
   
-  public void testFindFile()
-  {
+  public void testFindFile() {
     File thisFile;
     File noFile;
     
@@ -67,24 +66,33 @@ public class FileFinderTest extends TestCase
     ff.addPath("dynamicjava/util/");
     
     //Try to find a file that does exist, namely this current file
-    try
-    {
+    try {
       thisFile = ff.findFile("FileFinderTest.java");
       assertTrue("Found This File", thisFile != null);
     }
-    catch(IOException ioe)
-    {
+    catch(IOException ioe) {
       fail();
     }
     
+    //When running the ant script for testing this is the relative path to the directory that contains this file
+    ff.addPath("dynamicjava/interpreter");
+    
+    //Try to find a file that does exist, namely this current file
+    try {
+      thisFile = ff.findFile("Interpreter.java");
+      assertTrue("Found This File", thisFile != null);
+    }
+    catch(IOException ioe) {
+      fail();
+    }
+    
+    
     //Try to find a file that does not exist
-    try
-    {
+    try {
       noFile = ff.findFile("file.doesnotexist");
       fail();
     }
-    catch(IOException fnf)
-    {
+    catch(IOException fnf) {
       assertEquals("File Not Found", "File Not Found: file.doesnotexist", fnf.getMessage());
     }
   }

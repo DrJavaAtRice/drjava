@@ -256,6 +256,18 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
     assertEquals("Should have autounboxed", expected, actual);
     
     _interpretText(text);
+    
+    text = "while (new Character('a')) { }";
+    stmt = _parseCode(text).get(0);
+    
+    try {
+      stmt.acceptVisitor(_typeChecker);
+      fail("shouldn't allow while statement with character");
+    }
+    catch (ExecutionError e) {
+      //Test Passed
+    }
+
   }
   
   /**
@@ -272,6 +284,17 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
     assertEquals("Should have autounboxed", expected, actual);
     
     _interpretText(text);
+    
+    text = "do { } while( 'a' );";
+    stmt = _parseCode(text).get(0);
+    try {
+      stmt.acceptVisitor(_typeChecker);
+      fail("shouldn't accept integer for boolean expression");
+    }
+    catch (ExecutionError e) {
+      //Test Passed
+    }
+    
   }  
   
   /**
@@ -290,6 +313,16 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
     assertEquals("Should have autounboxed", expected, actual);
 
     _interpretText(text);
+    
+    text = "for(; new Integer(5););";
+    stmt = _parseCode(text).get(0);
+    try {
+      stmt.acceptVisitor(_typeChecker);
+      fail("shouldn't accept integer for boolean expression");
+    }
+    catch (ExecutionError e) {
+      //Test Passed
+    }    
   }
   
   /**
@@ -547,7 +580,20 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
     assertEquals("should yield label statement", expected, actual);
     stmt.acceptVisitor(_typeChecker);
   }
-*/  
+*/
+  
+  public void testSynchronizedStatement() { 
+    String text = "synchronized (Integer.class) { }";
+    SynchronizedStatement stmt = (SynchronizedStatement)_parseCode(text).get(0);
+    
+    String expected = "(koala.dynamicjava.tree.BlockStatement: [])";
+    String actual = stmt.getBody().toString();
+    assertEquals("body of synchronized should be empty", expected, actual);
+    expected = "(koala.dynamicjava.tree.TypeExpression: (koala.dynamicjava.tree.ReferenceType: Integer))";
+    actual = stmt.getLock().toString();
+    assertEquals("should be locking on Class object", expected, actual);
+  }
+  
   public void testIfThenStatement() throws InterpreterException {
     String text = "if (B) { }";
     IfThenStatement stmt = (IfThenStatement) _parseCode(text).get(0);
