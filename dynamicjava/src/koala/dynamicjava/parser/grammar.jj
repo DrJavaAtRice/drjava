@@ -694,7 +694,7 @@ PARSER_END(Parser)
 
 /* COMMENTS */
 
-  MORE :
+  SKIP :
   {
     "//" : IN_SINGLE_LINE_COMMENT
       |
@@ -706,25 +706,25 @@ PARSER_END(Parser)
   }
 
   <IN_SINGLE_LINE_COMMENT>
-  SPECIAL_TOKEN :
+  SKIP :
   {
     <SINGLE_LINE_COMMENT: "\n" | "\r" | "\r\n" > : DEFAULT
   }
 
   <IN_FORMAL_COMMENT>
-  SPECIAL_TOKEN :
+  SKIP :
   {
     <FORMAL_COMMENT: "*/" > : DEFAULT
   }
 
   <IN_MULTI_LINE_COMMENT>
-  SPECIAL_TOKEN :
+  SKIP :
   {
     <MULTI_LINE_COMMENT: "*/" > : DEFAULT
   }
 
   <IN_SINGLE_LINE_COMMENT,IN_FORMAL_COMMENT,IN_MULTI_LINE_COMMENT>
-  MORE :
+  SKIP :
   {
     < ~[] >
   }

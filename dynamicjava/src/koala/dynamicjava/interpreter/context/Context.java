@@ -146,7 +146,7 @@ public interface Context extends SimpleContext {
      * @param methodName the method name
      * @param args the argument list for the method
      */
-    List<IdentifierToken> getQualifiedName(String methodName, Class<?>[] args) throws NoSuchMethodException;
+    String getQualifiedName(String methodName, Class<?>[] args) throws NoSuchMethodException;
     
     /**
      * Returns the fully qualified class name that wraps the given staticly imported field

@@ -568,20 +568,21 @@ public class ImportationManager implements Cloneable {
      * @param methodName the method name
      * @param args the argument list for the method
      */
-  public List<IdentifierToken> getQualifiedName(String methodName, Class[] args) 
+  public String getQualifiedName(String methodName, Class[] args) 
     throws NoSuchMethodException {
     List<IdentifierToken> toReturn = new LinkedList<IdentifierToken>(); 
     Method m = lookupMethod(methodName, args);
-    String toParse = m.getDeclaringClass().getName();
-    if(toParse.startsWith("class "))
-      toParse = toParse.substring(6,toParse.length());
-    int i;
-    while((i=toParse.lastIndexOf(".")) != -1) {
-      toReturn.add(0, new Identifier(toParse.substring(i+1,toParse.length())));
-      toParse = toParse.substring(0,i);
-    }
-    toReturn.add(0, new Identifier(toParse));
-    return toReturn;
+    return m.getDeclaringClass().getName();
+//    String toParse = m.getDeclaringClass().getName();
+//    if(toParse.startsWith("class "))
+//      toParse = toParse.substring(6,toParse.length());
+//    int i;
+//    while((i=toParse.lastIndexOf(".")) != -1) {
+//      toReturn.add(0, new Identifier(toParse.substring(i+1,toParse.length())));
+//      toParse = toParse.substring(0,i);
+//    }
+//    toReturn.add(0, new Identifier(toParse));
+//    return toReturn;
   }
     
   /**

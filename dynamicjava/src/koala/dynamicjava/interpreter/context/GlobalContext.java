@@ -335,7 +335,7 @@ public class GlobalContext extends VariableContext implements Context {
    * @param methodName the method name
    * @param args the argument list for the method
    */
-  public List<IdentifierToken> getQualifiedName(String methodName, Class<?>[] args) throws NoSuchMethodException{
+  public String getQualifiedName(String methodName, Class<?>[] args) throws NoSuchMethodException{
     return importationManager.getQualifiedName(methodName, args);    
   }
   

@@ -589,9 +589,9 @@ public class NameVisitor extends VisitorObject<Node> {
         }
           
         
-        List<IdentifierToken> ids = context.getQualifiedName(node.getMethodName(),params);
+        String representation = context.getQualifiedName(node.getMethodName(),params);
         if (! existsInCurrentScope)
-          o = new ReferenceType(ids);
+          o = new ReferenceType(representation);
       }      
       catch(Exception e){
         //If the class type of one of the parameters can't be found, throws an exception
