@@ -961,6 +961,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
 
     /**
+     * Retrieves the class name for the associated document
+     * reads the name of the first class declaration
+     */
+    public String getClassName() { 
+      return _doc.getClassName();
+    }
+    /**
      * Returns whether this document is currently untitled
      * (indicating whether it has a file yet or not).
      * @return true if the document is untitled and has no file

@@ -858,6 +858,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       _saveChooser.setSelectedFile(selection);
       _saveChooser.setSelectedFile(null);
     }
+    
+    OpenDefinitionsDocument active = _model.getActiveDocument();
+    if (active.isUntitled()) { 
+      _saveChooser.setSelectedFile(new File(active.getClassName()));
+    } 
+
     int rc = _saveChooser.showSaveDialog(this);
     return getChosenFile(_saveChooser, rc);
   }

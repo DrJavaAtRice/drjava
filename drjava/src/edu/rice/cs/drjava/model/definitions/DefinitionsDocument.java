@@ -657,6 +657,20 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   }
 
   /**
+   * Returns true if the given position is inside a paren/brace/etc phrase.
+   * @param pos the position we're looking at
+   * @return true if pos is immediately inside a paren/brace/etc
+   */
+  protected boolean posNotInPhrase(int pos) {
+    int here = _reduced.absOffset();
+    _reduced.move(pos - here);
+    IndentInfo info = _reduced.getIndentInformation();
+    boolean inParenPhrase = info.braceTypeCurrent.equals(IndentInfo.noBrace);
+    _reduced.move(here - pos);
+    return inParenPhrase;
+  }
+
+  /**
    * Returns the indent level of the start of the statement
    * that the cursor is on.  Uses a default set of delimiters.
   * (';', '{', '}')
@@ -1589,6 +1603,124 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       }
 
       return toReturn;
+    }
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
+    }
+    finally {
+      setCurrentLocation(oldLocation);
+    }
+  }
+
+ /**
+   * Gets the name of the class this source file
+   * This attempts to find the first declaration of a class or interface
+   *
+   * @return The name of first class in the file or the empty string
+   */
+  public String getClassName() {
+    // Where we'll build up the package name we find
+    int oldLocation = getCurrentLocation();
+
+    try {
+      setCurrentLocation(0);
+      final int docLength = getLength();
+      final String text = getText(0, docLength);
+      
+      boolean done = false;
+      int index = 0;
+
+      while (!done) {
+        index = text.indexOf("class", index);
+        if (index == -1) {  //not found
+          done = true; break;
+        } else {
+          //found a match, check quality
+          setCurrentLocation(index);
+          if (!_isCommentedOrSpace(index,text)) {
+            done = true;
+            if (!posNotInPhrase(index)) { //in a paren phrase, gone too far
+              index = -1;
+            }
+          } else {
+            index++;  //move past so we can search again
+          }
+        }
+      }
+
+      if (index > -1) {
+        //top level class declaration found
+        index = index + "class".length();
+        
+      } else {
+        //no acceptable match, search for interface
+        done = false;
+        index = 0; 
+
+        //search again for interface
+        while (!done) {
+          index = text.indexOf("interface", index);
+          if (index == -1) {  //not found
+            done = true; break;
+          } else {
+            //found a match, check for quality
+            setCurrentLocation(index);
+            if (!_isCommentedOrSpace(index,text)) {
+              done = true;
+              if (!posNotInPhrase(index)) { //in a paren phrase, gone too far
+                index = -1;
+              }
+            } else { 
+              index++; //move past so we can search again
+            }
+          }
+        }
+
+        if (index > -1) {
+          index = index + "interface".length();
+        } else {
+          //no match
+          return "";
+        }
+      }
+      //if we make it here we have a valid index
+
+      char c;  //tmp char
+      int j;   
+
+      //first find index of first non whitespace
+      done = false;
+      char[] whitespace = {' ', '\t', '\n'};
+      for (int i=index; i < docLength && !done; i++) {
+        c = text.charAt(i);
+
+        done = true;
+        for (j = 0; j < whitespace.length; j++) {
+          if (c == whitespace[j]) {
+            done = false;
+          }
+        }
+        if (done) index = i;
+      }
+
+      int endIndex = docLength; //just in case no whitespace at end of file
+
+      //find index of next delimiter or whitespace
+
+      done = false;
+      char[] delims = {' ', '\t', '\n','{','}','[',']','(',')',';','<','>'};
+      for (int i=index; i < docLength && !done; i++) {
+        c = text.charAt(i);
+
+        for (j = 0; j < delims.length; j++) {
+          if (c == delims[j]) {
+            endIndex = i;
+            done = true; break;
+          }
+        }
+      }
+
+      return text.substring(index,endIndex);
     }
     catch (BadLocationException ble) {
       throw new UnexpectedException(ble);

@@ -64,6 +64,7 @@ public interface OpenDefinitionsDocument {
    */
   public DefinitionsDocument getDocument();
 
+  public String getClassName();
   /**
    * Returns whether this document is currently untitled
    * (indicating whether it has a file yet or not).
