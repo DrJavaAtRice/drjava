@@ -77,6 +77,14 @@ public class GJv6Compiler implements CompilerInterface {
       return super.useSource(source);
     }
 
+    /**
+     * Overrides Log.print, making it a no-op.
+     * This prevents extraneous prints of compiler error messages
+     * to the console.
+     */
+    public void print(String s) {
+    }
+    
     public void warning(int pos, String msg) {
       super.warning(pos, msg);
 

@@ -57,7 +57,6 @@ class InteractionsDocument extends PlainDocument {
   }
 
   public void addClassPath(String path) {
-		System.out.println(path);
     _interpreter.addClassPath(path);
   }
 
@@ -87,7 +86,7 @@ class InteractionsDocument extends PlainDocument {
       throw new InternalError("getting repl text failed");
     }
     catch (Exception e) {
-			System.out.println("\n\nhey!!!!!!\n\n");
+			//System.out.println("\n\nhey!!!!!!\n\n");
       try {
 				if(e.toString().startsWith("java.lang.RuntimeException: Encountered"))
 					{
@@ -100,7 +99,7 @@ class InteractionsDocument extends PlainDocument {
       }
       catch (BadLocationException willNeverHappen) {}
     }
-		System.out.println("\n\neval done!!!!!!\n\n");
+		//System.out.println("\n\neval done!!!!!!\n\n");
 	}
 }
 

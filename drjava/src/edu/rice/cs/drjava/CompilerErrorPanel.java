@@ -366,7 +366,7 @@ public class CompilerErrorPanel extends JPanel {
     private int _errorAtPoint(Point p) {
       int modelPos = viewToModel(p);
 
-      System.err.println("model pos=" + modelPos);
+      //System.err.println("model pos=" + modelPos);
 
       if (modelPos == -1)
         return -1;
@@ -382,7 +382,7 @@ public class CompilerErrorPanel extends JPanel {
         }
       }
 
-      System.err.println("error num=" + errorNum);
+      //System.err.println("error num=" + errorNum);
 
       return errorNum;
     }
@@ -492,7 +492,7 @@ public class CompilerErrorPanel extends JPanel {
         // that encompasses the entire error
         startRect.add(endRect);
 
-        System.err.println("scrll vis: " + startRect);
+        //System.err.println("scrll vis: " + startRect);
 
         scrollRectToVisible(startRect);
       } 

@@ -23,6 +23,9 @@ public class DynamicJavaAdapter implements JavaInterpreter {
 
   public DynamicJavaAdapter() {
     _djInterpreter = new InterpreterExtension();
+
+    // Allow access to private fields/methods from interpreter!
+    _djInterpreter.setAccessible(true);
   }
 
   public Object interpret(String s) {
@@ -51,7 +54,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
 				return JavaInterpreter.NO_RESULT;
     }
     catch (Throwable ie) {
-			System.out.println("\n\ngotinterpreter exception\n\n");
+			//System.out.println("\n\ngotinterpreter exception\n\n");
       throw new RuntimeException(ie.getMessage());
     }
   }

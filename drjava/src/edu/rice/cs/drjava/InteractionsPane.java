@@ -25,13 +25,16 @@ public class InteractionsView extends JTextArea
 	
 	public InteractionsView() {
     super(new InteractionsDocument());
+    setLineWrap(true);
+    setWrapStyleWord(true);
+
     reset();
 
-		//add actions for indent keay
-		Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
+		//add actions for enter key
+		Keymap ourMap = addKeymap("INTERACTIONS_KEYMAP", getKeymap());
 		
 		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
-																 (Action) _evalAction);
+																 _evalAction);
 
 		setKeymap(ourMap);
 

@@ -137,7 +137,9 @@ public class FindReplaceDialog extends JDialog {
 				_fWord = findField.getText();
 				_rWord = replaceField.getText();
 				_message.setText("");
-				System.err.println(e.getActionCommand());
+
+				//System.err.println(e.getActionCommand());
+
 				boolean found = _view.findNextText(_fWord);
 
 				if (found) {
