@@ -157,6 +157,18 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   }
   
   /**
+   * Notifies listeners that the interpreter has changed.
+   * @param inProgress Whether the new interpreter is currently in progress.
+   */
+  protected void _notifyInterpreterChanged(final boolean inProgress) {
+    _notifier.notifyListeners(new EventNotifier.Notifier() {
+      public void notifyListener(GlobalModelListener l) {
+        l.interpreterChanged(inProgress);
+      }
+    });
+  }
+  
+  /**
    * Notifies listeners that the interpreter is resetting.
    */
   protected void _notifyInterpreterResetting() {

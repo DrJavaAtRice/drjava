@@ -198,6 +198,62 @@ public class NewJVMTest extends TestCase {
                    _jvm.exceptionTraceBuf.trim());
     }
   }
+  
+  
+  /**
+   * Ensure that switching to a non-existant interpreter throws an Exception.
+   */
+  public void testSwitchToNonExistantInterpreter() {
+    try {
+      _jvm.setActiveInterpreter("monkey");
+      fail("Should have thrown an exception!");
+    }
+    catch (IllegalArgumentException e) {
+      // good, that's what should happen
+    }
+  }
+  
+  /**
+   * Ensure that MainJVM can correctly switch the active interpreter used by
+   * the interpreter JVM.
+   */
+  public void testSwitchActiveInterpreter() throws InterruptedException {
+    synchronized(_jvm) {
+      _jvm.interpret("x = 6;");
+      _jvm.wait();
+    }
+    _jvm.addDebugInterpreter("monkey");
+    
+    // x should be defined in active interpreter
+    synchronized(_jvm) {
+      _jvm.interpret("x");
+      _jvm.wait();
+      assertEquals("result", "6", _jvm.returnBuf);
+    }
+    
+    // switch interpreter
+    _jvm.setActiveInterpreter("monkey");
+    synchronized(_jvm) {
+      _jvm.interpret("x");
+      _jvm.wait();
+      assertTrue("exception was thrown",
+                 !_jvm.exceptionClassBuf.equals(""));
+    }
+    
+    // define x to 3 and switch back
+    synchronized(_jvm) {
+      _jvm.interpret("x = 3;");
+      _jvm.wait();
+    }
+    _jvm.setDefaultInterpreter();
+    
+    // x should have its old value
+    synchronized(_jvm) {
+      _jvm.interpret("x");
+      _jvm.wait();
+      assertEquals("result", "6", _jvm.returnBuf);
+    }
+  }
 
   private static class TestJVMExtension extends MainJVM {
     public String outBuf;

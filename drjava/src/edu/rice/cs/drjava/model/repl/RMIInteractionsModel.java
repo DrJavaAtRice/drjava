@@ -102,7 +102,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    * @param name the name of the new interpreter
    */
   public void addDebugInterpreter(String name) {
-    InterpreterJVM.ONLY.addDebugInterpreter(name, new DynamicJavaAdapter());
+    _interpreterControl.addDebugInterpreter(name);
   }
 
   /**
@@ -111,15 +111,25 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    * @param prompt the prompt the interpreter should have.
    */
   public void setActiveInterpreter(String name, String prompt) {
-    InterpreterJVM.ONLY.setActiveInterpreter(name);
+    boolean inProgress = _interpreterControl.setActiveInterpreter(name);
     _document.setPrompt(prompt);
+    _notifyInterpreterChanged(inProgress);
   }
 
   /**
    * Sets the default interpreter to be the current one.
    */
   public void setDefaultInterpreter() {
-    InterpreterJVM.ONLY.setDefaultInterpreter();
+    boolean inProgress = _interpreterControl.setDefaultInterpreter();
     _document.setPrompt(_document.DEFAULT_PROMPT);
+    _notifyInterpreterChanged(inProgress);
   }
+  
+  /**
+   * Notifies listeners that the interpreter has changed.
+   * (Subclasses must maintain listeners.)
+   * @param inProgress Whether the new interpreter is currently in progress
+   * with an interaction (ie. whether an interactionEnded event will be fired)
+   */
+  protected abstract void _notifyInterpreterChanged(boolean inProgress);
 }

@@ -647,4 +647,27 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
 
   }
   
+  /**
+   * Tests that the appropriate event is fired when the model's interpreter changes.
+   */
+  public void testSwitchInterpreters() {
+    TestListener listener = new TestListener() {
+      public void interpreterChanged(boolean inProgress) {
+        assertTrue("should not be in progress", !inProgress);
+        interpreterChangedCount++;
+      }
+    };
+    _model.addListener(listener);
+    
+    // Create a new debug interpreter
+    ((RMIInteractionsModel)_model.getInteractionsModel()).
+      addDebugInterpreter("testInterpreter");
+    
+    // Set it to be active
+    ((RMIInteractionsModel)_model.getInteractionsModel()).
+      setActiveInterpreter("testInterpreter", "myPrompt>");
+    
+    listener.assertInterpreterChangedCount(1);
+    _model.removeListener(listener);
+  }
 }

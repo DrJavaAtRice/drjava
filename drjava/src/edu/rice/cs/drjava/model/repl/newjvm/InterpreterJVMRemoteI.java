@@ -56,4 +56,22 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   public void runTestSuite(String className, String fileName) throws RemoteException;
   public void setPackageScope(String s) throws RemoteException;
   public void reset() throws RemoteException;
+  
+  /**
+   * Adds a named DynamicJavaAdapter to this interpreter's list of debug 
+   * interpreters
+   * @param name the unique name for the interpreter
+   */
+  public void addDebugInterpreter(String name) throws RemoteException;
+  
+  /**
+   * sets the current interpreter to the one specified by name
+   * @param name the unique name of the interpreter to set active
+   */
+  public boolean setActiveInterpreter(String name) throws RemoteException;
+  
+  /**
+   * Sets the default interpreter to be the current one.
+   */
+  public boolean setDefaultInterpreter() throws RemoteException;
 }

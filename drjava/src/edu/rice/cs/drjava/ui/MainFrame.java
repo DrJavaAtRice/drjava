@@ -2959,6 +2959,47 @@ public class MainFrame extends JFrame implements OptionConstants {
         _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
     }
   }
+
+  /**
+   * Ensures that the interactions pane is not editable during an interaction.
+   */
+  protected void _disableInteractionsPane() {
+    // Only change GUI from event-dispatching thread
+    Runnable doCommand = new Runnable() {
+      public void run() {
+        _interactionsPane.setEditable(false);
+        _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+      }
+    };
+    SwingUtilities.invokeLater(doCommand);
+  }
+  
+  /**
+   * Ensures that the interactions pane is editable after an interaction completes.
+   */
+  protected void _enableInteractionsPane() {
+    // Only change GUI from event-dispatching thread
+    Runnable doCommand = new Runnable() {
+      public void run() {
+        /**
+         if (inDebugMode()) {
+         _disableStepTimer();
+         Debugger manager = _model.getDebugger();
+         manager.clearCurrentStepRequest();
+         _removeThreadLocationHighlight();
+         }
+         */
+        
+        _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+        _interactionsPane.setEditable(true);
+        _interactionsController.moveToEnd();
+        if (_interactionsPane.hasFocus()) {
+          _interactionsPane.getCaret().setVisible(true);
+        }
+      }
+    };
+    SwingUtilities.invokeLater(doCommand);
+  }
   
   /**
    * Blocks access to DrJava while the hourglass cursor is on
@@ -3350,38 +3391,25 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void interactionStarted() {
-      // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
-        public void run() {
-          _interactionsPane.setEditable(false);
-          _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        }
-      };
-      SwingUtilities.invokeLater(doCommand);
+      _disableInteractionsPane();
     }
 
     public void interactionEnded() {
-      // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
-        public void run() {
-          /**
-           if (inDebugMode()) {
-            _disableStepTimer();
-            Debugger manager = _model.getDebugger();
-            manager.clearCurrentStepRequest();
-            _removeThreadLocationHighlight();
-          }
-          */
-          
-          _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-          _interactionsPane.setEditable(true);
-          _interactionsController.moveToEnd();
-          if (_interactionsPane.hasFocus()) {
-            _interactionsPane.getCaret().setVisible(true);
-          }
-        }
-      };
-      SwingUtilities.invokeLater(doCommand);
+      _enableInteractionsPane();
+    }
+    
+    /**
+     * Called when the active interpreter is changed.
+     * @param inProgress Whether the new interpreter is currently in progress
+     * with an interaction (ie. whether an interactionEnded event will be fired)
+     */
+    public void interpreterChanged(boolean inProgress) {
+      if (inProgress) {
+        _disableInteractionsPane();
+      }
+      else {
+        _enableInteractionsPane();
+      }
     }
 
     public void compileStarted() {

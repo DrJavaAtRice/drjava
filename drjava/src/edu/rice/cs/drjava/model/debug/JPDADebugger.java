@@ -726,6 +726,7 @@ public class JPDADebugger implements Debugger {
       _model.printDebugMessage("Breakpoint hit in class " + 
                                breakpoint.getClassName() + "  [line " +
                                breakpoint.getLineNumber() + "]");
+      
       notifyListeners(new EventNotifier() {
         public void notifyListener(DebugListener l) {
           l.breakpointReached(breakpoint);

@@ -112,6 +112,5 @@ public interface InteractionsModelCallback {
    * Called when a new Java interpreter has registered and is ready for use.
    */
   public void interpreterReady();
-  
 
 }

@@ -454,6 +454,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    */
   protected abstract void _notifyInterpreterReady();
   
+  
   /**
    * Assumes a trimmed String. Returns a string of the main call that the
    * interpretor can use.

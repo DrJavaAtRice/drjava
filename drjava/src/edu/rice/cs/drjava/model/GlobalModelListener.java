@@ -158,6 +158,13 @@ public interface GlobalModelListener {
   public void interactionEnded();
   
   /**
+   * Called when the active interpreter is changed.
+   * @param inProgress Whether the new interpreter is currently in progress
+   * with an interaction (ie. whether an interactionEnded event will be fired)
+   */
+  public void interpreterChanged(boolean inProgress);
+  
+  /**
    * Called when the caret position in the interactions pane is changed
    */
   //public void interactionCaretPositionChanged(int pos);

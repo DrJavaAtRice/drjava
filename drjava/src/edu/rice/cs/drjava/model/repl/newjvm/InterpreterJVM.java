@@ -75,18 +75,16 @@ public class InterpreterJVM extends AbstractSlaveJVM
   //public static final String EMPTY_TRACE_TEXT = "  at (the interactions window)";
 
   private MainJVMRemoteI _mainJVM;
-  private JavaInterpreter _interpreter;
-  private Hashtable<String,JavaInterpreter> _debugInterpreters;
-  private JavaInterpreter _activeInterpreter;
+  private InterpreterData _defaultInterpreter;
+  private Hashtable<String,InterpreterData> _debugInterpreters;
+  private InterpreterData _activeInterpreter;
   private String _classpath;
   private JUnitTestManager _junitTestManager;
   
   public static final InterpreterJVM ONLY = new InterpreterJVM();
 
   private InterpreterJVM() {
-    _debugInterpreters = new Hashtable<String,JavaInterpreter>();
     reset();
-    _junitTestManager = new JUnitTestManager(this);
   }
 
   protected void handleStart(MasterRemote mainJVM) {
@@ -137,13 +135,15 @@ public class InterpreterJVM extends AbstractSlaveJVM
   }
 
   //public InterpretResult interpret(final String s) {
-  public void interpret(final String s) {
+  public synchronized void interpret(final String s) {
     Thread thread = new Thread("interpret thread: " + s) {
       public void run() {
         try {
           try {
             _dialog("to interp: " + s);
-            Object result = _activeInterpreter.interpret(s);
+            _activeInterpreter.setInProgress(true);
+            Object result = _activeInterpreter.getInterpreter().interpret(s);
+            _activeInterpreter.setInProgress(false);
             
             if (result == JavaInterpreter.NO_RESULT) {
               //return new VoidResult();
@@ -280,7 +280,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
 
   public void addClassPath(String s) {
     //_dialog("add classpath: " + s);
-    _activeInterpreter.addClassPath(s);
+    _activeInterpreter.getInterpreter().addClassPath(s);
     _classpath += s;
     _classpath += System.getProperty("path.separator");
   }
@@ -290,7 +290,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
   }
 
   public void setPackageScope(String s) {
-    _activeInterpreter.setPackageScope(s);
+    _activeInterpreter.getInterpreter().setPackageScope(s);
   }
   
   /**
@@ -375,14 +375,17 @@ public class InterpreterJVM extends AbstractSlaveJVM
   }
 
   public void reset() {
-    _interpreter = new DynamicJavaAdapter();
-    _activeInterpreter = _interpreter;
+    _defaultInterpreter = new InterpreterData(new DynamicJavaAdapter());
+    _activeInterpreter = _defaultInterpreter;
+    _debugInterpreters = new Hashtable<String,InterpreterData>();
+    _junitTestManager = new JUnitTestManager(this);
+    
     _debugInterpreters.clear();
     _classpath = "";
     
     // do an interpretation to get the interpreter loaded fully
     try {
-      _activeInterpreter.interpret("0");
+      _activeInterpreter.getInterpreter().interpret("0");
     }
     catch (ExceptionReturnedException e) {
       throw new edu.rice.cs.util.UnexpectedException(e);
@@ -390,32 +393,46 @@ public class InterpreterJVM extends AbstractSlaveJVM
   }
   
   /**
-   * adds a named interpreter to this interpreter's list of debug interpreters
+   * Adds a named DynamicJavaAdapter to this interpreter's list of debug 
+   * interpreters
    * @param name the unique name for the interpreter
-   * @param interpreter the JavaInterpreter
    */
-  public void addDebugInterpreter(String name, JavaInterpreter interpreter) {
-    if (_debugInterpreters.containsKey(name)) {
-      throw new IllegalArgumentException("Names for debug interpreters must be unique");
-    }
-    _debugInterpreters.put(name, interpreter);
+  public void addDebugInterpreter(String name) {
+    addDebugInterpreter(name, new DynamicJavaAdapter());
   }
   
   /**
-   * Gets the hashtable containing the debug interpreters
-   * @return said hashtable
+   * Adds a named interpreter to this interpreter's list of debug 
+   * interpreters.  Package private; for tests only.
+   * @param name the unique name for the interpreter
+   * @param interpreter the JavaInterpreter
    */
-  public Hashtable<String,JavaInterpreter> getDebugInterpreters() {
-    return _debugInterpreters;
+  void addDebugInterpreter(String name, JavaInterpreter interpreter) {
+    if (_debugInterpreters.containsKey(name)) {
+      throw new IllegalArgumentException("Names for debug interpreters must be unique");
+    }
+    _debugInterpreters.put(name, new InterpreterData(interpreter));
   }
+  
+   /**
+    * Gets the hashtable containing the debug interpreters.  Package private
+    * for testing purposes.
+    * @return said hashtable
+    */
+   Hashtable<String,InterpreterData> getDebugInterpreters() {
+     return _debugInterpreters;
+   }
 
   /**
    * sets the current interpreter to the one specified by name
    * @param name the unique name of the interpreter to set active
+   * @return Whether the new interpreter is currently in progress
+   * with an interaction (ie. whether an interactionEnded event will be fired)
    */
-  public void setActiveInterpreter(String name) {
+  public boolean setActiveInterpreter(String name) {
     if (_debugInterpreters.containsKey(name)) {
       _activeInterpreter = _debugInterpreters.get(name);
+      return _activeInterpreter.isInProgress();
     }
     else {
       throw new IllegalArgumentException("Interpreter <" + name + "> does not exist.");
@@ -423,13 +440,48 @@ public class InterpreterJVM extends AbstractSlaveJVM
   }
   
   /**
-   * Sets the default interpreter to be the current one.
+   * Sets the default interpreter to be active.
+   * @return Whether the new interpreter is currently in progress
+   * with an interaction (ie. whether an interactionEnded event will be fired)
    */
-  public void setDefaultInterpreter() {
-    _activeInterpreter = _interpreter;
+  public boolean setDefaultInterpreter() {
+    _activeInterpreter = _defaultInterpreter;
+    return _activeInterpreter.isInProgress();
   }
   
-  public JavaInterpreter getActiveInterpreter() {
-    return _activeInterpreter;
+  /**
+   * Package private; for tests only.
+   */
+  JavaInterpreter getActiveInterpreter() {
+    return _activeInterpreter.getInterpreter();
+  }
+}
+
+/**
+ * Bookkeeping class to maintain meta information about each interpreter,
+ * such as whether it is currently in progress.
+ */
+class InterpreterData {
+  protected final JavaInterpreter _interpreter;
+  protected boolean _inProgress;
+  
+  InterpreterData(JavaInterpreter interpreter) {
+    _interpreter = interpreter;
+    _inProgress = false;
+  }
+  
+  /** Gets the interpreter. */
+  public JavaInterpreter getInterpreter() {
+    return _interpreter;
+  }
+  
+  /** Returns whether this interpreter is currently in progress with an interaction. */
+  public boolean isInProgress() {
+    return _inProgress;
+  }
+  
+  /** Sets whether this interpreter is currently in progress. */
+  public void setInProgress(boolean inProgress) {
+    _inProgress = inProgress;
   }
 }

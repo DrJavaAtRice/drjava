@@ -129,7 +129,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
 
   public void interpret(final String s) {
-    // silently fail if diabled. see killInterpreter docs for details.
+    // silently fail if disabled. see killInterpreter docs for details.
     if (! _enabled) return;
 
     ensureInterpreterConnected();
@@ -164,13 +164,14 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 //        _log.log("EXCEPTION in interpretResult: " + t.toString());
 //      }
   }
+  
 
   /**
    * Adds the given path to the Interpreter's class path.
    * @param path Path to be added to classpath
    */
   public void addClassPath(String path) {
-    // silently fail if diabled. see killInterpreter docs for details.
+    // silently fail if disabled. see killInterpreter docs for details.
     if (! _enabled) return;
 
     ensureInterpreterConnected();
@@ -189,7 +190,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * @param packageName Name of the package to enter.
    */
   public void setPackageScope(String packageName) {
-    // silently fail if diabled. see killInterpreter docs for details.
+    // silently fail if disabled. see killInterpreter docs for details.
     if (! _enabled) return;
 
     ensureInterpreterConnected();
@@ -246,7 +247,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * @param fileName Name of the file for the TestCase class
    */
   public void runTestSuite(String className, String fileName) {
-    // silently fail if diabled. see killInterpreter docs for details.
+    // silently fail if disabled. see killInterpreter docs for details.
     if (! _enabled) return;
 
     ensureInterpreterConnected();
@@ -305,6 +306,67 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public void testSuiteEnded(JUnitError[] errors) throws RemoteException {
     _junitModel.testSuiteEnded(errors);
+  }
+  
+  
+  /**
+   * Adds a named DynamicJavaAdapter to this interpreter's list of debug 
+   * interpreters
+   * @param name the unique name for the interpreter
+   */
+  public void addDebugInterpreter(String name) {
+    // silently fail if disabled. see killInterpreter docs for details.
+    if (! _enabled) return;
+
+    ensureInterpreterConnected();
+    
+    try {
+      _interpreterJVM().addDebugInterpreter(name);
+    }
+    catch (RemoteException re) {
+      _threwException(re);
+    }
+  }
+
+  /**
+   * sets the current interpreter to the one specified by name
+   * @param name the unique name of the interpreter to set active
+   * @return Whether the new interpreter is currently in progress
+   * with an interaction (ie. whether an interactionEnded event will be fired)
+   */
+  public boolean setActiveInterpreter(String name) {
+    // silently fail if disabled. see killInterpreter docs for details.
+    if (! _enabled) return false;
+
+    ensureInterpreterConnected();
+    
+    try {
+      return _interpreterJVM().setActiveInterpreter(name);
+    }
+    catch (RemoteException re) {
+      _threwException(re);
+      return false;
+    }
+  }
+  
+  /**
+   * Sets the default interpreter to be the current one.
+   * @return Whether the new interpreter is currently in progress
+   * with an interaction (ie. whether an interactionEnded event will be fired)
+   */
+  public boolean setDefaultInterpreter() {
+    // silently fail if disabled. see killInterpreter docs for details.
+    if (! _enabled) return false;
+
+    ensureInterpreterConnected();
+    
+    try {
+      return _interpreterJVM().setDefaultInterpreter();
+    }
+    catch (RemoteException re) {
+      _threwException(re);
+      return false;
+    }
   }
 
   /**
@@ -445,6 +507,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
     return port;
   }
+  
   
   /**
    * Return whether to allow assertions in the InterpreterJVM.

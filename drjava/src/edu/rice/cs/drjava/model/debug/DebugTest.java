@@ -119,24 +119,29 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     "}";
   
   protected static final String MONKEY_CLASS = 
-    "class Monkey {\n" +  
-    "  public static void main(String[] args) {\n" +
-    "    Thread t = new Thread(){\n" +
-    "      public void run(){\n" +
-    "        System.out.println(\"I\'m a thread! Yeah!\");\n" +
-    "      }\n" +
-    "    };\n" +
-    "\n" +
-    "    try{\n" +
-    "      t.start();\n" +
-    "      System.out.println(\"I just woke up.  I\'m a big boy now.\");\n" +
-    "      System.out.println(\"James likes bananas!\");\n" +
-    "      System.out.println(\"Yes they do.\");\n" +
-    "    }catch(Exception e){\n" +
-    "      e.printStackTrace();\n" +
-    "    }\n" +
-    "  }\n" +
-    "}\n";
+/* 1 */    "class Monkey {\n" +  
+/* 2 */    "  public static void main(String[] args) {\n" +
+/* 3 */    "\n" +
+/* 4 */    "    Thread t = new Thread(){\n" +
+/* 5 */    "      public void run(){\n" +
+/* 6 */    "       try{\n" +
+/* 7 */    "         Thread.sleep(1000);\n" +
+/* 8 */    "       }\n" +
+/* 9 */    "       catch(InterruptedException e){\n" +
+/* 10 */    "      }\n" +
+/* 11 */    "      System.out.println(\"I\'m a thread! Yeah!\");\n" +
+/* 12 */    "      }\n" +
+/* 13 */    "    };\n" +
+/* 14 */    "    try{\n" +
+/* 15 */    "      t.start();\n" +
+/* 16 */    "      System.out.println(\"I just woke up.  I\'m a big boy now.\");\n" +
+/* 17 */    "      System.out.println(\"James likes bananas!\");\n" +
+/* 18 */    "      System.out.println(\"Yes they do.\");\n" +
+/* 19 */    "    }catch(Exception e){\n" +
+/* 20 */    "      e.printStackTrace();\n" +
+/* 21 */    "    }\n" +
+/* 22 */    "  }\n" +
+/* 23 */    "}\n";
   
   protected JPDADebugger _debugger;
   
@@ -306,9 +311,9 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     assertTrue("Debug Manager should be ready", _debugger.isReady());
         
     int index = MONKEY_CLASS.indexOf("System.out.println(\"I\'m a thread! Yeah!\");");
-    _debugger.toggleBreakpoint(doc,index,5);
-    index = MONKEY_CLASS.indexOf("System.out.println(\"I just woke up.  I\'m a big boy now.\");");
     _debugger.toggleBreakpoint(doc,index,11);
+    index = MONKEY_CLASS.indexOf("System.out.println(\"I just woke up.  I\'m a big boy now.\");");
+    _debugger.toggleBreakpoint(doc,index,16);
     debugListener.assertBreakpointSetCount(2);
         
      // Run the main() method, hitting breakpoints
@@ -350,15 +355,25 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     DebugThreadData thread3 = new DebugThreadData(_debugger.getCurrentThread());
     assertTrue("testMultiThreadedBreakPoint thread references were not equal ", thread2.getName().equals(thread3.getName()));
-    
+     _debugger.addListener(debugListener);
+    // Resume until finished, waiting for interpret call to end
+     InterpretListener interpretListener = new InterpretListener();
+     _model.addListener(interpretListener);
+     synchronized(_notifierLock) {
+       _debugger.resume();
+       _waitForNotifies(2);  // interactionEnded, currThreadDied
+       _notifierLock.wait();
+     }
+     interpretListener.assertInteractionEndCount(1);
+     _model.removeListener(interpretListener);
+     
     // Close doc and make sure breakpoints are removed
     _model.closeFile(doc);
 
-    _debugger.addListener(debugListener);
     // Shutdown the debugger
     if (printMessages) System.out.println("Shutting down...");
     synchronized(_notifierLock) {
-      _model.resetInteractions();
+      _debugger.shutdown();
       _waitForNotifies(1);  // shutdown
       _notifierLock.wait();
     }

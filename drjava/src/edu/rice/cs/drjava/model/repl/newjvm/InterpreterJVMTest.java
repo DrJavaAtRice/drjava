@@ -48,7 +48,7 @@ import gj.util.Hashtable;
  */
 public class InterpreterJVMTest extends TestCase {
   private InterpreterJVM jvm = InterpreterJVM.ONLY;
-  private Hashtable<String,JavaInterpreter> _debugInterpreters;
+  private Hashtable<String,InterpreterData> _debugInterpreters;
   private JavaInterpreter _interpreter1;
   private JavaInterpreter _interpreter2;
   private JavaInterpreter _interpreter3;
@@ -69,21 +69,20 @@ public class InterpreterJVMTest extends TestCase {
   public void testAddNamedDebugInterpreter() {
     assertTrue(_debugInterpreters.isEmpty());
     _addInterpreter("interpreter1", _interpreter1);
-    assertEquals(_interpreter1, _debugInterpreters.get("interpreter1"));
+    assertSame(_interpreter1, _debugInterpreters.get("interpreter1").getInterpreter());
     assertTrue(!_debugInterpreters.containsKey("interpreter2"));
     
     _addInterpreter("interpreter2", _interpreter2);
-    assertEquals(_interpreter1, _debugInterpreters.get("interpreter1"));
-    assertEquals(_interpreter2, _debugInterpreters.get("interpreter2"));
+    assertSame(_interpreter1, _debugInterpreters.get("interpreter1").getInterpreter());
+    assertSame(_interpreter2, _debugInterpreters.get("interpreter2").getInterpreter());
     
     try {
       _addInterpreter("interpreter1", _interpreter3);
       fail();
     }
     catch (IllegalArgumentException ex) {
-      assertEquals(_interpreter1, _debugInterpreters.get("interpreter1"));
-      assertEquals(_interpreter2, _debugInterpreters.get("interpreter2"));
-      assertTrue(!_debugInterpreters.contains(_interpreter3));
+      assertSame(_interpreter1, _debugInterpreters.get("interpreter1").getInterpreter());
+      assertSame(_interpreter2, _debugInterpreters.get("interpreter2").getInterpreter());
     }
   }
   
