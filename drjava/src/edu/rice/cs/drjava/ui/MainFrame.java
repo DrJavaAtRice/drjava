@@ -64,6 +64,7 @@ import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.debug.DebugManager;
 import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.drjava.model.debug.DebugListener;
@@ -1139,13 +1140,18 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     // Fill in class name
     //if (active.isUntitled()) {
-    String className = active.getClassName();
-    if (!className.equals("")) {
-      jfc.setSelectedFile(new File(jfc.getCurrentDirectory(), className));
+    try {
+      String className = active.getFirstTopLevelClassName();
+      if (!className.equals("")) {
+        jfc.setSelectedFile(new File(jfc.getCurrentDirectory(), className));
+      }
     }
-    //}
-    int rc = jfc.showSaveDialog(this);//_saveChooser.showSaveDialog(this);
-    return getChosenFile(jfc, rc);//_saveChooser, rc);
+    catch (ClassNameNotFoundException e) {
+      // Don't set selected file
+    }
+
+    int rc = jfc.showSaveDialog(this);
+    return getChosenFile(jfc, rc);
   }
 
   /**

@@ -276,9 +276,27 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * Gets the package and class name of this OpenDefinitionsDocument
    * @return the qualified class name
    */
-  public String getQualifiedClassName() {
+  public String getQualifiedClassName() throws ClassNameNotFoundException {
+    return _getPackageQualifier() + getFirstTopLevelClassName();
+  }
+  
+  /**
+   * Gets fully qualified class name of the top level class enclosing
+   * the given position.
+   */
+  public String getQualifiedClassName(int pos) 
+    throws ClassNameNotFoundException 
+  {
+    return _getPackageQualifier() + getEnclosingTopLevelClassName(pos);
+  }
+  
+  /**
+   * Gets an appropriate prefix to fully qualify a class name.
+   * Returns this class's package followed by a dot, or the empty
+   * string if no package name is found.
+   */
+  protected String _getPackageQualifier() {
     String packageName = "";
-    String className = "";
     try {
       packageName = this.getPackageName();
     }
@@ -286,10 +304,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       // Couldn't find package, pretend there's none
     }
     if ((packageName != null) && (!packageName.equals(""))) {
-      className = packageName + ".";
+      packageName = packageName + ".";
     }
-    className += this.getClassName();
-    return className;
+    return packageName;
   }
   
   public void setClassFileInSync(boolean inSync) {
@@ -1797,26 +1814,90 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     getReduced().resetLocation();
   }
   
- /**
-   * Gets the name of the class this source file
-   * This attempts to find the first declaration of a class or interface
-   *
-   * @return The name of first class in the file or the empty string
+  /**
+   * Returns the name of the class or interface enclosing the caret position
+   * at the top level.
+   * @return Name of enclosing class or interface
+   * @throws ClassNameNotFoundException if no enclosing class found
    */
-  public String getClassName() {
+  public synchronized String getEnclosingTopLevelClassName(int pos) throws
+    ClassNameNotFoundException
+  {
+    int oldLocation = getCurrentLocation();
+    
+    try {
+      setCurrentLocation(pos);
+      
+      IndentInfo info = _reduced.getIndentInformation();
+      
+      // Find top level open brace
+      int topLevelBracePos = -1;
+      String braceType = info.braceTypeCurrent;
+      while (!braceType.equals(IndentInfo.noBrace)) {
+        if (braceType.equals(IndentInfo.openSquiggly)) {
+          topLevelBracePos = getCurrentLocation() - info.distToBraceCurrent;
+        }
+        move(-info.distToBraceCurrent);
+        info = _reduced.getIndentInformation();
+        braceType = info.braceTypeCurrent;
+      }
+      if (topLevelBracePos == -1) {
+        // No top level brace was found, so we can't find a top level class name
+        setCurrentLocation(oldLocation);
+        throw new ClassNameNotFoundException("no top level brace found");
+      }
+      
+      char[] delims = {'{', '}', ';'};
+      int prevDelimPos = findPrevDelimiter(topLevelBracePos, delims);
+      if (prevDelimPos == ERROR_INDEX) {
+        // Search from start of doc
+        prevDelimPos = DOCSTART;
+      }
+      else {
+        prevDelimPos++;
+      }
+      setCurrentLocation(oldLocation);
+      
+      // Parse out the class name
+      return getNextTopLevelClassName(prevDelimPos, topLevelBracePos);      
+    }
+    catch (BadLocationException ble) {
+      // All positions here should be legal
+      throw new UnexpectedException(ble);
+    }
+    finally {
+      setCurrentLocation(oldLocation);
+    }
+  }
+  
+  /**
+   * Gets the name of the top level class in this source file.
+   * This attempts to find the first declaration of a class or interface.
+   *
+   * @return The name of first class in the file
+   * @throws ClassNameNotFoundException if no top level class found
+   */
+  public String getFirstTopLevelClassName() throws ClassNameNotFoundException {
+    return getNextTopLevelClassName(0, getLength());
+  }
+  
+  // note: need to update this to work with pos
+  public String getNextTopLevelClassName(int startPos, int endPos)
+    throws ClassNameNotFoundException 
+  {
     // Where we'll build up the package name we find
     int oldLocation = getCurrentLocation();
 
     try {
-      setCurrentLocation(0);
-      final int docLength = getLength();
-      final String text = getText(0, docLength);
+      setCurrentLocation(startPos);
+      final int textLength = endPos - startPos;
+      final String text = getText(startPos, textLength);
       
       boolean done = false;
       int index = 0;
 
-      int indexOfClass = _findKeywordAtToplevel("class", text);
-      int indexOfInterface = _findKeywordAtToplevel("interface", text);
+      int indexOfClass = _findKeywordAtToplevel("class", text, startPos);
+      int indexOfInterface = _findKeywordAtToplevel("interface", text, startPos);
       
       if ( indexOfClass > -1 ) {
         
@@ -1838,22 +1919,24 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
         }
         else { 
           // neither index was valid
-          return "";
+          throw new ClassNameNotFoundException("No top level class name found");
         }
       }
       
       //if we make it here we have a valid index
-
-      //first find index of first non whitespace
-      index = getFirstNonWSCharPos(index);
-      if (index == -1) return "";
       
-      int endIndex = docLength; //just in case no whitespace at end of file
+      //first find index of first non whitespace (from the index in document)
+      index = getFirstNonWSCharPos(startPos + index) - startPos;
+      if (index == -1) {
+        throw new ClassNameNotFoundException("No top level class name found");
+      }
+      
+      int endIndex = textLength; //just in case no whitespace at end of file
 
       //find index of next delimiter or whitespace
       char c;
       done = false;
-      for (int i=index; i < docLength && !done; i++) {
+      for (int i=index; i < textLength && !done; i++) {
         c = text.charAt(i);
         if (!Character.isJavaIdentifierPart(c)) {
           endIndex = i;
@@ -1873,13 +1956,17 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   }
 
   /**
-   * Finds the first occurrence of the keyword within the document that is not
+   * Finds the first occurrence of the keyword within the text that is not
    *  enclosed within a brace or comment
    * @param keyword the keyword for which to search
-   * @param 
+   * @param text in which to search
+   * @param textOffset Offset at which the text occurs in the document
    */
-  private synchronized int _findKeywordAtToplevel( String keyword, String text) {
-   
+  private synchronized int _findKeywordAtToplevel(String keyword,
+                                                  String text,
+                                                  int textOffset) {
+    int oldLocation = getCurrentLocation();
+    
     int index = 0;
     boolean done = false;
     
@@ -1889,7 +1976,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
         done = true; break;
       } else {
         //found a match, check quality
-        setCurrentLocation(index);
+        setCurrentLocation(textOffset + index);
           
         // check that the keyword is not in a comment and is followed by whitespace
         ReducedToken rt = _reduced.currentToken();
@@ -1904,9 +1991,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
           index++;  //move past so we can search again
         }
       }
-    } 
+    }
+    setCurrentLocation(oldLocation);
     return index;
-    
   }
   
   private class CommandUndoableEdit extends AbstractUndoableEdit {

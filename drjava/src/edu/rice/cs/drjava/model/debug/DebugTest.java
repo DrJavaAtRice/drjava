@@ -76,8 +76,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   private Boolean _userStepInterpreter;
   private Boolean _userStepDrJava;
   protected static final String DEBUG_CLASS = 
-    /*  1 */ "class DrJavaDebugClass {\n" + //19
-    /*  2 */ "  public void foo() {\n" +//43
+    /*  1 */ "class DrJavaDebugClass {\n" +
+    /*  2 */ "  public void foo() {\n" +
     /*  3 */ "    System.out.println(\"Foo Line 1\");\n" +
     /*  4 */ "    bar();\n" +
     /*  5 */ "    System.out.println(\"Foo Line 3\");\n" +
@@ -86,7 +86,13 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     /*  8 */ "    System.out.println(\"Bar Line 1\");\n" +
     /*  9 */ "    System.out.println(\"Bar Line 2\");\n" + 
     /* 10 */ "  }\n" +
-    /* 11 */ "}";
+    /* 11 */ "}\n" +
+    /* 12 */ "class DrJavaDebugClass2 {\n" +
+    /* 13 */ "  public void baz() {\n" +
+    /* 14 */ "    System.out.println(\"Baz Line 1\");\n" +
+    /* 15 */ "    new DrJavaDebugClass().bar();\n" +
+    /* 16 */ "  }\n" +
+    /* 17 */ "}";
   
   protected DebugManager _debugManager;
   
@@ -112,8 +118,9 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     assertTrue("Debug Manager should not be null", _debugManager != null);
   }
   
-  public void tearDown() throws IOException{
+  public void tearDown() throws IOException {
     super.tearDown();
+    _debugManager = _model.getDebugManager();
     assertTrue("Debug Manager should not be null", _debugManager != null);
   }
   
@@ -128,7 +135,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
    * 
    * @param n The number of times to be "notified" through _notifyObject
    */
-  private void _waitForNotifies(int n)
+  protected void _waitForNotifies(int n)
     throws InterruptedException
   {
     synchronized(_notifierLock) {
@@ -141,7 +148,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
    * Notifies the given object if the notify count has expired.
    * See _waitForNotifies
    */
-  private void _notifyObject(Object o) {
+  protected void _notifyObject(Object o) {
     synchronized(_notifierLock) {
       if (printMessages) System.out.println("notified");
       _pendingNotifies--;
@@ -150,95 +157,396 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
         o.notify();
       }
       if(_pendingNotifies < 0){
-        if (printMessages) System.out.println("Notified too many times!");
         fail("Notified too many times");
       }
     }
   }
   
   /**
-   * tests debug classpath config option
+   * Compiles a new file with the given text.
+   */
+  protected OpenDefinitionsDocument _doCompile(String text, File file)
+    throws IOException, BadLocationException, InterruptedException
+  {
+    OpenDefinitionsDocument doc = setupDocument(text);
+    doc.saveFile(new FileSelector(file));
+
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
+    _model.addListener(listener);
+    synchronized(listener) {
+      doc.startCompile();
+      int numErrors = _model.getNumErrors();
+      if (_model.getNumErrors() > 0) {
+        fail("compile failed: " + doc.getCompilerErrorModel());
+      }
+      listener.wait();
+    }
+    listener.checkCompileOccurred();
+    _model.removeListener(listener);
+    return doc;
+  }
+  
+  /**
+   * Asserts that the given string exists in the Interactions Document.
+   */
+  protected void assertInteractionsContains(String text) throws BadLocationException{
+    _assertInteractionContainsHelper(text, true);
+  }
+  
+  /**
+   * Asserts that the given string does not exist in the Interactions Document.
+   */
+  protected void assertInteractionsDoesNotContain(String text)
+    throws BadLocationException{
+    _assertInteractionContainsHelper(text, false);
+  }
+  
+  private void _assertInteractionContainsHelper(String text, boolean shouldContain)
+    throws BadLocationException {
+    
+    String interactText = getInteractionsText();
+    int contains = interactText.lastIndexOf(text);
+    assertTrue("Interactions document should " +
+               (shouldContain ? "" : "not ")
+                 + "contain: "
+                 +text,
+               (contains != -1) == shouldContain);    
+  }
+  
+  /**
+   * Returns the current contents of the interactions document
+   */
+  protected String getInteractionsText() throws BadLocationException {
+    Document doc = _model.getInteractionsDocument();
+    return doc.getText(0, doc.getLength());
+  }
+
+  
+  
+  /**
+   * Tests that breakpoints behave correctly.
+   */
+  public synchronized void testBreakpoints() 
+    throws DebugException, BadLocationException, IOException, InterruptedException
+  {
+    if (printMessages) System.out.println("----testBreakpoints----");
+    BreakpointTestListener debugListener = new BreakpointTestListener();
+    
+    // Compile the class
+    OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS, tempFile());
+    _debugManager.addListener(debugListener);
+    // Start debugger and add breakpoint (before class is loaded)
+    synchronized(_notifierLock) {
+      _debugManager.startup();
+      _waitForNotifies(1);
+      _notifierLock.wait();
+    }
+   
+    _debugManager.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
+    debugListener.assertBreakpointSetCount(1);
+    
+    // Run the foo() method, hitting breakpoint
+    synchronized(_notifierLock) {
+      interpretIgnoreResult("new DrJavaDebugClass().foo()");
+      _waitForNotifies(3);  // suspended, updated, breakpointReached
+      _notifierLock.wait();
+    }
+    
+    if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
+      
+    // Ensure breakpoint is hit
+    debugListener.assertBreakpointReachedCount(1);  //fires
+    debugListener.assertThreadLocationUpdatedCount(1);  //fires
+    debugListener.assertCurrThreadSuspendedCount(1);  //fires
+    debugListener.assertCurrThreadResumedCount(0);
+    debugListener.assertCurrThreadDiedCount(0);
+    assertInteractionsContains("Foo Line 1");
+    assertInteractionsDoesNotContain("Bar Line 1");
+    
+    if (printMessages) System.out.println("adding another breakpoint");
+    
+    // Set another breakpoint (after is class loaded)
+    _debugManager.toggleBreakpoint(doc,
+       DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), 9);
+    debugListener.assertBreakpointSetCount(2);
+    
+    
+    // Resume until next breakpoint
+    synchronized(_notifierLock) {
+      if (printMessages) System.out.println("resuming");
+      _debugManager.resume();
+      _waitForNotifies(3);  // suspended, updated, breakpointReached
+      _notifierLock.wait();
+    }
+    if (printMessages) System.out.println("----After one resume:\n" + getInteractionsText());
+    debugListener.assertCurrThreadResumedCount(1);  //fires (no waiting)
+    debugListener.assertBreakpointReachedCount(2);  //fires
+    debugListener.assertThreadLocationUpdatedCount(2);  //fires
+    debugListener.assertCurrThreadSuspendedCount(2);  //fires
+    debugListener.assertCurrThreadDiedCount(0);
+    assertInteractionsContains("Bar Line 1");
+    assertInteractionsDoesNotContain("Bar Line 2");
+    
+    // Resume until finished
+    synchronized(_notifierLock) {
+      _debugManager.resume();
+      _waitForNotifies(1);  // threadDied
+      _notifierLock.wait();
+    }
+    if (printMessages) System.out.println("----After second resume:\n" + getInteractionsText());
+    debugListener.assertCurrThreadResumedCount(2);  //fires (no waiting)
+    debugListener.assertCurrThreadDiedCount(1);  //fires
+    debugListener.assertBreakpointReachedCount(2);
+    debugListener.assertThreadLocationUpdatedCount(2);
+    debugListener.assertCurrThreadSuspendedCount(2);
+    assertInteractionsContains("Foo Line 3");
+    
+    // Close doc and make sure breakpoints are removed
+    _model.closeFile(doc);
+    debugListener.assertBreakpointRemovedCount(2);  //fires twice (no waiting)
+      
+    // Remove listener at end
+    if (printMessages) System.out.println("Shutting down...");
+    synchronized(_notifierLock) {
+      _debugManager.shutdown();
+      _waitForNotifies(1);  // shutdown
+      _notifierLock.wait();
+    }
+    debugListener.assertDebuggerShutdownCount(1);  //fires
+    if (printMessages) System.out.println("Shut down.");
+    _debugManager.removeListener(debugListener);
+  }
+  
+  /**
+   * Tests that breakpoints and steps behave correctly.
+   */
+  public void testStepInto() 
+    throws DebugException, BadLocationException, IOException, InterruptedException
+  {
+    if (printMessages) System.out.println("----testStepInto----");
+    StepTestListener debugListener = new StepTestListener();
+    
+    // Compile the class
+    OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS, tempFile());
+   
+    _debugManager.addListener(debugListener); 
+    // Start debugger
+    synchronized(_notifierLock) {
+      _debugManager.startup();
+      _waitForNotifies(1);  // startup
+      _notifierLock.wait();
+    }
+    debugListener.assertDebuggerStartedCount(1);
+    
+    // Add a breakpoint
+    _debugManager.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
+    debugListener.assertBreakpointSetCount(1);
+    
+    // Run the foo() method, hitting breakpoint
+    synchronized(_notifierLock) {
+      interpretIgnoreResult("new DrJavaDebugClass().foo()");
+      _waitForNotifies(3);  // suspended, updated, breakpointReached
+      _notifierLock.wait();
+    }
+    
+    if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
+      
+    // Ensure breakpoint is hit
+    debugListener.assertBreakpointReachedCount(1);  //fires
+    debugListener.assertThreadLocationUpdatedCount(1);  //fires
+    debugListener.assertCurrThreadSuspendedCount(1);  //fires
+    debugListener.assertCurrThreadResumedCount(0);
+    debugListener.assertCurrThreadDiedCount(0);
+    assertInteractionsContains("Foo Line 1");
+    assertInteractionsDoesNotContain("Bar Line 1");
+
+    // Step into bar() method
+    synchronized(_notifierLock){
+      _debugManager.step(DebugManager.STEP_INTO);
+      _waitForNotifies(1);  // suspended
+      _notifierLock.wait();
+    }
+    debugListener.assertStepRequestedCount(1);  // fires (don't wait)
+    debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
+    //NOTE: LocationUpdatedCount is still 1 because the manager could not find the
+    //file on the sourcepath so the count was not updated.
+    debugListener.assertThreadLocationUpdatedCount(1);
+    debugListener.assertCurrThreadSuspendedCount(2);  //fires
+    debugListener.assertBreakpointReachedCount(1);
+    debugListener.assertCurrThreadDiedCount(0);
+    assertInteractionsDoesNotContain("Bar Line 1");
+    
+    // Step to next line
+    synchronized(_notifierLock){
+      _debugManager.step(DebugManager.STEP_OVER);
+      _waitForNotifies(1);  // suspended
+      _notifierLock.wait();
+    }
+    
+    if (printMessages) System.out.println("****"+getInteractionsText());
+    debugListener.assertStepRequestedCount(2);  // fires (don't wait)
+    debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
+    debugListener.assertThreadLocationUpdatedCount(1);  
+    debugListener.assertCurrThreadDiedCount(0);
+    debugListener.assertCurrThreadSuspendedCount(3);  //fires
+    debugListener.assertBreakpointReachedCount(1);
+    assertInteractionsContains("Bar Line 1");
+    assertInteractionsDoesNotContain("Bar Line 2");
+    
+    // Step to next line
+    synchronized(_notifierLock){
+      _debugManager.step(DebugManager.STEP_OVER);
+      _waitForNotifies(1);  // suspended
+      _notifierLock.wait();
+    }
+    debugListener.assertStepRequestedCount(3);  // fires (don't wait)
+    debugListener.assertCurrThreadResumedCount(3); // fires (don't wait)
+    debugListener.assertThreadLocationUpdatedCount(1);
+    debugListener.assertCurrThreadDiedCount(0);
+    debugListener.assertCurrThreadSuspendedCount(4);  //fires
+    debugListener.assertBreakpointReachedCount(1);        
+    assertInteractionsContains("Bar Line 2");
+    assertInteractionsDoesNotContain("Foo Line 3");
+    
+    // Step twice to print last line in Foo
+    synchronized(_notifierLock){
+      _debugManager.step(DebugManager.STEP_OVER);
+      _waitForNotifies(1);  // suspended
+      _notifierLock.wait();
+    }
+    synchronized(_notifierLock){
+      _debugManager.step(DebugManager.STEP_OVER);
+      _waitForNotifies(1);  // suspended
+      _notifierLock.wait();
+    }
+    debugListener.assertStepRequestedCount(5);  // fires (don't wait)
+    debugListener.assertCurrThreadResumedCount(5); // fires (don't wait)
+    debugListener.assertThreadLocationUpdatedCount(1);
+    debugListener.assertCurrThreadDiedCount(0);
+    debugListener.assertCurrThreadSuspendedCount(6);  //fires
+    debugListener.assertBreakpointReachedCount(1);      
+    assertInteractionsContains("Foo Line 3");
+    
+    
+    // Step again to finish
+    synchronized(_notifierLock){
+      _debugManager.step(DebugManager.STEP_OVER);
+      _waitForNotifies(1);  // threadDied
+      _notifierLock.wait();
+    }
+    debugListener.assertStepRequestedCount(6);  // fires (don't wait)
+    debugListener.assertCurrThreadDiedCount(1);
+
+      // Remove listener at end
+    if (printMessages) System.out.println("Shutting down...");
+    synchronized(_notifierLock) {
+      _debugManager.shutdown();
+      _waitForNotifies(1);  // shutdown
+      _notifierLock.wait();
+    }
+    debugListener.assertBreakpointRemovedCount(1);  //fires once (no waiting)
+    debugListener.assertDebuggerShutdownCount(1);  //fires
+    if (printMessages) System.out.println("Shut down.");
+    _debugManager.removeListener(debugListener);
+  }
+  
+  /**
+   * Tests that stepping out of a method behaves correctly.
+   */
+  public void testStepOut() 
+    throws DebugException, BadLocationException, IOException, InterruptedException
+  {
+    if (printMessages)  System.out.println("----testStepOut----");
+    StepTestListener debugListener = new StepTestListener();
+    
+    // Compile the class
+    File file2 = new File(_tempDir, "DrJavaDebugClass.java");
+    OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS, file2);
+    _debugManager.addListener(debugListener); 
+    // Start debugger and add breakpoint
+    synchronized(_notifierLock) {
+      _debugManager.startup();
+      _waitForNotifies(1);  // startup
+      _notifierLock.wait();
+    }
+    
+    debugListener.assertDebuggerStartedCount(1);
+    
+    _debugManager.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
+    debugListener.assertBreakpointSetCount(1);
+    
+    // Run the foo() method, hitting breakpoint
+    synchronized(_notifierLock) {
+      interpretIgnoreResult("new DrJavaDebugClass().foo()");
+      _waitForNotifies(3);  // suspended, updated, breakpointReached
+      _notifierLock.wait();
+    }
+    
+    if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
+      
+    // Ensure breakpoint is hit
+    debugListener.assertBreakpointReachedCount(1);  // fires
+    debugListener.assertThreadLocationUpdatedCount(1);  // fires
+    debugListener.assertCurrThreadSuspendedCount(1);  // fires
+    debugListener.assertCurrThreadResumedCount(0);
+    debugListener.assertCurrThreadDiedCount(0);
+    assertInteractionsContains("Foo Line 1");
+    assertInteractionsDoesNotContain("Bar Line 1");
+
+    // Step into bar() method
+    synchronized(_notifierLock){
+      _debugManager.step(DebugManager.STEP_INTO);
+      _waitForNotifies(2);  // suspended, updated
+      _notifierLock.wait();
+    }
+    debugListener.assertStepRequestedCount(1);  // fires (don't wait)
+    debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
+    debugListener.assertThreadLocationUpdatedCount(2);  //fires
+    debugListener.assertCurrThreadSuspendedCount(2);  //fires
+    debugListener.assertBreakpointReachedCount(1);
+    debugListener.assertCurrThreadDiedCount(0);
+    assertInteractionsDoesNotContain("Bar Line 1");
+    
+    // Step out of method
+    synchronized(_notifierLock){
+      _debugManager.step(DebugManager.STEP_OUT);
+      _waitForNotifies(2);  // suspended, updated
+      _notifierLock.wait();
+    }
+    
+    if (printMessages) System.out.println("****"+getInteractionsText());
+    debugListener.assertStepRequestedCount(2);  // fires (don't wait)
+    debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
+    debugListener.assertThreadLocationUpdatedCount(3);  // fires
+    debugListener.assertCurrThreadDiedCount(0);
+    debugListener.assertCurrThreadSuspendedCount(3);  //fires
+    debugListener.assertBreakpointReachedCount(1);
+    assertInteractionsContains("Bar Line 2");
+    assertInteractionsDoesNotContain("Foo Line 3");
+    
+    //Remove listener at end
+    if (printMessages) System.out.println("Shutting down...");
+    synchronized(_notifierLock) {
+      _debugManager.shutdown();
+      _waitForNotifies(2);  // threadDied, shutdown
+      _notifierLock.wait();
+    }
+    debugListener.assertCurrThreadDiedCount(1);  // fires
+    debugListener.assertBreakpointRemovedCount(1);  // fires (don't wait)
+    debugListener.assertDebuggerShutdownCount(1);  // fires
+    if (printMessages) System.out.println("Shut down.");
+    _debugManager.removeListener(debugListener);
+  }
+  
+  /**
+   * Tests that the sourcepath config option properly adds files to the
+   * search directories.
    */
   public void testDebugSourcepath() 
     throws DebugException, BadLocationException, IOException, InterruptedException
   {
     if (printMessages)  System.out.println("----testDebugSourcePath----");
-    DebugTestListener debugListener = new DebugTestListener() {
-      public void breakpointSet(Breakpoint bp) {
-        breakpointSetCount++;
-      }
-      public void breakpointReached(Breakpoint bp) {
-        synchronized(_notifierLock) {
-          breakpointReachedCount++;
-          if (printEvents) System.out.println("breakpointReached " + breakpointReachedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void breakpointRemoved(Breakpoint bp) {
-        //synchronized(_notifierLock) {
-        breakpointRemovedCount++;
-        if (printEvents) System.out.println("breakpointRemoved " + breakpointRemovedCount);
-        //  _notifyObject(_notifierLock);
-        //}
-      }
-      
-      public void stepRequested() {
-        //synchronized(_notifierLock) {
-          stepRequestedCount++;
-          if (printEvents) System.out.println("stepRequested " + stepRequestedCount);
-        //  _notifyObject(_notifierLock);
-        //}
-      }
-      
-      public void currThreadSuspended() {
-        synchronized(_notifierLock) {
-          currThreadSuspendedCount++;
-          if (printEvents) System.out.println("threadSuspended " + currThreadSuspendedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void currThreadResumed() {
-        //synchronized(_notifierLock) {
-        currThreadResumedCount++;
-        if (printEvents) System.out.println("threadResumed " + currThreadResumedCount);
-        //  _notifyObject(_notifierLock);
-        //}
-      }
-      
-      public void currThreadDied() {
-        synchronized(_notifierLock) {
-          currThreadDiedCount++;
-          if (printEvents) System.out.println("threadDied " + currThreadDiedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber){
-        synchronized(_notifierLock) {
-          threadLocationUpdatedCount++;
-          if (printEvents) System.out.println("threadUpdated " + threadLocationUpdatedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void debuggerShutdown() {
-        synchronized(_notifierLock) {
-          debuggerShutdownCount++;
-          if (printEvents) System.out.println("debuggerShutdown " + debuggerShutdownCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void debuggerStarted() {
-        synchronized(_notifierLock) {
-          debuggerStartedCount++;
-          if (printEvents) System.out.println("debuggerStarted " + debuggerStartedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-    };
+    StepTestListener debugListener = new StepTestListener();
     
     // Compile the class
     File file2 = new File(_tempDir, "DrJavaDebugClass.java");
@@ -250,7 +558,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   
     // Start debugger and add breakpoint
     synchronized(_notifierLock) {
-      _startup();  //_debugManager.startup();
+      _debugManager.startup();
       _waitForNotifies(1);  // startup
       _notifierLock.wait();
     }
@@ -262,7 +570,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _waitForNotifies(3);  // suspended, updated, breakpointReached
       _notifierLock.wait();
     }
-    // Source is highlighted because doc is on breakpoint object
+    // Source is highlighted because document is stored in breakpoint
     debugListener.assertThreadLocationUpdatedCount(1);  // fires
     
     // Step into bar() method
@@ -301,7 +609,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
-    // Source is highlighted because file is on sourcepath
+    // Source is highlighted because file is now on sourcepath
     debugListener.assertStepRequestedCount(3);  // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(3);  // fires
     
@@ -318,483 +626,37 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     if (printMessages) System.out.println("Shut down.");
     _debugManager.removeListener(debugListener);
   }
-  
-  
-  /**
-   * Tests that stepping out of a method behaves correctly.
-   */
-  public void testStepOut() 
-    throws DebugException, BadLocationException, IOException, InterruptedException
-  {
-    if (printMessages)  System.out.println("----testStepOut----");
-    DebugTestListener debugListener = new DebugTestListener() {
-      public void breakpointSet(Breakpoint bp) {
-        breakpointSetCount++;
-      }
-      public void breakpointReached(Breakpoint bp) {
-        synchronized(_notifierLock) {
-          breakpointReachedCount++;
-          if (printEvents) System.out.println("breakpointReached " + breakpointReachedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void breakpointRemoved(Breakpoint bp) {
-        //synchronized(_notifierLock) {
-          breakpointRemovedCount++;
-          if (printEvents) System.out.println("breakpointRemoved " + breakpointRemovedCount);
-        //  _notifyObject(_notifierLock);
-        //}
-      }
-      
-      public void stepRequested() {
-        //synchronized(_notifierLock) {
-          stepRequestedCount++;
-          if (printEvents) System.out.println("stepRequested " + stepRequestedCount);
-        //  _notifyObject(_notifierLock);
-        //}
-      }
-      
-      public void currThreadSuspended() {
-        synchronized(_notifierLock) {
-          currThreadSuspendedCount++;
-          if (printEvents) System.out.println("threadSuspended " + currThreadSuspendedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void currThreadResumed() {
-        //synchronized(_notifierLock) {
-          currThreadResumedCount++;
-          if (printEvents) System.out.println("threadResumed " + currThreadResumedCount);
-        //  _notifyObject(_notifierLock);
-        //}
-      }
-      
-      public void currThreadDied() {
-        synchronized(_notifierLock) {
-          currThreadDiedCount++;
-          if (printEvents) System.out.println("threadDied " + currThreadDiedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber){
-        synchronized(_notifierLock) {
-          threadLocationUpdatedCount++;
-          if (printEvents) System.out.println("threadUpdated " + threadLocationUpdatedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void debuggerShutdown() {
-        synchronized(_notifierLock) {
-          debuggerShutdownCount++;
-          if (printEvents) System.out.println("debuggerShutdown " + debuggerShutdownCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void debuggerStarted() {
-        synchronized(_notifierLock) {
-          debuggerStartedCount++;
-          if (printEvents) System.out.println("debuggerStarted " + debuggerStartedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-    };
-    
-    // Compile the class
-    File file2 = new File(_tempDir, "DrJavaDebugClass.java");
-    OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS, file2);
-    _debugManager.addListener(debugListener); 
-    // Start debugger and add breakpoint
-    synchronized(_notifierLock) {
-      _startup();  //_debugManager.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
-    }
-    
-    debugListener.assertDebuggerStartedCount(1);
-    
-    _debugManager.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
-    debugListener.assertBreakpointSetCount(1);
-    
-    // Run the foo() method, hitting breakpoint
-    synchronized(_notifierLock) {
-      interpretIgnoreResult("new DrJavaDebugClass().foo()");
-      _waitForNotifies(3);  // suspended, updated, breakpointReached
-      _notifierLock.wait();
-    }
-    
-    if (printMessages) System.out.println("----After breakpoint:\n" + _getInteractionsText());
-      
-    // Ensure breakpoint is hit
-    debugListener.assertBreakpointReachedCount(1);  // fires
-    debugListener.assertThreadLocationUpdatedCount(1);  // fires
-    debugListener.assertCurrThreadSuspendedCount(1);  // fires
-    debugListener.assertCurrThreadResumedCount(0);
-    debugListener.assertCurrThreadDiedCount(0);
-    assertInteractionsContains("Foo Line 1");
-    assertInteractionsDoesNotContain("Bar Line 1");
-
-    // Step into bar() method
-    synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_INTO);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
-    }
-    debugListener.assertStepRequestedCount(1);  // fires (don't wait)
-    debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
-    debugListener.assertThreadLocationUpdatedCount(2);  //fires
-    debugListener.assertCurrThreadSuspendedCount(2);  //fires
-    debugListener.assertBreakpointReachedCount(1);
-    debugListener.assertCurrThreadDiedCount(0);
-    assertInteractionsDoesNotContain("Bar Line 1");
-    
-    // Step out of method
-    synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_OUT);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
-    }
-    
-    if (printMessages) System.out.println("****"+_getInteractionsText());
-    debugListener.assertStepRequestedCount(2);  // fires (don't wait)
-    debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
-    debugListener.assertThreadLocationUpdatedCount(3);  // fires
-    debugListener.assertCurrThreadDiedCount(0);
-    debugListener.assertCurrThreadSuspendedCount(3);  //fires
-    debugListener.assertBreakpointReachedCount(1);
-    assertInteractionsContains("Bar Line 2");
-    assertInteractionsDoesNotContain("Foo Line 3");
-    
-    //Remove listener at end
-    if (printMessages) System.out.println("Shutting down...");
-    synchronized(_notifierLock) {
-      _debugManager.shutdown();
-      _waitForNotifies(2);  // threadDied, shutdown
-      _notifierLock.wait();
-    }
-    debugListener.assertCurrThreadDiedCount(1);  // fires
-    debugListener.assertBreakpointRemovedCount(1);  // fires (don't wait)
-    debugListener.assertDebuggerShutdownCount(1);  // fires
-    if (printMessages) System.out.println("Shut down.");
-    _debugManager.removeListener(debugListener);
-  }
-
-  
-  /**
-   * Tests that breakpoints and steps behave correctly.
-   */
-  public void testStepInto() 
-    throws DebugException, BadLocationException, IOException, InterruptedException
-  {
-    if (printMessages) System.out.println("----testStepInto----");
-    DebugTestListener debugListener = new DebugTestListener() {
-      public void breakpointSet(Breakpoint bp) {
-        breakpointSetCount++;
-      }
-      public void breakpointReached(Breakpoint bp) {
-        synchronized(_notifierLock) {
-          breakpointReachedCount++;
-          if (printEvents) System.out.println("breakpointReached " + breakpointReachedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void breakpointRemoved(Breakpoint bp) {
-        //synchronized(_notifierLock) {
-          breakpointRemovedCount++;
-          if (printEvents) System.out.println("breakpointRemoved " + breakpointRemovedCount);
-        //  _notifyObject(_notifierLock);
-        //}
-      }
-      
-      public void stepRequested() {
-        //synchronized(_notifierLock) {
-          stepRequestedCount++;
-          if (printEvents) System.out.println("stepRequested " + stepRequestedCount);
-        //  _notifyObject(_notifierLock);
-        //}
-      }
-      
-      public void currThreadSuspended() {
-        synchronized(_notifierLock) {
-          currThreadSuspendedCount++;
-          if (printEvents) System.out.println("threadSuspended " + currThreadSuspendedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void currThreadResumed() {
-        //synchronized(_notifierLock) {
-          currThreadResumedCount++;
-          if (printEvents) System.out.println("threadResumed " + currThreadResumedCount);
-        //  _notifyObject(_notifierLock);
-        //}
-      }
-      
-      public void currThreadDied() {
-        synchronized(_notifierLock) {
-          currThreadDiedCount++;
-          if (printEvents) System.out.println("threadDied " + currThreadDiedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber){
-        synchronized(_notifierLock) {
-          threadLocationUpdatedCount++;
-          if (printEvents) System.out.println("threadUpdated " + threadLocationUpdatedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void debuggerShutdown() {
-        synchronized(_notifierLock) {
-          debuggerShutdownCount++;
-          if (printEvents) System.out.println("debuggerShutdown " + debuggerShutdownCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void debuggerStarted() {
-        synchronized(_notifierLock) {
-          debuggerStartedCount++;
-          if (printEvents) System.out.println("debuggerStarted " + debuggerStartedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-    };
-    
-    // Compile the class
-    OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS, tempFile());
-   
-    _debugManager.addListener(debugListener); 
-    // Start debugger
-    synchronized(_notifierLock) {
-      _startup();  //_debugManager.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
-    }
-    debugListener.assertDebuggerStartedCount(1);
-    
-    // Add a breakpoint
-    _debugManager.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
-    debugListener.assertBreakpointSetCount(1);
-    
-    // Run the foo() method, hitting breakpoint
-    synchronized(_notifierLock) {
-      interpretIgnoreResult("new DrJavaDebugClass().foo()");
-      _waitForNotifies(3);  // suspended, updated, breakpointReached
-      _notifierLock.wait();
-    }
-    
-    if (printMessages) System.out.println("----After breakpoint:\n" + _getInteractionsText());
-      
-    // Ensure breakpoint is hit
-    debugListener.assertBreakpointReachedCount(1);  //fires
-    debugListener.assertThreadLocationUpdatedCount(1);  //fires
-    debugListener.assertCurrThreadSuspendedCount(1);  //fires
-    debugListener.assertCurrThreadResumedCount(0);
-    debugListener.assertCurrThreadDiedCount(0);
-    assertInteractionsContains("Foo Line 1");
-    assertInteractionsDoesNotContain("Bar Line 1");
-
-    // Step into bar() method
-    synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_INTO);
-      _waitForNotifies(1);  // suspended
-      _notifierLock.wait();
-    }
-    debugListener.assertStepRequestedCount(1);  // fires (don't wait)
-    debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
-    //NOTE: LocationUpdatedCount is still 1 because the manager could not find the
-    //file on the sourcepath so the count was not updated.
-    debugListener.assertThreadLocationUpdatedCount(1);
-    debugListener.assertCurrThreadSuspendedCount(2);  //fires
-    debugListener.assertBreakpointReachedCount(1);
-    debugListener.assertCurrThreadDiedCount(0);
-    assertInteractionsDoesNotContain("Bar Line 1");
-    
-    // Step to next line
-    synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_OVER);
-      _waitForNotifies(1);  // suspended
-      _notifierLock.wait();
-    }
-    
-    if (printMessages) System.out.println("****"+_getInteractionsText());
-    debugListener.assertStepRequestedCount(2);  // fires (don't wait)
-    debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
-    debugListener.assertThreadLocationUpdatedCount(1);  
-    debugListener.assertCurrThreadDiedCount(0);
-    debugListener.assertCurrThreadSuspendedCount(3);  //fires
-    debugListener.assertBreakpointReachedCount(1);
-    assertInteractionsContains("Bar Line 1");
-    assertInteractionsDoesNotContain("Bar Line 2");
-    
-
-    // Step to next line
-    synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_OVER);
-      _waitForNotifies(1);  // suspended
-      _notifierLock.wait();
-    }
-    debugListener.assertStepRequestedCount(3);  // fires (don't wait)
-    debugListener.assertCurrThreadResumedCount(3); // fires (don't wait)
-    debugListener.assertThreadLocationUpdatedCount(1);
-    debugListener.assertCurrThreadDiedCount(0);
-    debugListener.assertCurrThreadSuspendedCount(4);  //fires
-    debugListener.assertBreakpointReachedCount(1);        
-    assertInteractionsContains("Bar Line 2");
-    assertInteractionsDoesNotContain("Foo Line 3");
-    
-    // Step twice to print last line in Foo
-    synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_OVER);
-      _waitForNotifies(1);  // suspended
-      _notifierLock.wait();
-    }
-
-    synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_OVER);
-      _waitForNotifies(1);  // suspended
-      _notifierLock.wait();
-    }
-    debugListener.assertStepRequestedCount(5);  // fires (don't wait)
-    debugListener.assertCurrThreadResumedCount(5); // fires (don't wait)
-    debugListener.assertThreadLocationUpdatedCount(1);
-    debugListener.assertCurrThreadDiedCount(0);
-    debugListener.assertCurrThreadSuspendedCount(6);  //fires
-    debugListener.assertBreakpointReachedCount(1);      
-    assertInteractionsContains("Foo Line 3");
-    
-    
-    // Step again to finish
-    synchronized(_notifierLock){
-      _debugManager.step(DebugManager.STEP_OVER);
-      _waitForNotifies(1);  // threadDied
-      _notifierLock.wait();
-    }
-    debugListener.assertStepRequestedCount(6);  // fires (don't wait)
-    debugListener.assertCurrThreadDiedCount(1);
-
-      // Remove listener at end
-    if (printMessages) System.out.println("Shutting down...");
-    synchronized(_notifierLock) {
-      _debugManager.shutdown();
-      _waitForNotifies(1);  // shutdown
-      _notifierLock.wait();
-    }
-    debugListener.assertBreakpointRemovedCount(1);  //fires once (no waiting)
-    debugListener.assertDebuggerShutdownCount(1);  //fires
-    if (printMessages) System.out.println("Shut down.");
-    _debugManager.removeListener(debugListener);
-  }
-
-  
   
   /**
    * Tests that breakpoints behave correctly.
    */
-  public synchronized void testBreakpoints() 
+  public synchronized void testBreakpointsNonPublicClasses() 
     throws DebugException, BadLocationException, IOException, InterruptedException
   {
-    if (printMessages) System.out.println("----testBreakpoints----");
-    DebugTestListener debugListener = new DebugTestListener() {
-      public void breakpointSet(Breakpoint bp) {
-        breakpointSetCount++;
-      }
-      public void breakpointReached(Breakpoint bp) {
-        synchronized(_notifierLock) {
-          breakpointReachedCount++;
-          if (printEvents) System.out.println("breakpointReached " + breakpointReachedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void breakpointRemoved(Breakpoint bp) {
-        //synchronized(_notifierLock) {
-          breakpointRemovedCount++;
-          if (printEvents) System.out.println("breakpointRemoved " + breakpointRemovedCount);
-        //  _notifyObject(_notifierLock);
-        //}
-      }
-      
-      public void currThreadSuspended() {
-        synchronized(_notifierLock) {
-          currThreadSuspendedCount++;
-          if (printEvents) System.out.println("threadSuspended " + currThreadSuspendedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void currThreadResumed() {
-        //synchronized(_notifierLock) {
-          currThreadResumedCount++;
-          if (printEvents) System.out.println("threadResumed " + currThreadResumedCount);
-        //  _notifyObject(_notifierLock);
-        //}
-      }
-      
-      public void currThreadDied() {
-        synchronized(_notifierLock) {
-          currThreadDiedCount++;
-          if (printEvents) System.out.println("threadDied " + currThreadDiedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber){
-        synchronized(_notifierLock) {
-          threadLocationUpdatedCount++;
-          if (printEvents) System.out.println("threadUpdated " + threadLocationUpdatedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      
-      public void debuggerShutdown() {
-        synchronized(_notifierLock) {
-          debuggerShutdownCount++;
-          if (printEvents) System.out.println("debuggerShutdown " + debuggerShutdownCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-       
-      public void debuggerStarted() {
-        synchronized(_notifierLock) {
-          debuggerStartedCount++;
-          if (printEvents) System.out.println("debuggerStarted " + debuggerStartedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-    };
-    
-    
+    if (printMessages) System.out.println("----testBreakpointsNonPublicClasses----");
+    BreakpointTestListener debugListener = new BreakpointTestListener();
     
     // Compile the class
     OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS, tempFile());
     _debugManager.addListener(debugListener);
     // Start debugger and add breakpoint (before class is loaded)
     synchronized(_notifierLock) {
-      _startup();  //_debugManager.startup();
+      _debugManager.startup();
       _waitForNotifies(1);
       _notifierLock.wait();
     }
    
-    _debugManager.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
+    _debugManager.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Baz Line 1"),14);
     debugListener.assertBreakpointSetCount(1);
     
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
-      interpretIgnoreResult("new DrJavaDebugClass().foo()");
+      interpretIgnoreResult("new DrJavaDebugClass2().baz()");
       _waitForNotifies(3);  // suspended, updated, breakpointReached
       _notifierLock.wait();
     }
     
-    if (printMessages) System.out.println("----After breakpoint:\n" + _getInteractionsText());
+    if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
       
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(1);  //fires
@@ -802,8 +664,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     debugListener.assertCurrThreadSuspendedCount(1);  //fires
     debugListener.assertCurrThreadResumedCount(0);
     debugListener.assertCurrThreadDiedCount(0);
-    assertInteractionsContains("Foo Line 1");
-    assertInteractionsDoesNotContain("Bar Line 1");
+    assertInteractionsDoesNotContain("Baz Line 1");
     
     if (printMessages) System.out.println("adding another breakpoint");
     
@@ -820,12 +681,13 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _waitForNotifies(3);  // suspended, updated, breakpointReached
       _notifierLock.wait();
     }
-    if (printMessages) System.out.println("----After one resume:\n" + _getInteractionsText());
+    if (printMessages) System.out.println("----After one resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(1);  //fires (no waiting)
     debugListener.assertBreakpointReachedCount(2);  //fires
     debugListener.assertThreadLocationUpdatedCount(2);  //fires
     debugListener.assertCurrThreadSuspendedCount(2);  //fires
     debugListener.assertCurrThreadDiedCount(0);
+    assertInteractionsContains("Baz Line 1");
     assertInteractionsContains("Bar Line 1");
     assertInteractionsDoesNotContain("Bar Line 2");
     
@@ -835,13 +697,13 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _waitForNotifies(1);  // threadDied
       _notifierLock.wait();
     }
-    if (printMessages) System.out.println("----After second resume:\n" + _getInteractionsText());
+    if (printMessages) System.out.println("----After second resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(2);  //fires (no waiting)
     debugListener.assertCurrThreadDiedCount(1);  //fires
     debugListener.assertBreakpointReachedCount(2);
     debugListener.assertThreadLocationUpdatedCount(2);
     debugListener.assertCurrThreadSuspendedCount(2);
-    assertInteractionsContains("Foo Line 3");
+    assertInteractionsContains("Bar Line 2");
     
     // Close doc and make sure breakpoints are removed
     _model.closeFile(doc);
@@ -867,26 +729,11 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   public synchronized void testStartupAndShutdown() throws DebugException, 
     InterruptedException {
     if (printMessages) System.out.println("----testStartupAndShutdown----");
-    DebugTestListener listener = new DebugTestListener() {
-      public void debuggerStarted() {
-        synchronized(_notifierLock) {
-          debuggerStartedCount++;
-          if (printEvents) System.out.println("debuggerStarted " + debuggerStartedCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-      public void debuggerShutdown() {
-        synchronized(_notifierLock) {
-          debuggerShutdownCount++;
-          if (printEvents) System.out.println("debuggerShutdown " + debuggerShutdownCount);
-          _notifyObject(_notifierLock);
-        }
-      }
-    };
+    DebugStartAndStopListener listener = new DebugStartAndStopListener();
 
     _debugManager.addListener(listener);
      synchronized(_notifierLock) {
-       _startup();
+       _debugManager.startup();
        _waitForNotifies(1);
       _notifierLock.wait();
     }
@@ -905,69 +752,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     assertTrue("Debug Manager should not be ready", !_debugManager.isReady());
 
     _debugManager.removeListener(listener);
-  }
+  }  
   
-  private void _startup() throws DebugException{
-    try {
-      _debugManager.startup();
-    }
-    catch (Exception e) {
-
-      try {
-        Thread.sleep(1000);
-      }
-      catch (InterruptedException ie) {
-      }            
-      // try starting up again
-      _debugManager.startup();
-    }
-    
-  }
-  
-  
-  /**
-   * Compiles a new file with the given text.
-   */
-  private OpenDefinitionsDocument _doCompile(String text, File file)
-    throws IOException, BadLocationException
-  {
-    OpenDefinitionsDocument doc = setupDocument(text);
-    doc.saveFile(new FileSelector(file));
-    doc.startCompile();
-    return doc;
-  }
-  
-  /**
-   * Asserts that the given string exists in the Interactions Document.
-   */
-  private void assertInteractionsContains(String text) throws BadLocationException{
-    assertInteractionHelper(text, true);
-  }
-  
-  private void assertInteractionsDoesNotContain(String text)
-    throws BadLocationException{
-    assertInteractionHelper(text,false);
-  }
-  
-  private void assertInteractionHelper(String text, boolean shouldContain)
-    throws BadLocationException {
-    
-    String interactText = _getInteractionsText();
-    int contains = interactText.lastIndexOf(text);
-    assertTrue("Interactions document should " +
-               (shouldContain ? "" : "not ")
-                 + "contain: "
-                 +text,
-               (contains != -1) == shouldContain);    
-  }
-  
-  /**
-   * Returns the current contents of the interactions document
-   */
-  private String _getInteractionsText() throws BadLocationException {
-    Document doc = _model.getInteractionsDocument();
-    return doc.getText(0, doc.getLength());
-  }
   
   
   /**
@@ -1070,6 +856,93 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     public void currThreadDied() {
       fail(" fired unexpectedly");
+    }
+  }
+  
+  /**
+   * Test Listener for all tests starting the debugger.
+   */
+  class DebugStartAndStopListener extends DebugTestListener {
+    public void debuggerStarted() {
+      // EventHandler's thread: test should wait
+      synchronized(_notifierLock) {
+        debuggerStartedCount++;
+        if (printEvents) System.out.println("debuggerStarted " + debuggerStartedCount);
+        _notifyObject(_notifierLock);
+      }
+    }
+    public void debuggerShutdown() {
+      // EventHandler's thread: test should wait
+      synchronized(_notifierLock) {
+        debuggerShutdownCount++;
+        if (printEvents) System.out.println("debuggerShutdown " + debuggerShutdownCount);
+        _notifyObject(_notifierLock);
+      }
+    }
+  }
+  
+  /**
+   * Test Listener for all tests setting breakpoints.
+   */
+  class BreakpointTestListener extends DebugStartAndStopListener {
+    public void breakpointSet(Breakpoint bp) {
+      // Manager's thread: test shouldn't wait
+      breakpointSetCount++;
+    }
+    public void breakpointReached(Breakpoint bp) {
+      // EventHandler's thread: test should wait
+      synchronized(_notifierLock) {
+        breakpointReachedCount++;
+        if (printEvents) System.out.println("breakpointReached " + breakpointReachedCount);
+        _notifyObject(_notifierLock);
+      }
+    }
+    public void breakpointRemoved(Breakpoint bp) {
+      // Manager's thread: test shouldn't wait
+      breakpointRemovedCount++;
+      if (printEvents) System.out.println("breakpointRemoved " + breakpointRemovedCount);
+    }
+    
+    public void currThreadSuspended() {
+      // EventHandler's thread: test should wait
+      synchronized(_notifierLock) {
+        currThreadSuspendedCount++;
+        if (printEvents) System.out.println("threadSuspended " + currThreadSuspendedCount);
+        _notifyObject(_notifierLock);
+      }
+    }
+    public void currThreadResumed() {
+      // Manager's thread: test shouldn't wait
+      currThreadResumedCount++;
+      if (printEvents) System.out.println("threadResumed " + currThreadResumedCount);
+    }
+    public void currThreadDied() {
+      // EventHandler's thread: test should wait
+      synchronized(_notifierLock) {
+        currThreadDiedCount++;
+        if (printEvents) System.out.println("threadDied " + currThreadDiedCount);
+        _notifyObject(_notifierLock);
+      }
+    }
+    public void threadLocationUpdated(OpenDefinitionsDocument doc, 
+                                      int lineNumber) {
+      // EventHandler's thread: test should wait
+      synchronized(_notifierLock) {
+        threadLocationUpdatedCount++;
+        if (printEvents) System.out.println("threadUpdated " + threadLocationUpdatedCount);
+        _notifyObject(_notifierLock);
+      }
+    }
+  }
+  
+  /**
+   * TestListener for all tests using the stepper.
+   */
+  class StepTestListener extends BreakpointTestListener {
+    public void stepRequested() {
+      // Manager's thread: test shouldn't wait
+      stepRequestedCount++;
+      if (printEvents) System.out.println("stepRequested " + stepRequestedCount);
     }
   }
 }

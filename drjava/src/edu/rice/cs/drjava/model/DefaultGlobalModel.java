@@ -962,6 +962,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
     });
   }
+  
+  /**
+   * Blocks until the interpreter has registered.
+   */
+  public void waitForInterpreter() {
+    _interpreterControl.ensureInterpreterConnected();
+  }
 
   /**
    * Signifies that the most recent interpretation completed successfully,
@@ -1374,11 +1381,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
 
     /**
-     * Retrieves the class name for the associated document
-     * reads the name of the first class declaration
+     * Returns the name of the top level class, if any.
+     * @throws ClassNameNotFoundException if no top level class name found.
      */
-    public String getClassName() { 
-      return _doc.getClassName();
+    public String getFirstTopLevelClassName() throws ClassNameNotFoundException { 
+      return _doc.getFirstTopLevelClassName();
     }
     
     /**
@@ -1799,72 +1806,26 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * class file to that of the source file.
    */
     public boolean checkIfClassFileInSync() {
+      // If modified, then definitely out of sync
       if(isModifiedSinceSave()) {
         _doc.setClassFileInSync(false);
         return false;
       }
+      
+      // Look for cached class file
       File classFile = _doc.getCachedClassFile();
       if (classFile == null) {
-        String className = _doc.getQualifiedClassName();
-        String ps = System.getProperty("file.separator");
-        // replace periods with the System's file separator
-        className = StringOps.replace(className, ".", ps);
-        
-        String filename = className + ".class";
-        // Check source root set (open files)
-        File[] sourceRoots = getSourceRootSet();
-        Vector<File> roots = new Vector<File>();
-        // Add the current document to the beginning of the roots Vector
-        try {
-          roots.addElement(getSourceRoot());
-        }
-        catch (InvalidPackageException ipe) {
-          try {
-            File f = getFile().getParentFile();
-            if (f != null) {
-              roots.addElement(f);
-            }
-          }
-          catch (IllegalStateException ise) {
-          }
-          catch (FileMovedException fme) {
-            File root = fme.getFile().getParentFile();
-            if (root != null) {
-              roots.addElement(root);
-            }
-          }
-        }
-        
-        for (int i=0; i < sourceRoots.length; i++) {
-          roots.addElement(sourceRoots[i]);
-        }
-        classFile = getSourceFileFromPaths(filename, roots);
-        if (classFile == null) {
-          // not on source root set, check system classpath
-          String cp = System.getProperty("java.class.path");
-          String pathSeparator = System.getProperty("path.separator");
-          Vector<File> cpVector = new Vector<File>();
-          for (int i = 0; i < cp.length();) {
-            int nextSeparator = cp.indexOf(pathSeparator, i);
-            if (nextSeparator == -1) {
-              cpVector.addElement(new File(cp.substring(i, cp.length())));
-              break;
-            }
-            cpVector.addElement(new File(cp.substring(i, nextSeparator)));
-            i = nextSeparator + 1;
-          }
-          classFile = getSourceFileFromPaths(filename, cpVector);
-        }
-        if (classFile == null) {
-          // not on system classpath, check interactions classpath
-          classFile = getSourceFileFromPaths(filename, DrJava.getConfig().getSetting(EXTRA_CLASSPATH));
-        }
+        // Not cached, so locate the file
+        classFile = _locateClassFile();
         _doc.setCachedClassFile(classFile);
+        
         if (classFile == null) {
           // couldn't find the class file
+          _doc.setClassFileInSync(false);
           return false;
         }
       }
+      
       // compare timestamps
       File sourceFile = null;
       try {
@@ -1886,6 +1847,82 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         return true;
       }
     }
+    
+    /**
+     * Returns the class file for this source document, if one could be found.
+     * Looks in the source root directories of the open documents, the 
+     * system classpath, and the "extra.classpath".  Returns null if the
+     * class file could not be found.
+     */
+    private File _locateClassFile() {
+      try {
+        String className = _doc.getQualifiedClassName();
+        String ps = System.getProperty("file.separator");
+        // replace periods with the System's file separator
+        className = StringOps.replace(className, ".", ps);
+        String filename = className + ".class";
+        
+        // Check source root set (open files)
+        File[] sourceRoots = getSourceRootSet();
+        Vector<File> roots = new Vector<File>();
+        // Add the current document to the beginning of the roots Vector
+        try {
+          roots.addElement(getSourceRoot());
+        }
+        catch (InvalidPackageException ipe) {
+          try {
+            File f = getFile().getParentFile();
+            if (f != null) {
+              roots.addElement(f);
+            }
+          }
+          catch (IllegalStateException ise) {
+            // No file, don't add to source root set
+          }
+          catch (FileMovedException fme) {
+            // Moved, but we'll add the old file to the set anyway
+            File root = fme.getFile().getParentFile();
+            if (root != null) {
+              roots.addElement(root);
+            }
+          }
+        }
+        
+        for (int i=0; i < sourceRoots.length; i++) {
+          roots.addElement(sourceRoots[i]);
+        }
+        File classFile = getSourceFileFromPaths(filename, roots);
+        
+        if (classFile == null) {
+          // Class not on source root set, check system classpath
+          String cp = System.getProperty("java.class.path");
+          String pathSeparator = System.getProperty("path.separator");
+          Vector<File> cpVector = new Vector<File>();
+          for (int i = 0; i < cp.length();) {
+            int nextSeparator = cp.indexOf(pathSeparator, i);
+            if (nextSeparator == -1) {
+              cpVector.addElement(new File(cp.substring(i, cp.length())));
+              break;
+            }
+            cpVector.addElement(new File(cp.substring(i, nextSeparator)));
+            i = nextSeparator + 1;
+          }
+          classFile = getSourceFileFromPaths(filename, cpVector);
+        }
+        
+        if (classFile == null) {
+          // not on system classpath, check interactions classpath
+          classFile = getSourceFileFromPaths(filename, DrJava.getConfig().getSetting(EXTRA_CLASSPATH));
+        }
+        
+        return classFile;
+      }
+      catch (ClassNameNotFoundException cnnfe) {
+        // No class name found, so we can't find a class file
+        return null;
+      }
+    }
+    
       
     /** 
      * Determines if the defintions document has been changed

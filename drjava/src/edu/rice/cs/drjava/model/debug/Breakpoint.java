@@ -70,7 +70,7 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
   public Breakpoint( OpenDefinitionsDocument doc, int offset, int lineNumber, DebugManager manager) 
     throws DebugException {    
     
-    super (manager, doc);
+    super(manager, doc, offset);
     _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;
     _lineNumber = lineNumber;
     

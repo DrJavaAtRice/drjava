@@ -48,6 +48,7 @@ import java.io.File;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
+import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 
 /**
  * Superclasses all DebugActions that are associated with specific 
@@ -69,11 +70,21 @@ public abstract class DocumentDebugAction<T extends EventRequest>
    * _initializeRequest in its constructor.
    * @param manager DebugManager in charge
    * @param doc Document this action corresponds to
+   * @param offset Offset into the document that the action affects
    */
-  public DocumentDebugAction (DebugManager manager, OpenDefinitionsDocument doc) 
-    throws DebugException {
+  public DocumentDebugAction (DebugManager manager, 
+                              OpenDefinitionsDocument doc,
+                              int offset)
+    throws DebugException 
+  {
     super(manager);
-    _className = doc.getDocument().getQualifiedClassName();
+    try {
+      _className = doc.getDocument().getQualifiedClassName(offset);
+    }
+    catch (ClassNameNotFoundException cnnfe) {
+      // Couldn't find class name, leave as empty string
+      _className = "";
+    }
     try {
       _file = doc.getFile();
     }

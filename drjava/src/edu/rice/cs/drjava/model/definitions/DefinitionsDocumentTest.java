@@ -657,21 +657,24 @@ public class DefinitionsDocumentTest extends TestCase
   /**
    * Test class name-finding on document 
    */
-  public void testClassName()
-    throws BadLocationException {
+  public void testTopLevelClassName()
+    throws BadLocationException, ClassNameNotFoundException
+  {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; class MyClass<T> implements O{";
     String result = "MyClass";
     defModel.insertString(0, weird, null);
 
     assertEquals("class name for weird: '" + weird + "'",
                  result,
-                 defModel.getClassName());
+                 defModel.getFirstTopLevelClassName());
   }
 
  /**
    * Test interface name-finding on document 
    */
-  public void testInterfaceName() throws BadLocationException {
+  public void testTopLevelInterfaceName()
+    throws BadLocationException, ClassNameNotFoundException
+  {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
       " interface thisInterface { \n" +
       " class MyClass {";
@@ -680,13 +683,15 @@ public class DefinitionsDocumentTest extends TestCase
 
     assertEquals("class name for interface: '" + weird + "'",
                  result,
-                 defModel.getClassName());
+                 defModel.getFirstTopLevelClassName());
   }
 
  /**
    * Test class name-finding on document 
    */
-  public void testClassNameWComments() throws BadLocationException {
+  public void testTopLevelClassNameWComments()
+    throws BadLocationException, ClassNameNotFoundException
+  {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" + 
       "/* class Y */ \n" + 
       " /* class Foo \n" + 
@@ -701,28 +706,31 @@ public class DefinitionsDocumentTest extends TestCase
 
     assertEquals("class name for class: '" + weird + "'",
                  result,
-                 defModel.getClassName());
+                 defModel.getFirstTopLevelClassName());
   }
   
   /**
    * Tests that the word class is not recognized if it is not followed 
    * by whitespace.
    */
-  public void testClassNameWithClassloaderImport()
-    throws BadLocationException {
+  public void testTopLevelClassNameWithClassloaderImport()
+    throws BadLocationException, ClassNameNotFoundException
+  {
     String weird = "import classloader.class; class MyClass {";
     String result = "MyClass";
     defModel.insertString(0, weird, null);
 
     assertEquals("class name for weird: '" + weird + "'",
                  result,
-                 defModel.getClassName());
+                 defModel.getFirstTopLevelClassName());
   }
   
   /**
    * Test class name-finding on document 
    */
-  public void testClassNameMisleading() throws BadLocationException {
+  public void testTopLevelClassNameMisleading()
+    throws BadLocationException, ClassNameNotFoundException
+  {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
       " {class X} \n" + 
       " interface thisInterface { \n" +
@@ -732,13 +740,15 @@ public class DefinitionsDocumentTest extends TestCase
 
     assertEquals("class name for interface: '" + weird + "'",
                  result,
-                 defModel.getClassName());
+                 defModel.getFirstTopLevelClassName());
   }
 
   /**
    * Test class name-finding on document 
    */
-  public void testInterfaceNameMisleading() throws BadLocationException {
+  public void testTopLevelInterfaceNameMisleading()
+    throws BadLocationException, ClassNameNotFoundException
+  {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
       " {interface X} " + 
       " \"class Foo\"" +
@@ -748,13 +758,15 @@ public class DefinitionsDocumentTest extends TestCase
 
     assertEquals("class name for interface: '" + weird + "'",
                  result,
-                 defModel.getClassName());
+                 defModel.getFirstTopLevelClassName());
   }
   
     /**
    * Test class name-finding on document 
    */
-  public void testInterfaceNameBeforeClassName() throws BadLocationException {
+  public void testTopLevelInterfaceNameBeforeClassName() 
+    throws BadLocationException, ClassNameNotFoundException
+  {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
       " interface thisInterface { \n" + 
       "  } \n" +
@@ -765,13 +777,15 @@ public class DefinitionsDocumentTest extends TestCase
 
     assertEquals("interface should have been chosen, rather than the class: '" + weird + "'",
                  result,
-                 defModel.getClassName());
+                 defModel.getFirstTopLevelClassName());
   }
   
   /**
    * Test class name-finding on document 
    */
-  public void testClassNameWithDelimiters() throws BadLocationException {
+  public void testTopLevelClassNameWithDelimiters() 
+    throws BadLocationException, ClassNameNotFoundException
+  {
     String weird1 = "package edu . rice\n./*comment!*/cs.drjava; \n" +
        " class MyClass<T> {";
     String result1 = "MyClass";
@@ -779,7 +793,7 @@ public class DefinitionsDocumentTest extends TestCase
 
     assertEquals("generics should be removed: '" + weird1 + "'",
                  result1,
-                 defModel.getClassName());
+                 defModel.getFirstTopLevelClassName());
     
     String weird2 = "package edu . rice\n./*comment!*/cs.drjava; \n" +
        " class My_Class {";
@@ -788,7 +802,240 @@ public class DefinitionsDocumentTest extends TestCase
 
     assertEquals("underscores should remain: '" + weird1 + "'",
                  result2,
-                 defModel.getClassName());
+                 defModel.getFirstTopLevelClassName());
   }
+  
+  /**
+   * Tests that the name of a top level enclosing class can be found.
+   */
+  public void testTopLevelEnclosingClassName()
+    throws BadLocationException, ClassNameNotFoundException
+  {
+    String classes =
+      "import foo;\n" +  // 12 (including newline)
+      "class C1 {\n" +  // 23
+      "  void foo() { int a; }\n" +  // 47
+      "  class C2 { int x;\n" +  // 67
+      "    int y;\n" +  // 78
+      "    class C3 {}\n" +  // 94
+      "  } int b;\n" +  // 105
+      "}\n" +  // 107
+      "class C4 {\n" +  // 118
+      "  class C5 {\n" +  // 131
+      "    void bar() { int c; } class C6 {}\n" +  // 169
+      "  }\n" +  // 173
+      "} class C7 {}";  // 186
+    
+    defModel.insertString(0, classes, null);
+    
+    // No enclosing class at start
+    try {
+      String result = defModel.getEnclosingTopLevelClassName(3);
+      fail("no enclosing class should be found at start");
+    }
+    catch (ClassNameNotFoundException cnnfe) {
+      // Correct: no class name found
+    }
+    
+    // No enclosing class before open brace
+    try {
+      String result = defModel.getEnclosingTopLevelClassName(15);
+      fail("no enclosing class should be found before open brace");
+    }
+    catch (ClassNameNotFoundException cnnfe) {
+      // Correct: no class name found
+    }
+    
+    assertEquals("top level class name after first open brace", "C1",
+                 defModel.getEnclosingTopLevelClassName(22));
+    assertEquals("top level class name inside C1", "C1",
+                 defModel.getEnclosingTopLevelClassName(26));
+    assertEquals("top level class name inside method of C1", "C1",
+                 defModel.getEnclosingTopLevelClassName(42));
+    assertEquals("top level class name on C2's brace", "C1",
+                 defModel.getEnclosingTopLevelClassName(58));
+    assertEquals("top level class name after C2's brace", "C1",
+                 defModel.getEnclosingTopLevelClassName(59));
+    assertEquals("top level class name inside C2", "C1",
+                 defModel.getEnclosingTopLevelClassName(68));
+    assertEquals("top level class name inside C3", "C1",
+                 defModel.getEnclosingTopLevelClassName(92));
+    assertEquals("top level class name after C3's close brace", "C1",
+                 defModel.getEnclosingTopLevelClassName(93));
+    assertEquals("top level class name after C2's close brace", "C1",
+                 defModel.getEnclosingTopLevelClassName(100));
+    
+    // No enclosing class between classes
+    try {
+      String result = defModel.getEnclosingTopLevelClassName(107);
+      fail("no enclosing class should be found between classes");
+    }
+    catch (ClassNameNotFoundException cnnfe) {
+      // Correct: no class name found
+    }
+    
+    assertEquals("class name inside C4", "C4",
+                 defModel.getEnclosingTopLevelClassName(122));
+    assertEquals("class name inside C5", "C4",
+                 defModel.getEnclosingTopLevelClassName(135));
+    assertEquals("class name inside C6", "C4",
+                 defModel.getEnclosingTopLevelClassName(167));
+    assertEquals("class name inside C7", "C7",
+                 defModel.getEnclosingTopLevelClassName(185));
+    
+    // No enclosing class at end
+    try {
+      String result = defModel.getEnclosingTopLevelClassName(186);
+      fail("no enclosing class should be found at end");
+    }
+    catch (ClassNameNotFoundException cnnfe) {
+      // Correct: no class name found
+    }
+  }
+  
+  /**
+   * Tests that the correct qualified class name is returned with a package.
+   */
+  public void testQualifiedClassNameWithPackage()
+    throws BadLocationException, ClassNameNotFoundException
+  {
+    String classes =
+      "package foo;\n" +  // 13
+      "class C1 {}\n" +  // 25
+      "class C2 {}";  // 36
+    defModel.insertString(0, classes, null);
+    
+    assertEquals("qualified class name without pos", "foo.C1",
+                 defModel.getQualifiedClassName());
+    assertEquals("enclosing class name in C1", "C1",
+                 defModel.getEnclosingTopLevelClassName(23));
+    assertEquals("qualified class name with pos in C1", "foo.C1",
+                 defModel.getQualifiedClassName(23));
+    assertEquals("qualified class name with pos in C2", "foo.C2",
+                 defModel.getQualifiedClassName(35));
+    
+    // No class name outside classes
+    try {
+      String result = defModel.getQualifiedClassName(15);
+      fail("no qualified class name should be found outside classes");
+    }
+    catch (ClassNameNotFoundException cnnfe) {
+      // Correct: no class name found
+    }
+  }
+  
+  /**
+   * Tests that the correct qualified class name is returned without a package.
+   */
+  public void testQualifiedClassNameWithoutPackage()
+    throws BadLocationException, ClassNameNotFoundException
+  {
+    String classes =
+      "class C1 {}\n" +  // 12
+      "class C2 {}";  // 36
+    defModel.insertString(0, classes, null);
+    
+    assertEquals("qualified class name without pos", "C1",
+                 defModel.getQualifiedClassName());
+    assertEquals("qualified class name with pos in C1", "C1",
+                 defModel.getQualifiedClassName(10));
+    assertEquals("qualified class name with pos in C2", "C2",
+                 defModel.getQualifiedClassName(22));
+    
+    // No class name outside classes
+    try {
+      String result = defModel.getQualifiedClassName(15);
+      fail("no qualified class name should be found outside classes");
+    }
+    catch (ClassNameNotFoundException cnnfe) {
+      // Correct: no class name found
+    }
+  }
+  
+  /**
+   * Tests that the name of an enclosing class can be found.
+   * 
+   * Note: I started to write this assuming that we would need to find
+   * inner class names, but I'm not sure that's the case.  I'm writing
+   * the method for the debugger, which only needs the *top level*
+   * enclosing class.  Rather than delete this test, though, I'll leave
+   * it in case we ever need to write getEnclosingClassName().
+   *
+  public void testEnclosingClassName()
+    throws BadLocationException, ClassNameNotFoundException
+  {
+    String classes =
+      "import foo;\n" +  // 12 (including newline)
+      "class C1 {\n" +  // 23
+      "  void foo() { int a; }\n" +  // 47
+      "  class C2 { int x;\n" +  // 67
+      "    int y;\n" +  // 78
+      "    class C3 {}\n" +  // 94
+      "  } int b;\n" +  // 105
+      "}\n" +  // 107
+      "class C4 {\n" +  // 118
+      "} class C5 {}";  // 131
+    defModel.insertString(0, classes, null);
+    
+    // No enclosing class at start
+    try {
+      String result = defModel.getEnclosingClassName(3);
+      fail("no enclosing class should be found at start");
+    }
+    catch (ClassNameNotFoundException cnnfe) {
+      // Correct: no class name found
+    }
+    
+    // No enclosing class before open brace
+    try {
+      String result = defModel.getEnclosingClassName(15);
+      fail("no enclosing class should be found before open brace");
+    }
+    catch (ClassNameNotFoundException cnnfe) {
+      // Correct: no class name found
+    }
+    
+    assertEquals("class name after first open brace", "C1",
+                 defModel.getEnclosingClassName(22));
+    assertEquals("class name inside C1", "C1",
+                 defModel.getEnclosingClassName(26));
+    assertEquals("class name inside method of C1", "C1",
+                 defModel.getEnclosingClassName(42));
+    assertEquals("class name on C2's brace", "C1",
+                 defModel.getEnclosingClassName(58));
+    assertEquals("class name after C2's brace", "C2",
+                 defModel.getEnclosingClassName(59));
+    assertEquals("class name inside C2", "C2",
+                 defModel.getEnclosingClassName(68));
+    assertEquals("class name inside C3", "C3",
+                 defModel.getEnclosingClassName(92));
+    assertEquals("class name after C3's close brace", "C2",
+                 defModel.getEnclosingClassName(93));
+    assertEquals("class name after C2's close brace", "C1",
+                 defModel.getEnclosingClassName(100));
+    
+    // No enclosing class between classes
+    try {
+      String result = defModel.getEnclosingClassName(107);
+      fail("no enclosing class should be found between classes");
+    }
+    catch (ClassNameNotFoundException cnnfe) {
+      // Correct: no class name found
+    }
+    
+    assertEquals("class name inside C4", "C4",
+                 defModel.getEnclosingClassName(118));
+    assertEquals("class name inside C5", "C5",
+                 defModel.getEnclosingClassName(130));
+    
+    // No enclosing class at end
+    try {
+      String result = defModel.getEnclosingClassName(131);
+      fail("no enclosing class should be found at end");
+    }
+    catch (ClassNameNotFoundException cnnfe) {
+      // Correct: no class name found
+    }
+  }*/
   
 }

@@ -159,6 +159,9 @@ public class DebugManager {
    * Handles the details of attaching to the InteractionsJVM.
    */
   private void _attachToVM() throws DebugException {
+    // Blocks until interpreter has registered itself
+    _model.waitForInterpreter();
+    
     // Get the connector
     VirtualMachineManager vmm = Bootstrap.virtualMachineManager();
     List connectors = vmm.attachingConnectors();

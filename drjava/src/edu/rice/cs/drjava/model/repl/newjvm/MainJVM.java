@@ -188,7 +188,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
   }
 
   public void interpret(String s) {
-    _ensureInterpreterConnected();
+    ensureInterpreterConnected();
 
     try {
       //System.err.println("interpret to " + _interpreterJVM + ": " + s);
@@ -200,7 +200,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
   }
 
   public void addClassPath(String path) {
-    _ensureInterpreterConnected();
+    ensureInterpreterConnected();
 
     try {
       _interpreterJVM.addClassPath(path);
@@ -213,7 +213,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
   }
 
   public void setPackageScope(String packageName) {
-    _ensureInterpreterConnected();
+    ensureInterpreterConnected();
 
     try {
       _interpreterJVM.setPackageScope(packageName);
@@ -224,7 +224,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
   }
 
   public void reset() {
-    _ensureInterpreterConnected();
+    ensureInterpreterConnected();
 
     try {
       _interpreterJVM.reset();
@@ -517,7 +517,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
    * If an interpreter has not registered itself, this method will
    * block until one does.
    */
-  private void _ensureInterpreterConnected() {
+  public void ensureInterpreterConnected() {
     try {
       synchronized(this) {
         while (_interpreterJVM == null) {
@@ -601,7 +601,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
   }
   
   public void runTest(String className, String fileName) {
-    _ensureInterpreterConnected();
+    ensureInterpreterConnected();
     
     try {
       _interpreterJVM.runTest(className, fileName);

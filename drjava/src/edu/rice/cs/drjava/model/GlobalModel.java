@@ -263,6 +263,11 @@ public interface GlobalModel {
 
   /** Called when the debugger wants to print a message. */
   public void printDebugMessage(String s);
+  
+  /**
+   * Blocks until the interpreter has registered.
+   */
+  public void waitForInterpreter();
 
   /**
    * Signifies that the most recent interpretation completed successfully,

@@ -66,7 +66,11 @@ public interface OpenDefinitionsDocument {
    */
   public DefinitionsDocument getDocument();
 
-  public String getClassName();
+  /**
+   * Returns the name of the top level class, if any.
+   * @throws ClassNameNotFoundException if no top level class name found.
+   */
+  public String getFirstTopLevelClassName() throws ClassNameNotFoundException;
     
   /**
    * Returns whether this document is currently untitled
