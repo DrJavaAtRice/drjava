@@ -224,7 +224,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
       public void compileEnded() {
         // Only clear interactions if there were no errors
-        if ((_compilerModel.getNumErrors() == 0)
+        if (((_compilerModel.getNumErrors() == 0) ||
+             (_compilerModel.getCompilerErrorModel().hasOnlyWarnings()))
               // reset even when the interpreter is not used.
               //&& _interactionsModel.interpreterUsed()
               && _resetAfterCompile) {
