@@ -130,6 +130,12 @@ class ModelList<T>
 				return new Iterator(this);
 			}
 
+
+		public boolean eq(Object thing)
+			{
+				return this._point == ((Iterator)(thing))._point;
+			}
+		
 		public void setTo(Iterator it)
 			{
 				this._point = it._point;

@@ -23,7 +23,7 @@ import gj.util.Stack;
  *      in the middle of a comment, it is treated as two separate slashes.
  *      Similar for /*.
  * </ol>
- * @author Mike Yantosca
+ * @author Mike Yantosca, Jonathan Bannet
  */
 
 public class ReducedModel implements BraceReduction
@@ -250,7 +250,10 @@ public class ReducedModel implements BraceReduction
 			_insertNewBrace("*",copyCursor); //leaving us after the brace.
 			copyCursor.prev();
 			_updateBasedOnCurrentState();
-			copyCursor.next();
+			if (copyCursor.current().getSize() == 2)
+				_offset = 1;
+			else
+				copyCursor.next();
 		}
 
 		
@@ -347,11 +350,14 @@ public class ReducedModel implements BraceReduction
 							return;
 						}
 				}
-
+			//here we know the / unites with nothing behind it.
 			_insertNewBrace("/",copyCursor); //leaving us after the brace.
 			copyCursor.prev();
 			_updateBasedOnCurrentState();
-			copyCursor.next();
+			if (copyCursor.current().getSize() == 2)
+				_offset = 1;
+			else
+				copyCursor.next();
 		}
 
 	
@@ -718,7 +724,7 @@ public class ReducedModel implements BraceReduction
 					copyCursor.insert(Brace.MakeBrace("/", getStateAtCurrent()));
 					copyCursor.next(); // pointing to second slash
 					_updateBasedOnCurrentState(); // slashes will not be combined
-					_offset = 0;
+					//_offset = 0;
 				}
 			else if (copyCursor.current().isBlockCommentStart())
 				{
@@ -727,7 +733,7 @@ public class ReducedModel implements BraceReduction
 					copyCursor.insert(Brace.MakeBrace("/", getStateAtCurrent()));
 					copyCursor.next();
 					_updateBasedOnCurrentState();
-					_offset = 0;
+					//_offset = 0;
 				}
 			else if (copyCursor.current().isBlockCommentEnd())
 				{
@@ -736,7 +742,7 @@ public class ReducedModel implements BraceReduction
 					copyCursor.insert(Brace.MakeBrace("*", getStateAtCurrent()));
 					copyCursor.next();
 					_updateBasedOnCurrentState();
-					_offset = 0;
+					//_offset = 0;
 				}
 			else
 				{
@@ -819,13 +825,18 @@ private void _updateBasedOnCurrentStateHelper(
     _combineCurrentAndNextIfFind("/", "*", copyCursor);
     //_combineCurrentAndNextIfFind("*", "/", copyCursor);
     _combineCurrentAndNextIfFind("/", "/", copyCursor);
-
+		_combineCurrentAndNextIfFind("","", copyCursor);
+		//if a / preceeds a /* or a // combine them.
+		_combineCurrentAndNextIfFind("/","/*",copyCursor);
+		_combineCurrentAndNextIfFind("/","//",copyCursor);
+		
     String type = copyCursor.current().getType();
 		if (type.equals("*/"))
 			{
-				_breakComment(copyCursor);
+				_splitCurrentIfCommentBlock(true,copyCursor);
+        //_breakComment(copyCursor);
 				copyCursor.prev();
-				_updateFree(copyCursor);
+				_updateBasedOnCurrentStateHelper(copyCursor);
 			}
 		else if (type.equals("//"))
     {
@@ -873,6 +884,7 @@ private void _updateBasedOnCurrentStateHelper(
       return;
 
     _splitCurrentIfCommentBlock(true, copyCursor);
+		_combineCurrentAndNextIfFind("","", copyCursor);
 
     String type = copyCursor.current().getType();
 
@@ -914,6 +926,7 @@ private void _updateBasedOnCurrentStateHelper(
       return;
 
     _splitCurrentIfCommentBlock(true, copyCursor);
+		_combineCurrentAndNextIfFind("","", copyCursor);
 
     String type = copyCursor.current().getType();
 
@@ -950,6 +963,7 @@ private void _updateBasedOnCurrentStateHelper(
     _combineCurrentAndNextIfFind("*", "/", copyCursor);
 		_combineCurrentAndNextIfFind("*","//", copyCursor);
 		_combineCurrentAndNextIfFind("*","/*", copyCursor);
+		_combineCurrentAndNextIfFind("","", copyCursor);
     _splitCurrentIfCommentBlock(false, copyCursor);
 
     String type = copyCursor.current().getType();
@@ -1008,9 +1022,37 @@ private void _updateBasedOnCurrentStateHelper(
 						copyCursor.current().setState(ReducedToken.FREE);
 						return true;
 					}
-				// first delete the second Brace
+				else if ((copyCursor.current().getType().equals("/*"))&&
+								 (copyCursor.prevItem().getType().equals("/")))
+					{
+						copyCursor.current().setType("*");
+						copyCursor.prev();
+						copyCursor.current().setType("//");
+						copyCursor.current().setState(ReducedToken.FREE);
+						return true;
+					}
+				else if ((copyCursor.current().getType().equals("//"))&&
+								 (copyCursor.prevItem().getType().equals("/")))
+					{
+						copyCursor.current().setType("/");
+						copyCursor.prev();
+						copyCursor.current().setType("//");
+						copyCursor.current().setState(ReducedToken.FREE);
+						return true;
+					}
+				else if ((copyCursor.current().getType().equals(""))&&
+								 (copyCursor.prevItem().getType().equals("")))
+					{
+						// delete first Gap and augment the second
+						copyCursor.prev();
+						int growth = copyCursor.current().getSize();
+						copyCursor.remove();
+						copyCursor.current().grow(growth);
+						return true;
+					}
+				// delete the first Brace and augment the second
+				copyCursor.prev();
 				copyCursor.remove();
-				copyCursor.prev(); // move back to the first Brace				
 				copyCursor.current().setType(first + second);
 				return true;
     }
@@ -1122,7 +1164,7 @@ private void _updateBasedOnCurrentStateHelper(
 			if (copyCursor.atEnd())
 				throw new IllegalArgumentException("At end");
 			
-			while (count >= copyCursor.current().getSize()){
+			while (count >= copyCursor.current().getSize() - currentOffset){
 				count = count - copyCursor.current().getSize()+currentOffset;
 				copyCursor.next();
 				currentOffset = 0;
@@ -1174,11 +1216,275 @@ private void _updateBasedOnCurrentStateHelper(
    * @param count indicates the size and direction of text deletion.
    * Negative values delete text to the left of the cursor, positive
    * values delete text to the right.
+	 * Always move count spaces to make sure we can delete.
    */
   public void delete( int count )
-		{			
+		{
+			if (count == 0)
+				return;
+			ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
+			// from = the _cursor
+			// to = _cursor.copy()
+			_offset = _delete(count, _offset, _cursor, copyCursor);
 		}
-  
+
+	private int _delete(int count, int offset,
+											ModelList<ReducedToken>.Iterator delFrom,
+											ModelList<ReducedToken>.Iterator delTo)
+		{
+			
+				
+				//gaurentees that its possible to delete count characters
+				if (count >0){
+					int endOffset = -1;
+					try {
+						endOffset = _move(count,delTo, offset);
+					}
+					catch (Exception e) {
+						throw new IllegalArgumentException("Trying to delete" +
+																							 " past end of file.");				
+					}
+					return _deleteRight(offset, endOffset,delFrom, delTo);
+				}
+				else {//(count < 0)
+					int startOffset = -1;
+					try {
+						startOffset = _move(count,delFrom, offset);
+					}
+					catch (Exception e) {
+						throw new IllegalArgumentException("Trying to delete" +
+																							 " past end of file.");				
+					}
+
+					return _deleteRight(startOffset,offset, delFrom, delTo);
+				}
+		}
+	
+	private int _deleteLeft(int offset,
+													 ModelList<ReducedToken>.Iterator delFrom,
+													 ModelList<ReducedToken>.Iterator delTo)
+		{
+			return -1;
+		}
+	
+	/**
+	 *!!!!!!!COMBINE GAPS!!!!!!!!!!!
+	 */
+	private int _deleteRight(int offset,int endOffset,
+													 ModelList<ReducedToken>.Iterator delFrom,
+													 ModelList<ReducedToken>.Iterator delTo)
+		{
+			
+		
+
+			delFrom.collapse(delTo);
+						
+			// if both pointing to same item, and it's a gap
+			if (delFrom.eq(delTo) && delFrom.current().isGap()){
+				// inside gap
+				delFrom.current().shrink(endOffset-offset);
+				return offset;
+			}
+
+			//if brace is multiple char it must be a comment because the above if
+ 			//test gaurentees it can't be a gap.
+			if (!delFrom.eq(delTo))
+				_clipLeft(offset, delFrom);
+
+			_clipRight(endOffset, delTo);			
+
+			if (!delFrom.atStart())
+				delFrom.prev();
+					
+			//int delToSizePrevious = delTo.current().getSize();
+			//String delToTypePrevious = delTo.current().getType();
+			int delToSizeCurr;
+			String delToTypeCurr;
+			if (delTo.atEnd()){
+				_updateBasedOnCurrentState();
+				delFrom.setTo(delTo);
+				return 0;
+			}
+			else{
+				delToSizeCurr = delTo.current().getSize();
+				delToTypeCurr = delTo.current().getType();
+			}
+					
+			//get info on previous item.
+			delTo.prev();//get stats on previous item
+			
+			int delToSizePrev;
+			String delToTypePrev;
+			if (delTo.atStart()){//no previous item, can't be at end
+				delTo.next();
+				_updateBasedOnCurrentStateHelper(delFrom);
+				delFrom.setTo(delTo);
+				return 0;
+			}
+			else{
+				delToSizePrev = delTo.current().getSize();
+				delToTypePrev = delTo.current().getType();
+			}
+			delTo.next(); //put delTo back on original node
+
+
+			_updateBasedOnCurrentState();
+
+			int temp =
+				_calculateOffset(delToSizePrev,delToTypePrev,
+												 delToSizeCurr, delToTypeCurr,
+												 delTo);
+			delFrom.setTo(delTo);
+			return temp;
+		}
+	
+
+	private void _clipLeft(int offset, ModelList<ReducedToken>.Iterator
+												 copyCursor)
+		{
+			if (copyCursor.atStart()){
+					return;
+				}
+			else if (offset == 0){
+					copyCursor.remove();
+				}
+			else if (copyCursor.current().isGap()){
+					int size = copyCursor.current().getSize();
+					copyCursor.current().shrink(size-offset);
+				}
+			else if (copyCursor.current().isMultipleCharBrace()){
+					if (offset != 1)
+						throw new IllegalArgumentException("Offset incorrect");
+					else{
+						String type = copyCursor.current().getType();
+						String first = type.substring(0,1);
+						copyCursor.current().setType(first);
+					}
+				}
+			else {
+					throw new IllegalArgumentException("Cannot clip left.");
+			}
+		}
+	
+
+	private void _clipRight(int offset, ModelList<ReducedToken>.Iterator
+												 copyCursor)
+		{
+			if (copyCursor.atEnd()){
+					return;
+			}
+			else if (offset == 0) {
+				return;
+			}
+			else if (offset == copyCursor.current().getSize()){
+				copyCursor.remove();
+			}
+			else if (copyCursor.current().isGap()){
+				copyCursor.current().shrink(offset);
+			}
+			else if (copyCursor.current().isMultipleCharBrace()){
+				if (offset != 1)
+					throw new IllegalArgumentException("Offset incorrect");
+				else{
+					String type = copyCursor.current().getType();
+					String second = type.substring(1,2);
+					copyCursor.current().setType(second);
+				}
+			}
+			else {
+				throw new IllegalArgumentException("Cannot clip left.");
+			}
+		}
+
+	/**
+	 *By contrasting the delTo token after the walk to what it was before the
+	 *walk we can see how it has changed and where the offset should go.
+	 */
+	private int _calculateOffset(int delToSizePrev, String delToTypePrev,
+															 int delToSizeCurr, String delToTypeCurr,
+																ModelList<ReducedToken>.Iterator delTo)
+		{			
+			int delToSizeChange = delTo.current().getSize();
+			String delToTypeChange = delTo.current().getType();
+
+			//1)if there was a gap previous to the gap at delTo delTo should be
+			//augmented by its size, and that size is the offset.
+			//2)if the gap was not preceeded by a gap then it would not need to
+			//be shrunk
+			if (delTo.atEnd())
+				throw new IllegalArgumentException("Shouldn't happen");
+			if (delTo.current().isGap())
+				return delToSizeChange - delToSizeCurr;
+			//this means that the item at the end formed a double brace with the
+			//item that the delete left preceeding it. /dddddd*
+
+			//the final item shrunk. This can only happen if the starting item
+			//stole one of its braces: /ddddd*/
+			//or if it was a double brace that had to get broken because it was
+			//now commented or no longer has an open block
+
+			//EXAMPLES: /*___*/  becoming */
+			//          /*___*/  delete the first star, through the spaces to get
+			//                   /*/
+			//         //*__\n// becoming //*__//, the // is broken
+			//         //*__\n// becoming ////   , the // is broken
+			//THIS MUST HAVE THE previous items size and type passed in from
+			//before the update. This way we know how it's changing too.
+				
+			// case of /
+			if (delToTypePrev.equals("/")){
+				//  /-/* becoming //-*
+				if(delToTypeCurr.equals("/*") && 
+					 _checkPrevEquals(delTo,"//")){ //because pointer will be at *
+					delTo.prev();
+					return 1;
+				}
+				else if (delToTypeCurr.equals("//") &&
+								 _checkPrevEquals(delTo,"//")){
+					delTo.prev();
+					return 1;
+				}
+				else if (delToTypeCurr.equals("*/") && //changed
+								 delTo.current().getType().equals("/*")){										
+					return 1;
+				}
+				else if (delToTypeCurr.equals("*") &&
+								 delTo.current().getType().equals("/*"))
+					return 1;
+				else if (delToTypeCurr.equals("/") &&
+								 delTo.current().getType().equals("//"))
+					return 1;
+			}
+			//case of *
+			else if (delToTypePrev.equals("*")){
+				//  /-/* becoming //-*
+				if(delToTypeCurr.equals("/*") && 
+					 _checkPrevEquals(delTo,"*/")){ //because pointer will be at *
+					delTo.prev();
+					return 1;
+				}
+				else if (delToTypeCurr.equals("//") &&
+								 _checkPrevEquals(delTo,"*/")){
+					delTo.prev();
+					return 1;
+				}
+				else if (delToTypeCurr.equals("/") &&
+								 delTo.current().getType().equals("*/"))
+					return 1;							
+			}
+							
+			return 0;
+		}
+
+	private boolean _checkPrevEquals(ModelList<ReducedToken>.Iterator delTo,
+																	 String match)
+		{
+			if (delTo.atFirstItem() || delTo.atStart())
+				return false;
+
+			return delTo.prevItem().getType().equals(match);
+		}
+	
   /**
    * <P>Is there a brace to the left of the cursor?</P>
    * @return true if there is a brace to the left of the cursor.
@@ -1196,25 +1502,120 @@ private void _updateBasedOnCurrentStateHelper(
 		{
 			return false;
 		}
-  
+
+
+
   /**
-   * <P>Finds the next significant brace.</P>
+   * Finds the distant to the next significant brace.
    * @return the distance to the next significant brace.
+   * If there is no following significant brace to be found, it
+   * returns -1.
    */
   public int nextBrace()
-		{
-			return -1;
-		}
+    {
+			ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
+      return _nextBraceHelp( _offset, 0, copyCursor );
+    }
   
   /**
-   * <P>Finds the previous significant brace.</P>
+   * Finds the distance to the previous significant brace.
    * @return the distance to the previous significant brace.
+   * If there is no preceding significant brace to be found, it
+   * returns -1.
    */
   public int previousBrace()
-		{
-			return -1;
-		}
+    {
+			ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
+      return _prevBraceHelp( _offset, 0, copyCursor );
+    }
+
+  /** If the current brace is a /, a *, a // or a \n, it's not matchable.
+   *  This means it is ignored on balancing and on next/prev brace finding.
+   *  All other braces are matchable.
+   */
+  private boolean _isCurrentBraceMatchable(
+		ModelList<ReducedToken>.Iterator copyCursor)
+  {
+    String type = copyCursor.current().getType();
+
+    return !(type.equals("/")  ||
+             type.equals("*")  ||
+             type.equals("\n") ||
+             type.equals("//"));
+  }
   
+	/**
+     * A helper function for previousBrace().
+     * @param off the offset to start at
+     * @param dist the distance currently covered
+     */
+	private int _prevBraceHelp( int off, int dist,
+															 ModelList<ReducedToken>.Iterator copyCursor)
+    {
+			if (copyCursor.atEnd())
+				copyCursor.prev();
+      // if we're in the middle of the first brace element, we're
+      // not going to find any previous braces
+      if (copyCursor.atStart() || (copyCursor.atFirstItem() && (_offset == 0)))
+				{
+					return -1;
+				}
+      else
+				{
+					// if the cursor is beyond the start of the brace
+					if (( !copyCursor.current().isShadowed() ) &&
+              _isCurrentBraceMatchable(copyCursor))
+              
+						{
+							return dist + off;
+						}
+					else
+						{
+							// look at the previous brace element
+							copyCursor.prev();
+							dist += off;
+							dist = _prevBraceHelp( copyCursor.current().getSize(), dist,
+																		copyCursor);
+							return dist;
+						}
+				}
+    }
+  
+  /**
+   * A helper function for nextBrace().
+   * @param off the offset to start at
+   * @param dist the distance currently covered
+   */
+  private int _nextBraceHelp( int off, int dist,
+															 ModelList<ReducedToken>.Iterator copyCursor)
+    {
+			if ( copyCursor.atStart())
+				copyCursor.next();
+      // there are no braces on the last brace element - it's empty
+      if ( copyCursor.atEnd() )
+				{
+					return -1;
+				}
+      else
+				{
+					// if the cursor is just before the start of a brace
+					if (( !copyCursor.current().isShadowed() ) &&
+              _isCurrentBraceMatchable(copyCursor))
+						{
+							return dist - off;
+						}
+					else
+						{
+							dist += copyCursor.current().getSize() - off;
+							// look at the next brace element
+							copyCursor.next();
+							dist = _nextBraceHelp( 0, dist, copyCursor );
+							return dist;
+						}
+				}
+    }
+
+
   /**
    * <P>Finds the closing brace that matches the next significant
    * brace iff that brace is an open brace.</P>
@@ -1223,20 +1624,33 @@ private void _updateBasedOnCurrentStateHelper(
    * @see #nextBrace()
    */
   public int balanceForward()
-		{
-			return -1;
-		}
+    {
+      return _balance(true);
+    }
   
   /**
-   * <P>Finds the open brace that matches the previous significant
-   * brace iff that brace is an closing brace.</P>
+   * Finds the open brace that matches the previous significant
+   * brace iff that brace is an closing brace.
    * @return the distance until the matching open brace.  On
    * failure, returns -1.
    * @see #previousBrace()
    */
   public int balanceBackward()
-		{
+    { 
+			return _balance(false);
+    }
+  
+  /**
+   * An abstraction over balanceBackward() and balanceForward().
+   * This function was added to avoid unnecessary code duplication.
+   * @param fwd true implies forward matching, false implies
+   * backward matching
+   * @return the distance until the matching brace.  On
+   * failure, returns -1.
+   */
+  private int _balance(boolean fwd)
+
+    {
 			return -1;
 		}
-
 }

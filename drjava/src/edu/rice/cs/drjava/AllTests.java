@@ -8,6 +8,7 @@ import junit.extensions.*;
 
 public class AllTests
 {
+
   public static Test suite()
   {
     TestSuite allSuite = new TestSuite("All DrJava tests");

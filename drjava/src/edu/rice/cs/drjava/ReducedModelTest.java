@@ -222,20 +222,22 @@ public class ReducedModelTest extends TestCase {
 			assertEquals("#0.0","/",model1._cursor.current().getType());
 			model1._cursor.prev();
 			assertEquals("#0.1","*",model1._cursor.current().getType());
-			
 			// /____#*/
+			
 			model1._cursor.next();
 			model1.insertSlash();
-			model1._cursor.prev();
-			assertEquals("#1.0","//",model1._cursor.current().getType());
-			// /____*#//
-			model1._cursor.prev();
-			model1._cursor.prev();
+			assertEquals("#1.0",1,model1._offset);
+			model1.move(-2);
+			// /____#*//
+			assertEquals("#1.0","*",model1._cursor.current().getType());
+
+			model1.move(-4);
 			model1.insertStar();
 			// /*#____*//
 			assertEquals("#2.0","/*",model1._cursor.prevItem().getType());
 			assertEquals("#2.1",ReducedToken.FREE,
 									 model1._cursor.prevItem().getState());
+			assertEquals("#2.2",0,model1._offset);
 			model1._cursor.next();
 			assertEquals("#2.2","*/",model1._cursor.current().getType());
 			assertEquals("#2.3",ReducedToken.FREE,
@@ -864,9 +866,779 @@ public class ReducedModelTest extends TestCase {
 			}
 			assertTrue("#6.1", model1._cursor.current().isGap());
 			assertEquals("#6.2", 3, model1._offset);
-			
+
 		}
+
+//*********************THE DELETE TESTS************************************/
+
+	public void testDeleteSimple()
+		{ 
+			model1.insertSlash();
+			model1.insertSlash();
+			model1.move(-2);
+			
+			assertEquals("#0.0","//",model1._cursor.current().getType());
+			model1.delete(1);
+			
+			assertEquals("#1.0","/",model1._cursor.current().getType());
+			assertEquals("#1.1",0,model1._offset);
+			//System.out.println(model1.simpleString());
+	 		model1.insertSlash();
+			//System.out.println(model1.simpleString());
+			model1.delete(1);   //This time delete the second slash
+			//System.out.println(model1.simpleString());
+			assertEquals("#2.0","/",model1._cursor.prevItem().getType());
+			assertTrue("#2.1",model1._cursor.atEnd());
+			assertEquals("#2.2",0,model1._offset);
+
+			// /#
+			model1.move(-1);
+			model1.delete(1);
+			assertTrue("#3.0",model1._braces.isEmpty());
+
+			model1.insertGap(8);
+			model1.move(-6);
+			model1.delete(3);
+		 	assertEquals("#4.0",2,model1._offset);
+			assertEquals("#4.1",5,model1._cursor.current().getSize());
+
+			model1.move(3);
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertGap(6);
+			model1.move(-9);
+			assertEquals("#5.0",5,model1._cursor.current().getSize());
+			assertEquals("#5.1",true,model1._cursor.current().isGap());
+			assertEquals("#5.2","/*",model1._cursor.nextItem().getType());
+			assertEquals("#5.3",4,model1._offset);
+
+			//_____#_/*______
+			//System.out.println(model1.simpleString());
+			model1.delete(5);
+			assertEquals("#6.0",8,model1._cursor.current().getSize());
+			assertEquals("#6.1",true,model1._cursor.current().isGap());
+			assertEquals("#6.2",4,model1._offset);
+			assertTrue("#6.3",model1._cursor.atLastItem());
+		}
+
+		
+	public void testStartDeleteInDoubleBrace2()
+		{
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertGap(2);
+			model1.insertStar();
+			model1.insertSlash();
+			model1.insertGap(1);
+			//  /*__*/_#
+			model1.move(-6);
+			model1.delete(4);
+			//  /#/_
+
+			assertEquals("#0.0","//",model1._cursor.current().getType());
+			assertEquals("#0.2",1,model1._offset);
+			assertEquals("#0.3",ReducedToken.FREE,
+									 model1.getStateAtCurrent());
+			model1._cursor.next(); //move to tail, leave offset == 1
+			assertEquals("#0.4",ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.current().getState());
+		}
+
+	public void testStartDeleteInDoubleBrace3()
+		{
+			model1.insertSlash();
+			model1.insertGap(2);
+			model1.insertSlash();
+			model1.insertStar();
+			//  /__/*#
+			model1.move(-4);
+			model1.delete(2);
+			// /#/*
+			assertEquals("#0.0","//",model1._cursor.current().getType());
+			assertEquals("#0.1","*",model1._cursor.nextItem().getType());
+			assertEquals("#0.2",1,model1._offset);
+			assertEquals("#0.3",ReducedToken.FREE,
+									 model1.getStateAtCurrent());
+			assertEquals("#0.4",ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.nextItem().getState());
+			assertEquals("#0.4",ReducedToken.FREE,
+									 model1._cursor.current().getState());
+		}
+	public void testStartDeleteInDoubleBrace4()
+		{
+			model1.insertSlash();
+			model1.insertGap(2);
+			model1.insertSlash();
+			model1.insertSlash();
+			//  /__/*#
+			model1.move(-4);
+			model1.delete(2);
+			// /#/*
+			assertEquals("#0.0","//",model1._cursor.current().getType());
+			assertEquals("#0.1","/",model1._cursor.nextItem().getType());
+			assertEquals("#0.2",1,model1._offset);
+			assertEquals("#0.3",ReducedToken.FREE,
+									 model1.getStateAtCurrent());
+			assertEquals("#0.4",ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.nextItem().getState());
+			assertEquals("#0.5",ReducedToken.FREE,
+									 model1._cursor.current().getState());
+
+		}
+
+	public void testDeleteInsideGap()
+		{
+			model1.insertGap(15);
+			model1.move(-6);
+			model1.delete(4);
+		 	assertTrue("#0.0",model1._cursor.current().isGap());
+			assertEquals("#0.1",11, model1._cursor.current().getSize());
+			assertEquals("#0.2",9,model1._offset);
+		}
+
+public void testDeleteThroughToStar()
+		{
+			model1.insertSlash();
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertNewline();
+			model1.insertSlash();
+			model1.insertStar();
+			
+			assertEquals("#0.4",ReducedToken.FREE,
+									 model1._cursor.prevItem().getState());
+			// //*
+			// /*#
+			model1.move(-3);
+			model1.delete(1);
+			
+			assertEquals("#0.0","/",model1._cursor.current().getType());
+			assertEquals("#0.1","*",model1._cursor.prevItem().getType());
+			assertEquals("#0.2","*",model1._cursor.nextItem().getType());
+			assertEquals("#0.3",0,model1._offset);
+			assertEquals("#0.4",ReducedToken.INSIDE_LINE_COMMENT,
+									 model1.getStateAtCurrent());
+			assertEquals("#0.5",ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.prevItem().getState());
+		}
+
+	public void testStartDeleteInDoubleBrace()
+		{
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertGap(2);
+			model1.insertStar();
+			model1.insertSlash();
+			//  /*__*/#
+			
+			model1.move(-5);
+			model1.delete(3);
+			//  /#*/
+			assertEquals("#0.0","/*",model1._cursor.current().getType());
+			assertEquals("#0.1","/",model1._cursor.nextItem().getType());
+			assertEquals("#0.2",1,model1._offset);
+			assertEquals("#0.3",ReducedToken.FREE,
+									 model1.getStateAtCurrent());
+			assertEquals("#0.4",ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1._cursor.nextItem().getState());
+			assertEquals("#0.4",ReducedToken.FREE,
+									 model1._cursor.current().getState());
+
+			model1.delete(2);
+			//  /#
+			assertEquals("#1.0", "/", model1._cursor.prevItem().getType());
+			assertEquals("#1.1", 0, model1._offset);
+			assertEquals("#1.2", ReducedToken.FREE,
+									 model1.getStateAtCurrent());
+
+			model1.insertGap(4);
+			// /____#
+
+			model1.insertSlash();
+			model1.insertSlash();
+			// /____//#
+
+			model1.move(-6);
+			model1.delete(4);
+			// /#//
+			assertEquals("#2.0", "//", model1._cursor.current().getType());
+			assertEquals("#2.1", "/", model1._cursor.nextItem().getType());
+			assertEquals("#2.2", 1, model1._offset);
+			assertEquals("#2.3", ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.nextItem().getState());
+
+			model1.move(-1);
+			model1.delete(3);
+			// <empty>
+			assertTrue("#3.0", model1._braces.isEmpty());
+			assertEquals("#3.1", 0, model1._offset);
+
+			model1.insertSlash();
+			model1.insertGap(3);
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertNewline();
+			model1.insertGap(2);
+			model1.insertOpenParen();
+			model1.insertStar();
+			model1.insertSlash();
+			//  /___/*
+			//  __(*/#
+			model1.move(-3);
+			//  /___/*
+			//  __#(*/
+			assertEquals("#4.0", "(", model1._cursor.current().getType());
+			assertEquals("#4.1", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1._cursor.current().getState());
+			assertTrue("#4.2", model1._cursor.prevItem().isGap());
+			assertEquals("#4.3", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1._cursor.prevItem().getState());
+			assertEquals("#4.4", "*/", model1._cursor.nextItem().getType());
+			assertEquals("#4.5", ReducedToken.FREE,
+									 model1._cursor.nextItem().getState());
+			assertEquals("#4.3", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1.getStateAtCurrent());
+
+			model1.move(-8);
+			model1.delete(3);
+
+			//  /#/*
+			//  __(*/
+			assertEquals("#5.0", "//", model1._cursor.current().getType());
+			assertEquals("#5.1", 1, model1._offset);
+			assertEquals("#5.2", "*", model1._cursor.nextItem().getType());
+			assertEquals("#5.3", ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.nextItem().getState());
+
+			model1.move(6);
+			//  //*
+			//  __(#*/
+			assertEquals("#6.0", "*", model1._cursor.current().getType());
+			assertEquals("#6.1", 0, model1._offset);
+			assertEquals("#6.2", "(", model1._cursor.prevItem().getType());
+			assertEquals("#6.3", ReducedToken.FREE,
+									 model1._cursor.prevItem().getState());			
+			assertEquals("#6.4", ReducedToken.FREE,
+									 model1._cursor.current().getState());
+
+			model1.move(-6);
+			model1.delete(1);
+			//  /#*
+			//  __(*/
+			assertEquals("#7.0", "/*", model1._cursor.current().getType());
+			assertEquals("#7.1", 1, model1._offset);
+			assertEquals("#7.2", "\n", model1._cursor.nextItem().getType());
+			assertEquals("#7.3", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1._cursor.nextItem().getState());
+
+			model1.move(5);
+			assertEquals("#8.1", "(", model1._cursor.prevItem().getType());
+			assertEquals("#8.2", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1._cursor.prevItem().getState());
+			assertEquals("#8.3", "*/", model1._cursor.current().getType());
+			assertEquals("#8.4", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1.getStateAtCurrent());
+		}
+
+	public void testStartDeleteGap()
+		{
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertGap(2);
+			model1.insertStar();
+			model1.insertSlash();
+			//  /*__*/#
+			model1.move(-4);
+			model1.delete(2);
+			assertEquals("#0.0", "/*", model1._cursor.prevItem().getType());
+			assertEquals("#0.1", ReducedToken.FREE,
+									 model1._cursor.prevItem().getState());
+			assertEquals("#0.2", "*/", model1._cursor.current().getType());
+			assertEquals("#0.3", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1.getStateAtCurrent());
+			assertEquals("#0.4",0,model1._offset);
+		}
+
+	public void testDeleteToCloseBlock()
+		{
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertGap(2);
+			model1.insertStar();
+			model1.insertSlash();
+			//  /*__*/#
+			model1.move(-6);
+			model1.delete(4);
+		
+			assertEquals("#0.0", "*", model1._cursor.current().getType());
+			assertEquals("#0.1", ReducedToken.FREE,
+									 model1._cursor.current().getState());
+			assertEquals("#0.2", "/", model1._cursor.nextItem().getType());
+			assertEquals("#0.3", ReducedToken.FREE,
+									 model1.getStateAtCurrent());
+			assertEquals("#0.4", ReducedToken.FREE,
+									 model1._cursor.current().getState());
+			assertEquals("#0.5", ReducedToken.FREE,
+									 model1._cursor.nextItem().getState());
+			assertEquals("#0.6",0,model1._offset);
+		}
+public void testDeleteToLine()
+		{
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertGap(2);
+			model1.insertSlash();
+			model1.insertSlash();
+			//  /*__*/#
+			model1.move(-6);
+			model1.delete(4);
+
+			assertEquals("#0.0", "//", model1._cursor.current().getType());
+			assertEquals("#0.1", ReducedToken.FREE,
+									 model1._cursor.current().getState());
+			assertEquals("#0.3", ReducedToken.FREE,
+									 model1.getStateAtCurrent());
+			assertEquals("#0.4", ReducedToken.FREE,
+									 model1._cursor.current().getState());
+			assertEquals("#0.5",0,model1._offset);
+		}
+	
+	public void testCrazyDelete()
+		{
+			model1.insertSlash();
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertGap(2);
+			model1.insertNewline();
+			model1.insertSlash();
+			model1.insertSlash();
+
+			model1.move(-6);
+			model1.delete(4);
+			
+			assertEquals("#0.0", "/", model1._cursor.current().getType());
+			assertEquals("#0.1", ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.current().getState());
+			assertEquals("#0.2", "/", model1._cursor.nextItem().getType());
+			assertEquals("#0.3", ReducedToken.INSIDE_LINE_COMMENT,
+									 model1.getStateAtCurrent());
+			assertEquals("#0.4", ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.current().getState());
+			assertEquals("#0.5", ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.nextItem().getState());
+			assertEquals("#0.6",0,model1._offset);
+		}
+
+
+	public void testDeleteThroughToStar2()
+		{
+			model1.insertSlash();
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertNewline();
+			model1.insertSlash();
+			model1.insertStar();
+			
+			assertEquals("#0.4",ReducedToken.FREE,
+									 model1._cursor.prevItem().getState());
+			// //*
+			// /*#
+			model1.move(-2);
+			model1.delete(-1);
+			
+			assertEquals("#0.0","/",model1._cursor.current().getType());
+			assertEquals("#0.1","*",model1._cursor.prevItem().getType());
+			assertEquals("#0.2","*",model1._cursor.nextItem().getType());
+			assertEquals("#0.3",0,model1._offset);
+			assertEquals("#0.4",ReducedToken.INSIDE_LINE_COMMENT,
+									 model1.getStateAtCurrent());
+			assertEquals("#0.5",ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.prevItem().getState());
+		}
+
+	public void testStartDeleteInDoubleBrace5()
+		{
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertGap(2);
+			model1.insertStar();
+			model1.insertSlash();
+			//  /*__*/#
+			
+			model1.move(-2);
+			model1.delete(-3);
+			//  /#*/
+			assertEquals("#0.0","/*",model1._cursor.current().getType());
+			assertEquals("#0.1","/",model1._cursor.nextItem().getType());
+			assertEquals("#0.2",1,model1._offset);
+			assertEquals("#0.3",ReducedToken.FREE,
+									 model1.getStateAtCurrent());
+			assertEquals("#0.4",ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1._cursor.nextItem().getState());
+			assertEquals("#0.4",ReducedToken.FREE,
+									 model1._cursor.current().getState());
+			model1.move(2);
+			model1.delete(-2);
+			//  /#
+			assertEquals("#1.0", "/", model1._cursor.prevItem().getType());
+			assertEquals("#1.1", 0, model1._offset);
+			assertEquals("#1.2", ReducedToken.FREE,
+									 model1.getStateAtCurrent());
+
+			model1.insertGap(4);
+			// /____#
+
+			model1.insertSlash();
+			model1.insertSlash();
+			// /____//#
+
+			model1.move(-2);
+			model1.delete(-4);
+			// /#//
+			assertEquals("#2.0", "//", model1._cursor.current().getType());
+			assertEquals("#2.1", "/", model1._cursor.nextItem().getType());
+			assertEquals("#2.2", 1, model1._offset);
+			assertEquals("#2.3", ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.nextItem().getState());
+
+			model1.move(2);
+			model1.delete(-3);
+			// <empty>
+			assertTrue("#3.0", model1._braces.isEmpty());
+			assertEquals("#3.1", 0, model1._offset);
+
+			model1.insertSlash();
+			model1.insertGap(3);
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertNewline();
+			model1.insertGap(2);
+			model1.insertOpenParen();
+			model1.insertStar();
+			model1.insertSlash();
+			//  /___/*
+			//  __(*/#
+			model1.move(-3);
+			//  /___/*
+			//  __#(*/
+			assertEquals("#4.0", "(", model1._cursor.current().getType());
+			assertEquals("#4.1", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1._cursor.current().getState());
+			assertTrue("#4.2", model1._cursor.prevItem().isGap());
+			assertEquals("#4.3", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1._cursor.prevItem().getState());
+			assertEquals("#4.4", "*/", model1._cursor.nextItem().getType());
+			assertEquals("#4.5", ReducedToken.FREE,
+									 model1._cursor.nextItem().getState());
+			assertEquals("#4.3", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1.getStateAtCurrent());
+
+			model1.move(-5);
+			model1.delete(-3);
+
+			//  /#/*
+			//  __(*/
+			assertEquals("#5.0", "//", model1._cursor.current().getType());
+			assertEquals("#5.1", 1, model1._offset);
+			assertEquals("#5.2", "*", model1._cursor.nextItem().getType());
+			assertEquals("#5.3", ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.nextItem().getState());
+
+			model1.move(6);
+			//  //*
+			//  __(#*/
+			assertEquals("#6.0", "*", model1._cursor.current().getType());
+			assertEquals("#6.1", 0, model1._offset);
+			assertEquals("#6.2", "(", model1._cursor.prevItem().getType());
+			assertEquals("#6.3", ReducedToken.FREE,
+									 model1._cursor.prevItem().getState());			
+			assertEquals("#6.4", ReducedToken.FREE,
+									 model1._cursor.current().getState());
+
+			model1.move(-5);
+			model1.delete(-1);
+			//  /#*
+			//  __(*/
+			assertEquals("#7.0", "/*", model1._cursor.current().getType());
+			assertEquals("#7.1", 1, model1._offset);
+			assertEquals("#7.2", "\n", model1._cursor.nextItem().getType());
+			assertEquals("#7.3", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1._cursor.nextItem().getState());
+
+			model1.move(5);
+			assertEquals("#8.1", "(", model1._cursor.prevItem().getType());
+			assertEquals("#8.2", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1._cursor.prevItem().getState());
+			assertEquals("#8.3", "*/", model1._cursor.current().getType());
+			assertEquals("#8.4", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1.getStateAtCurrent());
+		}
+
+	public void testStartDeleteGap2()
+		{
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertGap(2);
+			model1.insertStar();
+			model1.insertSlash();
+			//  /*__*/#
+			model1.move(-2);
+			model1.delete(-2);
+			assertEquals("#0.0", "/*", model1._cursor.prevItem().getType());
+			assertEquals("#0.1", ReducedToken.FREE,
+									 model1._cursor.prevItem().getState());
+			assertEquals("#0.2", "*/", model1._cursor.current().getType());
+			assertEquals("#0.3", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model1.getStateAtCurrent());
+			assertEquals("#0.4",0,model1._offset);
+		}
+
+	public void testDeleteToCloseBlock2()
+		{
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertGap(2);
+			model1.insertStar();
+			model1.insertSlash();
+			//  /*__*/#
+			model1.move(-2);
+			model1.delete(-4);
+		
+			assertEquals("#0.0", "*", model1._cursor.current().getType());
+			assertEquals("#0.1", ReducedToken.FREE,
+									 model1._cursor.current().getState());
+			assertEquals("#0.2", "/", model1._cursor.nextItem().getType());
+			assertEquals("#0.3", ReducedToken.FREE,
+									 model1.getStateAtCurrent());
+			assertEquals("#0.4", ReducedToken.FREE,
+									 model1._cursor.current().getState());
+			assertEquals("#0.5", ReducedToken.FREE,
+									 model1._cursor.nextItem().getState());
+			assertEquals("#0.6",0,model1._offset);
+		}
+public void testDeleteToLine2()
+		{
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertGap(2);
+			model1.insertSlash();
+			model1.insertSlash();
+			//  /*__*/#
+			model1.move(-2);
+			model1.delete(-4);
+
+			assertEquals("#0.0", "//", model1._cursor.current().getType());
+			assertEquals("#0.1", ReducedToken.FREE,
+									 model1._cursor.current().getState());
+			assertEquals("#0.3", ReducedToken.FREE,
+									 model1.getStateAtCurrent());
+			assertEquals("#0.4", ReducedToken.FREE,
+									 model1._cursor.current().getState());
+			assertEquals("#0.5",0,model1._offset);
+		}
+	
+	public void testCrazyDelete2()
+		{
+			model1.insertSlash();
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertGap(2);
+			model1.insertNewline();
+			model1.insertSlash();
+			model1.insertSlash();
+
+			model1.move(-2);
+			model1.delete(-4);
+			
+			assertEquals("#0.0", "/", model1._cursor.current().getType());
+			assertEquals("#0.1", ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.current().getState());
+			assertEquals("#0.2", "/", model1._cursor.nextItem().getType());
+			assertEquals("#0.3", ReducedToken.INSIDE_LINE_COMMENT,
+									 model1.getStateAtCurrent());
+			assertEquals("#0.4", ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.current().getState());
+			assertEquals("#0.5", ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.nextItem().getState());
+			assertEquals("#0.6",0,model1._offset);
+		}
+
+
+	public void testDeleteSimple2()
+		{ 
+			model1.insertSlash();
+			model1.insertSlash();
+			model1.move(-1);
+			
+			assertEquals("#0.0","//",model1._cursor.current().getType());
+			model1.delete(-1);
+			
+			assertEquals("#1.0","/",model1._cursor.current().getType());
+			assertEquals("#1.1",0,model1._offset);
+	 		model1.insertSlash();
+
+			model1.move(1);
+			model1.delete(-1);   //This time delete the second slash
+
+			assertEquals("#2.0","/",model1._cursor.prevItem().getType());
+			assertTrue("#2.1",model1._cursor.atEnd());
+			assertEquals("#2.2",0,model1._offset);
+
+			// /#
+			model1.delete(-1);
+			assertTrue("#3.0",model1._braces.isEmpty());
+
+			model1.insertGap(8);
+			model1.move(-3);
+			model1.delete(-3);
+		 	assertEquals("#4.0",2,model1._offset);
+			assertEquals("#4.1",5,model1._cursor.current().getSize());
+
+			model1.move(3);
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertGap(6);
+			model1.move(-9);
+			assertEquals("#5.0",5,model1._cursor.current().getSize());
+			assertEquals("#5.1",true,model1._cursor.current().isGap());
+			assertEquals("#5.2","/*",model1._cursor.nextItem().getType());
+			assertEquals("#5.3",4,model1._offset);
+
+			//_____#_/*______
+			//System.out.println(model1.simpleString());
+			model1.move(5);
+			model1.delete(-5);
+			assertEquals("#6.0",8,model1._cursor.current().getSize());
+			assertEquals("#6.1",true,model1._cursor.current().isGap());
+			assertEquals("#6.2",4,model1._offset);
+			assertTrue("#6.3",model1._cursor.atLastItem());
+		}
+
+		
+	public void testStartDeleteInDoubleBrace6()
+		{
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertGap(2);
+			model1.insertStar();
+			model1.insertSlash();
+			model1.insertGap(1);
+			//  /*__*/_#
+			model1.move(-2);
+			model1.delete(-4);
+			//  /#/_
+
+			assertEquals("#0.0","//",model1._cursor.current().getType());
+			assertEquals("#0.2",1,model1._offset);
+			assertEquals("#0.3",ReducedToken.FREE,
+									 model1.getStateAtCurrent());
+			model1._cursor.next(); //move to tail, leave offset == 1
+			assertEquals("#0.4",ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.current().getState());
+		}
+
+	public void testStartDeleteInDoubleBrace7()
+		{
+			model1.insertSlash();
+			model1.insertGap(2);
+			model1.insertSlash();
+			model1.insertStar();
+			//  /__/*#
+			model1.move(-2);
+			model1.delete(-2);
+			// /#/*
+			assertEquals("#0.0","//",model1._cursor.current().getType());
+			assertEquals("#0.1","*",model1._cursor.nextItem().getType());
+			assertEquals("#0.2",1,model1._offset);
+			assertEquals("#0.3",ReducedToken.FREE,
+									 model1.getStateAtCurrent());
+			assertEquals("#0.4",ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.nextItem().getState());
+			assertEquals("#0.4",ReducedToken.FREE,
+									 model1._cursor.current().getState());
+		}
+	public void testStartDeleteInDoubleBrace8()
+		{
+			model1.insertSlash();
+			model1.insertGap(2);
+			model1.insertSlash();
+			model1.insertSlash();
+			//  /__/*#
+			model1.move(-2);
+			model1.delete(-2);
+			// /#/*
+			assertEquals("#0.0","//",model1._cursor.current().getType());
+			assertEquals("#0.1","/",model1._cursor.nextItem().getType());
+			assertEquals("#0.2",1,model1._offset);
+			assertEquals("#0.3",ReducedToken.FREE,
+									 model1.getStateAtCurrent());
+			assertEquals("#0.4",ReducedToken.INSIDE_LINE_COMMENT,
+									 model1._cursor.nextItem().getState());
+			assertEquals("#0.5",ReducedToken.FREE,
+									 model1._cursor.current().getState());
+
+		}
+
+	public void testDeleteInsideGap2()
+		{
+			model1.insertGap(15);
+			model1.move(-2);
+			model1.delete(-4);
+		 	assertTrue("#0.0",model1._cursor.current().isGap());
+			assertEquals("#0.1",11, model1._cursor.current().getSize());
+			assertEquals("#0.2",9,model1._offset);
+		}
+
+	public void testDeleteMakeBlockCommentStart()
+		{
+			model1.insertSlash();
+			model1.insertGap(3);
+			model1.insertStar();
+			model1.move(-1);
+			model1.delete(-3);
+
+			assertEquals("#0.0", "/*", model1._cursor.current().getType());
+			assertEquals("#0.1", 1, model1._offset);
+		}
+
+	public void testDeleteCloseOpenBlockComment()
+		{
+			model1.insertSlash();
+			model1.insertStar();
+			model1.insertGap(1);
+			model1.insertStar();
+			model1.insertGap(2);
+			model1.insertSlash();
+			model1.move(-1);
+			model1.delete(-2);
+
+			assertEquals("#0.0", "*/", model1._cursor.current().getType());
+			assertEquals("#0.1", 1, model1._offset);
+			model1.move(1);
+			assertEquals("#0.2", ReducedToken.FREE,
+									 model1.getStateAtCurrent());
+		}
+
+	public void testDeleteMakeLineCommentStart()
+		{
+			model1.insertSlash();
+			model1.insertGap(3);
+			model1.insertSlash();
+			model1.move(-1);
+			model1.delete(-3);
+
+			assertEquals("#0.0", "//", model1._cursor.current().getType());
+			assertEquals("#0.1", 1, model1._offset);
+		}
+
+	
 }
+
+
+
+
+
+
 
 
 
