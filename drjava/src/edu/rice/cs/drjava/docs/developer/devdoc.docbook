@@ -123,12 +123,6 @@
           </formalpara>
         </listitem>
 
-        <listitem>
-          <formalpara>
-            <title>Emacs</title>
-            <para>If you will be committing code, you will need to have a text editor that can open in a new window; we recommend Emacs.  Most Unix and Linux systems already have Emacs installed.  For Windows, download the latest version from <ulink url="http://ftp.gnu.org/gnu/windows/emacs/latest/">http://ftp.gnu.org/gnu/windows/emacs/latest/</ulink>, then decompress the package (using WinZip) to a convenient folder (eg. <filename>c:\emacs-21.1</filename>).  You can also run the included <filename>addpm.exe</filename> to put Emacs in the Start menu.  For Mac OS X 10.2, you can download Emacs as an application from <ulink url="http://mindlube.com/developer/">http://mindlube.com/developer</ulink>.  Users with earlier versions of Mac OS X will need to install Emacs with an X server, such as OroborOSX.  (Contact a DrJava project administrator for help, if you need it.)</para>
-          </formalpara>
-        </listitem>
       </itemizedlist>
     </section>
 
@@ -385,9 +379,6 @@ ant clean compile
             <title>Committing changes: "<literal>commit</literal>"</title>
             <para>This will commit the code on your computer to the CVS repository.  This task incorporates most of the other tasks:  it updates your code to ensure it is not out of date, it compiles your code, and it runs all the unit tests.  If these tasks pass, it will ask for a commit message and commit the code.  If you have not set up an SSH key pair (see <link linkend="env-sf-keypair">Sourceforge SSH Key Pairs</link>), you will have to enter your Sourceforge password several times.  (Once to update, once to commit, and once to tag the code for a potential release.)</para>
           </formalpara>
-<!--
-          <para><emphasis>Important Note:</emphasis> This task requires that you can open Emacs in a separate window.  Ant will not allow you to enter the commit comments in the console.  On most Unix systems, this is not a problem.  (If you are developing on Unix through a Windows SSH session, you will need to have X-Win32 running.)  On Windows, you will need to have Emacs set up correctly.  On Mac OS X, you will need an X server (either Apple's or OrobosOSX/XDarwin) and a copy of Emacs that opens in a new window (eg. from Fink).</para>
--->
         </listitem>
 
       </itemizedlist>
