@@ -399,11 +399,6 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
   public List<OpenDefinitionsDocument> getProjectDocuments();
   
   /**
-   * @return the directory that the class files should be stored after compilation
-   */
-  public File getBuildDirectory();
-  
-  /**
    * @return true if the model has a project open, false otherwise.
    */
   public boolean isProjectActive();
@@ -413,16 +408,31 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    */
   public File getProjectFile();
   
-   /**
+  /**
    * Sets the current built directory
    */
   public void setBuildDirectory(File f);
   
   /**
-   * Return all files currently saved as source files in the project file
-   * If not in project mode, returns null
+   * @return the directory that the class files should be stored after compilation
    */
   public File[] getProjectFiles();
+
+  /**
+   * @return the directory that the class files should be stored after compilation
+   */
+  public File getBuildDirectory();
+
+  /**
+   * Sets the main file of the project
+   */
+  public void setJarMainClass(File f);
+  
+  /**
+   * Return the main file for the project
+   * If not in project mode, returns null
+   */
+  public File getJarMainClass();
   
   /**
    * Returns true the given file is in the current project file.

@@ -41,8 +41,9 @@ public class ProjectFileBuilder
     _classpathFiles.add(sf);
   }
   
-  public void addJarFile(File sf)
+  public void setJarMainClass(File sf)
   {
+    _jarFiles.clear();
     _jarFiles.add(sf);
   }
   

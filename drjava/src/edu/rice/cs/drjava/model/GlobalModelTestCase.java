@@ -652,6 +652,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       filePathContainsPoundCount = 0;
     }
 
+    
+    public void projectRunnableChanged(){ }
+    
     /**
      * Appends the stack trace from the listener's creation to the
      * end of the given failure message.

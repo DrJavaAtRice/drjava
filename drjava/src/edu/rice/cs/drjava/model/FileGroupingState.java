@@ -58,13 +58,6 @@ import java.io.File;
 public interface FileGroupingState {
   
   /**
-   * Returns the directory in which to put the class files
-   * after compilation
-   * @return null if no build directory is specified
-   */
-  public File getBuildDirectory();
-  
-  /**
    * @return true if the model is in project mode, false otherwise
    */
   public boolean isProjectActive();
@@ -82,9 +75,28 @@ public interface FileGroupingState {
   public File getProjectFile();
   
   /**
+   * Returns the directory in which to put the class files
+   * after compilation
+   * @return null if no build directory is specified
+   */
+  public File getBuildDirectory();
+  
+  /**
    * Sets the current built directory
    */
   public void setBuildDirectory(File f);
+  
+  /**
+   * Returns the source file that has the main method of the project
+   * @return null if no build directory is specified
+   */
+  public File getJarMainClass();
+  
+  /**
+   * Sets the file that has the main method of the project
+   * (Note: should point to the sourcefile of the document, not the class file)
+   */
+  public void setJarMainClass(File f);
   
   /**
    * Return all files currently saved as source files in the project file

@@ -231,7 +231,7 @@ public class TagFactory {
       if( ch == -1 ) {
         throw new MalformedProjectFileException("End of file reached while searching for char " + c + " in the project file");
       }
-      /* return false if we encounter the end tag, this signifies that there are no more entries */
+      /* return false if _readAllEntries(SOURCE_TAG, projFile, r)we encounter the end tag, this signifies that there are no more entries */
       if( (char)ch == END_TAG ) {
         return false;
       }

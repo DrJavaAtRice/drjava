@@ -100,7 +100,7 @@ public class ProjectFileParser {
     public File[] getResourceFiles() {
       return _resource.entries();
     }
-    
+
     /**
      * @return an array of the single build directory for this project file
      */
@@ -118,8 +118,8 @@ public class ProjectFileParser {
     /**
      * @return an the name of the Jar main class associated with this project
      */
-    public String getJarMainClass() {
-      return _jar.entries()[0].getName();
-    } 
+    public File getJarMainClass() {
+      return (_jar.entries().length > 0) ? _jar.entries()[0] : null;
+    }
   }
 }

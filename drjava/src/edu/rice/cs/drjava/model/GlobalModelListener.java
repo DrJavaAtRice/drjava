@@ -139,5 +139,7 @@ public interface GlobalModelListener extends InteractionsListener,
    * Called when saving a file whose path contains a '#' symbol.
    */
   public void filePathContainsPound();
+  
+  public void projectRunnableChanged();
 }
 

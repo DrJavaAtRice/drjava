@@ -387,6 +387,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
+  private Action _runProjectAction = new AbstractAction("Run") {
+    public void actionPerformed(ActionEvent ae) {
+      _runProject();
+    }
+  };
+
   /**
    * Sets the document in the definitions pane to a new templated junit test class.
    */
@@ -2045,14 +2051,14 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   void openProject(FileOpenSelector projectSelector) {
-    if(_model.isProjectActive())    
-      _closeProject();    
     try {
       hourglassOn();
       final File[] file = projectSelector.getFiles();
       if( file.length < 1 ) {
         throw new IllegalStateException("Open project file selection not canceled but no project file was selected.");
       }
+      if(_model.isProjectActive())    
+        _closeProject();    
       _openProjectHelper(file[0]);
     }
     catch(OperationCanceledException oce) {
@@ -2091,46 +2097,32 @@ public class MainFrame extends JFrame implements OptionConstants {
       return;
     }
 
-    
-    /**
-     * now the model
-     */
     List<OpenDefinitionsDocument> nonProjDocs = _model.getNonProjectDocuments();
     List<OpenDefinitionsDocument> projDocs = _model.getProjectDocuments();
+    File[] projectFiles = _model.getProjectFiles();
     
-    
-    /**
-     * close all project files
-     */
-//    for(OpenDefinitionsDocument d: projDocs){
-//      _model.closeFile(d);
-//    }
-      
-    closeFiles(projDocs);
     
     /**
      * keep all nonproject files open
      */
     IDocumentNavigator nav = _model.getDocumentNavigator();
-//    nav.clear();
 
-//    for(OpenDefinitionsDocument d: nonProjDocs){
-//      System.err.println("adding" + d);
-//      try{
-//        /* transfer docs with files to new navigator */
-//        nav.addDocument(_model.getIDocGivenODD(d), d.getFile().getParentFile().getAbsolutePath());
-//      }catch(IllegalStateException e){
-//        /* transfer untitled docs to new navigator */
-//        nav.addDocument(_model.getIDocGivenODD(d));
-//      }catch(FileMovedException e){
-//        /* if the file has moved or been deleted,
-//         * then add it to external files, since it's
-//         * "no longer in the project directory"
-//         */
-//        nav.addDocument(_model.getIDocGivenODD(d));
-//      }
-//    }
     
+    // close all project files
+    List<OpenDefinitionsDocument> docsToClose = new LinkedList<OpenDefinitionsDocument>();
+    for(OpenDefinitionsDocument d: projDocs){
+      if(d.isProjectFile()){
+        docsToClose.add(d);
+      }else{
+        try{
+          nav.refreshDocument(_model.getIDocGivenODD(d), d.getFile().getParentFile().getCanonicalPath());
+        }catch(IOException e){
+          // noop
+        }
+      }
+    }
+
+    closeFiles(docsToClose);
     
     final File[] files = srcFiles;
     // project could be empty
@@ -2668,6 +2660,37 @@ public class MainFrame extends JFrame implements OptionConstants {
     worker.start();
   }
 
+  
+  private void _runProject(){
+    try {
+      final File f = _model.getJarMainClass();
+      if(f != null){
+        open(new FileOpenSelector(){
+          public File[] getFiles() {
+            return new File[]{ f };
+          }
+        });
+        _model.getActiveDocument().runMain();
+      }
+    }
+    catch (ClassNameNotFoundException e) {
+      // Display a warning message if a class name can't be found.
+      String msg =
+        "DrJava could not find the top level class name in the\n" +
+        "current document, so it could not run the class.  Please\n" +
+        "make sure that the class is properly defined first.";
+
+      JOptionPane.showMessageDialog(MainFrame.this, msg, "No Class Found",
+                                    JOptionPane.ERROR_MESSAGE);
+    }
+    catch (FileMovedException fme) {
+      _showFileMovedError(fme);
+    }
+    catch (IOException ioe) {
+      _showIOError(ioe);
+    }
+  }
+  
   /**
    * Internal helper method to run the main method of the current document in
    * the interactions pane.
@@ -3474,6 +3497,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     _addMenuItem(projectMenu, _closeProjectAction, KEY_CLOSE_PROJECT);
 
     projectMenu.addSeparator();
+    // run project
+    _runProjectAction.setEnabled(false);
+    projectMenu.add(_runProjectAction);
+    
+    projectMenu.addSeparator();
     // eventually add project options
     projectMenu.add(_projectPropertiesAction);
     
@@ -3951,6 +3979,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _tabbedPane.addChangeListener(new ChangeListener () {
       public void stateChanged(ChangeEvent e) {
         clearStatusMessage();
+
         if (_tabbedPane.getSelectedComponent() == _interactionsContainer) {
           /**
            * This was probably a bad design decision but I couldn't think
@@ -3973,13 +4002,14 @@ public class MainFrame extends JFrame implements OptionConstants {
         else if (_tabbedPane.getSelectedComponent() == _consoleScroll) {
           _consolePane.requestFocus();
         }
+
         // Update error highlights?
         if (_currentDefPane != null) {
           int pos = _currentDefPane.getCaretPosition();
           _currentDefPane.removeErrorHighlight();
           _currentDefPane.getErrorCaretListener().updateHighlight(pos);
         }
-      }
+}
     });
 
     //_interactionsWithSyncPanel = new JPanel(new BorderLayout());
@@ -5618,6 +5648,15 @@ public class MainFrame extends JFrame implements OptionConstants {
           _interactionsController.getConsoleDoc().insertNewLine(caretPos);
         }
       });
+    }
+    
+    
+    public void projectRunnableChanged(){
+      if(_model.getJarMainClass() != null && _model.getJarMainClass().exists()){
+        _runProjectAction.setEnabled(true);
+      }else{
+        _runProjectAction.setEnabled(false);
+      }
     }
   }
 

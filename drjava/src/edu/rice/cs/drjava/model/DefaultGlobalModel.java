@@ -293,6 +293,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     _interpreterControl.startInterpreterJVM();
     
     setFileGroupingState(_makeFlatFileGroupingState());
+    _notifier.projectRunnableChanged();
   }
 
   /**
@@ -357,17 +358,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   public void setFileGroupingState(FileGroupingState state){
     _state = state;
+    _notifier.projectRunnableChanged();
   }
   
   public FileGroupingState getFileGroupingState(){
     return _state;
-  }
-  
-   /**
-   * Sets the current built directory
-   */
-  public void setBuildDirectory(File f) {
-    _state.setBuildDirectory(f);
   }
   
   /**
@@ -383,16 +378,81 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public boolean isProjectChanged() {
     return _state.isProjectChanged();
   }
+    
+  /**
+   * @return true if the model has a project open, false otherwise.
+   */
+  public boolean isProjectActive(){
+    return _state.isProjectActive();
+  }
   
-  public FileGroupingState _makeProjectFileGroupingState(final File buildDir, final File projectFile, final File[] projectFiles) { 
+  /**
+   * @return the file that points to the current project file. Null if not currently in project view
+   */
+  public File getProjectFile() {
+    return _state.getProjectFile();
+  }
+  
+  /**
+   * Return all files currently saved as source files in the project file
+   * If not in project mode, returns null
+   */
+  public File[] getProjectFiles() {
+    return _state.getProjectFiles();
+  }
+  
+  /**
+   * Returns true the given file is in the current project file.
+   */
+  public boolean isProjectFile(File f) {
+    return _state.isProjectFile(f);
+  }
+   
+  /**
+   * a file is in the project if the source root is the same as the
+   * project root. this means that project files must be saved at the
+   * source root. (we query the model through the model's state)
+   */
+  public boolean isInProjectPath(OpenDefinitionsDocument doc) {
+    return _state.isInProjectPath(doc);
+  }
+  
+   /**
+   * Sets the class with the project's main method
+   */
+  public void setJarMainClass(File f) {
+    _state.setJarMainClass(f);
+    _notifier.projectRunnableChanged();
+  }
+  
+  /**
+   * @return the class with the project's main method
+   */
+  public File getJarMainClass(){
+    return _state.getJarMainClass();
+  }
+
+   /**
+   * Sets the class with the project's main method
+   */
+  public void setBuildDirectory(File f) {
+    _state.setBuildDirectory(f);
+  }
+  
+  /**
+   * @return the class with the project's main method
+   */
+  public File getBuildDirectory(){
+    return _state.getBuildDirectory();
+  }
+
+  public FileGroupingState _makeProjectFileGroupingState(final File jarMainClass, final File buildDir, final File projectFile, final File[] projectFiles) { 
     return new FileGroupingState(){
       private File _builtDir = buildDir;
       
-      private boolean _isProjectChanged = false;
+      private File _mainFile = jarMainClass;
       
-      public File getBuildDirectory(){
-        return _builtDir;
-      }
+      private boolean _isProjectChanged = false;
       
       public boolean isProjectActive(){
         return true;
@@ -444,8 +504,20 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return projectFiles;
       }
       
+      public File getBuildDirectory(){
+        return _builtDir;
+      }
+      
       public void setBuildDirectory(File f) {
         _builtDir = f;
+      }
+      
+      public File getJarMainClass(){
+        return _mainFile;
+      }
+      
+      public void setJarMainClass(File f) {
+        _mainFile = f;
       }
       
       public boolean isProjectChanged() {
@@ -475,7 +547,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return null;
       }
       public void setBuildDirectory(File f) {
-        //Do nothing
+        // noop, this action is not applicable for flat file
       }
       public File[] getProjectFiles() {
         return null;
@@ -484,7 +556,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return false;
       }
       
-       public boolean isProjectChanged() {
+      public File getJarMainClass(){
+        return null;
+      }
+      
+      public void setJarMainClass(File f) {
+        // noop, this action is not applicable for flat file
+      }
+
+      public boolean isProjectChanged() {
         return false;
       }
       
@@ -493,52 +573,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       }
     };
   }
-  
-  /**
-   * @return the directory that the class files should be stored after compilation
-   */
-  public File getBuildDirectory(){
-    return _state.getBuildDirectory();
-  }
-  
-  /**
-   * @return true if the model has a project open, false otherwise.
-   */
-  public boolean isProjectActive(){
-    return _state.isProjectActive();
-  }
-  
-  /**
-   * @return the file that points to the current project file. Null if not currently in project view
-   */
-  public File getProjectFile() {
-    return _state.getProjectFile();
-  }
-  
-  /**
-   * Return all files currently saved as source files in the project file
-   * If not in project mode, returns null
-   */
-  public File[] getProjectFiles() {
-    return _state.getProjectFiles();
-  }
-  
-  /**
-   * Returns true the given file is in the current project file.
-   */
-  public boolean isProjectFile(File f) {
-    return _state.isProjectFile(f);
-  }
-   
-  /**
-   * a file is in the project if the source root is the same as the
-   * project root. this means that project files must be saved at the
-   * source root. (we query the model through the model's state)
-   */
-  public boolean isInProjectPath(OpenDefinitionsDocument doc) {
-    return _state.isInProjectPath(doc);
-  }
-  
   
   // ----- METHODS -----
   /**
@@ -856,13 +890,20 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     if(f != null)
       builder.setBuildDir(f);
     
+    // add jar main class
+    File mainClass = getJarMainClass();
+    //System.out.println(f);
+    if(mainClass != null){
+      builder.setJarMainClass(mainClass);
+    }
+    
     //Tried to use .toArray and a cast but always seemed to throw a class cast exception
     Vector<File> srcFileVector = builder.getSourceFiles();
     File [] srcFiles = new File[srcFileVector.size()];
     for(int i = 0; i<srcFileVector.size(); i++)
       srcFiles[i] = srcFileVector.elementAt(i);
     
-    setFileGroupingState(_makeProjectFileGroupingState(f, new File(filename), srcFiles));
+    setFileGroupingState(_makeProjectFileGroupingState(mainClass, f, new File(filename), srcFiles));
     
     // write to disk
     FileWriter fw = new FileWriter(filename);
@@ -889,7 +930,17 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     setDocumentNavigator(newNav);
     
     File buildDir = (ir.getBuildDirectory().length > 0) ? ir.getBuildDirectory()[0] : null;
-    setFileGroupingState(_makeProjectFileGroupingState(buildDir, projectFile, srcFiles));
+    File mainClass;
+    try{
+      mainClass = ir.getJarMainClass();
+      if(mainClass != null){
+        mainClass = new File(projectFile.getParentFile().getPath(), mainClass.getPath()).getCanonicalFile();
+      }
+    }catch(IOException e){
+      mainClass = null;
+    }
+    
+    setFileGroupingState(_makeProjectFileGroupingState(mainClass, buildDir, projectFile, srcFiles));
     
     
     String projfilepath = projectFile.getCanonicalPath();
@@ -1693,7 +1744,21 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public boolean isInProjectPath(){
       return _state.isInProjectPath(this);
     }
-    
+
+        
+    /**
+     * a file is in the project if the source root is the same as the
+     * project root. this means that project files must be saved at the
+     * source root. (we query the model through the model's state)
+     */
+    public boolean isProjectFile(){
+      if(!isUntitled()){
+        return _state.isProjectFile(_file);
+      }else{
+        return false;
+      }
+    }
+
     /**
      * makes a default DDReconstructor that will make a Document based on if the Handler has a file or not
      */

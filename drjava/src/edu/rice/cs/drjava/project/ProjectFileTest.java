@@ -71,7 +71,7 @@ public class ProjectFileTest extends TestCase {
   private static final String CLASSPATH_ENTRY_1 = "(" + CLASSPATH_1 + ")\n";
   private static final String CLASSPATH_ENTRY_2 = "(" + CLASSPATH_2 + ")\n";
   private static final String CLASSPATH_ENTRY_3 = "(" + CLASSPATH_3 + ")\n";
-  private static final String JAR_MAIN_CLASS = "edu.rice.cs.drjava.DrJava";
+  private static final String JAR_MAIN_CLASS = "drjava/DrJava.java";
   private static final String JAR_ENTRY = "(" + JAR_MAIN_CLASS + ")\n";
   
   /** the temporary file used to read from */
@@ -180,7 +180,7 @@ public class ProjectFileTest extends TestCase {
     JarTag tag = TagFactory.makeJarTag(testFile, reader);
     
     assertTrue( tag.entries().length == 1 );
-    assertTrue(tag.entries()[0].getName().equals(JAR_MAIN_CLASS));
+    assertTrue(tag.entries()[0].getPath().equals(JAR_MAIN_CLASS));
   }
   
   public void testParser() throws Exception {
@@ -203,6 +203,6 @@ public class ProjectFileTest extends TestCase {
     assertTrue(ir.getClasspath()[1].getAbsolutePath().equals(CLASSPATH_2));
     assertTrue(ir.getClasspath()[2].getAbsolutePath().equals(CLASSPATH_3));
     
-    assertTrue(ir.getJarMainClass().equals(JAR_MAIN_CLASS));
+    assertTrue(ir.getJarMainClass().getPath().equals(JAR_MAIN_CLASS));
   }
 }

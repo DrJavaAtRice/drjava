@@ -75,6 +75,13 @@ import edu.rice.cs.javalanglevels.tree.*;
 public class DefaultCompilerModel implements CompilerModel {
 
   /**
+   * returns file extensions of files types that we can compile
+   */
+  private String[] getCompilableExtensions(){
+    return new String[]{".java", ".dj0", ".dj1", ".dj2"};
+  }
+  
+  /**
    * Manages listeners to this model.
    */
   private final CompilerEventNotifier _notifier = new CompilerEventNotifier();
@@ -195,10 +202,22 @@ public class DefaultCompilerModel implements CompilerModel {
       File[] sourceRoots = getSourceRootSet();
       ArrayList<File> filesToCompile = new ArrayList<File>();
 
+      File f;
+      String[] exts = getCompilableExtensions();
+      boolean okToAdd;
       for (int i = 0; i < defDocs.size(); i++) {
         OpenDefinitionsDocument doc = defDocs.get(i);
         try {
-          filesToCompile.add(doc.getFile());
+          f = doc.getFile();
+          okToAdd = false;
+          for(String ext: exts){
+            if(f.getName().endsWith(ext)){
+              okToAdd = true;
+            }
+          }
+          if(okToAdd){
+            filesToCompile.add(f);
+          }
         }
         catch (IllegalStateException ise) {
           // No file for this document; skip it

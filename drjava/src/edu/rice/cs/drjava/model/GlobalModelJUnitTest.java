@@ -61,7 +61,30 @@ import edu.rice.cs.drjava.model.junit.*;
 public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /** Whether or not to print debugging output. */
   static final boolean printMessages = false;
-
+  
+  
+  private static final String ELSPETH_ERROR_TEXT = 
+    "import junit.framework.TestCase;" +
+    "public class Elspeth extends TestCase {" +
+    "    public void testMe() {" +
+    "        String s = \"elspeth\";" +
+    "        assertEquals(\"they match\", s, \"elspeth4\");" +
+    "    }" +
+    "  public Elspeth() {" +
+    "    super();" +
+    "  }" +
+    "  public java.lang.String toString() {" +
+    "    return \"Elspeth(\" + \")\";" +
+    "  }" +
+    "  public boolean equals(java.lang.Object o) {" +
+    "    if ((o == null) || getClass() != o.getClass()) return false;" +
+    "    return true;" +
+    "  }" +
+    "  public int hashCode() {" +
+    "    return getClass().hashCode();" +
+    "  }" +
+    "}";
+  
   private static final String MONKEYTEST_PASS_TEXT =
     "import junit.framework.*; " +
     "public class MonkeyTestPass extends TestCase { " +
@@ -193,6 +216,34 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
                  _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     _model.removeListener(listener);
   }
+
+  /**
+   * Tests that a JUnit file with an error is reported to have an error.
+   */
+  public void testElspethOneJUnitError() throws Exception {
+    if (printMessages) System.out.println("----testOneJUnitError-----");
+
+    OpenDefinitionsDocument doc = setupDocument(ELSPETH_ERROR_TEXT);
+    final File file = new File(_tempDir, "Elspeth.java");
+    doc.saveFile(new FileSelector(file));
+    JUnitTestListener listener = new JUnitTestListener();
+    _model.addListener(listener);
+    if (printMessages) System.out.println("before compile");
+    doc.startCompile();
+    if (printMessages) System.out.println("after compile");
+    synchronized(listener) {
+      doc.startJUnit();
+      if (printMessages) System.out.println("waiting for test");
+      listener.wait();
+    }
+    if (printMessages) System.out.println("after test");
+
+    JUnitErrorModel jem = _model.getJUnitModel().getJUnitErrorModel();
+    assertEquals("test case has one error reported", 1, jem.getNumErrors());
+    assertTrue("first error should be an error not a warning", !jem.getError(0).isWarning());
+    _model.removeListener(listener);
+  }
+
 
   /**
    * Tests that a test class which throws a *real* Error (not an Exception)
@@ -558,6 +609,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 
     JUnitErrorModel jem = _model.getJUnitModel().getJUnitErrorModel();
     assertEquals("test case has one error reported", 2, jem.getNumErrors());
+    
     assertTrue("first error should be an error", jem.getError(0).isWarning());
     assertFalse("second error should be a failure", jem.getError(1).isWarning());
   }

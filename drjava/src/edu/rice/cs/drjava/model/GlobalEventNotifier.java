@@ -87,6 +87,21 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     implements GlobalModelListener {
 
 
+  public void projectRunnableChanged(){
+    _lock.startRead();
+    try {
+      int size = _listeners.size();
+      for(int i = 0; i < size; i++) {
+        _listeners.get(i).projectRunnableChanged();
+      }
+    }
+    finally {
+      _lock.endRead();
+    }
+  }
+  
+  
+  
   // ---------- Deprecated Methods ----------
 
   /**

@@ -56,6 +56,11 @@ import java.util.List;
 public class DummySingleDisplayModelListener implements SingleDisplayModelListener {
   
   /**
+   * called when a project's main class has been set/unset
+   */
+  public void projectRunnableChanged(){  }
+  
+  /**
    * Called after a new document is created.
    */
   public void newFileCreated(OpenDefinitionsDocument doc) { }

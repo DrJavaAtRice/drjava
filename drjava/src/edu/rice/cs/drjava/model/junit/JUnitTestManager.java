@@ -198,7 +198,16 @@ public class JUnitTestManager {
     String testString = failedTest.toString();
     int firstIndex = testString.indexOf('(') + 1;
     int secondIndex = testString.indexOf(')');
-    String className = testString.substring(firstIndex, secondIndex);
+    
+    String className1 = testString.substring(firstIndex, secondIndex);
+    String className2 = testString.substring(0, firstIndex-1);
+    String className;
+    if(firstIndex == secondIndex){
+      className = className2;
+    }else{
+      className = className1;
+    }
+    
     int indexOfClass = classNames.indexOf(className);
     File file;
     if (indexOfClass != -1) {
@@ -231,6 +240,25 @@ public class JUnitTestManager {
       failure.thrownException().getMessage();
     boolean isFailure = (failure.thrownException() instanceof AssertionFailedError) &&
       !classNameAndTest.equals("junit.framework.TestSuite$1.warning");
+
+//    for dubugging    
+//    try{
+//      File temp = File.createTempFile("asdf", "java", new File("/home/awulf"));
+//      FileWriter writer = new FileWriter(temp);
+//      writer.write("testString: " + testString + "\n");
+//      writer.write("old className: " + className1 + "\n");
+//      writer.write("new className: " + className2 + "\n");
+//      writer.write("file: " + file + "\n");
+//      writer.write("lineNum: " + lineNum + "\n");
+//      writer.write("exception: " + exception + "\n");
+//      writer.write("!isFailure: " + !isFailure + "\n");
+//      writer.write("testName: " + testName + "\n");
+//      writer.write("className: " + className + "\n");
+//      writer.write("stackTrace: " + stackTrace + "\n");
+//      writer.close();
+//    }catch(IOException e){
+//      
+//    }
     return new JUnitError(file, lineNum, 0, exception, !isFailure, testName, className, stackTrace);
   }
 
@@ -257,7 +285,7 @@ public class JUnitTestManager {
     catch (NumberFormatException e) {
       throw new UnexpectedException(e);
     }
-
+    
     return lineNum;
   }
 }

@@ -111,6 +111,11 @@ public interface OpenDefinitionsDocument extends Document, Finalizable<Definitio
   public boolean isInProjectPath();
   
   /**
+   * @return true if the documents file is saved in the current project file
+   */
+  public boolean isProjectFile();
+  
+  /**
    * Returns whether this document is currently untitled
    * (indicating whether it has a file yet or not).
    * @return true if the document is untitled and has no file

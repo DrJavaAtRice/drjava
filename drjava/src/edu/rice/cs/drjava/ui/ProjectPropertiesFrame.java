@@ -63,6 +63,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.config.*;
 
 import edu.rice.cs.util.swing.FileSelectorComponent;
+import javax.swing.filechooser.FileFilter;
 
 /**
  * The frame for setting Project Preferences
@@ -80,6 +81,7 @@ public class ProjectPropertiesFrame extends JFrame {
   private MainFrame _mainFrame;
   
   private FileSelectorComponent _builtDirSelector;
+  private FileSelectorComponent _jarMainClassSelector;
   
   /**
    * Sets up the frame and displays it.
@@ -191,6 +193,14 @@ public class ProjectPropertiesFrame extends JFrame {
       textField.setText("");
     else
       _builtDirSelector.setFileField(f);
+
+    f = _mainFrame.getModel().getJarMainClass();
+    
+    textField = _jarMainClassSelector.getFileField();
+    if(f == null)
+      textField.setText("");
+    else
+      _jarMainClassSelector.setFileField(f);
   }
 
   /**
@@ -198,6 +208,7 @@ public class ProjectPropertiesFrame extends JFrame {
    */
   public boolean saveSettings() {//throws IOException {
     _mainFrame.getModel().setBuildDirectory(_builtDirSelector.getFileFromField());
+    _mainFrame.getModel().setJarMainClass(_jarMainClassSelector.getFileFromField());
     _mainFrame.saveProject();
     return true;
   }
@@ -222,8 +233,8 @@ public class ProjectPropertiesFrame extends JFrame {
     GridBagConstraints c = new GridBagConstraints();
     panel.setLayout(gridbag);
     c.fill = GridBagConstraints.HORIZONTAL;
-    Insets labelInsets = new Insets(0, 10, 0, 10);
-    Insets compInsets  = new Insets(0, 0, 0, 0);
+    Insets labelInsets = new Insets(5, 10, 0, 10);
+    Insets compInsets  = new Insets(5, 0, 0, 0);
     c.weightx = 0.0;
     c.gridwidth = 1;
     c.insets = labelInsets;
@@ -238,6 +249,24 @@ public class ProjectPropertiesFrame extends JFrame {
      JPanel dirPanel = _builtDirectoryPanel();
      gridbag.setConstraints(dirPanel, c);
      panel.add(dirPanel);
+     
+    c.weightx = 0.0;
+    c.gridwidth = 1;
+    c.insets = labelInsets;
+
+    JLabel classLabel = new JLabel("Main File");
+    gridbag.setConstraints(classLabel, c);
+    panel.add(classLabel);
+
+    c.weightx = 1.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.insets = compInsets;
+
+    JPanel mainClassPanel = _jarMainClassSelector();
+    gridbag.setConstraints(mainClassPanel, c);
+    panel.add(mainClassPanel);
+     
+     
     
   }
   
@@ -256,5 +285,25 @@ public class ProjectPropertiesFrame extends JFrame {
     _builtDirSelector.setFileFilter(new DirectoryFilter());
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
     return _builtDirSelector;
+  }
+  
+  public JPanel _jarMainClassSelector(){
+    JFileChooser fileChooser = new JFileChooser(_mainFrame.getModel().getProjectFile().getParentFile());
+    fileChooser.setDialogTitle("Select");
+    fileChooser.setApproveButtonText("Select");
+    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    fileChooser.setMultiSelectionEnabled(false);
+    _jarMainClassSelector = new FileSelectorComponent(this,fileChooser,20,12f);
+    _jarMainClassSelector.setFileFilter(new FileFilter(){
+      public boolean accept(File f){
+        return f.getName().endsWith(".java") || f.isDirectory();
+      }
+      public String getDescription(){
+        return "Java Files (*.java)";
+      }
+      
+    });
+    //toReturn.add(_builtDirSelector, BorderLayout.EAST);
+    return _jarMainClassSelector;
   }
 }

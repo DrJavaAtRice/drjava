@@ -485,7 +485,11 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public boolean isInProjectPath(){
     return false;
   }
-  
+
+  public boolean isProjectFile(){
+    return false;
+  }
+
   public boolean belongsHuh(Document doc){
     return false;
   }
