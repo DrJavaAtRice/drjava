@@ -98,11 +98,12 @@ public class JarBuilder {
    * @return the string concatenation of the parent and the name
    */
   private String makeName(String parent, String name) {
+    String sep = "/"; // NOTE: This can be a '/' since it is a path in the jar file itself
     if( parent.equals("") )
       return name;
-    if (parent.endsWith("/"))
+    if (parent.endsWith(sep))
       return parent + name;
-    return parent + "/" + name;
+    return parent + sep + name;
   }
 
   /**

@@ -94,7 +94,7 @@ public class ManifestWriter {
 
     StringBuffer sbuf = new StringBuffer();
     sbuf.append(Attributes.Name.MANIFEST_VERSION.toString());
-    sbuf.append(": 1.0\n");
+    sbuf.append(": 1.0"+System.getProperty("line.separator"));
     if( !_classPaths.isEmpty() ) {
       Iterator<String> iter = _classPaths.iterator();
       sbuf.append(Attributes.Name.CLASS_PATH.toString());
@@ -103,13 +103,13 @@ public class ManifestWriter {
         sbuf.append(" ");
         sbuf.append(iter.next());
       }
-      sbuf.append("\n");
+      sbuf.append(System.getProperty("line.separator"));
     }
     if( _mainClass != null ) {
       sbuf.append(Attributes.Name.MAIN_CLASS.toString());
       sbuf.append(": ");
       sbuf.append(_mainClass);
-      sbuf.append("\n");
+      sbuf.append(System.getProperty("line.separator"));
     }
     try {
       return new ByteArrayInputStream(sbuf.toString().getBytes("UTF-8"));
