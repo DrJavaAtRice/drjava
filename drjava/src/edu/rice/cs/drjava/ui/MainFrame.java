@@ -807,11 +807,11 @@ public class MainFrame extends JFrame {
       _defScrollPanes.get(_model.getActiveDocument());
 
     // Overall layout
-    _docSplitPane = new BorderlessSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+    _docSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                    true,
                                    listScroll,
                                    defScroll);
-    JSplitPane split = new BorderlessSplitPane(JSplitPane.VERTICAL_SPLIT,
+    JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                                        true,
                                        _docSplitPane,
                                        _tabbedPane);
