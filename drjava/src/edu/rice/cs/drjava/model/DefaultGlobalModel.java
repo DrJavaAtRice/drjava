@@ -70,6 +70,10 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.newjvm.*;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.model.junit.*;
+import edu.rice.cs.drjava.model.definitions.indent.Indenter;
+import edu.rice.cs.drjava.project.*;
+import edu.rice.cs.drjava.platform.PlatformFactory;
+import edu.rice.cs.util.docnavigation.*;
 
 /**
  * Handles the bulk of DrJava's program logic.
@@ -105,9 +109,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   private final DefinitionsEditorKit _editorKit = new DefinitionsEditorKit(_notifier);
 
   /**
-   * ListModel for storing all OpenDefinitionsDocuments.
+   * Collection for storing all OpenDefinitionsDocuments.
    */
-  private final DefaultListModel _definitionsDocs = new DefaultListModel();
+  private final BidirectionalHashMap<INavigatorItem, OpenDefinitionsDocument> _documentsRepos =
+    new OrderedBidirectionalHashMap<INavigatorItem, OpenDefinitionsDocument>();
 
 
   // ---- Interpreter fields ----
@@ -154,7 +159,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * Should only be false in test cases.
    */
   private boolean _resetAfterCompile = true;
-
+  
 
   // ---- JUnit Fields ----
 
@@ -224,6 +229,18 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   private PageFormat _pageFormat = new PageFormat();
 
+  /**
+   * Listens for requests from System.in.
+   */
+  private InputListener _inputListener;
+
+  
+  /**
+   * the abstract container which contains views of open documents and allows user to 
+   * navigate document focus among this collection of open documents
+   */
+  protected IAWTContainerNavigatorActor _documentNavigator = AWTContainerNavigatorFactory.Singleton.makeListNavigator();
+  
 
   // ----- CONSTRUCTORS -----
 
@@ -393,17 +410,61 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public JavadocModel getJavadocModel() {
     return _javadocModel;
   }
+  
+  public IAWTContainerNavigatorActor getDocumentNavigator()
+  {
+    return _documentNavigator;
+  }
+  
+  public void setDocumentNavigator(IAWTContainerNavigatorActor newnav)
+  {
+    _documentNavigator = newnav;
+  }
+  
+  private INavigatorItem makeIDocFromODD(final OpenDefinitionsDocument oddoc)
+  {
+      final INavigatorItem idoc  = new INavigatorItem()
+          {
+             public String getName()
+             {
+               return oddoc.getFilename();
+             }
+             
+             public boolean equals(Object obj)
+             {
+               try
+               {
+               
+                 INavigatorItem castidoc = (INavigatorItem)obj;
+                 return this == castidoc;
+               }
+               catch(ClassCastException e)
+               {
+                 return oddoc.equals(obj);
+               }
+             }
+             
+             public String toString()
+             {
+               return oddoc.getFilename();
+             }
+          };
+    
+    return idoc;
+  }
 
   /**
    * Creates a new definitions document and adds it to the list.
    * @return The new open document
    */
   public OpenDefinitionsDocument newFile() {
-    final OpenDefinitionsDocument doc = _createOpenDefinitionsDocument();
-    doc.getDocument().setFile(null);
-    _definitionsDocs.addElement(doc);
-    _notifier.newFileCreated(doc);
-    return doc;
+    final OpenDefinitionsDocument oddoc = _createOpenDefinitionsDocument();
+    INavigatorItem idoc = makeIDocFromODD(oddoc);
+    oddoc.getDocument().setFile(null);
+    _documentsRepos.put(idoc, oddoc);
+    _documentNavigator.addDocument(idoc);
+    _notifier.newFileCreated(oddoc);
+    return oddoc;
   }
 
   /**
@@ -475,7 +536,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     // This code is duplicated in MainFrame._setCurrentDirectory(File) for safety.
     final File file = (com.getFiles())[0].getCanonicalFile();
     OpenDefinitionsDocument odd = _openFile(file);
-
     // Make sure this is on the classpath
     try {
       File classpath = odd.getSourceRoot();
@@ -547,12 +607,43 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @exception IOException
    */
   public void saveAllFiles(FileSaveSelector com) throws IOException {
-    for (int i = 0; i < _definitionsDocs.getSize(); i++) {
-      OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
-        _definitionsDocs.getElementAt(i);
+    
+    Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
+    while(odds.hasNext())
+    {
+      OpenDefinitionsDocument doc = odds.next();
       aboutToSaveFromSaveAll(doc);
       doc.saveFile(com);
     }
+  }
+  
+  public void saveProject(String filename) throws IOException {
+    
+    String base = filename.substring(0, filename.lastIndexOf(File.separator));
+    System.out.println("base is " + base);
+    ProjectFileBuilder builder = new ProjectFileBuilder(base);
+    
+    // add opendefinitionsdocument
+    Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
+    while(odds.hasNext())
+    {
+      OpenDefinitionsDocument doc = odds.next();
+      builder.addSourceFile(doc.getFile());
+    }
+    
+    // add classpath info
+    Vector<File> currentclasspaths = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
+    for(int i = 0; i<currentclasspaths.size(); i++)
+    {
+      builder.addClasspathFile(currentclasspaths.get(i));
+    }
+    
+    // write to disk
+    FileWriter fw = new FileWriter(filename);
+    fw.write(builder.makeProjectFile());
+    fw.close();
+    
+    
   }
 
   /**
@@ -574,7 +665,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     if (canClose) {
       doc.removeFromDebugger();
       // Only fire event if doc exists and was removed from list
-      if (_definitionsDocs.removeElement(doc)) {
+      INavigatorItem idoc = _documentsRepos.removeKey(closedDoc);
+      if (idoc != null) {
+        _documentNavigator.removeDocument(idoc);
         _notifier.fileClosed(closedDoc);
         return true;
       }
@@ -588,28 +681,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   public boolean closeAllFiles() {
     boolean keepClosing = true;
-    while (!_definitionsDocs.isEmpty() && keepClosing) {
-      OpenDefinitionsDocument openDoc = (OpenDefinitionsDocument)
-        _definitionsDocs.get(0);
-      keepClosing = closeFile(openDoc);
+    Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
+    while (odds.hasNext() &&  keepClosing) {
+      OpenDefinitionsDocument next = odds.next();
+      keepClosing = closeFile(next);
+      odds = _documentsRepos.valuesIterator(); // call to closeFile can mutate Iterator, so generate a new "current" Iterator on each loop 
     }
+
+    
     return keepClosing;
   }
-
-  /**
-   * Reverts all open files.
-   * Not working yet: causes an exception in the reduced model if a
-   * non-active document is reverted...?
-   *
-  public void revertAllFiles() throws IOException {
-    for (int i = 0; i < _definitionsDocs.getSize(); i++) {
-      OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
-        _definitionsDocs.getElementAt(i);
-      if (!doc.isUntitled()) {
-        doc.revertFile();
-      }
-    }
-  }*/
 
   /**
    * Exits the program.
@@ -640,7 +721,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     _interpreterControl.killInterpreter(false);
 
     _notifier.removeAllListeners();
-    _definitionsDocs.clear();
+    _documentsRepos.clear();
+    _documentNavigator.clear();
+    
+      
   }
 
   //----------------------- Specified by IGetDocuments -----------------------//
@@ -691,9 +775,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * TODO: Protect this object from untrusted code!
    * @deprecated Use getDefinitionsDocuments().
    */
-  public ListModel getDefinitionsDocs() {
-    return _definitionsDocs;
-  }
+ // public IDocList getDefinitionsDocs() {
+  //  return _documentsRepos;
+  //}
 
   /**
    * Returns the OpenDefinitionsDocument corresponding to the document
@@ -702,13 +786,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @return its corresponding OpenDefinitionsDocument
    */
   public OpenDefinitionsDocument getODDForDocument(Document doc) {
-    int index = _getIndexOfDocument(doc);
-    if (index == -1) {
-      throw new UnexpectedException(new IllegalStateException("Could not get the OpenDefinitionsDocument for Document: " + doc));
+    Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
+    while(odds.hasNext())
+    {
+      OpenDefinitionsDocument odd = odds.next();
+      if(doc == odd.getDocument())
+      {
+        return odd;
+      }
     }
-    else {
-      return (OpenDefinitionsDocument) _definitionsDocs.elementAt(index);
-    }
+    throw new UnexpectedException(new IllegalStateException("Could not get the OpenDefinitionsDocument for Document: " + doc));
   }
 
   /**
@@ -725,16 +812,23 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @return the next Document
    */
   public Document getNextDocument(Document doc) {
-    int index = _getIndexOfDocument(doc);
-    if (index == -1) {
-      throw new UnexpectedException(new IllegalStateException("Could not get the next Document for Document: " + doc));
+    Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
+    while(odds.hasNext())
+    {
+      OpenDefinitionsDocument odd = odds.next();
+      if(doc == odd.getDocument())
+      {
+        if(odds.hasNext())
+        {
+          return odds.next().getDocument();
+        }
+        else
+        {
+          return _documentsRepos.valuesIterator().next().getDocument();
+        }
+      }
     }
-    else if (index == _definitionsDocs.size() - 1) {
-      return ((OpenDefinitionsDocument)_definitionsDocs.elementAt(0)).getDocument();
-    }
-    else {
-      return ((OpenDefinitionsDocument)_definitionsDocs.elementAt(index+1)).getDocument();
-    }
+    throw new UnexpectedException(new IllegalStateException("Could not get the next Document for Document: " + doc));
   }
 
   /**
@@ -744,23 +838,37 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @return the previous Document
    */
   public Document getPrevDocument(Document doc) {
-    int index = _getIndexOfDocument(doc);
-    if (index == -1) {
-      throw new UnexpectedException(new IllegalStateException("Could not get the previous Document for Document: " + doc));
+    Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
+    OpenDefinitionsDocument prev = null;
+    while(odds.hasNext())
+    {
+      OpenDefinitionsDocument odd = odds.next();
+      if(doc == odd.getDocument())
+      {
+        if(prev != null)
+        {
+          return prev.getDocument();
+        }
+        else
+        {
+          while(odds.hasNext())
+          {
+            prev = odds.next();
+          }
+          return prev.getDocument();
+        }
+      }
+      prev = odd;
     }
-    else if (index == 0) {
-      return ((OpenDefinitionsDocument)_definitionsDocs.elementAt(_definitionsDocs.size()-1)).getDocument();
-    }
-    else {
-      return ((OpenDefinitionsDocument)_definitionsDocs.elementAt(index-1)).getDocument();
-    }
+    throw new UnexpectedException(new IllegalStateException("Could not get the previous Document for Document: " + doc));
   }
 
+  /*
   private int _getIndexOfDocument(Document doc) {
     int index = 0;
-    Enumeration en = _definitionsDocs.elements();
+    Enumeration<OpenDefinitionsDocument> en = _documentsRepos.elements();
     while (en.hasMoreElements()) {
-      if (doc == ((OpenDefinitionsDocument)en.nextElement()).getDocument()) {
+      if (doc == en.nextElement().getDocument()) {
         return index;
       }
       else {
@@ -769,6 +877,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     return -1;
   }
+  
+  
+  */
 
   /**
    * Returns a collection of all documents currently open for editing.
@@ -778,15 +889,32 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   public List<OpenDefinitionsDocument> getDefinitionsDocuments() {
     ArrayList<OpenDefinitionsDocument> docs =
-      new ArrayList<OpenDefinitionsDocument>(_definitionsDocs.size());
-    Enumeration en = _definitionsDocs.elements();
+      new ArrayList<OpenDefinitionsDocument>(_documentsRepos.size());
+    Iterator<OpenDefinitionsDocument> en = _documentsRepos.valuesIterator();
 
-    while (en.hasMoreElements()) {
-      docs.add((OpenDefinitionsDocument) en.nextElement());
+    while (en.hasNext()) {
+      docs.add(en.next());
     }
 
     return docs;
   }
+
+    /**
+     * @return the size of the collection of OpenDefinitionsDocument's
+     */
+    public int getDefinitionsDocumentsSize() {
+ return _documentsRepos.size();
+    }
+
+    OpenDefinitionsDocument getODDGivenIDoc(INavigatorItem idoc)
+    {
+      return _documentsRepos.getValue(idoc);
+    }
+    
+    INavigatorItem getIDocGivenODD(OpenDefinitionsDocument odd)
+    {
+      return _documentsRepos.getKey(odd);
+    }
 
   //----------------------- End IGetDocuments Methods -----------------------//
 
@@ -795,10 +923,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @param indent the number of spaces to make per level of indent
    */
   void setDefinitionsIndent(int indent) {
-    for (int i = 0; i < _definitionsDocs.size(); i++) {
-      OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
-        _definitionsDocs.get(i);
-      doc.setDefinitionsIndent(indent);
+    Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
+    while(odds.hasNext())
+    {
+      odds.next().setDefinitionsIndent(indent);
     }
   }
 
@@ -1027,9 +1155,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public File[] getSourceRootSet() {
     LinkedList<File> roots = new LinkedList<File>();
 
-    for (int i = 0; i < _definitionsDocs.size(); i++) {
-      OpenDefinitionsDocument doc
-        = (OpenDefinitionsDocument) _definitionsDocs.get(i);
+    Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
+    while(odds.hasNext())
+    {
+      OpenDefinitionsDocument doc = odds.next();
 
       try {
         File root = doc.getSourceRoot();
@@ -1074,43 +1203,17 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         filename = filename.substring(0, extIndex);
       }
     }
-
+    
     // Mark if modified
     if (doc.isModifiedSinceSave()) {
       filename = filename + " *";
     }
-
+    
     return filename;
   }
 
-  /**
-   * Return the absolute path of the file, or "(untitled)" if no file exists.
-   * TODO: move to a static utility class?
-   */
-  public String getDisplayFullPath(OpenDefinitionsDocument doc) {
 
-    String path = "(untitled)";
-    try {
-      File file = doc.getFile();
-      path = file.getAbsolutePath();
-    }
-    catch (IllegalStateException ise) {
-      // No file, filename stays "Untitled"
-    }
-    catch (FileMovedException fme) {
-      // Recover, even though file was deleted
-      File file = fme.getFile();
-      path = file.getAbsolutePath();
-    }
-
-    // Mark if modified
-    if (doc.isModifiedSinceSave()) {
-      path = path + " *";
-    }
-
-    return path;
-  }
-
+  
   /**
    * Return the absolute path of the file with the given index,
    * or "(untitled)" if no file exists.
@@ -1122,7 +1225,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       throw new RuntimeException(
         "Document not found with index " + index);
     }
-    return getDisplayFullPath(doc);
+    return GlobalModelNaming.getDisplayFullPath(doc);
   }
 
   /**
@@ -1156,9 +1259,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   public boolean hasModifiedDocuments() {
     boolean modified = false;
-    for (int i = 0; i < _definitionsDocs.getSize(); i++) {
-      OpenDefinitionsDocument doc =
-        (OpenDefinitionsDocument)_definitionsDocs.getElementAt(i);
+    Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
+    while(odds.hasNext())
+    { 
+      OpenDefinitionsDocument doc = odds.next();
       if (doc.isModifiedSinceSave()) {
         modified = true;
         break;
@@ -2001,6 +2105,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       }
     }
 
+      
+
     /**
      * Finds the root directory of the source files.
      * @return The root directory of the source files,
@@ -2134,9 +2240,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   private OpenDefinitionsDocument _getOpenDocument(File file) {
     OpenDefinitionsDocument doc = null;
 
-    for (int i=0; ((i < _definitionsDocs.size()) && (doc == null)); i++) {
-      OpenDefinitionsDocument thisDoc =
-        (OpenDefinitionsDocument) _definitionsDocs.get(i);
+    Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
+    while(odds.hasNext() && doc == null)
+    {
+      OpenDefinitionsDocument thisDoc = odds.next();
       try {
         File thisFile = null;
         try {
@@ -2196,12 +2303,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     throws IOException, AlreadyOpenException
   {
     try {
+      
       OpenDefinitionsDocument openDoc = _getOpenDocument(file);
       if (openDoc != null) {
         throw new AlreadyOpenException(openDoc);
       }
       DefinitionsDocument tempDoc = (DefinitionsDocument) _editorKit.createNewDocument();
 
+      
       FileReader reader = new FileReader(file);
       _editorKit.read(reader, tempDoc, 0);
       reader.close(); // win32 needs readers closed explicitly!
@@ -2211,7 +2320,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       tempDoc.setCurrentLocation(0);
 
       final OpenDefinitionsDocument doc = new DefinitionsDocumentHandler(tempDoc);
-      _definitionsDocs.addElement(doc);
+      INavigatorItem idoc = makeIDocFromODD(doc);
+      _documentsRepos.put(idoc, doc);
+      
+      String path = doc.getFile().getCanonicalPath();
+      path = path.substring(0, path.lastIndexOf(File.separator));
+     
+      _documentNavigator.addDocument(idoc, path);
       //doc.checkIfClassFileInSync();
 
       // Make sure this is on the classpath

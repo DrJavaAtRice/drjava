@@ -79,7 +79,12 @@ public interface OptionConstants {
    */
   public static final StringOption BROWSER_STRING =
     new StringOption("browser.string", "");
-
+  
+  /** 
+   * the extension for a DrJava project file 
+   */
+  public static final String PROJECT_FILE_EXTENSION = ".pjt";
+  
   public static final FileOption JAVAC_LOCATION =
     new FileOption("javac.location", FileOption.NULL_FILE);
 
@@ -300,6 +305,13 @@ public interface OptionConstants {
     new KeyStrokeOption("key.new.file",
                         KeyStroke.getKeyStroke(KeyEvent.VK_N, mask));
   /**
+   * The key binding for opening an entire project.  I is right next to O, so
+   * it seemed logical that ctrl-I would open a project and ctrl-O open a file
+   */
+  public static final KeyStrokeOption KEY_OPEN_PROJECT =
+    new KeyStrokeOption("key.open.project",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_I, mask));
+  /**
    * The key binding for creating a new JUnit test case
    */
   public static final KeyStrokeOption KEY_NEW_TEST =
@@ -350,6 +362,11 @@ public interface OptionConstants {
     new KeyStrokeOption("key.close.all.files",
                         KeyStroke.getKeyStroke(KeyEvent.VK_W, mask |
                                                InputEvent.ALT_MASK));
+  
+  public static final KeyStrokeOption KEY_CLOSE_PROJECT =
+    new KeyStrokeOption("key.close.project",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_W, mask |
+                                               InputEvent.SHIFT_MASK));
   /**
    * The key binding for showing the print preview
    */

@@ -43,71 +43,36 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model;
-
-import edu.rice.cs.util.docnavigation.*;
+package edu.rice.cs.util.docnavigation;
 
 /**
- * A GlobalModel that enforces invariants associated with having
- * one active document at a time.
- *
- * Invariants:
- * <OL>
- * <LI>{@link #getDefinitionsDocuments} will always return an array of
- *     at least size 1.
- * </LI>
- * <LI>(follows from previous) If there is ever no document in the model,
- *     a new one will be created.
- * </LI>
- * <LI>There is always exactly one active document, which can be get/set
- *     via {@link #getActiveDocument} and {@link #setActiveDocument}.
- * </LI>
- * </OL>
- *
- * Other functions added by this class:
- * <OL>
- * <LI>When calling {@link #openFile}, if there is currently only one open
- *     document, and it is untitled and unchanged, it will be closed after the
- *     new document is opened. This means that, in one atomic transaction, the
- *     model goes from having one totally empty document open to having one
- *     document (the requested one) open.
- * </LI>
- * </OL>
- *
- * @version $Id$
+ * <code>INavigatorItem</code> models (very abstractly) some entity that is
+ * eledigable for insertion and removal inside an
+ * <code>IDocuemntNavigator</code>. Conceptually, if an
+ * <code>IDocumentNavigator</code> represented a file cabinet then each file in
+ * the cabinet would be an <code>INavigatorItem</code>. If an
+ * <code>IDocumentNavigator</code> represented a wallet then each credit card
+ * and driver's license would be an <code>IDocumentNavigator</code>. <p> The
+ * only real responsibilities a class implementing <code>INavigatorItem</code> has is
+ * to provide a simple <code>String</code> representation of itself via the
+ * <code>getName</code> method and to devise some notion of equality.
  */
-public interface SingleDisplayModel extends GlobalModel {
+public interface INavigatorItem {
   /**
-   * @return the currently active document.
-   */
-  public OpenDefinitionsDocument getActiveDocument();
-
+   * Returns a "simple" name representing this <code>INavigatorItem</code>.
+   * Strings returned by this method may or may not be unique with respect to other <code>INavigatorItem</code>s within or without
+   * a given <code>IDocumentNavigator</code>.
+   * 
+   * @return the simple name for this document.
+   * */
+  public String getName();
+  
   /**
-   * Sets the currently active document by updating the selection model.
-   * @param doc Document to set as active
+   * Tests for conceptual equality between this <code>IDocuemnt<code> and the given <code>Object</code>
+   * It is left up to the implementing class to decide and document what "conceptual equality" means for said class.
+   * 
+   * @param the object to be tested for conceptual equality to this document.
+   * @return <code>true</code> if the passed object is conceptually equal to this document and <code>false</code> if it is not.
    */
-  public void setActiveDocument(OpenDefinitionsDocument doc);
-
-  /**
-   * @return the IDocumentNavigator container expressed as an AWT component
-   */
-  public java.awt.Container getDocCollectionWidget();
-
-  /**
-   * Sets the active document to be the next one in the list.
-   */
-  public void setActiveNextDocument();
-
-  /**
-   * Sets the active document to be the previous one in the list.
-   */
-  public void setActivePreviousDocument();
-
-  /**
-   * Returns whether we are in the process of closing all documents.
-   * (Don't want to prompt the user to revert files that have become
-   * modified on disk if we're just closing everything.)
-   * TODO: Move to DGM?  Make private?
-   */
-  public boolean isClosingAllFiles();
+  public boolean equals(Object obj);
 }

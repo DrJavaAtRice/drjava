@@ -224,7 +224,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     assertActiveDocument(doc2);
 
     // Test setActive
-    getSDModel().setActiveDocument(0);
+    getSDModel().setActiveDocument(doc1);
     listener.assertSwitchCount(6);
     assertActiveDocument(doc1);
 

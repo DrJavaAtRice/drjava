@@ -61,6 +61,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Vector;
+import java.util.Arrays;
+import java.util.StringTokenizer;
 import java.net.URL;
 import java.net.MalformedURLException;
 
@@ -76,6 +78,16 @@ import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.ExitingNotAllowedException;
+import edu.rice.cs.util.swing.DelegatingAction;
+import edu.rice.cs.util.swing.HighlightManager;
+import edu.rice.cs.util.swing.SwingWorker;
+import edu.rice.cs.util.swing.ConfirmCheckBoxDialog;
+import edu.rice.cs.util.swing.BorderlessScrollPane;
+import edu.rice.cs.util.swing.BorderlessSplitPane;
+import edu.rice.cs.util.text.SwingDocumentAdapter;
+import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.docnavigation.*;
+import edu.rice.cs.drjava.project.*;
 import edu.rice.cs.util.swing.*;
 
 /**
@@ -171,7 +183,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JSplitPane _debugSplitPane;
   private JSplitPane _mainSplit;
 
-  private JList _docList;
+ // private Container _docCollectionWidget;
   private JButton _compileButton;
   private JButton _closeButton;
   private JButton _undoButton;
@@ -212,6 +224,8 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private RecentFileManager _recentFileManager;
 
+  private File _currentProjFile;
+  
   /**
    * Timer to display "Stepping..." message if a step takes longer than
    * a certain amount of time.  All accesses must be synchronized on it.
@@ -254,6 +268,32 @@ public class MainFrame extends JFrame implements OptionConstants {
   private FileOpenSelector _openSelector = new FileOpenSelector() {
     public File[] getFiles() throws OperationCanceledException {
       return getOpenFiles(_openChooser);
+    }
+  };
+  
+  /**
+   * Returns the project file to open.
+   */
+  private FileOpenSelector _openProjectSelector = new FileOpenSelector() {
+    public File[] getFiles() throws OperationCanceledException {
+      javax.swing.filechooser.FileFilter filter = _openChooser.getFileFilter();
+      _openChooser.setFileFilter(new javax.swing.filechooser.FileFilter(){
+        public boolean accept(File f) {
+          if( f.isDirectory() || f.getPath().endsWith(PROJECT_FILE_EXTENSION) ) {
+            return true;
+          }
+          else {
+            return false;
+          }
+        }
+        
+        public String getDescription() {
+          return "DrJava Project Files (*.pjt)";
+        }
+      });
+      File[] retFiles = getOpenFiles(_openChooser);
+      _openChooser.setFileFilter(filter);
+      return retFiles;
     }
   };
 
@@ -326,7 +366,24 @@ public class MainFrame extends JFrame implements OptionConstants {
       _open();
     }
   };
-
+  
+  /**
+   * Asks user for project file name and and reads the associated files into
+   * the file navigator (and places the first source file in the editor pane)
+   */
+  private Action _openProjectAction = new AbstractAction("Open Project...") {
+    public void actionPerformed(ActionEvent ae) {
+      _openProject();
+    }
+  };
+  
+  private Action _closeProjectAction = new AbstractAction("Close Project") {
+    public void actionPerformed(ActionEvent ae) {
+      _closeProject();
+    }
+  };
+  
+ 
   /**
    * Closes the current active document, prompting to save if necessary.
    */
@@ -360,6 +417,13 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _saveAsAction = new AbstractAction("Save As...") {
     public void actionPerformed(ActionEvent ae) {
       _saveAs();
+    }
+  };
+  
+  
+  private Action _saveProjectAction = new AbstractAction("Save Project Snapshot...") {
+    public void actionPerformed(ActionEvent ae) {
+      _saveProject();
     }
   };
 
@@ -1322,7 +1386,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpActions();
     _setUpMenuBar();
     _setUpToolBar();
-    _setUpDocumentSelector();
+    //    _setUpDocumentSelector();
     _setUpContextMenus();
 
     _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2,
@@ -1394,7 +1458,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Set the fonts
     _setMainFont();
     Font doclistFont = config.getSetting(FONT_DOCLIST);
-    _docList.setFont(doclistFont);
+    _model.getDocCollectionWidget().setFont(doclistFont);
 
     // Set the colors
     _updateNormalColor();
@@ -1669,15 +1733,15 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   public void updateFileTitle() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
-    String filename = _model.getDisplayFilename(doc);
+    String filename = GlobalModelNaming.getDisplayFilename(doc);
     if (!filename.equals(_fileTitle)) {
       _fileTitle = filename;
       setTitle(filename + " - DrJava");
-      _docList.repaint();
+      _model.getDocCollectionWidget().repaint();
     }
     // Always update this field-- two files in different directories
     //  can have the same _fileTitle
-    _fileNameField.setText(_model.getDisplayFullPath(doc));
+    _fileNameField.setText(GlobalModelNaming.getDisplayFullPath(doc));
   }
 
   /**
@@ -1838,7 +1902,105 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _open() {
     open(_openSelector);
   }
+  
+  
+  
+  private void _openProjectHelper(File projectFile) {
+    _currentProjFile = projectFile;
+    final ProjectFileIR ir;
+    final File[] srcFiles;
+    try
+    {
+      ir = ProjectFileParser.ONLY.parse(projectFile);
+      srcFiles = ir.getSourceFiles();
+      
+      
+      
+      
+      _model.setDocumentNavigator(AWTContainerNavigatorFactory.Singleton.makeTreeNavigator(projectFile.getName(),
+                                                                                         _model.getDocumentNavigator()));
+      
 
+      File projectfile = projectFile;
+      String projfilepath = projectfile.getCanonicalPath();
+      String tlp = projfilepath.substring(0, projfilepath.lastIndexOf(File.separator));
+      
+      _model.getDocumentNavigator().setTopLevelPath(tlp);
+    }
+    catch(IOException e)
+    {
+      throw new UnexpectedException(e);
+    }
+    
+    
+    
+    File[] projectclasspaths = ir.getClasspath();
+    Vector<File> currentclasspaths = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
+    for(int i = 0; i<projectclasspaths.length; i++)
+    {
+      currentclasspaths.add(projectclasspaths[i].getAbsoluteFile());
+    }
+    DrJava.getConfig().setSetting(OptionConstants.EXTRA_CLASSPATH, currentclasspaths);
+    //System.out.println("classpaths are now = " + DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH));
+    
+    _model.getDocumentNavigator().asContainer().addMouseListener(new RightClickMouseAdapter()
+                                                                   {
+      protected void _popupAction(MouseEvent e) {
+        System.out.println(e.getSource());
+        _docPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+      }
+    }
+    );
+    
+    
+    _closeAll();
+    
+    _docSplitPane.remove(_docSplitPane.getLeftComponent());
+    _docSplitPane.setLeftComponent(new JScrollPane(_model.getDocumentNavigator().asContainer()));
+    Font doclistFont = DrJava.getConfig().getSetting(FONT_DOCLIST);
+    _model.getDocCollectionWidget().setFont(doclistFont);
+    _updateNormalColor();
+    _updateBackgroundColor();
+    open(new FileOpenSelector(){
+      public File[] getFiles() {
+        return srcFiles; 
+      }
+    });
+    _closeProjectAction.setEnabled(true);    
+    
+  }
+  
+  private void _openProject() {
+    try {
+      hourglassOn();
+      final File[] file = _openProjectSelector.getFiles();
+      if( file.length < 1 ) {
+        throw new IllegalStateException("Open project file selection not canceled but no project file was selected.");
+      }
+      _openProjectHelper(file[0]);
+    }
+    catch(OperationCanceledException oce) {
+      // do nothing, we just won't open anything
+    }
+    finally {
+      hourglassOff();
+    }    
+  }
+  
+  private void _closeProject()
+  {
+        
+      _model.setDocumentNavigator(AWTContainerNavigatorFactory.Singleton.makeListNavigator(_model.getDocumentNavigator()));
+      _closeAll();
+      _docSplitPane.remove(_docSplitPane.getLeftComponent());
+      _docSplitPane.setLeftComponent(new JScrollPane(_model.getDocumentNavigator().asContainer()));
+      _updateNormalColor();
+      _updateBackgroundColor();
+      Font doclistFont = DrJava.getConfig().getSetting(FONT_DOCLIST);
+      _model.getDocCollectionWidget().setFont(doclistFont);
+      _closeProjectAction.setEnabled(false);
+  }
+  
   void open(FileOpenSelector openSelector) {
     try {
       hourglassOn();
@@ -1984,6 +2146,38 @@ public class MainFrame extends JFrame implements OptionConstants {
     catch (IOException ioe) {
       _showIOError(ioe);
     }
+  }
+  
+  private void _saveProject() {
+    
+    
+    // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
+    File selection = _saveChooser.getSelectedFile();
+    if (selection != null) {
+      _saveChooser.setSelectedFile(selection.getParentFile());
+      _saveChooser.setSelectedFile(selection);
+      _saveChooser.setSelectedFile(null);
+    }
+
+    if (_currentProjFile != null) 
+      _saveChooser.setSelectedFile(_currentProjFile);
+
+    int rc = _saveChooser.showSaveDialog(this);
+    if (rc == JFileChooser.APPROVE_OPTION) {
+      
+      try{
+        File file = _saveChooser.getSelectedFile();
+        String filename = file.getCanonicalPath();    
+        _model.saveProject(filename);
+        _openProjectHelper(file);
+      }
+      catch(IOException ioe) {
+        _showIOError(ioe);
+      }
+    }
+    
+
+    
   }
 
   private void _revert() {
@@ -2606,15 +2800,20 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_newAction, "New", "Create a new document");
     _setUpAction(_newJUnitTestAction, "New", "Create a new JUnit test case class");
     _setUpAction(_openAction, "Open", "Open an existing file");
+    _setUpAction(_openProjectAction, "Open", "Open an existing project");
     _setUpAction(_saveAction, "Save", "Save the current document");
     _setUpAction(_saveAsAction, "Save As", "SaveAs",
                  "Save the current document with a new name");
+    _setUpAction(_saveProjectAction, "Save Project Snapshot", "SaveAs", 
+                 "Save all currently open files to new project file");
     _setUpAction(_revertAction, "Revert", "Revert the current document to the saved version");
     //_setUpAction(_revertAllAction, "Revert All", "RevertAll",
     //             "Revert all open documents to the saved versions");
 
     _setUpAction(_closeAction, "Close", "Close the current document");
     _setUpAction(_closeAllAction, "Close All", "CloseAll", "Close all documents");
+    _setUpAction(_closeProjectAction, "Close Project", "CloseAll", "Close the current project");
+    _closeProjectAction.setEnabled(false);
     _setUpAction(_saveAllAction, "Save All", "SaveAll", "Save all open documents");
 
     _setUpAction(_compileAction, "Compile", "Compile the current document");
@@ -2789,12 +2988,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     _addMenuItem(fileMenu, _newAction, KEY_NEW_FILE);
     _addMenuItem(fileMenu, _newJUnitTestAction, KEY_NEW_TEST);
     _addMenuItem(fileMenu, _openAction, KEY_OPEN_FILE);
+    _addMenuItem(fileMenu, _openProjectAction, KEY_OPEN_PROJECT);
+    
     fileMenu.addSeparator();
 
     _addMenuItem(fileMenu, _saveAction, KEY_SAVE_FILE);
     _saveAction.setEnabled(true);
     _addMenuItem(fileMenu, _saveAsAction, KEY_SAVE_FILE_AS);
     _addMenuItem(fileMenu, _saveAllAction, KEY_SAVE_ALL_FILES);
+    fileMenu.add(_saveProjectAction);
 
     _addMenuItem(fileMenu, _revertAction, KEY_REVERT_FILE);
     _revertAction.setEnabled(false);
@@ -2804,6 +3006,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     fileMenu.addSeparator();
     _addMenuItem(fileMenu, _closeAction, KEY_CLOSE_FILE);
     _addMenuItem(fileMenu, _closeAllAction, KEY_CLOSE_ALL_FILES);
+    _addMenuItem(fileMenu, _closeProjectAction, KEY_CLOSE_PROJECT);
 
     // Page setup, print preview, print
     fileMenu.addSeparator();
@@ -3404,14 +3607,17 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /**
    * Configures the component used for selecting active documents.
-   * TODO: Does the ListModel here need to write through to the model?
-   *       Answer: no! The cast here is a hack until we refactor DGM.
    */
+  /*private void _setUpDocumentSelector() {
+      _model.getDocCollectionWidget() = _model.getDocCollectionWidget();
+  }*/
+  /*
   private void _setUpDocumentSelector() {
     _docList = new JList(((DefaultGlobalModel) _model).getDefinitionsDocs());
     _docList.setSelectionModel(_model.getDocumentSelectionModel());
     _docList.setCellRenderer(new DocCellRenderer());
   }
+  */
 
   /**
    * Sets up the context menu to show in the document pane.
@@ -3432,9 +3638,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _docPanePopupMenu.add(_junitAction);
     _docPanePopupMenu.add(_javadocCurrentAction);
     _docPanePopupMenu.add(_runAction);
-    _docList.addMouseListener(new RightClickMouseAdapter() {
+    _model.getDocCollectionWidget().addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
-        _docList.setSelectedIndex(_docList.locationToIndex(e.getPoint()));
         _docPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
       }
     });
@@ -3519,11 +3724,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
 
   private void _setUpPanes() {
-    // Document list pane
-    JScrollPane listScroll =
-      new BorderlessScrollPane(_docList,
-                               JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                               JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+   
 
     // DefinitionsPane
     JScrollPane defScroll = _defScrollPanes.get(_model.getActiveDocument());
@@ -3560,7 +3761,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Overall layout
     _docSplitPane = new BorderlessSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                             true,
-                                            listScroll,
+                                            new JScrollPane(_model.getDocumentNavigator().asContainer()),
                                             defScroll);
     _debugSplitPane = new BorderlessSplitPane(JSplitPane.VERTICAL_SPLIT, true);
     _debugSplitPane.setBottomComponent(_debugPanel);
@@ -3804,7 +4005,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     Color norm = DrJava.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR);
 
     // Change the text (foreground) color for the doc list.
-    _docList.setForeground(norm);
+    _model.getDocCollectionWidget().setForeground(norm);
 
     // We also need to immediately repaint the foremost scroll pane.
     _repaintLineNums();
@@ -3818,7 +4019,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     Color back = DrJava.getConfig().getSetting(DEFINITIONS_BACKGROUND_COLOR);
 
     // Change the background color for the doc list.
-    _docList.setBackground(back);
+    _model.getDocCollectionWidget().setBackground(back);
 
     // We also need to immediately repaint the foremost scroll pane.
     _repaintLineNums();
@@ -4940,32 +5141,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
-
-  /**
-   * Prints a display label for each item in the document list.
-   */
-  private class DocCellRenderer extends DefaultListCellRenderer {
-    /**
-     * Change the display of the label, but keep other
-     * behavior the same.
-     */
-    public Component getListCellRendererComponent(JList list,
-                                                  Object value,
-                                                  int index,
-                                                  boolean iss,
-                                                  boolean chf)
-    {
-      // Use exisiting behavior
-      super.getListCellRendererComponent(list, value, index, iss, chf);
-
-      // Change label
-      String label = _model.getDisplayFilename((OpenDefinitionsDocument)value);
-      setText(label);
-
-      return this;
-    }
-  }
-
   public JViewport getDefViewport() {
     JScrollPane defScroll = _defScrollPanes.get(_model.getActiveDocument());
     return defScroll.getViewport();
@@ -5175,7 +5350,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private class DoclistFontOptionListener implements OptionListener<Font> {
     public void optionChanged(OptionEvent<Font> oce) {
       Font doclistFont = DrJava.getConfig().getSetting(FONT_DOCLIST);
-      _docList.setFont(doclistFont);
+      _model.getDocCollectionWidget().setFont(doclistFont);
     }
   }
 

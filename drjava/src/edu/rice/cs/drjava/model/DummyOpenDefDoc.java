@@ -57,10 +57,9 @@ import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.junit.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
+import edu.rice.cs.util.docnavigation.*;
 
-public class DummyOpenDefDoc implements OpenDefinitionsDocument {
-  
-  
+public class DummyOpenDefDoc implements OpenDefinitionsDocument {  
   /**
    * Determines if this definitions document has changed since the
    * last save.
@@ -433,5 +432,11 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public int getCurrentDefinitionsLocation() {
     throw new UnsupportedOperationException("Dummy method");
   }
-  
+    
+    /**
+     * @return the INavigatorItem representing this object
+     */
+    public INavigatorItem getIDoc() {
+        throw new UnsupportedOperationException("Dummy method");
+    }
 }

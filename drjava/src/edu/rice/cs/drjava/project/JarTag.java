@@ -43,71 +43,13 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model;
+package edu.rice.cs.drjava.project;
 
-import edu.rice.cs.util.docnavigation.*;
-
-/**
- * A GlobalModel that enforces invariants associated with having
- * one active document at a time.
- *
- * Invariants:
- * <OL>
- * <LI>{@link #getDefinitionsDocuments} will always return an array of
- *     at least size 1.
- * </LI>
- * <LI>(follows from previous) If there is ever no document in the model,
- *     a new one will be created.
- * </LI>
- * <LI>There is always exactly one active document, which can be get/set
- *     via {@link #getActiveDocument} and {@link #setActiveDocument}.
- * </LI>
- * </OL>
- *
- * Other functions added by this class:
- * <OL>
- * <LI>When calling {@link #openFile}, if there is currently only one open
- *     document, and it is untitled and unchanged, it will be closed after the
- *     new document is opened. This means that, in one atomic transaction, the
- *     model goes from having one totally empty document open to having one
- *     document (the requested one) open.
- * </LI>
- * </OL>
- *
- * @version $Id$
+import java.io.*;
+ 
+/** 
+ * The class representing the main class of any Jar file which will be generated from the Project
+ * exists only for typing purposes.  At this point all tags are fundamentally the same.
  */
-public interface SingleDisplayModel extends GlobalModel {
-  /**
-   * @return the currently active document.
-   */
-  public OpenDefinitionsDocument getActiveDocument();
-
-  /**
-   * Sets the currently active document by updating the selection model.
-   * @param doc Document to set as active
-   */
-  public void setActiveDocument(OpenDefinitionsDocument doc);
-
-  /**
-   * @return the IDocumentNavigator container expressed as an AWT component
-   */
-  public java.awt.Container getDocCollectionWidget();
-
-  /**
-   * Sets the active document to be the next one in the list.
-   */
-  public void setActiveNextDocument();
-
-  /**
-   * Sets the active document to be the previous one in the list.
-   */
-  public void setActivePreviousDocument();
-
-  /**
-   * Returns whether we are in the process of closing all documents.
-   * (Don't want to prompt the user to revert files that have become
-   * modified on disk if we're just closing everything.)
-   * TODO: Move to DGM?  Make private?
-   */
-  public boolean isClosingAllFiles();
+public abstract class JarTag implements ProjectFileTag {
 }

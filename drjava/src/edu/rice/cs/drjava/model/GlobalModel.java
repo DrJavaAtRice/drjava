@@ -57,6 +57,7 @@ import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
+import edu.rice.cs.util.docnavigation.*;
 
 /**
  * Handles the bulk of DrJava's program logic.
@@ -114,7 +115,14 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    * Gets the Debugger, which interfaces with the integrated debugger.
    */
   public Debugger getDebugger();
-
+  
+  /**
+   * Gets the DocumentNavigator, which controls the document view.
+   */
+   public IAWTContainerNavigatorActor getDocumentNavigator();
+   
+   public void setDocumentNavigator(IAWTContainerNavigatorActor newnav);
+ 
   //---------------------------- File Management ----------------------------//
 
   /**
@@ -158,6 +166,8 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    * Saves all open documents, prompting when necessary.
    */
   public void saveAllFiles(FileSaveSelector com) throws IOException;
+  
+  public void saveProject(String filename) throws IOException;
 
   /**
    * Searches for a file with the given name on the current source roots and the
@@ -184,14 +194,11 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
   /**
    * Return the name of the file, or "(untitled)" if no file exists.
    * Does not include the ".java" if it is present.
-   */
+   */      
   public String getDisplayFilename(OpenDefinitionsDocument doc);
 
-  /**
-   * Return the absolute path of the file, or "(untitled)" if no file exists.
-   */
-  public String getDisplayFullPath(OpenDefinitionsDocument doc);
 
+  
   /**
    * Return the absolute path of the file with the given index,
    * or "(untitled)" if no file exists.

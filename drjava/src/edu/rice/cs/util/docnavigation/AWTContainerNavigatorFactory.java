@@ -43,71 +43,68 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model;
+package edu.rice.cs.util.docnavigation;
+import java.util.*;
+import java.awt.*;
+import java.awt.event.*;
 
-import edu.rice.cs.util.docnavigation.*;
+public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory
+{
+  public static final AWTContainerNavigatorFactory Singleton = new AWTContainerNavigatorFactory();
+  
+  private AWTContainerNavigatorFactory()
+  {
+  }
 
-/**
- * A GlobalModel that enforces invariants associated with having
- * one active document at a time.
- *
- * Invariants:
- * <OL>
- * <LI>{@link #getDefinitionsDocuments} will always return an array of
- *     at least size 1.
- * </LI>
- * <LI>(follows from previous) If there is ever no document in the model,
- *     a new one will be created.
- * </LI>
- * <LI>There is always exactly one active document, which can be get/set
- *     via {@link #getActiveDocument} and {@link #setActiveDocument}.
- * </LI>
- * </OL>
- *
- * Other functions added by this class:
- * <OL>
- * <LI>When calling {@link #openFile}, if there is currently only one open
- *     document, and it is untitled and unchanged, it will be closed after the
- *     new document is opened. This means that, in one atomic transaction, the
- *     model goes from having one totally empty document open to having one
- *     document (the requested one) open.
- * </LI>
- * </OL>
- *
- * @version $Id$
- */
-public interface SingleDisplayModel extends GlobalModel {
-  /**
-   * @return the currently active document.
-   */
-  public OpenDefinitionsDocument getActiveDocument();
 
-  /**
-   * Sets the currently active document by updating the selection model.
-   * @param doc Document to set as active
-   */
-  public void setActiveDocument(OpenDefinitionsDocument doc);
+    public IAWTContainerNavigatorActor makeListNavigator() {
+        return new JListNavigator();
+    }
 
-  /**
-   * @return the IDocumentNavigator container expressed as an AWT component
-   */
-  public java.awt.Container getDocCollectionWidget();
-
-  /**
-   * Sets the active document to be the next one in the list.
-   */
-  public void setActiveNextDocument();
-
-  /**
-   * Sets the active document to be the previous one in the list.
-   */
-  public void setActivePreviousDocument();
-
-  /**
-   * Returns whether we are in the process of closing all documents.
-   * (Don't want to prompt the user to revert files that have become
-   * modified on disk if we're just closing everything.)
-   * TODO: Move to DGM?  Make private?
-   */
-  public boolean isClosingAllFiles();
+    public IAWTContainerNavigatorActor makeTreeNavigator(String name) {
+        return new JTreeNavigator(name);
+    }
+    
+    public IAWTContainerNavigatorActor makeListNavigator(IDocumentNavigator parent)
+    {
+      IAWTContainerNavigatorActor tbr = makeListNavigator();
+      migrateNavigatorItems(tbr, parent);
+      migrateListeners(tbr, parent);
+      return tbr;
+    }
+  
+    public IAWTContainerNavigatorActor makeTreeNavigator(String name, IDocumentNavigator parent)
+    {
+      IAWTContainerNavigatorActor tbr = makeTreeNavigator(name);
+      migrateNavigatorItems(tbr, parent);
+      migrateListeners(tbr, parent);
+      return tbr;
+    }
+    
+    private void migrateNavigatorItems(IDocumentNavigator child, IDocumentNavigator parent)
+    {
+      Enumeration<INavigatorItem> enumerator =  parent.getDocuments();
+      while(enumerator.hasMoreElements())
+      {
+        INavigatorItem navitem = enumerator.nextElement();
+        child.addDocument(navitem);
+        parent.removeDocument(navitem);
+        enumerator = parent.getDocuments();
+      }
+      
+    }
+    
+    private void migrateListeners(IDocumentNavigator child, IDocumentNavigator parent)
+    {
+      Collection<INavigationListener> listeners = parent.getNavigatorListeners();
+      Iterator<INavigationListener> it = listeners.iterator();
+      while(it.hasNext())
+      {
+        INavigationListener listener = it.next();
+        child.addNavigationListener(listener);
+        parent.removeNavigationListener(listener);
+        it = listeners.iterator();
+      }
+      
+    }
 }

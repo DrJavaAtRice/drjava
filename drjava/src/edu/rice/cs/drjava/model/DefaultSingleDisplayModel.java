@@ -45,12 +45,24 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
+import javax.swing.text.*;
 import javax.swing.ListSelectionModel;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 import java.io.*;
 import java.util.*;
+import java.awt.Container;
+
+import edu.rice.cs.util.swing.FindReplaceMachine;
+
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.Version;
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.drjava.model.definitions.*;
+import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.drjava.model.compiler.*;
+import edu.rice.cs.util.docnavigation.*;
 
 /**
  * A GlobalModel that enforces invariants associated with having
@@ -82,7 +94,7 @@ import java.util.*;
  * @version $Id$
  */
 public class DefaultSingleDisplayModel extends DefaultGlobalModel
-    implements SingleDisplayModel {
+    implements SingleDisplayModel{
 
   /**
    * The active document pointer, which will never be null once
@@ -90,10 +102,6 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    */
   private OpenDefinitionsDocument _activeDocument;
 
-  /**
-   * Keeps track of the currently selected document in the list model.
-   */
-  private ListSelectionModel _selectionModel;
 
   /**
    * Denotes whether the model is currently trying to close all
@@ -115,28 +123,24 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
   }
 
   /**
-   * Creates a SingleDisplayModel using the Interactions JVM from
-   * the given model.  (Useful in test cases.)
-   * @param other A model with a valid Interactions JVM to use.
-   *
-  public SingleDisplayModel(DefaultGlobalModel other) {
-    super(other);
-    _init();
-  }*/
-
-  /**
    * Initiates this SingleDisplayModel.  Should only be called
    * from the constructor.
    */
   private void _init() {
+    _documentNavigator.addNavigationListener(new INavigationListener() {
+     public void gainedSelection(INavigatorItem docu) {
+  _setActiveDoc(docu);
+     }
 
-    _selectionModel = new DefaultListSelectionModel();
-    _selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    _selectionModel.addListSelectionListener(new SelectionModelListener());
-
+     public void lostSelection(INavigatorItem docu) {
+  // not important, only one document selected at a time
+     }
+ });
     _isClosingAllDocs = false;
     _ensureNotEmpty();
-    setActiveDocument(0);
+    _setActiveFirstDocument();
+    
+    
   }
 
   /**
@@ -165,61 +169,34 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * Sets the currently active document by updating the selection model.
    * @param doc Document to set as active
    */
-  public void setActiveDocument(OpenDefinitionsDocument doc) {
-    setActiveDocument(_getDocumentIndex(doc));
+  public void setActiveDocument(OpenDefinitionsDocument doc) {    
+    _setActiveDoc(getIDocGivenODD(doc));
   }
 
-  /**
-   * Sets the currently active document by updating the selection model.
-   * The selection model will trigger our SelectionModelListener
-   * to fire an activeDocumentChanged event.
-   * @param index Index of active document in the list of documents.
-   */
-  public void setActiveDocument(int index) {
-    int oldIndex = _selectionModel.getMinSelectionIndex();
-    if ((index < 0) || (index >= getDefinitionsDocuments().size())) {
-      throw new IllegalArgumentException(
-        "No such document in model to be set to active.");
+    public Container getDocCollectionWidget() {
+ return _documentNavigator.asContainer();
     }
-    // Automatically fires event if index has changed
-    _selectionModel.setSelectionInterval(index, index);
-
-    // Make sure field is set and event is fired,
-    //  even if selection index did not change
-    if (index == oldIndex) {
-      _setActiveDoc(index);
-    }
-  }
 
   /**
-   * Returns the selection model for the list of documents.
-   */
-  public ListSelectionModel getDocumentSelectionModel() {
-    return _selectionModel;
-  }
-
-  /**
-   * Sets the active document to be the next one in the list.
+   * Sets the active document to be the next one in the collection
    */
   public void setActiveNextDocument() {
-    int index = _getDocumentIndex(_activeDocument);
-
-    if (index < getDefinitionsDocuments().size() - 1) {
-      index++;
-      setActiveDocument(index);
-    }
+      INavigatorItem key = getIDocGivenODD(_activeDocument);
+      INavigatorItem nextKey =_documentNavigator.getNext(key);
+      if( key != nextKey ) {
+   _setActiveDoc(nextKey);
+      }
   }
 
   /**
-   * Sets the active document to be the previous one in the list.
+   * Sets the active document to be the previous one in the collection
    */
   public void setActivePreviousDocument() {
-    int index = _getDocumentIndex(_activeDocument);
-
-    if (index > 0) {
-      index--;
-      setActiveDocument(index);
-    }
+      INavigatorItem key = getIDocGivenODD(_activeDocument);
+      INavigatorItem prevKey =_documentNavigator.getPrevious(key);
+      if( key != prevKey ) {
+   _setActiveDoc(prevKey);
+      }
   }
 
   /**
@@ -340,27 +317,27 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * @return true if the document was closed
    */
   public boolean closeFile(OpenDefinitionsDocument doc) {
-    int index = _getDocumentIndex(doc);
-    if (super.closeFile(doc)) {
-      // Select next document if not closing all documents
-      if (!_isClosingAllDocs) {
-        _ensureNotEmpty();
-
-        // Select next document
-        int size = getDefinitionsDocuments().size();
-        if (index < 0) {
-          index = 0;
-        }
-        if (index >= size) {
-          index = size - 1;
-        }
-        setActiveDocument(index);
+      INavigatorItem switchTo =_documentNavigator.getNext(getIDocGivenODD(doc));
+      /** if we can't move forward, go backwards */
+      if( switchTo == getIDocGivenODD(doc)) {
+   switchTo = _documentNavigator.getPrevious(switchTo);
       }
-      return true;
-    }
-    else {
+
+      if( super.closeFile(doc) ) {
+   // Select next document if not closing all documents
+   if (!_isClosingAllDocs) {
+       _ensureNotEmpty();
+
+       if( getDefinitionsDocumentsSize() == 1 ) {
+    _setActiveFirstDocument();
+       }
+       else {
+    _setActiveDoc(switchTo);
+       }
+   }
+   return true;
+      }
       return false;
-    }
   }
 
   /**
@@ -373,35 +350,18 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     _isClosingAllDocs = true;
     boolean success = super.closeAllFiles();
     _isClosingAllDocs = false;
-
+    
     _ensureNotEmpty();
-    setActiveDocument(0);
+    _setActiveFirstDocument();
     return success;
   }
-
-
-  /**
-   * Returns the index of the first occurrence of the specified document
-   * in the list of open documents, or -1 if it is not found.
-   */
-  private int _getDocumentIndex(OpenDefinitionsDocument doc) {
-    List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
-    int index = -1;
-    for (int i=0; (i < docs.size()) && (index < 0); i++) {
-      if (docs.get(i).equals(doc)) {
-        index = i;
-      }
-    }
-    return index;
-  }
-
 
   /**
    * Returns whether there is currently only one open document
    * which is untitled and unchanged.
    */
   private boolean _hasOneEmptyDocument() {
-    return ((getDefinitionsDocuments().size() == 1) &&
+    return ((getDefinitionsDocumentsSize() == 1) &&
             (_activeDocument.isUntitled()) &&
             (!_activeDocument.isModifiedSinceSave()));
   }
@@ -411,24 +371,25 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    */
   private void _ensureNotEmpty() {
     if ((!_isClosingAllDocs) &&
-        (getDefinitionsDocuments().size() == 0)) {
+        (getDefinitionsDocumentsSize() == 0)) {
       super.newFile();
     }
   }
 
-  /**
-   * Actually set the activeDocument field to the document
-   * at the given index, and fire an activeDocumentChanged event.
-   * This should usually be called from the SelectionModelListener,
-   * but must also be called in setActiveDocument in the case
-   * where the selection index does not change, and thus the
-   * SelectionModel does not fire a valueChanged event.
-   */
-  private void _setActiveDoc(int index) {
-    List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
-    _activeDocument = docs.get(index);
+    /**
+     * some duplicated work, but avoids duplicated code, which is our nemesis
+     */
+    private void _setActiveFirstDocument() {
+ List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
+ _setActiveDoc(getIDocGivenODD(docs.get(0)));
+    }
+  
+  private void _setActiveDoc(INavigatorItem idoc) {
+      //Hashtable<INavigatorItem, OpenDefinitionsDocument> docs = getDefinitionsDocumentsTable();
+    
+    _activeDocument = super.getODDGivenIDoc(idoc);
     _activeDocument.checkIfClassFileInSync();
-
+    
     // notify single display model listeners   // notify single display model listeners
     _notifier.notifyListeners(new GlobalEventNotifier.Notifier() {
       public void notifyListener(GlobalModelListener l) {
@@ -441,27 +402,6 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
       }
     });
   }
-
-  /**
-   * Listens to the selection model for the open documents.  On a change,
-   * this updates the activeDocument and notifies all listeners to the model.
-   */
-  private class SelectionModelListener implements ListSelectionListener {
-    public void valueChanged(ListSelectionEvent e) {
-      if (! e.getValueIsAdjusting()) {
-        int index = _selectionModel.getMinSelectionIndex();
-        List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
-        //if ((index < 0) || (index > docs.getSize())) {
-          //throw new RuntimeException("Document index out of bounds: " + index);
-        //}
-
-        // not sure why, but i just saw this get called with index=-1
-        // let's just ignore that.
-        if ((index >= 0) && (index < docs.size())) {
-          _setActiveDoc(index);
-        }
-      }
-    }
-  }
+  
 
 }

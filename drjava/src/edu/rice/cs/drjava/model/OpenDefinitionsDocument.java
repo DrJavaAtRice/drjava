@@ -45,6 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
+import edu.rice.cs.util.docnavigation.*;
 import java.util.Vector;
 import java.io.*;
 import java.awt.print.*;
@@ -336,4 +337,6 @@ public interface OpenDefinitionsDocument {
    * all related state from the debug manager.
    */
   public void removeFromDebugger();
+
+  
 }

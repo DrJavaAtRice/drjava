@@ -326,7 +326,7 @@ public class DrJava implements OptionConstants {
    * If file exists, open it in DrJava.  Otherwise, ignore it.
    * Is there a better way to handle nonexistent files?  Dialog box, maybe?
    */
-  static void openCommandLineFiles(MainFrame mf, String[] filesToOpen) {
+  static void openCommandLineFiles(MainFrame mf, String[] filesToOpen) {  
     for(int i = 0; i < filesToOpen.length; i++) {
       final File file = new File(filesToOpen[i]);
       FileOpenSelector command = new FileOpenSelector() {

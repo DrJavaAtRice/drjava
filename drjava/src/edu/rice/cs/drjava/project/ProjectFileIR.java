@@ -43,71 +43,33 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model;
+package edu.rice.cs.drjava.project;
 
-import edu.rice.cs.util.docnavigation.*;
+import java.io.*;
 
-/**
- * A GlobalModel that enforces invariants associated with having
- * one active document at a time.
- *
- * Invariants:
- * <OL>
- * <LI>{@link #getDefinitionsDocuments} will always return an array of
- *     at least size 1.
- * </LI>
- * <LI>(follows from previous) If there is ever no document in the model,
- *     a new one will be created.
- * </LI>
- * <LI>There is always exactly one active document, which can be get/set
- *     via {@link #getActiveDocument} and {@link #setActiveDocument}.
- * </LI>
- * </OL>
- *
- * Other functions added by this class:
- * <OL>
- * <LI>When calling {@link #openFile}, if there is currently only one open
- *     document, and it is untitled and unchanged, it will be closed after the
- *     new document is opened. This means that, in one atomic transaction, the
- *     model goes from having one totally empty document open to having one
- *     document (the requested one) open.
- * </LI>
- * </OL>
- *
- * @version $Id$
- */
-public interface SingleDisplayModel extends GlobalModel {
+public interface ProjectFileIR {
   /**
-   * @return the currently active document.
+   * @return an array full of all the source files in this project file
    */
-  public OpenDefinitionsDocument getActiveDocument();
-
+  public File[] getSourceFiles();
+  
   /**
-   * Sets the currently active document by updating the selection model.
-   * @param doc Document to set as active
+   * @return an array full of all the resource files in this project file
    */
-  public void setActiveDocument(OpenDefinitionsDocument doc);
-
+  public File[] getResourceFiles();
+  
   /**
-   * @return the IDocumentNavigator container expressed as an AWT component
+   * @return an array full of all the miscellaneous files in this project file
    */
-  public java.awt.Container getDocCollectionWidget();
-
+  public File[] getMiscFiles();
+  
   /**
-   * Sets the active document to be the next one in the list.
+   * @return an array full of all the classpath path elements in the classpath for this project file
    */
-  public void setActiveNextDocument();
-
+  public File[] getClasspath();
+  
   /**
-   * Sets the active document to be the previous one in the list.
+   * @return an the name of the Jar main class associated with this project
    */
-  public void setActivePreviousDocument();
-
-  /**
-   * Returns whether we are in the process of closing all documents.
-   * (Don't want to prompt the user to revert files that have become
-   * modified on disk if we're just closing everything.)
-   * TODO: Move to DGM?  Make private?
-   */
-  public boolean isClosingAllFiles();
+  public String getJarMainClass();
 }
