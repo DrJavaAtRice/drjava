@@ -53,6 +53,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
+import edu.rice.cs.drjava.model.DefaultGlobalModel;
 
 /**
  * The model for the definitions pane.
@@ -102,6 +103,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   private File _file;
   private long _timestamp;
 
+  private final Indenter _indenter;
+
   /**
    * Constant for starting position of document.
    */
@@ -116,7 +119,12 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * Constructor.
    */
   public DefinitionsDocument() {
+    this(DefaultGlobalModel.INDENTER);
+  }
+
+  public DefinitionsDocument(Indenter i) {
     super();
+    _indenter = i;
     _file = null;
     _cachedLocation = 0;
     _cachedLineNum = 1;
@@ -1065,7 +1073,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * Indents a line using the Indenter decision tree.
    */
   private void _indentLine() {
-    Indenter.ONLY.indent(this);
+    _indenter.indent(this);
   }
   
   /**

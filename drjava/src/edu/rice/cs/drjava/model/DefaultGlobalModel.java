@@ -61,8 +61,8 @@ import edu.rice.cs.util.swing.FindReplaceMachine;
 
 import gj.util.Vector;
 import gj.util.Enumeration;
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.*;
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
@@ -75,6 +75,7 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.newjvm.*;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.model.junit.*;
+import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 
 import junit.framework.Test;
 import junit.framework.TestResult;
@@ -114,6 +115,21 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
   // Create a debug manager
   private DebugManager _debugManager = null;
+
+  public static final Indenter INDENTER;
+
+  static {
+    int ind = DrJava.CONFIG.getSetting(OptionConstants.INDENT_LEVEL).intValue();
+    INDENTER = new Indenter(ind);
+    if (CodeStatus.DEVELOPMENT) {
+      DrJava.CONFIG.addOptionListener( OptionConstants.INDENT_LEVEL, 
+                                      new OptionListener<Integer>() {
+          public void optionChanged(OptionEvent<Integer> oce) {
+            INDENTER.buildTree(DrJava.CONFIG.getSetting(OptionConstants.INDENT_LEVEL).intValue());
+          }  
+        });
+    }
+  }
 
   public static final String EXIT_CALLED_MESSAGE
     = "The interaction was aborted by a call to System.exit.";

@@ -54,21 +54,11 @@ import edu.rice.cs.drjava.config.FileConfiguration;
  * @version $Id$
  */
 public class Indenter {
-  /**
-   * Singleton instance.
-   */
-  public static final Indenter ONLY = new Indenter();
 
-  /**
-   * Private constructor for singleton instance.
-   */
-  private Indenter() { 
-      buildTree();
-      if (CodeStatus.DEVELOPMENT) {
-        DrJava.CONFIG.addOptionListener( OptionConstants.INDENT_LEVEL, new IndentOptionListener());
-      }
+  public Indenter(int indentLevel) { 
+      buildTree(indentLevel);
   }
-  
+
   /**
    * Root of decision tree.
    */
@@ -80,9 +70,9 @@ public class Indenter {
    * For now, this method needs to be called every time the
    * size of one indent level is being changed!
    */
-  public void buildTree()
+  public void buildTree(int indentLevel)
   {
-    char[] indent = new char[DrJava.CONFIG.getSetting(OptionConstants.INDENT_LEVEL).intValue()];
+    char[] indent = new char[indentLevel];
     java.util.Arrays.fill(indent,' ');
     String oneLevel = new String(indent);
     
@@ -139,15 +129,6 @@ public class Indenter {
     _topRule.indentLine(doc);
   }
   
-  /**
-   * The OptionListener for INDENT_LEVEL 
-   */
-  private class IndentOptionListener implements OptionListener<Integer> {
-    public void optionChanged(OptionEvent<Integer> oce) {
-      buildTree();
-    }
-  }
-
 }
 
 
