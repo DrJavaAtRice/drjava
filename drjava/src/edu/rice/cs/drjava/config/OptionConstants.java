@@ -497,10 +497,16 @@ public interface OptionConstants {
                         KeyStroke.getKeyStroke(KeyEvent.VK_J, mask | InputEvent.SHIFT_MASK));
   
   /**
-   * The key binding for loading an interactions history.
+   * The key binding for executing an interactions history.
    */
-  public static final KeyStrokeOption KEY_LOAD_HISTORY =
-    new KeyStrokeOption("key.load.history", KeyStrokeOption.NULL_KEYSTROKE);
+  public static final KeyStrokeOption KEY_EXECUTE_HISTORY =
+    new KeyStrokeOption("key.execute.history", KeyStrokeOption.NULL_KEYSTROKE);
+  
+  /**
+   * The key binding for loading an interactions history as a script.
+   */
+  public static final KeyStrokeOption KEY_LOAD_HISTORY_SCRIPT =
+    new KeyStrokeOption("key.load.history.script", KeyStrokeOption.NULL_KEYSTROKE);
   
   /**
    * The key binding for saving an interactions history.

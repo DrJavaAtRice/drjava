@@ -576,6 +576,16 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
 
     _highlightManager = new HighlightManager(this);
 
+    int rate = this.getCaret().getBlinkRate();
+    // Change the caret to one that doesn't remove selection highlighting when focus is lost.
+    // Fixes bug #788295 "No highlight when find/replace switches docs".
+    this.setCaret(new DefaultCaret() {
+      public void focusLost(FocusEvent e) {        
+        setVisible(false);
+      }
+    });
+    this.getCaret().setBlinkRate(rate);
+    
   }
 
   /**

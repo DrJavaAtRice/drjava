@@ -169,12 +169,13 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
 
   }
 
+  /**
+   * The action performed when hitting the Enter key in the find field.
+   */
   private Action _findNextAction = new AbstractAction("Find Next") {
     public void actionPerformed(ActionEvent e) {
       _doFind();
       _findField.requestFocus();
-      _defPane.getCaret().setSelectionVisible(true);
-      
     }
   };
 
@@ -197,6 +198,8 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     Document doc = fr.getDocument();
     int pos = fr.getFoundOffset();
     if (doc != openDoc.getDocument()) {
+      Caret c = _defPane.getCaret();
+      c.setDot(c.getDot());
       // XXX: this is fundamentally ugly - we should support direct, ordered
       //      iteration through all OpenDefinitionsDocuments.
       _model.setActiveDocument(((DefaultSingleDisplayModel) _model).getODDForDocument(doc));
@@ -602,7 +605,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _defPane.select(from, to);
 
     // Found this little statement that will show the selected text
-    // in _defPane without giving _defPane focus, previously allowing the
+    // in _defPane without giving _defPane focus, allowing the
     // user to hit enter repeatedly and change the document while finding
     // next.
     _defPane.getCaret().setSelectionVisible(true);

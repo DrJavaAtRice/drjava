@@ -132,6 +132,12 @@ public abstract class AbstractConsoleController {
   protected void _addDocumentStyles() {
     // Default
     _adapter.setDocStyle(ConsoleDocument.DEFAULT_STYLE, _defaultStyle);
+    DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR,
+                                         new OptionListener<Color>() {
+      public void optionChanged(OptionEvent<Color> oe) {
+        setDefaultFont(oe.value);
+      }
+    });
 
     // System.out
     _systemOutStyle.addAttributes(_defaultStyle);
@@ -165,12 +171,38 @@ public abstract class AbstractConsoleController {
    * @param f New font to use.
    */
   public void setDefaultFont(Font f) {
+    Color c = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
+    setDefaultFont(f, c);
+  }  
+  
+  /**
+   * Sets the color for the document, updating all existing text.
+   * This behavior is only necessary in Mac OS X, JDK 1.4.1, since
+   * changing the main font works on all other tested platforms.
+   * @param c New color to use.
+   */
+  public void setDefaultFont(Color c) {
+    Font f = DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN);
+    setDefaultFont(f, c);
+  }  
+  
+  /**
+   * Sets the font and color for the document, updating all existing text.
+   * This behavior is only necessary in Mac OS X, JDK 1.4.1, since setFont() and
+   * changing the main font works on all other tested platforms.
+   * @param f New font to use.
+   * @param c New color to use.
+   */
+  public void setDefaultFont(Font f, Color c) {
     if (PlatformFactory.ONLY.isMac14Platform()) {
       SimpleAttributeSet fontSet = new SimpleAttributeSet();
       StyleConstants.setFontFamily(fontSet, f.getFamily());
       StyleConstants.setFontSize(fontSet, f.getSize());
       StyleConstants.setBold(fontSet, f.isBold());
       StyleConstants.setItalic(fontSet, f.isItalic());
+      if (c != null) {
+        StyleConstants.setForeground(fontSet, c);
+      }
       _adapter.setCharacterAttributes(0, _adapter.getDocLength()+1, fontSet, false);
       _pane.setCharacterAttributes(fontSet, false);
       _updateStyles(fontSet);

@@ -631,6 +631,26 @@ public class MainFrame extends JFrame implements OptionConstants {
       //_setDividerLocation();
     }
   };
+  
+  /** Find the next instance of the find word. */
+  private Action _findNextAction = new AbstractAction("Find Next") {
+    public void actionPerformed(ActionEvent ae) {
+      if(!_findReplace.isDisplayed()) {
+        showTab(_findReplace);
+        _findReplace.beginListeningTo(_currentDefPane);
+      }
+      _findReplace.findNext();
+      // This is a fix for a highlighting bug when
+      // calling this from _findReplace. Perhaps there
+      // is a better solution.
+      if (_lastFocusOwner == _findReplace) {
+        _currentDefPane.requestFocus();
+      }
+      else {
+        _lastFocusOwner.requestFocus();
+      }
+    }
+  };
 
   /** Asks the user for a line number and goes there. */
   private Action _gotoLineAction = new AbstractAction("Go to Line...") {
@@ -1026,12 +1046,12 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Interprets the commands in a file in the interactions window
    */
-  private Action _loadHistoryAction = new AbstractAction("Execute Interactions History...") {
+  private Action _executeHistoryAction = new AbstractAction("Execute Interactions History...") {
     public void actionPerformed(ActionEvent ae) {
       // Show interactions tab
       _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
 
-      _interactionsHistoryChooser.setDialogTitle("Load Interactions History");
+      _interactionsHistoryChooser.setDialogTitle("Execute Interactions History");
       try {
         _model.loadHistory(_interactionsHistoryFileSelector);
       }
@@ -1061,7 +1081,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Action to load an interactions history as a replayable script.
    */
-  private Action _loadHistoryScriptAction =new AbstractAction("Load Interactions History as Script...") {
+  private Action _loadHistoryScriptAction = new AbstractAction("Load Interactions History as Script...") {
     public void actionPerformed(ActionEvent e) {
       try {
         _interactionsHistoryChooser.setDialogTitle("Load Interactions History");
@@ -1117,10 +1137,19 @@ public class MainFrame extends JFrame implements OptionConstants {
       FileSaveSelector selector = new FileSaveSelector() {
         public File getFile() throws OperationCanceledException {
           // Don't try to set the filename with getSaveFile;
-          // just display the dialog and get file with getChosenFile
-          return getSaveFile(_interactionsHistoryChooser);
-//          int rc = _interactionsHistoryChooser.showSaveDialog(MainFrame.this);
-//          return getChosenFile(_interactionsHistoryChooser, rc);
+          // just display the dialog and get file with getChosenFile, otherwise
+          // the suggested file name will be whatever document is open.
+          // ED (8.14.03): Had to add this next block of code from getSaveFile to 
+          // fix bug #788311 "NullPointer when saving history"
+          File selection = _interactionsHistoryChooser.getSelectedFile();//_saveChooser.getSelectedFile();
+          if (selection != null) {
+            _interactionsHistoryChooser.setSelectedFile(selection.getParentFile());
+            _interactionsHistoryChooser.setSelectedFile(selection);
+            _interactionsHistoryChooser.setSelectedFile(null);
+          }
+//          return getSaveFile(_interactionsHistoryChooser);
+          int rc = _interactionsHistoryChooser.showSaveDialog(MainFrame.this);
+          return getChosenFile(_interactionsHistoryChooser, rc);
         }
         public void warnFileOpen() {
           _warnFileOpen();
@@ -2519,6 +2548,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_uncommentLinesAction, "Uncomment Lines", "Uncomment all selected lines");
 
     _setUpAction(_findReplaceAction, "Find", "Find or replace text in the document");
+    _setUpAction(_findNextAction, "Find Next", "Repeats the last find");
     _setUpAction(_gotoLineAction, "Go to line", "Go to a line number in the document");
 
     _setUpAction(_switchToPrevAction, "Back", "Switch to the previous document");
@@ -2534,7 +2564,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_javadocCurrentAction, "Preview Javadoc Current", "Preview the Javadoc for the current document");
     _setUpAction(_runAction, "Run Document", "Run the main method of the current document");
 
-    _setUpAction(_loadHistoryAction, "Execute History", "Load and execute a history of interactions from a file");
+    _setUpAction(_executeHistoryAction, "Execute History", "Load and execute a history of interactions from a file");
     _setUpAction(_loadHistoryScriptAction, "Load History as Script", "Load a history from a file as a series of interactions");
     _setUpAction(_saveHistoryAction, "Save History", "Save the history of interactions to a file");
     _setUpAction(_clearHistoryAction, "Clear History", "Clear the current history of interactions");
@@ -2719,6 +2749,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Find/replace, goto
     editMenu.addSeparator();
     _addMenuItem(editMenu, _findReplaceAction, KEY_FIND_REPLACE);
+    _addMenuItem(editMenu, _findNextAction, KEY_FIND_NEXT);
     _addMenuItem(editMenu, _gotoLineAction, KEY_GOTO_LINE);
 
     // Next, prev doc
@@ -2756,7 +2787,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _addMenuItem(toolsMenu, _runAction, KEY_RUN);
     toolsMenu.addSeparator();
 
-    _addMenuItem(toolsMenu, _loadHistoryAction, KEY_LOAD_HISTORY);
+    _addMenuItem(toolsMenu, _executeHistoryAction, KEY_EXECUTE_HISTORY);
+    _addMenuItem(toolsMenu, _loadHistoryScriptAction, KEY_LOAD_HISTORY_SCRIPT);
     _addMenuItem(toolsMenu, _saveHistoryAction, KEY_SAVE_HISTORY);
     _addMenuItem(toolsMenu, _clearHistoryAction, KEY_CLEAR_HISTORY);
     toolsMenu.addSeparator();
@@ -3299,7 +3331,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _interactionsPanePopupMenu.add(copyAction);
     _interactionsPanePopupMenu.add(pasteAction);
     _interactionsPanePopupMenu.addSeparator();
-    _interactionsPanePopupMenu.add(_loadHistoryAction);
+    _interactionsPanePopupMenu.add(_executeHistoryAction);
     _interactionsPanePopupMenu.add(_loadHistoryScriptAction);
     _interactionsPanePopupMenu.add(_saveHistoryAction);
     _interactionsPanePopupMenu.add(_clearHistoryAction);
@@ -4928,16 +4960,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     KeyBindingManager.Singleton.put(KEY_DELETE_NEXT,
                                     _actionMap.get(DefaultEditorKit.deleteNextCharAction), null, "Delete Next");
     KeyBindingManager.Singleton.put(KEY_FIND_NEXT,
-                                    new AbstractAction("FindNext") {
-      public void actionPerformed(ActionEvent ae) {
-        if(!_findReplace.isDisplayed()) {
-          showTab(_findReplace);
-          _findReplace.beginListeningTo(_currentDefPane);
-        }
-        _findReplace.findNext();
-        _currentDefPane.requestFocus();
-      }
-    }, null, "Find Next");
+                                    _findNextAction, null, "Find Next");
 
     // For now, _switchToPreviousPaneAction only switches the focus from the interactions pane to the definitions pane.
     // Change this when the behavior is updated. Same for _switchToNextPaneAction.
