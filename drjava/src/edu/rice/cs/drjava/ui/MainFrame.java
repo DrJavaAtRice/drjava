@@ -202,7 +202,7 @@ public class MainFrame extends JFrame {
 
   /** Aborts current interaction. */
   private Action _abortInteractionAction
-    = new AbstractAction("Abort current interaction")
+    = new AbstractAction("Abort interaction")
   {
     public void actionPerformed(ActionEvent ae) {
       String title = "Confirm abort interaction";
@@ -406,24 +406,18 @@ public class MainFrame extends JFrame {
   private void _installNewDocumentListener(Document d) {
     d.addDocumentListener(new DocumentListener() {
       public void changedUpdate(DocumentEvent e) {
-        _saveButton.setEnabled(true);
-        _compileButton.setEnabled(false);
-        _saveMenuItem.setEnabled(true);
-        _compileMenuItem.setEnabled(false);
+        _saveAction.setEnabled(true);
+        _compileAction.setEnabled(false);
         updateFileTitle();
       }
       public void insertUpdate(DocumentEvent e) {
-        _saveButton.setEnabled(true);
-        _compileButton.setEnabled(false);
-        _saveMenuItem.setEnabled(true);
-        _compileMenuItem.setEnabled(false);
+        _saveAction.setEnabled(true);
+        _compileAction.setEnabled(false);
         updateFileTitle();
       }
       public void removeUpdate(DocumentEvent e) {
-        _saveButton.setEnabled(true);
-        _compileButton.setEnabled(false);
-        _saveMenuItem.setEnabled(true);
-        _compileMenuItem.setEnabled(false);
+        _saveAction.setEnabled(true);
+        _compileAction.setEnabled(false);
         updateFileTitle();
       }
     });
@@ -601,37 +595,37 @@ public class MainFrame extends JFrame {
    * constructor of each action, which will subclass AbstractAction.
    */
   private void _setUpActions() {
-    _newAction.putValue(Action.SMALL_ICON, _getIcon("New16.gif"));
-    _newAction.putValue(Action.SHORT_DESCRIPTION, "New");
-    _openAction.putValue(Action.SMALL_ICON, _getIcon("Open16.gif"));
-    _openAction.putValue(Action.SHORT_DESCRIPTION, "Open");
-    _saveAction.putValue(Action.SMALL_ICON, _getIcon("Save16.gif"));
-    _saveAction.putValue(Action.SHORT_DESCRIPTION, "Save");
-    _saveAsAction.putValue(Action.SMALL_ICON, _getIcon("SaveAs16.gif"));
-    _saveAsAction.putValue(Action.SHORT_DESCRIPTION, "Save As");
-    _compileAction.putValue(Action.SHORT_DESCRIPTION, "Compile");
+    _setUpAction(_newAction, "New", "New");
+    _setUpAction(_openAction, "Open", "Open");
+    _setUpAction(_saveAction, "Save", "Save the current document");
+    _setUpAction(_saveAsAction, "SaveAs", "Save the current document with a new name");
+    _setUpAction(_compileAction, "Play", "Compile the current document");
     
-    _cutAction.putValue(Action.NAME, "Cut");
-    _cutAction.putValue(Action.SMALL_ICON, _getIcon("Cut16.gif"));
-    _cutAction.putValue(Action.SHORT_DESCRIPTION, "Cut");
-    _copyAction.putValue(Action.NAME, "Copy");
-    _copyAction.putValue(Action.SMALL_ICON, _getIcon("Copy16.gif"));
-    _copyAction.putValue(Action.SHORT_DESCRIPTION, "Copy");
-    _pasteAction.putValue(Action.NAME, "Paste");
-    _pasteAction.putValue(Action.SMALL_ICON, _getIcon("Paste16.gif"));
-    _pasteAction.putValue(Action.SHORT_DESCRIPTION, "Paste");
-    
-    _switchToPrevAction.putValue(Action.SMALL_ICON, _getIcon("Back16.gif"));
-    _switchToPrevAction.putValue(Action.SHORT_DESCRIPTION, "Previous Document");
-    _switchToNextAction.putValue(Action.SMALL_ICON, _getIcon("Forward16.gif"));
-    _switchToNextAction.putValue(Action.SHORT_DESCRIPTION, "Next Document");
-    
-    _findReplaceAction.putValue(Action.SMALL_ICON, _getIcon("Find16.gif"));
-    _findReplaceAction.putValue(Action.SHORT_DESCRIPTION, "Find/Replace");
-    _aboutAction.putValue(Action.SMALL_ICON, _getIcon("About16.gif"));
-    _aboutAction.putValue(Action.SHORT_DESCRIPTION, "About");
+    _setUpAction(_cutAction, "Cut", "Cut selected text to the clipboard");
+    _setUpAction(_copyAction, "Copy", "Copy selected text to the clipboard");
+    _setUpAction(_pasteAction, "Copy", "Paste text from the clipboard");
 
+    _cutAction.putValue(Action.NAME, "Cut");
+    _copyAction.putValue(Action.NAME, "Copy");
+    _pasteAction.putValue(Action.NAME, "Paste");
+    
+    _setUpAction(_switchToPrevAction, "Back", "Previous Document");
+    _setUpAction(_switchToNextAction, "Forward", "Next Document");
+    
+    _setUpAction(_findReplaceAction, "Find", "Find/Replace");
+    _setUpAction(_aboutAction, "About", "About");
+
+    _setUpAction(_undoAction, "Undo", "Undo");
+    _setUpAction(_redoAction, "Redo", "Redo");
+    _setUpAction(_abortInteractionAction, "Stop", "Abort the current interaction");
+    _setUpAction(_resetInteractionsAction, "Refresh", "Reset interactions");
   }
+
+  private void _setUpAction(Action a, String icon, String desc) {
+    a.putValue(Action.SMALL_ICON, _getIcon(icon + "16.gif"));
+    a.putValue(Action.SHORT_DESCRIPTION, desc);
+  }
+
 
   /**
    * Returns the icon with the given name.
@@ -685,7 +679,7 @@ public class MainFrame extends JFrame {
 
     // keep track of the save menu item
     _saveMenuItem = tmpItem;
-    _saveMenuItem.setEnabled(false);
+    _saveAction.setEnabled(false);
 
     tmpItem = fileMenu.add(_saveAsAction);
 
@@ -701,7 +695,7 @@ public class MainFrame extends JFrame {
 
     // keep track of the compile menu item
     _compileMenuItem = tmpItem;
-    _compileMenuItem.setEnabled(false);
+    _compileAction.setEnabled(false);
 
     _abortInteractionAction.setEnabled(false);
     _abortInteractionMenuItem = fileMenu.add(_abortInteractionAction);
@@ -782,7 +776,6 @@ public class MainFrame extends JFrame {
     _toolBar.add(_newAction);
     _toolBar.add(_openAction);
     _saveButton = _toolBar.add(_saveAction);
-    _saveButton.setEnabled(false);
     
     _toolBar.addSeparator();
     
@@ -790,6 +783,8 @@ public class MainFrame extends JFrame {
     _toolBar.add(_cutAction);
     _toolBar.add(_copyAction);
     _toolBar.add(_pasteAction);
+    _toolBar.add(_undoAction);
+    _toolBar.add(_redoAction);
     
     _toolBar.addSeparator();
     
@@ -801,8 +796,10 @@ public class MainFrame extends JFrame {
     
     // Compile (disabled)
     _compileButton = _toolBar.add(_compileAction);
-    _compileButton.setEnabled(false);
     
+    _toolBar.add(_resetInteractionsAction);
+    _toolBar.add(_abortInteractionAction);
+
     getContentPane().add(_toolBar, BorderLayout.NORTH);
   }
   
@@ -982,10 +979,8 @@ public class MainFrame extends JFrame {
     }
 
     public void fileSaved(OpenDefinitionsDocument doc) {
-      _saveButton.setEnabled(false);
-      _compileButton.setEnabled(true);
-      _saveMenuItem.setEnabled(false);
-      _compileMenuItem.setEnabled(true);
+      _saveAction.setEnabled(false);
+      _compileAction.setEnabled(true);
       updateFileTitle();
       _currentDefPane.grabFocus();
     }
@@ -1004,10 +999,8 @@ public class MainFrame extends JFrame {
 
       boolean isModified = active.isModifiedSinceSave();
       boolean canCompile = (!isModified && !active.isUntitled());
-      _saveButton.setEnabled(isModified);
-      _compileButton.setEnabled(canCompile);
-      _saveMenuItem.setEnabled(isModified);
-      _compileMenuItem.setEnabled(canCompile);
+      _saveAction.setEnabled(isModified);
+      _compileAction.setEnabled(canCompile);
 
       // Update error highlights
       _errorPanel.getErrorListPane().selectNothing();
@@ -1023,11 +1016,11 @@ public class MainFrame extends JFrame {
     public void interactionStarted() {
       _interactionsPane.setEditable(false);
       _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-      _abortInteractionMenuItem.setEnabled(true);
+      _abortInteractionAction.setEnabled(true);
     }
 
     public void interactionEnded() {
-      _abortInteractionMenuItem.setEnabled(false);
+      _abortInteractionAction.setEnabled(false);
       _interactionsPane.setCursor(null);
       _interactionsPane.setEditable(true);
       int pos = _interactionsPane.getDocument().getLength();
@@ -1036,10 +1029,8 @@ public class MainFrame extends JFrame {
 
     public void compileStarted() {
       _tabbedPane.setSelectedIndex(COMPILE_TAB);
-      _saveButton.setEnabled(false);
-      _compileButton.setEnabled(false);
-      _saveMenuItem.setEnabled(false);
-      _compileMenuItem.setEnabled(false);
+      _saveAction.setEnabled(false);
+      _compileAction.setEnabled(false);
       hourglassOn();
     }
 
@@ -1047,7 +1038,7 @@ public class MainFrame extends JFrame {
       hourglassOff();
       _updateErrorListeners();
       _errorPanel.reset();
-      _compileButton.setEnabled(true);
+      _compileAction.setEnabled(true);
     }
 
     public void interactionsExited(int status) {
