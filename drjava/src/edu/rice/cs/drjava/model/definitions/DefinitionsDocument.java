@@ -63,7 +63,6 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
-import edu.rice.cs.drjava.model.DefaultGlobalModel;
 import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 import edu.rice.cs.drjava.model.OperationCanceledException;
@@ -402,7 +401,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
 
     // Determine if prevFindChar was findChar, rather than end
     //  of statement delimiter
-    boolean found = false;
+    boolean found;
     try {
       String foundString = this.getText(prevFindChar, 1);
       char foundChar = foundString.charAt(0);
@@ -1162,7 +1161,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
 
     // Get the position of the first non-ws character on this line
     int lineFirstNonWS = getLineFirstCharPos(lineStartStmt);
-    String lineText = "";
+    String lineText;
     try {
       lineText = getText(lineStartStmt, lineFirstNonWS - lineStartStmt);
     }
@@ -1974,6 +1973,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       for (int i = pos-1; ((i >= 0) && goodWing); i--) {
         char c = text.charAt(i);
         // If a previous char is not whitespace, we're not looking at a wing comment.
+        // TODO: why the following???
         if (!((c == ' ') || (c == ' ') || (c == ' '))) {
           goodWing = false;
         }
@@ -2098,13 +2098,13 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @param i the index to look at for the space in text
    * @param text a block of text
    * @return true if the conditions are met
-   */
+   * doesn't seem to be used/
   private synchronized boolean _isCommentedOrSpace(int i, String text) {
     ReducedToken rt = _reduced.currentToken();
     String type = rt.getType();
-    return  (rt.isCommented() || type.equals("//") || type.equals("/*") || type.equals("*/")
+    return  (rt.isCommented() || type.equals("//") || type.equals("")
         || (text.charAt(i) == ' '));
-  }
+  }*/
 
   /**
    * Gets the number of whitespace characters between the current location and the rest of
@@ -2293,7 +2293,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     // new things into.
     int index = i;
 
-    boolean process = false;
+    boolean process;
     int state = 0;
     while (tokenizer.hasMoreTokens()) {
       String token = tokenizer.nextToken();
@@ -2630,13 +2630,13 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       final int textLength = endPos - startPos;
       final String text = getText(startPos, textLength);
 
-      boolean done = false;
-      int index = 0;
+      boolean done;
+      int index;
 
       int indexOfClass = _findKeywordAtToplevel("class", text, startPos);
       int indexOfInterface = _findKeywordAtToplevel("interface", text, startPos);
 
-      if ( indexOfClass > -1 ) {
+      if (indexOfClass > -1) {
 
         if (indexOfInterface > -1) {
           // compare indices to find the lesser
@@ -2650,7 +2650,6 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
         }
       }
       else {
-
         if (indexOfInterface > -1) {
           index = indexOfInterface + "interface".length();
         }

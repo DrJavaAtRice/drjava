@@ -53,7 +53,6 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.compiler.CompilerError;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
-import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
@@ -91,22 +90,22 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   // TODO: is this necessary, or can we get by with installing a domain-specific
   //       model in the constructor - e.g. JavadocModel
   protected SingleDisplayModel _model;
-  
+
   private JScrollPane _scroller;
-  
+
   /** This contains the _scroller and the _errorNavPanel. */
   private JPanel _leftPanel;
-  
+
   /** This contains the label, showHighlightsCheckBox, and the customPanel. */
   private JPanel _rightPanel;
-  
+
   private JPanel _errorNavPanel;
-  
+
   private JPanel _errorNavButtonsPanel;
-  
+
   /** This JPanel contains each child panel's specific UI components. **/
   protected JPanel customPanel;
-  
+
   private JButton _nextErrorButton;
   private JButton _prevErrorButton;
 
@@ -128,17 +127,17 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   public ErrorPanel(SingleDisplayModel model, MainFrame frame, String tabString, String labelString){
     super(frame, tabString);
     _model = model;
-    
+
     _mainPanel.setLayout(new BorderLayout());
-    
+
     _leftPanel = new JPanel(new BorderLayout());
-    
+
     _errorNavPanel = new JPanel(new GridBagLayout());
-    
-    
+
+
     /******** Initialize the error navigation buttons ********/
     _errorNavButtonsPanel = new JPanel(new BorderLayout());
-    
+
     _nextErrorButton = new JButton(MainFrame.getIcon("Down16.gif"));//new JButton("Next Error");
     _prevErrorButton = new JButton(MainFrame.getIcon("Up16.gif"));//new JButton("Prev Error");
 
@@ -147,8 +146,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     _prevErrorButton.setMargin(new Insets(0,0,0,0));
     _prevErrorButton.setToolTipText("Go to the previous error");
 
-    
-//    _errorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 3)); 
+
+//    _errorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 3));
 //    _errorPanel.setPreferredSize(new Dimension(27,35));
 //    _errorPanel.add(_prevErrorButton);
 //    _errorPanel.add(_nextErrorButton);
@@ -156,20 +155,20 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     _errorNavButtonsPanel.add(_prevErrorButton, BorderLayout.NORTH);
     _errorNavButtonsPanel.add(_nextErrorButton, BorderLayout.SOUTH);
     _errorNavButtonsPanel.setBorder(new EmptyBorder(18,5,18,5)); // 5 pix padding on sides
-    
+
 //    JPanel middlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
 //    middlePanel.add(_errorNavButtonsPanel);
-    
+
     _errorNavPanel.add(_errorNavButtonsPanel);//, BorderLayout.CENTER);
     _showHighlightsCheckBox = new JCheckBox( "Highlight source", true);
-    
+
 //    _mainPanel.setMinimumSize(new Dimension(225,60));
     // We make the vertical scrollbar always there.
     // If we don't, when it pops up it cuts away the right edge of the
     // text. Very bad.
     _scroller = new BorderlessScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                                          JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-    
+
     _leftPanel.add(_scroller, BorderLayout.CENTER);
     _leftPanel.add(_errorNavPanel, BorderLayout.EAST);
 
@@ -180,11 +179,11 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     _rightPanel.add(new JLabel(labelString, SwingConstants.LEFT), BorderLayout.NORTH);
     _rightPanel.add(customPanel, BorderLayout.CENTER);
     _rightPanel.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
-    
+
     _mainPanel.add(_leftPanel, BorderLayout.CENTER);
     _mainPanel.add(_rightPanel, BorderLayout.EAST);
   }
-  
+
   protected void setErrorListPane(final ErrorListPane elp) {
     _scroller.setViewportView(elp);
     _nextErrorButton.setEnabled(false);
@@ -331,7 +330,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     _showHighlightsCheckBox.addChangeListener( new ChangeListener() {
       public void stateChanged (ChangeEvent ce) {
         DefinitionsPane lastDefPane = _frame.getCurrentDefPane();
-        
+
         if (_showHighlightsCheckBox.isSelected()) {
           lastDefPane.setCaretPosition( lastDefPane.getCaretPosition());
           getErrorListPane().switchToError(getSelectedIndex());
@@ -643,7 +642,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         _removeListHighlight();
       }
     }
-            
+
     private void _updateScrollButtons() {
       if (hasNextError()) {
         _nextErrorButton.setEnabled(true);

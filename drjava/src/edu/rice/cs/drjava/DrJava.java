@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava;
@@ -50,11 +50,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.MalformedURLException;
 import java.util.jar.JarFile;
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
-import java.awt.event.*;
 
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.drjava.ui.SplashScreen;
@@ -70,14 +66,14 @@ import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.config.*;
 
-/** 
- * Main class for DrJava. 
+/**
+ * Main class for DrJava.
  * @version $Id$
  */
 public class DrJava implements OptionConstants {
   /** Class to probe to see if the debugger is available */
   public static final String TEST_DEBUGGER_CLASS = "com.sun.jdi.Bootstrap";
-  
+
   private static final PrintStream _consoleOut = System.out;
   private static final PrintStream _consoleErr = System.err;
   private static PreventExitSecurityManager _manager;
@@ -88,19 +84,19 @@ public class DrJava implements OptionConstants {
   private static SimpleInteractionsWindow _debugConsole = null;
 
   /*
-   * Config objects can't be public static final, since we have to delay 
-   * construction until we know the config file's location.  (Might be 
+   * Config objects can't be public static final, since we have to delay
+   * construction until we know the config file's location.  (Might be
    * specified on command line.)
    * Instead, use accessor methods to prevent others from assigning new values.
    */
-  
+
   /**
    * Properties file used by the configuration object.
    * Defaults to ".drjava" in the user's home directory.
    */
-  private static File _propertiesFile = 
+  private static File _propertiesFile =
     new File(System.getProperty("user.home"), ".drjava");
-  
+
   /**
    * Configuration object with all customized and default values.
    */
@@ -112,7 +108,7 @@ public class DrJava implements OptionConstants {
   public static File getPropertiesFile() {
     return _propertiesFile;
   }
-  
+
   /**
    * Returns the configuration object with all customized and default values.
    */
@@ -121,11 +117,11 @@ public class DrJava implements OptionConstants {
     if (_config == null) {
       initConfig();
     }
-    
+
     return _config;
   }
-  
-  
+
+
   /**
    * Starts running DrJava.  Not done in the actual main method so a
    * custom class loader can be used.
@@ -136,7 +132,7 @@ public class DrJava implements OptionConstants {
     try {
       // handleCommandLineArgs will return true if the program should load
       if (handleCommandLineArgs(args)) {
-        
+
         try {
           initConfig();
         }
@@ -151,7 +147,7 @@ public class DrJava implements OptionConstants {
           UIManager.setLookAndFeel(configLAFName);
         }
 
-        // Don't use JSR14v20 if running with Java 1.5 because we putting it on the bootclasspath causes DrJava to 
+        // Don't use JSR14v20 if running with Java 1.5 because we putting it on the bootclasspath causes DrJava to
         // hang on startup.
         _usingJSR14v20 = checkForJSR14v20() && !System.getProperty("java.specification.version").equals("1.5");
 
@@ -159,27 +155,27 @@ public class DrJava implements OptionConstants {
 
         // Show splash screen
         SplashScreen splash = new SplashScreen();
-        splash.show();
-      
+        splash.setVisible(true);
+
         // The MainFrame *must* be constructed after the compiler setup process has
         // occurred; otherwise, the list of compilers in the UI will be wrong.
         // At some point this should be fixed, which would involve making the
         // CompilerRegistry notify listeners when there is a change in the list of
         // available compilers.
         final MainFrame mf = new MainFrame();
-        
+
         // Make sure all uncaught exceptions are shown in an AWTExceptionHandler
         AWTExceptionHandler.setFrame(mf);
-        System.setProperty("sun.awt.exception.handler", 
+        System.setProperty("sun.awt.exception.handler",
                            "edu.rice.cs.drjava.ui.AWTExceptionHandler");
-        
+
         // This enabling of the security manager must happen *after* the mainframe
         // is constructed. See bug #518509.
         enableSecurityManager();
 
         openCommandLineFiles(mf, _filesToOpen);
         splash.dispose();
-        mf.show();
+        mf.setVisible(true);
 
 
         // redirect stdout to DrJava's console
@@ -188,21 +184,21 @@ public class DrJava implements OptionConstants {
             mf.getModel().systemOutPrint(s);
           }
         }));
-        
+
         // redirect stderr to DrJava's console
         System.setErr(new PrintStream(new OutputStreamRedirector() {
           public void print(String s) {
             mf.getModel().systemErrPrint(s);
           }
         }));
-        
+
         // Show debug console if enabled
         if (_showDrJavaDebugConsole) {
           showDrJavaDebugConsole(mf);
         }
       }
-        
-    } 
+
+    }
     catch (Throwable t) {
       // Show any errors to the real System.err and in an AWTExceptionHandler
       _consoleErr.println(t.getClass().getName() + ": " + t.getMessage());
@@ -217,7 +213,7 @@ public class DrJava implements OptionConstants {
    */
   static boolean handleCommandLineArgs(String[] args) {
     int firstFile = 0;
-    
+
     // Loop through arguments looking for known options
     for (int i=0; i < args.length; i++) {
       if (args[i].equals("-config")) {
@@ -229,29 +225,29 @@ public class DrJava implements OptionConstants {
           firstFile = i+1;
         }
       }
-      
+
       else if (args[i].equals("-attemptingAugmentedClasspath")) {
         _attemptingAugmentedClasspath = true;
       }
-      
+
       else if (args[i].equals("-debugConsole")) {
         _showDrJavaDebugConsole = true;
       }
-      
+
       else if (args[i].equals("-help") || args[i].equals("-?")) {
         displayUsage();
         return false;
       }
     }
-    
+
     // Open the rest as filenames
     int numFiles = args.length - firstFile;
     _filesToOpen = new String[numFiles];
     System.arraycopy(args, firstFile, _filesToOpen, 0, numFiles);
-    
+
     return true;
   }
-  
+
   /**
    * Displays a usage message about the available options.
    */
@@ -263,7 +259,7 @@ public class DrJava implements OptionConstants {
     buf.append("  -help | -?            print this help message\n");
     _consoleOut.print(buf.toString());
   }
-  
+
   /**
    * Switches the config object to use a custom config file.
    * Ensures that Java source files aren't accidentally used.
@@ -273,8 +269,8 @@ public class DrJava implements OptionConstants {
       _propertiesFile = new File(filename);
     }
   }
-  
-  
+
+
   /**
    * Initializes the configuration object with the current
    * notion of the properties file.
@@ -285,7 +281,7 @@ public class DrJava implements OptionConstants {
     if (_config != null) {
       throw new IllegalStateException("Can only call initConfig once!");
     }
-    
+
     try {
       _propertiesFile.createNewFile();
       // be nice and ensure a config file if there isn't one
@@ -304,7 +300,7 @@ public class DrJava implements OptionConstants {
       _config.storeStartupException(e);
     }
   }
-  
+
   /**
    * Saves the contents of the config file.
    * TO DO: log any IOExceptions that occur
@@ -319,12 +315,12 @@ public class DrJava implements OptionConstants {
                                     "the '.drjava' file in your home directory. \n" +
                                     "Another process may be using the file.\n\n" + e,
                                     "Could Not Save Changes",
-                                    JOptionPane.ERROR_MESSAGE);  
+                                    JOptionPane.ERROR_MESSAGE);
       // TODO: log this error
     }
   }
-  
-  
+
+
   /**
    * Handle the list of files specified on the command line.  Feature request #509701.
    * If file exists, open it in DrJava.  Otherwise, ignore it.
@@ -342,7 +338,7 @@ public class DrJava implements OptionConstants {
         }
       };
       try {
-        //OpenDefinitionsDocument doc = 
+        //OpenDefinitionsDocument doc =
         mf.getModel().openFile(command);
       }
       catch (FileNotFoundException ex) {
@@ -356,19 +352,19 @@ public class DrJava implements OptionConstants {
       }
     }
   }
-  
+
   /**
    * Helper method called by checkForJSR14v2 and checkForJSR14v24.
    */
   private static boolean checkJSR14JarForClass(String checkClass, String msg, String title) {
     File jsr14 = _config.getSetting(JSR14_LOCATION);
-    
+
     if (jsr14 != FileOption.NULL_FILE) {
       try {
         JarFile jsr14jar = new JarFile(jsr14);
         if (jsr14jar.getJarEntry(checkClass) != null) {
           // If we're using Java 1.3, don't allow JSR14v2.x
-          // Also, if we're using Java 1.4.0, don't allow it 
+          // Also, if we're using Java 1.4.0, don't allow it
           // (bug #825113 "I tried to open a legitimate java file").
           if (System.getProperty("java.specification.version").equals("1.3") ||
               System.getProperty("java.runtime.version").startsWith("1.4.0")) {
@@ -379,7 +375,7 @@ public class DrJava implements OptionConstants {
             }
             return false;
           }
-          
+
           return true;
         }
       }
@@ -392,7 +388,7 @@ public class DrJava implements OptionConstants {
     // Therefore, not using jsr14 v2.x.
     return false;
   }
-  
+
   /**
    * Try to determine if the preferences specify jsr14 v2.4, so that we can
    * restart with the proper boot classpath.
@@ -405,7 +401,7 @@ public class DrJava implements OptionConstants {
     String title = "Cannot Load JSR-14 v2.4";
     return checkJSR14JarForClass(checkClass, msg, title);
   }
-  
+
 
   /**
    * Try to determine if the preferences specify jsr14 v2.0, so that we can
@@ -422,8 +418,8 @@ public class DrJava implements OptionConstants {
 
   /**
    * Check to see if a compiler and the debugger are available.  If necessary,
-   * starts DrJava in a new JVM with an augmented classpath to make these 
-   * available.  If it can't find them at all, it prompts the user to 
+   * starts DrJava in a new JVM with an augmented classpath to make these
+   * available.  If it can't find them at all, it prompts the user to
    * optionally specify tools.jar
    * @param args Command line argument array, in case we need to restart
    */
@@ -432,7 +428,7 @@ public class DrJava implements OptionConstants {
       // We're on our second attempt-- just load DrJava
       return;
     }
-    
+
     boolean restartForToolsJar = false;
 
     // Try to make sure both compiler and debugger are available
@@ -452,7 +448,7 @@ public class DrJava implements OptionConstants {
       }
     }
     else {
-      
+
       if (hasAvailableDebugger()) {
         // Debugger but no compiler => probably jpda on classpath.
         // Prompt user for compiler (in tools.jar)
@@ -471,21 +467,21 @@ public class DrJava implements OptionConstants {
         restartForToolsJar = promptForToolsJar(true, true);
       }
     }
-    
+
     // Originally this also took in a flag if it was necessary to
     // restart to be able to use JSR-14 on OS X.  That is no longer
     // necessary, but I'll leave the contract like this for the time
     // being (in case another condition comes up).
     restartIfNecessary(restartForToolsJar, args);
   }
-  
+
   /**
    * Returns whether the CompilerRegistry has been able to load a compiler.
    */
   public static boolean hasAvailableCompiler() {
     return !CompilerRegistry.ONLY.isNoCompilerAvailable();
   }
-  
+
   /**
    * Returns whether the debugger will be able to load successfully.
    * Checks for the ability to load the com.sun.jdi.Bootstrap class.
@@ -502,7 +498,7 @@ public class DrJava implements OptionConstants {
       return false;
     }
   }
-  
+
   /**
    * Returns whether the debugger will be able to load successfully
    * if we restart with our notion of tools.jar on the classpath.
@@ -542,7 +538,7 @@ public class DrJava implements OptionConstants {
       return false;
     }
   }
-  
+
   public static boolean bootClasspathHasJSR14v24() {
     try {
       Class.forName("com.sun.javadoc.ParameterizedType");
@@ -569,14 +565,14 @@ public class DrJava implements OptionConstants {
       return false;
     }
   }
-  
+
   /**
    * Tries to run a new DrJava process with our notion of tools.jar
    * appended to the end of the classpath.  This should allow us to
    * always make the debugger available.
    *
    * Note: this used to take in a flag for JSR-14 in addition to tools.jar,
-   * but that isn't needed anymore.  I'll leave the contract like this in 
+   * but that isn't needed anymore.  I'll leave the contract like this in
    * case another condition becomes necessary.  For now, it just returns
    * if you pass in false for the first argument.
    * Also, this function now restarts when using jsr14 v2.0, since it has to be
@@ -597,15 +593,15 @@ public class DrJava implements OptionConstants {
 
     String pathSep = System.getProperty("path.separator");
     String classpath = System.getProperty("java.class.path");
-    
+
     // Class arguments
     String[] classArgs = new String[args.length + 1];
     System.arraycopy(args, 0, classArgs, 0, args.length);
     classArgs[args.length] = "-attemptingAugmentedClasspath";
-    
+
     // JVM arguments
     String[] jvmArgs;
-    
+
     if (_usingJSR14v20) {
       //System.out.println("Using JSR14v20, appending bootclasspath");
       String jsr14 = _config.getSetting(JSR14_LOCATION).getAbsolutePath();
@@ -614,24 +610,24 @@ public class DrJava implements OptionConstants {
     else {
       jvmArgs = new String[0];
     }
-    
+
     if (forToolsJar) {
       // Try to restart with tools.jar on the classpath
       classpath += pathSep;
-    
+
       // Add tools.jar from preferences if specified
       File toolsFromConfig = getConfig().getSetting(JAVAC_LOCATION);
       if (toolsFromConfig != FileOption.NULL_FILE) {
         classpath += toolsFromConfig.getAbsolutePath() + pathSep;
       }
-      
+
       // Fall back on guesses from ToolsJarClassLoader
       classpath += ToolsJarClassLoader.getToolsJarClasspath();
     }
-    
+
     // Run a new copy of DrJava and exit
     try {
-      ExecJVM.runJVM("edu.rice.cs.drjava.DrJava", classArgs, 
+      ExecJVM.runJVM("edu.rice.cs.drjava.DrJava", classArgs,
                      classpath, jvmArgs);
       System.exit(0);
     }
@@ -650,7 +646,7 @@ public class DrJava implements OptionConstants {
       }
     }
   }
-  
+
   public static boolean usingJSR14v20() {
     return _usingJSR14v20;
   }
@@ -677,10 +673,10 @@ public class DrJava implements OptionConstants {
       "(If you say 'No', DrJava might be unable to compile ",
       "or debug programs.)"
     };
-    
+
     int result = JOptionPane.showConfirmDialog(null, text, "Locate 'tools.jar'?",
                                                JOptionPane.YES_NO_OPTION);
-    
+
     if (result == JOptionPane.YES_OPTION) {
       JFileChooser chooser = new JFileChooser();
       chooser.setFileFilter(new ClasspathFilter() {
@@ -695,29 +691,29 @@ public class DrJava implements OptionConstants {
           return "Jar Files";
         }
       });
-      
+
       // Loop until we find a good tools.jar or the user gives up
       do {
         if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
           File jar = chooser.getSelectedFile();
-          
+
           if (jar != null) {
             // set the tools.jar property
             getConfig().setSetting(JAVAC_LOCATION, jar);
-            
+
             // Adjust if we needed a compiler
             if (needCompiler) {
               // need to re-call getAvailable for it to re-check availability
               CompilerInterface[] compilers
                 = CompilerRegistry.ONLY.getAvailableCompilers();
-              
+
               if (compilers[0] != NoCompilerAvailable.ONLY) {
                 needCompiler = false;
                 CompilerRegistry.ONLY.setActiveCompiler(compilers[0]);
                 _saveConfig();
               }
             }
-            
+
             // Adjust if we need a debugger
             if (needDebugger) {
               if (classLoadersCanFindDebugger()) {
@@ -731,10 +727,10 @@ public class DrJava implements OptionConstants {
       }
       while ((needCompiler || needDebugger) && _userWantsToPickAgain());
     }
-    
+
     return restartRequired;
   }
-  
+
   /**
    * Displays a prompt to the user indicating that tools.jar could not be
    * found in the specified location, and asks if he would like to specify
@@ -750,15 +746,15 @@ public class DrJava implements OptionConstants {
       "(If you say 'No', DrJava might be unable to compile or ",
       "debug programs.)"
     };
-    
+
     int result = JOptionPane.showConfirmDialog(null,
                                                text,
                                                "Locate 'tools.jar'?",
                                                JOptionPane.YES_NO_OPTION);
-    
+
     return result == JOptionPane.YES_OPTION;
   }
-  
+
   /**
    * Shows a separate interactions window with a reference to DrJava's
    * MainFrame defined as "mainFrame".  Useful for debugging DrJava.
@@ -766,7 +762,7 @@ public class DrJava implements OptionConstants {
    */
   public static void showDrJavaDebugConsole(MainFrame mf) {
     if (_debugConsole == null) {
-      _debugConsole = new SimpleInteractionsWindow("DrJava Debug Console") { 
+      _debugConsole = new SimpleInteractionsWindow("DrJava Debug Console") {
         protected void close() {
           dispose();
           _debugConsole = null;
@@ -776,7 +772,7 @@ public class DrJava implements OptionConstants {
       _debugConsole.defineConstant("model", mf.getModel());
       _debugConsole.defineConstant("config", _config);
       _debugConsole.setInterpreterPrivateAccessible(true);
-      _debugConsole.show();
+      _debugConsole.setVisible(true);
     }
     else {
       _debugConsole.toFront();
@@ -786,21 +782,21 @@ public class DrJava implements OptionConstants {
   public static PreventExitSecurityManager getSecurityManager() {
     return _manager;
   }
-  
+
   public static void enableSecurityManager() {
     if (_manager == null) {
       _manager = PreventExitSecurityManager.activate();
     }
-    
+
     if (System.getSecurityManager() != _manager) {
       System.setSecurityManager(_manager);
     }
   }
-  
+
   public static void disableSecurityManager() {
     _manager.deactivate();
   }
-  
+
   /**
    * Get the actual System.err stream.
    * @return System.err
@@ -808,7 +804,7 @@ public class DrJava implements OptionConstants {
   public static PrintStream consoleErr() {
     return  _consoleErr;
   }
-  
+
   /**
    * Get the actual System.out stream.
    * @return System.out

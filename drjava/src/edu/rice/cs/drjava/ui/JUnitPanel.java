@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
@@ -59,11 +59,8 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -118,9 +115,9 @@ public class JUnitPanel extends ErrorPanel{
           }
         }
       };
-  
+
   private JButton _showStackTraceButton;
-  
+
   /** The currently selected error. */
   private JUnitError _error = null;
   private Window _stackFrame = null;
@@ -128,7 +125,7 @@ public class JUnitPanel extends ErrorPanel{
   private final JLabel _errorLabel = new JLabel();
   private final JLabel _testLabel = new JLabel();
   private final JLabel _fileLabel = new JLabel();
-  
+
   /**
    * Constructor.
    * @param model SingleDisplayModel in which we are running
@@ -138,15 +135,15 @@ public class JUnitPanel extends ErrorPanel{
     super(model, frame, "Test Output", "Test Progress");
     _testCount = 0;
     _testsSuccessful = true;
-    
+
     _progressBar = new JUnitProgressBar();
     _showStackTraceButton = new JButton(_showStackTraceAction);
     customPanel.add(_progressBar, BorderLayout.NORTH);
     customPanel.add(_showStackTraceButton, BorderLayout.SOUTH);
-    
+
     _errorListPane = new JUnitErrorListPane();
     setErrorListPane(_errorListPane);
-    
+
   }
 
   /**
@@ -237,7 +234,7 @@ public class JUnitPanel extends ErrorPanel{
     }
     _stackTextArea.setText(e.stackTrace());
     _stackTextArea.setCaretPosition(0);
-    _stackFrame.show();
+    _stackFrame.setVisible(true);
   }
 
   /**
@@ -522,7 +519,7 @@ public class JUnitPanel extends ErrorPanel{
 
       ActionListener closeListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          _stackFrame.hide();
+          _stackFrame.setVisible(false);
         }
       };
       JButton closeButton = new JButton("Close");
@@ -545,24 +542,24 @@ public class JUnitPanel extends ErrorPanel{
       // initial location is relative to parent (MainFrame)
       _dialog.setLocationRelativeTo(_frame);
     }
-    
+
     /**
      * Overrides selectItem in ErrorListPane to update the current _error selected
-     * and enabling the _showStackTraceButton. 
+     * and enabling the _showStackTraceButton.
      */
     public void selectItem(CompilerError error) {
       super.selectItem(error);
       _error = (JUnitError)error;
       _showStackTraceButton.setEnabled(true);
     }
-     
-    
+
+
     /**
-     * Overrides _removeListHighlight in ErrorListPane to disable the _showStackTraceButton. 
+     * Overrides _removeListHighlight in ErrorListPane to disable the _showStackTraceButton.
      */
-    protected void _removeListHighlight() {   
+    protected void _removeListHighlight() {
       super._removeListHighlight();
-      _showStackTraceButton.setEnabled(false);        
+      _showStackTraceButton.setEnabled(false);
     }
 
     /**

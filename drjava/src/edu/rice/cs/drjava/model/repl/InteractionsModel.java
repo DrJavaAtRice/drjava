@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
@@ -48,23 +48,15 @@ package edu.rice.cs.drjava.model.repl;
 import java.io.*;
 import java.net.ServerSocket;
 import java.util.List;
-import java.util.LinkedList;
-import java.util.ListIterator;
-import java.util.StringTokenizer;
-
-import java.util.Vector;
 import java.util.ArrayList;
 
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.model.FileOpenSelector;
 import edu.rice.cs.drjava.model.OperationCanceledException;
-import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.DocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 
-import edu.rice.cs.javaast.*;
-import edu.rice.cs.javaast.tree.*;
 import edu.rice.cs.javaast.parser.*;
 
 /**
@@ -85,51 +77,51 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * System-dependent newline string.
    */
   protected static final String _newLine = System.getProperty("line.separator");
-  
+
   /**
    * InteractionsDocument containing the commands and history.
    */
   protected final InteractionsDocument _document;
-  
+
   /**
    * Whether we are waiting for the interpreter to register for the first time.
    */
   protected boolean _waitingForFirstInterpreter;
-  
+
   /**
    * Whether the interpreter has been used since its last reset.
    */
   protected boolean _interpreterUsed;
-  
+
   /**
    * A lock object to prevent multiple threads from interpreting at once.
    */
   private final Object _interpreterLock;
-  
+
   /**
    * A lock object to prevent print calls to System.out or System.err
    * from flooding the JVM, ensuring the UI remains responsive.
    */
   private final Object _writerLock;
-  
+
   /**
    * Number of milliseconds to wait after each println, to prevent
    * the JVM from being flooded with print calls.
    */
   private int _writeDelay;
-  
+
   /**
    * Port used by the debugger to connect to the Interactions JVM.
    * Uniquely created in getDebugPort().
    */
   private int _debugPort;
-  
+
   /**
    * Whether the debug port has been set already or not.
    * If not, calling getDebugPort will generate an available port.
    */
   private boolean _debugPortSet;
-  
+
   /** Interactions processor, currently a pre-processor **/
   private InteractionsProcessorI _interactionsProcessor;
 
@@ -151,7 +143,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _debugPortSet = false;
     _interactionsProcessor = new InteractionsProcessor();
   }
-  
+
   /**
    * Add a JavadocListener to the model.
    * @param listener a listener that reacts to Interactions events
@@ -175,14 +167,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public void removeAllInteractionListeners() {
     _notifier.removeAllListeners();
   }
-  
+
   /**
    * Returns the InteractionsDocument stored by this model.
    */
   public InteractionsDocument getDocument() {
     return _document;
   }
-  
+
   /**
    * Sets this model's notion of whether it is waiting for the first
    * interpreter to connect.  The interactionsReady event is not fired
@@ -191,7 +183,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public void setWaitingForFirstInterpreter(boolean waiting) {
     _waitingForFirstInterpreter = waiting;
   }
-  
+
   /**
    * Interprets the current given text at the prompt in the interactions doc.
    */
@@ -258,7 +250,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _interpreterUsed = true;
     _interpret(toEval);
   }
-  
+
   /**
    * Interprets the given command.  This should only be called from
    * interpret, never directly.
@@ -280,9 +272,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * @return true iff the interaction is complete
    */
   protected boolean _checkInteraction(String toCheck) {
-    String result;
     try {
-      result = _interactionsProcessor.preProcess(toCheck);
+      _interactionsProcessor.preProcess(toCheck);
     }
     catch (ParseException pe) {
       // A ParseException indicates a syntax error in the input window
@@ -307,19 +298,19 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * (Subclasses must maintain listeners.)
    */
   protected abstract void _notifyInteractionStarted();
-  
+
   /**
    * Gets the string representation of the value of a variable in the current interpreter.
    * @param var the name of the variable
    */
   public abstract String getVariableToString(String var);
-  
+
   /**
    * Gets the class name of a variable in the current interpreter.
    * @param var the name of the variable
    */
   public abstract String getVariableClassName(String var);
-  
+
   /**
    * Resets the Java interpreter, resetting the flag to indicate whether
    * the interpreter has been used since the last reset.
@@ -328,13 +319,13 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _interpreterUsed = false;
     _resetInterpreter();
   }
-  
+
   /**
    * Resets the Java interpreter.  This should only be called from
    * resetInterpreter, never directly.
    */
   protected abstract void _resetInterpreter();
-  
+
   /**
    * Returns whether the interpreter has been used since the last reset
    * operation.  (Set to true in interpret and false in resetInterpreter.)
@@ -342,16 +333,16 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public boolean interpreterUsed() {
     return _interpreterUsed;
   }
-  
+
   /**
    * Adds the given path to the interpreter's classpath.
    * @param path Path to add
    */
   public abstract void addToClassPath(String path);
-  
-  /** 
+
+  /**
    * Handles a syntax error being returned from an interaction
-   * @param offset the first character of the error in the InteractionsDocument 
+   * @param offset the first character of the error in the InteractionsDocument
    * @param length the length of the error.
    */
   protected abstract void _notifySyntaxErrorOccurred(int offset, int length);
@@ -365,14 +356,13 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected ArrayList<String> _getHistoryText(FileOpenSelector selector)
     throws IOException, OperationCanceledException
   {
-    File[] files = null;
-    files = selector.getFiles();
+    File[] files = selector.getFiles();
     ArrayList<String> histories = new ArrayList<String>();
     ArrayList<String> strings = new ArrayList<String>();
     if (files == null) {
       throw new IOException("No Files returned from FileSelector");
     }
-    
+
     for (int i=0; i < files.length; i++) {
       if (files[i] == null) {
         throw new IOException("File name returned from FileSelector is null");
@@ -394,7 +384,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
           //_showIOError(ioe);
         }
       }
-      
+
       // Create a single string with all formatted lines from this history
       String text = "";
       String currString;
@@ -511,7 +501,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
     return new InteractionsScriptModel(this, interactions);
   }
-  
+
   /**
    * Returns the port number to use for debugging the interactions JVM.
    * Generates an available port if one has not been set manually.
@@ -523,7 +513,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
     return _debugPort;
   }
-  
+
   /**
    * Generates an available port for use with the debugger.
    * @throws IOException if unable to get a valid port number.
@@ -543,7 +533,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       System.setProperty("drjava.debug.port", String.valueOf(_debugPort));
     }
   }
-  
+
   /**
    * Sets the port number to use for debugging the interactions JVM.
    * @param port Port to use to debug the interactions JVM
@@ -552,7 +542,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _debugPort = port;
     _debugPortSet = true;
   }
-  
+
   /**
    * Called when the repl prints to System.out.
    * @param s String to print
@@ -568,7 +558,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public void replSystemErrPrint(String s) {
     _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_ERR_STYLE);
   }
-  
+
   /**
    * Returns a line of text entered by the user at the equivalent
    * of System.in.
@@ -585,13 +575,13 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _document.insertPrompt();
     _notifyInteractionEnded();
   }
-  
+
   /**
    * Notifies listeners that an interaction has ended.
    * (Subclasses must maintain listeners.)
    */
   protected abstract void _notifyInteractionEnded();
-  
+
   /**
    * Appends a string to the given document using a named style.
    * Also waits for a small amount of time (_writeDelay) to prevent any one
@@ -605,7 +595,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       synchronized(_writerLock) {
         try {
           _document.insertText(_document.getDocLength(), s, styleName);
-          
+
           // Wait to prevent being flooded with println's
           _writerLock.wait(_writeDelay);
         }
@@ -618,7 +608,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       }
     }
   }
-  
+
   /**
    * Signifies that the most recent interpretation completed successfully,
    * returning no value.
@@ -658,7 +648,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
                                     InteractionsDocument.ERROR_STYLE);
     _interactionIsOver();
   }
-  
+
   /**
    * Signifies that the most recent interpretation was preempted
    * by a syntax error.  The integer parameters support future
@@ -676,12 +666,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
                                       int startCol,
                                       int endRow,
                                       int endCol ) {
-    edu.rice.cs.util.Pair<Integer,Integer> oAndL = 
+    edu.rice.cs.util.Pair<Integer,Integer> oAndL =
       StringOps.getOffsetAndLength(interaction, startRow, startCol, endRow, endCol);
-    
+
     _notifySyntaxErrorOccurred(_document.getPromptPos() + oAndL.getFirst().intValue(),
                                 oAndL.getSecond().intValue());
-    
+
     _document.appendSyntaxErrorResult(errorMessage,
                                       startRow,
                                       startCol,
@@ -691,7 +681,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 
     _interactionIsOver();
   }
-  
+
   /**
    * Signifies that the most recent interpretation contained a call to
    * System.exit.
@@ -701,14 +691,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public void replCalledSystemExit(int status) {
     _notifyInterpreterExited(status);
   }
-  
+
   /**
    * Notifies listeners that the interpreter has exited unexpectedly.
    * @param status Status code of the dead process
    * (Subclasses must maintain listeners.)
    */
   protected abstract void _notifyInterpreterExited(int status);
-  
+
   /**
    * Called when the interpreter starts to reset.
    */
@@ -717,7 +707,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       _document.insertBeforeLastPrompt("Resetting Interactions..." + _newLine,
                                        InteractionsDocument.ERROR_STYLE);
       _document.setInProgress(true);
-      
+
       // Change to a new debug port to avoid conflicts
       try {
         _createNewDebugPort();
@@ -725,17 +715,17 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       catch (IOException ioe) {
         // Oh well, leave it at the previous port
       }
-      
+
       _notifyInterpreterResetting();
     }
   }
-  
+
   /**
    * Notifies listeners that the interpreter is resetting.
    * (Subclasses must maintain listeners.)
    */
   protected abstract void _notifyInterpreterResetting();
-  
+
   /**
    * This method is called by the Main JVM if the Interpreter JVM cannot
    * be exited (likely because of its having a security manager)
@@ -746,21 +736,21 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _document.setInProgress(false);
     _notifyInterpreterResetFailed(t);
   }
-  
+
   /**
    * Any extra action to perform (beyond notifying listeners) when
    * the interpreter fails to reset.
    * @param t The Throwable thrown by System.exit
    */
   protected abstract void _interpreterResetFailed(Throwable t);
-  
+
   /**
    * Notifies listeners that the interpreter reset failed.
    * @param t Throwable explaining why the reset failed.
    * (Subclasses must maintain listeners.)
    */
   protected abstract void _notifyInterpreterResetFailed(Throwable t);
-  
+
   /**
    * Called when a new Java interpreter has registered and is ready for use.
    */
@@ -772,14 +762,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
     _waitingForFirstInterpreter = false;
   }
-  
+
   /**
    * Notifies listeners that the interpreter is ready.
    * (Subclasses must maintain listeners.)
    */
   protected abstract void _notifyInterpreterReady();
-  
-  
+
+
   /**
    * Assumes a trimmed String. Returns a string of the main call that the
    * interpretor can use.

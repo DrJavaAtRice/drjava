@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,27 +32,23 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
-
-import java.util.*;
-import java.io.*;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.DocumentAdapter;
 import edu.rice.cs.util.text.DocumentEditCondition;
 import edu.rice.cs.util.text.DocumentAdapterException;
-import edu.rice.cs.drjava.model.FileSaveSelector;
 
 /**
  * @version $Id$
@@ -82,17 +78,17 @@ public class ConsoleDocument implements DocumentAdapter {
    * The document storing the text for this console model.
    */
   protected DocumentAdapter _document;
-  
+
   /**
    * A runnable command to use for a notification beep.
    */
   protected Runnable _beep;
-  
-  /** 
+
+  /**
    * Index in the document of the first place that is editable.
    */
   protected int _promptPos;
-  
+
   /**
    * String to use for the prompt.
    */
@@ -102,7 +98,7 @@ public class ConsoleDocument implements DocumentAdapter {
    * Whether the document currently has a prompt and is ready to accept input.
    */
   protected boolean _hasPrompt;
-  
+
   /**
    * Creates a new ConsoleDocument with the given DocumentAdapter.
    * @param adapter the DocumentAdapter to use
@@ -134,7 +130,7 @@ public class ConsoleDocument implements DocumentAdapter {
   public String getPrompt() {
     return _prompt;
   }
-  
+
   /**
    * Sets the string to use for the prompt.
    * @param prompt String to use for the prompt.
@@ -142,16 +138,16 @@ public class ConsoleDocument implements DocumentAdapter {
   public void setPrompt(String prompt) {
     _prompt = prompt;
   }
-  
+
   /**
    * Gets the object which can determine whether an insert
    * or remove edit should be applied, based on the inputs.
-   * @param condition Object to determine legality of inputs
+   * @return the DocumentEditCondition to determine legality of inputs
    */
   public DocumentEditCondition getEditCondition() {
     return _document.getEditCondition();
   }
-  
+
   /**
    * Provides an object which can determine whether an insert
    * or remove edit should be applied, based on the inputs.
@@ -183,8 +179,8 @@ public class ConsoleDocument implements DocumentAdapter {
   public void setBeep(Runnable beep) {
     _beep = beep;
   }
-  
-  /** 
+
+  /**
    * Resets the document to a clean state.
    */
   public void reset() {
@@ -210,7 +206,7 @@ public class ConsoleDocument implements DocumentAdapter {
       throw new UnexpectedException(e);
     }
   }
-  
+
   /**
    * Disables the prompt in this document.
    */
@@ -231,7 +227,7 @@ public class ConsoleDocument implements DocumentAdapter {
     else if (pos < 0) {
       pos = 0;
     }
-    
+
     try {
       String newLine = System.getProperty("line.separator");
       insertText(pos, newLine, DEFAULT_STYLE);
@@ -271,7 +267,7 @@ public class ConsoleDocument implements DocumentAdapter {
       throw new UnexpectedException(ble);
     }
   }
-  
+
   /**
    * Inserts a string into the document at the given offset
    * and the given named style, if the edit condition allows it.
@@ -291,7 +287,7 @@ public class ConsoleDocument implements DocumentAdapter {
       _document.insertText(offs, str, style);
     }
   }
-  
+
   /**
    * Inserts a string into the document at the given offset
    * and the given named style, regardless of the edit condition.
@@ -316,12 +312,12 @@ public class ConsoleDocument implements DocumentAdapter {
   public void removeText(int offs, int len) throws DocumentAdapterException {
     if (offs < _promptPos) {
       _beep.run();
-    } 
+    }
     else {
       _document.removeText(offs, len);
     }
   }
-  
+
   /**
    * Removes a portion of the document, regardless of the edit condition.
    * @param offs Offset to start deleting from
@@ -331,14 +327,14 @@ public class ConsoleDocument implements DocumentAdapter {
   public void forceRemoveText(int offs, int len) throws DocumentAdapterException {
     _document.forceRemoveText(offs, len);
   }
-  
+
   /**
    * Returns the length of the document.
    */
   public int getDocLength() {
     return _document.getDocLength();
   }
-  
+
   /**
    * Returns a portion of the document.
    * @param offs First offset of the desired text
@@ -348,7 +344,7 @@ public class ConsoleDocument implements DocumentAdapter {
   public String getDocText(int offs, int len) throws DocumentAdapterException {
     return _document.getDocText(offs, len);
   }
-  
+
   /**
    * Returns the string that the user has entered at the current prompt.
    * May contain newline characters.
@@ -381,7 +377,7 @@ public class ConsoleDocument implements DocumentAdapter {
       throw new UnexpectedException(ble);
     }
   }
-  
+
   /**
    * Class to ensure that any attempt to edit the document
    * above the prompt is rejected.

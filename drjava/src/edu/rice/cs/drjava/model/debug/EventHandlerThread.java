@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,23 +32,21 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.debug;
 
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.Log;
 
-import java.io.*;
 import com.sun.jdi.*;
 import com.sun.jdi.event.*;
 import com.sun.jdi.request.*;
@@ -65,23 +63,23 @@ public class EventHandlerThread extends Thread {
    * Debugger to which this class reports events.
    */
   protected final JPDADebugger _debugger;
-  
+
   /**
    * JPDA reference to the VirtualMachine generating the events.
    */
   protected final VirtualMachine _vm;
-  
+
   /**
    * Whether this event handler is currently connected to the
    * JPDA VirtualMachine.
    */
   private boolean _connected;
-  
+
   /**
    * A log for recording messages in a file.
    */
   protected final Log _log;
-  
+
   /**
    * Creates a new EventHandlerThread to listen to events from the given
    * debugger and virtual machine.  Calling this Thread's start() method
@@ -105,7 +103,7 @@ public class EventHandlerThread extends Thread {
   protected void _log(String message) {
     _log.logTime(message);
   }
-  
+
   /**
    * Logs any unexpected behavior that occurs (but which should not
    * cause DrJava to abort).
@@ -115,14 +113,14 @@ public class EventHandlerThread extends Thread {
   protected void _log(String message, Throwable t) {
     _log.logTime(message, t);
   }
-  
+
   /**
    * Main functionality for this thread.  Continually consumes events
    * from the VM's event queue until it is disconnected.
    */
   public void run() {
     _debugger.notifyDebuggerStarted();
-    
+
     EventQueue queue = _vm.eventQueue();
     while (_connected) {
       try {
@@ -150,13 +148,13 @@ public class EventHandlerThread extends Thread {
         _log("Exception in main event handler loop.", e);
         _debugger.eventHandlerError(e);
         _debugger.printMessage("An exception occurred in the event handler:\n" + e);
-        _debugger.printMessage("The debugger may have become unstable as a result."); 
+        _debugger.printMessage("The debugger may have become unstable as a result.");
       }
     }
-    
+
     _debugger.notifyDebuggerShutdown();
   }
-  
+
   /**
    * Processes a given event from JPDA.
    * A visitor approach would be much better for this, but Sun's Event
@@ -164,7 +162,7 @@ public class EventHandlerThread extends Thread {
    */
   public void handleEvent(Event e) throws DebugException {
     _log("handling event: " + e);
-    
+
     if (e instanceof BreakpointEvent) {
       _handleBreakpointEvent((BreakpointEvent) e);
     }
@@ -198,27 +196,27 @@ public class EventHandlerThread extends Thread {
    * Returns whether the given thread is both suspended and has
    * stack frames.
    */
-  protected boolean _isSuspendedWithFrames(ThreadReference thread) 
+  protected boolean _isSuspendedWithFrames(ThreadReference thread)
     throws DebugException
   {
     try {
       return thread.isSuspended() && thread.frameCount() > 0;
     }
     catch (IncompatibleThreadStateException itse) {
-      throw new DebugException("Could not count frames on a suspended thread: " + 
+      throw new DebugException("Could not count frames on a suspended thread: " +
                                itse);
     }
   }
-  
+
   /**
    * Responds to a breakpoint event.
    * @param e breakpoint event from JPDA
    */
-  protected void _handleBreakpointEvent(BreakpointEvent e) 
+  protected void _handleBreakpointEvent(BreakpointEvent e)
     throws DebugException
   {
     synchronized(_debugger) {
-      if (_isSuspendedWithFrames(e.thread()) && 
+      if (_isSuspendedWithFrames(e.thread()) &&
           _debugger.setCurrentThread(e.thread())) {
         _debugger.currThreadSuspended();
 //        _debugger.scrollToSource(e);
@@ -231,15 +229,15 @@ public class EventHandlerThread extends Thread {
    * Responds to a step event.
    * @param e step event from JPDA
    */
-  protected void _handleStepEvent(StepEvent e) 
+  protected void _handleStepEvent(StepEvent e)
     throws DebugException
   {
     synchronized(_debugger) {
       if (_isSuspendedWithFrames(e.thread()) &&
           _debugger.setCurrentThread(e.thread())) {
-        _debugger.printMessage("Stepped to " + 
+        _debugger.printMessage("Stepped to " +
                                e.location().declaringType().name() + "." +
-                               e.location().method().name() + "(...)  [line " + 
+                               e.location().method().name() + "(...)  [line " +
                                e.location().lineNumber() + "]");
         _debugger.currThreadSuspended();
 //        _debugger.scrollToSource(e);
@@ -259,7 +257,7 @@ public class EventHandlerThread extends Thread {
     _debugger.printMessage("Field: " + e.field() + " Value: " +
                           e.valueToBe() +"]");
   }*/
-  
+
   /**
    * Responds when a class of interest has been prepared.
    * Allows the debugger to set a pending breakpoint before any code in
@@ -267,17 +265,17 @@ public class EventHandlerThread extends Thread {
    * @param e class prepare event from JPDA
    * @throws DebugException if actions performed on the prepared class fail
    */
-  protected void _handleClassPrepareEvent(ClassPrepareEvent e) 
+  protected void _handleClassPrepareEvent(ClassPrepareEvent e)
     throws DebugException
   {
     synchronized(_debugger) {
       _debugger.getPendingRequestManager().classPrepared(e);
-      // resume this thread which was suspended because its 
+      // resume this thread which was suspended because its
       // suspend policy was SUSPEND_EVENT_THREAD
       e.thread().resume();
     }
   }
-  
+
   /**
    * Responds to a thread start event.
    * @param e thread start event from JPDA
@@ -287,7 +285,7 @@ public class EventHandlerThread extends Thread {
       _debugger.threadStarted();
     }
   }
-  
+
   /**
    * Reponds to a thread death event.
    * @param e thread death event from JPDA
@@ -305,7 +303,7 @@ public class EventHandlerThread extends Thread {
           StepRequest step = (StepRequest)steps.get(i);
           if (step.thread().equals(e.thread())) {
             erm.deleteEventRequest(step);
-            
+
             // There can only be one step request per thread,
             //  so we can stop looking
             break;
@@ -317,7 +315,7 @@ public class EventHandlerThread extends Thread {
         _debugger.nonCurrThreadDied();
       }
     }
-    
+
     // Thread is suspended on death, so resume it now.
     e.thread().resume();
   }
@@ -337,7 +335,7 @@ public class EventHandlerThread extends Thread {
   protected void _handleVMDisconnectEvent(VMDisconnectEvent e) throws DebugException {
     _cleanUp(e);
   }
-  
+
   /**
    * Cleans up the state after the virtual machine being debugged
    * dies or disconnects.
@@ -354,7 +352,7 @@ public class EventHandlerThread extends Thread {
       }
     }
   }
-  
+
   /**
    * Responds if a VMDisconnectedException occurs while dealing with
    * another event.  We need to flush the event queue, dealing only
@@ -378,7 +376,7 @@ public class EventHandlerThread extends Thread {
           // else ignore the event
         }
         eventSet.resume(); // Resume the VM
-      } 
+      }
       catch (InterruptedException ie) {
         // ignore
         _log("InterruptedException after a disconnected exception.", ie);

@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
@@ -56,6 +56,8 @@ import edu.rice.cs.drjava.config.OptionConstants;
  * @version $Id$
  */
 public class LineEnumRule extends JComponent {
+  /** The magic number for Swing's JTextPane border padding. */
+  private static final int BORDER_PADDING = 3;
 
   /** Width of the rule */
   public static int SIZE = 35;
@@ -128,25 +130,20 @@ public class LineEnumRule extends JComponent {
       (OptionConstants.DEFINITIONS_NORMAL_COLOR);
     g.setColor(foreg);
 
-    // Some vars we need.
-    int end = 0;
-    int start = 1;
-    String text = null;
-
     // Use clipping bounds to calculate first tick and last tick location.
-    start = (drawHere.y / _increment) * _increment;
-    end = (((drawHere.y + drawHere.height) / _increment) + 1) * _increment;
+    int start = (drawHere.y / _increment) * _increment;
+    int end = (((drawHere.y + drawHere.height) / _increment) + 1) * _increment;
+
 
     int baseline = (int) (( _nfm.getAscent() + _fm.getHeight() - _fm.getDescent())/2.0 );
 
     // ticks and labels
     for (int i = start; i < end; i += _increment) {
-      text = Integer.toString(i/_increment +1);
+      String text = Integer.toString(i/_increment +1);
 
       // When we paint, we get a good look at the Graphics hints.
       // Use them to update our estimate of total width.
-      // XXX: 3 is the magic number for Swing's JTextPane border padding.
-      SIZE = (int) _nfm.getStringBounds("99999", g).getWidth() + 3;
+      SIZE = (int) _nfm.getStringBounds("99999", g).getWidth() + BORDER_PADDING;
       int offset = SIZE - ((int) (_nfm.getStringBounds(text, g).getWidth() + 1));
 
       //g.drawLine(SIZE-1, i, SIZE-tickLength-1, i);

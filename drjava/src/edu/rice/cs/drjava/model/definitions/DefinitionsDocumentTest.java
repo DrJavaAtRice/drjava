@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,21 +32,19 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions;
 
-import javax.swing.undo.CannotUndoException;
-import javax.swing.undo.CannotRedoException;
 import javax.swing.text.*;
 import java.util.Vector;
 
@@ -63,7 +61,7 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
  * @version $Id$
  */
 public final class DefinitionsDocumentTest extends TestCase
-  implements ReducedModelStates 
+  implements ReducedModelStates
 {
   private DefinitionsDocument _defModel;
   private GlobalEventNotifier _notifier;
@@ -242,15 +240,15 @@ public final class DefinitionsDocumentTest extends TestCase
       // Sanity check: length > 0?
       assertTrue("Item #" + i + " in highlight vector has positive length",
                  v.get(i).getLength() > 0);
-      
+
       walk += v.get(i).getLength();
     }
     assertEquals("Location after walking highlight vector",
                  end,
                  walk);
   }
-  
-  /** 
+
+  /**
    * Test that keywords are highlighted properly.
    * @exception BadLocationException
    */
@@ -278,7 +276,7 @@ public final class DefinitionsDocumentTest extends TestCase
     assertEquals(HighlightStatus.NUMBER, v.get(10).getState());
     assertEquals(HighlightStatus.NORMAL, v.get(11).getState());
   }
-  
+
   /**
    * This test case simulates what happens when some text is selected
    * and there is a keyword around too.
@@ -308,7 +306,7 @@ public final class DefinitionsDocumentTest extends TestCase
     assertEquals(0, v.get(0).getLocation());
     assertEquals(2, v.get(0).getLength());
   }
-  
+
   /**
    * Test going to the second line in a two-line document.
    * @exception BadLocationException
@@ -384,7 +382,7 @@ public final class DefinitionsDocumentTest extends TestCase
     _defModel.gotoLine(3);
     assertEquals("#0.0", 11, _defModel.getCurrentLocation());
   }
-  
+
   /**
    * Tests returning the current column in the document.
    */
@@ -396,8 +394,8 @@ public final class DefinitionsDocumentTest extends TestCase
     _defModel.gotoLine(0);
     assertEquals("#0.2", 0, _defModel.getCurrentCol());
   }
-  
-  
+
+
   /**
    * Tests returning the current column in the document.
    */
@@ -406,7 +404,7 @@ public final class DefinitionsDocumentTest extends TestCase
     _defModel.insertString(0, s, null);
     assertEquals("#0.0", 5, _defModel.getCurrentCol() );
   }
-  
+
   /**
    * Test returning second line in a two-line document.
    * @exception BadLocationException
@@ -501,7 +499,7 @@ public final class DefinitionsDocumentTest extends TestCase
     _defModel.setCurrentLocation(5);
     assertEquals("After delete", 1, _defModel.getCurrentLine() );
   }
-  
+
   /**
    * Tests line numbering output after deletion of a block
    */
@@ -513,7 +511,7 @@ public final class DefinitionsDocumentTest extends TestCase
     _defModel.remove(18,7);
     assertEquals("After delete", 2, _defModel.getCurrentLine());
   }
-  
+
   /**
    * Test whether removeTabs actually removes all tabs.
    */
@@ -523,7 +521,7 @@ public final class DefinitionsDocumentTest extends TestCase
     String result = _defModel._removeTabs(test);
     assertEquals( "  this   is a      test  ", result);
   }
-  
+
   /**
    * As of drjava-20020122-1534, files with tabs ended up garbled, with
    * some of the text jumbled all around (bug #506630).
@@ -551,7 +549,7 @@ public final class DefinitionsDocumentTest extends TestCase
     String result = _defModel._removeTabs(bigIn.toString());
     assertEquals(bigExp.toString(), result);
   }
-  
+
   /**
    * Test whether tabs are removed as appropriate on call to insertString.
    */
@@ -581,7 +579,7 @@ public final class DefinitionsDocumentTest extends TestCase
     _defModel.setIndent(1);
     _defModel.insertString(0, " \t yet \t\tanother\ttest\t", null);
     String result = _defModel.getText(0, _defModel.getLength());
-    
+
     if (_defModel.tabsRemoved()) {
       assertEquals("   yet   another test ", result);
     }
@@ -591,12 +589,8 @@ public final class DefinitionsDocumentTest extends TestCase
   }
 
   /** Test package-finding on empty document. */
-  public void testPackageNameEmpty()
-    throws BadLocationException, InvalidPackageException
-  {
-    assertEquals("Package name for empty document",
-                 "",
-                 _defModel.getPackageName());
+  public void testPackageNameEmpty() throws InvalidPackageException {
+    assertEquals("Package name for empty document", "", _defModel.getPackageName());
   }
 
   /** Test package-finding on simple document, with no funny comments. */
@@ -618,7 +612,7 @@ public final class DefinitionsDocumentTest extends TestCase
 
         setUp();
         _defModel.insertString(0,
-                              curComment + "\n\n" + 
+                              curComment + "\n\n" +
                                 "package " + curPack +
                                 ";\nclass Foo { int x; }\n",
                               null);
@@ -682,7 +676,7 @@ public final class DefinitionsDocumentTest extends TestCase
     return _defModel.getText(0, _defModel.getLength());
   }
   /**
-   * Test class name-finding on document 
+   * Test class name-finding on document
    */
   public void testTopLevelClassName()
     throws BadLocationException, ClassNameNotFoundException
@@ -697,7 +691,7 @@ public final class DefinitionsDocumentTest extends TestCase
   }
 
  /**
-   * Test interface name-finding on document 
+   * Test interface name-finding on document
    */
   public void testTopLevelInterfaceName()
     throws BadLocationException, ClassNameNotFoundException
@@ -714,17 +708,17 @@ public final class DefinitionsDocumentTest extends TestCase
   }
 
  /**
-   * Test class name-finding on document 
+   * Test class name-finding on document
    */
   public void testTopLevelClassNameWComments()
     throws BadLocationException, ClassNameNotFoundException
   {
-    String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" + 
-      "/* class Y */ \n" + 
-      " /* class Foo \n" + 
-      " * class Bar \n" + 
-      " interface Baz \n" + 
-      " */ \n" + 
+    String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
+      "/* class Y */ \n" +
+      " /* class Foo \n" +
+      " * class Bar \n" +
+      " interface Baz \n" +
+      " */ \n" +
       "//class Blah\n" +
       "class MyClass {";
 
@@ -735,7 +729,7 @@ public final class DefinitionsDocumentTest extends TestCase
                  result,
                  _defModel.getFirstTopLevelClassName());
   }
-  
+
   /**
    * Tests that a keyword with no space following it does not cause
    * a StringOutOfBoundsException (bug 742226).
@@ -753,9 +747,9 @@ public final class DefinitionsDocumentTest extends TestCase
       // Good, we expect this
     }
   }
-  
+
   /**
-   * Tests that the word class is not recognized if it is not followed 
+   * Tests that the word class is not recognized if it is not followed
    * by whitespace.
    */
   public void testTopLevelClassNameWithClassloaderImport()
@@ -769,15 +763,15 @@ public final class DefinitionsDocumentTest extends TestCase
                  result,
                  _defModel.getFirstTopLevelClassName());
   }
-  
+
   /**
-   * Test class name-finding on document 
+   * Test class name-finding on document
    */
   public void testTopLevelClassNameMisleading()
     throws BadLocationException, ClassNameNotFoundException
   {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
-      " {class X} \n" + 
+      " {class X} \n" +
       " interface thisInterface { \n" +
       " class MyInnerClass {";
     String result = "thisInterface";
@@ -789,13 +783,13 @@ public final class DefinitionsDocumentTest extends TestCase
   }
 
   /**
-   * Test class name-finding on document 
+   * Test class name-finding on document
    */
   public void testTopLevelInterfaceNameMisleading()
     throws BadLocationException, ClassNameNotFoundException
   {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
-      " {interface X} " + 
+      " {interface X} " +
       " \"class Foo\"" +
       " class MyClass {";
     String result = "MyClass";
@@ -805,15 +799,15 @@ public final class DefinitionsDocumentTest extends TestCase
                  result,
                  _defModel.getFirstTopLevelClassName());
   }
-  
+
   /**
-   * Test class name-finding on document 
+   * Test class name-finding on document
    */
   public void testTopLevelInterfaceNameMisleading2()
     throws BadLocationException, ClassNameNotFoundException
   {
     String weird = "package edu . rice\n./*interface comment!*/cs.drjava; \n" +
-      " {interface X<T>} " + 
+      " {interface X<T>} " +
       " \"class interface Foo\"" +
       " class MyClass extends Foo<T> {";
     String result = "MyClass";
@@ -825,13 +819,13 @@ public final class DefinitionsDocumentTest extends TestCase
   }
 
   /**
-   * Test class name-finding on document 
+   * Test class name-finding on document
    */
-  public void testTopLevelInterfaceNameBeforeClassName() 
+  public void testTopLevelInterfaceNameBeforeClassName()
     throws BadLocationException, ClassNameNotFoundException
   {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
-      " interface thisInterface { \n" + 
+      " interface thisInterface { \n" +
       "  } \n" +
       " class thatClass {\n" +
       "  }";
@@ -842,11 +836,11 @@ public final class DefinitionsDocumentTest extends TestCase
                  result,
                  _defModel.getFirstTopLevelClassName());
   }
-  
+
   /**
-   * Test class name-finding on document 
+   * Test class name-finding on document
    */
-  public void testTopLevelClassNameWithDelimiters() 
+  public void testTopLevelClassNameWithDelimiters()
     throws BadLocationException, ClassNameNotFoundException
   {
     String weird1 = "package edu . rice\n./*comment!*/cs.drjava; \n" +
@@ -857,7 +851,7 @@ public final class DefinitionsDocumentTest extends TestCase
     assertEquals("generics should be removed: '" + weird1 + "'",
                  result1,
                  _defModel.getFirstTopLevelClassName());
-    
+
     String weird2 = "package edu . rice\n./*comment!*/cs.drjava; \n" +
        " class My_Class {";
     String result2 = "My_Class";
@@ -867,7 +861,7 @@ public final class DefinitionsDocumentTest extends TestCase
                  result2,
                  _defModel.getFirstTopLevelClassName());
   }
-  
+
   /**
    * Tests that the name of a top level enclosing class can be found.
    */
@@ -888,9 +882,9 @@ public final class DefinitionsDocumentTest extends TestCase
       "    void bar() { int c; } class C6 {}\n" +  // 169
       "  }\n" +  // 173
       "} class C7 {}";  // 186
-    
+
     _defModel.insertString(0, classes, null);
-    
+
     // No enclosing class at start
     try {
       String result = _defModel.getEnclosingTopLevelClassName(3);
@@ -899,16 +893,16 @@ public final class DefinitionsDocumentTest extends TestCase
     catch (ClassNameNotFoundException cnnfe) {
       // Correct: no class name found
     }
-    
+
     // No enclosing class before open brace
     try {
-      String result = _defModel.getEnclosingTopLevelClassName(15);
+      _defModel.getEnclosingTopLevelClassName(15);
       fail("no enclosing class should be found before open brace");
     }
     catch (ClassNameNotFoundException cnnfe) {
       // Correct: no class name found
     }
-    
+
     try {
       String result = _defModel.getEnclosingTopLevelClassName(186);
       fail("no enclosing class should be found at end of file");
@@ -916,7 +910,7 @@ public final class DefinitionsDocumentTest extends TestCase
     catch (ClassNameNotFoundException cnnfe) {
       // Correct: no class name found
     }
-    
+
     assertEquals("top level class name after first open brace", "C1",
                  _defModel.getEnclosingTopLevelClassName(22));
     assertEquals("top level class name inside C1", "C1",
@@ -935,16 +929,16 @@ public final class DefinitionsDocumentTest extends TestCase
                  _defModel.getEnclosingTopLevelClassName(93));
     assertEquals("top level class name after C2's close brace", "C1",
                  _defModel.getEnclosingTopLevelClassName(100));
-    
+
     // No enclosing class between classes
     try {
-      String result = _defModel.getEnclosingTopLevelClassName(107);
+      _defModel.getEnclosingTopLevelClassName(107);
       fail("no enclosing class should be found between classes");
     }
     catch (ClassNameNotFoundException cnnfe) {
       // Correct: no class name found
     }
-    
+
     assertEquals("class name inside C4", "C4",
                  _defModel.getEnclosingTopLevelClassName(122));
     assertEquals("class name inside C5", "C4",
@@ -953,7 +947,7 @@ public final class DefinitionsDocumentTest extends TestCase
                  _defModel.getEnclosingTopLevelClassName(167));
     assertEquals("class name inside C7", "C7",
                  _defModel.getEnclosingTopLevelClassName(185));
-    
+
     // No enclosing class at end
     try {
       String result = _defModel.getEnclosingTopLevelClassName(186);
@@ -963,7 +957,7 @@ public final class DefinitionsDocumentTest extends TestCase
       // Correct: no class name found
     }
   }
-  
+
   /**
    * Tests that the correct qualified class name is returned with a package.
    */
@@ -975,7 +969,7 @@ public final class DefinitionsDocumentTest extends TestCase
       "class C1 {}\n" +  // 25
       "class C2 {}";  // 36
     _defModel.insertString(0, classes, null);
-    
+
     assertEquals("qualified class name without pos", "foo.C1",
                  _defModel.getQualifiedClassName());
     assertEquals("enclosing class name in C1", "C1",
@@ -984,17 +978,17 @@ public final class DefinitionsDocumentTest extends TestCase
                  _defModel.getQualifiedClassName(23));
     assertEquals("qualified class name with pos in C2", "foo.C2",
                  _defModel.getQualifiedClassName(35));
-    
+
     // No class name outside classes
     try {
-      String result = _defModel.getQualifiedClassName(15);
+      _defModel.getQualifiedClassName(15);
       fail("no qualified class name should be found outside classes");
     }
     catch (ClassNameNotFoundException cnnfe) {
       // Correct: no class name found
     }
   }
-  
+
   /**
    * Tests that the correct qualified class name is returned without a package.
    */
@@ -1005,27 +999,27 @@ public final class DefinitionsDocumentTest extends TestCase
       "class C1 {}\n" +  // 12
       "class C2 {}";  // 36
     _defModel.insertString(0, classes, null);
-    
+
     assertEquals("qualified class name without pos", "C1",
                  _defModel.getQualifiedClassName());
     assertEquals("qualified class name with pos in C1", "C1",
                  _defModel.getQualifiedClassName(10));
     assertEquals("qualified class name with pos in C2", "C2",
                  _defModel.getQualifiedClassName(22));
-    
+
     // No class name outside classes
     try {
-      String result = _defModel.getQualifiedClassName(15);
+      _defModel.getQualifiedClassName(15);
       fail("no qualified class name should be found outside classes");
     }
     catch (ClassNameNotFoundException cnnfe) {
       // Correct: no class name found
     }
   }
-  
+
   /**
    * Tests that the name of an enclosing class can be found.
-   * 
+   *
    * Note: I started to write this assuming that we would need to find
    * inner class names, but I'm not sure that's the case.  I'm writing
    * the method for the debugger, which only needs the *top level*
@@ -1047,7 +1041,7 @@ public final class DefinitionsDocumentTest extends TestCase
       "class C4 {\n" +  // 118
       "} class C5 {}";  // 131
     _defModel.insertString(0, classes, null);
-    
+
     // No enclosing class at start
     try {
       String result = _defModel.getEnclosingClassName(3);
@@ -1056,7 +1050,7 @@ public final class DefinitionsDocumentTest extends TestCase
     catch (ClassNameNotFoundException cnnfe) {
       // Correct: no class name found
     }
-    
+
     // No enclosing class before open brace
     try {
       String result = _defModel.getEnclosingClassName(15);
@@ -1065,7 +1059,7 @@ public final class DefinitionsDocumentTest extends TestCase
     catch (ClassNameNotFoundException cnnfe) {
       // Correct: no class name found
     }
-    
+
     assertEquals("class name after first open brace", "C1",
                  _defModel.getEnclosingClassName(22));
     assertEquals("class name inside C1", "C1",
@@ -1084,7 +1078,7 @@ public final class DefinitionsDocumentTest extends TestCase
                  _defModel.getEnclosingClassName(93));
     assertEquals("class name after C2's close brace", "C1",
                  _defModel.getEnclosingClassName(100));
-    
+
     // No enclosing class between classes
     try {
       String result = _defModel.getEnclosingClassName(107);
@@ -1093,12 +1087,12 @@ public final class DefinitionsDocumentTest extends TestCase
     catch (ClassNameNotFoundException cnnfe) {
       // Correct: no class name found
     }
-    
+
     assertEquals("class name inside C4", "C4",
                  _defModel.getEnclosingClassName(118));
     assertEquals("class name inside C5", "C5",
                  _defModel.getEnclosingClassName(130));
-    
+
     // No enclosing class at end
     try {
       String result = _defModel.getEnclosingClassName(131);
@@ -1115,17 +1109,17 @@ public final class DefinitionsDocumentTest extends TestCase
    */
   public void testUndoAndRedoAfterMultipleLineIndent() throws BadLocationException {
     String text =
-      "public class stuff {\n" + 
-      "private int _int;\n" + 
+      "public class stuff {\n" +
+      "private int _int;\n" +
       "private Bar _bar;\n" +
       "public void foo() {\n" +
       "_bar.baz(_int);\n" +
       "}\n" +
       "}\n";
-    
+
     String indented =
-      "public class stuff {\n" + 
-      "  private int _int;\n" + 
+      "public class stuff {\n" +
+      "  private int _int;\n" +
       "  private Bar _bar;\n" +
       "  public void foo() {\n" +
       "    _bar.baz(_int);\n" +
@@ -1148,20 +1142,20 @@ public final class DefinitionsDocumentTest extends TestCase
    * verify that undoing a multiple-line indent will be a single undo action
    * @throws BadLocationException
    */
-  public void testUndoAndRedoAfterMultipleLineCommentAndUncomment() 
+  public void testUndoAndRedoAfterMultipleLineCommentAndUncomment()
     throws BadLocationException {
     String text =
-      "public class stuff {\n" + 
-      "  private int _int;\n" + 
+      "public class stuff {\n" +
+      "  private int _int;\n" +
       "  private Bar _bar;\n" +
       "  public void foo() {\n" +
       "    _bar.baz(_int);\n" +
       "  }\n" +
       "}\n";
-    
+
     String commented =
-      "//public class stuff {\n" + 
-      "//  private int _int;\n" + 
+      "//public class stuff {\n" +
+      "//  private int _int;\n" +
       "//  private Bar _bar;\n" +
       "//  public void foo() {\n" +
       "//    _bar.baz(_int);\n" +
@@ -1172,7 +1166,7 @@ public final class DefinitionsDocumentTest extends TestCase
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,new Integer(2));
     _defModel.insertString(0,text,null);
     assertEquals("insertion",text, _defModel.getText(0,_defModel.getLength()));
-    
+
     _defModel.commentLines(0,_defModel.getLength());
     assertEquals("commenting",commented, _defModel.getText(0,_defModel.getLength()));
     _defModel.getUndoManager().undo();
@@ -1187,9 +1181,9 @@ public final class DefinitionsDocumentTest extends TestCase
     _defModel.getUndoManager().redo();
     assertEquals("redo uncommenting",text, _defModel.getText(0,_defModel.getLength()));
   }
-  
+
   /**
-   * Test method for CompoundUndoManager.  Tests that the nested 
+   * Test method for CompoundUndoManager.  Tests that the nested
    * compound edit functionality works correctly.
    * @throws BadLocationException
    */
@@ -1198,90 +1192,90 @@ public final class DefinitionsDocumentTest extends TestCase
       "public class foo {\n" +
       "int bar;\n" +
       "}";
-    
+
     String indented =
       "public class foo {\n" +
       "  int bar;\n" +
       "}";
-    
+
     _defModel.addUndoableEditListener(_defModel.getUndoManager());
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,new Integer(2));
 
     // 1
-    
+
     // Start a compound edit and verify the returned key
     int key = _defModel.getUndoManager().startCompoundEdit();
     assertEquals("Should have returned the correct key.", 0, key);
-    
+
     // Insert a test string into the document
     _defModel.insertString(0, text, null);
-    assertEquals("Should have inserted the text properly.", text, 
+    assertEquals("Should have inserted the text properly.", text,
                  _defModel.getText(0, _defModel.getLength()));
-    
+
     // Indent the lines, so as to trigger a nested compound edit
     _defModel.indentLines(0, _defModel.getLength());
-    assertEquals("Should have indented correctly.", indented, 
+    assertEquals("Should have indented correctly.", indented,
                  _defModel.getText(0, _defModel.getLength()));
-    
+
     // End the outer compound edit and verify that both get undone
     _defModel.getUndoManager().endCompoundEdit(key);
     _defModel.getUndoManager().undo();
-    assertEquals("Should have undone correctly.", "", 
+    assertEquals("Should have undone correctly.", "",
                  _defModel.getText(0, _defModel.getLength()));
-    
+
     // 2
-    
-    String commented = 
+
+    String commented =
       "//public class foo {\n" +
       "//  int bar;\n" +
       "//}";
-    
+
     // Start a compound edit and verify the returned key
     key = _defModel.getUndoManager().startCompoundEdit();
     assertEquals("Should have returned the correct key.", 2, key);
-    
+
     // Insert a test string into the document
     _defModel.insertString(0, text, null);
-    assertEquals("Should have inserted the text properly.", text, 
+    assertEquals("Should have inserted the text properly.", text,
                  _defModel.getText(0, _defModel.getLength()));
-    
+
     // Indent the lines, so as to trigger a nested compond edit
     _defModel.indentLines(0, _defModel.getLength());
-    assertEquals("Should have indented correctly.", indented, 
+    assertEquals("Should have indented correctly.", indented,
                  _defModel.getText(0, _defModel.getLength()));
-    
+
     // End the outer compound edit trigger a second compound edit
     _defModel.getUndoManager().endCompoundEdit(key);
     _defModel.commentLines(0, _defModel.getLength());
-    assertEquals("Should have commented correctly.", commented, 
+    assertEquals("Should have commented correctly.", commented,
                  _defModel.getText(0, _defModel.getLength()));
-    
+
     // Undo the second compound edit
     _defModel.getUndoManager().undo();
     assertEquals("Should have undone the commenting.", indented,
                  _defModel.getText(0, _defModel.getLength()));
-    
+
     // Undo the first compound edit
     _defModel.getUndoManager().undo();
     assertEquals("Should have undone the indenting and inserting.", "",
                  _defModel.getText(0, _defModel.getLength()));
-    
-    // 3    
-    
+
+    // 3
+
     // Start a compound edit and verify the returned key
     key = _defModel.getUndoManager().startCompoundEdit();
     assertEquals("Should have returned the correct key.", 5, key);
-    
+
     // Insert a test string into the document
     _defModel.insertString(0, text, null);
-    assertEquals("Should have inserted the text properly.", text, 
+    assertEquals("Should have inserted the text properly.", text,
                  _defModel.getText(0, _defModel.getLength()));
-    
+
     // Indent the lines, so as to trigger a nested compond edit
     _defModel.indentLines(0, _defModel.getLength());
-    assertEquals("Should have indented correctly.", indented, 
+    assertEquals("Should have indented correctly.", indented,
                  _defModel.getText(0, _defModel.getLength()));
-    
+
 //    // Try to undo the nested edit
 //    try {
 //      _defModel.getUndoManager().undo();
@@ -1298,27 +1292,27 @@ public final class DefinitionsDocumentTest extends TestCase
 //    catch (CannotRedoException cre) {
 //      // Correct: cannot redo a nested edit
 //    }
-//    
+//
     // Try end the compound edit with a wrong key
     try {
       _defModel.getUndoManager().endCompoundEdit(key + 1);
       fail("Should not have allowed ending a compound edit with a wrong key.");
     }
     catch (IllegalStateException e) {
-      assertEquals("Should have printed the correct error message.", 
+      assertEquals("Should have printed the correct error message.",
                    "Improperly nested compound edits.", e.getMessage());
     }
-    
+
     // Indent the lines, so as to trigger a nested compound edit
     _defModel.indentLines(0, _defModel.getLength());
-    assertEquals("Should have indented correctly.", indented, 
+    assertEquals("Should have indented correctly.", indented,
                  _defModel.getText(0, _defModel.getLength()));
-    
+
     // We've taken out this part of the test because of our change to
     // undo where we close the nearest open compound edit upon undo-ing,
     // pasting, commenting, un-commenting, indenting, and backspacing.
     // We should never have a nested edit anymore.
-    
+
     // Try to undo the nested edit
 //    try {
 //      _defModel.getUndoManager().undo();
@@ -1327,7 +1321,7 @@ public final class DefinitionsDocumentTest extends TestCase
 //    catch (CannotUndoException e) {
 //      // Correct: cannot undo a nested edit
 //    }
-    
+
     // End the compound edit and undo
 //    _defModel.getUndoManager().endCompoundEdit(key);
     _defModel.getUndoManager().undo();

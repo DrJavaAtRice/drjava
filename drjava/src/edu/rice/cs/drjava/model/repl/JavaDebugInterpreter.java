@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
@@ -49,7 +49,6 @@ import koala.dynamicjava.interpreter.error.*;
 import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.interpreter.context.*;
 import koala.dynamicjava.tree.*;
-import koala.dynamicjava.tree.visitor.*;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -70,11 +69,11 @@ import edu.rice.cs.util.UnexpectedException;
  *
  * This class is loaded in the Interpreter JVM, not the Main JVM.
  * (Do not use DrJava's config framework here.)
- * 
+ *
  * @version $Id$
  */
 public class JavaDebugInterpreter extends DynamicJavaAdapter {
-  
+
   /** This interpreter's name. */
   protected final String _name;
 
@@ -110,7 +109,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * @param node Tree to process
    */
   public Node processTree(Node node) {
-    return (Node) node.acceptVisitor(_translationVisitor);
+    return node.acceptVisitor(_translationVisitor);
   }
 
   public GlobalContext makeGlobalContext(TreeInterpreter i) {
@@ -174,17 +173,12 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * that represents the field.
    * @param field the name of the field
    * @param context the context
-   * @param className the className to search from. Initially is the
-   * className of "this", but may be called recursively if "this" is
-   * an anonymous inner class.
    * @return the ObjectFieldAccess that represents the field or null
    * if it cannot find the field in any enclosing class.
    */
   protected ObjectFieldAccess _getObjectFieldAccessForField(String field, Context context) {
     TypeChecker tc = makeTypeChecker(context);
     int numDollars = _getNumDollars(_thisClassName);
-    Expression expr = null;
-    Expression newExpr = null;
 
     // Check if this has an anonymous inner class
     if (hasAnonymous(_thisClassName)) {
@@ -203,12 +197,12 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       }
     }
     for (int i = 0; i <= numDollars; i++) {
-      expr = _buildObjectFieldAccess(i, numDollars);
-      newExpr = new ObjectFieldAccess(expr, field);
+      Expression expr = _buildObjectFieldAccess(i, numDollars);
+      Expression newExpr = new ObjectFieldAccess(expr, field);
       try {
         // the type checker will tell us if it's a field
-        tc.visit((ObjectFieldAccess)newExpr);
-        return (ObjectFieldAccess)newExpr;
+        tc.visit((ObjectFieldAccess) newExpr);
+        return (ObjectFieldAccess) newExpr;
       }
       catch (ExecutionError e) {
         // try concatenating "val$" to the beginning of field
@@ -241,7 +235,6 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     int numDollars = _getNumDollars(_thisClassName);
     String methodName = method.getMethodName();
     List<Expression> args = method.getArguments();
-    Expression expr = null;
 
     // Check if this has an anonymous inner class
     if (hasAnonymous(_thisClassName)) {
@@ -260,7 +253,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       }
     }
     for (int i = 0; i <= numDollars; i++) {
-      expr = _buildObjectFieldAccess(i, numDollars);
+      Expression expr = _buildObjectFieldAccess(i, numDollars);
       expr = new ObjectMethodCall(expr, methodName, args, null, 0, 0, 0, 0);
       try {
         // the type checker will tell us if it's a field
@@ -286,14 +279,13 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
   protected StaticFieldAccess _getStaticFieldAccessForField(String field, Context context) {
     TypeChecker tc = makeTypeChecker(context);
     int numDollars = _getNumDollars(_thisClassName);
-    StaticFieldAccess expr = null;
     String currClass = _getFullyQualifiedClassNameForThis();
     int index = currClass.length();
     // iterate outward trying to find the field
     for (int i = 0; i <= numDollars; i++) {
       currClass = currClass.substring(0, index);
       ReferenceType rt = new ReferenceType(currClass);
-      expr = new StaticFieldAccess(rt, field);
+      StaticFieldAccess expr = new StaticFieldAccess(rt, field);
       try {
         // the type checker will tell us if it's a field
         tc.visit(expr);
@@ -321,14 +313,13 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     int numDollars = _getNumDollars(_thisClassName);
     String methodName = method.getMethodName();
     List<Expression> args = method.getArguments();
-    StaticMethodCall expr = null;
     String currClass = _getFullyQualifiedClassNameForThis();
     int index = currClass.length();
     // iterate outward trying to find the method
     for (int i = 0; i <= numDollars; i++) {
       currClass = currClass.substring(0, index);
       ReferenceType rt = new ReferenceType(currClass);
-      expr = new StaticMethodCall(rt, methodName, args);
+      StaticMethodCall expr = new StaticMethodCall(rt, methodName, args);
       try {
         // the type checker will tell us if it's a field
         tc.visit(expr);
@@ -501,7 +492,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
   /**
    * Returns the number of dollar characters in
    * a given String.
-   * @param classname the string to be examined
+   * @param className the string to be examined
    * @return the number of dollars in the string
    */
   private int _getNumDollars(String className) {
@@ -516,7 +507,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
 
   /**
    * Checks if the className passed in is a valid className.
-   * @param classname the className of the ThisExpression
+   * @param className the className of the ThisExpression
    * @return the number of outer classes to walk out to
    */
   protected int verifyClassName(String className) {

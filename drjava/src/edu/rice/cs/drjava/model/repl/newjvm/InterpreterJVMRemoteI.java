@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,20 +32,19 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Vector;
 import java.util.List;
@@ -65,19 +64,19 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
     throws RemoteException;
   public void setPackageScope(String s) throws RemoteException;
   public void reset() throws RemoteException;
-  
+
   /**
    * @param show Whether to show a message if a reset operation fails.
    */
   public void setShowMessageOnResetFailure(boolean show) throws RemoteException;
-  
+
   /**
    * Adds a named DynamicJavaAdapter to the list of interpreters.
    * @param name the unique name for the interpreter
    * @throws IllegalArgumentException if the name is not unique
    */
   public void addJavaInterpreter(String name) throws RemoteException;
-  
+
   /**
    * Adds a named JavaDebugInterpreter to the list of interpreters.
    * @param name the unique name for the interpreter
@@ -92,7 +91,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    * @param name Name of the interpreter to remove
    */
   public void removeInterpreter(String name) throws RemoteException;
-  
+
   /**
    * Sets the current interpreter to be the one specified by the given name
    * @param name the unique name of the interpreter to set active
@@ -100,25 +99,25 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    * with an interaction
    */
   public boolean setActiveInterpreter(String name) throws RemoteException;
-  
+
   /**
    * Sets the default interpreter to be active.
    * @return Whether the new interpreter is currently in progress
    * with an interaction
    */
   public boolean setToDefaultInterpreter() throws RemoteException;
-  
+
   /**
    * Returns a copy of the list of unique entries on the classpath.
    */
   public Vector<String> getAugmentedClasspath() throws RemoteException;
-  
+
   /**
    * Gets the string representation of the value of a variable in the current interpreter.
    * @param var the name of the variable
    */
   public String getVariableToString(String var) throws RemoteException;
-  
+
   /**
    * Gets the class name of a variable in the current interpreter.
    * @param var the name of the variable
@@ -129,7 +128,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    * Gets the classpath as a string.
    */
   public String getClasspathString() throws RemoteException;
-  
+
   /**
    * Sets whether to allow private access.
    */

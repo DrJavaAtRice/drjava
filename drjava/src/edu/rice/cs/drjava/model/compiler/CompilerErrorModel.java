@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.compiler;
@@ -52,7 +52,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.HashMap;
-import java.lang.reflect.Array;
 import javax.swing.text.*;
 
 import edu.rice.cs.util.UnexpectedException;
@@ -79,19 +78,19 @@ public class CompilerErrorModel<T extends CompilerError> {
    * In all cases, where all else is equal, warnings are sorted below errors.
    */
   private final T[] _errors;
-  
+
   /**
    * An array of file offsets, parallel to the _errors array.
    * NOTE: If there is no position associated with an error, its entry here
    *       should be set to null.
    */
   private final Position[] _positions;
-  
+
   /**
    * The size of _errors and _positions.  This should never change after the constructor!
    */
   private final int _numErrors;
-  
+
   /**
    * Cached result of hasOnlyWarnings.
    * Three-state enum:
@@ -100,20 +99,20 @@ public class CompilerErrorModel<T extends CompilerError> {
    *   1 => true
    */
   private int _onlyWarnings = -1;
-  
+
   /**
    * Used internally in building _positions.
    * The file used as the index *must* be a canonical file, or else
    * errors won't always be associated with the right documents.
    */
-  private final HashMap<File, StartAndEndIndex> _filesToIndexes = 
+  private final HashMap<File, StartAndEndIndex> _filesToIndexes =
     new HashMap<File, StartAndEndIndex>();
-  
+
   /**
    * The global model which created/controls this object.
    */
   private final IGetDocuments _model;
-  
+
   /**
    * Constructs an empty CompilerErrorModel.
    * @param empty the empty array of T
@@ -146,17 +145,17 @@ public class CompilerErrorModel<T extends CompilerError> {
    */
   public CompilerErrorModel(T[] errors, IGetDocuments model) {
     _model = model;
-    
+
     // TODO: If we move to NextGen-style generics, ensure _errors is non-null.
     _errors = errors;
-    
+
     // Next two lines are order-dependent!
     _numErrors = errors.length;
     _positions = new Position[_numErrors];
-    
+
     // Sort the errors by file and position
     Arrays.sort(_errors);
-    
+
     // Populates _positions.
     _calculatePositions();
   }
@@ -164,7 +163,7 @@ public class CompilerErrorModel<T extends CompilerError> {
   /**
    * Accessor for errors maintained here.
    * @param idx the index of the error to retrieve
-   * @returns the error at index idx
+   * @return the error at index idx
    * @throws NullPointerException if this object was improperly initialized
    * @throws ArrayIndexOutOfBoundsException if !(0 <= idx < this.getNumErrors())
    */
@@ -207,7 +206,7 @@ public class CompilerErrorModel<T extends CompilerError> {
    * @return the CompilerError at the given offset, null if no error corresponds to this location
    */
   public T getErrorAtOffset(OpenDefinitionsDocument odd, int offset) {
-    File file = null;
+    File file;
     try {
       file = odd.getFile();
     }
@@ -217,7 +216,7 @@ public class CompilerErrorModel<T extends CompilerError> {
     catch (FileMovedException e) {
       file = e.getFile();
     }
-    
+
     // Use the canonical file if possible
     try {
       file = file.getCanonicalFile();
@@ -313,7 +312,7 @@ public class CompilerErrorModel<T extends CompilerError> {
     if (file == null) {
       return false;
     }
-    
+
     // Try to use the canonical file
     try {
       file = file.getCanonicalFile();
@@ -331,7 +330,7 @@ public class CompilerErrorModel<T extends CompilerError> {
     }
     return true;
   }
-  
+
   /**
    * Checks whether all CompilerErrors contained here are actually warnings.
    * This would indicate that there were no "real" errors, so output is valid.
@@ -355,7 +354,7 @@ public class CompilerErrorModel<T extends CompilerError> {
       _onlyWarnings = clean? 1: 0;
       return clean;
     }
-  } 
+  }
 
   /**
    * Create array of positions where each error occurred.
@@ -364,10 +363,10 @@ public class CompilerErrorModel<T extends CompilerError> {
   private void _calculatePositions() {
     try {
       int curError = 0;
-      
+
       // for(; numProcessed < _numErrors; numProcessed++) {
       while ((curError < _numErrors)) {
-        
+
         // find the next error with a line number (skipping others)
         curError = nextErrorWithLine(curError);
         if (curError >= _numErrors){
@@ -376,10 +375,10 @@ public class CompilerErrorModel<T extends CompilerError> {
 
         //Now find the file and document we are working on
         File file = _errors[curError].file();
-        Document document = null;
+        Document document;
         try {
           document = _model.getDocumentForFile(file).getDocument();
-        } 
+        }
         catch (Exception e) {
           // This is intended to catch IOException or OperationCanceledException
           if ((e instanceof IOException) || (e instanceof OperationCanceledException)) {
@@ -387,7 +386,7 @@ public class CompilerErrorModel<T extends CompilerError> {
             do {
               curError++;
             } while ((curError < _numErrors) && (_errors[curError].file().equals(file)));
-            
+
             //If the document couldn't be loaded, start the loop over at the top
             continue;
           }
@@ -430,7 +429,7 @@ public class CompilerErrorModel<T extends CompilerError> {
           if (curError < _numErrors) {
             int curErrorLine = _errors[curError].lineNumber();
             int nextNewline = 0;
-            while ((curLine != curErrorLine) 
+            while ((curLine != curErrorLine)
                      && (nextNewline != -1)
                      && (file.equals(_errors[curError].file()))) {
               nextNewline = defsText.indexOf(newLine, offset);
@@ -445,7 +444,7 @@ public class CompilerErrorModel<T extends CompilerError> {
           }
         }
 
-        //Remember the indexes in the _errors and _positions arrays that 
+        //Remember the indexes in the _errors and _positions arrays that
         // are for the errors in this file
         int fileEndIndex = curError;
         if (fileEndIndex != fileStartIndex) {
@@ -467,13 +466,13 @@ public class CompilerErrorModel<T extends CompilerError> {
 
   /**
    * Finds the first error after numProcessed which has a file and line number.
-   * @param start the starting index of the search
+   * @param idx the starting index of the search
    * @return the index of the found error
    */
   private int nextErrorWithLine(int idx) {
-    while ((idx < _numErrors)
-           && (_errors[idx].hasNoLocation()
-               || (_errors[idx].file() == null))) {
+    while ((idx < _numErrors) && (_errors[idx].hasNoLocation()
+           || (_errors[idx].file() == null)))
+    {
       idx++;
     }
     return idx;

@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,20 +32,18 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.debug;
-
-import edu.rice.cs.drjava.DrJava;
 
 import com.sun.jdi.*;
 import com.sun.jdi.request.*;
@@ -53,7 +51,6 @@ import com.sun.jdi.event.*;
 
 import java.util.Hashtable;
 import java.util.List;
-import java.util.LinkedList;
 import java.util.Vector;
 
 /**
@@ -77,9 +74,8 @@ public class PendingRequestManager {
    * @param action The DebugAction that is pending
    */
   public void addPendingRequest (DocumentDebugAction action) {
-    Vector<DocumentDebugAction> actions = null;
     String className = action.getClassName();
-    actions = _pendingActions.get(className);
+    Vector<DocumentDebugAction> actions = _pendingActions.get(className);
     if (actions == null) {
       actions = new Vector<DocumentDebugAction>();
 
@@ -101,9 +97,8 @@ public class PendingRequestManager {
    * @param action The DebugAction that was set and removed
    */
   public void removePendingRequest (DocumentDebugAction action) {
-    Vector<DocumentDebugAction> actions = null;
     String className = action.getClassName();
-    actions = _pendingActions.get(className);
+    Vector<DocumentDebugAction> actions = _pendingActions.get(className);
     if (actions == null) {
       return;
     }
@@ -180,7 +175,7 @@ public class PendingRequestManager {
         // next line was in condition for if
         actions.get(i).createRequests(refTypes);  // This type warning will go away in JDK 1.5
         // actions.get(i) has raw type because type parameter in actions is the raw approximation to an existential type /**?
-        
+
 //        if (!) {
           // if no request created, skip this action
           //i++;

@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,29 +32,27 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
 import java.io.*;
 import java.util.HashSet;
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Collection;
 
 import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.drjava.DrJava;
@@ -78,7 +76,7 @@ public class DefaultJavadocModel implements JavadocModel {
    * Used by CompilerErrorModel to open documents that have errors.
    */
   private IGetDocuments _getter;
-  
+
   /**
    * Manages listeners to this model.
    */
@@ -98,9 +96,9 @@ public class DefaultJavadocModel implements JavadocModel {
     _javadocErrorModel =
       new CompilerErrorModel<CompilerError>(new CompilerError[0]);
   }
-  
+
   //-------------------------- Listener Management --------------------------//
-  
+
   /**
    * Add a JavadocListener to the model.
    * @param listener a listener that reacts to Javadoc events
@@ -124,7 +122,7 @@ public class DefaultJavadocModel implements JavadocModel {
   public void removeAllListeners() {
     _notifier.removeAllListeners();
   }
-  
+
   //----------------------------- Error Results -----------------------------//
 
   /**
@@ -256,11 +254,12 @@ public class DefaultJavadocModel implements JavadocModel {
    * This method handles most of the logic of performing a Javadoc operation,
    * once we know that it won't be canceled.
    *
-   * @param destDir the destination directory for the doc files
+   * @param destDirFile the destination directory for the doc files
    * @param saver a command object for saving a document (if it moved/changed)
    * @param classpath an array of classpath elements to be used by Javadoc
    */
-  private void _javadocAllWorker(File destDirFile, FileSaveSelector saver,
+  private void _javadocAllWorker(File destDirFile,
+                                 FileSaveSelector saver,
                                  String[] classpath)
   {
     if (!_ensureValidToolsJar()) {
@@ -429,7 +428,8 @@ public class DefaultJavadocModel implements JavadocModel {
     final String[] classpathArray = classpath.toArray(new String[0]);
     new Thread("DrJava Javadoc Thread") {
       public void run() {
-        _javadocDocumentWorker(destDir, file, doc, saver, classpathArray);
+//        _javadocDocumentWorker(destDir, file, doc, saver, classpathArray);
+        _javadocDocumentWorker(destDir, file, classpathArray);
       }
     }.start();
   }
@@ -444,10 +444,9 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param saver a command object for saving a document (if it moved/changed)
    * @param classpath an array of classpath elements to be used by Javadoc
    */
-  private void _javadocDocumentWorker(File destDirFile,
-                                      File docFile,
-                                      OpenDefinitionsDocument document,
-                                      FileSaveSelector saver,
+  private void _javadocDocumentWorker(File destDirFile, File docFile,
+//                                      OpenDefinitionsDocument document,
+//                                      FileSaveSelector saver,
                                       String[] classpath)
   {
     if (!_ensureValidToolsJar()) {
@@ -470,17 +469,17 @@ public class DefaultJavadocModel implements JavadocModel {
    * Suggests a default location for generating Javadoc, based on the given
    * document's source root.  (Appends JavadocModel.SUGGESTED_DIR_NAME to
    * the sourceroot.)
-   * 
+   *
    * Ensures that the document is saved first, or else no reasonable
    * suggestion will be found.
-   * 
+   *
    * @param doc Document with the source root to use as the default.
    * @return Suggested destination directory, or null if none could be
    * determined.
    */
   public File suggestJavadocDestination(OpenDefinitionsDocument doc) {
     _attemptSaveAllDocuments();
-    
+
     try {
       File sourceRoot = doc.getSourceRoot();
       return new File(sourceRoot, SUGGESTED_DIR_NAME);
@@ -489,11 +488,11 @@ public class DefaultJavadocModel implements JavadocModel {
       return null;
     }
   }
-  
+
   /**
    * If any documents are modified, this gives the user a chance
    * to save them before proceeding.
-   * 
+   *
    * Callers can check _getter.hasModifiedDocuments() after calling
    * this method to determine if the user cancelled the save process.
    */
@@ -503,7 +502,7 @@ public class DefaultJavadocModel implements JavadocModel {
       _notifier.saveBeforeJavadoc();
     }
   }
-  
+
   /**
    * Ensures that a valid version of tools.jar is being used for our classpath.
    * Ends the process with an error and returns false if not.
@@ -557,7 +556,7 @@ public class DefaultJavadocModel implements JavadocModel {
   {
     // Start a new process to execute Javadoc and tell listeners it has started
     // And finally, when we're done notify the listeners with a success flag
-    boolean result = false;
+    boolean result;
     try {
       // Notify all listeners that Javadoc is starting.
       _notifier.javadocStarted();
@@ -593,8 +592,7 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param classpath an array of classpath elements to use in the Javadoc JVM
    * @return true if Javadoc succeeded in building the HTML, otherwise false
    */
-  private boolean _javadoc_1_3(String[] args, String[] classpath)
-    throws IOException, ClassNotFoundException, InterruptedException {
+  private boolean _javadoc_1_3(String[] args, String[] classpath) throws IOException {
     final String JAVADOC_CLASS = "com.sun.tools.javadoc.Main";
     Process javadocProcess;
 
@@ -784,7 +782,7 @@ public class DefaultJavadocModel implements JavadocModel {
    * in a new location.
    *
    * @param doc OpenDefinitionsDocument from which to get the file
-   * @param aver FileSaveSelector to allow the user to save the file if it has moved.
+   * @param saver FileSaveSelector to allow the user to save the file if it has moved.
    *
    * @throws IllegalStateException if the doc has no file (hasn't been saved)
    * @throws IOException if the file can't be saved after it was moved
@@ -849,13 +847,11 @@ public class DefaultJavadocModel implements JavadocModel {
    * The list does not include arguments for source path or
    * online links to documentation.
    *
-   * @param docUnits All files or packages to include in the Javadoc
+   * @param file the file
    * @param destDir Destination directory to pass
-   * @param sourcePath Full sourcepath to pass
    * @param classpath All classpath entries to pass
    */
-  protected ArrayList<String> _buildCommandLineArgs(File file,
-                                                    String destDir,
+  protected ArrayList<String> _buildCommandLineArgs(File file, String destDir,
                                                     String[] classpath)
   {
     ArrayList<String> args = new ArrayList<String>();
@@ -872,7 +868,7 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param args List of arguments
    * @param destDir Destination directory to pass
    * @param sourcePath Full sourcepath to pass, or the empty string (NOT NULL).
-   * @param classpaths All classpath entries to pass
+   * @param classpath All classpath entries to pass
    */
   private void _addBasicArguments(ArrayList<String> args,
                                   String destDir,

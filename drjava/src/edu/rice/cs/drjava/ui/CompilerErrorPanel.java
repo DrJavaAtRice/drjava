@@ -49,7 +49,6 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.compiler.CompilerError;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
@@ -64,10 +63,6 @@ import javax.swing.text.Position;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.Vector;
 
@@ -83,10 +78,10 @@ import java.util.Vector;
 public class CompilerErrorPanel extends ErrorPanel {
 
   /** Whether a compile has occurred since the last compiler change. */
-  private boolean _compileHasOccurred;  
+  private boolean _compileHasOccurred;
   private CompilerErrorListPane _errorListPane;
   private final JComboBox _compilerChoiceBox;
-  
+
   /**
    * Constructor.
    * @param model SingleDisplayModel in which we are running
@@ -96,10 +91,10 @@ public class CompilerErrorPanel extends ErrorPanel {
     super(model, frame, "Compiler Output", "Compiler");
     _compileHasOccurred = false;
     _numErrors = 0;
-    
+
     _errorListPane = new CompilerErrorListPane();
     setErrorListPane(_errorListPane);
-    
+
     /******** Initialize the drop-down compiler menu ********/
     // Limitation: Only compiler choices are those that were available
     // at the time this box was created.
@@ -129,7 +124,7 @@ public class CompilerErrorPanel extends ErrorPanel {
     });
 
     customPanel.add(_compilerChoiceBox, BorderLayout.NORTH);
-    
+
     DrJava.getConfig().addOptionListener(OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener<File>());
     DrJava.getConfig().addOptionListener(OptionConstants.JSR14_LOCATION, new CompilerLocationOptionListener<File>());
     DrJava.getConfig().addOptionListener(OptionConstants.EXTRA_COMPILERS, new CompilerLocationOptionListener<Vector<String>>());

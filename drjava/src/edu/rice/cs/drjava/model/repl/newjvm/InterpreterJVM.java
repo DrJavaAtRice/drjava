@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl.newjvm;
@@ -51,7 +51,6 @@ import java.util.Vector;
 import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.ArrayList;
 import java.io.*;
 import java.rmi.*;
 
@@ -69,20 +68,6 @@ import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.repl.*;
 
-//<<<<<<< InterpreterJVM.java
-//import edu.rice.cs.javaast.*;  //should be deleted, by end of merging NOT NEEDED DAMMIT!
-//import edu.rice.cs.javaast.tree.*; //should be deleted, by end of merging
-//import edu.rice.cs.javaast.parser.*; //should be deleted, by end of merging
-//
-////import koala.dynamicjava.interpreter.InterpreterException;  //should be using a layer to handle scriptlanguages
-////import koala.dynamicjava.tree.*; //should be using a layer to handle scriptlanguages
-////import koala.dynamicjava.parser.*; //should be using a layer to handle scriptlanguages
-//=======
-//import edu.rice.cs.javaast.*;
-//import edu.rice.cs.javaast.tree.*;
-//import edu.rice.cs.javaast.parser.*;
-//>>>>>>> 1.59
-
 // For Windows focus fix
 import javax.swing.JDialog;
 
@@ -92,7 +77,7 @@ import javax.swing.JDialog;
  * to be subclassed to use with another interpreter. (Really, there would
  * need to be an abstract base class, but since we don't need it yet I'm
  * not making one.)
- * 
+ *
  * This class is loaded in the Interpreter JVM, not the Main JVM.
  * (Do not use DrJava's config framework here.)
  *
@@ -236,8 +221,8 @@ public class InterpreterJVM extends AbstractSlaveJVM
     if (PlatformFactory.ONLY.isWindowsPlatform()) {
       JDialog d = new JDialog();
       d.setSize(0,0);
-      d.show();
-      d.hide();
+      d.setVisible(true);
+      d.setVisible(false);
     }
     //_dialog("interpreter JVM started");
   }
@@ -311,7 +296,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
             //                           getStackTrace(t));
             _mainJVM.interpretResult(new ExceptionResult(t.getClass().getName(),
                                                          t.getMessage(),
-                                                         InterpreterJVM.this.getStackTrace(t)));
+                                                         InterpreterJVM.getStackTrace(t)));
           }
 //<<<<<<< InterpreterJVM.java
 ////          catch (InterpreterException ie) {
@@ -344,7 +329,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
             //                           getStackTrace(t));
             _mainJVM.interpretResult(new ExceptionResult(t.getClass().getName(),
                                                          t.getMessage(),
-                                                         InterpreterJVM.this.getStackTrace(t)));
+                                                         InterpreterJVM.getStackTrace(t)));
           }
         }
         catch (RemoteException re) {
@@ -532,11 +517,11 @@ public class InterpreterJVM extends AbstractSlaveJVM
     * the named interpreter is not a Java interpreter
     */
    public JavaInterpreter getJavaInterpreter(String name) {
-     if( printMessages ) System.err.println("Getting interpreter data");
+     if (printMessages) System.err.println("Getting interpreter data");
      InterpreterData interpreterData = getInterpreter(name);
-     if( printMessages ) System.out.println("Getting interpreter instance");
+     if (printMessages) System.out.println("Getting interpreter instance");
      Interpreter interpreter = interpreterData.getInterpreter();
-     if( printMessages ) System.out.println("returning");
+     if (printMessages) System.out.println("returning");
 
      if (interpreter instanceof JavaInterpreter) {
        return (JavaInterpreter) interpreter;
@@ -753,7 +738,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
       _log.logTime("quitFailed: " + re.toString());
     }
   }
-  
+
   /**
    * Sets the interpreter to allow access to private members.
    */

@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,24 +32,22 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui.config;
 
 import javax.swing.*;
-import javax.swing.text.*;
 import javax.swing.event.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileFilter;
 import java.awt.event.*;
 import java.awt.*;
 import java.util.Enumeration;
@@ -77,7 +75,7 @@ public class ConfigFrame extends JFrame {
 
   private MainFrame _mainFrame;
 
-  private JSplitPane _splitPane;
+//  private JSplitPane _splitPane;
   private JTree _tree;
   private DefaultTreeModel _treeModel;
   private PanelTreeNode _rootNode;
@@ -85,7 +83,7 @@ public class ConfigFrame extends JFrame {
   private JButton _okButton;
   private JButton _applyButton;
   private JButton _cancelButton;
-  private JButton _saveSettingsButton;
+//  private JButton _saveSettingsButton;
   private JPanel _mainPanel;
   private JFileChooser _fileOptionChooser;
   private JFileChooser _browserChooser;
@@ -144,36 +142,41 @@ public class ConfigFrame extends JFrame {
     cp.add(_splitPane, BorderLayout.CENTER);
     */
 
-    _okButton = new JButton("OK");
-    _okButton.addActionListener(new ActionListener() {
+    Action okAction = new AbstractAction("OK") {
       public void actionPerformed(ActionEvent e) {
         // Always apply and save settings
         boolean successful = true;
         try {
           successful = saveSettings();
         }
-        catch (IOException ioe) {}
-        if (successful) ConfigFrame.this.hide();
+        catch (IOException ioe) {
+          // oh well...
+        }
+        if (successful) {
+          ConfigFrame.this.setVisible(false);
+        }
       }
-    });
+    };
+    _okButton = new JButton(okAction);
 
-    _applyButton = new JButton("Apply");
-    _applyButton.addActionListener(new ActionListener() {
+    Action applyAction = new AbstractAction("Apply") {
       public void actionPerformed(ActionEvent e) {
         // Always save settings
         try {
           saveSettings();
         }
-        catch (IOException ioe) {}
+        catch (IOException ioe) {
+        }
       }
-    });
+    };
+    _applyButton = new JButton(applyAction);
 
-    _cancelButton = new JButton("Cancel");
-    _cancelButton.addActionListener(new ActionListener() {
+    Action cancelAction = new AbstractAction("Cancel") {
       public void actionPerformed(ActionEvent e) {
         cancel();
       }
-    });
+    };
+    _cancelButton = new JButton(cancelAction);
 
     /* Now always saves settings...
     _saveSettingsButton = new JButton("Save Settings");
@@ -272,7 +275,7 @@ public class ConfigFrame extends JFrame {
    */
   public void cancel() {
     resetToCurrent();
-    ConfigFrame.this.hide();
+    ConfigFrame.this.setVisible(false);
   }
 
   /**
@@ -758,7 +761,7 @@ public class ConfigFrame extends JFrame {
     JFileChooser dirChooser = new JFileChooser(_getWorkDir());
     dirChooser.setDialogTitle("Select");
     dirChooser.setApproveButtonText("Select");
-    dirChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+    dirChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
     dirChooser.setMultiSelectionEnabled(false);
     FileOptionComponent workDir =
       new FileOptionComponent(OptionConstants.WORKING_DIRECTORY,
@@ -789,7 +792,7 @@ public class ConfigFrame extends JFrame {
                                                   "Whether to allow users to access private (and protected) fields and methods."));
     panel.addComponent(new StringOptionComponent(OptionConstants.JVM_ARGS, "JVM Args for Interactions", this,
                                                  "The command-line arguments to pass to the Interactions JVM."));
-    
+
     panel.displayComponents();
   }
 

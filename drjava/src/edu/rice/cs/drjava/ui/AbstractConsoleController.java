@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
@@ -50,8 +50,6 @@ import javax.swing.text.*;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.Toolkit;
 import java.awt.Color;
 import java.awt.Font;
 
@@ -72,34 +70,34 @@ public abstract class AbstractConsoleController {
    * Adapter for the Swing document used by the model.
    */
   protected SwingDocumentAdapter _adapter;
-  
+
   /**
    * Pane from the view.
    */
   protected InteractionsPane _pane;
-  
+
   /**
    * Style to use for default text.
    */
   protected SimpleAttributeSet _defaultStyle;
-  
+
   /**
    * Style to use for System.out.
    */
   protected final SimpleAttributeSet _systemOutStyle;
-  
+
   /**
    * Style to use for System.err.
    */
   protected final SimpleAttributeSet _systemErrStyle;
-  
+
   // package private for testing purposes (although I haven't written tests yet)
-  
+
   /**
    * Action to change focus to previous pane.
    */
   Action switchToPrevPaneAction;
-  
+
   /**
    * Action to change focus to next pane.
    */
@@ -117,7 +115,7 @@ public abstract class AbstractConsoleController {
     _systemOutStyle = new SimpleAttributeSet();
     _systemErrStyle = new SimpleAttributeSet();
   }
-  
+
   /**
    * Gets the console document for this console.
    */
@@ -156,7 +154,7 @@ public abstract class AbstractConsoleController {
         _systemOutStyle.addAttribute(StyleConstants.Foreground, oe.value);
       }
     });
-   
+
     // System.err
     _systemErrStyle.addAttributes(_defaultStyle);
     _systemErrStyle.addAttribute(StyleConstants.Foreground,
@@ -169,7 +167,7 @@ public abstract class AbstractConsoleController {
       }
     });
   }
-  
+
   /**
    * Sets the font for the document, updating all existing text.
    * This behavior is only necessary in Mac OS X, JDK 1.4.1, since
@@ -179,8 +177,8 @@ public abstract class AbstractConsoleController {
   public void setDefaultFont(Font f) {
     Color c = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
     setDefaultFont(f, c);
-  }  
-  
+  }
+
   /**
    * Sets the color for the document, updating all existing text.
    * This behavior is only necessary in Mac OS X, JDK 1.4.1, since
@@ -190,8 +188,8 @@ public abstract class AbstractConsoleController {
   public void setDefaultFont(Color c) {
     Font f = DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN);
     setDefaultFont(f, c);
-  }  
-  
+  }
+
   /**
    * Sets the font and color for the document, updating all existing text.
    * This behavior is only necessary in Mac OS X, JDK 1.4.1, since setFont() and
@@ -214,7 +212,7 @@ public abstract class AbstractConsoleController {
       _updateStyles(fontSet);
     }
   }
-  
+
   /**
    * Updates all document styles with the attributes contained in newSet.
    * @param newSet Style containing new attributes to use.
@@ -241,7 +239,7 @@ public abstract class AbstractConsoleController {
       int caretPos = _pane.getCaretPosition();
       int promptPos = doc.getPromptPos();
       int length = doc.getDocLength();
-      
+
       // Figure out where the prompt was before the update
       int prevPromptPos = promptPos;
       if (e.getOffset() < promptPos) {
@@ -287,8 +285,8 @@ public abstract class AbstractConsoleController {
       }
     }
   }
-  
-  
+
+
   /**
    * Sets up the view.
    */
@@ -326,14 +324,14 @@ public abstract class AbstractConsoleController {
   public SwingDocumentAdapter getDocumentAdapter() {
     return _adapter;
   }
-  
+
   /**
    * Accessor method for the InteractionsPane.
    */
   public InteractionsPane getPane() {
     return _pane;
   }
-  
+
   /**
    * Determines if the associated console pane is currently computing.
    * @return true iff the console is busy
@@ -348,7 +346,7 @@ public abstract class AbstractConsoleController {
       getConsoleDoc().insertNewLine(_pane.getCaretPosition());
     }
   };
-  
+
   /** Removes all text after the prompt. */
   AbstractAction clearCurrentAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
@@ -376,7 +374,7 @@ public abstract class AbstractConsoleController {
       moveToPrompt();
     }
   };
-  
+
   /** Selects to the current prompt. */
   AbstractAction selectToPromptPosAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
@@ -384,31 +382,31 @@ public abstract class AbstractConsoleController {
       _pane.moveCaretPosition(getConsoleDoc().getPromptPos());
     }
   };
-  
+
   /** Moves the pane's caret to the end of the document. */
   void moveToEnd() {
     moveTo(getConsoleDoc().getDocLength());
   }
-  
+
   /** Moves the pane's caret to the document's prompt. */
   void moveToPrompt() {
     moveTo(getConsoleDoc().getPromptPos());
   }
-  
+
   /** Moves the pane's caret to the given position, as long as it's legal. */
   void moveTo(int pos) {
     // Sanity check
     if (pos < 0) pos = 0;
     if (pos > getConsoleDoc().getDocLength()) pos = getConsoleDoc().getDocLength();
-    
+
     _pane.setCaretPosition(pos);
-  } 
-  
+  }
+
   public void setPrevPaneAction(Action a) {
     switchToPrevPaneAction = a;
-    
+
     // We do this here since switchToPrevPaneAction is set after the
-    // constructor is called. 
+    // constructor is called.
     _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_PANE),
                                 switchToPrevPaneAction);
     DrJava.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_PANE, new OptionListener<KeyStroke>() {
@@ -418,12 +416,12 @@ public abstract class AbstractConsoleController {
       }
     });
   }
-  
+
   public void setNextPaneAction(Action a) {
     switchToNextPaneAction = a;
-    
+
     // We do this here since switchToNextPaneAction is set after the
-    // constructor is called. 
+    // constructor is called.
     _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_PANE),
                                 switchToNextPaneAction);
     DrJava.getConfig().addOptionListener(OptionConstants.KEY_NEXT_PANE, new OptionListener<KeyStroke>() {

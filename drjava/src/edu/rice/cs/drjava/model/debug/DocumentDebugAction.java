@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.debug;
@@ -51,9 +51,7 @@ import com.sun.jdi.request.*;
 import java.util.Vector;
 import java.io.File;
 
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 
 /**
@@ -63,12 +61,12 @@ import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
  */
 public abstract class DocumentDebugAction<T extends EventRequest>
   extends DebugAction<T> {
-  
+
   protected String _className;
   protected File _file;
   protected OpenDefinitionsDocument _doc;
-  
-  
+
+
   /**
    * Creates a new DocumentDebugAction.  Automatically tries to create the
    * EventRequest if a ReferenceType can be found, or else adds this object to the
@@ -113,28 +111,28 @@ public abstract class DocumentDebugAction<T extends EventRequest>
     }
     _doc = doc;
   }
-  
+
   /**
    * Returns the class name this DebugAction occurs in.
    */
   public String getClassName() {
     return _className;
   }
-  
+
   /**
    * Returns the file this DebugAction occurs in.
    */
   public File getFile() {
     return _file;
   }
-  
+
   /**
    * Returns the document this DebugAction occurs in.
    */
   public OpenDefinitionsDocument getDocument() {
     return _doc;
   }
-  
+
   /**
    * Creates EventRequests corresponding to this DebugAction, using the
    * given ReferenceTypes.  This is called either from the DebugAction
@@ -155,7 +153,7 @@ public abstract class DocumentDebugAction<T extends EventRequest>
       return false;
     }
   }
- 
+
   /**
    * This should always be called from the constructor of the subclass.
    * Attempts to create EventRequests on the given ReferenceTypes, and
@@ -170,12 +168,12 @@ public abstract class DocumentDebugAction<T extends EventRequest>
     }
     //if (_request == null) {
       // couldn't create the request yet, add to the pending request manager
-    
+
     // Experiment: always add to pending request, to deal with multpile class loads
     _manager.getPendingRequestManager().addPendingRequest(this);
     //}
   }
-  
+
   /**
    * Creates appropriate EventRequests from the EventRequestManager and
    * stores them in the _requests field.
@@ -185,7 +183,7 @@ public abstract class DocumentDebugAction<T extends EventRequest>
    */
   protected abstract void _createRequests(Vector<ReferenceType> refTypes)
     throws DebugException;
-  
+
   /**
    * Prepares this EventRequest with the current stored values.
    * @param request the EventRequest to prepare

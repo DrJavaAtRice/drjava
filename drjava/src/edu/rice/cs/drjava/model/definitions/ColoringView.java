@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions;
@@ -52,7 +52,6 @@ import javax.swing.event.DocumentEvent;
 import java.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -61,9 +60,9 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 /**
  * This view class renders text on the screen using the reduced model info.
  * By extending WrappedPlainView, we only have to override the parts we want to.
- * Here we only override drawUnselectedText. We may want to override 
+ * Here we only override drawUnselectedText. We may want to override
  * drawSelectedText at some point. As of 2002/06/17, we now extend PlainView because
- * WrappedPlainView was causing bugs related to resizing the viewport of the 
+ * WrappedPlainView was causing bugs related to resizing the viewport of the
  * definitions scroll pane.
  *
  * @version $Id$
@@ -80,29 +79,29 @@ public class ColoringView extends PlainView implements OptionConstants {
   private static Color TYPE_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_TYPE_COLOR);
 
   /**
-   * Constructor.
-   * @param   Element elem
+   * Constructs a new coloring view.
+   * @param elem the element
    */
   ColoringView(Element elem) {
     super(elem);
-    
+
     // Might be a PlainDocument (when DefPane is first constructed).
     //   See comments for DefinitionsEditorKit.createNewDocument() for details.
     Document doc = getDocument();
     if (doc instanceof DefinitionsDocument) {
       _doc = (DefinitionsDocument)doc;
     }
-    
+
     // Listen for updates to configurable colors
     ColorOptionListener col = new ColorOptionListener();
-    
+
     DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
     DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
     DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
     DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
     DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
     DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col); 
+    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col);
  }
 
   /**
@@ -118,14 +117,14 @@ public class ColoringView extends PlainView implements OptionConstants {
    * @param y the starting Y coordinate
    * @param p0 the beginning position in the model
    * @param p1 the ending position in the model
-   * @returns the x coordinate at the end of the range
-   * @exception BadLocationException if the range is invalid
+   * @return the x coordinate at the end of the range
+   * @throws BadLocationException if the range is invalid
    */
-  protected int drawUnselectedText(Graphics g, int x, int y, int p0, int p1) 
-    throws BadLocationException 
+  protected int drawUnselectedText(Graphics g, int x, int y, int p0, int p1)
+    throws BadLocationException
   {
     /*
-     DrJava.consoleErr().println("drawUnselected: " + p0 + "-" + p1 + 
+     DrJava.consoleErr().println("drawUnselected: " + p0 + "-" + p1 +
      " doclen=" + _doc.getLength() +" x="+x+" y="+y);
      */
     // If there's nothing to show, don't do anything!
@@ -167,14 +166,14 @@ public class ColoringView extends PlainView implements OptionConstants {
    * @param y
    * @param p0
    * @param p1
-   * @return 
+   * @return
    * @exception BadLocationException
    */
-  protected int drawSelectedText(Graphics g, int x, int y, int p0, int p1) 
-    throws BadLocationException 
+  protected int drawSelectedText(Graphics g, int x, int y, int p0, int p1)
+    throws BadLocationException
   {
     /*
-     DrJava.consoleErr().println("drawSelected: " + p0 + "-" + p1 + 
+     DrJava.consoleErr().println("drawSelected: " + p0 + "-" + p1 +
      " doclen=" + _doc.getLength() +" x="+x+" y="+y);
      */
     return  super.drawSelectedText(g, x, y, p0, p1);
@@ -224,12 +223,12 @@ public class ColoringView extends PlainView implements OptionConstants {
     // Make sure we redraw since something changed in the formatting
     getContainer().repaint();
   }
-  
+
   /**
    * Called when an OptionListener perceives a change in any of the colors
-   */ 
+   */
   public void updateColors() {
-    
+
     COMMENTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_COMMENT_COLOR);
     DOUBLE_QUOTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_DOUBLE_QUOTED_COLOR);
     SINGLE_QUOTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_SINGLE_QUOTED_COLOR);
@@ -237,22 +236,22 @@ public class ColoringView extends PlainView implements OptionConstants {
     KEYWORD_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_KEYWORD_COLOR);
     NUMBER_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_NUMBER_COLOR);
     TYPE_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_TYPE_COLOR);
-    
+
     //Avoid the ColoringView that does not have a container.
     if ( getContainer() != null) {
       getContainer().repaint();
     }
-      
+
   }
-  
+
   /**
-   * The OptionListeners for DEFINITIONS COLORs 
+   * The OptionListeners for DEFINITIONS COLORs
    */
   private class ColorOptionListener implements OptionListener<Color> {
-    
+
     public void optionChanged(OptionEvent<Color> oce) {
       updateColors();
     }
   }
-  
+
 }

@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.debug;
@@ -54,19 +54,19 @@ import junit.framework.*;
 /**
  * This class contains the basic fields and methods that are necessary
  * for any test file that needs to use the JPDADebugger.
- * 
+ *
  * @version $Id$
  */
 public abstract class DebugTestCase extends GlobalModelTestCase {
 
   protected final boolean printEvents = false;
   protected final boolean printMessages = false;
-  
+
   protected int _pendingNotifies = 0;
   protected Object _notifierLock = new Object();
 
   protected JPDADebugger _debugger;
-  
+
   protected static final String DEBUG_CLASS =
     /*  1 */ "class DrJavaDebugClass {\n" +
     /*  2 */ "  public void foo() {\n" +
@@ -85,7 +85,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /* 15 */ "    new DrJavaDebugClass().bar();\n" +
     /* 16 */ "  }\n" +
     /* 17 */ "}";
-  
+
   protected static final String DEBUG_CLASS_WITH_PACKAGE =
     /*  1 */ "package a;\n" +
     /*  2 */ "public class DrJavaDebugClassWithPackage {\n" +
@@ -94,7 +94,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /*  5 */ "    System.out.println(\"foo line 2\");\n" +
     /*  6 */ "  }\n" +
     /*  7 */ "}";
-  
+
   protected static final String SUSPEND_CLASS =
     "class Suspender {\n" +
     "  public static void main(String[] args) {\n" +
@@ -107,7 +107,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     "    t1.start();\n" +
     "  }\n" +
     "}";
-  
+
   protected static final String MONKEY_CLASS =
     /* 1 */    "class Monkey {\n" +
     /* 2 */    "  public static void main(String[] args) {\n" +
@@ -132,7 +132,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /* 21 */    "    }\n" +
     /* 22 */    "  }\n" +
     /* 23 */    "}\n";
-  
+
   protected static final String MONKEY_WITH_INNER_CLASS =
     /* 1 */    "class Monkey {\n" +
     /* 2 */    "  static int foo = 6; \n" +
@@ -177,7 +177,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /* 41 */   "    int z = 3;\n" +
     /* 42 */   "  }\n" +
     /* 43 */   "}\n";
-  
+
   protected static final String INNER_CLASS_WITH_LOCAL_VARS =
     /*  1 */ "class InnerClassWithLocalVariables {\n" +
     /*  2 */ "  public static void main(final String[] args) {\n" +
@@ -192,7 +192,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /* 11 */ "    }.run();\n" +
     /* 12 */ "  }\n" +
     /* 13 */ "}\n";
-  
+
   protected static final String CLASS_WITH_STATIC_FIELD =
     /*  1 */    "public class DrJavaDebugStaticField {\n" +
     /*  2 */    "  public static int x = 0;\n" +
@@ -209,7 +209,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /* 13 */    "    new DrJavaDebugStaticField().bar();\n" +
     /* 14 */    "  }\n" +
     /* 15 */    "}";
-  
+
   protected static final String MONKEY_STATIC_STUFF =
     /*1*/ "class MonkeyStaticStuff {\n" +
     /*2*/ "  static int foo = 6;\n" +
@@ -228,11 +228,11 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /*15*/"          System.out.println(innerFoo);\n" +
     /*16*/"        }\n" +
     /*17*/"      }\n" +
-    /*18*/"      static int getNegativeTwo() { return -2; }\n" +    
+    /*18*/"      static int getNegativeTwo() { return -2; }\n" +
     /*19*/"    }\n" +
     /*20*/"  }\n" +
     /*21*/"}";
-  
+
   protected static final String THREAD_DEATH_CLASS =
     /*  1 */ "class Jones {\n" +
     /*  2 */ "  public static void threadShouldDie() {\n" +
@@ -246,14 +246,6 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /* 10 */ "    System.out.println(\"Thread died.\");\n" +
     /* 11 */ "  }\n" +
     /* 12 */ "}";
-
-  /**
-   * Constructor.
-   * @param  String name
-   */
-  public DebugTestCase(String name) {
-    super(name);
-  }
 
   /**
    * Sets up the debugger for each test.
@@ -272,7 +264,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     super.tearDown();
   }
 
-  
+
   /**
    * Ensures that the given object will wait for n notifications.
    * Callers must call o.wait() AFTER this is called.  (We can't call it
@@ -314,8 +306,8 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       }
     }
   }
-  
-  
+
+
   /**
    * Cleanly starts the debugger with a newly compiled file saved in a
    * temporary directory.  Assumes that the file will compile successfully.
@@ -330,7 +322,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     File file = new File(_tempDir, fileName);
     return _startupDebugger(file, classText);
   }
-  
+
   /**
    * Cleanly starts the debugger with a newly compiled file saved in a
    * temporary directory.  Assumes that the file will compile successfully.
@@ -343,7 +335,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
   {
     // Compile the file
     OpenDefinitionsDocument doc = doCompile(classText, file);
-    
+
     // Start debugger
     synchronized(_notifierLock) {
       _debugger.startup();
@@ -359,7 +351,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
    */
   protected void _shutdownWithoutSuspendedInteraction() throws Exception {
     _debugger.removeAllBreakpoints();
-      
+
     // Shutdown the debugger
     if (printMessages) {
       System.out.println("Shutting down...");
@@ -373,14 +365,14 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       System.out.println("Shut down.");
     }
   }
-  
+
   /**
    * Cleanly shuts down the debugger, waiting for a suspended
    * interaction to complete.
    */
   protected void _shutdownAndWaitForInteractionEnded() throws Exception {
     _debugger.removeAllBreakpoints();
-    
+
     // Shutdown the debugger
     if (printMessages) {
       System.out.println("Shutting down...");
@@ -400,7 +392,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     interpretListener.assertInteractionEndCount(1);
     interpretListener.assertInterpreterChangedCount(1);  // fires (don't wait)
     _model.removeListener(interpretListener);
-    
+
     if (printMessages) {
       System.out.println("Shut down.");
     }
@@ -430,7 +422,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       }
     }.start();
   }
-  
+
   /**
    * Resumes the debugger asynchronously so as to aovid
    * getting notified before we start waiting for notifies
@@ -448,7 +440,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       }
     }.start();
   }
-  
+
   /**
    * Sets the current thread in a new thread to avoid
    * being notified of events before we start waiting for them
@@ -467,8 +459,8 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       }
     }.start();
   }
-    
-    
+
+
   /**
    * Listens to events from the debugger to ensure that they happen at the
    * correct times.
@@ -487,47 +479,47 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     protected int currThreadDiedCount = 0;
     protected int currThreadSetCount = 0;
     protected int nonCurrThreadDiedCount = 0;
-    
+
     public void assertDebuggerStartedCount(int i) {
       assertEquals("number of times debuggerStarted fired", i, debuggerStartedCount);
     }
-    
+
     public void assertDebuggerShutdownCount(int i) {
       assertEquals("number of times debuggerShutdown fired", i, debuggerShutdownCount);
     }
-    
+
     public void assertThreadLocationUpdatedCount(int i) {
       assertEquals("number of times threadLocationUpdated fired", i,
                    threadLocationUpdatedCount);
     }
-    
+
     public void assertBreakpointSetCount(int i) {
       assertEquals("number of times breakpointSet fired", i, breakpointSetCount);
     }
-    
+
     public void assertBreakpointReachedCount(int i) {
       assertEquals("number of times breakpointReached fired", i, breakpointReachedCount);
     }
-    
+
     public void assertBreakpointRemovedCount(int i) {
       assertEquals("number of times breakpointRemoved fired", i, breakpointRemovedCount);
     }
-    
+
     public void assertStepRequestedCount(int i) {
       assertEquals("number of times stepRequested fired", i,
                    stepRequestedCount);
     }
-    
+
     public void assertStepFinishedCount(int i) {
       assertEquals("number of times stepRequested fired", i,
                    stepRequestedCount);
     }
-    
+
     public void assertCurrThreadSuspendedCount(int i) {
       assertEquals("number of times currThreadSuspended fired", i,
                    currThreadSuspendedCount);
     }
-    
+
     public void assertCurrThreadResumedCount(int i) {
       assertEquals("number of times currThreadResumed fired", i,
                    currThreadResumedCount);
@@ -537,17 +529,17 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       assertEquals("number of times currThreadSet fired", i,
                    currThreadSetCount);
     }
-    
+
     public void assertThreadStartedCount(int i) {
       assertEquals("number of times threadStarted fired", i,
                    threadStartedCount);
     }
-    
+
     public void assertCurrThreadDiedCount(int i) {
       assertEquals("number of times currThreadDied fired", i,
                    currThreadDiedCount);
     }
-    
+
     public void assertNonCurrThreadDiedCount(int i) {
       assertEquals("number of times nonCurrThreadDied fired", i,
                    nonCurrThreadDiedCount);
@@ -557,7 +549,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     public void debuggerStarted() {
       fail("debuggerStarted fired unexpectedly");
     }
-    
+
     public void debuggerShutdown() {
       fail("debuggerShutdown fired unexpectedly");
     }
@@ -565,35 +557,35 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) {
       fail("threadLocationUpdated fired unexpectedly");
     }
-  
+
     public void breakpointSet(Breakpoint bp) {
       fail("breakpointSet fired unexpectedly");
     }
-    
+
     public void breakpointReached(Breakpoint bp) {
       fail("breakpointReached fired unexpectedly");
     }
-    
+
     public void breakpointRemoved(Breakpoint bp) {
       fail("breakpointRemoved fired unexpectedly");
     }
-    
+
     public void stepRequested() {
       fail("stepRequested fired unexpectedly");
     }
-    
+
     public void currThreadSuspended() {
       fail("currThreadSuspended fired unexpectedly");
     }
-    
+
     public void currThreadResumed() {
       fail("currThreadResumed fired unexpectedly");
     }
-    
+
     public void currThreadSet(DebugThreadData dtd) {
       fail("currThreadSet fired unexpectedly");
     }
-    
+
     /**
      * This won't fail because threads could be starting at any time.
      * We have to expect this to be fired.
@@ -601,11 +593,11 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     public void threadStarted() {
       threadStartedCount++;
     }
-    
+
     public void currThreadDied() {
       fail("currThreadDied fired unexpectedly");
     }
-    
+
     /**
      * This won't fail because threads could be dying at any time.
      * We have to expect this to be fired.
@@ -659,7 +651,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       breakpointRemovedCount++;
       if (printEvents) System.out.println("breakpointRemoved " + breakpointRemovedCount);
     }
-    
+
     public void currThreadSuspended() {
       // EventHandler's thread: test should wait
       synchronized(_notifierLock) {
@@ -696,7 +688,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       }
     }
   }
-  
+
   /**
    * DebugTestListener for all tests using the stepper.
    */
@@ -707,7 +699,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       if (printEvents) System.out.println("stepRequested " + stepRequestedCount);
     }
   }
-  
+
   /**
    * TestListener that listens for an interpretation to end, and
    * then notifies anyone waiting on it.  (Necessary to prevent tests
@@ -728,7 +720,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
         _notifyLock();
       }
     }
-    
+
     public void interpreterChanged(boolean inProgress){
       synchronized(_notifierLock) {
         interpreterChangedCount++;

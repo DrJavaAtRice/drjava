@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
@@ -51,15 +51,11 @@ import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.Version;
 import javax.swing.*;
-import javax.swing.text.*;
 import javax.swing.border.*;
-import javax.swing.event.*;
 import java.awt.event.*;
 import java.awt.*;
 
-import java.net.URL;
 import java.io.*;
-import java.util.Hashtable;
 import java.util.Map;
 /**
  * About dialog.
@@ -67,13 +63,13 @@ import java.util.Map;
  * @version $Id$
  */
 public class AboutDialog extends JDialog implements ActionListener {
-  
+
   private static ImageInfo CSLOGO = new ImageInfo("RiceCS.gif",new Color(0x423585)),
     SF = new ImageInfo("SourceForge.gif",Color.black),
     DRJAVA = new ImageInfo("DrJava.png",new Color(0xCCCCFF));
 
   private final JButton _okButton = new JButton("OK");
-  
+
   public AboutDialog(JFrame owner) {
     super(owner, "About DrJava", true); // (changed to non-modal for now)
 
@@ -85,7 +81,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     //System.out.println("Dialog created...");
   }
-  
+
   public void show() {
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -94,7 +90,10 @@ public class AboutDialog extends JDialog implements ActionListener {
                      (screenSize.height - frameSize.height) / 2);
     super.show();
   }
-  
+
+  public void setVisible(boolean vis) {
+  }
+
   public void buildGUI(Container cp) {
     cp.setLayout(new BorderLayout());
     JLabel drjava = createImageLabel(DRJAVA,JLabel.LEFT);
@@ -118,7 +117,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     cp.add(createBottomBar(),BorderLayout.SOUTH);
     cp.add(tabs,BorderLayout.CENTER);
   }
-  
+
   private static JComponent createSysPropTab() {
     java.util.Properties props = System.getProperties();
     int size = props.size();
@@ -146,13 +145,13 @@ public class AboutDialog extends JDialog implements ActionListener {
     propTab.add(scroller,BorderLayout.CENTER);
     return propTab;
   }
-  
+
   private static void addTab(JTabbedPane tabs, String title,
                              JComponent tab) {
     wrapBorder(tab,new EmptyBorder(5,6,6,5));
     tabs.addTab(title,tab);
   }
-  
+
   public static JComponent createCopyrightTab() {
     JPanel panel = new JPanel(new BorderLayout());
 
@@ -164,13 +163,13 @@ public class AboutDialog extends JDialog implements ActionListener {
     sb.append(COPYRIGHT);
     JComponent copy = createTextScroller(sb.toString());
     wrapBorder(copy,new EmptyBorder(0,0,5,0));
-    
+
     // deal with logos now (calibrate size)
     LogoList logos = new LogoList();
     logos.addLogo(createBorderedLabel(CSLOGO,new EmptyBorder(5,5,5,5)));
     logos.addLogo(createBorderedLabel(SF,null));
     logos.resizeLogos();
-    
+
     // add to panel
     JPanel logoPanel = new JPanel();
     logoPanel.setLayout(new BoxLayout(logoPanel,BoxLayout.X_AXIS));
@@ -184,18 +183,19 @@ public class AboutDialog extends JDialog implements ActionListener {
     panel.add(copy,BorderLayout.CENTER);
     return panel;
   }
-  
+
   private static class LogoList extends java.util.LinkedList<JPanel> {
     private int width = Integer.MIN_VALUE;
     private int height = Integer.MIN_VALUE;
     private void addLogo(JPanel logo) {
-      if(logo == null) return;
-      Dimension d = logo.getMinimumSize();
-      width = (int) Math.max(width,d.width);
-      height = (int) Math.max(height,d.height);
-      add(logo);
+      if (logo != null) {
+        Dimension d = logo.getMinimumSize();
+        width = Math.max(width,d.width);
+        height = Math.max(height,d.height);
+        add(logo);
+      }
     }
-    
+
     private void resizeLogos() {
       java.util.Iterator it = iterator();
       Dimension d = new Dimension(width,height);
@@ -207,7 +207,7 @@ public class AboutDialog extends JDialog implements ActionListener {
       }
     }
   }
-  
+
   public static JPanel createBorderedLabel(ImageInfo info,
                                            EmptyBorder pad) {
     JLabel label = createImageLabel(info,JLabel.CENTER);
@@ -220,7 +220,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     panel.add(label);
     return panel;
   }
-      
+
   public static JLabel createImageLabel(ImageInfo info, int align) {
     ImageIcon icon = MainFrame.getIcon(info.name);
     if(icon==null) return null;
@@ -229,7 +229,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     label.setBackground(info.color);
     return label;
   }
-  
+
   public static JTextArea createTextArea(String text) {
     JTextArea textArea = new JTextArea(text);
     textArea.setEditable(false);
@@ -238,11 +238,11 @@ public class AboutDialog extends JDialog implements ActionListener {
     textArea.setCaretPosition(0);
     return textArea;
   }
-  
+
   public static JScrollPane createTextScroller(String text) {
     return new BorderlessScrollPane(createTextArea(text));
   }
-  
+
   private JPanel createBottomBar() {
     JPanel panel = new JPanel(new BorderLayout());
     _okButton.addActionListener(this);
@@ -250,12 +250,12 @@ public class AboutDialog extends JDialog implements ActionListener {
     wrapBorder(panel,new EmptyBorder(5,5,5,5));
     return panel;
   }
-  
+
   public void actionPerformed(ActionEvent e) {
-    hide();
+    setVisible(false);
   }
-  
-  public static final String COPYRIGHT = 
+
+  public static final String COPYRIGHT =
     "Copyright \u00a9 2001-2003 JavaPLT group at Rice University\n"+
     "(javaplt@rice.edu)\n\n"+
     "See http://www.drjava.org for more information on DrJava or to\n"+
@@ -287,7 +287,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     " window based on a \"read-eval-print loop\", which allows programmers to develop, test, and debug"+
     " Java programs in an interactive, incremental fashion.\n\n"+
     "Home Page: http://www.drjava.org\nPaper: http://drjava.sf.net/papers/drjava-paper.shtml";
-  
+
   public static class ImageInfo {
     private final String name;
     private final Color color;
@@ -299,7 +299,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 
   public static String getLicense() {
     if(initLicense) return LICENSE;
-    
+
     try {
       InputStream is = AboutDialog.class.getResourceAsStream("/edu/rice/cs/LICENSE");
       if(is!=null) {
@@ -307,7 +307,7 @@ public class AboutDialog extends JDialog implements ActionListener {
         StringBuffer sb = new StringBuffer();
         for(String s = r.readLine(); s != null; s = r.readLine()) {
           int lastSig = s.length()-1; // the last char index
-          
+
           while(lastSig >= 0 && Character.isWhitespace(s.charAt(lastSig))) {
             lastSig--;
           }
@@ -329,11 +329,11 @@ public class AboutDialog extends JDialog implements ActionListener {
       throw new UnexpectedException(e, StringOps.getStackTrace(e));
 //      LICENSE = null;
     }
-    
+
     initLicense = true;
     return LICENSE;
   }
-  
+
   private static void wrapBorder(JComponent c, Border b) {
     c.setBorder(new CompoundBorder(b,c.getBorder()));
   }

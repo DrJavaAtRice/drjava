@@ -45,10 +45,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Font;
 import java.awt.print.*;
 import javax.swing.text.*;
 import javax.swing.ListModel;
@@ -56,33 +52,17 @@ import javax.swing.DefaultListModel;
 import javax.swing.ProgressMonitor;
 import java.io.*;
 import java.util.*;
-import java.net.ServerSocket;
-
-import java.text.AttributedString;
-import java.text.AttributedCharacterIterator;
-import java.awt.font.TextLayout;
-import java.awt.font.LineBreakMeasurer;
-import java.awt.font.TextAttribute;
-import java.awt.geom.*;
-
-import edu.rice.cs.util.swing.FindReplaceMachine;
 
 import java.util.Vector;
 import java.util.Enumeration;
-import java.util.Hashtable;
 import edu.rice.cs.util.*;
-import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.CodeStatus;
-import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
-import edu.rice.cs.drjava.config.FileOption;
-import edu.rice.cs.drjava.config.BooleanOption;
 import edu.rice.cs.drjava.model.print.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.debug.*;
@@ -90,9 +70,6 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.newjvm.*;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.model.junit.*;
-import edu.rice.cs.drjava.model.definitions.indent.Indenter;
-import edu.rice.cs.drjava.platform.PlatformFactory;
-
 
 /**
  * Handles the bulk of DrJava's program logic.
@@ -101,7 +78,6 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
  * This removes the dependency on the UI for the logical flow of the program's
  * features.  With the current implementation, we can finally test the compile
  * functionality of DrJava, along with many other things.
- *
  * @version $Id$
  */
 public class DefaultGlobalModel implements GlobalModel, OptionConstants,
@@ -687,11 +663,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
       // TODO: Is this class construction overhead really necessary?
       FileOpenSelector selector = new FileOpenSelector() {
-        public File getFile() throws OperationCanceledException {
+        public File getFile() {
           return f;
         }
 
-        public File[] getFiles() throws OperationCanceledException {
+        public File[] getFiles() {
           return new File[] {f};
         }
       };
@@ -952,12 +928,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     // Listen to any relevant config options
     DrJava.getConfig().addOptionListener(EXTRA_CLASSPATH,
                                          new ExtraClasspathOptionListener());
-    
+
     DrJava.getConfig().addOptionListener(BACKUP_FILES,
                                          new BackUpFileOptionListener());
     Boolean makeBackups = DrJava.getConfig().getSetting(BACKUP_FILES);
     FileOps.DefaultFileSaver.setBackupsEnabled(makeBackups.booleanValue());
-    
+
     DrJava.getConfig().addOptionListener(ALLOW_PRIVATE_ACCESS,
                                          new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {
@@ -1224,7 +1200,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @return the file if it is found, or null otherwise
    */
   public File getSourceFileFromPaths(String filename, Vector<File> paths) {
-    File f = null;
+    File f;
     for (int i = 0; i < paths.size(); i++) {
       f = _getSourceFileFromPath(filename, paths.get(i));
       if (f != null) {
@@ -1432,7 +1408,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           if (! file.getCanonicalFile().getName().equals(file.getName())) {
             file.renameTo(file);
           }
-          
+
           // Check for # in the path of the file because if there
           // is one, then the file cannot be used in the Interactions Pane
           if (file.getAbsolutePath().indexOf("#") != -1) {
@@ -1667,7 +1643,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       }
 
       // compare timestamps
-      File sourceFile = null;
+      File sourceFile;
       try {
         sourceFile = getFile();
       }
@@ -2209,14 +2185,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * file is open, or false if that file is not open.
    * @param file File object to search for
    * @return boolean whether file is open
-   */
+   * doesn't seem to be used.
   private boolean _docIsOpen(File file) {
     OpenDefinitionsDocument doc = _getOpenDocument(file);
     if (doc == null)
       return false;
     else
       return true;
-  }
+  }*/
 
   /**
    * Creates a document from a file.

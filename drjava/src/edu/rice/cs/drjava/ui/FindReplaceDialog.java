@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
@@ -51,18 +51,14 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.border.EmptyBorder;
-import java.beans.*;
 
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.DefaultSingleDisplayModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.swing.FindReplaceMachine;
 import edu.rice.cs.util.swing.FindResult;
-import edu.rice.cs.util.swing.ContinueCommand;
 import edu.rice.cs.util.UnexpectedException;
 
 /**
@@ -71,7 +67,6 @@ import edu.rice.cs.util.UnexpectedException;
  * @version $Id$
  */
 class FindReplaceDialog extends TabbedPanel implements OptionConstants {
-  private JOptionPane _optionPane;
   private JButton _findNextButton;
   private JButton _replaceButton;
   private JButton _replaceFindButton;
@@ -83,7 +78,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private JCheckBox _matchCase;
   private JCheckBox _searchBackwards;
   private JCheckBox _searchAllDocuments;
-  private ButtonGroup _radioButtonGroup;
+//  private ButtonGroup _radioButtonGroup;
   private JPanel _lowerCheckPanel;
   private JCheckBox _matchWholeWord; // private JRadioButton _matchWholeWord; // JL
   //private JRadioButton _findAnyOccurrence; // JL
@@ -157,7 +152,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         _replaceAllAction.setEnabled(true);
       }
       _mainframe.clearStatusMessage(); // _message.setText(""); // JL
-    } 
+    }
     else {
       throw new UnexpectedException(new RuntimeException("FindReplaceDialog should not be listening to anything"));
     }
@@ -239,9 +234,9 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     // was found
     else {
       Toolkit.getDefaultToolkit().beep();
-      _mainframe.setStatusMessage("Search text \"" + _machine.getFindWord() + 
+      _mainframe.setStatusMessage("Search text \"" + _machine.getFindWord() +
                                   "\" not found."); // JL
-//      _message.setText("Search text \"" + _machine.getFindWord() + 
+//      _message.setText("Search text \"" + _machine.getFindWord() +
 //                       "\" not found."); // JL
     }
   }
@@ -285,7 +280,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         _replaceAction.setEnabled(false);
         _replaceFindAction.setEnabled(false);
         Toolkit.getDefaultToolkit().beep();
-        _mainframe.setStatusMessage("Replace failed."); 
+        _mainframe.setStatusMessage("Replace failed.");
 //        _message.setText("Replace failed."); // JL
       }
     }
@@ -328,7 +323,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     super._close();
     //_frame.uninstallFindReplaceDialog(this);
   }
-  
+
   private MainFrame _mainframe;
 
   /**
@@ -342,7 +337,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _model = model;
     _mainframe = frame;
 
-    int i = this.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT;
+    int i = WHEN_ANCESTOR_OF_FOCUSED_COMPONENT;
     //i = this.WHEN_FOCUSED;
     //i = this.WHEN_IN_FOCUSED_WINDOW;
     //InputMap im = _mainPanel.getInputMap(i);
@@ -389,7 +384,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     // Sets font for the "Find" field
     Font font = DrJava.getConfig().getSetting(FONT_MAIN);
     setFieldFont(font);
-    
+
     // Create the Labels
     JLabel findLabel = new JLabel("Find", SwingConstants.LEFT);
     //findLabel.setLabelFor(_findField);
@@ -414,7 +409,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     // _labelPanel.add(matchLabel); // JL
     _labelPanel.setBorder(new EmptyBorder(0,5,0,5)); // 5 pix on sides
 
-    
+
     /******** Listeners for the right-hand check boxes ********/
     MatchCaseListener mcl = new MatchCaseListener();
     _matchCase = new JCheckBox("Match Case", true);
@@ -428,7 +423,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     SearchAllDocumentsListener sadl= new SearchAllDocumentsListener();
     _searchAllDocuments = new JCheckBox("Search All Documents", false);
     _searchAllDocuments.addItemListener(sadl);
-    
+
     MatchWholeWordListener mwwl = new MatchWholeWordListener();
     _matchWholeWord = new JCheckBox("Whole Word");// new JRadioButton("Whole Word"); // JL
     _matchWholeWord.addItemListener(mwwl);
@@ -440,7 +435,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
 
     this.removeAll(); // actually, override the behavior of TabbedPanel
 
-    
+
     /******** Initialize the panels containing the checkboxes ********/
     // remake closePanel
     _closePanel = new JPanel(new BorderLayout());
@@ -460,11 +455,11 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _matchCaseAndClosePanel.add(_searchBackwards); // JL
     //_matchCaseAndClosePanel.add(_searchAllDocuments); // JL - moved to _radioButtonGroup
     //_matchCaseAndClosePanel.add(_matchWholeWord);
-    //_matchCaseAndClosePanel.add(_findAnyOccurrence); 
+    //_matchCaseAndClosePanel.add(_findAnyOccurrence);
     _matchCaseAndClosePanel.add(_closePanel);
     //_findAnyOccurrence.setSelected(true); // JL
 
-    
+
     /******** Set up the Panel containing the Text Fields ********/
     //_rightPanel = new JPanel(new GridLayout(1,2,5,0));
     JPanel midPanel = new JPanel(new GridLayout(2,1));
@@ -478,24 +473,24 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     farRightPanel.add(_matchCaseAndClosePanel);
     farRightPanel.add(_lowerCheckPanel); // JL
     //farRightPanel.add(_message); // JL
-    
-    
+
+
     /******** Set upt the Panel containing the two above main panels ********/
     _rightPanel = new JPanel(new BorderLayout(5, 0));
     _rightPanel.add(midPanel, BorderLayout.CENTER);
     _rightPanel.add(farRightPanel, BorderLayout.EAST);
     //_rightPanel.add(_lowerCheckPanel, BorderLayout.SOUTH);
 
-    
+
     /******* Put all the main panels onto the Find/Replace tab ********/
     hookComponents(this,_rightPanel,_labelPanel,buttons);
 
-    
+
     _machine = new FindReplaceMachine(_model.getDocumentIterator());
 
     _findField.addActionListener(_findNextAction);
 
-    
+
     /******** Set the Tab order ********/
     _findField.setNextFocusableComponent(_replaceField);
     _replaceField.setNextFocusableComponent(_matchCase);

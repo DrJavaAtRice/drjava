@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,31 +32,27 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
 import javax.swing.*;
 import javax.swing.text.*;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.DocumentEvent;
 import javax.swing.border.Border;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.Toolkit;
 import java.awt.Color;
 import java.awt.Event;
-import java.awt.Cursor;
-import java.lang.reflect.InvocationTargetException;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -66,18 +62,15 @@ import edu.rice.cs.drjava.model.InputListener;
 import edu.rice.cs.drjava.model.repl.ConsoleDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsModel;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.SwingWorker;
-import edu.rice.cs.util.text.DocumentEditCondition;
-import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
 
 /**
  * This class installs listeners and actions between an InteractionsDocument
  * in the model and an InteractionsPane in the view.
- * 
+ *
  * We may want to refactor this class into a different package.
- * 
+ *
  * @version $Id$
  */
 public class InteractionsController extends AbstractConsoleController {
@@ -85,17 +78,17 @@ public class InteractionsController extends AbstractConsoleController {
    * InteractionsModel to handle interpretation
    */
   protected InteractionsModel _model;
-  
+
   /**
    * Document from the model.
    */
   protected InteractionsDocument _doc;
-  
+
   /**
    * Style to use for error messages.
    */
   protected SimpleAttributeSet _errStyle;
-  
+
   /**
    * Style to use for debug messages.
    */
@@ -132,7 +125,7 @@ public class InteractionsController extends AbstractConsoleController {
    * Current contents of the most recent InputBox.
    */
   private String _inputText;
-  
+
   /**
    * The most recent graphical box used to request input for
    * System.in.
@@ -145,11 +138,11 @@ public class InteractionsController extends AbstractConsoleController {
   protected InputListener _inputListener = new InputListener() {
     public String getConsoleInput() {
       synchronized(_inputEnteredAction) {
-        
+
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             _box = new InputBox();
-            
+
             /*        if (_busy()) {
              _pane.setEditable(true);
              moveToEnd();
@@ -180,20 +173,20 @@ public class InteractionsController extends AbstractConsoleController {
 //            }
 //            catch (DocumentAdapterException dae) {
 //            }
-            
+
             _inputEnteredAction.setEnabled(true);
             //          _insertNewlineAction.setEnabled(true);
             _box.requestFocus();
           }
         });
-        
+
         try {
           _inputEnteredAction.wait();
         }
         catch (InterruptedException ie) {
         }
       }
-      
+
       return _inputText + "\n";
     }
   };
@@ -206,7 +199,7 @@ public class InteractionsController extends AbstractConsoleController {
   public InteractionsController(InteractionsModel model, SwingDocumentAdapter adapter) {
     this(model, adapter, new InteractionsPane(adapter));
   }
-  
+
   /**
    * Glue together the given model and view.
    * @param model An InteractionsModel
@@ -221,7 +214,7 @@ public class InteractionsController extends AbstractConsoleController {
     _doc = model.getDocument();
     _errStyle = new SimpleAttributeSet();
     _debugStyle = new SimpleAttributeSet();
-    
+
     _init();
   }
 
@@ -237,7 +230,7 @@ public class InteractionsController extends AbstractConsoleController {
       _inputEnteredAction.notify();
     }
   }
-  
+
   /**
    * Accessor method for the InteractionsModel.
    */
@@ -267,7 +260,7 @@ public class InteractionsController extends AbstractConsoleController {
 //  public void notifyInputEnteredAction() {
 // _inputEnteredAction.notify();
 //}
-  
+
   /**
    * Adds AttributeSets as named styles to the document adapter.
    */
@@ -286,7 +279,7 @@ public class InteractionsController extends AbstractConsoleController {
         _errStyle.addAttribute(StyleConstants.Foreground, oe.value);
       }
     });
-    
+
     // Debug
     _debugStyle.addAttributes(_defaultStyle);
     _debugStyle.addAttribute(StyleConstants.Foreground, DrJava.getConfig().getSetting(OptionConstants.DEBUG_MESSAGE_COLOR));
@@ -299,7 +292,7 @@ public class InteractionsController extends AbstractConsoleController {
       }
     });
   }
-  
+
   /**
    * Updates all document styles with the attributes contained in newSet.
    * This behavior is only used in Mac OS X, JDK 1.4.1, since
@@ -313,7 +306,7 @@ public class InteractionsController extends AbstractConsoleController {
     _debugStyle.addAttributes(newSet);
     StyleConstants.setBold(_debugStyle, true);  // ensure debug is always bold
   }
-  
+
   /**
    * Adds listeners to the model.
    */
@@ -322,7 +315,7 @@ public class InteractionsController extends AbstractConsoleController {
     _doc.setBeep(_pane.getBeep());
   }
 
-  
+
   /**
    * Adds actions to the view.
    */
@@ -333,29 +326,29 @@ public class InteractionsController extends AbstractConsoleController {
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
     // Add actions with keystrokes
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), 
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                                 evalAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 
-                                                       java.awt.Event.SHIFT_MASK), 
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,
+                                                       java.awt.Event.SHIFT_MASK),
                                 newLineAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_B, mask), 
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_B, mask),
                                 clearCurrentAction);
 
     // Up and down need to be bound both for keypad and not
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0), 
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0),
                                 historyPrevAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), 
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
                                 historyPrevAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, 0), 
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, 0),
                                 historyNextAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), 
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
                                 historyNextAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), 
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0),
                                 historyReverseSearchAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 
-                                                       java.awt.Event.SHIFT_MASK), 
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB,
+                                                       java.awt.Event.SHIFT_MASK),
                                 historyForwardSearchAction);
-    
+
 
     // Left needs to be prevented from rolling cursor back before the prompt.
     // Both left and right should lock when caret is before the prompt.
@@ -483,7 +476,7 @@ public class InteractionsController extends AbstractConsoleController {
   AbstractAction moveRightAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       int position = _pane.getCaretPosition();
-      if (position < _doc.getPromptPos()) { 
+      if (position < _doc.getPromptPos()) {
         moveToEnd();
       }
       else if (position >= _doc.getDocLength()) {

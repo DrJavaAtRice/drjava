@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
@@ -60,9 +60,9 @@ import edu.rice.cs.util.swing.BorderlessScrollPane;
 /**
  * The frame for displaying the HTML help files.
  * @version $Id$
- */ 
+ */
 public class HTMLFrame extends JFrame {
-  
+
   private static final int FRAME_WIDTH = 750;
   private static final int FRAME_HEIGHT = 600;
   private static final int LEFT_PANEL_WIDTH = 250;
@@ -79,11 +79,11 @@ public class HTMLFrame extends JFrame {
   private Vector<HyperlinkListener> _hyperlinkListeners;
   private boolean _linkError;
   private URL _lastURL;
-  
+
   private JPanel _navPane;
-  
+
   protected HistoryList _history;
-  
+
   private HyperlinkListener _resetListener = new HyperlinkListener() {
     public void hyperlinkUpdate(HyperlinkEvent e) {
       if (_linkError && e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
@@ -101,30 +101,30 @@ public class HTMLFrame extends JFrame {
       this.prev = null;
     }
     private HistoryList(URL contents, HistoryList prev) {
-      this.contents = contents; 
+      this.contents = contents;
       this.prev = prev;
       prev.next = this;
     }
   }
-  
+
   public static abstract class ResourceAction extends AbstractAction {
     public ResourceAction(String name, String iconName) {
       super(name,MainFrame.getIcon(iconName));
     }
   }
-  
+
   private static abstract class ConsolidatedAction extends ResourceAction {
     private ConsolidatedAction(String name) {
       super(name,name+"16.gif");
     }
   }
-  
+
   private Action _forwardAction = new ConsolidatedAction("Forward") {
     public void actionPerformed(ActionEvent e) {
       _history = _history.next;
 
       // user is always allowed to move back after a forward.
-      _backAction.setEnabled(true); 
+      _backAction.setEnabled(true);
 
       if(_history.next == null) {
         // no more forwards after this
@@ -133,14 +133,14 @@ public class HTMLFrame extends JFrame {
       _displayPage(_history.contents);
     }
   };
-  
+
   private Action _backAction = new ConsolidatedAction("Back") {
     public void actionPerformed(ActionEvent e) {
       _history = _history.prev;
-      
+
       // user is always allowed to move forward after backing up
       _forwardAction.setEnabled(true);
-      
+
       if(_history.prev == null) {
         // no more backing up
         _backAction.setEnabled(false);
@@ -148,13 +148,13 @@ public class HTMLFrame extends JFrame {
       _displayPage(_history.contents);
     }
   };
-  
+
   private Action _closeAction = new AbstractAction("Close") {
-    public void actionPerformed(ActionEvent e) {        
-      HTMLFrame.this.hide();
+    public void actionPerformed(ActionEvent e) {
+      HTMLFrame.this.setVisible(false);
     }
   };
- 
+
   private static JButton makeButton(Action a, int horTextPos,
                                     int left, int right) {
     JButton j = new JButton(a);
@@ -188,14 +188,14 @@ public class HTMLFrame extends JFrame {
     _contentsDocPane = new JEditorPane();
     _contentsDocPane.setEditable(false);
     JScrollPane contentsScroll = new BorderlessScrollPane(_contentsDocPane);
-    
+
     _mainDocPane = new JEditorPane();
     _mainDocPane.setEditable(false);
     _mainScroll = new BorderlessScrollPane(_mainDocPane);
-    
+
     _splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                 true,
-                                contentsScroll, 
+                                contentsScroll,
                                 _mainScroll);
     _splitPane.setDividerLocation(LEFT_PANEL_WIDTH);
     _splitPaneHolder = new JPanel(new GridLayout(1,1));
@@ -249,7 +249,7 @@ public class HTMLFrame extends JFrame {
     else {
       _baseURL = null;
     }
-          
+
     // Load contents page
     if (indexUrl != null) {
       try {
@@ -293,7 +293,7 @@ public class HTMLFrame extends JFrame {
     this.setLocation((screenSize.width - frameSize.width) / 2,
                      (screenSize.height - frameSize.height) / 2);
   }
-  
+
   /**
    * Hides the navigation panel on the left.  Cannot currently be undone.
    */
@@ -304,7 +304,7 @@ public class HTMLFrame extends JFrame {
 
   private void _resetMainPane() {
     _linkError = false;
-    
+
     _mainDocPane = new JEditorPane();
     _mainDocPane.setEditable(false);
     for (int i = 0; i < _hyperlinkListeners.size(); i++) {
@@ -346,7 +346,7 @@ public class HTMLFrame extends JFrame {
       }
     }
   }
-  
+
   /**
    * Prints an error indicating that the HTML file to load in the main pane
    * could not be found
@@ -400,7 +400,7 @@ public class HTMLFrame extends JFrame {
 
   public void jumpTo(URL url) {
     _history = new HistoryList(url,_history); // current history is prev for this node
-    
+
     _backAction.setEnabled(true); // now we can back up.
     _forwardAction.setEnabled(false); // can't go any more forward
     // (any applicable previous forward info is lost) because you nuked the forward list

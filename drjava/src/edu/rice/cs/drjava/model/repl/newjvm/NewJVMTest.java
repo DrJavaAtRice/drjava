@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl.newjvm;
@@ -50,8 +50,6 @@ import junit.extensions.*;
 
 import java.rmi.*;
 
-import edu.rice.cs.drjava.model.*;
-
 /**
  * Tests the functionality of the new JVM manager.
  *
@@ -59,17 +57,17 @@ import edu.rice.cs.drjava.model.*;
  */
 public final class NewJVMTest extends TestCase {
   final boolean printMessages = false;
-  
+
   private static TestJVMExtension _jvm;
 
   public NewJVMTest(String name) {
     super(name);
   }
 
-  protected void setUp() throws RemoteException {
+  protected void setUp() {
     _jvm.resetFlags();
   }
-  
+
   public static Test suite() {
     TestSuite suite = new TestSuite(NewJVMTest.class);
     TestSetup setup = new TestSetup(suite) {
@@ -84,8 +82,8 @@ public final class NewJVMTest extends TestCase {
 
     return setup;
   }
-  
-  
+
+
   public void testPrintln() throws Throwable {
     if (printMessages) System.out.println("----testPrintln-----");
     synchronized(_jvm) {
@@ -126,20 +124,20 @@ public final class NewJVMTest extends TestCase {
 
   public void testWorksAfterRestartConstant() throws Throwable {
     if (printMessages) System.out.println("----testWorksAfterRestartConstant-----");
-    
+
     // Check that a constant is returned
     synchronized(_jvm) {
       _jvm.interpret("5");
       _jvm.wait();
       assertEquals("result", "5", _jvm.returnBuf);
     }
-    
+
     // Now restart interpreter
     synchronized(_jvm) {
       _jvm.killInterpreter(true);  // true: start back up
       _jvm.wait();
     }
-    
+
     // Now evaluate another constant
     synchronized(_jvm) {
       _jvm.interpret("4");
@@ -147,8 +145,8 @@ public final class NewJVMTest extends TestCase {
       assertEquals("result", "4", _jvm.returnBuf);
     }
   }
-  
-  
+
+
   public void testThrowRuntimeException() throws Throwable {
     if (printMessages) System.out.println("----testThrowRuntimeException-----");
     synchronized(_jvm) {
@@ -159,7 +157,7 @@ public final class NewJVMTest extends TestCase {
                    _jvm.exceptionClassBuf);
     }
   }
-  
+
   public void testToStringThrowsRuntimeException() throws Throwable {
     if (printMessages) System.out.println("----testToStringThrowsRuntimeException-----");
     synchronized(_jvm) {
@@ -180,7 +178,7 @@ public final class NewJVMTest extends TestCase {
       while (_jvm.exceptionClassBuf == null) {
         _jvm.wait();
       }
-      
+
       assertEquals("exception class",
                    "java.lang.NullPointerException",
                    _jvm.exceptionClassBuf);
@@ -204,8 +202,8 @@ public final class NewJVMTest extends TestCase {
                    _jvm.exceptionTraceBuf.trim());
     }
   }
-  
-  
+
+
   /**
    * Ensure that switching to a non-existant interpreter throws an Exception.
    */
@@ -218,7 +216,7 @@ public final class NewJVMTest extends TestCase {
       // good, that's what should happen
     }
   }
-  
+
   /**
    * Ensure that MainJVM can correctly switch the active interpreter used by
    * the interpreter JVM.
@@ -229,14 +227,14 @@ public final class NewJVMTest extends TestCase {
       _jvm.wait();
     }
     _jvm.addJavaInterpreter("monkey");
-    
+
     // x should be defined in active interpreter
     synchronized(_jvm) {
       _jvm.interpret("x");
       _jvm.wait();
       assertEquals("result", "6", _jvm.returnBuf);
     }
-    
+
     // switch interpreter
     _jvm.setActiveInterpreter("monkey");
     synchronized(_jvm) {
@@ -245,21 +243,21 @@ public final class NewJVMTest extends TestCase {
       assertTrue("exception was thrown",
                  !_jvm.exceptionClassBuf.equals(""));
     }
-    
+
     // define x to 3 and switch back
     synchronized(_jvm) {
       _jvm.interpret("x = 3;");
       _jvm.wait();
     }
     _jvm.setToDefaultInterpreter();
-    
+
     // x should have its old value
     synchronized(_jvm) {
       _jvm.interpret("x");
       _jvm.wait();
       assertEquals("result", "6", _jvm.returnBuf);
     }
-    
+
     // test syntax error handling
     //  (temporarily disabled until bug 750605 fixed)
 //     synchronized(_jvm) {
@@ -268,7 +266,7 @@ public final class NewJVMTest extends TestCase {
 //       assertTrue("syntax error was reported",
 //                  ! _jvm.syntaxErrorMsgBuf.equals("") );
 //     }
-    
+
   }
 
   private static class TestJVMExtension extends MainJVM {
@@ -284,16 +282,16 @@ public final class NewJVMTest extends TestCase {
     public int syntaxErrorEndRow;
     public int syntaxErrorEndCol;
     public boolean voidReturnFlag;
-    
+
     private InterpretResultVisitor<Object> _testHandler;
 
-    public TestJVMExtension() throws RemoteException { 
+    public TestJVMExtension() { 
       super();
       _testHandler = new TestResultHandler();
       startInterpreterJVM();
       ensureInterpreterConnected();
     }
-    
+
     protected InterpretResultVisitor<Object> getResultHandler() {
       return _testHandler;
     }
@@ -310,9 +308,9 @@ public final class NewJVMTest extends TestCase {
       syntaxErrorStartRow = 0;
       syntaxErrorStartCol = 0;
       syntaxErrorEndRow = 0;
-      syntaxErrorEndCol = 0;      
+      syntaxErrorEndCol = 0;
     }
-    
+
     protected void handleSlaveQuit(int status) {
       synchronized(this) {
         this.notify();
@@ -358,26 +356,26 @@ public final class NewJVMTest extends TestCase {
           exceptionClassBuf = that.getExceptionClass();
           exceptionTraceBuf = that.getStackTrace();
           exceptionMsgBuf = that.getExceptionMessage();
-          
+
           //System.out.println("notify threw");
           TestJVMExtension.this.notify();
           return null;
         }
       }
-      
+
       public Object forSyntaxErrorResult(SyntaxErrorResult that) {
         synchronized(TestJVMExtension.this) {
           syntaxErrorMsgBuf = that.getErrorMessage();
-          syntaxErrorStartRow = that.getStartRow();   
-          syntaxErrorStartCol = that.getStartCol();  
-          syntaxErrorEndRow = that.getEndRow();            
-          syntaxErrorEndCol = that.getEndCol();  
+          syntaxErrorStartRow = that.getStartRow();
+          syntaxErrorStartCol = that.getStartCol();
+          syntaxErrorEndRow = that.getEndRow();
+          syntaxErrorEndCol = that.getEndCol();
           //System.out.println("notify threw");
           TestJVMExtension.this.notify();
           return null;
         }
       }
-      
+
     }
   }
 }

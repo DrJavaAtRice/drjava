@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
@@ -49,8 +49,6 @@ import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.event.*;
 import javax.swing.border.*;
-import javax.swing.plaf.*;
-import javax.swing.filechooser.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.awt.print.*;
@@ -61,40 +59,25 @@ import java.io.*;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Vector;
-import java.util.Arrays;
 import java.net.URL;
 import java.net.MalformedURLException;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.platform.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
-import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.debug.*;
-import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
 import edu.rice.cs.drjava.ui.config.*;
-import edu.rice.cs.drjava.ui.CompilerErrorPanel.CompilerErrorListPane;
-import edu.rice.cs.drjava.ui.JUnitPanel.JUnitErrorListPane;
-import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeOptionListener;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.ExitingNotAllowedException;
-import edu.rice.cs.util.swing.DelegatingAction;
-import edu.rice.cs.util.swing.HighlightManager;
-import edu.rice.cs.util.swing.SwingWorker;
-import edu.rice.cs.util.swing.ConfirmCheckBoxDialog;
-import edu.rice.cs.util.swing.BorderlessScrollPane;
-import edu.rice.cs.util.swing.BorderlessSplitPane;
-import edu.rice.cs.util.text.SwingDocumentAdapter;
-import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.swing.*;
 
 /**
  * DrJava's main window.
@@ -172,11 +155,10 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Panel to hold both InteractionsPane and its sync message.
    * TO DO: move sync message into the pane itself.
    */
-  private JPanel _interactionsWithSyncPanel;
-  /**
-   * Label to display message if Interactions are out of sync with Definitions.
-   */
-  private JLabel _syncStatus;
+//  private JPanel _interactionsWithSyncPanel;
+
+  /** Label to display message if Interactions are out of sync with Definitions. */
+//  private JLabel _syncStatus;
 
   // Status bar fields
   private JPanel _statusBar;
@@ -206,15 +188,15 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenu _debugMenu;
   private JMenu _helpMenu;
   private JMenuItem _debuggerEnabledMenuItem;
-  private JMenuItem _runDebuggerMenuItem;
-  private JMenuItem _resumeDebugMenuItem;
-  private JMenuItem _stepIntoDebugMenuItem;
-  private JMenuItem _stepOverDebugMenuItem;
-  private JMenuItem _stepOutDebugMenuItem;
-  private JMenuItem _suspendDebugMenuItem;
-  private JMenuItem _toggleBreakpointMenuItem;
-  private JMenuItem _printBreakpointsMenuItem;
-  //private JMenuItem _clearAllBreakpointsMenuItem;
+//  private JMenuItem _runDebuggerMenuItem;
+//  private JMenuItem _resumeDebugMenuItem;
+//  private JMenuItem _stepIntoDebugMenuItem;
+//  private JMenuItem _stepOverDebugMenuItem;
+//  private JMenuItem _stepOutDebugMenuItem;
+//  private JMenuItem _suspendDebugMenuItem;
+//  private JMenuItem _toggleBreakpointMenuItem;
+//  private JMenuItem _printBreakpointsMenuItem;
+//  private JMenuItem _clearAllBreakpointsMenuItem;
 
   // Popup menus
   private JPopupMenu _docPanePopupMenu;
@@ -246,7 +228,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Table to map breakpoints to their corresponding highlight objects.
    */
-  private gj.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo> _breakpointHighlights;
+  private java.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo> _breakpointHighlights;
 
   /**
    * Whether to display a prompt message before quitting.
@@ -541,6 +523,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   Action pasteAction = new DefaultEditorKit.PasteAction() {
     public void actionPerformed(ActionEvent e) {
       Component c = SwingUtilities.findFocusOwner(MainFrame.this);
+//      Component c = KeyboardFocusManager.getFocusOwner();
       if (_currentDefPane.hasFocus()) {
         _currentDefPane.endCompoundEdit();
         CompoundUndoManager undoMan = _model.getActiveDocument().getDocument().getUndoManager();
@@ -551,7 +534,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       else {
         super.actionPerformed(e);
       }
-      if (c != null) c.requestFocus();
+      if (c != null) {
+        c.requestFocus();
+      }
     }
   };
 
@@ -642,7 +627,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       //_setDividerLocation();
     }
   };
-  
+
   /** Find the next instance of the find word. */
   private Action _findNextAction = new AbstractAction("Find Next") {
     public void actionPerformed(ActionEvent ae) {
@@ -792,7 +777,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (_helpFrame == null) {
         _helpFrame = new HelpFrame();
       }
-      _helpFrame.show();
+      _helpFrame.setVisible(true);
     }
   };
 
@@ -908,7 +893,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (_configFrame == null) {
         _configFrame = new ConfigFrame(MainFrame.this);
       }
-      _configFrame.show();
+      _configFrame.setVisible(true);
       _configFrame.toFront();
     }
   };
@@ -1154,7 +1139,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           // Don't try to set the filename with getSaveFile;
           // just display the dialog and get file with getChosenFile, otherwise
           // the suggested file name will be whatever document is open.
-          // ED (8.14.03): Had to add this next block of code from getSaveFile to 
+          // ED (8.14.03): Had to add this next block of code from getSaveFile to
           // fix bug #788311 "NullPointer when saving history"
           File selection = _interactionsHistoryChooser.getSelectedFile();//_saveChooser.getSelectedFile();
           if (selection != null) {
@@ -1446,7 +1431,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       (JSR14_LOCATION, new OptionListener<File>() {
       public void optionChanged(OptionEvent<File> oe) {
         boolean bootClasspathHasv2 = DrJava.bootClasspathHasJSR14v20();
-        boolean bootClasspathHasv24 = DrJava.bootClasspathHasJSR14v24();        
+        boolean bootClasspathHasv24 = DrJava.bootClasspathHasJSR14v24();
         if (oe.value != FileOption.NULL_FILE) {
           boolean checkForV20 = DrJava.checkForJSR14v20();
           boolean checkForV24 = DrJava.checkForJSR14v24();
@@ -1539,7 +1524,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     });
 
     // Initialize breakpoint highlights hashtable, for easy removal of highlights
-    _breakpointHighlights = new gj.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
+    _breakpointHighlights = new java.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
 
     // Set cached frames and dialogs to null until they are created
     _configFrame = null;
@@ -1841,8 +1826,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   public void setStatusMessageColor(Color c) {
     _sbMessage.setForeground(c);
   }
-  
-  
+
+
   private void _new() {
     _model.newFile();
   }
@@ -1858,7 +1843,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     catch (AlreadyOpenException aoe) {
       OpenDefinitionsDocument openDoc = aoe.getOpenDocument();
-      String filename = "File";
+      String filename;
       try {
         filename = openDoc.getFile().getName();
       }
@@ -2025,7 +2010,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   */
 
   /**
-   * Saves the current 
+   * Saves the current
    */
   private void _saveCurrentDirectory() {
     try {
@@ -3010,18 +2995,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     boolean useText = DrJava.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
     final Icon icon = (useIcon) ? (Icon) a.getValue(Action.SMALL_ICON) : null;
     if (icon == null) {
-      ret = new JButton( (String) a.getValue(Action.DEFAULT)) {
-        public boolean isFocusTraversable() {
-          return false;
-        }
-      };
+      ret = new UnfocusableButton((String) a.getValue(Action.DEFAULT));
     }
     else {
-      ret = new JButton(icon) {
-        public boolean isFocusTraversable() {
-          return false;
-        }
-      };
+      ret = new UnfocusableButton(icon);
       if (useText) {
         ret.setText((String) a.getValue(Action.DEFAULT));
       }
@@ -3053,11 +3030,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     boolean useIcons = DrJava.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
     Font buttonFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
 
-    final JButton result = new JButton(a) {
-      public boolean isFocusTraversable() {
-        return false;
-      }
-    };
+    final JButton result = new UnfocusableButton(a);
     result.setText((String) a.getValue(Action.DEFAULT));
     result.setFont(buttonFont);
     if (!useIcons) result.setIcon(null);
@@ -3250,19 +3223,20 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Set up the 3 labels:
     _fileNameField = new JLabel();
     _fileNameField.setFont(_fileNameField.getFont().deriveFont(Font.PLAIN));
-        
+
     _sbMessage = new JLabel();//("This is the text for the center message");
     _sbMessage.setHorizontalAlignment(SwingConstants.RIGHT);
+
     JPanel fileNameAndMessagePanel = new JPanel(new BorderLayout());
     fileNameAndMessagePanel.add(_fileNameField, BorderLayout.CENTER);
     fileNameAndMessagePanel.add(_sbMessage, BorderLayout.EAST);
-    
+
     _currLocationField = new JLabel();
     _currLocationField.setFont(_currLocationField.getFont().deriveFont(Font.PLAIN));
     _currLocationField.setHorizontalAlignment(SwingConstants.RIGHT);
     _currLocationField.setPreferredSize(new Dimension(65,12));
     //_currLocationField.setVisible(true);
-    
+
     // Create the status bar panel
     //SpringLayout layout = new SpringLayout();
     _statusBar = new JPanel(new BorderLayout());//( layout );
@@ -3274,20 +3248,20 @@ public class MainFrame extends JFrame implements OptionConstants {
                          new CompoundBorder(new BevelBorder(BevelBorder.LOWERED),
                                             new EmptyBorder(2,2,2,2))));
     getContentPane().add(_statusBar, BorderLayout.SOUTH);
-    
+
     /*
     //Adjust constraints for the fileName label so it's next to the left edge.
     layout.getConstraints(_fileNameField).setX(Spring.constant(0));
-    
+
     //Adjust constraints for the message label so it's spaced a bit from the right.
     //and doesn't interfere with the left-most label
     layout.putConstraint(SpringLayout.EAST, _sbMessage, -65,
                          SpringLayout.EAST, _statusBar);
-    
+
     //Adjust constraints for the location label so it's next to the right edge.
     layout.putConstraint(SpringLayout.EAST, _currLocationField, 0,
                          SpringLayout.EAST, _statusBar);
-    
+
     //Adjust constraints for the panel to set its size
     layout.putConstraint(SpringLayout.SOUTH, _statusBar, 0,
                          SpringLayout.SOUTH, _currLocationField);*/
@@ -3506,7 +3480,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // made this package private to allow testing of disabling editing
     // during compile and successful switching on and off of ability to
     // edit
-    DefinitionsPane pane = new DefinitionsPane(this, _model, doc);
+    DefinitionsPane pane = new DefinitionsPane(this, doc);
 
     // Add listeners
     _installNewDocumentListener(doc.getDocument());
@@ -3572,11 +3546,11 @@ public class MainFrame extends JFrame implements OptionConstants {
         // Don't use the debugger
         _debugPanel = null;
       }
-      catch (DebugException de) {
-        // Show the error
-        _showDebugError(de);
-        _debugPanel = null;
-      }
+//      catch (DebugException de) {
+//        // Show the error
+//        _showDebugError(de);
+//        _debugPanel = null;
+//      }
     } else {
       _debugPanel = null;
     }
@@ -3787,7 +3761,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /**
    * Sets the font of all panes and panels to the main font
-   * @param f is a Font object
+//   * @param f is a Font object
    */
   private void _setMainFont() {
 
@@ -4075,7 +4049,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           // for a call to setSize.
           _firstCallFromSetSize = true;
           ActionListener setSizeListener = new ActionListener() {
-            public void actionPerformed(ActionEvent ae) { 
+            public void actionPerformed(ActionEvent ae) {
 //              if (_firstCallFromSetSize) {
 //                _firstCallFromSetSize = false;
 //              }
@@ -4596,7 +4570,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           // Display the results.
 //             System.out.println("did we get this far?");
           if (success) {
-            String className = "";
+            String className;
             try {
               className =
                 _model.getActiveDocument().getDocument().getQualifiedClassName();
@@ -4615,7 +4589,7 @@ public class MainFrame extends JFrame implements OptionConstants {
               if (!PlatformFactory.ONLY.openURL(address)) {
                 JavadocFrame _javadocFrame =
                   new JavadocFrame(destDir, className, allDocs);
-                _javadocFrame.show();
+                _javadocFrame.setVisible(true);
               }
             }
             catch (MalformedURLException me) {
@@ -4803,17 +4777,17 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
     }
-    
+
     public void filePathContainsPound() {
       if (DrJava.getConfig().getSetting(WARN_PATH_CONTAINS_POUND).booleanValue()) {
-        String msg = 
+        String msg =
           "Files whose paths contain the '#' symbol cannot be used in the\n" +
           "Interactions Pane due to a bug in Java's file to URL conversion.\n" +
           "It is suggested that you change the name of the directory\n" +
           "containing the '#' symbol.";
-        
+
         String title = "Path Contains Pound Sign";
-        
+
         ConfirmCheckBoxDialog dialog =
           new ConfirmCheckBoxDialog(MainFrame.this, title, msg,
                                     "Do not show this message again",
@@ -4953,7 +4927,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           throw new RuntimeException("Invalid rc: " + rc);
       }
     }
-    
+
     public void interactionIncomplete() {
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
@@ -5039,25 +5013,32 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
+  /**
+   * Sets the location of the main divider.
+   * (not currently used)
   private void _setDividerLocation() {
     int divLocation = _mainSplit.getHeight() -
       _mainSplit.getDividerSize() -
       (int)_tabbedPane.getMinimumSize().getHeight();
     if (_mainSplit.getDividerLocation() > divLocation)
       _mainSplit.setDividerLocation(divLocation);
-  }
+  }*/
 
+  /**
+   * Warns the user that the current file is open and cannot be modified.
+   */
   private void _warnFileOpen() {
     // If we'd like to change to an error message for this, instead
     // of a warning, change both incidents of WARNING to ERROR.
-    JOptionPane.showMessageDialog
-      ( MainFrame.this,
-       "This file is open in DrJava.  You may not overwrite it.",
-       "File Open Warning",
-       JOptionPane.WARNING_MESSAGE);
+    JOptionPane.showMessageDialog(MainFrame.this,
+                                  "This file is open in DrJava.  You may not overwrite it.",
+                                  "File Open Warning", JOptionPane.WARNING_MESSAGE);
   }
 
-
+  /**
+   * Confirms with the user that the file should be overwritten.
+   * @return <code>true</code> iff the user accepts overwriting.
+   */
   private boolean _verifyOverwrite() {
     Object[] options = {"Yes","No"};
     int n = JOptionPane.showOptionDialog
@@ -5069,9 +5050,7 @@ public class MainFrame extends JFrame implements OptionConstants {
        null,
        options,
        options[1]);
-    if (n==JOptionPane.YES_OPTION){ return true;}
-    else {return false;}
-
+    return (n == JOptionPane.YES_OPTION);
   }
 
   boolean inDebugMode() {
@@ -5159,7 +5138,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     KeyBindingManager.Singleton.put(KEY_DELETE_PREVIOUS,
                                     _actionMap.get(DefaultEditorKit.deletePrevCharAction), null, "Delete Previous");
     KeyBindingManager.Singleton.put(KEY_DELETE_NEXT,
-                                    _actionMap.get(DefaultEditorKit.deleteNextCharAction), null, "Delete Next");    
+                                    _actionMap.get(DefaultEditorKit.deleteNextCharAction), null, "Delete Next");
   }
 
   /**

@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
@@ -50,13 +50,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
 
-import  junit.framework.*;
-import  java.util.Vector;
-import  junit.extensions.*;
-import  javax.swing.text.BadLocationException;
-import  java.lang.RuntimeException;
-import  java.io.File;
-
+import junit.framework.*;
 
 /**
  * Tests the functionality of the repl interpreter.
@@ -65,15 +59,6 @@ import  java.io.File;
 public final class JavaInterpreterTest extends TestCase {
   private JavaInterpreter _interpreter;
   static public boolean testValue;
-
-  /**
-   * Constructs a new JavaInterpreterTest.
-   * @param String name
-   */
-  public JavaInterpreterTest(String name) {
-    super(name);
-    testValue = false;
-  }
 
   /**
    * The setup method run before each test.
@@ -99,8 +84,7 @@ public final class JavaInterpreterTest extends TestCase {
   private void tester(Pair[] cases) throws ExceptionReturnedException {
     for (int i = 0; i < cases.length; i++) {
       Object out = _interpreter.interpret(cases[i].first());
-      assertEquals(cases[i].first() + " interpretation wrong!", cases[i].second(),
-          out);
+      assertEquals(cases[i].first() + " interpretation wrong!", cases[i].second(), out);
     }
   }
 
@@ -300,8 +284,8 @@ public final class JavaInterpreterTest extends TestCase {
 
     _interpreter.interpret("int c = a++;");
   }
-  
-  /** 
+
+  /**
    * Tests that variables are assigned default values.
    */
   public void testVariableDefaultValues() throws ExceptionReturnedException {
@@ -322,7 +306,7 @@ public final class JavaInterpreterTest extends TestCase {
       Pair.make("f", new Float(0.0f)),
       Pair.make("d", new Double(0.0d)),
       Pair.make("c", "'" + new Character('\u0000') + "'"), // quotes are added around chars
-      Pair.make("bool", new Boolean(false)),        
+      Pair.make("bool", new Boolean(false)),
       Pair.make("str", null)
     };
     tester(cases);
@@ -472,7 +456,7 @@ public final class JavaInterpreterTest extends TestCase {
   /**
    * Tests that the value of a variable can be queried externally.
    */
-  public void testQueryVariableExternally() throws ExceptionReturnedException {
+  public void testQueryVariableExternally() {
     _interpreter.defineVariable("x", 7);
     // Get value of variable externally
     assertEquals("external query for x",
@@ -491,7 +475,7 @@ public final class JavaInterpreterTest extends TestCase {
   /**
    * Tests that a constant can be defined in the interpreter by an external source.
    */
-  public void testDefineConstantExternally() throws ExceptionReturnedException {
+  public void testDefineConstantExternally() {
     _interpreter.defineConstant("y", 3);
     try {
       _interpreter.interpret("y = 4");
@@ -501,11 +485,11 @@ public final class JavaInterpreterTest extends TestCase {
       // correct, it should fail
     }
   }
-  
-  /** 
+
+  /**
    * Tests that arrays initializers are accepted.
    */
-  public void testInitializeArrays() throws ExceptionReturnedException {    
+  public void testInitializeArrays() throws ExceptionReturnedException {
     try {
       _interpreter.interpret("int i[] = new int[]{1,2,3};");
       _interpreter.interpret("int j[][] = new int[][]{{1}, {2,3}};");
@@ -515,7 +499,7 @@ public final class JavaInterpreterTest extends TestCase {
       fail("Legal array initializations were not accepted.");
     }
   }
-  
+
   /**
    * Tests that the Interactions Pane will or won't allow access to private members
    * given the value of the ALLOW_PRIVATE_ACCESS configuration option.
@@ -537,11 +521,11 @@ public final class JavaInterpreterTest extends TestCase {
       assertTrue(ere.getContainedException() instanceof IllegalAccessException);
     }
     DrJava.getConfig().setSetting(OptionConstants.ALLOW_PRIVATE_ACCESS, new Boolean(true));
-    assertEquals("Should be able to access private field i whose value should be 0", 
-                 new Integer(0), 
+    assertEquals("Should be able to access private field i whose value should be 0",
+                 new Integer(0),
                  _interpreter.interpret("new A().i"));
   }
-  
+
   /**
    * Tests that declaring a void method in the Interactions Pane won't cause a bad type
    * exception. Tests bug #915906 "Methods in Interactions no longer work".
@@ -567,48 +551,41 @@ public final class JavaInterpreterTest extends TestCase {
 
 /**
  * A structure to contain a String and an Object pair.
- *  This class is used to help test the JavaInterpreter.
+ * This class is used to help test the JavaInterpreter.
  */
-class Pair {
-  private String _first;
-  private Object _second;
-
+class Pair extends edu.rice.cs.util.Pair<String, Object> {
   /**
-   * put your documentation comment here
-   * @param     String f
-   * @param     Object s
+   * Constructs a pair.
+   * @param f the first item in the pair
+   * @param s the second in the pair
    */
-  Pair(String f, Object s) {
-    this._first = f;
-    this._second = s;
+  public Pair(String f, Object s) {
+    super(f, s);
   }
 
   /**
-   * put your documentation comment here
-   * @param first
-   * @param second
-   * @return
+   * Makes a new pair.
+   * @param first the first item in the pair
+   * @param second the second in the pair
+   * @return the new Pair
    */
   public static Pair make(String first, Object second) {
-    return  new Pair(first, second);
+    return new Pair(first, second);
   }
 
   /**
-   * put your documentation comment here
-   * @return
+   * Gets the first of this pair.
+   * @return getFirst()
    */
   public String first() {
-    return  this._first;
+    return getFirst();
   }
 
   /**
-   * put your documentation comment here
-   * @return
+   * Gets the second of this pair.
+   * @return getSecond()
    */
   public Object second() {
-    return  this._second;
+    return getSecond();
   }
 }
-
-
-

@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,20 +32,19 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
-import javax.swing.text.BadLocationException;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent;
 import java.net.URL;
@@ -62,7 +61,7 @@ import edu.rice.cs.util.UnexpectedException;
  * @version $Id$
  */
 public class JavadocFrame extends HTMLFrame {
-  
+
   private static final int MAX_READ_PACKAGES_LINES = 100;
   private static final int MAX_READ_FOR_LINK_LINES = 100;
   private static final String[] INTRO_PAGE= {
@@ -70,14 +69,14 @@ public class JavadocFrame extends HTMLFrame {
     "packages.html"
   };
   private static final String INDEX_PAGE= "allclasses-frame.html";
-  
+
   private static String introPagePath(File destDir, String curClass) {
     // Iterate through possible intro pages, looking for one that exists.
     File test = new File(destDir, curClass + ".html");
     for (int i = 0; !test.exists() && (i < INTRO_PAGE.length); i++) {
       test = new File(destDir, INTRO_PAGE[i]);
     }
-    
+
     // Packages.html might just be a pointer to another file
     if (test.exists()) {
       if (test.getName().equals("packages.html")) {
@@ -89,7 +88,7 @@ public class JavadocFrame extends HTMLFrame {
     }
     return test.getAbsolutePath();
   }
-  
+
   /**
    * Reads through the beginning of the packages.html file to determine
    * if it is just a pointer to another file.  Returns either the same
@@ -113,7 +112,7 @@ public class JavadocFrame extends HTMLFrame {
           numLinesRead++;
         }
       }
-      
+
       // Replace packages.html with the No Frames link.
       if (found) {
         boolean foundLink = false;
@@ -126,7 +125,7 @@ public class JavadocFrame extends HTMLFrame {
             numLinesRead++;
           }
         }
-        
+
         if (foundLink) {
           String start = "HREF=\"";
           int startIndex = line.indexOf(start) + start.length();
@@ -141,10 +140,10 @@ public class JavadocFrame extends HTMLFrame {
     catch (IOException ioe) {
       throw new UnexpectedException(ioe);
     }
-    
+
     return packages;
   }
-  
+
   /**
    * Constructor.
    * @param destDir Directory holding the Javadoc
@@ -168,7 +167,7 @@ public class JavadocFrame extends HTMLFrame {
         }
       }
     });
-    
+
     if (!allDocs) {
       _hideNavigationPane();
     }
