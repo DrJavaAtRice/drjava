@@ -43,6 +43,7 @@ import junit.framework.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.awt.Color;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.DrJava;
@@ -55,7 +56,9 @@ import edu.rice.cs.drjava.config.*;
 public class ConfigFileTest extends TestCase {
   private static final String CUSTOM_PROPS =
     "indent.level = 5\n" +
-    "history.max.size = 1\n";
+    "history.max.size = 1\n" +
+    "definitions.keyword.color = #0000ff\n";
+  
   
   /**
    * Constructor.
@@ -79,6 +82,9 @@ public class ConfigFileTest extends TestCase {
                  config.getSetting(OptionConstants.INDENT_LEVEL).intValue());
     assertEquals("custom history size", 1,
                  config.getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue());
+    //Tests if a user can put a default value in the .drjava file
+    assertEquals("definitions.keyword.color", Color.blue,
+                 config.getSetting(OptionConstants.DEFINITIONS_KEYWORD_COLOR));
     assertEquals("default javac location", 
                  OptionConstants.JAVAC_LOCATION.getDefault(),
                  config.getSetting(OptionConstants.JAVAC_LOCATION));

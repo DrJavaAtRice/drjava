@@ -122,9 +122,10 @@ public class JPDADebugger implements Debugger {
    */
   private RandomAccessStack _suspendedThreads;
   
-  /** 
-   * A structure for remembering threads which we have been informed have died 
-   * (via currThreadDied()) but which _vm.allThreads() will still return
+  /**
+   * Storage to facilitate remembering threads which have died
+   * so that we can filter them out of the the list of threads 
+   * returned by the VM we are debugging
    */
   private DeadThreadFilter _deadThreads;
   
@@ -1143,6 +1144,14 @@ public class JPDADebugger implements Debugger {
     });
   }
   
+  synchronized void threadStarted() {
+    notifyListeners(new EventNotifier() {
+      public void notifyListener(DebugListener l) {
+        l.threadStarted();
+      }
+    });
+  }
+  
   /**
    * Notifies all listeners that the current thread has died.
    * updateThreads is set to true if the threads and stack tables
@@ -1151,10 +1160,10 @@ public class JPDADebugger implements Debugger {
   synchronized void currThreadDied() {
     _model.printDebugMessage("The current thread has finished.");
     if( _runningThread != null ){
-      _deadThreads.add(_runningThread);
+      _deadThreads.add(new DebugThreadData(_runningThread));
       _runningThread = null;
     }
-        
+       
     if (_suspendedThreads.size() > 0) {
       try{
         scrollToSource(_suspendedThreads.peek().frame(0).location());
@@ -1172,8 +1181,18 @@ public class JPDADebugger implements Debugger {
     });
   }
   
+  synchronized void nonCurrThreadDied(DebugThreadData threadRef) {
+    _deadThreads.add(threadRef);
+    
+    notifyListeners(new EventNotifier() {
+      public void notifyListener(DebugListener l) {
+        l.nonCurrThreadDied();
+      }
+    });
+  }
+  
   synchronized void currThreadSet(final DebugThreadData thread) {
-    _model.printDebugMessage("The current thread has been set.");
+    _model.printDebugMessage("The current thread is now " + thread.getName() + ".");
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
         l.currThreadSet(thread);
@@ -1315,12 +1334,12 @@ public class JPDADebugger implements Debugger {
      * good decision]
      */
     class DeadThreadFilter{
-      private Hashtable<Long,ThreadReference> _theDeadThreads;
+      private Hashtable<Long,DebugThreadData> _theDeadThreads;
       public DeadThreadFilter(){
-        _theDeadThreads = new Hashtable<Long,ThreadReference>();
+        _theDeadThreads = new Hashtable<Long,DebugThreadData>();
       }
-      public void add(ThreadReference thread){
-        _theDeadThreads.put(new Long(thread.uniqueID()), thread);
+      public void add(DebugThreadData thread){
+        _theDeadThreads.put(new Long(thread.getUniqueID()), thread);
       }
       
       public List filter(List threads){

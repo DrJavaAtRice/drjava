@@ -1058,8 +1058,10 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     protected int stepRequestedCount = 0;
     protected int currThreadSuspendedCount = 0;
     protected int currThreadResumedCount = 0;
+    protected int threadStartedCount = 0;
     protected int currThreadDiedCount = 0;
     protected int currThreadSetCount = 0;
+    protected int nonCurrThreadDiedCount = 0;
     
     public void assertDebuggerStartedCount(int i) {
       assertEquals("number of times debuggerStarted fired", i, debuggerStartedCount);
@@ -1105,11 +1107,20 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       assertEquals("number of times currThreadSet fired", i,
                    currThreadSetCount);
     }
-
+    
+    public void assertThreadStartedCount(int i) {
+      assertEquals("number of times threadStarted fired", i,
+                   threadStartedCount);
+    }
     
     public void assertCurrThreadDiedCount(int i) {
       assertEquals("number of times currThreadDied fired", i,
                    currThreadDiedCount);
+    }
+    
+    public void assertNonCurrThreadDiedCount(int i) {
+      assertEquals("number of times nonCurrThreadDied fired", i,
+                   nonCurrThreadDiedCount);
     }
 
 
@@ -1153,8 +1164,24 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       fail("currThreadSet fired unexpectedly");
     }
     
+    /**
+     * This won't fail because threads could be dying at any time. 
+     * We have to expect this to be fired.
+     */  
+    public void threadStarted() {
+      threadStartedCount++;
+    }
+    
     public void currThreadDied() {
       fail("currThreadDied fired unexpectedly");
+    }
+    
+    /**
+     * This won't fail because threads could be dying at any time. 
+     * We have to expect this to be fired.
+     */
+    public void nonCurrThreadDied() {
+      nonCurrThreadDiedCount++;
     }
   }
 
@@ -1215,11 +1242,16 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       currThreadResumedCount++;
       if (printEvents) System.out.println("threadResumed " + currThreadResumedCount);
     }
+    public void currThreadSet(DebugThreadData dtd) {
+      // Manager's thread: test shouldn't wait
+      currThreadSetCount++;
+      if (printEvents) System.out.println("threadSet " + currThreadSetCount);
+    }
     public void currThreadDied() {
       // EventHandler's thread: test should wait
       synchronized(_notifierLock) {
         currThreadDiedCount++;
-        if (printEvents) System.out.println("threadDied " + currThreadDiedCount);
+        if (printEvents) System.out.println("currThreadDied " + currThreadDiedCount);
         _notifyObject(_notifierLock);
       }
     }

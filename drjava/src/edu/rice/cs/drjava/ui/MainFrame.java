@@ -2011,7 +2011,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _setUpAction(Action a, String icon, String shortDesc) {
     _setUpAction(a, icon, icon, shortDesc);
   }
-
+  
 
   /**
    * Returns the icon with the given name.
@@ -3100,6 +3100,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       SwingUtilities.invokeLater(doCommand);
     }
     
+    public void threadStarted() {
+    }
+    
     public void currThreadDied() {
       _disableStepTimer();
       
@@ -3120,6 +3123,9 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       };
       SwingUtilities.invokeLater(doCommand);
+    }
+    
+    public void nonCurrThreadDied() {
     }
   }
 

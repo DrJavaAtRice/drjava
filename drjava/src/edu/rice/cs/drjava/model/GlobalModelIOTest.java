@@ -1235,6 +1235,70 @@ public class GlobalModelIOTest extends GlobalModelTestCase implements OptionCons
   }
   
   /**
+   * Loads two history files, one whose statements end in semicolons, and one whose statements do not.
+   * Makes sure that it doesn't matter.
+   */
+  public void testLoadHistoryWithAndWithoutSemicolons() throws BadLocationException, 
+    InterruptedException, IOException
+  {
+    TestListener listener = new TestListener() {
+      public void interactionStarted() {
+        synchronized(this) {
+          interactionStartCount++;
+        }
+      }
+      public void interactionEnded() {
+        synchronized(this) {
+          interactionEndCount++;
+          // stops threads from waiting
+          this.notify();
+        }
+      }
+    };
+    
+    _model.addListener(listener);
+    File f1 = tempFile(1);
+    File f2 = tempFile(2);
+    FileSelector fs1 = new FileSelector(f1);
+    FileSelector fs2 = new FileSelector(f2);
+    String s1 = "int x = 5";
+    String s2 = "System.out.println(\"x = \" + x)";
+    String s3 = "x = 5;";
+    String s4 = "System.out.println(\"x = \" + x)";
+    FileOps.writeStringToFile(f1,s1+'\n'+s2+'\n');
+    FileOps.writeStringToFile(f2,s3+'\n'+s4+'\n');
+    
+    listener.assertInteractionStartCount(0);    
+    _model.loadHistory(fs1);
+    while (listener.interactionEndCount == 0) {
+      synchronized(listener) {
+        try {
+          listener.wait();
+        }
+        catch (InterruptedException ie) {
+          throw new UnexpectedException(ie);
+        }
+      }
+    }
+    _model.loadHistory(fs2);
+    while (listener.interactionEndCount < 2) {
+      synchronized(listener) {
+        try {
+          listener.wait();
+        }
+        catch (InterruptedException ie) {
+          throw new UnexpectedException(ie);
+        }
+      }
+    }
+    // check that output of loaded history is correct
+    DefaultStyledDocument con = (DefaultStyledDocument)_model.getConsoleDocument();
+    assertEquals("Output of loaded history is not correct: "+con.getText(0, con.getLength()).trim(),
+                 "x = 5"+'\n'+"x = 5",
+                 con.getText(0, con.getLength()).trim());
+  }
+  
+  /**
    * Test for the possibility that the file has been moved or deleted
    *  since it was last referenced
    */

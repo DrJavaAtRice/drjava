@@ -90,6 +90,9 @@ public class EventHandler extends Thread {
     else if (e instanceof ClassPrepareEvent) {
       _handleClassPrepareEvent((ClassPrepareEvent) e);
     }
+    else if (e instanceof ThreadStartEvent) {
+      _handleThreadStartEvent((ThreadStartEvent) e);
+    }
     else if (e instanceof ThreadDeathEvent) {
       _handleThreadDeathEvent((ThreadDeathEvent) e);
     }
@@ -144,6 +147,10 @@ public class EventHandler extends Thread {
     }
   }
   
+  private void _handleThreadStartEvent(ThreadStartEvent e) {
+    _manager.threadStarted();
+  }
+  
   private void _handleThreadDeathEvent(ThreadDeathEvent e) {
     /** no need to check if there are suspended threads on the stack
      * because all that logic should be in the debugger
@@ -159,6 +166,9 @@ public class EventHandler extends Thread {
         }
       }
       _manager.currThreadDied();
+    }
+    else {
+      _manager.nonCurrThreadDied(new DebugThreadData(e.thread()));
     }
   }
   

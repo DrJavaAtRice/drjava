@@ -100,9 +100,19 @@ public interface DebugListener {
   public void currThreadResumed();
   
   /**
+   * Called when a thread starts
+   */
+  public void threadStarted();
+  
+  /**
    * Called when the current thread dies
    */
   public void currThreadDied();
+  
+  /**
+   * Called when any thread other than the current thread dies
+   */
+  public void nonCurrThreadDied();
 
   /**
    * Called when the current (selected) thread is set in the debugger.

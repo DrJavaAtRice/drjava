@@ -127,6 +127,15 @@ public class JavaInterpreterTest extends TestCase {
     };
     tester(cases);
   }
+  
+  /** Tests short circuiting */
+  public void testShortCircuit() throws ExceptionReturnedException {
+    Pair[] cases = new Pair[] {
+      Pair.make("false && (3 == 1/0)", new Boolean(false)),
+        Pair.make("true || (1/0 != 43)", new Boolean(true))        
+    };
+    tester(cases);
+  }
 
   /**
    * put your documentation comment here

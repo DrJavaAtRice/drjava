@@ -648,9 +648,35 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
     
     /**
+     * Called when a thread starts
+     */
+    public void threadStarted() {
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          updateData();
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
+    }
+    
+    /**
      * Called when the current thread dies
      */
     public void currThreadDied() {
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          updateData();
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
+    }
+    
+    /**
+     * Called when any thread other than the current thread dies
+     */
+    public void nonCurrThreadDied() {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {

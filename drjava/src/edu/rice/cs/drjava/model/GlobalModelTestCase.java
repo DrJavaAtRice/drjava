@@ -955,5 +955,4 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertCompileStartCount(1);
     }
   }
-  
 }
