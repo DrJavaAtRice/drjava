@@ -18,8 +18,11 @@ public class TabRemover {
         
         for (int next = bufferedSource.read(); next != -1; next = bufferedSource.read()) {
           if ((char)next != '\t') {
-            System.err.println(next);
             temp.add(new Character((char)next));
+          }
+          else { // Replace tab with two spaces.
+            temp.add(new Character(' '));
+            temp.add(new Character(' '));
           }
         }
         bufferedSource.close();
