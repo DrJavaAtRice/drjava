@@ -353,20 +353,21 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
    *  that is equal to the passed document.
    */
   public INavigatorItem removeDocument(INavigatorItem doc) throws IllegalArgumentException {
-    DefaultMutableTreeNode toRemove = _doc2node.get(doc);
-    //toRemove.removeFromParent();
-   /*
-    if(toRemove.getSiblingCount() == 1 && toRemove.getParent().getParent() != null)
-    {
-       
-        _model.removeNodeFromParent((MutableTreeNode)toRemove.getParent()); 
-        _path2node.removeKey((DefaultMutableTreeNode)toRemove.getParent());
-        
-        
-    }
-    */
+    return removeNode(getNodeForDoc(doc));
+  }
+  
+  
+  private DefaultMutableTreeNode getNodeForDoc(INavigatorItem doc){
+    return _doc2node.get(doc);
+  }
+  
+  /**
+   * only takes in nodes that have a inavigatoritem as their object
+   */
+  private INavigatorItem removeNode(DefaultMutableTreeNode toRemove){
+    
     _model.removeNodeFromParent(toRemove);
-    _doc2node.remove(doc);
+    _doc2node.remove((INavigatorItem)toRemove.getUserObject());
    
     Enumeration enumeration = _root.depthFirstEnumeration();
     while(enumeration.hasMoreElements())
@@ -384,7 +385,7 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
     {
       _hasnonprojfilesopen = false;
     }
-    return doc;
+    return (INavigatorItem)toRemove.getUserObject();
   }
     
   /**
@@ -395,8 +396,9 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
    *  that is equal to the passed document.
    */
   public void refreshDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
-    removeDocument(doc);
+    DefaultMutableTreeNode node = getNodeForDoc(doc);
     addDocument(doc, path);
+    _model.removeNodeFromParent(node);
   }
   
   /** sets the input document to be active */
@@ -407,6 +409,7 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
       TreePath path = new TreePath(nodes);
       this.expandPath(path);
       this.setSelectionPath(path);
+      this.scrollPathToVisible(path);
     }
   }
 
@@ -710,6 +713,7 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
       if(node.getUserObject() instanceof INavigatorItem){
         this.expandPath(path);
         this.setSelectionPath(path);
+        this.scrollPathToVisible(path);
         return true;
       }else{
         return false;

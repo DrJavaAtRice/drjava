@@ -108,12 +108,13 @@ class JListSortNavigator extends JListNavigator{
    * inserts the document into its sorted position
    * @param doc the document to add
    */
-  private void insertDoc(INavigatorItem doc){
+  private int insertDoc(INavigatorItem doc){
     int i=0;
     while(i<_docs.size() && (_docs.get(i).getName().toUpperCase().compareTo(doc.getName().toUpperCase())) < 0){
       i++;
     }
     _docs.add(i, doc);
+    return i;
   }
   
   /**
@@ -196,8 +197,17 @@ class JListSortNavigator extends JListNavigator{
       throw new IllegalArgumentException("Document " + doc + " not found in Document Navigator");
     }
     else {
-      INavigatorItem tbr = _docs.remove(i);
-      insertDoc(doc);
+      int j = insertDoc(doc);
+      
+      /**
+       * if i just inserted before where i was going to remove, then
+       * i just bumped that document down the list one space.
+       */
+      if(j<=i){
+        INavigatorItem tbr = _docs.remove(i+1);
+      }else{
+        INavigatorItem tbr = _docs.remove(i);
+      }
       this.setListData(_docs);
     }
   }
@@ -327,6 +337,9 @@ class JListSortNavigator extends JListNavigator{
     }
   }
 
+  public void paint(Graphics g){
+    super.paint(g);
+  }
 
   
   /**
