@@ -548,19 +548,19 @@ public class NameVisitor extends VisitorObject<Node> {
     if (args != null) {
       visitExprList(args);
     }
-    
+    Object defaultQualifier = context.getDefaultQualifier(node);
     // Check the expression
     Expression exp = node.getExpression();
     Object o;
     if (exp == null) {
-      o = context.getDefaultQualifier(node);
+      o = defaultQualifier;
     } else {
       o = exp.acceptVisitor(this);
       if (o == null) {
         return null;
       }
     }
-    if(o == null) {
+    if(o == null || o == defaultQualifier) {
       try {
         //Get fully qualified name for Object o if the methodCall is to a staticly imported method
         //The full class name is given as if the user gave a call using the entire fully qualified name
@@ -575,6 +575,7 @@ public class NameVisitor extends VisitorObject<Node> {
         o = new ReferenceType(ids);
       }      
       catch(Exception e){
+        o = defaultQualifier;
         //If the class type of one of the parameters can't be found, throws an exception
         //Also, if no method found to have been imported, throws an exception
         //This will occur every time the user calls a method that has not been staticly imported

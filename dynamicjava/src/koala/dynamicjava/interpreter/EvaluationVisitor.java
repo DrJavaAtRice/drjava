@@ -2055,7 +2055,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       Context ctx = new GlobalContext(context.getInterpreter());
       ctx.setImportationManager(im);
 
-      NameVisitor nv = new NameVisitor(ctx);
+      NameVisitor nv = new NameVisitor(ctx,ctx);
       Iterator<FormalParameter> it = md.getParameters().iterator();
       while (it.hasNext()) {
         it.next().acceptVisitor(nv);

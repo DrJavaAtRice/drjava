@@ -72,19 +72,7 @@ public class TigerUtilitiesTest extends TestCase {
     TigerUtilities.resetVersion();
     assertEquals("Did not reset runtime version correctly",TigerUtilities.VERSION>=1.5,TigerUtilities.isTigerEnabled());
   }
-  
-  /**
-   * Tests the ability to enable and disable the functionality of 1.5
-   */
-  public void testSetAndResetTigerEnabled() {
-    TigerUtilities.setTigerEnabled(true);
-    TigerUtilities.assertTigerEnabled("Tiger should be enabled");
-    assertEquals("Tiger should be enabled",TigerUtilities.isTigerEnabled(),true);
-    TigerUtilities.setTigerEnabled(false);
-    assertEquals("Tiger should be disabled",TigerUtilities.isTigerEnabled(),false);
-    
-  }
-  
+   
   /**
    * Tests the isVarArgs method
    */

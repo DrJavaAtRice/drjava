@@ -41,17 +41,17 @@ public class TigerTest extends TestCase {
 //    return astInterpreter.interpret(exps);
   }
   
-  // Interpreting STATIC IMPORT, NOT YET SUPPORTED
-  public void xtestStaticImport(){
-    //STATIC FIELD
-    testString =
-      "import static java.lang.Integer.MAX_VALUE;\n"+
-      "class A{\n"+
-      "  int m(){return MAX_VALUE;}\n"+
-      "}\n"+
-      "A a = new A(); a.m();\n";
-    
-    assertEquals(new Integer(java.lang.Integer.MAX_VALUE), interpret(testString));
+  // Interpreting static import. Static import of fields not yet supported
+  public void testStaticImport(){
+//    //STATIC FIELD
+//    testString =
+//      "import static java.lang.Integer.MAX_VALUE;\n"+
+//      "class A{\n"+
+//      "  int m(){return MAX_VALUE;}\n"+
+//      "}\n"+
+//      "A a = new A(); a.m();\n";
+//    
+//    assertEquals(new Integer(java.lang.Integer.MAX_VALUE), interpret(testString));
     
     //STATIC METHOD
     testString = 

@@ -179,7 +179,7 @@ public class TreeInterpreter implements Interpreter {
       resultingList = new ArrayList<Node>();
       while (it.hasNext()) {
         Node n = it.next();
-        NameVisitor nv = new NameVisitor(nameVisitorContext);
+        NameVisitor nv = new NameVisitor(nameVisitorContext,checkVisitorContext);
         Node o = n.acceptVisitor(nv);
         if (o != null) n = o;
 
@@ -547,7 +547,7 @@ public class TreeInterpreter implements Interpreter {
         // pass 1: names resolution
         Context ctx = new StaticContext(this, c, md.importationManager);
         ctx.setAdditionalClassLoaderContainer(classLoader);
-        NameVisitor nv = new NameVisitor(ctx);
+        NameVisitor nv = new NameVisitor(ctx,checkVisitorContext);
 
         ListIterator<FormalParameter> it1 = mparams.listIterator();
         while (it1.hasNext()) {
@@ -596,11 +596,11 @@ public class TreeInterpreter implements Interpreter {
         // pass 1: names resolution
         Context ctx1 = new MethodContext(this, c, c, md.importationManager);
         ctx1.setAdditionalClassLoaderContainer(classLoader);
-        NameVisitor nv1 = new NameVisitor(ctx1);
+        NameVisitor nv1 = new NameVisitor(ctx1,checkVisitorContext);
 
         Context ctx2 = new MethodContext(this, c, c, md.importationManager);
         ctx2.setAdditionalClassLoaderContainer(classLoader);
-        NameVisitor nv2 = new NameVisitor(ctx2);
+        NameVisitor nv2 = new NameVisitor(ctx2,checkVisitorContext);
 
         // Initializes the context with the outerclass variables
         Object[][] cc = null;
@@ -774,7 +774,7 @@ public class TreeInterpreter implements Interpreter {
 
       Context ctx = new StaticContext(this, c, cpd.importationManager);
       ctx.setAdditionalClassLoaderContainer(classLoader);
-      NameVisitor nv = new NameVisitor(ctx);
+      NameVisitor nv = new NameVisitor(ctx,checkVisitorContext);
       AbstractTypeChecker tc = AbstractTypeChecker.makeTypeChecker(ctx);
 
       // Check the parameters

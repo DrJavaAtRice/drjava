@@ -31,6 +31,7 @@ package koala.dynamicjava.tree;
 import java.util.*;
 
 import koala.dynamicjava.tree.visitor.*;
+import koala.dynamicjava.util.*;
 
 /**
  * This class represents the import declarations
@@ -91,6 +92,7 @@ public class ImportDeclaration extends Node {
 
     if (ident == null) throw new IllegalArgumentException("ident == null");
 
+    if (sttc) TigerUtilities.assertTigerEnabled("Static Import is not supported before Java 1.5");
     pckage     = pkg;
     sttic      = sttc;
     name       = TreeUtilities.listToName(ident);

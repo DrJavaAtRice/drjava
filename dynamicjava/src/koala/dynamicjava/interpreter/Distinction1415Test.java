@@ -61,6 +61,7 @@ import koala.dynamicjava.parser.wrapper.JavaCCParserFactory;
 
 import koala.dynamicjava.interpreter.throwable.WrongVersionException;
 
+
 /**
  * 
  * Tests to ensure the type checker behaves 
@@ -83,9 +84,22 @@ public class Distinction1415Test extends TestCase {
     strInterpreter = new TreeInterpreter(parserFactory); // ParserFactory is needed to interpret a string
     TigerUtilities.resetVersion();
   }
-    
+  
   public Object interpret(String testString) throws InterpreterException {
     return strInterpreter.interpret(new StringReader(testString), "Unit Test");
+  }
+  
+  
+  /**
+   * Tests the ability to enable and disable the functionality of 1.5
+   */
+  public void testSetAndResetTigerEnabled() {
+    TigerUtilities.setTigerEnabled(true);
+    TigerUtilities.assertTigerEnabled("Tiger should be enabled");
+    assertEquals("Tiger should be enabled",TigerUtilities.isTigerEnabled(),true);
+    TigerUtilities.setTigerEnabled(false);
+    assertEquals("Tiger should be disabled",TigerUtilities.isTigerEnabled(),false);
+    
   }
   
   /**
@@ -254,7 +268,7 @@ public class Distinction1415Test extends TestCase {
     //Set the java runtime version back to the correct version
     TigerUtilities.resetVersion();
   }
-   
+  
   /**
    * Test that the use of methods with variable arguments fails when the runtime environment is set to 1.4
    */
@@ -268,7 +282,7 @@ public class Distinction1415Test extends TestCase {
         "    return s[3];"+
         "  }\n"+
         "}\n";
-              
+      
       interpret(testString);
       fail("Should have thrown a WrongVersionException");
     }
@@ -341,14 +355,14 @@ public class Distinction1415Test extends TestCase {
    * Test that the use of static imports should not fail when the runtime environment is set to 1.5
    * Note: static importing is not yet supported. Uncomment the test case when it is supported
    */ /**/
-  public void xtestStaticImport15() {
+  public void testStaticImport15() {
     TigerUtilities.setTigerEnabled(true);
     try {
       testString =
         "import static java.lang.Math.abs;\n"+
         "abs(-2);";      
       assertEquals(2,interpret(testString));
-   
+      
       testString =
         "import static java.lang.String.*;"+
         "valueOf(1);";      
@@ -413,7 +427,4 @@ public class Distinction1415Test extends TestCase {
   }
   
 }
-  
-
-
 

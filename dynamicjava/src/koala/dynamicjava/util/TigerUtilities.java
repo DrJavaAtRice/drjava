@@ -47,9 +47,24 @@ END_COPYRIGHT_BLOCK*/
 
 package koala.dynamicjava.util;
 
-import koala.dynamicjava.interpreter.throwable.WrongVersionException;
+
 import java.lang.reflect.*;
 import java.util.*;
+import junit.framework.*;
+
+import koala.dynamicjava.tree.*;
+import koala.dynamicjava.interpreter.*;
+import koala.dynamicjava.SourceInfo;
+import koala.dynamicjava.util.*;
+
+import java.io.StringReader;
+import java.util.List;
+import koala.dynamicjava.parser.wrapper.ParserFactory;
+import koala.dynamicjava.parser.wrapper.JavaCCParserFactory;
+
+import koala.dynamicjava.interpreter.throwable.WrongVersionException;
+
+
 
 /**
  * Common utilities of DynamicJava for implementing features of 1.5.
@@ -84,7 +99,9 @@ public class TigerUtilities {
   }
   
   /**
-   * Allows the features in 1.5 to be enabled or disabled. Used mostly in test cases.
+   * Allows the features in 1.5 to be enabled or disabled. Used mostly in test cases. Should not be used if the
+   * user is running a version less than 1.5, as this enables features which call methods that do not exist prior 
+   * to 1.5 i.e. isVarArgs()
    * @param enabled - a boolean that specifies whether or not Tiger features are to be enabled
    */  
   public static void setTigerEnabled(boolean enabled) {

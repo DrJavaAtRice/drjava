@@ -227,7 +227,7 @@ public class ImportationManager implements Cloneable {
    * @param cname the fully qualified class name
    * @exception ClassNotFoundException if the class cannot be found
    */
-  public void declareClassImport(String cname) throws ClassNotFoundException {
+  public void declareClassImport(String cname) throws ClassNotFoundException {  
     try {
       // A previous importation of this class is removed to avoid a new
       // existance verification and to speed up further loadings.
@@ -240,7 +240,7 @@ public class ImportationManager implements Cloneable {
       singleTypeImportClauses.remove((c == null) ? cname : c.getName());
       singleTypeImportClauses.add(0, (c == null) ? cname : c.getName());
     } finally {
-      singleTypeImportClauses.add(0, cname);
+        singleTypeImportClauses.add(0, cname);
     }
   }
   
@@ -294,8 +294,20 @@ public class ImportationManager implements Cloneable {
        
     boolean foundSomethingToImport = false;
     boolean foundSecurityException = false;
-    //First, check for all static inner classes by the given name
+    String name = member.substring(i+1,member.length());
+    
+    
+    //First, check for a static inner class by the given name
+    //**//Note, all static inner classes imported with "import static" have to be added to the list twice, once with a '.' and once with a '$'. 
+    //The first class in the list which successfully works is the one used when the user actually instantiates the class, and both are needed because 
+    //Different methods require different formats, and having both can't hurt anything. Any of the methods that use the list of classes try and catch through the
+    //list until they come across a class that fits
     try {
+      try {
+        Class.forName(member, true, classLoader);
+      } catch (ClassNotFoundException cnfe) {
+        findInnerClass(member);
+      }
       declareClassImport(member);
       foundSomethingToImport = true;
     }
@@ -310,7 +322,7 @@ public class ImportationManager implements Cloneable {
     
     //Next, check for all static fields
     try {
-      Field f = surroundingClass.getField(member);
+      Field f = surroundingClass.getField(name);
       singleTypeImportStaticFieldClauses.remove(f);
       singleTypeImportStaticFieldClauses.add(0,f);
       foundSomethingToImport = true;
@@ -325,7 +337,7 @@ public class ImportationManager implements Cloneable {
     try {
       Method[] methodArray = surroundingClass.getMethods();
       for(int j = 0; j<methodArray.length; j++) {
-        if(isPublicAndStatic(methodArray[j].getModifiers())) {
+        if(isPublicAndStatic(methodArray[j].getModifiers()) && methodArray[j].getName().equals(name)) {
           Method m = methodArray[j];
           singleTypeImportStaticMethodClauses.remove(m);
           singleTypeImportStaticMethodClauses.add(0,m);
@@ -337,8 +349,10 @@ public class ImportationManager implements Cloneable {
       foundSecurityException = true;
     }
     
-    if(foundSecurityException || ! foundSomethingToImport)
-      throw new RuntimeException("No public members of the name " + member);
+    if(foundSomethingToImport)
+      return;
+    
+    throw new RuntimeException("No public members of the name " + member);
   }
   
   
@@ -571,18 +585,34 @@ public class ImportationManager implements Cloneable {
    * Tests whether the fully qualified class name c1 ends with c2
    */
   protected boolean hasSuffix(String c1, String c2) {
-    int i = c1.lastIndexOf('.');
-    String s = c1;
-    if (i != -1) {
-      s = c1.substring(i + 1, c1.length());
-    }
-    return s.equals(c2);
+    return suffix(c1).equals(c2);
   }
+  
+  /**
+   * Return the string following the last '.'
+   */
+  protected String suffix(String s) {
+    int i = s.lastIndexOf('.');
+    String s2 = s;
+    if(i != -1) {
+      s2 = s.substring(i+1, s.length());
+    }
+    return s2;
+  }
+  
   
   /**
    * Return true iff the integer argument includes the static modifer and the public modifier, false otherwise.
    */
   protected boolean isPublicAndStatic(int modifiers) {
     return Modifier.isStatic(modifiers) && Modifier.isPublic(modifiers);
+  }
+  
+  /**
+   * Return true iff the name is a field that has been staticly imported
+   */
+  public boolean fieldExists(String name) {
+    return false; //to do
+    
   }
 }

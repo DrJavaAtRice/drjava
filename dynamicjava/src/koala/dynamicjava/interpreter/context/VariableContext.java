@@ -184,13 +184,8 @@ public class VariableContext implements SimpleContext {
       }
     }
     
-    //Check importation manager for explicitly imported fields
-    
-    
-    //Check importation manager for import-on-demand clauses with fields
-    
-    
-    return false;
+    return importationManager.fieldExists(name);
+    //return false;
   }
   
   /**
