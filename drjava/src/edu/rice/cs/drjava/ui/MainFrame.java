@@ -227,7 +227,7 @@ public class MainFrame extends JFrame
 		{
 			public void actionPerformed(ActionEvent ae)
 			{
-				//_definitionsView.findReplace();
+				_definitionsView.findReplace();
 			}
 		};
 	
@@ -378,9 +378,9 @@ public class MainFrame extends JFrame
 		_editMenu.add(copyAction);
 		_editMenu.add(pasteAction);
 		_editMenu.addSeparator();
-    //tmpItem = _editMenu.add(_findReplaceAction);
-		//tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,
-		//																							ActionEvent.CTRL_MASK));
+		tmpItem = _editMenu.add(_findReplaceAction);
+		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,
+																									ActionEvent.CTRL_MASK));
 		_editMenu.add(_clearOutputAction);
 
 
