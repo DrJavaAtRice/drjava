@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# relicense: Changes the copyright/license block on *.java (recursively)
+# to whatever's in ./COPYRIGHT.
+
+for A in `find . -name *.java -o -name *.orig`; do
+  mv $A $A.old
+  cp COPYRIGHT $A
+  ./strip-license < $A.old >> $A
+  rm -f $A.old
+  echo "$A"
+done
+
+echo ""
+echo "All done."
