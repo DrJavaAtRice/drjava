@@ -53,7 +53,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  * @version $Id$
  */
 public class DefinitionsEditorKit extends DefaultEditorKit {
-  private static final ViewFactory _factory = new ViewFactory() {
+  private static ViewFactory _factory = new ViewFactory() {
     public View create(Element elem) {
       // The following line is for performance analysis only!
       // return new WrappedPlainView(elem, true);

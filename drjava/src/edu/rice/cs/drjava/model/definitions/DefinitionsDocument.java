@@ -391,8 +391,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     try {
       writeLock();
       _modifiedSinceSave = false;
-			if (_file != null)
-					_timestamp = _file.lastModified();
+   if (_file != null)
+     _timestamp = _file.lastModified();
     }
     finally {
       writeUnlock();
@@ -431,7 +431,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       readUnlock();
     }
   }
-	
+ 
   /**
    * Get the current location of the cursor in the document.
    * Unlike the usual swing document model, which is stateless, because of our implementation

@@ -52,11 +52,13 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  * This view class renders text on the screen using the reduced model info.
  * By extending WrappedPlainView, we only have to override the parts we want to.
  * Here we only override drawUnselectedText. We may want to override 
- * drawSelectedText at some point.
+ * drawSelectedText at some point. As of 2002/06/17, we now extend PlainView because
+ * WrappedPlainView was causing bugs related to resizing the viewport of the 
+ * definitions scroll pane.
  *
  * @version $Id$
  */
-public class ColoringView extends WrappedPlainView implements OptionConstants {
+public class ColoringView extends PlainView implements OptionConstants {
   private DefinitionsDocument _doc;
 
   private static final Color COMMENTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_COMMENT_COLOR);

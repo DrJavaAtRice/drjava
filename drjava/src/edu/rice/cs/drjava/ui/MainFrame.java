@@ -1128,7 +1128,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
         // this code was taken from FindReplaceDialog's 
         // _selectFoundItem method
-        JScrollPane defScroll = (JScrollPane)
+        JScrollPane defScroll = (JScrollPane) 
           _defScrollPanes.get(_model.getActiveDocument());
         int viewHeight = (int)defScroll.getViewport().getSize().getHeight();
         // Scroll to make sure this item is visible
@@ -1739,12 +1739,19 @@ public class MainFrame extends JFrame implements OptionConstants {
     // add a listener to update line and column.
     pane.addCaretListener( _posListener );
     _posListener.updateLocation();
-
+    
     // Add to a scroll pane
     JScrollPane scroll = new BorderlessScrollPane(pane,
                                                   JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                                                  JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                                                  JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     //scroll.setBorder(null); // removes all default borders (MacOS X installs default borders)
+    
+    // can be used to make sure line wrapping occurs
+    /*scroll.getViewport().addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
+        pane.setSize(scroll.getViewport().getWidth(), pane.getHeight());
+      }
+    });*/
     _defScrollPanes.put(doc, scroll);
     
     return scroll;
@@ -1828,15 +1835,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     JScrollBar oldbar = scroll.getVerticalScrollBar();
     JScrollBar newbar = scroll.createVerticalScrollBar();
+    newbar.setEnabled(true);
     newbar.setValue(oldbar.getValue());
     newbar.setVisibleAmount(oldbar.getVisibleAmount());
     newbar.setMinimum(oldbar.getMinimum());
     newbar.setMaximum(oldbar.getMaximum());
-    newbar.setEnabled(true);
     newbar.revalidate();
     scroll.setVerticalScrollBar(newbar);
     scroll.revalidate();
-    
+    //scroll.updateUI();
     
     // This will need to be repeated for a horizontal scrollbar!
   }

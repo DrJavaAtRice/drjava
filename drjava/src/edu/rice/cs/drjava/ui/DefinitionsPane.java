@@ -264,6 +264,20 @@ public class DefinitionsPane extends JEditorPane
                          GlobalModel model,
                          OpenDefinitionsDocument doc)
   {
+
+    /*this.setEditorKit(new DefaultEditorKit() {
+      ViewFactory vf = null;
+      public ViewFactory getViewFactory() {
+        if (vf == null)
+          vf = new NoWrapFactory();
+        return vf;
+      }
+      class NoWrapFactory implements ViewFactory {
+        public View create( Element e ) {
+          return new PlainView(e);
+        }
+      }
+    });*/
     _mainFrame = mf;
     _model = model;
     _doc = doc;
@@ -276,6 +290,7 @@ public class DefinitionsPane extends JEditorPane
                               DrJava.CONFIG.getSetting(FONT_MAIN_SIZE).intValue());
     setFont(mainFont);
     
+    //setSize(new Dimension(1024, 1000));
     setEditable(true);
 
     //add actions for indent key
@@ -291,7 +306,9 @@ public class DefinitionsPane extends JEditorPane
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(':'),
       (Action)_indentKeyActionColon);
     setKeymap(ourMap);
-
+                      
+    //this.setEditorKit(new StyledEditorKit());
+    
     // Add listener that checks if position in the document has changed.
     // If it has changed, check and see if we should be highlighting matching braces.
     this.addCaretListener(_matchListener);
@@ -506,6 +523,10 @@ public class DefinitionsPane extends JEditorPane
       }
     }
   }
+  
+  /*public boolean getScrollableTracksViewportWidth(){
+    return false;
+  }*/
 
   /**
    * The undo action.
