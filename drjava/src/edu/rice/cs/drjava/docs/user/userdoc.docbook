@@ -181,7 +181,7 @@
 
     <section id="junit-writing">
       <title>Writing JUnit Tests</title>
-      <comment>(Contributed by Chris Haynes, chaynes@indiana.edu.)</comment>
+      <!-- Contributed by Chris Haynes, chaynes@indiana.edu -->
       <para>To use the Test button on a file, the following programming conventions must be used:
 <itemizedlist>
 	  <listitem>
