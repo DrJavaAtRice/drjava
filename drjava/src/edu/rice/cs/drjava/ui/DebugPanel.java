@@ -80,8 +80,8 @@ public class DebugPanel extends JPanel {
   
   private final DebugLogger _logger;
 
-  private Object _curBreakpointTag=null; // currently highlighted line
-  private int    _curBP;                 // and its associated tag.
+    //  private Object _curBreakpointTag=null; // currently highlighted line
+    //  private int    _curBP;                 // and its associated tag.
     
   /**
    * Action performed when the Enter key is pressed.
@@ -104,9 +104,9 @@ public class DebugPanel extends JPanel {
    * Highlighter for active breakpoint.
    */
   /** Highlight painter for selected list items. */
-  private static final DefaultHighlighter.DefaultHighlightPainter
-    _activeBreakpointHighlightPainter
-      = new DefaultHighlighter.DefaultHighlightPainter(new Color(255,155,155));
+    //  private static final DefaultHighlighter.DefaultHighlightPainter
+    //    _activeBreakpointHighlightPainter
+    //      = new DefaultHighlighter.DefaultHighlightPainter(new Color(255,155,155));
     
   /**
    * Constructor.
@@ -380,17 +380,18 @@ public class DebugPanel extends JPanel {
         try {
           File file = ((FileSource)src).getFile();
           if (file.exists()) {
-            DrJava.consoleOut().println("DebugPanel: file: " + file.getName());
+	      //            DrJava.consoleOut().println("DebugPanel: file: " + file.getName());
             OpenDefinitionsDocument doc = _model.getDocumentForFile(file);
             _model.setActiveDocument(doc);	    
-            DrJava.consoleErr().println("Showing line " + line);	    
+	    //            DrJava.consoleErr().println("Showing line " + line);	    
             if (line > 0) {
+		/*
  	      if (_curBP>0 && line != _curBP) // remove existing bp
 		_frame.getCurrentDefPane().getHighlighter().removeHighlight(_curBreakpointTag);
 
 	      _curBreakpointTag = highlightLine(line, _activeBreakpointHighlightPainter);
 	      _curBP = line;
-	      	      
+		*/    
 	      // _frame.getCurrentDefPane().setCaretPosition(doc.getDocument().getCurrentLocation());
 	      
             }
@@ -416,14 +417,15 @@ public class DebugPanel extends JPanel {
               DrJava.consoleOut().println(" NEEDED HACK.");
               OpenDefinitionsDocument doc = _model.getDocumentForFile(file);
               _model.setActiveDocument(doc);
-              DrJava.consoleErr().println("Showing line " + line);
+	      //              DrJava.consoleErr().println("Showing line " + line);
               if (line > 0) {
+		  /* no highlighting
 		if (_curBP>0 && line != _curBP) // remove existing bp
 		  _frame.getCurrentDefPane().getHighlighter().removeHighlight(_curBreakpointTag);
 
   	        _curBreakpointTag = highlightLine(line, _activeBreakpointHighlightPainter);
 	        _curBP = line;
-	      	      
+		  */
 	        // _frame.getCurrentDefPane().setCaretPosition(doc.getDocument().getCurrentLocation());
 
               }
@@ -462,6 +464,7 @@ public class DebugPanel extends JPanel {
     *
     * @return the highlight tag for removal later (Object)
     */
+    /*
   public Object highlightLine(int line, DefaultHighlighter.DefaultHighlightPainter brush) {
       
       OpenDefinitionsDocument doc = _model.getActiveDocument();
@@ -479,7 +482,9 @@ public class DebugPanel extends JPanel {
       } catch (BadLocationException badBadLocation) { System.err.println("DebugPanel.highlightLine() Got a ble."); }
       return o;
   }
-    
+
+    */
+  
    /**
     * Highlights the given region (not used right now)
     *
@@ -488,7 +493,9 @@ public class DebugPanel extends JPanel {
     * @param  brush  the highlighter to use.
     *
     * @return the highlight tag for removal later (Object)
-    */     
+    */
+
+    /*
   public Object highlightRegion(int start, int end, DefaultHighlighter.DefaultHighlightPainter brush) {
 	Object o=null;      
 	try {
@@ -497,7 +504,6 @@ public class DebugPanel extends JPanel {
 									 brush);
       } catch (BadLocationException badBadLocation) { System.err.println("DebugPanel.highlightRegion() Got a ble."); }
 	return o;
-    }
+	} */
 }
-
-
+    

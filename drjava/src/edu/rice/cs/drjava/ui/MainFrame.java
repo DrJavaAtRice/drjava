@@ -762,7 +762,7 @@ public class MainFrame extends JFrame {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
     try {
       _model.getDebugManager().
-        setBreakpoint(doc, doc.getDocument().getCurrentLine());
+        toggleBreakpoint(doc, doc.getDocument().getCurrentLine());
     }
     catch (IOException ioe) {
       _showIOError(ioe);

@@ -40,8 +40,10 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.debug;
 
 import java.io.*;
+import java.util.Iterator;
 
 // DrJava stuff
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.GlobalModelListener;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -51,6 +53,7 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import com.bluemarsh.jswat.*;
 import com.bluemarsh.jswat.ui.*;
 import com.bluemarsh.jswat.breakpoint.*;
+import com.bluemarsh.util.StringTokenizer;
 import com.sun.jdi.Bootstrap;
 
 /**
@@ -65,6 +68,7 @@ public class DebugManager {
   private JSwat _swat;
   
   private GlobalModel _model;
+  private Writer _logwriter;
   
   /**
    * Builds a new DebugManager which interfaces to JSwat.
@@ -75,6 +79,7 @@ public class DebugManager {
     _session = null;
     _swat = null;
     _model = model;
+    _logwriter = new PrintWriter(DrJava.consoleOut());
   }
   
   /**
@@ -146,6 +151,7 @@ public class DebugManager {
     Log log = _session.getStatusLog();
     log.attach(w);
     log.start();
+    _logwriter = w;
   }
   
  
@@ -171,11 +177,16 @@ public class DebugManager {
   public void removeAllBreakpoints();
   
   public void getBreakpoints();
- */ 
-  public void setBreakpoint(OpenDefinitionsDocument doc, int lineNumber) 
-    throws IOException, ClassNotFoundException, DebugException {
+ */
+
+ /**
+  * Sets a breakpoint (or removes it, if it already
+  * exists at given line).
+  */
+  public void toggleBreakpoint(OpenDefinitionsDocument doc, int lineNumber)
+    throws IOException, ClassNotFoundException, DebugException {  
     BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
-    
+
     if (doc.isModifiedSinceSave()) {
       doc.saveBeforeProceeding(GlobalModelListener.DEBUG_REASON);
     }
@@ -184,26 +195,76 @@ public class DebugManager {
     if (className == null) {
       throw new ClassNotFoundException();
     }
+
+    Iterator i = bpManager.breakpoints(true);
+    Object o;
+    ResolvableBreakpoint rbp;
+    ReferenceTypeSpec rts;
     
-    try {
-      bpManager.createBreakpoint(className, lineNumber);
-    }    
-    catch(ClassNotFoundException cnfEx) {
-      //try {
-      doc.startCompile();
-      if(_model.getNumErrors() != 0) {
-        return;
+    while (i.hasNext()) {
+      o = i.next();
+      if (o instanceof ResolvableBreakpoint) {
+	  rbp = (ResolvableBreakpoint)o;
+	  rts = rbp.getReferenceTypeSpec();
+	  if (rts.matches(className) &&
+	      rbp instanceof LineBreakpoint &&
+	      ((LineBreakpoint)(rbp)).getLineNumber() == lineNumber) {
+	      // FOUND IT!
+	      removeBreakpoint((LineBreakpoint)rbp, className);
+	      return;
+	  }
       }
-      //}
     }
-    catch (ResolveException re) {
-      throw new DebugException();
-    }
+
+    setBreakpoint(className, lineNumber);
   }
 
-  /* 
-  public void removeBreakpoint();
-  
+ /**
+  * Writes the string to the log, ignoring exceptions.
+  *
+  * @param s the string to write to the stream.
+  */
+  protected void writeToLog(String s) {
+    try {
+      _logwriter.write(s);
+    }
+    catch (IOException ioe) {}
+  }
+
+ /**
+  * Sets a breakpoint.
+  *
+  * @param className the name of the class in which to break
+  * @param lineNumber the line number at which to break
+  */    
+  protected void setBreakpoint(String className, int lineNumber) throws DebugException {
+    BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
+    try {
+      bpManager.createBreakpoint(className, lineNumber);
+    } catch (ResolveException re) {
+      throw new DebugException();
+    } catch (ClassNotFoundException cnfe) {
+      throw new DebugException();
+    }
+    writeToLog("Breakpoint added: " + className + ":" + lineNumber + "\n");
+  }
+
+ /**
+  * Removes a breakpoint.
+  * Called from ToggleBreakpoint -- even with BPs that are not active.
+  * this takes in a LineBreakpoint (only kind DrJava creates) so that we can
+  * get out the line number and unlighlight it if necessary.
+  *
+  * @param bp The breakpoint to remove.
+  * @param className the name of the class the BP is being removed from.
+  */    
+  protected void removeBreakpoint(LineBreakpoint bp, String className) {
+    BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);    
+    bpManager.removeBreakpoint(bp);
+    writeToLog("Breakpoint removed: " + className + ":" + bp.getLineNumber() + "\n");
+  }
+    
+  /*   
   public void addWatch();
   
   public void removeWatch();
