@@ -807,14 +807,14 @@ public class MainFrame extends JFrame {
       _defScrollPanes.get(_model.getActiveDocument());
 
     // Overall layout
-    _docSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                                   true,
-                                   listScroll,
-                                   defScroll);
+    _docSplitPane = new BorderlessSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+					    true,
+					    listScroll,
+					    defScroll);
     JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                                       true,
-                                       _docSplitPane,
-                                       _tabbedPane);
+				      true,
+				      _docSplitPane,
+				      _tabbedPane);
     getContentPane().add(split, BorderLayout.CENTER);
     // This is annoyingly order-dependent. Since split2 contains split1,
     // we need to get split2's divider set up first to give split1 an overall
