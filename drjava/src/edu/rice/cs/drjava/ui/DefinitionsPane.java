@@ -924,11 +924,12 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   }
 
   
-  
+  /**
+   * This instance of the scroll pane is here in order
+   * to allow for the definitions pane to save the
+   * horizontal and vertical scroll
+   */
   private JScrollPane _scrollPane;
-  
-  private int _saved_vert_pos;
-  private int _saved_horz_pos;
   
   public void setScrollPane(JScrollPane s){
     _scrollPane = s;
@@ -936,9 +937,15 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   
   
   /**
-   * used to save the caret position when setting the pane as inactive
+   * used to save the caret position, selection, and scroll
+   * when setting the definitions pane to be inactive
    */
+  
+  private int _saved_vert_pos;
+  private int _saved_horz_pos;
   private int _position;
+  private int _selStart;
+  private int _selEnd;
   
   /**
    * This function is called when the active document is changed. this function
@@ -956,20 +963,21 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     try {
       // Sync caret with location before switching
       getOpenDocument().syncCurrentLocationWithDefinitions(getCaretPosition());
-      int loc = _doc.getCurrentDefinitionsLocation();
+      
       
       // Remove any error highlighting in the old def pane
       removeErrorHighlight();
       
+      _position = _doc.getCurrentDefinitionsLocation();
+      _selStart = getSelectionStart();
+      _selEnd = getSelectionEnd();
+
+      _saved_vert_pos = _scrollPane.getVerticalScrollBar().getValue();
+      _saved_horz_pos = _scrollPane.getHorizontalScrollBar().getValue();
+      
       super.setDocument(NULL_DOCUMENT);
 //      _doc.syncCurrentLocationWithDefinitions(loc);
       
-      
-      _position = loc; // added because saving the location through the ddoc didn't work
-      
-      
-      _saved_vert_pos = _scrollPane.getVerticalScrollBar().getValue();
-      _saved_horz_pos = _scrollPane.getHorizontalScrollBar().getValue();
     }
     catch(NoSuchDocumentException e) {
       // This exception was just thrown because the document was just 
@@ -986,13 +994,20 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    */
   public void notifyActive() {
 //    int loc = _doc.getCurrentDefinitionsLocation();
-    int loc = _position;
+    
     super.setDocument(_doc.getDocument());
-    super.setCaretPosition(loc);
-    _doc.syncCurrentLocationWithDefinitions(loc);
+    setCaretPosition(_position);
+    if(_position == _selStart){
+      setCaretPosition(_selEnd);
+      moveCaretPosition(_selStart);
+    }else{
+      setCaretPosition(_selStart);
+      moveCaretPosition(_selEnd);
+    }
+    
+    _doc.syncCurrentLocationWithDefinitions(_position);
     _scrollPane.getVerticalScrollBar().setValue(_saved_vert_pos);
     _scrollPane.getHorizontalScrollBar().setValue(_saved_horz_pos);
-    // NOTE: Should we be resetting the undo???
   }
   
   

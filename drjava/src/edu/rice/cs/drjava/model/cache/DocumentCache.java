@@ -68,7 +68,7 @@ public class DocumentCache{
    */
   LinkedList<OpenDefinitionsDocument> lru;
   
-  private int CACHE_SIZE = 4;
+  private int CACHE_SIZE = 20;
   
   public DocumentCache(){
     lru = new LinkedList<OpenDefinitionsDocument>();
