@@ -127,7 +127,6 @@ public class FileSelectorComponent extends JPanel {
     _parent = parent;
     _chooser = chooser;
     _fileFilter = null;
-    _file = null;
     
     _fileField = new JTextField(numCols) {
       public Dimension getMaximumSize() {
@@ -200,21 +199,18 @@ public class FileSelectorComponent extends JPanel {
 
   /**
    * Sets the text of the file field to be the given file.
-   *
    * @param file File to display in the file field.
    */
   public void setFileField(File file) {
-    //    if (file != null) {
-    //      try {
-    //        _file = file.getCanonicalFile();
-    //      }
-    //      catch(IOException e) {
-    //        //handle it gracefully
-    //        _file = file.getAbsoluteFile();
-    //      }
     _file = file;
+    if (file != null && !file.getPath().equals("")) {
+      try {
+        _file = file.getCanonicalFile();
+      }
+      catch(IOException e) {
+      }
+    }
     resetFileField();
-    //    }
   }
 
   public void resetFileField() {
@@ -222,7 +218,7 @@ public class FileSelectorComponent extends JPanel {
       _fileField.setText("");
     }
     else {
-      _fileField.setText(_file.toString());
+      _fileField.setText(_file.getPath());
       _fileField.setCaretPosition(_fileField.getText().length());
     }
   }
@@ -292,7 +288,11 @@ public class FileSelectorComponent extends JPanel {
                                     "is invalid because it does not exist.",
                                     "Invalid File Name",
                                     JOptionPane.ERROR_MESSAGE);
+      if (!_file.exists()) {
+        _file = null;
+      }
       resetFileField(); // revert if not valid
+      
       _validationInProgress = false;
       return false;
     }

@@ -197,17 +197,15 @@ public class DirectorySelectorComponent extends JPanel {
    * @param file File to display in the file field.
    */
   public void setFileField(File file) {
-//    if (file != null && file.exists()) {
-//      try {
-//        _file = file.getCanonicalFile();
-//      }
-//      catch(IOException e) {
-//        //handle it gracefully
-//        _file = file.getAbsoluteFile();
-//      }
     _file = file;
+    if (file != null && !file.getPath().equals("")) {
+      try {
+        _file = file.getCanonicalFile();
+      }
+      catch(IOException e) {
+      }
+    }
     resetFileField();
-//    }
   }
 
   public void resetFileField() {

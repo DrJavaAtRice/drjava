@@ -83,4 +83,10 @@ public interface FileDisplayManager {
    */
   public FileDisplay makeNewFolderDisplay(File parent);
   
+  /**
+   * Notifies the manager that the file system has changed. This may
+   * affect the way the manager chooses icons for the files.
+   */
+  public void update();
+  
 }
