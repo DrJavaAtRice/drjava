@@ -306,8 +306,11 @@ public class EventHandlerThread extends Thread {
       _debugger.currThreadDied();
     }
     else {
-      _debugger.nonCurrThreadDied(new DebugThreadData(e.thread()));
+      _debugger.nonCurrThreadDied();
     }
+    
+    // Thread is suspended on death, so resume it now.
+    e.thread().resume();
   }
 
   /**

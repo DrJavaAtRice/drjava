@@ -234,6 +234,19 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     /*20*/"  }\n" +
     /*21*/"}";
   
+  protected static final String THREAD_DEATH_CLASS =
+    /*  1 */ "class Jones {\n" +
+    /*  2 */ "  public static void threadShouldDie() {\n" +
+    /*  3 */ "    Thread cooper = new Thread() {\n" +
+    /*  4 */ "      public void run() {\n" +
+    /*  5 */ "        System.out.println(\"This thread should die.\");\n" +
+    /*  6 */ "      }\n" +
+    /*  7 */ "    };\n" +
+    /*  8 */ "    cooper.start();\n" +
+    /*  9 */ "    while(cooper.isAlive()) {}\n" +
+    /* 10 */ "    System.out.println(\"Thread died.\");\n" +
+    /* 11 */ "  }\n" +
+    /* 12 */ "}";
   
   /**
    * Constructor.
@@ -1678,6 +1691,33 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
 
     // Shut down
     _shutdownAndWaitForInteractionEnded();
+    _debugger.removeListener(debugListener);
+  }
+  
+  /**
+   * Tests that watches can correctly see the values of final local
+   * variables and method parameters from enclosing classes.
+   * 
+   * Note:  Some final local variables are inlined by the compiler
+   * (even in debug mode), so they are unavailable to the debugger.
+   */
+  public void testThreadShouldDie() throws Exception {
+    if (printMessages) {
+      System.out.println("----testThreadShouldDie----");
+    }
+    StepTestListener debugListener = new StepTestListener();
+    _debugger.addListener(debugListener);
+    
+    // Start up
+    OpenDefinitionsDocument doc = _startupDebugger("DrJavaThreadDeathTest.java",
+                                                   THREAD_DEATH_CLASS);
+
+    // Before bugs 697825 and 779111 were fixed, this line would just
+    //  hang, since dead threads remained suspended indefinitely.
+    interpret("Jones.threadShouldDie()");
+
+    // Shut down
+    _shutdownWithoutSuspendedInteraction();
     _debugger.removeListener(debugListener);
   }
   

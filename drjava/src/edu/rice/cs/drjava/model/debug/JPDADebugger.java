@@ -144,13 +144,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   private RandomAccessStack _suspendedThreads;
   
   /**
-   * Storage to facilitate remembering threads which have died
-   * so that we can filter them out of the the list of threads
-   * returned by the VM we are debugging
-   */
-  private DeadThreadFilter _deadThreads;
-  
-  /**
    * A handle to the interpreterJVM that we need so we can
    * populate the environment.
    */
@@ -183,7 +176,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     _suspendedThreads = new RandomAccessStack();
     _pendingRequestManager = new PendingRequestManager(this);
     _runningThread = null;
-    _deadThreads = new DeadThreadFilter();
     _interpreterJVM = null;
     _eventHandlerError = null;
     _log = new Log("DebuggerLog", false);
@@ -414,7 +406,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       _vm = null;
       _eventManager = null;
       _suspendedThreads = new RandomAccessStack();
-      _deadThreads = new DeadThreadFilter();
       _runningThread = null;
     }
   }
@@ -1130,9 +1121,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     _ensureReady();
     List listThreads = _vm.allThreads();
 
-    // get an iterator that filters out threads that we know are dead from
-    // the list returned by _vm.allThreads()
-    Iterator<ThreadReference> iter = _deadThreads.filter(listThreads).iterator();
+    // get an iterator from the list returned by _vm.allThreads()
+    Iterator<ThreadReference> iter = listThreads.iterator();
     Vector<DebugThreadData> threads = new Vector<DebugThreadData>();
     while (iter.hasNext()) {
       threads.addElement(new DebugThreadData(iter.next()));
@@ -2338,10 +2328,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    */
   synchronized void currThreadDied() throws DebugException {
     printMessage("The current thread has finished.");
-    if( _runningThread != null ){
-      _deadThreads.add(new DebugThreadData(_runningThread));
-      _runningThread = null;
-    }
+    _runningThread = null;
+    
     _updateWatches();
        
     if (_suspendedThreads.size() > 0) {
@@ -2379,9 +2367,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     });
   }
     
-  synchronized void nonCurrThreadDied(DebugThreadData threadRef) {
-    _deadThreads.add(threadRef);
-    
+  synchronized void nonCurrThreadDied() {    
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
         l.nonCurrThreadDied();
@@ -2531,56 +2517,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
     public boolean isEmpty() {
       return size() == 0;
-    }
-  }
-  
-  /**
-   * A class for filtering threads that we know are dead from the List returned by
-   * _vm.allThreads() [thanks sun for returning dead threads in this method call,
-   * good decision]
-   */
-  class DeadThreadFilter {
-    private HashMap<Long,DebugThreadData> _theDeadThreads;
-    public DeadThreadFilter(){
-      _theDeadThreads = new HashMap<Long,DebugThreadData>();
-    }
-    public void add(DebugThreadData thread){
-      _theDeadThreads.put(new Long(thread.getUniqueID()), thread);
-    }
-    
-    public List<ThreadReference> filter(List<ThreadReference> threads) {
-      LinkedList<ThreadReference> retList = new LinkedList();
-      Iterator<Long> keys = _theDeadThreads.keySet().iterator();
-
-      // The following code removes dead threads from _theDeadThreads if
-      // the threads do not appear in the list of threads threads.  This
-      // must be done to make sure that _theDeadThreads doesn't grow too
-      // large with useless info.
-      while(keys.hasNext()){
-        Long key = keys.next();
-
-        boolean flag = false;
-        for(int i = 0; i < threads.size(); i++){
-          if(threads.get(i).uniqueID() == key.longValue()){
-            flag = true;
-            break;
-          }
-        }
-
-        if(!flag) {
-          _theDeadThreads.remove(key);
-        }
-      }
-
-      Iterator<ThreadReference> iterator = threads.iterator();
-      while(iterator.hasNext()) {
-        ThreadReference ref = iterator.next();
-        if(_theDeadThreads.get(new Long(ref.uniqueID())) == null) {
-          retList.add(ref);
-        }
-      }
-      
-      return retList;
     }
   }
   
