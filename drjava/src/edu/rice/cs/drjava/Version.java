@@ -15,7 +15,7 @@ public abstract class Version {
    * This string will be automatically expanded upon "ant commit".
    * Do not edit it by hand!
    */
-  public static final String BUILD_TIME_STRING = "20020129-1635";
+  public static final String BUILD_TIME_STRING = "20020206-0208";
   public static final Date BUILD_TIME = _getBuildDate();
 
   private static Date _getBuildDate() {

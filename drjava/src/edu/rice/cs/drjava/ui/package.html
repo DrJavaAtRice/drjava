@@ -9,7 +9,99 @@
 </head>
 <body bgcolor="white">
 
-This is where a description of this package goes.
+The <code>ui</code> package contains classes for the default user interface
+for DrJava.
+
+The interface allows multiple documents to be open, but requires that exactly
+one document is active at any time, since only one document is displayed in
+the GUI.  This is enforced by subclassing the
+<code>DefaultGlobalModel</code> in the <code>model</code> package to add
+additional constraints to the logic and state of DrJava, while maintaining
+the separation from the pure user interface classes.
+<p>
+
+<h3>Additional Logic</h3><p>
+The <code>SingleDisplayModel</code> is a subclass of
+<code>DefaultGlobalModel</code>, primarily providing the constraint that
+exactly one document is active at any time.  It adds public methods for
+getting and setting the currently active document to the interface provided
+by <code>GlobalModel</code>, and fires a corresponding event through the
+<code>SingleDisplayModelListener</code> class, which is a subclass of
+<code>GlobalModelListener</code>.
+<p>
+
+Note that this behavior is not included in the
+<code>DefaultGlobalModel</code> because the notion of a single active document
+is specific to this user interface.  Alternative GUIs might choose to display
+multiple documents simultaneously, eliminating the need for this additional
+constraint.  Housing this logic in a subclass of
+<code>DefaultGlobalModel</code>, rather than in <code>MainFrame</code> itself,
+allows us to verify through unit tests that only one document can be active.
+<p>
+
+<h3>User Interface</h3><p>
+The graphical user interface is implemented in Swing and is coordinated
+through the <code>MainFrame</code> class.  The general layout and primary
+components of the interface are shown in the image below.
+<p>
+
+<img src="http://csr.wrc.rice.edu/~creis/drjava/ui.png"
+     width=693 height=575 alt="DrJava GUI">
+<p>
+
+<h3>MainFrame</h3><p>
+The <code>MainFrame</code> is the <code>JFrame</code> which houses all
+other components of the GUI.  It is solely a means of displaying the
+state and logic kept within its <code>SingleDisplayModel</code>, and
+maintains as little state of its own as possible.  The
+<code>MainFrame</code> consists of a <code>JMenuBar</code> containing the
+menus, current filename, and toolbar buttons, together with a collection
+of panes for displaying the various components of DrJava.  These include
+a scrollable <code>JList</code> with the <code>OpenDefinitionDocuments</code>,
+a <code>DefinitionsPane</code> for displaying and editing the source code,
+and a tabbed pane at the bottom which houses the
+<code>InteractionsPane</code>, <code>CompilerErrorPanel</code>, and
+<code>OutputPane</code>.
+<p>
+
+In addition to setting up the GUI and passing action requests to the
+model, <code>MainFrame</code> is also responsible for listening to
+events fired by both the <code>GlobalModel</code> and the document
+itself, in order to keep the display current.
+<p>
+
+
+<h3>Other Components</h3><p>
+<ul>
+  <li>The primary GUI component outside the <code>MainFrame</code> is the
+      <code>DefinitionsPane</code>, which is a <code>JEditorPane</code> that
+      is tied to a specific <code>OpenDefinitionsDocument</code> in the
+      model.  This pane handles all highlighting and text indenting for its
+      document, as well as undoing actions specific to the document.
+
+  <li>The <code>InteractionsPane</code> is held in the tabbed pane at the
+      bottom of the interface and provides the actual interaction with the
+      <code>repl</code> interpreter within the <code>GlobalModel</code>.
+
+  <li>The <code>CompilerErrorPanel</code> is another tab in the tabbed pane,
+      and contains both a <code>JComboBox</code> for selecting the compiler
+      and an <code>ErrorListPane</code> for displaying all the errors from
+      the most recent compilation, sorted by document.  The
+      <code>ErrorListPane</code> is an inner class of
+      <code>CompilerErrorPanel</code>, and is responsible for highlighting
+      errors in the list and in the source consistently.
+
+  <li>The <code>OutputPane</code> is the third tab in the tabbed pane, and
+      is simply where <code>System.out</code> and <code>System.err</code>
+      are redirected when DrJava is run.
+
+  <li>The <code>FindReplaceDialog</code> is a separate <code>JDialog</code>
+      which handles the logic and state of finding and replacing text in the
+      code, including highlighting and changing the source position as
+      necessary.  Only one <code>FindReplaceDialog</code> exists in the GUI,
+      and it must be notified each time the active document is changed.
+</ul>
+<p>
 
 </body>
 </html>

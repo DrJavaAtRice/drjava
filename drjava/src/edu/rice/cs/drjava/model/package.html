@@ -9,7 +9,57 @@
 </head>
 <body bgcolor="white">
 
-This is where a description of this package goes.
+The <code>model</code> package is responsible for the majority of the logic
+and state in DrJava.
+
+It is independent of the presentation, allowing different user interfaces
+to be created for the same codebase.  The interfaces and classes in this
+package maintain the state of all open documents, interface to the compiler
+and interaction components, and communicate with the user interface through
+public methods and <code>GlobalModelListeners</code>.
+<p>
+
+<h3>GlobalModel's Role</h3><p>
+The <code>GlobalModel</code> is the central point of DrJava, coordinating
+all components and communicating with the user interface.
+<p>
+
+To maintain state, the <code>GlobalModel</code> keeps a list of the
+<code>OpenDefinitionsDocuments</code>, each of which is responsible for its
+own <code>DefinitionsDocument</code> object and document specific actions
+on that object, such as saving and compiling.
+<p>
+
+The <code>GlobalModel</code> also provides a set of public methods which
+allow it to communicate with the user interface.  This gives the
+<code>ui</code> package access to the <code>OpenDefinitionsDocuments</code>,
+compiler, console, and interactions code.
+<p>
+
+To keep the user interface up-to-date, the <code>GlobalModel</code> fires
+events to all <code>GlobalModelListeners</code> which have registered with
+it.  Events are fired after actions which can affect the user interface, such
+as the opening, saving, and closing of files, or the starting and ending
+of compilation or interaction.
+<p>
+
+<h3>Subpackages</h3><p>
+<ul>
+  <li>The <code>compiler</code> package provides an interface between the
+      <code>model</code> and the available compilers, allowing DrJava to
+      compile documents and maintain any errors produced as a result.
+      
+  <li>The <code>definitions</code> package provides the model of the documents
+      and editor kit, as well as the <code>reducedmodel</code> package for
+      lightweight representation of a document for easy parenthesis matching
+      and similar syntactic features.
+
+  <li>The <code>repl</code> package contains the classes used for the
+      Interactions window, allowing the dynamic execution of Java code
+      from within DrJava.
+
+</ul>
+<p>
 
 </body>
 </html>
