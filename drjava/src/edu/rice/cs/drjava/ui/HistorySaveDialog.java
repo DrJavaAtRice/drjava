@@ -61,7 +61,7 @@ import java.io.*;
  * the current history and allow the user to edit or save it to a file.
  * $Id$
  */
-public class HistorySaveDialog extends ScrollableDialog {
+public class HistorySaveDialog extends DrJavaScrollableDialog {
 
   /**
    * Reference to the history text being edited.

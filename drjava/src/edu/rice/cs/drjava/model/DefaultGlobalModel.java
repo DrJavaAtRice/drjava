@@ -291,7 +291,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
     // Perhaps do this in another thread to allow startup to continue...
     _interpreterControl.startInterpreterJVM();
-    resetInteractionsClasspath();
   }
 
   /**

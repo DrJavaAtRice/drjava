@@ -91,6 +91,8 @@ import edu.rice.cs.util.swing.DelegatingAction;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.ConfirmCheckBoxDialog;
+import edu.rice.cs.util.swing.BorderlessScrollPane;
+import edu.rice.cs.util.swing.BorderlessSplitPane;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 
@@ -771,8 +773,8 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
 
-      new ScrollableDialog(MainFrame.this, "Interactions Classpath",
-                           "Current Interpreter Classpath", classpath).show();
+      new DrJavaScrollableDialog(MainFrame.this, "Interactions Classpath",
+                                 "Current Interpreter Classpath", classpath).show();
     }
   };
 

@@ -55,6 +55,7 @@ import java.net.*;
 import java.io.*;
 import java.util.Vector;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.BorderlessScrollPane;
 
 /**
  * The frame for displaying the HTML help files.

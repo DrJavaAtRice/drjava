@@ -155,6 +155,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   protected void createModel() {
     //_model = new DefaultGlobalModel(_originalModel);
     _model = new DefaultGlobalModel();
+
+    // Wait until it has connected
+    _model._interpreterControl.ensureInterpreterConnected();
   }
   
   /**

@@ -56,6 +56,7 @@ import java.io.*;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.swing.BorderlessScrollPane;
 
 /**
  * Displayed whenever an uncaught exception is thrown and propagates back to an 
