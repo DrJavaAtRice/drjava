@@ -37,48 +37,32 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.definitions.indent;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import junit.framework.*;
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
-/**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020311-1757;
- *
- * @version $Id$
- */
-public abstract class Version {
+class ActionStartPrevLinePlus extends IndentRuleAction {
+  private String _suffix;
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Repeats the indentation from the previous line, plus a string
+   * @param suffix The string to be added
    */
-  private static final String BUILD_TIME_STRING = "20020311-1757";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public ActionStartPrevLinePlus(String suffix) {
+    _suffix = suffix;
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  /**
+   * Indents the line according to the previous line, with the suffix string added.
+   */
+  public void indentLine(DefinitionsDocument doc, int pos) {
+    // START = findPrevDelimiter
+    // START' = scoot behind the delimiter we just found
+    // PREVSTART = findPrevDelimiter(START')              -- prev line's START
+    // sol = startOfLine(PREVSTART);                      -- 1st non-WS on prev line
+    // prevWS = dist btw. PREVSTART and sol
+    // replace area btw. START and startOfLine(START) with prevWS
+    return;
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

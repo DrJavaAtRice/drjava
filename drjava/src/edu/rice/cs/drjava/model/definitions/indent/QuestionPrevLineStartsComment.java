@@ -37,48 +37,40 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
-
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020311-1757;
- *
  * @version $Id$
+ * 
+ * Given the start of the current line is inside a C-style comment, asks
+ * whether the comment begins on the "previous line," ignoring white space.
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20020311-1757";
 
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
+package edu.rice.cs.drjava.model.definitions.indent;
 
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+class QuestionPrevLineStartsComment extends IndentRuleQuestion {
+  QuestionPrevLineStartsComment(IndentRule yesRule, IndentRule noRule) {
+    super(yesRule, noRule);
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  boolean applyRule(DefinitionsDocument doc, int pos) {
+    // return 
+    //   (stateAtRelLocation(dist. to PREVSTART) != INSIDE_BLOCK_COMMENT)
+    // NB: not always accurate.  No false positives, but may give false
+    // negative.  Example:
+    // * /  foo  / *
+    // bar
+    // Indenting at "bar" will not notice that its comment begins on the
+    // "foo" line.  But it will be treated as a continuation of the comment
+    // before "foo", so I think this is acceptable.
+    return true;
   }
+}
+// previous pseudocode:
 
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
+// point = prev line's START
+// while 1 {
+//    if this line starts with "//", keep looking
+//    if this line is empty, keep looking
+//    if this line contains a non-quoted "/*", return true
+//    otherwise, return false
+// }
 
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 

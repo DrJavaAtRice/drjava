@@ -37,48 +37,30 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
-
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020311-1757;
- *
  * @version $Id$
+ * 
+ * Asks whether the current line is empty (contains only whitespace).
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20020311-1757";
+package edu.rice.cs.drjava.model.definitions.indent;
 
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+class QuestionCurrLineEmpty extends IndentRuleQuestion {
+  QuestionCurrLineEmpty(IndentRule yesRule, IndentRule noRule) {
+    super(yesRule, noRule);
   }
+  //private IndentRule _yesRule = new ActionStartPrevLinePlus(" ");
+  //private IndentRule _noRule = new ActionDoNothing();
+  boolean applyRule(DefinitionsDocument doc, int pos) {
+    // one solution: if startOfLine somehow tells you when 
+    //   there's no first WS char on this line
+    //   (i.e. the line is empty), just use that.
+    // otherwise:
+    // START = findPrevDelimiter(start of statement)   --START
+    // END = go forward to find first \n or EOF
+    // return true if there's only WS between START and END    
 
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+    return true;
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

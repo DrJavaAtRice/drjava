@@ -37,48 +37,40 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
-
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020311-1757;
- *
  * @version $Id$
+ * 
+ * Asks whether the beginning of the current line is inside a C-style comment.
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20020311-1757";
 
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
+package edu.rice.cs.drjava.model.definitions.indent;
 
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+
+class QuestionInsideComment extends IndentRuleQuestion {
+  QuestionInsideComment(IndentRule yesRule, IndentRule noRule) {
+    super(yesRule, noRule);
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  //private IndentRule _yesRule = new QuestionPrevLineStartsComment();
+  //private IndentRule _noRule = new QuestionBraceIsParenOrBracket();
+  boolean applyRule(DefinitionsDocument doc, int pos) {
+    // Reduced model makes it easy!
+    // return (stateAtRelLocation(dist. to START) == INSIDE_BLOCK_COMMENT)
+    // [see classes in reducedmodel package:
+    //  ReducedModelStates, AbstractReducedModel, InsideBlockComment]
+    // I only wish we had stateAtAbsLocation.
+    return true;
   }
+}
 
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
+// previous, incorrect version:
 
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+// Search backwards...
+// point = findPrevDelimiter(start of statement)
+// while point != DOCSTART {
+//    if this line starts with "//", keep looking
+//    if this line contains a non-quoted "/*", return true
+//    point = previous START
+// }
+// return false
+

@@ -36,49 +36,66 @@
  * remove the dependency first!)
  *
 END_COPYRIGHT_BLOCK*/
-
-package edu.rice.cs.drjava;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
-
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020311-1757;
- *
  * @version $Id$
+ *
+ * Tests Rule #3: Is the current line empty?
+ * (see http://www.owlnet.rice.edu/~creis/comp312/indentrules.html)
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20020311-1757";
 
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
+package edu.rice.cs.drjava.model.definitions.indent;
 
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+import junit.framework.*;
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+
+// Rule #3: Is the current line empty?
+public class QuestionCurrLineEmptyTest extends IndentRulesTestCase {
+  public QuestionCurrLineEmptyTest(String name) {
+    super(name);
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+  // generic rule always returns false...
+  // to use until we get the actual implementation
+  static IndentRuleQuestion rule3 = new 
+    IndentRuleQuestion(new ActionDoNothing(), new ActionDoNothing()) {
+    public boolean applyRule(DefinitionsDocument doc, int pos) {
+      return false;
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
+  };
 
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
+  public void testDummy() {
   }
-} 
+    
+//  public void testEmpty() throws javax.swing.text.BadLocationException {
+//    // /*
+//    // 
+//    // */
+//    _setDocText("/*\n\n*/");
+//    //               .
+//    //_doc.setCurrentLocation(3);
+//    assertEquals(true, rule3.applyRule(_doc, 3));
+//  }
+//  public void testSpaces() throws javax.swing.text.BadLocationException {
+//    // /*
+//    //                         [some spaces]
+//    // */
+//    _setDocText("/*\n        \n*/");
+//    //                  .
+//    //_doc.setCurrentLocation(6);
+//    assertEquals(true, rule3.applyRule(_doc, 6));
+//  }
+  static String stuffExample = "/*\n   foo   \n*/";
+  //                                .       .
+  // /*
+  //     foo   
+  // */
+//  public void testStuffBefore() throws javax.swing.text.BadLocationException {
+//    _setDocText(stuffExample);
+//    //_doc.setCurrentLocation(3);
+//    assertEquals(false, rule3.applyRule(_doc, 3));
+//  }
+//  public void testStuffAfter() throws javax.swing.text.BadLocationException {
+//    _setDocText(stuffExample);
+//    //_doc.setCurrentLocation(11);
+//    assertEquals(false, rule3.applyRule(_doc, 11));
+//  }
+}
