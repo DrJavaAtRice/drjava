@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
@@ -69,10 +69,10 @@ import edu.rice.cs.drjava.DrJava;
 
 /**
  * An implementation of the interpreter for the repl pane.
- * 
+ *
  * This class is loaded in the Interpreter JVM, not the Main JVM.
  * (Do not use DrJava's config framework here.)
- * 
+ *
  * @version $Id$
  */
 public class DynamicJavaAdapter implements JavaInterpreter {
@@ -107,8 +107,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     try {
       Object result = _djInterpreter.interpret(reader, "DrJava");
       if (print)
-        return result; 
-      else 
+        return result;
+      else
         return JavaInterpreter.NO_RESULT;
     }
     catch (InterpreterException ie) {
@@ -145,7 +145,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   public List<Node> parse(String input) {
     return _djInterpreter.parse(input);
   }
-  
+
   /**
    * Adds a path to the current classpath.
    * @param path the path to add
@@ -163,7 +163,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     StringReader reader = new StringReader("package " + packageName + ";");
     _djInterpreter.interpret(reader, "DrJava");
   }
-  
+
   /**
    * Returns the value of the variable with the given name in
    * the interpreter.
@@ -173,7 +173,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   public Object getVariable(String name) {
     return _djInterpreter.getVariable(name);
   }
-  
+
   /**
    * Returns the class of the variable with the given name in
    * the interpreter.
@@ -183,7 +183,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   public Class getVariableClass(String name) {
     return _djInterpreter.getVariableClass(name);
   }
-  
+
   /**
    * Assigns the given value to the given name in the interpreter.
    * If type == null, we assume that the type of this variable
@@ -198,7 +198,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     }
     ((TreeInterpreter)_djInterpreter).defineVariable(name, value, type);
   }
-  
+
   /**
    * Assigns the given value to the given name in the interpreter.
    * @param name Name of the variable
@@ -207,7 +207,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   public void defineVariable(String name, Object value) {
     ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
-  
+
   /**
    * Assigns the given value to the given name in the interpreter.
    * @param name Name of the variable
@@ -216,7 +216,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   public void defineVariable(String name, boolean value) {
     ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
-  
+
   /**
    * Assigns the given value to the given name in the interpreter.
    * @param name Name of the variable
@@ -243,7 +243,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   public void defineVariable(String name, double value) {
     ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
-  
+
   /**
    * Assigns the given value to the given name in the interpreter.
    * @param name Name of the variable
@@ -253,7 +253,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
 
-  
+
   /**
    * Assigns the given value to the given name in the interpreter.
    * @param name Name of the variable
@@ -280,7 +280,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   public void defineVariable(String name, short value) {
     ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
-  
+
   /**
    * Assigns the given value to the given name in the interpreter.
    * @param name Name of the variable
@@ -360,8 +360,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   public void defineConstant(String name, short value) {
     ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
   }
-  
-  
+
+
   /**
    * Sets whether protected and private variables should be accessible in
    * the interpreter.
@@ -379,7 +379,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   public NameVisitor makeNameVisitor(Context nameContext, Context typeContext) {
     return new NameVisitorExtension(nameContext, typeContext);
   }
-  
+
   /**
    * Factory method to make a new TypeChecker.
    * @param nameContext Context for the NameVisitor
@@ -390,10 +390,10 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    */
 //  public AbstractTypeChecker makeTypeChecker(Context context) {
 //    // TO DO: move this into its own class if more methods need to be added
-//    return AbstractTypeChecker.makeTypeChecker(context);      
+//    return AbstractTypeChecker.makeTypeChecker(context);
 //  }
-// Removed because AbstractTypeChecker contains a makeTypeChecker method  
-  
+// Removed because AbstractTypeChecker contains a makeTypeChecker method
+
   /**
    * Factory method to make a new EvaluationVisitor.
    * @param context the context
@@ -410,11 +410,11 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   public Node processTree(Node node) {
     return node;
   }
-  
+
   public GlobalContext makeGlobalContext(TreeInterpreter i) {
     return new GlobalContext(i);
   }
-  
+
   /**
    * An extension of DynamicJava's interpreter that makes sure classes are
    * not loaded by the system class loader (when possible) so that future
@@ -423,7 +423,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * by user defined classes.  (Without this, classes on "extra.classpath"
    * can only be referred to directly, and cannot be extended, etc.)
    * <p>
-   * 
+   *
    * We also override the evaluation visitor to allow the interpreter to be
    * interrupted and to return NO_RESULT if there was no result.
    */
@@ -434,7 +434,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      */
     public InterpreterExtension() {
       super(new JavaCCParserFactory());
-      
+
       classLoader = new ClassLoaderExtension(this);
       // We have to reinitialize these variables because they automatically
       // fetch pointers to classLoader in their constructors.
@@ -450,7 +450,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       evalVisitorContext = makeGlobalContext(this);
       evalVisitorContext.setAdditionalClassLoaderContainer(clc);
       //System.err.println("set loader: " + classLoader);
-      
+
     }
 
     /**
@@ -471,11 +471,11 @@ public class DynamicJavaAdapter implements JavaInterpreter {
 
         while (it.hasNext()) {
           Node n = (Node)it.next();
-          
+
           // Process, if necessary
           n = processTree(n);
-          
-          
+
+
           NameVisitor nv = makeNameVisitor(nameVisitorContext, checkVisitorContext);
           Node o = n.acceptVisitor(nv);
           if (o != null) n = o;
@@ -490,7 +490,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
           EvaluationVisitor ev = makeEvaluationVisitor(evalVisitorContext);
           result = n.acceptVisitor(ev);
         }
-        
+
         if (result instanceof String) {
           result = "\"" + result + "\"";
         }
@@ -509,7 +509,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
         throw new InterpreterException(e);
       }
     }
-    
+
     /**
      * Assigns the given value to the given name in the interpreter.
      * @param name Name of the variable
@@ -521,7 +521,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       checkVisitorContext.defineConstant(name, c);
       evalVisitorContext.defineConstant(name, value);
     }
-    
+
     /**
      * Assigns the given value to the given name as a constant in the interpreter.
      * @param name Name of the variable
@@ -533,7 +533,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       checkVisitorContext.defineConstant(name, c);
       evalVisitorContext.defineConstant(name, new Boolean(value));
     }
-    
+
     /**
      * Assigns the given value to the given name as a constant in the interpreter.
      * @param name Name of the variable
@@ -545,7 +545,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       checkVisitorContext.defineConstant(name, c);
       evalVisitorContext.defineConstant(name, new Byte(value));
     }
-    
+
     /**
      * Assigns the given value to the given name as a constant in the interpreter.
      * @param name Name of the variable
@@ -557,7 +557,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       checkVisitorContext.defineConstant(name, c);
       evalVisitorContext.defineConstant(name, new Character(value));
     }
-    
+
     /**
      * Assigns the given value to the given name as a constant in the interpreter.
      * @param name Name of the variable
@@ -569,7 +569,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       checkVisitorContext.defineConstant(name, c);
       evalVisitorContext.defineConstant(name, new Double(value));
     }
-    
+
     /**
      * Assigns the given value to the given name as a constant in the interpreter.
      * @param name Name of the variable
@@ -581,7 +581,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       checkVisitorContext.defineConstant(name, c);
       evalVisitorContext.defineConstant(name, new Float(value));
     }
-    
+
     /**
      * Assigns the given value to the given name as a constant in the interpreter.
      * @param name Name of the variable
@@ -593,7 +593,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       checkVisitorContext.defineConstant(name, c);
       evalVisitorContext.defineConstant(name, new Integer(value));
     }
-    
+
     /**
      * Assigns the given value to the given name as a constant in the interpreter.
      * @param name Name of the variable
@@ -623,7 +623,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    */
   public static class ClassLoaderExtension extends TreeClassLoader {
     private static boolean classLoaderCreated = false;
-    
+
     private static StickyClassLoader _stickyLoader;
 
     /**
@@ -664,11 +664,11 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      * This seems to cause problems for us in certain cases, such as accessing
      * static fields or methods in a class that extends a superclass which is
      * loaded by "child" classloader...
-     * 
+     *
      * Instead, we'll replace the old URLClassLoader with a new one containing
      * all the known URLs.
      *
-     * (I don't know if this really works yet, so I'm not including it in 
+     * (I don't know if this really works yet, so I'm not including it in
      * the current release.  CSR, 3-13-2003)
      *
     public void addURL(URL url) {
@@ -680,7 +680,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
         URL[] newURLs = new URL[oldURLs.length + 1];
         System.arraycopy(oldURLs, 0, newURLs, 0, oldURLs.length);
         newURLs[oldURLs.length] = url;
-        
+
         // Create a new class loader with all the URLs
         classLoader = new URLClassLoader(newURLs);
       }
@@ -700,7 +700,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
         DrJava.consoleErr().println("debug class " + name + " to " + file.getAbsolutePath());
       }
       catch (Throwable t) {}
-      
+
       Class c = super.defineClass(name, code);
       return c;
     }

@@ -325,7 +325,7 @@ public class ProjectFileBuilder {
    * @param s the normal string to turn into a string literal
    * @return the valid Java string literal
    */
-  private static String convertToLiteral(String s) {
+  public static String convertToLiteral(String s) {
     String output = s;
     output = replaceAll(output, "\\", "\\\\"); // convert \ to \\
     output = replaceAll(output, "\"", "\\\""); // convert " to \"
