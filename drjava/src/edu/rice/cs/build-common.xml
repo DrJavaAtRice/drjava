@@ -107,7 +107,15 @@ optimize="off"/>
   <echo message="All tests passed. Rebuilding to put version tag (${version-tag}) into the code." />
   <antcall target="compile" />
 
-  <cvs command="commit" />
+  <input message="Please enter the log message for the commit:"
+         addproperty="cvs-commit-message" />
+  <cvs>
+    <commandline>
+      <argument value="commit" />
+      <argument value="-m" />
+      <argument value="${cvs-commit-message}" /> 
+    </commandline>
+  </cvs>
 
   <cvs command="tag -c ${version-tag}" quiet="true" />
 
