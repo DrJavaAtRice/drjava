@@ -398,25 +398,39 @@ public class MainFrame extends JFrame {
 
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
     Dimension frameSize = this.getSize();
+    final int menubarHeight = 24;
 
-    if (frameSize.height > screenSize.height) {
-      frameSize.height = screenSize.height;
+    if (frameSize.height > screenSize.height - menubarHeight) {
+//       System.out.println("Too Tall! " + 
+// 			 screenSize.height + " vs. " + frameSize.height);
+	
+      frameSize.height = screenSize.height - menubarHeight;
+
+//       System.out.println("Frame Height: " + frameSize.height);
     }
 
     if (frameSize.width > screenSize.width) {
+//       System.out.println("Too Wide! " +
+// 			 screenSize.width + " vs. " + frameSize.width);
+
       frameSize.width = screenSize.width;
+
+//       System.out.println("Frame Width: " + frameSize.height);
     }
 
+    this.setSize(frameSize);
     this.setLocation((screenSize.width - frameSize.width) / 2, 
-        (screenSize.height - frameSize.height) / 2);
+        (screenSize.height - frameSize.height - menubarHeight) / 2);
 
     _setUpPanes();
     updateFileTitle();
     _setAllFonts(new Font("Monospaced", 0, 12));
     _docList.setFont(new Font("Monospaced", 0, 10));
     _findReplace = new FindReplaceDialog(this, _currentDefPane);
+
+//     frameSize = this.getSize();
+//     System.out.println("Actual Frame Height: " + frameSize.height);
   }
 
   /**
