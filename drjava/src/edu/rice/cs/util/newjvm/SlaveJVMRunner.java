@@ -48,9 +48,11 @@ package edu.rice.cs.util.newjvm;
 import java.io.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.RemoteException;
-
+import java.rmi.*;
+  
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.ScrollableDialog;
+import edu.rice.cs.util.FileOps;
 
 /**
  * This class is used for its {@link #main} method, which is used
@@ -96,21 +98,39 @@ public final class SlaveJVMRunner {
     }
   }
 
+  
   /**
    * The main method for invoking a slave JVM.
    * 
-   * @param args Command-line parameters, of which there must be two.
+   * @param args Command-line parameters, of which there must be two or three.
    * The first is the absolute path to the file containing the serialized
    * MasterRemote stub, and the second is the fully-qualified class name
    * of the slave JVM implementation class.
+   * the third parameter is optional. it is a file containing the serialized
+   * IRemoteClassLoader to use as the remote classloader. this will only work
+   * if the system classloader has been set to a CustomSystemClassLoader
    */
   public static void main(String[] args) {
     try {
       // Make sure RMI doesn't use an IP address that might change
       System.setProperty("java.rmi.server.hostname", "127.0.0.1");
       
-      if (args.length != 2) System.exit(1);
+      if (args.length != 3 && args.length != 2) System.exit(1);
       
+      // if we have a remote classloader to use
+      if(args.length == 3){
+        //get the classloader
+        IRemoteClassLoader remote = null;
+        FileInputStream fstream = new FileInputStream(args[2]);
+        ObjectInputStream ostream = new ObjectInputStream(fstream);
+        remote = (IRemoteClassLoader) ostream.readObject();
+        if(ClassLoader.getSystemClassLoader() instanceof CustomSystemClassLoader){
+          CustomSystemClassLoader loader = (CustomSystemClassLoader) ClassLoader.getSystemClassLoader();
+          loader.setMasterRemote(remote);
+        }
+      }
+
+      // get the master remote
       FileInputStream fstream = new FileInputStream(args[0]);
       ObjectInputStream ostream = new ObjectInputStream(fstream);
       MasterRemote remote = (MasterRemote) ostream.readObject();
@@ -161,6 +181,7 @@ public final class SlaveJVMRunner {
   private static void _showErrorMessage(String cause, Throwable t) {
     String msg = "An error occurred while starting the slave JVM:\n  " +
       cause + "\n\nOriginal error:\n" + StringOps.getStackTrace(t);
+
     if (SHOW_DEBUG_DIALOGS) {
       new ScrollableDialog(null, "Error", "Error details:", msg).show();
     }

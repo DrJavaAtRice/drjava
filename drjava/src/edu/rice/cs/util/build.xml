@@ -72,11 +72,9 @@
       classpath="${classpath_text}"
       classname="edu.rice.cs.util.newjvm.IntegratedMasterSlaveTest.CounterSlave" />
     
-    <!--
     <rmic base="${built}"
       classpath="${classpath_text}"
-      classname="edu.rice.cs.util.newjvm.CounterSlave" />
-    -->
+      classname="edu.rice.cs.util.newjvm.RemoteClassLoader" />
 
     <copy todir="${built}">
       <fileset dir="${srcroot}">

@@ -46,7 +46,8 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util.newjvm;
 
 import java.rmi.*;
-
+import edu.rice.cs.util.FileOps;
+import java.io.*;
 /**
  * A partial implementation of a {@link SlaveRemote} that provides
  * the quit functionality and that also periodically checks if the master is
@@ -67,6 +68,7 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
    */
   protected String _pollMasterThreadName = "Poll MasterJVM Thread";
 
+  
   /**
    * Quits the slave JVM, calling {@link #beforeQuit} before it does.
    */

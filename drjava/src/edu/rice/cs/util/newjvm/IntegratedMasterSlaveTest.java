@@ -47,6 +47,8 @@ package edu.rice.cs.util.newjvm;
 
 import junit.framework.*;
 import java.rmi.*;
+import edu.rice.cs.util.FileOps;
+import java.io.*;
 
 /**
  * Test cases for the master/slave jvm control framework.
@@ -93,8 +95,9 @@ public class IntegratedMasterSlaveTest extends TestCase {
       // this needs to be reset because the slave is going to check it!
       _letter = 'a';
 
-      invokeSlave();
-
+      invokeSlave(new String[]{"-Djava.system.class.loader=edu.rice.cs.util.newjvm.CustomSystemClassLoader"});
+//      invokeSlave();
+      
       // we don't wait for it to start before calling quit.
       // This should not throw an exception! It should quickly return,
       // queueing up a quit to be processes ASAP.
@@ -117,7 +120,8 @@ public class IntegratedMasterSlaveTest extends TestCase {
 
 //      long start, end;
 //      start = System.currentTimeMillis();
-      invokeSlave();
+      invokeSlave(new String[]{"-Djava.system.class.loader=edu.rice.cs.util.newjvm.CustomSystemClassLoader"});
+//      invokeSlave();
       wait();  // for handleConnected
 //      end = System.currentTimeMillis();
 //      System.err.println((end-start) + "ms waiting for invocation");

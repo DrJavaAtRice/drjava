@@ -47,6 +47,7 @@ package edu.rice.cs.util.newjvm;
 
 import java.io.*;
 import java.util.*;
+import edu.rice.cs.util.FileOps;
 
 /**
  * A utility class to allow executing another JVM.
@@ -158,10 +159,6 @@ public final class ExecJVM {
     _addArray(args, classParams);
 
     String[] argArray = args.toArray(new String[0]);
-
-//    for (int i = 0; i < argArray.length; i++) {
-//      System.err.println("arg #" + i + ": " + argArray[i]);
-//    }
 
     return Runtime.getRuntime().exec(argArray);
   }
