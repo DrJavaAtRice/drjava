@@ -169,6 +169,9 @@ public class InteractionsController {
     _promptToReset = store.getBoolean(DrJavaConstants.INTERACTIONS_RESET_PROMPT);
     _promptIfExited = store.getBoolean(DrJavaConstants.INTERACTIONS_EXIT_PROMPT);
     
+    // Set the interpreter's accessibility
+    _model.setPrivateAccessible(store.getBoolean(DrJavaConstants.ALLOW_PRIVATE_ACCESS));
+    
     // History size
     _doc.getHistory().setMaxSize(store.getInt(DrJavaConstants.HISTORY_MAX_SIZE));
     

@@ -539,4 +539,8 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
     }
     catch (IOException ioe) {}
   }
+  
+  public void setPrivateAccessible(boolean allow) {
+    _interpreterControl.setPrivateAccessible(allow);
+  }
 }

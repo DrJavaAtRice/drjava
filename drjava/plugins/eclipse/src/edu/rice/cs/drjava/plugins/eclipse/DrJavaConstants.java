@@ -64,6 +64,12 @@ public interface DrJavaConstants {
     "interactions.reset.prompt";
   
   /**
+   * Whether to allow users to access to all members in the Interactions Pane.
+   */
+  public static final String ALLOW_PRIVATE_ACCESS =
+    "allow.private.access";
+
+  /**
    * Whether to prompt when the interactions pane is unexpectedly reset.
    */
   public static final String INTERACTIONS_EXIT_PROMPT =
