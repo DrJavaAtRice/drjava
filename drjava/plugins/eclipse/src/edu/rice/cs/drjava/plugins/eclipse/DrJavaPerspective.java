@@ -39,6 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.plugins.eclipse;
 
+import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.search.ui.SearchUI;
@@ -65,7 +66,7 @@ public class DrJavaPerspective implements IPerspectiveFactory {
     IFolderLayout bottom =
       layout.createFolder("bottom", IPageLayout.BOTTOM, 0.75f, editorArea);
     bottom.addView("edu.rice.cs.drjava.InteractionsView");
-    bottom.addPlaceholder(IDebugUIConstants.ID_CONSOLE_VIEW);
+    bottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
     bottom.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
     
     // left: same as Java perspective, need the package view for the files

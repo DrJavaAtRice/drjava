@@ -59,11 +59,12 @@ import edu.rice.cs.drjava.plugins.eclipse.repl.EclipseInteractionsModel;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InputListener;
+import edu.rice.cs.drjava.model.repl.ConsoleDocument;
 import edu.rice.cs.util.text.SWTDocumentAdapter;
 import edu.rice.cs.util.text.SWTDocumentAdapter.SWTStyle;
 import edu.rice.cs.util.text.DocumentAdapter;
+import edu.rice.cs.util.StringOps;
 
-import java.io.File;
 import java.util.Vector;
 
 /**
@@ -99,6 +100,7 @@ public class InteractionsController {
   protected Color _colorDarkGreen;
   protected Color _colorDarkBlue;
   protected Color _colorYellow;
+  protected Color _colorPurple;
 
   /** Whether the Interactions Pane is currently enabled. */
   protected boolean _enabled;
@@ -106,6 +108,7 @@ public class InteractionsController {
   protected static final String INPUT_ENTERED_NAME = "Input Entered";
   protected static final String INSERT_NEWLINE_NAME = "Insert Newline";
 
+  /** Input validator that always accepts input. */
   private IInputValidator _inputValidator = new IInputValidator() {
     public String isValid(String newText) {
       return null;
@@ -125,18 +128,20 @@ public class InteractionsController {
         public void run() {
           try {
             InputDialog input = new InputDialog(_view.getSite().getShell(), "System.in",
-                                                "Please enter the input to System.in",
+                                                "Please enter a line of input to System.in.",
                                                 "", _inputValidator);
             input.open();
             _input = input.getValue();
           }
           catch (Throwable t) {
-            t.printStackTrace();
-            _input = t.getMessage();
+//            t.printStackTrace();
+            _input = StringOps.getStackTrace(t);
           }
         }
       });
-      return _input + "\n";
+      _input += "\n";
+      _doc.insertBeforeLastPrompt(_input, ConsoleDocument.SYSTEM_IN_STYLE);
+      return _input;
     }
   };
 
@@ -150,7 +155,6 @@ public class InteractionsController {
 
   /** Whether to prompt if Interactions are reset unexpectedly. */
   protected boolean _promptIfExited;
-
 
   /**
    * Glue together the given model and view.
@@ -258,6 +262,7 @@ public class InteractionsController {
     _colorDarkGreen = new Color(display, 0, 124, 0);
     _colorDarkBlue = new Color(display, 0, 0, 178);
     _colorYellow = new Color(display, 255, 255, 0);
+    _colorPurple = new Color(display, 124, 0, 124);
 
     // System.out
     SWTStyle out = new SWTStyle(_colorDarkGreen, 0);
@@ -266,6 +271,10 @@ public class InteractionsController {
     // System.err
     SWTStyle err = new SWTStyle(_colorRed, 0);
     _adapter.addDocStyle(InteractionsDocument.SYSTEM_ERR_STYLE, err);
+
+    // System.in
+    SWTStyle in = new SWTStyle(_colorPurple, 0);
+    _adapter.addDocStyle(InteractionsDocument.SYSTEM_IN_STYLE, in);
 
     // Error
     SWTStyle error = new SWTStyle(_colorDarkRed, SWT.BOLD);
@@ -401,7 +410,14 @@ public class InteractionsController {
    * Assigns key bindings to the view.
    */
   protected void _setupView() {
+/*    _view.getTextPane().getDisplay().syncExec(new Runnable() {
+      public void run() {
+        int b1 = ((int) '\t') | SWT.SHIFT;
+        _view.showInfoDialog("binding for " + b1, String.valueOf(_view.getTextPane().getKeyBinding(b1)));
+      }
+    });*/
     _view.getTextPane().addVerifyKeyListener(new KeyUpdateListener());
+//    _view.getTextPane().setKeyBinding(((int) '\t') | SWT.SHIFT, SWT.NULL);
 
     // Set up menu
     _setupMenu();
@@ -490,7 +506,7 @@ public class InteractionsController {
         event.doit = gotoPromptPosAction();
       }
       // tab
-      else if (event.keyCode == '\t') {
+      else if (event.keyCode == '\t' && event.stateMask == 0) {
         event.doit = historyReverseSearchAction();
       }
       // shift+tab
