@@ -567,7 +567,7 @@ public class DirectoryChooser extends JPanel {
       }
     });
     
-//    diag.setLocationRelativeTo(null);
+    diag.setLocationRelativeTo(null);
     diag.setSize(330, 400);
     return diag;
   }
