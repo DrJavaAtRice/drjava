@@ -65,6 +65,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.BooleanOption;
 import edu.rice.cs.drjava.model.print.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.debug.*;
@@ -153,14 +154,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       throw new UnexpectedException(re);
     }
     
-    try{
-      // uncomment this to enable debugger
-      //js _debugManager = new DebugManager(this);
-    }
-    catch( NoClassDefFoundError ncdfe ){
-      // JSwat not present, so we won't use it.
-    }
-      
+    _createDebugger();
   }
   
   /**
@@ -179,15 +173,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     _interpreterControl.setModel(this);
     _interpreterControl.startInterpreterJVM();
     _interpreterControl.reset();
-    try{
-      // uncomment this to enable debugger
-      //js _debugManager = new DebugManager(this);
-    }
-    catch( NoClassDefFoundError ncdfe ){
-      // JSwat not present, so we won't use it.
-    }
+    _createDebugger();
   }
-  
   
   /**
    * Add a listener to this global model.
@@ -1455,6 +1442,27 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     else
       return true;
   }
+  
+  /**
+   * Instantiates the integrated debugger if the "debugger.enabled"
+   * config option is set to true.  Leaves it at null if not.
+   */
+  private void _createDebugger() {
+    boolean useDebug = 
+      DrJava.CONFIG.getSetting(DEBUGGER_ENABLED).booleanValue();
+    if (useDebug) {
+      try {
+        _debugManager = new DebugManager(this);
+      }
+      catch( NoClassDefFoundError ncdfe ){
+        // JSwat not present, so we won't use it.
+      }
+    }
+    else {
+      _debugManager = null;
+    }
+  } 
+  
   
   
   /**

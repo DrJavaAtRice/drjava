@@ -41,43 +41,47 @@ package edu.rice.cs.drjava.config;
 import java.io.File;
 import gj.util.Vector;
 public interface OptionConstants {
-
-    // STATIC VARIABLES    
-    public static final IntegerOption INDENT_LEVEL =
-	new IntegerOption("indent.level",new Integer(2));
-
-    public static final StringOption JAVAC_LOCATION = 
-	new StringOption("javac.location","");
-	
-    public static final StringOption JSR14_LOCATION =
-	new StringOption("jsr14.location","");
-    
-    public static final StringOption JSR14_COLLECTIONSPATH = 
-	new StringOption("jsr14.collectionspath","");
-    
-    public static final VectorOption<String> EXTRA_CLASSPATH = 
-	(new Begin<VectorOption<String>>() {
-	    private String warning =
-	    "WARNING: Configurability interface only supports path separators"+
-	    " of maximum length 1 character as of this moment.";
-	    public VectorOption<String> evaluate() {
-		// system path separator
-		String ps = System.getProperty("path.separator");
-		if(ps.length() > 1) { 
-		    // spit out warning if it's more than one character.
-		    System.err.println(warning);
-		    System.err.println("using '"+ps.charAt(0)+
-				       "' for delimiter.");
-		}
-		StringOption sop = new StringOption("","");
-		String name = "extra.classpath";
-		char delim = ps.charAt(0);
-		return new VectorOption<String>(name,sop,"",delim,"",new Vector<String>());
-	    }
-	}).evaluate();
-
   
-    
+  // STATIC VARIABLES    
+  public static final IntegerOption INDENT_LEVEL =
+    new IntegerOption("indent.level",new Integer(2));
+  
+  public static final StringOption JAVAC_LOCATION = 
+    new StringOption("javac.location","");
+  
+  public static final StringOption JSR14_LOCATION =
+    new StringOption("jsr14.location","");
+  
+  public static final StringOption JSR14_COLLECTIONSPATH = 
+    new StringOption("jsr14.collectionspath","");
+  
+  public static final VectorOption<String> EXTRA_CLASSPATH = 
+    (new Begin<VectorOption<String>>() {
+      private String warning =
+        "WARNING: Configurability interface only supports path separators"+
+        " of maximum length 1 character as of this moment.";
+      public VectorOption<String> evaluate() {
+        // system path separator
+        String ps = System.getProperty("path.separator");
+        if(ps.length() > 1) { 
+          // spit out warning if it's more than one character.
+          System.err.println(warning);
+          System.err.println("using '"+ps.charAt(0)+
+                             "' for delimiter.");
+        }
+        StringOption sop = new StringOption("","");
+        String name = "extra.classpath";
+        char delim = ps.charAt(0);
+        return new VectorOption<String>(name,sop,"",delim,"",new Vector<String>());
+      }
+    }).evaluate();
+  
+  /**
+   * Whether the integrated debugger should be displayed as available.
+   */
+  public static final BooleanOption DEBUGGER_ENABLED =
+    new BooleanOption("debugger.enabled", new Boolean(false));
+  
 }
 
 
