@@ -651,4 +651,176 @@ public class TigerTest extends TestCase {
 //        }
     }
     
+  public void testParseEnumDeclaration1(){
+    testString =
+      "public enum Suit { CLUBS, DIAMONDS, HEARTS, SPADES }";
+    
+    ReferenceType enumType = new ReferenceType("Suit");
+    
+    List<Expression> args1 = new LinkedList<Expression>();
+    args1.add(new StringLiteral("\"CLUBS\""));
+    args1.add(new IntegerLiteral("0"));
+    Allocation constantInit1 = new SimpleAllocation(enumType, args1);
+    
+    List<Expression> args2 = new LinkedList<Expression>();
+    args2.add(new StringLiteral("\"DIAMONDS\""));
+    args2.add(new IntegerLiteral("1"));
+    Allocation constantInit2 = new SimpleAllocation(enumType, args2);
+    
+    List<Expression> args3 = new LinkedList<Expression>();
+    args3.add(new StringLiteral("\"HEARTS\""));
+    args3.add(new IntegerLiteral("2"));
+    Allocation constantInit3 = new SimpleAllocation(enumType, args3);
+    
+    List<Expression> args4 = new LinkedList<Expression>();
+    args4.add(new StringLiteral("\"SPADES\""));
+    args4.add(new IntegerLiteral("3"));
+    Allocation constantInit4 = new SimpleAllocation(enumType, args4);
+
+    int accessFlags = java.lang.reflect.Modifier.PUBLIC;
+    int fieldAccessFlags = java.lang.reflect.Modifier.PUBLIC | java.lang.reflect.Modifier.STATIC | java.lang.reflect.Modifier.FINAL;
+    List<Node> body = new LinkedList<Node> ();
+    
+    body.add(new FieldDeclaration(fieldAccessFlags, enumType, "CLUBS",    constantInit1));
+    body.add(new FieldDeclaration(fieldAccessFlags, enumType, "DIAMONDS", constantInit2));
+    body.add(new FieldDeclaration(fieldAccessFlags, enumType, "HEARTS",   constantInit3));
+    body.add(new FieldDeclaration(fieldAccessFlags, enumType, "SPADES",   constantInit4));
+    
+    EnumDeclaration ed = new EnumDeclaration(accessFlags, "Suit", null, body);
+    assertEquals(ed, parse(testString).get(0));
+  }    
+    
+
+  public void testParseEnumDeclaration2(){
+    testString =
+      "public enum Suit { \n"+
+      "  CLUBS(23), DIAMONDS(75), HEARTS(11), SPADES(61);\n"+
+      "  Suit(int i) {}\n"+
+      "}";
+    
+    List<Expression> args1 = new LinkedList<Expression>();
+    args1.add(new StringLiteral("\"CLUBS\""));
+    args1.add(new IntegerLiteral("0"));
+    args1.add(new IntegerLiteral("23"));
+    List<Expression> args2 = new LinkedList<Expression>();
+    args2.add(new StringLiteral("\"DIAMONDS\""));
+    args2.add(new IntegerLiteral("1"));
+    args2.add(new IntegerLiteral("75"));
+    List<Expression> args3 = new LinkedList<Expression>();
+    args3.add(new StringLiteral("\"HEARTS\""));
+    args3.add(new IntegerLiteral("2"));
+    args3.add(new IntegerLiteral("11"));
+    List<Expression> args4 = new LinkedList<Expression>();
+    args4.add(new StringLiteral("\"SPADES\""));
+    args4.add(new IntegerLiteral("3"));
+    args4.add(new IntegerLiteral("61"));
+
+    ReferenceType enumType = new ReferenceType("Suit");
+    Allocation constantInit1 = new SimpleAllocation(enumType, args1);
+    Allocation constantInit2 = new SimpleAllocation(enumType, args2);
+    Allocation constantInit3 = new SimpleAllocation(enumType, args3);
+    Allocation constantInit4 = new SimpleAllocation(enumType, args4);
+    int accessFlags = java.lang.reflect.Modifier.PUBLIC;
+    int fieldAccessFlags = java.lang.reflect.Modifier.PUBLIC | java.lang.reflect.Modifier.STATIC | java.lang.reflect.Modifier.FINAL;
+    List<Node> body = new LinkedList<Node> ();
+    
+    body.add(new FieldDeclaration(fieldAccessFlags, enumType, "CLUBS",    constantInit1));
+    body.add(new FieldDeclaration(fieldAccessFlags, enumType, "DIAMONDS", constantInit2));
+    body.add(new FieldDeclaration(fieldAccessFlags, enumType, "HEARTS",   constantInit3));
+    body.add(new FieldDeclaration(fieldAccessFlags, enumType, "SPADES",   constantInit4));
+    
+    List<FormalParameter> params = new LinkedList<FormalParameter>();
+    params.add(new FormalParameter(false, new IntType(), "i"));
+    body.add(new ConstructorDeclaration(0, "Suit", params, new LinkedList<ReferenceType>(), null, new LinkedList<Node>()));
+      
+    EnumDeclaration ed = new EnumDeclaration(accessFlags, "Suit", null, body);
+    assertEquals(ed, parse(testString).get(0));
+  }    
+
+  public void testParseEnumDeclaration3(){
+    testString =
+      "public enum Suit { \n"+
+      "  CLUBS(23, null) {void m() {}  void n() {}},\n" +
+      "  DIAMONDS(75, CLUBS) {void m() {}},\n" +
+      "  HEARTS(11, CLUBS) {void m() {}},\n" + 
+      "  SPADES(61, HEARTS) {void m() {}};\n"+
+      "  Suit(int i, Suit s) {}\n"+
+      "  abstract void m();\n"+
+      "  void n() {}\n"+
+      "}";
+    
+    List<Expression> args1 = new LinkedList<Expression>();
+    args1.add(new StringLiteral("\"CLUBS\""));
+    args1.add(new IntegerLiteral("0"));
+    args1.add(new IntegerLiteral("23"));
+    args1.add(new NullLiteral());
+                
+    List<Expression> args2 = new LinkedList<Expression>();
+    args2.add(new StringLiteral("\"DIAMONDS\""));
+    args2.add(new IntegerLiteral("1"));
+    args2.add(new IntegerLiteral("75"));
+    List<IdentifierToken> idnt2  = new LinkedList<IdentifierToken>();
+    idnt2.add(new Identifier("CLUBS"));
+    args2.add(new QualifiedName(idnt2));
+    
+    List<Expression> args3 = new LinkedList<Expression>();
+    args3.add(new StringLiteral("\"HEARTS\""));
+    args3.add(new IntegerLiteral("2"));
+    args3.add(new IntegerLiteral("11"));
+    List<IdentifierToken> idnt3  = new LinkedList<IdentifierToken>();
+    idnt3.add(new Identifier("CLUBS"));
+    args3.add(new QualifiedName(idnt3));
+    
+    List<Expression> args4 = new LinkedList<Expression>();
+    args4.add(new StringLiteral("\"SPADES\""));
+    args4.add(new IntegerLiteral("3"));
+    args4.add(new IntegerLiteral("61"));
+    List<IdentifierToken> idnt4  = new LinkedList<IdentifierToken>();
+    idnt4.add(new Identifier("HEARTS"));
+    args4.add(new QualifiedName(idnt4));
+
+    ReferenceType enumType = new ReferenceType("Suit");
+
+    List<Node> body1 = new LinkedList<Node>();
+    List<Node> body2 = new LinkedList<Node>();
+    List<Node> body3 = new LinkedList<Node>();
+    List<Node> body4 = new LinkedList<Node>();
+    MethodDeclaration m =   new MethodDeclaration(0, new VoidType(), "m", new LinkedList<FormalParameter>(), new LinkedList<ReferenceType>(), new BlockStatement(new LinkedList<Node>()));
+    MethodDeclaration n =   new MethodDeclaration(0, new VoidType(), "n", new LinkedList<FormalParameter>(), new LinkedList<ReferenceType>(), new BlockStatement(new LinkedList<Node>()));
+
+    body1.add(m);
+    body1.add(n);
+    body2.add(m);
+    body3.add(m);
+    body4.add(m);
+    
+    ClassAllocation constantInit1 = new ClassAllocation(enumType, args1, body1);
+    ClassAllocation constantInit2 = new ClassAllocation(enumType, args2, body2);
+    ClassAllocation constantInit3 = new ClassAllocation(enumType, args3, body3);
+    ClassAllocation constantInit4 = new ClassAllocation(enumType, args4, body4);
+    int accessFlags = java.lang.reflect.Modifier.PUBLIC;
+    int fieldAccessFlags = java.lang.reflect.Modifier.PUBLIC | java.lang.reflect.Modifier.STATIC | java.lang.reflect.Modifier.FINAL;
+    List<Node> body = new LinkedList<Node>();
+    body.add(new FieldDeclaration(fieldAccessFlags, enumType, "CLUBS",    constantInit1));
+    body.add(new FieldDeclaration(fieldAccessFlags, enumType, "DIAMONDS", constantInit2));
+    body.add(new FieldDeclaration(fieldAccessFlags, enumType, "HEARTS",   constantInit3));
+    body.add(new FieldDeclaration(fieldAccessFlags, enumType, "SPADES",   constantInit4));
+    
+    List<FormalParameter> params = new LinkedList<FormalParameter>();
+    params.add(new FormalParameter(false, new IntType(), "i"));
+    params.add(new FormalParameter(false, new ReferenceType("Suit"), "s"));
+    body.add(new ConstructorDeclaration(0, "Suit", params, new LinkedList<ReferenceType>(), null, new LinkedList<Node>()));
+    MethodDeclaration am = new MethodDeclaration(java.lang.reflect.Modifier.ABSTRACT, new VoidType(), "m", new LinkedList<FormalParameter>(), new LinkedList<ReferenceType>(), null);
+    body.add(am);
+    body.add(n);
+      
+    EnumDeclaration ed = new EnumDeclaration(accessFlags, "Suit", null, body);
+    assertEquals(ed, parse(testString).get(0));
+  }
+  
+  void xtestParsingFaultyEnum1() {
+     testString =
+      "private enum Suit { CLUBS, DIAMONDS, HEARTS, SPADES }";
+   
+  }
 }

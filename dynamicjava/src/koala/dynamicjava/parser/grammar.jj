@@ -644,6 +644,61 @@ public class Parser {
       endColumn = ec;
     }
   }
+  
+  /**
+   * 
+   */
+  static class EnumConstant {
+    Token id;
+    List/*<Expression>*/ args;
+    ClassBody _classBody;
+    
+    EnumConstant(Token _id, List/*<Expression>*/ _args, ClassBody _class_Body) {
+      id = _id;
+      args = _args;
+      _classBody = _class_Body;
+    }
+    
+    Token                getId() {return id;}
+    List/*<Expression>*/ getArguments() {return args;}
+    ClassBody            getClassBody() {return _classBody;}
+  }
+  
+  List/*<Node>*/ makeEnumBodyDeclarationsFromEnumConsts(String enumTypeName, List/*<EnumConstant>*/ consts) {
+    List/*<Node>*/ list = new LinkedList/*<Node>*/();
+    
+    int accessFlags  = java.lang.reflect.Modifier.PUBLIC;
+        accessFlags |= java.lang.reflect.Modifier.STATIC;
+        accessFlags |= java.lang.reflect.Modifier.FINAL;
+    
+    ReferenceType enumType = new ReferenceType(enumTypeName);
+    
+    Allocation allocExpr = null;
+    
+    Iterator/*<EnumConstant>*/ it = consts.listIterator();
+    int i = 0;
+    while(it.hasNext()){
+      List/*<Expression>*/ args = new LinkedList/*<Expression>*/ ();
+      EnumConstant ec = it.next();
+      
+      args.add(new StringLiteral("\""+ec.getId().image+"\""));
+      args.add(new IntegerLiteral(String.valueOf(i++)));
+      
+      if(ec.getArguments() != null){
+        args.addAll(ec.getArguments());
+      }
+      
+      if (ec.getClassBody() != null){
+        allocExpr = new ClassAllocation(enumType, args, ec.getClassBody().list); 
+      }
+      else {
+        allocExpr = new SimpleAllocation(enumType, args); 
+      }
+      
+      list.add(new FieldDeclaration(accessFlags, enumType, ec.getId().image, allocExpr));
+    }
+    return list;
+  } 
 }
 PARSER_END(Parser)
   
@@ -1240,9 +1295,13 @@ PARSER_END(Parser)
   }
   {
     try {
-      (    LOOKAHEAD( ( "abstract" | "final" | "public" )* "class" )
+    (    //LOOKAHEAD( ( "abstract" | "final" | "public" )* "class" )
+         LOOKAHEAD(classDeclarationLookahead())
          node=classDeclaration()
-         | LOOKAHEAD( ( <STATIC> | <ABSTRACT> | <FINAL> | <PUBLIC> | <PROTECTED> | <PRIVATE> )* <INTERFACE> )
+         | LOOKAHEAD(enumDeclarationLookahead())
+         node=enumDeclaration()
+//       | LOOKAHEAD( ( <STATIC> | <ABSTRACT> | <FINAL> | <PUBLIC> | <PROTECTED> | <PRIVATE> )* <INTERFACE> )
+         | LOOKAHEAD(interfaceDeclarationLookahead())
          node=interfaceDeclaration()
          )
       {
@@ -1689,32 +1748,35 @@ PARSER_END(Parser)
     List/*<Node>*/ list = new LinkedList/*<Node>*/();
   }
   {
-    try {      
-      ( LOOKAHEAD(2)
-         node=initializer()
-         |
-       LOOKAHEAD( classDeclarationLookahead())
-         node=classDeclaration()
-         |
-       LOOKAHEAD( interfaceDeclarationLookahead() )
-         node=interfaceDeclaration()
-         |
-       LOOKAHEAD( constructorDeclarationLookahead() )
-         node=constructorDeclaration()
-         |
-       LOOKAHEAD( methodDeclarationLookahead() )
-         node=methodDeclaration()
-         |
-       list=fieldDeclaration()
-         |
-       ";"
-         )
-      {
-        if (node != null) {
-          list.add(node);
-        }
-        return list;
+    try {
+    ( LOOKAHEAD(2)
+       node=initializer()
+       |
+     LOOKAHEAD( classDeclarationLookahead())
+       node=classDeclaration()
+       |
+     LOOKAHEAD( enumDeclarationLookahead())
+       node=enumDeclaration()
+       |
+     LOOKAHEAD( interfaceDeclarationLookahead() )
+       node=interfaceDeclaration()
+       |
+     LOOKAHEAD( constructorDeclarationLookahead() )
+       node=constructorDeclaration()
+       |
+     LOOKAHEAD( methodDeclarationLookahead() )
+       node=methodDeclaration()
+       |
+     list=fieldDeclaration()
+       |
+     ";"
+       )
+    {
+      if (node != null) {
+        list.add(node);
       }
+      return list;
+    }
     }
     catch (ParseException pe) {
       _throwParseException(pe,"Invalid Member Declaration");
@@ -1973,6 +2035,15 @@ PARSER_END(Parser)
 //    }
 //  }
 //  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   // Production for Initializer ===================================================
   
   /**
@@ -2000,6 +2071,16 @@ PARSER_END(Parser)
       }
     }
   }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   // Productions for Constructor Declaration ======================================
   
@@ -2106,6 +2187,15 @@ PARSER_END(Parser)
     }
   }
   
+  
+  
+  
+  
+  
+  
+  
+  
+  
   // Productions for Interfaces ///////////////////////////////////////////////////
   
   /**
@@ -2194,6 +2284,9 @@ PARSER_END(Parser)
     ( LOOKAHEAD( classDeclarationLookahead() )
        node=classDeclaration()
        |
+     LOOKAHEAD( enumDeclarationLookahead() )
+       node=enumDeclaration()
+       |
      LOOKAHEAD( interfaceDeclarationLookahead() )
        node=interfaceDeclaration()
        |
@@ -2213,6 +2306,132 @@ PARSER_END(Parser)
       _throwParseException(pe, "Invalid interface member declaration");
     }
   }
+  
+  
+  
+  // Productions for Enums ////////////////////////////////////////////////////////
+  
+  /**
+   * Parses an enum declaration
+   * @see koala.dynamicjava.tree.EnumDeclaration
+   */
+  EnumDeclaration enumDeclaration() :
+  {
+    EnumDeclaration  ed;
+    ModifierFlags    md;
+  }
+  {
+    md=modifiers() ed = unmodifiedEnumDeclaration(md)
+    {
+      return ed;
+    }
+  }
+  
+  EnumDeclaration unmodifiedEnumDeclaration(ModifierFlags mf) :
+  {
+    Token            t, e;
+    Token            id;
+    List/*<? extends ReferenceType>*/ impl = null;
+    List/*<Node>*/   body;
+    int   m = 0;
+  }
+  {
+    t=<ENUM>
+    id=<IDENTIFIER>
+    ["implements" impl=ReferenceTypeNameList()]
+    "{"
+    body = enumBody(id.image)
+    e="}"
+    {
+      if (mf != null) m = mf.accessFlags;
+      return new EnumDeclaration(m, id.image, impl, body,
+                                 filename,
+                                 t.beginLine, t.beginColumn,
+                                 e.endLine,   e.endColumn);
+    }  
+  }
+  
+  /**
+   * Parses the body of an enum
+   * @see koala.dynamicjava.tree.Node
+   */
+  List/*<Node>*/ enumBody(String enumTypeName) :
+  {
+    List/*<Node>*/         body = new LinkedList/*<Node>*/();
+    List/*<EnumConstant>*/ consts = null;
+    List/*<Node>*/         decl = null;
+  }
+  {
+    [ consts = enumConstants()
+      { body.addAll(makeEnumBodyDeclarationsFromEnumConsts(enumTypeName, consts)); }
+    ]
+    
+    [","]
+      
+    [ decl = enumBodyDeclarations()
+      { 
+        body.addAll(decl); 
+      }
+    ]
+    
+    {
+      return body;
+    }
+  }
+  
+  List/*<EnumConstant>*/ enumConstants() :
+  {
+    List/*<EnumConstant>*/ list = new LinkedList/*<EnumConstant>*/();
+    EnumConstant individual = null;
+  }
+  {
+    individual = enumConstant()
+    { list.add(individual); }
+    (LOOKAHEAD(2)
+       "," 
+       individual = enumConstant()  
+       { list.add(individual); }
+    )*
+    
+    {
+      return list; 
+    }
+  }
+  
+  EnumConstant enumConstant() :
+  {
+    List/*<Node>*/       body = new LinkedList/*<Node>*/();
+    ArgumentsSuffix args = null;
+    Token                id;
+    ClassBody            _classBody = null;
+  }
+  {
+    id = <IDENTIFIER>
+    [ args = arguments() ]
+    [ _classBody = classBody() ]
+      
+    {
+      return new EnumConstant(id, (args==null) ? null : args.arguments, _classBody);
+    }
+  }
+  
+  List/*<Node>*/ enumBodyDeclarations() :
+  {
+    List/*<Node>*/ body = new LinkedList/*<Node>*/();
+    List/*<Node>*/ decl = null;
+  }
+  {
+    ";"
+    (
+      decl = classBodyDeclaration()
+      { body.addAll(decl); }
+    )*
+    
+    {
+      return body;
+    }
+  }  
+  
   
   // Productions for Arrays ////////////////////////////////////////////////////////
   
@@ -2262,6 +2481,29 @@ PARSER_END(Parser)
     }
   }
   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   // Productions for Blocks And Statements ////////////////////////////////////////////
   
   /**
@@ -2310,6 +2552,10 @@ PARSER_END(Parser)
            list.add(node);
          }
        | node=unmodifiedClassDeclaration(null)
+         {
+           list.add(node);
+         }
+       | node=unmodifiedEnumDeclaration(null)
          {
            list.add(node);
          }
@@ -2830,6 +3076,17 @@ ForSlashEachStatement forStatement() :
           }
         }
   }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   // Productions for Statements /////////////////////////////////////////////////////////
   
@@ -3798,7 +4055,7 @@ ForSlashEachStatement forStatement() :
     Token t;
     ArrayAllocation.TypeDescriptor td;
     Type            pt;
-    List/*<Type>*/ typeArgs = null;
+    List/*<Type>*/  typeArgs = null;
     ArgumentsSuffix as;
     ClassBody       cb = null;
   }
@@ -3880,6 +4137,20 @@ ForSlashEachStatement forStatement() :
      }
      )
   }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   // Productions for Types ///////////////////////////////////////////////////////////
   
@@ -4399,6 +4670,15 @@ ForSlashEachStatement forStatement() :
   /**
    * Used internally for lookahead
    */
+  void enumBodyLookahead() :
+  {}
+  {
+    "{" [ enumConstants()] [","] ";" ( classBodyDeclarationLookahead() )* "}"
+  }
+  
+  /**
+   * Used internally for lookahead
+   */
   void classBodyDeclarationLookahead() :
   {}
   {
@@ -4406,6 +4686,9 @@ ForSlashEachStatement forStatement() :
       |
       LOOKAHEAD( classDeclarationLookahead() )
       classDeclarationLookahead2()
+      |
+      LOOKAHEAD( enumDeclarationLookahead() )
+      enumDeclaration()
       |
       LOOKAHEAD( interfaceDeclarationLookahead() )
       interfaceDeclarationLookahead2()
@@ -4571,6 +4854,8 @@ ForSlashEachStatement forStatement() :
       statementLookahead()
       |
       unmodifiedClassDeclarationLookahead()
+      |
+      unmodifiedEnumDeclarationLookahead()
       |
       unmodifiedInterfaceDeclarationLookahead()
   }
@@ -4844,6 +5129,15 @@ ForSlashEachStatement forStatement() :
   /**
    * Used internally for lookahead
    */
+  void enumDeclarationLookahead() :
+  {}
+  {
+    modifiersLookahead() "enum"
+  }
+  
+  /**
+   * Used internally for lookahead
+   */
   void classDeclarationLookahead2() :
   {}
   {
@@ -4859,6 +5153,24 @@ ForSlashEachStatement forStatement() :
     "class" <IDENTIFIER> [ TypeParametersLookahead() ] [ "extends" nameLookahead() ]
       [ "implements" nameListLookahead() ]
       classBodyLookahead()
+  }
+  
+//  /**
+//   * Used internally for lookahead
+//   */
+//  void enumDeclarationLookahead2() :
+//  {}
+//  {
+//    modifiersLookahead() unmodifiedEnumDeclarationLookahead()
+//  }
+//  
+  /**
+   * Used internally for lookahead
+   */
+  void unmodifiedEnumDeclarationLookahead() :
+  {}
+  {
+    "enum" <IDENTIFIER> [ "implements" nameListLookahead() ]  enumBodyLookahead()
   }
   
   /**
@@ -4897,6 +5209,9 @@ ForSlashEachStatement forStatement() :
   {
     LOOKAHEAD( classDeclarationLookahead() )
       classDeclarationLookahead2()
+      |
+    LOOKAHEAD( enumDeclarationLookahead() )
+      enumDeclaration()
       |
       LOOKAHEAD( interfaceDeclarationLookahead() )
       interfaceDeclarationLookahead2()

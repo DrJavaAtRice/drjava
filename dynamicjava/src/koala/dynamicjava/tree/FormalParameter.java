@@ -85,7 +85,6 @@ public class FormalParameter extends Node {
    * @param f     is the parameter final?
    * @param t     the type of the parameter
    * @param n     the name of the parameter
-   * @param va    whether paramater is a varargs
    * @param fn    the filename
    * @param bl    the begin line
    * @param bc    the begin column
