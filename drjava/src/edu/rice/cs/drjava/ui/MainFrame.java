@@ -6882,9 +6882,9 @@ public class MainFrame extends JFrame implements OptionConstants {
                                     _cutLineAction, null, "Cut Line");
     KeyBindingManager.Singleton.put(KEY_CLEAR_LINE,
                                     _clearLineAction, null, "Clear Line");
-    KeyBindingManager.Singleton.put(KEY_DELETE_PREVIOUS,
+    KeyBindingManager.Singleton.put(KEY_SHIFT_DELETE_PREVIOUS,
                                     _actionMap.get(DefaultEditorKit.deletePrevCharAction), null, "Delete Previous");
-    KeyBindingManager.Singleton.put(KEY_DELETE_NEXT,
+    KeyBindingManager.Singleton.put(KEY_SHIFT_DELETE_NEXT,
                                     _actionMap.get(DefaultEditorKit.deleteNextCharAction), null, "Delete Next");
   }
 

@@ -131,6 +131,7 @@ public final class DefinitionsPaneTest extends TestCase {
                                              shiftDeleteCode));
     _assertDocumentContents(doc, "ts", "Did not delete on shift+delete");
   }
+
   
   /**
    * Tests that typing a brace in a string/comment does not cause an indent.
@@ -623,7 +624,13 @@ public final class DefinitionsPaneTest extends TestCase {
                                               KeyEvent.KEY_RELEASED,
                                               (new Date()).getTime(),
                                               0,
-					      backspaceCode));
+                                              backspaceCode));
+     definitions.processKeyEvent(new KeyEvent(definitions,
+                                              KeyEvent.KEY_TYPED,
+                                              (new Date()).getTime(),
+                                              0,
+                                              KeyEvent.VK_UNDEFINED,
+                                              '\b'));
      _assertDocumentContents(doc, "tes", "Deleting with Backspace went wrong");
   }
   

@@ -661,17 +661,29 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_PREVIOUS_WORD =
     new KeyStrokeOption("key.previous.word", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, mask));
 
-  /**
+ /**
    * The key binding for deleting the next character
    */
   public static final KeyStrokeOption KEY_DELETE_NEXT =
     new KeyStrokeOption("key.delete.next",
                         KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
   /**
-   * The key binding for deleting the previous character
+   * The key binding for deleting the previous character (with shift set)
    */
   public static final KeyStrokeOption KEY_DELETE_PREVIOUS =
     new KeyStrokeOption("key.delete.previous", KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0));
+
+  /**
+   * The key binding for deleting the next character (with shift set)
+   */
+  public static final KeyStrokeOption KEY_SHIFT_DELETE_NEXT =
+    new KeyStrokeOption("key.delete.next",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.SHIFT_MASK));
+  /**
+   * The key binding for deleting the previous character (with shift set)
+   */
+  public static final KeyStrokeOption KEY_SHIFT_DELETE_PREVIOUS =
+    new KeyStrokeOption("key.delete.previous", KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, InputEvent.SHIFT_MASK));
 
   /**
    * The key binding for moving the cursor down
