@@ -63,6 +63,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.DebugManager;
 import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
+import edu.rice.cs.drjava.ui.JUnitPanel.JUnitErrorListPane;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.util.swing.DelegatingAction;
@@ -293,16 +294,37 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Compiles the document in the definitions pane. */
   private Action _compileAction = new AbstractAction("Compile Current Document") {
     public void actionPerformed(ActionEvent ae) {
+      if (!_errorPanel.isDisplayed()) {
+        ErrorListPane elp = _errorPanel.getErrorListPane();
+        elp.setSize(_tabbedPane.getMinimumSize());
+        showTab(_errorPanel);
+      }
       _compile();
+      _tabbedPane.setSelectedComponent(_errorPanel);
+      _setDividerLocation();
     }
   };
 
   /** Runs JUnit on the document in the definitions pane. */
   private Action _junitAction = new AbstractAction("Test Using JUnit") {
     public void actionPerformed(ActionEvent ae) {
-      if (!_junitPanel.isDisplayed())
+      // display the compiler output tab since a compilation will occur
+      if (!_errorPanel.isDisplayed()) {
+        ErrorListPane elp = _errorPanel.getErrorListPane();
+        elp.setSize(_tabbedPane.getMinimumSize());
+        showTab(_errorPanel);
+      }
+      // display the test output tab
+      if (!_junitPanel.isDisplayed()) {
+        JUnitErrorListPane elp = _junitPanel.getJUnitErrorListPane();
+        elp.setSize(_tabbedPane.getMinimumSize());
         showTab(_junitPanel);
+      }
       _junit();
+      // it will not be displayed if a compilation error occured while running JUnit
+      if (_junitPanel.isDisplayed())
+        _tabbedPane.setSelectedComponent(_junitPanel);
+      _setDividerLocation();
     }
   };
 
@@ -366,11 +388,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       _tabbedPane.setSelectedComponent(_findReplace);  
       _findReplace.requestFocus();
-      int divLocation = _mainSplit.getHeight() - 
-        _mainSplit.getDividerSize() - 
-        (int)_tabbedPane.getMinimumSize().getHeight();
-      if (_mainSplit.getDividerLocation() > divLocation)
-        _mainSplit.setDividerLocation(divLocation);
+      _setDividerLocation();
     }
   };
 
@@ -1661,8 +1679,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _tabs.addLast(_findReplace);
     
     // Show compiler output pane by default
-    showTab(_errorPanel);
-    showTab(_junitPanel);
+    //showTab(_errorPanel);
+    //showTab(_junitPanel);
     
     _tabbedPane.setSelectedIndex(0);
     
@@ -1964,6 +1982,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       _errorPanel.reset();
       //_compileAction.setEnabled(true);
     }
+    
+    public void compileErrorDuringJUnit() {
+      System.err.println("Called");
+      removeTab(_junitPanel);
+      _tabbedPane.setSelectedComponent(_errorPanel);
+    }
 
     public void junitStarted() {
       //_tabbedPane.setSelectedIndex(JUNIT_TAB);
@@ -1976,7 +2000,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _updateErrorListeners();
       _errorPanel.reset();
       _junitPanel.reset();
-      _tabbedPane.setSelectedComponent(_junitPanel);
+      //_tabbedPane.setSelectedComponent(_junitPanel);
     }
 
     public void interactionsExited(int status) {
@@ -2167,15 +2191,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
-  public void installFindReplaceDialog(FindReplaceDialog frd) {
-    frd.beginListeningTo(_currentDefPane);
-  }
-  
-  public void uninstallFindReplaceDialog(FindReplaceDialog frd) {
-    //remove listeners
-    frd.stopListening();
-  }
-
   public JViewport getDefViewport() {
     JScrollPane defScroll = (JScrollPane)
       _defScrollPanes.get(_model.getActiveDocument());
@@ -2195,6 +2210,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   public void showTab(Component c) {
     int numVisible = 0;
     TabbedPanel tp;
+    
     for (int i = 0; i < _tabs.size(); i++) {
       tp = (TabbedPanel)_tabs.get(i);
       if (tp == c) {
@@ -2208,5 +2224,13 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (tp.isDisplayed())
         numVisible++;
     }
+  }
+  
+  private void _setDividerLocation() {    
+    int divLocation = _mainSplit.getHeight() - 
+      _mainSplit.getDividerSize() - 
+      (int)_tabbedPane.getMinimumSize().getHeight();
+    if (_mainSplit.getDividerLocation() > divLocation)
+      _mainSplit.setDividerLocation(divLocation);
   }
 }

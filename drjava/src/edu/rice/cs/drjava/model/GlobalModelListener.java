@@ -103,6 +103,11 @@ public interface GlobalModelListener {
    * Called when a compile has finished running.
    */
   public void compileEnded();
+  
+  /**
+   * Called when a compile error occurs when JUnit is being run
+   */
+  public void compileErrorDuringJUnit();
 
   /**
    * Called after JUnit is started by the GlobalModel.

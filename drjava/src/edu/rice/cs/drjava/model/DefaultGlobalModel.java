@@ -1122,6 +1122,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
         startCompile();
         if(getNumErrors() != 0) {
+          notifyListeners(new EventNotifier() {
+            public void notifyListener(GlobalModelListener l) {
+            l.compileErrorDuringJUnit();
+          }
+          });        
           return null;
         }
 

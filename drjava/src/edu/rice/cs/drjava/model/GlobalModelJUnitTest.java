@@ -121,12 +121,16 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     final File file = new File(_tempDir, "MonkeyTestCompileError.java");
     doc.saveFile(new FileSelector(file));
     
-    CompileShouldFailListener listener = new CompileShouldFailListener();
+    CompileShouldFailListener listener = new CompileShouldFailListener() {
+      public void compileErrorDuringJUnit() { compileErrorDuringJUnitCount++; }
+    };
     
     _model.addListener(listener);
+    listener.assertCompileErrorDuringJUnitCount(0);
     doc.startJUnit();
     listener.checkCompileOccurred();
     assertCompileErrorsPresent("JUnit", true);
+    listener.assertCompileErrorDuringJUnitCount(1);
     listener.assertJUnitStartCount(0);
     listener.assertJUnitEndCount(0);
   }
