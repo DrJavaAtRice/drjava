@@ -337,7 +337,7 @@ public interface OptionConstants extends ConfigurationTool {
     (!CodeStatus.DEVELOPMENT)?
     null:
     new KeyStrokeOption("key.abort.interaction", 
-                        KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
   /**
    * The key binding for moving the cursor backwards
    */

@@ -97,6 +97,12 @@ public class InteractionsPane extends JTextPane {
     }
   };
   
+  AbstractAction _selectToFrozenPosAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      selectToPrompt();
+    }
+  };
+  
   AbstractAction _moveLeft = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (getCaretPosition() < _model.getInteractionsFrozenPos()) {
@@ -139,16 +145,23 @@ public class InteractionsPane extends JTextPane {
     super(model.getInteractionsDocument());
     _model = model;
     
+    // Get proper cross-platform mask.
+    int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+    
     //add actions for enter key, etc.
     Keymap ourMap = addKeymap("INTERACTIONS_KEYMAP", getKeymap());
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), 
                                  _evalAction);
 
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), 
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_B, mask), 
                                  _clearCurrentAction);
 
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0), 
                                  _gotoFrozenPosAction);
+    
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_HOME,
+                                                        java.awt.Event.SHIFT_MASK), 
+                                 _selectToFrozenPosAction);
 
     // Up and down need to be bound both for keypad and not
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0), 
@@ -183,6 +196,11 @@ public class InteractionsPane extends JTextPane {
   
   private void moveToPrompt() {
     setCaretPosition(_model.getInteractionsFrozenPos());
+  }
+  
+  private void selectToPrompt() {
+    // Selects the text between the old pos and the prompt
+    moveCaretPosition(_model.getInteractionsFrozenPos());
   }
   
   private void moveLeft() {

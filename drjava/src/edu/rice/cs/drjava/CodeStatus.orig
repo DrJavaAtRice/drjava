@@ -46,7 +46,6 @@ package edu.rice.cs.drjava;
  * To set the flag to false, use the "stable" target in ant and the 
  * "development" target to set the flag to true.  All new features during a beta
  * test period should be surrounded by a conditional based on this flag.
- * @version $Id$
  */
 public class CodeStatus {
   public static final boolean DEVELOPMENT = @DEVELOPMENT@;
