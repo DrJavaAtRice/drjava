@@ -110,10 +110,8 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
     _model.addListener(listener);
-    int numErrors = _model.getNumErrors();
     synchronized(listener) {
       _model.compileAll();
-      numErrors = _model.getNumErrors();
       if (_model.getNumErrors() > 0) {
         fail("compile failed: " + getCompilerErrorString());
       }
@@ -224,9 +222,10 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         assertInteractionsResetCount(0);
         assertConsoleResetCount(0);
         
-        File f = null;
+        //File f = null;
         try {
-          f = doc.getFile();
+          //f = 
+          doc.getFile();
         }
         catch (IllegalStateException ise) {
           // We know file should exist

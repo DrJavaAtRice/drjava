@@ -70,8 +70,6 @@ public final class VectorOptionTest extends TestCase {
   }
   
   public void testParse() {
-    Vector<Integer> iv = new Vector<Integer>();
-    
     assertTrue(_ivo.parse("[]").isEmpty());
     assertTrue(_bvo.parse("[]").isEmpty());
     

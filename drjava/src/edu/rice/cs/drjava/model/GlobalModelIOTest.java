@@ -261,7 +261,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     
     _model.addListener(listener);
     try {
-      OpenDefinitionsDocument newDoc =
+      //OpenDefinitionsDocument newDoc =
         _model.openFile(new CancelingSelector());
     }
     catch (AlreadyOpenException aoe) {
@@ -363,7 +363,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     
     // Now reopen
     try {
-      OpenDefinitionsDocument doc2 = _model.openFile(new FileSelector(tempFile));
+      //OpenDefinitionsDocument doc2 = 
+        _model.openFile(new FileSelector(tempFile));
       fail("file should already be open");
     }
     catch (AlreadyOpenException aoe) {
@@ -382,7 +383,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       String dotSlash = "." + System.getProperty("file.separator");
       parent = new File(parent, dotSlash);
       File sameFile = new File(parent, tempFile.getName());
-      OpenDefinitionsDocument doc2 = _model.openFile(new FileSelector(sameFile));
+      //OpenDefinitionsDocument doc2 = 
+        _model.openFile(new FileSelector(sameFile));
       fail("file should already be open");
     }
     catch (AlreadyOpenException aoe) {
@@ -477,7 +479,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     
     _model.addListener(listener);
     try {
-      OpenDefinitionsDocument newDoc =
+      //OpenDefinitionsDocument newDoc =
         _model.openFiles(new CancelingSelector());
     }
     catch (AlreadyOpenException aoe) {
@@ -496,9 +498,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       assertModified(true, doc1);
       assertContents(FOO_TEXT, doc1);
       
-      doc1 = docs.get(1);
-      assertModified(true, doc1);
-      assertContents(BAR_TEXT, doc1);
+      doc2 = docs.get(1);
+      assertModified(true, doc2);
+      assertContents(BAR_TEXT, doc2);
     }
   }
   
@@ -565,7 +567,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
   {
     
     OpenDefinitionsDocument doc = null;
-    final File tempFile1 = writeToNewTempFile(FOO_TEXT);
+    //final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     
     try {
       doc = _model.openFiles(new FileOpenSelector() {
@@ -620,9 +622,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     
     TestListener listener = new TestListener() {
       public void fileOpened(OpenDefinitionsDocument doc) {
-        File file = null;
+        //File file = null;
         try {
-          file = doc.getFile();
+          //file = 
+          doc.getFile();
         }
         catch (IllegalStateException ise) {
           // We know file should exist
@@ -1015,9 +1018,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     
     TestListener listener = new TestListener() {
       public void fileOpened(OpenDefinitionsDocument doc) {
-        File file = null;
+        //File file = null;
         try {
-          file = doc.getFile();
+          //file = 
+          doc.getFile();
         }
         catch (IllegalStateException ise) {
           // We know file should exist
@@ -1223,7 +1227,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     _model.saveHistory(fs);
     
     // check that the file contains the correct value
-    String newLine = System.getProperty("line.separator");
+    //String newLine = System.getProperty("line.separator");
     assertEquals("contents of saved file",
                  History.HISTORY_FORMAT_VERSION_2 + s1 + "\n" + s2 + ";\n",
                  FileOps.readFileAsString(f));

@@ -45,7 +45,7 @@ import javax.swing.Action;
  * Central interface for all platform-specific code in DrJava.
  * A default platform-neutral implementation is provided in DefaultPlatform.
  * @version $Id$
- * @see DefaultPlatform
+ * @see edu.rice.cs.drjava.platform.DefaultPlatform
  */
 public interface PlatformSupport {
   

@@ -141,7 +141,7 @@ public class CompilerErrorModel<T extends CompilerError> {
   /**
    * Returns the position of the given error in the document representing its file
    */
-  public Position getPosition(T error) {
+  public Position getPosition(CompilerError error) {
     int spot = Arrays.binarySearch(_errors, error);
     return _positions[spot];
   }

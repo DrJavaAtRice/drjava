@@ -1093,7 +1093,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         // Get sourceroots and all files
         File[] sourceRoots = getSourceRootSet();
         ArrayList<File> filesToCompile = new ArrayList<File>();
-        int index = 0;
         for (int i = 0; i < _definitionsDocs.getSize(); i++) {
           OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
             _definitionsDocs.getElementAt(i);

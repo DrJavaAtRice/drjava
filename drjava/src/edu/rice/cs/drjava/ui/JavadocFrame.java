@@ -39,11 +39,17 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
+import javax.swing.text.BadLocationException;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.io.File;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.IOException;
+
+import edu.rice.cs.util.UnexpectedException;
 
 /**
  * DrJava's Javadoc viewing frame
@@ -51,28 +57,89 @@ import java.io.File;
  */
 public class JavadocFrame extends HTMLFrame {
   
+  private static final int MAX_READ_PACKAGES_LINES = 100;
+  private static final int MAX_READ_FOR_LINK_LINES = 100;
   private static final String[] INTRO_PAGE= {
     "overview-summary.html",
     "packages.html"
   };
   private static final String INDEX_PAGE= "allclasses-frame.html";
   
-  private static String introPagePath(File destDir) {
+  private static String introPagePath(File destDir, String curClass) {
     // Iterate through possible intro pages, looking for one that exists.
-    File test = new File(destDir, INTRO_PAGE[0]);
-    int i = 0;
+    File test = new File(destDir, curClass + ".html");
+    int i = -1;
     while (!test.exists() && (i < INTRO_PAGE.length)) {
       i++;
       test = new File(destDir, INTRO_PAGE[i]);
     }
+    
+    // Packages.html might just be a pointer to another file
+    if (test.getName().equals("packages.html")) {
+      test = _parsePackagesFile(test, destDir);
+    }
     return test.getAbsolutePath();
   }
-    
   
-  public JavadocFrame(File destDir) throws MalformedURLException {
+  /**
+   * Reads through the beginning of the packages.html file to determine
+   * if it is just a pointer to another file.  Returns either the same
+   * file (if it's not a pointer), or the file used for "No frames" (if
+   * it is a pointer).
+   * @param packages Full path to the packages.html file
+   */
+  private static File _parsePackagesFile(File packages, File destDir) {
+    try {
+      FileReader fr = new FileReader(packages);
+      BufferedReader br = new BufferedReader(fr);
+      boolean found = false;
+      String line = br.readLine();
+      int numLinesRead = 1;
+      while ((!found) &&
+             (numLinesRead < MAX_READ_PACKAGES_LINES) &&
+             (line != null)) {
+        found = (line.indexOf("The front page has been relocated") != -1);
+        if (!found) {
+          line = br.readLine();
+          numLinesRead++;
+        }
+      }
+      
+      // Replace packages.html with the No Frames link.
+      if (found) {
+        boolean foundLink = false;
+        while ((!foundLink) &&
+               (numLinesRead < MAX_READ_FOR_LINK_LINES) &&
+               (line != null)) {
+          foundLink = (line.indexOf("Non-frame version") != -1);
+          if (!foundLink) {
+            line = br.readLine();
+            numLinesRead++;
+          }
+        }
+        
+        if (foundLink) {
+          String start = "HREF=\"";
+          int startIndex = line.indexOf(start) + start.length();
+          int endIndex = line.indexOf("\">");
+          if ((startIndex != -1) && (endIndex != -1)) {
+            String filename = line.substring(startIndex, endIndex);
+            return new File(destDir, filename);
+          }
+        }
+      }
+    }
+    catch (IOException ioe) {
+      throw new UnexpectedException(ioe);
+    }
+    
+    return packages;
+  }
+  
+  public JavadocFrame(File destDir, String curClass) throws MalformedURLException {
     // This call has to happen first!
     super("Javadoc Viewer",
-          new URL("file", "", introPagePath(destDir)),
+          new URL("file", "", introPagePath(destDir, curClass)),
           new URL("file", "", (new File(destDir, INDEX_PAGE)).getAbsolutePath()),
            "DrJavadoc.png", destDir);
 

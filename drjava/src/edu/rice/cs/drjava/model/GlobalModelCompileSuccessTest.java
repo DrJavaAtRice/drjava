@@ -137,9 +137,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelTestCase {
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
-    int numErrors = _model.getNumErrors();
     _model.compileAll();
-    numErrors = _model.getNumErrors();
     if (_model.getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }

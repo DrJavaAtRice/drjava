@@ -3834,8 +3834,19 @@ public class MainFrame extends JFrame implements OptionConstants {
           // Display the results.
 //             System.out.println("did we get this far?");
           if (success) {
+            String className = "";
             try {
-              _javadocFrame = new JavadocFrame(destDir);
+              className =
+                _model.getActiveDocument().getDocument().getQualifiedClassName();
+              className = className.replace('.', File.separatorChar);
+            }
+            catch (ClassNameNotFoundException cnf) {
+              // If there is no class name, pass the empty string as a flag.
+              // We don't want to blow up here.
+              className = "";
+            }
+            try {
+              _javadocFrame = new JavadocFrame(destDir, className);
               _javadocFrame.show();
             }
             catch (MalformedURLException me) {

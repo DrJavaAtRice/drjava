@@ -54,11 +54,11 @@ public class DebugStackData {
    * @param frame JPDA's reference to the stack frame
    */
   public DebugStackData(StackFrame frame) {
-    String method = "(unknown)";
-    String line = "(unknown)";
-    method = frame.location().declaringType().name() + "." +
+    //String method = "(unknown)";
+    //String line = "(unknown)";
+    _method = frame.location().declaringType().name() + "." +
       frame.location().method().name();
-    _method = method;
+    //_method = method;
     _line = frame.location().lineNumber();
   }
   

@@ -319,7 +319,8 @@ public class DrJava implements OptionConstants {
         }
       };
       try {
-        OpenDefinitionsDocument doc = mf.getModel().openFile(command);
+        //OpenDefinitionsDocument doc = 
+        mf.getModel().openFile(command);
       }
       catch (FileNotFoundException ex) {
         // TODO: show a dialog? (file not found)

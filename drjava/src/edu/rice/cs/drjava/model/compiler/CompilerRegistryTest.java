@@ -126,7 +126,8 @@ public final class CompilerRegistryTest extends TestCase {
    */
   public void testLimitOneByOne() {
     for (int i = 0; i < _allAvailableCompilers.length; i++) {
-      CompilerInterface[] compilers = _getCompilersAfterDisablingOne(i);
+      //CompilerInterface[] compilers = 
+      _getCompilersAfterDisablingOne(i);
       // That method includes all the tests we need!
     }
   }

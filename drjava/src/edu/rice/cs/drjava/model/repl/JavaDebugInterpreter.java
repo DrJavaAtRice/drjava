@@ -313,6 +313,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * @return corresponding QualifiedName
    */
   protected QualifiedName _convertThisToName(ThisExpression node) {
+    // Can't parametize this List for some reason.
     List ids = new LinkedList();
     ids.add(new Identifier("this", node.getBeginLine(), node.getBeginColumn(),
                            node.getEndLine(), node.getEndColumn()));

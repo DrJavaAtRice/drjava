@@ -1344,6 +1344,7 @@ public final class DebugTest extends DebugTestCase
       _notifierLock.wait();
     }
 
+    // TODO: Why is this call being made?
     DebugThreadData threadA = new DebugThreadData(_debugger.getCurrentThread());
     DebugThreadData threadB = new DebugThreadData(_debugger.getThreadAt(1));
 

@@ -474,7 +474,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
           // check and see if this error is without source info, and
           // if so don't try to highlight source info!
           if (!error.hasNoLocation()) {
-            CompilerErrorModel<CompilerError> errorModel = getErrorModel();
+            CompilerErrorModel errorModel = getErrorModel();
             Position pos = errorModel.getPosition(error);
 
             // move caret to that position

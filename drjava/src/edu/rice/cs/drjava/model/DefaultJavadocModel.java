@@ -41,6 +41,7 @@ package edu.rice.cs.drjava.model;
 
 import java.io.*;
 import java.util.HashSet;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -565,10 +566,16 @@ public class DefaultJavadocModel implements JavadocModel {
       // error message is everything after the colon and space that are after the line number
       String errMessage = line.substring(pos+2);
       
+      // check to see if the first word in the error message is "warning"
+      boolean isWarning = false;
+      if (errMessage.substring(0, 7).equalsIgnoreCase("warning")) {
+        isWarning = true;
+      }
+      
       if (lineno >= 0) {
-        error = new CompilerError(new File(filename), lineno, 0, errMessage, false);
+        error = new CompilerError(new File(filename), lineno, 0, errMessage, isWarning);
       } else {
-        error = new CompilerError(new File(filename), errMessage, false);
+        error = new CompilerError(new File(filename), errMessage, isWarning);
       }
     }
     return error;

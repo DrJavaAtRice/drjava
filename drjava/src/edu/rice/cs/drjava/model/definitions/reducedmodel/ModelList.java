@@ -55,7 +55,7 @@ class ModelList<T> {
   /** keep track of length for constant time length lookup */
   private int _length;
   /** a set of objects that can trigger and listen for updates to the list */
-  private Set<ModelList.Iterator> _listeners;
+  private Set<ModelList<T>.Iterator> _listeners;
   
   /**
    * Constructor.
@@ -73,7 +73,7 @@ class ModelList<T> {
     _tail.pred = _head;
     _tail.succ = null;
     _length = 0;
-    _listeners = new HashSet<ModelList.Iterator>();
+    _listeners = new HashSet<ModelList<T>.Iterator>();
   }
   
   /**
@@ -88,7 +88,7 @@ class ModelList<T> {
   }
    
   public void insertFront(T item) {
-    ModelList.Iterator it = new ModelList.Iterator();
+    ModelList<T>.Iterator it = new ModelList.Iterator();
     it.insert(item);
     it.dispose();
   }
@@ -108,11 +108,11 @@ class ModelList<T> {
     }
   }
   
-  private void addListener(ModelList.Iterator thing) {
+  private void addListener(ModelList<T>.Iterator thing) {
     this._listeners.add(thing);
   }
   
-  private void removeListener(ModelList.Iterator thing) {
+  private void removeListener(ModelList<T>.Iterator thing) {
     this._listeners.remove(thing);
   }
 
@@ -135,7 +135,7 @@ class ModelList<T> {
    * iterator adds itself to the list's listeners.  The iterator
    * must be notified of changes so it does not become out-of-date.
    */
-  public ModelList.Iterator getIterator() {
+  public ModelList<T>.Iterator getIterator() {
     return new ModelList.Iterator();
   }
   
@@ -195,7 +195,7 @@ class ModelList<T> {
      * Creates a new iterator with the same values as the progenitor.
      * Adds it to the list's set of listeners.
      */
-    public Iterator(ModelList.Iterator iter) {
+    public Iterator(ModelList<T>.Iterator iter) {
       _point = iter._point;
       _pos = iter._pos;
       ModelList.this.addListener(this);
@@ -215,7 +215,7 @@ class ModelList<T> {
     /**
      * Force this iterator to take the values of the given iterator.
      */
-    public void setTo(ModelList.Iterator it) {
+    public void setTo(ModelList<T>.Iterator it) {
       this._point = it._point;
       this._pos = it._pos;
     }
@@ -374,7 +374,7 @@ class ModelList<T> {
      *
      *D oes not remove points iterators point to.
      */
-    public void collapse(ModelList.Iterator iter) {
+    public void collapse(ModelList<T>.Iterator iter) {
       int leftPos;
       int rightPos;
       Node<T> rightPoint;
@@ -413,7 +413,7 @@ class ModelList<T> {
       java.util.Iterator<ModelList<T>.Iterator> iter =
         ModelList.this._listeners.iterator();
       while (iter.hasNext()) {
-        ModelList.Iterator next = iter.next();
+        ModelList<T>.Iterator next = iter.next();
         if ( next._pos < pos ) {
           // do nothing
         }
@@ -431,7 +431,7 @@ class ModelList<T> {
       java.util.Iterator<ModelList<T>.Iterator> iter =
         ModelList.this._listeners.iterator();
       while (iter.hasNext()) {
-        ModelList.Iterator next = iter.next();
+        ModelList<T>.Iterator next = iter.next();
         if ( next._pos < pos ) {
           // do nothing
         }
@@ -452,7 +452,7 @@ class ModelList<T> {
       java.util.Iterator<ModelList<T>.Iterator> iter =
         ModelList.this._listeners.iterator();
       while (iter.hasNext()) {
-        ModelList.Iterator next = iter.next();
+        ModelList<T>.Iterator next = iter.next();
         if ( next._pos <= leftPos ) {
           // do nothing
         }

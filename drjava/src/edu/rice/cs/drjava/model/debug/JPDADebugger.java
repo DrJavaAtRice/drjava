@@ -129,7 +129,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   /**
    * Provides a way for the JPDADebugger to communicate with the view.
    */
-  private LinkedList _listeners;
+  private LinkedList<DebugListener> _listeners;
   
   /**
    * The running ThreadReference that we are debugging.
@@ -176,7 +176,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     _model = model;
     _vm = null;
     _eventManager = null;
-    _listeners = new LinkedList();
+    _listeners = new LinkedList<DebugListener>();
     _breakpoints = new Vector<Breakpoint>();
     _watches = new Vector<DebugWatchData>();
     _suspendedThreads = new RandomAccessStack();
@@ -880,7 +880,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
     
     if (printMessages) System.out.println("Issued step request");
-    Step step = new Step(this, StepRequest.STEP_LINE, flag);
+    //Step step = 
+    new Step(this, StepRequest.STEP_LINE, flag);
     if (shouldNotify) {
       notifyStepRequested();
     }
