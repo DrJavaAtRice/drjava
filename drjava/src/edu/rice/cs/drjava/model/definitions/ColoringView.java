@@ -218,7 +218,7 @@ public class ColoringView extends PlainView implements OptionConstants {
   /**
    * Called when an OptionListener perceives a change in any of the colors
    */ 
-  private void _updateColors() {
+  public void updateColors() {
     
     if (CodeStatus.DEVELOPMENT) {
       
@@ -230,7 +230,11 @@ public class ColoringView extends PlainView implements OptionConstants {
       NUMBER_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_NUMBER_COLOR);
       TYPE_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_TYPE_COLOR);
         
-      //getContainer().repaint();
+      //Avoid the ColoringView that does not have a container.
+      if ( getContainer() != null) {
+        getContainer().repaint();
+      }
+      
     }
   }
   
@@ -238,8 +242,9 @@ public class ColoringView extends PlainView implements OptionConstants {
    * The OptionListeners for DEFINITIONS COLORs 
    */
   private class ColorOptionListener implements OptionListener<Color> {
+    
     public void optionChanged(OptionEvent<Color> oce) {
-      //_updateColors();
+      updateColors();
     }
   }
   

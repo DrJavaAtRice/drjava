@@ -40,6 +40,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.compiler;
 
 import java.io.File;
+import edu.rice.cs.util.UnexpectedException;
 
 /**
  * A CompilerInterface implementation for signifying that no compiler is
@@ -71,6 +72,21 @@ public class NoCompilerAvailable implements CompilerInterface {
 
   public String toString() {
     return getName();
+  }
+
+  /**
+   * Allows us to set the extra classpath for the compilers without referencing the
+   * config object in a loaded class file
+   */ 
+  public void setExtraClassPath( String extraClassPath) {
+  }
+  
+  /**
+   * This method allows us to set the JSR14 collections path across a class loader.
+   * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
+   */
+  public void addToBootClassPath( String cp) {
+    throw new UnexpectedException( new Exception("Method only implemented in JSR14Compiler"));
   }
 }
 

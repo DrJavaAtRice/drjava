@@ -75,6 +75,18 @@ public interface CompilerInterface {
 
   /** Should return info about compiler, at least including name. */
   String toString();
+  
+  /**
+   * Allows us to set the extra classpath for the compilers without referencing the
+   * config object in a loaded class file
+   */ 
+  void setExtraClassPath( String extraClassPath);
+  
+  /**
+   * This method allows us to set the JSR14 collections path across a class loader.
+   * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
+   */ 
+  void addToBootClassPath( String s);
 }
 
 

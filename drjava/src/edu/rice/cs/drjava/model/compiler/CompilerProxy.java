@@ -44,6 +44,10 @@ import java.net.URL;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.classloader.StickyClassLoader;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.UnexpectedException;
+import gj.util.Vector;
+import gj.util.Enumeration;
 
 /**
  * A compiler interface to search a given 
@@ -88,6 +92,8 @@ public class CompilerProxy implements CompilerInterface {
   }
 
   private void _recreateCompiler() {
+    String collectionsPath = DrJava.CONFIG.getSetting(OptionConstants.JSR14_COLLECTIONSPATH);
+            
     StickyClassLoader loader =
       new StickyClassLoader(_newLoader,
                             getClass().getClassLoader(),
@@ -96,12 +102,28 @@ public class CompilerProxy implements CompilerInterface {
     try {
       Class c = loader.loadClass(_className);
       _realCompiler = CompilerRegistry.createCompiler(c);
+     
+      StringBuffer newclasspath = new StringBuffer();
+      Vector<String> cp = DrJava.CONFIG.getSetting(OptionConstants.EXTRA_CLASSPATH);
+      if(cp!=null) {
+        Enumeration<String> enum = cp.elements();
+        while(enum.hasMoreElements()) {
+          newclasspath.append(System.getProperty("path.separator")).append(enum.nextElement());
+        }
+      }
+      _realCompiler.setExtraClassPath(newclasspath.toString());
+      
+      if (_realCompiler.getClass().getName().equals("edu.rice.cs.drjava.model.compiler.JSR14Compiler")) {
+        _realCompiler.addToBootClassPath( collectionsPath );
+      }
+      
       //DrJava.consoleErr().println("real compiler: " + _realCompiler + " this: " + this);
     }
     catch (Throwable t) {
-      // don't do anything. realCompiler stays null.
-      //DrJava.consoleErr().println("loadClass fails: " + t);
-      //t.printStackTrace(DrJava.consoleErr());
+      
+        // don't do anything. realCompiler stays null.
+        //DrJava.consoleErr().println("loadClass fails: " + t);
+        //t.printStackTrace(DrJava.consoleErr());
     }
   }
 
@@ -116,9 +138,10 @@ public class CompilerProxy implements CompilerInterface {
    */
   public CompilerError[] compile(File sourceRoot, File[] files) {
     //DrJava.consoleErr().println("proxy to compile: " + files[0]);
-
-    CompilerError[] ret =  _realCompiler.compile(sourceRoot, files);
+     
     _recreateCompiler();
+    CompilerError[] ret =  _realCompiler.compile(sourceRoot, files);
+    
     return ret;
   }
 
@@ -154,6 +177,24 @@ public class CompilerProxy implements CompilerInterface {
   public String toString() {
     return getName();
   }
+  
+  /**
+   * Allows us to set the extra classpath for the compilers without referencing the
+   * config object in a loaded class file
+   */ 
+  public void setExtraClassPath( String extraClassPath) {
+    _realCompiler.setExtraClassPath(extraClassPath);
+  }
+  
+  /**
+   * This method allows us to set the JSR14 collections path across a class loader.
+   * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
+   */
+  public void addToBootClassPath( String cp) {
+    _realCompiler.addToBootClassPath(cp);
+  }
+  
+  
 }
 
 

@@ -57,7 +57,6 @@ import com.sun.tools.javac.v8.util.List;
 import com.sun.tools.javac.v8.util.Log;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.FileOps;
 
 /**
@@ -68,30 +67,49 @@ import edu.rice.cs.util.FileOps;
  *
  * @version $Id$
  */
-public class JSR14Compiler extends JavacGJCompiler 
-    implements OptionConstants {
+public class JSR14Compiler extends JavacGJCompiler {
+  
+  private String _collectionsPath;
+  
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new JSR14Compiler();
 
   protected JSR14Compiler() {
     super();
   }
-
-  protected void initCompiler(File sourceRoot) {
-    super.initCompiler(sourceRoot);
+  
+  protected void updateBootClassPath() {
 
     // add collections path to the bootclasspath
     // Yes, we are mutating some other class's public variable.
     // But the docs for ClassReader say it's OK for others to mutate it!
     // And this way, we don't need to specify the entire bootclasspath,
     // just what we want to add on to it.
-    String ccp = DrJava.CONFIG.getSetting(JSR14_COLLECTIONSPATH);
-    if (ccp != null || ccp.length() == 0) {
+    
+    String ccp = _collectionsPath;
+    
+    if (ccp != null && ccp.length() > 0) {
       compiler.syms.reader.bootClassPath = ccp +
-                                           System.getProperty("path.separator")+
-                                           compiler.syms.reader.bootClassPath;
+        System.getProperty("path.separator")+
+        compiler.syms.reader.bootClassPath;
+  
     }
   }
+    
+  protected void initCompiler(File sourceRoot) {
+    super.initCompiler(sourceRoot);
+    updateBootClassPath();
+  }
 
+  /**
+   * This method allows us to set the JSR14 collections path across a class loader.
+   * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
+   */ 
+  public void addToBootClassPath( String cp) {
+    _collectionsPath = cp;
+  }
+  
   public String getName() { return "JSR-14"; }
+
+
 }

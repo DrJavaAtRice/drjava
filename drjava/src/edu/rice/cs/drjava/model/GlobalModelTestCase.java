@@ -75,25 +75,25 @@ public abstract class GlobalModelTestCase extends TestCase {
   protected DefaultGlobalModel _model;
   protected File _tempDir;
 
-  protected static final String FOO_TEXT = "class Foo {}";
-  protected static final String BAR_TEXT = "class Bar {}";
+  protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
+  protected static final String BAR_TEXT = "class DrJavaTestBar {}";
   protected static final String FOO_MISSING_CLOSE_TEXT =
-    "class Foo {";
+    "class DrJavaTestFoo {";
 
   protected static final String FOO_PACKAGE_AFTER_IMPORT =
     "import java.util.*;\npackage a;\n" + FOO_TEXT;
 
   protected static final String FOO_PACKAGE_INSIDE_CLASS =
-    "class Foo { package a; }";
+    "class DrJavaTestFoo { package a; }";
 
   protected static final String FOO_PACKAGE_AS_FIELD =
-    "class Foo { int package; }";
+    "class DrJavaTestFoo { int package; }";
 
   protected static final String FOO_PACKAGE_AS_FIELD_2 =
-    "class Foo { int package = 5; }";
+    "class DrJavaTestFoo { int package = 5; }";
 
   protected static final String FOO_PACKAGE_AS_PART_OF_FIELD =
-    "class Foo { int cur_package = 5; }";
+    "class DrJavaTestFoo { int cur_package = 5; }";
 
 
   /**

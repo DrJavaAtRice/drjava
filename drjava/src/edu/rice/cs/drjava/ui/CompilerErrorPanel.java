@@ -51,10 +51,12 @@ import java.awt.event.*;
 import java.awt.*;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.config.*;
 
 /**
  * The panel which houses the list of errors after an unsuccessful compilation.
@@ -182,15 +184,33 @@ public class CompilerErrorPanel extends TabbedPanel {
     uiBox.add(new JPanel(),BorderLayout.CENTER);
     _mainPanel.add(scroller, BorderLayout.CENTER);
     _mainPanel.add(compilerPanel, BorderLayout.EAST);
+    if (CodeStatus.DEVELOPMENT) {
+      DrJava.CONFIG.addOptionListener( OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener());
+      DrJava.CONFIG.addOptionListener( OptionConstants.JSR14_LOCATION, new CompilerLocationOptionListener());
+    }
   }
-
+  
+  
+  /**
+   * The OptionListener for compiler LOCATIONs 
+   */
+  private class CompilerLocationOptionListener implements OptionListener<String> {
+    
+    public void optionChanged(OptionEvent<String> oce) {
+      _compilerChoiceBox.removeAllItems();
+      CompilerInterface[] availCompilers = _model.getAvailableCompilers();
+      for (int i=0; i<availCompilers.length; i++) {
+        _compilerChoiceBox.addItem(availCompilers[i]);
+      }
+    }
+  }
   /**
    * Returns the ErrorListPane that this panel manages.
    */
   public ErrorListPane getErrorListPane() {
     return _errorListPane;
   }
-
+  
   /** Changes the font of the error list. */
   public void setListFont(Font f) {
     StyleConstants.setFontFamily(NORMAL_ATTRIBUTES, f.getFamily());
@@ -277,7 +297,7 @@ public class CompilerErrorPanel extends TabbedPanel {
         }
       }
     };
-
+    
     /**
      * Constructs the ErrorListPane.
      */

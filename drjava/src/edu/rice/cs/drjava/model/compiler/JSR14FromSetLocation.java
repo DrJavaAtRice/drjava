@@ -55,10 +55,12 @@ import edu.rice.cs.util.classloader.ToolsJarClassLoader;
  * @version $Id$
  */
 public class JSR14FromSetLocation extends CompilerProxy implements OptionConstants {
-  public static final CompilerInterface ONLY = new JSR14FromSetLocation();
-
-  /** Private constructor due to singleton. */
-  private JSR14FromSetLocation() {
+ 
+  /**
+   * No longer a Singleton in order to re-determine the compiler's location multiple times.
+   */
+  
+  public JSR14FromSetLocation() {
     super("edu.rice.cs.drjava.model.compiler.JSR14Compiler",
           _getClassLoader());
   }

@@ -57,10 +57,10 @@ import com.sun.tools.javac.v8.util.List;
 import com.sun.tools.javac.v8.util.Log;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.OptionConstants;
 import gj.util.Vector;
 import gj.util.Enumeration;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.UnexpectedException;
 
 /**
  * An implementation of the CompilerInterface that supports compiling with
@@ -69,7 +69,10 @@ import edu.rice.cs.util.FileOps;
  *
  * @version $Id$
  */
-public class JavacGJCompiler implements CompilerInterface, OptionConstants {
+public class JavacGJCompiler implements CompilerInterface {
+  
+  private String _extraClassPath = "";  
+    
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new JavacGJCompiler();
 
@@ -192,6 +195,22 @@ public class JavacGJCompiler implements CompilerInterface, OptionConstants {
     return getName();
   }
 
+  /**
+   * Allows us to set the extra classpath for the compilers without referencing the
+   * config object in a loaded class file
+   */ 
+  public void setExtraClassPath( String extraClassPath) {
+      _extraClassPath = extraClassPath;
+  }
+  
+  /**
+   * This method allows us to set the JSR14 collections path across a class loader.
+   * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
+   */
+  public void addToBootClassPath( String cp) {
+    throw new UnexpectedException( new Exception("Method only implemented in JSR14Compiler"));
+  }
+  
   protected Hashtable<String, String> createOptionsHashtable(File sourceRoot) {
     Hashtable<String, String> options = Hashtable.make();
 
@@ -209,16 +228,9 @@ public class JavacGJCompiler implements CompilerInterface, OptionConstants {
     options.put("-sourcepath", sourceRoot.getAbsolutePath());
 
     String cp = System.getProperty("java.class.path");
-
     // Adds extra.classpath to the classpath.
-    Vector<String> ecp = DrJava.CONFIG.getSetting(EXTRA_CLASSPATH);
-    if(ecp!=null) {
-        Enumeration<String> enum = ecp.elements();
-        while(enum.hasMoreElements()) {
-            cp += System.getProperty("path.separator") + enum.nextElement();
-        }
-    }
-
+    cp += _extraClassPath;
+    
     options.put("-classpath", cp);
 
     return options;

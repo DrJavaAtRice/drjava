@@ -58,25 +58,25 @@ import edu.rice.cs.util.UnexpectedException;
  */
 public class GlobalModelCompileTest extends GlobalModelTestCase {
   private static final String FOO_MISSING_CLOSE_TEXT =
-    "class Foo {";
+    "class DrJavaTestFoo {";
 
   private static final String FOO_PACKAGE_AFTER_IMPORT =
     "import java.util.*;\npackage a;\n" + FOO_TEXT;
 
   private static final String FOO_PACKAGE_INSIDE_CLASS =
-    "class Foo { package a; }";
+    "class DrJavaTestFoo { package a; }";
 
   private static final String FOO_PACKAGE_AS_FIELD =
-    "class Foo { int package; }";
+    "class DrJavaTestFoo { int package; }";
 
   private static final String FOO_PACKAGE_AS_FIELD_2 =
-    "class Foo { int package = 5; }";
+    "class DrJavaTestFoo { int package = 5; }";
 
   private static final String FOO_PACKAGE_AS_PART_OF_FIELD =
-    "class Foo { int cur_package = 5; }";
+    "class DrJavaTestFoo { int cur_package = 5; }";
 
   private static final String FOO2_EXTENDS_FOO_TEXT =
-    "class Foo2 extends Foo {}";
+    "class DrJavaTestFoo2 extends DrJavaTestFoo {}";
 
   /**
    * Constructor.
@@ -133,26 +133,26 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
 
     // Make sure .class exists
-    File compiled = classForJava(file, "Foo");
+    File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
   }
 
   /**
    * Test that one compiled file can depend on the other.
-   * We compile Foo and then Foo2 (which extends Foo). This shows
-   * that the compiler successfully found Foo2 when compiling Foo.
+   * We compile DrJavaTestFoo and then DrJavaTestFoo2 (which extends DrJavaTestFoo). This shows
+   * that the compiler successfully found DrJavaTestFoo2 when compiling DrJavaTestFoo.
    */
   public void testCompileClasspathOKDefaultPackage()
     throws BadLocationException, IOException
   {
     // Create/compile foo, assuming it works
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
-    final File fooFile = new File(_tempDir, "Foo.java");
+    final File fooFile = new File(_tempDir, "DrJavaTestFoo.java");
     doc1.saveFile(new FileSelector(fooFile));
     doc1.startCompile();
 
     OpenDefinitionsDocument doc2 = setupDocument(FOO2_EXTENDS_FOO_TEXT);
-    final File foo2File = new File(_tempDir, "Foo2.java");
+    final File foo2File = new File(_tempDir, "DrJavaTestFoo2.java");
     doc2.saveFile(new FileSelector(foo2File));
 
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
@@ -162,15 +162,15 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
 
     // Make sure .class exists
-    File compiled = classForJava(foo2File, "Foo2");
+    File compiled = classForJava(foo2File, "DrJavaTestFoo2");
     assertTrue(_name() + "Class file doesn't exist after compile",
                compiled.exists());
   }
 
   /**
    * Test that one compiled file can depend on the other.
-   * We compile a.Foo and then b.Foo2 (which extends Foo). This shows
-   * that the compiler successfully found Foo2 when compiling Foo.
+   * We compile a.DrJavaTestFoo and then b.DrJavaTestFoo2 (which extends DrJavaTestFoo). This shows
+   * that the compiler successfully found DrJavaTestFoo2 when compiling DrJavaTestFoo.
    */
   public void testCompileClasspathOKDifferentPackages()
     throws BadLocationException, IOException
@@ -181,16 +181,16 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     bDir.mkdir();
 
     // Create/compile foo, assuming it works
-    // foo must be public and in Foo.java!
+    // foo must be public and in DrJavaTestFoo.java!
     OpenDefinitionsDocument doc1 =
       setupDocument("package a;\n" + "public " + FOO_TEXT);
-    final File fooFile = new File(aDir, "Foo.java");
+    final File fooFile = new File(aDir, "DrJavaTestFoo.java");
     doc1.saveFile(new FileSelector(fooFile));
     doc1.startCompile();
 
     OpenDefinitionsDocument doc2 =
-      setupDocument("package b;\nimport a.Foo;\n" + FOO2_EXTENDS_FOO_TEXT);
-    final File foo2File = new File(bDir, "Foo2.java");
+      setupDocument("package b;\nimport a.DrJavaTestFoo;\n" + FOO2_EXTENDS_FOO_TEXT);
+    final File foo2File = new File(bDir, "DrJavaTestFoo2.java");
     doc2.saveFile(new FileSelector(foo2File));
 
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
@@ -200,7 +200,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
 
     // Make sure .class exists
-    File compiled = classForJava(foo2File, "Foo2");
+    File compiled = classForJava(foo2File, "DrJavaTestFoo2");
     assertTrue(_name() + "Class file doesn't exist after compile",
                compiled.exists());
   }
@@ -224,7 +224,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
 
     // Make sure .class exists
-    File compiled = classForJava(file, "Foo");
+    File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
   }
 
@@ -248,7 +248,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     // There better be an error since "package" can not be an identifier!
     assertCompileErrorsPresent(_name(), true);
 
-    File compiled = classForJava(file, "Foo");
+    File compiled = classForJava(file, "DrJavaTestFoo");
     assertEquals(_name() + "Class file exists after failing compile",
                  false,
                  compiled.exists());
@@ -275,7 +275,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     // There better be an error since "package" can not be an identifier!
     assertCompileErrorsPresent(_name(), true);
 
-    File compiled = classForJava(file, "Foo");
+    File compiled = classForJava(file, "DrJavaTestFoo");
     assertEquals(_name() + "Class file exists after failing compile",
                  false,
                  compiled.exists());
@@ -297,7 +297,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     assertCompileErrorsPresent(_name(), true);
     listener.checkCompileOccurred();
 
-    File compiled = classForJava(file, "Foo");
+    File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue(_name() + "Class file exists after compile?!", !compiled.exists());
   }
 
@@ -311,13 +311,13 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     // Create temp file
     File baseTempDir = tempDirectory();
     File subdir = new File(baseTempDir, "a");
-    File fooFile = new File(subdir, "Foo.java");
-    File compiled = classForJava(fooFile, "Foo");
+    File fooFile = new File(subdir, "DrJavaTestFoo.java");
+    File compiled = classForJava(fooFile, "DrJavaTestFoo");
 
     // Now make subdirectory a
     subdir.mkdir();
 
-    // Save the footext to Foo.java in the subdirectory
+    // Save the footext to DrJavaTestFoo.java in the subdirectory
     OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_INSIDE_CLASS);
     doc.saveFileAs(new FileSelector(fooFile));
 
@@ -393,7 +393,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
 
     // Make sure .class exists
-    File compiled = classForJava(file, "Foo");
+    File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
   }
 
@@ -519,7 +519,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
     
     // Make sure .class exists
-    File compiled = classForJava(file, "Foo");
+    File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
   }
 
@@ -597,7 +597,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
     
     // Make sure .class exists
-    File compiled = classForJava(file, "Foo");
+    File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
   }
 }

@@ -65,6 +65,8 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.*;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.OptionEvent;
+import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.BooleanOption;
 import edu.rice.cs.drjava.model.print.*;
 import edu.rice.cs.drjava.model.definitions.*;
@@ -168,6 +170,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
 
     _createDebugger();
+    
+    if (CodeStatus.DEVELOPMENT) {
+      DrJava.CONFIG.addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
+    }
   }
 
   /**
@@ -186,6 +192,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     _interpreterControl.setModel(this);
     _interpreterControl.reset();
     _createDebugger();
+    
+    if (CodeStatus.DEVELOPMENT) {    
+      DrJava.CONFIG.addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
+    }
   }
 
   /**
@@ -295,7 +305,18 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       _editorKit.createDefaultDocument();
 
     final File file = (com.getFiles())[0].getAbsoluteFile();
-    return _openFile(file);
+    OpenDefinitionsDocument odd = _openFile(file);
+    
+    // Make sure this is on the classpath
+    try {
+        File classpath = odd.getSourceRoot();
+        _interpreterControl.addClassPath(classpath.getAbsolutePath());
+    }
+    catch (InvalidPackageException e) {
+        // Invalid package-- don't add it to classpath
+    }
+    
+    return odd;
   }
 
   /**
@@ -1762,6 +1783,20 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
   }
 
+  private class ExtraClasspathOptionListener implements OptionListener<Vector<String>> {
+   
+      public void optionChanged (OptionEvent<Vector<String>> oce) {
+          Vector<String> cp = oce.value;
+          if(cp!=null) {
+              Enumeration<String> enum = cp.elements();
+              while(enum.hasMoreElements()) {
+                  _interpreterControl.addClassPath(enum.nextElement());
+              }
+          }
+          
+      }
+      
+  }
 
   /**
    * Sets up a new interpreter to clear out the interpreter's environment.

@@ -88,6 +88,7 @@ public class DefinitionsPane extends JEditorPane
 
   static {
     Color highColor = DrJava.CONFIG.getSetting(DEFINITIONS_MATCH_COLOR);
+    
     _highlightPainter = 
       new DefaultHighlighter.DefaultHighlightPainter(highColor);
   }
@@ -166,6 +167,18 @@ public class DefinitionsPane extends JEditorPane
     _matchHighlight = getHighlighter().addHighlight(from, to, _highlightPainter);
   }
 
+  /**
+   * The OptionListener for DEFINITIONS_MATCH_COLOR 
+   */
+  private class MatchColorOptionListener implements OptionListener<Color> { 
+    public void optionChanged(OptionEvent<Color> oce) {
+      //Set the highlightPainter to the most recent one.
+      _highlightPainter = 
+      new DefaultHighlighter.DefaultHighlightPainter( DrJava.CONFIG.getSetting(DEFINITIONS_MATCH_COLOR) );
+    }
+    
+  }
+  
   /**
    * Removes the previous highlight so document is cleared when caret position changes.
    */
@@ -345,6 +358,9 @@ public class DefinitionsPane extends JEditorPane
     // Add listener that checks if position in the document has changed.
     // If it has changed, check and see if we should be highlighting matching braces.
     this.addCaretListener(_matchListener);
+    if (CodeStatus.DEVELOPMENT) {
+      DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_MATCH_COLOR, new MatchColorOptionListener());
+    }
   }
   
   /**

@@ -58,6 +58,8 @@ import java.util.LinkedList;
 import java.util.Arrays;
 import java.net.URL;
 
+import gj.util.Vector;
+
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.config.*;
@@ -400,7 +402,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   
-  // SET CONFIGS
+  // SET CONFIGS coded here for convenience. None should be enabled
   /** Clears DrJava's output console. */
   private Action _clearOutputAction = new AbstractAction("Clear Console") {
     public void actionPerformed(ActionEvent ae) {
@@ -412,7 +414,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       //CONFIG.setSetting(TOOLBAR_ICONS_ENABLED, new Boolean(!DrJava.CONFIG.getSetting(TOOLBAR_ICONS_ENABLED).booleanValue()));
       //CONFIG.setSetting(LINEENUM_ENABLED, new Boolean(!DrJava.CONFIG.getSetting(LINEENUM_ENABLED).booleanValue()));
       //CONFIG.setSetting(DEFINITIONS_COMMENT_COLOR, Color.red.darker());
-      //drjava&CONFIG.setSetting(DEFINITIONS_NORMAL_COLOR, Color.gray.brighter());
+      //CONFIG.setSetting(DEFINITIONS_MATCH_COLOR, Color.gray.brighter());
+      //CONFIG.setSetting(JSR14_LOCATION, "/home/javaplt/packages/jsr14_adding_generics-1_2-ea/javac.jar");
+      //CONFIG.setSetting(JAVAC_LOCATION, "/usr/local/bin/javac");
+      //Vector<String> v = new Vector<String>();
+      //v.addElement("/home/mcgraw/javafiles/");
+      //CONFIG.setSetting(EXTRA_CLASSPATH, v);
     }
   };
 
@@ -422,6 +429,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   {
     public void actionPerformed(ActionEvent ae) {
       _model.resetInteractions();
+      //CONFIG.setSetting(JSR14_COLLECTIONSPATH, "/home/javaplt/packages/jsr14_adding_generics-1_2-ea/collect.jar");
       //CONFIG.setSetting(TOOLBAR_TEXT_ENABLED, new Boolean(!DrJava.CONFIG.getSetting(TOOLBAR_TEXT_ENABLED).booleanValue()));
     }
   };
@@ -684,8 +692,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       DrJava.CONFIG.addOptionListener( OptionConstants.FONT_MAIN, new MainFontOptionListener());
       DrJava.CONFIG.addOptionListener( OptionConstants.FONT_DOCLIST, new DoclistFontOptionListener());
       DrJava.CONFIG.addOptionListener( OptionConstants.FONT_TOOLBAR, new ToolbarFontOptionListener());
-      DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_ICONS_ENABLED, new ToolbarIconsOptionListener());
-      DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_TEXT_ENABLED, new ToolbarTextOptionListener());
+      DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
+      DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
       DrJava.CONFIG.addOptionListener( OptionConstants.LINEENUM_ENABLED, new LineEnumOptionListener());
     }
     
@@ -1927,8 +1935,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _tabs.addLast(_junitPanel);
     _tabs.addLast(_findReplace);
     
-    // Show compiler output pane by default --- not anymore
-    //showTab(_errorPanel);
+    // Show compiler output pane by default
+    showTab(_errorPanel);
     //showTab(_junitPanel);
     
     _tabbedPane.setSelectedIndex(0);
@@ -2752,29 +2760,20 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   
-  /**
-   *  The OptionListener for TOOLBAR_ICONS_ENABLED
-   */
-  private class ToolbarIconsOptionListener implements OptionListener<Boolean> {
-    public void optionChanged(OptionEvent<Boolean> oce) {
-      _updateToolbarButtons();
-    }
-  }
-  
-  /**
-   *  The OptionListener for TOOLBAR_TEXT_ENABLED
-   */
-  private class ToolbarTextOptionListener implements OptionListener<Boolean> {
-    public void optionChanged(OptionEvent<Boolean> oce) {
-      _updateToolbarButtons();
-    }
-  }
   
   /**
    *  The OptionListener for FONT_TOOLBAR
    */
   private class ToolbarFontOptionListener implements OptionListener<Font> {
     public void optionChanged(OptionEvent<Font> oce) {
+      _updateToolbarButtons();
+    }
+  }
+  /**
+   *  The OptionListener for TOOLBAR options
+   */
+  private class ToolbarOptionListener implements OptionListener<Boolean> {
+    public void optionChanged(OptionEvent<Boolean> oce) {
       _updateToolbarButtons();
     }
   }

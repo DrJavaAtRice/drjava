@@ -43,12 +43,12 @@ import junit.framework.*;
 
 import java.io.*;
 
-import java.util.Vector;
 import javax.swing.text.BadLocationException;
 import junit.extensions.*;
 import java.util.LinkedList;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
+import gj.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
@@ -56,6 +56,7 @@ import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.util.*;
+import edu.rice.cs.drjava.CodeStatus;
 
 /**
  * A test on the GlobalModel that does deals with everything outside of
@@ -139,8 +140,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
   {
     //System.err.println("Entering testInteractionAbort");
     _doCompile(setupDocument(FOO_TEXT), tempFile());
-    final String beforeAbort = interpret("Foo.class.getName()");
-    assertEquals("Foo", beforeAbort);
+    final String beforeAbort = interpret("DrJavaTestFoo.class.getName()");
+    assertEquals("DrJavaTestFoo", beforeAbort);
     
     TestListener listener = new TestListener() {
       public void interactionStarted() {
@@ -198,10 +199,10 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     assertEquals("5", interpret("5"));
 
     // make sure we can still see class foo
-    //System.err.println("about to check Foo");
-    final String afterAbort = interpret("Foo.class.getName()");
-    assertEquals("Foo", afterAbort);
-    //System.err.println("done check Foo: " + afterAbort);
+    //System.err.println("about to check DrJavaTestFoo");
+    final String afterAbort = interpret("DrJavaTestFoo.class.getName()");
+    assertEquals("DrJavaTestFoo", afterAbort);
+    //System.err.println("done check DrJavaTestFoo: " + afterAbort);
   }
 
   /**
@@ -285,10 +286,10 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     _doCompile(doc, tempFile());
 
-    String result = interpret("new Foo().getClass().getName()");
+    String result = interpret("new DrJavaTestFoo().getClass().getName()");
 
     assertEquals("interactions result",
-                 "Foo",
+                 "DrJavaTestFoo",
                  result);
   }
 
@@ -299,7 +300,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
   public void testInteractionsCanSeeChangedClass()
     throws BadLocationException, IOException
   {
-    final String text_before = "class Foo { public int m() { return ";
+    final String text_before = "class DrJavaTestFoo { public int m() { return ";
     final String text_after = "; } }";
     final int num_iterations = 5;
     File file;
@@ -313,7 +314,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
 
       assertEquals("interactions result, i=" + i,
           String.valueOf(i),
-          interpret("new Foo().m()"));
+          interpret("new DrJavaTestFoo().m()"));
     }
   }
 
@@ -359,8 +360,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     subdir = new File(subdir, "c");
     subdir.mkdirs();
 
-    // Save the footext to Foo.java in the subdirectory
-    File fooFile = new File(subdir, "Foo.java");
+    // Save the footext to DrJavaTestFoo.java in the subdirectory
+    File fooFile = new File(subdir, "DrJavaTestFoo.java");
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     doc.saveFileAs(new FileSelector(fooFile));
 
@@ -385,8 +386,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     subdir = new File(subdir, "c");
     subdir.mkdirs();
 
-    // Save the footext to Foo.java in the subdirectory
-    File fooFile = new File(subdir, "Foo.java");
+    // Save the footext to DrJavaTestFoo.java in the subdirectory
+    File fooFile = new File(subdir, "DrJavaTestFoo.java");
     OpenDefinitionsDocument doc =
       setupDocument("package a.b.c;\n" + FOO_TEXT);
     doc.saveFileAs(new FileSelector(fooFile));
@@ -414,8 +415,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     subdir = new File(subdir, "d");
     subdir.mkdirs();
 
-    // Save the footext to Foo.java in the subdirectory
-    File fooFile = new File(subdir, "Foo.java");
+    // Save the footext to DrJavaTestFoo.java in the subdirectory
+    File fooFile = new File(subdir, "DrJavaTestFoo.java");
     OpenDefinitionsDocument doc =
       setupDocument("package a.b.c;\n" + FOO_TEXT);
     doc.saveFileAs(new FileSelector(fooFile));
@@ -441,8 +442,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     File subdir = new File(baseTempDir, "a");
     subdir.mkdir();
 
-    // Save the footext to Foo.java in the subdirectory
-    File fooFile = new File(subdir, "Foo.java");
+    // Save the footext to DrJavaTestFoo.java in the subdirectory
+    File fooFile = new File(subdir, "DrJavaTestFoo.java");
     OpenDefinitionsDocument doc = setupDocument("package a;\n" + FOO_TEXT);
     doc.saveFileAs(new FileSelector(fooFile));
 
@@ -470,8 +471,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     File subdir2 = new File(baseTempDir, "b");
     subdir2.mkdir();
 
-    // Save the footext to Foo.java in subdirectory 1
-    File file1 = new File(subdir1, "Foo.java");
+    // Save the footext to DrJavaTestFoo.java in subdirectory 1
+    File file1 = new File(subdir1, "DrJavaTestFoo.java");
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
     doc1.saveFileAs(new FileSelector(file1));
 
@@ -503,4 +504,52 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     }
   }
 
+  
+  /**
+   * Creates a new class, compiles it and then checks that the REPL
+   * can see it.
+   */
+  public void testInteractionsLiveUpdateClasspath()
+    throws BadLocationException, IOException
+  {
+    if (CodeStatus.DEVELOPMENT) {
+      
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    File f = tempFile();
+    
+    _doCompile(doc, f);
+
+    // Rename the directory so it's not on the classpath anymore
+    String tempPath = f.getParent();
+    File tempDir = new File(tempPath);
+    tempDir.renameTo(new File(tempPath+"a"));
+                      
+    String result = interpret("new DrJavaTestFoo().getClass().getName()");
+    
+    // Should cause a NoClassDefFound, but we shouldn't check exact syntax.
+    //  Instead, make sure it isn't "DrJavaTestFoo", as if the class was found.
+    assertTrue("interactions should have an error, not the correct answer",
+               !"DrJavaTestFoo".equals(result));
+
+    // Add new directory to classpath through CONFIG
+    Vector<String> cp = new Vector<String>();
+    cp.addElement(tempPath + "a");
+    DrJava.CONFIG.setSetting(EXTRA_CLASSPATH, cp);
+    
+    result = interpret("new DrJavaTestFoo().getClass().getName()");
+    
+    // Now it should be on the classpath
+    assertEquals("interactions result",
+                 "DrJavaTestFoo",
+                 result);
+    
+    
+    // Rename directory back to clean up
+    tempDir = new File(tempPath + "a");
+    tempDir.renameTo( new File(tempPath));
+
+    }
+    else return;
+  }
+  
 }

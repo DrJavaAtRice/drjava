@@ -49,15 +49,18 @@ import gjc.v6.util.List;
 import gjc.v6.util.Log;
 import gj.util.Vector;
 import gj.util.Enumeration;
-import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.util.UnexpectedException;
 
 /**
  * The GJ compiler used by DrJava.
  * @version $Id$
  */
-public class GJv6Compiler implements CompilerInterface, OptionConstants{
+public class GJv6Compiler implements CompilerInterface{
+  
+  private String _extraClassPath = "";
+    
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new GJv6Compiler();
 
@@ -103,14 +106,7 @@ public class GJv6Compiler implements CompilerInterface, OptionConstants{
       newclasspath.append(oldclasspath);
     }
 
-    Vector<String> cp = DrJava.CONFIG.getSetting(EXTRA_CLASSPATH);
-    if(cp!=null) {
-        Enumeration<String> enum = cp.elements();
-        while(enum.hasMoreElements()) {
-            newclasspath.append(System.getProperty("path.separator")).
-                append(enum.nextElement());
-        }
-    }
+    newclasspath.append(_extraClassPath);
 
     options.put("-classpath", newclasspath.toString());
 
@@ -158,6 +154,23 @@ public class GJv6Compiler implements CompilerInterface, OptionConstants{
     return getName();
   }
 
+  
+  /**
+   * Allows us to set the extra classpath for the compilers without referencing the
+   * config object in a loaded class file
+   */ 
+  public void setExtraClassPath( String extraClassPath) {
+      _extraClassPath = extraClassPath;
+  }
+  
+  /**
+   * This method allows us to set the JSR14 collections path across a class loader.
+   * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
+   */
+  public void addToBootClassPath( String cp) {
+    throw new UnexpectedException( new Exception("Method only implemented in JSR14Compiler"));
+  }
+  
   /**
    * put your documentation comment here
    */
