@@ -355,12 +355,14 @@ public class ReflectionUtilities {
    */
   protected static Method selectTheMostSpecificMethod(List<Method> list) {
     if (list.isEmpty()) return null;
-    
+        
     Iterator<Method> it = list.iterator();
     Method best = it.next();
     Method ambiguous = null; // there is no ambiguous other method at first
     while (it.hasNext()) {
       Method curr = it.next();
+      if(TigerUtilities.isBridge(curr)) continue; //If the method is a bridge method, dont consider it, go to the next
+
       Class<?>[] a1 = best.getParameterTypes();
       Class<?>[] a2 = curr.getParameterTypes();
       
@@ -402,14 +404,6 @@ public class ReflectionUtilities {
       }
     }
     if (ambiguous != null) {
-      boolean bestBridge = TigerUtilities.isBridge(best);
-      boolean ambiBridge = TigerUtilities.isBridge(ambiguous);
-      if (bestBridge && !ambiBridge) {
-        return ambiguous;
-      }
-      else if (!bestBridge && ambiBridge) {
-        return best;
-      }
       throw new AmbiguousMethodException(best, ambiguous);
     }
     return best;
