@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -35,18 +35,39 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
- END_COPYRIGHT_BLOCK*/
+END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
-/**
- * Interface for any visitor that handles InterpretResults.
- * 
- * @version $Id$
- */
-public interface InterpretResultVisitor<T> {
-  public T forVoidResult(VoidResult that);
-  public T forValueResult(ValueResult that);
-  public T forExceptionResult(ExceptionResult that);
-  public T forSyntaxErrorResult(SyntaxErrorResult that);
+import edu.rice.cs.javaast.parser.*;
+import edu.rice.cs.javaast.tree.*;
+import edu.rice.cs.javaast.*;
+import java.io.*;
+
+interface InteractionsProcessorI {
+  public String preProcess(String s) throws ParseException;
+  public String postProcess(String s, Object result);
 }
+
+
+public class InteractionsProcessor implements InteractionsProcessorI {
+
+  boolean precalled = false;
+  boolean postcalled = false;
+
+  public String preProcess(String s) throws ParseException
+  {
+    InteractionsInput tree = new GJParser( new StringReader( s ) ).InteractionsInput();
+    // WHY do we need the cast?
+    JavaAST typeErasedTree = (JavaAST) tree.accept( new TypeEraser() );
+    precalled = true;
+    return InteractionsPrinter.generateSource( typeErasedTree );
+    //return s;
+  }
+
+  public String postProcess(String s, Object result)
+  {
+    postcalled = true;
+    return s;
+  }
+} 

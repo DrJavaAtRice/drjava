@@ -3412,6 +3412,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       _enableInteractionsPane();
     }
     
+    public void interactionsErrorOccurred(int offset, int length){      
+      _interactionsPane.highlightError(offset, length);
+    }
+    
     /**
      * Called when the active interpreter is changed.
      * @param inProgress Whether the new interpreter is currently in progress

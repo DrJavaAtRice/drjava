@@ -156,6 +156,17 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     });
   }
   
+  
+  /**
+   * Notifies listeners that an error was present in the interaction.
+   */
+  protected void _notifySyntaxErrorOccurred(final int offset, final int length) {
+    _notifier.notifyListeners(new EventNotifier.Notifier() {
+      public void notifyListener(GlobalModelListener l) {
+        l.interactionsErrorOccurred(offset,length);
+      }
+    });
+  }
   /**
    * Notifies listeners that the interpreter has changed.
    * @param inProgress Whether the new interpreter is currently in progress.

@@ -56,6 +56,11 @@ public interface InteractionsListener {
   public void interactionEnded();
   
   /**
+   * Called when an interaction results in a syntax error.
+   */
+  public void interactionsErrorOccurred(int offset, int length);
+  
+  /**
    * Called when the interpreter is resetting.
    */
   public void interpreterResetting();

@@ -43,17 +43,32 @@ import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.Toolkit;
 
+import edu.rice.cs.util.swing.*;
+import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.*;
+
 
 /**
  * The view component for repl interaction.
  *
  * @version $Id$
  */
-public class InteractionsPane extends JTextPane {
+public class InteractionsPane extends JTextPane implements OptionConstants {
   
   /** The custom keymap for the interactions pane. */
   protected Keymap _keymap;
+  // InteractionsPane must be constructed completely, so
+  // this can't be placed in the constructor.
+  protected HighlightManager _highlightManager = null;
   
+  
+  /**
+   *  Highlight painter for syntax errors, currently borrowing breakpoint color.
+   */
+  public static DefaultHighlighter.DefaultHighlightPainter 
+    ERROR_PAINTER =
+    new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
+ 
   
   /** A runnable object that causes the editor to beep. */
   protected Runnable _beep = new Runnable() {
@@ -100,6 +115,17 @@ public class InteractionsPane extends JTextPane {
   public void setBeep(Runnable beep) {
     _beep = beep;
   }
+  
+  private void _initializeHighlightManager(){
+    _highlightManager = new HighlightManager(this);
+  }
+  
+  public void highlightError( int offset, int length ){
+    if( _highlightManager == null ) _initializeHighlightManager();
+    _highlightManager.addHighlight( offset, offset+length, ERROR_PAINTER );
+  }
+  
+  
 }
 
 

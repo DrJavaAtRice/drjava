@@ -178,6 +178,14 @@ public interface GlobalModelListener {
    * Called when the interactions window is reset.
    */
   public void interactionsReset();
+  
+  /**
+   * Called when the interactions window generates a syntax error.
+   * 
+   * @param offset the error's offset into the InteractionsDocument
+   * @param length the length of the error
+   */
+  public void interactionsErrorOccurred(int offset, int length);
 
   /**
    * Called when the interactions JVM was closed by System.exit

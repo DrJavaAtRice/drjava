@@ -50,7 +50,7 @@ import gj.util.Vector;
 import edu.rice.cs.drjava.model.FileOpenSelector;
 import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
-import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.DocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 
@@ -184,6 +184,13 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * @param path Path to add
    */
   public abstract void addToClassPath(String path);
+  
+  /** 
+   * Handles a syntax error being returned from an interaction
+   * @param offset the first character of the error in the InteractionsDocument 
+   * @param length the length of the error.
+   */
+  protected abstract void _notifySyntaxErrorOccurred(int offset, int length);
   
   /**
    * Interprets the files selected in the FileOpenSelector. Assumes all strings
@@ -400,6 +407,39 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
                                     message,
                                     stackTrace,
                                     InteractionsDocument.ERROR_STYLE);
+    _interactionIsOver();
+  }
+  
+  /**
+   * Signifies that the most recent interpretation was preempted
+   * by a syntax error.  The integer parameters support future
+   * error highlighting.
+   *
+   * @param errorMessage The syntax error message
+   * @param startRow The starting row of the error
+   * @param startCol The starting column of the error
+   * @param startRow The end row of the error
+   * @param startCol The end column of the error
+   */
+  public void replReturnedSyntaxError(String errorMessage,
+                                      String interaction,
+                                      int startRow,
+                                      int startCol,
+                                      int endRow,
+                                      int endCol ) {
+    edu.rice.cs.util.Pair<Integer,Integer> oAndL = 
+      StringOps.getOffsetAndLength( interaction, startRow, startCol, endRow, endCol );
+    
+    _notifySyntaxErrorOccurred( _document.getPromptPos() + oAndL.getFirst().intValue(),
+                                oAndL.getSecond().intValue() );
+    
+    _document.appendSyntaxErrorResult(errorMessage,
+                                      startRow,
+                                      startCol,
+                                      endRow,
+                                      endCol,
+                                      InteractionsDocument.ERROR_STYLE);
+
     _interactionIsOver();
   }
   

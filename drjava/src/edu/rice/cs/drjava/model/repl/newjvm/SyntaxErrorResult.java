@@ -39,14 +39,62 @@
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
+import edu.rice.cs.javaast.parser.*;
+import edu.rice.cs.javaast.tree.*;
+import edu.rice.cs.javaast.*;
+
 /**
- * Interface for any visitor that handles InterpretResults.
+ * A syntax error to pass back to the main JVM after a call
+ * to interpret.
  * 
  * @version $Id$
  */
-public interface InterpretResultVisitor<T> {
-  public T forVoidResult(VoidResult that);
-  public T forValueResult(ValueResult that);
-  public T forExceptionResult(ExceptionResult that);
-  public T forSyntaxErrorResult(SyntaxErrorResult that);
+public class SyntaxErrorResult implements InterpretResult {
+  private final int _startRow;
+  private final int _startCol;
+  private final int _endRow;
+  private final int _endCol;
+  
+  private final String _errorMessage;
+  private final String _interaction;
+
+  public SyntaxErrorResult(ParseException pe, String s)
+  {
+    _startRow = pe.getBeginLine();
+    _startCol = pe.getBeginColumn();
+    _endRow = pe.getEndLine();
+    _endCol = pe.getEndColumn();
+    _errorMessage = pe.getInteractionsMessage();
+    _interaction = s;
+  }
+  
+  public SyntaxErrorResult(TokenMgrError pe, String s)
+  {
+    _endRow = _startRow = pe.getErrorRow();
+    // The lexical error is thrown from the position following
+    // the offending character.  Failure to correct this has
+    // grave consequences for our error highlighting.
+    _endCol = _startCol = pe.getErrorColumn() - 1;
+    _errorMessage = pe.getMessage();
+    _interaction = s;
+  }
+  
+  public String getErrorMessage() {
+    return _errorMessage;
+  }
+  
+  public String getInteraction(){
+    return _interaction;
+  }
+
+  public int getStartRow(){ return _startRow; }
+  public int getStartCol(){ return _startCol; }
+  public int getEndRow(){ return _endRow; }
+  public int getEndCol(){ return _endCol; }
+
+  public <T> T apply(InterpretResultVisitor<T> v) {
+    return v.forSyntaxErrorResult(this);
+  }
+
+  public String toString() { return "(syntax error: " + _errorMessage + ")"; }
 }

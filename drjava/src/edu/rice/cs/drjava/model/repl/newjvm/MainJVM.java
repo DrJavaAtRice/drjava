@@ -664,6 +664,20 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
                                 that.getStackTrace());
       return null;
     }
+    
+    /**
+     * Indicates there was a syntax error to the model.
+     * @returns null
+     */
+    public Object forSyntaxErrorResult(SyntaxErrorResult that) {
+      _interactionsModel.replReturnedSyntaxError(that.getErrorMessage(),
+                                                 that.getInteraction(),
+                                                 that.getStartRow(),
+                                                 that.getStartCol(),
+                                                 that.getEndRow(),
+                                                 that.getEndCol() );
+      return null;
+    }
   }
 
   /**
@@ -680,6 +694,12 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void replThrewException(String exceptionClass,
                                    String message,
                                    String stackTrace) {}
+    public void replReturnedSyntaxError(String errorMessage,
+                                        String interaction,
+                                        int startRow,
+                                        int startCol,
+                                        int endRow,
+                                        int endCol ) {}
     public void replCalledSystemExit(int status) {}
     public void interpreterResetting() {}
     public void interpreterReady() {}

@@ -660,6 +660,34 @@ public class InteractionsDocument implements DocumentAdapter {
     }
   }
   
+  public void appendSyntaxErrorResult(String message,
+                                      int startRow,
+                                      int startCol,
+                                      int endRow,
+                                      int endCol, 
+                                      String styleName )
+  {
+    //writeLock();
+    try {
+
+      if (null == message || "null".equals(message)) {
+        message = "";
+      }
+      
+      
+      
+     insertText( getDocLength(), message + "\n" , styleName );
+    }
+
+    catch (DocumentAdapterException ble) {
+      throw new UnexpectedException(ble);
+    }
+    finally {
+      //writeUnlock();
+    }
+  }
+
+  
   /**
    * Class to ensure that any attempt to edit the document
    * above the prompt is rejected.

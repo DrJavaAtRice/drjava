@@ -325,6 +325,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
           this.notify();
         }
       }
+      
     };
 
     _model.addListener(listener);
@@ -568,6 +569,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected int junitEndCount;
     protected int interactionStartCount;
     protected int interactionEndCount;
+    protected int interactionErrorCount;
     protected int interpreterChangedCount;
     //protected int interactionCaretPositionChangedCount;
     protected int consoleResetCount;
@@ -580,7 +582,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected int fileRevertedCount;
     protected int shouldRevertFileCount;
     protected int undoableEditCount;
-
+    
     public TestListener() {
       resetCounts();
     }
@@ -600,6 +602,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       junitEndCount = 0;
       interactionStartCount = 0;
       interactionEndCount = 0;
+      interactionErrorCount = 0;
       interpreterChangedCount = 0;
       //interactionCaretPositionChangedCount = 0;
       consoleResetCount = 0;
@@ -674,6 +677,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("number of times interactionEnded fired", i, interactionEndCount);
     }
     
+    public void assertInteractionErrorCount(int i) {
+      assertEquals("number of times interactionError fired", i, interactionErrorCount );
+    }
+    
     public void assertInterpreterChangedCount(int i) {
       assertEquals("number of times interpreterChanged fired", i, interpreterChangedCount);
     }
@@ -707,6 +714,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("number of times interactionsExited fired",
                    i,
                    interactionsExitedCount);
+    }
+    
+    public void assertInteractionsErrorCount(int i) {
+      assertEquals("number of times interactionsError fired",
+                   i,
+                   interactionErrorCount);
     }
 
     public void assertConsoleResetCount(int i) {
@@ -796,6 +809,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     public void interactionEnded() {
       listenerFail("interactionEnded fired unexpectedly");
+    }
+    
+    public void interactionsErrorOccurred(int offset, int length){
+      listenerFail("interpreterErrorOccurred fired unexpectedly");
     }
     
     public void interpreterChanged(boolean inProgress) {

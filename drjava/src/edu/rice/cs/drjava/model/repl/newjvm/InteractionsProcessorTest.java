@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -35,18 +35,73 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
- END_COPYRIGHT_BLOCK*/
+END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
-/**
- * Interface for any visitor that handles InterpretResults.
- * 
- * @version $Id$
- */
-public interface InterpretResultVisitor<T> {
-  public T forVoidResult(VoidResult that);
-  public T forValueResult(ValueResult that);
-  public T forExceptionResult(ExceptionResult that);
-  public T forSyntaxErrorResult(SyntaxErrorResult that);
+import junit.framework.*;
+import edu.rice.cs.javaast.parser.*;
+import edu.rice.cs.javaast.tree.*;
+import edu.rice.cs.javaast.*;
+
+public class InteractionsProcessorTest extends TestCase {
+
+  InteractionsProcessor _ip;
+
+  public InteractionsProcessorTest(String s)
+  {
+    super(s);
+  }
+
+  protected void setUp()
+  {
+    _ip = new InteractionsProcessor();
+  }
+
+  public void testPreProcess()
+  {
+    try{
+      String s = _ip.preProcess("0");
+    }
+    catch( ParseException pe ){
+      assertTrue("preProcess failed", false);
+    }
+    assertTrue("InteractionProcessor.testPreProcess:", _ip.precalled);
+    
+    // this test is presumptive for the real preprocessor, correct? -jvf
+    //assertEquals("InteractionProcessor.testPreProcess:", "0", s);
+  }
+  
+  public void testPreProcessSyntaxError()
+  {
+    try{
+      String s = _ip.preProcess("i+");
+      fail("preProcess failed, syntax error expected");
+    }
+    catch( ParseException pe ){
+      // expected this.
+    }
+  }
+  
+  
+  public void testPreProcessTokenMgrError()
+  {
+    try{
+      String s = _ip.preProcess("#");
+      fail("preProcess failed, token manager error expected");
+    }
+    catch( ParseException pe ){
+      fail("preProcess failed, token manager error expected");
+    }
+    catch( TokenMgrError tme ){
+     // this was what we wanted.
+    }
+  }
+
+  public void testPostProcess()
+  {
+    String s = _ip.postProcess("0", null);
+    assertTrue("InteractionProcessor.testPostProcess:", _ip.postcalled);
+    assertEquals("InteractionProcessor.testPostProcess:", "0", s);
+  }
 }

@@ -764,8 +764,8 @@ public class GlobalModelIOTest extends GlobalModelTestCase implements OptionCons
                  FOO_TEXT,
                  FileOps.readFileAsString(file));
     assertEquals("contents of backup file 3rd write",
-		 BAR_TEXT,
-		 FileOps.readFileAsString(backup));
+   BAR_TEXT,
+   FileOps.readFileAsString(backup));
 
     /* Set the config back to the original option */
     DrJava.getConfig().setSetting(BACKUP_FILES, backupStatus);
@@ -1162,7 +1162,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase implements OptionCons
     _model.addListener(listener);
     File f = tempFile();
     FileSelector fs = new FileSelector(f);
-    String s1 = "int x = 5";
+    String s1 = "int x = 5;";
     String s2 = "System.out.println(\"x = \" + x)";
     listener.assertInteractionStartCount(0);
     listener.assertInteractionEndCount(0);
@@ -1196,7 +1196,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase implements OptionCons
                  s1+'\n'+s2+'\n',
                  _model.getHistoryAsString());
     assertEquals("History and getHistoryAsStringWithSemicolons don't match up correctly.",
-                 s1+";\n"+s2+";\n",
+                 s1+"\n"+s2+";\n",
                  _model.getHistoryAsStringWithSemicolons());
     listener.assertInteractionEndCount(2);
     listener.assertInteractionStartCount(2);
@@ -1205,7 +1205,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase implements OptionCons
     // check that the file contains the correct value
     String newLine = System.getProperty("line.separator");
     assertEquals("contents of saved file",
-                 History.HISTORY_FORMAT_VERSION_2 + s1 + ";\n" + s2 + ";\n",
+                 History.HISTORY_FORMAT_VERSION_2 + s1 + "\n" + s2 + ";\n",
                  FileOps.readFileAsString(f));
     
     _model.clearHistory();
@@ -1261,7 +1261,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase implements OptionCons
     File f2 = tempFile(2);
     FileSelector fs1 = new FileSelector(f1);
     FileSelector fs2 = new FileSelector(f2);
-    String s1 = "int x = 5";
+    String s1 = "int x = 5;";
     String s2 = "System.out.println(\"x = \" + x)";
     String s3 = "x = 5;";
     String s4 = "System.out.println(\"x = \" + x)";

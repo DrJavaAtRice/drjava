@@ -163,6 +163,7 @@ public class InteractionsModelTest extends TestCase {
     }
     protected void _notifyInteractionStarted() {}
     protected void _notifyInteractionEnded() {}
+    protected void _notifySyntaxErrorOccurred(int offset, int length) {}
     protected void _notifyInterpreterExited(int status) {}
     protected void _notifyInterpreterResetting() {}
     protected void _notifyInterpreterReady() {}

@@ -253,6 +253,15 @@ public class NewJVMTest extends TestCase {
       _jvm.wait();
       assertEquals("result", "6", _jvm.returnBuf);
     }
+    
+    // test syntax error handling
+    synchronized(_jvm) {
+      _jvm.interpret("x+");
+      _jvm.wait();
+      assertTrue("syntax error was reported",
+                 ! _jvm.syntaxErrorMsgBuf.equals("") );
+    }
+    
   }
 
   private static class TestJVMExtension extends MainJVM {
@@ -262,6 +271,11 @@ public class NewJVMTest extends TestCase {
     public String exceptionClassBuf;
     public String exceptionMsgBuf;
     public String exceptionTraceBuf;
+    public String syntaxErrorMsgBuf;
+    public int syntaxErrorStartRow;
+    public int syntaxErrorStartCol;
+    public int syntaxErrorEndRow;
+    public int syntaxErrorEndCol;
     public boolean voidReturnFlag;
     
     private InterpretResultVisitor<Object> _testHandler;
@@ -285,6 +299,11 @@ public class NewJVMTest extends TestCase {
       exceptionMsgBuf = null;
       exceptionTraceBuf = null;
       voidReturnFlag = false;
+      syntaxErrorMsgBuf = null;
+      syntaxErrorStartRow = 0;
+      syntaxErrorStartCol = 0;
+      syntaxErrorEndRow = 0;
+      syntaxErrorEndCol = 0;      
     }
     
     protected void handleSlaveQuit(int status) {
@@ -338,6 +357,20 @@ public class NewJVMTest extends TestCase {
           return null;
         }
       }
+      
+      public Object forSyntaxErrorResult(SyntaxErrorResult that) {
+        synchronized(TestJVMExtension.this) {
+          syntaxErrorMsgBuf = that.getErrorMessage();
+          syntaxErrorStartRow = that.getStartRow();   
+          syntaxErrorStartCol = that.getStartCol();  
+          syntaxErrorEndRow = that.getEndRow();            
+          syntaxErrorEndCol = that.getEndCol();  
+          //System.out.println("notify threw");
+          TestJVMExtension.this.notify();
+          return null;
+        }
+      }
+      
     }
   }
 }
