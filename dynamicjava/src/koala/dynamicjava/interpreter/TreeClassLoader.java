@@ -210,11 +210,11 @@ public class TreeClassLoader extends SecureClassLoader
    * Adds an URL in the class path
    */
   public void addURL(URL url) {
-//    if (classLoader == null) {
-//      classLoader = new URLClassLoader(new URL[] { url });
-//    } else {
+    if (classLoader == null) {
+      classLoader = new URLClassLoader(new URL[] { url });
+    } else {
       classLoader = new URLClassLoader(new URL[] { url }, classLoader);
-//    }
+    }
   }
 
   /**
