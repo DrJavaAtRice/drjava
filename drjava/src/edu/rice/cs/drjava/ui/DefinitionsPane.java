@@ -75,6 +75,7 @@ public class DefinitionsPane extends JEditorPane
   private UndoManager _undoManager;
   private UndoAction _undoAction;
   private RedoAction _redoAction;
+  private KeyBindingManager _keyBindingManager;
   /**
    * Our current paren/brace/bracket matching highlight.
    */
@@ -113,6 +114,12 @@ public class DefinitionsPane extends JEditorPane
   private JUnitErrorCaretListener _junitErrorListener;
 
   /**
+   * Used in processKeyEvent to disallow the use of the UI's default key-bindings
+   * for commands like cut, copy, and paste
+   */
+  private int _mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+  
+  /**
    * Looks for changes in the caret position to see if a paren/brace/bracket
    * highlight is needed.
   */
@@ -132,8 +139,8 @@ public class DefinitionsPane extends JEditorPane
         _updateMatchHighlight();
       } catch (BadLocationException ex) {}
     }
-  };
-
+  };  
+  
   /**
    * Updates the highlight if there is any.
    * @exception BadLocationException
@@ -241,7 +248,7 @@ public class DefinitionsPane extends JEditorPane
    */
   private Action _indentKeyActionLine =
     new IndentKeyAction("\n",
-                        getKeymap().getAction(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)));
+                        (Action)this.getActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)));
 
   /**
    * Likewise, regular text keys like '{', '}', and ':' do not have special actions
@@ -258,6 +265,39 @@ public class DefinitionsPane extends JEditorPane
     new IndentKeyAction(":", getKeymap().getDefaultAction());
 
   /**
+   * Takes in any keyboard input, checks to see if it is in the keyToActionMap 
+   * in KeybindingManager, if so executes the action, otherwise checks if it
+   * contains the current platform's menu shortcut modifier and if so, ignores 
+   * that command (this disallows the execution of the UI's default 
+   * actions such as cut/copy/paste/select all), otherwise does whatever 
+   * normally would be done
+   */
+  public void processKeyEvent(KeyEvent e) {
+    if (CodeStatus.DEVELOPMENT) {
+      KeyStroke ks = KeyStroke.getKeyStrokeForEvent(e);
+      Action a = _keyBindingManager.get(ks);
+      if (a != null) {
+        if (a.isEnabled()) {// prevents the user from undoing (for example) if it's not enabled
+          a.actionPerformed(null);
+        }
+        e.consume();
+      }
+      else {        
+        if ((ks.getModifiers() & mask) != 0)
+          e.consume();
+      }
+      if (!e.isConsumed())
+        super.processKeyEvent(e);
+    }
+    else
+      super.processKeyEvent(e);
+  }
+  
+  public void setKeyBindingManager(KeyBindingManager keyBindingManager) {
+    _keyBindingManager = keyBindingManager;
+  }
+  
+  /**
    * Constructor.  Sets up all the defaults.
    * @param mf the parent window
    */
@@ -265,20 +305,6 @@ public class DefinitionsPane extends JEditorPane
                          GlobalModel model,
                          OpenDefinitionsDocument doc)
   {
-
-    /*this.setEditorKit(new DefaultEditorKit() {
-      ViewFactory vf = null;
-      public ViewFactory getViewFactory() {
-        if (vf == null)
-          vf = new NoWrapFactory();
-        return vf;
-      }
-      class NoWrapFactory implements ViewFactory {
-        public View create( Element e ) {
-          return new PlainView(e);
-        }
-      }
-    });*/
     _mainFrame = mf;
     _model = model;
     _doc = doc;
@@ -553,10 +579,6 @@ public class DefinitionsPane extends JEditorPane
       }
     }
   }
-  
-  /*public boolean getScrollableTracksViewportWidth(){
-    return false;
-  }*/
 
   /**
    * The undo action.

@@ -43,7 +43,12 @@ import gj.util.Vector;
 import java.awt.Color;
 import java.awt.Font;
 import edu.rice.cs.drjava.DrJava;
+import javax.swing.KeyStroke;
+import java.awt.event.KeyEvent;
+import java.awt.event.InputEvent;
+import java.awt.Toolkit;
 import edu.rice.cs.drjava.CodeStatus;
+
 public interface OptionConstants extends ConfigurationTool {
   
   // STATIC VARIABLES  
@@ -178,6 +183,307 @@ public interface OptionConstants extends ConfigurationTool {
     new BooleanOption("lineenum.enabled", new Boolean(false)):
     null;
   
+  
+  /* ---------- Key Binding Options ----------- */
+  static int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+  /**
+   * The key binding for creating a new file
+   */
+  public static final KeyStrokeOption KEY_NEW_FILE =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.new.file", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_N, mask));
+  /**
+   * The key binding for opening a file
+   */
+  public static final KeyStrokeOption KEY_OPEN_FILE =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.open.file", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_O, mask));
+  /**
+   * The key binding for saving a file
+   */
+  public static final KeyStrokeOption KEY_SAVE_FILE =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.save.file", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_S, mask));
+  /**
+   * The key binding for saving a file as
+   */
+  public static final KeyStrokeOption KEY_SAVE_FILE_AS =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.save.file.as", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_S, mask |
+                                               InputEvent.SHIFT_MASK));
+  /**
+   * The key binding for closing a file
+   */
+  public static final KeyStrokeOption KEY_CLOSE_FILE =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.close.file", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_W, mask));
+  /**
+   * The key binding for showing the print preview
+   */
+  public static final KeyStrokeOption KEY_PRINT_PREVIEW =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.print.preview", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_P, mask |
+                                               InputEvent.SHIFT_MASK));
+  /**
+   * The key binding for printing a file
+   */
+  public static final KeyStrokeOption KEY_PRINT =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.print", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_P, mask));
+  /**
+   * The key binding for quitting
+   */
+  public static final KeyStrokeOption KEY_QUIT =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.quit", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_Q, mask));
+  /**
+   * The key binding for undo-ing
+   */
+  public static final KeyStrokeOption KEY_UNDO =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.undo", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_Z, mask));
+  /**
+   * The key binding for redo-ing
+   */
+  public static final KeyStrokeOption KEY_REDO =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.redo", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_R, mask));
+  /**
+   * The key binding for cutting
+   */
+  public static final KeyStrokeOption KEY_CUT =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.cut", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_X, mask));
+  /**
+   * The key binding for copying
+   */
+  public static final KeyStrokeOption KEY_COPY =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.copy", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_C, mask));
+  /**
+   * The key binding for pasting
+   */
+  public static final KeyStrokeOption KEY_PASTE =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.paste", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_V, mask));
+  /**
+   * The key binding for selecting all text
+   */
+  public static final KeyStrokeOption KEY_SELECT_ALL =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.select.all", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_A, mask));
+  /**
+   * The key binding for find and replace
+   */
+  public static final KeyStrokeOption KEY_FIND_REPLACE =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.find.replace", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F, mask));
+  /**
+   * The key binding for goto line
+   */
+  public static final KeyStrokeOption KEY_GOTO_LINE =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.goto.line", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_G, mask));
+  /**
+   * The key binding for selecting previous document
+   */
+  public static final KeyStrokeOption KEY_PREVIOUS_DOCUMENT =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.previous.document", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, mask));
+  /**
+   * The key binding for selecting next document
+   */
+  public static final KeyStrokeOption KEY_NEXT_DOCUMENT =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.next.document", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, mask));
+  /**
+   * The key binding for compiling
+   */
+  public static final KeyStrokeOption KEY_COMPILE =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.compile", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
+  /**
+   * The key binding for aborting the current interaction
+   */
+  public static final KeyStrokeOption KEY_ABORT_INTERACTION =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.abort.interaction", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
+  /**
+   * The key binding for moving the cursor backwards
+   */
+  public static final KeyStrokeOption KEY_BACKWARD =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.backward", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0));
+  /**
+   * The key binding for moving the cursor to the beginning of the document
+   */
+  public static final KeyStrokeOption KEY_BEGIN_DOCUMENT =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.begin.document", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_HOME, mask));
+  /**
+   * The key binding for moving the cursor to the beginning of the current line
+   */
+  public static final KeyStrokeOption KEY_BEGIN_LINE =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.begin.line", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0));
+  /**
+   * The key binding for moving the cursor to the beginning of the current paragraph
+   */
+  public static final KeyStrokeOption KEY_BEGIN_PARAGRAPH =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.begin.paragraph", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_UP, mask));
+  /**
+   * The key binding for moving the cursor to the beginning of the previous word
+   */
+  public static final KeyStrokeOption KEY_PREVIOUS_WORD =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.previous.word", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, mask));
+  /**
+   * The key binding for deleting the next character
+   */
+  public static final KeyStrokeOption KEY_DELETE_NEXT =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.delete.next", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
+  /**
+   * The key binding for deleting the previous character
+   */
+  public static final KeyStrokeOption KEY_DELETE_PREVIOUS =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.delete.previous", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0));
+  /**
+   * The key binding for moving the cursor down
+   */
+  public static final KeyStrokeOption KEY_DOWN =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.down", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0));
+  /**
+   * The key binding for moving the cursor up
+   */
+  public static final KeyStrokeOption KEY_UP =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.up", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0));
+  /**
+   * The key binding for moving the cursor to the end of the document
+   */
+  public static final KeyStrokeOption KEY_END_DOCUMENT =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.end.document", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_END, mask));
+  /**
+   * The key binding for moving the cursor to the end of the current line
+   */
+  public static final KeyStrokeOption KEY_END_LINE =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.end.line", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_END, 0));
+  /**
+   * The key binding for moving the cursor to the end of the current paragraph
+   */
+  public static final KeyStrokeOption KEY_END_PARAGRAPH =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.end.paragraph", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, mask));
+  /**
+   * The key binding for moving the cursor to the beginning of the next word
+   */
+  public static final KeyStrokeOption KEY_NEXT_WORD =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.next.word", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, mask));
+  /**
+   * The key binding for moving the cursor forwards
+   */
+  public static final KeyStrokeOption KEY_FORWARD =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.forward", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0));
+  /**
+   * The key binding for page down
+   */
+  public static final KeyStrokeOption KEY_PAGE_DOWN =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.page.down", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0));
+  /**
+   * The key binding for page up
+   */
+  public static final KeyStrokeOption KEY_PAGE_UP =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.page.up", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0));
+  /**
+   * The key binding for cutting a line
+   */
+  public static final KeyStrokeOption KEY_CUT_LINE =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.cut.line", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_K, mask));
   
   /* ---------- Misc Options ---------- */
   

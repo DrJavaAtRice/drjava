@@ -80,10 +80,10 @@ public class KeyStrokeOptionTest extends TestCase
                                           InputEvent.ALT_MASK | InputEvent.SHIFT_MASK,
                                           true),
                    io.parse("alt shift released NUM_LOCK"));
-      assertEquals(KeyStroke.getKeyStroke(KeyEvent.VK_R,
+      assertEquals(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA,
                                           InputEvent.ALT_MASK | InputEvent.SHIFT_MASK,
                                           false),
-                   io.parse("alt shift R"));
+                   io.parse("alt shift COMMA"));
       assertEquals(KeyStroke.getKeyStroke('%'),
                    io.parse("typed %"));
       // behaves correctly in 1.3, but the test will not work for some reason

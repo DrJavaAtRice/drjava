@@ -40,18 +40,46 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.CodeStatus;
+import edu.rice.cs.util.UnexpectedException;
+import java.lang.reflect.Field;
 import javax.swing.KeyStroke;
 import java.awt.event.KeyEvent;
+import java.util.Hashtable;
 
 /**
  * Class representing all configuration options with values of type KeyStroke.
  */
 public class KeyStrokeOption extends Option<KeyStroke> {
   
+  static Hashtable keys = new Hashtable();
+  public static final KeyStroke NULL_KEYSTROKE = KeyStroke.getKeyStroke(0, 0);
   /**
    * @param key The name of this option.
    */
-  public KeyStrokeOption(String key, KeyStroke def) { super(key,def); }
+  public KeyStrokeOption(String key, KeyStroke def) { 
+    super(key,def); }
+  
+  // This sets up the hashtable that has key-value pairs consisting of
+  // ascii codes and Strings that describe the ascii character and are
+  // in the form that KeyStroke.getKeyStroke(String s) requires.
+  static {
+    if (CodeStatus.DEVELOPMENT) {
+      try {
+        Field[] fields = KeyEvent.class.getFields();
+        for (int i = 0; i < fields.length; i++) {
+          Field currfield = fields[i];
+          String name = currfield.getName();
+          if (name.startsWith("VK_")) {
+            keys.put(new Integer(currfield.getInt(null)), name.substring(3));
+          }
+        }
+      }
+      catch(IllegalAccessException iae) {
+        throw new UnexpectedException(iae);
+      }
+    }
+  }
+  
   
   /**
    * @param s The String to be parsed, must be the string representation of 
@@ -62,22 +90,25 @@ public class KeyStrokeOption extends Option<KeyStroke> {
    */
   public KeyStroke parse(String s) {
     if (CodeStatus.DEVELOPMENT) {
+      if (s.equals("null"))
+        return NULL_KEYSTROKE;
       KeyStroke ks = KeyStroke.getKeyStroke(s);
       if (ks == null)
-        throw new IllegalArgumentException("Input must be a string that is a valid " +
+        throw new IllegalArgumentException("Input "+s+" must be a string that is a valid " +
                                            "representation of a Keystroke");
       return ks;
     }
-    else
-      return null;
+    else return NULL_KEYSTROKE;
   }
-
+  
   /**
    * @param k The instance of class KeyStroke to be formatted.
    * @return A String representing the KeyStroke "k".
    */
   public String format(KeyStroke k) {
     if (CodeStatus.DEVELOPMENT) {
+      if (k == NULL_KEYSTROKE)
+        return "null";
       String s = KeyEvent.getKeyModifiersText(k.getModifiers()).toLowerCase();
       s = s.replace('+', ' ');
       s += " ";
@@ -91,11 +122,44 @@ public class KeyStrokeOption extends Option<KeyStroke> {
         // defaults to pressed
         if (k.isOnKeyRelease())
           s += "released ";
-        s += KeyEvent.getKeyText(k.getKeyCode()).toUpperCase().replace(' ', '_');
+        String key = (String) keys.get(new Integer(k.getKeyCode()));
+        if (key == null)
+          throw new IllegalArgumentException("Invalid keystroke");
+        s += key;
+        return s; 
+        /*String key = new String();
+         switch(k.getKeyCode()) {
+         // COMMA
+         case 44:key = "COMMA";
+         break;
+         // PERIOD
+         case 46:key = "PERIOD";
+         break;
+         // SLASH
+         case 47:key = "SLASH";
+         break;
+         // SEMICOLON
+         case 59:key = "SEMICOLON";
+         break;
+         // EQUALS
+         case 61:key = "EQUALS";
+         break;
+         // OPEN BRACKET
+         case 91:key = "OPEN_BRACKET";
+         break;
+         // BACKSLASH
+         case 92:key = "BACKSLASH";
+         break;
+         // CLOSE BRACKET
+         case 93:key = "CLOSE_BRACKET";
+         break;
+         default:key = KeyEvent.getKeyText(k.getKeyCode()).toUpperCase()
+         .replace(' ', '_');
+         }
+         s += key;*/
       }
       return s; 
     }
-    else
-      return null;
+    else return "";
   }
 }

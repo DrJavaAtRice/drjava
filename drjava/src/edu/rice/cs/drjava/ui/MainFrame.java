@@ -43,6 +43,7 @@ import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.event.*;
 import javax.swing.border.*;
+import javax.swing.plaf.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.awt.print.*;
@@ -54,6 +55,7 @@ import java.io.PrintWriter;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Arrays;
 import java.net.URL;
 
 import edu.rice.cs.drjava.DrJava;
@@ -65,6 +67,7 @@ import edu.rice.cs.drjava.model.debug.DebugManager;
 import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
 import edu.rice.cs.drjava.ui.JUnitPanel.JUnitErrorListPane;
+import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeOptionListener;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.util.swing.DelegatingAction;
@@ -74,6 +77,7 @@ import edu.rice.cs.util.swing.DelegatingAction;
  * @version $Id$
  */
 public class MainFrame extends JFrame implements OptionConstants {
+  
   private static final int INTERACTIONS_TAB = 0;
   private static final int COMPILE_TAB = 1;
   private static final int OUTPUT_TAB = 2;
@@ -120,10 +124,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JButton _saveButton;
   private JButton _compileButton;
   private JButton _junitButton;
-  private JMenuItem _saveMenuItem;
-  private JMenuItem _revertMenuItem;
-  private JMenuItem _compileMenuItem;
-  private JMenuItem _abortInteractionMenuItem;
   private JCheckBoxMenuItem _debuggerEnabledMenuItem;
   private JMenuItem _runDebuggerMenuItem;
   private JMenuItem _resumeDebugMenuItem;
@@ -134,7 +134,9 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenuItem _printBreakpointsMenuItem;
   private JMenuItem _clearAllBreakpointsMenuItem;
   private LinkedList _tabs;
-
+  
+  private KeyBindingManager _keyBindingManager;
+  
   public SingleDisplayModel getModel() {
     return _model;
   }
@@ -206,7 +208,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _open();
     }
   };
-
+  
   /**
    * Closes the current active document, prompting to save if necessary.
    */
@@ -247,18 +249,17 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _revertAction = new AbstractAction("Revert to Saved") {
     public void actionPerformed(ActionEvent ae) {
       String title = "Revert to Saved?";
-
+      
       String message = "Are you sure you want to revert the current " +
         "file to the version on disk?";
-
+      
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
                                              message,
                                              title,
                                              JOptionPane.YES_NO_OPTION);
       if (rc == JOptionPane.YES_OPTION) {
-     _revert();
+        _revert();
       }
-
     }
   };
 
@@ -346,15 +347,13 @@ public class MainFrame extends JFrame implements OptionConstants {
   private DelegatingAction _redoAction = new DelegatingAction();
 
   /** Aborts current interaction. */
-  private Action _abortInteractionAction
-    = new AbstractAction("Abort Current Interaction")
-  {
+  private Action _abortInteractionAction = new AbstractAction("Abort Current Interaction") {  
     public void actionPerformed(ActionEvent ae) {
       String title = "Confirm abort interaction";
-
+      
       String message = "Are you sure you want to abort the " +
         "current interaction?";
-
+      
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
                                              message,
                                              title,
@@ -533,7 +532,26 @@ public class MainFrame extends JFrame implements OptionConstants {
       _clearAllBreakpoints();
     }
   };
-
+  
+  /** Clears all breakpoints */
+  private Action _cutLineAction = new AbstractAction("Cut Line")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      if (CodeStatus.DEVELOPMENT) {
+        ActionMap _actionMap = _currentDefPane.getActionMap();
+        int oldCol = _model.getActiveDocument().getDocument().getCurrentCol();
+        _actionMap.get(DefaultEditorKit.selectionEndLineAction).actionPerformed(ae);
+        // if oldCol is equal to the current column, then selectionEndLine did
+        // nothing, so we're at the end of the line and should remove the newline
+        // character
+        if (oldCol == _model.getActiveDocument().getDocument().getCurrentCol())
+          _actionMap.get(DefaultEditorKit.deleteNextCharAction).actionPerformed(ae);
+        else
+          _cutAction.actionPerformed(ae);
+      }
+    }
+  };
+  
   /** How DrJava responds to window events. */
   private WindowListener _windowCloseListener = new WindowAdapter() {
     public void windowActivated(WindowEvent ev) {}
@@ -558,9 +576,10 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** Creates the main window, and shows it. */
   public MainFrame() {
-    // Set up the status bar
-    // This line is here so that each DefinitionsPane
-    // can understand the notion of the Location area.
+    
+    if (CodeStatus.DEVELOPMENT) {
+      _keyBindingManager = new KeyBindingManager(this);
+    }
     _posListener = new PositionListener();
     _setUpStatusBar();
 
@@ -586,6 +605,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     _defScrollPanes = new Hashtable();
     JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
     _currentDefPane = (DefinitionsPane) defScroll.getViewport().getView();
+    
+    // set up key-bindings
+    if (CodeStatus.DEVELOPMENT) {
+      _keyBindingManager.setActionMap(_currentDefPane.getActionMap());
+      _setUpKeyBindingMaps();
+    }
+    
     _posListener.updateLocation();
 
     // Need to set undo/redo actions to point to the initial def pane
@@ -1339,8 +1365,23 @@ public class MainFrame extends JFrame implements OptionConstants {
     _menuBar.add(_helpMenu);
     setJMenuBar(_menuBar);
   }
-
-
+  
+  private void _addMenuItem(JMenu menu, Action a, Option<KeyStroke> opt) {
+    JMenuItem tmpItem;
+    tmpItem = menu.add(a);
+    
+    KeyStroke ks = DrJava.CONFIG.getSetting(opt);
+    // checks that "a" is the action associated with the keystroke
+    // need to check in case two actions were assigned to the same
+    // key in the config file
+    if (_keyBindingManager.get(ks) == a) { 
+      tmpItem.setAccelerator(ks);
+      _keyBindingManager.putKeyToMenuItemMap(ks, tmpItem);
+    }
+    _keyBindingManager.addListener(opt, tmpItem);
+    
+  }
+  
   /**
    * Creates and returns a file menu.  Side effects: sets values for
    * _saveMenuItem and _compileMenuItem.
@@ -1349,53 +1390,82 @@ public class MainFrame extends JFrame implements OptionConstants {
     JMenuItem tmpItem;
     JMenu fileMenu = new JMenu("File");
 
-    // New, open
-    tmpItem = fileMenu.add(_newAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, mask));
-    tmpItem = fileMenu.add(_openAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, mask));
-    // Save, Save as, Save all
+    // New, open 
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = fileMenu.add(_newAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, mask));
+    }
+    else
+      _addMenuItem(fileMenu, _newAction, KEY_NEW_FILE);
+    
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = fileMenu.add(_openAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, mask));
+    }
+    else
+      _addMenuItem(fileMenu, _openAction, KEY_OPEN_FILE);
     fileMenu.addSeparator();
 
-    tmpItem = fileMenu.add(_saveAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, mask));
-    // keep track of the save menu item
-    _saveMenuItem = tmpItem;
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = fileMenu.add(_saveAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, mask));
+    }
+    else
+      _addMenuItem(fileMenu, _saveAction, KEY_SAVE_FILE);
     _saveAction.setEnabled(false);
 
-    tmpItem = fileMenu.add(_saveAsAction);
-    tmpItem.setAccelerator
-      (KeyStroke.getKeyStroke(KeyEvent.VK_S, mask | ActionEvent.SHIFT_MASK));
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = fileMenu.add(_saveAsAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, 
+                                                    mask | InputEvent.SHIFT_MASK));
+    }
+    else
+      _addMenuItem(fileMenu, _saveAsAction, KEY_SAVE_FILE_AS);
 
     tmpItem = fileMenu.add(_saveAllAction);
 
     tmpItem = fileMenu.add(_revertAction);
-    _revertMenuItem = tmpItem;
     _revertAction.setEnabled(false);
 
     // Close, Close all
     fileMenu.addSeparator();
-
-    tmpItem = fileMenu.add(_closeAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, mask));
-
+    
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = fileMenu.add(_closeAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, mask));
+    }
+    else
+    _addMenuItem(fileMenu, _closeAction, KEY_CLOSE_FILE);
     tmpItem = fileMenu.add(_closeAllAction);
 
     // Page setup, print preview, print
     fileMenu.addSeparator();
 
     tmpItem = fileMenu.add(_pageSetupAction);
-    tmpItem = fileMenu.add(_printPreviewAction);
-    tmpItem.setAccelerator
-      (KeyStroke.getKeyStroke(KeyEvent.VK_P, mask | ActionEvent.SHIFT_MASK));
-    tmpItem = fileMenu.add(_printAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, mask));
-
+    
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = fileMenu.add(_printPreviewAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, 
+                                                    mask | InputEvent.SHIFT_MASK));
+    }
+    else
+      _addMenuItem(fileMenu, _printPreviewAction, KEY_PRINT_PREVIEW);
+    
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = fileMenu.add(_printAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, mask));
+    }
+    else
+      _addMenuItem(fileMenu, _printAction, KEY_PRINT);
     // Quit
     fileMenu.addSeparator();
-
-    tmpItem = fileMenu.add(_quitAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, mask));
+    
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = fileMenu.add(_quitAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, mask));
+    }
+    else
+      _addMenuItem(fileMenu, _quitAction, KEY_QUIT);
     return fileMenu;
   }
 
@@ -1407,39 +1477,82 @@ public class MainFrame extends JFrame implements OptionConstants {
     JMenu editMenu = new JMenu("Edit");
 
     // Undo, redo
-    tmpItem = editMenu.add(_undoAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, mask));
-    tmpItem = editMenu.add(_redoAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, mask));
-
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = editMenu.add(_undoAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, mask));
+    }
+    else
+      _addMenuItem(editMenu, _undoAction, KEY_UNDO);
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = editMenu.add(_redoAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, mask));
+    }
+    else
+      _addMenuItem(editMenu, _redoAction, KEY_REDO);
     // Cut, copy, paste
     editMenu.addSeparator();
-
-    tmpItem = editMenu.add(_cutAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, mask));
-    tmpItem = editMenu.add(_copyAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, mask));
-    tmpItem = editMenu.add(_pasteAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, mask));
-
+    
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = editMenu.add(_cutAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, mask));
+    }
+    else
+      _addMenuItem(editMenu, _cutAction, KEY_CUT);
+    
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = editMenu.add(_copyAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, mask));
+    }
+    else
+      _addMenuItem(editMenu, _copyAction, KEY_COPY);
+    
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = editMenu.add(_pasteAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, mask));
+    }
+    else
+      _addMenuItem(editMenu, _pasteAction, KEY_PASTE);   
+    
     // Select All
-    tmpItem = editMenu.add(_selectAllAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, mask));
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = editMenu.add(_selectAllAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, mask));
+    }
+    else
+      _addMenuItem(editMenu, _selectAllAction, KEY_SELECT_ALL);
 
     // Find/replace, goto
     editMenu.addSeparator();
-    tmpItem = editMenu.add(_findReplaceAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, mask));
-    tmpItem = editMenu.add(_gotoLineAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, mask));
-
+    
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = editMenu.add(_findReplaceAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, mask));
+    }
+    else
+      _addMenuItem(editMenu, _findReplaceAction, KEY_FIND_REPLACE);
+    
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = editMenu.add(_gotoLineAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, mask));
+    }
+    else
+      _addMenuItem(editMenu, _gotoLineAction, KEY_GOTO_LINE);
     // Next, prev doc
     editMenu.addSeparator();
-    tmpItem = editMenu.add(_switchToPrevAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, mask));
-    tmpItem = editMenu.add(_switchToNextAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, mask));
-
+    
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = editMenu.add(_switchToPrevAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, mask));
+    }
+    else
+      _addMenuItem(editMenu, _switchToPrevAction, KEY_PREVIOUS_DOCUMENT);
+    
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = editMenu.add(_switchToNextAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, mask));
+    }
+    else
+      _addMenuItem(editMenu, _switchToNextAction, KEY_NEXT_DOCUMENT);
     // access to configurations GUI
     //editMenu.addSeparator();
     //tmpItem = editMenu.add(_preferencesAction);
@@ -1457,11 +1570,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     JMenu toolsMenu = new JMenu("Tools");
 
     // Compile
-    tmpItem = toolsMenu.add(_compileAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
-
-    // keep track of the compile menu item
-    _compileMenuItem = tmpItem;
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = toolsMenu.add(_compileAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
+    }
+    else
+      _addMenuItem(toolsMenu, _compileAction, KEY_COMPILE);
 
     toolsMenu.add(_junitAction);
 
@@ -1469,9 +1583,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     toolsMenu.addSeparator();
 
     _abortInteractionAction.setEnabled(false);
-    _abortInteractionMenuItem = toolsMenu.add(_abortInteractionAction);
-    _abortInteractionMenuItem
-      .setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
+    if (!CodeStatus.DEVELOPMENT) {
+      tmpItem = toolsMenu.add(_abortInteractionAction);
+      tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
+    }
+    else
+      _addMenuItem(toolsMenu, _abortInteractionAction, KEY_ABORT_INTERACTION);
+
     toolsMenu.add(_resetInteractionsAction);
     toolsMenu.add(_clearOutputAction);
 
@@ -1809,7 +1927,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _tabs.addLast(_junitPanel);
     _tabs.addLast(_findReplace);
     
-    // Show compiler output pane by default
+    // Show compiler output pane by default --- not anymore
     //showTab(_errorPanel);
     //showTab(_junitPanel);
     
@@ -1857,6 +1975,10 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JScrollPane _createDefScrollPane(OpenDefinitionsDocument doc) {
     DefinitionsPane pane = new DefinitionsPane(this, _model, doc);
 
+    if (CodeStatus.DEVELOPMENT) {
+      pane.setKeyBindingManager(_keyBindingManager);
+    }
+    
     // Add listeners
     _installNewDocumentListener(doc.getDocument());
     CompilerErrorCaretListener caretListener =
@@ -1868,7 +1990,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     pane.addJUnitErrorCaretListener(junitCaretListener);
 
     // add a listener to update line and column.
-    pane.addCaretListener( _posListener );
+    pane.addCaretListener( _posListener );    
     
     // Add to a scroll pane
     JScrollPane scroll = new BorderlessScrollPane(pane,
@@ -2397,9 +2519,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   public void removeTab(Component c) {
-    //int index = _tabbedPane.indexOfComponent(c);
-    //System.err.println("Called show yet?");
-    //_tabbedPane.removeTabAt(index);
     _tabbedPane.remove(c);
     ((TabbedPanel)c).setDisplayed(false);
     _tabbedPane.setSelectedIndex(0);
@@ -2431,6 +2550,186 @@ public class MainFrame extends JFrame implements OptionConstants {
       (int)_tabbedPane.getMinimumSize().getHeight();
     if (_mainSplit.getDividerLocation() > divLocation)
       _mainSplit.setDividerLocation(divLocation);
+  }
+  
+  /**
+   * Builds the Hashtables in KeyBindingManager that are used to keep track
+   * of key-bindings and allows for live updating, conflict resolution, and
+   * intelligent error messages (the ActionToNameMap)
+   */
+  private void _setUpKeyBindingMaps() {
+    if (CodeStatus.DEVELOPMENT) {
+      ActionMap _actionMap = _currentDefPane.getActionMap();
+      _keyBindingManager.putActionToNameMap(_newAction, 
+                                            "New File");
+      _keyBindingManager.putActionToNameMap(_openAction, 
+                                            "Open File");
+      _keyBindingManager.putActionToNameMap(_saveAction, 
+                                            "Save File");
+      _keyBindingManager.putActionToNameMap(_saveAsAction, 
+                                            "Save File As");
+      _keyBindingManager.putActionToNameMap(_closeAction, 
+                                            "Close File");
+      _keyBindingManager.putActionToNameMap(_printPreviewAction, 
+                                            "Print Preview");
+      _keyBindingManager.putActionToNameMap(_printAction, 
+                                            "Print");
+      _keyBindingManager.putActionToNameMap(_quitAction, 
+                                            "Quit");
+      _keyBindingManager.putActionToNameMap(_undoAction, 
+                                            "Undo");
+      _keyBindingManager.putActionToNameMap(_redoAction, 
+                                            "Redo");
+      _keyBindingManager.putActionToNameMap(_cutAction, 
+                                            "Cut");
+      _keyBindingManager.putActionToNameMap(_copyAction, 
+                                            "Copy");
+      _keyBindingManager.putActionToNameMap(_pasteAction, 
+                                            "Paste");
+      _keyBindingManager.putActionToNameMap(_selectAllAction, 
+                                            "Select All");
+      _keyBindingManager.putActionToNameMap(_findReplaceAction, 
+                                            "Find Replace");
+      _keyBindingManager.putActionToNameMap(_gotoLineAction, 
+                                            "Goto Line");
+      _keyBindingManager.putActionToNameMap(_switchToPrevAction, 
+                                            "Previous Document");
+      _keyBindingManager.putActionToNameMap(_switchToNextAction, 
+                                            "Next Document");
+      _keyBindingManager.putActionToNameMap(_compileAction, 
+                                            "Compile");
+      _keyBindingManager.putActionToNameMap(_abortInteractionAction, 
+                                            "Abort Interaction");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.backwardAction), 
+                                            "Backward");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionBackwardAction), 
+                                            "Selection Backward");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.beginAction), 
+                                            "Begin Document");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionBeginAction), 
+                                            "Selection Begin Document");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.beginLineAction), 
+                                            "Begin Line");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionBeginLineAction), 
+                                            "Selection Begin Line");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.beginParagraphAction), 
+                                            "Begin Paragraph");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionBeginParagraphAction), 
+                                            "Selection Begin Paragraph");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.previousWordAction), 
+                                            "Previous Word");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionPreviousWordAction), 
+                                            "Selection Previous Word");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.downAction), 
+                                            "Down");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionDownAction), 
+                                            "Selection Down");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.endLineAction), 
+                                            "End Line");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionEndLineAction), 
+                                            "Selection End Line");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.endParagraphAction), 
+                                            "End Paragraph");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionEndParagraphAction), 
+                                            "Selection End Paragraph");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.nextWordAction), 
+                                            "Next Word");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionNextWordAction), 
+                                            "Selection Next Word");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.forwardAction), 
+                                            "Forward");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionForwardAction), 
+                                            "Selection Forward");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.pageDownAction), 
+                                            "Page Down");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.pageUpAction), 
+                                            "Page Up");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.upAction), 
+                                            "Up");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionUpAction), 
+                                            "Selection Up");
+      _keyBindingManager.putActionToNameMap(_cutLineAction, 
+                                            "Cut Line");
+      
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_NEW_FILE), _newAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_OPEN_FILE), _openAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_SAVE_FILE), _saveAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_SAVE_FILE_AS), _saveAsAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_CLOSE_FILE), _closeAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_PRINT_PREVIEW), _printPreviewAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_PRINT), _printAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_QUIT), _quitAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_UNDO), _undoAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_REDO), _redoAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_CUT), _cutAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_COPY), _copyAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_PASTE), _pasteAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_SELECT_ALL), _selectAllAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_FIND_REPLACE), _findReplaceAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_GOTO_LINE), _gotoLineAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_PREVIOUS_DOCUMENT), 
+                 _switchToPrevAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_NEXT_DOCUMENT), 
+                 _switchToNextAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_COMPILE), _compileAction);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_ABORT_INTERACTION), 
+                 _abortInteractionAction);
+      
+      _keyBindingManager.addShiftAction(KEY_BACKWARD, 
+                                        DefaultEditorKit.backwardAction, 
+                                        DefaultEditorKit.selectionBackwardAction);
+ 
+      _keyBindingManager.addShiftAction(KEY_BEGIN_DOCUMENT, 
+                                        DefaultEditorKit.beginAction, 
+                                        DefaultEditorKit.selectionBeginAction);
+      
+      _keyBindingManager.addShiftAction(KEY_BEGIN_LINE, 
+                                        DefaultEditorKit.beginLineAction, 
+                                        DefaultEditorKit.selectionBeginLineAction);
+          
+      _keyBindingManager.addShiftAction(KEY_BEGIN_PARAGRAPH, 
+                                        DefaultEditorKit.beginParagraphAction, 
+                                        DefaultEditorKit.selectionBeginParagraphAction); 
+      
+      _keyBindingManager.addShiftAction(KEY_PREVIOUS_WORD, 
+                                        DefaultEditorKit.previousWordAction, 
+                                        DefaultEditorKit.selectionPreviousWordAction);
+       
+      _keyBindingManager.addShiftAction(KEY_DOWN, 
+                                        DefaultEditorKit.downAction, 
+                                        DefaultEditorKit.selectionDownAction);
+       
+      _keyBindingManager.addShiftAction(KEY_END_LINE, 
+                                        DefaultEditorKit.endLineAction, 
+                                        DefaultEditorKit.selectionEndLineAction);
+      
+      _keyBindingManager.addShiftAction(KEY_END_PARAGRAPH, 
+                                        DefaultEditorKit.endParagraphAction, 
+                                        DefaultEditorKit.selectionEndParagraphAction);
+       
+      _keyBindingManager.addShiftAction(KEY_NEXT_WORD, 
+                                        DefaultEditorKit.nextWordAction, 
+                                        DefaultEditorKit.selectionNextWordAction);
+      
+      _keyBindingManager.addShiftAction(KEY_FORWARD, 
+                                        DefaultEditorKit.forwardAction, 
+                                        DefaultEditorKit.selectionForwardAction);
+      
+      _keyBindingManager.addShiftAction(KEY_UP, 
+                                        DefaultEditorKit.upAction, 
+                                        DefaultEditorKit.selectionUpAction);     
+      
+      // These last methods have no default selection methods
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_PAGE_DOWN), 
+                                   _actionMap.get(DefaultEditorKit.pageDownAction));
+      _keyBindingManager.addListener(KEY_PAGE_DOWN, null);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_PAGE_UP), 
+                                   _actionMap.get(DefaultEditorKit.pageUpAction));
+      _keyBindingManager.addListener(KEY_PAGE_UP, null);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_CUT_LINE), 
+                                   _cutLineAction);
+      _keyBindingManager.addListener(KEY_CUT_LINE, null);
+    }
   }
   
   /**
