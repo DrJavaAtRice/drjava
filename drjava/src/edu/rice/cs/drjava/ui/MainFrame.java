@@ -799,7 +799,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       _model.openFiles(_openSelector);
     }
     catch (AlreadyOpenException aoe) {
-      // Switch to existing copy after prompting user
       OpenDefinitionsDocument openDoc = aoe.getOpenDocument();
       String filename = "File";
       try {
@@ -809,19 +808,22 @@ public class MainFrame extends JFrame implements OptionConstants {
         // Can't happen: this open document must have a file
         throw new UnexpectedException(ise);
       }
-      /* This prompt is removed until it can provide a useful revert option. */
-//       String title = "File already open";
-//       String message = filename + " is already open.\n" +
-//         "Click OK to switch to the open copy\n" +
-//         "or Cancel to return to the previous file.";
-//       int choice = JOptionPane.showConfirmDialog(this,
-//                                                  message,
-//                                                  title,
-//                                                  JOptionPane.OK_CANCEL_OPTION);
-//       if (choice == JOptionPane.OK_OPTION) {
-
+      // Always switch to doc
       _model.setActiveDocument(openDoc);
-//       }
+      
+      // Prompt to revert if modified
+      if (openDoc.isModifiedSinceSave()) {
+        String title = "Revert to Saved?";
+        String message = filename + " is already open and modified.\n" +
+          "Would you like to revert to the version on disk?\n";
+        int choice = JOptionPane.showConfirmDialog(this,
+                                                   message,
+                                                   title,
+                                                   JOptionPane.YES_NO_OPTION);
+        if (choice == JOptionPane.YES_OPTION) {
+          _revert();
+        }
+      }
     }
     catch (OperationCanceledException oce) {
       // Ok, don't open a file
