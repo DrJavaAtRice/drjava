@@ -403,7 +403,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent e) {
       Component c = SwingUtilities.findFocusOwner(MainFrame.this);
       super.actionPerformed(e);
-      c.requestFocus();
+      if (c != null) c.requestFocus();
     }
   };
 
@@ -412,7 +412,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent e) {
       Component c = SwingUtilities.findFocusOwner(MainFrame.this);
       super.actionPerformed(e);
-      c.requestFocus();
+      if (c != null) c.requestFocus();
     }
   };
 
@@ -421,7 +421,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent e) {
       Component c = SwingUtilities.findFocusOwner(MainFrame.this);
       super.actionPerformed(e);
-      c.requestFocus();
+      if (c != null) c.requestFocus();
     }
   };
 
@@ -476,6 +476,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
+  /** Indents the current selection. 
+  private Action _indentLinesAction = new AbstractAction("Indent Line(s)") {
+    public void actionPerformed(ActionEvent ae) {
+      _currentDefPane.indentLines();
+    }
+  };*/
+  
   
   /** Clears DrJava's output console. */
   private Action _clearOutputAction = new AbstractAction("Clear Console") {
@@ -2040,6 +2047,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     editMenu.addSeparator();
     _addMenuItem(editMenu, _findReplaceAction, KEY_FIND_REPLACE);
     _addMenuItem(editMenu, _gotoLineAction, KEY_GOTO_LINE);
+    
+    // Indent lines
+    //editMenu.addSeparator();
+    //_addMenuItem(editMenu, _indentLinesAction, KEY_INDENT);
       
     // Next, prev doc
     editMenu.addSeparator();

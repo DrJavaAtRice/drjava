@@ -39,6 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
@@ -91,15 +92,16 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion
         // Precondition not met: we should have a brace
         return false;
       }
-      int bracePos = lineStart - info.distToBrace;    
+      int bracePos = lineStart - info.distToBrace;
       
       // Get position of previous non-WS char (not in comments)
       int prevNonWS = -1;
       try {
         prevNonWS = doc.findPrevNonWSCharPos(bracePos);
+        char c = doc.getText(prevNonWS,1).charAt(0);
         for (int i=0; i<_prefix.length; i++) {
           char prefix = _prefix[i];
-          if (doc.getText(prevNonWS,1).charAt(0) == prefix) {
+          if (c == prefix) {
             return true;
           } 
         }

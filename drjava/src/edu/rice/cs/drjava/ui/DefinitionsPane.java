@@ -54,6 +54,7 @@ import edu.rice.cs.util.Pair;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
+import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
@@ -73,7 +74,7 @@ import edu.rice.cs.drjava.model.debug.Breakpoint;
 public class DefinitionsPane extends JEditorPane 
   implements OptionConstants {
   private static final EditorKit EDITOR_KIT = new DefinitionsEditorKit();
-  private static final int UNDO_LIMIT = 100;
+  private static final int UNDO_LIMIT = 1000;
 
   /**
    * Our parent window.
@@ -504,7 +505,7 @@ public class DefinitionsPane extends JEditorPane
     JMenuItem indentItem = new JMenuItem("Indent Line(s)");
     indentItem.addActionListener ( new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
-        _indentLines();
+        indentLines();
       }
     });
     _popMenu.add(indentItem);
@@ -576,8 +577,8 @@ public class DefinitionsPane extends JEditorPane
   /**
    *  Indents the lines contained within the given selection.
    */
-  private void _indentLines() {
-    _doc.getDocument().indentLines(getSelectionStart(), getSelectionEnd());
+  void indentLines() {
+    _doc.indentLinesInDefinitions(getSelectionStart(), getSelectionEnd());
   }
   
   
@@ -860,9 +861,9 @@ public class DefinitionsPane extends JEditorPane
     boolean showWaitCursor = selEnd > (selStart + 100);
 
     // Temporary hack because of slow indent...
-    //  Prompt if more than 2000 characters to be indented
+    //  Prompt if more than 10000 characters to be indented
     boolean doIndent = true;
-    if (selEnd > (selStart + 2000)) {
+    if (selEnd > (selStart + 10000)) {
       Object[] options = {"Yes","No"};
       int n = JOptionPane.showOptionDialog
         (_mainFrame,
@@ -881,7 +882,8 @@ public class DefinitionsPane extends JEditorPane
       if (showWaitCursor) {
         _mainFrame.hourglassOn();
       }
-      _doc.indentLinesInDefinitions(selStart, selEnd);
+      //_doc.indentLinesInDefinitions(selStart, selEnd);
+      indentLines();
       setCaretPosition(_doc.getCurrentDefinitionsLocation());
       if (showWaitCursor) {
         _mainFrame.hourglassOff();

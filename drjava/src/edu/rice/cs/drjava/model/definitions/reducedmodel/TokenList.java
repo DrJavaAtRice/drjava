@@ -255,14 +255,14 @@ public class TokenList extends ModelList<ReducedToken>
     private int _move(int count, int currentOffset)
     {
       int retval = currentOffset;
-      TokenList.Iterator it = this._copy();
-      
       if (count == 0) {
-        it.dispose();
         return retval;
       }
+      
+      TokenList.Iterator it = this._copy();
+      
       //make copy of cursor and return new iterator?
-      else if (count > 0) {
+      if (count > 0) {
         retval = it._moveRight(count, currentOffset);
       }
       else {

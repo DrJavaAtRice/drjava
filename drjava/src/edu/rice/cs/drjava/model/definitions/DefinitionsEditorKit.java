@@ -61,8 +61,31 @@ public class DefinitionsEditorKit extends DefaultEditorKit {
     }
   };
   
-  /** Factory method to make this view create correct model objects. */
-  public Document createDefaultDocument() {
+  /**
+   * Creates a new DefinitionsDocument.
+   * This used to be named createDefaultDocument() so that the view
+   * (DefinitionsPane) would create a DefinitionsDocument by default
+   * when it was constructed.  However, we already have an existing
+   * DefinitionsDocument we want to use when the DefinitionsPane is
+   * constructed, so this default one was being created and thrown
+   * away (very expensive).  Ideally, we would have the DefinitionsPane
+   * use our existing document from the beginning, but the JEditorPane
+   * constructor does not take in a Document.  The only possible
+   * approach would be to have this EditorKit return the desired 
+   * existing document when the JEditorPane requests a new one, but
+   * since the EditorKit must be kept as a static field on DefinitionsPane
+   * (since we can't set one until after JEditorPane's constructor is
+   * finished), there's no clean way to tell the EditorKit which document
+   * to return at which time.  (It would require a large synchronization
+   * effort each time a DefinitionsPane is constructed.)
+   * 
+   * As an easier alternative, we just let the DefaultEditorKit return
+   * a PlainDocument (much lighter weight), which can then be thrown
+   * away when the true DefinitionsDocument is assigned.
+   * 
+   * Improvements to this approach are welcome...  :)
+   */
+  public Document createNewDocument() {
     return  _createDefaultTypedDocument();
   }
   

@@ -262,6 +262,14 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_GOTO_LINE =
     new KeyStrokeOption("key.goto.line", 
                         KeyStroke.getKeyStroke(KeyEvent.VK_G, mask));
+  
+  /**
+   * The key binding for indenting
+   *
+  public static final KeyStrokeOption KEY_INDENT =
+    new KeyStrokeOption("key.indent", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_TAB, mask)); */
+  
   /**
    * The key binding for selecting previous document
    */

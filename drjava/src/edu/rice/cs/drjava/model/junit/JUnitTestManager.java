@@ -79,7 +79,7 @@ public class JUnitTestManager {
             return;
           }
           Test suite = _testRunner.getTest(className);
-          TestResult result = _testRunner.doRun(suite, false); 
+          TestResult result = _testRunner.doRun(suite); 
           
           JUnitError[] errors = new JUnitError[result.errorCount() + result.failureCount()];
           

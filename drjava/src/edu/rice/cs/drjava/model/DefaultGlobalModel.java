@@ -2342,7 +2342,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    */
   private OpenDefinitionsDocument _createOpenDefinitionsDocument() {
     DefinitionsDocument doc = (DefinitionsDocument)
-      _editorKit.createDefaultDocument();
+      _editorKit.createNewDocument();
     return new DefinitionsDocumentHandler(doc);
   }
 
@@ -2406,7 +2406,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     throws IOException, AlreadyOpenException {
 
       DefinitionsDocument tempDoc = (DefinitionsDocument)
-        _editorKit.createDefaultDocument();
+        _editorKit.createNewDocument();
 
     try {
       OpenDefinitionsDocument openDoc = _getOpenDocument(file);

@@ -49,7 +49,11 @@ import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import javax.swing.JOptionPane;
+
+// For Windows focus fix
 import javax.swing.JDialog;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 
 /**
  * This is the main class for the interpreter JVM.
@@ -155,6 +159,7 @@ public class InterpreterJVM extends UnicastRemoteObject
     // platforms appear correctly in front of DrJava.
     if (_isWindowsPlatform()) {
       JDialog d = new JDialog();
+      d.setSize(0,0);
       d.show();
       d.hide();
     }

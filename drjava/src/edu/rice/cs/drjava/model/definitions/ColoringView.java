@@ -78,8 +78,14 @@ public class ColoringView extends PlainView implements OptionConstants {
    */
   ColoringView(Element elem) {
     super(elem);
-    _doc = (DefinitionsDocument)getDocument();
-       
+    
+    // Might be a PlainDocument (when DefPane is first constructed).
+    //   See comments for DefinitionsEditorKit.createNewDocument() for details.
+    Document doc = getDocument();
+    if (doc instanceof DefinitionsDocument) {
+      _doc = (DefinitionsDocument)doc;
+    }
+    
     // Listen for updates to configurable colors
     ColorOptionListener col = new ColorOptionListener();
     

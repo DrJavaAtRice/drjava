@@ -46,6 +46,7 @@ import java.io.PrintStream;
 import javax.swing.*;
 import javax.swing.text.StyledDocument;
 import javax.swing.text.BadLocationException;
+import java.awt.Color;
 
 import junit.runner.*;
 import junit.framework.*;
@@ -58,9 +59,9 @@ import junit.textui.TestRunner;
  * @version $Id$
  */
 public class JUnitTestRunner extends junit.textui.TestRunner {
-
+  
   /**
-   * Used to tie the output of the ui textrunner 
+   * Used to tie the output of the ui textrunner
    * to nothing.
    */
   private PrintStream _writer;
@@ -70,6 +71,9 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
    */
   private TestSuiteLoader _classLoader;
   
+  //private ProgressBar _progress;
+  
+  private TestResult _result;
   
   /**
    * Constructor
@@ -85,10 +89,33 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
       public void println() {
       }
     };
+    
+    // Prototype code for new progress bar
+    /*
+     JFrame f = new JFrame();
+     _progress = new ProgressBar();
+     f.getContentPane().add(_progress);
+     f.show();
+     */
   }
-
+  
+  public TestResult doRun(Test suite) {
+    //_progress.reset();
+    //_progress.start(suite.countTestCases());
+    _result= createTestResult();
+    _result.addListener(this);
+    long startTime= System.currentTimeMillis();
+    suite.run(_result);
+    long endTime= System.currentTimeMillis();
+    long runTime= endTime-startTime;
+    //fPrinter.print(result, runTime);
+    
+    //pause(wait);
+    return _result;
+  }
+  
   /**
-   * Overrides method in super class to always return a 
+   * Overrides method in super class to always return a
    * reloading test suite loader.
    */
   public TestSuiteLoader getLoader() {
@@ -106,7 +133,81 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
   protected PrintStream writer() {
     return getWriter();
   }
-
+  
+  public void testStarted(String testName) {
+    //System.out.println("Starting " + testName + "...");
+  }
+  
+  public void testEnded(String testName) {
+    /*
+    System.out.println("Done.");
+    synchUI();
+    SwingUtilities.invokeLater( new Runnable() {
+      public void run() {
+        if (_result != null) {
+          _progress.step(_result.runCount(), _result.wasSuccessful());
+        }
+      }
+    });
+    */
+  }
+  
+  public void testFailed(int status, Test test, Throwable t) {
+    //System.out.println("Failed!  status: " + status + ", test: " + test +
+    //                   "\n" + t.toString());
+  }
+  
+  
+  /**
+   * Wait until all the events are processed in the event thread
+   */
+  private void synchUI() {
+    try {
+      SwingUtilities.invokeAndWait(new Runnable() {
+        public void run() {}
+      });
+    }
+    catch (Exception e) {
+    }
+  }
+  
 }
 
 
+/**
+ * A progress bar showing the green/red status.
+ * Adapted from JUnit code.
+ */
+class ProgressBar extends JProgressBar {
+  boolean fError= false;
+  
+  public ProgressBar() {
+    super();
+    setForeground(getStatusColor());
+  }
+  
+  private Color getStatusColor() {
+    if (fError)
+      return Color.red;
+    return Color.green;
+  }
+  
+  public void reset() {
+    fError= false;
+    setForeground(getStatusColor());
+    setValue(0);
+  }
+  
+  public void start(int total) {
+    setMaximum(total);
+    reset();
+  }
+  
+  public void step(int value, boolean successful) {
+    setValue(value);
+    if (!fError && !successful) {
+      fError= true;
+      setForeground(getStatusColor());
+    }
+  }
+}
