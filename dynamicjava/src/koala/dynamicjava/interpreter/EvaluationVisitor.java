@@ -805,7 +805,44 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Object argArray = Array.newInstance(componentType,new int[]{(larg_size-typs.length+1)});
     for(int j = 0; j < larg_size-typs.length+1; j++){
       Object p  = it.next().acceptVisitor(this);
-      Array.set(argArray, j, performCast(componentType, p));
+      Object casted = performCast(componentType, p);
+      if (componentType.isPrimitive()) {
+        if (componentType == boolean.class && casted instanceof Boolean) {
+          Array.setBoolean(argArray, j, ((Boolean)casted).booleanValue());
+        }
+        else if (componentType == char.class && casted instanceof Character) {
+          Array.setChar(argArray, j, ((Character)casted).charValue());
+        }
+        else if (casted instanceof Number) {
+          if (componentType == char.class) { // just in case
+            Array.setChar(argArray, j, (char)((Number)casted).intValue());
+          }
+          else if (componentType == byte.class) {
+            Array.setByte(argArray, j, ((Number)casted).byteValue());
+          }
+          else if (componentType == short.class) {
+            Array.setShort(argArray, j, ((Number)casted).shortValue());
+          }
+          else if (componentType == int.class) {
+            Array.setInt(argArray, j, ((Number)casted).intValue());
+          }
+          else if (componentType == long.class) {
+            Array.setLong(argArray, j, ((Number)casted).longValue());
+          }
+          else if (componentType == float.class) {
+            Array.setFloat(argArray, j, ((Number)casted).floatValue());
+          }
+          else { // double
+            Array.setDouble(argArray, j, ((Number)casted).doubleValue());
+          }
+        }
+        else {
+          throw new ClassCastException("Cannot insert object of type " + casted.getClass() + " into primitive array");
+        }
+      }
+      else {
+        Array.set(argArray, j, casted);
+      }
     }
     return argArray;
   }
@@ -972,17 +1009,19 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     // Fill the arguments
     if (larg != null) {
       args = new Object[typs.length];
-      Iterator<Expression> it = larg.iterator();
+      ListIterator<Expression> it = larg.listIterator();
       int      i  = 0;
       while (i < typs.length-1) {
         args[i] = it.next().acceptVisitor(this);
         i++;
       }
       if(typs.length > 0){
-        if(!TigerUtilities.isVarArgs(m)){
-          args[i] = it.next().acceptVisitor(this);
-          i++;
+        Object last = it.next().acceptVisitor(this);
+        if(!TigerUtilities.isVarArgs(m) || 
+           (last != null && typs[i].isAssignableFrom(last.getClass()))){
+          args[i] = last;
         } else {
+          it.previous(); // back up since we pulled the expression out a few lines above
           args[i] = buildArrayOfRemainingArgs(typs, larg.size(), it);
         }
       }
@@ -2117,7 +2156,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
 
     if (tc != ec && tc.isPrimitive() && ec != null) {
       if (tc != char.class && ec == Character.class) {
-        o = new Integer(((Character)o).charValue());
+        o = new Character(((Character)o).charValue());
       } 
       else if (tc == byte.class) {
         o = new Byte(((Number)o).byteValue());

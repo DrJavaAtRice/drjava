@@ -313,4 +313,48 @@ public class EvaluationVisitorTest extends DynamicJavaTestCase {
     res = interpret("--c[0]");
     assertEquals("char value should be \'`\'","`",res.toString());
   }
+  
+  /**
+   * At one point passing in an int array for the in varargs would cause
+   * djava to throw an unexpected ClassCastException inside performCast(EvaluationVisitor.java:2129)
+   * Also, if the class was defined to have an Integer varargs signature, passing in the classic
+   * array form would cause an IllegalArgumentException with Array.set inside
+   * buildArrayOfRemainingArgs(EvaluationVisitor.java:808)
+   */
+  public void testVarArgsWithMethodInvocation() throws InterpreterException {
+    String text = "public class ClassA { public static void x(int... y) { } }; ClassA.x(new int[]{1,2,3});";
+    Object res = interpret(text);
+    text = "public class ClassB { public static Object x(Integer... y) { return y; } };";
+    interpret(text);
+    
+    text = "ClassB.x(new Integer[]{1,2,3})";
+    res = interpret(text);
+    assertFalse("Result shouldn't be null", res == null);
+    assertEquals("Should be an array of Integers", Integer[].class, res.getClass());
+    
+    text = 
+      "import java.util.*;" + 
+      "public class ClassC {" +
+      "  public static List<Integer> asList(Integer... a) {" + 
+      "    ArrayList<Integer> list = new ArrayList<Integer>(a.length);"+
+      "    for(Integer i : a) {" + 
+      "      list.add(i);" +
+      "    }" +
+      "    return list;" +
+      "  }" +
+      "}";
+    interpret(text);
+    
+    text = "ClassC.asList(new Integer[]{1,2,3})";
+    res = interpret(text);
+    assertTrue("res should be an instance of a List", res instanceof java.util.List);
+    assertEquals("first element should be 1", new Integer(1), ((java.util.List)res).get(0));
+    
+    text = "Arrays.asList(new Integer[]{1,2,3})";
+    res = interpret(text);
+    assertTrue("res should be an instance of a List", res instanceof java.util.List);
+    assertEquals("first element should be 1", new Integer(1), ((java.util.List)res).get(0));
+  }
+    
+    
 }

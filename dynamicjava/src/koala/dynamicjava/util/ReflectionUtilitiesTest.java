@@ -243,6 +243,16 @@ public class ReflectionUtilitiesTest extends DynamicJavaTestCase {
     }
     catch(AmbiguousMethodException e) {  }
     
+    // test6() -> method not found
+    try {
+      m = ReflectionUtilities.lookupMethod(TestClass.class, "test6", new Class[]{});
+      fail("test6() didn't throw a NoSuchMethodException");
+    }
+    catch(NoSuchMethodException e) { }
+      
+    // java.util.Arrays.asList(Object...) with Integer[]
+    m = ReflectionUtilities.lookupMethod(java.util.Arrays.class, "asList", new Class[]{Integer[].class});
+    
   }
   
   
@@ -332,6 +342,8 @@ public class ReflectionUtilitiesTest extends DynamicJavaTestCase {
     
     public static int test5(int a, int... rest) { return 1; }
     public static int test5(int a, int b, int... rest) { return 2; }
+    
+    public static int test6(int a) { return 1; }
          
     public int value() { return value; }
   }

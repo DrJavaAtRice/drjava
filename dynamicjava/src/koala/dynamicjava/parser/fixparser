@@ -25,4 +25,4 @@ sed "s/Vector/Vector<Object>/g"
 
 
 
-
+sed "s/LinkedList VariableDeclaratorList()/LinkedList<VariableDeclarator> VariableDeclaratorList()/g"

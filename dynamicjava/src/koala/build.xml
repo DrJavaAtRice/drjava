@@ -39,6 +39,12 @@
   <property name="manifest" value="manifest" />
 
 
+  <!-- properties for the parser generation -->
+  <property environment="env" />
+  <property name="parser_path" value="dynamicjava/parser" />
+  <property name="javacc_home"  value="${env.JAVACC_HOME}" />
+  <!-- end properties for autocomplete parser generation -->
+
   <!-- Sets a flag indicating that code dealing with new features since the 
     last stable release should be enabled and testable.
     Takes effect only after a clean compile -->
@@ -114,6 +120,124 @@
       <param name="jarfile" value="${dist}/${version-tag}.jar" />
     </antcall>
   </target>
+
+
+
+    
+  <!-- targets used to generate the parser for autocompletion -->
+  <target name="clean-parser">
+    <delete file="${parser_path}/Parser.java" />
+    <delete file="${parser_path}/ParserConstants.java" />
+    <delete file="${parser_path}/ParserTokenManager.java" />
+  </target>
+
+  <!-- based off of fixparser script in parser folder -->
+  <target name="generate-parser" depends="init">
+    <javacc target="${parser_path}/grammar.jj" javacchome="${javacc_home}" outputdirectory="${parser_path}" />
+    <echo message="Uncommenting the generics in the Parser.java file" />
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser1.java">
+      <arg line="&quot;s/\/\*&lt;/&lt;/g&quot;" />
+      <arg line="Parser.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser2.java">
+      <arg line="&quot;s/&gt;\*\//&gt;/g&quot;" />
+      <arg line="tmpParser1.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser1.java">
+      <arg line="&quot;s/List name[(]/List&lt;IdentifierToken&gt; name(/&quot;" />
+      <arg line="tmpParser2.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser2.java">
+      <arg line="&quot;s/List TypeArguments[(]/List&lt;Type&gt; TypeArguments(/&quot;" />
+      <arg line="tmpParser1.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser1.java">
+      <arg line="&quot;s/List ReferenceTypeNameList[(]/List&lt;? extends ReferenceType&gt; ReferenceTypeNameList(/&quot;" />
+      <arg line="tmpParser2.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser2.java">
+      <arg line="&quot;s/List localVariableDeclaration[(]/List&lt;Node&gt; localVariableDeclaration(/&quot;" />
+      <arg line="tmpParser1.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser1.java">
+      <arg line="&quot;s/List nameList[(]/List&lt;List&lt;IdentifierToken&gt;&gt; nameList(/&quot;" />
+      <arg line="tmpParser2.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser2.java">
+      <arg line="&quot;s/List enumConstants[(]/List&lt;EnumDeclaration.EnumConstant&gt; enumConstants(/&quot;" />
+      <arg line="tmpParser1.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser1.java">
+      <arg line="&quot;s/List enumBodyDeclarations[(]/List&lt;Node&gt; enumBodyDeclarations(/&quot;" />
+      <arg line="tmpParser2.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser2.java">
+      <arg line="&quot;s/List topLevelStatement[(]/List&lt;Node&gt; topLevelStatement(/&quot;" />
+      <arg line="tmpParser1.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser1.java">
+      <arg line="&quot;s/List classBodyDeclaration[(]/List&lt;Node&gt; classBodyDeclaration(/&quot;" />
+      <arg line="tmpParser2.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser2.java">
+      <arg line="&quot;s/List fieldDeclaration[(]/List&lt;Node&gt; fieldDeclaration(/&quot;" />
+      <arg line="tmpParser1.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser1.java">
+      <arg line="&quot;s/List formalParameters[(]/List&lt;FormalParameter&gt; formalParameters(/&quot;" />
+      <arg line="tmpParser2.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser2.java">
+      <arg line="&quot;s/List argumentList[(]/List&lt;Expression&gt; argumentList(/&quot;" />
+      <arg line="tmpParser1.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser1.java">
+      <arg line="&quot;s/List parseStream[(]/List&lt;Node&gt; parseStream(/&quot;" />
+      <arg line="tmpParser2.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser2.java">
+      <arg line="&quot;s/List parseCompilationUnit[(]/List&lt;Node&gt; parseCompilationUnit(/&quot;" />
+      <arg line="tmpParser1.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser1.java">
+      <arg line="&quot;s/List interfaceMemberDeclaration[(]/List&lt;Node&gt; interfaceMemberDeclaration(/&quot;" />
+      <arg line="tmpParser2.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser2.java">
+      <arg line="&quot;s/List blockStatement[(]/List&lt;Node&gt; blockStatement(/&quot;" />
+      <arg line="tmpParser1.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser1.java">
+      <arg line="&quot;s/List forInit[(]/List&lt;Node&gt; forInit(/&quot;" />
+      <arg line="tmpParser2.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser2.java">
+      <arg line="&quot;s/List statementExpressionList[(]/List&lt;Node&gt; statementExpressionList(/&quot;" />
+      <arg line="tmpParser1.java" />
+    </exec>
+    <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser1.java">
+      <arg line="&quot;s/Vector/Vector&lt;Object&gt;/g&quot;" />
+      <arg line="tmpParser2.java" />
+    </exec>
+
+    <!-- This is a template for the above calls to sed. Replace the #s with the correct values. follow the
+         pattern used for the numbering of tmpParser and make sure the output of the last one is the one
+         moved and the input of the last one is the one deleted. 
+        
+        <exec executable="sed" dir="${parser_path}" failonerror="true" output="${parser_path}/tmpParser#.java">
+          <arg line="&quot;#&quot;" />
+          <arg line="tmpParser#.java" /> 
+        </exec>
+    -->
+
+    <move file="${parser_path}/tmpParser1.java" tofile="${parser_path}/Parser.java" />
+    <delete file="${parser_path}/tmpParser2.java" />
+  </target>
+
+  <target name="rebuild-parser" depends="clean, clean-parser, generate-parser, compile" />
+  
+
+
 
   <target name="compile" depends="do-compile">
 

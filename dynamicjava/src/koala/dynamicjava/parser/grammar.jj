@@ -1855,26 +1855,26 @@ PARSER_END(Parser)
   {
     List/*<FormalParameter>*/ list = new LinkedList/*<FormalParameter>*/();
     FormalParameter node;
-    FormalParameter lastVarArgsParam = null;
+    FormalParameter lastParam = null;
   }
   {
     try
     {
     "("
-      [ LOOKAHEAD(formalParameterLookahead())
-       node=formalParameter()
-           {
-      list.add(node);
-    }
-         ( "," node=formalParameter()
-            {
-           list.add(node);
-         }
-         )* ] [lastVarArgsParam = varArgsFormalParameter() ] ")"
+      
+       [  
+          ( LOOKAHEAD(formalParameterLookahead() ",")  node=formalParameter() "," {
+              list.add(node);
+            }
+          )*   
+        (LOOKAHEAD(varArgsFormalParameterLookahead() ")") lastParam = varArgsFormalParameter() 
+           { lastFormalParameterIsVarArgs = true; } | 
+         LOOKAHEAD(formalParameterLookahead() ")") lastParam = formalParameter()
+           { lastFormalParameterIsVarArgs = false; } )
+       ] ")"
          {
-           lastFormalParameterIsVarArgs = (lastVarArgsParam != null);
-           if(lastFormalParameterIsVarArgs) {
-             list.add(lastVarArgsParam);
+           if(lastParam != null) {
+             list.add(lastParam);
            }
            return list;
          }
@@ -4654,6 +4654,12 @@ ForSlashEachStatement forStatement() :
   {}
   {
     [ "final" ] typeLookahead() variableDeclaratorIdLookahead()
+  }
+  
+  void varArgsFormalParameterLookahead() :
+  {}
+  {
+    [ "final" ] typeLookahead() <VAR_ARGS> variableDeclaratorIdLookahead()
   }
 
   /**
