@@ -59,8 +59,8 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   /**
    * Message to signal that input is required from the console.
    */
-  public static final String INPUT_REQUIRED_MESSAGE =
-    "Please enter input in the Console tab." + _newLine;
+//  public static final String INPUT_REQUIRED_MESSAGE =
+//    "Please enter input in the Console tab." + _newLine;
   
   /**
    * Model that contains the interpreter to use.
@@ -142,13 +142,13 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
    * @return the input
    */
   public String getConsoleInput() {
-    if (_document.inProgress()) {
-      _docAppend(INPUT_REQUIRED_MESSAGE, InteractionsDocument.DEBUGGER_STYLE);
-    }
-    else {
-      _document.insertBeforeLastPrompt(INPUT_REQUIRED_MESSAGE,
-                                       InteractionsDocument.DEBUGGER_STYLE);
-    }
+//    if (_document.inProgress()) {
+//      _docAppend(INPUT_REQUIRED_MESSAGE, InteractionsDocument.DEBUGGER_STYLE);
+//    }
+//    else {
+//      _document.insertBeforeLastPrompt(INPUT_REQUIRED_MESSAGE,
+//                                       InteractionsDocument.DEBUGGER_STYLE);
+//    }
     return _model.getConsoleInput();
   }
 

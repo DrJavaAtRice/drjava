@@ -48,14 +48,15 @@ import java.awt.*;
 
 import java.io.*;
 
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.StringOps;
+
 /**
  * Displayed whenever an uncaught exception is thrown and propagates back to an 
  * action. Displays information about the exception, asks the user to submit a 
  * bug report, and prints the stack trace.
  * @version $Id$
  */
-
-// wanted to make this a JWindow, but it looked funny with no border
 public class UncaughtExceptionWindow extends JDialog {
   
   /** information about the exception */
@@ -86,9 +87,15 @@ public class UncaughtExceptionWindow extends JDialog {
     this.setSize(600,400);
     setLocationRelativeTo(frame);
 
+    String trace = StringOps.getStackTrace(_exception);
+    if (_exception instanceof UnexpectedException) {
+      Throwable t = ((UnexpectedException)_exception).getContainedThrowable();
+      trace = trace + "\nCaused by:\n" + StringOps.getStackTrace(t);
+    }
+    
     // If we set this pane to be of type text/rtf, it wraps based on words
     // as opposed to based on characters.
-    _stackTrace = new JTextArea(_getStackTraceString());
+    _stackTrace = new JTextArea(trace);
     msg[1] = exception.toString();
     _exceptionInfo = new JOptionPane(msg,JOptionPane.ERROR_MESSAGE,
                                      JOptionPane.DEFAULT_OPTION,null,
@@ -146,15 +153,4 @@ public class UncaughtExceptionWindow extends JDialog {
     "You may wish to save all your work and restart DrJava.",
     "Thanks for your help in making DrJava better!"};
   
-  
-  /**
-   * Returns the stack trace in String form
-   */
-  private String _getStackTraceString() {
-    StringWriter swFail = new StringWriter();
-    PrintWriter pwFail  = new PrintWriter(swFail);
-    
-    _exception.printStackTrace(pwFail);
-    return swFail.toString();
-  }   
 }

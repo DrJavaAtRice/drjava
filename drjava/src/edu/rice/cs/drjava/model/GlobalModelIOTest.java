@@ -1383,7 +1383,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     });
     
     String result = interpret("System.in.read()");
-    String expected = DefaultInteractionsModel.INPUT_REQUIRED_MESSAGE +
+    String expected = /* DefaultInteractionsModel.INPUT_REQUIRED_MESSAGE + */
       String.valueOf((int)'i');
     assertEquals("read() should prompt for input and return the first byte of \"input\"",
                  expected, result);

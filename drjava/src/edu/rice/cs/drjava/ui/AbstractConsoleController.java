@@ -157,7 +157,7 @@ public abstract class AbstractConsoleController {
       StyleConstants.setFontSize(fontSet, f.getSize());
       StyleConstants.setBold(fontSet, f.isBold());
       StyleConstants.setItalic(fontSet, f.isItalic());
-      _adapter.setCharacterAttributes(0, _adapter.getDocLength(), fontSet, false);
+      _adapter.setCharacterAttributes(0, _adapter.getDocLength()+1, fontSet, false);
       _pane.setCharacterAttributes(fontSet, false);
       _updateStyles(fontSet);
     }

@@ -482,7 +482,7 @@ public class CalculatorTest extends TestCase {
     <title>Documentation with Javadoc</title>
     <para>Documenting your code is crucial to help others understand it, and even to remind yourself how your own older programs work.  Unfortunately, it is easy for most external documentation to become out of date as a program changes.  For this reason, it is useful to write documentation as comments in the code itself, where they can be easily updated with other changes.  Javadoc is a documentation tool which defines a standard format for such comments, and which can generate HTML files to view the documentation from a web broswer.  (As an example, see Sun's Javadoc documentation for the Java libraries at <ulink url="http://java.sun.com/j2se/1.4/docs/api/index.html">http://java.sun.com/j2se/1.4/docs/api/index.html</ulink>.)</para>
 
-    <para>You can easily run Javadoc over your programs from within DrJava, using the "Javadoc All Documents" and "Javadoc Current Document" commands in the Tools menu.  These commands will generate Javadoc HTML files from the comments you have written and display them in a browser.  This chapter gives a brief overview of these commands and how to write Javadoc comments.  More detailed information on writing Javadoc comments can be found online at <ulink url="http://java.sun.com/j2se/javadoc/writingdoccomments/">http://java.sun.com/j2se/javadoc/writingdoccomments/</ulink>.</para>
+    <para>You can easily run Javadoc over your programs from within DrJava, using the "Javadoc All Documents" and "Preview Javadoc for Current Document" commands in the Tools menu.  These commands will generate Javadoc HTML files from the comments you have written and display them in a browser.  This chapter gives a brief overview of these commands and how to write Javadoc comments.  More detailed information on writing Javadoc comments can be found online at <ulink url="http://java.sun.com/j2se/javadoc/writingdoccomments/">http://java.sun.com/j2se/javadoc/writingdoccomments/</ulink>.</para>
 
 
     <section id="javadoc-writing">
@@ -548,11 +548,11 @@ public class Student {
 
     <section id="javadoc-use">
       <title>How to Use Javadoc in DrJava</title>
-      <para>In general, Javadoc HTML files are most useful when they are generated in large batches, since the HTML files for each of the related classes can link to each other.  For this reason, DrJava's "Javadoc All Documents" command looks for all source files in the folders and subfolders of the open documents and includes them all in the documentation, saving the files in a "<filename>doc</filename>" folder nearby.  (This folder will be placed either in the current folder or the top-level folder of the current package.)  On the other hand, it is occasionally useful to view the Javadoc HTML for a single class, to quickly get a feel for its structure.  Therefore, DrJava also provides a "Javadoc Current Document" command that only generates Javadoc for the current open document.  This command saves the file in a temporary location that will be automatically deleted when you quit DrJava.  If either of these commands finds errors in the source files, they will report them in a tab like <link linkend="compiling-errors">compiler errors</link>.</para>
+      <para>In general, Javadoc HTML files are most useful when they are generated in large batches, since the HTML files for each of the related classes can link to each other.  For this reason, DrJava's "Javadoc All Documents" command looks for all source files in the folders and subfolders of the open documents and includes them all in the documentation, saving the files in a "<filename>doc</filename>" folder nearby.  (This folder will be placed either in the current folder or the top-level folder of the current package.)  On the other hand, it is occasionally useful to view the Javadoc HTML for a single class, to quickly get a feel for its structure.  Therefore, DrJava also provides a "Preview Javadoc for Current Document" command that only generates Javadoc for the current open document without saving it to a permanent location.  (This command saves the file in a temporary location that will be automatically deleted when you quit DrJava.)  If either of these commands finds errors in the source files, they will report them in a tab like <link linkend="compiling-errors">compiler errors</link>.</para>
 
     <formalpara>
       <title>Viewing Javadoc</title>
-      <para>When either of the "Javadoc All Documents" or "Javadoc Current Document" commands complete successfully (or find only warnings and no errors), DrJava displays the resulting HTML files in a new window.  For Windows and Mac OS X users, these files will be displayed in the system's default web browser.  On other platforms, the files will be displayed in a simple viewer, unless the "Web Browser" option has been configured in the "Resource Locations" section of the Preferences (see <link linkend="configuration">Configuring DrJava</link>).</para>
+      <para>When either of the "Javadoc All Documents" or "Preview Javadoc for Current Document" commands complete successfully (or find only warnings and no errors), DrJava displays the resulting HTML files in a new window.  For Windows and Mac OS X users, these files will be displayed in the system's default web browser.  On other platforms, the files will be displayed in a simple viewer, unless the "Web Browser" option has been configured in the "Resource Locations" section of the Preferences (see <link linkend="configuration">Configuring DrJava</link>).</para>
     </formalpara>
 
     <formalpara>
@@ -602,14 +602,29 @@ public class Student {
 	    <varlistentry>
 	      <term>Web Browser (<varname>browser.file = ""</varname>)</term>
 	      <listitem>
-		<para>Optional filename of your computer's web browser, to be used to view Javadoc and links from the Help.  If blank, the platform's default browser will be used unless you specify a Web Browser Command (below).</para>
+		<para>Optional filename of your computer's web browser, to be used to view Javadoc and links from the Help.  If blank, the platform's default browser (on Windows or Mac OS X) will be used unless you specify a Web Browser Command (explained below).</para>
 	      </listitem>
 	    </varlistentry>
 
 	    <varlistentry>
 	      <term>Web Browser Command (<varname>browser.string = ""</varname>)</term>
 	      <listitem>
-		<para>Any command or arguments you need to start your web browser.  If both this and the Web Browser option are blank, the platform's default browser will be used.  In this option, any occurrence of "<literal>&lt;URL&gt;</literal>" will be replaced with the URL to open.</para>
+		<para>Any command or arguments you need to start your web browser.  If both this option and the Web Browser option are blank, the platform's default browser will be used.  In this option, any occurrence of "<literal>&lt;URL&gt;</literal>" will be replaced with the URL to open.  (If "<literal>&lt;URL&gt;</literal>" is not specified, the URL will be appended to the end of the command.)</para>
+                <para>On Windows and Mac OS X, you can just leave this option blank and your default web browser will be used.  For other platforms (eg. Linux), here are commands to open common browsers:</para>
+                <itemizedlist>
+                  <listitem>
+                    <para>Mozilla (if it is already running)</para>
+                    <programlisting>mozilla -remote "openurl(&lt;URL&gt;)"</programlisting>
+                  </listitem>
+                  <listitem>
+                    <para>Mozilla (if it is not already running)</para>
+                    <programlisting>mozilla &lt;URL&gt;</programlisting>
+                  </listitem>
+                  <listitem>
+                    <para>Konqueror (the KDE web browser)</para>
+                    <programlisting>konqueror &lt;URL&gt;</programlisting>
+                  </listitem>
+                </itemizedlist>
 	      </listitem>
 	    </varlistentry>
 	    

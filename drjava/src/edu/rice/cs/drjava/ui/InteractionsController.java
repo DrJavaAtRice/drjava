@@ -110,6 +110,7 @@ public class InteractionsController extends AbstractConsoleController {
       _inputText = _box.getText();
       notify();
       _pane.setCaretPosition(_doc.getDocLength());
+      _pane.requestFocus();
     }
   };
 
@@ -122,7 +123,15 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
 
+  /**
+   * Current contents of the most recent InputBox.
+   */
   private String _inputText;
+  
+  /**
+   * The most recent graphical box used to request input for
+   * System.in.
+   */
   private InputBox _box;
 
   /**
@@ -130,46 +139,49 @@ public class InteractionsController extends AbstractConsoleController {
    */
   protected InputListener _inputListener = new InputListener() {
     public String getConsoleInput() {
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          _box = new InputBox();
-
-/*        if (_busy()) {
-            _pane.setEditable(true);
-            moveToEnd();
-            _pane.insertComponent(_box);
-            _pane.setEditable(false);
-          }
-          else {
-            DocumentEditCondition ec = _doc.getEditCondition();
-            _doc.setEditCondition(new DocumentEditCondition());
-            int pos = _doc.getPositionBeforePrompt();
-            _pane.setCaretPosition(pos);
-            _pane.insertComponent(_box);
-            _doc.setPromptPos(_doc.getPromptPos() + 1);
-//            _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
-            _doc.setEditCondition(ec);
-          }
-*/
-          int pos = _doc.getPositionBeforePrompt();
-          _doc.insertBeforeLastPrompt(" ", _doc.DEFAULT_STYLE);
-          SimpleAttributeSet att = new SimpleAttributeSet();
-          StyleConstants.setComponent(att, _box);
-          _adapter.setCharacterAttributes(pos, 1, att, false);
-          try {
-            int len = _doc.getDocLength();
-            _doc.forceInsertText(len, " ", _doc.DEFAULT_STYLE);
-            _doc.forceRemoveText(len, 1);
-          }
-          catch (DocumentAdapterException dae) {
-          }
-
-          _inputEnteredAction.setEnabled(true);
-//          _insertNewlineAction.setEnabled(true);
-          _box.requestFocus();
-        }
-      });
       synchronized(_inputEnteredAction) {
+        
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            _box = new InputBox();
+            
+            /*        if (_busy()) {
+             _pane.setEditable(true);
+             moveToEnd();
+             _pane.insertComponent(_box);
+             _pane.setEditable(false);
+             }
+             else {
+             DocumentEditCondition ec = _doc.getEditCondition();
+             _doc.setEditCondition(new DocumentEditCondition());
+             int pos = _doc.getPositionBeforePrompt();
+             _pane.setCaretPosition(pos);
+             _pane.insertComponent(_box);
+             _doc.setPromptPos(_doc.getPromptPos() + 1);
+             //            _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
+             _doc.setEditCondition(ec);
+             }
+             */
+            int pos = _doc.getPositionBeforePrompt();
+            _doc.insertBeforeLastPrompt(" ", _doc.DEFAULT_STYLE);
+            SimpleAttributeSet att = new SimpleAttributeSet();
+            StyleConstants.setComponent(att, _box);
+            _adapter.setCharacterAttributes(pos, 1, att, false);
+            _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
+//            try {
+//              int len = _doc.getDocLength();
+//              _doc.forceInsertText(len, " ", _doc.DEFAULT_STYLE);
+//              _doc.forceRemoveText(len, 1);
+//            }
+//            catch (DocumentAdapterException dae) {
+//            }
+            
+            _inputEnteredAction.setEnabled(true);
+            //          _insertNewlineAction.setEnabled(true);
+            _box.requestFocus();
+          }
+        });
+        
         try {
           _inputEnteredAction.wait();
         }
@@ -177,7 +189,7 @@ public class InteractionsController extends AbstractConsoleController {
         }
       }
       
-      return _inputText;
+      return _inputText + "\n";
     }
   };
 
@@ -468,7 +480,7 @@ public class InteractionsController extends AbstractConsoleController {
    */
   class InputBox extends JTextArea {
     public InputBox() {
-      super(1, 80);
+      //super(1, 80);
       DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR,
                                            new OptionListener<Color>() {
         public void optionChanged(OptionEvent<Color> oe) {

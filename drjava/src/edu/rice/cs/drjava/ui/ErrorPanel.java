@@ -112,7 +112,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     
     Document doc = getErrorListPane().getDocument();
     if (doc instanceof StyledDocument) {
-      ((StyledDocument)doc).setCharacterAttributes(0, doc.getLength(), set, false);
+      ((StyledDocument)doc).setCharacterAttributes(0, doc.getLength()+1, set, false);
     }
   }
   

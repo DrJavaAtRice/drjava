@@ -1408,6 +1408,37 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   }
   
   /**
+   * Returns the "intelligent" beginning of line.  If currPos is to
+   * the right of the first non-whitespace character, the position of the
+   * first non-whitespace character is returned.  If currPos is at or
+   * to the left of the first non-whitespace character, the beginning of
+   * the line is returned.
+   * @param currPos A position on the current line
+   */
+  public int getIntelligentBeginLinePos(int currPos) throws BadLocationException {
+    int firstChar = getLineStartPos(currPos);
+    String prefix = getText(firstChar, currPos-firstChar);
+      
+    // Walk through string until we find a non-whitespace character
+    int i;
+    boolean found = false;
+    for (i = 0; i < prefix.length() && !found; i++ ) {
+      found = !Character.isWhitespace(prefix.charAt(i));
+    }
+    
+    // If we found a non-WS char left of curr pos, return it
+    if (found) {
+      i--;  // want the position just before the non-WS char
+      int firstRealChar = firstChar + i;
+      if (firstRealChar < currPos) {
+        return firstRealChar;
+      }
+    }
+    // Otherwise, return the beginning of the line
+    return firstChar;
+  }
+  
+  /**
    * Returns the offset corresponding to the first character of the given line number,
    *  or -1 if the lineNum is not found.
    * @param lineNum the line number for which to calculate the offset.

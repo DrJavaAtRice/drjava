@@ -108,7 +108,7 @@ public final class ConsoleControllerTest extends GlobalModelTestCase {
     }
     result = interpret("System.in.read()");
 
-    String expected = DefaultInteractionsModel.INPUT_REQUIRED_MESSAGE +
+    String expected = /*DefaultInteractionsModel.INPUT_REQUIRED_MESSAGE + */
       String.valueOf((int) 'a');
     assertEquals("read() returns the correct character", expected, result);
     result = interpret("System.in.read()");

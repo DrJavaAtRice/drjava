@@ -492,7 +492,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   /** Runs Javadoc on the current document. */
-  private Action _javadocCurrentAction = new AbstractAction("Javadoc Current Document") {
+  private Action _javadocCurrentAction = new AbstractAction("Preview Javadoc for Current Document") {
     public void actionPerformed(ActionEvent ae) {
       try {
         _model.getActiveDocument().generateJavadoc(_saveSelector);
@@ -618,7 +618,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** Asks the user for a line number and goes there. */
-  private Action _gotoLineAction = new AbstractAction("Goto Line...") {
+  private Action _gotoLineAction = new AbstractAction("Go to Line...") {
     public void actionPerformed(ActionEvent ae) {
       _gotoLine();
     }
@@ -674,7 +674,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Shows the DebugConsole.
    */
-  private Action _showDebugConsoleAction = new AbstractAction("Show Debug Console") {
+  private Action _showDebugConsoleAction = new AbstractAction("Show DrJava Debug Console") {
     public void actionPerformed(ActionEvent e) {
       DrJava.showDrJavaDebugConsole(MainFrame.this);
     }
@@ -955,31 +955,47 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   /**
-   * A more intelligent action for the home key: moves to the first
-   * non-whitespace character on the line (if right of it), otherwise
-   * moves to the first character on the line.
-   *
-  private Action _homeAction = new AbstractAction("Home") {
+   * Moves the caret to the "intelligent" beginning of the line.
+   * @see #_getBeginLinePos
+   */
+  private Action _beginLineAction = new AbstractAction("Begin Line") {
     public void actionPerformed(ActionEvent ae) {
-      try {
-        DefinitionsDocument doc = _model.getActiveDocument().getDocument();
-        int currPos = _currentDefPane.getCaretPosition();
-        int firstRealChar = doc.getFirstNonWSCharPos(currPos);
-        System.out.println("homeAction: " + currPos + " " + firstRealChar);
-        if ((firstRealChar > -1) && (firstRealChar < currPos)) {
-          _currentDefPane.setCaretPosition(firstRealChar);
-        }
-        else {
-          int firstChar = doc.getLineStartPos(currPos);
-          _currentDefPane.setCaretPosition(firstChar);
-        }
-      }
-      catch (BadLocationException ble) {
-        // Shouldn't happen: we're using a legal position
-        throw new UnexpectedException(ble);
-      }
+      int beginLinePos = _getBeginLinePos();
+      _currentDefPane.setCaretPosition(beginLinePos);
     }
-  };*/
+  };
+  
+  /**
+   * Selects to the "intelligent" beginning of the line.
+   * @see #_getBeginLinePos
+   */
+  private Action _selectionBeginLineAction = new AbstractAction("Select to Beginning of Line") {
+    public void actionPerformed(ActionEvent ae) {
+      int beginLinePos = _getBeginLinePos();
+      _currentDefPane.moveCaretPosition(beginLinePos);
+    }
+  };
+  
+  /**
+   * Returns the "intelligent" beginning of line.  If the caret is to
+   * the right of the first non-whitespace character, the position of the
+   * first non-whitespace character is returned.  If the caret is at or
+   * to the left of the first non-whitespace character, the beginning of
+   * the line is returned.
+   */
+  private int _getBeginLinePos() {
+    try {
+      int currPos = _currentDefPane.getCaretPosition();
+      OpenDefinitionsDocument openDoc = _model.getActiveDocument();
+      openDoc.syncCurrentLocationWithDefinitions(currPos);
+      DefinitionsDocument doc = openDoc.getDocument();
+      return doc.getIntelligentBeginLinePos(currPos);
+    }
+    catch (BadLocationException ble) {
+      // Shouldn't happen: we're using a legal position
+      throw new UnexpectedException(ble);
+    }
+  }
   
   /**
    * Interprets the commands in a file in the interactions window
@@ -1853,10 +1869,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Display a warning message if a class name can't be found.
       String msg =
         "DrJava could not find the top level class name in the\n" +
-        "current document.  Please make sure that a class is\n" +
-        "properly defined before trying to run its main method.";
+        "current document, so it could not run the class.  Please\n" +
+        "make sure that the class is properly defined first.";
 
-      JOptionPane.showMessageDialog(MainFrame.this, msg, "No Main Method",
+      JOptionPane.showMessageDialog(MainFrame.this, msg, "No Class Found",
                                     JOptionPane.ERROR_MESSAGE);
     }
     catch (FileMovedException fme) {
@@ -2297,12 +2313,12 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _setUpActions() {
     _setUpAction(_newAction, "New", "Create a new document");
-    _setUpAction(_newJUnitTestAction, "New", "Create a new JUnit test case");
+    _setUpAction(_newJUnitTestAction, "New", "Create a new JUnit test case class");
     _setUpAction(_openAction, "Open", "Open an existing file");
     _setUpAction(_saveAction, "Save", "Save the current document");
     _setUpAction(_saveAsAction, "Save As", "SaveAs",
                  "Save the current document with a new name");
-    _setUpAction(_revertAction, "Revert", "Revert the current document to saved version");
+    _setUpAction(_revertAction, "Revert", "Revert the current document to the saved version");
     //_setUpAction(_revertAllAction, "Revert All", "RevertAll",
     //             "Revert all open documents to the saved versions");
 
@@ -2314,10 +2330,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_compileAllAction, "Compile All", "CompileAll",
                  "Compile all open documents");
     _setUpAction(_printAction, "Print", "Print the current document");
-    _setUpAction(_pageSetupAction, "Page Setup", "PageSetup", "Page Setup");
-    _setUpAction(_printPreviewAction, "Print Preview", "PrintPreview", "Print Preview");
+    _setUpAction(_pageSetupAction, "Page Setup", "PageSetup", "Change the printer settings");
+    _setUpAction(_printPreviewAction, "Print Preview", "PrintPreview", "Preview how the document will be printed");
     
-    _setUpAction(_quitAction, "Quit", "Quit", "Exit DrJava");
+    _setUpAction(_quitAction, "Quit", "Quit", "Quit DrJava");
 
     _setUpAction(_undoAction, "Undo", "Undo previous command");
     _setUpAction(_redoAction, "Redo", "Redo last undo");
@@ -2334,22 +2350,23 @@ public class MainFrame extends JFrame implements OptionConstants {
     pasteAction.putValue(Action.NAME, "Paste");
     
     _setUpAction(_indentLinesAction, "Indent Lines", "Indent all selected lines");
-    _setUpAction(_commentLinesAction, "Comment Lines", "Comment all selected lines");
+    _setUpAction(_commentLinesAction, "Comment Lines", "Comment out all selected lines");
     _setUpAction(_uncommentLinesAction, "Uncomment Lines", "Uncomment all selected lines");
 
+    _setUpAction(_findReplaceAction, "Find", "Find or replace text in the document");
+    _setUpAction(_gotoLineAction, "Go to line", "Go to a line number in the document");
+    
     _setUpAction(_switchToPrevAction, "Back", "Switch to the previous document");
     _setUpAction(_switchToNextAction, "Forward", "Switch to the next document");
-    _setUpAction(_switchToPreviousPaneAction, "Previous Pane", "Switch the focus to the previous pane");
-    _setUpAction(_switchToNextPaneAction, "Next Pane", "Switch the focus to the next pane");
+    _setUpAction(_switchToPreviousPaneAction, "Previous Pane", "Switch focus to the previous pane");
+    _setUpAction(_switchToNextPaneAction, "Next Pane", "Switch focus to the next pane");
     
-    _setUpAction(_findReplaceAction, "Find", "Find/Replace");
-    _setUpAction(_gotoLineAction, "Goto line", "Jump to a line in the document");
-    _setUpAction(_editPreferencesAction, "Preferences", "Edit DrJava Preferences");
+    _setUpAction(_editPreferencesAction, "Preferences", "Edit configurable settings in DrJava");
 
     _setUpAction(_junitAction, "Test Current", "Run JUnit over the current document");
     _setUpAction(_junitAllAction, "Test", "Run JUnit over all open JUnit tests");
-    _setUpAction(_javadocAllAction, "Javadoc", "Create Javadoc for the packages of all open documents");
-    _setUpAction(_javadocCurrentAction, "Javadoc Current", "Create Javadoc for the current document");
+    _setUpAction(_javadocAllAction, "Javadoc", "Create and save Javadoc for the packages of all open documents");
+    _setUpAction(_javadocCurrentAction, "Preview Javadoc Current", "Preview the Javadoc for the current document");
     _setUpAction(_runAction, "Run Document", "Run the main method of the current document");
     
     _setUpAction(_loadHistoryAction, "Load History", "Load a history of interactions from a file");
@@ -2362,10 +2379,18 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_copyInteractionToDefinitionsAction, "Lift Current Interaction", "Copy the current interaction into the Definitions Pane");
     
     _setUpAction(_clearConsoleAction, "Clear Console", "Clear all text in the Console Pane");
-    _setUpAction(_showDebugConsoleAction, "Show DrJava Debug Console", "Show a console for debugging DrJava " +
-                 "that defines \"mainFrame\", \"model\", and \"config\".");
+    _setUpAction(_showDebugConsoleAction, "Show DrJava Debug Console", "<html>Show a console for debugging DrJava<br>" +
+                 "(with \"mainFrame\", \"model\", and \"config\" variables defined)</html>");
     
-    _setUpAction(_helpAction, "Help", "Show the User Documentation");
+    _setUpAction(_toggleDebuggerAction, "Debug Mode", "Enable or disable DrJava's debugger");
+    _setUpAction(_toggleBreakpointAction, "Toggle Breakpoint", "Set or clear a breakpoint on the current line");
+    _setUpAction(_clearAllBreakpointsAction, "Clear Breakpoints", "Clear all breakpoints in all classes");
+    _setUpAction(_resumeDebugAction, "Resume", "Resume the current suspended thread");
+    _setUpAction(_stepIntoDebugAction, "Step Into", "Step into the current line or method call");
+    _setUpAction(_stepOverDebugAction, "Step Over", "Step over the current line or method call");
+    _setUpAction(_stepOutDebugAction, "Step Out", "Step out of the current method");
+    
+    _setUpAction(_helpAction, "Help", "Show documentation on how to use DrJava");
     _setUpAction(_aboutAction, "About", "About DrJava");
     
   }
@@ -2554,13 +2579,16 @@ public class MainFrame extends JFrame implements OptionConstants {
     JMenu toolsMenu = new JMenu("Tools");
     toolsMenu.setMnemonic(KeyEvent.VK_T);
     
-    // Compile, Compile all, Run Main Method
+    // Compile, Test, Javadoc
     _addMenuItem(toolsMenu, _compileAllAction, KEY_COMPILE_ALL);
     _addMenuItem(toolsMenu, _compileAction, KEY_COMPILE);
     _addMenuItem(toolsMenu, _junitAllAction, KEY_TEST_ALL);
     _addMenuItem(toolsMenu, _junitAction, KEY_TEST);
     _addMenuItem(toolsMenu, _javadocAllAction, KEY_JAVADOC_ALL);
     _addMenuItem(toolsMenu, _javadocCurrentAction, KEY_JAVADOC_CURRENT);
+    toolsMenu.addSeparator();
+    
+    // Run
     _addMenuItem(toolsMenu, _runAction, KEY_RUN);
     toolsMenu.addSeparator();
     
@@ -2970,8 +2998,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _interactionsController.setNextPaneAction(_switchToNextPaneAction);
     _interactionsPane = _interactionsController.getPane();
 
-    _model.setInputListener(_consoleController.getInputListener());
-//    _model.setInputListener(_interactionsController.getInputListener());
+//    _model.setInputListener(_consoleController.getInputListener());
+    _model.setInputListener(_interactionsController.getInputListener());
 
     _findReplace = new FindReplaceDialog(this, _model);
 
@@ -4511,11 +4539,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_DOCUMENT,
                                                DefaultEditorKit.selectionBeginAction);
     
-    KeyBindingManager.Singleton.put(KEY_BEGIN_LINE, _actionMap.get(DefaultEditorKit.beginLineAction), null, "Begin Line");
-    //KeyBindingManager.Singleton.put(KEY_BEGIN_LINE, _homeAction,
-    //                                null, "Begin Line");
+    //KeyBindingManager.Singleton.put(KEY_BEGIN_LINE, _actionMap.get(DefaultEditorKit.beginLineAction), null, "Begin Line");
+    KeyBindingManager.Singleton.put(KEY_BEGIN_LINE, _beginLineAction,
+                                    null, "Begin Line");
+    //KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_LINE,
+    //                                           DefaultEditorKit.selectionBeginLineAction);
     KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_LINE,
-                                               DefaultEditorKit.selectionBeginLineAction);
+                                               _selectionBeginLineAction);
     
     KeyBindingManager.Singleton.put(KEY_PREVIOUS_WORD,
                                     _actionMap.get(DefaultEditorKit.previousWordAction), null, "Previous Word");

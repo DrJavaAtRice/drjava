@@ -421,7 +421,49 @@ public final class IndentHelperTest extends IndentRulesTestCase {
                  "after call to getLineFirstCharPos",
                  reducedModelPos,
                  _doc.getReduced().absOffset());
-  }  
+  }
+  
+  /**
+   * Tests that the "intelligent" beginning of line can be found, given
+   * a position on the line.  Very similar to getFirstNonWSCharPos, except
+   * that comments are treated as non-whitespace, and less parsing needs
+   * to be done.
+   */
+  public void testGetIntelligentBeginLinePos() throws BadLocationException {
+    _setDocText("   foo();");
+    assertEquals("simple text, in WS", 
+                 0, _doc.getIntelligentBeginLinePos(1));
+    assertEquals("simple text, end of WS", 
+                 0, _doc.getIntelligentBeginLinePos(3));
+    assertEquals("simple text, in text", 
+                 3, _doc.getIntelligentBeginLinePos(4));
+    assertEquals("simple text, at end", 
+                 3, _doc.getIntelligentBeginLinePos(9));
+    
+    _setDocText("   // foo");
+    assertEquals("comment, in WS", 
+                 0, _doc.getIntelligentBeginLinePos(0));
+    assertEquals("comment, end of WS", 
+                 0, _doc.getIntelligentBeginLinePos(3));
+    assertEquals("comment, in text", 
+                 3, _doc.getIntelligentBeginLinePos(4));
+    assertEquals("comment, at end", 
+                 3, _doc.getIntelligentBeginLinePos(9));
+    
+    _setDocText("   foo();\n bar();\n");
+    assertEquals("multiple lines, at start", 
+                 10, _doc.getIntelligentBeginLinePos(10));
+    assertEquals("multiple lines, end of WS", 
+                 10, _doc.getIntelligentBeginLinePos(11));
+    assertEquals("multiple lines, in text", 
+                 11, _doc.getIntelligentBeginLinePos(13));
+    assertEquals("multiple lines, at end", 
+                 11, _doc.getIntelligentBeginLinePos(17));
+    
+    _setDocText("abc  def");
+    assertEquals("no leading WS, in middle", 
+                 0, _doc.getIntelligentBeginLinePos(5));
+  }
 }
 
 

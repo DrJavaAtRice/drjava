@@ -148,19 +148,28 @@ public class KeyBindingManager {
   }
 */
   /**
-   * Takes an option, its name, and the name of the corresponding
-   * selection action and returns the selection action after putting
-   * the appropriate data pairs into their respective Hashtables
+   * Assigns the selection action with the given name to the combination of the
+   * shift key and the given key stroke option.
    * Also adds new KeyStrokOptionListeners to the non-shifted Actions
    * @param opt the KeyStroke Option of the Action
-   * @param s the name of the Action
    * @param shiftS the name of the Selection Action
    */
   public void addShiftAction(Option<KeyStroke> opt, String shiftS) {
+    Action shiftA = (Action) _actionMap.get(shiftS);
+    addShiftAction(opt, shiftA);
+  }
+  
+  /**
+   * Assigns the given selection action to the combination of the
+   * shift key and the given key stroke option.
+   * Also adds new KeyStrokOptionListeners to the non-shifted Actions
+   * @param opt the KeyStroke Option of the Action
+   * @param shiftA the Selection Action
+   */
+  public void addShiftAction(Option<KeyStroke> opt, Action shiftA) {
     KeyStroke ks = DrJava.getConfig().getSetting(opt);
 
     KeyStrokeData normal = _keyToDataMap.get(ks);
-    Action shiftA = (Action) _actionMap.get(shiftS);
     normal.setShiftAction(shiftA);
 
     KeyStrokeData ksd = new KeyStrokeData(addShiftModifier(ks), shiftA, null,
