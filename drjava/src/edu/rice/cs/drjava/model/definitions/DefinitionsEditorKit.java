@@ -131,6 +131,20 @@ class ColoringView extends WrappedPlainView {
     return x;
   }
 
+  protected int drawSelectedText(Graphics g,
+                                   int x,
+                                   int y,
+                                   int p0,
+                                   int p1) throws BadLocationException
+  {
+    /*
+    DrJava.consoleErr().println("drawSelected: " + p0 + "-" + p1 + 
+                                " doclen=" + _doc.getLength() +" x="+x+" y="+y);
+    */
+    return super.drawSelectedText(g, x, y, p0, p1);
+  }
+
+
   private void setFormattingForState(Graphics g, int state) {
     switch (state) {
       case HighlightStatus.NORMAL:

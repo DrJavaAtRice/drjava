@@ -124,15 +124,20 @@ public class DefinitionsDocumentTest extends TestCase {
       assertEquals("Item #" + i + "in highlight vector starts at right place",
                    walk,
                    v.elementAt(i).getLocation());
+
+      // Sanity check: length > 0?
+      assertTrue("Item #" + i + " in highlight vector has positive length",
+                 v.elementAt(i).getLength() > 0);
+      
       walk += v.elementAt(i).getLength();
     }
 
-    assertEquals("Highlight vector ends at right place",
-                 walk,
-                 end);
+    assertEquals("Location after walking highlight vector",
+                 end,
+                 walk);
   }
 
-  public void testHighlightKeywords() throws BadLocationException {
+  public void testHighlightKeywords1() throws BadLocationException {
     Vector<HighlightStatus> v;
 
     final String s = "public class Foo {\n" +
@@ -153,5 +158,38 @@ public class DefinitionsDocumentTest extends TestCase {
     assertEquals(HighlightStatus.NORMAL, v.elementAt(5).getState());
     assertEquals(HighlightStatus.KEYWORD, v.elementAt(6).getState());
     assertEquals(HighlightStatus.NORMAL, v.elementAt(7).getState());
+  }
+
+  /**
+   * This test case simulates what happens when some text is selected
+   * and there is a keyword around too.
+   * In drjava-20010720-1712 there is a bug that if you enter "int Y" and
+   * then try to select "t Y", it exceptions. This is a test for that case.
+   * The important thing about the selecting thing is that because it wants
+   * to render the last three chars selected, it asks for the first two only
+   * in the call to getHighlightStatus.
+   */
+  public void testHighlightKeywords2() throws BadLocationException {
+    Vector<HighlightStatus> v;
+
+    final String s = "int Y";
+
+    defModel.insertString(defModel.getLength(), s, null);
+
+    // First sanity check the whole string's status
+    v = defModel.getHighlightStatus(0, defModel.getLength());
+    _checkHighlightStatusConsistent(v, 0, defModel.getLength());
+
+    // Make sure the keyword is highlighted
+    assertEquals("vector length", 2, v.size());
+    assertEquals(HighlightStatus.KEYWORD, v.elementAt(0).getState());
+    assertEquals(HighlightStatus.NORMAL, v.elementAt(1).getState());
+
+    // Now only ask for highlights for "in"
+    v = defModel.getHighlightStatus(0, 2);
+    _checkHighlightStatusConsistent(v, 0, 2);
+    assertEquals("vector length", 1, v.size());
+    assertEquals(0, v.elementAt(0).getLocation());
+    assertEquals(2, v.elementAt(0).getLength());
   }
 }

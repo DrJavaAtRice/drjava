@@ -442,7 +442,7 @@ public class ReducedModelControl implements BraceReduction
     int curLength;
 
     ModelList<ReducedToken>.Iterator cursor = rmc._cursor.copy();
-    curLocation = start; //+ rmc._offset;
+    curLocation = start;
     curLength = cursor.current().getSize() - rmc._offset;
     curState = cursor.current().getHighlightState();
 
@@ -461,6 +461,14 @@ public class ReducedModelControl implements BraceReduction
         curLength = cursor.current().getSize();
         curState = nextState;
       }
+    }
+
+    // Make sure this token length doesn't extend past start+length.
+    // This is because we guarantee that the returned vector only refers
+    // to chars on [start, start+length).
+    int requestEnd = start + length;
+    if ((curLocation + curLength) > requestEnd) {
+      curLength = requestEnd - curLocation;
     }
 
     // Add the last one, which has not been added yet

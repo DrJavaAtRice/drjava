@@ -9,8 +9,9 @@ public class DrJava {
   // Generated automatically when you check out with tag name!
   public static final String DRJAVA_BUILD = "$Name$";
 
-  private static PrintStream _consoleOut;
-  private static PrintStream _consoleErr;
+  // Pre-initialize them in case we use them before calling main
+  private static PrintStream _consoleOut = System.out;
+  private static PrintStream _consoleErr = System.err;
 
   /** Compiler to use everywhere. */
   public static final CompilerInterface compiler = new GJv6Compiler();

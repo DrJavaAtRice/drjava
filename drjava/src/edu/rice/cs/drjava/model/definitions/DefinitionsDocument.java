@@ -67,6 +67,7 @@ public class DefinitionsDocument extends PlainDocument
   public void insertString(int offset, String str, AttributeSet a)
     throws BadLocationException
   {
+    //System.err.println("insert@" + offset + ": |" + str + "|");
     int locationChange = offset - _currentLocation;
     int strLength = str.length();
     int prevSize;   //stores the size of the item prev when insert begins.
@@ -141,6 +142,7 @@ public class DefinitionsDocument extends PlainDocument
   
   public void remove(int offset, int len) throws BadLocationException
   {
+    //System.err.println("remove: " + offset + ", " + len);
     int locationChange = offset - _currentLocation;
 
     _reduced.move(locationChange);
@@ -179,8 +181,18 @@ public class DefinitionsDocument extends PlainDocument
     fireChangedUpdate(evt);
   }
 
+  /*
+  protected void insertUpdate(AbstractDocument.DefaultDocumentEvent chng,
+                              AttributeSet attr)
+  {
+    // OK we need to add an UndoableEdit to chng to make it undo
+    // reduced model changes
+  }
+  */
+
   /** Whenever this document has been saved, this method should be called
-   *  so that it knows it's no longer in a modified state. */
+   *  so that it knows it's no longer in a modified state.
+   */
   public void resetModification()
   {
     _modifiedSinceSave = false;
@@ -441,7 +453,7 @@ public class DefinitionsDocument extends PlainDocument
    */
   private int _highlightKeywords(Vector<HighlightStatus> v, int i) {
     // Basically all non-alphanumeric chars are delimiters
-    final String delimiters = " \t\n\r{}()[].+-/*;:=!~<>";
+    final String delimiters = " \t\n\r{}()[].+-/*;:=!~<>?";
     final HighlightStatus original = v.elementAt(i);
 
     final String text;
@@ -464,7 +476,7 @@ public class DefinitionsDocument extends PlainDocument
     int start = original.getLocation();
     int length = 0;
 
-    // Remove the old element frm the vector.
+    // Remove the old element from the vector.
     v.removeElementAt(i);
 
     // Index where we are in the vector. It's the location we would insert
