@@ -101,12 +101,14 @@ public class DirectoryChooser extends JDialog {
   protected File    _rootFile;
   protected boolean _allowMultiple;
   protected boolean _showHidden;
+  protected boolean _showFiles;
   protected boolean _isEditable;
   protected int     _finalResult;
   protected Set<File> _offLimits;
   
   private TreeExpansionListener _expansionListener;
   private LinkedList<FileFilter> _choosableDirs;
+  private LinkedList<FileFilter> _normalFileFilters;
   private Action _cancelAction;
   
   private JScrollPane _scroller;
@@ -235,6 +237,7 @@ public class DirectoryChooser extends JDialog {
     _showHidden = showHidden;
     _finalResult = ERROR_OPTION;
     _choosableDirs = new LinkedList<FileFilter>();
+    _normalFileFilters = new LinkedList<FileFilter>();
     _jfc = new JFileChooser();
   
     _offLimits = new HashSet<File>();
@@ -433,11 +436,11 @@ public class DirectoryChooser extends JDialog {
         boolean canChoose = enable;
         File f = getFileForTreePath(_tree.getSelectionPath());
         for (FileFilter filter : _choosableDirs) {
-          canChoose &= filter.accept(f);
+          canChoose &= (f != null && filter.accept(f));
         }
         _approveButton.setEnabled(canChoose);
-        boolean canWrite = enable && f.canWrite();
-        _newFolderButton.setEnabled(canWrite);
+        boolean canSubDir = enable && f.isDirectory() && f.canWrite();
+        _newFolderButton.setEnabled(canSubDir);
       }
     });
     
@@ -471,18 +474,18 @@ public class DirectoryChooser extends JDialog {
           boolean isExp = _tree.isExpanded(tp);
           _collapseItem.setVisible(isExp);
           _expandItem.setVisible(!isExp);
-          
-          boolean canWrite = false;
+          boolean canSubDir = false;
           boolean canAlter = false;
           try {
             File f = getFileForTreePath(tp);
-            canWrite = f.canWrite();
+            boolean canWrite = f.canWrite();
+            canSubDir = canWrite && f.isDirectory();
             canAlter = canWrite && !_offLimits.contains(f);
           } catch(IllegalArgumentException iae) { }
           _renameItem.setEnabled(canAlter);
           _deleteItem.setEnabled(canAlter);
-          _newFolderItem.setEnabled(canWrite);
-          _newFolderButton.setEnabled(canWrite);
+          _newFolderItem.setEnabled(canSubDir);
+          _newFolderButton.setEnabled(canSubDir);
           _tree.setSelectionPath(tp);
           _treePopup.show(e.getComponent(), e.getX(), e.getY());
         }
@@ -508,6 +511,30 @@ public class DirectoryChooser extends JDialog {
   
   public void clearChoosableFileFilters() {
     _choosableDirs.clear();
+  }
+  
+  /**
+   * Adds a file filter for non-directory files.  These 
+   * filters do not apply to directories and thus would not
+   * have an effect if the chooser was not set to show files
+   * as well as directories.
+   */
+  public void addFileFilter(FileFilter filter) {
+    if (filter != null) _normalFileFilters.add(filter);
+  }
+  
+  /**
+   * Removes a file filter for non-directory files
+   */
+  public void removeFileFilter(FileFilter filter) {
+    if (filter != null) _normalFileFilters.remove(filter);
+  }
+  
+  /**
+   * Clears all non-directory file filters
+   */
+  public void clearFileFilters() {
+    _normalFileFilters.clear();
   }
   
   /**
@@ -888,9 +915,11 @@ public class DirectoryChooser extends JDialog {
       
       File[] childFiles = parentFile.listFiles();
       if (childFiles != null) {
-        Arrays.sort(childFiles);
+        Arrays.sort(childFiles, _fileComparator);
+        
         for (File f : childFiles) {
-          if (f.isDirectory() && (_showHidden || !f.isHidden())) {
+          if ((f.isDirectory() || (_showFiles && allowFile(f))) && 
+              (_showHidden || !f.isHidden())) {
             DefaultMutableTreeNode n = makeFileNode(f);
             node.add(n);
             ((DefaultTreeModel)_tree.getModel()).nodeStructureChanged(node);
@@ -900,6 +929,31 @@ public class DirectoryChooser extends JDialog {
       ((DefaultTreeModel)_tree.getModel()).nodeStructureChanged(node);
     }
   }
+  
+  protected boolean allowFile(File f) {
+    try{
+      for (FileFilter ff : _normalFileFilters) {
+        if (!ff.accept(f)) return false;
+      }
+      return true;
+    }
+    catch(Exception e) {
+      return false;
+    }
+  }
+  
+  protected Comparator<File> _fileComparator = new Comparator<File>() {
+    public int compare(File f1, File f2) {
+      boolean d1 = f1.isDirectory();
+      boolean d2 = f2.isDirectory();
+      if (!(d1 ^ d2))
+        return f1.getName().compareToIgnoreCase(f2.getName());
+      else if (d1)
+        return -1;
+      else
+        return 1;
+    }
+  };
   
   /**
    * Renames the file for the given node and propagates that
@@ -976,8 +1030,7 @@ public class DirectoryChooser extends JDialog {
   
   protected DefaultMutableTreeNode makeFileNode(File f) {
     DefaultMutableTreeNode n = new DefaultMutableTreeNode(new FileDisplay(f));
-    n.add(new EmptyTreeNode()); // dummy node so it's not a leaf
-
+    if (f.isDirectory()) n.add(new EmptyTreeNode()); // dummy node so it's not a leaf
     return n;
   }
   
@@ -1260,6 +1313,7 @@ public class DirectoryChooser extends JDialog {
     }
     
     final DirectoryChooser d = new DirectoryChooser((Frame)null,dir);
+    d._showFiles = true;
     final JCheckBox cb = new JCheckBox("Enable edits");
     cb.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
@@ -1270,9 +1324,23 @@ public class DirectoryChooser extends JDialog {
     d.setTopComponent(new JLabel("Select a folder so open", UIManager.getIcon("OptionPane.informationIcon"), JLabel.LEFT));
     d.addChoosableFileFilter(new FileFilter() {
       public boolean accept(File f) {
-        return f.getName().equals("foo");
+        try {
+          return !f.isDirectory();
+        }
+        catch (Exception e) {
+          System.out.println(f);
+          throw new RuntimeException(e);
+        }
       }
       public String getDescription() { return "Only select the file whose name is foo"; }
+    });
+    d.addFileFilter(new FileFilter() {
+      public boolean accept(File f) {
+        String name = f.getName();
+        int idx = name.lastIndexOf(".");
+        return (name.substring(idx+1).equalsIgnoreCase("java"));
+      }
+      public String getDescription() { return "Only allow java files"; };
     });
     int res = d.showDialog();
     System.out.println("done with success: " + res);
