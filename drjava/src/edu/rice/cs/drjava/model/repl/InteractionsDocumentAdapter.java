@@ -48,6 +48,7 @@ package edu.rice.cs.drjava.model.repl;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
+import edu.rice.cs.drjava.model.definitions.ColoringView;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.Pair;
@@ -63,25 +64,13 @@ import javax.swing.text.AbstractDocument;
  */
 public class InteractionsDocumentAdapter extends AbstractDJDocument {
   
-  private static Color INTERACTIONS_SYSTEM_ERR_COLOR = DrJava.getConfig().getSetting(SYSTEM_ERR_COLOR);
-  private static Color INTERACTIONS_SYSTEM_IN_COLOR = DrJava.getConfig().getSetting(SYSTEM_IN_COLOR);
-  private static Color INTERACTIONS_SYSTEM_OUT_COLOR = DrJava.getConfig().getSetting(SYSTEM_OUT_COLOR);
-  //Renamed as to avoid confusion with the one in option constants
-  private static Color INTERACTIONS_STANDARD_ERROR_COLOR = DrJava.getConfig().getSetting(INTERACTIONS_ERROR_COLOR);
-  private static Color INTERACTIONS_DEBUGGER_COLOR = DrJava.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
-  
-  private static Color INTERACTIONS_OBJECT_RETURN_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR);
-  private static Color INTERACTIONS_STRING_RETURN_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_DOUBLE_QUOTED_COLOR);
-  private static Color INTERACTIONS_CHARACTER_RETURN_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_SINGLE_QUOTED_COLOR);
-  private static Color INTERACTIONS_NUMBER_RETURN_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_NUMBER_COLOR);
-  
-  private static Font INTERACTIONS_MAIN_FONT = DrJava.getConfig().getSetting(FONT_MAIN);
-  
+  /**
+   * Holds a flag telling the adapter that the interpreter was recently reset, and to reset the styles list the next   
+   * time a style is added. 
+   * Cannot reset immediately because then the styles would be lost while the interactions pane is resetting.
+   */
   private boolean _toClear = false;
   
-  final ColorOptionListener col = new ColorOptionListener();
-  final FontOptionListener fol = new FontOptionListener();
-    
   protected void throwErrorHuh() {
     //Do nothing
   }
@@ -110,7 +99,13 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
     return new Indenter(indentLevel);
   }
   
-  //A list of styles and their locations
+  /**
+   * A list of styles and their locations.
+   * This list holds pairs of locations in the document and styles, which is basically a map of regions where the coloring view
+   * that is now attached to the Interactions Pane is not allowed to use the reduced model to determine the color settings when rendering
+   * text. We keep a list of all places where styles not considered by the reduced model are being used, 
+   * such as System.out, System.err, and the various return styles for Strings and other Objects.
+   */
   private List<Pair<Pair<Integer,Integer>,String>> _stylesList = new LinkedList<Pair<Pair<Integer,Integer>,String>>();
   
   //Adds the given coloring style to the list
@@ -141,44 +136,44 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
       if(loc.getFirst() <= point && loc.getSecond() >= point) {
         if(p.getSecond().equals(InteractionsDocument.ERROR_STYLE)) {
           //DrJava.consoleErr().println("Error Style");
-          g.setColor(INTERACTIONS_STANDARD_ERROR_COLOR);   
+          g.setColor(ColoringView.ERROR_COLOR);   
           g.setFont(g.getFont().deriveFont(Font.BOLD));
         }
         else if(p.getSecond().equals(InteractionsDocument.DEBUGGER_STYLE)) {
           //DrJava.consoleErr().println("Debugger Style");
-          g.setColor(INTERACTIONS_DEBUGGER_COLOR);
+          g.setColor(ColoringView.DEBUGGER_COLOR);
           g.setFont(g.getFont().deriveFont(Font.BOLD));
         }
         else if(p.getSecond().equals(ConsoleDocument.SYSTEM_OUT_STYLE)) {
           //DrJava.consoleErr().println("System.out Style");
-          g.setColor(INTERACTIONS_SYSTEM_OUT_COLOR);
-          g.setFont(INTERACTIONS_MAIN_FONT);
+          g.setColor(ColoringView.INTERACTIONS_SYSTEM_OUT_COLOR);
+          g.setFont(ColoringView.MAIN_FONT);
         }
         else if(p.getSecond().equals(ConsoleDocument.SYSTEM_IN_STYLE)) {
           //DrJava.consoleErr().println("System.in Style");
-          g.setColor(INTERACTIONS_SYSTEM_IN_COLOR);
-          g.setFont(INTERACTIONS_MAIN_FONT);
+          g.setColor(ColoringView.INTERACTIONS_SYSTEM_IN_COLOR);
+          g.setFont(ColoringView.MAIN_FONT);
         }
         else if(p.getSecond().equals(ConsoleDocument.SYSTEM_ERR_STYLE)) {
           //DrJava.consoleErr().println("System.err Style");
-          g.setColor(INTERACTIONS_SYSTEM_ERR_COLOR);
-          g.setFont(INTERACTIONS_MAIN_FONT);
+          g.setColor(ColoringView.INTERACTIONS_SYSTEM_ERR_COLOR);
+          g.setFont(ColoringView.MAIN_FONT);
         }
         else if(p.getSecond().equals(InteractionsDocument.OBJECT_RETURN_STYLE)) {
-          g.setColor(INTERACTIONS_OBJECT_RETURN_COLOR);
-          g.setFont(INTERACTIONS_MAIN_FONT);
+          g.setColor(ColoringView.NORMAL_COLOR);
+          g.setFont(ColoringView.MAIN_FONT);
         }
         else if(p.getSecond().equals(InteractionsDocument.STRING_RETURN_STYLE)) {
-          g.setColor(INTERACTIONS_STRING_RETURN_COLOR);
-          g.setFont(INTERACTIONS_MAIN_FONT);
+          g.setColor(ColoringView.DOUBLE_QUOTED_COLOR);
+          g.setFont(ColoringView.MAIN_FONT);
         }
         else if(p.getSecond().equals(InteractionsDocument.NUMBER_RETURN_STYLE)) {
-          g.setColor(INTERACTIONS_NUMBER_RETURN_COLOR);
-          g.setFont(INTERACTIONS_MAIN_FONT);
+          g.setColor(ColoringView.NUMBER_COLOR);
+          g.setFont(ColoringView.MAIN_FONT);
         }
         else if(p.getSecond().equals(InteractionsDocument.CHARACTER_RETURN_STYLE)) {
-          g.setColor(INTERACTIONS_CHARACTER_RETURN_COLOR);
-          g.setFont(INTERACTIONS_MAIN_FONT);
+          g.setColor(ColoringView.SINGLE_QUOTED_COLOR);
+          g.setFont(ColoringView.MAIN_FONT);
         }
         else { //Normal text color
           return false; 
@@ -189,7 +184,9 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
     return false;
   }
   
-  
+  /**
+   * Attempts to set the font on the graphics context based upon the styles held in the styles list
+   */
   public synchronized void setBoldFonts(int point, Graphics g) {
     for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
       Pair<Integer,Integer> loc = p.getFirst();
@@ -201,7 +198,7 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
           g.setFont(g.getFont().deriveFont(Font.BOLD));
         }
         else {
-          g.setFont(INTERACTIONS_MAIN_FONT);
+          g.setFont(ColoringView.MAIN_FONT);
         }
         return;
       }
@@ -228,63 +225,10 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
     return toReturn;
   }
   
-  
-  public InteractionsDocumentAdapter() {
-      DrJava.getConfig().addOptionListener( OptionConstants.SYSTEM_IN_COLOR, col);
-      DrJava.getConfig().addOptionListener( OptionConstants.SYSTEM_OUT_COLOR, col);
-      DrJava.getConfig().addOptionListener( OptionConstants.SYSTEM_ERR_COLOR, col);
-      DrJava.getConfig().addOptionListener( OptionConstants.INTERACTIONS_ERROR_COLOR, col);
-      DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_MESSAGE_COLOR, col);
-      DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
-      DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
-      DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
-      DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
-      DrJava.getConfig().addOptionListener( OptionConstants.FONT_MAIN, fol); 
-  }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  private void updateColors() {
-    INTERACTIONS_SYSTEM_ERR_COLOR = DrJava.getConfig().getSetting(SYSTEM_ERR_COLOR);
-    INTERACTIONS_SYSTEM_IN_COLOR = DrJava.getConfig().getSetting(SYSTEM_IN_COLOR);
-    INTERACTIONS_SYSTEM_OUT_COLOR = DrJava.getConfig().getSetting(SYSTEM_OUT_COLOR);
-    INTERACTIONS_STANDARD_ERROR_COLOR = DrJava.getConfig().getSetting(INTERACTIONS_ERROR_COLOR);
-    INTERACTIONS_DEBUGGER_COLOR = DrJava.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
-    
-    INTERACTIONS_OBJECT_RETURN_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR);
-    INTERACTIONS_STRING_RETURN_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_DOUBLE_QUOTED_COLOR);
-    INTERACTIONS_CHARACTER_RETURN_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_SINGLE_QUOTED_COLOR);
-    INTERACTIONS_NUMBER_RETURN_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_NUMBER_COLOR);
-    
-  }  
-  
   /**
-   * The OptionListeners for DEFINITIONS COLORs
+   * Public constructor. Currently does nothing
    */
-  private class ColorOptionListener implements OptionListener<Color> {
-    
-    public void optionChanged(OptionEvent<Color> oce) {
-      updateColors();
-    }
-  }
-  
-  private class FontOptionListener implements OptionListener<Font> {
-    
-    public void optionChanged(OptionEvent<Font> oce) {
-      INTERACTIONS_MAIN_FONT = DrJava.getConfig().getSetting(FONT_MAIN);
-    }
-  }
-  
-  
+  public InteractionsDocumentAdapter() {
+    super();
+  }  
 }
