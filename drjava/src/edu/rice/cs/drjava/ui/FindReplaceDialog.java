@@ -103,7 +103,6 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   };
 
   public void requestFocus() {
-    System.out.println("findField has requested focus");
     super.requestFocus();
     _findField.requestFocus();
     _findField.selectAll();

@@ -101,6 +101,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private Vector<DebugWatchData> _watches;
   private Vector<DebugThreadData> _threads;
   private Vector<DebugStackData> _stackFrames;
+  
+  private DefaultTreeCellRenderer dtcr;
 
   /**
    * Constructs a new panel to display debugging information when the
@@ -202,7 +204,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     // Breakpoint tree
     _breakpointRootNode = new DefaultMutableTreeNode("Breakpoints");
     _bpTreeModel = new DefaultTreeModel(_breakpointRootNode);
-    _bpTree = new JTree(_bpTreeModel);
+    _bpTree = new BPTree(_bpTreeModel);
     _bpTree.setEditable(false);
     _bpTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     _bpTree.setShowsRootHandles(true);
@@ -210,9 +212,11 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _bpTree.putClientProperty("JTree.lineStyle", "Angled");
     _bpTree.setScrollsOnExpand(true);
     // Breakpoint tree cell renderer
-    DefaultTreeCellRenderer dtcr = new BreakPointRenderer();
+    dtcr = new BreakPointRenderer();
+    dtcr.setOpaque(false);
+    _setColors(dtcr);
     _bpTree.setCellRenderer(dtcr);
-
+    
     _leftPane.addTab("Breakpoints", new JScrollPane(_bpTree));
 
     // Stack table
@@ -290,7 +294,16 @@ public class DebugPanel extends JPanel implements OptionConstants {
    */
   static class BreakPointRenderer extends DefaultTreeCellRenderer {
 
+    public void setBackground(Color c){
+      this.setBackgroundNonSelectionColor(c);
+    }
+    
+    public void setForeground(Color c){
+      this.setTextNonSelectionColor(c);
+    }
+    
     private BreakPointRenderer() {
+      this.setTextSelectionColor(Color.black);
       setLeafIcon(null);
       setOpenIcon(null);
       setClosedIcon(null);
@@ -306,7 +319,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
         (tree, value, selected, expanded, leaf, row, hasFocus);
 
       if (renderer instanceof JComponent) {
-        ((JComponent) renderer).setOpaque(true);
+        ((JComponent) renderer).setOpaque(false);
       }
 
       _setColors(renderer);
@@ -1124,6 +1137,23 @@ public class DebugPanel extends JPanel implements OptionConstants {
         _lastRow = _table.rowAtPoint(e.getPoint());
         _action();
       }
+    }
+  }
+  
+  private class BPTree extends JTree{
+    public BPTree(DefaultTreeModel s){
+      super(s);
+    }
+    
+    public void setForeground(Color c){
+      super.setForeground(c);
+      dtcr.setTextNonSelectionColor(c);
+    }
+    
+    public void setBackground(Color c){
+      super.setBackground(c);
+      if(dtcr != null)
+        dtcr.setBackgroundNonSelectionColor(c);
     }
   }
 }

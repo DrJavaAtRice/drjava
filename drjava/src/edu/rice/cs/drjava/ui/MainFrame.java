@@ -2010,6 +2010,9 @@ public class MainFrame extends JFrame implements OptionConstants {
   {
         
       _model.setDocumentNavigator(AWTContainerNavigatorFactory.Singleton.makeListNavigator(_model.getDocumentNavigator()));
+      Component renderer = _model.getDocumentNavigator().getRenderer();
+      new ForegroundColorListener(renderer);
+      new BackgroundColorListener(renderer);
       _closeAll();
       _docSplitPane.remove(_docSplitPane.getLeftComponent());
       _docSplitPane.setLeftComponent(new JScrollPane(_model.getDocumentNavigator().asContainer()));
