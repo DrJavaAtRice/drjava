@@ -237,9 +237,9 @@
 
     <classpath refid="classpath" />
 
-    <link href="http://www.cs.rice.edu/~javaplt/javadoc/java-api" />
-    <link href="http://www.cs.rice.edu/~javaplt/javadoc/junit" />
-    <link href="http://www.cs.rice.edu/~javaplt/javadoc/dynamicjava" />
+    <link href="http://www.junit.org/junit/javadoc/3.7" />
+    <link href="http://java.sun.com/j2se/1.3/docs/api" />
+    <link href="http://koala.ilog.fr/djava/javadoc" />
   </javadoc>
 
   <!-- delete source we generated without generics -->

@@ -14,6 +14,9 @@
   <!-- built is where the compiled classes go -->
   <property name="built" value="${srcroot}/../built/" />
 
+  <!-- dist is where the packaged jars go -->
+  <property name="dist" value="${srcroot}/../dist/" />
+
   <!-- projpath is the path from srcroot to the root directory of this project
   -->
   <property name="projpath" value="edu/rice/cs/${ant.project.name}" />
@@ -42,18 +45,40 @@
        Note: Release must be run on CS net
   -->
   <target name="release" if="version-tag" depends="update,compile">
-    <antcall target="jar">
-      <param name="jarfile" value="${jars_dir}/${version-tag}.jar" />
-    </antcall>
+    <delete dir="${dist}/${version-tag}" />
+    <mkdir dir="${dist}/${version-tag}" />
 
     <!-- generate javadoc for the committed version! -->
     <antcall target="generate_javadoc">
-      <param name="javadoc_dir" value="${public_javadoc_dir}" />
+      <param name="javadoc_dir" value="${dist}/${version-tag}/javadoc" />
       <param name="javadoc_title" value="${version-tag}" />
     </antcall>
 
-    <!-- give group permissions to write over the javadoc -->
-    <chmod perm="g+w,a+rX" dir="${public_javadoc_dir}" type="both" includes="**" />
+    <zip zipfile="${dist}/${version-tag}-javadoc.zip">
+      <fileset dir="${dist}">
+        <include name="${version-tag}/javadoc/**" />
+      </fileset>
+    </zip>
+
+    <delete dir="${dist}/${version-tag}/javadoc" />
+
+    <cvs dest="${dist}/${version-tag}"
+         tag="HEAD"
+         quiet="yes"
+         package="src/edu/rice/cs"
+         command="export -N" />
+
+    <zip zipfile="${dist}/${version-tag}-src.zip">
+      <fileset dir="${dist}">
+        <include name="${version-tag}/src/**" />
+      </fileset>
+    </zip>
+
+    <delete dir="${dist}/${version-tag}" />
+
+    <antcall target="jar">
+      <param name="jarfile" value="${dist}/${version-tag}.jar" />
+    </antcall>
   </target>
 
   <target name="compile" depends="do-compile">
