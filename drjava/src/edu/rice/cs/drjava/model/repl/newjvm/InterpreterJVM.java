@@ -73,6 +73,7 @@ import java.awt.Toolkit;
 public class InterpreterJVM extends AbstractSlaveJVM
                             implements InterpreterJVMRemoteI
 {
+  private static final boolean printMessages = false;
   /** Singleton instance of this class. */
   public static final InterpreterJVM ONLY = new InterpreterJVM();
   
@@ -362,8 +363,12 @@ public class InterpreterJVM extends AbstractSlaveJVM
     * the named interpreter is not a Java interpreter
     */
    public JavaInterpreter getJavaInterpreter(String name) {
+     if( printMessages ) System.err.println("Getting interpreter data");
      InterpreterData interpreterData = getInterpreter(name);
+     if( printMessages ) System.out.println("Getting interpreter instance");
      Interpreter interpreter = interpreterData.getInterpreter();
+     if( printMessages ) System.out.println("returning");
+
      if (interpreter instanceof JavaInterpreter) {
        return (JavaInterpreter) interpreter;
      }

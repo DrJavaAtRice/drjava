@@ -453,9 +453,15 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private void _initPopup() {
     _threadRunningPopupMenu = new JPopupMenu("Thread Selection");
     JMenuItem threadRunningSuspend = new JMenuItem();
-    Action suspendAction = new AbstractAction() {
+    Action suspendAction
+      = new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
-        _debugger.suspend(getSelectedThread());
+        try{
+          _debugger.suspend(getSelectedThread());
+        }
+        catch(DebugException exception){
+          JOptionPane.showMessageDialog(_frame, "Cannot suspend the thread.", "Debugger Error", JOptionPane.ERROR_MESSAGE);
+        }
       }
     };
     threadRunningSuspend.setAction(suspendAction);
@@ -468,7 +474,12 @@ public class DebugPanel extends JPanel implements OptionConstants {
     JMenuItem threadSuspendedResume = new JMenuItem();
     threadSuspendedResume.setAction(new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
+        try{
         _debugger.resume(getSelectedThread());
+        }
+        catch(DebugException dbe){
+          JOptionPane.showMessageDialog(_frame, "Cannot resume the thread.", "Debugger Error", JOptionPane.ERROR_MESSAGE);
+        }
       }
     });
     _threadSuspendedPopupMenu.add(threadSuspendedSelect);
@@ -800,7 +811,12 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
     public void _action() {
       if (getSelectedThread().isSuspended()) {
-        _debugger.suspend(getSelectedThread());
+         try{
+          _debugger.suspend(getSelectedThread());
+        }
+        catch(DebugException exception){
+          JOptionPane.showMessageDialog(_frame, "Cannot suspend the thread.", "Debugger Erro", JOptionPane.ERROR_MESSAGE);
+        }
       }
     }
   }

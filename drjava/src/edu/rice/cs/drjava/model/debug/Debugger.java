@@ -79,7 +79,7 @@ public interface Debugger {
   /**
    * Suspends execution of the thread referenced by d
    */
-  public void suspend(DebugThreadData d);
+  public void suspend(DebugThreadData d) throws DebugException;
   
   /** Suspends all the threads in the VM the debugger is attached to */
   public void suspendAll();
@@ -87,18 +87,18 @@ public interface Debugger {
   /** 
    * Sets the current thread we are debugging to the thread referenced by d
    */
-  public void setCurrentThread(DebugThreadData d);
+  public void setCurrentThread(DebugThreadData d) throws DebugException;
   
   /**
    * Resumes execution of the currently loaded document.
    */
-  public void resume();
+  public void resume() throws DebugException;
 
   /**
    * Resumes execution of the given thread.
    * @param data the DebugThreadData representing the thread to resume
    */
-  public void resume(DebugThreadData data);
+  public void resume(DebugThreadData data) throws DebugException;
 
   /** 
    * Steps into the execution of the currently loaded document.

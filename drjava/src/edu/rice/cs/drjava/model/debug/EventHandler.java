@@ -166,7 +166,6 @@ public class EventHandler extends Thread {
         }
       }
       _manager.currThreadDied();
-      _manager.setCurrentThread((DebugThreadData) null);
     }
     else {
       _manager.nonCurrThreadDied(new DebugThreadData(e.thread()));
@@ -185,7 +184,6 @@ public class EventHandler extends Thread {
     _connected = false;
     if (_manager.hasSuspendedThreads()) {
       _manager.currThreadDied();
-      _manager.setCurrentThread((DebugThreadData) null);
     }
     _manager.shutdown();
   }
