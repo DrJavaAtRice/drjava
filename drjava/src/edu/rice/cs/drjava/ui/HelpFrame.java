@@ -64,13 +64,17 @@ public class HelpFrame extends JFrame implements HyperlinkListener {
   private static final String CONTENTS_PAGE = "index.html";
   private static final String HOME_PAGE = "intro.html";
   
-  //private static final String CONTENTS_PAGE = "book1.html";
-  //private static final String HOME_PAGE = "book1.html";
-  
-  
   private JEditorPane _mainDocPane;
   private JSplitPane _splitPane;
   private JEditorPane _contentsDocPane;
+  private JPanel _closePanel;
+  private JButton _closeButton;
+  
+  private Action _closeAction = new AbstractAction("Close") {
+    public void actionPerformed(ActionEvent e) {        
+      HelpFrame.this.hide();
+    }
+  };
  
   /**
    * Sets up the frame and displays it.
@@ -88,18 +92,20 @@ public class HelpFrame extends JFrame implements HyperlinkListener {
     _mainDocPane.addHyperlinkListener(this);
     JScrollPane mainScroll = new JScrollPane(_mainDocPane);
     
-    
-    
-    
     _splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                 true,
                                 contentsScroll, 
                                 mainScroll);
     _splitPane.setDividerLocation(LEFT_PANEL_WIDTH);
     
+    _closeButton = new JButton(_closeAction);
+    _closePanel = new JPanel(new BorderLayout());
+    _closePanel.add(_closeButton, BorderLayout.EAST);
+    
     Container cp = getContentPane();
     cp.setLayout(new BorderLayout());
     cp.add(_splitPane, BorderLayout.CENTER);
+    cp.add(_closePanel, BorderLayout.SOUTH);
     
     // Load contents page
     URL indexUrl = this.getClass().getResource(HELP_PATH + CONTENTS_PAGE);

@@ -39,6 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.Version;
 import javax.swing.*;
 import javax.swing.text.*;
@@ -73,14 +74,15 @@ public class AboutDialog extends JDialog implements ActionListener {
 
     buildGUI(getContentPane());
     
-    pack();
+    //pack();
+    setSize(500, 400);
     // setSize((int) (owner.getWidth() * (.8f)),(int) (owner.getHeight() * (.8f)));
     // suggested from zaq@nosi.com, to keep the frame on the screen!
-    System.out.println("Dialog created...");
+    //System.out.println("Dialog created...");
   }
   
   public void show() {
-    System.out.println("Showing dialog...");
+    //System.out.println("Showing dialog...");
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = this.getSize();
     this.setLocation((screenSize.width - frameSize.width) / 2,
@@ -89,10 +91,17 @@ public class AboutDialog extends JDialog implements ActionListener {
   }
   
   public void buildGUI(Container cp) {
-    JLabel drjava = createImageLabel(DRJAVA,JLabel.LEFT);
-    if(drjava != null)
-      cp.add(drjava,BorderLayout.NORTH);
     cp.setLayout(new BorderLayout());
+
+    JLabel drjava = createImageLabel(DRJAVA, JLabel.LEFT);
+    if (drjava != null) {
+      //DrJava.consoleOut().println("adding drjava logo");
+      cp.add(drjava,BorderLayout.NORTH);
+    }
+    //else { 
+    //  DrJava.consoleOut().println("drjava logo is null");
+    //}
+
     JTabbedPane tabs = new JTabbedPane();
     tabs.addTab("About",createCopyrightTab());
     tabs.addTab("GNU Public License",createTextScroller(GPL));
@@ -108,7 +117,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     logos.addLogo(createBorderedLabel(CSLOGO));
     logos.addLogo(createBorderedLabel(SF));
     logos.resizeLogos();
-    panel.add(new JLabel("DrJava Version: "+Version.getBuildTimeString()),BorderLayout.NORTH);
+    panel.add(new JLabel("DrJava Version "+Version.getBuildTimeString()),BorderLayout.NORTH);
     JPanel logoPanel = new JPanel();
     logoPanel.setLayout(new BoxLayout(logoPanel,BoxLayout.X_AXIS));
     logoPanel.add(Box.createHorizontalGlue());
@@ -136,8 +145,8 @@ public class AboutDialog extends JDialog implements ActionListener {
     private void resizeLogos() {
       java.util.Iterator it = iterator();
       Dimension d = new Dimension(width,height);
-      System.out.println("resizing logos to "+d);
-      System.out.flush();
+      //System.out.println("resizing logos to "+d);
+      //System.out.flush();
       while(it.hasNext()) {
         JComponent i = (JComponent) it.next();
         i.setMinimumSize(d);
@@ -226,6 +235,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     try {
       InputStream is = AboutDialog.class.getResourceAsStream("/edu/rice/cs/LICENSE");
       if(is!=null) {
+        //DrJava.consoleOut().println("gpl found");
         BufferedReader r = new BufferedReader(new InputStreamReader(is));
         StringBuffer sb = new StringBuffer();
         char[] buf = new char[0x1000];
@@ -234,7 +244,11 @@ public class AboutDialog extends JDialog implements ActionListener {
         r.close();
         gpl = sb.toString();
       }
-    } catch(Exception e) {
+      else {
+        //DrJava.consoleOut().println("no gpl found");
+      }
+    }
+    catch(Exception e) {
     }
     GPL = gpl;
   }

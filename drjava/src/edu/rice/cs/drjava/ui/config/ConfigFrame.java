@@ -467,6 +467,9 @@ public class ConfigFrame extends JFrame {
       }
     });
     panel.addComponent( sourcePath );
+    panel.addComponent( new BooleanOptionComponent ( OptionConstants.DEBUG_SHOW_THREADS,
+                                                    "Show Current Threads Tab",
+                                                    this));
     panel.addComponent( new BooleanOptionComponent ( OptionConstants.DEBUG_STEP_JAVA, 
                                                     "Step Into Java Classes", 
                                                     this));
@@ -476,9 +479,7 @@ public class ConfigFrame extends JFrame {
     panel.addComponent( new BooleanOptionComponent ( OptionConstants.DEBUG_STEP_DRJAVA, 
                                                     "Step Into DrJava Classes", 
                                                     this));
-    panel.addComponent( new BooleanOptionComponent ( OptionConstants.DEBUG_SHOW_THREADS,
-                                                    "Show Threads Tab",
-                                                    this));
+    
     panel.displayComponents();
   }
   

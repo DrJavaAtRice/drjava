@@ -1285,9 +1285,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       boolean isUntitled = doc.getDocument().isUntitled();
       if (isUntitled) {
         JOptionPane.showMessageDialog(this,
-                                      "Before you can set a breakpoint you must save and compile\n" +
-                                      "this document.",
-                                      "Cannot set breakpoint on untitled document.",
+                                      "You must save and compile this document before you can\n" +
+                                      "set a breakpoint in it.",
+                                      "Must Save and Compile",
                                       JOptionPane.ERROR_MESSAGE);
         return;
       }
@@ -1296,17 +1296,17 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (isModified  && !_currentDefPane.hasWarnedAboutModified()) {
         
         int rc = JOptionPane.showConfirmDialog(this,
-                                               "This document has been modified since its last save and\n" + 
-                                               "may be out of sync with the debugger. It is suggested that\n" +
-                                               "you save and recompile before continuing to debug in order\n" +
-                                               "to avoid any unexpected errors. Would you still like to toggle\n" +
-                                               "the breakpoint at the specified line?",
+                                               "This document has been modified and may be out of sync\n" + 
+                                               "with the debugger.  It is recommended that you first\n" +
+                                               "save and recompile before continuing to use the debugger,\n" +
+                                               "to avoid any unexpected errors.  Would you still like to\n" +
+                                               "toggle the breakpoint on the specified line?",
                                                "Toggle breakpoint on modified file?",
                                                JOptionPane.YES_NO_OPTION);
-        _currentDefPane.hasWarnedAboutModified(true);
         
         switch (rc) {
           case JOptionPane.YES_OPTION:
+            _currentDefPane.hasWarnedAboutModified(true);
             break;
           case JOptionPane.NO_OPTION:
           case JOptionPane.CANCEL_OPTION:
@@ -2104,8 +2104,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   private class PositionListener implements CaretListener {
 
     public void caretUpdate( CaretEvent ce ) {
-      //_model.getActiveDocument().
-      //  syncCurrentLocationWithDefinitions(ce.getDot());
+      _model.getActiveDocument().
+        syncCurrentLocationWithDefinitions(ce.getDot());
       updateLocation();
     }
 

@@ -123,10 +123,10 @@ public class UncaughtExceptionWindow extends JFrame {
   }
   
   private Action _okAction = new AbstractAction("OK") {
-      public void actionPerformed(ActionEvent e) {        
-        UncaughtExceptionWindow.this.dispose();
-      }
-    };
+    public void actionPerformed(ActionEvent e) {        
+      UncaughtExceptionWindow.this.dispose();
+    }
+  };
   
   /**
    * Returns the canned message for the user
