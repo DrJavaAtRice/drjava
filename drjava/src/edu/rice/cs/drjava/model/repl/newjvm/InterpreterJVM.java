@@ -257,9 +257,9 @@ public class InterpreterJVM extends AbstractSlaveJVM
           try {
             _dialog("to interp: " + s);
             
-            String s1 = _interactionsProcessor.preProcess(s);
-            Object result = interpreter.getInterpreter().interpret(s1);
-            String s2 = _interactionsProcessor.postProcess(s1, result);
+            //String s1 = _interactionsProcessor.preProcess(s);
+            Object result = interpreter.getInterpreter().interpret(s);
+            //String s2 = _interactionsProcessor.postProcess(s1, result);
             
             if (result == Interpreter.NO_RESULT) {
               //return new VoidResult();
@@ -286,14 +286,14 @@ public class InterpreterJVM extends AbstractSlaveJVM
                                                          t.getMessage(),
                                                          getStackTrace(t)));
           }
-          catch (ParseException pe) {
-            // A ParseException indicates a syntax error in the input window
-            _mainJVM.interpretResult( new SyntaxErrorResult( pe, s ) );
-          }
-          catch (TokenMgrError tme) {
-            // A TokenMgrError indicates some lexical difficulty with input.
-            _mainJVM.interpretResult( new SyntaxErrorResult( tme, s ) );
-          }
+//          catch (ParseException pe) {
+//            // A ParseException indicates a syntax error in the input window
+//            _mainJVM.interpretResult( new SyntaxErrorResult( pe, s ) );
+//          }
+//          catch (TokenMgrError tme) {
+//            // A TokenMgrError indicates some lexical difficulty with input.
+//            _mainJVM.interpretResult( new SyntaxErrorResult( tme, s ) );
+//          }
           catch (Throwable t) {
             // A user's toString method might throw anything, so we need to be careful
             //_dialog("thrown by toString: " + t);
