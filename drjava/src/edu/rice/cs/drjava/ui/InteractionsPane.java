@@ -56,9 +56,11 @@ import java.util.List;
 import java.util.LinkedList;
 
 import edu.rice.cs.util.swing.*;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import edu.rice.cs.drjava.model.DJDocument;
+import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.drjava.model.repl.*;
 
 /**
@@ -243,14 +245,39 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     
   }
   
+  /**
+   * Indent the given selection, for the given reason, in the current document.
+   * @param selStart - the selection start
+   * @param selEnd - the selection end
+   * @param reason - the reason for the indent
+   * @param pm - the ProgressMonitor used by the indenter
+   */
+  protected void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm) {
+    try {
+      _doc.indentLines(selStart, selEnd, reason, pm);
+      setCaretPosition(_doc.getCurrentLocation());
+    }
+    catch (OperationCanceledException oce) {
+      throw new UnexpectedException(oce);
+    }
+  }
+  
+  
+  /**
+   * Returns true if the indent is to be performed.
+   * The code in the definitions pane prompts the user, but this requires a copy of mainframe,
+   * and a reason to do so. The user does not need to be prompted here. The cutoff in the definitions
+   * pane for the prompt is 10000 characters, which is unlikely to occur in the interactions pane very often if at all.
+   * @param selStart - the selection start
+   * @param selEnd - the selection end
+   */
+  protected boolean shouldIndent(int selStart, int selEnd) {
+    return true;
+  }
   
   /**
    * Gets the current prompt position
    */
   public abstract int getPromptPos();
   
-//  public void requestFocus() {
-//    super.requestFocus();
-//    System.out.println("InteractionsPane.setFocus() was called");
-//  }
 }

@@ -202,7 +202,10 @@ public class InteractionsController extends AbstractConsoleController {
     public void interpreterResetFailed(Throwable t) {}  
     public void interpreterExited(int status) {}  
     public void interpreterChanged(boolean inProgress) {}
-    public void interactionIncomplete() {}
+    public void interactionIncomplete() {
+//      moveToEnd();
+//      _pane.indent();
+    }
   };
 
   /**

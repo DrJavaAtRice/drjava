@@ -663,6 +663,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       if (shortMessage.endsWith("<EOF>\"")) {
         _document.setInProgress(false);
         _notifyInteractionEnded();
+        _notifyInteractionIncomplete();
         return;
       }
     }
@@ -694,6 +695,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       if (errorMessage.endsWith("<EOF>\"")) {
         _document.setInProgress(false);
         _notifyInteractionEnded();
+        _notifyInteractionIncomplete();
         return;
       }
     }

@@ -116,23 +116,34 @@ public final class MainFrameTest extends MultiThreadedTestCase {
    * caret location after documents are switched.
    */
   public void testDocLocationAfterSwitch() throws BadLocationException {
+    final Object _lock = new Object();
     DefinitionsPane pane = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = pane.getOpenDefDocument();//.getDocument();
+    OpenDefinitionsDocument doc;
+    synchronized(_lock) {
+      doc = pane.getOpenDefDocument();//.getDocument();
+    }
     /**
      * NOTE: This has been added because MainFrameTest hangs randomly (about every other time) without this line.
      * It is still unknown why this occurs - being that the above method calls are all accessors, this shouldn't be a situation
      * where the document is being accessed by insertString before it is ready to be accessed.
      * Added 5/19/2004 by pakruse 
      */ /**/
-    try {
-      Thread.sleep(1000); 
+    /**
+     * UPDATE: 7/16/2004 by pakruse. Synchronizing the two statements prevents this test from hanging. Still don't know why
+     * this happens, but no more need for the Thread.sleep command.
+     * If this test ever takes more than two minutes to run, then it's hanging, and the following lines should be added back in:
+     */
+//    try {
+//      Thread.sleep(1000); 
+//    }
+//    catch(java.lang.InterruptedException e) {
+//    
+//    }
+       
+    synchronized(_lock) {
+      doc.insertString(0, "abcd", null);
     }
-    catch(java.lang.InterruptedException e) {
     
-    }
-        
-    doc.insertString(0, "abcd", null);
-
     
     pane.setCaretPosition(3);
     assertEquals("Location of old doc before switch", 3, doc.getCurrentLocation());

@@ -41,7 +41,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
@@ -80,6 +80,8 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
   final ColorOptionListener col = new ColorOptionListener();
   final FontOptionListener fol = new FontOptionListener();
   
+  private final Object _lock = new Object();
+  
   protected void throwErrorHuh() {
     //Do nothing
   }
@@ -105,94 +107,99 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
   
   //Adds the given coloring style to the list
   public void addColoring(int start, int end, String style) {
-    if(_toClear) {
-      _stylesList.clear();    
-      _toClear = false;
+    synchronized(_lock) {
+      
+      if(_toClear) {
+        _stylesList.clear();    
+        _toClear = false;
+      }
+      _stylesList.add(new Pair<Pair<Integer,Integer>,String>
+                      (new Pair<Integer,Integer>(start,end), style));
     }
-    _stylesList.add(new Pair<Pair<Integer,Integer>,String>
-                    (new Pair<Integer,Integer>(start,end), style));
   }
-    
   /**
    * package protected accessor method used for test cases
    */
   List<Pair<Pair<Integer, Integer>, String>> getStylesList() {
     return _stylesList;
   }
-    
+  
   /**
    * Attempts to set the coloring on the graphics based upon the content of the styles list
    * returns false if the point is not in the list.
    */
   public boolean setColoring(int point, Graphics g) {
-    
-    for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
-      Pair<Integer,Integer> loc = p.getFirst();
-      if(loc.getFirst() <= point && loc.getSecond() >= point) {
-        if(p.getSecond().equals(InteractionsDocument.ERROR_STYLE)) {
-          //DrJava.consoleErr().println("Error Style");
-          g.setColor(INTERACTIONS_STANDARD_ERROR_COLOR);   
-          g.setFont(g.getFont().deriveFont(Font.BOLD));
+    synchronized(_lock) {
+      for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
+        Pair<Integer,Integer> loc = p.getFirst();
+        if(loc.getFirst() <= point && loc.getSecond() >= point) {
+          if(p.getSecond().equals(InteractionsDocument.ERROR_STYLE)) {
+            //DrJava.consoleErr().println("Error Style");
+            g.setColor(INTERACTIONS_STANDARD_ERROR_COLOR);   
+            g.setFont(g.getFont().deriveFont(Font.BOLD));
+          }
+          else if(p.getSecond().equals(InteractionsDocument.DEBUGGER_STYLE)) {
+            //DrJava.consoleErr().println("Debugger Style");
+            g.setColor(INTERACTIONS_DEBUGGER_COLOR);
+            g.setFont(g.getFont().deriveFont(Font.BOLD));
+          }
+          else if(p.getSecond().equals(ConsoleDocument.SYSTEM_OUT_STYLE)) {
+            //DrJava.consoleErr().println("System.out Style");
+            g.setColor(INTERACTIONS_SYSTEM_OUT_COLOR);
+            g.setFont(INTERACTIONS_MAIN_FONT);
+          }
+          else if(p.getSecond().equals(ConsoleDocument.SYSTEM_IN_STYLE)) {
+            //DrJava.consoleErr().println("System.in Style");
+            g.setColor(INTERACTIONS_SYSTEM_IN_COLOR);
+            g.setFont(INTERACTIONS_MAIN_FONT);
+          }
+          else if(p.getSecond().equals(ConsoleDocument.SYSTEM_ERR_STYLE)) {
+            //DrJava.consoleErr().println("System.err Style");
+            g.setColor(INTERACTIONS_SYSTEM_ERR_COLOR);
+            g.setFont(INTERACTIONS_MAIN_FONT);
+          }
+          else if(p.getSecond().equals(InteractionsDocument.OBJECT_RETURN_STYLE)) {
+            g.setColor(INTERACTIONS_OBJECT_RETURN_COLOR);
+            g.setFont(INTERACTIONS_MAIN_FONT);
+          }
+          else if(p.getSecond().equals(InteractionsDocument.STRING_RETURN_STYLE)) {
+            g.setColor(INTERACTIONS_STRING_RETURN_COLOR);
+            g.setFont(INTERACTIONS_MAIN_FONT);
+          }
+          else if(p.getSecond().equals(InteractionsDocument.NUMBER_RETURN_STYLE)) {
+            g.setColor(INTERACTIONS_NUMBER_RETURN_COLOR);
+            g.setFont(INTERACTIONS_MAIN_FONT);
+          }
+          else if(p.getSecond().equals(InteractionsDocument.CHARACTER_RETURN_STYLE)) {
+            g.setColor(INTERACTIONS_CHARACTER_RETURN_COLOR);
+            g.setFont(INTERACTIONS_MAIN_FONT);
+          }
+          else { //Normal text color
+            return false; 
+          }
+          return true;
         }
-        else if(p.getSecond().equals(InteractionsDocument.DEBUGGER_STYLE)) {
-          //DrJava.consoleErr().println("Debugger Style");
-          g.setColor(INTERACTIONS_DEBUGGER_COLOR);
-          g.setFont(g.getFont().deriveFont(Font.BOLD));
-        }
-        else if(p.getSecond().equals(ConsoleDocument.SYSTEM_OUT_STYLE)) {
-          //DrJava.consoleErr().println("System.out Style");
-          g.setColor(INTERACTIONS_SYSTEM_OUT_COLOR);
-          g.setFont(INTERACTIONS_MAIN_FONT);
-        }
-        else if(p.getSecond().equals(ConsoleDocument.SYSTEM_IN_STYLE)) {
-          //DrJava.consoleErr().println("System.in Style");
-          g.setColor(INTERACTIONS_SYSTEM_IN_COLOR);
-          g.setFont(INTERACTIONS_MAIN_FONT);
-        }
-        else if(p.getSecond().equals(ConsoleDocument.SYSTEM_ERR_STYLE)) {
-          //DrJava.consoleErr().println("System.err Style");
-          g.setColor(INTERACTIONS_SYSTEM_ERR_COLOR);
-          g.setFont(INTERACTIONS_MAIN_FONT);
-        }
-        else if(p.getSecond().equals(InteractionsDocument.OBJECT_RETURN_STYLE)) {
-          g.setColor(INTERACTIONS_OBJECT_RETURN_COLOR);
-          g.setFont(INTERACTIONS_MAIN_FONT);
-        }
-        else if(p.getSecond().equals(InteractionsDocument.STRING_RETURN_STYLE)) {
-          g.setColor(INTERACTIONS_STRING_RETURN_COLOR);
-          g.setFont(INTERACTIONS_MAIN_FONT);
-        }
-        else if(p.getSecond().equals(InteractionsDocument.NUMBER_RETURN_STYLE)) {
-          g.setColor(INTERACTIONS_NUMBER_RETURN_COLOR);
-          g.setFont(INTERACTIONS_MAIN_FONT);
-        }
-        else if(p.getSecond().equals(InteractionsDocument.CHARACTER_RETURN_STYLE)) {
-          g.setColor(INTERACTIONS_CHARACTER_RETURN_COLOR);
-          g.setFont(INTERACTIONS_MAIN_FONT);
-        }
-        else { //Normal text color
-          return false; 
-        }
-        return true;
       }
+      return false;
     }
-    return false;
   }
   
   public void setBoldFonts(int point, Graphics g) {
-    for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
-      Pair<Integer,Integer> loc = p.getFirst();
-      if(loc.getFirst() <= point && loc.getSecond() >= point) {
-        if(p.getSecond().equals(InteractionsDocument.ERROR_STYLE)) {
-          g.setFont(g.getFont().deriveFont(Font.BOLD));
+    synchronized(_lock) {
+      for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
+        Pair<Integer,Integer> loc = p.getFirst();
+        if(loc.getFirst() <= point && loc.getSecond() >= point) {
+          if(p.getSecond().equals(InteractionsDocument.ERROR_STYLE)) {
+            g.setFont(g.getFont().deriveFont(Font.BOLD));
+          }
+          else if(p.getSecond().equals(InteractionsDocument.DEBUGGER_STYLE)) {
+            g.setFont(g.getFont().deriveFont(Font.BOLD));
+          }
+          else {
+            g.setFont(INTERACTIONS_MAIN_FONT);
+          }
+          return;
         }
-        else if(p.getSecond().equals(InteractionsDocument.DEBUGGER_STYLE)) {
-          g.setFont(g.getFont().deriveFont(Font.BOLD));
-        }
-        else {
-          g.setFont(INTERACTIONS_MAIN_FONT);
-        }
-        return;
       }
     }
   }
@@ -205,18 +212,18 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
   }
   
   public InteractionsDocumentAdapter() {
-    
-    DrJava.getConfig().addOptionListener( OptionConstants.SYSTEM_IN_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.SYSTEM_OUT_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.SYSTEM_ERR_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.INTERACTIONS_ERROR_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_MESSAGE_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.FONT_MAIN, fol); 
-    
+    synchronized(_lock) {
+      DrJava.getConfig().addOptionListener( OptionConstants.SYSTEM_IN_COLOR, col);
+      DrJava.getConfig().addOptionListener( OptionConstants.SYSTEM_OUT_COLOR, col);
+      DrJava.getConfig().addOptionListener( OptionConstants.SYSTEM_ERR_COLOR, col);
+      DrJava.getConfig().addOptionListener( OptionConstants.INTERACTIONS_ERROR_COLOR, col);
+      DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_MESSAGE_COLOR, col);
+      DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
+      DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
+      DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
+      DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
+      DrJava.getConfig().addOptionListener( OptionConstants.FONT_MAIN, fol); 
+    }
     
   }
   
@@ -251,7 +258,7 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
    * The OptionListeners for DEFINITIONS COLORs
    */
   private class ColorOptionListener implements OptionListener<Color> {
-
+    
     public void optionChanged(OptionEvent<Color> oce) {
       updateColors();
     }

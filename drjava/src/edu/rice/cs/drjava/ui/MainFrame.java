@@ -5924,12 +5924,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     public void interactionIncomplete() {
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          int caretPos = _interactionsPane.getCaretPosition();
-          _interactionsController.getConsoleDoc().insertNewLine(caretPos);
-        }
-      });
     }
     
     /* changes to the state */

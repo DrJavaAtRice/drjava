@@ -48,6 +48,7 @@ package edu.rice.cs.drjava.ui;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 
 import edu.rice.cs.util.swing.*;
 
@@ -141,6 +142,91 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
       _matchHighlight = null;
     }
   }
+  
+  
+  /**
+   * Be sure to update the document (and thus the reduced model) any time
+   * the caret position changes.
+   * @param pos
+   */
+  public void setCaretPosition(int pos) {
+    super.setCaretPosition(pos);
+    getDJDocument().setCurrentLocation(pos);
+//    _doc.setCurrentLocation(pos);
+  }
+  
+  
+  /**
+   * Runs indent(int) with a default value of Indenter.OTHER
+   */
+  public void indent(){
+    indent(Indenter.OTHER);
+  }
+
+  /**
+   * Perform an indent either on the current line or on the given
+   * selected box of text.  Calls are sent to GlobalModel which are then
+   * forwarded on to the document.  Hopefully the indent code
+   * will be fixed and corrected so this doesn't look so ugly.
+   * The purpose is to divorce the pane from the document so we can just
+   * pass a document to DefinitionsPane and that's all it cares about.
+   * @param reason the action that spawned this indent action.  Enter presses
+   * are special, so that stars are inserted when lines in a multiline comment
+   * are broken up.
+   */
+  public void indent(final int reason) {
+
+    /**
+     * Because indent() is a function called directly by the Keymap,
+     * it does not go through the regular insertString channels and thus
+     * it may not be in sync with the document's position.  For that
+     * reason, we must sync the document with the pane before we go
+     * ahead and indent.
+     * old: _doc().setCurrentLocation(getCaretPosition());
+     * new:
+     */
+    getDJDocument().setCurrentLocation(getCaretPosition());
+
+    final int selStart = getSelectionStart();
+    final int selEnd = getSelectionEnd();
+
+    //    final SwingWorker worker = new SwingWorker() {
+    //      public Object construct() {
+
+    //        // Use a progress monitor to show a progress dialog only if necessary.
+    ProgressMonitor pm = null;
+    //= new ProgressMonitor(_mainFrame, "Indenting...",
+    //                    null, 0, selEnd - selStart);
+
+    //pm.setProgress(0);
+    // 3 seconds before displaying the progress bar.
+    //pm.setMillisToDecideToPopup(3000);
+
+    // XXX: Temporary hack because of slow indent...
+    //  Prompt if more than 10000 characters to be indented
+    boolean doIndent = shouldIndent(selStart,selEnd);
+    
+    // Do the indent
+    if (doIndent) {
+      indentLines(selStart, selEnd, reason, pm);
+    }
+  }
+
+  /**
+   * Indent the given selection, for the given reason, in the current document.
+   * @param selStart - the selection start
+   * @param selEnd - the selection end
+   * @param reason - the reason for the indent
+   * @param pm - the ProgressMonitor used by the indenter
+   */
+  protected abstract void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm);
+     
+  /**
+   * Returns true if the indent is to be performed.
+   * @param selStart - the selection start
+   * @param selEnd - the selection end
+   */
+  protected abstract boolean shouldIndent(int selStart, int selEnd);
   
   /**
    * Returns the DJDocument held by the pane

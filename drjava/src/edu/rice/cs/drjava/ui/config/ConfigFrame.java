@@ -388,7 +388,7 @@ public class ConfigFrame extends JFrame {
 
     PanelTreeNode displayNode = _createPanel("Display Options");
     _setupDisplayPanel(displayNode.getPanel());
-
+    
     PanelTreeNode fontNode = _createPanel("Fonts", displayNode);
     _setupFontPanel(fontNode.getPanel());
 
@@ -397,7 +397,10 @@ public class ConfigFrame extends JFrame {
 
     PanelTreeNode keystrokesNode = _createPanel("Key Bindings");
     _setupKeyBindingsPanel(keystrokesNode.getPanel());
-
+    
+    PanelTreeNode compilerOptionsNode = _createPanel("Compiler Options");
+    _setupCompilerPanel(compilerOptionsNode.getPanel());
+    
     PanelTreeNode debugNode = _createPanel("Debugger");
     _setupDebugPanel(debugNode.getPanel());
 
@@ -406,13 +409,10 @@ public class ConfigFrame extends JFrame {
 
     PanelTreeNode notificationsNode = _createPanel("Notifications");
     _setupNotificationsPanel(notificationsNode.getPanel());
-
+    
     PanelTreeNode miscNode = _createPanel("Miscellaneous");
     _setupMiscPanel(miscNode.getPanel());
     
-    PanelTreeNode compilerOptionsNode = _createPanel("Compiler Options");
-    _setupCompilerPanel(compilerOptionsNode.getPanel());
-
     // Expand the display options node
     //DrJava.consoleOut().println("expanding path...");
     //_tree.expandPath(new TreePath(fontNode.getPath()));

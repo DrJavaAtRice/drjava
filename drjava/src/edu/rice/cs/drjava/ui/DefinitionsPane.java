@@ -669,17 +669,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
 
   /**
-   * Be sure to update the document (and thus the reduced model) any time
-   * the caret position changes.
-   * @param pos
-   */
-  public void setCaretPosition(int pos) {
-    super.setCaretPosition(pos);
-    _doc.setCurrentLocation(pos);
-//    _doc.setCurrentLocation(pos);
-  }
-
-  /**
    *  Creates the popup menu for the DefinitionsPane
    */
   private void createPopupMenu() {
@@ -1141,56 +1130,14 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     //return _editorKit;
     return EDITOR_KIT;
   }
-
+  
   /**
-   * Runs indent(int) with a default value of Indenter.OTHER
+   * Prompt the user whether or not they wish to indent, if the selection size is very large.
+   * Return true if the indent is to be completed
+   * @param selStart - the selection start
+   * @param selEnd - the selection end
    */
-  public void indent(){
-    indent(Indenter.OTHER);
-  }
-
-  /**
-   * Perform an indent either on the current line or on the given
-   * selected box of text.  Calls are sent to GlobalModel which are then
-   * forwarded on to DefinitionsDocument.  Hopefully the indent code
-   * will be fixed and corrected so this doesn't look so ugly.
-   * The purpose is to divorce the pane from the document so we can just
-   * pass a document to DefinitionsPane and that's all it cares about.
-   * @param reason the action that spawned this indent action.  Enter presses
-   * are special, so that stars are inserted when lines in a multiline comment
-   * are broken up.
-   */
-  public void indent(final int reason) {
-
-    /**
-     * Because indent() is a function called directly by the Keymap,
-     * it does not go through the regular insertString channels and thus
-     * it may not be in sync with the document's position.  For that
-     * reason, we must sync the document with the pane before we go
-     * ahead and indent.
-     * old: _doc().setCurrentLocation(getCaretPosition());
-     * new:
-     */
-    _doc.setCurrentLocation(getCaretPosition());
-
-    final int selStart = getSelectionStart();
-    final int selEnd = getSelectionEnd();
-
-    //    final SwingWorker worker = new SwingWorker() {
-    //      public Object construct() {
-
-    //        // Use a progress monitor to show a progress dialog only if necessary.
-    ProgressMonitor pm = null;
-    //= new ProgressMonitor(_mainFrame, "Indenting...",
-    //                    null, 0, selEnd - selStart);
-
-    //pm.setProgress(0);
-    // 3 seconds before displaying the progress bar.
-    //pm.setMillisToDecideToPopup(3000);
-
-    // XXX: Temporary hack because of slow indent...
-    //  Prompt if more than 10000 characters to be indented
-    boolean doIndent = true;
+  protected boolean shouldIndent(int selStart, int selEnd) {
     if (selEnd > (selStart + 10000)) {
       Object[] options = {"Yes", "No"};
       int n = JOptionPane.showOptionDialog
@@ -1206,17 +1153,24 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         case JOptionPane.CANCEL_OPTION:
         case JOptionPane.CLOSED_OPTION:
         case JOptionPane.NO_OPTION:
-          doIndent = false;
-          break;
+          return false;
         default:
-          doIndent = true;
-          break;
+          return true;
       }
     }
-
-    // Do the indent
-    if (doIndent) {
-      _mainFrame.hourglassOn();
+    return true;
+  }
+  
+  
+  /**
+   * Indent the given selection, for the given reason, in the current document.
+   * @param selStart - the selection start
+   * @param selEnd - the selection end
+   * @param reason - the reason for the indent
+   * @param pm - the ProgressMonitor used by the indenter
+   */
+  protected void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm) {
+    _mainFrame.hourglassOn();
       final int key = _doc.getUndoManager().startCompoundEdit();
       try {
         _doc.indentLines(selStart, selEnd, reason, pm);
@@ -1249,27 +1203,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       //      }
       //    };
       //    worker.start();
-    }
   }
-
-//  protected void finalize() throws Throwable {
-//    System.err.println("finalizing DefinitionsPane: " + _doc);
-//  }
     
-  /**
-   * Updates the UI to a new look and feel.
-   * Need to update the contained popup menu as well.
-   *
-   * Currently, we don't support changing the look and feel
-   * on the fly, so this is disabled.
-   *
-   public void updateUI() {
-   super.updateUI();
-   if (_popMenu != null) {
-   SwingUtilities.updateComponentTreeUI(_popMenu);
-   }
-   }*/
-
+  
   /**
    * Saved option listeners kept in this field so they can
    * be removed for garbage collection 
