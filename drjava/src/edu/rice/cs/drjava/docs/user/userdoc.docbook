@@ -118,7 +118,7 @@
 
       <formalpara>
 	<title>Contextual Menu</title>
-	<para>The Document List also has a contextual menu, which can be used by right-clicking on any document in the list.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to document-related commands, such as saving, reverting, printing, compiling, and testing.</para>
+	<para>The Document List also has a contextual menu, which can be used by right-clicking on any document in the list.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to document-related commands, such as saving, reverting, printing, compiling, running, and testing.</para>
       </formalpara>
     </section>
 
@@ -183,6 +183,7 @@ Welcome to DrJava.
     </formalpara>
     <programlisting>java MyClass arg1 arg2</programlisting>
     <para>Note that this feature does not support passing special flags or arguments to the JVM, as is supported on the command line.</para>
+    <para>Another shortcut for this feature is the "Run Document's Main Method" command, which can be found in both the Tools menu and the contextual menu of the document list.  This command will simply insert the appropriate <literal>"java MyClass"</literal> text into the Interactions Pane to run the current class's main method.</para>
 
     <formalpara>
       <title>Keyboard Shortcuts</title>
@@ -382,31 +383,8 @@ public static Test suite() {
     <section id="debug-interactions">
       <title>Interactions at a Breakpoint</title>
       <para>When a breakpoint has been reached during a method call, a new prompt is printed to the Interactions Pane.  This prompt represents the context of the program which has been suspended, and all variables, fields, and methods that are in scope at the breakpoint are available at the prompt.  (The prompt itself contains the name of the thread which has been suspended.  In most cases, this name will include the text being interpreted.)  The user can type the name of any variable or field to view its value or assign a new value, and any method in scope can be invoked to observe its behavior.  Changes to values in scope will be reflected in the program when it resumes execution, either by stepping or resuming.</para>
-
-      <formalpara>
-	<title>Interacting with Fields and Methods</title>
-	<para>At a debugging prompt, variables can be easily referred to by name.  At the moment, interacting with fields and methods is slightly more complicated, since the <literal>"this"</literal> keyword must prefix the name.  For example, <literal>"this.x"</literal> will print the value of a field name <literal>"x"</literal>, and <literal>"this.foo(v)"</literal> will return the result of calling the <literal>"foo"</literal> method with local variable <literal>"v"</literal>.</para>
-      </formalpara>
-
-      <para>If the program is suspended while in an inner class, it is a little more complicated to refer to fields and methods of its enclosing class.  Each enclosing class is referred to as <literal>"this$N"</literal>, where N is the number of additional enclosing classes.  For example, suppose the following class is defined in the Definitions Pane.</para>
-
-<programlisting>
-class Foo {
-  int x;
-  class FooInner {
-    int y;
-    class FooInnerInner {
-      int z;
-      public void myMethod() {
-        // code ...
-      }
-    }
-  }
-}
-</programlisting>
-
-      <para>If a breakpoint is hit in <literal>"myMethod"</literal>, <literal>"z"</literal> is accessible as <literal>"this.z"</literal>, <literal>"y"</literal> is accessible as <literal>"this.this$1.y"</literal>, and <literal>"x"</literal> is accessible as <literal>"this.this$1.this$0.x"</literal>.  This is contrary to traditional Java syntax, where the outer fields could be accessible as <literal>"FooInner.y"</literal> and <literal>"Foo.x"</literal>.  (For this reason, we plan to allow such syntax in a future release of DrJava.)</para>
     </section>
+
 
 
     <section id="debug-step">
