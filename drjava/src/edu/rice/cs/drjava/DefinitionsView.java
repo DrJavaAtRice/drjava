@@ -210,6 +210,7 @@ public class DefinitionsView extends JEditorPane
 		setKeymap(ourMap);
 					
 		this.addCaretListener(_matchListener);
+		_mainFrame.installNewDocumentListener(_doc());
 //		this.addKeyListener(_indentKeyListener);
   }
 
@@ -255,7 +256,7 @@ public class DefinitionsView extends JEditorPane
     if (_currentFileName == "")
       return saveAs();
     else
-      return _saveToFile(_currentFileName);
+      return saveToFile(_currentFileName);
   }
 
   public boolean modifiedSinceSave()
@@ -277,7 +278,7 @@ public class DefinitionsView extends JEditorPane
         return false;
       case JFileChooser.APPROVE_OPTION:
         File chosen = fc.getSelectedFile();
-        return _saveToFile(chosen.getAbsolutePath());
+        return saveToFile(chosen.getAbsolutePath());
       default: // impossible since rc must be one of these
         throw new RuntimeException("filechooser returned bad rc " + rc);
     }
@@ -305,7 +306,7 @@ public class DefinitionsView extends JEditorPane
   /** Save the current document to the given path.
    *  Inform the user if there was a problem.
    */
-  private boolean _saveToFile(String path)
+  boolean saveToFile(String path)
   {
     try
     {
@@ -435,7 +436,7 @@ public class DefinitionsView extends JEditorPane
     return retVal;
   }
 
-  private DefinitionsDocument _doc()
+ DefinitionsDocument _doc()
   {
     return (DefinitionsDocument) getDocument();
   }
@@ -607,7 +608,7 @@ public class DefinitionsView extends JEditorPane
 			}
 		// unselect
 		setCaretPosition(getSelectionEnd());
-		_saveToFile("fuckup");
+		saveToFile("fuckup");
 		return count;
 	}
 

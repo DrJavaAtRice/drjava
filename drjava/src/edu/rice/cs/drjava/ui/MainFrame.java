@@ -7,6 +7,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.Action;
 import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -17,6 +18,9 @@ import javax.swing.KeyStroke;
 import javax.swing.JMenuItem;
 
 import javax.swing.text.DefaultEditorKit;
+
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -41,9 +45,12 @@ public class MainFrame extends JFrame
   private JMenuBar _menuBar;
   private JMenu _fileMenu;
   private JMenu _editMenu;
-	// status bar at bottom of window
-	public static Label _status = new Label("");
+    // status bar at bottom of window
+    public static Label _status = new Label("");
 	
+    JButton _saveButton;
+    JButton _compileButton;
+    
   // Make some actions for menus
   private Action _quitAction = new AbstractAction("Quit")
   {
@@ -59,10 +66,6 @@ public class MainFrame extends JFrame
     }
   };
 
-	public Action getQuitAction() {
-		return _quitAction;
-	}
-	
   private Action _openAction = new AbstractAction("Open")
   {
     public void actionPerformed(ActionEvent ae)
@@ -70,15 +73,12 @@ public class MainFrame extends JFrame
       boolean opened = _definitionsView.open();
       if (opened) {
         _resetInteractions();
+	_saveButton.setEnabled(false);
+	_compileButton.setEnabled(true);
       }
     }
   };
 
-	public Action getOpenAction() {
-		return _openAction;
-	}
-
-	
   private Action _newAction = new AbstractAction("New")
   {
     public void actionPerformed(ActionEvent ae)
@@ -86,13 +86,44 @@ public class MainFrame extends JFrame
       boolean createdNew = _definitionsView.newFile();
       if (createdNew) {
         _resetInteractions();
+	_saveButton.setEnabled(false);
+	_compileButton.setEnabled(true);
       }
     }
   };
 
-	public Action getNewAction() {
-		return _newAction;
+    boolean saveToFile(String fileName) 
+    {
+	boolean result = _definitionsView.saveToFile(fileName);
+	if (result) {
+	    updateEnablesAfterSave();
 	}
+	return result;
+    }
+
+    boolean save()
+    {
+	boolean result = _definitionsView.save();
+	if (result) {
+	    updateEnablesAfterSave();
+	}
+	return result;
+    }
+
+    boolean saveAs() 
+    {
+       boolean result = _definitionsView.saveAs();
+       if (result) {
+	   updateEnablesAfterSave();
+       }
+       return result;
+    }
+
+    void updateEnablesAfterSave() 
+    {
+      _saveButton.setEnabled(false);
+      _compileButton.setEnabled(true);
+    }
 
   private Action _saveAction = new AbstractAction("Save")
   {
@@ -105,58 +136,25 @@ public class MainFrame extends JFrame
 
     public void actionPerformed(ActionEvent ae)
     {
-      _definitionsView.save();
+	if (_definitionsView.getCurrentFileName() == "")
+	saveAs();
+	else
+	saveToFile(_definitionsView.getCurrentFileName());
     }
   };
-
-	public Action getSaveAction() {
-		return _saveAction;
-	}
 
   private Action _saveAsAction = new AbstractAction("Save as")
   {
     public void actionPerformed(ActionEvent ae)
     {
-      _definitionsView.saveAs();
+	saveAs();
     }
   };
 
-	public Action getSaveAsAction() {
-		return _saveAsAction;
-	}
-
-  private Action _compileAction = new AbstractAction("Compile")
-  {
-    // This doesn't seem to ever re-enable once disabled!
-    /*
-    public boolean isEnabled() {
-      return _definitionsView.getDocument().getLength() > 0;
-    }
-    */
-
-    public void actionPerformed(ActionEvent ae)
+    void compile() 
     {
-      boolean modified = _definitionsView.modifiedSinceSave();
+	_compileButton.setEnabled(false);
 
-      if (modified) {
-        // file was not saved -- tell user they must save before compiling
-        String msg = "The definitions must be saved before compiling. " + 
-                     "Would you like to save and compile now?";
-        int rc = JOptionPane.showConfirmDialog(MainFrame.this,
-                                               msg,
-                                               "File not saved",
-                                               JOptionPane.YES_NO_OPTION);
-        if (rc == JOptionPane.YES_OPTION) {
-          _definitionsView.save();
-          // Check if they cancelled the save. If they did, exit!
-          if (_definitionsView.modifiedSinceSave()) {
-            return;
-          }
-        }
-        else {
-          return; // user wants to do nothing
-        }
-      }
 
       String filename = _definitionsView.getCurrentFileName();
 
@@ -180,12 +178,43 @@ public class MainFrame extends JFrame
         _resetInteractions();
       }
     }
+
+  private Action _compileAction = new AbstractAction("Compile")
+  {
+    // This doesn't seem to ever re-enable once disabled!
+    /*
+    public boolean isEnabled() {
+      return _definitionsView.getDocument().getLength() > 0;
+    }
+    */
+
+    public void actionPerformed(ActionEvent ae)
+    {
+      boolean modified = _definitionsView.modifiedSinceSave();
+
+      if (modified) {
+        // file was not saved -- tell user they must save before compiling
+        String msg = "The definitions must be saved before compiling. " + 
+                     "Would you like to save and compile now?";
+        int rc = JOptionPane.showConfirmDialog(MainFrame.this,
+                                               msg,
+                                               "File not saved",
+                                               JOptionPane.YES_NO_OPTION);
+        if (rc == JOptionPane.YES_OPTION) {
+	    save();
+          // Check if they cancelled the save. If they did, exit!
+          if (_definitionsView.modifiedSinceSave()) {
+            return;
+          }
+        }
+        else {
+          return; // user wants to do nothing
+        }
+      }
+      compile();
+    }
   };
 
-	public Action getCompileAction() {
-		return _compileAction;
-	}
-	
   private Action _findReplaceAction = new AbstractAction("Find/Replace")
 		{
 			public void actionPerformed(ActionEvent ae)
@@ -193,10 +222,6 @@ public class MainFrame extends JFrame
 				_definitionsView.findReplace();
 			}
 		};
-	
-	public Action getFindReplaceAction() {
-		return _findReplaceAction;
-	}
 	
 	private Action _clearOutputAction = new AbstractAction("Clear Output")
 		{
@@ -240,6 +265,23 @@ public class MainFrame extends JFrame
 		public void windowOpened(WindowEvent ev) {}
 	};
 
+
+    void installNewDocumentListener(DefinitionsDocument d) {
+	d.addDocumentListener(new DocumentListener() {
+	    public void changedUpdate(DocumentEvent e) {
+		_saveButton.setEnabled(true);
+		_compileButton.setEnabled(false);
+	    }
+	    public void insertUpdate(DocumentEvent e) {
+		_saveButton.setEnabled(true);
+		_compileButton.setEnabled(false);
+	    }
+	    public void removeUpdate(DocumentEvent e) {
+		_saveButton.setEnabled(true);
+		_compileButton.setEnabled(false);
+	    }
+	});
+    }
 	
   /** Creates the main window, and shows it. */
   public MainFrame()
@@ -256,8 +298,8 @@ public class MainFrame extends JFrame
     _fileMenu = new JMenu("File");
     _editMenu = new JMenu("Edit");
 
-		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-		this.addWindowListener(_windowCloseListener);
+    this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+    this.addWindowListener(_windowCloseListener);
 		
     // Add items to menus
     JMenuItem tmpItem = _fileMenu.add(_newAction);
@@ -314,6 +356,15 @@ public class MainFrame extends JFrame
     
     // Menu bars can actually hold anything!
     _menuBar.add(_fileNameField);
+
+    // Add buttons.
+    _saveButton = new JButton(_saveAction); 
+    _saveButton.setEnabled(false);
+    _menuBar.add(_saveButton);
+
+    _compileButton = new JButton(_compileAction);
+    _menuBar.add(_compileButton);
+    _compileButton.setEnabled(false);
 
     setJMenuBar(_menuBar);
    
