@@ -1162,31 +1162,42 @@ public class DefinitionsDocumentTest extends TestCase
   }
   
   /**
-   * Test method for hitting enter and then undoing.  Verifies that undoing after 
-   * hitting enter will undo both the newline and the indent at once, instead of one 
-   * at a time.
+   * Test method for CompoundUndoManager.  Tests that the nested 
+   * compound edit functionality works correctly.
+   * @throws BadLocationException
    */
-  public void testUndoAndRedoAfterHittingEnter() throws BadLocationException {
-    String text = "public class foo {";
-    
-    String afterEnter =
+  public void testCompoundUndoManager() throws BadLocationException {
+    String text =
       "public class foo {\n" +
-      "  ";
-
+      "int bar;\n" +
+      "}";
+    
+    String indented =
+      "public class foo {\n" +
+      "  int bar;\n" +
+      "}";
+    
     _defModel.addUndoableEditListener(_defModel.getUndoManager());
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL, new Integer(2));
-    _defModel.insertString(0, text, null);
-    assertEquals("Should have inserted correctly.", text, 
-                 _defModel.getText(0, _defModel.getLength()));
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,new Integer(2));
 
-    _defModel.insertString(18, "\n", null);
-/*
-    assertEquals("Should have entered the newline correctly.", afterEnter, 
-                 _defModel.getText(0,_defModel.getLength()));
+    // Start a compound edit and verify the returned key
+    int key = _defModel.getUndoManager().startCompoundEdit();
+    assertEquals("Should have returned the correct key.", 0, key);
+    
+    // Insert a test string into the document
+    _defModel.insertString(0, text, null);
+    assertEquals("Should have inserted the text properly.", text, 
+                 _defModel.getText(0, _defModel.getLength()));
+    
+    // Indent the lines, so as to trigger a nested compond edit
+    _defModel.indentLines(0, _defModel.getLength());
+    assertEquals("Should have indented correctly.", indented, 
+                 _defModel.getText(0, _defModel.getLength()));
+    
+    // End the outer compound edit and verify that both get undone
+    _defModel.getUndoManager().endCompoundEdit(key);
     _defModel.getUndoManager().undo();
-    assertEquals("undo commenting",text, _defModel.getText(0,_defModel.getLength()));
-    _defModel.getUndoManager().redo();
-    assertEquals("redo commenting",commented, _defModel.getText(0,_defModel.getLength()));
-*/    
+    assertEquals("Should have undone correctly.", "", 
+                 _defModel.getText(0, _defModel.getLength()));
   }
 }
