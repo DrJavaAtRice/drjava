@@ -51,7 +51,6 @@ import java.awt.Color;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
-import edu.rice.cs.util.text.DocumentEditCondition;
 
 /**
  * This class installs listeners and actions between an InteractionsDocument
@@ -197,8 +196,6 @@ public class InteractionsController {
    * Adds actions to the view.
    */
   protected void _addViewActions() {
-    // Prevent any edits before the prompt!
-    _adapter.setEditCondition(new InteractionsEditCondition());
     
     // Get proper cross-platform mask.
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -243,31 +240,6 @@ public class InteractionsController {
                                 moveRightAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0),
                                 moveRightAction);
-  }
-  
-  /**
-   * Class to ensure that any attempt to edit the Swing document
-   * above the prompt is rejected.
-   */
-  class InteractionsEditCondition extends DocumentEditCondition {
-    public boolean canInsertText(int offs, String str, String style) {
-      if (offs < _doc.getPromptPos()) {
-        _pane.getBeep().run();
-        return false;
-      }
-      else {
-        return true;
-      }
-    }
-    public boolean canRemoveText(int offs, int len) {
-      if (offs < _doc.getPromptPos()) {
-        _pane.getBeep().run();
-        return false;
-      }
-      else {
-        return true;
-      }
-    }
   }
   
   

@@ -572,6 +572,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected int lastExitStatus;
     protected int fileRevertedCount;
     protected int shouldRevertFileCount;
+    protected int undoableEditCount;
 
     public TestListener() {
       resetCounts();
@@ -601,6 +602,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       lastExitStatus = 0;
       fileRevertedCount = 0;
       shouldRevertFileCount = 0;
+      undoableEditCount = 0;
     }
     
     /**
@@ -712,19 +714,24 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
                    nonTestCaseCount);
     }
 
-  public void assertFileRevertedCount(int i) {
+    public void assertFileRevertedCount(int i) {
       assertEquals("number of times fileReverted fired",
                    i,
                    fileRevertedCount);
     }
 
-  public void assertShouldRevertFileCount(int i) {
+    public void assertUndoableEditCount(int i) {
+      assertEquals("number of times undoableEditHappened fired",
+                   i,
+                   undoableEditCount);
+    }
+    
+    public void assertShouldRevertFileCount(int i) {
       assertEquals("number of times shouldRevertFile fired",
                    i,
                    shouldRevertFileCount);
     }
 
-    
     public void newFileCreated(OpenDefinitionsDocument doc) {
       listenerFail("newFileCreated fired unexpectedly");
     }
@@ -743,6 +750,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     public void fileReverted(OpenDefinitionsDocument doc) {
       listenerFail("fileReverted fired unexpectedly");
+    }
+    
+    public void undoableEditHappened() {
+      listenerFail("undoableEditHappened fired unexpectedly");
     }
 
     public void junitStarted(OpenDefinitionsDocument doc) {

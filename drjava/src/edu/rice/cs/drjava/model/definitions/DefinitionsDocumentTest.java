@@ -49,6 +49,7 @@ import junit.extensions.*;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.model.EventNotifier;
 
 /**
  * Tests the functionality of the definitions document.
@@ -58,6 +59,7 @@ public class DefinitionsDocumentTest extends TestCase
   implements ReducedModelStates 
 {
   private DefinitionsDocument _defModel;
+  private EventNotifier _notifier;
 
   /**
    * Constructor.
@@ -71,7 +73,8 @@ public class DefinitionsDocumentTest extends TestCase
    * Create a definitions document to work with.
    */
   protected void setUp() {
-    _defModel = new DefinitionsDocument();
+    _notifier = new EventNotifier();
+    _defModel = new DefinitionsDocument(_notifier);
     DrJava.getConfig().resetToDefaults();
   }
 

@@ -44,6 +44,7 @@ import junit.framework.*;
 import java.io.*;
 
 import javax.swing.text.BadLocationException;
+import javax.swing.event.*;
 import junit.extensions.*;
 import java.util.LinkedList;
 import javax.swing.text.Document;
@@ -81,7 +82,32 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
   public static Test suite() {
     return new TestSuite(GlobalModelOtherTest.class);
   }
-
+  
+  /**
+   * Tests that the undoableEditHappened event is fired if the undo manager
+   * is in use.
+   */
+  public void testUndoEventsOccur() throws BadLocationException {
+    final OpenDefinitionsDocument doc = _model.newFile();
+    
+    // Have to add an undoable edit listener for Undo to work
+    doc.getDocument().addUndoableEditListener(new UndoableEditListener() {
+      public void undoableEditHappened(UndoableEditEvent e) {
+        doc.getDocument().getUndoManager().addEdit(e.getEdit());
+      }
+    });
+    
+    TestListener listener = new TestListener() {
+      public void undoableEditHappened() {
+        undoableEditCount++;
+      }
+    };
+    _model.addListener(listener);
+    changeDocumentText("test", doc);
+    _model.removeListener(listener);
+    listener.assertUndoableEditCount(1);
+  }
+  
   /**
    * Checks that System.exit is handled appropriately from
    * interactions frame.

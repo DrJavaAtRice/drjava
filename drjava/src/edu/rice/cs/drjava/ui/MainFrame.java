@@ -914,6 +914,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     // create our model
     _model = new SingleDisplayModel();
     
+    // Ensure that DefinitionsPane uses the correct EditorKit!
+    //   This has to be stored as a static field on DefinitionsPane because
+    //   the JEditorPane constructor uses it before we get a chance to
+    //   assign it to an instance field...
+    DefinitionsPane.setEditorKit(_model.getEditorKit());
+    
     if (_model.getDebugger().isAvailable()) {
       // add listener to debug manager
       _model.getDebugger().addListener(new UIDebugListener());
@@ -3223,6 +3229,11 @@ public class MainFrame extends JFrame implements OptionConstants {
       _currentDefPane.hasWarnedAboutModified(false);
       _currentDefPane.setPositionAndScroll(0);
       if (inDebugMode()) _updateDebugStatus();
+    }
+    
+    public void undoableEditHappened() {
+      _currentDefPane.getUndoAction().updateUndoState();
+      _currentDefPane.getRedoAction().updateRedoState();
     }
     
     // NOTE: Not necessarily called from event-dispatching thread...

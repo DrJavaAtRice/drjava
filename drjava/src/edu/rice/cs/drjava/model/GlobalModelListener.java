@@ -94,6 +94,11 @@ public interface GlobalModelListener {
    * Called after a document is reverted.
    */
   public void fileReverted(OpenDefinitionsDocument doc);
+  
+  /**
+   * Called when an undoable edit occurs.
+   */
+  public void undoableEditHappened();
 
   /**
    * Called after a compile is started by the GlobalModel.

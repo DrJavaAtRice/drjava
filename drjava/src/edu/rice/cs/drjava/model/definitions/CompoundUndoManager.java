@@ -56,6 +56,8 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.DefaultGlobalModel;
 import edu.rice.cs.drjava.model.FileMovedException;
+import edu.rice.cs.drjava.model.EventNotifier;
+import edu.rice.cs.drjava.model.GlobalModelListener;
 
 /**
  * Extended UndoManager with increased functionality.  Can handle aggregating 
@@ -80,13 +82,19 @@ public class CompoundUndoManager extends UndoManager {
   private int _nextKey;
   
   /**
+   * keeps track of the listeners to this undo manager
+   */
+  private final EventNotifier _notifier;
+  
+  /**
    * Default constructor.
    */
-  public CompoundUndoManager() {
+  public CompoundUndoManager(EventNotifier notifier) {
     super();
     _compoundEdits = new Vector<CompoundEdit>();
     _keys = new Vector<Integer>();
     _nextKey = 0;
+    _notifier = notifier;
   }
   
   /**
@@ -112,6 +120,7 @@ public class CompoundUndoManager extends UndoManager {
 
       if (!_compoundEditInProgress()) {
         super.addEdit(compoundEdit);
+        _notifyUndoHappened();
       }
       else {
         _compoundEdits.firstElement().addEdit(compoundEdit);
@@ -151,7 +160,9 @@ public class CompoundUndoManager extends UndoManager {
       return _compoundEdits.firstElement().addEdit(e);
     }
     else {
-      return super.addEdit(e);
+      boolean result = super.addEdit(e);
+      _notifyUndoHappened();
+      return result;
     }
   }
   
@@ -210,5 +221,16 @@ public class CompoundUndoManager extends UndoManager {
     else {
       super.redo();
     }
+  }
+  
+  /**
+   * helper method to notify the view that an undoable edit has occured
+   */
+  private void _notifyUndoHappened() {
+    _notifier.notifyListeners(new EventNotifier.Notifier() {
+      public void notifyListener(GlobalModelListener l) {
+        l.undoableEditHappened();
+      }
+    });
   }
 }

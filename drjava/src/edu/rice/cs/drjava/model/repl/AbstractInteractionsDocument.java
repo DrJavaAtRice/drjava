@@ -44,6 +44,7 @@ import java.io.*;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.DocumentAdapter;
+import edu.rice.cs.util.text.DocumentEditCondition;
 import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 
@@ -91,6 +92,10 @@ public abstract class AbstractInteractionsDocument
                                       int maxHistorySize) {
     _document = document;
     _history = new History(maxHistorySize);
+    
+    // Prevent any edits before the prompt!
+    _document.setEditCondition(new InteractionsEditCondition());
+    
     reset();
   }
   
@@ -107,6 +112,24 @@ public abstract class AbstractInteractionsDocument
    * Interprets the current command at the prompt.
    */
   public abstract void interpretCurrentInteraction();
+  
+  /**
+   * Gets the object which can determine whether an insert
+   * or remove edit should be applied, based on the inputs.
+   * @param condition Object to determine legality of inputs
+   */
+  public DocumentEditCondition getEditCondition() {
+    return _document.getEditCondition();
+  }
+  
+  /**
+   * Provides an object which can determine whether an insert
+   * or remove edit should be applied, based on the inputs.
+   * @param condition Object to determine legality of inputs
+   */
+  public void setEditCondition(DocumentEditCondition condition) {
+    _document.setEditCondition(condition);
+  }
 
   /**
    * Returns the first location in the document where editing is allowed.
@@ -537,5 +560,28 @@ public abstract class AbstractInteractionsDocument
     }
   }
   
-  
+  /**
+   * Class to ensure that any attempt to edit the document
+   * above the prompt is rejected.
+   */
+  class InteractionsEditCondition extends DocumentEditCondition {
+    public boolean canInsertText(int offs, String str, String style) {
+      if (offs < getPromptPos()) {
+        _beep.run();
+        return false;
+      }
+      else {
+        return true;
+      }
+    }
+    public boolean canRemoveText(int offs, int len) {
+      if (offs < getPromptPos()) {
+        _beep.run();
+        return false;
+      }
+      else {
+        return true;
+      }
+    }
+  }
 }

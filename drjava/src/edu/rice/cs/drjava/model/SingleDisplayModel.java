@@ -491,11 +491,15 @@ public class SingleDisplayModel extends DefaultGlobalModel {
     _activeDocument = (OpenDefinitionsDocument) docs.getElementAt(index);
     _activeDocument.checkIfClassFileInSync();
 
-    // notify listeners
-    notifyListeners(new EventNotifier() {
+    // notify single display model listeners
+    getNotifier().notifyListeners(new EventNotifier.Notifier() {
       public void notifyListener(GlobalModelListener l) {
-        SingleDisplayModelListener sl = (SingleDisplayModelListener) l;
-        sl.activeDocumentChanged(_activeDocument);
+        // If it is a SingleDisplayModelListener, let it know that the 
+        //  active doc changed
+        if (l instanceof SingleDisplayModelListener) {
+          SingleDisplayModelListener sl = (SingleDisplayModelListener) l;
+          sl.activeDocumentChanged(_activeDocument);
+        }
       }
     });
   }

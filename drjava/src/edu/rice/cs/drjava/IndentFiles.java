@@ -45,6 +45,7 @@ import gj.util.Vector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.EventNotifier;
 
 /**
  * Allows users to pass filenames to a command-line indenter.
@@ -129,7 +130,7 @@ public class IndentFiles {
       }
       try {
         String fileContents = FileOps.readFileAsString(file);
-        DefinitionsDocument doc = new DefinitionsDocument(indenter);
+        DefinitionsDocument doc = new DefinitionsDocument(indenter, new EventNotifier());
         doc.insertString(0, fileContents, null); // (no attributes)
         int docLen = doc.getLength();
         doc.indentLines(0, docLen);

@@ -73,8 +73,12 @@ import edu.rice.cs.drjava.model.debug.Breakpoint;
  */
 public class DefinitionsPane extends JEditorPane implements OptionConstants {
   
-  private static final EditorKit EDITOR_KIT = new DefinitionsEditorKit();
-
+  /**
+   * This field NEEDS to be set by setEditorKit() BEFORE any DefinitonsPanes
+   * are created.
+   */
+  private static DefinitionsEditorKit EDITOR_KIT;
+  
   /**
    * Our parent window.
    */
@@ -150,21 +154,6 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     THREAD_PAINTER =
     new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_THREAD_COLOR));
   
-  private UndoableEditListener _undoListener = new UndoableEditListener() {
-
-    /**
-     * The function to handle what happens when an UndoableEditEvent occurs.
-     * @param e
-     */
-    public void undoableEditHappened(UndoableEditEvent e) {
-      //Remember the edit and update the menus
-      UndoWithPosition undo = new UndoWithPosition(e.getEdit(), getCaretPosition());
-      _doc.getDocument().getUndoManager().addEdit(undo);
-      _undoAction.updateUndoState();
-      _redoAction.updateRedoState();
-    }
-  };
-
   /**
    * The OptionListener for DEFINITIONS_BACKGROUND_COLOR 
    */
@@ -236,6 +225,22 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       _antiAliasText = oce.value.booleanValue();
     }
   }
+  
+  /**
+   * Listens to any undoable events in the document, and adds them
+   * to the undo manager.  Must be done in the view because the edits are
+   * stored along with the caret position at the time of the edit.
+   */
+  private UndoableEditListener _undoListener = new UndoableEditListener() {
+    /**
+     * The function to handle what happens when an UndoableEditEvent occurs.
+     * @param e
+     */
+    public void undoableEditHappened(UndoableEditEvent e) {
+      UndoWithPosition undo = new UndoWithPosition(e.getEdit(), getCaretPosition());
+      _doc.getDocument().getUndoManager().addEdit(undo);
+    }
+  };
   
   /**
    * The menu item for the "Toggle Breakpoint" option. Stored in field so that it may be enabled and
@@ -464,6 +469,13 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     }
   }
   
+  /**
+   * Sets the editor kit that will be used by all DefinitionsPanes.
+   * @param editorKit The editor kit to use for new DefinitionsPanes.
+   */
+  public static void setEditorKit(DefinitionsEditorKit editorKit) {
+    EDITOR_KIT = editorKit;
+  }
   
   /**
    * Constructor.  Sets up all the defaults.
@@ -475,7 +487,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   {
     _mainFrame = mf;
     _model = model;
-    _doc = doc;    
+    _doc = doc;
     setDocument(_doc);
     setContentType("text/java");
     setBackground(DrJava.getConfig().getSetting(DEFINITIONS_BACKGROUND_COLOR));
@@ -679,14 +691,14 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   /**
    * @return the undo action
    */
-  public Action getUndoAction() {
+  public UndoAction getUndoAction() {
     return  _undoAction;
   }
 
   /**
    * @return the redo action
    */
-  public Action getRedoAction() {
+  public RedoAction getRedoAction() {
     return  _redoAction;
   }
 
@@ -946,6 +958,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    * editor pane use our editor kit (and thus our model).
    */
   protected EditorKit createDefaultEditorKit() {
+    //return _editorKit;
     return EDITOR_KIT;
   }
 

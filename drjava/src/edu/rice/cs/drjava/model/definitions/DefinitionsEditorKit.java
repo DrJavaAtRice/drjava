@@ -44,6 +44,7 @@ import java.awt.*;
 import javax.swing.event.DocumentEvent;
 
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+import edu.rice.cs.drjava.model.EventNotifier;
 
 /**
  * This is an editor kit for editing Java source files.
@@ -53,6 +54,18 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  * @version $Id$
  */
 public class DefinitionsEditorKit extends DefaultEditorKit {
+  
+  private EventNotifier _notifier;
+  
+  /**
+   * Creates a new editor kit with the given listeners.
+   * @param notifier Keeps track of the listeners to the model
+   */
+  public DefinitionsEditorKit(EventNotifier notifier) {
+    _notifier = notifier;
+  }
+  
+  
   private static ViewFactory _factory = new ViewFactory() {
     public View create(Element elem) {
       // The following line is for performance analysis only!
@@ -93,8 +106,8 @@ public class DefinitionsEditorKit extends DefaultEditorKit {
    * Creates a new DefinitionsDocument.
    * @return a new DefinitionsDocument.
    */
-  private static DefinitionsDocument _createDefaultTypedDocument() {
-    return new DefinitionsDocument();
+  private DefinitionsDocument _createDefaultTypedDocument() {
+    return new DefinitionsDocument(_notifier);
   }
   
   /**

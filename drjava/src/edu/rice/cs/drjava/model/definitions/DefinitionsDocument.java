@@ -56,6 +56,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.DefaultGlobalModel;
 import edu.rice.cs.drjava.model.FileMovedException;
+import edu.rice.cs.drjava.model.EventNotifier;
 
 
 /**
@@ -74,7 +75,7 @@ import edu.rice.cs.drjava.model.FileMovedException;
  * (via the _reduced field) MUST be synchronized.  This prevents any thread
  * from seeing an inconsistent state in the middle of another thread's changes.
  *
- * @see BraceReduction
+ * @see BraceReductions
  * @see ReducedModelControl
  * @see ReducedModelComment
  * @see ReducedModelBrace
@@ -150,7 +151,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * is cleared after each change to the document.
    */
   private static final int MAX_CACHE_SIZE = 10000;
-
+  
   /**
    * Constant for starting position of document.
    */
@@ -162,13 +163,18 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   public static final int ERROR_INDEX = -1;
 
   /**
+   * keeps track of the listeners to this model
+   */
+  private final EventNotifier _notifier;
+  
+  /**
    * Constructor.
    */
-  public DefinitionsDocument() {
-    this(DefaultGlobalModel.INDENTER);
+  public DefinitionsDocument(EventNotifier notifier) {
+    this(DefaultGlobalModel.INDENTER, notifier);
   }
 
-  public DefinitionsDocument(Indenter i) {
+  public DefinitionsDocument(Indenter i, EventNotifier notifier) {
     super();
     _indenter = i;
     _file = null;
@@ -181,6 +187,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     _helperCache = new Hashtable();
     _helperCacheHistory = new Vector();
     _cacheInUse = false;
+    _notifier = notifier;
     resetUndoManager();
   }
 
@@ -2666,7 +2673,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * resets the undo manager
    */
   public void resetUndoManager() {
-    _undoManager = new CompoundUndoManager();
+    _undoManager = new CompoundUndoManager(_notifier);
     _undoManager.setLimit(UNDO_LIMIT);
   }
 
