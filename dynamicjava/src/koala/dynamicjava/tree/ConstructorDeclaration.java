@@ -258,6 +258,6 @@ public class ConstructorDeclaration extends Node {
    * Implementation of toString for use in unit testing
    */
   public String toString() {
-    return "("+getClass().getName()+": "+getAccessFlags()+" "+getName()+" "+getParameters()+" "+getExceptions()+" "+getConstructorInvocation()+" "+getStatements()+")";
+    return "("+getClass().getName()+": "+java.lang.reflect.Modifier.toString(getAccessFlags())+" "+getName()+" "+getParameters()+" "+getExceptions()+" "+getConstructorInvocation()+" "+getStatements()+")";
   }
 }

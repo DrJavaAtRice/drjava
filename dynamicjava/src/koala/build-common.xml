@@ -53,7 +53,8 @@
          includes="edu/rice/cs/util/ant/TstampGMT.java"
          destdir="${built}"
          bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}"
-         target="1.1"
+         source="1.5"
+         target="jsr14"
          fork="on"
          debug="on"
          optimize="off">

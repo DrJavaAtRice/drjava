@@ -38,6 +38,7 @@ import koala.dynamicjava.util.*;
 
 import java.security.CodeSource;
 import java.security.SecureClassLoader;
+import java.security.cert.Certificate;
 
 import java.net.URL;
 import java.net.MalformedURLException;
@@ -99,14 +100,15 @@ public class TreeClassLoader extends SecureClassLoader
   static {
     try {
       String url = System.getProperty(CODE_SOURCE_URL_PROPERTY);
-      if ( url != null ) codeSource = new CodeSource(new URL(url), null);
+      // if ( url != null ) codeSource = new CodeSource(new URL(url), null);
+      if ( url != null ) codeSource = new CodeSource(new URL(url), (Certificate[]) null);
     } catch (java.net.MalformedURLException mfue) {
       // property value malformed, return null
       // [XXX]: print error message
-      codeSource = new CodeSource(null, null);
+      codeSource = new CodeSource(null, (Certificate[]) null);
     }
     try {
-      codeSource = new CodeSource(new URL(DEFAULT_CODE_SOURCE_URL), null);
+      codeSource = new CodeSource(new URL(DEFAULT_CODE_SOURCE_URL), (Certificate[]) null);
     } catch (java.net.MalformedURLException mfue) {
       // should never appear
       throw new RuntimeException(mfue.getMessage());

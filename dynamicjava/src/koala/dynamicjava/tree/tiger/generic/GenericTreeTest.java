@@ -1,3 +1,4 @@
+
 package koala.dynamicjava.tree.tiger.generic;
 
 import java.util.*;
@@ -82,7 +83,7 @@ public class GenericTreeTest extends TestCase {
     assertEquals("java.util.LinkedList", result.getClass().getName());
   }
   
-  public void testGenericClass1(){
+  public void testHandParsedGenericClass(){
     // public class C<T extends Number> {
     //   public T n;
     //   public C(T _n){ n = _n; }
@@ -557,26 +558,208 @@ public class GenericTreeTest extends TestCase {
   
   public void testBrackets(){
     
-    // left shift
-    //assertEquals(new Integer(400 << 5),interpret("400 << 5;"));
-    
     // right shift
     assertEquals(new Integer(400 >> 5),interpret("400 >> 5;"));
-      
+    
     // unsigned right shift
     assertEquals(new Integer(400 >>> 5), interpret("400 >>> 5;"));
-      
-/*
-      // less than
-      Pair.make("5 < 4", new Boolean(5 < 4)),
-      // less than or equal to
-      Pair.make("4 <= 4", new Boolean(4 <= 4)), Pair.make("4 <= 5", new Boolean(4 <= 5)),
-      // greater than
-      Pair.make("5 > 4", new Boolean(5 > 4)), Pair.make("5 > 5", new Boolean(5 > 5)),
-      // greater than or equal to
-      Pair.make("5 >= 4", new Boolean(5 >= 4)), Pair.make("5 >= 5", new Boolean(5 >= 5)),
-      
-      _interpreter.interpret("(false) ? 2/0 : 1 ");
- */   
+    
+    
+    // left shift
+    assertEquals(new Integer(400 << 5),interpret("400 << 5;"));
+    
+    // less than
+    assertEquals(new Boolean(5 < 4), interpret("5 < 4;"));
+    
+    // less than or equal to
+    assertEquals(new Boolean(4 <= 4), interpret("4 <= 4;"));
+    assertEquals(new Boolean(4 <= 5), interpret("4 <= 5;"));
+    
+    // greater than
+    assertEquals(new Boolean(5 > 4), interpret("5 > 4;"));
+    assertEquals(new Boolean(5 > 5), interpret("5 > 5;"));
+    
+    // greater than or equal to
+    assertEquals(new Boolean(5 >= 4), interpret("5 >= 4;"));
+    assertEquals(new Boolean(5 >= 5), interpret("5 >= 5;"));
+    
+    //_interpreter.interpret("(false) ? 2/0 : 1 ");
   }
+  
+  public void testInnerParameterizedClass(){
+    testString = 
+      "public class A{\n"+
+      "  public static class B<T>{\n"+
+      "    public String toString(){return \"fooo\";}\n"+
+      "  }\n"+
+      "}\n"+
+      
+      "A.B<String> b = new A.B<String>(); b.toString();\n";
+    assertEquals("fooo", interpret(testString));
+  }
+  
+  // SHOULD BE FIXED TO PASS!
+  public void xtestInnerParameterizedClassInParameterizedClass(){
+    testString = 
+      "public class A<S>{\n"+
+      "  public static class B<T>{\n"+
+      "    public String toString(){return \"fooo\";}\n"+
+      "  }\n"+
+      "}\n"+
+      
+      "A<Integer>.B<String> b = new A<Integer>.B<String>(); b.toString();\n";
+    assertEquals("fooo", interpret(testString));
+  }
+  
+  // SHOULD BE FIXED TO PASS!
+  
+  public void xtestInnerClassInParameterizedClass(){
+    testString = 
+      "public class A<T>{\n"+
+      "  public static class B{\n"+
+      "    public String toString(){return \"fooo\";}\n"+
+      "  }\n"+
+      "}\n"+
+      
+      "A<String>.B b = new A<String>.B(); b.toString();\n";
+    assertEquals("fooo", interpret(testString));
+  }
+  
+  
+  // STATIC IMPORT, NOT YET SUPPORTED
+  public void xtestStaticImport(){
+    testString =
+      "import static java.lang.Integer.MAX_VALUE;\n"+
+      "class A{\n"+
+      "  int m(){return MAX_VALUE;}\n"+
+      "}\n"+
+      "A a = new A(); a.m();\n";
+    
+    assertEquals(new Integer(java.lang.Integer.MAX_VALUE), interpret(testString));
+    
+  }
+  
+  // wildcards
+  public void testWildcards(){
+    testString =
+      "import java.util.LinkedList;\n"+
+      "import java.util.List;\n"+
+      "class A{\n"+
+      "  LinkedList<String> l;\n"+
+      "  LinkedList<LinkedList<String>> ll;\n"+
+      "  A(){\n"+
+      "    l = new LinkedList<String>();\n"+
+      "    ll = new LinkedList<LinkedList<String>>();\n"+
+      "    l.add(\"String1\");\n"+
+      "    ll.add(l);\n"+
+      "  }\n"+
+      "  String someMethod(LinkedList<? extends List<String>> list){\n"+ //Note that when you have the LinkedList<? extends List>
+      "    return ((LinkedList<String>)list.get(0)).get(0);\n"+ //instead of LinkedList<LinkedList<String>> you have to do a cast.
+      "  }\n"+
+      "}\n"+
+      
+      "A a = new A(); a.someMethod(a.ll);\n";
+    assertEquals("String1", interpret(testString));
+  }
+
+  
+  // wildcards /**/
+  // Type checker should catch this error, as you are not allowed to call the add method on list, as list is read only  
+  // Error: cannot find symbol
+  // symbol  : method add(java.util.LinkedList<java.lang.String>)
+  // location: class java.util.LinkedList<? extends java.util.List<java.lang.String>>
+  public void testWildcards2(){
+    testString =
+      "import java.util.LinkedList;\n"+
+      "import java.util.List;\n"+
+      "class A{\n"+
+      "  LinkedList<String> l;\n"+
+      "  LinkedList<LinkedList<String>> ll;\n"+
+      "  A(){\n"+
+      "    l = new LinkedList<String>();\n"+
+      "    ll = new LinkedList<LinkedList<String>>();\n"+
+      "    l.add(\"String1\");\n"+
+      "    ll.add(l);\n"+
+      "  }\n"+
+      "  String someMethod(LinkedList<? extends List<String>> list){\n"+ //Note that when you have the LinkedList<? extends List>
+      "    LinkedList<String> list2 = new LinkedList<String>();\n"+
+      "    list2.add(\"String2\");\n"+
+      "    list.add(list2);\n"+
+      "    return ((LinkedList<String>)list.get(0)).get(0);\n"+ //instead of LinkedList<LinkedList<String>> you have to do a cast.
+      "  }\n"+
+      "}\n"+
+      
+      "A a = new A(); a.someMethod(a.ll);\n";
+    assertEquals("String1", interpret(testString));
+  }
+  
+   // wildcards, ? alone (which means extends Object)
+  public void testSingleWildcard(){
+    testString =
+      "import java.util.LinkedList;\n"+
+      "import java.util.List;\n"+
+      "class A{\n"+
+      "  LinkedList<String> l;\n"+
+      "  LinkedList<LinkedList<String>> ll;\n"+
+      "  A(){\n"+
+      "    l = new LinkedList<String>();\n"+
+      "    ll = new LinkedList<LinkedList<String>>();\n"+
+      "    l.add(\"String1\");\n"+
+      "    ll.add(l);\n"+
+      "  }\n"+
+      "  String someMethod(LinkedList<?> list){\n"+ 
+      "    return ((LinkedList<String>)list.get(0)).get(0);\n"+
+      "  }\n"+
+      "}\n"+
+      
+      "A a = new A(); a.someMethod(a.ll);\n";
+    assertEquals("String1", interpret(testString));
+  }  
+  
+  // Wildcards, testing super, the lower bounds
+  public void testWildcardSuper(){
+    testString =
+      "import java.util.List;\n"+
+      "import java.util.LinkedList;\n"+
+      
+      "class TestSuper {\n"+
+      "  Integer n;\n"+
+      "  TestSuper(List<? super Integer> li){\n"+
+      "    Object o = li.get(0);\n"+
+      "    if(o instanceof Integer){\n"+
+      "      n =(Integer) o;\n"+
+      "    }\n"+
+      "  }\n"+
+      "}\n"+
+      "List<? super Number> ln = new LinkedList<Number>();\n"+
+      "ln.add(new Integer(3));\n"+
+      "TestSuper ts = new TestSuper(ln);\n ts.n;";
+
+    assertEquals("Expect to be allowed to read from the list, but only as objects.",new Integer(3), interpret(testString));
+  }
+  
+ /*   public void testWildcardSuper2(){
+    testString =
+      "import java.util.List;\n"+
+      "import java.util.LinkedList;\n"+
+      
+      "class TestSuper {\n"+
+      "  Integer n;\n"+
+      "  TestSuper(List<? super Integer> li){\n"+
+      "    Object o = li.get(0);\n"+
+      "    if(o instanceof Integer){\n"+
+      "      n =(Integer) o;\n"+
+      "    }\n"+
+      "  }\n"+
+      "}\n"+
+      "List<? super Number> ln = new LinkedList<Number>();\n"+
+      "ln.add(new Integer(3));\n"+
+      "Integer i = ln.get(0);"; //should fail, as you can only read as objects when using super
+      
+
+    assertEquals("Expect to be allowed to read from the list, but only as objects.",new Integer(3), interpret(testString));
+  }
+  */
 }
+
+
