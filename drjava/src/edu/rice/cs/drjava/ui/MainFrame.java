@@ -2467,7 +2467,17 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (rc == JFileChooser.APPROVE_OPTION) {
       File file = _saveChooser.getSelectedFile();
       _saveProjectHelper(file);
-      _openProjectHelper(file);
+      try {
+        if (file.getCanonicalPath().endsWith(".pjt")) {
+          _openProjectHelper(file);
+        }
+        else {
+          _openProjectHelper(new File(file.getCanonicalPath() + ".pjt"));
+        }
+      }
+      catch (IOException e) {
+        throw new UnexpectedException(e);
+      }
     }
   }
   
