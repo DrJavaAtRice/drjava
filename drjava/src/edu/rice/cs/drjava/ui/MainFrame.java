@@ -18,6 +18,8 @@ import javax.swing.text.DefaultEditorKit;
 
 import java.awt.event.ActionEvent;
 
+import java.awt.BorderLayout;
+
 import java.io.File;
 
 /** Main DrJava window.
@@ -25,6 +27,7 @@ import java.io.File;
  *    Definitions, Output and Interactions. */
 public class MainFrame extends JFrame
 {
+  private CompilerErrorPanel _errorPanel;
   private DefinitionsView _definitionsView;
   private OutputView _outputView;
   private InteractionsView _interactionsView;
@@ -133,9 +136,10 @@ public class MainFrame extends JFrame
       _outputView.clear();
       
       File file = new File(filename);
-      boolean success = DrJava.compiler.compile(new File[] { file });
+      CompilerError[] errors = DrJava.compiler.compile(new File[] { file });
+      _errorPanel.resetErrors(errors);
 
-      if (success) {
+      if (errors.length == 0) {
         // Success doesn't print anything, so we should print something
         // to let them know it worked.
         System.out.println(file.getName() + " compiled successfully.");
@@ -168,6 +172,7 @@ public class MainFrame extends JFrame
 
     _definitionsView = new DefinitionsView(this);
     _outputView = new OutputView();
+    _errorPanel = new CompilerErrorPanel(_definitionsView);
 
     // Make the menu bar, and stub file and edit menus
     _menuBar = new JMenuBar();
@@ -227,10 +232,11 @@ public class MainFrame extends JFrame
     setBounds(25, 25, 300, 500);
     setSize(300, 500);
 
-    getContentPane().add(split2);
+    getContentPane().add(_errorPanel, BorderLayout.SOUTH);
+    getContentPane().add(split2, BorderLayout.CENTER);
 
 
-    getContentPane().setLayout(new BoxLayout(getContentPane(),BoxLayout.Y_AXIS));
+    //getContentPane().setLayout(new BoxLayout(getContentPane(),BoxLayout.Y_AXIS));
     show();
     setSize(300, 500);
 

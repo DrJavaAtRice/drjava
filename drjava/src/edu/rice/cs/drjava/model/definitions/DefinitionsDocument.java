@@ -22,7 +22,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 
     //System.err.println("rv at start=" + _reduced.simpleString());
 
-    _reduced.move(locationChange);
+    //_reduced.move(locationChange);
 
     //System.err.println("location changed: " + locationChange);
     //System.err.println("old location: " + _currentLocation + 
@@ -31,7 +31,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
     for (int i = 0; i < str.length(); i++)
     {
       char curChar = str.charAt(i);
-      _addCharToReducedView(curChar);
+      //_addCharToReducedView(curChar);
     }
 
     _currentLocation = offset + str.length();
@@ -89,8 +89,8 @@ public class DefinitionsDocument extends DefaultStyledDocument
 
     int locationChange = offset - _currentLocation;
     //System.err.println("doc.remove: locChange=" + locationChange);
-    _reduced.move(locationChange);
-    _reduced.delete(len);
+    //_reduced.move(locationChange);
+    //_reduced.delete(len);
 
     _currentLocation = offset;
     _modifiedSinceSave = true;

@@ -2,15 +2,15 @@
 
 package edu.rice.cs.drjava;
 
-import java.io.OutputStream;
+import java.io.PrintStream;
 
 /** Main class for DrJava. */
 public class DrJava {
   // Generated automatically when you check out with tag name!
   public static final String DRJAVA_BUILD = "$Name$";
 
-  private static OutputStream _consoleOut;
-  private static OutputStream _consoleErr;
+  private static PrintStream _consoleOut;
+  private static PrintStream _consoleErr;
 
   /** Compiler to use everywhere. */
   public static final CompilerInterface compiler = new GJv6Compiler();
@@ -23,6 +23,6 @@ public class DrJava {
     MainFrame mf = new MainFrame();
   }
 
-  public static OutputStream consoleErr() { return _consoleErr; }
-  public static OutputStream consoleOut() { return _consoleOut; }
+  public static PrintStream consoleErr() { return _consoleErr; }
+  public static PrintStream consoleOut() { return _consoleOut; }
 }

@@ -4,8 +4,12 @@ package edu.rice.cs.drjava;
 
 import java.io.File;
 
+import java.util.LinkedList;
+
 import gjc.v6.JavaCompiler;
 
+import gjc.v6.util.Name;
+import gjc.v6.util.Position;
 import gjc.v6.util.Hashtable;
 import gjc.v6.util.List;
 import gjc.v6.util.Log;
@@ -18,13 +22,13 @@ public class GJv6Compiler implements CompilerInterface {
    * since the log is not retrievable from the compiler. We
    * need to use the log to determine if any errors occurred.
    */ 
-  private Log _compilerLog;
+  private OurLog _compilerLog;
 
   public GJv6Compiler() {
   }
 
   private void _initCompiler() {
-    _compilerLog = new Log();
+    _compilerLog = new OurLog();
 
     // To use the GJ compiler, we build up the GJ options hashtable.
     Hashtable<String, String> options = Hashtable.make();
@@ -35,8 +39,7 @@ public class GJv6Compiler implements CompilerInterface {
     _compiler = JavaCompiler.make(_compilerLog, options);
   }
 
-  /** Returns true if succeeds and false if not. */
-  public boolean compile(File[] files) {
+  public CompilerError[] compile(File[] files) {
     // We must re-initialize the compiler on each compile. Otherwise
     // it gets very confused.
     _initCompiler();
@@ -52,9 +55,50 @@ public class GJv6Compiler implements CompilerInterface {
     catch (Throwable t) {
       // GJ defines the compile method to throw Throwable?!
       System.err.println("Compile error: " + t);
-      return false; // it failed!
+      return new CompilerError[] {
+        new CompilerError("",
+                          -1,
+                          -1,
+                          "Compile exception: " + t,
+                          false)
+      };
     }
 
-    return (_compilerLog.nerrors == 0);
+    return _compilerLog.getErrors();
+  }
+
+  private class OurLog extends Log {
+    // List of CompilerError
+    private LinkedList _errors = new LinkedList();
+    private String _sourceName = "";
+
+    public Name useSource(Name source) {
+      _sourceName = source.toString();
+      return super.useSource(source);
+    }
+
+    public void warning(int pos, String msg) {
+      super.warning(pos, msg);
+
+      _errors.addLast(new CompilerError(_sourceName,
+                                        Position.line(pos) - 1, // gj is 1 based
+                                        Position.column(pos) - 1,
+                                        msg,
+                                        true));
+    }
+
+    public void error(int pos, String msg) {
+      super.error(pos, msg);
+
+      _errors.addLast(new CompilerError(_sourceName,
+                                        Position.line(pos) - 1, // gj is 1 based
+                                        Position.column(pos) - 1,
+                                        msg,
+                                        false));
+    }
+
+    public CompilerError[] getErrors() {
+      return (CompilerError[]) _errors.toArray(new CompilerError[0]);
+    }
   }
 }
