@@ -3010,6 +3010,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
      * @param saver FileSaveSelector for saving the file if it needs to be saved
      */
     public void generateJavadoc(FileSaveSelector saver) throws IOException {
+      // Use the model's classpath, and use the EventNotifier as the listener
       _javadocModel.javadocDocument(this, saver, getClasspathString());
     }
     

@@ -203,7 +203,7 @@ public class DefaultJavadocModel implements JavadocModel {
         if (!destDir.getPath().equals("") && !destDir.exists()) {
           // If the choice doesn't exist, ask to create it.
           boolean create = select.askUser
-            ("The directory you chose does not exist:\n" +
+            ("The directory you chose does not exist:\\n" +
              "'" + destDir + "'\n" +
              "Would you like to create it?",
              "Create Directory?");
@@ -593,10 +593,18 @@ public class DefaultJavadocModel implements JavadocModel {
   private boolean _javadoc_1_3(String[] args, String classpath) throws IOException {
     final String JAVADOC_CLASS = "com.sun.tools.javadoc.Main";
     Process javadocProcess;
-
+    
+    // This was a quick fix in order to get a working jar out.
+    
+    String jsr14path = DrJava.getConfig().getSetting(OptionConstants.JSR14_LOCATION).toString();
+    double version = Double.valueOf(System.getProperty("java.specification.version"));
+    String[] jvmArgs = new String[0];
+    if (version < 1.5 && jsr14path != null && !jsr14path.equals(""))
+      jvmArgs = new String[]{"-Xbootclasspath/p:" + jsr14path};
+    
     // We must use this classpath nonsense to make sure our new Javadoc JVM
     // can see everything the interactions pane can see.
-    javadocProcess =  ExecJVM.runJVM(JAVADOC_CLASS, args, classpath, new String[0]);
+    javadocProcess =  ExecJVM.runJVM(JAVADOC_CLASS, args, new String[]{classpath}, jvmArgs);
 
     //System.err.println("javadoc started with args:\n" + Arrays.asList(args));
 
@@ -888,7 +896,7 @@ public class DefaultJavadocModel implements JavadocModel {
     }
     args.add("-d");
     args.add(destDir);
-
+    
     // Add classpath
     args.add("-classpath");
     args.add(classpath);
