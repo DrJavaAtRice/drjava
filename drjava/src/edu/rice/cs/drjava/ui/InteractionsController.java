@@ -183,8 +183,15 @@ public class InteractionsController {
     public void insertUpdate(DocumentEvent e) {
       int caretPos = _pane.getCaretPosition();
       int promptPos = _doc.getPromptPos();
-      int prevPromptPos = promptPos - e.getLength();
       int length = _doc.getDocLength();
+      
+      // Figure out where the prompt was before the update
+      int prevPromptPos = promptPos;
+      if (e.getOffset() < promptPos) {
+        // Insert happened before prompt,
+        //  so previous position was further back
+        prevPromptPos = promptPos - e.getLength();
+      }
 
       if (_doc.inProgress()) {
         // Scroll to the end of the document, since output has been
@@ -202,7 +209,10 @@ public class InteractionsController {
         else {
           // Caret was on or after prompt, so move it right by the size
           //  of the insert.
-          moveTo(caretPos + e.getLength());
+          int size = promptPos - prevPromptPos;
+          if (size > 0) {
+            moveTo(caretPos + size);
+          }
         }
       }
     }

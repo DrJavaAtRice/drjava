@@ -685,46 +685,55 @@ public class CompilerErrorPanel extends TabbedPanel
      * Selects the given error inside the error list pane.
      */
     public void selectItem(CompilerError error) {
-      // Find corresponding index
-      int i = _getIndexForError(error);
-
-      _selectedIndex = i;
-      _removeListHighlight();
-
-      int startPos = _errorListPositions[i].getOffset();
-
-      // end pos is either the end of the document (if this is the last error)
-      // or the char where the next error starts
-      int endPos;
-      if (i + 1 >= (_numErrors)) {
-        endPos = getDocument().getLength();
-      }
-      else {
-        endPos = _errorListPositions[i + 1].getOffset();
-      }
-
       try {
-        _listHighlightTag =
-          _highlightManager.addHighlight(startPos,
-                                         endPos,
-                                         _listHighlightPainter);
+        // Find corresponding index
+        int i = _getIndexForError(error);
         
-        // Scroll to make sure this item is visible
-        Rectangle startRect = modelToView(startPos);
-        Rectangle endRect = modelToView(endPos - 1);
-
-        // Add the end rect onto the start rect to make a rectangle
-        // that encompasses the entire error
-        startRect.add(endRect);
-
-        //System.err.println("scrll vis: " + startRect);
-
-        scrollRectToVisible(startRect);
-
+        _selectedIndex = i;
+        _removeListHighlight();
+        
+        int startPos = _errorListPositions[i].getOffset();
+        
+        // end pos is either the end of the document (if this is the last error)
+        // or the char where the next error starts
+        int endPos;
+        if (i + 1 >= (_numErrors)) {
+          endPos = getDocument().getLength();
+        }
+        else {
+          endPos = _errorListPositions[i + 1].getOffset();
+        }
+        
+        try {
+          _listHighlightTag =
+            _highlightManager.addHighlight(startPos,
+                                           endPos,
+                                           _listHighlightPainter);
+          
+          // Scroll to make sure this item is visible
+          Rectangle startRect = modelToView(startPos);
+          Rectangle endRect = modelToView(endPos - 1);
+          
+          // Add the end rect onto the start rect to make a rectangle
+          // that encompasses the entire error
+          startRect.add(endRect);
+          
+          //System.err.println("scrll vis: " + startRect);
+          
+          scrollRectToVisible(startRect);
+          
+        }
+        catch (BadLocationException badBadLocation) {}
+        
+        _resetEnabledStatus();
       }
-      catch (BadLocationException badBadLocation) {}
-
-      _resetEnabledStatus();
+      catch (IllegalArgumentException iae) {
+        // This shouldn't be happening, but it was reported in bug 704006.
+        // (_getIndexForError throws it.)
+        // We'll at least fail a little more gracefully.
+        _removeListHighlight();
+        _resetEnabledStatus();
+      }
     }
 
     /**

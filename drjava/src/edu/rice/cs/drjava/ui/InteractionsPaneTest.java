@@ -274,5 +274,13 @@ public class InteractionsPaneTest extends TestCase {
     _doc.insertBeforeLastPrompt("ccc", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("caret should be at prompt",
                  _doc.getPromptPos(), _pane.getCaretPosition());
+    
+    // Move caret after prompt and insert more text
+    pos = _doc.getPromptPos();
+    // simulate a keystroke by putting caret just *after* pos of insert
+    _pane.setCaretPosition(pos+1);
+    _doc.insertText(pos, "d", InteractionsDocument.DEFAULT_STYLE);
+    assertEquals("caret should be immediately after the d",
+                 pos + 1, _pane.getCaretPosition());
   }
 }
