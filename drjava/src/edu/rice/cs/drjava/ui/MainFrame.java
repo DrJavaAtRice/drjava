@@ -248,8 +248,8 @@ public class MainFrame extends JFrame {
   private Action _aboutAction = new AbstractAction("About") {
 
     public void actionPerformed(ActionEvent ae) {
-      final String message = _model.getAboutText();
-      JOptionPane.showMessageDialog(MainFrame.this, message);
+      //JOptionPane.showMessageDialog(MainFrame.this, _model.getAboutText());
+      new AboutDialog(MainFrame.this, _model.getAboutText()).show();
     }
   };
 

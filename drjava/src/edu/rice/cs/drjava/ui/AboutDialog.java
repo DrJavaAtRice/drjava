@@ -37,40 +37,50 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import javax.swing.*;
+import javax.swing.text.*;
+import javax.swing.event.*;
+import java.awt.event.*;
+import java.awt.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Hashtable;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020208-1121;
+ * About dialog.
  *
  * @version $Id$
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  public static final String BUILD_TIME_STRING = "20020208-1121";
+public class AboutDialog extends JDialog {
+  public AboutDialog(JFrame owner, String text) {
+    super(owner, "About DrJava", true);
 
-  /** A {@link Date} version of the build time. */
-  public static final Date BUILD_TIME = _getBuildDate();
+    JTextArea textArea = new JTextArea(text);
+    textArea.setEditable(false);
+    textArea.setLineWrap(true);
+    textArea.setWrapStyleWord(true);
+    getContentPane().add(new JScrollPane(textArea), BorderLayout.CENTER);
 
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm").parse(BUILD_TIME_STRING);
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+    JButton button = new JButton("OK");
+    button.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        AboutDialog.this.hide();
+      }
+    });
+
+    JPanel bottom = new JPanel();
+    bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
+    bottom.add(Box.createHorizontalGlue());
+    bottom.add(button);
+    bottom.add(Box.createHorizontalGlue());
+
+    getContentPane().add(bottom, BorderLayout.SOUTH);
+
+    //pack();
+    setSize((int) (owner.getWidth() * (4f/5f)),
+            (int) (owner.getHeight() * (4f/5f)));
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}
