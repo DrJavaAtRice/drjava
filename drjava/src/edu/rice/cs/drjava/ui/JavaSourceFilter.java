@@ -45,8 +45,10 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
-import  java.io.File;
-import  javax.swing.filechooser.FileFilter;
+import java.io.File;
+import javax.swing.filechooser.FileFilter;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 
 
 /**
@@ -55,7 +57,7 @@ import  javax.swing.filechooser.FileFilter;
  * @version $Id$
  */
 public class JavaSourceFilter extends FileFilter {
-
+  
   /**
    * Returns true if the file's extension matches Java or GJ.
    */
@@ -65,11 +67,15 @@ public class JavaSourceFilter extends FileFilter {
     }
     String extension = getExtension(f);
     if (extension != null) {
-      if (extension.equals("java") || extension.equals("j")) {
-        return true;
-      } 
-      else {
-        return false;
+      switch (DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL)) {
+        case (DrJava.FULL_JAVA) :
+          return (extension.equals("java") || extension.equals("j"));
+        case (DrJava.ELEMENTARY_LEVEL) :
+          return extension.equals("dj0");
+        case (DrJava.INTERMEDIATE_LEVEL) :
+          return extension.equals("dj1");
+        case (DrJava.ADVANCED_LEVEL) :
+          return extension.equals("dj2");
       }
     }
     return false;
@@ -79,6 +85,16 @@ public class JavaSourceFilter extends FileFilter {
    * @return A description of this filter to display
    */
   public String getDescription() {
+    switch (DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL)) {
+        case (DrJava.FULL_JAVA) :
+          return "Java and GJ source files";
+        case (DrJava.ELEMENTARY_LEVEL) :
+          return "Elementary source files (.dj0)";
+        case (DrJava.INTERMEDIATE_LEVEL) :
+          return "Intermediate source files (.dj1)";
+        case (DrJava.ADVANCED_LEVEL) :
+          return "Advanced source files (.dj2)";
+      }
     return "Java and GJ source files";
   }
 

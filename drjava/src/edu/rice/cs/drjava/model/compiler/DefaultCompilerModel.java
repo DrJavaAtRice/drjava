@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- *
+ * 
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to
- * whom the Software is furnished to do so, subject to the following
+ * to deal with the Software without restriction, including without 
+ * limitation the rights to use, copy, modify, merge, publish, distribute, 
+ * sublicense, and/or sell copies of the Software, and to permit persons to 
+ * whom the Software is furnished to do so, subject to the following 
  * conditions:
- *
- *     - Redistributions of source code must retain the above copyright
+ * 
+ *     - Redistributions of source code must retain the above copyright 
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright
+ *     - Redistributions in binary form must reproduce the above copyright 
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
  * OTHER DEALINGS WITH THE SOFTWARE.
- *
+ * 
 END_COPYRIGHT_BLOCK*/
 
 // TODO: should this be in the compiler package?
@@ -51,9 +51,20 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Iterator;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.IGetDocuments;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
+import javax.swing.*;
+import java.lang.reflect.*;
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.javalanglevels.*;
+import edu.rice.cs.javalanglevels.parser.*;
+import edu.rice.cs.javalanglevels.tree.*;
+
+
 /**
  * Default implementation all compiler functionality in the model, as specified
  * in the CompilerModel interface.  This is the implementation that is used in
@@ -279,6 +290,42 @@ public class DefaultCompilerModel implements CompilerModel {
   //-------------------------------- Helpers --------------------------------//
 
   /**
+   * Converts ParseExceptions thrown by the JExprParser in language levels to
+   * CompilerErrors.
+   */
+  private LinkedList<CompilerError> _parseExceptions2CompilerErrors(LinkedList<ParseException> pes) {
+    LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
+    Iterator<ParseException> iter = pes.iterator();
+    while(iter.hasNext()) {
+      ParseException pe = iter.next();
+      errors.addLast(new CompilerError(pe.file, pe.currentToken.beginLine-1, pe.currentToken.beginColumn-1, pe.getMessage(), false));
+    }
+    return errors;
+  }
+  
+  /**
+   * Converts errors thrown by the language level visitors to CompilerErrors.
+   */
+  private LinkedList<CompilerError> _visitorErrors2CompilerErrors(LinkedList<Pair<String, JExpression>> visitorErrors) {
+    LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
+    Iterator<Pair<String, JExpression>> iter = visitorErrors.iterator();
+    while (iter.hasNext()) {
+      Pair<String, JExpression> pair = iter.next();
+      String message = pair.getFirst();      
+//      System.out.println("Got error message: " + message);
+      JExpression jexpr = pair.getSecond();
+      SourceInfo si;
+      if (jexpr == null) {
+        si = JExprParser.NO_SOURCE_INFO;
+      }
+      else {
+        si = pair.getSecond().getSourceInfo();
+      }
+      errors.addLast(new CompilerError(si.getFile(), si.getStartLine()-1, si.getStartColumn()-1, message, false));
+    }
+    return errors;
+  }
+  /**
    * Compile the given files (with the given sourceroots), and update
    * the model with any errors that result.  Does not notify listeners;
    * use compileAll or doc.startCompile instead.
@@ -288,16 +335,67 @@ public class DefaultCompilerModel implements CompilerModel {
    *        null means output to the same directory as the source file
    */
   protected void _compileFiles(File[] sourceRoots, File[] files, File buildDir) throws IOException {
-    CompilerError[] errors = new CompilerError[0];
 
+//    CompilerError[] errors = new CompilerError[0];
+    Pair<LinkedList<ParseException>, LinkedList<Pair<String, JExpression>>> errors;
+    LinkedList<ParseException> parseExceptions;
+    LinkedList<Pair<String, JExpression>> visitorErrors;
+      LinkedList<CompilerError> compilerErrors = new LinkedList<CompilerError>();
     CompilerInterface compiler
       = CompilerRegistry.ONLY.getActiveCompiler();
 
     compiler.setBuildDirectory(buildDir);
     if (files.length > 0) {
-      errors = compiler.compile(sourceRoots, files);
+//      if (DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL) == DrJava.ELEMENTARY_LEVEL) {
+      LanguageLevelConverter llc = new LanguageLevelConverter();
+      // Language level files are moved to another file, copied back
+      // in augmented form to be compiled.  This compiled version
+      // is also copied to another file with the same path with the 
+      // ".augmented" suffix on the end.
+      // We have to copy the original back to its original spot so the
+      // user doesn't have to do anything funny.
+      //      LinkedList<File> filesToRestore = new LinkedList<File>();
+      //      System.out.println("Calling convert!");
+      errors = llc.convert(files);//, filesToRestore);
+      
+      /**Rename any .dj0 files in files to be .java files, so the correct thing is compiled.*/
+      for (int i = 0; i<files.length; i++) {
+        String fileName = files[i].getAbsolutePath();
+        int lastIndex = fileName.lastIndexOf(".dj");
+        if (lastIndex != -1) {
+          files[i]=new File(fileName.substring(0, lastIndex) + ".java");
+        }
+      }
+      parseExceptions = errors.getFirst();
+      compilerErrors.addAll(_parseExceptions2CompilerErrors(parseExceptions));
+      visitorErrors = errors.getSecond();
+      compilerErrors.addAll(_visitorErrors2CompilerErrors(visitorErrors));
+//      }
+//      System.out.println("Got back " + errors.length + " errors");
+      CompilerError[] compilerErrorsArray = (CompilerError[]) compilerErrors.toArray(new CompilerError[0]);
+      if (compilerErrorsArray.length == 0) {
+        compilerErrorsArray = compiler.compile(sourceRoots, files);
+      }
+//      Iterator<File> iter = filesToRestore.iterator();
+//      while (iter.hasNext()) {
+//        _getter.getDocumentForFile(iter.next()).revertFile();
+//      }
+      _distributeErrors(compilerErrorsArray);
+      // Restore the files that were moved.
+//      Iterator<File> iter = filesToRestore.iterator();
+//      while (iter.hasNext()) {
+//        File f = iter.next();
+//        File sourceFile = new File(f.getAbsolutePath() + ".beginner");
+//        // Windows needs this since otherwise rename won't work.
+//        if (f.exists()) {
+//          f.delete();
+//        }
+//        sourceFile.renameTo(f);
+//      }
     }
-    _distributeErrors(errors);
+    else {
+      _distributeErrors(new CompilerError[0]);
+    }
   }
 
   /**
@@ -305,8 +403,10 @@ public class DefaultCompilerModel implements CompilerModel {
    * based on the file, giving each group to the appropriate
    * OpenDefinitionsDocument, opening files if necessary.
    */
-  private void _distributeErrors(CompilerError[] errors) {
+  private void _distributeErrors(CompilerError[] errors)
+      throws IOException {
     resetCompilerErrors();
+
     _compilerErrorModel = new CompilerErrorModel<CompilerError>(errors, _getter);
   }
 

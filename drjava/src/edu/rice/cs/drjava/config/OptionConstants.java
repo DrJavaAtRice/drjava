@@ -1050,6 +1050,13 @@ public interface OptionConstants {
   /* ---------- Undisplayed Options ---------- */
 
   /**
+   * The language level to use when starting DrJava.  Stores the most recently used one.
+   * Defaults to full java.
+   */
+  public static final IntegerOption LANGUAGE_LEVEL =
+    new IntegerOption("language.level", new Integer(0));
+  
+  /**
    * A vector containing the most recently used files.
    */
   public static final VectorOption<File> RECENT_FILES =

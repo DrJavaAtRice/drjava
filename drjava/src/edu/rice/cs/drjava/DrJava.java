@@ -71,6 +71,15 @@ import edu.rice.cs.drjava.config.*;
  * @version $Id$
  */
 public class DrJava implements OptionConstants {
+  
+  /* Constants for language levels */
+  public static final int FULL_JAVA = 0;
+  public static final int ELEMENTARY_LEVEL = 1;
+  public static final int INTERMEDIATE_LEVEL = 2;
+  public static final int ADVANCED_LEVEL = 3;
+  
+  public static final String[] LANGUAGE_LEVEL_EXTENSIONS = new String[] {".java", ".dj0", ".dj1", ".dj2"};
+  
   /** Class to probe to see if the debugger is available */
   public static final String TEST_DEBUGGER_CLASS = "com.sun.jdi.Bootstrap";
 
@@ -531,7 +540,7 @@ public class DrJava implements OptionConstants {
     // If not, try to guess tools.jar location
     ToolsJarClassLoader loader = new ToolsJarClassLoader();
     try {
-      loader.loadClass("com.sun.jdi.Bootstrap");
+      loader.loadClass(TEST_DEBUGGER_CLASS);
       return true;
     }
     catch (ClassNotFoundException cnfe) {

@@ -204,7 +204,7 @@ export CVS_RSH=ssh
       <itemizedlist>
         <listitem>
           <para>If this is the first time you have used your SourceForge account, you might need to SSH into the CVS server to initialize it.  You will be logged out immediately, but your account will be ready to use.  Do this with the following command, replacing [USERNAME] with your SourceForge username.</para>
-          <programlisting>ssh cvs.drjava.sf.net -l [USERNAME]</programlisting>
+          <programlisting>ssh cvs.sf.net -l [USERNAME]</programlisting>
         </listitem>
 
         <listitem>
@@ -219,7 +219,7 @@ mkdir ~/drjava/built
           <para>Change to the <filename>drjava</filename> directory and check out the code.</para>
           <programlisting>
 cd ~/drjava
-cvs -d [USERNAME]@cvs.drjava.sf.net:/cvsroot/drjava co src
+cvs -d [USERNAME]@cvs.sf.net:/cvsroot/drjava co src
           </programlisting>
         </listitem>
       </itemizedlist>

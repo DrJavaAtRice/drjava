@@ -103,7 +103,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   //private static final int OUTPUT_TAB = 2;
   //private static final int JUNIT_TAB = 3;
   //private static final int JAVADOC_TAB = 4;
-
+  
   // GUI Dimensions
 //  private static final int GUI_WIDTH = 800;
 //  private static final int GUI_HEIGHT = 700;
@@ -200,6 +200,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenu _toolsMenu;
   private JMenu _projectMenu;
   private JMenu _debugMenu;
+  private JMenu _languageLevelMenu;
   private JMenu _helpMenu;
   private JMenuItem _debuggerEnabledMenuItem;
 //  private JMenuItem _runDebuggerMenuItem;
@@ -2876,10 +2877,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       case JFileChooser.APPROVE_OPTION:
         File chosen = fc.getSelectedFile();
         if (chosen != null) {
-          //append ".java" if not written by user
+          //append the appropriate language level extension if not written by user
           if (fc.getFileFilter() instanceof JavaSourceFilter) {
             if (chosen.getName().indexOf(".") == -1)
-              return new File (chosen.getAbsolutePath() + ".java");
+              return new File (chosen.getAbsolutePath() + DrJava.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);//".java");
           }
           return chosen;
         }
@@ -3150,6 +3151,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _toolsMenu = _setUpToolsMenu(mask);
     _projectMenu = _setUpProjectMenu(mask);
     if (showDebugger) _debugMenu = _setUpDebugMenu(mask);
+    _languageLevelMenu = _setUpLanguageLevelMenu(mask);
     _helpMenu = _setUpHelpMenu(mask);
 
     _menuBar.add(_fileMenu);
@@ -3157,6 +3159,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _menuBar.add(_toolsMenu);
     _menuBar.add(_projectMenu);
     if (showDebugger) _menuBar.add(_debugMenu);
+    _menuBar.add(_languageLevelMenu);
     _menuBar.add(_helpMenu);
     setJMenuBar(_menuBar);
   }
@@ -3418,6 +3421,56 @@ public class MainFrame extends JFrame implements OptionConstants {
     _stepOverDebugAction.setEnabled(isSuspended);
     _stepOutDebugAction.setEnabled(isSuspended);
     _debugPanel.setThreadDependentButtons(isSuspended);
+  }
+  
+  /**
+   * Creates and returns the language levels menu
+   */
+  private JMenu _setUpLanguageLevelMenu(int mask) {
+    JMenu languageLevelMenu = new JMenu("Language Level");
+    languageLevelMenu.setMnemonic(KeyEvent.VK_L);
+    ButtonGroup group = new ButtonGroup();
+    
+    final Configuration config = DrJava.getConfig();
+    int currentLanguageLevel = config.getSetting(LANGUAGE_LEVEL);
+    JRadioButtonMenuItem rbMenuItem;
+    rbMenuItem = new JRadioButtonMenuItem("Full Java");
+    if (currentLanguageLevel == DrJava.FULL_JAVA) { rbMenuItem.setSelected(true); }
+    rbMenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        config.setSetting(LANGUAGE_LEVEL, DrJava.FULL_JAVA);
+      }});
+    group.add(rbMenuItem);
+    languageLevelMenu.add(rbMenuItem);
+    languageLevelMenu.addSeparator();
+    
+    rbMenuItem = new JRadioButtonMenuItem("Elementary");
+    if (currentLanguageLevel == DrJava.ELEMENTARY_LEVEL) { rbMenuItem.setSelected(true); }
+    rbMenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        config.setSetting(LANGUAGE_LEVEL, DrJava.ELEMENTARY_LEVEL);
+      }});
+    group.add(rbMenuItem);
+    languageLevelMenu.add(rbMenuItem);
+    
+    rbMenuItem = new JRadioButtonMenuItem("Intermediate");
+    if (currentLanguageLevel == DrJava.INTERMEDIATE_LEVEL) { rbMenuItem.setSelected(true); }
+    rbMenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        config.setSetting(LANGUAGE_LEVEL, DrJava.INTERMEDIATE_LEVEL);
+      }});
+    group.add(rbMenuItem);
+    languageLevelMenu.add(rbMenuItem);
+    
+    rbMenuItem = new JRadioButtonMenuItem("Advanced");
+    if (currentLanguageLevel == DrJava.ADVANCED_LEVEL) { rbMenuItem.setSelected(true); }
+    rbMenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        config.setSetting(LANGUAGE_LEVEL, DrJava.ADVANCED_LEVEL);
+      }});
+    group.add(rbMenuItem);
+    languageLevelMenu.add(rbMenuItem);
+    return languageLevelMenu;
   }
 
   /**
