@@ -62,7 +62,7 @@ public class FontOption extends Option<Font> {
    */ 
   public String format(Font f) {  
     if (CodeStatus.DEVELOPMENT) {
-      StringBuffer str = new StringBuffer(f.getFamily());
+      StringBuffer str = new StringBuffer(f.getName());
       str.append("-");
       if (f.isBold()) {
         str.append("BOLD");

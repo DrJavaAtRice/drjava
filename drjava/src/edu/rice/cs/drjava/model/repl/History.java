@@ -42,6 +42,8 @@ package edu.rice.cs.drjava.model.repl;
 import  gj.util.Vector;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.CodeStatus;
 
 /**
  * Keeps track of what was typed in the interactions pane.
@@ -55,6 +57,15 @@ public class History implements OptionConstants {
   private Vector<String> _vector = new Vector<String>();
   private int _cursor = -1;
  
+  /**
+   * Constructor, so we can add a listener to the Config item being used.
+   */ 
+  public History() {
+    if (CodeStatus.DEVELOPMENT) {
+      DrJava.CONFIG.addOptionListener(HISTORY_MAX_SIZE, new HistorySizeOptionListener());
+    }
+  }
+  
   /**
    * Adds an item to the history and moves the cursor to point
    * to the place after it.
@@ -133,8 +144,25 @@ public class History implements OptionConstants {
     return _vector.size();
   }
   
-  
+  /**
+   * The OptionListener for HISTORY_MAX_SIZE
+   */
+  private class HistorySizeOptionListener implements OptionListener<Integer> {
+   
+    public void optionChanged (OptionEvent<Integer> oce) {
+      int historySize = oce.value.intValue();
+      
+      if (size() > historySize) {
+        
+        int numberOfElements = size() - historySize;
+        
+        for (int i=0; i< numberOfElements; i++) {
+          _vector.removeElementAt(0);
+        }
+        
+        moveEnd();
+      }
+      MAX_SIZE = historySize;
+    }
+  }
 }
-
-
-
