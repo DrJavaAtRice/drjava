@@ -86,8 +86,8 @@ public class StrictURLClassLoaderTest extends TestCase {
    * Make sure this loader can load from the given URLs.
    */
   public void testWillLoadClassFromGivenURLs() throws Throwable {
-    String logResource = "com/sun/tools/javac/util/Log.class";
-    String compilerClass = "com.sun.tools.javac.util.Context";
+    String logResource = "com/sun/tools/javac/Main.class";
+    String compilerClass = "com.sun.tools.javac.Main";
     URL[] urls = ToolsJarClassLoader.getToolsJarURLs();
 
     if (urls.length > 0) {
