@@ -142,6 +142,13 @@ public interface Context extends SimpleContext {
     void declareMemberStaticImport(String member);
 
     /**
+     * Returns the fully qualified class name that wraps the given staticly imported method
+     * @param methodName the method name
+     * @param args the argument list for the method
+     */
+    List<IdentifierToken> getQualifiedName(String methodName, Class[] args) throws NoSuchMethodException;
+    
+    /**
      * Returns the default qualifier for this context
      * @param node the current node
      */
@@ -268,6 +275,7 @@ public interface Context extends SimpleContext {
     Method lookupMethod(Node prefix, String mname, Class[] params)
  throws NoSuchMethodException;
 
+   
     /**
      * Looks for a function
      * @param mname  the function name

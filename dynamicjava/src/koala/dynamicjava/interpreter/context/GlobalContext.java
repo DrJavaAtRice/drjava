@@ -75,11 +75,6 @@ public class GlobalContext extends VariableContext implements Context {
   protected static int classCount = 0;
 
   /**
-   * The importation manager
-   */
-  protected ImportationManager importationManager;
-
-  /**
    * The interpreter
    */
   protected Interpreter interpreter;
@@ -117,7 +112,7 @@ public class GlobalContext extends VariableContext implements Context {
    * @param cl2 the additional classloader
    */
   public GlobalContext(Interpreter i, ClassLoader cl) {
-    importationManager = new BufferedImportationManager(cl);
+    super(new BufferedImportationManager(cl));
     interpreter        = i;
     classLoader        = cl;
   }
@@ -238,7 +233,7 @@ public class GlobalContext extends VariableContext implements Context {
   public void defineFunction(MethodDeclaration node) {
     functions.add(0, node);
   }
-
+  
   /**
    * Defines a class from its syntax tree
    * @param node the class declaration
@@ -329,6 +324,15 @@ public class GlobalContext extends VariableContext implements Context {
    */
   public Node getDefaultQualifier(Node node, String tname) {
     return null;
+  }
+  
+  /**
+     * Returns the fully qualified class name that wraps the given staticly imported method
+     * @param methodName the method name
+     * @param args the argument list for the method
+     */
+  public List<IdentifierToken> getQualifiedName(String methodName, Class[] args) throws NoSuchMethodException{
+   return importationManager.getQualifiedName(methodName, args);    
   }
 
   /**
@@ -666,7 +670,7 @@ public class GlobalContext extends VariableContext implements Context {
     }
     return m;
   }
-
+  
   /**
    * Looks for a function
    * @param mname  the function name
@@ -705,7 +709,8 @@ public class GlobalContext extends VariableContext implements Context {
         return md;
       }
     }
-
+       
+    
     throw new NoSuchFunctionException(mname);
   }
 

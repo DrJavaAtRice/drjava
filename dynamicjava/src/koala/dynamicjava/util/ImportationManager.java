@@ -77,6 +77,8 @@ import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
 
+import koala.dynamicjava.tree.*;
+
 /**
  * The instances of this class manages the importation clauses.
  *
@@ -506,7 +508,65 @@ public class ImportationManager implements Cloneable {
     classLoader               = im.classLoader;
   }
 
+
+  /** 
+   * Looks through the list of staticly imported methods and through all statically imported classes
+   * for the method with the given names and parameters
+   * @param name - the name of the method
+   * @param params - the parameters of the method
+   */  
+  protected Method lookupMethod(String name, Class[] params) throws NoSuchMethodException {
+    Method m, toReturn;
+    Iterator<Method> i = singleTypeImportStaticMethodClauses.iterator();
+    while(i.hasNext()) {
+      m = i.next();
+      if(m.getName().equals(name) && ReflectionUtilities.hasCompatibleSignatures(m.getParameterTypes(),params))
+        return m;
+    }
+    //If not found in the singleTypeImport list, check the import on demand list
+    String className;
+    Iterator<String> it = importOnDemandStaticClauses.iterator();
+    while(it.hasNext()) {
+      className = it.next();
+      try {
+        toReturn = ReflectionUtilities.lookupMethod(lookupClass(className,null),name,params);
+          //Class.forName(className, true, classLoader).getMethod(name,params);    
+        return toReturn;
+      }
+      catch(NoSuchMethodException nsme) {
+        //Will throw lots of these
+      }
+      catch(ClassNotFoundException cnfe) {
+        throw new RuntimeException("Class existed on static import and does not exist on method lookup");
+      }
+    }
+    
+    //If it hasn't returned by now, there hasn't been a method of this name with this parameter list that has been staticly imported
+    throw new NoSuchMethodException(name);
+  }
   
+  
+  /**
+     * Returns the fully qualified class name that wraps the given staticly imported method
+     * @param methodName the method name
+     * @param args the argument list for the method
+     */
+  public List<IdentifierToken> getQualifiedName(String methodName, Class[] args) 
+    throws NoSuchMethodException {
+    List<IdentifierToken> toReturn = new LinkedList<IdentifierToken>(); 
+    Method m = lookupMethod(methodName, args);
+    String toParse = m.getDeclaringClass().getName();
+    if(toParse.startsWith("class "))
+      toParse = toParse.substring(6,toParse.length());
+    int i;
+    while((i=toParse.lastIndexOf(".")) != -1) {
+      toReturn.add(0, new Identifier(toParse.substring(i+1,toParse.length())));
+      toParse = toParse.substring(0,i);
+    }
+    toReturn.add(0, new Identifier(toParse));
+    return toReturn;
+  }
+    
   /**
    * Tests whether the fully qualified class name c1 ends with c2
    */

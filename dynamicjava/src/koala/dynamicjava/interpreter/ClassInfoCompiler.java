@@ -326,7 +326,7 @@ public class ClassInfoCompiler {
   protected class ConstructorVisitor extends VisitorObject<Object> {
     String          superConstructor;
     String[]        constructorParameters = new String[0];
-    VariableContext context               = new VariableContext();
+    VariableContext context               = new VariableContext(importationManager);
 
     /**
      * Visits a ConstructorInvocation

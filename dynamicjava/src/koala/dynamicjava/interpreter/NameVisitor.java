@@ -52,6 +52,11 @@ public class NameVisitor extends VisitorObject<Node> {
   private Context context;
   
   /**
+   * The type checker context
+   */
+  private Context typeCheckerContext;
+  
+  /**
    * a counter to help define unique variable names
    * added to help with foreach variable naming
    */
@@ -64,6 +69,16 @@ public class NameVisitor extends VisitorObject<Node> {
   public NameVisitor(Context ctx) {
     context = ctx;
     name_counter = new Integer(0);
+  }
+  
+  /**
+   * Creates a new name visitor with two context, one that is the default context and one which will be passed to a Type Checker
+   * @param ctx the context
+   * @param typeCtx the typeChecker Context
+   */
+  public NameVisitor(Context ctx, Context typeCtx) {
+    this(ctx);
+    typeCheckerContext = typeCtx;
   }
   
   protected static void rejectReferenceType(Node o, Node n) {
@@ -544,6 +559,27 @@ public class NameVisitor extends VisitorObject<Node> {
       if (o == null) {
         return null;
       }
+    }
+    if(o == null) {
+      try {
+        //Get fully qualified name for Object o if the methodCall is to a staticly imported method
+        //The full class name is given as if the user gave a call using the entire fully qualified name
+        Class[] params = new Class[args!=null? args.size() : 0];
+        if(args != null) {
+          for(int i = 0; i < args.size(); i++) {
+            String toParse = args.get(i).toString();
+            params[i]=(args.get(i).acceptVisitor(AbstractTypeChecker.makeTypeChecker(typeCheckerContext)));
+          }
+        }   
+        List<IdentifierToken> ids = context.getQualifiedName(node.getMethodName(),params);
+        o = new ReferenceType(ids);
+      }      
+      catch(Exception e){
+        //If the class type of one of the parameters can't be found, throws an exception
+        //Also, if no method found to have been imported, throws an exception
+        //This will occur every time the user calls a method that has not been staticly imported
+        //As this section is new code, this is being caught to prevent breaking old code
+      }     
     }
     
     if (o == null) {

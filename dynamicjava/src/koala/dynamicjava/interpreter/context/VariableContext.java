@@ -31,6 +31,8 @@ package koala.dynamicjava.interpreter.context;
 import java.lang.ref.*;
 import java.util.*;
 
+import koala.dynamicjava.util.ImportationManager;
+
 /**
  * This class encapsulates the behaviour of Java scopes.
  *
@@ -55,11 +57,17 @@ public class VariableContext implements SimpleContext {
   protected Scope cscope;
   
   /**
+   * The current importation manager for the context
+   */
+  protected ImportationManager importationManager;
+  
+  /**
    * Creates a new context initialized with an empty initial scope
    */
-  public VariableContext() {
+  protected VariableContext() { 
     enterScope();
   }
+  
   
   /**
    * Creates a new context initialized with the given entries defined
@@ -67,11 +75,21 @@ public class VariableContext implements SimpleContext {
    * @param entries a set of string
    */
   public VariableContext(Set entries) {
-    this();
+    this();    
     Iterator it = entries.iterator();
     while (it.hasNext()) {
       ((AbstractVariable)it.next()).set(this, null);
     }
+  }
+  
+  /**
+   * Creates a new context initialized with an empty initial scope and 
+   * sets the given Importation manager
+   * @param im an importationManager for use in all child contexts
+   */
+  public VariableContext(ImportationManager im) {
+    this();
+    importationManager = im;
   }
   
   /**
@@ -165,6 +183,13 @@ public class VariableContext implements SimpleContext {
         return true;
       }
     }
+    
+    //Check importation manager for explicitly imported fields
+    
+    
+    //Check importation manager for import-on-demand clauses with fields
+    
+    
     return false;
   }
   

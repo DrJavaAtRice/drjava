@@ -440,7 +440,8 @@ public class MethodContext extends StaticContext {
         }
         m.setAccessible(true);
         throw new MethodModificationError(exp, m);
-      } else {
+      } 
+      else {
         throw e;
       }
     }

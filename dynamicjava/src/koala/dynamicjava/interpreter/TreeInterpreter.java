@@ -894,7 +894,7 @@ public class TreeInterpreter implements Interpreter {
    * @return the result of the evaluation of the last statement
    */
   public Object interpret(Node AST) throws InterpreterException {
-    NameVisitor nv = new NameVisitor(nameVisitorContext);
+    NameVisitor nv = new NameVisitor(nameVisitorContext,checkVisitorContext);
     Node o = AST.acceptVisitor(nv);
     if (o != null) AST = o;
 

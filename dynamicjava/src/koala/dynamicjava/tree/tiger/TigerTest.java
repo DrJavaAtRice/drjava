@@ -66,30 +66,156 @@ public class TigerTest extends TestCase {
   
   public void testStaticImportOfStaticInnerClass(){
     testString = 
-     "package P;\n"+
-     "public class A { \n"+
-     "  public static class B {\n"+
-     "    public static int m(){ return 0; }\n"+
-     "  }\n"+
-     "}\n"+
-     "package Q;\n"+
-     "import static P.A.B;\n"+
-     "B.m();\n";
-   assertEquals(0,interpret(testString));
-     
+      "package P;\n"+
+      "public class A { \n"+
+      "  public static class B {\n"+
+      "    public static int m(){ return 0; }\n"+
+      "  }\n"+
+      "}\n"+
+      "package Q;\n"+
+      "import static P.A.B;\n"+
+      "B.m();\n";
+    assertEquals(0,interpret(testString));
+    
     testString = 
-     "package R;\n"+
-     "public class C { \n"+
-     "  public static class D {\n"+
-     "    public static int m(){ return 0; }\n"+
-     "  }\n"+
-     "}\n"+
-     "package S;\n"+
-     "import static R.C.*;\n"+
-     "D.m();\n";
-   assertEquals(0,interpret(testString));
+      "package R;\n"+
+      "public class C { \n"+
+      "  public static class D {\n"+
+      "    public static int m(){ return 0; }\n"+
+      "  }\n"+
+      "}\n"+
+      "package S;\n"+
+      "import static R.C.*;\n"+
+      "D.m();\n";
+    assertEquals(0,interpret(testString));
     
   }
+  
+  public void testStaticImportOfMethods(){
+    
+    //no parameters
+    testString = 
+      "package Pack;\n"+
+      "public class Aclass { \n"+
+      "  public static int m() { return 0; }\n"+
+      "}\n"+
+      "package Q;\n"+
+      "import static Pack.Aclass.m;\n"+
+      "m();\n";
+    assertEquals(0,interpret(testString));
+    
+    testString = 
+      "package R;\n"+
+      "public class C { \n"+
+      "  public static int m2(){ return 0; }\n"+
+      "}\n"+
+      "package S;\n"+
+      "import static R.C.*;\n"+
+      "m2();\n";
+    assertEquals(0,interpret(testString));
+    
+    //With a parameter
+    
+    testString =
+      "package T;\n"+
+      "public class D { \n"+
+      "  public static String m3(String s) { return s; }\n"+
+      "}\n"+
+      "package U;\n"+
+      "import static T.D.m3;\n"+
+      "m3(\"5\");\n";
+    assertEquals("5",interpret(testString));
+    
+    testString =
+      "package V;\n"+
+      "public class E { \n"+
+      "  public static String m4(String s, String s2) { return s; }\n"+
+      "}\n"+
+      "package W;\n"+
+      "import static V.E.*;\n"+
+      "m4(\"5\",\"6\");\n";
+    assertEquals("5",interpret(testString));
+    
+    
+    testString = 
+      "package AA;\n"+
+      "public class BB {"+
+      "  public static int m5(int i) { return i; }\n"+
+      "}\n"+
+      "package CC;\n"+
+      "import static AA.BB.m5;"+
+      "m5(1+2+3+4+5);\n";
+    assertEquals(15,interpret(testString));
+    
+    
+    //With multiple parameters of different types
+    
+    testString =
+      "package X;\n"+
+      "public class F { \n"+
+      "  public static String m6(String s, Class c) { return s; }\n"+
+      "}\n"+
+      "package Y;\n"+
+      "import static X.F.*;\n"+
+      "m6(\"5\",Integer.class);\n";
+    assertEquals("5",interpret(testString));
+    
+    
+    //With unequal parameters
+    testString =
+      "package DD;\n"+
+      "public class EE { \n"+
+      "  public static int m7(int i) { return i; }\n"+
+      "}\n"+
+      "package FF;\n"+
+      "import static DD.EE.*;\n"+
+      "m7(\"5\");\n";
+    try {
+      assertEquals(5,interpret(testString));
+      fail("Method parameter types String and int are not equal!");
+    }
+    catch(Error e) {
+      //Expected to fail
+    }
+    
+    //Test for context shift
+    //In other words, because we run a TypeChecker on the arguments, make sure that it doesn't actually add 
+    // the element 5 to the list when it is checking its type for the name visitor.
+    testString = 
+      "package GG;\n"+
+      "public class HH {\n"+
+      "  public static int m8(int i) { return i; } \n" +
+      "}\n"+
+      "package II;\n"+
+      "import static GG.HH.m8;\n"+
+      "int i = 0;"+
+      "m8(i);";
+    assertEquals(0,interpret(testString));
+    testString =
+      "m8(i++);";
+    assertEquals(0,interpret(testString));
+    testString =
+      "m8(++i);";
+    assertEquals(2,interpret(testString));
+    
+    
+    
+    testString = 
+      "package KK;\n"+
+      "import static java.lang.Math.*;\n"+
+      "abs(-4);";
+    assertEquals(4,interpret(testString));
+    testString = 
+      "sqrt(4);";
+    assertEquals(2.0,interpret(testString));
+    testString =
+      "sqrt(abs(-4));";
+    assertEquals(2.0,interpret(testString));
+    
+    
+    
+  }
+      
   
   public void testParseStaticImport(){
     testString =
