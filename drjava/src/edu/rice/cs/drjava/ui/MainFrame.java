@@ -897,12 +897,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Set up listeners
     this.addWindowListener(_windowCloseListener);
     _model.addListener(new ModelListener());
+    
+    _defScrollPanes = new Hashtable();
 
     // Create tabs before DefPane
     _setUpTabs();
 
     // DefinitionsPane
-    _defScrollPanes = new Hashtable();
     JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
     _currentDefPane = (DefinitionsPane) defScroll.getViewport().getView();
     
@@ -2421,6 +2422,11 @@ public class MainFrame extends JFrame implements OptionConstants {
           outputScroll.repaint();
         }
         // Update error highlights?
+        if (_currentDefPane != null) {
+          int pos = _currentDefPane.getCaretPosition();
+          _currentDefPane.getErrorCaretListener().updateHighlight(pos);
+          _currentDefPane.getJUnitErrorCaretListener().updateHighlight(pos);
+        }
       }
     });
     
@@ -3170,7 +3176,31 @@ public class MainFrame extends JFrame implements OptionConstants {
       SwingUtilities.invokeLater(doCommand);
     }
     
-    public void junitRunning() {}
+    //public void junitRunning() {}
+    
+    public void junitSuiteStarted(final int numTests) {
+      SwingUtilities.invokeLater( new Runnable() {
+        public void run() {
+          _junitPanel.progressReset(numTests);
+        }
+      });
+    }
+  
+    public void junitTestStarted(final OpenDefinitionsDocument doc, final String name) {
+      _junitPanel.getJUnitErrorListPane().testStarted(name);
+    }
+  
+    public void junitTestEnded(final OpenDefinitionsDocument doc, final String name,
+                               final boolean wasSuccessful, final boolean causedError) {
+      // syncUI...?
+      SwingUtilities.invokeLater( new Runnable() {
+        public void run() {
+          _junitPanel.getJUnitErrorListPane().
+            testEnded(name, wasSuccessful, causedError);
+          _junitPanel.progressStep(wasSuccessful);
+        }
+      });
+    }
 
     public void junitEnded() {
       // Only change GUI from event-dispatching thread

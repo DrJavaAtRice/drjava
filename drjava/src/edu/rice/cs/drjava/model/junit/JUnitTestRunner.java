@@ -61,6 +61,11 @@ import junit.textui.TestRunner;
 public class JUnitTestRunner extends junit.textui.TestRunner {
   
   /**
+   * Receives updates on the test suite's progress.
+   */
+  private InterpreterJVM _jvm;
+  
+  /**
    * Used to tie the output of the ui textrunner
    * to nothing.
    */
@@ -71,15 +76,27 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
    */
   private TestSuiteLoader _classLoader;
   
-  //private ProgressBar _progress;
-  
+  /**
+   * The JUnit TestResult being accumulated.
+   */
   private TestResult _result;
+  
+  /**
+   * The current number of errors in the result.
+   */
+  private int _errorCount;
+  
+  /**
+   * The current number of failures in the result.
+   */
+  private int _failureCount;
   
   /**
    * Constructor
    */
   public JUnitTestRunner(InterpreterJVM jvm) {
     super();
+    _jvm = jvm;
     _classLoader = new DrJavaTestClassLoader(jvm);
     _writer = new PrintStream(System.out) {
       public void print(String s) {
@@ -90,18 +107,18 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
       }
     };
     
-    // Prototype code for new progress bar
-    /*
-     JFrame f = new JFrame();
-     _progress = new ProgressBar();
-     f.getContentPane().add(_progress);
-     f.show();
-     */
+    _errorCount = 0;
+    _failureCount = 0;
   }
   
   public TestResult doRun(Test suite) {
-    //_progress.reset();
-    //_progress.start(suite.countTestCases());
+    
+    // Reset all bookkeeping
+    _errorCount = 0;
+    _failureCount = 0;
+    _jvm.testSuiteStarted(suite.countTestCases());
+    
+    // Run the test
     _result= createTestResult();
     _result.addListener(this);
     long startTime= System.currentTimeMillis();
@@ -110,7 +127,6 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
     long runTime= endTime-startTime;
     //fPrinter.print(result, runTime);
     
-    //pause(wait);
     return _result;
   }
   
@@ -134,80 +150,31 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
     return getWriter();
   }
   
-  public void testStarted(String testName) {
-    //System.out.println("Starting " + testName + "...");
+  /**
+   * Called by JUnit when a test is started.
+   */
+  public synchronized void startTest(Test test) {
+    _jvm.testStarted(test.toString());
   }
-  
-  public void testEnded(String testName) {
-    /*
-    System.out.println("Done.");
-    synchUI();
-    SwingUtilities.invokeLater( new Runnable() {
-      public void run() {
-        if (_result != null) {
-          _progress.step(_result.runCount(), _result.wasSuccessful());
-        }
-      }
-    });
-    */
-  }
-  
-  public void testFailed(int status, Test test, Throwable t) {
-    //System.out.println("Failed!  status: " + status + ", test: " + test +
-    //                   "\n" + t.toString());
-  }
-  
   
   /**
-   * Wait until all the events are processed in the event thread
+   * Called by JUnit when a test has finished.
    */
-  private void synchUI() {
-    try {
-      SwingUtilities.invokeAndWait(new Runnable() {
-        public void run() {}
-      });
+  public synchronized void endTest(Test test) {
+    boolean error = false;
+    boolean failure = false;
+    if (_result.errorCount() > _errorCount) {
+      error = true;
+      _errorCount++;
     }
-    catch (Exception e) {
+    if (_result.failureCount() > _failureCount) {
+      failure = true;
+      _failureCount++;
     }
+    boolean success = !(failure || error);
+    _jvm.testEnded(test.toString(), success, failure);
+    
   }
-  
 }
 
 
-/**
- * A progress bar showing the green/red status.
- * Adapted from JUnit code.
- */
-class ProgressBar extends JProgressBar {
-  boolean fError= false;
-  
-  public ProgressBar() {
-    super();
-    setForeground(getStatusColor());
-  }
-  
-  private Color getStatusColor() {
-    if (fError)
-      return Color.red;
-    return Color.green;
-  }
-  
-  public void reset() {
-    fError= false;
-    setForeground(getStatusColor());
-    setValue(0);
-  }
-  
-  public void start(int total) {
-    setMaximum(total);
-    reset();
-  }
-  
-  public void step(int value, boolean successful) {
-    setValue(value);
-    if (!fError && !successful) {
-      fError= true;
-      setForeground(getStatusColor());
-    }
-  }
-}

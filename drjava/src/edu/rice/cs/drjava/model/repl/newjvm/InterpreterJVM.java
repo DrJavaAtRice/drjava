@@ -368,23 +368,76 @@ public class InterpreterJVM extends UnicastRemoteObject
     return _classpath;
   }
   
-  public void runTest(String className, String fileName) throws RemoteException {
+  /**
+   * Runs a JUnit Test class in the Interpreter JVM.
+   * @param className Name of the TestCase class
+   * @param fileName Name of the file for the TestCase class
+   */
+  public void runTestSuite(String className, String fileName) throws RemoteException {
     _junitTestManager.runTest(className, fileName);
   }
   
+  /**
+   * Notifies the main JVM if JUnit is invoked on a non TestCase class.
+   */
   public void nonTestCase() {
     try {
       _mainJVM.nonTestCase();
     }
-      catch (RemoteException re) {
-        // nothing to do
-      }
-      
+    catch (RemoteException re) {
+      // nothing to do
+    }
   }
   
-  public void testFinished(JUnitError[] errors) {
+  /**
+   * Notifies that a suite of tests has started running.
+   * @param numTests The number of tests in the suite to be run.
+   */
+  public void testSuiteStarted(int numTests) {
     try {
-      _mainJVM.testFinished(errors);
+      _mainJVM.testSuiteStarted(numTests);
+    }
+    catch (RemoteException re) {
+      // nothing to do
+    }
+  }
+  
+  /**
+   * Notifies that a particular test has started.
+   * @param testName The name of the test being started.
+   */
+  public void testStarted(String testName) {
+    try {
+      _mainJVM.testStarted(testName);
+    }
+    catch (RemoteException re) {
+      // nothing to do
+    }
+  }
+  
+  /**
+   * Notifies that a particular test has ended.
+   * @param testName The name of the test that has ended.
+   * @param wasSuccessful Whether the test passed or not.
+   * @param causedError If not successful, whether the test caused an error
+   *  or simply failed.
+   */
+  public void testEnded(String testName, boolean wasSuccessful, boolean causedError) {
+    try {
+      _mainJVM.testEnded(testName, wasSuccessful, causedError);
+    }
+    catch (RemoteException re) {
+      // nothing to do
+    }
+  }
+  
+  /**
+   * Notifies that a full suite of tests has finished running.
+   * @param errors The array of errors from all failed tests in the suite.
+   */
+  public void testSuiteFinished(JUnitError[] errors) {
+    try {
+      _mainJVM.testSuiteEnded(errors);
     }
     catch (RemoteException re) {
       // nothing to do

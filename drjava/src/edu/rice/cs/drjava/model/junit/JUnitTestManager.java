@@ -101,7 +101,7 @@ public class JUnitTestManager {
           }
           
           Arrays.sort(errors);
-          _jvm.testFinished(errors);
+          _jvm.testSuiteFinished(errors);
         }
         catch (Throwable t) {
           t.printStackTrace();

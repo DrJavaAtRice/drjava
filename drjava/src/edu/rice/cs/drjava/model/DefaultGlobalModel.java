@@ -1322,9 +1322,57 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
   
   /**
-   * Called from the JUnitTestManager after the test finishes
+   * Called to indicate that a suite of tests has started running.
+   * @param numTests The number of tests in the suite to be run.
    */
-  public void testFinished(JUnitError[] errors) {
+  public void testSuiteStarted(final int numTests) {
+    synchronized(_compilerLock) {
+      notifyListeners(new EventNotifier() {
+        public void notifyListener(GlobalModelListener l) {
+          l.junitSuiteStarted(numTests);
+        }
+      });
+    }
+  }
+  
+  /**
+   * Called when a particular test is started.
+   * @param testName The name of the test being started.
+   */
+  public void testStarted(final String testName) {
+    synchronized(_compilerLock) {
+      notifyListeners(new EventNotifier() {
+        public void notifyListener(GlobalModelListener l) {
+          l.junitTestStarted(_docBeingTested, testName);
+        }
+      });
+    }
+  }
+  
+  /**
+   * Called when a particular test has ended.
+   * @param testName The name of the test that has ended.
+   * @param wasSuccessful Whether the test passed or not.
+   * @param causedError If not successful, whether the test caused an error
+   *  or simply failed.
+   */
+  public void testEnded(final String testName, final boolean wasSuccessful,
+                        final boolean causedError)
+  {
+    synchronized(_compilerLock) {
+      notifyListeners(new EventNotifier() {
+        public void notifyListener(GlobalModelListener l) {
+          l.junitTestEnded(_docBeingTested, testName, wasSuccessful, causedError);
+        }
+      });
+    }
+  }
+  
+  /**
+   * Called when a full suite of tests has finished running.
+   * @param errors The array of errors from all failed tests in the suite.
+   */
+  public void testSuiteEnded(JUnitError[] errors) {
     synchronized(_compilerLock) {
       if (_docBeingTested == null) {
         return;
@@ -1702,19 +1750,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
           if(!packageName.equals("")) {
             testFilename = packageName + "." + testFilename;
           }
-          _interpreterControl.runTest(testFilename, testFile.getAbsolutePath());
-          // Assign _docBeingTested after calling runTest because we know at this point that
-          // the interpreterJVM has registered itself. We also know that the testFinished
-          // cannot be entered before this because it has to acquire the same lock as this
-          // method.
+          _interpreterControl.runTestSuite(testFilename, 
+                                           testFile.getAbsolutePath());
+          // Assign _docBeingTested after calling runTest because we know at
+          // this point that the interpreterJVM has registered itself. We also 
+          // know that the testFinished cannot be entered before this because 
+          // it has to acquire the same lock as this method.
           _docBeingTested = this;
           
-          // Notify that the tests have started running
-          notifyListeners(new EventNotifier() {
-            public void notifyListener(GlobalModelListener l) {
-              l.junitRunning();
-            }
-          });
         }
         catch (IllegalStateException e) {
           // No file exists, don't try to compile and test

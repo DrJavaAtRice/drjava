@@ -119,6 +119,11 @@ public class JUnitErrorCaretListener implements CaretListener {
    * Update the highlight appropriately.
    */
   public void updateHighlight(int curPos) {
+    // Don't highlight unless test tab selected
+    if (!_frame.isTestTabSelected()) {
+      _errorListPane.selectNothing();
+      return;
+    }
 
     // check if the dot is on a line with an error.
     // Find the first error that is on or after the dot. If this comes
@@ -215,6 +220,7 @@ public class JUnitErrorCaretListener implements CaretListener {
    * @param newIndex Index into _errors array
    */
   private void _highlightErrorInSource(int newIndex) {
+    
     Position pos = _positions[newIndex];
     if (pos == null) {
       return;
@@ -241,11 +247,11 @@ public class JUnitErrorCaretListener implements CaretListener {
       }
 
       if (_errorListPane.getLastDefPane() != null) {
-        _errorListPane.getLastDefPane().removeErrorHighlight();
+        _errorListPane.getLastDefPane().removeTestErrorHighlight();
       }
       prevNewline++;
       if (prevNewline <= nextNewline) {
-        _definitionsPane.addErrorHighlight(prevNewline, nextNewline);
+        _definitionsPane.addTestErrorHighlight(prevNewline, nextNewline);
       }
       _errorListPane.setLastDefPane(_definitionsPane);
     }

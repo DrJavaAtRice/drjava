@@ -117,9 +117,15 @@ public class DefinitionsPane extends JEditorPane
   }
 
   /**
-   * Our current error matching highlight.
+   * Our current compiler error matching highlight.
    */
   private HighlightManager.HighlightInfo _errorHighlightTag = null;
+  
+  /**
+   * Our current test error matching highlight.
+   */
+  private HighlightManager.HighlightInfo _testErrorHighlightTag = null;
+  
   /**
    * Highlight painter for selected errors in the defs doc.
    */
@@ -175,7 +181,13 @@ public class DefinitionsPane extends JEditorPane
         int start = _errorHighlightTag.getStartOffset();
         int end = _errorHighlightTag.getEndOffset();
         _errorHighlightTag.remove();
-        addErrorHighlight(start, end);
+        addCompilerErrorHighlight(start, end);
+      }
+      if (_testErrorHighlightTag != null) {
+        int start = _testErrorHighlightTag.getStartOffset();
+        int end = _testErrorHighlightTag.getEndOffset();
+        _testErrorHighlightTag.remove();
+        addTestErrorHighlight(start, end);
       }
     }
   }
@@ -675,24 +687,44 @@ public class DefinitionsPane extends JEditorPane
   }
 
   /**
-   * Adds an error highlight to the document.
+   * Adds a compiler error highlight to the document.
    * @exception BadLocationException
    */
-  public void addErrorHighlight(int from, int to)
+  public void addCompilerErrorHighlight(int from, int to)
   {
-    removeErrorHighlight();
+    removeCompilerErrorHighlight();
     _errorHighlightTag = _highlightManager.addHighlight(from, to, ERROR_PAINTER);
   }
 
   /**
-   * Removes the previous error highlight from the document after the cursor
-   * has moved.
+   * Removes the previous compiler error highlight from the document after 
+   * the cursor has moved.
    */
-  public void removeErrorHighlight() {
+  public void removeCompilerErrorHighlight() {
     if (_errorHighlightTag != null) {
       _errorHighlightTag.remove();
-      //_highlightManager.removeHighlight( (HighlightManager.HighlightInfo)_errorHighlightTag);
       _errorHighlightTag = null;
+    }
+  }
+  
+  /**
+   * Adds a JUnit test error highlight to the document.
+   * @exception BadLocationException
+   */
+  public void addTestErrorHighlight(int from, int to)
+  {
+    removeTestErrorHighlight();
+    _testErrorHighlightTag = _highlightManager.addHighlight(from, to, ERROR_PAINTER);
+  }
+
+  /**
+   * Removes the previous test error highlight from the document after the cursor
+   * has moved.
+   */
+  public void removeTestErrorHighlight() {
+    if (_testErrorHighlightTag != null) {
+      _testErrorHighlightTag.remove();
+      _testErrorHighlightTag = null;
     }
   }
 

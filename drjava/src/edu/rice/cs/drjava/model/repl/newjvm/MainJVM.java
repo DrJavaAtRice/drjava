@@ -600,24 +600,66 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     }
   }
   
-  public void runTest(String className, String fileName) {
+  /**
+   * Runs a JUnit Test class in the Interpreter JVM.
+   * @param className Name of the TestCase class
+   * @param fileName Name of the file for the TestCase class
+   */
+  public void runTestSuite(String className, String fileName) {
     ensureInterpreterConnected();
     
     try {
-      _interpreterJVM.runTest(className, fileName);
+      _interpreterJVM.runTestSuite(className, fileName);
     }
     catch (RemoteException re) {
       _threwException(re);
     }
   }
   
+  /**
+   * Called if JUnit is invoked on a non TestCase class.
+   */
   public void nonTestCase() throws RemoteException {
     _model.nonTestCase();
   }
   
-  public void testFinished(JUnitError[] errors) throws RemoteException {
-    _model.testFinished(errors);
+  /**
+   * Called to indicate that a suite of tests has started running.
+   * @param numTests The number of tests in the suite to be run.
+   */
+  public void testSuiteStarted(int numTests) throws RemoteException {
+    _model.testSuiteStarted(numTests);
   }
+  
+  /**
+   * Called when a particular test is started.
+   * @param testName The name of the test being started.
+   */
+  public void testStarted(String testName) throws RemoteException {
+    _model.testStarted(testName);
+  }
+  
+  /**
+   * Called when a particular test has ended.
+   * @param testName The name of the test that has ended.
+   * @param wasSuccessful Whether the test passed or not.
+   * @param causedError If not successful, whether the test caused an error
+   *  or simply failed.
+   */
+  public void testEnded(String testName, boolean wasSuccessful, boolean causedError)
+    throws RemoteException {
+    _model.testEnded(testName, wasSuccessful, causedError);
+  }
+  
+  /**
+   * Called when a full suite of tests has finished running.
+   * @param errors The array of errors from all failed tests in the suite.
+   */
+  public void testSuiteEnded(JUnitError[] errors) throws RemoteException {
+    _model.testSuiteEnded(errors);
+  }
+  
+  
   
   private class RestartThread extends Thread {
     protected boolean _shouldReset = true;

@@ -388,7 +388,30 @@ public interface GlobalModel {
   public void nonTestCase();
   
   /**
-   * Called from the JUnitTestManager after the test finishes
+   * Called to indicate that a suite of tests has started running.
+   * @param numTests The number of tests in the suite to be run.
    */
-  public void testFinished(JUnitError[] errors);
+  public void testSuiteStarted(int numTests);
+  
+  /**
+   * Called when a particular test is started.
+   * @param testName The name of the test being started.
+   */
+  public void testStarted(String testName);
+  
+  /**
+   * Called when a particular test has ended.
+   * @param testName The name of the test that has ended.
+   * @param wasSuccessful Whether the test passed or not.
+   * @param causedError If not successful, whether the test caused an error
+   *  or simply failed.
+   */
+  public void testEnded(String testName, boolean wasSuccessful,
+                        boolean causedError);
+  
+  /**
+   * Called when a full suite of tests has finished running.
+   * @param errors The array of errors from all failed tests in the suite.
+   */
+  public void testSuiteEnded(JUnitError[] errors);
 }

@@ -450,7 +450,9 @@ public abstract class GlobalModelTestCase extends TestCase {
     protected int compileStartCount;
     protected int compileEndCount;
     protected int junitStartCount;
-    protected int junitRunningCount;
+    protected int junitSuiteStartedCount;
+    protected int junitTestStartedCount;
+    protected int junitTestEndedCount;
     protected int junitEndCount;
     protected int interactionStartCount;
     protected int interactionEndCount;
@@ -478,7 +480,9 @@ public abstract class GlobalModelTestCase extends TestCase {
       compileStartCount = 0;
       compileEndCount = 0;
       junitStartCount = 0;
-      junitRunningCount = 0;
+      junitSuiteStartedCount = 0;
+      junitTestStartedCount = 0;
+      junitTestEndedCount = 0;
       junitEndCount = 0;
       interactionStartCount = 0;
       interactionEndCount = 0;
@@ -517,8 +521,16 @@ public abstract class GlobalModelTestCase extends TestCase {
       assertEquals("number of times junitStarted fired", i, junitStartCount);
     }
     
-    public void assertJUnitRunningCount(int i) {
-      assertEquals("number of times junitRunning fired", i, junitRunningCount);
+    public void assertJUnitSuiteStartedCount(int i) {
+      assertEquals("number of times junitSuiteStarted fired", i, junitSuiteStartedCount);
+    }
+    
+    public void assertJUnitTestStartedCount(int i) {
+      assertEquals("number of times junitTestStarted fired", i, junitTestStartedCount);
+    }
+    
+    public void assertJUnitTestEndedCount(int i) {
+      assertEquals("number of times junitTestEnded fired", i, junitTestEndedCount);
     }
 
     public void assertJUnitEndCount(int i) {
@@ -617,11 +629,20 @@ public abstract class GlobalModelTestCase extends TestCase {
     public void junitStarted(OpenDefinitionsDocument doc) {
       fail("junitStarted fired unexpectedly");
     }
-    
-    public void junitRunning() {
-      fail("junitRunning fired unexpectedly");
-    }
 
+    public void junitSuiteStarted(int numTests) {
+      fail("junitSuiteStarted fired unexpectedly");
+    }
+  
+    public void junitTestStarted(OpenDefinitionsDocument doc, String name) {
+      fail("junitTestStarted fired unexpectedly");
+    }
+  
+    public void junitTestEnded(OpenDefinitionsDocument doc, String name,
+                               boolean wasSuccessful, boolean causedError) {
+      fail("junitTestEnded fired unexpectedly");
+    }
+  
     public void junitEnded() {
       fail("junitEnded fired unexpectedly");
     }

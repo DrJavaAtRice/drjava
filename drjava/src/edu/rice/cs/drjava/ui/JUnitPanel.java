@@ -104,7 +104,10 @@ public class JUnitPanel extends TabbedPanel
   private final SingleDisplayModel _model;
   private final JUnitErrorListPane _errorListPane;
   private OpenDefinitionsDocument _docBeingTested;
+  private int _testCount;
+  private boolean _testsSuccessful;
   
+  private JUnitProgressBar _progressBar;
   private JCheckBox _showHighlightsCheckBox;
   
   /**
@@ -115,6 +118,8 @@ public class JUnitPanel extends TabbedPanel
   public JUnitPanel(SingleDisplayModel model, MainFrame frame) {
     super(frame, "Test Output");
     _model = model;
+    _testCount = 0;
+    _testsSuccessful = true;
     _errorListPane = new JUnitErrorListPane();
 
     _mainPanel.setLayout(new BorderLayout());
@@ -130,9 +135,19 @@ public class JUnitPanel extends TabbedPanel
 
     _mainPanel.add(scroller, BorderLayout.CENTER);
     
-    JPanel buttonPane = new JPanel();
-    buttonPane.setLayout(new BorderLayout());
+    JPanel sidePanel = new JPanel(new BorderLayout());
+    sidePanel.setBorder(new EmptyBorder(0,5,0,5)); // 5 pix padding on sides
+    JPanel innerPanel = new JPanel(new BorderLayout());  // bar and checkbox
+    innerPanel.setBorder(new EmptyBorder(5,0,0,0)); // 5 pix padding on top
+    sidePanel.add(new JLabel("Test Progress", SwingConstants.LEFT),
+                      BorderLayout.NORTH);
+       
+    sidePanel.add(innerPanel,BorderLayout.CENTER);
     
+    _progressBar = new JUnitProgressBar();
+    innerPanel.add(_progressBar, BorderLayout.NORTH);
+    innerPanel.add(new JPanel(),BorderLayout.CENTER);
+        
     _showHighlightsCheckBox = new JCheckBox( "Highlight source", true);
     _showHighlightsCheckBox.addChangeListener( new ChangeListener() {
       public void stateChanged (ChangeEvent ce) {
@@ -145,13 +160,13 @@ public class JUnitPanel extends TabbedPanel
           lastDefPane.getCaret().setVisible(true);
         }
         else {
-          lastDefPane.removeErrorHighlight();
+          lastDefPane.removeTestErrorHighlight();
         }
       }
     });
     
-    buttonPane.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
-    _mainPanel.add(buttonPane, BorderLayout.EAST);
+    innerPanel.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
+    _mainPanel.add(sidePanel, BorderLayout.EAST);
 
   }
   
@@ -216,6 +231,26 @@ public class JUnitPanel extends TabbedPanel
    * buttons in the compiler error panel.
    */
   private void _resetEnabledStatus() {
+  }
+  
+  /**
+   * Resets the progress bar to start counting the given number of tests.
+   */
+  public void progressReset(int numTests) {
+    _progressBar.reset();
+    _progressBar.start(numTests);
+    _testsSuccessful = true;
+    _testCount = 0;
+  }
+  
+  /**
+   * Steps the progress bar forward by one test.
+   * @param successful Whether the last test was successful or not.
+   */
+  public void progressStep(boolean successful) {
+    _testCount++;
+    _testsSuccessful &= successful;
+    _progressBar.step(_testCount, _testsSuccessful);
   }
 
 
@@ -555,6 +590,7 @@ public class JUnitPanel extends TabbedPanel
     public void setJUnitInProgress(OpenDefinitionsDocument odd) {
       _docBeingTested = odd;
       _errorListPositions = new Position[0];
+      progressReset(0);
 
       DefaultStyledDocument doc = new DefaultStyledDocument();
       _checkSync(doc);
@@ -572,6 +608,50 @@ public class JUnitPanel extends TabbedPanel
       selectNothing();
     }
 
+    /**
+     * Provides the ability to display the name of the test being run.
+     * Not currently used, since it appears and disappears to quickly
+     * to be useful in the current setup.
+     */
+    public void testStarted(String name) {
+      /*
+      Document doc = getDocument();
+      try {
+        doc.insertString(doc.getLength(),
+                         "  " + name,
+                         NORMAL_ATTRIBUTES);
+      }
+      catch (BadLocationException ble) {
+        // Inserting at end, shouldn't happen
+        throw new UnexpectedException(ble);
+      }
+      */
+    }
+    
+    /**
+     * Provides the ability to display the results of a test that has finished.
+     * Not currently used, since it appears and disappears to quickly
+     * to be useful in the current setup.
+     */
+    public void testEnded(String name, boolean wasSuccessful, boolean causedError) {
+      /*
+      Document doc = getDocument();
+      String status = "ok";
+      if (!wasSuccessful) {
+        status = (causedError) ? "error" : "failed";
+      }
+      try {
+        doc.insertString(doc.getLength(),
+                         "  [" + status + "]\n",
+                         NORMAL_ATTRIBUTES);
+      }
+      catch (BadLocationException ble) {
+        // Inserting at end, shouldn't happen
+        throw new UnexpectedException(ble);
+      }
+      */
+    }
+    
     /**
      * Used to show that the last compile was successful.
      */
@@ -719,7 +799,7 @@ public class JUnitPanel extends TabbedPanel
       _resetEnabledStatus();
 
       // Remove highlight from the defPane that has it
-      _lastDefPane.removeErrorHighlight();
+      _lastDefPane.removeTestErrorHighlight();
     }
 
     /**
@@ -809,7 +889,7 @@ public class JUnitPanel extends TabbedPanel
         
         else {
           // Remove last highlight
-          _lastDefPane.removeErrorHighlight();
+          _lastDefPane.removeTestErrorHighlight();
           
           DefinitionsPane defPane = _frame.getCurrentDefPane();
           defPane.getJUnitErrorCaretListener().shouldHighlight(false);
@@ -892,4 +972,46 @@ public class JUnitPanel extends TabbedPanel
     
   }
 
+}
+
+/**
+ * A progress bar showing the status of JUnit tests.
+ * Green until a test fails, then red.
+ * Adapted from JUnit code.
+ */
+class JUnitProgressBar extends JProgressBar {
+  private boolean _hasError = false;
+  
+  public JUnitProgressBar() {
+    super();
+    setForeground(getStatusColor());
+  }
+  
+  private Color getStatusColor() {
+    if (_hasError) {
+      return Color.red;
+    }
+    else {
+      return Color.green;
+    }
+  }
+  
+  public void reset() {
+    _hasError = false;
+    setForeground(getStatusColor());
+    setValue(0);
+  }
+  
+  public void start(int total) {
+    setMaximum(total);
+    reset();
+  }
+  
+  public void step(int value, boolean successful) {
+    setValue(value);
+    if (!_hasError && !successful) {
+      _hasError= true;
+      setForeground(getStatusColor());
+    }
+  }
 }

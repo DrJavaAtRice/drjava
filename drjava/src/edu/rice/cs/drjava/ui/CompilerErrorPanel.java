@@ -208,7 +208,7 @@ public class CompilerErrorPanel extends TabbedPanel
           lastDefPane.getCaret().setVisible(true);
         }
         else {
-          lastDefPane.removeErrorHighlight();
+          lastDefPane.removeCompilerErrorHighlight();
         }
       }
     });
@@ -294,6 +294,8 @@ public class CompilerErrorPanel extends TabbedPanel
    * selects an item) but items can each wrap, etc.
    */
   public class ErrorListPane extends JEditorPane {
+    
+    private boolean _compileHasOccurred;
 
     /**
      * Index into _errorListPositions of the currently selected error.
@@ -349,6 +351,7 @@ public class CompilerErrorPanel extends TabbedPanel
       super("text/rtf", "");
       addMouseListener(_mouseListener);
 
+      _compileHasOccurred = false;
       _selectedIndex = 0;
       _errorListPositions = new Position[0];
       _errorTable = new Hashtable();
@@ -477,6 +480,7 @@ public class CompilerErrorPanel extends TabbedPanel
     /** Puts the error pane into "compilation in progress" state. */
     public void setCompilationInProgress() {
       _errorListPositions = new Position[0];
+      _compileHasOccurred = true;
 
       DefaultStyledDocument doc = new DefaultStyledDocument();
 
@@ -499,9 +503,11 @@ public class CompilerErrorPanel extends TabbedPanel
      */
     private void _updateNoErrors() throws BadLocationException {
       DefaultStyledDocument doc = new DefaultStyledDocument();
-      doc.insertString(0,
-                       "Last compilation completed successfully.",
-                       NORMAL_ATTRIBUTES);
+      if (_compileHasOccurred) {
+        doc.insertString(0,
+                         "Last compilation completed successfully.",
+                         NORMAL_ATTRIBUTES);
+      }
       setDocument(doc);
 
       selectNothing();
@@ -639,7 +645,7 @@ public class CompilerErrorPanel extends TabbedPanel
       _resetEnabledStatus();
 
       // Remove highlight from the defPane that has it
-      _lastDefPane.removeErrorHighlight();
+      _lastDefPane.removeCompilerErrorHighlight();
     }
 
     /**
@@ -722,7 +728,7 @@ public class CompilerErrorPanel extends TabbedPanel
       }
       else {
         // Remove last highlight
-        _lastDefPane.removeErrorHighlight();
+        _lastDefPane.removeCompilerErrorHighlight();
       }
 
       // Select item wants the error, which is what we were passed

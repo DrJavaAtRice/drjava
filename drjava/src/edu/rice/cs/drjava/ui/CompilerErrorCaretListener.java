@@ -118,6 +118,12 @@ public class CompilerErrorCaretListener implements CaretListener {
    * Update the highlight appropriately.
    */
   public void updateHighlight(int curPos) {
+    // Don't highlight unless compiler tab selected
+    if (!_frame.isCompilerTabSelected()) {
+      _errorListPane.selectNothing();
+      return;
+    }
+    
     //DrJava.consoleOut().println("updateHighlight: " + curPos);
     // check if the dot is on a line with an error.
     // Find the first error that is on or after the dot. If this comes
@@ -193,6 +199,15 @@ public class CompilerErrorCaretListener implements CaretListener {
   }
   
   /**
+   * Hides the error highlight in the document.
+   */
+  public void removeHighlight() {
+    if (_errorListPane.getLastDefPane() != null) {
+      _errorListPane.getLastDefPane().removeCompilerErrorHighlight();
+    }
+  }
+  
+  /**
    * Highlights the given error in the source.
    * @param newIndex Index into _errors array
    */
@@ -220,15 +235,14 @@ public class CompilerErrorCaretListener implements CaretListener {
         nextNewline = _document.getLength();
       }
 
-      if (_errorListPane.getLastDefPane() != null) {
-        _errorListPane.getLastDefPane().removeErrorHighlight();
-      }
+      removeHighlight();
+      
       //Add 1 if not the first line of the file, so that the highlight range
       // will match the range chosen for the highlight manager.
       if (prevNewline>0) prevNewline++;      
       
       if (prevNewline <= nextNewline) {
-        _definitionsPane.addErrorHighlight(prevNewline, nextNewline);
+        _definitionsPane.addCompilerErrorHighlight(prevNewline, nextNewline);
       }
       _errorListPane.setLastDefPane(_definitionsPane);
     }

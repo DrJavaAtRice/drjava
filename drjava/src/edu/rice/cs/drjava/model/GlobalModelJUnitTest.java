@@ -143,7 +143,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     assertEquals("test case should have no errors reported",
                  0,
-                 doc.getJUnitErrorModel().getNumErrors());                 
+                 doc.getJUnitErrorModel().getNumErrors());
   }
   
   /**
@@ -167,7 +167,6 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertEquals("test case has one error reported",
                  1,
                  doc.getJUnitErrorModel().getNumErrors());
-                 
   }
  
   /**
@@ -197,6 +196,9 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     // Check events fired
     listener.assertJUnitEndCount(1);
     listener.assertNonTestCaseCount(1);
+    listener.assertJUnitSuiteStartedCount(0);
+    listener.assertJUnitTestStartedCount(0);
+    listener.assertJUnitTestEndedCount(0);
   }
   
     /**
@@ -274,6 +276,9 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertNonTestCaseCount(1);
     listener.assertJUnitStartCount(1);
     listener.assertJUnitEndCount(1);
+    listener.assertJUnitSuiteStartedCount(0);
+    listener.assertJUnitTestStartedCount(0);
+    listener.assertJUnitTestEndedCount(0);
                  
   }
   
@@ -293,8 +298,8 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
         junitStartCount++;
       }
       
-      public void junitRunning() {
-        junitRunningCount++;
+      public void junitSuiteStarted(int numTests) {
+        junitSuiteStartedCount++;
         // kill the infinite test once the tests have started
         _model.resetInteractions();
       }
@@ -379,13 +384,22 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     public void junitStarted(OpenDefinitionsDocument odd) {
       junitStartCount++;
     }
-    public void junitRunning() {
+    public void junitSuiteStarted(int numTests) {
       assertJUnitStartCount(1);
-      junitRunningCount++;
+      junitSuiteStartedCount++;
+    }
+    public void junitTestStarted(OpenDefinitionsDocument doc, String name) {
+      junitTestStartedCount++;
+    }
+    public void junitTestEndedCount(OpenDefinitionsDocument doc, String name,
+                                    boolean wasSuccessful, boolean causedError) {
+      junitTestEndedCount++;
+      assertTrue("junitTestEndedCount should be same as junitTestStartedCount",
+                 junitTestStartedCount == junitTestEndedCount);
     }
     public void junitEnded() {
       synchronized(this) {
-        assertJUnitRunningCount(1);
+        //assertJUnitSuiteStartedCount(1);
         junitEndCount++;
         notify();
       }

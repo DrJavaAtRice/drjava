@@ -111,11 +111,27 @@ public interface GlobalModelListener {
   public void junitStarted(OpenDefinitionsDocument doc);
   
   /**
-   * Called once JUnit actually starts running the tests.
-   * (Primarily used in test cases.)
+   * Called to indicate that a suite of tests has started running.
+   * @param numTests The number of tests in the suite to be run.
    */
-  public void junitRunning();
-
+  public void junitSuiteStarted(int numTests);
+  
+  /**
+   * Called when a particular test is started.
+   * @param testName The name of the test being started.
+   */
+  public void junitTestStarted(OpenDefinitionsDocument doc, String name);
+  
+  /**
+   * Called when a particular test has ended.
+   * @param testName The name of the test that has ended.
+   * @param wasSuccessful Whether the test passed or not.
+   * @param causedError If not successful, whether the test caused an error
+   *  or simply failed.
+   */
+  public void junitTestEnded(OpenDefinitionsDocument doc, String name,
+                             boolean wasSuccesful, boolean causedError);
+  
   /**
    * Called after JUnit is finished running tests.
    */
