@@ -96,6 +96,7 @@ public class StickyClassLoader extends ClassLoader {
    * <LI>If the class is in java.* or javax.*, it will be loaded using
    *     {@link ClassLoader#getSystemClassLoader}. This is because only
    *     the system loader is allowed to load system classes!
+   *     Also: sun.*.
    * </LI>
    * <LI>If the class name is in the list of classes to load with the
    *     old class loader (passed to constructor), the new loader is not
@@ -111,7 +112,10 @@ public class StickyClassLoader extends ClassLoader {
   {
     Class clazz;
     
-    if (name.startsWith("java.") || name.startsWith("javax.")) {
+    if (name.startsWith("java.") ||
+        name.startsWith("javax.") ||
+        name.startsWith("sun."))
+    {
       clazz = getSystemClassLoader().loadClass(name);
     }
     else if (Arrays.binarySearch(_classesToLoadWithOld, name) >= 0) {
