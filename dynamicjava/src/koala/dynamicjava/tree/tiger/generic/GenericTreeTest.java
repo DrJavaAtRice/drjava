@@ -16,35 +16,35 @@ import koala.dynamicjava.parser.wrapper.JavaCCParserFactory;
 public class GenericTreeTest extends TestCase {
   private TreeInterpreter astInterpreter;
   private TreeInterpreter strInterpreter;
-  
+
   private ParserFactory parserFactory;
   private String testString;
-  
+
   public GenericTreeTest(String name) {
     super(name);
   }
-  
+
   public void setUp(){
     parserFactory = new JavaCCParserFactory();
     astInterpreter = new TreeInterpreter(null); // No ParserFactory needed to interpret an AST
     strInterpreter = new TreeInterpreter(parserFactory); // ParserFactory is needed to interpret a string
   }
-  
+
   public List<Node> parse(String testString){
     List<Node> retval = parserFactory.createParser(new StringReader(testString),"UnitTest").parseStream();
     return retval;
   }
-  
+
   public Object interpret(String testString) throws InterpreterException {
     return strInterpreter.interpret(new StringReader(testString), "Unit Test");
   }
-  
+
   public void testParserBasics() {
     testString = "1;";
     List<Node> ast = parse(testString);
     IntegerLiteral il = (IntegerLiteral)ast.get(0);
     assertEquals("1", il.getRepresentation());
-    
+
     testString = "Integer x = new Integer(5);";
     ast = parse(testString);
     VariableDeclaration vd = (VariableDeclaration)ast.get(0);
@@ -58,7 +58,7 @@ public class GenericTreeTest extends TestCase {
     IntegerLiteral initil = (IntegerLiteral)(init.getArguments().get(0));
     assertEquals("5", initil.getRepresentation());
   }
-  
+
   public void testSimpleAllocation() {
     // new java.util.LinkedList<Integer>()
     //
@@ -67,21 +67,21 @@ public class GenericTreeTest extends TestCase {
     IdentifierToken listId = new Identifier("LinkedList");
     List<IdentifierToken> ids = new LinkedList<IdentifierToken>();
     ids.add(javaId); ids.add(utilId); ids.add(listId);
-    
+
     IdentifierToken iId = new Identifier("Integer");
     List<IdentifierToken> iIds = new LinkedList<IdentifierToken>();
     iIds.add(iId);
-    
+
     List<ReferenceType> targs = new LinkedList<ReferenceType>();
     targs.add(new ReferenceType(iIds));
-    
+
     Type genericListType = new GenericReferenceType(ids, targs);
     SimpleAllocation sa = new SimpleAllocation(genericListType, null); // Call parameters-less constructor of LinkedList
-    
+
     Object result = astInterpreter.interpret(sa);
     assertEquals("java.util.LinkedList", result.getClass().getName());
   }
-  
+
   public void testGenericClass1(){
     // public class C<T extends Number> {
     //   public T n;
@@ -94,7 +94,7 @@ public class GenericTreeTest extends TestCase {
     //   ==> Should return an Integer(5)
     //
     int accessFlags = java.lang.reflect.Modifier.PUBLIC;
-    
+
     List<IdentifierToken> tIds = new LinkedList<IdentifierToken>();
     tIds.add(new Identifier("T"));
     List<IdentifierToken> numberIds = new LinkedList<IdentifierToken>();
@@ -103,14 +103,14 @@ public class GenericTreeTest extends TestCase {
     TypeParameter t = new TypeParameter(new SourceInfo(), tIds, numberType); // T extends Number
     TypeParameter[] typeParams = new TypeParameter[1];
     typeParams[0] = t;
-    
+
     List<Node> body = new LinkedList<Node>();
     FieldDeclaration n = new FieldDeclaration(accessFlags, t, "n", null);
     body.add(n);
     FormalParameter param = new FormalParameter(false, t, "_n");
     List<FormalParameter> cparams = new LinkedList<FormalParameter>();
     cparams.add(param);
-    
+
     List<Node> cstmts = new LinkedList<Node>();
     List<IdentifierToken> nIds = new LinkedList<IdentifierToken>();
     nIds.add(new Identifier("n"));
@@ -129,22 +129,22 @@ public class GenericTreeTest extends TestCase {
     MethodDeclaration m = new MethodDeclaration(accessFlags, t, "m", mparams, mexcepts, new BlockStatement(mstmts));
     body.add(m);
     GenericClassDeclaration cls = new GenericClassDeclaration(accessFlags, "C", null, null, body, typeParams);
-    
+
     astInterpreter.interpret(cls); // set the context for the following method call
-    
-    
-    
+
+
+
     IdentifierToken cId = new Identifier("C");
     List<IdentifierToken> ids = new LinkedList<IdentifierToken>();
     ids.add(cId);
-    
+
     IdentifierToken iId = new Identifier("Integer");
     List<IdentifierToken> iIds = new LinkedList<IdentifierToken>();
     iIds.add(iId);
-    
+
     List<ReferenceType> targs = new LinkedList<ReferenceType>();
     targs.add(new ReferenceType(iIds));
-    
+
     Type genericCType = new GenericReferenceType(ids, targs);
     List<Expression> mccargs = new LinkedList<Expression>(); // method call constructor args
     List<Expression> fiveExps = new LinkedList<Expression>();
@@ -152,19 +152,19 @@ public class GenericTreeTest extends TestCase {
     mccargs.add(new SimpleAllocation(new ReferenceType(iIds), fiveExps));
     SimpleAllocation sa = new SimpleAllocation(genericCType, mccargs);
     MethodCall mc = new ObjectMethodCall(sa, "m", new LinkedList<Expression>(), "", 0, 0, 0, 0);
-    
+
     Object result = astInterpreter.interpret(mc);
     assertEquals("java.lang.Integer",result.getClass().getName());
     assertEquals(new Integer(5), (Integer)result);
   }
-  
+
   public void testTypeParameterGetName(){
     ReferenceType r = new ReferenceType("Integer");
     TypeParameter t = new TypeParameter(new SourceInfo(), "T", r);
     assertEquals("Integer", t.getRepresentation());
     assertEquals("T", t.getName());
   }
-  
+
   public void testGenericClassWithUpgradedParser(){
     // public class C<T extends Number> {
     //   public T n;
@@ -178,25 +178,25 @@ public class GenericTreeTest extends TestCase {
     //
     //   ==> Should return an Integer(5)
     //
-    
+
     testString = ""+
       "public class C<T extends Number> {\n"+
       "  public T n;\n"+
       "  public C(T _n){ n = _n; }\n"+
       "  public T m(){ return n; }\n"+
       "}\n";
-    
+
     List<Node> AST = parse(testString);
     Object result = astInterpreter.interpret(AST.get(0));
-    
+
     testString = "new C<Integer>(new Integer(5)).m();\n";
     AST = parse(testString);
     result = astInterpreter.interpret(AST.get(0));
-    
+
     assertEquals("java.lang.Integer", result.getClass().getName());
     assertEquals(new Integer(5), (Integer)result);
   }
-  
+
   public void testAnotherGenericClassWithUpgradedParser(){
     // public class C<T extends Number, A extends T> { // treated by Java as 'A extends Number'?!
     //   public T m;
@@ -216,7 +216,7 @@ public class GenericTreeTest extends TestCase {
     //   ==> i should equals() Integer(5), and
     //   ==> d should equals() Float(3.3)
     //
-    
+
     testString = ""+
       "public class C<T extends Number, A extends T> { // treated by Java as 'A extends Number'?!\n"+
       "  public T m;\n"+
@@ -232,8 +232,8 @@ public class GenericTreeTest extends TestCase {
       "Integer i = c.m(); i;\n"+
       "\n"+
       "Double d = c.n(); d;\n";
-    
-    
+
+
     List<Node> AST = parse(testString);
     Object result = astInterpreter.interpret(AST.get(0));
     result = astInterpreter.interpret(AST.get(1));
@@ -241,38 +241,38 @@ public class GenericTreeTest extends TestCase {
     result = astInterpreter.interpret(AST.get(3));
     assertEquals("java.lang.Integer",result.getClass().getName());
     assertEquals(new Integer(5), (Integer)result);
-    
+
     result = astInterpreter.interpret(AST.get(4));
     result = astInterpreter.interpret(AST.get(5));
     assertEquals("java.lang.Double",result.getClass().getName());
     assertEquals(new Double(3.3), (Double)result);
   }
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
   public void testInterpreterBasics() {
     testString = "Integer x = new Integer(5); x;";
     assertEquals("Evaluation of Integer(5)", new Integer(5), interpret(testString));
-    
+
     testString = "Boolean y = Boolean.FALSE; y;";
     assertEquals("Evaluation of Boolean.FALSE", Boolean.FALSE, interpret(testString));
-    
+
     testString = "String z = \"FOO\" + \"BAR\"; z;";
     assertEquals("String concatenation", "FOOBAR", interpret(testString));
-    
+
     testString = "int[] a = new int[]{1,2,3}; \"\"+a[0]+a[1]+a[2];";
     assertEquals("Anonymous array", "123", interpret(testString));
-    
+
     testString = "int[][] b = new int[][]{{12, 0}, {1, -15}}; b[0][0] + b[1][1];";
     assertEquals("2D Anonymous array", new Integer(-3), interpret(testString));
-    
+
     testString = "(Number) new Integer(12);";
     assertEquals("Successful cast test", new Integer(12), interpret(testString));
   }
-  
+
   public void testMultiTypeNonGenericList(){
     testString =
       "import java.util.*;"+
@@ -281,16 +281,16 @@ public class GenericTreeTest extends TestCase {
       "l.add(new Integer(7));"+
       "String s = l.toString();"+
       "s;";
-    
+
     assertEquals("s should be [5.5, 7]", "[5.5, 7]", interpret(testString));
-    
+
     testString = "Float f = (Float)l.get(0); f;";
     assertEquals("f should be 5.5", new Float(5.5), interpret(testString));
-    
+
     testString = "l.remove(0); Integer i = (Integer)l.get(0); i;";
     assertEquals("i should be 7", new Integer(7), interpret(testString));
   }
-  
+
   public void testSingleTypeNonGenerifiedList(){
     testString =
       "import java.util.*;"+
@@ -299,16 +299,16 @@ public class GenericTreeTest extends TestCase {
       "l.add(new Float(7.3));"+  // note that this is a float as well
       "String s = l.toString();"+
       "s;";
-    
+
     assertEquals("s should be [5.5, 7.3]", "[5.5, 7.3]", interpret(testString));
-    
+
     testString = "Float f = (Float)l.get(0); f;";
     assertEquals("f should be 5.5", new Float(5.5), interpret(testString));
-    
+
     testString = "l.remove(0); Float f2 = (Float)l.get(0); f2;";
     assertEquals("f2 should be 7.3", new Float(7.3), interpret(testString));
   }
-  
+
   //Test with Generics.
   public void testGenericList(){
     testString =
@@ -318,21 +318,21 @@ public class GenericTreeTest extends TestCase {
       "l.add(new Float(7.3));"+
       "String s = l.toString();"+
       "s;";
-    
+
     assertEquals("s should be [5.5, 7.3]", "[5.5, 7.3]", interpret(testString));
-    
+
     testString = "Float f = l.get(0); f;";
     assertEquals("f should be 5.5", new Float(5.5), interpret(testString));
-    
+
     testString = "l.remove(0); Float f2 = l.get(0); f2;";
     assertEquals("f2 should be 7.3", new Float(7.3), interpret(testString));
   }
-  
+
   // More complex test with visitors.
   // The types for the AbstractShapeVisitor interface methods
   // have been weakened to Object because DynamicJava does not
   // support forward class references
-  
+
   public void testVisitorsNonGeneric() {
     testString = stringHelper()+
       "AbstractShape a;"+
@@ -356,58 +356,58 @@ public class GenericTreeTest extends TestCase {
       "result;";
     assertEquals("Result should be 81", new Integer(81), interpret(testString));
   }
-  
+
   private String stringHelper(){
     return
       "interface AbstractShapeVisitor{"+
       "Object forBox(Object b);"+
       "Object forSphere(Object s);}"+
-      
+
       "interface AbstractShape{"+
       "Object accept(AbstractShapeVisitor v);}"+
-      
+
       "class Box implements AbstractShape{"+
       "private int _length;"+
       "private int _width;"+
       "private int _height;"+
-      
+
       "Box(int l,int w,int h){"+
       "_length=l;"+
       "_width=w;"+
       "_height=h;}"+
-      
+
       "int getLength(){"+
       "return _length;}"+
-      
+
       "int getWidth(){"+
       "return _length;}"+
-      
+
       "int getHeight(){"+
       "return _length;}"+
-      
+
       "public Object accept(AbstractShapeVisitor v){return v.forBox(this);}}"+
-      
+
       "class Sphere implements AbstractShape{"+
       "private int _radius;"+
-      
+
       "Sphere(int r){ _radius=r; }"+
-      
+
       "int getRadius(){ return _radius; }"+
-      
+
       "public Object accept(AbstractShapeVisitor v){ return v.forSphere(this); }}"+
-      
+
       "public class VolumeCalculator implements AbstractShapeVisitor{"+
-      
+
       "public Object forBox(Object a){"+
       "Box b = (Box) a;" +
       "return new Integer(b.getLength()*b.getWidth()*b.getHeight());}"+
-      
+
       "public Object forSphere(Object a){"+
       "Sphere s = (Sphere) a;" +
       "int rad = s.getRadius();"+
       "return new Integer(rad*rad*rad*3*1);}}";
   }
-  
+
   public void testPolymorphicMethods(){
     testString = ""+
       "public class C{\n"+
@@ -416,83 +416,83 @@ public class GenericTreeTest extends TestCase {
       "Float f = new C().m(); f;";
     Object result = interpret(testString);
     assertEquals("Result should be 6.7", new Float(6.7), result);
-    
+
     testString = ""+
       "public class D{\n"+
       "  public <T> T m(T param) { return param; }\n"+
       "}\n"+
       "Float ff = new Float(3.3);\n"+
       "Float fff = new D().m(ff); fff;";
-    
+
     result = interpret(testString);
     assertEquals("Result should be 3.3", new Float(3.3), result);
   }
-  
+
   // More complex test with *generic* visitors.
   // The types for the AbstractShapeVisitor interface methods
   // have been weakened to Object because DynamicJava does not
   // support forward class references
-  
+
   public void testVisitorsGeneric() {
     testString = ""+
       "interface AbstractShapeVisitor<T>{\n"+
       "T forBox(Object b);\n"+
       "T forSphere(Object s);}\n"+
-      
+
       "interface AbstractShape{"+
       "<T> T accept(AbstractShapeVisitor<T> v);}\n"+
-      
+
       "class Box implements AbstractShape{\n"+
       "private int _length;\n"+
       "private int _width;\n"+
       "private int _height;\n"+
-      
+
       "Box(int l,int w,int h){\n"+
       "_length=l;\n"+
       "_width=w;\n"+
       "_height=h;}\n"+
-      
+
       "int getLength(){\n"+
       "return _length;}\n"+
-      
+
       "int getWidth(){\n"+
       "return _length;}\n"+
-      
+
       "int getHeight(){\n"+
       "return _length;}\n"+
-      
+
       "public <T> T accept(AbstractShapeVisitor<T> v){return v.forBox(this);}}\n"+
-      
+
       "class Sphere implements AbstractShape{\n"+
       "private int _radius;\n"+
-      
+
       "Sphere(int r){ _radius=r; }\n"+
-      
+
       "int getRadius(){ return _radius; }\n"+
-      
+
       "public <T> T accept(AbstractShapeVisitor<T> v){ return v.forSphere(this); }}\n"+
-      
+
       "public class VolumeCalculator implements AbstractShapeVisitor<Integer>{\n"+
-      
+
       "public Object forBox(Object a){ return (Integer)forBox(a); }\n"+
       /**/// MANUALLY WRITTEN BRIDGE METHOD -- SHOULD BE AUTOMATICALLY GENERATED BY
       // DynamicJava, or taken care of by the underlying JVM??
-      
+
       "public Integer forBox(Object a){\n"+
       //      "Box b = (Box) a;\n"+
       "Box b = a;\n"+
       "return new Integer(b.getLength()*b.getWidth()*b.getHeight());}\n"+
-      
-      "public Object forSphere(Object a){ return (Integer)forSphere(a); }\n"+  
+
+      "public Object forSphere(Object a){ return (Integer)forSphere(a); }\n"+
       /**/// MANUALLY WRITTEN BRIDGE METHOD -- SHOULD BE AUTOMATICALLY GENERATED BY
       // DynamicJava, or taken care of by the underlying JVM??
-      
+
       "public Integer forSphere(Object a){\n"+
       //      "Sphere s = (Sphere) a;\n" +
       "Sphere s = a;\n" +
       "int rad = s.getRadius();\n"+
       "return new Integer(rad*rad*rad*3*1);}}\n";
-    
+
     testString = testString +
       "AbstractShape a;\n"+
       "a = new Box(2,2,2);\n";
@@ -515,20 +515,20 @@ public class GenericTreeTest extends TestCase {
       "result;\n";
     assertEquals("Result should be 81", new Integer(81), interpret(testString));
   }
-  
+
   public void testMethodOver1oading(){
     // Note the name of this method. If u realize the problem u'd know why
     // the test below used to fail, if we use lower case variable names,
     // ... and a sloppy typer (who presses the key for 'one' instead of the
     // key for 'L')!
     //
-    testString = 
+    testString =
       "import java.util.LinkedList;\n"+
       "//class C<T>{}\n"+
       "class C{\n"+
       "String m(LinkedList<String> l){\n"+
       "return \"LLWithString\";}\n"+
-      
+
       "String m(LinkedList<Integer> l){\n"+
       "return \"LLWithInteger\";}}\n"+
       "LinkedList<String> LS = new LinkedList<String>();"+
@@ -539,12 +539,12 @@ public class GenericTreeTest extends TestCase {
       "LinkedList<Integer> LI = new LinkedList<Integer>();\n"+
       "LI.add(new Integer(3));\n"+
       "String str2 = new C().m(LI);\n";
-    
+
     try{
       interpret(testString);
       testString = "str1;";
       assertEquals("str1 should be CWithString", new String("CWithString"), interpret(testString));
-      
+
       testString = "str2;";
       assertEquals("str2 should be CWithInteger", new String("CWithInteger"), interpret(testString));
       fail("In JDK 1.5 generic type info is erased, and not "+
@@ -553,89 +553,5 @@ public class GenericTreeTest extends TestCase {
            "parameter types are essentially the same (duplicate) methods.");
     } catch (ClassFormatError e){
     }
-  }
-  
-   public void testGenericClass2(){
-    // public class C<T extends Number> {
-    //   public T n;
-    //   public C(final T _n){ n = _n; }
-    //   public T m(){ return n; }
-    // }
-    // 
-    // new C<Integer>(new Integer(5)).m()
-    //
-    //   ==> Should return an Integer(5)
-    //
-    int accessFlags = java.lang.reflect.Modifier.PUBLIC;
-    
-    List<IdentifierToken> tIds = new LinkedList<IdentifierToken>();
-    tIds.add(new Identifier("T"));
-    List<IdentifierToken> numberIds = new LinkedList<IdentifierToken>();
-    numberIds.add(new Identifier("Number"));  // "java.lang" is imported automatically by DynamicJava
-    ReferenceType numberType = new ReferenceType(numberIds);
-    TypeParameter t = new TypeParameter(new SourceInfo(), tIds, numberType); // T extends Number
-    TypeParameter[] typeParams = new TypeParameter[1];
-    typeParams[0] = t;
-    
-    List<Node> body = new LinkedList<Node>();
-    FieldDeclaration n = new FieldDeclaration(accessFlags, t, "n", null);
-    body.add(n);
-    FormalParameter param = new FormalParameter(false, t, "_n");   // first arg was true, but it generated an IllegalState exception
-    List<FormalParameter> cparams = new LinkedList<FormalParameter>();
-    cparams.add(param);
-    
-    List<Node> cstmts = new LinkedList<Node>();
-    List<IdentifierToken> nIds = new LinkedList<IdentifierToken>();
-    nIds.add(new Identifier("n"));
-    QualifiedName nName = new QualifiedName(nIds);
-    List<IdentifierToken> _nIds = new LinkedList<IdentifierToken>();
-    _nIds.add(new Identifier("_n"));
-    AssignExpression stmt = new SimpleAssignExpression(nName, new QualifiedName(_nIds));
-    cstmts.add(stmt);
-    ConstructorDeclaration c = new ConstructorDeclaration(accessFlags, "C", cparams, new LinkedList<ReferenceType>(), null, cstmts);
-    body.add(c);
-    List<Node> mstmts = new LinkedList<Node>();
-    ReturnStatement mstmt = new ReturnStatement(nName);
-    mstmts.add(mstmt);
-    List<FormalParameter> mparams = new LinkedList<FormalParameter>();
-    List<ReferenceType> mexcepts = new LinkedList<ReferenceType>();
-    MethodDeclaration m = new MethodDeclaration(accessFlags, t, "m", mparams, mexcepts, new BlockStatement(mstmts));
-    body.add(m);
-    GenericClassDeclaration cls = new GenericClassDeclaration(accessFlags, "C", null, null, body, typeParams);
-    
-    astInterpreter.interpret(cls); // set the context for the following method call
-    
-    
-    
-    IdentifierToken cId = new Identifier("C");
-    List<IdentifierToken> ids = new LinkedList<IdentifierToken>();
-    ids.add(cId);
-    
-    IdentifierToken iId = new Identifier("Integer");
-    List<IdentifierToken> iIds = new LinkedList<IdentifierToken>();
-    iIds.add(iId);
-    
-    List<ReferenceType> targs = new LinkedList<ReferenceType>();
-    targs.add(new ReferenceType(iIds));
-    
-    Type genericCType = new GenericReferenceType(ids, targs);
-    List<Expression> mccargs = new LinkedList<Expression>(); // method call constructor args
-    List<Expression> fiveExps = new LinkedList<Expression>();
-    fiveExps.add(new IntegerLiteral("5"));
-    mccargs.add(new SimpleAllocation(new ReferenceType(iIds), fiveExps));
-    SimpleAllocation sa = new SimpleAllocation(genericCType, mccargs);
-    MethodCall mc = new ObjectMethodCall(sa, "m", new LinkedList<Expression>(), "", 0, 0, 0, 0);
-    
-    
-//    This test failed with the error:  java.lang.illegalStateException: _n
-//    in the evaluation of the arguments to the call.  After inspecting the trace,
-//    I determined that the error is thrown because the formal parameter _n is either
-//    final or not properly defined.  I looked at the code above and _n is final so
-//    I made it unfinal and the test worked.  Is there a bug in DynamicJava's treatment
-//    of final formal parameters?  Corky 29 Mar 04
-    
-    Object result = astInterpreter.interpret(mc);
-    assertEquals("java.lang.Integer",result.getClass().getName());
-    assertEquals(new Integer(5), (Integer)result);
   }
 }
