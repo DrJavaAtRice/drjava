@@ -411,19 +411,52 @@ public final class DefinitionsPaneTest extends TestCase {
                  doc.getText(0, doc.getLength()));
     
     // Call the undoAction in MainFrame through the KeyBindingManager.
-    KeyStroke ks = DrJava.getConfig().getSetting(OptionConstants.KEY_UNDO);
-    Action a = KeyBindingManager.Singleton.get(ks);
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_PRESSED,
-                                             (new Date()).getTime(),
-                                             ks.getModifiers(),
-                                             ks.getKeyCode(), KeyEvent.CHAR_UNDEFINED));
+    final KeyStroke ks = DrJava.getConfig().getSetting(OptionConstants.KEY_UNDO);
+    final Action a = KeyBindingManager.Singleton.get(ks);
+    
+    final KeyEvent e = new KeyEvent(definitions,
+                                    KeyEvent.KEY_PRESSED,
+                                    0,
+                                    ks.getModifiers(),
+                                    ks.getKeyCode(),
+                                    KeyEvent.CHAR_UNDEFINED);
+    definitions.processKeyEvent(e);
 //                              ks.getKeyChar());
     // Performs the action a
 //    SwingUtilities.notifyAction(a, ks, e, e.getSource(), e.getModifiers());
 //    doc.getUndoManager().undo();
     assertEquals("Should have undone correctly.", "", 
                  doc.getText(0, doc.getLength()));
+    
+    // 2
+    /* Test bug #905405 Undo Alt+Anything Causes Exception */
+    
+    // Type 'Alt-B'
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_PRESSED, 
+                                             (new Date()).getTime(),
+                                             InputEvent.ALT_MASK,
+                                             KeyEvent.VK_Q, KeyEvent.CHAR_UNDEFINED));
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_TYPED, 
+                                             (new Date()).getTime(),
+                                             InputEvent.ALT_MASK,
+                                             KeyEvent.VK_UNDEFINED, 'Q'));
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_RELEASED, 
+                                             (new Date()).getTime(),
+                                             InputEvent.ALT_MASK,
+                                             KeyEvent.VK_Q, KeyEvent.CHAR_UNDEFINED));
+    
+    /*
+     * If the bug is not fixed in DefinitionsPane.processKeyEvent, this test
+     * will not fail because the exception is thrown in another thread. 
+     * However, the stack trace will get printed onto the console.  I don't
+     * know how to fix this problem in case someone unfixes the bug.
+     */
+    SwingUtilities.notifyAction(a, ks, e, e.getSource(), e.getModifiers());
+//    definitions.setCaretPosition(doc.getLength());
+    
     
     // 2
     /* This part doesn't work right now because by just calling processKeyEvent we
@@ -493,10 +526,7 @@ public final class DefinitionsPaneTest extends TestCase {
     assertEquals("Should have undone correctly.", "a", 
                  doc.getText(0, doc.getLength()));*/
   }
-  
 }
-
-
 
 class KeyTestListener implements KeyListener {
   

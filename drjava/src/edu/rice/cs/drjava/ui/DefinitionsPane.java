@@ -496,8 +496,11 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
         e.consume();
       }
       else {
-        // The following conditional fixes bug 676586 by ignoring typed events when the meta key is down
-        if (((e.getModifiers() & InputEvent.META_MASK) != 0) && e.getKeyCode() == KeyEvent.VK_UNDEFINED) {
+        // The following conditional fixes bug #676586 by ignoring typed events when the meta key is down
+        // and fixes bug #905405 "Undo Alt+Anything Causes Exception" by ignoring typed events when
+        // the alt key is down.
+        if ((((e.getModifiers() & InputEvent.META_MASK) != 0) || ((e.getModifiers() & InputEvent.ALT_MASK) != 0)) 
+              && e.getKeyCode() == KeyEvent.VK_UNDEFINED) {
           return;
         }
         

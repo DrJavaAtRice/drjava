@@ -556,7 +556,16 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
 
   public Object visit(FunctionCall node) {
     _checkInterrupted(node);
-    return super.visit(node);
+//    Method m = (Method) node.getProperty(NodeProperties.METHOD);
+    Object ret = super.visit(node);
+
+    // workaround to not return null for void returns
+    if (Void.TYPE.equals(node.getProperty(NodeProperties.TYPE))) {
+      return Interpreter.NO_RESULT;
+    }
+    else {
+      return ret;
+    }
   }
 
   public Object visit(PackageDeclaration node) {

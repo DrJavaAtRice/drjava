@@ -135,8 +135,8 @@
         <include name="${projpath}/**/*.gif" />
         <include name="${projpath}/**/*.png" />
 
-	<!-- include files used for testing -->
-	<include name="${projpath}/**/testFiles/*" />
+ <!-- include files used for testing -->
+ <include name="${projpath}/**/testFiles/*" />
       </fileset>
     </copy>
 
@@ -162,8 +162,8 @@
         <include name="${projpath}/**/*.gif" />
         <include name="${projpath}/**/*.png" />
 
-	<!-- include files used for testing -->
-	<include name="${projpath}/**/testFiles/*" />
+ <!-- include files used for testing -->
+ <include name="${projpath}/**/testFiles/*" />
       </fileset>
     </copy>
 
@@ -627,6 +627,8 @@
     <apply executable="docbook2html" failonerror="yes" type="file">
       <arg value="-o"/>
       <arg value="${doc_dir}/user/"/>
+      <arg value="-V"/>
+      <arg value="%use-id-as-filename%"/>
       <fileset dir="${srcroot}/${projpath}/docs/user">
         <include name="userdoc.docbook" />
       </fileset>

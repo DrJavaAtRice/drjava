@@ -541,15 +541,28 @@ public final class JavaInterpreterTest extends TestCase {
                  new Integer(0), 
                  _interpreter.interpret("new A().i"));
   }
+  
+  /**
+   * Tests that declaring a void method in the Interactions Pane won't cause a bad type
+   * exception. Tests bug #915906 "Methods in Interactions no longer work".
+   */
+  public void testDeclareVoidMethod() {
+    try {
+      _interpreter.interpret("void method() {}");
+    }
+    catch (ExceptionReturnedException ere) {
+      fail("Should be able to declare void methods.");
+    }
+  }
 
   /**
    * Tests that a call to user-defined void method returns NO_RESULT, instead of null.
    * This test does not pass, it is currently broken.
    */
-//   public void testUserDefinedVoidMethod() throws ExceptionReturnedException {
-//     Object result = _interpreter.interpret("public void foo() {}; foo()");
-//     assertSame("Should have returned NO_RESULT.", Interpreter.NO_RESULT, result);
-//   }
+  public void testUserDefinedVoidMethod() throws ExceptionReturnedException {
+     Object result = _interpreter.interpret("public void foo() {}; foo()");
+     assertSame("Should have returned NO_RESULT.", Interpreter.NO_RESULT, result);
+   }
 }
 
 /**

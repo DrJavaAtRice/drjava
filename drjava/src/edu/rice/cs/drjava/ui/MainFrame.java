@@ -4694,22 +4694,33 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void nonTestCase(boolean isTestAll) {
 
       String message = isTestAll ?
-        "There are no open test cases.  Please make sure all\n" +
-        "open documents have been compiled, and at least one\n" +
-        "of them is a subclass of junit.framework.TestCase." :
-
-        "The  Test  button  (and menu item) in  DrJava invokes the JUnit\n"  +
-        "test  harness  over  the currently open document.  In order for\n" +
-        "that  to  work,  the  current  document  must  be a valid JUnit\n" +
-        "TestCase, i.e., a subclass of junit.framework.TestCase.\n\n" +
-
-        "Make  sure  the current  document  has been saved and  compiled\n" +
-        "before using the Test button.\n\n" +
-
-        "For information on how to write JUnit TestCases, view the JUnit\n" +
-        "chapter in the User Documentation or the online Help, or visit:\n\n" +
-
-        "  http://www.junit.org/\n\n";
+        "There are no open JUnit test cases.  Please make sure that:\n" +
+        "  - The documents containing tests have been compiled.\n" +
+        "  - They are subclasses of junit.framework.TestCase.\n" +
+        "For more information on writing JUnit TestCases, view the\n" +
+        "JUnit chapter in the User Documentation." :
+        "The current document is not a valid JUnit test case.\n" +
+        "Please make sure that:\n" +
+        "  - This document has been compiled.\n" +
+        "  - It is a subclass of junit.framework.TestCase.\n" +
+        "For more information on writing JUnit TestCases, view the\n" +
+        "JUnit chapter in the User Documentation.";
+//        "There are no open test cases.  Please make sure all\n" +
+//        "open documents have been compiled, and at least one\n" +
+//        "of them is a subclass of junit.framework.TestCase." :
+//
+//        "The  Test  button  (and menu item) in  DrJava invokes the JUnit\n"  +
+//        "test  harness  over  the currently open document.  In order for\n" +
+//        "that  to  work,  the  current  document  must  be a valid JUnit\n" +
+//        "TestCase, i.e., a subclass of junit.framework.TestCase.\n\n" +
+//
+//        "Make  sure  the current  document  has been saved and  compiled\n" +
+//        "before using the Test button.\n\n" +
+//
+//        "For information on how to write JUnit TestCases, view the JUnit\n" +
+//        "chapter in the User Documentation or the online Help, or visit:\n\n" +
+//
+//        "  http://www.junit.org/\n\n";
 
       JOptionPane.showMessageDialog(MainFrame.this, message,
                                     "Test Works Only On JUnit TestCases",
