@@ -55,11 +55,11 @@ class Lexer extends StreamTokenizer {
   private SExpToken buffer;
   
   public Lexer(File file) throws FileNotFoundException{
-    this(new FileReader(file));
+    this(new BufferedReader(new FileReader(file)));
   }
   
   public Lexer(Reader reader) {
-    super(reader);
+    super(new BufferedReader(reader));
     initLexer();
   }
   
