@@ -74,5 +74,12 @@ public interface InteractionsListener {
    * Called when the interpreter exits unexpectedly.
    */
   public void interpreterExited(int status);
+  
+  /**
+   * Called when the active interpreter is changed.
+   * @param inProgress Whether the new interpreter is currently in progress
+   * with an interaction (ie. whether an interactionEnded event will be fired)
+   */
+  public void interpreterChanged(boolean inProgress);
 
 }
