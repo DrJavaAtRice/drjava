@@ -145,6 +145,15 @@ public abstract class GlobalModelTestCase extends TestCase {
     return File.createTempFile("DrJava-test", ".java", _tempDir);
   }
 
+  /** 
+   * Create a new temporary file in _tempDir.  Calls with the same
+   * int will return the same filename, while calls with different
+   * ints will return different filenames.
+   */
+  protected File tempFile(int i) throws IOException {
+    return File.createTempFile("DrJava-test" + i, ".java", _tempDir);
+  }
+
   /** Create a new temporary directory in _tempDir. */
   protected File tempDirectory() throws IOException {
     return FileOps.createTempDirectory("DrJava-test", _tempDir);
@@ -330,9 +339,41 @@ public abstract class GlobalModelTestCase extends TestCase {
                  numErrors > 0);
   }
 
-  public class FileSelector implements FileOpenSelector, FileSaveSelector {
+    // These exceptions are specially used only in this test case.
+    // They are used to verify that the code blocks 
+  public class OverwriteException extends RuntimeException{}
+  public class OpenWarningException extends RuntimeException{}
+  
+  public class WarningFileSelector implements FileOpenSelector, FileSaveSelector {
     private File _file;
+    public WarningFileSelector(File f) {
+      _file = f;
+    }
 
+    public File getFile() throws OperationCanceledException {
+      return _file;
+    }
+    public void warnFileOpen(){
+      throw new OpenWarningException();
+    }
+    public boolean verifyOverwrite(){
+      throw new OverwriteException();
+    }
+  }
+
+  /** 
+   * this class is used by several test cases in Compile Tests that expect
+   * incorrect behavior concerning the saving of files.  This special
+   * FileSelector is included to ensure compliance with these test cases,
+   * for which the intricacies of saving files are unimportant.
+   *
+   * The only FileSelector that honest-to-supreme-deity matters is
+   * is DefaultGlobalModel.DefinitionsDocumentHandler, which is much
+   * more like WarningFileSelector
+   */
+  
+    public class FileSelector implements FileOpenSelector, FileSaveSelector {
+    private File _file;
     public FileSelector(File f) {
       _file = f;
     }
@@ -340,15 +381,25 @@ public abstract class GlobalModelTestCase extends TestCase {
     public File getFile() throws OperationCanceledException {
       return _file;
     }
+    public void warnFileOpen(){
+    }
+    public boolean verifyOverwrite(){
+      return true;
+    }
   }
-
+  
   public class CancelingSelector implements FileOpenSelector, FileSaveSelector
   {
     public File getFile() throws OperationCanceledException {
       throw new OperationCanceledException();
     }
+    public void warnFileOpen(){
+    }
+    public boolean verifyOverwrite(){
+      return true;
+    }
   }
-
+  
   /**
    * A GlobalModelListener for testing.
    * By default it expects no events to be fired. To customize,

@@ -124,6 +124,27 @@ public class MainFrame extends JFrame {
     public File getFile() throws OperationCanceledException {
       return getSaveFile();
     }
+    public void warnFileOpen() {
+      // If we'd like to change to an error message for this, instead
+      // of a warning, change both incidents of WARNING to ERROR.
+      JOptionPane.showMessageDialog
+        ( MainFrame.this,
+         "This file is open in DrJava.  You may not overwrite it.",
+         "File Open Warning",
+         JOptionPane.WARNING_MESSAGE);
+    }
+
+
+    public boolean verifyOverwrite() {
+      int n = JOptionPane.showConfirmDialog
+        (MainFrame.this,
+         "This file already exists.  Do you wish to overwrite the file?",
+         "Confirm Overwrite",
+         JOptionPane.YES_NO_OPTION);
+      if (n==JOptionPane.YES_OPTION){ return true;}
+      else {return false;}
+
+    }
   };
 
   /** Resets the document in the definitions pane to a blank one. */

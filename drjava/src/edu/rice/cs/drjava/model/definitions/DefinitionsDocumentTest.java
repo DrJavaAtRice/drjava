@@ -368,6 +368,28 @@ public class DefinitionsDocumentTest extends TestCase
   }
   
   /**
+   * Tests returning the current column in the document.
+   */
+  public void testGetColumn1() throws BadLocationException {
+    final String s = "1234567890";
+    assertEquals("#0.0", 1, defModel.getCurrentCol());
+    defModel.insertString(0, s, null);
+    assertEquals("#0.1", 11, defModel.getCurrentCol());
+    defModel.gotoLine(0);
+    assertEquals("#0.2", 1, defModel.getCurrentCol());
+  }
+  
+  
+  /**
+   * Tests returning the current column in the document.
+   */
+//  public void testGetColumn2() throws BadLocationException {
+//    final String s = "1234567890\n1234\n12345";
+//    defModel.insertString(0, s, null);
+//    assertEquals("#0.0", 5, defModel.getCurrentCol() );
+//  }
+  
+  /**
    * Test whether removeTabs actually removes all tabs.
    */
   public void testRemoveTabs1() {
@@ -383,12 +405,12 @@ public class DefinitionsDocumentTest extends TestCase
    * This test aims to replicate the problem.
    */
   public void testRemoveTabs2() {
-	  String input =
+   String input =
     "\ttoken = nextToken(); // read trailing parenthesis\n" +
     "\tif (token != ')')\n" +
     "\t  throw new ParseException(\"wrong number of arguments to |\");\n";
 
-	  String expected =
+   String expected =
     " token = nextToken(); // read trailing parenthesis\n" +
     " if (token != ')')\n" +
     "   throw new ParseException(\"wrong number of arguments to |\");\n";
@@ -409,13 +431,13 @@ public class DefinitionsDocumentTest extends TestCase
    * Test whether tabs are removed as appropriate on call to insertString.
    */
   public void testTabRemovalOnInsertString2() throws BadLocationException {
-	  String[] inputs = {
+   String[] inputs = {
       "\ttoken = nextToken(); // read trailing parenthesis\n",
       "\tif (token != ')')\n",
       "\t  throw new ParseException(\"wrong number of arguments to |\");\n",
     };
 
-	  String expected =
+   String expected =
     " token = nextToken(); // read trailing parenthesis\n" +
     " if (token != ')')\n" +
     "   throw new ParseException(\"wrong number of arguments to |\");\n";

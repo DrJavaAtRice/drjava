@@ -49,5 +49,7 @@ import java.io.File;
 public interface FileSaveSelector {
 
   public File getFile() throws OperationCanceledException;
+  public void warnFileOpen();
+  public boolean verifyOverwrite();
 
 }

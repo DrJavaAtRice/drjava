@@ -384,6 +384,33 @@ public class DefinitionsDocument extends PlainDocument {
     }
     _reduced.move(dist);
   }
+  
+  /** return the current column of the cursor position */
+  /** passes simple included test cases, not really working. */ 
+  public int getCurrentCol() {
+    int dist = _reduced.getDistToPreviousNewline( _currentLocation );
+    if( dist==-1 ){dist = _currentLocation+1;}
+    if( dist==0 ){ dist = 1; }
+    else{ dist = dist++;}
+    return dist;
+  }
+  
+  /** return the current row of the cursor position */
+  /** untested, uncalled */
+  public int getCurrentRow() {
+    int count=0;
+    int _copyLocation = _currentLocation;
+    int distPrevNewLine = _reduced.getDistToPreviousNewline( _currentLocation );
+    while (distPrevNewLine != -1 && _currentLocation>0) {
+      _currentLocation -= distPrevNewLine;
+      count++;
+      distPrevNewLine = _reduced.getDistToPreviousNewline( _currentLocation );
+    }
+    _currentLocation = _copyLocation;
+    return count;
+  }
+  
+   
 
   /**
    * Set the indent to a particular number of spaces.

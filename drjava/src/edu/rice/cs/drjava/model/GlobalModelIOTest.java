@@ -637,6 +637,46 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
                  BAR_TEXT,
                  FileOps.readFileAsString(file2));
   }
+  
+  public void testSaveAsExistsForOverwrite()
+    throws BadLocationException, IOException {
+      
+      OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+      final File file1 = tempFile();
+      try {
+        doc.saveFileAs(new WarningFileSelector(file1));
+        fail("Did not ask to verify overwrite as expected");
+      }
+      catch (OverwriteException e1) {
+        // good behavior for file saving...
+      }
+    }
+  
+  public void testSaveAsExistsAndOpen()
+  throws BadLocationException, IOException, 
+    OperationCanceledException, AlreadyOpenException{
+      OpenDefinitionsDocument doc1,doc2;
+      final File file1,file2;
+      
+      file1 = tempFile(1);
+      doc1 = _model.getDocumentForFile(file1);
+      changeDocumentText(FOO_TEXT,doc1);
+      doc1.saveFileAs(new FileSelector(file1));
+      
+      file2 = tempFile(2);
+      doc2 = _model.getDocumentForFile(file2);
+      changeDocumentText(BAR_TEXT, doc2);
+      
+      try {
+        doc2.saveFileAs(new WarningFileSelector(file1));
+        fail("Did not warn of open file as expected");
+      }
+      catch (OpenWarningException e) {
+        // good behavior for file saving...
+      }
+  }
+
+
   /**
    * Make sure that all open files are saved in appropriate order,
    * ie, even with BAR file as active document, save all should
@@ -659,13 +699,13 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
       _model.saveAllFiles(fs); // this should save the files as file1,file2,file3 respectively
 
       assertEquals("contents of saved file1",
-		   FOO_TEXT,
-		   FileOps.readFileAsString(file1));
+     FOO_TEXT,
+     FileOps.readFileAsString(file1));
       assertEquals("contents of saved file1",
-		   BAR_TEXT,
-		   FileOps.readFileAsString(file2));
+     BAR_TEXT,
+     FileOps.readFileAsString(file2));
       assertEquals("contents of saved file1",
-		   "third document contents",
-		   FileOps.readFileAsString(file3));      
-		   }
+     "third document contents",
+     FileOps.readFileAsString(file3));      
+     }
 }

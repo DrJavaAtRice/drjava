@@ -752,6 +752,10 @@ public class DefaultGlobalModel implements GlobalModel {
             public File getFile() throws OperationCanceledException {
               return file;
             }
+            public void warnFileOpen() {}
+            public boolean verifyOverwrite() {
+              return true;
+            }
           };
         }
 
@@ -777,6 +781,15 @@ public class DefaultGlobalModel implements GlobalModel {
       try {
         final OpenDefinitionsDocument openDoc = this;
         final File file = com.getFile();
+        final OpenDefinitionsDocument otherDoc = _getOpenDocument(file);
+        if ( otherDoc != null && openDoc != otherDoc ) {
+          com.warnFileOpen();
+          throw new OperationCanceledException();
+        }
+        else if (file.exists())
+          if (!com.verifyOverwrite())
+            throw new OperationCanceledException();  
+        
         FileWriter writer = new FileWriter(file);
         _editorKit.write(writer, _doc, 0, _doc.getLength());
         writer.close();
@@ -1203,6 +1216,7 @@ public class DefaultGlobalModel implements GlobalModel {
     return new DefinitionsDocumentHandler(doc);
   }
 
+  
   /**
    * Returns the OpenDefinitionsDocument corresponding to the given
    * File, or null if that file is not open.
@@ -1226,6 +1240,20 @@ public class DefaultGlobalModel implements GlobalModel {
     }
 
     return doc;
+  }
+  
+  /**
+   * Returns true if a document corresponding to the given
+   * file is open, or false if that file is not open.
+   * @param file File object to search for
+   * @return boolean whether file is open
+   */
+  private boolean _docIsOpen(File file) {
+    OpenDefinitionsDocument doc = _getOpenDocument(file);
+    if (doc == null)
+      return false;
+    else
+      return true;
   }
 
 

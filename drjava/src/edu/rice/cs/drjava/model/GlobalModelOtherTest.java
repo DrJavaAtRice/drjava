@@ -344,13 +344,14 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   {
     final String text_before = "class Foo { public int m() { return ";
     final String text_after = "; } }";
-    final File file = tempFile();
     final int num_iterations = 5;
+    File file;
     OpenDefinitionsDocument doc;
 
 
     for (int i = 0; i < num_iterations; i++) {
       doc = setupDocument(text_before + i + text_after);
+      file = tempFile(i);
       _doCompile(doc, file);
 
       assertEquals("interactions result, i=" + i,

@@ -125,9 +125,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
   public void testCompileNormal() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
-
-    // No listener for save -- assume it works
-    doc.saveFile(new FileSelector(file));
+    doc.saveFile(new FileSelector(file));    
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
     doc.startCompile();
