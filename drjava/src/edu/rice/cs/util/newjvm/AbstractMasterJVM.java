@@ -263,7 +263,13 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
     String msg = "SlaveJVM quit before registering!  Status: " + status;
     throw new IllegalStateException(msg);
   }
-
+  
+  /**
+   * Called if the slave JVM dies before it is able to register.
+   * @param cause The Throwable which caused the slave to die.
+   */
+  public abstract void errorStartingSlave(Throwable cause) throws RemoteException;
+  
   /**
    * No-op to prove that the master is still alive.
    */

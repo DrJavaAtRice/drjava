@@ -201,6 +201,14 @@ public class IntegratedMasterSlaveTest extends TestCase {
       notify();
       _justQuit = true;
     }
+    
+    /**
+     * Called if the slave JVM dies before it is able to register.
+     * @param cause The Throwable which caused the slave to die.
+     */
+    public void errorStartingSlave(Throwable cause) throws RemoteException {
+      fail("There was an error starting the slave JVM: " + cause);
+    }
   }
 
 

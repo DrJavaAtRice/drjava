@@ -43,32 +43,40 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util.newjvm;
+package edu.rice.cs.util.swing;
 
-import java.rmi.*;
-
+import javax.swing.*;
+import javax.swing.border.*;
+import java.awt.*;
 /**
- * The remote interface for a master JVM.
- *
+ * A JScrollPane without a traditional Swing border.  Uses its own
+ * EtchedBorder instead, which improves the appearance of nested panes
+ * on Mac OS X.
  * @version $Id$
  */
-// The type parameter specifies the remote interface for the slave JVM.
-// (Generics removed because they confused rmic!)
-public interface MasterRemote/*<SlaveType extends SlaveRemote>*/ extends Remote {
+public class BorderlessScrollPane extends JScrollPane {
   /**
-   * Registers a slave JVM.
-   * This method is called by the slave JVM after a connection is made.
+   * The default border for a "borderless" scroll pane.
    */
-  public void registerSlave(SlaveRemote slave) throws RemoteException;
+  private static final Border DEFAULT = new EtchedBorder();
 
-  /**
-   * No-op to prove that the master is still alive.
-   */
-  public void checkStillAlive() throws RemoteException;
+  // note, I can't think of a way to guarantee superclass behavior without
+  // overriding each superclass constructor and then calling setBorder().
   
-  /**
-   * Called if the slave JVM dies before it is able to register.
-   * @param cause The Throwable which caused the slave to die.
-   */
-  public void errorStartingSlave(Throwable cause) throws RemoteException;
+  public BorderlessScrollPane() {
+    super();
+    setBorder(DEFAULT);
+  }
+  public BorderlessScrollPane(Component view) {
+    super(view);
+    setBorder(DEFAULT);
+  }
+  public BorderlessScrollPane(Component view, int vsbPolicy, int hsbPolicy) {
+    super(view,vsbPolicy,hsbPolicy);
+    setBorder(DEFAULT);
+  }
+  public BorderlessScrollPane(int vsbPolicy, int hsbPolicy) {
+    super(vsbPolicy,hsbPolicy);
+    setBorder(DEFAULT);
+  }
 }

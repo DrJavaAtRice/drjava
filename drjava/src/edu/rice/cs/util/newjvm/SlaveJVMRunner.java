@@ -47,6 +47,10 @@ package edu.rice.cs.util.newjvm;
 
 import java.io.*;
 import java.rmi.server.UnicastRemoteObject;
+import java.rmi.RemoteException;
+
+import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.swing.ScrollableDialog;
 
 /**
  * This class is used for its {@link #main} method, which is used
@@ -67,6 +71,19 @@ import java.rmi.server.UnicastRemoteObject;
  */
 public final class SlaveJVMRunner {
 
+  /**
+   * Whether Swing dialogs should be displayed with diagnostic
+   * information if the slave is unable to register or contact the
+   * main JVM.  If false, the information will be printed to (the
+   * usually invisible) System.err.
+   * 
+   * Note that the master JVM will always be notified if possible if
+   * there is a problem instantiating or registering the slave, so
+   * it can take appropriate action.  This flag only affects those
+   * situations in which the master JVM cannot be contacted.
+   */
+  public static final boolean SHOW_DEBUG_DIALOGS = false;
+  
   /** Private constructor to prevent instantiation. */
   private SlaveJVMRunner() {}
 
@@ -88,12 +105,12 @@ public final class SlaveJVMRunner {
    * of the slave JVM implementation class.
    */
   public static void main(String[] args) {
-    // Make sure RMI doesn't use an IP address that might change
-    System.setProperty("java.rmi.server.hostname", "127.0.0.1");
-
-    if (args.length != 2) System.exit(1);
-
     try {
+      // Make sure RMI doesn't use an IP address that might change
+      System.setProperty("java.rmi.server.hostname", "127.0.0.1");
+      
+      if (args.length != 2) System.exit(1);
+      
       FileInputStream fstream = new FileInputStream(args[0]);
       ObjectInputStream ostream = new ObjectInputStream(fstream);
       MasterRemote remote = (MasterRemote) ostream.readObject();
@@ -112,17 +129,43 @@ public final class SlaveJVMRunner {
         slave.start(remote);
         remote.registerSlave(slave);
       }
-      catch (Throwable e) {
-        System.err.println("Exception while instantiating slave " + args[1]);
-        e.printStackTrace();
-        //javax.swing.JOptionPane.showMessageDialog(null, e.toString());
+      catch (Throwable t) {
+        // Couldn't instantiate the slave.
+        try {
+          // Try to show the error properly, through the master
+          remote.errorStartingSlave(t);
+        }
+        catch (RemoteException re) {
+          // Couldn't show the error properly, so use another approach
+          String msg = "Couldn't instantiate and register the slave.\n" +
+            "  Also failed to display error through master JVM, because:\n" +
+            StringOps.getStackTrace(re) + "\n";
+          _showErrorMessage(msg, t);
+        }
         System.exit(3);
       }
     }
-    catch (Throwable e) {
-      System.err.println("Exception while deserializing remote stub");
-      e.printStackTrace();
+    catch (Throwable t) {
+      // There's no master to display the error, so we'll do it ourselves
+      _showErrorMessage("Couldn't deserialize remote stub for the master JVM.", t);
       System.exit(2);
+    }
+  }
+  
+  /**
+   * Displays a graphical error message to notify the user of a problem
+   * while starting the slave JVM.
+   * @param cause A message indicating where the error took place.
+   * @param t The Throwable which caused the error.
+   */
+  private static void _showErrorMessage(String cause, Throwable t) {
+    String msg = "An error occurred while starting the slave JVM:\n  " +
+      cause + "\n\nOriginal error:\n" + StringOps.getStackTrace(t);
+    if (SHOW_DEBUG_DIALOGS) {
+      new ScrollableDialog(null, "Error", "Error details:", msg).show();
+    }
+    else {
+      System.err.println(msg);
     }
   }
 }

@@ -43,32 +43,39 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util.newjvm;
+package edu.rice.cs.util.swing;
 
-import java.rmi.*;
+import javax.swing.*;
+import java.awt.*;
 
 /**
- * The remote interface for a master JVM.
- *
+ * A JSplitPane without a traditional Swing border.  Uses a null
+ * border instead, which improves the appearance of nested panes
+ * on Mac OS X.
  * @version $Id$
  */
-// The type parameter specifies the remote interface for the slave JVM.
-// (Generics removed because they confused rmic!)
-public interface MasterRemote/*<SlaveType extends SlaveRemote>*/ extends Remote {
-  /**
-   * Registers a slave JVM.
-   * This method is called by the slave JVM after a connection is made.
-   */
-  public void registerSlave(SlaveRemote slave) throws RemoteException;
-
-  /**
-   * No-op to prove that the master is still alive.
-   */
-  public void checkStillAlive() throws RemoteException;
-  
-  /**
-   * Called if the slave JVM dies before it is able to register.
-   * @param cause The Throwable which caused the slave to die.
-   */
-  public void errorStartingSlave(Throwable cause) throws RemoteException;
+public class BorderlessSplitPane extends JSplitPane {
+  // note, I can't think of a way to guarantee superclass behavior without
+  // overriding each superclass constructor and then calling setBorder().
+  public BorderlessSplitPane() {
+    super();
+    setBorder(null);
+  }
+  public BorderlessSplitPane(int orient) { 
+    super(orient);
+    setBorder(null);
+  }
+  public BorderlessSplitPane(int orient, boolean layout) {
+    super(orient,layout);
+    setBorder(null);
+  }
+  public BorderlessSplitPane(int orient, boolean layout, Component left, 
+                             Component right) {
+    super(orient,layout,left,right);
+    setBorder(null);
+  }
+  public BorderlessSplitPane(int orient, Component left, Component right) {
+    super(orient,left,right);
+    setBorder(null);
+  }
 }
