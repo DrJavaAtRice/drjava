@@ -303,19 +303,19 @@ public class FileOpsTest extends TestCase {
     assertTrue("dir2 should be deleted", !dir2.exists());
     assertTrue("file2 should be deleted", !file2.exists());
   }
-  
+
   public void testSplitFile() {
     String[] parts = new String[]{"","home","username","dir"};
     String path1 = "";
     for (String s : parts) {
       path1 += s + File.separator;
     }
-    
+
     File f = new File(path1);
     String[] res = FileOps.splitFile(f);
-    
-    assertTrue( "Inconsitent results. Expected " + 
-               java.util.Arrays.toString(parts) + ", but found " + 
+
+    assertTrue( "Inconsitent results. Expected " +
+               java.util.Arrays.toString(parts) + ", but found " +
                java.util.Arrays.toString(res),
                java.util.Arrays.equals(parts,res));
   }
@@ -323,35 +323,32 @@ public class FileOpsTest extends TestCase {
   private String fixPathFormat(String s){
     return s.replace('\\', '/');
   }
-  
+
   public void testMakeRelativeTo() throws IOException, SecurityException {
     File base, abs;
-    
+
     base = new File("src/test1/test2/file.txt");
     abs = new File("built/test1/test2/file.txt");
-    assertEquals("Wrong Relative Path 1", 
+    assertEquals("Wrong Relative Path 1",
                  "../../../built/test1/test2/file.txt",
                  fixPathFormat(FileOps.makeRelativeTo(abs,base).getPath()));
-    
     base = new File("file.txt");
     abs = new File("built/test1/test2/file.txt");
-    assertEquals("Wrong Relative Path 2", 
+    assertEquals("Wrong Relative Path 2",
                  "built/test1/test2/file.txt",
                  fixPathFormat(FileOps.makeRelativeTo(abs,base).getPath()));
-    
     base = new File("built/test1/test2test/file.txt");
     abs = new File("built/test1/test2/file.txt");
-    assertEquals("Wrong Relative Path 3", 
+    assertEquals("Wrong Relative Path 3",
                  "../test2/file.txt",
                  fixPathFormat(FileOps.makeRelativeTo(abs,base).getPath()));
-    
     base = new File("file.txt");
-    abs = new File("test.txt"); 
-    assertEquals("Wrong Relative Path 4", 
+    abs = new File("test.txt");
+    assertEquals("Wrong Relative Path 4",
                  "test.txt",
                  fixPathFormat(FileOps.makeRelativeTo(abs,base).getPath()));
   }
-  
+
   /**
    * Main method to be called by testDeleteDirectoryOnExit.  Runs in
    * a new JVM so the files can be deleted.
