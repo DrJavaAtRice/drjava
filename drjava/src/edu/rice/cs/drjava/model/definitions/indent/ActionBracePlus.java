@@ -67,10 +67,12 @@ public class ActionBracePlus extends IndentRuleAction
    * line with the appropriate spacing or characters.
    * Preconditions: must be inside a brace.
    * @param doc DefinitionsDocument containing the line to be indented.
+   * @return true if the caller should update the current location itself,
+   * false if the indenter has already handled this
    */
-  public void indentLine(DefinitionsDocument doc, int reason)
+  public boolean indentLine(DefinitionsDocument doc, int reason)
   {
-    super.indentLine(doc, reason);
+    boolean supResult = super.indentLine(doc, reason);
     int here = doc.getCurrentLocation();
     int startLine = doc.getLineStartPos(here);
     doc.setCurrentLocation(startLine);
@@ -80,7 +82,7 @@ public class ActionBracePlus extends IndentRuleAction
     if ((ii.braceType.equals("")) ||
         (ii.distToBrace < 0)) {
       // Can't find brace, so do nothing.
-      return;
+      return supResult;
     }
 
     // Find length to brace
@@ -104,5 +106,7 @@ public class ActionBracePlus extends IndentRuleAction
     doc.setCurrentLocation(here);
 
     doc.setTab(tab.toString(), here);
+    
+    return supResult;
   }
 }

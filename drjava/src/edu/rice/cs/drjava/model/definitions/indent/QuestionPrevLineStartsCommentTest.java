@@ -49,9 +49,6 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  * @version $Id$
  */
 public final class QuestionPrevLineStartsCommentTest extends IndentRulesTestCase {
-  public QuestionPrevLineStartsCommentTest(String name) {
-    super(name);
-  }
 
   static IndentRuleQuestion rule2 = new QuestionPrevLineStartsComment(null,
               null);

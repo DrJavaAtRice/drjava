@@ -55,13 +55,6 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 public final class QuestionStartingNewStmtTest extends IndentRulesTestCase {
 
   /**
-   * Tests the indentation decision tree.
-   */
-  public QuestionStartingNewStmtTest(String name) {
-    super(name);
-  }
-
-  /**
    * Ensures that the current line is the first line of a statement.
    * This is done by testing if the previous character is one of
    * the following: docstart, ';', '{', '}'

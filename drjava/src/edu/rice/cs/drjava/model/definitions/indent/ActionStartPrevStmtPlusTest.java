@@ -55,14 +55,6 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  * @version $Id$
  */
 public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
-
-  /**
-   * Tests the indentation decision tree.
-   * @param     String name
-   */
-  public ActionStartPrevStmtPlusTest(String name) {
-    super(name);
-  }
   
   public void testNoPrevStmt() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartPrevStmtPlus("", true);

@@ -90,6 +90,9 @@ public class Indenter {
     java.util.Arrays.fill(indent,' ');
     String oneLevel = new String(indent);
 
+    boolean autoCloseComments = DrJava.getConfig().getSetting
+      (OptionConstants.AUTO_CLOSE_COMMENTS).booleanValue();
+    
     IndentRule
       // Main tree
       rule37 = new ActionStartCurrStmtPlus(oneLevel),
@@ -132,22 +135,29 @@ public class Indenter {
       rule06 = new QuestionPrevLineStartsWith("*", rule07, rule12),
       rule05 = new ActionStartPrevLinePlus(" "),
       rule04 = new ActionStartPrevLinePlus(" * "),
-      rule03 = new QuestionCurrLineEmptyOrEnterPress(rule04, rule05),
+        
+      rule41 = new ActionStartPrevLinePlusMultiline
+        (new String[] { " * \n", " */" }, 0, 3),
+      rule42 = new QuestionFollowedByStar(rule04, rule41),
+      rule03 = new QuestionCurrLineEmptyOrEnterPress
+          ((autoCloseComments? rule42 : rule04), rule05),
       rule02 = new QuestionPrevLineStartsComment(rule03, rule06),
-
+        
       rule01 = new QuestionInsideComment(rule02, rule13);
 
     _topRule = rule01;
   }
-
+  
   /**
    * Indents the current line based on a decision tree which determines
    * the indent based on context.
    * @param doc document containing line to be indented
+   * @return true if the caller should update the current location itself,
+   * false if the indenter has already handled this
    */
-  public void indent(DefinitionsDocument doc, int reason)
+  public boolean indent(DefinitionsDocument doc, int reason)
   {
-    _topRule.indentLine(doc, reason);
+    return _topRule.indentLine(doc, reason);
   }
 
 }

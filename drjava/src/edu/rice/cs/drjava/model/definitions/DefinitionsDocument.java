@@ -39,6 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions;
 
+import javax.swing.ProgressMonitor;
 import javax.swing.text.*;
 import javax.swing.undo.*;
 import javax.swing.event.DocumentEvent;
@@ -57,6 +58,7 @@ import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.DefaultGlobalModel;
 import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.EventNotifier;
+import edu.rice.cs.drjava.model.OperationCanceledException;
 
 
 /**
@@ -1099,7 +1101,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       nextNonWSChar = getFirstNonWSCharPos(DOCSTART);
     }
     else {
-      nextNonWSChar = getFirstNonWSCharPos(prevDelimiter+1,whitespace);
+      nextNonWSChar = getFirstNonWSCharPos(prevDelimiter+1, whitespace, false);
     }
     //long mid3 = System.currentTimeMillis();  // START STAGE 4
     
@@ -1308,18 +1310,33 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    */
   public int getFirstNonWSCharPos(int pos) throws BadLocationException {
     char[] whitespace = {' ', '\t', '\n'};
-    return getFirstNonWSCharPos(pos,whitespace);
+    return getFirstNonWSCharPos(pos, whitespace, false);
   }
+  
+  /**
+   * Similar to the single-argument version, but allows including comments.
+   * @param pos Position to start from
+   * @param acceptComments if true, find non-whitespace chars in comments
+   * @return position of first non-whitespace character after pos,
+   * or ERROR_INDEX if end of document is reached
+   */
+  public int getFirstNonWSCharPos(int pos, boolean acceptComments)
+      throws BadLocationException {
+    char[] whitespace = {' ', '\t', '\n'};
+    return getFirstNonWSCharPos(pos, whitespace, acceptComments);
+  }
+  
   /**
    * Finds the position of the first non-whitespace character after pos.
    * NB: Skips comments and all whitespace, including newlines
    * @param pos Position to start from
    * @param whitespace array of whitespace chars to ignore
+   * @param acceptComments if true, find non-whitespace chars in comments
    * @return position of first non-whitespace character after pos,
    * or ERROR_INDEX if end of document is reached
    */
-  public synchronized int getFirstNonWSCharPos(int pos,char[] whitespace)
-    throws BadLocationException
+  public synchronized int getFirstNonWSCharPos
+    (int pos, char[] whitespace, boolean acceptComments) throws BadLocationException
   {
     // Check cache
     String key = "getFirstNonWSCharPos:" + pos;
@@ -1361,26 +1378,27 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
         _reduced.move(i - reducedPos);
         reducedPos = i;
         
-        // Check if non-ws char is in comment
-        if((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
-           (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT))) {
+        // Check if non-ws char is in comment, and we want to ignore them.
+        if (!acceptComments &&
+            ((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
+             (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT))))
+        {
           // Ignore non-ws char
           
           // Move to next token?  (requires making getBlockOffset public)
           //  doesn't work yet
-          /*
-          int tokenSize = _reduced.currentToken().getSize();
-          int offset = _reduced.getBlockOffset();
-          //DrJava.consoleOut().println("     token len: " + tokenSize +
-          //                            ", offset: " + offset);
-          //DrJava.consoleOut().println("     token before: " + _reduced.currentToken().getState());
-          _reduced.move(tokenSize - offset);
-          i += tokenSize - offset;
-          //DrJava.consoleOut().println("     token after: " + _reduced.currentToken().getState());
-          */
+//          int tokenSize = _reduced.currentToken().getSize();
+//          int offset = _reduced.getBlockOffset();
+//          //DrJava.consoleOut().println("     token len: " + tokenSize +
+//          //                            ", offset: " + offset);
+//          //DrJava.consoleOut().println("     token before: " + _reduced.currentToken().getState());
+//          _reduced.move(tokenSize - offset);
+//          i += tokenSize - offset;
+//          //DrJava.consoleOut().println("     token after: " + _reduced.currentToken().getState());
+
         }
         else {
-          if(_isStartOfComment(text, i - pos)) {
+          if(!acceptComments && _isStartOfComment(text, i - pos)) {
             // Move i past the start of comment characters
             // and continue searching
             i = i + 1;
@@ -1621,10 +1639,32 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     return _reduced.balanceForward();
   }
 
+  /**
+   * Default indentation - uses OTHER flag and no progress indicator.
+   * @param selStart the offset of the initial character of the region to indent
+   * @param selEnd the offset of the last character of the region to indent
+   */
   public void indentLines(int selStart, int selEnd){
-    indentLines(selStart, selEnd, Indenter.OTHER);
+    try {
+      indentLines(selStart, selEnd, Indenter.OTHER, null);
+    }
+    catch (OperationCanceledException oce) {
+      // Indenting without a ProgressMonitor should never be cancelled!
+      throw new UnexpectedException(oce);
+    }
   }
-  public void indentLines(int selStart, int selEnd, int reason) {
+
+  /**
+   * Parameterized indentation for special-case handling.
+   * @param selStart the offset of the initial character of the region to indent
+   * @param selEnd the offset of the last character of the region to indent
+   * @param reason a flag from {@link Indenter} to indicate the reason for the indent
+   * (indent logic may vary slightly based on the trigger action)
+   * @param pm used to display progress, null if no reporting is desired
+   */
+  public void indentLines(int selStart, int selEnd, 
+                          int reason, ProgressMonitor pm)
+      throws OperationCanceledException {
     //long start = System.currentTimeMillis();
     try {
       // Begins a compound edit.
@@ -1632,16 +1672,18 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       
       if (selStart == selEnd) {
         Position oldCurrentPosition = createPosition(_currentLocation);
-        _indentLine(reason);
-        //int caretPos = getCaretPosition();
-        //_doc().setCurrentLocation(caretPos);
-        setCurrentLocation(oldCurrentPosition.getOffset());
-        int space = getWhiteSpace();
-        move(space);
-        //setCaretPosition(caretPos + space);
+        // Indent, updating current location if necessary.
+        if (_indentLine(reason)) {
+          //int caretPos = getCaretPosition();
+          //_doc().setCurrentLocation(caretPos);
+          setCurrentLocation(oldCurrentPosition.getOffset());
+          int space = getWhiteSpace();
+          move(space);
+          //setCaretPosition(caretPos + space);
+        }
       }
       else {
-        _indentBlock(selStart, selEnd, reason);
+        _indentBlock(selStart, selEnd, reason, pm);
       }
       // Ends the compound edit.
       _undoManager.endCompoundEdit(key);
@@ -1665,9 +1707,13 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * points start and end.
    * @param start Position in document to start indenting from
    * @param end Position in document to end indenting at
-   * @param reason the user action spawning this indent
+   * @param reason a flag from {@link Indenter} to indicate the reason for the indent
+   * (indent logic may vary slightly based on the trigger action)
+   * @param pm used to display progress, null if no reporting is desired
    */
-  private synchronized void _indentBlock(final int start, final int end, int reason) {
+  private synchronized void _indentBlock(final int start, final int end,
+                                         int reason, ProgressMonitor pm)
+      throws OperationCanceledException {
     //DrJava.consoleOut().println("indenting block of " + (end-start));
     try {
       // Keep marker at the end. This Position will be the
@@ -1682,17 +1728,31 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
         // regardless of how indentLine changes things
         Position walkerPos = this.createPosition(walker);
         // Indent current line
+        // We currently ignore current location info from each line, because
+        // it probably doesn't make sense in a block context.
         _indentLine(reason);
         // Move back to walker spot
         setCurrentLocation(walkerPos.getOffset());
         walker = walkerPos.getOffset();
+        
+        if (pm != null) {
+          // Update ProgressMonitor.
+          pm.setProgress(walker);
+          
+          // Check for cancel button-press.
+          if (pm.isCanceled()) {
+            throw new OperationCanceledException();
+          }
+        }
+        
         // Adding 1 makes us point to the first character AFTER the next newline.
         // We don't actually move yet. That happens at the top of the loop,
         // after we check if we're past the end.
         walker += _reduced.getDistToNextNewline() + 1;
         //DrJava.consoleOut().println("progress: " + (100*(walker-start)/(end-start)));
       }
-    } catch (BadLocationException e) {
+    }
+    catch (BadLocationException e) {
       // Should not happen
       throw new UnexpectedException(e);
     }
@@ -1701,8 +1761,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   /**
    * Indents a line using the Indenter decision tree.  Package private for testing purposes
    */
-  void _indentLine(int reason) {
-    _indenter.indent(this, reason);
+  boolean _indentLine(int reason) {
+    return _indenter.indent(this, reason);
   }
   
   /**

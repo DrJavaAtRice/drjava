@@ -37,53 +37,42 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.definitions.indent;
+package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
+import javax.swing.text.JTextComponent;
+import java.awt.Component;
+import java.awt.Color;
 
-import java.util.Vector;
-import java.io.PrintStream;
-import junit.framework.*;
-import javax.swing.text.BadLocationException;
+import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.*;
 
 /**
- * This class does almost all the work for keeping an indent tree trace.  IndentRuleQuestion
- * also does some of the work, and any subclass may substitute its own version of getRuleName()
- * @version $Id$
+ * Creates and installs an OptionListener for DEFINITIONS_NORMAL_COLOR on
+ * a specified JTextComponent.
  */
-public final class IndentRuleWithTraceTest extends IndentRulesTestCase{
-
-  public void testTrace() throws BadLocationException{
-    IndentRuleWithTrace.setRuleTraceEnabled(true);
-    IndentRule
-      rule4 = new ActionBracePlus("  "),
-      rule3 = new QuestionBraceIsCurly(rule4, rule4),
-      rule2 = new QuestionBraceIsParenOrBracket(rule3, rule3);
-    IndentRuleQuestion
-      rule1 = new QuestionInsideComment(rule2, rule2);
-    String text =
-      "public class foo {\n" +
-      "/**\n" +
-      " * This method does nothing\n" + 
-      " */\n" +
-      "public void method1(){\n" +
-      "}\n" +
-      "}\n";
-
-    _setDocText(text);
-    rule1.indentLine(_doc, 23, Indenter.OTHER);
-    rule1.indentLine(_doc, 75, Indenter.OTHER);
-
-    String[] expected = {"edu.rice.cs.drjava.model.definitions.indent.QuestionInsideComment No",
-    "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsParenOrBracket No",
-    "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsCurly Yes",
-    "edu.rice.cs.drjava.model.definitions.indent.ActionBracePlus "};
-
-    Vector<String> actual = IndentRuleWithTrace.getTrace();
-    assertEquals("steps in trace", 4, actual.size());
-    for(int x = 0; x < actual.size(); x++){
-      assertEquals("check trace step " + x, expected[x], actual.get(x));
+class ForegroundColorListener implements OptionListener<Color> {
+  final Component _target;
+  
+  public ForegroundColorListener(Component target) {
+    _target = target;
+    
+    Color color = DrJava.getConfig().getSetting
+      (OptionConstants.DEFINITIONS_NORMAL_COLOR);
+    _target.setForeground(color);
+    
+    if (_target instanceof JTextComponent) {
+      ((JTextComponent) _target).setCaretColor(color);
+    }
+    
+    DrJava.getConfig().addOptionListener
+      (OptionConstants.DEFINITIONS_NORMAL_COLOR, this);
+  }
+  
+  public void optionChanged(OptionEvent<Color> oce) {
+    _target.setForeground(oce.value);
+    
+    if (_target instanceof JTextComponent) {
+      ((JTextComponent) _target).setCaretColor(oce.value);
     }
   }
 }

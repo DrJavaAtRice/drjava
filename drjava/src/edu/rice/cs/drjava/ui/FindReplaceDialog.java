@@ -310,6 +310,12 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       }
     });
     
+    // Setup color listeners.
+    new ForegroundColorListener(_findField);
+    new BackgroundColorListener(_findField);
+    new ForegroundColorListener(_replaceField);
+    new BackgroundColorListener(_replaceField);
+  
     _findNextButton = new JButton(_findNextAction);
     _replaceButton = new JButton(_replaceAction);
     _replaceFindButton = new JButton(_replaceFindAction);

@@ -54,14 +54,6 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  */
 public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
 
-  /**
-   * Tests the indentation decision tree.
-   * @param     String name
-   */
-  public ActionStartStmtOfBracePlusTest(String name) {
-    super(name);
-  }
-
 
   /**
    * Tests indenting with a single line contract

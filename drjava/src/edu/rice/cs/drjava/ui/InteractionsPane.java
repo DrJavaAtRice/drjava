@@ -42,6 +42,7 @@ package edu.rice.cs.drjava.ui;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.Toolkit;
+import java.awt.Color;
 
 import edu.rice.cs.util.swing.*;
 import edu.rice.cs.drjava.config.*;
@@ -104,6 +105,10 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
     _keymap = addKeymap(keymapName, getKeymap());
 
     setCaretPosition(doc.getLength());
+    
+    // Setup color listeners.
+    new ForegroundColorListener(this);
+    new BackgroundColorListener(this);
   }
   
   /**

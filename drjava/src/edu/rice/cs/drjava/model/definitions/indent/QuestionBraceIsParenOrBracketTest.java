@@ -61,11 +61,6 @@ public final class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
     private String _text;
 
     private final IndentRuleQuestion _rule = new QuestionBraceIsParenOrBracket(null, null);
-
-    /**
-     * @param name The name of this test case.
-     */
-    public QuestionBraceIsParenOrBracketTest(String name) { super(name); }
     
     public void setUp() { super.setUp(); }
     

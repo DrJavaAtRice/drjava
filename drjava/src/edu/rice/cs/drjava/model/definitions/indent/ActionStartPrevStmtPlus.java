@@ -73,9 +73,11 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
    * line with the appropriate spacing or characters.
    *
    * @param doc DefinitionsDocument containing the line to be indented.
+   * @return true if the caller should update the current location itself,
+   * false if the indenter has already handled this
    */
-  public void indentLine(DefinitionsDocument doc, int reason) {
-    super.indentLine(doc, reason);
+  public boolean indentLine(DefinitionsDocument doc, int reason) {
+    boolean supResult = super.indentLine(doc, reason);
     String indent = "";
     int here = doc.getCurrentLocation();
 
@@ -93,7 +95,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     // For DOCSTART, align to left margin
     if(prevDelimiterPos <= DefinitionsDocument.DOCSTART) {
       doc.setTab(_suffix, here);
-      return;
+      return supResult;
     }
 
     try {
@@ -148,6 +150,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
 
     indent = indent + _suffix;
     doc.setTab(indent, here);
+    return supResult;
   }
 
   private boolean _isPrevNonWSCharEqualTo(DefinitionsDocument doc,int pos,char c) {

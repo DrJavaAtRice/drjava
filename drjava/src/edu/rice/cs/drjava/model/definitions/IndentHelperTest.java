@@ -51,10 +51,6 @@ import edu.rice.cs.drjava.model.definitions.indent.IndentRulesTestCase;
  */
 public final class IndentHelperTest extends IndentRulesTestCase {
 
-  public IndentHelperTest(String name) {
-    super(name);
-  }
-
   /**
    * @return The position of the first matching character in the given
    * array of characters found when scanning backwards from the current

@@ -56,8 +56,6 @@ public final class QuestionHasCharPrecedingOpenBraceTest extends IndentRulesTest
   private String _text;
     
   private IndentRuleQuestion _rule;
-      
-  public QuestionHasCharPrecedingOpenBraceTest(String name) { super(name); }
 
   public void setUp() { super.setUp(); }
 

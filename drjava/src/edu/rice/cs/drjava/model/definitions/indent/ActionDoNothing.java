@@ -62,8 +62,10 @@ public class ActionDoNothing extends IndentRuleAction {
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
    * @param doc DefinitionsDocument containing the line to be indented.
+   * @return true if the caller should update the current location itself,
+   * false if the indenter has already handled this
    */
-  public void indentLine(DefinitionsDocument doc, int reason) {
-    super.indentLine(doc, reason);
+  public boolean indentLine(DefinitionsDocument doc, int reason) {
+    return super.indentLine(doc, reason);
   }
 }

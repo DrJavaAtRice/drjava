@@ -69,9 +69,11 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
    * @param doc DefinitionsDocument containing the line to be indented.
+   * @return true if the caller should update the current location itself,
+   * false if the indenter has already handled this
    */
-  public void indentLine(DefinitionsDocument doc, int reason){
-    super.indentLine(doc, reason);
+  public boolean indentLine(DefinitionsDocument doc, int reason){
+    boolean supResult = super.indentLine(doc, reason);
     int pos = doc.getCurrentLocation();
 
     // Get distance to brace
@@ -81,7 +83,7 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
     // If there is no brace, align to left margin
     if (distToBrace == -1) {
       doc.setTab(_suffix, pos);
-      return;
+      return supResult;
     }
 
     // Get the absolute position of the brace
@@ -97,6 +99,8 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
     indent = indent + _suffix;
 
     doc.setTab(indent, pos);
+    
+    return supResult;
   }
 
 }

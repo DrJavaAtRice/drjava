@@ -747,6 +747,11 @@ public class ConfigFrame extends JFrame {
     panel.addComponent(new IntegerOptionComponent(OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this,
                                                   "<html>The number of files to remember in<br>" +
                                                   "the recently used files list in the File menu.</html>"));
+    
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.AUTO_CLOSE_COMMENTS, "Automatically Close Block Comments", this,
+                                                  "<html>Automatically inserts a closing comment tag (\"*/\")<br>" +
+                                                  "when the enter key is pressed after typing a new<br>" +
+                                                  "block comment tag (\"/*\" or \"/**\").</html>"));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.JAVAC_ALLOW_ASSERT, "Allow Assert Keyword in Java 1.4", this,
                                                   "<html>Whether to allow the <code>assert</code> keyword when compiling in Java 1.4.</html>"));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.BACKUP_FILES, "Keep Emacs-style Backup Files", this,

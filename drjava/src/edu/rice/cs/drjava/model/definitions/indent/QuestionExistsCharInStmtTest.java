@@ -58,14 +58,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
  * @version $Id$
  */
 public final class QuestionExistsCharInStmtTest extends IndentRulesTestCase {
-
-  /**
-   * Tests the indentation decision tree.
-   */
-  public QuestionExistsCharInStmtTest(String name) {
-    super(name);
-  }
-
+  
   /**
    * Ensures that a colon that is part of a ternary operator is detected.
    * Tests that this rule works for one line statements.

@@ -202,8 +202,24 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
 
       // Set the editor pane to be uneditable, but allow selecting text.
       setEditable(false);
-
-      DrJava.getConfig().addOptionListener( OptionConstants.COMPILER_ERROR_COLOR, new CompilerErrorColorOptionListener());
+      
+      DrJava.getConfig().addOptionListener(COMPILER_ERROR_COLOR,
+                                           new CompilerErrorColorOptionListener());
+      
+      // Set the colors.
+      StyleConstants.setForeground(NORMAL_ATTRIBUTES,
+                                   DrJava.getConfig().getSetting
+                                     (DEFINITIONS_NORMAL_COLOR));
+      StyleConstants.setForeground(BOLD_ATTRIBUTES,
+                                   DrJava.getConfig().getSetting
+                                     (DEFINITIONS_NORMAL_COLOR));
+      setBackground(DrJava.getConfig().getSetting(DEFINITIONS_BACKGROUND_COLOR));
+      
+      // Add OptionListeners for the colors.
+      DrJava.getConfig().addOptionListener(DEFINITIONS_NORMAL_COLOR,
+                                           new ForegroundColorListener());
+      DrJava.getConfig().addOptionListener(DEFINITIONS_BACKGROUND_COLOR,
+                                           new BackgroundColorListener());
 
       _showHighlightsCheckBox = new JCheckBox( "Highlight source", true);
       _showHighlightsCheckBox.addChangeListener( new ChangeListener() {
@@ -557,6 +573,35 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         if (_listHighlightTag != null) {
           _listHighlightTag.refresh(_listHighlightPainter);
         }
+      }
+    }
+
+    /**
+     * The OptionListener for compiler DEFINITIONS_NORMAL_COLOR
+     */
+    private class ForegroundColorListener implements OptionListener<Color> {
+      public void optionChanged(OptionEvent<Color> oce) {
+        StyleConstants.setForeground(NORMAL_ATTRIBUTES, oce.value);
+        StyleConstants.setForeground(BOLD_ATTRIBUTES, oce.value);
+        
+        // Re-attribute the existing text with the new color.
+        Document doc = getErrorListPane().getDocument();
+        if (doc instanceof StyledDocument) {
+          SimpleAttributeSet set = new SimpleAttributeSet();
+          set.addAttribute(StyleConstants.Foreground, oce.value);
+          ((StyledDocument)doc).setCharacterAttributes(0, doc.getLength(), set, false);
+        }
+//        ErrorListPane.this.repaint();
+      }
+    }
+
+    /**
+     * The OptionListener for compiler DEFINITIONS_BACKGROUND_COLOR
+     */
+    private class BackgroundColorListener implements OptionListener<Color> {
+      public void optionChanged(OptionEvent<Color> oce) {
+        setBackground(oce.value);
+        ErrorListPane.this.repaint();
       }
     }
   }

@@ -63,11 +63,6 @@ public final class QuestionBraceIsCurlyTest extends IndentRulesTestCase
   private String _text;
   
   private final IndentRuleQuestion _rule = new QuestionBraceIsCurly(null, null);
-
-  /**
-   * @param name The name of this test case.
-   */
-  public QuestionBraceIsCurlyTest(String name) { super(name); }
   
   public void setUp() { super.setUp(); }
   

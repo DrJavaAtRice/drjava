@@ -100,8 +100,12 @@ public abstract class IndentRuleWithTrace implements IndentRule{
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
    * @param doc DefinitionsDocument containing the line to be indented.
+   * @param pos ?
+   * @param reason ?
+   * @return true if the caller should update the current location itself,
+   * false if the indenter has already handled this
    */
-  public void indentLine(DefinitionsDocument doc, int pos, int reason) {
+  public boolean indentLine(DefinitionsDocument doc, int pos, int reason) {
     int oldPos = doc.getCurrentLocation();
     doc.setCurrentLocation(pos);
     indentLine(doc, reason);
@@ -109,13 +113,15 @@ public abstract class IndentRuleWithTrace implements IndentRule{
       oldPos = doc.getLength();
     }
     doc.setCurrentLocation(oldPos);
+    return false;
   }
 
-  public void indentLine(DefinitionsDocument doc, int reason){
+  public boolean indentLine(DefinitionsDocument doc, int reason){
     _addToIndentTrace(getRuleName(), TERMINUS_RULE, true);
 
     //Add the next line, and every time something is indented, the indent trace will be printed
     //printLastIndentTrace(System.out);
+    return true;
   }
 
   /**

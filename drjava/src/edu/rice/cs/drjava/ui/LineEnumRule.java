@@ -79,7 +79,8 @@ public class LineEnumRule extends JComponent {
     
     _newFont = _getLineNumFont();
     _nfm = getFontMetrics(_newFont);
-    SIZE = _nfm.stringWidth("99999");
+    // XXX: 3 is the magic number for Swing's JTextPane border padding.
+    SIZE = (int) _nfm.getStringBounds("99999", getGraphics()).getWidth() + 3;
   }
   
   /**
@@ -99,6 +100,8 @@ public class LineEnumRule extends JComponent {
     _newFont = _getLineNumFont();
       //_pane.getFont().deriveFont( 8f );
     _nfm = getFontMetrics(_newFont);
+    // XXX: 3 is the magic number for Swing's JTextPane border padding.
+    SIZE = (int) _nfm.getStringBounds("99999", getGraphics()).getWidth() + 3;
   }
   
   /**
@@ -115,7 +118,9 @@ public class LineEnumRule extends JComponent {
     
     // Do the ruler labels in a small font that's black.
     g.setFont(_newFont); 
-    g.setColor(Color.black);
+    Color foreg = DrJava.getConfig().getSetting
+      (OptionConstants.DEFINITIONS_NORMAL_COLOR);
+    g.setColor(foreg);
     
     // Some vars we need.
     int end = 0;
@@ -134,7 +139,11 @@ public class LineEnumRule extends JComponent {
       tickLength = 10;
       text = Integer.toString(i/_increment +1);
       
-      int offset = SIZE - (_nfm.stringWidth(text) + 1);
+      // When we paint, we get a good look at the Graphics hints.
+      // Use them to update our estimate of total width.
+      // XXX: 3 is the magic number for Swing's JTextPane border padding.
+      SIZE = (int) _nfm.getStringBounds("99999", g).getWidth() + 3;
+      int offset = SIZE - ((int) (_nfm.getStringBounds(text, g).getWidth() + 1));
       
       //g.drawLine(SIZE-1, i, SIZE-tickLength-1, i);
       if (text != null) {
@@ -168,7 +177,7 @@ public class LineEnumRule extends JComponent {
       else {
         newSize = lnf.getSize2D() - 1f;
       }
-      
+       
       // If that doesn't work, try reducing the size by one until it fits.
       do {
         lnf = lnf.deriveFont(newSize);

@@ -56,14 +56,6 @@ public abstract class IndentRulesTestCase extends TestCase {
   protected DefinitionsDocument _doc;
   private String _indent;
   private EventNotifier _notifier;
-  
-  /**
-   * Tests the indentation decision tree.
-   * @param     String name
-   */
-  public IndentRulesTestCase(String name) {
-    super(name);
-  }
 
   /**
    * Sets up the test environment.

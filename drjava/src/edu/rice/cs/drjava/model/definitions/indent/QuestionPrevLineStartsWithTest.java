@@ -54,13 +54,6 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
 
   /**
-   * Tests the indentation decision tree.
-   */
-  public QuestionPrevLineStartsWithTest(String name) {
-    super(name);
-  }
-
-  /**
    * Tests not having the prefix in the text.
    */
   public void testNoPrefix() throws BadLocationException {

@@ -49,9 +49,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  * @version $Id$
  */
 public final class QuestionInsideCommentTest extends IndentRulesTestCase {
-  public QuestionInsideCommentTest(String name) {
-    super(name);
-  }
+
   static IndentRuleQuestion _rule = new QuestionInsideComment(null, null);
   
   public void setUp() {

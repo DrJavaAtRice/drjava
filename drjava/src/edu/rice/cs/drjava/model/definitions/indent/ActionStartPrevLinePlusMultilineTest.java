@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -39,51 +39,42 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
+import junit.framework.TestCase;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
-
-import java.util.Vector;
-import java.io.PrintStream;
-import junit.framework.*;
-import javax.swing.text.BadLocationException;
 
 /**
- * This class does almost all the work for keeping an indent tree trace.  IndentRuleQuestion
- * also does some of the work, and any subclass may substitute its own version of getRuleName()
+ * Test class for an indent rule with a really long name.  :-)
+ * Inherits from ActionStartPrevLinePlusBackupTest, since this rule's 
+ * functionality should be a strict extension of ActionStartPrevLinePlusBackup.
  * @version $Id$
  */
-public final class IndentRuleWithTraceTest extends IndentRulesTestCase{
-
-  public void testTrace() throws BadLocationException{
-    IndentRuleWithTrace.setRuleTraceEnabled(true);
-    IndentRule
-      rule4 = new ActionBracePlus("  "),
-      rule3 = new QuestionBraceIsCurly(rule4, rule4),
-      rule2 = new QuestionBraceIsParenOrBracket(rule3, rule3);
-    IndentRuleQuestion
-      rule1 = new QuestionInsideComment(rule2, rule2);
-    String text =
-      "public class foo {\n" +
-      "/**\n" +
-      " * This method does nothing\n" + 
-      " */\n" +
-      "public void method1(){\n" +
-      "}\n" +
-      "}\n";
-
-    _setDocText(text);
-    rule1.indentLine(_doc, 23, Indenter.OTHER);
-    rule1.indentLine(_doc, 75, Indenter.OTHER);
-
-    String[] expected = {"edu.rice.cs.drjava.model.definitions.indent.QuestionInsideComment No",
-    "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsParenOrBracket No",
-    "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsCurly Yes",
-    "edu.rice.cs.drjava.model.definitions.indent.ActionBracePlus "};
-
-    Vector<String> actual = IndentRuleWithTrace.getTrace();
-    assertEquals("steps in trace", 4, actual.size());
-    for(int x = 0; x < actual.size(); x++){
-      assertEquals("check trace step " + x, expected[x], actual.get(x));
-    }
+public final class ActionStartPrevLinePlusMultilineTest
+    extends ActionStartPrevLinePlusBackupTest {
+  
+  /**
+   * Factory to enable reuse of methods from ActionStartPrevLinePlusTest.
+   * This creates an action that should behave identically to an instance of
+   * ActionStartPrevLinePlus.
+   * @param suffix the text to be added by this rule after indent padding
+   * @see ActionStartPrevLinePlus(String)
+   */
+  private IndentRuleAction makeAction(String suffix) {
+    return new ActionStartPrevLinePlusMultiline(new String[] {suffix},
+                                                0, suffix.length());
   }
+  
+  /**
+   * Factory to enable reuse of methods from ActionStartPrevLinePlusBackupTest.
+   * This works similarly to makeAction(String).
+   * @param suffix the text to be added by this rule after indent padding
+   * @param position the character within the suffix string before which to
+   * place the cursor
+   * @see ActionStartPrevLinePlusBackup(String, int)
+   */
+  private IndentRuleAction makeBackupAction(String suffix, int position) {
+    return new ActionStartPrevLinePlusMultiline(new String[] {suffix},
+                                                0, position);
+  }
+  
+  
 }

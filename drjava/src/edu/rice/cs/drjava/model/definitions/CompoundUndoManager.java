@@ -205,7 +205,23 @@ public class CompoundUndoManager extends UndoManager {
       super.undo();
     }
   }
-   
+  
+  /**
+   * Overload for undo which allows the initiator of a CompoundEdit to abondon it.
+   * @param key the key returned by the last call to startCompoundEdit
+   */
+  public void undo(int key) {
+    if(_keys.get(0).intValue() == key) {
+      CompoundEdit compoundEdit = _compoundEdits.get(0);
+      _compoundEdits.remove(0);
+      _keys.remove(0);
+      
+      compoundEdit.end();
+      compoundEdit.undo();
+      compoundEdit.die();
+    }
+  }
+  
   /**
    * overrides the inherited redo method so that an exception will
    * be thrown if redo is attempted while in the compound undo state

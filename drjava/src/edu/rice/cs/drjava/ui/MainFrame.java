@@ -62,7 +62,6 @@ import java.util.Arrays;
 import java.net.URL;
 import java.net.MalformedURLException;
 
-
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.platform.*;
@@ -99,9 +98,9 @@ public class MainFrame extends JFrame implements OptionConstants {
   //private static final int JUNIT_TAB = 3;
 
   // GUI Dimensions
-  private static final int GUI_WIDTH = 800;
-  private static final int GUI_HEIGHT = 700;
-  private static final int DOC_LIST_WIDTH = 150;
+//  private static final int GUI_WIDTH = 800;
+//  private static final int GUI_HEIGHT = 700;
+//  private static final int DOC_LIST_WIDTH = 150;
 
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
   private static final String DEBUGGER_OUT_OF_SYNC =
@@ -613,7 +612,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       _tabbedPane.setSelectedComponent(_findReplace);
       _findReplace.requestFocus();
-      _setDividerLocation();
+      //_setDividerLocation();
     }
   };
 
@@ -1131,6 +1130,9 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** Creates the main window, and shows it. */
   public MainFrame() {
+    // Cache the config object, since we use it a zillion times.
+    final Configuration config = DrJava.getConfig();
+    
     // Platform-specific UI setup.
     PlatformFactory.ONLY.beforeUISetup();
     
@@ -1161,7 +1163,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     
     // Working directory is default place to start
-    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
+    File workDir = config.getSetting(WORKING_DIRECTORY);
     if (workDir == FileOption.NULL_FILE) {
       workDir = new File(System.getProperty("user.dir"));
     }
@@ -1228,8 +1230,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     setIconImage(getIcon("drjava64.png").getImage());
 
     // Set size and position
-    setBounds(0, 0, GUI_WIDTH, GUI_HEIGHT);
-    setSize(GUI_WIDTH, GUI_HEIGHT);
+    int width = config.getSetting(WINDOW_WIDTH).intValue();
+    int height = config.getSetting(WINDOW_HEIGHT).intValue();
+    setBounds(0, 0, width, height);
+    setSize(width, height);
+    
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = this.getSize();
@@ -1250,25 +1255,46 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpPanes();
     updateFileTitle();
     
-    _promptBeforeQuit = DrJava.getConfig().getSetting(QUIT_PROMPT).booleanValue();
+    _promptBeforeQuit = config.getSetting(QUIT_PROMPT).booleanValue();
 
     // Set the fonts
     _setMainFont();
-    Font doclistFont = DrJava.getConfig().getSetting(FONT_DOCLIST);
+    Font doclistFont = config.getSetting(FONT_DOCLIST);
     _docList.setFont(doclistFont);
     
+    // Set the colors
+    _updateNormalColor();
+    _updateBackgroundColor();
+    
+    // Add OptionListeners for the colors.
+    config.addOptionListener
+      (DEFINITIONS_NORMAL_COLOR, new NormalColorOptionListener());
+    config.addOptionListener
+      (DEFINITIONS_BACKGROUND_COLOR, new BackgroundColorOptionListener());
+    
     // Add option listeners for changes to config options
-    DrJava.getConfig().addOptionListener(OptionConstants.FONT_MAIN, new MainFontOptionListener());
-    DrJava.getConfig().addOptionListener(OptionConstants.FONT_LINE_NUMBERS, new LineNumbersFontOptionListener());
-    DrJava.getConfig().addOptionListener(OptionConstants.FONT_DOCLIST, new DoclistFontOptionListener());
-    DrJava.getConfig().addOptionListener(OptionConstants.FONT_TOOLBAR, new ToolbarFontOptionListener());
-    DrJava.getConfig().addOptionListener(OptionConstants.TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
-    DrJava.getConfig().addOptionListener(OptionConstants.TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
-    DrJava.getConfig().addOptionListener(OptionConstants.WORKING_DIRECTORY, new WorkingDirOptionListener());
-    DrJava.getConfig().addOptionListener(OptionConstants.LINEENUM_ENABLED, new LineEnumOptionListener());
-    DrJava.getConfig().addOptionListener(OptionConstants.QUIT_PROMPT, new QuitPromptOptionListener());
-    DrJava.getConfig().addOptionListener(OptionConstants.RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
-    DrJava.getConfig().addOptionListener(OptionConstants.JSR14_LOCATION, new OptionListener<File>() {
+    config.addOptionListener
+      (FONT_MAIN, new MainFontOptionListener());
+    config.addOptionListener
+      (FONT_LINE_NUMBERS, new LineNumbersFontOptionListener());
+    config.addOptionListener
+      (FONT_DOCLIST, new DoclistFontOptionListener());
+    config.addOptionListener
+      (FONT_TOOLBAR, new ToolbarFontOptionListener());
+    config.addOptionListener
+      (TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
+    config.addOptionListener
+      (TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
+    config.addOptionListener
+      (WORKING_DIRECTORY, new WorkingDirOptionListener());
+    config.addOptionListener
+      (LINEENUM_ENABLED, new LineEnumOptionListener());
+    config.addOptionListener
+      (QUIT_PROMPT, new QuitPromptOptionListener());
+    config.addOptionListener
+      (RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
+    config.addOptionListener
+      (JSR14_LOCATION, new OptionListener<File>() {
       public void optionChanged(OptionEvent<File> oe) {
         boolean bootClasspathHasv2 = DrJava.bootClasspathHasJSR14v20();
         if (oe.value != FileOption.NULL_FILE) {
@@ -1286,7 +1312,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
     });
-    DrJava.getConfig().addOptionListener(OptionConstants.LOOK_AND_FEEL, new OptionListener<String>() {
+    config.addOptionListener(LOOK_AND_FEEL, new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oe) {
         /*
         try {
@@ -1321,14 +1347,14 @@ public class MainFrame extends JFrame implements OptionConstants {
         */
         String title = "Apply Look and Feel";
         String msg = "Look and feel changes will take effect when you restart DrJava.";
-        if (DrJava.getConfig().getSetting(OptionConstants.WARN_CHANGE_LAF).booleanValue()) {
+        if (config.getSetting(WARN_CHANGE_LAF).booleanValue()) {
           ConfirmCheckBoxDialog dialog =
             new ConfirmCheckBoxDialog(_configFrame, title, msg,
                                       "Do not show this message again",
                                       JOptionPane.INFORMATION_MESSAGE,
                                       JOptionPane.DEFAULT_OPTION);
           if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
-            DrJava.getConfig().setSetting(OptionConstants.WARN_CHANGE_LAF, Boolean.FALSE);
+            config.setSetting(WARN_CHANGE_LAF, Boolean.FALSE);
           }
         }
       }
@@ -1798,12 +1824,13 @@ public class MainFrame extends JFrame implements OptionConstants {
       else {
         // Only remember the checkbox if they say yes
         if (dialog.getCheckBoxValue() == true) {
-          DrJava.getConfig().setSetting(OptionConstants.QUIT_PROMPT, Boolean.FALSE);
+          DrJava.getConfig().setSetting(QUIT_PROMPT, Boolean.FALSE);
         }
       }
     }
-      
+    
     _recentFileManager.saveRecentFiles();
+    _storePositionInfo();
         
     // Save recent files, but only if there wasn't a problem at startup
     // (Don't want to overwrite a custom config file with a simple typo.)
@@ -1818,6 +1845,27 @@ public class MainFrame extends JFrame implements OptionConstants {
     _model.quit();
   }
   
+  /**
+   * Stores the current position and size info for window and panes to the
+   * config framework.
+   */
+  private void _storePositionInfo() {
+    Configuration config = DrJava.getConfig();
+    
+    // Window size.
+    Dimension size = getSize();
+    config.setSetting(WINDOW_HEIGHT, new Integer(size.height));
+    config.setSetting(WINDOW_WIDTH, new Integer(size.width));
+    
+    // Panel heights.
+    config.setSetting(DEBUG_PANEL_HEIGHT, new Integer(_debugPanel.getHeight()));
+//    config.setSetting(TABS_HEIGHT,
+//       new Integer(_mainSplit.getHeight() - _mainSplit.getDividerLocation()));
+  
+    // Doc list width.
+    config.setSetting(DOC_LIST_WIDTH, 
+                      new Integer(_docSplitPane.getDividerLocation()));
+  }
 
   private void _compile() {
     final SwingWorker worker = new SwingWorker() {
@@ -2702,8 +2750,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     Font buttonFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
 
     // Check whether icons should be shown
-    boolean useIcon = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
-    boolean useText = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
+    boolean useIcon = DrJava.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
+    boolean useText = DrJava.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
     final Icon icon = (useIcon) ? (Icon) a.getValue(Action.SMALL_ICON) : null;
     if (icon == null) {
       ret = new JButton( (String) a.getValue(Action.DEFAULT)) {
@@ -2745,8 +2793,8 @@ public class MainFrame extends JFrame implements OptionConstants {
    * _createManualToolbarButton.
    */
   public JButton _createToolbarButton(Action a) {
-    boolean useText = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
-    boolean useIcons = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
+    boolean useText = DrJava.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
+    boolean useIcons = DrJava.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
     Font buttonFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
     
     final JButton result = new JButton(a) {
@@ -3176,7 +3224,17 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (_model.getDebugger().isAvailable()) {
       try {
         _debugPanel = new DebugPanel(this);
-        _debugPanel.setPreferredSize(_debugPanel.getMinimumSize());
+        
+        // Set the panel's size.
+        int debugHeight = 
+          DrJava.getConfig().getSetting(DEBUG_PANEL_HEIGHT).intValue();
+        Dimension debugMinSize = _debugPanel.getMinimumSize();
+        
+        // TODO: check bounds compared to entire window.
+        if ((debugHeight > debugMinSize.height)) {
+          debugMinSize.height = debugHeight;
+        }
+        _debugPanel.setPreferredSize(debugMinSize);
       }
       catch(NoClassDefFoundError e) {
         // Don't use the debugger
@@ -3210,10 +3268,18 @@ public class MainFrame extends JFrame implements OptionConstants {
     // overall size. Then we can set _docSplitPane's divider. Ahh, Swing.
     // Also, according to the Swing docs, we need to set these dividers AFTER
     // we have shown the window. How annoying.
-    _mainSplit.setDividerLocation(2*getHeight()/3);
+//    int tabHeight = DrJava.getConfig().getSetting(TABS_HEIGHT).intValue();
+    
+    // 2*getHeight()/3
+    _mainSplit.setDividerLocation(_mainSplit.getHeight() - 132);
+//    _mainSplit.setDividerLocation(_mainSplit.getHeight() - tabHeight);
     _mainSplit.setOneTouchExpandable(true);
     _debugSplitPane.setOneTouchExpandable(true);
-    _docSplitPane.setDividerLocation(DOC_LIST_WIDTH);
+    
+    int docListWidth = DrJava.getConfig().getSetting(DOC_LIST_WIDTH).intValue();
+    
+    // TODO: Check bounds.
+    _docSplitPane.setDividerLocation(docListWidth);
     _docSplitPane.setOneTouchExpandable(true);
   }
 
@@ -3410,11 +3476,73 @@ public class MainFrame extends JFrame implements OptionConstants {
     _javadocErrorPanel.setListFont(f);
   }
   
+  /**
+   * Updates the text color for the doc list.
+   */
+  private void _updateNormalColor() {
+    // Get the new value.
+    Color norm = DrJava.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR);
+    
+    // Change the text (foreground) color for the doc list.
+    _docList.setForeground(norm);
+    
+    // We also need to immediately repaint the foremost scroll pane.
+    _repaintLineNums();
+  }
+  
+  /**
+   * Updates the background color for the doc list.
+   */
+  private void _updateBackgroundColor() {
+    // Get the new value.
+    Color back = DrJava.getConfig().getSetting(DEFINITIONS_BACKGROUND_COLOR);
+    
+    // Change the background color for the doc list.
+    _docList.setBackground(back);
+    
+    // We also need to immediately repaint the foremost scroll pane.
+    _repaintLineNums();
+  }
+  
+  /**
+   * Updates the font and colors of the line number display.
+   */
+  private void _updateLineNums() {
+    if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
+      Iterator<JScrollPane> it = _defScrollPanes.values().iterator();
+      
+      // Iterate over all definitions scroll panes.
+      while (it.hasNext()) {
+        // Update the font for all line number displays.
+        JScrollPane spane = it.next();
+        
+        LineEnumRule ler = (LineEnumRule) spane.getRowHeader().getView();
+        ler.updateFont();
+        ler.revalidate();
+      }
+      
+      // We also need to immediately repaint the foremost scroll pane.
+      _repaintLineNums();
+    }
+  }
+  
+  /**
+   * Repaints the line numbers on the active scroll pane.
+   */
+  private void _repaintLineNums() {
+    JScrollPane front = _defScrollPanes.get(_model.getActiveDocument());
+    JViewport rhvport = front.getRowHeader();
+    
+    if (rhvport != null) {
+      Component view = rhvport.getView();
+      view.repaint();
+    }
+  }
   
   /**
    *  Update the row header (line number enumeration) for the definitions scroll pane
    */
-  private void _updateDefScrollRowHeader() {
+  private void _updateDefScrollRowHeader() {    
     boolean ruleEnabled = DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue();
     
     Iterator scrollPanes = _defScrollPanes.values().iterator();
@@ -4642,25 +4770,10 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private class LineNumbersFontOptionListener implements OptionListener<Font> {
     public void optionChanged(OptionEvent<Font> oce) {
-      if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
-        Iterator<JScrollPane> it = _defScrollPanes.values().iterator();
-        
-        // Iterate over all definitions scroll panes.
-        while (it.hasNext()) {
-          // Update the font for all line number displays.
-          JScrollPane spane = it.next();
-          
-          LineEnumRule ler = (LineEnumRule) spane.getRowHeader().getView();
-          ler.updateFont();
-        }
-        
-        // We also need to immediately repaint the foremost scroll pane.
-        JScrollPane front = _defScrollPanes.get(_model.getActiveDocument());
-        front.getRowHeader().getView().repaint();
-      }
+      _updateLineNums();
     }
   }
-  
+
   /**
    * The OptionListener for FONT_DOCLIST
    */
@@ -4679,6 +4792,25 @@ public class MainFrame extends JFrame implements OptionConstants {
       _updateToolbarButtons();
     }
   }
+  
+  /**
+   *  The OptionListener for DEFINITIONS_NORMAL_COLOR
+   */
+  private class NormalColorOptionListener implements OptionListener<Color> {
+    public void optionChanged(OptionEvent<Color> oce) {
+      _updateNormalColor();
+    }
+  }
+  
+  /**
+   *  The OptionListener for DEFINITIONS_BACKGROUND_COLOR
+   */
+  private class BackgroundColorOptionListener implements OptionListener<Color> {
+    public void optionChanged(OptionEvent<Color> oce) {
+      _updateBackgroundColor();
+    }
+  }
+  
   /**
    *  The OptionListener for TOOLBAR options
    */

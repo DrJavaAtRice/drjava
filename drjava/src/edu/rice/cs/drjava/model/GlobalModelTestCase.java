@@ -136,7 +136,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     boolean ret = FileOps.deleteDirectory(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);
     super.tearDown();
-    //_model.dispose();
+    _model.dispose();
     
     _tempDir = null;
     _model = null;

@@ -55,13 +55,6 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
 
   /**
-   * Tests the indentation decision tree.
-   */
-  public QuestionNewParenPhraseTest(String name) {
-    super(name);
-  }
-
-  /**
    * Tests hitting start of document.
    */
   public void testStartOfDocument() throws BadLocationException {

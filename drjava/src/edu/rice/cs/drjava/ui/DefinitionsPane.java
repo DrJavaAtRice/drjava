@@ -58,6 +58,7 @@ import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
@@ -151,15 +152,6 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   public static DefaultHighlighter.DefaultHighlightPainter 
     THREAD_PAINTER =
     new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_THREAD_COLOR));
-  
-  /**
-   * The OptionListener for DEFINITIONS_BACKGROUND_COLOR 
-   */
-  private class BackgroundColorOptionListener implements OptionListener<Color> { 
-    public void optionChanged(OptionEvent<Color> oce) {
-      setBackground(oce.value);
-    }
-  }
   
   /**
    * The OptionListener for DEFINITIONS_MATCH_COLOR 
@@ -400,7 +392,6 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
      * a call to indentLine().
      */
     public void actionPerformed(ActionEvent e) {
-      int key = _doc.getDocument().getUndoManager().startCompoundEdit();
       _defaultAction.actionPerformed(e);
       
       // Only indent if in code
@@ -409,7 +400,6 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       if (state.equals(ReducedModelState.FREE) || _indentNonCode) {
         indent(getIndentReason());
       }
-      _doc.getDocument().getUndoManager().endCompoundEdit(key);
     }
   }
 
@@ -519,7 +509,6 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     _doc = doc;
     setDocument(_doc);
     setContentType("text/java");
-    setBackground(DrJava.getConfig().getSetting(DEFINITIONS_BACKGROUND_COLOR));
     //setFont(new Font("Courier", 0, 12));
     Font mainFont = DrJava.getConfig().getSetting(FONT_MAIN);
     setFont(mainFont);    
@@ -551,8 +540,10 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS).booleanValue();
     }
     
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_BACKGROUND_COLOR,
-                                    new BackgroundColorOptionListener());
+    // Setup the color listeners.
+    new ForegroundColorListener(this);
+    new BackgroundColorListener(this);
+    
     DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_MATCH_COLOR,
                                     new MatchColorOptionListener());
     DrJava.getConfig().addOptionListener( OptionConstants.COMPILER_ERROR_COLOR,
@@ -694,13 +685,6 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     public MouseEvent getLastMouseClick() {
       return _lastMouseClick;
     }
-  }
-  
-  /**
-   *  Indents the lines contained within the given selection.
-   */
-  private void _indentLines(int reason) {
-    _doc.indentLinesInDefinitions(getSelectionStart(), getSelectionEnd(), reason);
   }
   
   /**
@@ -980,7 +964,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    * Runs indent(int) with a default value of Indenter.OTHER
    */
   public void indent(){
-  indent(Indenter.OTHER);
+    indent(Indenter.OTHER);
   }
 
   /**
@@ -994,7 +978,9 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    * are special, so that stars are inserted when lines in a multiline comment
    * are broken up.
    */
-  public void indent(int reason) {
+  public void indent(final int reason) {
+    final int key = _doc.getDocument().getUndoManager().startCompoundEdit();
+    
     /**
      * Because indent() is a function called directly by the Keymap,
      * it does not go through the regular insertString channels and thus
@@ -1005,41 +991,63 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
      * new:
      */
     _doc.syncCurrentLocationWithDefinitions(getCaretPosition());
-    int selStart = getSelectionStart();
-    int selEnd = getSelectionEnd();
-
-    // Show a wait cursor for reasonable sized blocks
-    boolean showWaitCursor = selEnd > (selStart + 100);
-
-    // XXX: Temporary hack because of slow indent...
-    //  Prompt if more than 10000 characters to be indented
-    boolean doIndent = true;
-    if (selEnd > (selStart + 10000)) {
-      Object[] options = {"Yes", "No"};
-      int n = JOptionPane.showOptionDialog
-        (_mainFrame,
-         "Re-indenting this block may take a very long time.  Are you sure?",
-         "Confirm Re-indent",
-         JOptionPane.YES_NO_OPTION,
-         JOptionPane.QUESTION_MESSAGE,
-         null,
-         options,
-         options[1]);
-      if (n == JOptionPane.NO_OPTION) { doIndent = false; }
-    }
-
-    // Do the indent
-    if (doIndent) {
-      if (showWaitCursor) {
+    final int selStart = getSelectionStart();
+    final int selEnd = getSelectionEnd();
+    
+//    final SwingWorker worker = new SwingWorker() {
+//      public Object construct() {
         _mainFrame.hourglassOn();
-      }
-      //_doc.indentLinesInDefinitions(selStart, selEnd);
-      _indentLines(reason);
-      setCaretPosition(_doc.getCurrentDefinitionsLocation());
-      if (showWaitCursor) {
+        
+//        // Use a progress monitor to show a progress dialog only if necessary.
+        ProgressMonitor pm = null; //new ProgressMonitor(_mainFrame, "Indenting...",
+//                                                 null, 0, selEnd - selEnd);
+//        
+//        pm.setProgress(0);
+//        // 3 seconds before displaying the progress bar.
+//        pm.setMillisToDecideToPopup(3000);
+        
+          // Show a wait cursor for reasonable sized blocks
+        boolean showWaitCursor = selEnd > (selStart + 100);
+        
+        // XXX: Temporary hack because of slow indent...
+        //  Prompt if more than 10000 characters to be indented
+        boolean doIndent = true;
+        if (selEnd > (selStart + 10000)) {
+          Object[] options = {"Yes", "No"};
+          int n = JOptionPane.showOptionDialog
+            (_mainFrame,
+             "Re-indenting this block may take a very long time.  Are you sure?",
+             "Confirm Re-indent",
+             JOptionPane.YES_NO_OPTION,
+             JOptionPane.QUESTION_MESSAGE,
+             null,
+             options,
+             options[1]);
+          if (n == JOptionPane.NO_OPTION) { doIndent = false; }
+        }
+        
+        // Do the indent
+        try {
+          _doc.indentLinesInDefinitions(selStart, selEnd, reason, pm);
+          //      _indentLines(reason, pm);
+          
+          _doc.getDocument().getUndoManager().endCompoundEdit(key);
+        }
+        catch (OperationCanceledException oce) {
+          // if canceled, undo the indent
+//          _doc.getDocument().getUndoManager().undo(key);
+          throw new UnexpectedException(oce);
+        }
+        finally {
+          setCaretPosition(_doc.getCurrentDefinitionsLocation());
+//          pm.close();
+        }
+        
         _mainFrame.hourglassOff();
-      }
-    }
+//        return null;
+//      }
+//    };
+//    worker.start();
   }
 
   /**

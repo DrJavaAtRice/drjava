@@ -47,29 +47,66 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
  * Indents the current line in the document to the indent level of the
- * start of the previous line, plus the given suffix.
+ * start of the previous line, adds several lines of text at that indent level,
+ * and moves the cursor to a particular line and position.
  * @version $Id$
  */
-class ActionStartPrevLinePlus extends IndentRuleAction {
-  private String _suffix;
+class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
+  private String[] _suffices;
+  private int _line = 0;
+  private int _position = 0;
+  private int _offset = 0;
 
   /**
-   * Repeats the indentation from the previous line, plus a string
-   * @param suffix The string to be added
+   * Creates a multiline insert rule.  It should be noted that although the suffices
+   * are referred to as "lines", this class simply appends the strings with a
+   * number of spaces for padding.  Any newline characters you intend to place
+   * in the document must be explicitly placed within the input strings.
+   * Typically, all but the last "line" will have a '\n' character at the end.
+   * @param suffices the new lines to be added
+   * @param line the line on which to place the cursor 
+   * @param position the character within the line string before which to place
+   * the cursor
+   * @throws IllegalArgumentException if the integer params are negative or
+   * outside the appropriate bounds
    */
-  public ActionStartPrevLinePlus(String suffix) {
-    _suffix = suffix;
+  public ActionStartPrevLinePlusMultiline(String suffices[],
+                                          int line, int position) {
+    _suffices = suffices;
+    
+    // do bounds checking up-front
+    if ((line >= 0) && (line < suffices.length)) {
+      _line = line;
+    }
+    else {
+      throw new IllegalArgumentException
+        ("The specified line was outside the bounds of the specified array.");
+    }
+    
+    if ((position >= 0) && (position <= suffices[line].length())) {
+      _position = position;
+    }
+    else {
+      throw new IllegalArgumentException
+        ("The specified position was not within the bounds of the specified line.");
+    }
+    
+    // pre-compute the relative offset (without indents) of the new position
+    for (int i = 0; i < line; i++) {
+      _offset += _suffices[i].length();
+    }
+    _offset += position;
   }
-
+  
   /**
-   * Indents the line according to the previous line, with the suffix string added.
+   * Indents the line according to the previous line, with the suffix lines added
+   * and the cursor moved to a specific location.
    * If on the first line, indent is set to 0.
    * @param doc DefinitionsDocument containing the line to be indented.
-   * @return true if the caller should update the current location itself,
-   * false if the indenter has already handled this
+   * @return this is always false, since we are updating the cursor location
    */
   public boolean indentLine(DefinitionsDocument doc, int reason){
-    boolean supResult = super.indentLine(doc, reason);
+    super.indentLine(doc, reason);
     try {
       // Find start of line
       int here = doc.getCurrentLocation();
@@ -80,13 +117,25 @@ class ActionStartPrevLinePlus extends IndentRuleAction {
         int startPrevLine = doc.getLineStartPos(startLine - 1);
         int firstChar = doc.getLineFirstCharPos(startPrevLine);
         String prefix = doc.getText(startPrevLine, firstChar - startPrevLine);
-        doc.setTab(prefix + _suffix, here);
+        
+        // indent and add the suffices
+        for (int i = 0; i < _suffices.length; i++) {
+          doc.setTab(prefix + _suffices[i], here);
+          here += prefix.length() + _suffices[i].length();
+        }
+        
+        // move the cursor to the appropriate position
+        int newPos = startLine + _offset + (prefix.length() * (_line + 1));
+        doc.setCurrentLocation(newPos);
       }
       else {
         // On first line
-        doc.setTab(_suffix, here);
+        for (int i = 0; i < _suffices.length; i++) {
+          doc.setTab(_suffices[i], here);
+          here += _suffices[i].length();
+        }
       }
-      return supResult;
+      return false;
     }
     catch (BadLocationException e) {
       // Shouldn't happen

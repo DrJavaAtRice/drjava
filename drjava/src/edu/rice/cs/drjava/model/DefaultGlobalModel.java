@@ -47,6 +47,7 @@ import java.awt.print.*;
 import javax.swing.text.*;
 import javax.swing.ListModel;
 import javax.swing.DefaultListModel;
+import javax.swing.ProgressMonitor;
 import java.io.*;
 import java.util.*;
 import java.net.ServerSocket;
@@ -128,12 +129,18 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public static final Indenter INDENTER;
   static {
     // Statically create the indenter from the config values
-    int ind = DrJava.getConfig().getSetting(OptionConstants.INDENT_LEVEL).intValue();
+    int ind = DrJava.getConfig().getSetting(INDENT_LEVEL).intValue();
     INDENTER = new Indenter(ind);
-    DrJava.getConfig().addOptionListener(OptionConstants.INDENT_LEVEL,
-                                    new OptionListener<Integer>() {
+    DrJava.getConfig().addOptionListener(INDENT_LEVEL,
+                                         new OptionListener<Integer>() {
       public void optionChanged(OptionEvent<Integer> oce) {
-        INDENTER.buildTree(DrJava.getConfig().getSetting(OptionConstants.INDENT_LEVEL).intValue());
+        INDENTER.buildTree(oce.value.intValue());
+      }
+    });
+    DrJava.getConfig().addOptionListener(AUTO_CLOSE_COMMENTS,
+                                         new OptionListener<Boolean>() {
+      public void optionChanged(OptionEvent<Boolean> oce) {
+        INDENTER.buildTree(DrJava.getConfig().getSetting(INDENT_LEVEL).intValue());
       }
     });
   }
@@ -2191,8 +2198,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * A forwarding method to indent the current line or selection
      * in the definitions.
      */
-    public void indentLinesInDefinitions(int selStart, int selEnd, int reason) {
-      _doc.indentLines(selStart, selEnd, reason);
+    public void indentLinesInDefinitions(int selStart, int selEnd,
+                                         int reason, ProgressMonitor pm)
+        throws OperationCanceledException {
+      _doc.indentLines(selStart, selEnd, reason, pm);
     }
 
     /**

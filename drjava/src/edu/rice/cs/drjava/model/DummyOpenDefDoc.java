@@ -42,6 +42,7 @@ package edu.rice.cs.drjava.model;
 import java.util.Vector;
 import java.io.*;
 import java.awt.print.*;
+import javax.swing.ProgressMonitor;
 import javax.swing.text.BadLocationException;
 import junit.framework.TestResult;
 
@@ -178,7 +179,9 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
    * A forwarding method to indent the current line or selection
    * in the definitions.
    */
-  public void indentLinesInDefinitions(int selStart, int selEnd, int reason) {
+  public void indentLinesInDefinitions(int selStart, int selEnd,
+                                       int reason, ProgressMonitor pm)
+      throws OperationCanceledException {
     throw new UnsupportedOperationException("Dummy method");
   }
   

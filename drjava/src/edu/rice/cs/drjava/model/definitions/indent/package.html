@@ -33,9 +33,19 @@
         <li>2. Yes: <b>QuestionPrevLineStartsComment</b><br>
         <ul>
             <li>3. Yes: <b>QuestionCurrLineEmptyOrEnterPress</b><br>
+                <i>Starting first line of a mutli-line comment</i>
             <ul>
-                <li>4. Yes: ActionStartPrevLinePlus(" * ")<br>
-                    <i>Starting first line of a mutli-line comment</i>
+                <li>4. Yes (no auto-close): ActionStartPrevLinePlus(" * ")<br>
+                    <i>Without auto-close comments, we always do the same thing.</i>
+                <li>42. Yes (auto-close): <b>QuestionFollowedByStar</b><br>
+                <ul>
+                    <li>4. Yes: ActionStartPrevLinePlus(" * ")<br>
+                        <i>We are already inside a comment - no need to close it.</i>
+                    <li>41. No: ActionStartPrevLinePlusMultiline<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                  (new String[] { " * \n", " */" }, 0, 3)<br>
+                        <i>We are starting a new block comment - close it.</i>
+                </ul>
                 <li>5. No: ActionStartPrevLinePlus(" ")<br>
                     <i>Revisiting first line of a mutli-line comment</i>
             </ul>

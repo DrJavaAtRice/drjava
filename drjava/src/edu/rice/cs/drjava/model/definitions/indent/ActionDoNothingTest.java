@@ -52,14 +52,6 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
  */
 public final class ActionDoNothingTest extends IndentRulesTestCase {
 
-  /**
-   * Tests the indentation decision tree.
-   * @param     String name
-   */
-  public ActionDoNothingTest(String name) {
-    super(name);
-  }
-
 
   /**
    * Tests empty string

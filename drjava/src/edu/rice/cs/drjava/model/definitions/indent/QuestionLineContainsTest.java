@@ -57,13 +57,6 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 public final class QuestionLineContainsTest extends IndentRulesTestCase {
 
   /**
-   * Tests the indentation decision tree.
-   */
-  public QuestionLineContainsTest(String name) {
-    super(name);
-  }
-
-  /**
    * Ensures that a line containing a colon is detected.
    * Tests that a line of text containing a colon is detected.
    */

@@ -53,6 +53,8 @@ public interface IndentRule {
    * line with the appropriate spacing or characters.
    * @param doc DefinitionsDocument containing the line to be indented.
    * @param reason - The reason that indentation was initiated, specified in Indenter
+   * @return true if the caller should update the current location itself,
+   * false if the indenter has already handled this
    */
-  public void indentLine(DefinitionsDocument doc, int reason);
+  public boolean indentLine(DefinitionsDocument doc, int reason);
 }

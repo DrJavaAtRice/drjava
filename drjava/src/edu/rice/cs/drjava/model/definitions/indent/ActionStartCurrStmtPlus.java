@@ -70,9 +70,11 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
    * line with the appropriate spacing or characters.
    *
    * @param doc DefinitionsDocument containing the line to be indented.
+   * @return true if the caller should update the current location itself,
+   * false if the indenter has already handled this
    */
-  public void indentLine(DefinitionsDocument doc, int reason) {
-    super.indentLine(doc, reason);
+  public boolean indentLine(DefinitionsDocument doc, int reason) {
+    boolean supResult = super.indentLine(doc, reason);
 
     /**
      * This method is simply a call to getIndentOfCurrStmt, which is
@@ -92,5 +94,7 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
 
     indent = indent + _suffix;
     doc.setTab(indent, doc.getCurrentLocation());
+    
+    return supResult;
   }
 }

@@ -60,9 +60,6 @@ public final class ActionBracePlusTest extends IndentRulesTestCase
   
   private IndentRuleAction _action;
   
-  /** @param name The name of this test case. */
-  public ActionBracePlusTest(String name) { super(name); }
-  
   public void setUp() {
     super.setUp();
   }

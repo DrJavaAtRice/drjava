@@ -39,51 +39,58 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
+import javax.swing.text.*;
+import edu.rice.cs.util.UnexpectedException;
 
-import java.util.Vector;
-import java.io.PrintStream;
-import junit.framework.*;
-import javax.swing.text.BadLocationException;
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
- * This class does almost all the work for keeping an indent tree trace.  IndentRuleQuestion
- * also does some of the work, and any subclass may substitute its own version of getRuleName()
+ * Question rule in the indentation decision tree.  Determines if the 
+ * next non-whitespace character is a star '*'.  This is useful for determining
+ * if we are at the beginning of a previously ill-formed block comment.
+ * <p>
+ * <b>Does not work if character being searched for is a '/' or a '*'</b>
+ *
  * @version $Id$
  */
-public final class IndentRuleWithTraceTest extends IndentRulesTestCase{
-
-  public void testTrace() throws BadLocationException{
-    IndentRuleWithTrace.setRuleTraceEnabled(true);
-    IndentRule
-      rule4 = new ActionBracePlus("  "),
-      rule3 = new QuestionBraceIsCurly(rule4, rule4),
-      rule2 = new QuestionBraceIsParenOrBracket(rule3, rule3);
-    IndentRuleQuestion
-      rule1 = new QuestionInsideComment(rule2, rule2);
-    String text =
-      "public class foo {\n" +
-      "/**\n" +
-      " * This method does nothing\n" + 
-      " */\n" +
-      "public void method1(){\n" +
-      "}\n" +
-      "}\n";
-
-    _setDocText(text);
-    rule1.indentLine(_doc, 23, Indenter.OTHER);
-    rule1.indentLine(_doc, 75, Indenter.OTHER);
-
-    String[] expected = {"edu.rice.cs.drjava.model.definitions.indent.QuestionInsideComment No",
-    "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsParenOrBracket No",
-    "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsCurly Yes",
-    "edu.rice.cs.drjava.model.definitions.indent.ActionBracePlus "};
-
-    Vector<String> actual = IndentRuleWithTrace.getTrace();
-    assertEquals("steps in trace", 4, actual.size());
-    for(int x = 0; x < actual.size(); x++){
-      assertEquals("check trace step " + x, expected[x], actual.get(x));
+public class QuestionFollowedByStar extends IndentRuleQuestion {
+  
+  /**
+   * Constructs a new rule which determines if the current position is
+   * immediately followed by a star '*'.
+   * @param findChar Character to search for
+   * @param yesRule Rule to use if this rule holds
+   * @param noRule Rule to use if this rule does not hold
+   */
+  public QuestionFollowedByStar(IndentRule yesRule, IndentRule noRule) {
+    super(yesRule, noRule);
+  }
+  
+  /**
+   * Determines if the given character exists on the current line.
+   * Does not search in quotes or comments.
+   * <p>
+   * <b>Does not work if character being searched for is a '/' or a '*'</b>
+   * @param doc DefinitionsDocument containing the line to be indented.
+   * @return true if this node's rule holds.
+   */
+  boolean applyRule(DefinitionsDocument doc, int reason) {
+    try {
+      int charPos = doc.getFirstNonWSCharPos(doc.getCurrentLocation(), true);
+      if (charPos == DefinitionsDocument.ERROR_INDEX) {
+        return false;
+      } 
+      else if (doc.getText(charPos, 1).equals("*")) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
     }
   }
 }
+

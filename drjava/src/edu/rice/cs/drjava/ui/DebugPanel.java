@@ -146,6 +146,20 @@ public class DebugPanel extends JPanel implements OptionConstants {
     this.add(_buttonPanel, BorderLayout.EAST);
     
     _debugger.addListener(new DebugPanelListener());
+    
+    // Setup the color listeners.
+    _setColors(_watchTable);
+    _setColors(_bpTree);
+    _setColors(_stackTable);
+    _setColors(_threadTable);
+  }
+  
+  /**
+   * Quick helper for setting up color listeners.
+   */
+  private static void _setColors(Component c) {
+    new ForegroundColorListener(c);
+    new BackgroundColorListener(c);
   }
   
   /**
@@ -201,10 +215,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _bpTree.putClientProperty("JTree.lineStyle", "Angled");
     _bpTree.setScrollsOnExpand(true);
     // Breakpoint tree cell renderer
-    DefaultTreeCellRenderer dtcr = new DefaultTreeCellRenderer();
-    dtcr.setLeafIcon(null);
-    dtcr.setOpenIcon(null);
-    dtcr.setClosedIcon(null);
+    DefaultTreeCellRenderer dtcr = new BreakPointRenderer();
     _bpTree.setCellRenderer(dtcr);
     
     _leftPane.addTab("Breakpoints", new JScrollPane(_bpTree));
@@ -228,39 +239,15 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _initPopup();
   }
   
-  private void _initWatchTable() {    
+  private void _initWatchTable() {
     _watchTable = new JTable( new WatchTableModel());
-    // Adds a cell renderer to the watch table
-    TableCellRenderer watchTableRenderer = new DefaultTableCellRenderer() {
-      public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-                                                     boolean hasFocus, int row, int column) {
-        Component renderer =
-          super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);        
-        
-        _setWatchCellFont(row);
-        
-        return renderer;
-      }
-  
-      /**
-       * Sets the font for a cell in the watch table.
-       * @param row the current row
-       */
-      private void _setWatchCellFont(int row) {
-        int numWatches = _watches.size();
-        if (row < numWatches) {
-          DebugWatchData currWatch = _watches.elementAt(row);
-          if (currWatch.isChanged()) {
-            setFont(getFont().deriveFont(Font.BOLD));
-          }
-        }
-      }
-    };
-    _watchTable.getColumnModel().getColumn(0).setCellRenderer(watchTableRenderer);
-    _watchTable.getColumnModel().getColumn(1).setCellRenderer(watchTableRenderer);
-    _watchTable.getColumnModel().getColumn(2).setCellRenderer(watchTableRenderer);
+    _watchTable.setDefaultEditor(_watchTable.getColumnClass(0),
+                                 new WatchEditor());
+    _watchTable.setDefaultRenderer(_watchTable.getColumnClass(0),
+                                   new WatchRenderer());
+
     _leftPane.addTab("Watches", new JScrollPane(_watchTable));
-  }    
+  }
   
   private void _initThreadTable() {
     _threadTable = new JTable(new ThreadTableModel());
@@ -300,6 +287,89 @@ public class DebugPanel extends JPanel implements OptionConstants {
     };
     _threadTable.getColumnModel().getColumn(0).setCellRenderer(threadTableRenderer);
     _threadTable.getColumnModel().getColumn(1).setCellRenderer(threadTableRenderer);
+  }
+  
+  /**
+   * Adds config color support to DefaultTreeCellEditor.
+   */
+  static class BreakPointRenderer extends DefaultTreeCellRenderer {
+    
+    private BreakPointRenderer() {
+      setLeafIcon(null);
+      setOpenIcon(null);
+      setClosedIcon(null);
+    }
+    
+    /**
+     * Overrides the default renderer component to use proper coloring.
+     */
+    public Component getTreeCellRendererComponent
+        (JTree tree, Object value, boolean selected, boolean expanded,
+         boolean leaf, int row, boolean hasFocus) {
+      Component renderer = super.getTreeCellRendererComponent
+        (tree, value, selected, expanded, leaf, row, hasFocus);
+      
+      if (renderer instanceof JComponent) {
+        ((JComponent) renderer).setOpaque(true);
+      }
+      
+      _setColors(renderer);
+      return renderer;
+    }
+  }
+  
+  /**
+   * Adds config color support to DefaultCellEditor.
+   */
+  class WatchEditor extends DefaultCellEditor {
+    
+    WatchEditor() {
+      super(new JTextField());
+    }
+    
+    /**
+     * Overrides the default editor component to use proper coloring.
+     */
+    public Component getTableCellEditorComponent
+        (JTable table, Object value, boolean isSelected, int row, int column) {
+      Component editor = super.getTableCellEditorComponent
+        (table, value, isSelected, row, column);
+      _setColors(editor);
+      return editor;
+    }
+  }
+  
+  /**
+   * Adds config color support to DefaultTableCellRenderer.
+   */
+  class WatchRenderer extends DefaultTableCellRenderer {
+    
+    /**
+     * Overrides the default rederer component to use proper coloring.
+     */
+    public Component getTableCellRendererComponent
+        (JTable table, Object value, boolean isSelected, boolean hasFocus,
+         int row, int column) {
+      Component renderer = super.getTableCellRendererComponent
+        (table, value, isSelected, hasFocus, row, column);
+      _setColors(renderer);
+      _setWatchCellFont(row);
+      return renderer;
+    }
+  
+    /**
+     * Sets the font for a cell in the watch table.
+     * @param row the current row
+     */
+    private void _setWatchCellFont(int row) {
+      int numWatches = _watches.size();
+      if (row < numWatches) {
+        DebugWatchData currWatch = _watches.elementAt(row);
+        if (currWatch.isChanged()) {
+          setFont(getFont().deriveFont(Font.BOLD));
+        }
+      }
+    }
   }
   
   /**

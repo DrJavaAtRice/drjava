@@ -163,6 +163,12 @@ public interface OptionConstants {
    */
   public static final BooleanOption LINEENUM_ENABLED =
     new BooleanOption("lineenum.enabled", Boolean.FALSE);
+  
+  /**
+   * Whether to automatically close comments.
+   */
+  public static final BooleanOption AUTO_CLOSE_COMMENTS =
+    new BooleanOption("auto.close.comments", Boolean.FALSE);
     
   /**
    * Whether to draw anti-aliased text.  (Slightly slower.)
@@ -956,4 +962,38 @@ public interface OptionConstants {
    */
   public static final BooleanOption SHOW_DEBUG_CONSOLE =
     new BooleanOption("show.debug.console", Boolean.FALSE);
+  
+  /**
+   * Height of MainFrame at startup.  Can be overridden if out of bounds.
+   */
+  public static final NonNegativeIntegerOption WINDOW_HEIGHT =
+    new NonNegativeIntegerOption("window.height",new Integer(700));
+  
+  /**
+   * Width of MainFrame at startup.  Can be overridden if out of bounds.
+   */
+  public static final NonNegativeIntegerOption WINDOW_WIDTH =
+    new NonNegativeIntegerOption("window.width",new Integer(800));
+  
+  /**
+   * Width of DocList at startup.  Must be less than WINDOW_WIDTH.
+   * Can be overridden if out of bounds.
+   */
+  public static final NonNegativeIntegerOption DOC_LIST_WIDTH =
+    new NonNegativeIntegerOption("doc.list.width",new Integer(150));
+  
+  /**
+   * Height of tabbed panel at startup.  Must be less than WINDOW_HEIGHT +
+   * DEBUG_PANEL_HEIGHT.  Can be overridden if out of bounds.
+   */
+  public static final NonNegativeIntegerOption TABS_HEIGHT =
+    new NonNegativeIntegerOption("tabs.height",new Integer(120));
+  
+  /**
+   * Height of debugger panel at startup.  Must be less than WINDOW_HEIGHT +
+   * TABS_HEIGHT.  Can be overridden if out of bounds.
+   */
+  public static final NonNegativeIntegerOption DEBUG_PANEL_HEIGHT =
+    new NonNegativeIntegerOption("debug.panel.height",new Integer(0));
+  
 }

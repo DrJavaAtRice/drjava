@@ -62,11 +62,6 @@ public final class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase
   
   private IndentRuleQuestion _rule = new QuestionStartAfterOpenBrace(null, null);
   
-  /**
-   * @param name The name of this test case.
-   */
-  public QuestionStartAfterOpenBraceTest(String name) { super(name); }
-  
   public void setUp() { super.setUp(); }    
   
   public void testNoBrace() throws BadLocationException 

@@ -52,7 +52,7 @@ import edu.rice.cs.drjava.model.*;
  * @version $Id$
  */
 public final class NewJVMTest extends TestCase {
-  final boolean printMessages = false;
+  final boolean printMessages = true;
   
   private static TestJVMExtension _jvm;
 
@@ -85,7 +85,7 @@ public final class NewJVMTest extends TestCase {
     synchronized(_jvm) {
       _jvm.interpret("System.err.print(\"err\");");
       _jvm.wait(); // wait for println
-      _jvm.wait(); // wait for void return
+//      _jvm.wait(); // wait for void return
       assertEquals("system err buffer", "err", _jvm.errBuf);
       assertEquals("void return flag", true, _jvm.voidReturnFlag);
       _jvm.resetFlags();
@@ -94,7 +94,7 @@ public final class NewJVMTest extends TestCase {
     synchronized(_jvm) {
       _jvm.interpret("System.err.print(\"err2\");");
       _jvm.wait(); // wait for println
-      _jvm.wait(); // wait for void return
+//      _jvm.wait(); // wait for void return
       assertEquals("system err buffer", "err2", _jvm.errBuf);
       assertEquals("void return flag", true, _jvm.voidReturnFlag);
       _jvm.resetFlags();
@@ -103,7 +103,7 @@ public final class NewJVMTest extends TestCase {
     synchronized(_jvm) {
       _jvm.interpret("System.out.print(\"out\");");
       _jvm.wait(); // wait for println
-      _jvm.wait(); // wait for void return
+//      _jvm.wait(); // wait for void return
       assertEquals("system out buffer", "out", _jvm.outBuf);
       assertEquals("void return flag", true, _jvm.voidReturnFlag);
     }
@@ -318,7 +318,7 @@ public final class NewJVMTest extends TestCase {
       synchronized(this) {
         //System.out.println("notify err: " + s);
         errBuf = s;
-        this.notify();
+//        this.notify();
       }
     }
 
@@ -326,7 +326,7 @@ public final class NewJVMTest extends TestCase {
       synchronized(this) {
         //System.out.println("notify out: " + s);
         outBuf = s;
-        this.notify();
+//        this.notify();
       }
     }
 
