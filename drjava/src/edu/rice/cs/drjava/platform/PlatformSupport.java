@@ -40,6 +40,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.platform;
 
 import javax.swing.Action;
+import java.net.URL;
 
 /**
  * Central interface for all platform-specific code in DrJava.
@@ -48,6 +49,26 @@ import javax.swing.Action;
  * @see edu.rice.cs.drjava.platform.DefaultPlatform
  */
 public interface PlatformSupport {
+  
+  /**
+   * Returns whether this is a Mac platform (any JDK version).
+   */
+  public boolean isMacPlatform();
+  
+  /**
+   * Returns whether this is a Mac platform with JDK 1.3.1.
+   */
+  public boolean isMac13Platform();
+  
+  /**
+   * Returns whether this is a Mac platform with JDK 1.4.1.
+   */
+  public boolean isMac14Platform();
+  
+  /**
+   * Returns whether this is a Windows platform.
+   */
+  public boolean isWindowsPlatform();
   
   /**
    * Utility method to determine if the current Swing look and feel is the
@@ -70,22 +91,13 @@ public interface PlatformSupport {
   public void afterUISetup(Action about, Action prefs, Action quit);
   
   /**
-   * Returns whether this is a Mac platform (any JDK version).
+   * Utility method for opening a URL in a browser in a platform-specific way.
+   * The default implementation uses Runtime.exec to execute a command specified
+   * in Preferences.  Platform implementations should attempt the default method
+   * first, then try to use a "default browser", if such a thing exists on the
+   * specific platform.
+   * @param address the URL to open
+   * @return true if the URL was successfully handled, false otherwise
    */
-  public boolean isMacPlatform();
-  
-  /**
-   * Returns whether this is a Mac platform with JDK 1.3.1.
-   */
-  public boolean isMac13Platform();
-  
-  /**
-   * Returns whether this is a Mac platform with JDK 1.4.1.
-   */
-  public boolean isMac14Platform();
-  
-  /**
-   * Returns whether this is a Windows platform.
-   */
-  public boolean isWindowsPlatform();
+  public boolean openURL(URL address);
 }

@@ -348,7 +348,7 @@ public class DefaultJavadocModel implements JavadocModel {
     }
     
     String custom = config.getSetting(OptionConstants.JAVADOC_CUSTOM_PARAMS);
-    args.addAll(new ArgumentTokenizer().tokenize(custom));
+    args.addAll(ArgumentTokenizer.tokenize(custom));
 /*    StreamTokenizer st = new StreamTokenizer(new StringReader(custom));
     st.ordinaryChars('\u0021','\u00ff');
     st.wordChars('\u0021','\u00ff');

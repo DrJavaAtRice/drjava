@@ -735,6 +735,19 @@ public interface OptionConstants {
    */
   public static final VectorOption<File> RECENT_FILES =
     new VectorOption<File>("recent.files",new FileOption("",null),new Vector<File>());
+  
+  /**
+   * A file path to a user's preferred browser.
+   */
+  public static final FileOption BROWSER_FILE =
+    new FileOption("browser.file", FileOption.NULL_FILE);
+  
+  /**
+   * A String used with the command to launch a user's preferred browser.
+   * This will be tokenized and appended to the file path.
+   */
+  public static final StringOption BROWSER_STRING =
+    new StringOption("browser.string", "");
 }
 
 

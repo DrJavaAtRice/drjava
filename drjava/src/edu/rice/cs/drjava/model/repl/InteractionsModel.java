@@ -41,6 +41,7 @@ package edu.rice.cs.drjava.model.repl;
 
 import java.io.*;
 import java.net.ServerSocket;
+import java.util.List;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.StringTokenizer;
@@ -559,8 +560,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     if (s.endsWith(";")) {
       s = _deleteSemiColon(s);
     }
-    ArgumentTokenizer t = new ArgumentTokenizer();
-    ArrayList<String> args = t.tokenize(s, true);
+    List<String> args = ArgumentTokenizer.tokenize(s, true);
     boolean seenArg = false;
     String className = args.get(1);
     StringBuffer mainCall = new StringBuffer();

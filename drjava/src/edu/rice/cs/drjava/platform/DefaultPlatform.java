@@ -40,6 +40,15 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.platform;
 
 import javax.swing.*;
+import java.net.URL;
+import java.io.File;
+import java.util.List;
+
+import edu.rice.cs.util.ArgumentTokenizer;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.Configuration;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.FileOption;
 
 /**
  * Default platform-neutral implementation of PlatformSupport.  Most implementations
@@ -109,5 +118,48 @@ class DefaultPlatform implements PlatformSupport {
    */
   public boolean isWindowsPlatform() {
     return false;
+  }
+  
+  /**
+   * Utility method for opening a URL in a browser in a platform-specific way.
+   * The default implementation uses Runtime.exec to execute a command specified
+   * in Preferences.  Platform implementations should attempt the default method
+   * first, then try to use a "default browser", if such a thing exists on the
+   * specific platform.
+   * @param address the URL to open
+   * @return true if the URL was successfully handled, false otherwise
+   */
+  public boolean openURL(URL address) {
+    // Get the two config options.
+    Configuration config = DrJava.getConfig();
+    File exe = config.getSetting(OptionConstants.BROWSER_FILE);
+    String args = config.getSetting(OptionConstants.BROWSER_STRING);
+    
+    // Check for empty settings.
+    if ((exe == FileOption.NULL_FILE) && (args.equals(""))) {
+      // If the user hasn't specified anything, don't try to run it.
+      return false;
+    }
+    else {
+      // Build a string array of command and arguments.
+      List<String> command = ArgumentTokenizer.tokenize(args);
+      command.add(0, exe.getAbsolutePath());
+      command.add(address.toString());
+      
+      // Call the command.
+      try {
+        // Process proc = 
+        Runtime.getRuntime().exec(command.toArray(new String[command.size()]));
+        
+        // TODO: This may cause a memory leak on Windows, if we don't check the exit code.
+      }
+      catch (Throwable t) {
+        // If there was any kind of problem, ignore it and report failure.
+        return false;
+      }
+    }
+    
+    // Otherwise, trust that it worked.
+    return true;
   }
 }

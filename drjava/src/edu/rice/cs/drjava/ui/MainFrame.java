@@ -202,7 +202,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   // Cached frames and dialogs
   private ConfigFrame _configFrame;
   private HelpFrame _helpFrame;
-  private JavadocFrame _javadocFrame;
   private AboutDialog _aboutDialog;
   
   /**
@@ -3932,8 +3931,11 @@ public class MainFrame extends JFrame implements OptionConstants {
               className = "";
             }
             try {
-              _javadocFrame = new JavadocFrame(destDir, className);
-              _javadocFrame.show();
+              URL address = destDir.getAbsoluteFile().toURL();
+              if (!PlatformFactory.ONLY.openURL(address)) {
+                JavadocFrame _javadocFrame = new JavadocFrame(destDir, className);
+                _javadocFrame.show();
+              }
             }
             catch (MalformedURLException me) {
               throw new UnexpectedException(me);
