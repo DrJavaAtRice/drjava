@@ -50,35 +50,39 @@ import java.io.Serializable;
  * @version $Id$
  */
 public class JUnitError extends CompilerError implements Comparable, Serializable {
-
   private String _test;
+  private String _className;
   private String _stackTrace;
   
   /**
    * Constructor.
-   * @param     file the file where the error occurred
-   * @param     lineNumber the line number of the error
-   * @param     startColumn the starting column of the error
-   * @param     message  the error message
-   * @param     isWarning true if the error is a warning
-   * @param     test the name of the test that failed
+   * @param file the file where the error occurred
+   * @param lineNumber the line number of the error
+   * @param startColumn the starting column of the error
+   * @param message  the error message
+   * @param isWarning true if the error is a warning
+   * @param test the name of the test that failed
    */
   public JUnitError(File file, int lineNumber, int startColumn, String message,
-      boolean isWarning, String test, String stackTrace) {
+                    boolean isWarning, String test, String className, String stackTrace) {
     super(file, lineNumber, startColumn, message, isWarning);
     _test = test;
+    _className = className;
     _stackTrace = stackTrace;
   }
 
   /**
-   * Constructor for an error with no associated location (all JUnitErrors
-   * have a file, which is the file being tested).  This constructor also
+   * Constructor for an error with no associated location.  This constructor also
    * provides a default stackTrace.
+   * @param message  the error message
+   * @param isWarning true if the error is a warning
+   * @param test the name of the test that failed
    */
-  public JUnitError(File file, String message, boolean isWarning, String test) {
-    super(file, message, isWarning);
+  public JUnitError(String message, boolean isWarning, String test) {
+    super(message, isWarning);
     _stackTrace = "No associated stack trace";
     _test = test;
+    _className = "";
   }
 
   /**
@@ -86,7 +90,15 @@ public class JUnitError extends CompilerError implements Comparable, Serializabl
    * @return the test name
    */
   public String testName() {
-    return  _test;
+    return _test;
+  }
+
+  /**
+   * Gets the class name
+   * @return the class name
+   */
+  public String className() {
+    return _className;
   }
 
   /**

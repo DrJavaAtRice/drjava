@@ -44,6 +44,8 @@ import java.util.ListIterator;
 import java.util.Vector;
 import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.ArrayList;
 import java.io.*;
 import java.rmi.*;
 
@@ -56,13 +58,14 @@ import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.InputStreamRedirector;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.platform.PlatformFactory;
+import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.repl.*;
 
-import edu.rice.cs.javaast.parser.*;
-import edu.rice.cs.javaast.tree.*;
 import edu.rice.cs.javaast.*;
+import edu.rice.cs.javaast.tree.*;
+import edu.rice.cs.javaast.parser.*;
 
 // For Windows focus fix
 import javax.swing.JDialog;
@@ -77,7 +80,7 @@ import javax.swing.JDialog;
  * @version $Id$
  */
 public class InterpreterJVM extends AbstractSlaveJVM
-                            implements InterpreterJVMRemoteI
+                            implements InterpreterJVMRemoteI, JUnitModelCallback
 {
   private static final boolean printMessages = false;
   /** Singleton instance of this class. */
@@ -96,7 +99,10 @@ public class InterpreterJVM extends AbstractSlaveJVM
   
   /** Maps names to interpreters with metadata. */
   private Hashtable<String,InterpreterData> _interpreters;
-  
+
+  /**
+   * The current interpreter.
+   */
   private InterpreterData _activeInterpreter;
 
   /**
@@ -134,8 +140,8 @@ public class InterpreterJVM extends AbstractSlaveJVM
     _defaultInterpreter = new InterpreterData(new DynamicJavaAdapter());
     _activeInterpreter = _defaultInterpreter;
     _interpreters = new Hashtable<String,InterpreterData>();
-    _junitTestManager = new JUnitTestManager(this);
     _classpath = new Vector<String>();
+    _junitTestManager = new JUnitTestManager(this);
     
     // do an interpretation to get the interpreter loaded fully
     try {
@@ -653,19 +659,23 @@ public class InterpreterJVM extends AbstractSlaveJVM
   
   /**
    * Runs a JUnit Test class in the Interpreter JVM.
-   * @param className Name of the TestCase class
-   * @param fileName Name of the file for the TestCase class
+   * @param classNames the class names to run in a test
+   * @param files the associated files
+   * @param isTestAll if we're testing all open files or not
+   * @return the class names that are actually test cases
    */
-  public void runTestSuite(String className, String fileName) throws RemoteException {
-    _junitTestManager.runTest(className, fileName);
+  public List<String> runTestSuite(List<String> classNames, List<File> files,
+                                   boolean isTestAll) throws RemoteException {
+    return _junitTestManager.runTest(classNames, files, isTestAll);
   }
   
   /**
    * Notifies the main JVM if JUnit is invoked on a non TestCase class.
+   * @param isTestAll whether or not it was a use of the test all button
    */
-  public void nonTestCase() {
+  public void nonTestCase(boolean isTestAll) {
     try {
-      _mainJVM.nonTestCase();
+      _mainJVM.nonTestCase(isTestAll);
     }
     catch (RemoteException re) {
       // nothing to do
@@ -722,7 +732,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
    * Notifies that a full suite of tests has finished running.
    * @param errors The array of errors from all failed tests in the suite.
    */
-  public void testSuiteFinished(JUnitError[] errors) {
+  public void testSuiteEnded(JUnitError[] errors) {
     try {
       _mainJVM.testSuiteEnded(errors);
     }
@@ -732,8 +742,25 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
   }
 
+  /**
+   * Called when the JUnitTestManager wants to open a file that is not currently open.
+   * @param className the name of the class for which we want to find the file
+   * @return the file associated with the given class
+   */
+  public File getFileForClassName(String className) {
+    try {
+      return _mainJVM.getFileForClassName(className);
+    }
+    catch (RemoteException re) {
+      // nothing to do
+      _log.logTime("getFileForClassName: " + re.toString());
+      return null;
+    }
+  }
+  
+  public void junitJVMReady() {
+  }
 }
-
 
 /**
  * Bookkeeping class to maintain meta information about each interpreter,
@@ -742,7 +769,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
 class InterpreterData {
   protected final Interpreter _interpreter;
   protected boolean _inProgress;
-  
+
   InterpreterData(Interpreter interpreter) {
     _interpreter = interpreter;
     _inProgress = false;

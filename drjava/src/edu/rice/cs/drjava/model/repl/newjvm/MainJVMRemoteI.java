@@ -39,6 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
+import java.io.File;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import edu.rice.cs.util.newjvm.*;
@@ -70,8 +71,9 @@ public interface MainJVMRemoteI extends MasterRemote {
   
   /**
    * Called if JUnit is invoked on a non TestCase class.
+   * @param isTestAll whether or not it was a use of the test all button
    */
-  public void nonTestCase() throws RemoteException;
+  public void nonTestCase(boolean isTestAll) throws RemoteException;
   
   /**
    * Called to indicate that a suite of tests has started running.
@@ -100,7 +102,14 @@ public interface MainJVMRemoteI extends MasterRemote {
    * @param errors The array of errors from all failed tests in the suite.
    */
   public void testSuiteEnded(JUnitError[] errors) throws RemoteException;
-  
+
+  /**
+   * Called when the JUnitTestManager wants to open a file that is not currently open.
+   * @param className the name of the class for which we want to find the file
+   * @return the file associated with the given class
+   */
+  public File getFileForClassName(String className) throws RemoteException;
+
   /**
    * Notifies the main jvm that an assignment has been made in the given debug 
    * interpreter.

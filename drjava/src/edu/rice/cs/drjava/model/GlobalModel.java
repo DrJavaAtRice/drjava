@@ -282,8 +282,9 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments, JavadocModel
   
   /**
    * Called from the JUnitTestManager if its given className is not a test case.
+   * @param isTestAll whether or not it was a use of the test all button
    */
-  public void nonTestCase();
+  public void nonTestCase(boolean isTestAll);
   
   /**
    * Called to indicate that a suite of tests has started running.

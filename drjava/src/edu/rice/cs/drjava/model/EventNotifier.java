@@ -40,6 +40,7 @@
 package edu.rice.cs.drjava.model;
 
 import java.util.Vector;
+import java.util.List;
 import java.io.File;
 
 import edu.rice.cs.util.ReaderWriterLock;
@@ -204,16 +205,16 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called after JUnit is started by the GlobalModel.
    */
-  public void junitStarted(OpenDefinitionsDocument doc) {
+  public void junitStarted(List<OpenDefinitionsDocument> docs) {
     _lock.startRead();
     try {
       int size = _listeners.size();
       for(int i = 0; i < size; i++) {
-        _listeners.get(i).junitStarted(doc);
+        _listeners.get(i).junitStarted(docs);
       }
     }
     finally {
@@ -427,12 +428,12 @@ public class EventNotifier implements GlobalModelListener {
    * @param causedError If not successful, whether the test caused an error
    *  or simply failed.
    */
-  public void junitTestEnded(OpenDefinitionsDocument doc, String name, boolean wasSuccesful, boolean causedError) {
+  public void junitTestEnded(String name, boolean wasSuccesful, boolean causedError) {
     _lock.startRead();
     try {
       int size = _listeners.size();
       for(int i = 0; i < size; i++) {
-        _listeners.get(i).junitTestEnded(doc, name, wasSuccesful, causedError);
+        _listeners.get(i).junitTestEnded(name, wasSuccesful, causedError);
       }
     }
     finally {
@@ -511,13 +512,14 @@ public class EventNotifier implements GlobalModelListener {
   
   /**
    * Called when trying to test a non-TestCase class.
+   * @param isTestAll whether or not it was a use of the test all button
    */
-  public void nonTestCase() {
+  public void nonTestCase(boolean isTestAll) {
     _lock.startRead();
     try {
       int size = _listeners.size();
       for(int i = 0; i < size; i++) {
-        _listeners.get(i).nonTestCase();
+        _listeners.get(i).nonTestCase(isTestAll);
       }
     }
     finally {

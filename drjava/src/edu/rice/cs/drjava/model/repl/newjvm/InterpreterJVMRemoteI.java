@@ -42,6 +42,8 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Vector;
+import java.util.List;
+import java.io.File;
 import edu.rice.cs.util.newjvm.*;
 
 /**
@@ -53,7 +55,8 @@ import edu.rice.cs.util.newjvm.*;
 public interface InterpreterJVMRemoteI extends SlaveRemote {
   public void interpret(String s) throws RemoteException;
   public void addClassPath(String s) throws RemoteException;
-  public void runTestSuite(String className, String fileName) throws RemoteException;
+  public List<String> runTestSuite(List<String> classNames, List<File> files, boolean isTestAll)
+    throws RemoteException;
   public void setPackageScope(String s) throws RemoteException;
   public void reset() throws RemoteException;
   
@@ -103,4 +106,9 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    * Returns a copy of the list of unique entries on the classpath.
    */
   public Vector<String> getAugmentedClasspath() throws RemoteException;
+
+  /**
+   * Gets the classpath as a string.
+   */
+  public String getClasspathString() throws RemoteException;
 }

@@ -49,6 +49,8 @@ import java.io.*;
  */
 public class MultiThreadedTestCase extends TestCase {
 
+  public MultiThreadedTestCase() {
+  }
   public MultiThreadedTestCase(String s) {
     super(s);
   }

@@ -41,6 +41,7 @@ package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
+import edu.rice.cs.drjava.model.compiler.CompilerError;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitErrorModel;
 import edu.rice.cs.util.UnexpectedException;
@@ -58,6 +59,9 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * The panel which displays all the testing errors.
@@ -66,9 +70,11 @@ import java.util.Arrays;
  * @version $Id$
  */
 public class JUnitPanel extends ErrorPanel{
+  private static final String START_JUNIT_MSG = "Testing in progress.  Please wait...\n";
+  private static final String JUNIT_FINISHED_MSG = "All tests completed successfully.\n";
+  private static final String NO_TESTS_MSG = "";
 
   private static final SimpleAttributeSet OUT_OF_SYNC_ATTRIBUTES = _getOutOfSyncAttributes();
-  
   private static final SimpleAttributeSet _getOutOfSyncAttributes() {
     SimpleAttributeSet s = new SimpleAttributeSet();
     s.addAttribute(StyleConstants.Foreground, Color.red.darker());
@@ -76,15 +82,29 @@ public class JUnitPanel extends ErrorPanel{
     return s;
   }
 
-  private static final String TEST_OUT_OF_SYNC = "The document being tested has been modified " +
-    "and should be recompiled!\n";
+  private static final SimpleAttributeSet TEST_PASS_ATTRIBUTES = _getTestPassAttributes();
+  private static final SimpleAttributeSet _getTestPassAttributes() {
+    SimpleAttributeSet s = new SimpleAttributeSet();
+    s.addAttribute(StyleConstants.Foreground, Color.green.darker());
+    return s;
+  }
+
+  private static final SimpleAttributeSet TEST_FAIL_ATTRIBUTES = _getTestFailAttributes();
+  private static final SimpleAttributeSet _getTestFailAttributes() {
+    SimpleAttributeSet s = new SimpleAttributeSet();
+    s.addAttribute(StyleConstants.Foreground, Color.red);
+    return s;
+  }
+
+  private static final String TEST_OUT_OF_SYNC =
+    "The document(s) being tested have been modified and should be recompiled!\n";
 
   protected JUnitErrorListPane _errorListPane;
   private int _testCount;
   private boolean _testsSuccessful;
 
   private JUnitProgressBar _progressBar;
-  private OpenDefinitionsDocument _odd = null;
+  private List<OpenDefinitionsDocument> _odds = new ArrayList<OpenDefinitionsDocument>();
 
   /**
    * Constructor.
@@ -123,13 +143,13 @@ public class JUnitPanel extends ErrorPanel{
     innerPanel.add(_progressBar, BorderLayout.NORTH);
     innerPanel.add(new JPanel(),BorderLayout.CENTER);
         
-    _showHighlightsCheckBox = new JCheckBox( "Highlight source", true);
-    _showHighlightsCheckBox.addChangeListener( new ChangeListener() {
+    _showHighlightsCheckBox = new JCheckBox("Highlight source", true);
+    _showHighlightsCheckBox.addChangeListener(new ChangeListener() {
       public void stateChanged (ChangeEvent ce) {
         DefinitionsPane lastDefPane = getErrorListPane().getLastDefPane();
-        
+
         if (_showHighlightsCheckBox.isSelected()) {
-          //lastDefPane.setCaretPosition( lastDefPane.getCaretPosition());
+          //lastDefPane.setCaretPosition(lastDefPane.getCaretPosition());
           _errorListPane.switchToError(getErrorListPane().getSelectedIndex());
           lastDefPane.requestFocus();
           lastDefPane.getCaret().setVisible(true);
@@ -139,10 +159,9 @@ public class JUnitPanel extends ErrorPanel{
         }
       }
     });
-    
+
     innerPanel.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
     _mainPanel.add(sidePanel, BorderLayout.EAST);
-
   }
   
   /**
@@ -164,11 +183,13 @@ public class JUnitPanel extends ErrorPanel{
     super._updateStyles(newSet);
     OUT_OF_SYNC_ATTRIBUTES.addAttributes(newSet);
     StyleConstants.setBold(OUT_OF_SYNC_ATTRIBUTES, true);  // should always be bold
+    TEST_PASS_ATTRIBUTES.addAttributes(newSet);
+    TEST_FAIL_ATTRIBUTES.addAttributes(newSet);
   }
 
   /** Called when work begins. */
-  public void setJUnitInProgress(OpenDefinitionsDocument odd) {
-    _odd = odd;
+  public void setJUnitInProgress(List<OpenDefinitionsDocument> odds) {
+    _odds = odds;
     _errorListPane.setJUnitInProgress();
   }
 
@@ -199,7 +220,7 @@ public class JUnitPanel extends ErrorPanel{
   /**
    * Resets the progress bar to start counting the given number of tests.
    */
-  public void progressReset(int numTests) {
+  public synchronized void progressReset(int numTests) {
     _progressBar.reset();
     _progressBar.start(numTests);
     _testsSuccessful = true;
@@ -210,10 +231,13 @@ public class JUnitPanel extends ErrorPanel{
    * Steps the progress bar forward by one test.
    * @param successful Whether the last test was successful or not.
    */
-  public void progressStep(boolean successful) {
+  public synchronized void progressStep(boolean successful) {
     _testCount++;
     _testsSuccessful &= successful;
     _progressBar.step(_testCount, _testsSuccessful);
+  }
+
+  public synchronized void testStarted(String className, String testName) {
   }
 
   /**
@@ -224,71 +248,137 @@ public class JUnitPanel extends ErrorPanel{
     private JPopupMenu _popMenu;
     private Window _stackFrame = null;
     private JTextArea _stackTextArea;
-    private final JLabel _errorLabel = new JLabel(),
-    _testLabel = new JLabel(), _fileLabel = new JLabel();
-    protected PopupAdapter _popupAdapter = new PopupAdapter();
+    private final JLabel _errorLabel = new JLabel();
+    private final JLabel _testLabel = new JLabel();
+    private final JLabel _fileLabel = new JLabel();
+    private String _runningTestName;
+    private boolean _warnedOutOfSync;
+    private static final String JUNIT_WARNING = "junit.framework.TestSuite$1.warning";
+
+    /** The currently selected error. */
+    private JUnitError _error = null;
+
+    /**
+     * Maps any test names in the currently running suite to the position
+     * that they appear in the list pane.
+     */
+    private final HashMap<String, Position> _runningTestNamePositions;
 
     /**
      * Constructs the JUnitErrorListPane.
      */
     public JUnitErrorListPane() {
-      super();
-      this.removeMouseListener(defaultMouseListener);
-      this.addMouseListener(_popupAdapter);
+      removeMouseListener(defaultMouseListener);
+      _popMenu = new JPopupMenu();
+      _popMenu.add(new AbstractAction("Show Stack Trace") {
+        public void actionPerformed(ActionEvent ae) {
+          if (_error != null) {
+            _displayStackTrace(_error);
+          }
+        }
+      });
+      _error = null;
+      _setupStackTraceFrame();
+      addMouseListener(new PopupAdapter());
+      _runningTestName = null;
+      _runningTestNamePositions = new HashMap<String, Position>();
     }
 
+    private String _getTestFromName(String name) {
+      int paren = name.indexOf('(');
+      if ((paren > -1) && (paren < name.length())) {
+        return name.substring(0, paren);
+      }
+      else {
+        throw new IllegalArgumentException("Name does not contain any parens: " + name);
+      }
+    }
+    
+    private String _getClassFromName(String name) {
+      int paren = name.indexOf('(');
+      if ((paren > -1) && (paren < name.length())) {
+        return name.substring(paren + 1, name.length() - 1);
+      }
+      else {
+        throw new IllegalArgumentException("Name does not contain any parens: " + name);
+      }
+    }
+    
     /**
      * Provides the ability to display the name of the test being run.
-     * Not currently used, since it appears and disappears to quickly
-     * to be useful in the current setup.
      */
-    public void testStarted(String name) {
-//      Document doc = getDocument();
-//      try {
-//        doc.insertString(doc.getLength(),
-//                         "  " + name,
-//                         NORMAL_ATTRIBUTES);
-//      }
-//      catch (BadLocationException ble) {
-//        // Inserting at end, shouldn't happen
-//        throw new UnexpectedException(ble);
-//      }
+    public synchronized void testStarted(String name) {
+      String testName = _getTestFromName(name);
+      String className = _getClassFromName(name);
+      String fullName = className + "." + testName;
+      if (fullName.equals(JUNIT_WARNING)) {
+        return;
+      }
+      Document doc = getDocument();
+      int index = doc.getLength();
+      
+      try {
+        // Insert the classname if it has changed
+        if (!className.equals(_runningTestName)) {
+          _runningTestName = className;
+          doc.insertString(index, "  " + className + "\n", NORMAL_ATTRIBUTES);
+          index = doc.getLength();
+        }
+        
+        // Insert the test name, remembering its position
+        doc.insertString(index, "    ", NORMAL_ATTRIBUTES);
+        index = doc.getLength();
+        doc.insertString(index, testName + "\n", NORMAL_ATTRIBUTES);
+        Position pos = doc.createPosition(index);
+        _runningTestNamePositions.put(fullName, pos);
+        setCaretPosition(index);
+      }
+      catch (BadLocationException ble) {
+        // Inserting at end, shouldn't happen
+        throw new UnexpectedException(ble);
+      }
     }
 
     /**
      * Provides the ability to display the results of a test that has finished.
-     * Not currently used, since it appears and disappears to quickly
-     * to be useful in the current setup.
      */
-    public void testEnded(String name, boolean wasSuccessful, boolean causedError) {
-//      Document doc = getDocument();
-//      String status = "ok";
-//      if (!wasSuccessful) {
-//        status = (causedError) ? "error" : "failed";
-//      }
-//      try {
-//        doc.insertString(doc.getLength(),
-//                         "  [" + status + "]\n",
-//                         NORMAL_ATTRIBUTES);
-//      }
-//      catch (BadLocationException ble) {
-//        // Inserting at end, shouldn't happen
-//        throw new UnexpectedException(ble);
-//      }
+    public synchronized void testEnded(String name, boolean wasSuccessful, boolean causedError) {
+      String testName = _getTestFromName(name);
+      String fullName = _getClassFromName(name) + "." + testName;
+      if (fullName.equals(JUNIT_WARNING)) {
+        return;
+      }
+      Document doc = getDocument();
+      Position namePos = _runningTestNamePositions.get(fullName);
+      AttributeSet set;
+      if (!wasSuccessful || causedError) {
+        set = TEST_FAIL_ATTRIBUTES;
+      }
+      else {
+        set = TEST_PASS_ATTRIBUTES;
+      }
+      if (namePos != null) {
+        int index = namePos.getOffset();
+        int length = testName.length();
+        if (doc instanceof StyledDocument) {
+          ((StyledDocument)doc).setCharacterAttributes(index, length, set, false);
+        }
+      }
     }
 
-    /** Puts the error pane into "compilation in progress" state. */
-    public void setJUnitInProgress() {
+    /** Puts the error pane into "junit in progress" state. */
+    public synchronized void setJUnitInProgress() {
       _errorListPositions = new Position[0];
       progressReset(0);
+      _runningTestNamePositions.clear();
+      _runningTestName = null;
+      _warnedOutOfSync = false;
 
       DefaultStyledDocument doc = new DefaultStyledDocument();
       _checkSync(doc);
 
       try {
-        doc.insertString(doc.getLength(),
-                         "Testing in progress.  Please wait...\n",
-                         NORMAL_ATTRIBUTES);
+        doc.insertString(doc.getLength(), START_JUNIT_MSG, BOLD_ATTRIBUTES);
       }
       catch (BadLocationException ble) {
         throw new UnexpectedException(ble);
@@ -299,14 +389,87 @@ public class JUnitPanel extends ErrorPanel{
     }
 
     /**
-     * Used to show that the last compile was unsuccessful.
+     * Used to show that testing was unsuccessful.
      */
-    protected void _updateWithErrors() throws BadLocationException {
-      DefaultStyledDocument doc = new DefaultStyledDocument();
+    protected synchronized void _updateWithErrors() throws BadLocationException {
+      //DefaultStyledDocument doc = new DefaultStyledDocument();
+      DefaultStyledDocument doc = (DefaultStyledDocument) getDocument();
       _checkSync(doc);
       _updateWithErrors("test", "failed", doc);
     }
-    
+
+    protected void _updateWithErrors(String failureName, String failureMeaning,
+                                     DefaultStyledDocument doc)
+      throws BadLocationException
+    {
+      // Print how many errors
+      _replaceInProgressText(_getNumErrorsMessage(failureName, failureMeaning));
+
+      _insertErrors(doc);
+
+      // Select the first error
+      switchToError(0);
+    }
+
+    /**
+     * Prints a message for the given error
+     * @param error the error to print
+     * @param doc the document in the error pane
+     *
+     * This code inserts the error text underneath the test name (which should be red) in the
+     * pane.  However, the highlighter is dependent on the errors being contiguous and at the
+     * end of the document, so this is disabled pending an overhaul of the highlight manager.
+     *
+    protected void _insertErrorText(CompilerError error, Document doc) throws BadLocationException {
+      // Show file and line number
+      JUnitError err = (JUnitError)error;
+      String test = err.testName();
+      String name = err.className() + "." + test;
+      int index;
+      Position pos = _runningTestNamePositions.get(name);
+      if (pos != null) {
+        index = pos.getOffset() + test.length() + 1;
+      }
+      else {
+        index = doc.getLength();
+      }
+      String toInsert = "File: ";
+      doc.insertString(index, toInsert, BOLD_ATTRIBUTES);
+      index += toInsert.length();
+      toInsert = error.getFileMessage() + "  [line: " + error.getLineMessage() + "]\n";
+      doc.insertString(index, toInsert, NORMAL_ATTRIBUTES);
+      index += toInsert.length();
+
+      if (error.isWarning()) {
+        toInsert = _getWarningText();
+      }
+      else {
+        toInsert = _getErrorText();
+      }
+      doc.insertString(index, toInsert, BOLD_ATTRIBUTES);
+      index += toInsert.length();
+
+      toInsert = error.message() + "\n";
+      doc.insertString(index, toInsert, NORMAL_ATTRIBUTES);
+    }*/
+
+    /**
+     * Replaces the "Testing in progress..." text with the given message.
+     * @param msg the text to insert
+     */
+    private void _replaceInProgressText(String msg) throws BadLocationException {
+      int start = 0;
+      if (_warnedOutOfSync) {
+        start = TEST_OUT_OF_SYNC.length();
+      }
+      int len = START_JUNIT_MSG.length();
+      Document doc = getDocument();
+      if (doc.getLength() >= len + start) {
+        doc.remove(start, len);
+        doc.insertString(start, msg, BOLD_ATTRIBUTES);
+      }
+    }
+
     /**
      * Returns the string to identify a warning.
      * In JUnit, warnings (the odd case) indicate errors/exceptions.
@@ -324,19 +487,15 @@ public class JUnitPanel extends ErrorPanel{
     }
 
     /**
-     * Used to show that the last compile was successful.
+     * updates the list pane with no errors.
      */
-    protected void _updateNoErrors(boolean haveTestsRun) throws BadLocationException {
-      DefaultStyledDocument doc = new DefaultStyledDocument();
-      _checkSync(doc);
-      String msg = (haveTestsRun) ? "All tests completed successfully." : "";
-
-      doc.insertString(doc.getLength(),
-                       msg,
-                       NORMAL_ATTRIBUTES);
-      setDocument(doc);
+    protected synchronized void _updateNoErrors(boolean haveTestsRun) throws BadLocationException {
+      //DefaultStyledDocument doc = new DefaultStyledDocument();
+      _checkSync(getDocument());
+      _replaceInProgressText(haveTestsRun ? JUNIT_FINISHED_MSG : NO_TESTS_MSG);
 
       selectNothing();
+      setCaretPosition(0);
     }
 
     /**
@@ -344,21 +503,24 @@ public class JUnitPanel extends ErrorPanel{
      * displays a message in the document in the test output pane.
      */
     private void _checkSync(Document doc) {
-      if (_odd == null) {
+      if (_warnedOutOfSync) {
         return;
       }
-      if (!_odd.checkIfClassFileInSync()) {
-        try {
-          doc.insertString(doc.getLength(), TEST_OUT_OF_SYNC, OUT_OF_SYNC_ATTRIBUTES);
-        }
-        catch (BadLocationException ble) {
-          throw new UnexpectedException(ble);
+      for (int i = 0; i < _odds.size(); i++) {
+        if (!_odds.get(i).checkIfClassFileInSync()) {
+          try {
+            doc.insertString(0, TEST_OUT_OF_SYNC, OUT_OF_SYNC_ATTRIBUTES);
+            _warnedOutOfSync = true;
+            return;
+          }
+          catch (BadLocationException ble) {
+            throw new UnexpectedException(ble);
+          }
         }
       }
     }
 
     private void _setupStackTraceFrame() {
-
       //DrJava.consoleOut().println("Stack Trace for Error: \n"+ e.stackTrace());
       JDialog _dialog = new JDialog(_frame,"JUnit Error Stack Trace",false);
       _stackFrame = _dialog;
@@ -426,50 +588,56 @@ public class JUnitPanel extends ErrorPanel{
     }*/
 
     private class PopupAdapter extends RightClickMouseAdapter {
-      private JUnitError _error = null;
-
-      public PopupAdapter() {
-        _popMenu = new JPopupMenu();
-        JMenuItem stackTraceItem = new JMenuItem("Show Stack Trace");
-        stackTraceItem.addActionListener ( new AbstractAction() {
-          public void actionPerformed( ActionEvent ae) {
-            JUnitError error = getError();
-            if (error != null) {
-              if (_stackFrame == null) {
-                _setupStackTraceFrame();
-              }
-              _displayStackTrace(error);
-            }
-          }
-        });
-        _popMenu.add(stackTraceItem);
-      }
-
+      /**
+       * Show popup if the click is on an error.
+       * @param e the MouseEvent correponding to this click
+       */
       public void mousePressed(MouseEvent e) {
-        selectNothing();
-        super.mousePressed(e);
+        if (_selectError(e)) {
+          super.mousePressed(e);
+        }
       }
 
+      /**
+       * Show popup if the click is on an error.
+       * @param e the MouseEvent correponding to this click
+       */
       public void mouseReleased(MouseEvent e) {
+        if (_selectError(e)) {
+          super.mouseReleased(e);
+        }
+      }
+
+      /**
+       * Select the error at the given mouse event.
+       * @param e the MouseEvent correponding to this click
+       * @return true iff the mouse click is over an error
+       */
+      private boolean _selectError(MouseEvent e) {
         //TODO: get rid of cast in the next line, if possible
         _error = (JUnitError)_errorAtPoint(e.getPoint());
 
         if (_isEmptySelection() && _error != null) {
           _errorListPane.switchToError(_error);
+          return true;
         }
         else {
           selectNothing();
+          return false;
         }
-        super.mouseReleased(e);
       }
 
+      /**
+       * Shows the popup menu for this mouse adapter.
+       * @param e the MouseEvent correponding to this click
+       */
       protected void _popupAction(MouseEvent e) {
         _popMenu.show(e.getComponent(), e.getX(), e.getY());
       }
 
-      public JUnitError getError() {
-        return _error;
-      }
+//      public JUnitError getError() {
+//        return _error;
+//      }
     }
   }
 

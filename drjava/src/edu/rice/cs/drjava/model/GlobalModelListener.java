@@ -40,6 +40,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import java.io.File;
+import java.util.List;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 
 /**
@@ -97,7 +98,7 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   /**
    * Called after JUnit is started by the GlobalModel.
    */
-  public void junitStarted(OpenDefinitionsDocument doc);
+  public void junitStarted(List<OpenDefinitionsDocument> docs);
   
   /**
    * Called to indicate that a suite of tests has started running.
@@ -113,13 +114,12 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   
   /**
    * Called when a particular test has ended.
-   * @param testName The name of the test that has ended.
+   * @param name The name of the test that has ended.
    * @param wasSuccessful Whether the test passed or not.
    * @param causedError If not successful, whether the test caused an error
    *  or simply failed.
    */
-  public void junitTestEnded(OpenDefinitionsDocument doc, String name,
-                             boolean wasSuccesful, boolean causedError);
+  public void junitTestEnded(String name, boolean wasSuccesful, boolean causedError);
   
   /**
    * Called after JUnit is finished running tests.
@@ -235,8 +235,9 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   
   /**
    * Called when trying to test a non-TestCase class.
+   * @param isTestAll whether or not it was a use of the test all button
    */
-  public void nonTestCase();
+  public void nonTestCase(boolean isTestAll);
 
   /**
    * Called to ask the listener if it is OK to abandon the current

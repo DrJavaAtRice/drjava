@@ -688,6 +688,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   /**
    * Originally designed to allow undoManager to set the current document to
    * be modified whenever an undo or redo is performed.
+   * Now it actually does this.
    */
   public void setModifiedSinceSave() {
     _modifiedSinceSave = _undoManager.isModified();

@@ -52,26 +52,22 @@ import junit.runner.*;
  */
 public class DrJavaTestClassLoader implements TestSuiteLoader, OptionConstants {
   
-  private final InterpreterJVM _jvm;
+  private final JUnitModelCallback _jmc;
+  private TestCaseClassLoader _loader;
   
-  public DrJavaTestClassLoader(InterpreterJVM jvm) {
-    super();
-    _jvm = jvm;
-  }
-  
-  public Class load(String suiteClassName) throws ClassNotFoundException {
-    String classpath = _jvm.getClasspathString();
+  public DrJavaTestClassLoader(JUnitModelCallback jmc) {
+    _jmc = jmc;
+    String classpath = _jmc.getClasspathString();
     classpath += System.getProperty("path.separator");
     classpath += System.getProperty("java.class.path");
-    TestCaseClassLoader loader= new TestCaseClassLoader(classpath);
-    return loader.loadClass(suiteClassName, true);
+    _loader = new TestCaseClassLoader(classpath);
   }
-  
-  public Class reload(Class aClass) throws ClassNotFoundException {
-    String classpath = _jvm.getClasspathString();
-    classpath += System.getProperty("path.separator");
-    classpath += System.getProperty("java.class.path");
-    TestCaseClassLoader loader= new TestCaseClassLoader(classpath);
-    return loader.loadClass(aClass.getName(), true);
+
+  public Class load(String className) throws ClassNotFoundException {
+    return _loader.loadClass(className, true);
+  }
+
+  public Class reload(Class c) throws ClassNotFoundException {
+    return load(c.getName());
   }
 }

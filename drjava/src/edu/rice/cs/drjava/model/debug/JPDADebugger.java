@@ -1207,8 +1207,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     ReferenceType rt = location.declaringType();
     String filename = "";
     try {
-      filename = rt.sourceName();
-      filename = getPackageDir(rt.name()) + filename;
+      filename = getPackageDir(rt.name()) + rt.sourceName();
     }
     catch (AbsentInformationException aie) {
       // Don't know real source name:
@@ -1217,28 +1216,29 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       String ps = System.getProperty("file.separator");
       // replace periods with the System's file separator
       className = StringOps.replace(className, ".", ps);
-      
+
       // crop off the $ if there is one and anything after it
       int indexOfDollar = className.indexOf('$');
       if (indexOfDollar > -1) {
         className = className.substring(0, indexOfDollar);
       }
-      
+
       filename = className + ".java";
     }
     
     // Check source root set (open files)
-    File[] sourceRoots = _model.getSourceRootSet();
-    Vector<File> roots = new Vector<File>();
-    for (int i=0; i < sourceRoots.length; i++) {
-      roots.addElement(sourceRoots[i]);
-    }
-    File f = _model.getSourceFileFromPaths(filename, roots);
-    if (f == null) {
-      Vector<File> sourcepath =
-        DrJava.getConfig().getSetting(OptionConstants.DEBUG_SOURCEPATH);
-      f = _model.getSourceFileFromPaths(filename, sourcepath);
-    }
+    File f = _model.getSourceFile(filename);
+//    File[] sourceRoots = _model.getSourceRootSet();
+//    Vector<File> roots = new Vector<File>();
+//    for (int i=0; i < sourceRoots.length; i++) {
+//      roots.addElement(sourceRoots[i]);
+//    }
+//    File f = _model.getSourceFileFromPaths(filename, roots);
+//    if (f == null) {
+//      Vector<File> sourcepath =
+//        DrJava.getConfig().getSetting(OptionConstants.DEBUG_SOURCEPATH);
+//      f = _model.getSourceFileFromPaths(filename, sourcepath);
+//    }
     
     if (f != null) {
       // Get a document for this file, forcing it to open

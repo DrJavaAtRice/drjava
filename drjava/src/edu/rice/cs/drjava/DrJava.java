@@ -187,7 +187,7 @@ public class DrJava implements OptionConstants {
         
         // Show debug console if enabled
         if (_showDrJavaDebugConsole) {
-          _showDrJavaDebugConsole(mf);
+          showDrJavaDebugConsole(mf);
         }
       }
         
@@ -707,7 +707,7 @@ public class DrJava implements OptionConstants {
    * MainFrame defined as "mainFrame".  Useful for debugging DrJava.
    * @param mf MainFrame to define in the new window
    */
-  private static void _showDrJavaDebugConsole(MainFrame mf) {
+  public static void showDrJavaDebugConsole(MainFrame mf) {
     final SimpleInteractionsWindow window = 
       new SimpleInteractionsWindow("DrJava Debug Console") { 
       protected void close() {
@@ -716,7 +716,7 @@ public class DrJava implements OptionConstants {
     };
     window.defineVariable("mainFrame", mf);
     window.defineVariable("model", mf.getModel());
-    window.defineVariable("config", DrJava.getConfig());
+    window.defineVariable("config", _config);
     window.setInterpreterPrivateAccessible(true);
     window.show();
   }

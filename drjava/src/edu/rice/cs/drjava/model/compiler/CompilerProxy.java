@@ -94,11 +94,9 @@ public class CompilerProxy implements CompilerInterface {
 
   private void _recreateCompiler() {
     File collectionsPath = DrJava.getConfig().getSetting(OptionConstants.JSR14_COLLECTIONSPATH);
-            
-    StickyClassLoader loader =
-      new StickyClassLoader(_newLoader,
-                            getClass().getClassLoader(),
-                            _useOldLoader);
+
+    StickyClassLoader loader = new StickyClassLoader(_newLoader, getClass().getClassLoader(),
+                                                     _useOldLoader);
 
     try {
       Class c = loader.loadClass(_className);
@@ -123,7 +121,7 @@ public class CompilerProxy implements CompilerInterface {
            compilerClass.equals("edu.rice.cs.drjava.model.compiler.JSR14v12Compiler") ||
            compilerClass.equals("edu.rice.cs.drjava.model.compiler.JSR14v20Compiler")) &&
           collectionsPath != FileOption.NULL_FILE) {
-        _realCompiler.addToBootClassPath( collectionsPath );
+        _realCompiler.addToBootClassPath(collectionsPath);
       }
       
       //DrJava.consoleErr().println("real compiler: " + _realCompiler + " this: " + this);

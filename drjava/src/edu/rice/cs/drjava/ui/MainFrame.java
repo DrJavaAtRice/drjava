@@ -55,6 +55,7 @@ import java.io.*;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Vector;
 import java.util.Arrays;
@@ -461,6 +462,16 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
+  private Action _junitAllAction = new AbstractAction("Test All Open JUnit TestCases") {
+    public void actionPerformed(ActionEvent e) {
+      new Thread("Running JUnit Tests") {
+        public void run() {
+          _model.junitAll();
+        }
+      }.start();
+    }
+  };
+
   /** Runs Javadoc on all open documents (and the files in their packages). */
   private Action _javadocAllAction = new AbstractAction("Javadoc All Documents") {
       public void actionPerformed(ActionEvent ae) {
@@ -649,6 +660,15 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _clearConsoleAction = new AbstractAction("Clear Console") {
     public void actionPerformed(ActionEvent ae) {
       _model.resetConsole();
+    }
+  };
+
+  /**
+   * Shows the DebugConsole.
+   */
+  private Action _showDebugConsoleAction = new AbstractAction("Show Debug Console") {
+    public void actionPerformed(ActionEvent e) {
+      DrJava.showDrJavaDebugConsole(MainFrame.this);
     }
   };
 
@@ -1867,7 +1887,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     worker.start();
   }
 
-    
   /**
    * Suspends the current execution of the debugger
    *
@@ -2312,11 +2331,11 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     //_setUpAction(_abortInteractionAction, "Break", "Abort the current interaction");
     _setUpAction(_resetInteractionsAction, "Reset", "Reset interactions");
-  
-    _setUpAction(_junitAction, "Test", "Run JUnit over the current document");
+
+    _setUpAction(_junitAction, "Test Current", "Run JUnit over the current document");
+    _setUpAction(_junitAllAction, "Test", "Run JUnit over all open JUnit tests");
     _setUpAction(_javadocAllAction, "Javadoc", "Create Javadoc for the packages of all open documents");
     _setUpAction(_javadocCurrentAction, "Javadoc Current", "Create Javadoc for the current document");
-
   }
 
   private void _setUpAction(Action a, String name, String icon, String shortDesc) {
@@ -2324,6 +2343,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     a.putValue(Action.DEFAULT, name);
     a.putValue(Action.SHORT_DESCRIPTION, shortDesc);
   }
+
   private void _setUpAction(Action a, String icon, String shortDesc) {
     _setUpAction(a, icon, icon, shortDesc);
   }
@@ -2506,6 +2526,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (CodeStatus.DEVELOPMENT) {
       _addMenuItem(toolsMenu, _runAction, KEY_RUN);
     }
+    _addMenuItem(toolsMenu, _junitAllAction, KEY_TEST_ALL);
     _addMenuItem(toolsMenu, _junitAction, KEY_TEST);
     _addMenuItem(toolsMenu, _javadocAllAction, KEY_JAVADOC_ALL);
     _addMenuItem(toolsMenu, _javadocCurrentAction, KEY_JAVADOC_CURRENT);
@@ -2527,6 +2548,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     toolsMenu.addSeparator();
 
     _addMenuItem(toolsMenu, _clearConsoleAction, KEY_CLEAR_CONSOLE);
+    if (CodeStatus.DEVELOPMENT) {
+      toolsMenu.add(_showDebugConsoleAction);
+    }
 
     // Add the menus to the menu bar
     return toolsMenu;
@@ -2731,7 +2755,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Junit
     _toolBar.addSeparator();
     
-    _toolBar.add(_createToolbarButton(_junitAction));
+    _toolBar.add(_createToolbarButton(_junitAllAction));
     _toolBar.add(_createToolbarButton(_javadocAllAction));
 
     // Correct the vertical height of the buttons.
@@ -3903,7 +3927,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     public void runStarted(final OpenDefinitionsDocument doc) {
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
+      SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           // Make sure that this document is the active one.
           _model.setActiveDocument(doc);
@@ -3911,13 +3935,12 @@ public class MainFrame extends JFrame implements OptionConstants {
           // Switch to the interactions pane to show results.
           showTab(_interactionsPane);
         }
-      };
-      SwingUtilities.invokeLater(doCommand);
+      });
     }
 
     public void compileEnded() {
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
+      SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           _compilerErrorPanel.reset();
           if (inDebugMode()) {
@@ -3927,28 +3950,26 @@ public class MainFrame extends JFrame implements OptionConstants {
           hourglassOff();
         }
         
-      };
-      SwingUtilities.invokeLater(doCommand);
+      });
     }
 
-    public void junitStarted(final OpenDefinitionsDocument doc) {
-      
+    public void junitStarted(final List<OpenDefinitionsDocument> docs) {
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
+      SwingUtilities.invokeLater(new Runnable() {
         public void run() {
 //          MainFrame.this.hourglassOn();
           showTab(_junitErrorPanel);
-          _junitErrorPanel.setJUnitInProgress(doc);
+          _junitErrorPanel.setJUnitInProgress(docs);
           _junitAction.setEnabled(false);
+          _junitAllAction.setEnabled(false);
         }
-      };
-      SwingUtilities.invokeLater(doCommand);
+      });
     }
     
     //public void junitRunning() {}
     
     public void junitSuiteStarted(final int numTests) {
-      SwingUtilities.invokeLater( new Runnable() {
+      SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           _junitErrorPanel.progressReset(numTests);
         }
@@ -3959,10 +3980,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       _junitErrorPanel.getErrorListPane().testStarted(name); // this does nothing!
     }
   
-    public void junitTestEnded(final OpenDefinitionsDocument doc, final String name,
-                               final boolean wasSuccessful, final boolean causedError) {
+    public void junitTestEnded(final String name, final boolean wasSuccessful,
+                               final boolean causedError) {
       // syncUI...?
-      SwingUtilities.invokeLater( new Runnable() {
+      SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           _junitErrorPanel.getErrorListPane().
             testEnded(name, wasSuccessful, causedError); // this does nothing!
@@ -3973,15 +3994,15 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     public void junitEnded() {
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
+      SwingUtilities.invokeLater(new Runnable() {
         public void run() {
 //          MainFrame.this.hourglassOff();
           showTab(_junitErrorPanel);
           _junitAction.setEnabled(true);
+          _junitAllAction.setEnabled(true);
           _junitErrorPanel.reset();
         }
-      };
-      SwingUtilities.invokeLater(doCommand);
+      });
     }
 
     public void javadocStarted() {
@@ -4098,6 +4119,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
           _resetInteractionsAction.setEnabled(false);
           _junitAction.setEnabled(false);
+          _junitAllAction.setEnabled(false);
           _runAction.setEnabled(false);
           _interactionsPane.setEditable(false);
           _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -4116,6 +4138,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           interactionEnded();
           _runAction.setEnabled(true);
           _junitAction.setEnabled(true);
+          _junitAllAction.setEnabled(true);
           _resetInteractionsAction.setEnabled(true);
           if (_model.getDebugger().isAvailable()) {
             _toggleDebuggerAction.setEnabled(true);
@@ -4216,9 +4239,13 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
 
-    public void nonTestCase() {
+    public void nonTestCase(boolean isTestAll) {
 
-      String message =
+      String message = isTestAll ?
+        "There are no open test cases.  Please make sure all\n" +
+        "open documents have been compiled, and at least one\n" +
+        "of them is a subclass of junit.framework.TestCase." :
+
         "The  Test  button  (and menu item) in  DrJava invokes the JUnit\n"  +
         "test  harness  over  the currently open document.  In order for\n" +
         "that  to  work,  the  current  document  must  be a valid JUnit\n" +

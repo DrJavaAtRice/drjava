@@ -423,113 +423,106 @@ public interface OptionConstants {
    * The key binding for compiling current document
    */
   public static final KeyStrokeOption KEY_COMPILE =
-    new KeyStrokeOption("key.compile",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F5,
-                                               InputEvent.SHIFT_MASK));
+    new KeyStrokeOption("key.compile", KeyStroke.getKeyStroke(KeyEvent.VK_F5, InputEvent.SHIFT_MASK));
   
   /**
    * The key binding for compiling all
    */
   public static final KeyStrokeOption KEY_COMPILE_ALL =
-    new KeyStrokeOption("key.compile.all",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
+    new KeyStrokeOption("key.compile.all", KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
   
   /**
    * The key binding for openning the preferences dialog
    */
   public static final KeyStrokeOption KEY_RUN =
-    new KeyStrokeOption("key.run",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0));
+    new KeyStrokeOption("key.run", KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0));
   
   /**
    * The key binding for testing the current document
    */
   public static final KeyStrokeOption KEY_TEST =
     new KeyStrokeOption("key.test",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_T, mask));
-  
+                        KeyStroke.getKeyStroke(KeyEvent.VK_T, mask | InputEvent.SHIFT_MASK));
+
+  /**
+   * The key binding for testing all open JUnit test cases.
+   */
+  public static final KeyStrokeOption KEY_TEST_ALL =
+    new KeyStrokeOption("key.test.all", KeyStroke.getKeyStroke(KeyEvent.VK_T, mask));
+
   /**
    * The key binding for generating javadoc for all documents
    */
   public static final KeyStrokeOption KEY_JAVADOC_ALL =
-    new KeyStrokeOption("key.javadoc.all",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_J, mask));
+    new KeyStrokeOption("key.javadoc.all", KeyStroke.getKeyStroke(KeyEvent.VK_J, mask));
   
   /**
    * The key binding for generating javadoc for the current document
    */
   public static final KeyStrokeOption KEY_JAVADOC_CURRENT =
     new KeyStrokeOption("key.javadoc.current",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_J,
-                                               mask | InputEvent.SHIFT_MASK));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_J, mask | InputEvent.SHIFT_MASK));
   
   /**
    * The key binding for loading an interactions history.
    */
   public static final KeyStrokeOption KEY_LOAD_HISTORY =
-    new KeyStrokeOption("key.load.history",
-                        KeyStrokeOption.NULL_KEYSTROKE);
+    new KeyStrokeOption("key.load.history", KeyStrokeOption.NULL_KEYSTROKE);
   
   /**
    * The key binding for saving an interactions history.
    */
   public static final KeyStrokeOption KEY_SAVE_HISTORY =
-    new KeyStrokeOption("key.save.history",
-                        KeyStrokeOption.NULL_KEYSTROKE);
+    new KeyStrokeOption("key.save.history", KeyStrokeOption.NULL_KEYSTROKE);
   
   /**
    * The key binding for clearing the interactions history.
    */
   public static final KeyStrokeOption KEY_CLEAR_HISTORY =
-    new KeyStrokeOption("key.clear.history",
-                        KeyStrokeOption.NULL_KEYSTROKE);
+    new KeyStrokeOption("key.clear.history", KeyStrokeOption.NULL_KEYSTROKE);
   
   /**
    * The key binding for resetting the interactions pane.
    */
   public static final KeyStrokeOption KEY_RESET_INTERACTIONS =
-    new KeyStrokeOption("key.reset.interactions",
-                        KeyStrokeOption.NULL_KEYSTROKE);
+    new KeyStrokeOption("key.reset.interactions", KeyStrokeOption.NULL_KEYSTROKE);
   
   /**
    * The key binding for viewing the interactions classpath.
    */
   public static final KeyStrokeOption KEY_VIEW_INTERACTIONS_CLASSPATH =
-    new KeyStrokeOption("key.view.interactions.classpath",
-                        KeyStrokeOption.NULL_KEYSTROKE);
+    new KeyStrokeOption("key.view.interactions.classpath", KeyStrokeOption.NULL_KEYSTROKE);
   
   /**
    * The key binding for lifting the current interaction to definitions.
    */
   public static final KeyStrokeOption KEY_LIFT_CURRENT_INTERACTION =
-    new KeyStrokeOption("key.lift.current.interaction",
-                        KeyStrokeOption.NULL_KEYSTROKE);
+    new KeyStrokeOption("key.lift.current.interaction", KeyStrokeOption.NULL_KEYSTROKE);
   
   /**
    * The key binding for clearing the console.
    */
   public static final KeyStrokeOption KEY_CLEAR_CONSOLE =
-    new KeyStrokeOption("key.clear.console",
-                        KeyStrokeOption.NULL_KEYSTROKE);
+    new KeyStrokeOption("key.clear.console", KeyStrokeOption.NULL_KEYSTROKE);
                         
   /**
    * The key binding for moving the cursor backwards
    */
   public static final KeyStrokeOption KEY_BACKWARD =
-    new KeyStrokeOption("key.backward",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0));
+    new KeyStrokeOption("key.backward", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0));
+
   /**
    * The key binding for moving the cursor to the beginning of the document
    */
   public static final KeyStrokeOption KEY_BEGIN_DOCUMENT =
-    new KeyStrokeOption("key.begin.document",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_HOME, mask));
+    new KeyStrokeOption("key.begin.document", KeyStroke.getKeyStroke(KeyEvent.VK_HOME, mask));
+
   /**
    * The key binding for moving the cursor to the beginning of the current line
    */
   public static final KeyStrokeOption KEY_BEGIN_LINE =
-    new KeyStrokeOption("key.begin.line",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0));
+    new KeyStrokeOption("key.begin.line", KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0));
+
   /**
    * The key binding for moving the cursor to the beginning of the current paragraph.
    * (Doesn't seem to do anything useful...)
@@ -543,8 +536,8 @@ public interface OptionConstants {
    * The key binding for moving the cursor to the beginning of the previous word
    */
   public static final KeyStrokeOption KEY_PREVIOUS_WORD =
-    new KeyStrokeOption("key.previous.word",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, mask));
+    new KeyStrokeOption("key.previous.word", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, mask));
+
   /**
    * The key binding for deleting the next character
    */
@@ -555,20 +548,20 @@ public interface OptionConstants {
    * The key binding for deleting the previous character
    */
   public static final KeyStrokeOption KEY_DELETE_PREVIOUS =
-    new KeyStrokeOption("key.delete.previous",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0));
+    new KeyStrokeOption("key.delete.previous", KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0));
+
   /**
    * The key binding for moving the cursor down
    */
   public static final KeyStrokeOption KEY_DOWN =
-    new KeyStrokeOption("key.down",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0));
+    new KeyStrokeOption("key.down", KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0));
+
   /**
    * The key binding for moving the cursor up
    */
   public static final KeyStrokeOption KEY_UP =
-    new KeyStrokeOption("key.up",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0));
+    new KeyStrokeOption("key.up", KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0));
+
   /**
    * The key binding for moving the cursor to the end of the document
    */

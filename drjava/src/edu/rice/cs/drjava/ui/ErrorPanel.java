@@ -77,9 +77,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   protected SingleDisplayModel _model;
 
   /** Highlight painter for selected list items. */
-  protected static DefaultHighlighter.DefaultHighlightPainter
-    _listHighlightPainter
-      =  new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
+  protected static DefaultHighlighter.DefaultHighlightPainter _listHighlightPainter =
+    new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
 
   protected static final SimpleAttributeSet _getBoldAttributes() {
     SimpleAttributeSet s = new SimpleAttributeSet();
@@ -325,35 +324,30 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     abstract protected void _updateWithErrors() throws BadLocationException;
 
     /**
-     * Used to show that the last compile was unsuccessful.
+     * Gets the message indicating the number of errors.
      */
-    protected void _updateWithErrors(String failureName, String failureMeaning, DefaultStyledDocument doc)
-      throws BadLocationException {
-
-      // Print how many errors
+    protected String _getNumErrorsMessage(String failureName, String failureMeaning) {
       StringBuffer numErrMsg = new StringBuffer("" + _numErrors);
       numErrMsg.append(" " + failureName);
       if (_numErrors > 1) {
         numErrMsg.append("s");
       }
       numErrMsg.append(" " + failureMeaning + ":\n");
-      doc.insertString(doc.getLength(), numErrMsg.toString(), BOLD_ATTRIBUTES);
+      return numErrMsg.toString();
+    }
 
-      int errorNum = 0;
-      CompilerErrorModel cem = getErrorModel();
-      int numErrors = cem.getNumErrors();
-      // Show errors
-      for (int i = 0; i < numErrors; i++, errorNum++) {
-        int startPos = doc.getLength();
-        CompilerError err = cem.getError(i);
-        
-        _insertErrorText(err, doc);
+    /**
+     * Used to show that the last compile was unsuccessful.
+     */
+    protected void _updateWithErrors(String failureName, String failureMeaning,
+                                     DefaultStyledDocument doc)
+      throws BadLocationException
+    {
+      // Print how many errors
+      String numErrsMsg = _getNumErrorsMessage(failureName, failureMeaning);
+      doc.insertString(doc.getLength(), numErrsMsg, BOLD_ATTRIBUTES);
 
-        Position pos = doc.createPosition(startPos);
-        _errorListPositions[errorNum] = pos;
-        _errorTable.put(pos, err);
-      }
-
+      _insertErrors(doc);
       setDocument(doc);
 
       // Select the first error
@@ -361,25 +355,43 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     }
 
     /**
+     * Inserts all of the errors into the given document.
+     * @param doc the document into which to insert the errors
+     */
+    protected void _insertErrors(DefaultStyledDocument doc) throws BadLocationException {
+      CompilerErrorModel cem = getErrorModel();
+      int numErrors = cem.getNumErrors();
+      // Show errors
+      for (int errorNum = 0; errorNum < numErrors; errorNum++) {
+        int startPos = doc.getLength();
+        CompilerError err = cem.getError(errorNum);
+
+        _insertErrorText(err, doc);
+
+        Position pos = doc.createPosition(startPos);
+        _errorListPositions[errorNum] = pos;
+        _errorTable.put(pos, err);
+      }
+    }
+
+    /**
      * Prints a message for the given error
      * @param error the error to print
      * @param doc the document in the error pane
      */
-    protected void _insertErrorText(CompilerError error, Document doc)
-      throws BadLocationException {
+    protected void _insertErrorText(CompilerError error, Document doc) throws BadLocationException {
       // Show file and line number
       doc.insertString(doc.getLength(), "File: ", BOLD_ATTRIBUTES);
       String fileAndLineNumber = error.getFileMessage() + "  [line: " + error.getLineMessage() + "]";
       doc.insertString(doc.getLength(), fileAndLineNumber + "\n", NORMAL_ATTRIBUTES);
-      
-      
+
       if (error.isWarning()) {
         doc.insertString(doc.getLength(), _getWarningText(), BOLD_ATTRIBUTES);
       }
       else {
         doc.insertString(doc.getLength(), _getErrorText(), BOLD_ATTRIBUTES);
       }
-      
+
       doc.insertString(doc.getLength(), error.message(), NORMAL_ATTRIBUTES);
       doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
     }
@@ -444,10 +456,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         }
 
         try {
-          _listHighlightTag =
-            _highlightManager.addHighlight(startPos,
-                                           endPos,
-                                           _listHighlightPainter);
+          _listHighlightTag = _highlightManager.addHighlight(startPos, endPos, _listHighlightPainter);
 
           // Scroll to make sure this item is visible
           Rectangle startRect = modelToView(startPos);
@@ -484,7 +493,9 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
      * @param error The error to switch to
      */
     void switchToError(CompilerError error) {
-      if (error == null) return;
+      if (error == null) { 
+        return;
+      }
 
       if (error.file() != null) {
         try {
@@ -508,15 +519,17 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
             }
             defPane.requestFocus();
             defPane.getCaret().setVisible(true);
-
-          } else {
+          }
+          else {
             // Remove last highlight if we had an error with no position
             _lastDefPane.removeCompilerErrorHighlight();
           }
-        } catch (IOException ioe) {
+        }
+        catch (IOException ioe) {
           // Don't highlight the source if file can't be opened
         }
-      } else {
+      }
+      else {
         //Remove last highlight if we had an error with no file
         _lastDefPane.removeCompilerErrorHighlight();
       }
@@ -543,17 +556,11 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     private class CompilerErrorColorOptionListener implements OptionListener<Color> {
 
       public void optionChanged(OptionEvent<Color> oce) {
-
-        _listHighlightPainter
-          =  new DefaultHighlighter.DefaultHighlightPainter(oce.value);
-
+        _listHighlightPainter = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
         if (_listHighlightTag != null) {
           _listHighlightTag.refresh(_listHighlightPainter);
         }
       }
     }
-
   }
-
-
 }

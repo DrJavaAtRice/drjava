@@ -100,26 +100,10 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "}";
 
   /**
-   * Constructor.
-   */
-  public JUnitErrorModelTest(String name) {
-    super(name);
-  }
-
-  /**
-   * Creates a test suite for JUnit to run.
-   * @return a test suite based on the methods in this class
-   */
-  public static Test suite() {
-    return  new TestSuite(JUnitErrorModelTest.class);
-  }
-  
-  /**
    * Tests that the errors array contains all encountered failures and errors
    * in the right order.
    */
   public void testErrorsArrayInOrder() throws Exception { 
-    
     _m = new JUnitErrorModel(new JUnitError[0], _model, false);
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
     final File file = new File(_tempDir, "MonkeyTestFail.java");
@@ -145,7 +129,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     //JUnitError[] errorsWithPositions = _m.getErrorsWithPositions();
     //JUnitError[] errorsWithoutPositions = _m.getErrorsWithoutPositions();
     //assertTrue("testResults should not be null", testResults != null);
-    
+
     assertEquals("the test results should have one error and one failure "+_m.getNumErrors(),
                  2,
                   _m.getNumErrors());
@@ -187,7 +171,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     
     // Compile the incorrect ABC
     doc3.startCompile();
-    
+
     // Run the test: a VerifyError will be thrown.
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
@@ -195,9 +179,8 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
       doc2.startJUnit();
       listener.wait();
     }
-    
-    assertEquals("test case has one error reported",
-                 1,
+
+    assertEquals("test case has one error reported", 1,
                  _model.getJUnitErrorModel().getNumErrors());
     _model.removeListener(listener);
   }

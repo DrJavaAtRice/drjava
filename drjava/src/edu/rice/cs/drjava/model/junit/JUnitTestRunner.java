@@ -58,19 +58,18 @@ import junit.textui.TestRunner;
  *
  * @version $Id$
  */
-public class JUnitTestRunner extends junit.textui.TestRunner {
-  
+public class JUnitTestRunner extends TestRunner {
   /**
    * Receives updates on the test suite's progress.
    */
-  private InterpreterJVM _jvm;
-  
+  private JUnitModelCallback _jmc;
+
   /**
    * Used to tie the output of the ui textrunner
    * to nothing.
    */
   private PrintStream _writer;
-  
+
   /**
    * Class loader that uses DrJava's classpath. Overrides the super class' loader.
    */
@@ -94,10 +93,10 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
   /**
    * Constructor
    */
-  public JUnitTestRunner(InterpreterJVM jvm) {
+  public JUnitTestRunner(JUnitModelCallback jmc) {
     super();
-    _jvm = jvm;
-    _classLoader = new DrJavaTestClassLoader(jvm);
+    _jmc = jmc;
+    _classLoader = new DrJavaTestClassLoader(jmc);
     _writer = new PrintStream(System.out) {
       public void print(String s) {
       }
@@ -116,17 +115,17 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
     // Reset all bookkeeping
     _errorCount = 0;
     _failureCount = 0;
-    _jvm.testSuiteStarted(suite.countTestCases());
+    _jmc.testSuiteStarted(suite.countTestCases());
     
     // Run the test
-    _result= createTestResult();
+    _result = createTestResult();
     _result.addListener(this);
-    long startTime= System.currentTimeMillis();
+    long startTime = System.currentTimeMillis();
     suite.run(_result);
-    long endTime= System.currentTimeMillis();
-    long runTime= endTime-startTime;
+    long endTime = System.currentTimeMillis();
+    long runTime = endTime - startTime;
     //fPrinter.print(result, runTime);
-    
+
     return _result;
   }
   
@@ -137,7 +136,7 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
   public TestSuiteLoader getLoader() {
     return _classLoader;
   }
-  
+
   /**
    * Provides our own PrintStream which outputs
    * to the appropriate document.
@@ -154,9 +153,9 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
    * Called by JUnit when a test is started.
    */
   public synchronized void startTest(Test test) {
-    _jvm.testStarted(test.toString());
+    _jmc.testStarted(test.toString());
   }
-  
+
   /**
    * Called by JUnit when a test has finished.
    */
@@ -172,9 +171,6 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
       _failureCount++;
     }
     boolean success = !(failure || error);
-    _jvm.testEnded(test.toString(), success, failure);
-    
+    _jmc.testEnded(test.toString(), success, failure);
   }
 }
-
-

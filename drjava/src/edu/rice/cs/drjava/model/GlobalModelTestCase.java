@@ -45,6 +45,7 @@ import java.io.*;
 
 import junit.extensions.*;
 import java.util.LinkedList;
+import java.util.List;
 import javax.swing.text.*;
 import javax.swing.*;
 import java.rmi.registry.Registry;
@@ -102,6 +103,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     "class DrJavaTestFoo { int cur_package = 5; }";
 
 
+  public GlobalModelTestCase() {
+  }
   public GlobalModelTestCase(String name) {
     super(name);
   }
@@ -842,7 +845,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("undoableEditHappened fired unexpectedly");
     }
 
-    public void junitStarted(OpenDefinitionsDocument doc) {
+    public void junitStarted(List<OpenDefinitionsDocument> doc) {
       listenerFail("junitStarted fired unexpectedly");
     }
 
@@ -854,8 +857,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("junitTestStarted fired unexpectedly");
     }
   
-    public void junitTestEnded(OpenDefinitionsDocument doc, String name,
-                               boolean wasSuccessful, boolean causedError) {
+    public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
       listenerFail("junitTestEnded fired unexpectedly");
     }
   
@@ -950,7 +952,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("saveBeforeDebug fired unexpectedly");
     }*/
 
-    public void nonTestCase() {
+    public void nonTestCase(boolean isTestAll) {
       listenerFail("nonTestCase fired unexpectedly");
     }
 

@@ -183,7 +183,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * If a JUnit test is currently running, this is the OpenDefinitionsDocument
    * being tested.  Otherwise this is null.
    */
-  private OpenDefinitionsDocument _docBeingTested = null;
+//  private OpenDefinitionsDocument _docBeingTested = null;
+  private boolean _isTestInProgress = false;
   
   
   // ---- Javadoc Fields ----
@@ -998,27 +999,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   /**
    * Returns the current classpath in use by the Interpreter JVM.
    */
+  public String getClasspathString() {
+    return _interpreterControl.getClasspathString();
+  }
+
+  /**
+   * Returns the current classpath in use by the Interpreter JVM.
+   */
   public Vector<String> getClasspath() {
     return _interpreterControl.getClasspath();
-    /*
-    String separator= System.getProperty("path.separator");
-    String classpath= "";
-    File[] sourceFiles = getSourceRootSet();
-
-    for(int i=0; i < sourceFiles.length; i++) {
-      classpath += sourceFiles[i].getAbsolutePath() + separator;
-    }
-
-    // Adds extra.classpath to the classpath.
-    Vector<File> extraClasspath = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
-    if(extraClasspath != null) {
-        Enumeration<File> en = extraClasspath.elements();
-        while(en.hasMoreElements()) {
-            classpath += en.nextElement().getAbsolutePath() + separator;
-        }
-    }
-    return classpath;
-    */
   }
   
   /**
@@ -1168,6 +1157,59 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
 
   /**
+   * Creates a JUnit test suite over all currently open documents and runs it.
+   * If the class file associated with a file is not a test case, it will be ignored.
+   */
+  public void junitAll() {
+    synchronized (_compilerLock) {
+      Enumeration en = _definitionsDocs.elements();
+      HashMap<String,OpenDefinitionsDocument> classNamesToODDs =
+        new HashMap<String,OpenDefinitionsDocument>();
+      ArrayList<String> classNames = new ArrayList<String>();
+      ArrayList<File> files = new ArrayList<File>();
+      while (en.hasMoreElements()) {
+        try {
+          OpenDefinitionsDocument doc = (OpenDefinitionsDocument)en.nextElement();
+          DefinitionsDocument dd = doc.getDocument();
+          if (!doc.isUntitled()) {
+            String cn = dd.getQualifiedClassName();
+            classNames.add(cn);
+            File f;
+            try {
+              f = dd.getFile();
+            }
+            catch (FileMovedException fme) {
+              f = fme.getFile();
+            }
+            files.add(f);
+            classNamesToODDs.put(cn, doc);
+          }
+        }
+        catch (ClassNameNotFoundException cnnfe) {
+          // don't add it to the test suite
+        }
+      }
+      List<String> tests = _interpreterControl.runTestSuite(classNames, files, true);
+      ArrayList<OpenDefinitionsDocument> odds = new ArrayList<OpenDefinitionsDocument>();
+      Iterator<String> it = tests.iterator();
+      while (it.hasNext()) {
+        odds.add(classNamesToODDs.get(it.next()));
+      }
+      _notifier.junitStarted(odds);
+      _isTestInProgress = true;
+    }
+  }
+
+  /**
+   * Called when the JUnitTestManager wants to open a file that is not currently open.
+   * @param className the name of the class for which we want to find the file
+   * @return the file associated with the given class
+   */
+  public File getFileForClassName(String className) {
+    return getSourceFile(className + ".java");
+  }
+
+  /**
    * Gets the Debugger used by DrJava.
    */
   public Debugger getDebugger() {
@@ -1199,19 +1241,37 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     return modified;
   }
-  
+
+  /**
+   * Searches for a file with the given name on the current source roots and the
+   * augmented classpath.
+   * @param filename Name of the source file to look for
+   * @return the file corresponding to the given name, or null if it cannot be found
+   */
+  public File getSourceFile(String filename) {
+    File[] sourceRoots = getSourceRootSet();
+    for (int i = 0; i < sourceRoots.length; i++) {
+      File f = _getSourceFileFromPath(filename, sourceRoots[i]);
+      if (f != null) {
+        return f;
+      }
+    }
+    Vector<File> sourcepath = DrJava.getConfig().getSetting(OptionConstants.DEBUG_SOURCEPATH);
+    return getSourceFileFromPaths(filename, sourcepath);
+  }
+
   /**
    * Searches for a file with the given name on the provided paths.
    * Returns null if the file is not found.
    * @param filename Name of the source file to look for
    * @param paths An array of directories to search
+   * @return the file if it is found, or null otherwise
    */
   public File getSourceFileFromPaths(String filename, Vector<File> paths) {
     File f = null;
     for (int i = 0; i < paths.size(); i++) {
-      String currRoot = paths.elementAt(i).getAbsolutePath();
-      f = new File(currRoot + System.getProperty("file.separator") + filename);
-      if (f.exists()) {
+      f = _getSourceFileFromPath(filename, paths.elementAt(i));
+      if (f != null) {
         return f;
       }
     }
@@ -1219,14 +1279,29 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
   
   /**
-   * Called from the JUnitTestManager if its given className is not a test case.
+   * Gets the file named filename from the given path, if it exists.
+   * Returns null if it's not there.
+   * @param filename the file to look for
+   * @param path the path to look for it in
+   * @return the file if it exists
    */
-  public void nonTestCase() {
+  private File _getSourceFileFromPath(String filename, File path) {
+    String root = path.getAbsolutePath();
+    File f = new File(root + System.getProperty("file.separator") + filename);
+    return f.exists() ? f : null;
+  }
+
+  /**
+   * Called from the JUnitTestManager if its given className is not a test case.
+   * @param isTestAll whether or not it was a use of the test all button
+   */
+  public void nonTestCase(final boolean isTestAll) {
     synchronized(_compilerLock) {
-      _docBeingTested = null;
+//      _docBeingTested = null;
+      _isTestInProgress = false;
       _notifier.notifyListeners(new EventNotifier.Notifier() {
         public void notifyListener(GlobalModelListener l) {
-          l.nonTestCase();
+          l.nonTestCase(isTestAll);
           l.junitEnded();
         }
       });
@@ -1274,7 +1349,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     synchronized(_compilerLock) {
       _notifier.notifyListeners(new EventNotifier.Notifier() {
         public void notifyListener(GlobalModelListener l) {
-          l.junitTestEnded(_docBeingTested, testName, wasSuccessful, causedError);
+//          l.junitTestEnded(_docBeingTested, testName, wasSuccessful, causedError);
+          l.junitTestEnded(testName, wasSuccessful, causedError);
         }
       });
     }
@@ -1286,27 +1362,24 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   public void testSuiteEnded(JUnitError[] errors) {
     synchronized(_compilerLock) {
-      if (_docBeingTested == null) {
-        return;
-      }
-      _junitErrorModel = new JUnitErrorModel(errors, this, true);
+//      if (_docBeingTested == null) {
+      if (_isTestInProgress) {
+        _junitErrorModel = new JUnitErrorModel(errors, this, true);
 
-      _docBeingTested = null;
-      _notifier.notifyListeners(new EventNotifier.Notifier() {
-        public void notifyListener(GlobalModelListener l) {
-          l.junitEnded();
-        }
-      });
+//      _docBeingTested = null;
+        _isTestInProgress = false;
+        _notifier.junitEnded();
+      }
     }
   }
   
   /**
    * Returns the document currently being tested (with JUnit) if there is
    * one, otherwise null.
-   */
+   *
   public OpenDefinitionsDocument getDocBeingTested() {
     return _docBeingTested;
-  }
+  }*/
     
   // ---------- DefinitionsDocumentHandler inner class ----------
   
@@ -1732,13 +1805,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * given definitions document.
      *
      */
-    public void startJUnit() throws ClassNotFoundException, IOException{
+    public void startJUnit() throws ClassNotFoundException, IOException {
       synchronized(_compilerLock) {
         //JUnit started, so throw out all JUnitErrorModels now, regardless of whether
         //  the tests succeed, etc.
         
         // if a test is running, don't start another one
-        if (_docBeingTested != null) {
+//        if (_docBeingTested != null) {
+        if (_isTestInProgress) {
           return;
         }
 
@@ -1764,17 +1838,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             return;
           }
           */
-          _notifier.notifyListeners(new EventNotifier.Notifier() {
-            public void notifyListener(GlobalModelListener l) {
-              l.junitStarted(DefinitionsDocumentHandler.this);
-            }
-          });
+          ArrayList<OpenDefinitionsDocument> thisList = new ArrayList<OpenDefinitionsDocument>();
+          thisList.add(this);
+          _notifier.junitStarted(thisList);
           
           try {
             getJUnitDocument().remove(0, getJUnitDocument().getLength() - 1);
           }
           catch (BadLocationException e) {
-            nonTestCase();
+            nonTestCase(false);
             return;
           }
           
@@ -1783,7 +1855,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             testFilename = testFilename.substring(0, testFilename.length() - 5);
           }
           else {
-            nonTestCase();
+            nonTestCase(false);
             return;
           }
           String packageName;
@@ -1791,44 +1863,41 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             packageName = _doc.getPackageName();
           }
           catch (InvalidPackageException e) {
-            nonTestCase();
+            nonTestCase(false);
             return;
           }
           if(!packageName.equals("")) {
             testFilename = packageName + "." + testFilename;
           }
-          _interpreterControl.runTestSuite(testFilename,
-                                           testFile.getAbsolutePath());
+          ArrayList<String> classNames = new ArrayList<String>();
+          classNames.add(testFilename);
+          ArrayList<File> files = new ArrayList<File>();
+          files.add(testFile);
+          _interpreterControl.runTestSuite(classNames, files, false);
           // Assign _docBeingTested after calling runTest because we know at
           // this point that the interpreterJVM has registered itself. We also
           // know that the testFinished cannot be entered before this because
           // it has to acquire the same lock as this method.
-          _docBeingTested = this;
-          
+//          _docBeingTested = this;
+          _isTestInProgress = true;
         }
         catch (IllegalStateException e) {
           // No file exists, don't try to compile and test
-          nonTestCase();
+          nonTestCase(false);
           return;
         }
         catch (NoClassDefFoundError e) {
           // Method getTest in junit.framework.BaseTestRunner can throw a
           // NoClassDefFoundError (via reflection).
-          _docBeingTested = null;
-          _notifier.notifyListeners(new EventNotifier.Notifier() {
-            public void notifyListener(GlobalModelListener l) {
-              l.junitEnded();
-            }
-          });
+//          _docBeingTested = null;
+          _isTestInProgress = false;
+          _notifier.junitEnded();
           throw e;
         }
         catch (ExitingNotAllowedException enae) {
-          _docBeingTested = null;
-          _notifier.notifyListeners(new EventNotifier.Notifier() {
-            public void notifyListener(GlobalModelListener l) {
-              l.junitEnded();
-            }
-          });
+//          _docBeingTested = null;
+          _isTestInProgress = false;
+          _notifier.junitEnded();
           throw enae;
         }
       }
@@ -2624,23 +2693,25 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * Called when the JVM used for unit tests has registered.
    */
   public void junitJVMReady() {
-    
-    if (_docBeingTested != null) {
+//    if (_docBeingTested != null) {
+    if (_isTestInProgress) {
       JUnitError[] errors = new JUnitError[1];
       String fileName = null;
-      try {
-        fileName = _docBeingTested.getDocument().getFile().getAbsolutePath();
-      }
-      catch (IllegalStateException ise) {
-      }
-      catch (FileMovedException fme) {
-        fileName = fme.getFile().getAbsolutePath();
-      }
-      errors[0] = new JUnitError(new File(fileName), -1, -1, "Previous test was interrupted", true,
-                                 "", "No associated stack trace");
+//      try {
+//        fileName = _docBeingTested.getDocument().getFile().getAbsolutePath();
+//      }
+//      catch (IllegalStateException ise) {
+//      }
+//      catch (FileMovedException fme) {
+//        fileName = fme.getFile().getAbsolutePath();
+//      }
+//      errors[0] = new JUnitError(new File(fileName), -1, -1, "Previous test was interrupted", true,
+//                                 "", "No associated stack trace");
+      errors[0] = new JUnitError("Previous test was interrupted", true, "");
       // TODO: Should this happen here?  The modified field is on the outer class.
       _junitErrorModel = new JUnitErrorModel(errors, this, true);
-      _docBeingTested = null;
+//      _docBeingTested = null;
+      _isTestInProgress = false;
       _notifier.notifyListeners(new EventNotifier.Notifier() {
         public void notifyListener(GlobalModelListener l) {
           l.junitEnded();
@@ -2706,7 +2777,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
 
   private class ExtraClasspathOptionListener implements OptionListener<Vector<File>> {
-    
     public void optionChanged (OptionEvent<Vector<File>> oce) {
       Vector<File> cp = oce.value;
       if(cp!=null) {
@@ -2719,11 +2789,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
 
   private static class BackUpFileOptionListener implements OptionListener<Boolean> {
-
     public void optionChanged (OptionEvent<Boolean> oe){
       Boolean value = oe.value;
       FileOps.DefaultFileSaver.setBackupsEnabled(value.booleanValue());
     }
   }
-  
 }

@@ -45,6 +45,8 @@ import java.rmi.*;
 import java.io.*;
 
 import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
 
 // NOTE: Do NOT import/use the config framework in this class!
 //  (It seems to crash Eclipse...)
@@ -269,6 +271,19 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
 
   /**
+   * Gets the augmented classpath of the interpreter jvm as a string.
+   */
+  public String getClasspathString() {
+    try {
+      return _interpreterJVM().getClasspathString();
+    }
+    catch (RemoteException re) {
+      _threwException(re);
+      return "";
+    }
+  }
+
+  /**
    * Sets the Interpreter to be in the given package.
    * @param packageName Name of the package to enter.
    */
@@ -342,29 +357,34 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /**
    * Runs a JUnit Test class in the Interpreter JVM.
-   * @param className Name of the TestCase class
-   * @param fileName the name of the file for the TestCase class
+   * @param classNames the class names to run in a test
+   * @param files the associated filenames
+   * @param isTestAll if we're testing all open files or not
    */
-  public void runTestSuite(String className, String fileName) {
+  public List<String> runTestSuite(List<String> classNames, List<File> files,
+                                    boolean isTestAll) {
+    List<String> classes = new ArrayList<String>();
     // silently fail if disabled. see killInterpreter docs for details.
-    if (! _enabled) return;
+    if (_enabled) {
+      ensureInterpreterConnected();
 
-    ensureInterpreterConnected();
-    
-    try {
-      _interpreterJVM().runTestSuite(className, fileName);
+      try {
+        classes = _interpreterJVM().runTestSuite(classNames, files, isTestAll);
+      }
+      catch (RemoteException re) {
+        _threwException(re);
+      }
     }
-    catch (RemoteException re) {
-      _threwException(re);
-    }
+    return classes;
   }
 
   /**
    * Called if JUnit is invoked on a non TestCase class.  Forwards from
    * the other JVM to the local JUnit model.
+   * @param isTestAll whether or not it was a use of the test all button
    */
-  public void nonTestCase() throws RemoteException {
-    _junitModel.nonTestCase();
+  public void nonTestCase(boolean isTestAll) throws RemoteException {
+    _junitModel.nonTestCase(isTestAll);
   }
   
   /**
@@ -407,6 +427,15 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _junitModel.testSuiteEnded(errors);
   }
   
+  /**
+   * Called when the JUnitTestManager wants to open a file that is not currently open.
+   * @param className the name of the class for which we want to find the file
+   * @return the file associated with the given class
+   */
+  public File getFileForClassName(String className) throws RemoteException {
+    return _junitModel.getFileForClassName(className);
+  }
+
   /**
    * Notifies the main jvm that an assignment has been made in the given debug
    * interpreter.
@@ -834,9 +863,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /**
    * InteractionsModel which does not react to events.
    */
-  public static class DummyInteractionsModel
-    implements InteractionsModelCallback
-  {
+  public static class DummyInteractionsModel implements InteractionsModelCallback {
     public int getDebugPort() throws IOException { return -1; }
     public void replSystemOutPrint(String s) {}
     public void replSystemErrPrint(String s) {}
@@ -864,15 +891,16 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * JUnitModel which does not react to events.
    */
   public static class DummyJUnitModel implements JUnitModelCallback {
-    public void nonTestCase() {}
+    public void nonTestCase(boolean isTestAll) {}
     public void testSuiteStarted(int numTests) {}
     public void testStarted(String testName) {}
-    public void testEnded(String testName, boolean wasSuccessful,
-                          boolean causedError) {}
+    public void testEnded(String testName, boolean wasSuccessful, boolean causedError) {}
     public void testSuiteEnded(JUnitError[] errors) {}
+    public File getFileForClassName(String className) { return null; }
+    public String getClasspathString() { return ""; }
     public void junitJVMReady() {}
   }
-  
+
   /**
    * DebugModelCallback which does not react to events.
    */

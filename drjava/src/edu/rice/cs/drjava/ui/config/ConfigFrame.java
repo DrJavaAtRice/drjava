@@ -532,12 +532,11 @@ public class ConfigFrame extends JFrame {
    */
   private void _setupKeyBindingsPanel(ConfigPanel panel) {
     // using a treeset because it automatically sorts element upon insertion
-    TreeSet<KeyStrokeOptionComponent> _comps =
-      new TreeSet<KeyStrokeOptionComponent>();
+    TreeSet<KeyStrokeOptionComponent> _comps = new TreeSet<KeyStrokeOptionComponent>();
 
     KeyStrokeData tmpKsd;
     KeyStrokeOptionComponent tmpKsoc;
-    
+
     Enumeration e = KeyBindingManager.Singleton.getKeyStrokeData();
     while (e.hasMoreElements()) {
       tmpKsd = (KeyStrokeData) e.nextElement();

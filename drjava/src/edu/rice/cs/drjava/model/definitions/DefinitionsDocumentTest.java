@@ -1300,4 +1300,26 @@ public final class DefinitionsDocumentTest extends TestCase
     assertEquals("Should have undone the indenting and inserting.", "",
                  _defModel.getText(0, _defModel.getLength()));
   }
+
+  /**
+   * Verifies that the undo manager correctly determines if the document has
+   * been modified since the last save.
+   */
+  public void testUndoOrRedoSetsUnmodifiedState() throws BadLocationException {
+    _defModel.addUndoableEditListener(_defModel.getUndoManager());
+    _defModel.insertString(0, "This is text", null);
+    assertTrue("Document should be modified.", _defModel.isModifiedSinceSave());
+    _defModel.getUndoManager().undo();
+    _defModel.setModifiedSinceSave();
+    assertFalse("Document should no longer be modified after undo.", _defModel.isModifiedSinceSave());
+    _defModel.insertString(0, "This is text", null);
+    _defModel.resetModification();
+    assertFalse("Document should not be modified after \"save\".", _defModel.isModifiedSinceSave());
+    _defModel.getUndoManager().undo();
+    _defModel.setModifiedSinceSave();
+    assertTrue("Document should be modified after undo.", _defModel.isModifiedSinceSave());
+    _defModel.getUndoManager().redo();
+    _defModel.setModifiedSinceSave();
+    assertFalse("Document should no longer be modified after redo.", _defModel.isModifiedSinceSave());
+  }
 }

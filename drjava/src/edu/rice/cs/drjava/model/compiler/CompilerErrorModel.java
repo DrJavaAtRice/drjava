@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.HashMap;
 import java.lang.reflect.Array;
+import javax.swing.text.*;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.IGetDocuments;

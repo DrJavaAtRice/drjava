@@ -39,6 +39,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.junit;
 
+import java.io.File;
+
 /**
  * Callback interface which allows an JUnitModel to respond to
  * tests running in a remote JVM.
@@ -49,8 +51,9 @@ public interface JUnitModelCallback {
   
   /**
    * Called from the JUnitTestManager if its given className is not a test case.
+   * @param isTestAll whether or not it was a use of the test all button
    */
-  public void nonTestCase();
+  public void nonTestCase(boolean isTestAll);
   
   /**
    * Called to indicate that a suite of tests has started running.
@@ -80,6 +83,19 @@ public interface JUnitModelCallback {
    */
   public void testSuiteEnded(JUnitError[] errors);
   
+  /**
+   * Called when the JUnitTestManager wants to open a file that is not currently open.
+   * @param className the name of the class for which we want to find the file
+   * @return the file associated with the given class
+   */
+  public File getFileForClassName(String className);
+
+  /**
+   * Returns the accumulated classpath in use by all Java interpreters,
+   * in the form of a path-separator delimited string.
+   */
+  public String getClasspathString();
+
   /**
    * Called when the JVM used for unit tests has registered.
    */
