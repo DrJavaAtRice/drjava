@@ -20,14 +20,17 @@ public class StyleUpdateThread extends Thread {
 	public void run() {
 		MainFrame._status.setText("Updating highlight information...");
 		SimpleAttributeSet attributes = new SimpleAttributeSet();
-		int startOfInterimText = _changedStates.elementAt(0).location;
-
+		//int startOfInterimText = _changedStates.elementAt(0).location;
 		// Paint all affected text yellow as interim color.
 //		StyleConstants.setForeground(attributes, StateBlock.INTERIM_COLOR);
 //		_doc.setCharacterAttributes(startOfInterimText,
 //													 _doc.getLength() - startOfInterimText,
 //													 attributes,
 //													 false);
+		//synchronized(this) {
+				try {sleep(150);}
+				catch (InterruptedException ex) {}
+//			}
 
 		for (int i = 0; i < _changedStates.size(); i++) {
 			StateBlock currentSB = _changedStates.elementAt(i);

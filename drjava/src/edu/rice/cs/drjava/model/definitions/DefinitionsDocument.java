@@ -181,6 +181,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 			int startOfInterimText = changedStates.elementAt(0).location;
 			if (styleUpdater != null) {
 				styleUpdater._breakLocation = startOfInterimText;
+				styleUpdater.interrupt();
 				try { styleUpdater.join(); }
 				catch (InterruptedException ex) {}
 			}
