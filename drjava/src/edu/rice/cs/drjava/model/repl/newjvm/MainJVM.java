@@ -159,9 +159,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _startupClasspathVector.add(_startupClasspath.substring(lastIndex, index));
   }
 
-  public boolean isInterpreterRunning() {
-    return _interpreterJVM() != null;
-  }
+  public boolean isInterpreterRunning() { return _interpreterJVM() != null; }
 
   /**
    * Provides an object to listen to interactions-related events.

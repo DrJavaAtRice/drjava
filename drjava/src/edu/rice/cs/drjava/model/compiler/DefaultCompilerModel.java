@@ -117,8 +117,10 @@ public class DefaultCompilerModel implements CompilerModel {
   /**
    * Add a CompilerListener to the model.
    * @param listener a listener that reacts to compiler events
+   * 
+   * This operation is synchronized by the readers/writers protocol in EventNotifier<T>.
    */
-  public synchronized void addListener(CompilerListener listener) {
+  public void addListener(CompilerListener listener) {
     _notifier.addListener(listener);
   }
 
@@ -126,15 +128,17 @@ public class DefaultCompilerModel implements CompilerModel {
    * Remove a CompilerListener from the model.  If the listener is not currently
    * listening to this model, this method has no effect.
    * @param listener a listener that reacts to compiler events
+   * 
+   * This operation is synchronized by the readers/writers protocol in EventNotifier<T>.
    */
-  public synchronized void removeListener(CompilerListener listener) {
+  public void removeListener(CompilerListener listener) {
     _notifier.removeListener(listener);
   }
 
   /**
    * Removes all CompilerListeners from this model.
    */
-  public synchronized void removeAllListeners() {
+  public void removeAllListeners() {
     _notifier.removeAllListeners();
   }
 
