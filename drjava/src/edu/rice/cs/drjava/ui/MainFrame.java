@@ -340,7 +340,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   /** Reverts all open documents. 
-   * (not working yet
+   * (not working yet)
   private Action _revertAllAction = new AbstractAction("Revert All to Saved") {
     public void actionPerformed(ActionEvent ae) {
       String title = "Revert All to Saved?";
@@ -867,20 +867,12 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** Creates the main window, and shows it. */
   public MainFrame() {
-    this(-1);  // use a unique RMI port
-  }
-  /**
-   * Creates the main window and shows it.  The underlying model will
-   * be told to use the given port for the RMI registry.  If the
-   * port is -1, it will use a unique port.
-   */
-  public MainFrame(int rmiPort) {
     // create position listener for line numbers in status bar
     _posListener = new PositionListener();
     _setUpStatusBar();
 
     // create our model
-    _model = new SingleDisplayModel(rmiPort);
+    _model = new SingleDisplayModel();
     
     if (_model.getDebugger().isAvailable()) {
       // add listener to debug manager

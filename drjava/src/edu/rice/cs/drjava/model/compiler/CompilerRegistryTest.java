@@ -200,12 +200,19 @@ public class CompilerRegistryTest extends TestCase {
   private CompilerInterface[] _getCompilersAfterDisablingSome(int[] indices) {
     LimitingClassLoader loader = new LimitingClassLoader(_oldBaseLoader);
     _registry.setBaseClassLoader(loader);
+    //for (int j = 0; j < _allAvailableCompilers.length; j++) {
+    //  System.out.println("all available compilers: " + _allAvailableCompilers[j].getClass().getName());
+    //}
 
     for (int i = 0; i < indices.length; i++) {
+      //System.out.println("restricting compiler: " + _allAvailableCompilers[indices[i]].getClass().getName());
       loader.addToRestrictedList(_allAvailableCompilers[indices[i]].getClass().getName());
     }
 
     CompilerInterface[] compilers = _registry.getAvailableCompilers();
+    //for (int j = 0; j < compilers.length; j++) {
+    //  System.out.println("available compiler: " + compilers[j].getClass().getName());
+    //}
     assertEquals("Number of available compilers",
                  _allAvailableCompilers.length - indices.length,
                  compilers.length);

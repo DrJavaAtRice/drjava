@@ -43,7 +43,6 @@ import junit.framework.*;
 import junit.extensions.*;
 
 import java.rmi.*;
-import java.rmi.registry.Registry;
 
 import edu.rice.cs.drjava.model.*;
 
@@ -53,6 +52,9 @@ import edu.rice.cs.drjava.model.*;
  * @version $Id$
  */
 public class NewJVMTest extends TestCase {
+  final boolean printMessages = false;
+  
+  //private static GlobalModel _model;
   private static TestJVMExtension _jvm;
 
   public NewJVMTest(String name) {
@@ -62,23 +64,26 @@ public class NewJVMTest extends TestCase {
   protected void setUp() throws RemoteException {
     _jvm.resetFlags();
   }
-
+  
   public static Test suite() {
     TestSuite suite = new TestSuite(NewJVMTest.class);
     TestSetup setup = new TestSetup(suite) {
       protected void setUp() throws RemoteException {
+        //_model = new DefaultGlobalModel();  // why a new one on every test case?
         _jvm = new TestJVMExtension();
       }
 
       protected void tearDown() {
-        _jvm.killInterpreter();
+        _jvm.killInterpreter(false);
       }
     };
 
     return setup;
   }
   
+  
   public void testPrintln() throws Throwable {
+    if (printMessages) System.out.println("----testPrintln-----");
     synchronized(_jvm) {
       _jvm.interpret("System.err.print(\"err\");");
       _jvm.wait(); // wait for println
@@ -87,7 +92,6 @@ public class NewJVMTest extends TestCase {
       assertEquals("void return flag", true, _jvm.voidReturnFlag);
       _jvm.resetFlags();
     }
-
 
     synchronized(_jvm) {
       _jvm.interpret("System.err.print(\"err2\");");
@@ -108,6 +112,7 @@ public class NewJVMTest extends TestCase {
   }
 
   public void testReturnConstant() throws Throwable {
+    if (printMessages) System.out.println("----testReturnConstant-----");
     synchronized(_jvm) {
       _jvm.interpret("5");
       _jvm.wait();
@@ -115,7 +120,26 @@ public class NewJVMTest extends TestCase {
     }
   }
 
+  
+  public void testWorksAfterRestartConstant() throws Throwable {
+    if (printMessages) System.out.println("----testWorksAfterRestartConstant-----");
+    synchronized(_jvm) {
+      _jvm.interpret("5");
+      _jvm.wait();
+      assertEquals("result", "5", _jvm.returnBuf);
+      
+      _jvm.killInterpreter(true);
+      _jvm.wait();
+      
+      _jvm.interpret("4");
+      _jvm.wait();
+      assertEquals("result", "4", _jvm.returnBuf);
+    }
+  }
+  
+  
   public void testThrowRuntimeException() throws Throwable {
+    if (printMessages) System.out.println("----testThrowRuntimeException-----");
     synchronized(_jvm) {
       _jvm.interpret("throw new RuntimeException();");
       _jvm.wait();
@@ -126,6 +150,7 @@ public class NewJVMTest extends TestCase {
   }
   
   public void testToStringThrowsRuntimeException() throws Throwable {
+    if (printMessages) System.out.println("----testToStringThrowsRuntimeException-----");
     synchronized(_jvm) {
       _jvm.interpret(
         "class A { public String toString() { throw new RuntimeException(); } };" +
@@ -137,6 +162,7 @@ public class NewJVMTest extends TestCase {
   }
 
   public void testThrowNPE() throws Throwable {
+    if (printMessages) System.out.println("----testThrowNPE-----");
     synchronized(_jvm) {
       _jvm.interpret("throw new NullPointerException();");
 
@@ -151,6 +177,7 @@ public class NewJVMTest extends TestCase {
   }
 
   public void testStackTraceEmptyTrace() throws Throwable {
+    if (printMessages) System.out.println("----testStackTraceEmptyTrace-----");
     synchronized(_jvm) {
       _jvm.interpret("null.toString()");
 
@@ -175,9 +202,16 @@ public class NewJVMTest extends TestCase {
     public String exceptionMsgBuf;
     public String exceptionTraceBuf;
     public boolean voidReturnFlag;
+    
+    private InterpretResultVisitor<Object> _testHandler;
 
     public TestJVMExtension() throws RemoteException { 
-      super(Registry.REGISTRY_PORT);
+      super(null);
+      _testHandler = new TestResultHandler();
+    }
+    
+    protected InterpretResultVisitor<Object> getResultHandler() {
+      return _testHandler;
     }
 
     public void resetFlags() {
@@ -189,6 +223,13 @@ public class NewJVMTest extends TestCase {
       exceptionTraceBuf = null;
       voidReturnFlag = false;
     }
+    
+    protected void handleSlaveQuit(int status) {
+      synchronized(this) {
+        this.notify();
+        super.handleSlaveQuit(status);
+      }
+    }
 
     public void systemErrPrint(String s) throws RemoteException {
       synchronized(this) {
@@ -197,7 +238,7 @@ public class NewJVMTest extends TestCase {
         this.notify();
       }
     }
-    
+
     public void systemOutPrint(String s) throws RemoteException {
       synchronized(this) {
         outBuf = s;
@@ -206,43 +247,34 @@ public class NewJVMTest extends TestCase {
       }
     }
 
-    public void threwException(String exceptionClass,
-                               String message,
-                               String stackTrace)
-      throws RemoteException
-    {
-      synchronized(this) {
-        exceptionClassBuf = exceptionClass;
-        exceptionTraceBuf = stackTrace;
-        exceptionMsgBuf = message;
-
-        //System.out.println("notify threw");
-        this.notify();
+    private class TestResultHandler implements InterpretResultVisitor<Object> {
+      public Object forVoidResult(VoidResult that) {
+        synchronized(TestJVMExtension.this) {
+          voidReturnFlag = true;
+          //System.out.println("notify void");
+          TestJVMExtension.this.notify();
+          return null;
+        }
       }
-    }
-
-    public void returnedResult(String result) throws RemoteException
-    {
-      synchronized(this) {
-        returnBuf = result;
-        //System.out.println("notify returned");
-        this.notify();
+      public Object forValueResult(ValueResult that) {
+        synchronized(TestJVMExtension.this) {
+          returnBuf = that.getValueStr();
+          //System.out.println("notify returned");
+          TestJVMExtension.this.notify();
+          return null;
+        }
       }
-    }
-
-    public void returnedVoid() throws RemoteException {
-      synchronized(this) {
-        voidReturnFlag = true;
-        //System.out.println("notify void");
-        this.notify();
+      public Object forExceptionResult(ExceptionResult that) {
+        synchronized(TestJVMExtension.this) {
+          exceptionClassBuf = that.getExceptionClass();
+          exceptionTraceBuf = that.getStackTrace();
+          exceptionMsgBuf = that.getExceptionMessage();
+          
+          //System.out.println("notify threw");
+          TestJVMExtension.this.notify();
+          return null;
+        }
       }
-    }
-    
-    protected int getDebugPort() {
-      return -1;
-    }
-    
-    protected void replCalledSystemExit(int status) {
     }
   }
 }

@@ -690,7 +690,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
                !doc.checkIfClassFileInSync());
 
     // Have to wait 1 second so file will have a different timestamp
-    Thread.sleep(1000);
+    Thread.sleep(2000);
 
     doc.saveFile(new FileSelector(file));
     assertTrue("should not be in sync after save", 
@@ -735,7 +735,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
                doc.checkIfClassFileInSync());
     
     // Have to wait 1 second so file will have a different timestamp
-    Thread.sleep(1000);
+    Thread.sleep(2000);
     
     // Rename to a different file
     doc.saveFileAs(new FileSelector(file2));

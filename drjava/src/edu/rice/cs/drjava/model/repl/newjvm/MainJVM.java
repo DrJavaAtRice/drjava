@@ -35,7 +35,7 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
@@ -46,134 +46,47 @@ import java.io.*;
 
 import gj.util.Vector;
 
-import javax.swing.Timer;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.net.ServerSocket;
-
-import edu.rice.cs.util.newjvm.ExecJVM;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.junit.JUnitError;
+import edu.rice.cs.util.newjvm.*;
 
 /**
  * Manages a remote JVM.
  *
  * @version $Id$
  */
-public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
-  /** The name of the RMI object for the present JVM. */
-  private final String _identifier;
-  
-  /** 
-   * How long to wait for an interpreter to register itself before 
-   * starting another attempt.
-   */
-  private final static int RESET_TIME_OUT = 30;
+public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
+  private Log _log = new Log("MainJVM");
 
-  /** 
-   * Port on which RMI registry is running.
-   * Static because we only need one RMI registry port per JVM.
-   * Starts at a unique port, but defaults to the default RMI
-   * port (1099) if one cannot be found.
-   */
-  private static int _rmiPort = Registry.REGISTRY_PORT;
-  static {
-    _rmiPort = _generateSafeRMIPort();
-  }
-
-  /**
-   * The global model.
-   * This field might be null if the MainJVM is running in a test,
-   * but will never be null in actual use.
-   */
+  /** The global model. */
   private GlobalModel _model;
 
   /**
-   * Is there a JVM in the process of starting up?
-   * This variable is protected by synchronized(this).
+   * This flag is set to false to inhibit the automatic restart of the JVM.
    */
-  private boolean _startupInProgress = false;
-  
-  private RestartThread _restartThread = null;
-  private RestartThread _timerThread = null;
-  private Timer _restartTimer = null;
+  private boolean _enabled = true;
   
   /**
-   * Keeps track of whether we are currently in the process of cleanly
-   * resetting the interactions JVM, as opposed to having it killed by
-   * a thread in that JVM.  Used to determine whether or not to display
-   * an information message when the JVM restarts.
-   * This variable is protected by synchronized(this).
-   * @see #setIsResetting
+   * This flag is set to remember that the JVM is cleanly restarting, so
+   * that the replCalledSystemExit method does not need to be called.
    */
-  //private boolean _resetInProgress = false;
+  private boolean _cleanlyRestarting = false;
 
-  /**
-   * This is the pointer to the interpreter JVM remote object, used to call
-   * back to it. It has the value null when the interpeter JVM is not running
-   * or is not connected yet. It gets set to a value by
-   * {@link #registerInterpreterJVM}, which is called by the interpreter
-   * JVM itself over RMI.
-   *
-   * This can only be changed while holding the object lock.
-   */
-  private InterpreterJVMRemoteI _interpreterJVM = null;
+  /** Instance of inner class to handle interpret result. */
+  private final ResultHandler _handler = new ResultHandler();
 
-  /**
-   * Process object for the running interpreter, or null if none.
-   * This can only be changed while holding the object lock.
-   */
-  private Process _interpreterProcess = null;
-
-  /**
-   * Creates a new MainJVM to handle communication with the Interpreter
-   * JVM, and instantiates the Interpreter JVM.  Uses RMI over a
-   * unique port to communicate.
-   * @param model GlobalModel wishing to communicate with the Interpreter.
-   */
   public MainJVM(final GlobalModel model) throws RemoteException {
-    this(model, -1);
-  }
-  
-  /**
-   * Creates a new MainJVM to handle communication with the Interpreter
-   * JVM, and instantiates the Interpreter JVM.  Uses RMI over the
-   * given port to communicate.
-   * @param model GlobalModel wishing to communicate with the Interpreter.
-   * @param rmiPort Port on which to start the RMI registry.  If -1,
-   * then a unique port will be used.
-   */
-  public MainJVM(final GlobalModel model, int rmiPort) throws RemoteException {
-    super();
+    super(InterpreterJVM.class.getName());
 
     _model = model;
-    if (rmiPort > -1) {
-      _rmiPort = rmiPort;
-    }
-    _startNameServiceIfNeeded();
-    _identifier = _createIdentifier();
-
-    try {
-      Naming.rebind(_identifier, this);
-    }
-    catch (Exception e) {
-      throw new edu.rice.cs.util.UnexpectedException(e);
-    }
-
-    restartInterpreterJVM();
+    startInterpreterJVM();
   }
-  
-  /**
-   * Creates a MainJVM without a model.
-   * @param port on which to run the RMI registry, or -1 for a unique port.
-   */
-  public MainJVM(int rmiPort) throws RemoteException {
-    this(null, rmiPort);
+
+  public boolean isInterpreterRunning() {
+    return _interpreterJVM() != null;
   }
 
   /**
@@ -187,36 +100,79 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     _model = model;
   }
 
-  public void interpret(String s) {
+  public void interpret(final String s) {
+    // silently fail if diabled. see killInterpreter docs for details.
+    if (! _enabled) return;
+
     ensureInterpreterConnected();
 
+    /*
     try {
-      //System.err.println("interpret to " + _interpreterJVM + ": " + s);
-      _interpreterJVM.interpret(s);
+      //_log.log("main.interp: " + s);
+      _interpreterJVM().interpret(s);
     }
     catch (RemoteException re) {
       _threwException(re);
     }
+    */
+    
+    Thread thread = new Thread("interpret thread: " + s) {
+      public void run() {
+        try {
+          //System.err.println("interpret to " + _interpreterJVM() + ": " + s);
+          InterpretResult result = _interpreterJVM().interpret(s);
+          _log.log("main.interp: " + s + " --> " + result);
+          result.apply(getResultHandler());
+        }
+        catch (java.rmi.UnmarshalException ume) {
+          // Could not receive result from interpret; system probably exited.
+          // We will silently fail and let the interpreter restart.
+          _log.log("main.interp: UnmarshalException, so interpreter is dead:\n"
+                     + ume);
+        }
+        catch (RemoteException re) {
+          _threwException(re);
+        }
+      }
+    };
+
+    thread.setDaemon(true);
+    thread.start();
   }
+  
+  /**
+   * Called when a call to interpret has completed.
+   * @param result The result of the interpretation
+   *
+  public void interpretResult(InterpretResult result) throws RemoteException {
+    //_log.log("main.interp result: " + s);
+    result.apply(HANDLER);
+  }
+  */
 
   public void addClassPath(String path) {
+    // silently fail if diabled. see killInterpreter docs for details.
+    if (! _enabled) return;
+
     ensureInterpreterConnected();
 
     try {
-      _interpreterJVM.addClassPath(path);
+      //System.err.println("addclasspath to " + _interpreterJVM + ": " + path);
+      _interpreterJVM().addClassPath(path);
     }
     catch (RemoteException re) {
-      //DrJava.consoleOut().println("EXCEPTION in addClassPath:\n" + re);
-      //re.printStackTrace();
       _threwException(re);
     }
   }
 
   public void setPackageScope(String packageName) {
+    // silently fail if diabled. see killInterpreter docs for details.
+    if (! _enabled) return;
+
     ensureInterpreterConnected();
 
     try {
-      _interpreterJVM.setPackageScope(packageName);
+      _interpreterJVM().setPackageScope(packageName);
     }
     catch (RemoteException re) {
       _threwException(re);
@@ -224,18 +180,17 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
   }
 
   public void reset() {
+    // silently fail if diabled. see killInterpreter docs for details.
+    if (! _enabled) return;
+
     ensureInterpreterConnected();
 
     try {
-      _interpreterJVM.reset();
+      _interpreterJVM().reset();
     }
     catch (RemoteException re) {
       _threwException(re);
     }
-  }
-
-  public String getIdentifier() {
-    return _identifier;
   }
 
   public void systemErrPrint(String s) throws RemoteException {
@@ -245,361 +200,6 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
   public void systemOutPrint(String s) throws RemoteException {
     _model.replSystemOutPrint(s);
   }
-
-  /**
-   * Registers the interpreter JVM for later callbacks.
-   *
-   * @param remote The interpreter JVM controller.
-   */
-  public synchronized void registerInterpreterJVM(InterpreterJVMRemoteI remote)
-    throws RemoteException
-  {
-    if (_interpreterJVM != null) { 
-      try {
-        //DrJava.consoleOut().println("killing jvm! " + i);
-        remote.exitJVM();
-      }
-      catch (RemoteException re) {
-      }
-      return;
-    }
-    _timerThread.disable();
-    _interpreterJVM = remote;
-    // _model may be null if we're running a test on this
-    if (_model != null) {
-      _model.interactionsReady();
-    }
-    _startupInProgress = false;
-    // wake up anyone waiting for an interpreter!
-    notify();
-  }
-
-  /**
-   * Signifies that the most recent interpretation completed successfully,
-   * returning no value.
-   */
-  public void returnedVoid() throws RemoteException {
-    _model.replReturnedVoid();
-  }
-
-  /**
-   * Signifies that the most recent interpretation completed successfully,
-   * returning a value.
-   *
-   * @param result The .toString-ed version of the value that was returned
-   *               by the interpretation. We must return the String form
-   *               because returning the Object directly would require the
-   *               data type to be serializable.
-   */
-  public void returnedResult(String result) throws RemoteException {
-    _model.replReturnedResult(result);
-  }
-
-  /**
-   * Signifies that the most recent interpretation was ended 
-   * due to an exception being thrown.
-   *
-   * @param exceptionClass The name of the class of the thrown exception
-   * @param message The exception's message
-   * @param stackTrace The stack trace of the exception
-   */
-  public void threwException(String exceptionClass,
-                             String message,
-                             String stackTrace) throws RemoteException
-  {
-    _model.replThrewException(exceptionClass, message, stackTrace);
-  }
-
-  public synchronized void killInterpreter() {
-    if ((_interpreterProcess != null) && (_interpreterJVM != null)) {
-      try {
-        //DrJava.consoleOut().println("killing jvm! " + i);
-        _interpreterJVM.exitJVM();
-      }
-      catch (RemoteException re) {
-        // couldn't ask it to quit nicely. be mean and kill
-        _interpreterProcess.destroy();
-      }
-      
-      _interpreterProcess = null;
-      _interpreterJVM = null;
-    }
-  }
-
-  /**
-   * Kills current interpreter JVM if any, then starts a new one.
-   * It turns out that before I added the {@link #_startupInProgress} guard,
-   * we were starting up two jvms in quick succession sometimes. This caused
-   * nasty problems (sometimes, it was a timing thing!) if the addClasspath
-   * issued after an abort went to the first JVM but then future
-   * interpretations went to the second JVM! So, we can make
-   * restartInterpreterJVM safe for duplicate calls by just not starting
-   * another if the previous one is in the process of starting up.
-   */
-  public synchronized void restartInterpreterJVM() {
-    if (_startupInProgress) {
-      return;
-    }
-    _startupInProgress = true;
-    
-    // _model may be null if we're running a test on this
-    if (_model != null)
-      _model.interactionsResetting();
-    
-    if (_restartThread != null) {
-      //DrJava.consoleOut().println("Disabling _restartThread");
-      _restartThread.disable();
-    }
-    
-    killInterpreter();
-    
-    int debugPort = getDebugPort();
-    
-    String className = InterpreterJVM.class.getName();
-    String[] args = new String[] { getIdentifier() };
-    Vector<String> jvmArgs = new Vector<String>();
-    
-    if (allowAssertions()) {
-      jvmArgs.addElement("-ea");
-    }
-    
-    if (debugPort > -1) {
-      jvmArgs.addElement("-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=" + 
-                         debugPort);
-      jvmArgs.addElement("-Xdebug");
-      jvmArgs.addElement("-Xnoagent");
-      jvmArgs.addElement("-Djava.compiler=NONE");
-    }
-    
-    String[] jvmArgsArray = new String[jvmArgs.size()];
-    for (int i=0; i < jvmArgs.size(); i++) {
-      jvmArgsArray[i] = jvmArgs.elementAt(i);
-    }
-    
-    try {
-      //DrJava.consoleOut().println("In MainJVM: starting interpreter jvm");
-      _interpreterProcess = ExecJVM.
-        runJVMPropogateClassPath(className, args, jvmArgsArray);
-      
-      // Start a thread to wait for the interpreter to die and to fire
-      // off a new one (and notify model) when it happens
-      _restartThread = new RestartThread() {
-        public void run() {
-          try {
-            int status = _interpreterProcess.waitFor();
-            synchronized(MainJVM.this) {
-              if (_shouldReset) {
-                boolean currentlyStarting = _startupInProgress;
-                restartInterpreterJVM();
-                if (!currentlyStarting) {
-                  replCalledSystemExit(status);
-                }
-              }
-            }
-          }
-          catch (InterruptedException ie) {
-            throw new edu.rice.cs.util.UnexpectedException(ie);
-          }
-        }
-      };
-      // If RESET_TIME_OUT seconds pass before the new InterpreterJVM registers, try restarting the JVM
-      _timerThread = new RestartThread() {
-        public void run() {
-          _restartTimer = new Timer(RESET_TIME_OUT*1000, new ActionListener() {
-            int count = 0;
-            public void actionPerformed(ActionEvent e) {
-              synchronized(MainJVM.this) {
-                if (!_shouldReset) {
-                  _stopTimerThread();
-                  return;
-                }
-                if (count < 2) {
-                  _model.printDebugMessage("Could not connect to Interpreter JVM, trying again...");
-                  restartInterpreterJVM();
-                  count++;
-                  return;
-                }
-                _model.printDebugMessage("Unable to connect to Interpreter JVM, so the Interactions Pane is unavailable.");
-                _stopTimerThread();
-              }
-            }
-          });               
-          _restartTimer.setRepeats(true);
-          _restartTimer.start();   
-        }
-      };
-      _restartThread.start();
-      _timerThread.start();
-    }
-    catch (IOException ioe) {
-      _threwException(ioe);
-    }
-  }
-  
-  private void _stopTimerThread() {
-    _restartTimer.stop();
-  }
-  /**
-   * Returns the debug port to use, as specified by the model.
-   * Returns -1 if no usable port could be found.
-   */
-  protected int getDebugPort() {
-    int port = -1;
-    try {
-      port = _model.getDebugPort();
-    }
-    catch (IOException ioe) {
-      // Can't find port; don't use debugger
-    }
-    return port;
-  }
-  
-  /**
-   * Return whether to allow assertions in the InterpreterJVM.
-   */
-  protected boolean allowAssertions() {
-    Boolean allow = DrJava.getConfig().getSetting(OptionConstants.JAVAC_ALLOW_ASSERT);
-    String version = System.getProperty("java.version");
-    return ((allow.booleanValue()) && (version != null) &&
-        ("1.4.0".compareTo(version) <= 0));
-  }
-  
-  /**
-   * Action to take if the Repl tries to exit.
-   * @param status Exit code from the interpreter JVM
-   */
-  protected void replCalledSystemExit(int status) {
-    _model.replCalledSystemExit(status);
-  }
-
-  
-  /**
-   * Lets us know whether or not we are in the process of a clean reset.
-   * If we are, the message explaining that the JVM was exited should not
-   * be displayed.  For some reason, this needs to be set from outside this
-   * class, rather than simply setting the field in restartInteractionsJVM.
-   * (Timing issues, maybe?)
-   * @param b whether we are in the process of resetting
-   *
-  public synchronized void setIsResetting(boolean b) { 
-    //DrJava.consoleOut().println("setIsResestting: resetInProgress: " + b);
-    _resetInProgress = b;
-  }*/
-  
-  /**
-   * Returns whether we are in the process of cleanly resetting the
-   * interactions JVM.
-   * @see #setIsResetting
-   *
-  private synchronized boolean _isResetting() {
-    //DrJava.consoleOut().println("isResetting: resetInProgress: " + _resetInProgress);
-    return _resetInProgress;
-  }*/
-  
-  public void checkStillAlive() throws RemoteException {
-    // do nothing.
-  }
-
-  private void _threwException(Throwable t) {
-    StringWriter writer = new StringWriter();
-    t.printStackTrace(new PrintWriter(writer));
-
-    try {
-      threwException(t.getClass().getName(), t.getMessage(), writer.toString());
-    }
-    catch (RemoteException re) {
-      // impossible, we're not calling it remotely!
-      throw new edu.rice.cs.util.UnexpectedException(re);
-    }
-  }
-
-  /**
-   * If an interpreter has not registered itself, this method will
-   * block until one does.
-   */
-  public void ensureInterpreterConnected() {
-    try {
-      synchronized(this) {
-        while (_interpreterJVM == null) {
-          wait();
-        }
-      }
-    }
-    catch (InterruptedException ie) {
-      throw new edu.rice.cs.util.UnexpectedException(ie);
-    }
-  }
-  
-  /**
-   * Returns a unique port to be safely used for RMI.
-   */
-  private static int _generateSafeRMIPort() {
-    // Get a safe port to use.
-    //  If each copy of DrJava used the same port (or the same port as
-    //  another program's rmiregistry), then when the previous copy/program
-    //  quit, we would lose our registry and not be able to reset!
-    try {
-      ServerSocket socket = new ServerSocket(0);
-      int rmiPort = socket.getLocalPort();
-      socket.close();
-      return rmiPort;
-    }
-    catch (IOException ioe) {
-      return Registry.REGISTRY_PORT;
-    }
-  }
-  
-  /**
-   * Creates a new RMI registry for this copy on the current rmi port,
-   * if it is not already running.
-   */
-  private synchronized void _startNameServiceIfNeeded() {
-    Exception exception = null;
-    boolean success = false;
-    for (int i=0; i < 2; i++) {
-      try {
-        // See if our registry already exists
-        Naming.list("//127.0.0.1:" + _rmiPort);
-        //DrJava.consoleOut().println("registry exists");
-        success = true;
-        break;
-      }
-      catch (Exception e) {
-        // Didn't already exist, so try to create it
-        //e.printStackTrace(DrJava.consoleOut());
-        try {
-          //DrJava.consoleOut().println("trying to create registry on port: " + _rmiPort);
-          LocateRegistry.createRegistry(_rmiPort);
-        }
-        catch (Exception e2) {
-          // Failed to create.  Try again on another port
-          _rmiPort = _generateSafeRMIPort();
-          exception = e2;
-        }
-      }
-    }
-    if (!success) {
-      throw new UnexpectedException(new RuntimeException(
-          "Could not find a usable RMI Port: " + exception.toString()));
-    }
-  }
-
-  /**
-   * Returns a unique identifier to name this Main JVM.
-   */
-  private String _createIdentifier() {
-    try {
-      File file = File.createTempFile("drjava", "");
-      file.deleteOnExit();
-      //DrJava.consoleOut().println("DEBUG: temp file name: " + file.getAbsolutePath());
-      String id = "//127.0.0.1:" + _rmiPort + "/" + file.getName();
-      //DrJava.consoleOut().println("Identifier: " + id);
-      return id;
-    }
-    catch (IOException ioe) { 
-      throw new edu.rice.cs.util.UnexpectedException(ioe);
-    }
-  }
   
   /**
    * Runs a JUnit Test class in the Interpreter JVM.
@@ -607,10 +207,13 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
    * @param fileName Name of the file for the TestCase class
    */
   public void runTestSuite(String className, String fileName) {
+    // silently fail if diabled. see killInterpreter docs for details.
+    if (! _enabled) return;
+
     ensureInterpreterConnected();
     
     try {
-      _interpreterJVM.runTestSuite(className, fileName);
+      _interpreterJVM().runTestSuite(className, fileName);
     }
     catch (RemoteException re) {
       _threwException(re);
@@ -659,14 +262,230 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
   public void testSuiteEnded(JUnitError[] errors) throws RemoteException {
     _model.testSuiteEnded(errors);
   }
-  
-  
-  
-  private class RestartThread extends Thread {
-    protected boolean _shouldReset = true;
-    
-    public void disable() {
-      _shouldReset = false;
+
+  /**
+   * Kills the running interpreter JVM, and optionally restarts it
+   *
+   * @param shouldRestart if true, the interpreter will be restarted
+   * automatically.
+   * Note: If the interpreter is not restarted, all of the methods that
+   * delgate to the interpreter will silently fail!
+   * Therefore, killing without restarting should be used with extreme care
+   * and only in carefully controlled test cases or when DrJava is quitting
+   * anyway.
+   */
+  public void killInterpreter(boolean shouldRestart) {
+    try {
+      _enabled = shouldRestart;
+      if (shouldRestart) {
+        _cleanlyRestarting = true;
+      }
+      quitSlave();
+    }
+    catch (RemoteException re) {
+      _threwException(re);
     }
   }
+
+  /**
+   * Starts the interpreter if it's not running already.
+   */
+  public void startInterpreterJVM() {
+    if (isStartupInProgress() || isInterpreterRunning()) {
+      return;
+    }
+
+    // Pass assertion and debug port information as JVM arguments
+    Vector<String> jvmArgs = new Vector<String>();
+    if (allowAssertions()) {
+      jvmArgs.addElement("-ea");
+    }
+    int debugPort = getDebugPort();
+    if (debugPort > -1) {
+      jvmArgs.addElement("-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=" + 
+                         debugPort);
+      jvmArgs.addElement("-Xdebug");
+      jvmArgs.addElement("-Xnoagent");
+      jvmArgs.addElement("-Djava.compiler=NONE");
+    }
+    String[] jvmArgsArray = new String[jvmArgs.size()];
+    for (int i=0; i < jvmArgs.size(); i++) {
+      jvmArgsArray[i] = jvmArgs.elementAt(i);
+    }
+    
+    // Invoke the Interpreter JVM
+    try {
+      invokeSlave(jvmArgsArray);
+    }
+    catch (RemoteException re) {
+      _threwException(re);
+    }
+    catch (IOException ioe) {
+      _threwException(ioe);
+    }
+  }
+
+  protected void handleSlaveQuit(int status) {
+    // Only restart the slave if _enabled is true
+    if (_enabled) {
+      // _model may be null if we're running a test on this
+      if (_model != null) {
+        _model.interactionsResetting();
+      }
+
+      startInterpreterJVM();
+    }
+
+    if (!_cleanlyRestarting && (_model != null)) {
+      _model.replCalledSystemExit(status);
+    }
+    _cleanlyRestarting = false;
+  }
+
+  public boolean isStartupInProgress() {
+    return super.isStartupInProgress();
+  }
+
+  /**
+   * Called when the Interpreter JVM connects to us after being started.
+   */
+  protected void handleSlaveConnected() {
+    // we reset the enabled flag since, unless told otherwise via
+    // killInterpreter(false), we want to automatically respawn
+    _enabled = true;
+    _cleanlyRestarting = false;
+    
+    // _model may be null if we're running a test on this
+    if (_model != null) {
+      _model.interactionsReady();
+    }
+
+    _log.log("thread in connected: " + Thread.currentThread());
+
+    synchronized(this) {
+      // notify so that if we were waiting (in ensureConnected)
+      // this will wake em up
+      notify();
+    }
+  }
+  
+  /**
+   * Returns the visitor to handle an InterpretResult.
+   */
+  protected InterpretResultVisitor<Object> getResultHandler() {
+    return _handler;
+  }
+  
+  /**
+   * Returns the debug port to use, as specified by the model.
+   * Returns -1 if no usable port could be found.
+   */
+  protected int getDebugPort() {
+    int port = -1;
+    try {
+      if (_model != null) {
+        port = _model.getDebugPort();
+      }
+    }
+    catch (IOException ioe) {
+      // Can't find port; don't use debugger
+    }
+    return port;
+  }
+  
+  /**
+   * Return whether to allow assertions in the InterpreterJVM.
+   */
+  protected boolean allowAssertions() {
+    Boolean allow = DrJava.getConfig().getSetting(OptionConstants.JAVAC_ALLOW_ASSERT);
+    String version = System.getProperty("java.version");
+    return ((allow.booleanValue()) && (version != null) &&
+        ("1.4.0".compareTo(version) <= 0));
+  }
+
+  /**
+   * Lets the model know if any exceptions occur while communicating with
+   * the Interpreter JVM.
+   */
+  private void _threwException(Throwable t) {
+    StringWriter writer = new StringWriter();
+    t.printStackTrace(new PrintWriter(writer));
+
+    // model may be null if we're running a test
+    if (_model != null) {
+      _model.replThrewException(t.getClass().getName(),
+                                t.getMessage(),
+                                writer.toString());
+    }
+  }
+
+  /**
+   * If an interpreter has not registered itself, this method will
+   * block until one does.
+   */
+  public void ensureInterpreterConnected() {
+    try {
+      synchronized(this) {
+        // Now we silently fail if interpreter is disabled instead of
+        // throwing an exception. This situation occurs only in test cases
+        // and when DrJava is about to quit.
+        //if (! _enabled) {
+          //throw new IllegalStateException("Interpreter is disabled");
+        //}
+
+        while (_interpreterJVM() == null) {
+          wait();
+        }
+      }
+    }
+    catch (InterruptedException ie) {
+      throw new edu.rice.cs.util.UnexpectedException(ie);
+    }
+  }
+
+  /**
+   * Accessor for the remote interface to the Interpreter JVM.
+   */
+  private InterpreterJVMRemoteI _interpreterJVM() {
+    return (InterpreterJVMRemoteI) getSlave();
+  }
+
+  /**
+   * Peforms the appropriate action to return any type of result
+   * from a call to interpret back to the GlobalModel.
+   */
+  private class ResultHandler implements InterpretResultVisitor<Object> {
+    /**
+     * Lets the model know that void was returned.
+     * @returns null
+     */
+    public Object forVoidResult(VoidResult that) {
+      _model.replReturnedVoid();
+      return null;
+    }
+
+    /**
+     * Returns a value result (as a String) back to the model.
+     * @returns null
+     */
+    public Object forValueResult(ValueResult that) {
+      String result = that.getValueStr();
+      _log.log("return called: " + result);
+      _model.replReturnedResult(result);
+      _log.log("return call over: " + result);
+      return null;
+    }
+
+    /**
+     * Returns an exception back to the model.
+     * @returns null
+     */
+    public Object forExceptionResult(ExceptionResult that) {
+      _model.replThrewException(that.getExceptionClass(),
+                                that.getExceptionMessage(),
+                                that.getStackTrace());
+      return null;
+    }
+  }
+
 }

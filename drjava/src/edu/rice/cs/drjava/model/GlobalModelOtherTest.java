@@ -201,10 +201,10 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     listener.assertInteractionsResettingCount(1);
     listener.assertInteractionsResetCount(1);
     listener.assertInteractionsExitedCount(0);
-    _model.removeListener(listener);
 
     // now make sure it still works!
     assertEquals("5", interpret("5"));
+    _model.removeListener(listener);
 
     // make sure we can still see class foo
     final String afterAbort = interpret("DrJavaTestFoo.class.getName()");
@@ -220,7 +220,12 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     //System.err.println("Entering testResetConsole");
     TestListener listener = new TestListener() {
       public void interactionStarted() {}
-      public void interactionEnded() {}
+      public void interactionEnded() {
+        synchronized(this) {
+          interactionEndCount++;
+          this.notify();
+        }
+      }
 
       public void consoleReset() {
         consoleResetCount++;
@@ -236,8 +241,12 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
 
     listener.assertConsoleResetCount(1);
 
-    interpretIgnoreResult("System.out.print(\"a\");");
+    synchronized(listener) {
+      interpretIgnoreResult("System.out.print(\"a\");");
+      listener.wait();  // notified on interactionEnded
+    }
 
+    /*
     // alas, there's no very good way to know when it's done
     // so we just wait some time hoping the println will have happened
     int i;
@@ -248,8 +257,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
 
       Thread.currentThread().sleep(100);
     }
-
     //System.err.println("wait i=" + i);
+    */
 
     assertEquals("Length of console text",
                  1,
@@ -278,12 +287,15 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
     _model.addListener(listener);
     synchronized(listener) {
+      //System.out.println("doc.startCompile");
       doc.startCompile();
       if (_model.getNumErrors() > 0) {
         fail("compile failed: " + doc.getCompilerErrorModel());
       }
+      //System.out.println("listener.wait");
       listener.wait();
     }
+    //System.out.println("listener.checkCompileOccurred");
     listener.checkCompileOccurred();
     assertCompileErrorsPresent(false);
     _model.removeListener(listener);
@@ -305,10 +317,9 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     File file1 = new File(dir1, "TestFile1.java");
     _doCompile(doc1, file1);
 
-    String result = interpret("new DrJavaTestFoo().getClass().getName()");
     assertEquals("interactions result",
                  "\"DrJavaTestFoo\"",
-                 result);
+                 interpret("new DrJavaTestFoo().getClass().getName()"));
     
     // Add directory 1 to extra classpath and close doc1
     Vector<File> cp = new Vector<File>();
@@ -324,16 +335,14 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     _doCompile(doc2, file2);
     
     // Ensure that Baz can use the Foo class from extra classpath
-    result = interpret("new DrJavaTestBaz().getClass().getName()");
     assertEquals("interactions result",
                  "\"DrJavaTestBaz\"",
-                 result);
+                 interpret("new DrJavaTestBaz().getClass().getName()"));
     
     // Also ensure that Foo can be used directly
-    result = interpret("new DrJavaTestFoo().getClass().getName()");
     assertEquals("interactions result",
                  "\"DrJavaTestFoo\"",
-                 result);
+                 interpret("new DrJavaTestFoo().getClass().getName()"));
   }
 
   /**
@@ -345,16 +354,15 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
   {
     final String text_before = "class DrJavaTestFoo { public int m() { return ";
     final String text_after = "; } }";
-    final int num_iterations = 5;
+    final int num_iterations = 3;
     File file;
     OpenDefinitionsDocument doc;
-
 
     for (int i = 0; i < num_iterations; i++) {
       doc = setupDocument(text_before + i + text_after);
       file = tempFile(i);
       _doCompile(doc, file);
-
+      
       assertEquals("interactions result, i=" + i,
           String.valueOf(i),
           interpret("new DrJavaTestFoo().m()"));
@@ -375,7 +383,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     doc = setupDocument(interface_text);
     _doCompile(doc, file);
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 3; i++) {
       String s = "new I() { public int getValue() { return " + i + "; } }.getValue()";
 
       assertEquals("interactions result, i=" + i,

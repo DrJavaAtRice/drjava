@@ -129,7 +129,7 @@ public class CommandLineTest extends TestCase {
   }
 
   public void setUp() {
-    _mf = new MainFrame(Registry.REGISTRY_PORT);
+    _mf = new MainFrame();
   }
   
   /**

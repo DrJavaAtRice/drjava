@@ -47,6 +47,7 @@ import javax.swing.text.*;
 import javax.swing.border.EmptyBorder;
 import java.beans.*;
 
+import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;

@@ -174,7 +174,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   /**
    * Compiles a new file with the given text.
    */
-  protected OpenDefinitionsDocument _doCompile(String text, File file)
+  protected synchronized OpenDefinitionsDocument _doCompile(String text, File file)
     throws IOException, BadLocationException, InterruptedException
   {
     OpenDefinitionsDocument doc = setupDocument(text);
@@ -300,12 +300,20 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     assertInteractionsContains("Bar Line 1");
     assertInteractionsDoesNotContain("Bar Line 2");
     
-    // Resume until finished
-    synchronized(_notifierLock) {
-      _debugger.resume();
-      _waitForNotifies(1);  // threadDied
-      _notifierLock.wait();
+    // Resume until finished, waiting for interpret call to end
+    InterpretListener interpretListener = new InterpretListener();
+    _model.addListener(interpretListener);
+    synchronized(interpretListener) {
+      synchronized(_notifierLock) {
+        _debugger.resume();
+        interpretListener.wait();  // wait for interactionEnded
+        _waitForNotifies(1);  // threadDied
+        _notifierLock.wait();
+      }
     }
+    interpretListener.assertInteractionEndCount(1);
+    _model.removeListener(interpretListener);
+    
     if (printMessages) System.out.println("----After second resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(2);  //fires (no waiting)
     debugListener.assertCurrThreadDiedCount(1);  //fires
@@ -318,13 +326,14 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     _model.closeFile(doc);
     debugListener.assertBreakpointRemovedCount(2);  //fires twice (no waiting)
       
-    // Remove listener at end
+    // Shutdown the debugger
     if (printMessages) System.out.println("Shutting down...");
     synchronized(_notifierLock) {
       _debugger.shutdown();
       _waitForNotifies(1);  // shutdown
       _notifierLock.wait();
     }
+    
     debugListener.assertDebuggerShutdownCount(1);  //fires
     if (printMessages) System.out.println("Shut down.");
     _debugger.removeListener(debugListener);
@@ -439,22 +448,31 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     assertInteractionsContains("Foo Line 3");
     
     
-    // Step again to finish
-    synchronized(_notifierLock){
-      _debugger.step(Debugger.STEP_OVER);
-      _waitForNotifies(1);  // threadDied
-      _notifierLock.wait();
+    // Step again to finish, waiting for interpret call to end
+    InterpretListener interpretListener = new InterpretListener();
+    _model.addListener(interpretListener);
+    synchronized(interpretListener) {
+      synchronized(_notifierLock){
+        _debugger.step(Debugger.STEP_OVER);
+        interpretListener.wait();  // wait for interactionEnded
+        _waitForNotifies(1);  // threadDied
+        _notifierLock.wait();
+      }
     }
+    interpretListener.assertInteractionEndCount(1);
+    _model.removeListener(interpretListener);
+    
     debugListener.assertStepRequestedCount(6);  // fires (don't wait)
     debugListener.assertCurrThreadDiedCount(1);
 
-      // Remove listener at end
+    // Shutdown the debugger
     if (printMessages) System.out.println("Shutting down...");
     synchronized(_notifierLock) {
       _debugger.shutdown();
       _waitForNotifies(1);  // shutdown
       _notifierLock.wait();
     }
+  
     debugListener.assertBreakpointRemovedCount(1);  //fires once (no waiting)
     debugListener.assertDebuggerShutdownCount(1);  //fires
     if (printMessages) System.out.println("Shut down.");
@@ -464,7 +482,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   /**
    * Tests that stepping out of a method behaves correctly.
    */
-  public void testStepOut() 
+  public synchronized void testStepOut() 
     throws DebugException, BadLocationException, IOException, InterruptedException
   {
     if (printMessages)  System.out.println("----testStepOut----");
@@ -535,13 +553,21 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     assertInteractionsContains("Bar Line 2");
     assertInteractionsDoesNotContain("Foo Line 3");
     
-    //Remove listener at end
+    // Shutdown the debugger and listen for the interpret call to end
     if (printMessages) System.out.println("Shutting down...");
-    synchronized(_notifierLock) {
-      _debugger.shutdown();
-      _waitForNotifies(2);  // threadDied, shutdown
-      _notifierLock.wait();
+    InterpretListener interpretListener = new InterpretListener();
+    _model.addListener(interpretListener);
+    synchronized(interpretListener) {
+      synchronized(_notifierLock) {
+        _debugger.shutdown();
+        interpretListener.wait();  // wait for interactionEnded
+        _waitForNotifies(2);  // threadDied, shutdown
+        _notifierLock.wait();
+      }
     }
+    interpretListener.assertInteractionEndCount(1);
+    _model.removeListener(interpretListener);
+
     debugListener.assertCurrThreadDiedCount(1);  // fires
     debugListener.assertBreakpointRemovedCount(1);  // fires (don't wait)
     debugListener.assertDebuggerShutdownCount(1);  // fires
@@ -552,7 +578,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   /**
    * Tests that stepping works in a public class with a package
    */
-  public void testStepOverWithPackage() 
+  public synchronized void testStepOverWithPackage() 
     throws DebugException, BadLocationException, IOException, InterruptedException
   {
     if (printMessages) System.out.println("----testStepOverWithPackage----");
@@ -563,7 +589,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     aDir.mkdir();
     File file = new File(aDir, "DrJavaDebugClassWithPackage.java");
     OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS_WITH_PACKAGE, file);
-   
+    
     _debugger.addListener(debugListener); 
     // Start debugger
     synchronized(_notifierLock) {
@@ -625,12 +651,20 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     debugListener.assertBreakpointReachedCount(1);
     assertInteractionsContains("foo line 2");
     
-    // Resume until finished
-    synchronized(_notifierLock) {
-      _debugger.resume();
-      _waitForNotifies(1);  // threadDied
-      _notifierLock.wait();
+    // Resume until finished, waiting for interpret call to finish
+    InterpretListener interpretListener = new InterpretListener();
+    _model.addListener(interpretListener);
+    synchronized(interpretListener) {
+      synchronized(_notifierLock) {
+        _debugger.resume();
+        interpretListener.wait();  // wait for interactionEnded
+        _waitForNotifies(1);  // threadDied
+        _notifierLock.wait();
+      }
     }
+    interpretListener.assertInteractionEndCount(1);
+    _model.removeListener(interpretListener);
+
     if (printMessages) System.out.println("----After resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(3);  //fires (no waiting)
     debugListener.assertCurrThreadDiedCount(1);  //fires
@@ -642,13 +676,14 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     _model.closeFile(doc);
     debugListener.assertBreakpointRemovedCount(1);  //fires (no waiting)
       
-    // Remove listener at end
+    // Shutdown the debugger
     if (printMessages) System.out.println("Shutting down...");
     synchronized(_notifierLock) {
       _debugger.shutdown();
       _waitForNotifies(1);  // shutdown
       _notifierLock.wait();
     }
+    
     debugListener.assertDebuggerShutdownCount(1);  //fires
     if (printMessages) System.out.println("Shut down.");
     _debugger.removeListener(debugListener);
@@ -730,13 +765,21 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     debugListener.assertThreadLocationUpdatedCount(3);  // fires
     
     
-    //Remove listener at end
+    // Shutdown the debugger and listen for the interpret call to end
     if (printMessages) System.out.println("Shutting down...");
-    synchronized(_notifierLock) {
-      _debugger.shutdown();
-      _waitForNotifies(2);  // threadDied, shutdown
-      _notifierLock.wait();
+    InterpretListener interpretListener = new InterpretListener();
+    _model.addListener(interpretListener);
+    synchronized(interpretListener) {
+      synchronized(_notifierLock) {
+        _debugger.shutdown();
+        interpretListener.wait();  // wait for interactionEnded
+        _waitForNotifies(2);  // threadDied, shutdown
+        _notifierLock.wait();
+      }
     }
+    interpretListener.assertInteractionEndCount(1);
+    _model.removeListener(interpretListener);
+    
     debugListener.assertCurrThreadDiedCount(1);  // fires
     debugListener.assertDebuggerShutdownCount(1);  // fires
     if (printMessages) System.out.println("Shut down.");
@@ -744,7 +787,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   }
   
   /**
-   * Tests that breakpoints behave correctly.
+   * Tests that breakpoints behave correctly in non-public classes.
    */
   public synchronized void testBreakpointsAndStepsInNonPublicClasses() 
     throws DebugException, BadLocationException, IOException, InterruptedException
@@ -822,12 +865,20 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     assertInteractionsContains("Bar Line 1");
     assertInteractionsDoesNotContain("Bar Line 2");
     
-    // Resume until finished
-    synchronized(_notifierLock) {
-      _debugger.resume();
-      _waitForNotifies(1);  // threadDied
-      _notifierLock.wait();
+    // Resume until finished, waiting for call to interpret to end
+    InterpretListener interpretListener = new InterpretListener();
+    _model.addListener(interpretListener);
+    synchronized(interpretListener) {
+      synchronized(_notifierLock) {
+        _debugger.resume();
+        interpretListener.wait();  // wait for interactionEnded
+        _waitForNotifies(1);  // threadDied
+        _notifierLock.wait();
+      }
     }
+    interpretListener.assertInteractionEndCount(1);
+    _model.removeListener(interpretListener);
+    
     if (printMessages) System.out.println("----After second resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(3);  //fires (no waiting)
     debugListener.assertCurrThreadDiedCount(1);  //fires
@@ -840,7 +891,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     _model.closeFile(doc);
     debugListener.assertBreakpointRemovedCount(2);  //fires twice (no waiting)
       
-    // Remove listener at end
+    // Shutdown the debugger
     if (printMessages) System.out.println("Shutting down...");
     synchronized(_notifierLock) {
       _debugger.shutdown();
@@ -859,9 +910,11 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   public void testGetPackageDir() {
     String class1 = "edu.rice.cs.drjava.model.MyTest";
     String class2 = "MyTest";
+    String sep = System.getProperty("file.separator");
     
     assertEquals("package dir with package",
-                 "edu/rice/cs/drjava/model/",
+                 "edu" + sep + "rice" + sep + "cs" + sep + 
+                 "drjava" + sep + "model" + sep,
                  _debugger.getPackageDir(class1));
     assertEquals("package dir without package",
                  "",
@@ -973,7 +1026,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   }
   
   /**
-   * Test Listener for all tests starting the debugger.
+   * DebugTestListener for all tests starting the debugger.
    */
   class DebugStartAndStopListener extends DebugTestListener {
     public void debuggerStarted() {
@@ -995,7 +1048,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   }
   
   /**
-   * Test Listener for all tests setting breakpoints.
+   * DebugTestListener for all tests setting breakpoints.
    */
   class BreakpointTestListener extends DebugStartAndStopListener {
     public void breakpointSet(Breakpoint bp) {
@@ -1049,7 +1102,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   }
   
   /**
-   * TestListener for all tests using the stepper.
+   * DebugTestListener for all tests using the stepper.
    */
   class StepTestListener extends BreakpointTestListener {
     public void stepRequested() {

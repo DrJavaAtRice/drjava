@@ -37,7 +37,7 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.ui;
+package edu.rice.cs.drjava.model;
 
 import javax.swing.text.*;
 import javax.swing.ListModel;
@@ -53,7 +53,6 @@ import edu.rice.cs.util.swing.FindReplaceMachine;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.Version;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
@@ -88,42 +87,6 @@ import edu.rice.cs.drjava.model.compiler.*;
  * @version $Id$
  */
 public class SingleDisplayModel extends DefaultGlobalModel {
-  /**
-  public static final String ABOUT_TEXT =
-    "DrJava " + Version.getBuildTimeString() + "\n" +
-    "Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)\n" +
-    "See http://drjava.sourceforge.net for more information on DrJava or " +
-    "to obtain the latest version of the program or its source code." +
-    "\n\n" +
-    "DrJava is free software; you can redistribute it and/or modify " +
-    "it under the terms of the GNU General Public License as published by " +
-    "the Free Software Foundation; either version 2 of the License, or " +
-    "(at your option) any later version." +
-    "\n\n" +
-    "DrJava is distributed in the hope that it will be useful, " +
-    "but WITHOUT ANY WARRANTY; without even the implied warranty of " +
-    "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the " +
-    "GNU General Public License for more details. " +
-    "\n\n" +
-    "You should have received a copy of the GNU General Public License " +
-    "along with this program; if not, write to the Free Software " +
-    "Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA " +
-    "or see http://www.gnu.org/licenses/gpl.html" +
-    "\n\n" +
-    "DrJava incorporates DynamicJava (available at http://koala.ilog.fr/djava)"+
-    ":\n" +
-    "DynamicJava - Copyright (c) 1999 Dyade\n" +
-    "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n" +
-    "The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n" +
-    "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL DYADE BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n" +
-    "Except as contained in this notice, the name of Dyade shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization from Dyade." +
-    "\n\n" +
-    "DrJava version: " + Version.getBuildTimeString() + "\n" +
-    "Configuration file: " + DrJava.getPropertiesFile() + "\n" +
-    "Properties: " + DrJava.getConfig() + "\n" +
-     "JVM: " + System.getProperty("java.vm.vendor") + " " +
-     System.getProperty("java.vm.version");
-  */
 
   /**
    * The active document pointer, which will never be null once
@@ -149,11 +112,9 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    *   <li>A new document is created to satisfy the invariant.
    *   <li>The first document in the list is set as the active document.
    * </ol>
-   * @param rmiPort The port on which to run the RMI registry,
-   * or -1 for a unique port.
    */
-  public SingleDisplayModel(int rmiPort) {
-    super(rmiPort);
+  public SingleDisplayModel() {
+    super();
     _init();
   }
 
@@ -250,13 +211,6 @@ public class SingleDisplayModel extends DefaultGlobalModel {
       setActiveDocument(index);
     }
   }
-
-  /**
-   * Returns the text to be displayed in the About box.
-   *
-  public String getAboutText() {
-    return ABOUT_TEXT;
-  }*/
 
 
   /**

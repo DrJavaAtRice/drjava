@@ -82,7 +82,7 @@ public class InteractionsPaneTest extends TestCase {
    * Setup method for each JUnit test case.
    */
   public void setUp() {
-    _model = new DefaultGlobalModel(Registry.REGISTRY_PORT);
+    _model = new DefaultGlobalModel();
     _interactions = (InteractionsDocument)_model.getInteractionsDocument();
     _pane = new InteractionsPane(_model);
     _pane.setCaretPosition(_model.getInteractionsFrozenPos());

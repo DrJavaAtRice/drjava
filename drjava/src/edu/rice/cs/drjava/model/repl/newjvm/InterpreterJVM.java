@@ -44,11 +44,12 @@ import java.io.*;
 import java.rmi.server.*;
 import java.rmi.*;
 import java.net.MalformedURLException;
-import edu.rice.cs.drjava.model.repl.*;
+
+import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
-import javax.swing.JOptionPane;
+import edu.rice.cs.drjava.model.repl.*;
 
 // For Windows focus fix
 import javax.swing.JDialog;
@@ -64,33 +65,25 @@ import java.awt.Toolkit;
  *
  * @version $Id$
  */
-public class InterpreterJVM extends UnicastRemoteObject
+public class InterpreterJVM extends AbstractSlaveJVM
                             implements InterpreterJVMRemoteI
 {
-  public static final int WAIT_UNTIL_QUIT_MS = 100;
-  public static final int CHECK_MAIN_VM_ALIVE_MINUTES = 1;
   public static final String EMPTY_TRACE_TEXT = "";
   //public static final String EMPTY_TRACE_TEXT = "  at (the interactions window)";
 
-  private final MainJVMRemoteI _mainJVM;
+  private MainJVMRemoteI _mainJVM;
   private JavaInterpreter _interpreter;
   private String _classpath;
   private JUnitTestManager _junitTestManager;
 
-  public InterpreterJVM(String url) throws RemoteException,
-                                           NotBoundException,
-                                           MalformedURLException
-  {
-    super();
-    _classpath = "";
-
-    //_dialog("Starting InterpreterJVM initialization");
+  public InterpreterJVM() {
     reset();
-    
     _junitTestManager = new JUnitTestManager(this);
+  }
 
-    _mainJVM = (MainJVMRemoteI) Naming.lookup(url);
-    _mainJVM.registerInterpreterJVM(this);
+  protected void handleStart(MasterRemote mainJVM) 
+  {
+    _mainJVM = (MainJVMRemoteI) mainJVM;
 
     // redirect stdout
     System.setOut(new PrintStream(new OutputStreamRedirector() {
@@ -115,42 +108,7 @@ public class InterpreterJVM extends UnicastRemoteObject
         }
       }
     }));
-
-    // Start a thread to periodically ping the main VM and quit when
-    // it's dead
-    // This is just in case the main vm dies without killing us
-    Thread thread = new Thread() {
-      private boolean _masterPossiblyDead = false;
-      
-      public void run() {
-        while (true) {
-          try {
-            Thread.currentThread().sleep(CHECK_MAIN_VM_ALIVE_MINUTES*60*1000);
-          }
-          catch (InterruptedException ie) {
-          }
-
-          try {
-            _mainJVM.checkStillAlive();
-            _masterPossiblyDead = false;
-          }
-          catch (RemoteException re) {
-            if (_masterPossiblyDead) {
-              // not there anymore, and we've given it a chance. quit!
-              System.exit(0);
-            }
-            else {
-              // Set a flag and give it another chance
-              //  (in case machine was merely asleep)
-              _masterPossiblyDead = true;
-            }
-          }
-        }
-      }
-    };
-
-    thread.start();
-
+    
     // On Windows, any frame or dialog opened from Interactions pane will
     // appear *behind* DrJava's frame, unless a previous frame or dialog 
     // is shown here.  Not sure what the difference is, but this hack 
@@ -163,11 +121,8 @@ public class InterpreterJVM extends UnicastRemoteObject
       d.show();
       d.hide();
     }
-
-    //JOptionPane.showMessageDialog(null, "InterpreterJVM initialized");
-
   }
-
+  
   /**
    * Returns if the current platform is Windows.
    */
@@ -178,63 +133,45 @@ public class InterpreterJVM extends UnicastRemoteObject
     }
     else {
       return false;
-    }  
+    }
   }
 
+  public InterpretResult interpret(final String s) {
+    try {
+      _dialog("to interp: " + s);
+      Object result = _interpreter.interpret(s);
+      _dialog("interp ret: " + result);
 
-  public void interpret(final String s) throws RemoteException {
-    // fire off thread to interpret to keep from blocking the caller
-    // it's all asynchronous anyhow ...
-    Thread thread = new Thread() {
-      public void run() {
-        try {
-          //_dialog("to interp: " + s);
-          Object result = _interpreter.interpret(s);
-          //_dialog("interp ret: " + result);
-          if (result == JavaInterpreter.NO_RESULT) {
-            _mainJVM.returnedVoid();
-          }
-          else {
-            // we use String.valueOf because it deals with result = null!
-            _mainJVM.returnedResult(String.valueOf(result));
-          }
-        }
-        catch (RemoteException re) {
-          // what do do? nothing I guess. main jvm is dead!
-        }
-        catch (ExceptionReturnedException e) {
-          Throwable t = e.getContainedException();
-
-          try {
-            //_dialog("before call to threwException");
-            _mainJVM.threwException(t.getClass().getName(),
-                                    t.getMessage(),
-                                    getStackTrace(t));
-          }
-          catch (RemoteException re) {
-            // what do do? nothing I guess. main jvm is dead!
-          }
-        }
-        catch (Throwable t) {
-          // A toString method might throw anything, so we need to be careful
-          //_dialog("thrown by toString: " + t);
-          try {
-            _mainJVM.threwException(t.getClass().getName(),
-                                    t.getMessage(),
-                                    getStackTrace(t));
-          }
-          catch (RemoteException re) {
-            // what do do? nothing I guess. main jvm is dead!
-          }
-        }
+      if (result == JavaInterpreter.NO_RESULT) {
+        return new VoidResult();
       }
-    };
+      else {
+        // we use String.valueOf because it deals with result = null!
+        _dialog("about to tell main result was " + result);
+        return new ValueResult(String.valueOf(result));
+      }
+    }
+    catch (ExceptionReturnedException e) {
+      Throwable t = e.getContainedException();
 
-    thread.start();
+      //_dialog("before call to threwException");
+      return new ExceptionResult(t.getClass().getName(),
+                                 t.getMessage(),
+                                 getStackTrace(t));
+    }
+    catch (Throwable t) {
+      // A user's toString method might throw anything, so we need to be careful
+      //_dialog("thrown by toString: " + t);
+      return new ExceptionResult(t.getClass().getName(),
+                                 t.getMessage(),
+                                 getStackTrace(t));
+    }
   }
 
+  private static final Log _log = new Log("IntJVM");
   private static void _dialog(String s) {
-    javax.swing.JOptionPane.showMessageDialog(null, s);
+    //javax.swing.JOptionPane.showMessageDialog(null, s);
+    _log.log(s);
   }
 
   /**
@@ -270,46 +207,26 @@ public class InterpreterJVM extends UnicastRemoteObject
       return "Unable to get stack trace";
     }
 
-    // OK, now we search back to front looking for the first thing that's not
-    // prefixed by edu.rice.cs.drjava or koala.dynamicjava.
-    // We remove the extraneous items.
-    while (! traceItems.isEmpty()) {
-      String last = (String) traceItems.getLast();
-      last = last.trim();
-
-      if (last.startsWith("at edu.rice.cs.drjava.") ||
-          last.startsWith("at koala.dynamicjava."))
+    // OK, now we crop off everything after the first "koala.dynamicjava." or
+    //  "edu.rice.cs.drjava.", if there is one.
+    
+    //  First, find the index of an occurrence.
+    int index = -1;
+    for (int i=0; i < traceItems.size(); i++) {
+      String item = (String) traceItems.get(i);
+      item = item.trim();
+      if (item.startsWith("at edu.rice.cs.drjava.") ||
+          item.startsWith("at koala.dynamicjava."))
       {
-        traceItems.removeLast();
-      }
-      else {
+        index = i;
         break;
       }
     }
-
-    // Now, check if the last item here is a java.lang.reflect. If so,
-    // get rid of it.
-    if (! traceItems.isEmpty()) {
-      String last = (String) traceItems.getLast();
-      last = last.trim();
-
-      if (last.startsWith("at java.lang.reflect.")) {
+    
+    // Now crop off the rest
+    if (index > -1) {
+      while (traceItems.size() > index) {
         traceItems.removeLast();
-      }
-    }
-
-    // sigh. on jdk 1.4 above the java.lang.reflect there
-    // are some sun.reflect entries. get rid of em
-    while (! traceItems.isEmpty()) {
-      String last = (String) traceItems.getLast();
-      last = last.trim();
-
-      if (last.startsWith("at sun.reflect."))
-      {
-        traceItems.removeLast();
-      }
-      else {
-        break;
       }
     }
 
@@ -318,6 +235,7 @@ public class InterpreterJVM extends UnicastRemoteObject
     if (traceItems.isEmpty()) {
       traceItems.add(EMPTY_TRACE_TEXT);
     }
+    
 
     // OK, now rebuild string
     StringBuffer buf = new StringBuffer();
@@ -337,27 +255,7 @@ public class InterpreterJVM extends UnicastRemoteObject
     return buf.toString();
   }
 
-  public void exitJVM() throws RemoteException {
-    // can't just exit in the middle of the rmi call -- it confuses the other
-    // side. so make a thread start and wait a moment to exit.
-    
-    Thread thread = new Thread() {
-      public void run() {
-        try {
-          Thread.currentThread().sleep(WAIT_UNTIL_QUIT_MS);
-        }
-        catch (InterruptedException ie) {
-          // who cares? time to exit anyway!
-        }
-
-        System.exit(-1);
-      }
-    };
-
-    thread.start();
-  }
-
-  public void addClassPath(String s) throws RemoteException {
+  public void addClassPath(String s) {
     //_dialog("add classpath: " + s);
     _interpreter.addClassPath(s);
     _classpath += s;
@@ -366,6 +264,10 @@ public class InterpreterJVM extends UnicastRemoteObject
   
   public String getClasspath() {
     return _classpath;
+  }
+
+  public void setPackageScope(String s) {
+    _interpreter.setPackageScope(s);
   }
   
   /**
@@ -441,15 +343,12 @@ public class InterpreterJVM extends UnicastRemoteObject
     }
     catch (RemoteException re) {
       // nothing to do
-    }    
+    }
   }
-  
-  public void setPackageScope(String s) throws RemoteException {
-    _interpreter.setPackageScope(s);
-  }
-  
-  public void reset() throws RemoteException {
+
+  public void reset() {
     _interpreter = new DynamicJavaAdapter();
+    _classpath = "";
     
     // do an interpretation to get the interpreter loaded fully
     try {
@@ -457,27 +356,6 @@ public class InterpreterJVM extends UnicastRemoteObject
     }
     catch (ExceptionReturnedException e) {
       throw new edu.rice.cs.util.UnexpectedException(e);
-    }
-  }
-
-
-  /**
-   * Main entry point for interpreter JVM.
-   *
-   * @param args Command-line arguments. #1 must be the URL to find the 
-   *             MainJVMRemoteI via RMI.
-   */
-  public static void main(String[] args) {
-    //javax.swing.JFrame frame = new javax.swing.JFrame("interpreter up");
-    //frame.show();
-
-    try {
-      InterpreterJVM jvm = new InterpreterJVM(args[0]);
-    }
-    catch (Throwable t) {
-      //javax.swing.JOptionPane.showMessageDialog(null, "Interpreter JVM error: " + t);
-      t.printStackTrace();
-      System.exit(-1);
     }
   }
 }

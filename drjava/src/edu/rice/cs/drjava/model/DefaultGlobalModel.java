@@ -310,18 +310,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * Constructs a new GlobalModel.
    */
   public DefaultGlobalModel() {
-    this(-1);
-  }
-  
-  /**
-   * Constructs a new GlobalModel, using the given port for the RMI registry.
-   * If port is -1, uses a unique port.
-   */
-  public DefaultGlobalModel(int rmiPort) {
     // Create the interpreter
     try {
       _waitingForFirstInterpreter = true;
-      _interpreterControl = new MainJVM(this, rmiPort);
+      _interpreterControl = new MainJVM(this);
       _resetInteractionsClasspath();
     }
     catch (java.rmi.RemoteException re) {
@@ -651,7 +643,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   public void quit() {
     if (closeAllFiles()) {
       // Kill the interpreter
-      _interpreterControl.killInterpreter();
+      _interpreterControl.killInterpreter(false);
 
       if (DrJava.getSecurityManager() != null) {
         DrJava.getSecurityManager().exitVM(0);
@@ -735,7 +727,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     if ((_debugger.isAvailable()) && (_debugger.isReady())){
       _debugger.shutdown();
     }
-    _interpreterControl.restartInterpreterJVM();
+    //_interpreterControl.restartInterpreterJVM();
+    _interpreterControl.killInterpreter(true);
     //_restoreInteractionsState();
     
     /* Old approach.  (Didn't kill leftover interactions threads)
@@ -1270,7 +1263,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
           // Only clear console/interactions if there were no errors
           if (_numErrors == 0) {
             resetConsole();
-            resetInteractions();
+            if (_resetAfterCompile) {
+              resetInteractions();
+            }
           }
         }
       }

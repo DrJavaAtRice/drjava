@@ -37,7 +37,7 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.ui;
+package edu.rice.cs.drjava.model;
 
 import junit.framework.*;
 
@@ -54,7 +54,6 @@ import javax.swing.ListModel;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;

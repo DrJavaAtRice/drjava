@@ -72,10 +72,15 @@ public abstract class GlobalModelTestCase extends TestCase {
    * us from having to re-invoke the interpreter every time!
    */
   protected static final DefaultGlobalModel _originalModel = 
-    new DefaultGlobalModel(Registry.REGISTRY_PORT);
+    new DefaultGlobalModel();
 
   protected DefaultGlobalModel _model;
   protected File _tempDir;
+  
+  /**
+   * Keep track of whether the test failed in another thread.
+   */
+  protected static boolean _testFailed;
 
   protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
   protected static final String BAR_TEXT = "class DrJavaTestBar {}";
@@ -124,6 +129,7 @@ public abstract class GlobalModelTestCase extends TestCase {
     createModel();
     String user = System.getProperty("user.name");
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+    _testFailed = false;
   }
 
   /**
@@ -133,6 +139,7 @@ public abstract class GlobalModelTestCase extends TestCase {
   protected void tearDown() throws IOException {
     boolean ret = FileOps.deleteDirectory(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);
+    if (_testFailed) fail("test failed in another thread");
   }
 
   /**
@@ -509,6 +516,19 @@ public abstract class GlobalModelTestCase extends TestCase {
       fileRevertedCount = 0;
       shouldRevertFileCount = 0;
     }
+    
+    /**
+     * This method prints the failure message to System.err and
+     * kills the JVM.  Just calling fail() doesn't always cause the
+     * test to fail, because the listener is often called from another
+     * thread.
+     */
+    protected void listenerFail(String s) {
+      System.err.println("TEST FAILED: " + s);
+      new AssertionFailedError(s).printStackTrace(System.err);
+      _testFailed = true;
+      fail(s);
+    }
 
     public void assertAbandonCount(int i) {
       assertEquals("number of times canAbandon fired", i, canAbandonCount);
@@ -620,98 +640,98 @@ public abstract class GlobalModelTestCase extends TestCase {
 
     
     public void newFileCreated(OpenDefinitionsDocument doc) {
-      fail("newFileCreated fired unexpectedly");
+      listenerFail("newFileCreated fired unexpectedly");
     }
 
     public void fileOpened(OpenDefinitionsDocument doc) {
-      fail("fileOpened fired unexpectedly");
+      listenerFail("fileOpened fired unexpectedly");
     }
 
     public void fileClosed(OpenDefinitionsDocument doc) {
-      fail("fileClosed fired unexpectedly");
+      listenerFail("fileClosed fired unexpectedly");
     }
 
     public void fileSaved(OpenDefinitionsDocument doc) {
-      fail("fileSaved fired unexpectedly");
+      listenerFail("fileSaved fired unexpectedly");
     }
 
     public void fileReverted(OpenDefinitionsDocument doc) {
-      fail("fileReverted fired unexpectedly");
+      listenerFail("fileReverted fired unexpectedly");
     }
 
     public void junitStarted(OpenDefinitionsDocument doc) {
-      fail("junitStarted fired unexpectedly");
+      listenerFail("junitStarted fired unexpectedly");
     }
 
     public void junitSuiteStarted(int numTests) {
-      fail("junitSuiteStarted fired unexpectedly");
+      listenerFail("junitSuiteStarted fired unexpectedly");
     }
   
     public void junitTestStarted(OpenDefinitionsDocument doc, String name) {
-      fail("junitTestStarted fired unexpectedly");
+      listenerFail("junitTestStarted fired unexpectedly");
     }
   
     public void junitTestEnded(OpenDefinitionsDocument doc, String name,
                                boolean wasSuccessful, boolean causedError) {
-      fail("junitTestEnded fired unexpectedly");
+      listenerFail("junitTestEnded fired unexpectedly");
     }
   
     public void junitEnded() {
-      fail("junitEnded fired unexpectedly");
+      listenerFail("junitEnded fired unexpectedly");
     }
 
     public void interactionStarted() {
-      fail("interactionStarted fired unexpectedly");
+      listenerFail("interactionStarted fired unexpectedly");
     }
 
     public void interactionEnded() {
-      fail("interactionEnded fired unexpectedly");
+      listenerFail("interactionEnded fired unexpectedly");
     }
     /*
     public void interactionCaretPositionChanged(int pos) {
-      fail("interactionCaretPosition fired unexpectedly");
+      listenerFail("interactionCaretPosition fired unexpectedly");
     }*/
 
     public void compileStarted() {
-      fail("compileStarted fired unexpectedly");
+      listenerFail("compileStarted fired unexpectedly");
     }
 
     public void compileEnded() {
-      fail("compileEnded fired unexpectedly");
+      listenerFail("compileEnded fired unexpectedly");
     }
 
     public void interactionsResetting() {
-      fail("interactionsResetting fired unexpectedly");
+      listenerFail("interactionsResetting fired unexpectedly");
     }
     
     public void interactionsReset() {
-      fail("interactionsReset fired unexpectedly");
+      listenerFail("interactionsReset fired unexpectedly");
     }
 
     public void interactionsExited(int status) {
-      fail("interactionsExited(" + status + ") fired unexpectedly");
+      listenerFail("interactionsExited(" + status + ") fired unexpectedly");
     }
 
     public void consoleReset() {
-      fail("consoleReset fired unexpectedly");
+      listenerFail("consoleReset fired unexpectedly");
     }
 
     public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
-      fail("saveAllBeforeProceeding fired unexpectedly");
+      listenerFail("saveAllBeforeProceeding fired unexpectedly");
     }
 
     public void nonTestCase() {
-      fail("nonTestCase fired unexpectedly");
+      listenerFail("nonTestCase fired unexpectedly");
     }
 
     public boolean canAbandonFile(OpenDefinitionsDocument doc) {
-      fail("canAbandonFile fired unexpectedly");
+      listenerFail("canAbandonFile fired unexpectedly");
 
       // this is actually unreachable but the compiler won't believe me. sigh.
       throw new RuntimeException();
     }
     public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
-      fail("shouldRevertfile fired unexpectedly");
+      listenerFail("shouldRevertfile fired unexpectedly");
 
       // this is actually unreachable but the compiler won't believe me. sigh.
       throw new RuntimeException();
@@ -812,6 +832,23 @@ public abstract class GlobalModelTestCase extends TestCase {
     public void checkCompileOccurred() {
       assertCompileEndCount(1);
       assertCompileStartCount(1);
+    }
+  }
+  
+  /**
+   * TestListener that listens for an interpretation to end, and
+   * then notifies anyone waiting on it.  (Necessary to prevent tests
+   * from overlapping.)
+   */
+  public static class InterpretListener extends TestListener {
+    public void interactionStarted() {
+      interactionStartCount++;
+    }
+    public void interactionEnded() {
+      synchronized(this) {
+        interactionEndCount++;
+        this.notify();
+      }
     }
   }
 }

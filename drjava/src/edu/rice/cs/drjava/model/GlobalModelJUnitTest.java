@@ -57,6 +57,8 @@ import edu.rice.cs.util.UnexpectedException;
  * @version $Id$
  */
 public class GlobalModelJUnitTest extends GlobalModelTestCase {
+  final boolean printMessages = false;
+  
   private static final String MONKEYTEST_PASS_TEXT =
     "import junit.framework.*; " + 
     "public class MonkeyTestPass extends TestCase { " +
@@ -125,6 +127,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    * Tests that a JUnit file with no errors is reported to have no errors.
    */
   public void testNoJUnitErrors() throws Exception {
+    if (printMessages) System.out.println("----testNoJUnitErrors-----");
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     doc.saveFile(new FileSelector(file));
@@ -150,6 +153,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    * Tests that a JUnit file with an error is reported to have an error.
    */
   public void testOneJUnitError() throws Exception {
+    if (printMessages) System.out.println("----testOneJUnitError-----");
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
     final File file = new File(_tempDir, "MonkeyTestFail.java");
     doc.saveFile(new FileSelector(file));
@@ -174,6 +178,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    * is run on a non-TestCase.
    */
   public void testNonTestCaseError() throws Exception {
+    if (printMessages) System.out.println("----testNonTestCaseError-----");
     final OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
     final File file = new File(_tempDir, "NonTestCase.java");
     doc.saveFile(new FileSelector(file));
@@ -206,6 +211,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    * is run on a non-public TestCase.
    */
   public void testResultOfNonPublicTestCase() throws Exception {
+    if (printMessages) System.out.println("----testResultOfNonPublicTestCase-----");
     final OpenDefinitionsDocument doc = setupDocument(NONPUBLIC_TEXT);
     final File file = new File(_tempDir, "NonPublic.java");
     doc.saveFile(new FileSelector(file));
@@ -237,6 +243,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
   }
   
   public void testDoNotRunJUnitIfFileHasBeenMoved() throws Exception {
+    if (printMessages) System.out.println("----testDoNotRunJUnitIfFileHasBeenMoved-----");
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     doc.saveFile(new FileSelector(file));
@@ -259,6 +266,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    * Tests a document that has no corresponding class file.
    */
   public void testNoClassFile() throws Exception {
+    if (printMessages) System.out.println("----testNoClassFile-----");
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     doc.saveFile(new FileSelector(file));
@@ -287,6 +295,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    * the Reset button.
    */
   public void testInfiniteLoop() throws Exception {
+    if (printMessages) System.out.println("----testInfiniteLoop-----");
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_INFINITE_TEXT);
     final File file = new File(_tempDir, "MonkeyTestInfinite.java");
     doc.saveFile(new FileSelector(file));
@@ -299,9 +308,15 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
       }
       
       public void junitSuiteStarted(int numTests) {
+        assertEquals("should run 1 test", 1, numTests);
         junitSuiteStartedCount++;
         // kill the infinite test once the tests have started
         _model.resetInteractions();
+      }
+      
+      public void junitTestStarted(OpenDefinitionsDocument doc, String name) {
+        assertEquals("running wrong test", "testInfinite", name);
+        junitTestStartedCount++;
       }
       
       public void junitEnded() {
@@ -347,6 +362,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
    * has it's contents replaced by a test that should fail, will pass all tests.
    */
   public void testUnsavedAndUnCompiledChanges() throws Exception {
+    if (printMessages) System.out.println("----testUnsavedAndUnCompiledChanges-----");
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     doc.saveFile(new FileSelector(file));
@@ -394,8 +410,8 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     public void junitTestStarted(OpenDefinitionsDocument doc, String name) {
       junitTestStartedCount++;
     }
-    public void junitTestEndedCount(OpenDefinitionsDocument doc, String name,
-                                    boolean wasSuccessful, boolean causedError) {
+    public void junitTestEnded(OpenDefinitionsDocument doc, String name,
+                               boolean wasSuccessful, boolean causedError) {
       junitTestEndedCount++;
       assertTrue("junitTestEndedCount should be same as junitTestStartedCount",
                  junitTestStartedCount == junitTestEndedCount);

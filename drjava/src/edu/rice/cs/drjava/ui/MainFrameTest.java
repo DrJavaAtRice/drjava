@@ -79,7 +79,7 @@ public class MainFrameTest extends TestCase {
    * Setup method for each JUnit test case.
    */
   public void setUp() {
-    _frame = new MainFrame(Registry.REGISTRY_PORT);
+    _frame = new MainFrame();
   }
   
   /**

@@ -35,62 +35,17 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import edu.rice.cs.util.newjvm.*;
-import edu.rice.cs.drjava.model.junit.JUnitError;
-
 /**
- * This interface specifies the methods that the Main JVM exposes
- * for the InterpreterJVM to call.
- *
+ * Interface for any visitor that handles InterpretResults.
+ * 
  * @version $Id$
  */
-public interface MainJVMRemoteI extends MasterRemote {
-  public void systemErrPrint(String s) throws RemoteException;
-  public void systemOutPrint(String s) throws RemoteException;
-  
-  /**
-   * Called when a call to interpret has completed.
-   * @param result The result of the interpretation
-   *
-  public void interpretResult(InterpretResult result) throws RemoteException;
-   */
-  
-  /**
-   * Called if JUnit is invoked on a non TestCase class.
-   */
-  public void nonTestCase() throws RemoteException;
-  
-  /**
-   * Called to indicate that a suite of tests has started running.
-   * @param numTests The number of tests in the suite to be run.
-   */
-  public void testSuiteStarted(int numTests) throws RemoteException;
-  
-  /**
-   * Called when a particular test is started.
-   * @param testName The name of the test being started.
-   */
-  public void testStarted(String testName) throws RemoteException;
-  
-  /**
-   * Called when a particular test has ended.
-   * @param testName The name of the test that has ended.
-   * @param wasSuccessful Whether the test passed or not.
-   * @param causedError If not successful, whether the test caused an error
-   *  or simply failed.
-   */
-  public void testEnded(String testName, boolean wasSuccessful, boolean causedError)
-    throws RemoteException;
-  
-  /**
-   * Called when a full suite of tests has finished running.
-   * @param errors The array of errors from all failed tests in the suite.
-   */
-  public void testSuiteEnded(JUnitError[] errors) throws RemoteException;
+public interface InterpretResultVisitor<T> {
+  public T forVoidResult(VoidResult that);
+  public T forValueResult(ValueResult that);
+  public T forExceptionResult(ExceptionResult that);
 }

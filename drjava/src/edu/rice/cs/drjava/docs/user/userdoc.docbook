@@ -164,7 +164,7 @@
 
     <formalpara>
       <title>Keyboard Shortcuts</title>
-      <para>Many actions in the Interactions Pane have keyboard shortcuts that improve the pane's usability.  Use the Up and Down arrow keys to scroll through a history of the previously entered commands, or <keycode>Ctrl+B</keycode> to clear the current command.</para>
+      <para>Many actions in the Interactions Pane have keyboard shortcuts that improve the pane's usability.  Use the Up and Down arrow keys to scroll through a history of the previously entered commands, or <keycode>Ctrl+B</keycode> to clear the current command.  You can also use <keycode>Shift+Enter</keycode> to insert newlines into statements in the Interactions Pane.</para>
     </formalpara>
 
     <formalpara>

@@ -66,7 +66,7 @@ public class RecentFileManagerTest extends TestCase {
   protected static final String BAR_TEXT = "class DrJavaTestBar {}";
   private RecentFileManager _rfm;
   private JMenu _menu;
-  private DefaultGlobalModel _model = new DefaultGlobalModel(Registry.REGISTRY_PORT);
+  private DefaultGlobalModel _model = new DefaultGlobalModel();
   protected File _tempDir;
   
   /**
