@@ -190,7 +190,7 @@
       -->
 
       <fileset dir="/home/javaplt/classes"
-               includes="koala/**" />
+               includes="gj/**,koala/**" />
     </jar>
   </target>
 
