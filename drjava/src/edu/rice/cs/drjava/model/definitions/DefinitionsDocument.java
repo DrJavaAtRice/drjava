@@ -405,13 +405,20 @@ public class DefinitionsDocument extends PlainDocument {
     _reduced.move(dist);
   }
   
-  /** return the current column of the cursor position */
+  /** 
+   * Return the current column of the cursor position.
+   * Uses a 1 based index.
+   */
   public int getCurrentCol() {
-    int dist = getLineStartPos( getCurrentLocation() );
-    return getCurrentLocation() - dist + 1;
+    int here = getCurrentLocation();
+    int startOfLine = getLineStartPos(here);
+    return here - startOfLine + 1;
   }
   
-  /** return the current line of the cursor position */
+  /**
+   * Return the current line of the cursor position.
+   * Uses a 1 based index.
+   */
   public int getCurrentLine() {
     int count=1;
     int _copyLocation = getCurrentLocation();

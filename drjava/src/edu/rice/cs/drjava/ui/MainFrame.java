@@ -89,6 +89,7 @@ public class MainFrame extends JFrame {
   private JPanel _statusBar;
   private JLabel _fileNameField;
   private JLabel _currLocationField;
+  private PositionListener _posListener;
   private JTabbedPane _tabbedPane;
   private JSplitPane _docSplitPane;
   private JList _docList;
@@ -381,8 +382,12 @@ public class MainFrame extends JFrame {
     //set up the hourglass cursor
     setGlassPane(new GlassPane());
     this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+    
+    // Set up listeners
     this.addWindowListener(_windowCloseListener);
     _model.addListener(new ModelListener());
+    // COMMENTED UNTIL COMPLETE
+    //_posListener = new PositionListener();
     _setUpTabs();
 
     // DefinitionsPane
@@ -1084,42 +1089,17 @@ public class MainFrame extends JFrame {
    * Inner class to handle the updating of current position within the
    * document.  Registered with the definitionspane.
    **/
-  private class PositionField implements MouseListener, KeyListener {
+  private class PositionListener implements CaretListener {
    
-    JLabel currLoc;
-    DefinitionsDocument doc;
-    
-    PositionField( JLabel cl, OpenDefinitionsDocument odoc ){
-      currLoc = cl;
-      doc = odoc.getDocument();
+    public void caretUpdate( CaretEvent ce ) {
       updateLocation();
     }
-    
-    public void keyPressed( KeyEvent ke ){
-      updateLocation();
-    }
-    public void keyTyped( KeyEvent ke ){
-      updateLocation();
-    }
-    public void keyReleased( KeyEvent ke ){}
-    
-    public void mouseClicked( MouseEvent me ){
-      updateLocation();
-    }
-    public void mousePressed( MouseEvent me ){}
-    public void mouseReleased( MouseEvent me ){}
-    public void mouseEntered( MouseEvent me ){}
-    public void mouseExited( MouseEvent me ){}
     
     public void updateLocation() {
-      currLoc.setText(doc.getCurrentLine() + ":" + doc.getCurrentCol());
+      DefinitionsDocument doc = _model.getActiveDocument().getDocument();
+      _currLocationField.setText(doc.getCurrentLine() + 
+                                 ":" + doc.getCurrentCol());
     }
-    
-    public void setDocument(OpenDefinitionsDocument odoc) {
-      doc = odoc.getDocument();
-      updateLocation();
-    }
-    
   }
 
   private void _setUpTabs() {
@@ -1178,11 +1158,11 @@ public class MainFrame extends JFrame {
     CompilerErrorCaretListener caretListener =
       new CompilerErrorCaretListener(doc, _errorPanel.getErrorListPane(), pane);
     pane.addErrorCaretListener(caretListener);
-    // this code adds the updating capability of the position field
-    // in the status bar.
-    PositionField pf = new PositionField( _currLocationField, doc );
-    pane.addKeyListener( pf );
-    pane.addMouseListener( pf );
+    // add a listener to update line and column.
+    // COMMENTED UNTIL COMPLETE
+    //pane.addCaretListener( _posListener );
+    //_posListener.updateLocation();
+
     // Add to a scroll pane
     JScrollPane scroll = new BorderlessScrollPane(pane,
         JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
