@@ -208,10 +208,10 @@
 
      This version works with JDK 1.3 and JSR-14 v1.0.
      (Necessary for releases.)
--->
+       
 <target name="do-compile" depends="init">
   <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
+  <javac sourcepath="" srcdir="${srcroot}"
          includes="${projpath}/**/*java"
          destdir="${built}"
          bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}"
@@ -222,6 +222,7 @@
     <compilerarg value="-gj" />
   </javac>
 </target>
+-->
        
 
 <!-- Compile. We have to start at srcroot and then selectively include
@@ -233,7 +234,7 @@
 
 <target name="do-compile" depends="init">
   <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
+  <javac sourcepath="" srcdir="${srcroot}"
          includes="${projpath}/**/*java"
          destdir="${built}"
          bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}" 
@@ -256,7 +257,7 @@
 
 <target name="do-compile" depends="init">
   <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
+  <javac sourcepath="" srcdir="${srcroot}"
          includes="${projpath}/**/*java"
          destdir="${built}"
          bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}" 
@@ -264,7 +265,7 @@
          source="1.5"
          target="1.5"
          debug="on"
--        fork="on"
+         fork="on"
          optimize="off">
     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
     <compilerarg value="-novariance"/>
@@ -279,10 +280,10 @@
 
      This version works with JDK 1.4.1 and JSR-14 v2.2.
      (Be sure to have the right version of tools.jar on your classpath.)
-
+-->
 <target name="do-compile" depends="init">
   <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
+  <javac sourcepath="" srcdir="${srcroot}"
          includes="${projpath}/**/*java"
          destdir="${built}"
          bootclasspath="${jsr14_collect_classpath}:${sun.boot.class.path}" 
@@ -294,8 +295,8 @@
     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
   </javac>
 </target>
--->
-
+       
+       
 <!-- Compile. We have to start at srcroot and then selectively include
      just this project in order for it to realize what files have already
      been compiled (preventing needless recompilation).
@@ -304,7 +305,7 @@
      (Be sure to have the right version of tools.jar on your classpath.)
 <target name="do-compile" depends="init">
   <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
+  <javac sourcepath="" srcdir="${srcroot}"
          includes="${projpath}/**/*java"
          destdir="${built}"
          bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}" 
@@ -326,7 +327,7 @@
 -->
 <target name="checked-compile" depends="init">
   <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
+  <javac sourcepath="" srcdir="${srcroot}"
          includes="${projpath}/**/*java"
          destdir="${built}"
          bootclasspath="${jsr14_collect_classpath}:${sun.boot.class.path}" 
@@ -405,7 +406,7 @@
   <mkdir dir="${javadoc_dir}/src" />
 
   <!-- run jsr14 from jsr14.jar to make non-generic source. -->
-  <!-- Comment this block out to produce javadocs with generics -->
+  <!-- Comment this block out to produce javadocs with generics using JSR14v2_4 and Ant 1.6-->
   <apply executable="java" failonerror="yes" parallel="yes" type="file">
     <arg value="-classpath" />
     <arg value="${classpath_text}:${java.class.path}" />
