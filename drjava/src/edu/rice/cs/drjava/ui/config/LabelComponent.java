@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -37,48 +37,45 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui.config;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import javax.swing.*;
+import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.*;
+import java.awt.*;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020724-1327;
- *
+ * Displays a label in the form of an option component, to be displayed
+ * in a config panel.
  * @version $Id$
  */
-public abstract class Version {
+public class LabelComponent extends OptionComponent<Object> {
+  private JTextArea _text;
+  
+  public LabelComponent(String text, Frame parent) {
+    super("", parent);
+    _text = new JTextArea(text);
+    _text.setEditable(false);
+    _text.setBackground(new Color(204,204,204));
+  }
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Updates the config object with the new setting.  (Does nothing.)
+   * @return true if the new value is set successfully
    */
-  private static final String BUILD_TIME_STRING = "20020724-1327";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public boolean updateConfig() {
+    return true;
+  } 
+  
+  /**
+   * Displays the given value.  (Never changes.)
+   */
+  public void setValue(Object value) {
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+  
+  /**
+   * Return's this OptionComponent's configurable component.
+   */
+  public JComponent getComponent() { return _text; }
+    
+}
