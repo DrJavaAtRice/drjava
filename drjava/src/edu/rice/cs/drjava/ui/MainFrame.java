@@ -2978,12 +2978,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     try {
       final File f = _model.getMainClass();
       if(f != null){
-        open(new FileOpenSelector(){
-          public File[] getFiles() {
-            return new File[]{ f };
-          }
-        });
-        _model.getActiveDocument().runMain();
+        OpenDefinitionsDocument doc = _model.getDocumentForFile(f);
+        doc.runMain();
+        if(false){
+          throw new ClassNameNotFoundException("asdf");
+        }
       }
     }
     catch (ClassNameNotFoundException e) {
@@ -5662,9 +5661,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-          // Make sure that this document is the active one.
-          _model.setActiveDocument(doc);
-
           // Switch to the interactions pane to show results.
           showTab(_interactionsPane);
         }
