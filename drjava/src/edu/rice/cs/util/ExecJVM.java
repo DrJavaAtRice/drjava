@@ -134,15 +134,6 @@ public final class ExecJVM {
     }
   }
   
-  private static String _getExecExtension() {
-    if (_isDOS()) {
-      return ".exe";
-    }
-    else {
-      return "";
-    }
-  }
-
   /** DOS/Windows family OS's use ; to separate paths. */
   private static boolean _isDOS() {
     return PATH_SEPARATOR.equals(";");
@@ -157,11 +148,27 @@ public final class ExecJVM {
    * This logic comes from Ant.
    */
   private static String _getExecutable() {
-    File executable = new File(System.getProperty("java.home") +
-                               "/../bin/java" + _getExecExtension() );
-    
     // this netware thing is based on comments from ant's code
-    if (executable.exists() && ! _isNetware()) {
+    if (_isNetware()) {
+      return "java";
+    }
+    
+    File executable;
+
+    String start = System.getProperty("java.home") + "../bin/java";
+
+    // try javaw for dos
+    if (_isDOS()) {
+      executable = new File(start + "w.exe");
+      if (! executable.exists()) {
+        executable = new File(start + ".exe");
+      }
+    }
+    else {
+      executable = new File(start);
+    }
+
+    if (executable.exists()) {
       return executable.getAbsolutePath();
     }
     else {
