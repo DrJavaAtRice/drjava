@@ -151,33 +151,6 @@
 
   </target>
 
-
-  <target name="compile-optimized" depends="do-compile-optimized">
-    <rmic base="${built}"
-          classpath="${classpath_text}"
-          classname="edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM" />
-
-    <rmic base="${built}"
-          classpath="${classpath_text}"
-          classname="edu.rice.cs.drjava.model.repl.newjvm.MainJVM" />
-
-    <copy todir="${built}">
-      <fileset dir="${srcroot}">
-        <!-- include the GPL -->
-        <include name="edu/rice/cs/LICENSE" />
-
-        <!-- include graphics -->
-        <include name="${projpath}/**/LICENSE" />
-        <include name="${projpath}/**/README" />
-        <include name="${projpath}/**/*.gif" />
-        <include name="${projpath}/**/*.png" />
-
- <!-- include files used for testing -->
- <include name="${projpath}/**/testFiles/*" />
-      </fileset>
-    </copy>
-
-  </target>
     
     
   <!-- targets used to generate the parser for autocompletion -->
