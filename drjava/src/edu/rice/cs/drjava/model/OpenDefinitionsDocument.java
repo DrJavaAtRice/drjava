@@ -70,20 +70,15 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  *
  * @version $Id$
  */
-public interface OpenDefinitionsDocument extends StyledDocument, Finalizable<DefinitionsDocument> {
+public interface OpenDefinitionsDocument extends DJDocument, Finalizable<DefinitionsDocument> {
 
   // The following methods are forwarding methods required by the rest of the
   // program in order for the OpenDefinitionsDocument to truely handle the
   // DefinitionsDocument
-  public int getIntelligentBeginLinePos(int currPos) throws BadLocationException;
   public void commentLines(int selStart, int selEnd);
-  public void indentLines(int selStart, int selEnd);
   public void uncommentLines(int selStart, int selEnd);
   public boolean getClassFileInSync();
   public int getCurrentCol();
-  public int getLineStartPos(int pos);
-  public int getLineEndPos(int pos);
-  public ReducedModelState getStateAtCurrent();
   public int getOffset(int lineNum);
   public String getQualifiedClassName() throws ClassNameNotFoundException;
   public String getQualifiedClassName(int pos) throws ClassNameNotFoundException;
@@ -92,7 +87,6 @@ public interface OpenDefinitionsDocument extends StyledDocument, Finalizable<Def
   public File getCachedClassFile();
   public DocumentListener[] getDocumentListeners();
   public UndoableEditListener[] getUndoableEditListeners();
-  public int getCurrentLocation();
   
   /**
    * @return whether the undo manager can perform any undos
@@ -254,42 +248,6 @@ public interface OpenDefinitionsDocument extends StyledDocument, Finalizable<Def
    * @return Index into document of where it moved
    */
   public int gotoLine(int line);
-
-  /**
-   * Forwarding method to sync the definitions with whatever view
-   * component is representing them.
-   */
-  public void setCurrentLocation(int location);
-
-  /**
-   * Forwarding method to find the match for the closing brace
-   * immediately to the left, assuming there is such a brace.
-   * @return the relative distance backwards to the offset before
-   *         the matching brace.
-   */
-  public int balanceBackward();
-
-  /**
-   * Forwarding method to find the match for the open brace
-   * immediately to the right, assuming there is such a brace.
-   * @return the relative distance forwards to the offset after
-   *         the matching brace.
-   */
-  public int balanceForward();
-
-  /**
-   * Set the indent tab size for this document.
-   * @param indent the number of spaces to make per level of indent
-   */
-  public void setDefinitionsIndent(int indent);
-
-  /**
-   * A forwarding method to indent the current line or selection
-   * in the definitions.
-   */
-  public void indentLinesInDefinitions(int selStart, int selEnd,
-                                       int reason, ProgressMonitor pm)
-    throws OperationCanceledException;
 
   /**
    * A forwarding method to comment out the current line or selection

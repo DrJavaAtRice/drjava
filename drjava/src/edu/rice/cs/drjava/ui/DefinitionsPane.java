@@ -1260,7 +1260,7 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
       _mainFrame.hourglassOn();
       final int key = _doc.getUndoManager().startCompoundEdit();
       try {
-        _doc.indentLinesInDefinitions(selStart, selEnd, reason, pm);
+        _doc.indentLines(selStart, selEnd, reason, pm);
         //      _indentLines(reason, pm);
         _doc.getUndoManager().endCompoundEdit(key);
       }

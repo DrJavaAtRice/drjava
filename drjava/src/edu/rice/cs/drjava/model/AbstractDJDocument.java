@@ -62,7 +62,7 @@ import javax.swing.event.*;
 /**
  * Abstract DrJava Document which contains shared code between the Definitions Document and the Interactions Document Adapter
  */
-public abstract class AbstractDJDocument extends SwingDocumentAdapter implements OptionConstants {
+public abstract class AbstractDJDocument extends SwingDocumentAdapter implements DJDocument, OptionConstants {
   
   //-------- FIELDS ----------
   
@@ -556,7 +556,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   
   /**
    * This method should never be called outside of this class. Doing so can create
-   * all sorts of synchronization issues. It is package private for test purposes.
+   * all sorts of synchronization issues. It is public for test purposes.
    * @return The reduced model of this document.
    */
   public BraceReduction getReduced() {
@@ -1457,6 +1457,8 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     _storeInCache(key, new Integer(ERROR_INDEX));
     return ERROR_INDEX;
   }
+  
+  
   public int findPrevNonWSCharPos(int pos) throws BadLocationException {
     throwErrorHuh();
     char[] whitespace = {' ', '\t', '\n'};

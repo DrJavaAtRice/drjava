@@ -1371,7 +1371,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
     while(odds.hasNext())
     {
-      odds.next().setDefinitionsIndent(indent);
+      odds.next().setIndent(indent);
     }
   }
 
@@ -2739,24 +2739,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
 
     /**
-     * Set the indent tab size for this document.
-     * @param indent the number of spaces to make per level of indent
-     */
-    public void setDefinitionsIndent(int indent) {
-      getDocument().setIndent(indent);
-    }
-
-    /**
-     * A forwarding method to indent the current line or selection
-     * in the definitions.
-     */
-    public void indentLinesInDefinitions(int selStart, int selEnd,
-                                         int reason, ProgressMonitor pm)
-        throws OperationCanceledException {
-      getDocument().indentLines(selStart, selEnd, reason, pm);
-    }
-
-    /**
      * A forwarding method to comment out the current line or selection
      * in the definitions.
      */
@@ -3202,6 +3184,110 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public DocumentListener[] getDocumentListeners() {
       return getDocument().getDocumentListeners();
     }
+    
+    //--------- DJDocument methods ----------
+    
+    public void setTab(String tab, int pos) {
+      getDocument().setTab(tab,pos);
+    }
+    
+    public int getWhiteSpace() {
+      return getDocument().getWhiteSpace();
+    }
+    
+    public boolean posInParenPhrase(int pos) {
+      return getDocument().posInParenPhrase(pos);
+    }
+    
+    public boolean posInParenPhrase() {
+      return getDocument().posInParenPhrase();
+    }
+    
+    public int findPrevNonWSCharPos(int pos) throws BadLocationException {
+      return getDocument().findPrevNonWSCharPos(pos);
+    }
+    
+    public int getFirstNonWSCharPos(int pos) throws BadLocationException {
+      return getDocument().getFirstNonWSCharPos(pos);
+    }
+    
+    public int getFirstNonWSCharPos(int pos, boolean acceptComments) throws BadLocationException {
+      return getDocument().getFirstNonWSCharPos(pos, acceptComments);
+    }
+    
+    public int getFirstNonWSCharPos (int pos, char[] whitespace, boolean acceptComments) throws BadLocationException {
+      return getDocument().getFirstNonWSCharPos(pos, whitespace, acceptComments);
+    }
+    
+    public int getLineFirstCharPos(int pos) throws BadLocationException {
+      return getDocument().getLineFirstCharPos(pos);
+    }
+    
+    public int findCharOnLine(int pos, char findChar) {
+      return getDocument().findCharOnLine(pos, findChar);
+    }
+    
+    public String getIndentOfCurrStmt(int pos) throws BadLocationException {
+      return getDocument().getIndentOfCurrStmt(pos);
+    }
+  
+    public String getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
+      return getDocument().getIndentOfCurrStmt(pos, delims);
+    }
+    
+    public String getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
+      return getDocument().getIndentOfCurrStmt(pos, delims, whitespace);
+    }
+    
+    public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm) throws OperationCanceledException {
+      getDocument().indentLines(selStart, selEnd, reason, pm);
+    }
+    
+    public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {
+      return getDocument().findPrevCharPos(pos, whitespace);
+    }
+    
+    public boolean findCharInStmtBeforePos(char findChar, int position) {
+      return getDocument().findCharInStmtBeforePos(findChar, position);
+    }
+    
+    public int findPrevDelimiter(int pos, char[] delims) throws BadLocationException {
+      return getDocument().findPrevDelimiter(pos, delims);
+    }
+    
+    public int findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases) throws BadLocationException {
+      return getDocument().findPrevDelimiter(pos, delims, skipParenPhrases);
+    }
+    
+    public void resetReducedModelLocation() {
+      getDocument().resetReducedModelLocation();
+    }
+    
+    public ReducedModelState stateAtRelLocation(int dist) {
+      return getDocument().stateAtRelLocation(dist);
+    }
+    
+    public IndentInfo getIndentInformation() {
+      return getDocument().getIndentInformation();
+    }
+    
+    public void move(int dist) {
+      getDocument().move(dist);
+    }
+    
+    public Vector<HighlightStatus> getHighlightStatus(int start, int end) {
+      return getDocument().getHighlightStatus(start, end);
+    }
+    
+    public void setIndent(int indent) {
+      getDocument().setIndent(indent);
+    }
+    
+    public int getIndent() {
+      return getDocument().getIndent();
+    }
+    
+    //-----------------------
       
     /**
      * This method is put here because the ODD is the only way to get to the defdoc

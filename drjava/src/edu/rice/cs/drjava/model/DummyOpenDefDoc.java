@@ -41,7 +41,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
  * OTHER DEALINGS WITH THE SOFTWARE.
  * 
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
@@ -204,16 +204,6 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   }
   
   /**
-   * A forwarding method to indent the current line or selection
-   * in the definitions.
-   */
-  public void indentLinesInDefinitions(int selStart, int selEnd,
-                                       int reason, ProgressMonitor pm)
-      throws OperationCanceledException {
-    throw new UnsupportedOperationException("Dummy method");
-  }
-  
-  /**
    * Asks the GlobalModel if it can revert current definitions
    * to version on disk. If ok, it reverts the file to the
    * version on disk.
@@ -288,9 +278,9 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
    * character offset in the definitions.
    * NOT USED.
    */
-//  public FindReplaceMachine createFindReplaceMachine() {
-//    throw new UnsupportedOperationException("Dummy method");
-//  }
+  //  public FindReplaceMachine createFindReplaceMachine() {
+  //    throw new UnsupportedOperationException("Dummy method");
+  //  }
   
   /**
    * Finds the root directory of the source files.
@@ -414,14 +404,6 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   }
   
   /**
-   * Set the indent tab size for this document.
-   * @param indent the number of spaces to make per level of indent
-   */
-  public void setDefinitionsIndent(int indent) {
-    throw new UnsupportedOperationException("Dummy method");
-  }
-  
-  /**
    * Forwarding method to find the match for the closing brace
    * immediately to the left, assuming there is such a brace.
    * @return the relative distance backwards to the offset before
@@ -455,7 +437,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public int getCurrentLocation() {
     throw new UnsupportedOperationException("Dummy method");
   }
-    
+  
   /**
    * @return the INavigatorItem representing this object
    */
@@ -501,11 +483,11 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public boolean isInProjectPath(){
     return false;
   }
-
+  
   public boolean isProjectFile(){
     return false;
   }
-
+  
   public boolean belongsHuh(Document doc){
     return false;
   }
@@ -647,11 +629,11 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public void resetUndoManager() {
     throw new UnsupportedOperationException("Dummy method");
   }
-
+  
   public File getCachedClassFile() {
     throw new UnsupportedOperationException("Dummy method");
   }
-
+  
   public DocumentListener[] getDocumentListeners() {
     throw new UnsupportedOperationException("Dummy method");
   }
@@ -659,7 +641,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public UndoableEditListener[] getUndoableEditListeners() {
     throw new UnsupportedOperationException("Dummy method");
   }
-    
+  
   public void addFinalizationListener(FinalizationListener<DefinitionsDocument> fl) {
     throw new UnsupportedOperationException("Dummy method");
   }
@@ -667,7 +649,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public List<FinalizationListener<DefinitionsDocument>> getFinalizationListeners(){
     throw new UnsupportedOperationException("Dummy method");
   }
-
+  
   public boolean undoManagerCanUndo() {
     throw new UnsupportedOperationException("Dummy method");
   }
@@ -701,7 +683,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public Style getLogicalStyle(int p) {
     throw new UnsupportedOperationException("Dummy method");
   }
-   
+  
   public void setLogicalStyle(int pos, Style s) {
     throw new UnsupportedOperationException("Dummy method");
   }
@@ -723,6 +705,109 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   }
   
   public Style addStyle(String nm, Style parent) {
-     throw new UnsupportedOperationException("Dummy method");
+    throw new UnsupportedOperationException("Dummy method");
   }
+  
+  //---------- DJDocument Methods ----------
+  
+  public void setTab(String tab, int pos) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int getWhiteSpace() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public boolean posInParenPhrase(int pos) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public boolean posInParenPhrase() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int findPrevNonWSCharPos(int pos) throws BadLocationException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int getFirstNonWSCharPos(int pos) throws BadLocationException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int getFirstNonWSCharPos(int pos, boolean acceptComments) throws BadLocationException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int getFirstNonWSCharPos (int pos, char[] whitespace, boolean acceptComments) throws BadLocationException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int getLineFirstCharPos(int pos) throws BadLocationException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int findCharOnLine(int pos, char findChar) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public String getIndentOfCurrStmt(int pos) throws BadLocationException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public String getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public String getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm) throws OperationCanceledException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public boolean findCharInStmtBeforePos(char findChar, int position) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int findPrevDelimiter(int pos, char[] delims) throws BadLocationException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases) throws BadLocationException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void resetReducedModelLocation() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public ReducedModelState stateAtRelLocation(int dist) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public IndentInfo getIndentInformation() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void move(int dist) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public Vector<HighlightStatus> getHighlightStatus(int start, int end) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public void setIndent(int indent) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int getIndent() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
 }

@@ -46,9 +46,9 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 import  junit.framework.*;
-import  javax.swing.text.BadLocationException;
-
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import  javax.swing.text.*;
+import edu.rice.cs.drjava.model.*;
+//import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
 /**
@@ -57,14 +57,31 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
  */
 public final class IndentInfoTest extends TestCase {
   private String _text;
-  private DefinitionsDocument _document;
+  //private DefinitionsDocument _document;
   //private BraceReduction _reduced;
   private IndentInfo _info;
-  private GlobalEventNotifier _notifier;
+  //private GlobalEventNotifier _notifier;
+  private DJDocument _document;
+  
 
   public void setUp() {
-    _notifier = new GlobalEventNotifier();
-    _document = new DefinitionsDocument(_notifier);
+    //_notifier = new GlobalEventNotifier();
+   // _document = new DefinitionsDocument(_notifier);
+    _document = new AbstractDJDocument() {
+      protected void throwErrorHuh() {
+        //Do nothing
+      }
+      protected int startCompoundEdit() {
+        //Do nothing
+        return 0;
+      }
+      protected void endCompoundEdit(int key) {
+        //Do nothing
+      }
+      protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) {
+        //Do nothing
+      }
+    };
   }
 
   private void _infoTestHelper(int location, String message,
