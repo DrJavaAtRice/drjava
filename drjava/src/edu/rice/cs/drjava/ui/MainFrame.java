@@ -569,6 +569,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
+  /** Compiles all the project. */
+  private Action _compileProjectAction = new AbstractAction("Compile") {
+    public void actionPerformed(ActionEvent ae) {
+      // right now, it's the same as compile all
+      _compileAll();
+    }
+  };
+
   /** Compiles all open documents. */
   private Action _compileAllAction = new AbstractAction("Compile All Documents") {
     public void actionPerformed(ActionEvent ae) {
@@ -2183,6 +2191,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _closeProjectAction.setEnabled(true);
 //      _saveProjectAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(true);
+      _compileProjectAction.setEnabled(true);
       _model.setProjectChanged(false);
       _resetNavigatorPane(); 
     }
@@ -2211,6 +2220,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _closeProjectAction.setEnabled(false);
 //      _saveProjectAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(false);
+      _compileProjectAction.setEnabled(false);
       _setUpContextMenus();
       _currentProjFile = null;
       return true;
@@ -3192,6 +3202,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     _setUpAction(_projectPropertiesAction, "Project Properties", "Preferences", "Edit Project Properties");
     _projectPropertiesAction.setEnabled(false);    
+    _setUpAction(_compileProjectAction, "Compile", "Compile",
+                 "Compile the current project");
+    
+    _compileProjectAction.setEnabled(false);
     
     _setUpAction(_saveAllAction, "Save All", "SaveAll", "Save all open documents");
 
@@ -3516,6 +3530,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     projectMenu.addSeparator();
     // run project
     _runProjectAction.setEnabled(false);
+    projectMenu.add(_compileProjectAction);
     projectMenu.add(_runProjectAction);
     
     projectMenu.addSeparator();
@@ -4007,14 +4022,6 @@ public class MainFrame extends JFrame implements OptionConstants {
            * to give the tab focus, then steals the focus back to the
            * interactions pane.
            */
-          Thread t = new Thread() {
-            public void run() { 
-              try { Thread.sleep(100); } 
-              catch(Exception e) { throw new UnexpectedException(e); }
-              _interactionsPane.requestFocus();
-            }
-          };
-          t.start();
         }
         else if (_tabbedPane.getSelectedComponent() == _consoleScroll) {
           _consolePane.requestFocus();
