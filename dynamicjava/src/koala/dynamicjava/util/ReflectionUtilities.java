@@ -358,6 +358,14 @@ public class ReflectionUtilities {
         
     Iterator<Method> it = list.iterator();
     Method best = it.next();
+    while(TigerUtilities.isBridge(best)){
+	if(it.hasNext()){
+	    best=it.next();
+	}
+	else{
+	    return null;  //as if the list were empty, indicating nothing in the list could be used, shouldnt really happen, but added for completion.
+	}
+    }    
     Method ambiguous = null; // there is no ambiguous other method at first
     while (it.hasNext()) {
       Method curr = it.next();

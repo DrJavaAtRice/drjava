@@ -374,6 +374,7 @@ public class EvaluationVisitorTest extends DynamicJavaTestCase {
   public void testVarArgsWithMethodInvocation() throws InterpreterException {
     String text = "public class ClassA { public static void x(int... y) { } }; ClassA.x(new int[]{1,2,3});";
     Object res = interpret(text);
+    
     text = "public class ClassB { public static Object x(Integer... y) { return y; } };";
     interpret(text);
     
@@ -405,11 +406,15 @@ public class EvaluationVisitorTest extends DynamicJavaTestCase {
     assertTrue("res should be an instance of a List", res instanceof java.util.List);
     assertEquals("first element should be 1", new Integer(1), ((java.util.List)res).get(0));
     
-    text = "Arrays.asList(1,2,3,4)";
-    res = interpret(text);
-    assertTrue("res should be an instance of a List", res instanceof java.util.List);
-    assertEquals("size should be 4", 4, ((java.util.List)res).size());
-    assertEquals("last element should be 4", new Integer(4), ((java.util.List)res).get(3));
+    /**/
+    /* INSERTED FOR NOW, WANNA CHECK WITH CORKY */
+    
+    if(Float.parseFloat(System.getProperty("java.specification.version"))>=1.5){    
+      text = "Arrays.asList(1,2,3,4)";
+      res = interpret(text);
+      assertTrue("res should be an instance of a List", res instanceof java.util.List);
+      assertEquals("size should be 4", 4, ((java.util.List)res).size());
+      assertEquals("last element should be 4", new Integer(4), ((java.util.List)res).get(3));
     
     text = 
       "class ClassD { " +
@@ -436,7 +441,7 @@ public class EvaluationVisitorTest extends DynamicJavaTestCase {
       "(new ClassE()).new Inner().m(\"a\",\"b\",\"c\",\"d\");";
     res = interpret(text);
     assertEquals("Wrong output.", "abcd", res);
-        
+
     text =
       "public class ClassG {\n"+
       "  public class Inner {\n"+
@@ -466,7 +471,7 @@ public class EvaluationVisitorTest extends DynamicJavaTestCase {
       "l.apply()";
     res = interpret(text);
     assertEquals("Wrong output.", Boolean.TRUE, res);
-    
+    }        
   }
   
   public void testInnerClassScoping() {
