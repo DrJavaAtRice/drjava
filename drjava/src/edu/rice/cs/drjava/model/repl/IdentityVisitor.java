@@ -124,6 +124,22 @@ public class IdentityVisitor implements Visitor<Node> {
   }
 
   /**
+   * Visits a ForEachStatement
+   * @param node the node to visit
+   */
+  public Node visit(ForEachStatement node) {
+    FormalParameter param = node.getParameter();
+    Expression collection = node.getCollection();
+    Node stmt = node.getBody();
+    
+    node.setParameter((FormalParameter)param.acceptVisitor(this));
+    node.setCollection((Expression)collection.acceptVisitor(this));
+    node.setBody(stmt.acceptVisitor(this));
+    
+    return node;
+  }
+
+  /**
    * Visits a DoStatement
    * @param node the node to visit
    */
