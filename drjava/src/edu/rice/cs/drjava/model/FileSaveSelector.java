@@ -4,6 +4,8 @@ import java.io.File;
 /**
  * An interface to give GlobalModel a file to save a
  * document to.
+ *
+ * @version $Id$
  */
 public interface FileSaveSelector {
 

@@ -19,6 +19,8 @@ import edu.rice.cs.drjava.model.compiler.*;
  * This removes the dependency on the UI for the logical flow of the program's
  * features.  With the current implementation, we can finally test the compile
  * functionality of DrJava, along with many other things.
+ *
+ * @version $Id$
  */
 public class GlobalModel {
   private DefinitionsEditorKit _editorKit;

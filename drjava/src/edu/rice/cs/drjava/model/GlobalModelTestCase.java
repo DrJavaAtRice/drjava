@@ -11,18 +11,25 @@ import java.util.LinkedList;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
 
+import edu.rice.cs.drjava.util.FileOps;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
 
 /**
- * Tests the interface to the GlobalModel.  The test here substitutes as a sort
- * of false UI that runs all the methods in GlobalModel, simulating
- * user input.
+ * Base class for tests over the {@link GlobalModel}.
+ *
+ * This class provides a number of convenience methods for testing the
+ * GlobalModel. It also contains a model instance (reset in {@link #setUp}
+ * and a temporary directory that's created per test invocation (and
+ * subsequently cleaned in {@link #tearDown}. This reduces the burden
+ * for such file management stuff in the test cases themselves.
+ *
  * @version $Id$
  */
 public abstract class GlobalModelTestCase extends TestCase {
   protected GlobalModel _model;
+  protected File _tempDir;
 
   protected static final String FOO_TEXT = "class Foo {}";
   protected static final String BAR_TEXT = "class Bar {}";
@@ -36,17 +43,29 @@ public abstract class GlobalModelTestCase extends TestCase {
   }
 
   /**
-   * Creates a test suite for JUnit to run.
-   * @return a test suite based on the methods in this class
+   * Setup for each test case, which does the following.
+   * <OL>
+   * <LI>
+   *  Creates a new GlobalModel in {@link #_model} for each test case run.
+   * </LI>
+   * <LI>
+   *  Creates a new temporary directory in {@link #_tempDir}.
+   * </LI>
+   * </OL>
    */
-  public static Test suite() {
-    return  new TestSuite(GlobalModelTestCase.class);
+  protected void setUp() throws IOException {
+    _model = new GlobalModel();
+    String user = System.getProperty("user.name");
+    _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
   }
 
   /**
+   * Teardown for each test case, which recursively deletes the
+   * temporary directory created in setUp.
    */
-  public void setUp() {
-    _model = new GlobalModel();
+  protected void tearDown() throws IOException {
+    boolean ret = FileOps.deleteDirectory(_tempDir);
+    assertTrue("delete temp directory " + _tempDir, ret);
   }
 
   /**
@@ -61,24 +80,14 @@ public abstract class GlobalModelTestCase extends TestCase {
     assertContents(s);
   }
 
-  /**
-   * Read the entire contents of a file and return them.
-   */
-  protected String readFile(File file) throws IOException {
-    FileReader reader = new FileReader(file);
-    StringBuffer buf = new StringBuffer();
-
-    while (reader.ready()) {
-      char c = (char) reader.read();
-      buf.append(c);
-    }
-
-    return buf.toString();
+  /** Create a new temporary file in _tempDir. */
+  protected File tempFile() throws IOException {
+    return File.createTempFile("DrJava-test", ".java", _tempDir);
   }
 
-  /** Create a new temporary file. */
-  protected File tempFile() throws IOException {
-    return File.createTempFile("DrJava-test", ".java");
+  /** Create a new temporary directory in _tempDir. */
+  protected File tempDirectory() throws IOException {
+    return FileOps.createTempDirectory("DrJava-test", _tempDir);
   }
 
   /**
@@ -98,11 +107,9 @@ public abstract class GlobalModelTestCase extends TestCase {
    * The File object for the new file is returned.
    */
   protected File writeToNewTempFile(String text) throws IOException {
-    File file = tempFile();
-    FileWriter writer = new FileWriter(file);
-    writer.write(text);
-    writer.close();
-    return file;
+    File temp = tempFile();
+    FileOps.writeToFile(temp, text);
+    return temp;
   }
 
 
@@ -128,7 +135,6 @@ public abstract class GlobalModelTestCase extends TestCase {
     _model.removeListener(listener);
   }
 
-
   protected void assertModified(boolean b) {
     assertEquals("definitionsDocument.isModifiedSinceSave",
                  b,
@@ -152,7 +158,13 @@ public abstract class GlobalModelTestCase extends TestCase {
 
   protected void assertCompileErrorsPresent(boolean b) {
     CompilerError[] errors = _model.getCompileErrors();
-    assertEquals("compile errors > 0?",
+
+    StringBuffer buf = new StringBuffer();
+    for (int i = 0; i < errors.length; i++) {
+      buf.append("\nerror #" + i + ": " + errors[i]);
+    }
+    
+    assertEquals("compile errors > 0? errors=" + buf,
                  b,
                  errors.length > 0);
   }

@@ -19,10 +19,6 @@ import edu.rice.cs.drjava.model.compiler.*;
  * A test on the GlobalModel that does deals with everything outside of
  * simple file operations, e.g., compile, quit.
  *
- * TODO: Have setUp create a temp directory and tearDown delete it recursively.
- *       This would get rid of junk dealing with creating/deleting directories
- *       from each test.
- *
  * @version $Id$
  */
 public class GlobalModelOtherTest extends GlobalModelTestCase {
@@ -147,11 +143,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   public void testGetSourceRootDefaultPackage()
     throws BadLocationException, IOException, InvalidPackageException
   {
-    // Create temp file
-    File baseTempDir = tempFile();
-    // Delete the file and make a directory of the same name
-    baseTempDir.delete();
-    baseTempDir.mkdir();
+    // Create temp directory
+    File baseTempDir = tempDirectory();
 
     // Now make subdirectory a/b/c
     File subdir = new File(baseTempDir, "a");
@@ -170,27 +163,14 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     assertEquals("source root",
                  subdir,
                  _model.getSourceRoot());
-
-    fooFile.delete();
-
-    // walk back and delete all dirs to the base
-    while (! subdir.equals(baseTempDir)) {
-      subdir.delete();
-      subdir = subdir.getParentFile();
-    }
-
-    baseTempDir.delete();
   }
 
   public void testGetSourceRootPackageThreeDeepValid()
     throws BadLocationException, IOException, InvalidPackageException
   {
-    // Create temp file
-    File baseTempDir = tempFile();
-    // Delete the file and make a directory of the same name
-    baseTempDir.delete();
-    baseTempDir.mkdir();
-
+    // Create temp directory
+    File baseTempDir = tempDirectory();
+    
     // Now make subdirectory a/b/c
     File subdir = new File(baseTempDir, "a");
     subdir = new File(subdir, "b");
@@ -210,25 +190,13 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
                  baseTempDir,
                  _model.getSourceRoot());
 
-    fooFile.delete();
-
-    // walk back and delete all dirs to the base
-    while (! subdir.equals(baseTempDir)) {
-      subdir.delete();
-      subdir = subdir.getParentFile();
-    }
-
-    baseTempDir.delete();
   }
 
   public void testGetSourceRootPackageThreeDeepInvalid()
     throws BadLocationException, IOException
   {
-    // Create temp file
-    File baseTempDir = tempFile();
-    // Delete the file and make a directory of the same name
-    baseTempDir.delete();
-    baseTempDir.mkdir();
+    // Create temp directory
+    File baseTempDir = tempDirectory();
 
     // Now make subdirectory a/b/d
     File subdir = new File(baseTempDir, "a");
@@ -253,26 +221,13 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     catch (InvalidPackageException e) {
       // good.
     }
-
-    fooFile.delete();
-
-    // walk back and delete all dirs to the base
-    while (! subdir.equals(baseTempDir)) {
-      subdir.delete();
-      subdir = subdir.getParentFile();
-    }
-
-    baseTempDir.delete();
   }
 
   public void testGetSourceRootPackageOneDeepValid()
     throws BadLocationException, IOException, InvalidPackageException
   {
-    // Create temp file
-    File baseTempDir = tempFile();
-    // Delete the file and make a directory of the same name
-    baseTempDir.delete();
-    baseTempDir.mkdir();
+    // Create temp directory
+    File baseTempDir = tempDirectory();
 
     // Now make subdirectory a
     File subdir = new File(baseTempDir, "a");
@@ -291,9 +246,6 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
                  baseTempDir,
                  _model.getSourceRoot());
 
-    fooFile.delete();
-    subdir.delete();
-    baseTempDir.delete();
   }
 
  }

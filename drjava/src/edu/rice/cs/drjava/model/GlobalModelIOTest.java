@@ -11,10 +11,16 @@ import java.util.LinkedList;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
 
+import edu.rice.cs.drjava.util.FileOps;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
 
+/**
+ * Test I/O functions of the global model.
+ *
+ * @version $Id$
+ */
 public class GlobalModelIOTest extends GlobalModelTestCase {
   /**
    * Constructor.
@@ -101,7 +107,6 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     listener.assertOpenCount(1);
     assertModified(false);
     assertContents(BAR_TEXT);
-    tempFile.delete();
   }
 
   /**
@@ -208,9 +213,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
 
     assertEquals("contents of saved file",
                  FOO_TEXT,
-                 readFile(file));
-
-    file.delete();
+                 FileOps.readFile(file));
   }
 
   /**
@@ -227,7 +230,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     assertContents(FOO_TEXT);
     assertEquals("contents of saved file",
                  FOO_TEXT,
-                 readFile(file));
+                 FileOps.readFile(file));
 
     // Listener to use on future save
     TestListener listener = new TestListener() {
@@ -248,9 +251,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
 
     assertEquals("contents of saved file",
                  BAR_TEXT,
-                 readFile(file));
-
-    file.delete();
+                 FileOps.readFile(file));
   }
 
   /**
@@ -271,7 +272,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     assertContents(FOO_TEXT);
     assertEquals("contents of saved file",
                  FOO_TEXT,
-                 readFile(file));
+                 FileOps.readFile(file));
 
     TestListener listener = new TestListener() {
       public void fileSaved(File f) {
@@ -295,9 +296,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
 
     assertEquals("contents of saved file",
                  BAR_TEXT,
-                 readFile(file));
-
-    file.delete();
+                 FileOps.readFile(file));
   }
 
   /**
@@ -315,7 +314,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     assertContents(FOO_TEXT);
     assertEquals("contents of saved file",
                  FOO_TEXT,
-                 readFile(file));
+                 FileOps.readFile(file));
 
     // No events better be fired!
     _model.addListener(new TestListener());
@@ -327,9 +326,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
 
     assertEquals("contents of saved file",
                  FOO_TEXT,
-                 readFile(file));
-
-    file.delete();
+                 FileOps.readFile(file));
   }
 
   /**
@@ -348,7 +345,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     assertContents(FOO_TEXT);
     assertEquals("contents of saved file",
                  FOO_TEXT,
-                 readFile(file1));
+                 FileOps.readFile(file1));
 
     // Make sure we save now to the new file name
     TestListener listener = new TestListener() {
@@ -367,13 +364,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
 
     assertEquals("contents of saved file1",
                  FOO_TEXT,
-                 readFile(file1));
+                 FileOps.readFile(file1));
 
     assertEquals("contents of saved file2",
                  BAR_TEXT,
-                 readFile(file2));
-
-    file1.delete();
-    file2.delete();
+                 FileOps.readFile(file2));
   }
 }

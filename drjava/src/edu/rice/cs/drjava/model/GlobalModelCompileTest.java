@@ -35,6 +35,9 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
   private static final String FOO_PACKAGE_AS_PART_OF_FIELD = 
     "class Foo { int cur_package = 5; }";
 
+  private static final String FOO2_EXTENDS_FOO_TEXT = 
+    "class Foo2 extends Foo {}";
+
   /**
    * Constructor.
    * @param  String name
@@ -62,15 +65,16 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
    */
   public void runBare() throws Throwable {
     CompilerInterface[] compilers = CompilerRegistry.ONLY.getAvailableCompilers();
-    try {
-      for (int i = 0; i < compilers.length; i++) {
-        setUp();
-        _model.setActiveCompiler(compilers[i]);
+    for (int i = 0; i < compilers.length; i++) {
+      setUp();
+      _model.setActiveCompiler(compilers[i]);
+
+      try {
         runTest();
       }
-    }
-    finally {
-      tearDown();
+      finally {
+        tearDown();
+      }
     }
   }
 
@@ -99,9 +103,78 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     // Make sure .class exists
     File compiled = classForJava(file, "Foo");
     assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
+  }
 
-    file.delete();
-    compiled.delete();
+  /**
+   * Test that one compiled file can depend on the other.
+   * We compile Foo and then Foo2 (which extends Foo). This shows
+   * that the compiler successfully found Foo2 when compiling Foo.
+   */
+  public void testCompileClasspathOKDefaultPackage()
+    throws BadLocationException, IOException
+  {
+    // Create/compile foo, assuming it works
+    setupDocument(FOO_TEXT);
+    final File fooFile = new File(_tempDir, "Foo.java");
+    _model.saveFile(new FileSelector(fooFile));
+    _model.startCompile();
+
+    setupDocument(FOO2_EXTENDS_FOO_TEXT);
+    final File foo2File = new File(_tempDir, "Foo2.java");
+    _model.saveFile(new FileSelector(foo2File));
+
+    TestListener listener = new CompileShouldSucceedListener();
+    _model.addListener(listener);
+    _model.startCompile();
+    assertCompileErrorsPresent(false);
+    listener.assertCompileStartCount(1);
+    listener.assertCompileEndCount(1);
+    listener.assertInteractionsResetCount(1);
+    listener.assertConsoleResetCount(1);
+
+    // Make sure .class exists
+    File compiled = classForJava(foo2File, "Foo2");
+    assertTrue(_name() + "Class file doesn't exist after compile",
+               compiled.exists());
+  }
+
+  /**
+   * Test that one compiled file can depend on the other.
+   * We compile a.Foo and then b.Foo2 (which extends Foo). This shows
+   * that the compiler successfully found Foo2 when compiling Foo.
+   */
+  public void testCompileClasspathOKDifferentPackages()
+    throws BadLocationException, IOException
+  {
+    File aDir = new File(_tempDir, "a");
+    File bDir = new File(_tempDir, "b");
+    aDir.mkdir();
+    bDir.mkdir();
+
+    // Create/compile foo, assuming it works
+    // foo must be public and in Foo.java!
+    setupDocument("package a;\n" + "public " + FOO_TEXT);
+    final File fooFile = new File(aDir, "Foo.java");
+    _model.saveFile(new FileSelector(fooFile));
+    _model.startCompile();
+
+    setupDocument("package b;\nimport a.Foo;\n" + FOO2_EXTENDS_FOO_TEXT);
+    final File foo2File = new File(bDir, "Foo2.java");
+    _model.saveFile(new FileSelector(foo2File));
+
+    TestListener listener = new CompileShouldSucceedListener();
+    _model.addListener(listener);
+    _model.startCompile();
+    assertCompileErrorsPresent(false);
+    listener.assertCompileStartCount(1);
+    listener.assertCompileEndCount(1);
+    listener.assertInteractionsResetCount(1);
+    listener.assertConsoleResetCount(1);
+
+    // Make sure .class exists
+    File compiled = classForJava(foo2File, "Foo2");
+    assertTrue(_name() + "Class file doesn't exist after compile",
+               compiled.exists());
   }
 
   /**
@@ -128,9 +201,6 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     // Make sure .class exists
     File compiled = classForJava(file, "Foo");
     assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
-
-    file.delete();
-    compiled.delete();
   }
 
   /**
@@ -158,8 +228,6 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     assertEquals(_name() + "Class file exists after failing compile",
                  false,
                  compiled.exists());
-
-    file.delete();
   }
   
   /**
@@ -188,8 +256,6 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     assertEquals(_name() + "Class file exists after failing compile",
                  false,
                  compiled.exists());
-
-    file.delete();
   }
   
   /**
@@ -210,8 +276,6 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     listener.assertCompileEndCount(1);
     File compiled = classForJava(file, "Foo");
     assertTrue(_name() + "Class file exists after compile?!", !compiled.exists());
-
-    file.delete();
   }
 
   /**
@@ -222,43 +286,29 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     throws BadLocationException, IOException
   {
     // Create temp file
-    File baseTempDir = tempFile();
+    File baseTempDir = tempDirectory();
     File subdir = new File(baseTempDir, "a");
     File fooFile = new File(subdir, "Foo.java");
     File compiled = classForJava(fooFile, "Foo");
 
-    try {
-      // Delete the file and make a directory of the same name
-      baseTempDir.delete();
-      baseTempDir.mkdir();
+    // Now make subdirectory a
+    subdir.mkdir();
 
-      // Now make subdirectory a
-      subdir.mkdir();
+    // Save the footext to Foo.java in the subdirectory
+    setupDocument(FOO_PACKAGE_INSIDE_CLASS);
+    _model.saveFileAs(new FileSelector(fooFile));
 
-      // Save the footext to Foo.java in the subdirectory
-      setupDocument(FOO_PACKAGE_INSIDE_CLASS);
-      _model.saveFileAs(new FileSelector(fooFile));
+    // do compile -- should fail since package decl is not valid!
+    CompileShouldFailListener listener = new CompileShouldFailListener();
+    _model.addListener(listener);
+    _model.startCompile();
 
-      // do compile -- should fail since package decl is not valid!
-      CompileShouldFailListener listener = new CompileShouldFailListener();
-      _model.addListener(listener);
-      _model.startCompile();
-
-      listener.assertCompileStartCount(1);
-      listener.assertCompileEndCount(1);
-      assertCompileErrorsPresent(true);
-      assertTrue(_name() + "Class file exists after failed compile", !compiled.exists());
-    }
-    finally {
-      // Delete files and then directories
-      compiled.delete(); // shouldn't be there, but just in case
-      fooFile.delete();
-      subdir.delete();
-      baseTempDir.delete();
-    }
+    listener.assertCompileStartCount(1);
+    listener.assertCompileEndCount(1);
+    assertCompileErrorsPresent(true);
+    assertTrue(_name() + "Class file exists after failed compile",
+               !compiled.exists());
   }
-  
-
  
   /**
    * If we try to compile an unsaved file but we do save it from within
@@ -318,9 +368,6 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     // Make sure .class exists
     File compiled = classForJava(file, "Foo");
     assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
-
-    file.delete();
-    compiled.delete();
   }
 
   /**
