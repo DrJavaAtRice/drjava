@@ -331,16 +331,67 @@ public class DefinitionsDocumentTest extends TestCase
   /**
    * Test whether removeTabs actually removes all tabs.
    */
-  public void testRemoveTabs() {
-    defModel.setIndent(2);
+  public void testRemoveTabs1() {
+    defModel.setIndent(1);
     String test = "\t this \t\tis a \t\t\t\t\ttest\t\t";
     String result = defModel._removeTabs(test);
-    assertEquals( "   this     is a           test    ", result);
+    assertEquals( "  this   is a      test  ", result);
+  }
+  
+  /**
+   * As of drjava-20020122-1534, files with tabs ended up garbled, with
+   * some of the text jumbled all around (bug #506630).
+   * This test aims to replicate the problem.
+   */
+  public void testRemoveTabs2() {
+    defModel.setIndent(2);
+
+	  String input =
+    "\ttoken = nextToken(); // read trailing parenthesis\n" +
+    "\tif (token != ')')\n" +
+    "\t  throw new ParseException(\"wrong number of arguments to |\");\n";
+
+	  String expected =
+    "  token = nextToken(); // read trailing parenthesis\n" +
+    "  if (token != ')')\n" +
+    "    throw new ParseException(\"wrong number of arguments to |\");\n";
+
+    int count = 5000;
+    StringBuffer bigIn = new StringBuffer(input.length() * count);
+    StringBuffer bigExp = new StringBuffer(expected.length() * count);
+    for (int i = 0; i < count; i++) {
+      bigIn.append(input);
+      bigExp.append(expected);
+    }
+
+    String result = defModel._removeTabs(bigIn.toString());
+    assertEquals(bigExp.toString(), result);
   }
   
   /**
    * Test whether tabs are removed as appropriate on call to insertString.
-   * @exception BadLocationException
+   */
+  public void testTabRemovalOnInsertString2() throws BadLocationException {
+	  String[] inputs = {
+      "\ttoken = nextToken(); // read trailing parenthesis\n",
+      "\tif (token != ')')\n",
+      "\t  throw new ParseException(\"wrong number of arguments to |\");\n",
+    };
+
+	  String expected =
+    " token = nextToken(); // read trailing parenthesis\n" +
+    " if (token != ')')\n" +
+    "   throw new ParseException(\"wrong number of arguments to |\");\n";
+
+    for (int i = 0; i < inputs.length; i++) {
+      defModel.insertString(defModel.getLength(), inputs[i], null);
+    }
+
+    assertEquals(expected, _getAllText());
+  }
+
+  /**
+   * Test whether tabs are removed as appropriate on call to insertString.
    */
   public void testTabRemovalOnInsertString() throws BadLocationException {
     defModel.setIndent(1);

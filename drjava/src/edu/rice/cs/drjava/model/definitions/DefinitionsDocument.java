@@ -209,7 +209,8 @@ public class DefinitionsDocument extends PlainDocument {
 
   /**
    * Given a String, return a new String will all tabs converted to spaces.
-   * Each tab is converted to two spaces, or whatever the _indent field is.
+   * Each tab is converted to one space, since changing the number of 
+   * characters within insertString screws things up.
    * @param source the String to be converted.
    * @return a String will all the tabs converted to spaces
    */
@@ -231,6 +232,12 @@ public class DefinitionsDocument extends PlainDocument {
     }
     return target.toString();
   }
+
+  /*
+  String _removeTabs(final String source) {
+    return source.replace('\t', ' ');
+  }
+  */
 
   /**
    * Add a character to the underlying reduced model.

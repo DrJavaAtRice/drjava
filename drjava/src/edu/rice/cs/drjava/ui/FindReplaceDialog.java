@@ -1,13 +1,11 @@
 package edu.rice.cs.drjava.ui;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
-import java.awt.event.*;
-import java.beans.*;
 import javax.swing.text.*;
+import java.beans.*;
 
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.swing.FindReplaceMachine;
@@ -24,9 +22,9 @@ class FindReplaceDialog extends JDialog {
   private JButton _replaceFindButton;
   private JButton _replaceAllButton;
   private JButton _closeButton;
-  private JTextField _findField = new JTextField(10);
-  private JTextField _replaceField = new JTextField(10);
-  private Label _message;
+  private JTextField _findField = new JTextField(20);
+  private JTextField _replaceField = new JTextField(20);
+  private JLabel _message;
   private FindReplaceMachine _machine;
   private DefinitionsPane _defPane;
   private Object _previousHighlightTag;
@@ -168,38 +166,55 @@ class FindReplaceDialog extends JDialog {
     addWindowListener(_dialogListener);
     
     setTitle("Find/Replace");
-    final String msgString1 = "Find:";
-    final String msgString2 = "Replace:";
-    Object[] array =  {
-      msgString1, _findField, msgString2, _replaceField
-    };
+
     _findNextButton = new JButton(_findNextAction);
     _replaceButton = new JButton(_replaceAction);
     _replaceFindButton = new JButton(_replaceFindAction);
     _replaceAllButton = new JButton(_replaceAllAction);
     _closeButton = new JButton(_closeAction);
-    _message = new Label();
+    _message = new JLabel();
+
+    _replaceButton.setEnabled(false);
+    _replaceFindButton.setEnabled(false);
+
+    Font font = _findField.getFont().deriveFont(16f);
+    _findField.setFont(font);
+    _replaceField.setFont(font);
+
     // set up the layout
-    Box outside = Box.createVerticalBox();
-    Box buttons = Box.createHorizontalBox();
+    JPanel buttons = new JPanel();
+    buttons.setLayout(new BoxLayout(buttons, BoxLayout.X_AXIS));
+
+    buttons.add(Box.createGlue());
     buttons.add(_findNextButton);
     buttons.add(_replaceButton);
     buttons.add(_replaceFindButton);
-    _replaceButton.setEnabled(false);
-    _replaceFindButton.setEnabled(false);
     buttons.add(_replaceAllButton);
     buttons.add(_closeButton);
-    outside.add(new Label(msgString1));
-    outside.add(_findField);
-    outside.add(new Label(msgString2));
-    outside.add(_replaceField);
-    outside.add(buttons);
-    outside.add(_message);
-    setContentPane(outside);
+    buttons.add(Box.createGlue());
+
+    JLabel findLabel = new JLabel("Find:", SwingConstants.LEFT);
+    findLabel.setLabelFor(_findField);
+    findLabel.setHorizontalAlignment(SwingConstants.LEFT);
+
+    JLabel replaceLabel = new JLabel("Replace:", SwingConstants.LEFT);
+    replaceLabel.setLabelFor(_replaceField);
+    replaceLabel.setHorizontalAlignment(SwingConstants.LEFT);
+
+    Container main = getContentPane();
+    main.setLayout(new BoxLayout(main, BoxLayout.Y_AXIS));
+
+    main.add(findLabel);
+    main.add(_findField);
+    main.add(replaceLabel);
+    main.add(_replaceField);
+    main.add(buttons);
+    main.add(_message);
+
     setDefaultCloseOperation(HIDE_ON_CLOSE);
     setModal(true);
     
-    _findField.addActionListener((AbstractAction)_findNextAction);
+    _findField.addActionListener(_findNextAction);
     
     // DocumentListener that keeps track of changes in the find field.
     _findField.getDocument().addDocumentListener(new DocumentListener() {
@@ -238,11 +253,8 @@ class FindReplaceDialog extends JDialog {
       }
     });
         
-    // Set the size and position of the dialog.
-    // There are no guarantees to how accurate the size is,
-    // given Swing's tendency to muck things up.
-    setBounds(100, 200, 520, 300);
-    setSize(520, 200);
+    // let the dialog size itself correctly.
+    pack();
   }
   
   public void setMachine(DefinitionsPane defPane) {
