@@ -88,7 +88,7 @@ public class ExceptionsAttribute extends AttributeInfo {
   /**
    * The exception index table
    */
-  private List exceptionIndexTable;
+  private List<Short> exceptionIndexTable;
   
   /**
    * Creates a new empty (not valid) code attribute
@@ -97,7 +97,7 @@ public class ExceptionsAttribute extends AttributeInfo {
   public ExceptionsAttribute(ConstantPool cp) {
     super(cp, "Exceptions");
     length              = 2;
-    exceptionIndexTable = new LinkedList();
+    exceptionIndexTable = new LinkedList<Short>();
   }
   
   /**

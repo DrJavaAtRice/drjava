@@ -38,72 +38,72 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class IfThenElseStatement extends IfThenStatement {
-    /**
-     * The elseStatement property name
-     */
-    public final static String ELSE_STATEMENT = "elseStatement";
-
-    /**
-     * The 'else' statement
-     */
-    private Node elseStatement;
-
-    /**
-     * Creates a new while statement
-     * @param cond  the condition 
-     * @param tstmt the then statement
-     * @param estmt the else statement
-     * @exception IllegalArgumentException if cond is null or tstmt is null or
-     *                                     estmt is null
-     */
-    public IfThenElseStatement(Expression cond, Node tstmt, Node estmt) {
-	this(cond, tstmt, estmt, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Creates a new while statement
-     * @param cond  the condition 
-     * @param tstmt the then statement
-     * @param estmt the else statement
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if cond is null or tstmt is null or
-     *                                     estmt is null
-     */
-    public IfThenElseStatement(Expression cond, Node tstmt, Node estmt,
-			       String fn, int bl, int bc, int el, int ec) {
-	super(cond, tstmt, fn, bl, bc, el, ec);
-
-	if (estmt == null) throw new IllegalArgumentException("estmt == null");
-
-	elseStatement = estmt;
-    }
+  /**
+   * The elseStatement property name
+   */
+  public final static String ELSE_STATEMENT = "elseStatement";
+  
+  /**
+   * The 'else' statement
+   */
+  private Node elseStatement;
+  
+  /**
+   * Creates a new while statement
+   * @param cond  the condition 
+   * @param tstmt the then statement
+   * @param estmt the else statement
+   * @exception IllegalArgumentException if cond is null or tstmt is null or
+   *                                     estmt is null
+   */
+  public IfThenElseStatement(Expression cond, Node tstmt, Node estmt) {
+    this(cond, tstmt, estmt, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Creates a new while statement
+   * @param cond  the condition 
+   * @param tstmt the then statement
+   * @param estmt the else statement
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if cond is null or tstmt is null or
+   *                                     estmt is null
+   */
+  public IfThenElseStatement(Expression cond, Node tstmt, Node estmt,
+                             String fn, int bl, int bc, int el, int ec) {
+    super(cond, tstmt, fn, bl, bc, el, ec);
     
-    /**
-     * Returns the else statement of this statement
-     */
-    public Node getElseStatement() {
-	return elseStatement;
-    }
-
-    /**
-     * Sets the else statement of this statement
-     * @exception IllegalArgumentException if node is null
-     */
-    public void setElseStatement(Node node) {
-	if (node == null) throw new IllegalArgumentException("node == null");
-
-	firePropertyChange(ELSE_STATEMENT, elseStatement, elseStatement = node);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }    
+    if (estmt == null) throw new IllegalArgumentException("estmt == null");
+    
+    elseStatement = estmt;
+  }
+  
+  /**
+   * Returns the else statement of this statement
+   */
+  public Node getElseStatement() {
+    return elseStatement;
+  }
+  
+  /**
+   * Sets the else statement of this statement
+   * @exception IllegalArgumentException if node is null
+   */
+  public void setElseStatement(Node node) {
+    if (node == null) throw new IllegalArgumentException("node == null");
+    
+    firePropertyChange(ELSE_STATEMENT, elseStatement, elseStatement = node);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }    
 }

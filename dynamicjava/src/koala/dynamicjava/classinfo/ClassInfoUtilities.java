@@ -48,30 +48,29 @@ public class ClassInfoUtilities {
    */
   public static ConstructorInfo lookupConstructor(ClassInfo cl, ClassInfo[] ac)
     throws NoSuchMethodException {
-    List ms = getConstructors(cl, ac.length);
-    List mm = new LinkedList();
+    List<ConstructorInfo> ms = getConstructors(cl, ac.length);
+    List<ConstructorInfo> mm = new LinkedList<ConstructorInfo>();
     
     // Search for the constructors with good parameter types and
     // put them in 'mm'
-    Iterator it = ms.iterator();
+    Iterator<ConstructorInfo> it = ms.iterator();
     while (it.hasNext()) {
-      ConstructorInfo m = (ConstructorInfo)it.next();
+      ConstructorInfo m = it.next();
       if (hasCompatibleSignatures(m.getParameterTypes(), ac)) {
         mm.add(m);
       }
     }
     
     if (mm.isEmpty()) {
-      throw new NoSuchMethodException(cl.getName()+" constructor");
+      throw new NoSuchMethodException(cl.getName() + " constructor");
     }
     
     // Select the most specific constructor
     it = mm.iterator();
-    ConstructorInfo result = (ConstructorInfo)it.next();
+    ConstructorInfo result = it.next();
     
     while (it.hasNext()) {
-      result = selectTheMostSpecificConstructor(result,
-                                                (ConstructorInfo)it.next());
+      result = selectTheMostSpecificConstructor(result, it.next());
     }
     
     return result;
@@ -204,14 +203,14 @@ public class ClassInfoUtilities {
    */
   public static MethodInfo lookupMethod(ClassInfo cl, String name, ClassInfo[] ac)
     throws NoSuchMethodException {
-    List ms = getMethods(cl, name, ac.length);
-    List mm = new LinkedList();
+    List<MethodInfo> ms = getMethods(cl, name, ac.length);
+    List<MethodInfo> mm = new LinkedList<MethodInfo>();
     
     // Search for the methods with good parameter types and
     // put them in 'mm'
-    Iterator it = ms.iterator();
+    Iterator<MethodInfo> it = ms.iterator();
     while (it.hasNext()) {
-      MethodInfo m = (MethodInfo)it.next();
+      MethodInfo m = it.next();
       if (hasCompatibleSignatures(m.getParameterTypes(), ac)) {
         mm.add(m);
       }
@@ -223,10 +222,10 @@ public class ClassInfoUtilities {
     
     // Select the most specific method
     it = mm.iterator();
-    MethodInfo result = (MethodInfo)it.next();
+    MethodInfo result = it.next();
     
     while (it.hasNext()) {
-      result = selectTheMostSpecificMethod(result, (MethodInfo)it.next());
+      result = selectTheMostSpecificMethod(result, it.next());
     }
     
     return result;
@@ -265,8 +264,8 @@ public class ClassInfoUtilities {
    * @return a list that contains the found methods, an empty list if no
    *         matching method was found.
    */
-  public static List getMethods(ClassInfo cl, String name, int params) {
-    List  result = new LinkedList();
+  public static List<MethodInfo> getMethods(ClassInfo cl, String name, int params) {
+    List<MethodInfo> result = new LinkedList<MethodInfo>();
     
     if (cl.isInterface()) {
       MethodInfo[] ms = cl.getMethods();
@@ -305,8 +304,8 @@ public class ClassInfoUtilities {
    * @return a list that contains the found constructors, an empty list if no
    *         matching constructor was found.
    */
-  private static List getConstructors(ClassInfo cl, int params) {
-    List  result = new LinkedList();
+  private static List<ConstructorInfo> getConstructors(ClassInfo cl, int params) {
+    List<ConstructorInfo> result = new LinkedList<ConstructorInfo>();
     ConstructorInfo[] ms = cl.getConstructors();
     
     for (int i = 0; i < ms.length; i++) {

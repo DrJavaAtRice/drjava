@@ -36,48 +36,48 @@ package koala.dynamicjava.tree;
  */
 
 public abstract class Allocation extends PrimaryExpression {
-    /**
-     * The creationType property name
-     */
-    public final static String CREATION_TYPE = "creationType";
-
-    /**
-     * The creationType
-     */
-    private Type creationType;
-
-    /**
-     * Initializes the expression
-     * @param tp    the creation type
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if tp is null
-     */
-    protected Allocation(Type tp, String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-
-	if (tp == null) throw new IllegalArgumentException("tp == null");
-
-	creationType = tp;
-    }
-
-    /**
-     * Returns the creation type
-     */
-    public Type getCreationType() {
-	return creationType;
-    }
-
-    /**
-     * Sets the creation type
-     * @exception IllegalArgumentException if t is null
-     */
-    public void setCreationType(Type t) {
-	if (t == null) throw new IllegalArgumentException("t == null");
-
-	firePropertyChange(CREATION_TYPE, creationType, creationType = t);
-    }
+  /**
+   * The creationType property name
+   */
+  public final static String CREATION_TYPE = "creationType";
+  
+  /**
+   * The creationType
+   */
+  private Type creationType;
+  
+  /**
+   * Initializes the expression
+   * @param tp    the creation type
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if tp is null
+   */
+  protected Allocation(Type tp, String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
+    
+    if (tp == null) throw new IllegalArgumentException("tp == null");
+    
+    creationType = tp;
+  }
+  
+  /**
+   * Returns the creation type
+   */
+  public Type getCreationType() {
+    return creationType;
+  }
+  
+  /**
+   * Sets the creation type
+   * @exception IllegalArgumentException if t is null
+   */
+  public void setCreationType(Type t) {
+    if (t == null) throw new IllegalArgumentException("t == null");
+    
+    firePropertyChange(CREATION_TYPE, creationType, creationType = t);
+  }
 }

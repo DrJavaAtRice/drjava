@@ -40,59 +40,59 @@ import koala.dynamicjava.classinfo.*;
  */
 
 public class ClassPool {
-    /**
-     * The map that contains the classinfos
-     */
-    protected Map classes = new HashMap(11);
-
-    /**
-     * Adds a classinfo to the pool
-     * @param cn the classname
-     * @param ci the classinfo
-     * @return the given class info
-     */
-    public ClassInfo add(String cn, ClassInfo ci) {
-	classes.put(cn, ci);
-
-	// Add the inner classes to the pool
-	ClassInfo[] infos = ci.getDeclaredClasses();
-	for (int i = 0; i < infos.length; i++) {
-	    String s = infos[i].getName();
-	    if (!classes.containsKey(s)) {
-		add(s, infos[i]);
-	    }
-	}
-	return ci;
+  /**
+   * The map that contains the classinfos
+   */
+  protected Map<String,ClassInfo> classes = new HashMap<String,ClassInfo>(11);
+  
+  /**
+   * Adds a classinfo to the pool
+   * @param cn the classname
+   * @param ci the classinfo
+   * @return the given class info
+   */
+  public ClassInfo add(String cn, ClassInfo ci) {
+    classes.put(cn, ci);
+    
+    // Add the inner classes to the pool
+    ClassInfo[] infos = ci.getDeclaredClasses();
+    for (int i = 0; i < infos.length; i++) {
+      String s = infos[i].getName();
+      if (!classes.containsKey(s)) {
+        add(s, infos[i]);
+      }
     }
-
-    /**
-     * Tests whether this pool contains the given class
-     * @param cn the classname
-     */
-    public boolean contains(String cn) {
-	return classes.containsKey(cn);
+    return ci;
+  }
+  
+  /**
+   * Tests whether this pool contains the given class
+   * @param cn the classname
+   */
+  public boolean contains(String cn) {
+    return classes.containsKey(cn);
+  }
+  
+  /**
+   * Returns the class info mapped with the given key
+   * @param cn the classname
+   */
+  public ClassInfo get(String cn) {
+    return (ClassInfo)classes.get(cn);
+  }
+  
+  /**
+   * Gets the first compilable class in the pool
+   * @return null if no class was found
+   */
+  public ClassInfo getFirstCompilable() {
+    Iterator it = classes.keySet().iterator();
+    while (it.hasNext()) {
+      ClassInfo ci = (ClassInfo)classes.get(it.next());
+      if (ci.isCompilable()) {
+        return ci;
+      }
     }
-
-    /**
-     * Returns the class info mapped with the given key
-     * @param cn the classname
-     */
-    public ClassInfo get(String cn) {
-	return (ClassInfo)classes.get(cn);
-    }
-
-    /**
-     * Gets the first compilable class in the pool
-     * @return null if no class was found
-     */
-    public ClassInfo getFirstCompilable() {
-	Iterator it = classes.keySet().iterator();
-	while (it.hasNext()) {
-	    ClassInfo ci = (ClassInfo)classes.get(it.next());
-	    if (ci.isCompilable()) {
-		return ci;
-	    }
-	}
-	return null;
-    }
+    return null;
+  }
 }

@@ -40,77 +40,77 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class SwitchBlock  extends Node implements ExpressionContainer {
-    /**
-     * The statements property name
-     */
-    public final static String STATEMENTS = "statements";
-
-    /**
-     * The expression
-     */
-    private Expression expression;
-
-    /**
-     * The statements
-     */
-    private List statements;
-
-    /**
-     * Creates a new binding
-     */
-    public SwitchBlock(Expression exp, List stmts) {
-	this(exp, stmts, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Creates a new binding
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     */
-    public SwitchBlock(Expression exp, List stmts,
-		       String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-
-	expression = exp;
-	statements = stmts;
-    }
-
-    /**
-     * Returns the 'case' expression
-     */
-    public Expression getExpression() {
-	return expression;
-    }
-
-    /**
-     * Sets the 'case' expression
-     */
-    public void setExpression(Expression e) {
-	firePropertyChange(EXPRESSION, expression, expression = e);
-    }
-
-    /**
-     * Returns the statements
-     */
-    public List getStatements() {
-	return statements;
-    }
-
-    /**
-     * Sets the statements
-     */
-    public void setStatements(List l) {
-	firePropertyChange(STATEMENTS, statements, statements = l);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  /**
+   * The statements property name
+   */
+  public final static String STATEMENTS = "statements";
+  
+  /**
+   * The expression
+   */
+  private Expression expression;
+  
+  /**
+   * The statements
+   */
+  private List<Node> statements;
+  
+  /**
+   * Creates a new binding
+   */
+  public SwitchBlock(Expression exp, List<Node> stmts) {
+    this(exp, stmts, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Creates a new binding
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   */
+  public SwitchBlock(Expression exp, List<Node> stmts,
+                     String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
+    
+    expression = exp;
+    statements = stmts;
+  }
+  
+  /**
+   * Returns the 'case' expression
+   */
+  public Expression getExpression() {
+    return expression;
+  }
+  
+  /**
+   * Sets the 'case' expression
+   */
+  public void setExpression(Expression e) {
+    firePropertyChange(EXPRESSION, expression, expression = e);
+  }
+  
+  /**
+   * Returns the statements
+   */
+  public List<Node> getStatements() {
+    return statements;
+  }
+  
+  /**
+   * Sets the statements
+   */
+  public void setStatements(List<Node> l) {
+    firePropertyChange(STATEMENTS, statements, statements = l);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

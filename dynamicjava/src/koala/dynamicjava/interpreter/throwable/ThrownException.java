@@ -39,30 +39,30 @@ import koala.dynamicjava.tree.*;
  */
 
 public class ThrownException extends ExecutionError {
-
-    /**
-     * Constructs an <code>ThrownExceptionError</code> with no detail message. 
-     */
-    public ThrownException(Throwable e) {
-        super("uncaught.exception");
-	thrown = e;
-    }
-
-    /**
-     * Constructs an <code>ThrownExceptionError</code> with the specified 
-     * detail message, filename, line, column and exception.
-     * @param e  the thrown exception
-     * @param n  the node in the syntax tree where the error occurs
-     */
-    public ThrownException(Throwable e, Node n) {
-        super("uncaught.exception", n);
-	thrown = e;
-    }
-    
-    /**
-     * Returns the exception that causes this error throwing
-     */
-    public Throwable getException() {
-	return thrown;
-    }
+  
+  /**
+   * Constructs an <code>ThrownExceptionError</code> with no detail message. 
+   */
+  public ThrownException(Throwable e) {
+    super("uncaught.exception");
+    thrown = e;
+  }
+  
+  /**
+   * Constructs an <code>ThrownExceptionError</code> with the specified 
+   * detail message, filename, line, column and exception.
+   * @param e  the thrown exception
+   * @param n  the node in the syntax tree where the error occurs
+   */
+  public ThrownException(Throwable e, Node n) {
+    super("uncaught.exception", n);
+    thrown = e;
+  }
+  
+  /**
+   * Returns the exception that causes this error throwing
+   */
+  public Throwable getException() {
+    return thrown;
+  }
 }

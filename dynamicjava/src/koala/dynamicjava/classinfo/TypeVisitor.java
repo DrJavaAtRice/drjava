@@ -41,72 +41,72 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/06/03
  */
 
-public class TypeVisitor extends VisitorObject {
-    /**
-     * The class finder for this class
-     */
-    private ClassFinder classFinder;
-
-    /**
-     * The context
-     */
-    private ClassInfo context;
-
-    /**
-     * Creates a new type visitor
-     * @param cf  the class finder
-     * @param ctx the context
-     */
-    public TypeVisitor(ClassFinder cf, ClassInfo ctx) {
-	classFinder = cf;
-	context     = ctx;
+public class TypeVisitor extends VisitorObject<ClassInfo> {
+  /**
+   * The class finder for this class
+   */
+  private ClassFinder classFinder;
+  
+  /**
+   * The context
+   */
+  private ClassInfo context;
+  
+  /**
+   * Creates a new type visitor
+   * @param cf  the class finder
+   * @param ctx the context
+   */
+  public TypeVisitor(ClassFinder cf, ClassInfo ctx) {
+    classFinder = cf;
+    context     = ctx;
+  }
+  
+  /**
+   * Visits a PrimitiveType
+   * @param node the node to visit
+   * @return the representation of the visited type
+   */
+  public ClassInfo visit(PrimitiveType node) {
+    return new JavaClassInfo(node.getValue());
+  }
+  
+  /**
+   * Visits a ReferenceType
+   * @param node the node to visit
+   * @return the representation of the visited type
+   * @exception NoClassDefFoundError if the class cannot be loaded
+   */
+  public ClassInfo visit(ReferenceType node) {
+    return lookupClass(node.getRepresentation(), context);
+  }
+  
+  /**
+   * Visits a ArrayType
+   * @param node the node to visit
+   * @return the representation of the visited type
+   * @exception NoClassDefFoundError if the class cannot be loaded
+   */
+  public ClassInfo visit(ArrayType node) {
+    ClassInfo ci = (ClassInfo)node.getElementType().acceptVisitor(this);
+    return ci.getArrayType();
+  }
+  
+  /**
+   * Looks for a class from its name
+   * @param s the name of the class to find
+   * @param c the context
+   * @exception NoClassDefFoundError if the class cannot be loaded
+   */
+  private ClassInfo lookupClass(String s, ClassInfo c) {
+    try {
+      if (c != null) {
+        return classFinder.lookupClass(s, c);
+      } else {
+        return classFinder.lookupClass(s);
+      }
+    } catch (ClassNotFoundException e) {
+      throw new NoClassDefFoundError(e.getMessage());
     }
-
-    /**
-     * Visits a PrimitiveType
-     * @param node the node to visit
-     * @return the representation of the visited type
-     */
-    public Object visit(PrimitiveType node) {
-	return new JavaClassInfo(node.getValue());
-    }
-
-    /**
-     * Visits a ReferenceType
-     * @param node the node to visit
-     * @return the representation of the visited type
-     * @exception NoClassDefFoundError if the class cannot be loaded
-     */
-    public Object visit(ReferenceType node) {
-	return lookupClass(node.getRepresentation(), context);
-    }
-
-    /**
-     * Visits a ArrayType
-     * @param node the node to visit
-     * @return the representation of the visited type
-     * @exception NoClassDefFoundError if the class cannot be loaded
-     */
-    public Object visit(ArrayType node) {
-	ClassInfo ci = (ClassInfo)node.getElementType().acceptVisitor(this);
-	return ci.getArrayType();
-    }
-
-    /**
-     * Looks for a class from its name
-     * @param s the name of the class to find
-     * @param c the context
-     * @exception NoClassDefFoundError if the class cannot be loaded
-     */
-    private ClassInfo lookupClass(String s, ClassInfo c) {
-	try {
-	    if (c != null) {
-		return classFinder.lookupClass(s, c);
-	    } else {
-		return classFinder.lookupClass(s);
-	    }
-	} catch (ClassNotFoundException e) {
-	    throw new NoClassDefFoundError(e.getMessage());
-	}
-    }
+  }
 }

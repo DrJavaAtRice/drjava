@@ -38,56 +38,56 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public abstract class PrimitiveType extends Type {
-    /**
-     * The value property name
-     */
-    public final static String VALUE = "value";
-
-   /**
-     * The value of the node
-     */
-    private Class value;
-
-    /**
-     * Initializes the type
-     * @param val   the value of this type
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if val is null
-     */
-    protected PrimitiveType(Class val, String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-
-	if (val == null) throw new IllegalArgumentException("val == null");
-
-	value = val;
-    }
-
-    /**
-     * Returns the value of this node
-     */
-    public Class getValue() {
-	return value;
-    }
-
-    /**
-     * Sets the value of this node
-     * @exception IllegalArgumentException if c is null
-     */
-    public void setValue(Class c) {
-	if (c == null) throw new IllegalArgumentException("c == null");
-
-	firePropertyChange(VALUE, value, value = c);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  /**
+   * The value property name
+   */
+  public final static String VALUE = "value";
+  
+  /**
+   * The value of the node
+   */
+  private Class value;
+  
+  /**
+   * Initializes the type
+   * @param val   the value of this type
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if val is null
+   */
+  protected PrimitiveType(Class val, String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
+    
+    if (val == null) throw new IllegalArgumentException("val == null");
+    
+    value = val;
+  }
+  
+  /**
+   * Returns the value of this node
+   */
+  public Class getValue() {
+    return value;
+  }
+  
+  /**
+   * Sets the value of this node
+   * @exception IllegalArgumentException if c is null
+   */
+  public void setValue(Class c) {
+    if (c == null) throw new IllegalArgumentException("c == null");
+    
+    firePropertyChange(VALUE, value, value = c);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

@@ -36,15 +36,15 @@ package koala.dynamicjava.tree;
  */
 
 public abstract class Type extends Node {
-    /**
-     * Initializes the type
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     */
-    protected Type(String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-    }
+  /**
+   * Initializes the type
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   */
+  protected Type(String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
+  }
 }

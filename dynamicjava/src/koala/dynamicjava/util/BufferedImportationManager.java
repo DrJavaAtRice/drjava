@@ -39,90 +39,88 @@ import java.util.*;
  */
 
 public class BufferedImportationManager extends ImportationManager {
-    /**
-     * The class buffer
-     */
-    protected Map buffer = new HashMap(11);
-
-    /**
-     * Creates a new importation manager.
-     * @param cl the class loader to use
-     */
-    public BufferedImportationManager(ClassLoader cl) {
-	super(cl);
+  /**
+   * The class buffer
+   */
+  protected Map<String,Map<String,Class>> buffer = new HashMap<String,Map<String,Class>>(11);
+  
+  /**
+   * Creates a new importation manager.
+   * @param cl the class loader to use
+   */
+  public BufferedImportationManager(ClassLoader cl) {
+    super(cl);
+  }
+  
+  /**
+   * Returns a copy of this object
+   */
+  public Object clone() {
+    return new BufferedImportationManager(this);
+  }
+  
+  /**
+   * Sets the current package. This has no influence on the
+   * behaviour of the <code>lookupClass</code> method.
+   * @param pkg the package name
+   */
+  public void setCurrentPackage(String pkg) {
+    super.setCurrentPackage(pkg);
+    buffer.clear();
+  }
+  
+  /**
+   * Declares a new import-on-demand clause
+   * @param pkg the package name
+   */
+  public void declarePackageImport(String pkg) {
+    super.declarePackageImport(pkg);
+    if (buffer == null) {
+      buffer = new HashMap<String,Map<String,Class>>(11);
     }
-
-    /**
-     * Returns a copy of this object
-     */
-    public Object clone() {
-        return new BufferedImportationManager(this);
+    buffer.clear();
+  }
+  
+  /**
+   * Declares a new single-type-import clause
+   * @param cname the fully qualified class name
+   * @exception ClassNotFoundException if the class cannot be found
+   */
+  public void declareClassImport(String cname) throws ClassNotFoundException {
+    super.declareClassImport(cname);
+    buffer.clear();
+  }
+  
+  /**
+   * Loads the class that match to the given name in the source file
+   * @param  cname  the name of the class to find
+   * @param  ccname the name of the current class or null
+   * @return the class found
+   * @exception ClassNotFoundException if the class cannot be loaded
+   */
+  public Class lookupClass(String cname, String ccname)
+    throws ClassNotFoundException {
+    Map<String,Class> m = buffer.get(ccname);
+    if (m != null) {
+      Class c = m.get(cname);
+      if (c != null) return c;
     }
-
-    /**
-     * Sets the current package. This has no influence on the
-     * behaviour of the <code>lookupClass</code> method.
-     * @param pkg the package name
-     */
-    public void setCurrentPackage(String pkg) {
-	super.setCurrentPackage(pkg);
-	buffer.clear();
+    
+    Class c = super.lookupClass(cname, ccname);
+    
+    if (m == null) {
+      m = new HashMap<String,Class>(11);
+      buffer.put(ccname, m);
     }
-
-    /**
-     * Declares a new import-on-demand clause
-     * @param pkg the package name
-     */
-    public void declarePackageImport(String pkg) {
-	super.declarePackageImport(pkg);
-	if (buffer == null) {
-	    buffer = new HashMap(11);
-	}
-	buffer.clear();
-    }
-
-    /**
-     * Declares a new single-type-import clause
-     * @param cname the fully qualified class name
-     * @exception ClassNotFoundException if the class cannot be found
-     */
-    public void declareClassImport(String cname) throws ClassNotFoundException {
-	super.declareClassImport(cname);
-	buffer.clear();
-    }
-
-    /**
-     * Loads the class that match to the given name in the source file
-     * @param  cname  the name of the class to find
-     * @param  ccname the name of the current class or null
-     * @return the class found
-     * @exception ClassNotFoundException if the class cannot be loaded
-     */
-    public Class lookupClass(String cname, String ccname)
-	throws ClassNotFoundException {
-	Map m = (Map)buffer.get(ccname);
-	if (m != null) {
-	    Class c = (Class)m.get(cname);
-	    if (c != null) {
-		return c;
-	    }
-	}
-
-	Class c = super.lookupClass(cname, ccname);
-
-	if (m == null) {
-	    m = new HashMap(11);
-	    buffer.put(ccname, m);
-	}
-	m.put(cname, c);
-
-	return c;
-    }
-
-    /**
-     * Copy constructor
-     */
-    protected BufferedImportationManager(ImportationManager im) {
-	super(im);
-    }
+    m.put(cname, c);
+    
+    return c;
+  }
+  
+  /**
+   * Copy constructor
+   */
+  protected BufferedImportationManager(ImportationManager im) {
+    super(im);
+  }
 }

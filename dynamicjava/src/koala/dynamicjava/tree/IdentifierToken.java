@@ -27,6 +27,7 @@
  */
 
 package koala.dynamicjava.tree;
+import koala.dynamicjava.parser.Token;
 
 /**
  * This interface represents an identifier token, ie
@@ -37,33 +38,41 @@ package koala.dynamicjava.tree;
  */
 
 public interface IdentifierToken {
-    /**
-     * Returns the representation of the identifier
-     */
-    String image();
-
-    /**
-     * Returns the line number where the beginning of the token
-     * was found in the source file
-     */
-    int beginLine();
-
-    /**
-     * Returns the line number where the end of the token
-     * was found in the source file
-     */
-    int endLine();
-
-    /**
-     * Returns the column number where the beginning of the token
-     * was found in the source file
-     */
-    int beginColumn();
-
-    /**
-     * Returns the column number where the end of the token
-     * was found in the source file
-     */
-    int endColumn();
-
+  
+  /**
+   * Returns the parse token corresponding to the identifier;
+   * Throws an exception if this identifier is a Tree class
+   * (e.g., Identififer) instead of a Parser class (e.g., TreeToken)
+   */
+  Token getToken();
+  
+  /**
+   * Returns the representation of the identifier
+   */
+  String image();
+  
+  /**
+   * Returns the line number where the beginning of the token
+   * was found in the source file
+   */
+  int beginLine();
+  
+  /**
+   * Returns the line number where the end of the token
+   * was found in the source file
+   */
+  int endLine();
+  
+  /**
+   * Returns the column number where the beginning of the token
+   * was found in the source file
+   */
+  int beginColumn();
+  
+  /**
+   * Returns the column number where the end of the token
+   * was found in the source file
+   */
+  int endColumn();
+  
 }

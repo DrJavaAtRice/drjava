@@ -40,172 +40,172 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class ForStatement extends Statement implements ContinueTarget {
-    /**
-     * The initialization property name
-     */
-    public final static String INITIALIZATION = "initialization";
-
-    /**
-     * The condition property name
-     */
-    public final static String CONDITION = "condition";
-
-    /**
-     * The update property name
-     */
-    public final static String UPDATE = "update";
-
-    /**
-     * The body property name
-     */
-    public final static String BODY = "body";
-
-    /**
-     * The initialization statements
-     */
-    private List initialization;
-
-    /**
-     * The condition to evaluate at each loop
-     */
-    private Expression condition;
-
-    /**
-     * The update statements
-     */
-    private List update;
-
-    /**
-     * The body of this statement
-     */
-    private Node body;
-
-    /**
-     * The labels
-     */
-    private List labels;
-
-    /**
-     * Creates a new for statement
-     * @param init  the initialization statements
-     * @param cond  the condition to evaluate at each loop
-     * @param updt  the update statements
-     * @param body  the body
-     * @exception IllegalArgumentException if body is null
-     */
-    public ForStatement(List init, Expression cond, List updt, Node body) {
-	this(init, cond, updt, body, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Creates a new for statement
-     * @param init  the initialization statements
-     * @param cond  the condition to evaluate at each loop
-     * @param updt  the update statements
-     * @param body  the body
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if body is null
-     */
-    public ForStatement(List init, Expression cond, List updt, Node body,
-			String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-
-	if (body == null) throw new IllegalArgumentException("body == null");
-
-	initialization = init;
-	condition      = cond;
-	update         = updt;
-	this.body      = body;
-	labels         = new LinkedList();
-    }
+  /**
+   * The initialization property name
+   */
+  public final static String INITIALIZATION = "initialization";
+  
+  /**
+   * The condition property name
+   */
+  public final static String CONDITION = "condition";
+  
+  /**
+   * The update property name
+   */
+  public final static String UPDATE = "update";
+  
+  /**
+   * The body property name
+   */
+  public final static String BODY = "body";
+  
+  /**
+   * The initialization statements
+   */
+  private List<Node> initialization;
+  
+  /**
+   * The condition to evaluate at each loop
+   */
+  private Expression condition;
+  
+  /**
+   * The update statements
+   */
+  private List<Node> update;
+  
+  /**
+   * The body of this statement
+   */
+  private Node body;
+  
+  /**
+   * The labels
+   */
+  private List<String> labels;
+  
+  /**
+   * Creates a new for statement
+   * @param init  the initialization statements
+   * @param cond  the condition to evaluate at each loop
+   * @param updt  the update statements
+   * @param body  the body
+   * @exception IllegalArgumentException if body is null
+   */
+  public ForStatement(List<Node> init, Expression cond, List<Node> updt, Node body) {
+    this(init, cond, updt, body, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Creates a new for statement
+   * @param init  the initialization statements
+   * @param cond  the condition to evaluate at each loop
+   * @param updt  the update statements
+   * @param body  the body
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if body is null
+   */
+  public ForStatement(List<Node> init, Expression cond, List<Node> updt, Node body,
+                      String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
     
-    /**
-     * Gets the initialization statements
-     */
-    public List getInitialization() {
-	return initialization;
-    }
-
-    /**
-     * Sets the initialization statements
-     */
-    public void setInitialization(List l) {
-	firePropertyChange(INITIALIZATION, initialization, initialization = l);
-    }
-
-    /**
-     * Gets the condition to evaluate at each loop
-     */
-    public Expression getCondition() {
-	return condition;
-    }
-
-    /**
-     * Sets the condition to evaluate
-     */
-    public void setCondition(Expression e) {
-	firePropertyChange(CONDITION, condition, condition = e);
-    }
-
-    /**
-     * Gets the update statements
-     */
-    public List getUpdate() {
-	return update;
-    }
-
-    /**
-     * Sets the update statements
-     */
-    public void setUpdate(List l) {
-	firePropertyChange(UPDATE, update, update = l);
-    }
-
-    /**
-     * Returns the body of this statement
-     */
-    public Node getBody() {
-	return body;
-    }
-
-    /**
-     * Sets the body of this statement
-     * @exception IllegalArgumentException if node is null
-     */
-    public void setBody(Node node) {
-	if (node == null) throw new IllegalArgumentException("node == null");
-
-	firePropertyChange(BODY, body, body = node);
-    }
-
-    /**
-     * Adds a label to this statement
-     * @param label the label to add
-     * @exception IllegalArgumentException if label is null
-     */
-    public void addLabel(String label) {
-	if (label == null) throw new IllegalArgumentException("label == null");
-
-	labels.add(label);
-    }
-
-    /**
-     * Test whether this statement has the given label
-     * @return true if this statement has the given label
-     */
-    public boolean hasLabel(String label) {
-	return labels.contains(label);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }    
+    if (body == null) throw new IllegalArgumentException("body == null");
+    
+    initialization = init;
+    condition      = cond;
+    update         = updt;
+    this.body      = body;
+    labels         = new LinkedList<String>();
+  }
+  
+  /**
+   * Gets the initialization statements
+   */
+  public List<Node> getInitialization() {
+    return initialization;
+  }
+  
+  /**
+   * Sets the initialization statements
+   */
+  public void setInitialization(List<Node> l) {
+    firePropertyChange(INITIALIZATION, initialization, initialization = l);
+  }
+  
+  /**
+   * Gets the condition to evaluate at each loop
+   */
+  public Expression getCondition() {
+    return condition;
+  }
+  
+  /**
+   * Sets the condition to evaluate
+   */
+  public void setCondition(Expression e) {
+    firePropertyChange(CONDITION, condition, condition = e);
+  }
+  
+  /**
+   * Gets the update statements
+   */
+  public List<Node> getUpdate() {
+    return update;
+  }
+  
+  /**
+   * Sets the update statements
+   */
+  public void setUpdate(List<Node> l) {
+    firePropertyChange(UPDATE, update, update = l);
+  }
+  
+  /**
+   * Returns the body of this statement
+   */
+  public Node getBody() {
+    return body;
+  }
+  
+  /**
+   * Sets the body of this statement
+   * @exception IllegalArgumentException if node is null
+   */
+  public void setBody(Node node) {
+    if (node == null) throw new IllegalArgumentException("node == null");
+    
+    firePropertyChange(BODY, body, body = node);
+  }
+  
+  /**
+   * Adds a label to this statement
+   * @param label the label to add
+   * @exception IllegalArgumentException if label is null
+   */
+  public void addLabel(String label) {
+    if (label == null) throw new IllegalArgumentException("label == null");
+    
+    labels.add(label);
+  }
+  
+  /**
+   * Test whether this statement has the given label
+   * @return true if this statement has the given label
+   */
+  public boolean hasLabel(String label) {
+    return labels.contains(label);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }    
 }

@@ -27,6 +27,7 @@
  */
 
 package koala.dynamicjava.tree;
+import koala.dynamicjava.parser.Token;
 
 /**
  * This class implements a tree token
@@ -36,91 +37,99 @@ package koala.dynamicjava.tree;
  */
 
 public class Identifier implements IdentifierToken {
-    /**
-     * The image
-     */
-    private String image;
-
-    /**
-     * The begin line
-     */
-    private int beginLine;
-
-    /**
-     * The begin line
-     */
-    private int beginColumn;
-
-    /**
-     * The end line
-     */
-    private int endLine;
-
-    /**
-     * The end line
-     */
-    private int endColumn;
-
-    /**
-     * Creates a new token
-     * @param im the image
-     */
-    public Identifier(String im) {
-	this(im, 0, 0, 0, 0);
-    }
-
-    /**
-     * Creates a new token
-     * @param im the image
-     * @param bl the begin line
-     * @param bc the begin column
-     * @param el the end line
-     * @param ec the end column
-     */
-    public Identifier(String im, int bl, int bc, int el, int ec) {
-	image       = im;
-	beginLine   = bl;
-	beginColumn = bc;
-	endLine     = el;
-	endColumn   = ec;
-    }
-
-    /**
-     * Returns the representation of the identifier
-     */
-    public String image() {
-	return image;
-    }
-
-    /**
-     * Returns the line number where the beginning of the token
-     * was found in the source file
-     */
-    public int beginLine() {
-	return beginLine;
-    }
-
-    /**
-     * Returns the line number where the end of the token
-     * was found in the source file
-     */
-    public int endLine() {
-	return endLine;
-    }
-
-    /**
-     * Returns the column number where the beginning of the token
-     * was found in the source file
-     */
-    public int beginColumn() {
-	return beginColumn;
-    }
-
-    /**
-     * Returns the column number where the end of the token
-     * was found in the source file
-     */
-    public int endColumn() {
-	return endLine;
-    }
+  /**
+   * The image
+   */
+  private String image;
+  
+  /**
+   * The begin line
+   */
+  private int beginLine;
+  
+  /**
+   * The begin line
+   */
+  private int beginColumn;
+  
+  /**
+   * The end line
+   */
+  private int endLine;
+  
+  /**
+   * The end line
+   */
+  private int endColumn;
+  
+  /**
+   * Creates a new token
+   * @param im the image
+   */
+  public Identifier(String im) {
+    this(im, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Creates a new token
+   * @param im the image
+   * @param bl the begin line
+   * @param bc the begin column
+   * @param el the end line
+   * @param ec the end column
+   */
+  public Identifier(String im, int bl, int bc, int el, int ec) {
+    image       = im;
+    beginLine   = bl;
+    beginColumn = bc;
+    endLine     = el;
+    endColumn   = ec;
+  }
+  
+  /**
+   * Throws an exception since there is no corresponding parse token
+   * for tree identifiers.
+   */
+  public Token getToken() { 
+    throw new UnsupportedOperationException("Attempt to get the parse token corresponding to a tree identifier");
+  }
+  
+  /**
+   * Returns the representation of the identifier
+   */
+  public String image() {
+    return image;
+  }
+  
+  /**
+   * Returns the line number where the beginning of the token
+   * was found in the source file
+   */
+  public int beginLine() {
+    return beginLine;
+  }
+  
+  /**
+   * Returns the line number where the end of the token
+   * was found in the source file
+   */
+  public int endLine() {
+    return endLine;
+  }
+  
+  /**
+   * Returns the column number where the beginning of the token
+   * was found in the source file
+   */
+  public int beginColumn() {
+    return beginColumn;
+  }
+  
+  /**
+   * Returns the column number where the end of the token
+   * was found in the source file
+   */
+  public int endColumn() {
+    return endLine;
+  }
 }

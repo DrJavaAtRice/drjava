@@ -38,35 +38,35 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class AddAssignExpression extends AssignExpression {
-    /**
-     * Initializes the expression
-     * @param lexp  the LHS expression
-     * @param rexp  the RHS expression
-     */
-    public AddAssignExpression(Expression lexp, Expression rexp) {
-	this(lexp, rexp, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Initializes the expression
-     * @param lexp  the LHS expression
-     * @param rexp  the RHS expression
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     */
-    public AddAssignExpression(Expression lexp, Expression rexp,
-			       String fn, int bl, int bc, int el, int ec) {
-	super(lexp, rexp, fn, bl, bc, el, ec);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  /**
+   * Initializes the expression
+   * @param lexp  the LHS expression
+   * @param rexp  the RHS expression
+   */
+  public AddAssignExpression(Expression lexp, Expression rexp) {
+    this(lexp, rexp, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Initializes the expression
+   * @param lexp  the LHS expression
+   * @param rexp  the RHS expression
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   */
+  public AddAssignExpression(Expression lexp, Expression rexp,
+                             String fn, int bl, int bc, int el, int ec) {
+    super(lexp, rexp, fn, bl, bc, el, ec);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

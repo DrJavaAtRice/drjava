@@ -44,70 +44,74 @@ import koala.dynamicjava.util.*;
  */
 
 public class ArrayModifier extends LeftHandSideModifier {
-    /**
-     * The array expression
-     */
-    protected ArrayAccess node;
-
-    /**
-     * The array reference
-     */
-    protected Object array;
-
-    /**
-     * The cell number
-     */
-    protected Number cell;
-
-    /**
-     * A list used to manage recursive calls
-     */
-    protected List arrays = new LinkedList();
-
-    /**
-     * A list used to manage recursive calls
-     */
-    protected List cells  = new LinkedList();
-
-    /**
-     * Creates a new array modifier
-     * @param node the node of that represents this array
-     */
-    public ArrayModifier(ArrayAccess node) {
-	this.node = node;
+  /**
+   * The array expression
+   */
+  protected ArrayAccess node;
+  
+  /**
+   * The array reference
+   */
+  protected Object array;
+  
+  /**
+   * The cell number
+   */
+  protected Number cell;
+  
+  /**
+   * A list used to manage recursive calls
+   */
+  protected List<Object> arrays = new LinkedList<Object>();
+  
+  /**
+   * A list used to manage recursive calls
+   */
+  protected List<Number> cells  = new LinkedList<Number>();
+  
+  /**
+   * Creates a new array modifier
+   * @param node the node of that represents this array
+   */
+  public ArrayModifier(ArrayAccess aa) {
+    node = aa;
+  }
+  
+  /**
+   * Prepares the modifier for modification
+   * @param v    a Node visitor that returns either a Character or a Number
+   * @param ctx  Ignored!!
+   */
+  public Object prepare(Visitor<Object> v, Context ctx) {
+    arrays.add(0, array);
+    cells.add(0, cell);
+    
+    array = node.getExpression().acceptVisitor(v);
+    Object o  = node.getCellNumber().acceptVisitor(v);
+    if (o instanceof Character) {
+      o = new Integer(((Character)o).charValue());
     }
-
-    /**
-     * Prepares the modifier for modification
-     */
-    public Object prepare(Visitor v, Context ctx) {
-	arrays.add(0, array);
-	cells.add(0, cell);
-
-	array = node.getExpression().acceptVisitor(v);
-	Object o   = node.getCellNumber().acceptVisitor(v);
-	if (o instanceof Character) {
-	    o = new Integer(((Character)o).charValue());
-	}
-	cell = (Number)o;
-	return Array.get(array, cell.intValue());
+    cell = (Number) o;
+    return Array.get(array, cell.intValue());
+  }
+  
+  /**
+   * Sets the value of the underlying left hand side expression
+   * @param ctx  Ignored!!
+   * @param value  the value to be assigned to the cell in this
+   */
+  public void modify(Context ctx, Object value) {
+    try {
+      Array.set(array, cell.intValue(), value);
+    } catch (IllegalArgumentException e) {
+      // !!! Hummm ...
+      if (e.getMessage().equals("array element type mismatch")) {
+        throw new ArrayStoreException();
+      }
+      throw e;
+    } finally {
+      array = arrays.remove(0);
+      cell  = cells.remove(0);
     }
-
-    /**
-     * Sets the value of the underlying left hand side expression
-     */
-    public void modify(Context ctx, Object value) {
-	try {
-	    Array.set(array, cell.intValue(), value);
-	} catch (IllegalArgumentException e) {
-	    // !!! Hummm ...
-	    if (e.getMessage().equals("array element type mismatch")) {
-		throw new ArrayStoreException();
-	    }
-	    throw e;
-	} finally {
-	    array = arrays.remove(0);
-	    cell  = (Number)cells.remove(0);
-	}
-    }
+  }
 }

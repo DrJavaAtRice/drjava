@@ -38,134 +38,134 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class ConditionalExpression extends Expression {
-    /**
-     * The conditionExpression property name
-     */
-    public final static String CONDITION_EXPRESSION = "conditionExpression";
-
-    /**
-     * The ifTrueExpression property name
-     */
-    public final static String IF_TRUE_EXPRESSION = "ifTrueExpression";
+  /**
+   * The conditionExpression property name
+   */
+  public final static String CONDITION_EXPRESSION = "conditionExpression";
+  
+  /**
+   * The ifTrueExpression property name
+   */
+  public final static String IF_TRUE_EXPRESSION = "ifTrueExpression";
+  
+  /**
+   * The ifFalseExpression property name
+   */
+  public final static String IF_FALSE_EXPRESSION = "ifFalseExpression";
+  
+  /**
+   * The condition expression
+   */
+  private Expression conditionExpression;
+  
+  /**
+   * The if true expression
+   */
+  private Expression ifTrueExpression;
+  
+  /**
+   * The if false expression
+   */
+  private Expression ifFalseExpression;
+  
+  /**
+   * Initializes the expression
+   * @param cexp  the condition expression
+   * @param texp  the if true expression
+   * @param fexp  the if false expression
+   * @exception IllegalArgumentException if cexp is null or texp is null or
+   *            fexp is null
+   */
+  public ConditionalExpression(Expression cexp, Expression texp, Expression fexp) {
+    this(cexp, texp, fexp, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Initializes the expression
+   * @param cexp  the condition expression
+   * @param texp  the if true expression
+   * @param fexp  the if false expression
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if cexp is null or texp is null or
+   *            fexp is null
+   */
+  public ConditionalExpression(Expression cexp, Expression texp, Expression fexp,
+                               String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
     
-    /**
-     * The ifFalseExpression property name
-     */
-    public final static String IF_FALSE_EXPRESSION = "ifFalseExpression";
+    if (cexp == null) throw new IllegalArgumentException("cexp == null");
+    if (texp == null) throw new IllegalArgumentException("texp == null");
+    if (fexp == null) throw new IllegalArgumentException("fexp == null");
     
-    /**
-     * The condition expression
-     */
-    private Expression conditionExpression;
-
-    /**
-     * The if true expression
-     */
-    private Expression ifTrueExpression;
-
-    /**
-     * The if false expression
-     */
-    private Expression ifFalseExpression;
-
-    /**
-     * Initializes the expression
-     * @param cexp  the condition expression
-     * @param texp  the if true expression
-     * @param fexp  the if false expression
-     * @exception IllegalArgumentException if cexp is null or texp is null or
-     *            fexp is null
-     */
-    public ConditionalExpression(Expression cexp, Expression texp, Expression fexp) {
-	this(cexp, texp, fexp, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Initializes the expression
-     * @param cexp  the condition expression
-     * @param texp  the if true expression
-     * @param fexp  the if false expression
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if cexp is null or texp is null or
-     *            fexp is null
-     */
-    public ConditionalExpression(Expression cexp, Expression texp, Expression fexp,
-				 String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-
-	if (cexp == null) throw new IllegalArgumentException("cexp == null");
-	if (texp == null) throw new IllegalArgumentException("texp == null");
-	if (fexp == null) throw new IllegalArgumentException("fexp == null");
-
-	conditionExpression  = cexp;
-	ifTrueExpression     = texp;
-	ifFalseExpression    = fexp;
-    }
-
-    /**
-     * Returns the condition expression
-     */
-    public Expression getConditionExpression() {
-	return conditionExpression;
-    }
-
-    /**
-     * Sets the condition expression
-     * @exception IllegalArgumentException if e is null
-     */
-    public void setConditionExpression(Expression e) {
-	if (e == null) throw new IllegalArgumentException("e == null");
-
-	firePropertyChange(CONDITION_EXPRESSION,
-			   conditionExpression,
-			   conditionExpression = e);
-    }
-
-    /**
-     * Returns the if true expression
-     */
-    public Expression getIfTrueExpression() {
-	return ifTrueExpression;
-    }
-
-    /**
-     * Sets the if true expression
-     * @exception IllegalArgumentException if e is null
-     */
-    public void setIfTrueExpression(Expression e) {
-	if (e == null) throw new IllegalArgumentException("e == null");
-
-	firePropertyChange(IF_TRUE_EXPRESSION, ifTrueExpression, ifTrueExpression = e);
-    }
-
-    /**
-     * Returns the if false expression
-     */
-    public Expression getIfFalseExpression() {
-	return ifFalseExpression;
-    }
-
-    /**
-     * Sets the if false expression
-     * @exception IllegalArgumentException if e is null
-     */
-    public void setIfFalseExpression(Expression e) {
-	if (e == null) throw new IllegalArgumentException("e == null");
-
-	firePropertyChange(IF_FALSE_EXPRESSION,
-			   ifFalseExpression,
-			   ifFalseExpression = e);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+    conditionExpression  = cexp;
+    ifTrueExpression     = texp;
+    ifFalseExpression    = fexp;
+  }
+  
+  /**
+   * Returns the condition expression
+   */
+  public Expression getConditionExpression() {
+    return conditionExpression;
+  }
+  
+  /**
+   * Sets the condition expression
+   * @exception IllegalArgumentException if e is null
+   */
+  public void setConditionExpression(Expression e) {
+    if (e == null) throw new IllegalArgumentException("e == null");
+    
+    firePropertyChange(CONDITION_EXPRESSION,
+                       conditionExpression,
+                       conditionExpression = e);
+  }
+  
+  /**
+   * Returns the if true expression
+   */
+  public Expression getIfTrueExpression() {
+    return ifTrueExpression;
+  }
+  
+  /**
+   * Sets the if true expression
+   * @exception IllegalArgumentException if e is null
+   */
+  public void setIfTrueExpression(Expression e) {
+    if (e == null) throw new IllegalArgumentException("e == null");
+    
+    firePropertyChange(IF_TRUE_EXPRESSION, ifTrueExpression, ifTrueExpression = e);
+  }
+  
+  /**
+   * Returns the if false expression
+   */
+  public Expression getIfFalseExpression() {
+    return ifFalseExpression;
+  }
+  
+  /**
+   * Sets the if false expression
+   * @exception IllegalArgumentException if e is null
+   */
+  public void setIfFalseExpression(Expression e) {
+    if (e == null) throw new IllegalArgumentException("e == null");
+    
+    firePropertyChange(IF_FALSE_EXPRESSION,
+                       ifFalseExpression,
+                       ifFalseExpression = e);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

@@ -44,45 +44,45 @@ import koala.dynamicjava.util.*;
  */
 
 public class StaticFieldModifier extends LeftHandSideModifier {
-    /**
-     * The field
-     */
-    protected Field field;
-
-    /**
-     * The node
-     */
-    protected Node node;
-
-    /**
-     * Creates a new field modifier
-     * @param f the field to modify
-     * @param n the field access node
-     */
-    public StaticFieldModifier(Field f, Node n) {
-	field = f;
-	node  = n;
+  /**
+   * The field
+   */
+  protected Field field;
+  
+  /**
+   * The node
+   */
+  protected Node node;
+  
+  /**
+   * Creates a new field modifier
+   * @param f the field to modify
+   * @param n the field access node
+   */
+  public StaticFieldModifier(Field f, Node n) {
+    field = f;
+    node  = n;
+  }
+  
+  /**
+   * Prepares the modifier for modification
+   */
+  public Object prepare(Visitor<Object> v, Context ctx) {
+    try {
+      return field.get(null);
+    } catch (Exception e) {
+      throw new CatchedExceptionError(e, node);
     }
-
-    /**
-     * Prepares the modifier for modification
-     */
-    public Object prepare(Visitor v, Context ctx) {
-	try {
-	    return field.get(null);
-	} catch (Exception e) {
-            throw new CatchedExceptionError(e, node);
-	}
+  }
+  
+  /**
+   * Sets the value of the underlying left hand side expression
+   */
+  public void modify(Context ctx, Object value) {
+    try {
+      field.set(null, value);
+    } catch (Exception e) {
+      throw new CatchedExceptionError(e, node);
     }
-
-    /**
-     * Sets the value of the underlying left hand side expression
-     */
-    public void modify(Context ctx, Object value) {
-	try {
-	    field.set(null, value);
-	} catch (Exception e) {
-            throw new CatchedExceptionError(e, node);
-	}
-    }
+  }
 }

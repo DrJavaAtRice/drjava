@@ -38,54 +38,54 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class ReturnStatement extends Statement implements ExpressionContainer {
-    /**
-     * The expression
-     */
-    private Expression expression;
-
-    /**
-     * Creates a new while statement
-     * @param exp   the expression
-     * @exception IllegalArgumentException if exp is null
-     */
-    public ReturnStatement(Expression exp) {
-	this(exp, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Creates a new while statement
-     * @param exp   the expression
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     */
-    public ReturnStatement(Expression exp,
-			   String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-	expression = exp;
-    }
-    
-    /**
-     * Gets the expression
-     */
-    public Expression getExpression() {
-	return expression;
-    }
-
-    /**
-     * Sets the expression
-     */
-    public void setExpression(Expression e) {
-	firePropertyChange(EXPRESSION, expression, expression = e);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }    
+  /**
+   * The expression
+   */
+  private Expression expression;
+  
+  /**
+   * Creates a new while statement
+   * @param exp   the expression
+   * @exception IllegalArgumentException if exp is null
+   */
+  public ReturnStatement(Expression exp) {
+    this(exp, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Creates a new while statement
+   * @param exp   the expression
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   */
+  public ReturnStatement(Expression exp,
+                         String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
+    expression = exp;
+  }
+  
+  /**
+   * Gets the expression
+   */
+  public Expression getExpression() {
+    return expression;
+  }
+  
+  /**
+   * Sets the expression
+   */
+  public void setExpression(Expression e) {
+    firePropertyChange(EXPRESSION, expression, expression = e);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }    
 }

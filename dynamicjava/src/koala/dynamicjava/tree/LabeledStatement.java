@@ -38,97 +38,97 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class LabeledStatement extends Statement {
-    /**
-     * The label property name
-     */
-    public final static String LABEL = "label";
-
-    /**
-     * The statement property name
-     */
-    public final static String STATEMENT = "statement";
-
-    /**
-     * The label
-     */
-    private String label;
-
-    /**
-     * The statement
-     */
-    private Node statement;
-
-    /**
-     * Creates a new while statement
-     * @param label the label
-     * @param stat  the statement
-     * @exception IllegalArgumentException if label is null or stat is null
-     */
-    public LabeledStatement(String label, Node stat) {
-	this(label, stat, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Creates a new while statement
-     * @param label the label
-     * @param stat  the statement
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if label is null or stat is null
-     */
-    public LabeledStatement(String label, Node stat,
-			    String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-
-	if (label == null) throw new IllegalArgumentException("label == null");
-	if (stat == null)  throw new IllegalArgumentException("stat == null");
-
-	this.label = label;
-	statement  = stat;
-    }
+  /**
+   * The label property name
+   */
+  public final static String LABEL = "label";
+  
+  /**
+   * The statement property name
+   */
+  public final static String STATEMENT = "statement";
+  
+  /**
+   * The label
+   */
+  private String label;
+  
+  /**
+   * The statement
+   */
+  private Node statement;
+  
+  /**
+   * Creates a new while statement
+   * @param label the label
+   * @param stat  the statement
+   * @exception IllegalArgumentException if label is null or stat is null
+   */
+  public LabeledStatement(String label, Node stat) {
+    this(label, stat, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Creates a new while statement
+   * @param label the label
+   * @param stat  the statement
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if label is null or stat is null
+   */
+  public LabeledStatement(String label, Node stat,
+                          String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
     
-    /**
-     * Gets the label
-     */
-    public String getLabel() {
-	return label;
-    }
-
-    /**
-     * Sets the label
-     * @exception IllegalArgumentException if e is null
-     */
-    public void setLabel(String s) {
-	if (s == null) throw new IllegalArgumentException("s == null");
-
-	firePropertyChange(LABEL, label, label = s);
-    }
-
-    /**
-     * Returns the statement
-     */
-    public Node getStatement() {
-	return statement;
-    }
-
-    /**
-     * Sets the statement
-     * @exception IllegalArgumentException if n is null
-     */
-    public void setStatement(Node n) {
-	if (n == null) throw new IllegalArgumentException("n == null");
-
-	firePropertyChange(STATEMENT, statement, statement = n);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }    
+    if (label == null) throw new IllegalArgumentException("label == null");
+    if (stat == null)  throw new IllegalArgumentException("stat == null");
+    
+    this.label = label;
+    statement  = stat;
+  }
+  
+  /**
+   * Gets the label
+   */
+  public String getLabel() {
+    return label;
+  }
+  
+  /**
+   * Sets the label
+   * @exception IllegalArgumentException if e is null
+   */
+  public void setLabel(String s) {
+    if (s == null) throw new IllegalArgumentException("s == null");
+    
+    firePropertyChange(LABEL, label, label = s);
+  }
+  
+  /**
+   * Returns the statement
+   */
+  public Node getStatement() {
+    return statement;
+  }
+  
+  /**
+   * Sets the statement
+   * @exception IllegalArgumentException if n is null
+   */
+  public void setStatement(Node n) {
+    if (n == null) throw new IllegalArgumentException("n == null");
+    
+    firePropertyChange(STATEMENT, statement, statement = n);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }    
 }

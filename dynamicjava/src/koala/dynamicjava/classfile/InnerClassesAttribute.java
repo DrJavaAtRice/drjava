@@ -89,7 +89,7 @@ public class InnerClassesAttribute extends AttributeInfo {
   /**
    * The classes
    */
-  private List classes;
+  private List<InnerClassesEntry> classes;
   
   /**
    * Creates a new innerclasses attribute
@@ -98,7 +98,7 @@ public class InnerClassesAttribute extends AttributeInfo {
   public InnerClassesAttribute(ConstantPool cp) {
     super(cp, "InnerClasses");
     length  = 2;
-    classes = new LinkedList();
+    classes = new LinkedList<InnerClassesEntry>();
   }
   
   /**

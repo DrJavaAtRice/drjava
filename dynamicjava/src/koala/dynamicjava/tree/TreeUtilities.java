@@ -38,75 +38,75 @@ import java.util.*;
  */
 
 public class TreeUtilities {
-    /**
-     * Creates Type node from a Class object
-     * @param c     the class to use
-     */
-    public static Type classToType(Class c) {
-	return classToType(c, null, 0, 0, 0, 0);
+  /**
+   * Creates Type node from a Class object
+   * @param c     the class to use
+   */
+  public static Type classToType(Class c) {
+    return classToType(c, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Creates Type node from a Class object
+   * @param c     the class to use
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   */
+  public static Type classToType(Class c, String fn, int bl, int bc, int el, int ec) {
+    Type result;
+    if (c == int.class) {
+      result = new IntType(fn, bl, bc, el, ec);
+    } else if (c == double.class) {
+      result = new DoubleType(fn, bl, bc, el, ec);
+    } else if (c == long.class) {
+      result = new LongType(fn, bl, bc, el, ec);
+    } else if (c == float.class) {
+      result = new FloatType(fn, bl, bc, el, ec);
+    } else if (c == char.class) {
+      result = new CharType(fn, bl, bc, el, ec);
+    } else if (c == byte.class) {
+      result = new ByteType(fn, bl, bc, el, ec);
+    } else if (c == short.class) {
+      result = new ShortType(fn, bl, bc, el, ec);
+    } else if (c == boolean.class) {
+      result = new BooleanType(fn, bl, bc, el, ec);
+    } else if (c == void.class) {
+      result = new VoidType(fn, bl, bc, el, ec);
+    } else if (c.isArray()) {
+      result = new ArrayType(classToType(c.getComponentType(), fn, bl, bc, el, ec),
+                             1, fn, bl, bc, el, ec);
+    } else {
+      result = new ReferenceType(c.getName(), fn, bl, bc, el, ec);
     }
-
-    /**
-     * Creates Type node from a Class object
-     * @param c     the class to use
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     */
-    public static Type classToType(Class c, String fn, int bl, int bc, int el, int ec) {
-	Type result;
-	if (c == int.class) {
-	    result = new IntType(fn, bl, bc, el, ec);
-	} else if (c == double.class) {
-	    result = new DoubleType(fn, bl, bc, el, ec);
-	} else if (c == long.class) {
-	    result = new LongType(fn, bl, bc, el, ec);
-	} else if (c == float.class) {
-	    result = new FloatType(fn, bl, bc, el, ec);
-	} else if (c == char.class) {
-	    result = new CharType(fn, bl, bc, el, ec);
-	} else if (c == byte.class) {
-	    result = new ByteType(fn, bl, bc, el, ec);
-	} else if (c == short.class) {
-	    result = new ShortType(fn, bl, bc, el, ec);
-	} else if (c == boolean.class) {
-	    result = new BooleanType(fn, bl, bc, el, ec);
-	} else if (c == void.class) {
-	    result = new VoidType(fn, bl, bc, el, ec);
-	} else if (c.isArray()) {
-	    result = new ArrayType(classToType(c.getComponentType(), fn, bl, bc, el, ec),
-				   1, fn, bl, bc, el, ec);
-	} else {
-	    result = new ReferenceType(c.getName(), fn, bl, bc, el, ec);
-	}
-	return result;
+    return result;
+  }
+  
+  /**
+   * Transforms a list of token into a dot-separated name
+   * @param l a list of token. l can be null.
+   * @return "" if l is null.
+   */
+  public static String listToName(List<IdentifierToken> l) {
+    String   result = "";
+    if (l != null) {
+      Iterator<IdentifierToken> it = l.iterator();
+      if (it.hasNext()) {
+        result += it.next().image();
+      }
+      while (it.hasNext()) {
+        result += "." + it.next().image();
+      }
     }
-
-    /**
-     * Transforms a list of token into a dot-separated name
-     * @param l a list of token. l can be null.
-     * @return "" if l is null.
-     */
-    public static String listToName(List l) {
-	String   result = "";
-	if (l != null) {
-	    Iterator it = l.iterator();
-	    if (it.hasNext()) {
-		result += ((IdentifierToken)it.next()).image();
-	    }
-	    while (it.hasNext()) {
-		result += "." + ((IdentifierToken)it.next()).image();
-	    }
-	}
-	return result;
-    }
-
-    /**
-     * This class contains only static methods, so it is not useful
-     * to create instances of it or to extend it.
-     */
-    private TreeUtilities() {
-    }
+    return result;
+  }
+  
+  /**
+   * This class contains only static methods, so it is not useful
+   * to create instances of it or to extend it.
+   */
+  private TreeUtilities() {
+  }
 }

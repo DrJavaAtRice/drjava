@@ -40,57 +40,57 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class ThisExpression extends PrimaryExpression {
-    /**
-     * The className property name
-     */
-    public final static String CLASS_NAME = "className";
-
-    /**
-     * The class that qualify that object
-     */
-    private String className;
-
-    /**
-     * Initializes the expression
-     * @param ids   the identifiers (tokens) that qualify this 'this'.
-     *              Can be null.
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if ids is null or body is null
-     */
-    public ThisExpression(List ids, String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-
-	if (ids == null) throw new IllegalArgumentException("ids == null");
-
-	className = TreeUtilities.listToName(ids);
-    }
-
-    /**
-     * Returns the name of the class that qualify that object
-     */
-    public String getClassName() {
-	return className;
-    }
-
-    /**
-     * Sets the name of the class that qualify that object
-     * @exception IllegalArgumentException if s is null or body is null
-     */
-    public void setClassName(String s) {
-	if (s == null) throw new IllegalArgumentException("s == null");
-
-	firePropertyChange(CLASS_NAME, className, className = s);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  /**
+   * The className property name
+   */
+  public final static String CLASS_NAME = "className";
+  
+  /**
+   * The class that qualify that object
+   */
+  private String className;
+  
+  /**
+   * Initializes the expression
+   * @param ids   the identifiers (tokens) that qualify this 'this'.
+   *              Can be null.
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if ids is null or body is null
+   */
+  public ThisExpression(List<IdentifierToken> ids, String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
+    
+    if (ids == null) throw new IllegalArgumentException("ids == null");
+    
+    className = TreeUtilities.listToName(ids);
+  }
+  
+  /**
+   * Returns the name of the class that qualify that object
+   */
+  public String getClassName() {
+    return className;
+  }
+  
+  /**
+   * Sets the name of the class that qualify that object
+   * @exception IllegalArgumentException if s is null or body is null
+   */
+  public void setClassName(String s) {
+    if (s == null) throw new IllegalArgumentException("s == null");
+    
+    firePropertyChange(CLASS_NAME, className, className = s);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

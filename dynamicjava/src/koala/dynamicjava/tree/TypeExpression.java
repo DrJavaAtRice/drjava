@@ -38,65 +38,65 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class TypeExpression extends PrimaryExpression {
-    /**
-     * The type property name
-     */
-    public final static String TYPE = "type";
-
-    /**
-     * The type represented by this expression
-     */
-    private Type type;
+  /**
+   * The type property name
+   */
+  public final static String TYPE = "type";
+  
+  /**
+   * The type represented by this expression
+   */
+  private Type type;
+  
+  /**
+   * Initializes the expression
+   * @param t     the type represented by this expression
+   * @exception IllegalArgumentException if t is null
+   */
+  public TypeExpression(Type t) {
+    this(t, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Initializes the expression
+   * @param t     the type represented by this expression
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if t is null
+   */
+  public TypeExpression(Type t, String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
     
-    /**
-     * Initializes the expression
-     * @param t     the type represented by this expression
-     * @exception IllegalArgumentException if t is null
-     */
-    public TypeExpression(Type t) {
-	this(t, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Initializes the expression
-     * @param t     the type represented by this expression
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if t is null
-     */
-    public TypeExpression(Type t, String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-
-	if (t == null) throw new IllegalArgumentException("t == null");
-
-	type = t;
-    }
-
-    /**
-     * Returns the type represented by this expression
-     */
-    public Type getType() {
-	return type;
-    }
-
-    /**
-     * Sets the type
-     * @exception IllegalArgumentException if t is null
-     */
-    public void setType(ReferenceType t) {
-	if (t == null) throw new IllegalArgumentException("t == null");
-
-	firePropertyChange(TYPE, type, type = t);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+    if (t == null) throw new IllegalArgumentException("t == null");
+    
+    type = t;
+  }
+  
+  /**
+   * Returns the type represented by this expression
+   */
+  public Type getType() {
+    return type;
+  }
+  
+  /**
+   * Sets the type
+   * @exception IllegalArgumentException if t is null
+   */
+  public void setType(ReferenceType t) {
+    if (t == null) throw new IllegalArgumentException("t == null");
+    
+    firePropertyChange(TYPE, type, type = t);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

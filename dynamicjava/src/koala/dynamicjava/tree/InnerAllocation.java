@@ -40,92 +40,92 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class InnerAllocation extends Allocation implements ExpressionStatement,
-                                                           ExpressionContainer {
-    /**
-     * The arguments property name
-     */
-    public final static String ARGUMENTS = "arguments";
-
-    /**
-     * The outer object expression
-     */
-    private Expression expression;
-
-    /**
-     * The arguments to pass to the constructor
-     */
-    private List arguments;
-
-    /**
-     * Initializes the expression
-     * @param exp   the outer object
-     * @param tp    the type prefix
-     * @param args  the arguments of the constructor. null if no arguments.
-     * @exception IllegalArgumentException if exp is null or tp is null
-     */
-    public InnerAllocation(Expression exp, Type tp, List args) {
-	this(exp, tp, args, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Initializes the expression
-     * @param exp   the outer object
-     * @param tp    the type prefix
-     * @param args  the arguments of the constructor. null if no arguments.
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if exp is null or tp is null
-     */
-    public InnerAllocation(Expression exp, Type tp, List args,
-			   String fn, int bl, int bc, int el, int ec) {
-	super(tp, fn, bl, bc, el, ec);
-
-	if (exp == null) throw new IllegalArgumentException("exp == null");
-
-	expression = exp;
-	arguments  = args;
-    }
-
-    /**
-     * Returns the outer class instance expression
-     */
-    public Expression getExpression() {
-	return expression;
-    }
-
-    /**
-     * Sets the outer class instance expression
-     * @exception IllegalArgumentException if e is null
-     */
-    public void setExpression(Expression e) {
-	if (e == null) throw new IllegalArgumentException("e == null");
-
-	firePropertyChange(EXPRESSION, expression, expression = e);
-    }
-
-    /**
-     * Returns the constructor arguments.
-     * @return null if there is no argument.
-     */
-    public List getArguments() {
-	return arguments;
-    }
-
-    /**
-     * Sets the constructor arguments.
-     */
-    public void setArguments(List l) {
-	firePropertyChange(ARGUMENTS, arguments, arguments = l);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  ExpressionContainer {
+  /**
+   * The arguments property name
+   */
+  public final static String ARGUMENTS = "arguments";
+  
+  /**
+   * The outer object expression
+   */
+  private Expression expression;
+  
+  /**
+   * The arguments to pass to the constructor
+   */
+  private List<Expression> arguments;
+  
+  /**
+   * Initializes the expression
+   * @param exp   the outer object
+   * @param tp    the type prefix
+   * @param args  the arguments of the constructor. null if no arguments.
+   * @exception IllegalArgumentException if exp is null or tp is null
+   */
+  public InnerAllocation(Expression exp, Type tp, List<Expression> args) {
+    this(exp, tp, args, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Initializes the expression
+   * @param exp   the outer object
+   * @param tp    the type prefix
+   * @param args  the arguments of the constructor. null if no arguments.
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if exp is null or tp is null
+   */
+  public InnerAllocation(Expression exp, Type tp, List<Expression> args,
+                         String fn, int bl, int bc, int el, int ec) {
+    super(tp, fn, bl, bc, el, ec);
+    
+    if (exp == null) throw new IllegalArgumentException("exp == null");
+    
+    expression = exp;
+    arguments  = args;
+  }
+  
+  /**
+   * Returns the outer class instance expression
+   */
+  public Expression getExpression() {
+    return expression;
+  }
+  
+  /**
+   * Sets the outer class instance expression
+   * @exception IllegalArgumentException if e is null
+   */
+  public void setExpression(Expression e) {
+    if (e == null) throw new IllegalArgumentException("e == null");
+    
+    firePropertyChange(EXPRESSION, expression, expression = e);
+  }
+  
+  /**
+   * Returns the constructor arguments.
+   * @return null if there is no argument.
+   */
+  public List<Expression> getArguments() {
+    return arguments;
+  }
+  
+  /**
+   * Sets the constructor arguments.
+   */
+  public void setArguments(List<Expression> l) {
+    firePropertyChange(ARGUMENTS, arguments, arguments = l);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

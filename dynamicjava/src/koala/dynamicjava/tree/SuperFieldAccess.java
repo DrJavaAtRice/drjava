@@ -38,34 +38,34 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class SuperFieldAccess extends FieldAccess {
-    /**
-     * Creates a new field access node
-     * @param fln   the field name
-     * @exception IllegalArgumentException if fln is null
-     */
-    public SuperFieldAccess(String fln) {
-	this(fln, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Creates a new field access node
-     * @param fln   the field name
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if fln is null
-     */
-    public SuperFieldAccess(String fln, String fn, int bl, int bc, int el, int ec) {
-	super(fln, fn, bl, bc, el, ec);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  /**
+   * Creates a new field access node
+   * @param fln   the field name
+   * @exception IllegalArgumentException if fln is null
+   */
+  public SuperFieldAccess(String fln) {
+    this(fln, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Creates a new field access node
+   * @param fln   the field name
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if fln is null
+   */
+  public SuperFieldAccess(String fln, String fn, int bl, int bc, int el, int ec) {
+    super(fln, fn, bl, bc, el, ec);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

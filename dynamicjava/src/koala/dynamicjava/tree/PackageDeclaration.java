@@ -40,62 +40,62 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class PackageDeclaration extends Node {
-    /**
-     * The name property name
-     */
-    public final static String NAME = "name";
-
-    /**
-     * The name of the package
-     */
-    private String name;
-
-    /**
-     * Creates a new package declaration node
-     * @param ident a list of tokens that represents a package name.
-     *              The list can be null.
-     */
-    public PackageDeclaration(List ident) {
-	this(ident, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Creates a new package declaration node
-     * @param ident a list of tokens that represents a package name.
-     *              The list can be null.
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     */
-    public PackageDeclaration(List ident, String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-	name = TreeUtilities.listToName(ident);
-    }
-
-    /**
-     * Returns the name of the imported class or package
-     */
-    public String getName() {
-	return name;
-    }
-
-    /**
-     * Sets the name
-     * @exception IllegalArgumentException if s is null
-     */
-    public void setName(String s) {
-	if (s == null) throw new IllegalArgumentException("s == null");
-
-	firePropertyChange(NAME, name, name = s);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  /**
+   * The name property name
+   */
+  public final static String NAME = "name";
+  
+  /**
+   * The name of the package
+   */
+  private String name;
+  
+  /**
+   * Creates a new package declaration node
+   * @param ident a list of tokens that represents a package name.
+   *              The list can be null.
+   */
+  public PackageDeclaration(List<IdentifierToken> ident) {
+    this(ident, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Creates a new package declaration node
+   * @param ident a list of tokens that represents a package name.
+   *              The list can be null.
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   */
+  public PackageDeclaration(List<IdentifierToken> ident, String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
+    name = TreeUtilities.listToName(ident);
+  }
+  
+  /**
+   * Returns the name of the imported class or package
+   */
+  public String getName() {
+    return name;
+  }
+  
+  /**
+   * Sets the name
+   * @exception IllegalArgumentException if s is null
+   */
+  public void setName(String s) {
+    if (s == null) throw new IllegalArgumentException("s == null");
+    
+    firePropertyChange(NAME, name, name = s);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

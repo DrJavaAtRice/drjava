@@ -46,14 +46,14 @@ public class ReflectionUtilities {
    */
   public static Constructor lookupConstructor(Class cl, Class [] ac)
     throws NoSuchMethodException {
-    List ms = getConstructors(cl, ac.length);
-    List mm = new LinkedList();
+    List<Constructor> ms = getConstructors(cl, ac.length);
+    List<Constructor> mm = new LinkedList<Constructor>();
     
     // Search for the constructors with good parameter types and
     // put them in 'mm'
-    Iterator it = ms.iterator();
+    Iterator<Constructor> it = ms.iterator();
     while (it.hasNext()) {
-      Constructor m = (Constructor)it.next();
+      Constructor m = it.next();
       if (hasCompatibleSignatures(m.getParameterTypes(), ac)) {
         mm.add(m);
       }
@@ -65,10 +65,10 @@ public class ReflectionUtilities {
     
     // Select the most specific constructor
     it = mm.iterator();
-    Constructor result = (Constructor)it.next();
+    Constructor result = it.next();
     
     while (it.hasNext()) {
-      result = selectTheMostSpecificConstructor(result, (Constructor)it.next());
+      result = selectTheMostSpecificConstructor(result, it.next());
     }
     
     return result;
@@ -82,8 +82,8 @@ public class ReflectionUtilities {
    * @return a list that contains the found constructors, an empty list if no
    *         matching constructor was found.
    */
-  public static List getConstructors(Class cl, int params) {
-    List  result = new LinkedList();
+  public static List<Constructor> getConstructors(Class cl, int params) {
+    List<Constructor>  result = new LinkedList<Constructor>();
     Constructor[] ms = cl.getDeclaredConstructors();
     
     for (int i = 0; i < ms.length; i++) {
@@ -100,9 +100,9 @@ public class ReflectionUtilities {
    * @param name the name of the method
    * @param ac   the arguments classes (possibly not the exact declaring classes)
    */
-  public static Method lookupMethod(Class cl, String name, List ac)
+  public static Method lookupMethod(Class cl, String name, List<Class> ac)
     throws NoSuchMethodException {
-    return lookupMethod(cl, name, (Class[])ac.toArray());
+    return lookupMethod(cl, name, ac.toArray(new Class[0]));  
   }
   
   /**
@@ -111,16 +111,16 @@ public class ReflectionUtilities {
    * @param name the name of the method
    * @param ac   the arguments classes (possibly not the exact declaring classes)
    */
-  public static Method lookupMethod(Class cl, String name, Class [] ac)
+  public static Method lookupMethod(Class cl, String name, Class[] ac)
     throws NoSuchMethodException {
-    List ms = getMethods(cl, name, ac.length);
-    List mm = new LinkedList();
+    List<Method> ms = getMethods(cl, name, ac.length);
+    List<Method> mm = new LinkedList<Method>();
     
     // Search for the methods with good parameter types and
     // put them in 'mm'
-    Iterator it = ms.iterator();
+    Iterator<Method> it = ms.iterator();
     while (it.hasNext()) {
-      Method m = (Method)it.next();
+      Method m = it.next();
       if (hasCompatibleSignatures(m.getParameterTypes(), ac)) {
         mm.add(m);
       }
@@ -132,10 +132,10 @@ public class ReflectionUtilities {
     
     // Select the most specific method
     it = mm.iterator();
-    Method result = (Method)it.next();
+    Method result = it.next();
     
     while (it.hasNext()) {
-      result = selectTheMostSpecificMethod(result, (Method)it.next());
+      result = selectTheMostSpecificMethod(result, it.next());
     }
     
     return result;
@@ -150,8 +150,8 @@ public class ReflectionUtilities {
    * @return a list that contains the found methods, an empty list if no
    *         matching method was found.
    */
-  public static List getMethods(Class cl, String name, int params) {
-    List  result = new LinkedList();
+  public static List<Method> getMethods(Class cl, String name, int params) {
+    List<Method>  result = new LinkedList<Method>();
     
     if (cl.isInterface()) {
       Method[] ms = cl.getDeclaredMethods();
@@ -191,10 +191,10 @@ public class ReflectionUtilities {
    * @param name the name of the method
    * @param ac   the arguments classes (possibly not the exact declaring classes)
    */
-  public static Method lookupOuterMethod(Class cl, String name, Class [] ac)
+  public static Method lookupOuterMethod(Class cl, String name, Class[] ac)
     throws NoSuchMethodException {
     boolean sc = Modifier.isStatic(cl.getModifiers());
-    Class   c  = (cl != null) ? cl.getDeclaringClass() : null;
+    Class c = (cl != null) ? cl.getDeclaringClass() : null;
     while (c != null) {
       sc |= Modifier.isStatic(c.getModifiers());
       try {

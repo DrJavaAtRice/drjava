@@ -37,52 +37,52 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/07/04
  */
 public class CatchStatement extends Statement {
-    /**
-     * The catched exception
-     */
-    private FormalParameter exception;
-    
-    /**
-     * The block
-     */
-    private Node block;
-
-    /**
-     * Creates a new catch statement
-     * @param fp   the catched exception
-     * @param blk  the block
-     * @param fn     the filename
-     * @param bl     the begin line
-     * @param bc     the begin column
-     * @param el     the end line
-     * @param ec     the end column
-     */
-    public CatchStatement(FormalParameter fp, Node blk,
-			  String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-	exception = fp;
-	block     = blk;
-    }
-
-    /**
-     * Returns the catched exception descriptor
-     */
-    public FormalParameter getException() {
-	return exception;
-    }
-    
-    /**
-     * Returns the block
-     */
-    public Node getBlock() {
-	return block;
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  /**
+   * The catched exception
+   */
+  private FormalParameter exception;
+  
+  /**
+   * The block
+   */
+  private Node block;
+  
+  /**
+   * Creates a new catch statement
+   * @param fp   the catched exception
+   * @param blk  the block
+   * @param fn     the filename
+   * @param bl     the begin line
+   * @param bc     the begin column
+   * @param el     the end line
+   * @param ec     the end column
+   */
+  public CatchStatement(FormalParameter fp, Node blk,
+                        String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
+    exception = fp;
+    block     = blk;
+  }
+  
+  /**
+   * Returns the catched exception descriptor
+   */
+  public FormalParameter getException() {
+    return exception;
+  }
+  
+  /**
+   * Returns the block
+   */
+  public Node getBlock() {
+    return block;
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

@@ -103,7 +103,7 @@ public class CodeAttribute extends AttributeInfo {
   /**
    * The exception table
    */
-  private List exceptionTable;
+  private List<ExceptionTableEntry> exceptionTable;
   
   /**
    * The attributes
@@ -117,7 +117,7 @@ public class CodeAttribute extends AttributeInfo {
   public CodeAttribute(ConstantPool cp) {
     super(cp, "Code");
     length         = 12;
-    exceptionTable = new LinkedList();
+    exceptionTable = new LinkedList<ExceptionTableEntry>();
     attributes     = new LinkedList();
   }
   

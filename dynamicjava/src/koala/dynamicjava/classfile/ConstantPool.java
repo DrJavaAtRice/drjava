@@ -102,7 +102,7 @@ public class ConstantPool {
   /**
    * The constants
    */
-  private Map constants;
+  private Map<Object,Info> constants;
   
   /**
    * The constant count
@@ -112,15 +112,15 @@ public class ConstantPool {
   /**
    * The constants sorted in a list
    */
-  List constantList;
+  List<Info> constantList;
   
   /**
    * Creates a new constant pool
    */
   public ConstantPool() {
-    constants    = new HashMap();
+    constants    = new HashMap<Object,Info>();
     count        = 1;
-    constantList = new LinkedList();
+    constantList = new LinkedList<Info>();
   }
   
   /**

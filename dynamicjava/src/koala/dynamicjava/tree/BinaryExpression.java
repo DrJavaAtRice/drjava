@@ -36,79 +36,79 @@ package koala.dynamicjava.tree;
  */
 
 public abstract class BinaryExpression extends Expression {
-    /**
-     * The leftExpression property name
-     */
-    public final static String LEFT_EXPRESSION = "leftExpression";
-
-    /**
-     * The rightExpression property name
-     */
-    public final static String RIGHT_EXPRESSION = "rightExpression";
-
-    /**
-     * The LHS expression
-     */
-    private Expression leftExpression;
-
-    /**
-     * The RHS expression
-     */
-    private Expression rightExpression;
-
-    /**
-     * Initializes the expression
-     * @param lexp  the LHS expression
-     * @param rexp  the RHS expression
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if lexp is null or rexp is null
-     */
-    protected BinaryExpression(Expression lexp, Expression rexp,
-			       String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-
-	if (lexp == null) throw new IllegalArgumentException("lexp == null");
-	if (rexp == null) throw new IllegalArgumentException("rexp == null");
-
-	leftExpression  = lexp;
-	rightExpression = rexp;
-    }
-
-    /**
-     * Returns the left hand side expression
-     */
-    public Expression getLeftExpression() {
-	return leftExpression;
-    }
-
-    /**
-     * Sets the left hand side expression
-     * @exception IllegalArgumentException if exp is null
-     */
-    public void setLeftExpression(Expression exp) {
-	if (exp == null) throw new IllegalArgumentException("exp == null");
-
-	firePropertyChange(LEFT_EXPRESSION, leftExpression, leftExpression = exp);
-    }
-
-    /**
-     * Returns the right hand side expression
-     */
-    public Expression getRightExpression() {
-	return rightExpression;
-    }
-
-    /**
-     * Sets the right hand side expression
-     * @exception IllegalArgumentException if exp is null
-     */
-    public void setRightExpression(Expression exp) {
-	if (exp == null) throw new IllegalArgumentException("exp == null");
-
-	firePropertyChange(RIGHT_EXPRESSION, rightExpression, rightExpression = exp);
-    }
+  /**
+   * The leftExpression property name
+   */
+  public final static String LEFT_EXPRESSION = "leftExpression";
+  
+  /**
+   * The rightExpression property name
+   */
+  public final static String RIGHT_EXPRESSION = "rightExpression";
+  
+  /**
+   * The LHS expression
+   */
+  private Expression leftExpression;
+  
+  /**
+   * The RHS expression
+   */
+  private Expression rightExpression;
+  
+  /**
+   * Initializes the expression
+   * @param lexp  the LHS expression
+   * @param rexp  the RHS expression
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if lexp is null or rexp is null
+   */
+  protected BinaryExpression(Expression lexp, Expression rexp,
+                             String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
+    
+    if (lexp == null) throw new IllegalArgumentException("lexp == null");
+    if (rexp == null) throw new IllegalArgumentException("rexp == null");
+    
+    leftExpression  = lexp;
+    rightExpression = rexp;
+  }
+  
+  /**
+   * Returns the left hand side expression
+   */
+  public Expression getLeftExpression() {
+    return leftExpression;
+  }
+  
+  /**
+   * Sets the left hand side expression
+   * @exception IllegalArgumentException if exp is null
+   */
+  public void setLeftExpression(Expression exp) {
+    if (exp == null) throw new IllegalArgumentException("exp == null");
+    
+    firePropertyChange(LEFT_EXPRESSION, leftExpression, leftExpression = exp);
+  }
+  
+  /**
+   * Returns the right hand side expression
+   */
+  public Expression getRightExpression() {
+    return rightExpression;
+  }
+  
+  /**
+   * Sets the right hand side expression
+   * @exception IllegalArgumentException if exp is null
+   */
+  public void setRightExpression(Expression exp) {
+    if (exp == null) throw new IllegalArgumentException("exp == null");
+    
+    firePropertyChange(RIGHT_EXPRESSION, rightExpression, rightExpression = exp);
+  }
 }

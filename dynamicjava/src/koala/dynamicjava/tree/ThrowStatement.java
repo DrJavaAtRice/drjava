@@ -38,60 +38,60 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class ThrowStatement extends Statement implements ExpressionContainer {
-    /**
-     * The expression
-     */
-    private Expression expression;
-
-    /**
-     * Creates a new while statement
-     * @param exp   the expression
-     */
-    public ThrowStatement(Expression exp) {
-	this(exp, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Creates a new while statement
-     * @param exp   the expression
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if exp is null
-     */
-    public ThrowStatement(Expression exp,
-			  String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-
-	if (exp == null) throw new IllegalArgumentException("exp == null");
-
-	expression = exp;
-    }
+  /**
+   * The expression
+   */
+  private Expression expression;
+  
+  /**
+   * Creates a new while statement
+   * @param exp   the expression
+   */
+  public ThrowStatement(Expression exp) {
+    this(exp, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Creates a new while statement
+   * @param exp   the expression
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if exp is null
+   */
+  public ThrowStatement(Expression exp,
+                        String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
     
-    /**
-     * Gets the expression
-     */
-    public Expression getExpression() {
-	return expression;
-    }
-
-    /**
-     * Sets the expression
-     * @exception IllegalArgumentException if e is null
-     */
-    public void setExpression(Expression e) {
-	if (e == null) throw new IllegalArgumentException("e == null");
-
-	firePropertyChange(EXPRESSION, expression, expression = e);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }    
+    if (exp == null) throw new IllegalArgumentException("exp == null");
+    
+    expression = exp;
+  }
+  
+  /**
+   * Gets the expression
+   */
+  public Expression getExpression() {
+    return expression;
+  }
+  
+  /**
+   * Sets the expression
+   * @exception IllegalArgumentException if e is null
+   */
+  public void setExpression(Expression e) {
+    if (e == null) throw new IllegalArgumentException("e == null");
+    
+    firePropertyChange(EXPRESSION, expression, expression = e);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }    
 }

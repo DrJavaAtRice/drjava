@@ -40,79 +40,79 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class ClassDeclaration extends TypeDeclaration {
-    /**
-     * The superclass property name
-     */
-    public final static String SUPERCLASS = "superclass";
-
-    /**
-     * The superclass of this class
-     */
-    private String superclass;
-
-    /**
-     * Creates a new class declaration
-     * @param flags the access flags
-     * @param name  the name of the class to declare
-     * @param ext   the tokens that compose the name of the parent class.
-     *              The list can be null. The superclass property is then
-     *              set to "java.lang.Object".
-     * @param impl  the list of implemented interfaces (a list of list of
-     *              Token). Can be null.
-     * @param body  the list of members declarations
-     */
-    public ClassDeclaration(int flags, String name, List ext, List impl, List body) {
-	this(flags, name, ext, impl, body, null, 0, 0, 0, 0);
+  /**
+   * The superclass property name
+   */
+  public final static String SUPERCLASS = "superclass";
+  
+  /**
+   * The superclass of this class
+   */
+  private String superclass;
+  
+  /**
+   * Creates a new class declaration
+   * @param flags the access flags
+   * @param name  the name of the class to declare
+   * @param ext   the tokens that compose the name of the parent class.
+   *              The list can be null. The superclass property is then
+   *              set to "java.lang.Object".
+   * @param impl  the list of implemented interfaces (a list of list of
+   *              Token). Can be null.
+   * @param body  the list of members declarations
+   */
+  public ClassDeclaration(int flags, String name, List<IdentifierToken> ext, List<List<IdentifierToken>> impl, List<Node> body) {
+    this(flags, name, ext, impl, body, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Creates a new class declaration
+   * @param flags the access flags
+   * @param name  the name of the class to declare
+   * @param ext   the tokens that compose the name of the parent class.
+   *              The list can be null. The superclass property is then
+   *              set to "java.lang.Object".
+   * @param impl  the list of implemented interfaces (a list of list of
+   *              Token). Can be null.
+   * @param body  the list of members declarations
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   */
+  public ClassDeclaration(int flags, String name, List<IdentifierToken> ext, List<List<IdentifierToken>> impl, List<Node> body,
+                          String fn, int bl, int bc, int el, int ec) {
+    super(flags, name, impl, body, fn, bl, bc, el, ec);
+    if (ext == null) {
+      superclass = "java.lang.Object";
+    } else {
+      superclass = TreeUtilities.listToName(ext);
     }
-
-    /**
-     * Creates a new class declaration
-     * @param flags the access flags
-     * @param name  the name of the class to declare
-     * @param ext   the tokens that compose the name of the parent class.
-     *              The list can be null. The superclass property is then
-     *              set to "java.lang.Object".
-     * @param impl  the list of implemented interfaces (a list of list of
-     *              Token). Can be null.
-     * @param body  the list of members declarations
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     */
-    public ClassDeclaration(int flags, String name, List ext, List impl, List body,
-			    String fn, int bl, int bc, int el, int ec) {
-	super(flags, name, impl, body, fn, bl, bc, el, ec);
-	if (ext == null) {
-	    superclass = "java.lang.Object";
-	} else {
-	    superclass = TreeUtilities.listToName(ext);
-	}
-    }
-
-    /**
-     * Returns the name of the superclass of this class
-     */
-    public String getSuperclass() {
-	return superclass;
-    }
-
-    /**
-     * Sets the superclass name
-     * @exception IllegalArgumentException if s is null
-     */
-    public void setSuperclass(String s) {
-	if (s == null) throw new IllegalArgumentException("s == null");
-
-	firePropertyChange(SUPERCLASS, superclass, superclass = s);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  }
+  
+  /**
+   * Returns the name of the superclass of this class
+   */
+  public String getSuperclass() {
+    return superclass;
+  }
+  
+  /**
+   * Sets the superclass name
+   * @exception IllegalArgumentException if s is null
+   */
+  public void setSuperclass(String s) {
+    if (s == null) throw new IllegalArgumentException("s == null");
+    
+    firePropertyChange(SUPERCLASS, superclass, superclass = s);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

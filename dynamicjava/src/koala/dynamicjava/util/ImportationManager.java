@@ -342,43 +342,13 @@ public class ImportationManager implements Cloneable {
     //singleTypeImportClauses   =
     //  (List<String>)((LinkedList<String>)im.singleTypeImportClauses).clone();
     
-    importOnDemandClauses     = _cloneLinkedListOfString((LinkedList<String>)im.importOnDemandClauses);
-    singleTypeImportClauses   = _cloneLinkedListOfString((LinkedList<String>)im.singleTypeImportClauses);
+    importOnDemandClauses     = ListUtilities.listCopy(im.importOnDemandClauses);
+    singleTypeImportClauses   = ListUtilities.listCopy(im.singleTypeImportClauses);
     
     currentPackage            = im.currentPackage;
     classLoader               = im.classLoader;
   }
 
-  static private LinkedList<String> _cloneLinkedListOfString(LinkedList<String> l){
-    LinkedList<String> retval = new LinkedList<String>();
-    String str;
-    for( int i = 0; i < l.size(); i++ ){
-      str = new String(l.get(i));
-      retval.add(str);
-    }
-    return retval;
-  }
-  
-  // Is only used in our testsuite
-  public static class cloneTest extends junit.framework.TestCase {
-    public static void testCloneLinkedListOfString(){
-      LinkedList<String> l = new LinkedList<String>();
-      l.add("String 1");
-      l.add("String 2");
-      l.add("String 3");
-      LinkedList<String> ll = _cloneLinkedListOfString(l);
-      
-      assertFalse("l and ll should not be the same object", l == ll);
-      assertFalse("l[0] and ll[0] should not be the same object", l.get(0) == ll.get(0));
-      assertFalse("l[1] and ll[1] should not be the same object", l.get(1) == ll.get(1));
-      assertFalse("l[2] and ll[2] should not be the same object", l.get(2) == ll.get(2));
-      
-      assertTrue("l[0] and ll[0] should have the same contents", l.get(0).equals(ll.get(0)));
-      assertTrue("l[1] and ll[1] should have the same contents", l.get(1).equals(ll.get(1)));
-      assertTrue("l[2] and ll[2] should have the same contents", l.get(2).equals(ll.get(2)));
-      
-    }
-  }
   
   /**
    * Tests whether the fully qualified class name c1 ends with c2

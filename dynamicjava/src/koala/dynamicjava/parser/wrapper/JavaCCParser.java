@@ -32,6 +32,7 @@ import java.io.*;
 import java.util.*;
 
 import koala.dynamicjava.parser.*;
+import koala.dynamicjava.tree.*;
 
 /**
  * The instances of this class represents a parser
@@ -42,71 +43,71 @@ import koala.dynamicjava.parser.*;
  */
 
 public class JavaCCParser implements SourceCodeParser {
-    /**
-     * The parser
-     */
-    private Parser parser;
-
-    /**
-     * Creates a new JavaCCParser
-     * @param is    the input stream
-     * @param fname the file name
-     */
-    public JavaCCParser(InputStream is, String fname) {
-	parser = new Parser(is);
-	parser.setFilename(fname);
+  /**
+   * The parser
+   */
+  private Parser parser;
+  
+  /**
+   * Creates a new JavaCCParser
+   * @param is    the input stream
+   * @param fname the file name
+   */
+  public JavaCCParser(InputStream is, String fname) {
+    parser = new Parser(is);
+    parser.setFilename(fname);
+  }
+  
+  /**
+   * Creates a new JavaCCParser
+   * @param r     the reader
+   * @param fname the file name
+   */
+  public JavaCCParser(Reader r, String fname) {
+    parser = new Parser(r);
+    parser.setFilename(fname);
+  }
+  
+  /**
+   * Creates a new parser and returns it
+   * @param is    the input stream
+   * @param fname the file name
+   */
+  public SourceCodeParser createParser(InputStream is, String fname) {
+    return new JavaCCParser(is, fname);
+  }
+  
+  /**
+   * Creates a new parser and returns it
+   * @param r     the reader
+   * @param fname the file name
+   */
+  public SourceCodeParser createParser(Reader r, String fname) {
+    return new JavaCCParser(r, fname);
+  }
+  
+  /**
+   * Parses top level statements
+   * @return a list of nodes
+   * @see koala.dynamicjava.tree.Node
+   */
+  public List<Node> parseStream() {
+    try {
+      return parser.parseStream();
+    } catch (ParseException e) {
+      throw new ParseError(e.getMessage());
     }
-
-    /**
-     * Creates a new JavaCCParser
-     * @param r     the reader
-     * @param fname the file name
-     */
-    public JavaCCParser(Reader r, String fname) {
-	parser = new Parser(r);
-	parser.setFilename(fname);
+  }
+  
+  /**
+   * Parses a library file
+   * @see koala.dynamicjava.tree.Node
+   */
+  public List<Node> parseCompilationUnit() {
+    try {
+      return parser.parseCompilationUnit();
+    } catch (ParseException e) {
+      throw new ParseError(e.getMessage());
     }
-
-    /**
-     * Creates a new parser and returns it
-     * @param is    the input stream
-     * @param fname the file name
-     */
-    public SourceCodeParser createParser(InputStream is, String fname) {
-	return new JavaCCParser(is, fname);
-    }
-
-    /**
-     * Creates a new parser and returns it
-     * @param r     the reader
-     * @param fname the file name
-     */
-    public SourceCodeParser createParser(Reader r, String fname) {
-	return new JavaCCParser(r, fname);
-    }
-
-    /**
-     * Parses top level statements
-     * @return a list of nodes
-     * @see koala.dynamicjava.tree.Node
-     */
-    public List parseStream() {
-	try {
-	    return parser.parseStream();
-	} catch (ParseException e) {
-	    throw new ParseError(e.getMessage());
-	}
-    }
-    
-    /**
-     * Parses a library file
-     * @see koala.dynamicjava.tree.Node
-     */
-    public List parseCompilationUnit() {
-	try {
-	    return parser.parseCompilationUnit();
-	} catch (ParseException e) {
-	    throw new ParseError(e.getMessage());
-	}
-    }
+  }
 }

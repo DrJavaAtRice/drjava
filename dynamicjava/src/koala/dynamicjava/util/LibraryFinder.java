@@ -43,14 +43,14 @@ public class LibraryFinder extends FileFinder {
   /**
    * The file suffixes
    */
-  private List suffixes;
+  private List<String> suffixes;
   
   /**
    * Creates a new library finder
    * @param suffix the suffix of the source files
    */
   public LibraryFinder() {
-    suffixes = new LinkedList();
+    suffixes = new LinkedList<String>();
   }
   
   /**

@@ -36,37 +36,37 @@ package koala.dynamicjava.tree;
  */
 
 public class BooleanLiteral extends Literal {
-    /**
-     * The representations of true
-     */
-    private final static String TRUE  = "true";
-
-    /**
-     * The representations of false
-     */
-    private final static String FALSE = "false";
-
-    /**
-     * Initializes a literal
-     * @param val the value of the literal
-     */
-    public BooleanLiteral(boolean val) {
-	this(val, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Initializes a literal
-     * @param val the value of the literal
-     * @param fn  the filename
-     * @param bl  the begin line
-     * @param bc  the begin column
-     * @param el  the end line
-     * @param ec  the end column
-     */
-    public BooleanLiteral(boolean val, String fn, int bl, int bc, int el, int ec) {
-	super(val ? TRUE : FALSE,
-	      val ? Boolean.TRUE : Boolean.FALSE,
-	      boolean.class,
-	      fn, bl, bc, el, ec);
-    }
+  /**
+   * The representations of true
+   */
+  private final static String TRUE  = "true";
+  
+  /**
+   * The representations of false
+   */
+  private final static String FALSE = "false";
+  
+  /**
+   * Initializes a literal
+   * @param val the value of the literal
+   */
+  public BooleanLiteral(boolean val) {
+    this(val, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Initializes a literal
+   * @param val the value of the literal
+   * @param fn  the filename
+   * @param bl  the begin line
+   * @param bc  the begin column
+   * @param el  the end line
+   * @param ec  the end column
+   */
+  public BooleanLiteral(boolean val, String fn, int bl, int bc, int el, int ec) {
+    super(val ? TRUE : FALSE,
+          val ? Boolean.TRUE : Boolean.FALSE,
+          boolean.class,
+          fn, bl, bc, el, ec);
+  }
 }

@@ -40,64 +40,64 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class BlockStatement extends Statement {
-    /**
-     * The creationType property name
-     */
-    public final static String STATEMENTS = "statements";
-
-    /**
-     * The list of the statements contained in this block
-     */
-    private List statements;
+  /**
+   * The creationType property name
+   */
+  public final static String STATEMENTS = "statements";
+  
+  /**
+   * The list of the statements contained in this block
+   */
+  private List<Node> statements;
+  
+  /**
+   * Creates a new block statement
+   * @param stmts the list of the statements contained in this block
+   */
+  public BlockStatement(List<Node> stmts) {
+    this(stmts, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Creates a new block statement
+   * @param stmts the list of the statements contained in this block
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if stmts is null
+   */
+  public BlockStatement(List<Node> stmts, String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
     
-    /**
-     * Creates a new block statement
-     * @param stmts the list of the statements contained in this block
-     */
-    public BlockStatement(List stmts) {
-	this(stmts, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Creates a new block statement
-     * @param stmts the list of the statements contained in this block
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if stmts is null
-     */
-    public BlockStatement(List stmts, String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-
-	if (stmts == null) throw new IllegalArgumentException("stmts == null");
-
-	statements = stmts;
-    }
-
-    /**
-     * Returns the statements contained in this block
-     */
-    public List getStatements() {
-	return statements;
-    }
-
-    /**
-     * Sets the statements contained in this block
-     * @exception IllegalArgumentException if l is null
-     */
-    public void setStatements(List l) {
-	if (l == null) throw new IllegalArgumentException("l == null");
-
-	firePropertyChange(STATEMENTS, statements, statements = l);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+    if (stmts == null) throw new IllegalArgumentException("stmts == null");
+    
+    statements = stmts;
+  }
+  
+  /**
+   * Returns the statements contained in this block
+   */
+  public List<Node> getStatements() {
+    return statements;
+  }
+  
+  /**
+   * Sets the statements contained in this block
+   * @exception IllegalArgumentException if l is null
+   */
+  public void setStatements(List<Node> l) {
+    if (l == null) throw new IllegalArgumentException("l == null");
+    
+    firePropertyChange(STATEMENTS, statements, statements = l);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

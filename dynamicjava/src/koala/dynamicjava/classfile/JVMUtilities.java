@@ -87,12 +87,12 @@ public abstract class JVMUtilities {
   /**
    * The table of the base type characters. Keys are classes
    */
-  private final static Map types  = new HashMap(11, 1.0f);
+  private final static Map<Class,String> types  = new HashMap<Class,String>(11, 1.0f);
   
   /**
    * The table of the base type characters. Keys are strings
    */
-  private final static Map stypes = new HashMap(11, 1.0f);
+  private final static Map<String,String> stypes = new HashMap<String,String>(11, 1.0f);
   
   static {
     types.put(byte.class,    "B");

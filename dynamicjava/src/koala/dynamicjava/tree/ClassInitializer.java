@@ -38,33 +38,33 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class ClassInitializer extends Initializer {
-    /**
-     * Creates a new initializer statement
-     * @param block the block
-     */
-    public ClassInitializer(BlockStatement block) {
-	this(block, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Creates a new initializer statement
-     * @param block the block
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     */
-    public ClassInitializer(BlockStatement block,
-			    String fn, int bl, int bc, int el, int ec) {
-	super(block, fn, bl, bc, el, ec);
-    }
-    
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }    
+  /**
+   * Creates a new initializer statement
+   * @param block the block
+   */
+  public ClassInitializer(BlockStatement block) {
+    this(block, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Creates a new initializer statement
+   * @param block the block
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   */
+  public ClassInitializer(BlockStatement block,
+                          String fn, int bl, int bc, int el, int ec) {
+    super(block, fn, bl, bc, el, ec);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }    
 }

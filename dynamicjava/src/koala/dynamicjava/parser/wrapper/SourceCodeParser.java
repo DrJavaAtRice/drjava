@@ -30,6 +30,7 @@ package koala.dynamicjava.parser.wrapper;
 
 import java.io.*;
 import java.util.*;
+import koala.dynamicjava.tree.Node;
 
 /**
  * The classes that implements this interface represent
@@ -59,11 +60,11 @@ public interface SourceCodeParser {
      * @return a list of nodes
      * @see koala.dynamicjava.tree.Node
      */
-    List parseStream();
+    List<Node> parseStream();
     
     /**
      * Parses a library file
      * @see koala.dynamicjava.tree.Node
      */
-    List parseCompilationUnit();
+    List<Node> parseCompilationUnit();
 }

@@ -40,39 +40,39 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class InterfaceDeclaration extends TypeDeclaration {
-    /**
-     * Creates a new interface declaration
-     * @param flags the access flags
-     * @param name  the name of the interface to declare
-     * @param impl  the list of implemented interfaces. Can be null.
-     * @param body  the list of fields declarations
-     */
-    public InterfaceDeclaration(int flags, String name, List impl, List body) {
-	this(flags, name, impl, body, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Creates a new interface declaration
-     * @param flags the access flags
-     * @param name  the name of the interface to declare
-     * @param impl  the list of implemented interfaces. Can be null.
-     * @param body  the list of fields declarations
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     */
-    public InterfaceDeclaration(int flags, String name, List impl, List body,
-				String fn, int bl, int bc, int el, int ec) {
-	super(flags, name, impl, body, fn, bl, bc, el, ec);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  /**
+   * Creates a new interface declaration
+   * @param flags the access flags
+   * @param name  the name of the interface to declare
+   * @param impl  the list of implemented interfaces. Can be null.
+   * @param body  the list of fields declarations
+   */
+  public InterfaceDeclaration(int flags, String name, List<List<IdentifierToken>> impl, List<Node> body) {
+    this(flags, name, impl, body, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Creates a new interface declaration
+   * @param flags the access flags
+   * @param name  the name of the interface to declare
+   * @param impl  the list of implemented interfaces. Can be null.
+   * @param body  the list of fields declarations
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   */
+  public InterfaceDeclaration(int flags, String name, List<List<IdentifierToken>> impl, List<Node> body,
+                              String fn, int bl, int bc, int el, int ec) {
+    super(flags, name, impl, body, fn, bl, bc, el, ec);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

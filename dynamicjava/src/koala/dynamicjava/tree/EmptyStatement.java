@@ -38,28 +38,28 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class EmptyStatement extends Statement {
-    /**
-     * Creates a new empty statement
-     */
-    public EmptyStatement() {
-	this(null, 0, 0);
-    }
-
-    /**
-     * Creates a new empty statement
-     * @param line  the line in the input where the statement occurs
-     * @param fn    the filename
-     * @param col   the column
-     */
-    public EmptyStatement(String fn, int line, int col) {
-	super(fn, line, col, line, col);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  /**
+   * Creates a new empty statement
+   */
+  public EmptyStatement() {
+    this(null, 0, 0);
+  }
+  
+  /**
+   * Creates a new empty statement
+   * @param line  the line in the input where the statement occurs
+   * @param fn    the filename
+   * @param col   the column
+   */
+  public EmptyStatement(String fn, int line, int col) {
+    super(fn, line, col, line, col);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

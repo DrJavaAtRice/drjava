@@ -40,96 +40,96 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class ClassAllocation extends Allocation implements ExpressionStatement {
-    /**
-     * The arguments property name
-     */
-    public final static String ARGUMENTS = "arguments";
-
-    /**
-     * The members property name
-     */
-    public final static String MEMBERS = "members";
-
-    /**
-     * The arguments to pass to the constructor
-     */
-    private List arguments;
-
-    /**
-     * The members of the anonymous class
-     */
-    private List members;
-
-    /**
-     * Initializes the expression
-     * @param tp    the type prefix
-     * @param args  the arguments of the constructor. Can be null.
-     * @param memb  the members of the class
-     * @exception IllegalArgumentException if tp is null or memb is null
-     */
-    public ClassAllocation(Type tp, List args, List memb) {
-	this(tp, args, memb, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Initializes the expression
-     * @param tp    the type prefix
-     * @param args  the arguments of the constructor. null if no arguments.
-     * @param memb  the members of the class
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if tp is null or memb is null
-     */
-    public ClassAllocation(Type tp, List args, List memb,
-			   String fn, int bl, int bc, int el, int ec) {
-	super(tp, fn, bl, bc, el, ec);
-
-	if (memb == null) throw new IllegalArgumentException("memb == null");
-
-	arguments = args;
-	members   = memb;
-    }
-
-    /**
-     * Returns the constructor arguments
-     * @return null if there is no arguments
-     */
-    public List getArguments() {
-	return arguments;
-    }
-
-    /**
-     * Sets the constructor arguments
-     */
-    public void setArguments(List l) {
-	firePropertyChange(ARGUMENTS, arguments, arguments = l);
-    }
-
-    /**
-     * Returns the members of the anonymous class
-     */
-    public List getMembers() {
-	return members;
-    }
-
-    /**
-     * Sets the members of the anonymous class
-     * @exception IllegalArgumentException if t is null
-     */
-    public void setMembers(List l) {
-	if (l == null) throw new IllegalArgumentException("l == null");
-
-	firePropertyChange(MEMBERS, members, members = l);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  /**
+   * The arguments property name
+   */
+  public final static String ARGUMENTS = "arguments";
+  
+  /**
+   * The members property name
+   */
+  public final static String MEMBERS = "members";
+  
+  /**
+   * The arguments to pass to the constructor
+   */
+  private List<Expression> arguments;
+  
+  /**
+   * The members of the anonymous class
+   */
+  private List<Node> members;
+  
+  /**
+   * Initializes the expression
+   * @param tp    the type prefix
+   * @param args  the arguments of the constructor. Can be null.
+   * @param memb  the members of the class
+   * @exception IllegalArgumentException if tp is null or memb is null
+   */
+  public ClassAllocation(Type tp, List<Expression> args, List<Node> memb) {
+    this(tp, args, memb, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Initializes the expression
+   * @param tp    the type prefix
+   * @param args  the arguments of the constructor. null if no arguments.
+   * @param memb  the members of the class
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if tp is null or memb is null
+   */
+  public ClassAllocation(Type tp, List<Expression> args, List<Node> memb,
+                         String fn, int bl, int bc, int el, int ec) {
+    super(tp, fn, bl, bc, el, ec);
+    
+    if (memb == null) throw new IllegalArgumentException("memb == null");
+    
+    arguments = args;
+    members   = memb;
+  }
+  
+  /**
+   * Returns the constructor arguments
+   * @return null if there is no arguments
+   */
+  public List<Expression> getArguments() {
+    return arguments;
+  }
+  
+  /**
+   * Sets the constructor arguments
+   */
+  public void setArguments(List<Expression> l) {
+    firePropertyChange(ARGUMENTS, arguments, arguments = l);
+  }
+  
+  /**
+   * Returns the members of the anonymous class
+   */
+  public List<Node> getMembers() {
+    return members;
+  }
+  
+  /**
+   * Sets the members of the anonymous class
+   * @exception IllegalArgumentException if t is null
+   */
+  public void setMembers(List<Node> l) {
+    if (l == null) throw new IllegalArgumentException("l == null");
+    
+    firePropertyChange(MEMBERS, members, members = l);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

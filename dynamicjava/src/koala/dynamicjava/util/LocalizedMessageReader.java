@@ -56,7 +56,7 @@ public class LocalizedMessageReader {
    * @param name the name of the resource
    */
   public LocalizedMessageReader(String name) {
-    bundle = ResourceBundle.getBundle(name, Locale.getDefault());
+    bundle = ResourceBundle.getBundle(name);
   }
   
   /**

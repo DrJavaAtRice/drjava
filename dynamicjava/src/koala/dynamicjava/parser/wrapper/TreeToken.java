@@ -39,62 +39,62 @@ import koala.dynamicjava.tree.IdentifierToken;
  */
 
 public class TreeToken implements IdentifierToken {
-    /**
-     * The implementation
-     */
-    private Token token;
-
-    /**
-     * Creates a new tree token
-     * @param t the parser token
-     */
-    public TreeToken(Token t) {
-	token = t;
-    }
-
-    /**
-     * Returns the underlying token
-     */
-    public Token getToken() {
-	return token;
-    }
-
-    /**
-     * Returns the representation of the identifier
-     */
-    public String image() {
-	return token.image;
-    }
-
-    /**
-     * Returns the line number where the beginning of the token
-     * was found in the source file
-     */
-    public int beginLine() {
-	return token.beginLine;
-    }
-
-    /**
-     * Returns the line number where the end of the token
-     * was found in the source file
-     */
-    public int endLine() {
-	return token.endLine;
-    }
-
-    /**
-     * Returns the column number where the beginning of the token
-     * was found in the source file
-     */
-    public int beginColumn() {
-	return token.beginColumn;
-    }
-
-    /**
-     * Returns the column number where the end of the token
-     * was found in the source file
-     */
-    public int endColumn() {
-	return token.endLine;
-    }
+  /**
+   * The implementation
+   */
+  private Token token;
+  
+  /**
+   * Creates a new tree token
+   * @param t the parser token
+   */
+  public TreeToken(Token t) {
+    token = t;
+  }
+  
+  /**
+   * Returns the underlying token
+   */
+  public Token getToken() {
+    return token;
+  }
+  
+  /**
+   * Returns the representation of the identifier
+   */
+  public String image() {
+    return token.image;
+  }
+  
+  /**
+   * Returns the line number where the beginning of the token
+   * was found in the source file
+   */
+  public int beginLine() {
+    return token.beginLine;
+  }
+  
+  /**
+   * Returns the line number where the end of the token
+   * was found in the source file
+   */
+  public int endLine() {
+    return token.endLine;
+  }
+  
+  /**
+   * Returns the column number where the beginning of the token
+   * was found in the source file
+   */
+  public int beginColumn() {
+    return token.beginColumn;
+  }
+  
+  /**
+   * Returns the column number where the end of the token
+   * was found in the source file
+   */
+  public int endColumn() {
+    return token.endLine;
+  }
 }

@@ -38,98 +38,98 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class ArrayAccess extends PrimaryExpression implements LeftHandSide,
-                                                              ExpressionContainer {
-    /**
-     * The expression property name
-     */
-    public final static String EXPRESSION = "expression";
-
-    /**
-     * The cellNumber property name
-     */
-    public final static String CELL_NUMBER = "cellNumber";
-
-    /**
-     * The expression on which this array access applies
-     */
-    private Expression expression;
-
-    /**
-     * The expression which denotes the cell number
-     */
-    private Expression cellNumber;
-
-    /**
-     * Creates a new array access node
-     * @param exp   the expression on which this array access applies
-     * @param cell  the cell number
-     * @exception IllegalArgumentException if exp is null or cell is null
-     */
-    public ArrayAccess(Expression exp, Expression cell) {
-	this(exp, cell, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Creates a new array access node
-     * @param exp   the expression on which this array access applies
-     * @param cell  the cell number
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if exp is null or cell is null
-     */
-    public ArrayAccess(Expression exp, Expression cell,
-		       String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-
-	if (exp == null)  throw new IllegalArgumentException("exp == null");
-	if (cell == null) throw new IllegalArgumentException("cell == null");
-
-	expression = exp;
-	cellNumber = cell;
-    }
-
-    /**
-     * Returns the expression on which this array access applies
-     */
-    public Expression getExpression() {
-	return expression;
-    }
-
-    /**
-     * Sets the expression on which this array access applies
-     * @exception IllegalArgumentException if e is null
-     */
-    public void setExpression(Expression e) {
-	if (e == null)  throw new IllegalArgumentException("e == null");
-
-	firePropertyChange(EXPRESSION, expression, expression = e);
-    }
-
-    /**
-     * Returns the expression which denotes the cell number
-     */
-    public Expression getCellNumber() {
-	return cellNumber;
-    }
-
-    /**
-     * Sets the expression which denotes the cell number
-     * @exception IllegalArgumentException if e is null
-     */
-    public void setCellNumber(Expression e) {
-	if (e == null)  throw new IllegalArgumentException("e == null");
-
-	firePropertyChange(CELL_NUMBER, cellNumber, cellNumber = e);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  ExpressionContainer {
+  /**
+   * The expression property name
+   */
+  public final static String EXPRESSION = "expression";
+  
+  /**
+   * The cellNumber property name
+   */
+  public final static String CELL_NUMBER = "cellNumber";
+  
+  /**
+   * The expression on which this array access applies
+   */
+  private Expression expression;
+  
+  /**
+   * The expression which denotes the cell number
+   */
+  private Expression cellNumber;
+  
+  /**
+   * Creates a new array access node
+   * @param exp   the expression on which this array access applies
+   * @param cell  the cell number
+   * @exception IllegalArgumentException if exp is null or cell is null
+   */
+  public ArrayAccess(Expression exp, Expression cell) {
+    this(exp, cell, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Creates a new array access node
+   * @param exp   the expression on which this array access applies
+   * @param cell  the cell number
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if exp is null or cell is null
+   */
+  public ArrayAccess(Expression exp, Expression cell,
+                     String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
+    
+    if (exp == null)  throw new IllegalArgumentException("exp == null");
+    if (cell == null) throw new IllegalArgumentException("cell == null");
+    
+    expression = exp;
+    cellNumber = cell;
+  }
+  
+  /**
+   * Returns the expression on which this array access applies
+   */
+  public Expression getExpression() {
+    return expression;
+  }
+  
+  /**
+   * Sets the expression on which this array access applies
+   * @exception IllegalArgumentException if e is null
+   */
+  public void setExpression(Expression e) {
+    if (e == null)  throw new IllegalArgumentException("e == null");
+    
+    firePropertyChange(EXPRESSION, expression, expression = e);
+  }
+  
+  /**
+   * Returns the expression which denotes the cell number
+   */
+  public Expression getCellNumber() {
+    return cellNumber;
+  }
+  
+  /**
+   * Sets the expression which denotes the cell number
+   * @exception IllegalArgumentException if e is null
+   */
+  public void setCellNumber(Expression e) {
+    if (e == null)  throw new IllegalArgumentException("e == null");
+    
+    firePropertyChange(CELL_NUMBER, cellNumber, cellNumber = e);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

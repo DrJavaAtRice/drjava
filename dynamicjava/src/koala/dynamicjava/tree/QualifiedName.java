@@ -40,86 +40,86 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class QualifiedName extends PrimaryExpression implements LeftHandSide {
-    /**
-     * The identifiers property name
-     */
-    public final static String IDENTIFIERS = "identifiers";
-
-    /**
-     * The representation property name
-     */
-    public final static String REPRESENTATION = "representation";
-
-    /**
-     * The identifiers (tokens) that compose this name
-     */
-    private List identifiers;
-
-    /**
-     * The representation of this object
-     */
-    private String representation;
-
-    /**
-     * Creates a new qualified name
-     * @param ids  the identifiers (IdentifierTokens) that compose this name
-     * @exception IllegalArgumentException if ids is null
-     */
-    public QualifiedName(List ids) {
-	this(ids, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Creates a new qualified name
-     * @param ids  the identifiers (IdentifierTokens) that compose this name
-     * @param fn   the filename
-     * @param bl   the begin line
-     * @param bc   the begin column
-     * @param el   the end line
-     * @param ec   the end column
-     * @exception IllegalArgumentException if ids is null
-     */
-    public QualifiedName(List ids, String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-
-	if (ids == null) throw new IllegalArgumentException("ids == null");
-
-	identifiers    = ids;
-	representation = TreeUtilities.listToName(ids);
-    }
-
-    /**
-     * Returns the representation of this object
-     */
-    public String getRepresentation() {
-	return representation;
-    }
-
-    /**
-     * Returns the identifiers that compose this name
-     */
-    public List getIdentifiers() {
-	return identifiers;
-    }
-
-    /**
-     * Sets the identifiers that compose this name. Update representation
-     * @exception IllegalArgumentException if l is null
-     */
-    public void setIdentifier(List l) {
-	if (l == null) throw new IllegalArgumentException("l == null");
-	
-	firePropertyChange(IDENTIFIERS, identifiers, identifiers = l);
-	firePropertyChange(REPRESENTATION,
-			   representation,
-			   representation = TreeUtilities.listToName(l));
-    }
+  /**
+   * The identifiers property name
+   */
+  public final static String IDENTIFIERS = "identifiers";
+  
+  /**
+   * The representation property name
+   */
+  public final static String REPRESENTATION = "representation";
+  
+  /**
+   * The identifiers (tokens) that compose this name
+   */
+  private List<IdentifierToken> identifiers;
+  
+  /**
+   * The representation of this object
+   */
+  private String representation;
+  
+  /**
+   * Creates a new qualified name
+   * @param ids  the identifiers (IdentifierTokens) that compose this name
+   * @exception IllegalArgumentException if ids is null
+   */
+  public QualifiedName(List<IdentifierToken> ids) {
+    this(ids, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Creates a new qualified name
+   * @param ids  the identifiers (IdentifierTokens) that compose this name
+   * @param fn   the filename
+   * @param bl   the begin line
+   * @param bc   the begin column
+   * @param el   the end line
+   * @param ec   the end column
+   * @exception IllegalArgumentException if ids is null
+   */
+  public QualifiedName(List<IdentifierToken> ids, String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
     
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+    if (ids == null) throw new IllegalArgumentException("ids == null");
+    
+    identifiers    = ids;
+    representation = TreeUtilities.listToName(ids);
+  }
+  
+  /**
+   * Returns the representation of this object
+   */
+  public String getRepresentation() {
+    return representation;
+  }
+  
+  /**
+   * Returns the identifiers that compose this name
+   */
+  public List<IdentifierToken> getIdentifiers() {
+    return identifiers;
+  }
+  
+  /**
+   * Sets the identifiers that compose this name. Update representation
+   * @exception IllegalArgumentException if l is null
+   */
+  public void setIdentifier(List<IdentifierToken> l) {
+    if (l == null) throw new IllegalArgumentException("l == null");
+    
+    firePropertyChange(IDENTIFIERS, identifiers, identifiers = l);
+    firePropertyChange(REPRESENTATION,
+                       representation,
+                       representation = TreeUtilities.listToName(l));
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

@@ -38,77 +38,77 @@ import java.util.*;
  */
 
 public abstract class MethodCall extends    PrimaryExpression
-                                 implements ExpressionStatement {
-    /**
-     * The methodName property name
-     */
-    public final static String METHOD_NAME = "methodName";
-
-    /**
-     * The arguments property name
-     */
-    public final static String ARGUMENTS = "arguments";
-
-    /**
-     * The method name
-     */
-    private String methodName;
-
-    /**
-     * The arguments
-     */
-    private List arguments;
-
-    /**
-     * Creates a new node
-     * @param mn    the field name
-     * @param args  the arguments. null if no arguments.
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if mn is null
-     */
-    protected MethodCall(String mn, List args,
-			 String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-
-	if (mn == null) throw new IllegalArgumentException("mn == null");
-
-	methodName = mn;
-	arguments  = args;
-    }
-
-    /**
-     * Returns the method name
-     */
-    public String getMethodName() {
-	return methodName;
-    }
-
-    /**
-     * Sets the method name
-     * @exception IllegalArgumentException if s is null
-     */
-    public void setMethodName(String s) {
-	if (s == null) throw new IllegalArgumentException("s == null");
-
-	firePropertyChange(METHOD_NAME, methodName, methodName = s);
-    }
-
-    /**
-     * Returns the arguments.
-     * @return null if there is no argument
-     */
-    public List getArguments() {
-	return arguments;
-    }
-
-    /**
-     * Sets the constructor arguments.
-     */
-    public void setArguments(List l) {
-	firePropertyChange(ARGUMENTS, arguments, arguments = l);
-    }
+  implements ExpressionStatement {
+  /**
+   * The methodName property name
+   */
+  public final static String METHOD_NAME = "methodName";
+  
+  /**
+   * The arguments property name
+   */
+  public final static String ARGUMENTS = "arguments";
+  
+  /**
+   * The method name
+   */
+  private String methodName;
+  
+  /**
+   * The arguments
+   */
+  private List<Expression> arguments;
+  
+  /**
+   * Creates a new node
+   * @param mn    the field name
+   * @param args  the arguments. null if no arguments.
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if mn is null
+   */
+  protected MethodCall(String mn, List<Expression> args,
+                       String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
+    
+    if (mn == null) throw new IllegalArgumentException("mn == null");
+    
+    methodName = mn;
+    arguments  = args;
+  }
+  
+  /**
+   * Returns the method name
+   */
+  public String getMethodName() {
+    return methodName;
+  }
+  
+  /**
+   * Sets the method name
+   * @exception IllegalArgumentException if s is null
+   */
+  public void setMethodName(String s) {
+    if (s == null) throw new IllegalArgumentException("s == null");
+    
+    firePropertyChange(METHOD_NAME, methodName, methodName = s);
+  }
+  
+  /**
+   * Returns the arguments.
+   * @return null if there is no argument
+   */
+  public List<Expression> getArguments() {
+    return arguments;
+  }
+  
+  /**
+   * Sets the constructor arguments.
+   */
+  public void setArguments(List<Expression> l) {
+    firePropertyChange(ARGUMENTS, arguments, arguments = l);
+  }
 }

@@ -99,17 +99,17 @@ public class ClassFile extends AttributeOwnerComponent {
   /**
    * The implemented interfaces
    */
-  private List interfaces;
+  private List<Short> interfaces;
   
   /**
    * The fields
    */
-  private List fields;
+  private List<FieldInfo> fields;
   
   /**
    * The methods
    */
-  private List methods;
+  private List<MethodInfo> methods;
   
   /**
    * Creates a new ClassFile structure
@@ -122,9 +122,9 @@ public class ClassFile extends AttributeOwnerComponent {
     nameIndex    = constantPool.put(new ClassIdentifier(n));
     n = JVMUtilities.getName(sname);
     superClass   = constantPool.put(new ClassIdentifier(n));
-    interfaces   = new LinkedList();
-    fields       = new LinkedList();
-    methods      = new LinkedList();
+    interfaces   = new LinkedList<Short>();
+    fields       = new LinkedList<FieldInfo>();
+    methods      = new LinkedList<MethodInfo>();
   }
   
   /**

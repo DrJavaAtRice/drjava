@@ -36,22 +36,22 @@ package koala.dynamicjava.tree;
  */
 
 public class ByteType extends PrimitiveType {
-    /**
-     * Initializes the type
-     */
-    public ByteType() {
-	this(null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Initializes the type
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     */
-    public ByteType(String fn, int bl, int bc, int el, int ec) {
-	super(byte.class, fn, bl, bc, el, ec);
-    }
+  /**
+   * Initializes the type
+   */
+  public ByteType() {
+    this(null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Initializes the type
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   */
+  public ByteType(String fn, int bl, int bc, int el, int ec) {
+    super(byte.class, fn, bl, bc, el, ec);
+  }
 }

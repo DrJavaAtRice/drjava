@@ -45,60 +45,61 @@ import koala.dynamicjava.util.*;
  */
 
 public class ObjectFieldModifier extends LeftHandSideModifier {
-    /**
-     * The field
-     */
-    protected Field field;
-
-    /**
-     * The node
-     */
-    protected ObjectFieldAccess node;
-
-    /**
-     * The field
-     */
-    protected Object fieldObject;
-
-    /**
-     * The list used to manage recursive calls
-     */
-    protected List fields = new LinkedList();
-
-    /**
-     * Creates a new field modifier
-     * @param f the field to modify
-     * @param n the field access node
-     */
-    public ObjectFieldModifier(Field f, ObjectFieldAccess n) {
-	field = f;
-	node  = n;
+  /**
+   * The field
+   */
+  protected Field field;
+  
+  /**
+   * The node
+   */
+  protected ObjectFieldAccess node;
+  
+  /**
+   * The object in which field is accessed
+   */
+  protected Object fieldObject;
+  
+  /**
+   * The list used to manage recursive callsl it is a stack of pending
+   * fieldObjects
+   */
+  protected List<Object> fields = new LinkedList<Object>();
+  
+  /**
+   * Creates a new field modifier
+   * @param f the field to modify
+   * @param n the field access node
+   */
+  public ObjectFieldModifier(Field f, ObjectFieldAccess n) {
+    field = f;
+    node  = n;
+  }
+  
+  /**
+   * Prepares the modifier for modification
+   */
+  public Object prepare(Visitor<Object> v, Context ctx) {
+    fields.add(0, fieldObject);
+    
+    fieldObject = node.getExpression().acceptVisitor(v);
+    try {
+      return field.get(fieldObject);
+    } catch (Exception e) {
+      throw new CatchedExceptionError(e, node);
     }
-
-    /**
-     * Prepares the modifier for modification
-     */
-    public Object prepare(Visitor v, Context ctx) {
-	fields.add(0, fieldObject);
-
-	fieldObject = node.getExpression().acceptVisitor(v);
-	try {
-	    return field.get(fieldObject);
-	} catch (Exception e) {
-            throw new CatchedExceptionError(e, node);
-	}
+  }
+  
+  /**
+   * Sets the value of the underlying left hand side expression
+   */
+  public void modify(Context ctx, Object value) {
+    try {
+      field.set(fieldObject, value);
+    } catch (Exception e) {
+      throw new CatchedExceptionError(e, node);
+    } finally {
+      fieldObject = fields.remove(0);
     }
-
-    /**
-     * Sets the value of the underlying left hand side expression
-     */
-    public void modify(Context ctx, Object value) {
-	try {
-	    field.set(fieldObject, value);
-	} catch (Exception e) {
-            throw new CatchedExceptionError(e, node);
-	} finally {
-	    fieldObject = fields.remove(0);
-	}
-    }
+  }
 }

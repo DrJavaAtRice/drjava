@@ -42,126 +42,126 @@ import koala.dynamicjava.tree.*;
  */
 
 public class TreeConstructorInfo implements ConstructorInfo {
-    /**
-     * The abstract syntax tree of this constructor
-     */
-    private ConstructorDeclaration constructorTree;
-
-    /**
-     * The class finder for this class
-     */
-    private ClassFinder classFinder;
-
-    /**
-     * The parameters types
-     */
-    private ClassInfo[] parameters;
-
-    /**
-     * The exception types
-     */
-    private ClassInfo[] exceptions;
-
-    /**
-     * The declaring class
-     */
-    private ClassInfo declaringClass;
-
-    /**
-     * A visitor to load type infos
-     */
-    private TypeVisitor typeVisitor;
-
-    /**
-     * Creates a new class info
-     * @param f  the constructor tree
-     * @param cf the class finder
-     * @param dc the declaring class
-     */
-    public TreeConstructorInfo(ConstructorDeclaration f, ClassFinder cf, ClassInfo dc) {
-        constructorTree = f;
-        classFinder     = cf;
-	declaringClass  = dc;
-        typeVisitor     = new TypeVisitor(classFinder, declaringClass);
+  /**
+   * The abstract syntax tree of this constructor
+   */
+  private ConstructorDeclaration constructorTree;
+  
+  /**
+   * The class finder for this class
+   */
+  private ClassFinder classFinder;
+  
+  /**
+   * The parameters types
+   */
+  private ClassInfo[] parameters;
+  
+  /**
+   * The exception types
+   */
+  private ClassInfo[] exceptions;
+  
+  /**
+   * The declaring class
+   */
+  private ClassInfo declaringClass;
+  
+  /**
+   * A visitor to load type infos
+   */
+  private TypeVisitor typeVisitor;
+  
+  /**
+   * Creates a new class info
+   * @param f  the constructor tree
+   * @param cf the class finder
+   * @param dc the declaring class
+   */
+  public TreeConstructorInfo(ConstructorDeclaration f, ClassFinder cf, ClassInfo dc) {
+    constructorTree = f;
+    classFinder     = cf;
+    declaringClass  = dc;
+    typeVisitor     = new TypeVisitor(classFinder, declaringClass);
+  }
+  
+  /**
+   * Returns the constructor declaration
+   */
+  public ConstructorDeclaration getConstructorDeclaration() {
+    return constructorTree;
+  }
+  
+  /**
+   * Returns the modifiers for the constructor represented by this object
+   */
+  public int getModifiers() {
+    return constructorTree.getAccessFlags();
+  }
+  
+  /**
+   * Returns an array of class infos that represent the parameter
+   * types, in declaration order, of the constructor represented
+   * by this object
+   */
+  public ClassInfo[] getParameterTypes() {
+    if (parameters == null) {
+      List        ls = constructorTree.getParameters();
+      Iterator    it = ls.iterator();
+      parameters     = new ClassInfo[ls.size()];
+      int         i  = 0;
+      
+      while (it.hasNext()) {
+        FormalParameter fp = (FormalParameter)it.next();
+        parameters[i++] = (ClassInfo)fp.getType().acceptVisitor(typeVisitor);
+      }
     }
-
-    /**
-     * Returns the constructor declaration
-     */
-    public ConstructorDeclaration getConstructorDeclaration() {
-	return constructorTree;
+    return (ClassInfo[])parameters.clone();
+  }
+  
+  /**
+   * Returns an array of Class infos that represent the types of
+   * the exceptions declared to be thrown by the underlying constructor
+   */
+  public ClassInfo[] getExceptionTypes() {
+    if (exceptions == null) {
+      List        ls = constructorTree.getExceptions();
+      Iterator    it = ls.iterator();
+      exceptions     = new ClassInfo[ls.size()];
+      int         i  = 0;
+      while (it.hasNext()) {
+        exceptions[i++] = lookupClass((String)it.next(), declaringClass);
+      }
     }
-
-    /**
-     * Returns the modifiers for the constructor represented by this object
-     */
-    public int getModifiers() {
-        return constructorTree.getAccessFlags();
+    return (ClassInfo[])exceptions.clone();
+  }
+  
+  /**
+   * Indicates whether some other object is "equal to" this one
+   */
+  public boolean equals(Object obj) {
+    if (obj == null || !(obj instanceof TreeConstructorInfo)) {
+      return false;
     }
-
-    /**
-     * Returns an array of class infos that represent the parameter
-     * types, in declaration order, of the constructor represented
-     * by this object
-     */
-    public ClassInfo[] getParameterTypes() {
-	if (parameters == null) {
-	    List        ls = constructorTree.getParameters();
-	    Iterator    it = ls.iterator();
-	    parameters     = new ClassInfo[ls.size()];
-	    int         i  = 0;
-
-	    while (it.hasNext()) {
-		FormalParameter fp = (FormalParameter)it.next();
-		parameters[i++] = (ClassInfo)fp.getType().acceptVisitor(typeVisitor);
-	    }
-	}
-	return (ClassInfo[])parameters.clone();
+    return constructorTree.equals(((TreeConstructorInfo)obj).constructorTree);
+  }
+  
+  /**
+   * Looks for a class from its name
+   * @param s the name of the class to find
+   * @param c the context
+   * @exception NoClassDefFoundError if the class cannot be loaded
+   */
+  private ClassInfo lookupClass(String s, ClassInfo c) {
+    try {
+      if (c == null) {
+        return classFinder.lookupClass(s, c);
+      } else {
+        return classFinder.lookupClass(s);
+      }
+    } catch (ClassNotFoundException e) {
+      throw new NoClassDefFoundError(e.getMessage());
     }
-
-    /**
-     * Returns an array of Class infos that represent the types of
-     * the exceptions declared to be thrown by the underlying constructor
-     */
-    public ClassInfo[] getExceptionTypes() {
-	if (exceptions == null) {
-            List        ls = constructorTree.getExceptions();
-            Iterator    it = ls.iterator();
-            exceptions     = new ClassInfo[ls.size()];
-            int         i  = 0;
-            while (it.hasNext()) {
-                exceptions[i++] = lookupClass((String)it.next(), declaringClass);
-            }
-        }
-	return (ClassInfo[])exceptions.clone();
-    }
-
-    /**
-     * Indicates whether some other object is "equal to" this one
-     */
-    public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof TreeConstructorInfo)) {
-            return false;
-        }
-        return constructorTree.equals(((TreeConstructorInfo)obj).constructorTree);
-    }
-
-    /**
-     * Looks for a class from its name
-     * @param s the name of the class to find
-     * @param c the context
-     * @exception NoClassDefFoundError if the class cannot be loaded
-     */
-    private ClassInfo lookupClass(String s, ClassInfo c) {
-	try {
-	    if (c == null) {
-		return classFinder.lookupClass(s, c);
-	    } else {
-		return classFinder.lookupClass(s);
-	    }
-	} catch (ClassNotFoundException e) {
-	    throw new NoClassDefFoundError(e.getMessage());
-	}
-    }
-
+  }
+  
 }

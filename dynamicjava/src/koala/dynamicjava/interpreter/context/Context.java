@@ -63,12 +63,12 @@ public interface Context extends SimpleContext {
    /**
      * Sets the defined functions
      */
-    void setFunctions(List l);
+    void setFunctions(List<MethodDeclaration> l);
 
     /**
      * Returns the defined functions
      */
-    List getFunctions();
+    List<MethodDeclaration> getFunctions();
 
     /**
      * Returns the current interpreter
@@ -221,7 +221,7 @@ public interface Context extends SimpleContext {
      * @param args the classes of the arguments of the constructor
      * @param memb the class members
      */
-    Class setProperties(ClassAllocation node, Class c, Class[] args, List memb);
+    Class setProperties(ClassAllocation node, Class c, Class[] args, List<Node> memb);
 
     /**
      * Looks for a constructor
@@ -230,7 +230,7 @@ public interface Context extends SimpleContext {
      * @exception NoSuchMethodException if the constructor cannot be found
      */
     Constructor lookupConstructor(Class c, Class[] params)
-	throws NoSuchMethodException;
+ throws NoSuchMethodException;
 
     /**
      * Invokes a constructor
@@ -254,7 +254,7 @@ public interface Context extends SimpleContext {
      * @exception NoSuchMethodException if the method cannot be found
      */
     Method lookupMethod(Node prefix, String mname, Class[] params)
-	throws NoSuchMethodException;
+ throws NoSuchMethodException;
 
     /**
      * Looks for a function
@@ -263,7 +263,7 @@ public interface Context extends SimpleContext {
      * @exception NoSuchFunctionException if the function cannot be found
      */
     MethodDeclaration lookupFunction(String mname, Class[] params)
-	throws NoSuchFunctionException;
+ throws NoSuchFunctionException;
 
     /**
      * Looks for a super method
@@ -273,7 +273,7 @@ public interface Context extends SimpleContext {
      * @exception NoSuchMethodException if the method cannot be found
      */
     Method lookupSuperMethod(Node node, String mname, Class[] params)
-	throws NoSuchMethodException;
+ throws NoSuchMethodException;
 
     /**
      * Looks for a field

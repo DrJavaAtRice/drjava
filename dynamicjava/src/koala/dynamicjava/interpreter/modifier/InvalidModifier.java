@@ -42,29 +42,29 @@ import koala.dynamicjava.util.*;
  */
 
 public class InvalidModifier extends LeftHandSideModifier {
-    /**
-     * The node
-     */
-    private Node node;
-
-    /**
-     * Creates a new field modifier
-     * @param n the node
-     */
-    public InvalidModifier(Node n) {
-	node  = n;
-    }
-
-    /**
-     * Prepares the modifier for modification
-     */
-    public Object prepare(Visitor v, Context ctx) {
-	throw new ExecutionError("cannot.modify", node);
-    }
-
-    /**
-     * Sets the value of the underlying left hand side expression
-     */
-    public void modify(Context ctx, Object value) {
-    }
+  /**
+   * The node
+   */
+  private Node node;
+  
+  /**
+   * Creates a new field modifier
+   * @param n the node
+   */
+  public InvalidModifier(Node n) {
+    node  = n;
+  }
+  
+  /**
+   * Prepares the modifier for modification
+   */
+  public Object prepare(Visitor<Object> v, Context ctx) {
+    throw new ExecutionError("cannot.modify", node);
+  }
+  
+  /**
+   * Sets the value of the underlying left hand side expression
+   */
+  public void modify(Context ctx, Object value) {
+  }
 }

@@ -40,106 +40,106 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class ArrayInitializer extends Expression {
-    /**
-     * The cells property name
-     */
-    public final static String CELLS = "cells";
-
-    /**
-     * The element type property name
-     */
-    public final static String ELEMENT_TYPE = "elementType";
-
-    /**
-     * The list of initialized cells
-     */
-    private List cells;
-
-    /**
-     * The element type
-     */
-    private Type elementType;
-
-    /**
-     * Initializes the expression
-     * @param cells the list of initialized cells
-     * @exception IllegalArgumentException if cells is null
-     */
-    public ArrayInitializer(List cells) {
-	this(cells, null, 0, 0, 0, 0);
+  /**
+   * The cells property name
+   */
+  public final static String CELLS = "cells";
+  
+  /**
+   * The element type property name
+   */
+  public final static String ELEMENT_TYPE = "elementType";
+  
+  /**
+   * The list of initialized cells
+   */
+  private List<Expression> cells;
+  
+  /**
+   * The element type
+   */
+  private Type elementType;
+  
+  /**
+   * Initializes the expression
+   * @param cells the list of initialized cells
+   * @exception IllegalArgumentException if cells is null
+   */
+  public ArrayInitializer(List<Expression> cells) {
+    this(cells, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Initializes the expression
+   * @param cells the list of initialized cells
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if cells is null
+   */
+  public ArrayInitializer(List<Expression> cells,
+                          String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
+    
+    if (cells == null) throw new IllegalArgumentException("cells == null");
+    
+    this.cells = cells;
+  }
+  
+  /**
+   * Returns the list of cell initialization expressions
+   */
+  public List<Expression> getCells() {
+    return cells;
+  }
+  
+  /**
+   * Sets the list of cell initialization expressions
+   * @exception IllegalArgumentException if l is null
+   */
+  public void setCells(List<Expression> l) {
+    if (l == null) throw new IllegalArgumentException("l == null");
+    
+    firePropertyChange(CELLS, cells, cells = l);
+  }
+  
+  /**
+   * Returns the element type
+   * @exception IllegalStateException if elementType is null
+   */
+  public Type getElementType() {
+    if (elementType == null) throw new IllegalStateException("elementType == null");
+    
+    return elementType;
+  }
+  
+  /**
+   * Sets the element type
+   * @exception IllegalArgumentException if t is null
+   */
+  public void setElementType(Type t) {
+    if (t == null) throw new IllegalArgumentException("t == null");
+    
+    firePropertyChange(ELEMENT_TYPE, elementType, elementType = t);
+    if (t instanceof ArrayType) {
+      ArrayType at = (ArrayType)t;
+      Iterator  it = cells.iterator();
+      while (it.hasNext()) {
+        Object init = it.next();
+        if (init instanceof ArrayInitializer) {
+          ((ArrayInitializer)init).setElementType(at.getElementType());
+        }
+      }
     }
-
-    /**
-     * Initializes the expression
-     * @param cells the list of initialized cells
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if cells is null
-     */
-    public ArrayInitializer(List cells,
-			    String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-
-	if (cells == null) throw new IllegalArgumentException("cells == null");
-
-	this.cells = cells;
-    }
-
-    /**
-     * Returns the list of cell initialization expressions
-     */
-    public List getCells() {
-	return cells;
-    }
-
-    /**
-     * Sets the list of cell initialization expressions
-     * @exception IllegalArgumentException if l is null
-     */
-    public void setCells(List l) {
-	if (l == null) throw new IllegalArgumentException("l == null");
-
-	firePropertyChange(CELLS, cells, cells = l);
-    }
-
-    /**
-     * Returns the element type
-     * @exception IllegalStateException if elementType is null
-     */
-    public Type getElementType() {
-	if (elementType == null) throw new IllegalStateException("elementType == null");
-
-	return elementType;
-    }
-
-    /**
-     * Sets the element type
-     * @exception IllegalArgumentException if t is null
-     */
-    public void setElementType(Type t) {
-	if (t == null) throw new IllegalArgumentException("t == null");
-
-	firePropertyChange(ELEMENT_TYPE, elementType, elementType = t);
-	if (t instanceof ArrayType) {
-	    ArrayType at = (ArrayType)t;
-	    Iterator  it = cells.iterator();
-	    while (it.hasNext()) {
-		Object init = it.next();
-		if (init instanceof ArrayInitializer) {
-		    ((ArrayInitializer)init).setElementType(at.getElementType());
-		}
-	    }
-	}
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

@@ -40,37 +40,37 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class SuperMethodCall extends MethodCall {
-    /**
-     * Creates a new node
-     * @param mn    the method name
-     * @param args  the arguments. null if no arguments.
-     * @exception IllegalArgumentException if mn is null
-     */
-    public SuperMethodCall(String mn, List args) {
-	this(mn, args, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Creates a new node
-     * @param mn    the method name
-     * @param args  the arguments. null if no arguments.
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if mn is null
-     */
-    public SuperMethodCall(String mn, List args,
-			   String fn, int bl, int bc, int el, int ec) {
-	super(mn, args, fn, bl, bc, el, ec);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  /**
+   * Creates a new node
+   * @param mn    the method name
+   * @param args  the arguments. null if no arguments.
+   * @exception IllegalArgumentException if mn is null
+   */
+  public SuperMethodCall(String mn, List<Expression> args) {
+    this(mn, args, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Creates a new node
+   * @param mn    the method name
+   * @param args  the arguments. null if no arguments.
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if mn is null
+   */
+  public SuperMethodCall(String mn, List<Expression> args,
+                         String fn, int bl, int bc, int el, int ec) {
+    super(mn, args, fn, bl, bc, el, ec);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

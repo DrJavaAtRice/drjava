@@ -38,92 +38,92 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class InstanceOfExpression extends Expression implements ExpressionContainer {
-    /**
-     * The referenceType property name
-     */
-    public final static String REFERENCE_TYPE = "referenceType";
-
-    /**
-     * The expression to check
-     */
-    private Expression expression;
-
-    /**
-     * The type to check
-     */
-    private Type referenceType;
+  /**
+   * The referenceType property name
+   */
+  public final static String REFERENCE_TYPE = "referenceType";
+  
+  /**
+   * The expression to check
+   */
+  private Expression expression;
+  
+  /**
+   * The type to check
+   */
+  private Type referenceType;
+  
+  /**
+   * Initializes the expression
+   * @param exp   the expression to test
+   * @param t     the type to check
+   * @exception IllegalArgumentException if exp is null or t is null
+   */
+  public InstanceOfExpression(Expression exp, Type t) {
+    this(exp, t, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Initializes the expression
+   * @param exp   the expression to test
+   * @param t     the type to check
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if exp is null or t is null
+   */
+  public InstanceOfExpression(Expression exp, Type t,
+                              String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
     
-    /**
-     * Initializes the expression
-     * @param exp   the expression to test
-     * @param t     the type to check
-     * @exception IllegalArgumentException if exp is null or t is null
-     */
-    public InstanceOfExpression(Expression exp, Type t) {
-	this(exp, t, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Initializes the expression
-     * @param exp   the expression to test
-     * @param t     the type to check
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if exp is null or t is null
-     */
-    public InstanceOfExpression(Expression exp, Type t,
-				String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-
-	if (exp == null) throw new IllegalArgumentException("exp == null");
-	if (t == null)   throw new IllegalArgumentException("t == null");
-
-	expression    = exp;
-	referenceType = t;
-    }
-
-    /**
-     * Returns the expression to check
-     */
-    public Expression getExpression() {
-	return expression;
-    }
-
-    /**
-     * Sets the expression to check
-     * @exception IllegalArgumentException if e is null
-     */
-    public void setExpression(Expression e) {
-	if (e == null) throw new IllegalArgumentException("e == null");
-
-	firePropertyChange(EXPRESSION, expression, expression = e);
-    }
-
-    /**
-     * Returns the type to check
-     */
-    public Type getReferenceType() {
-	return referenceType;
-    }
-
-    /**
-     * Sets the type to check
-     * @exception IllegalArgumentException if t is null
-     */
-    public void setReferenceType(Type t) {
-	if (t == null) throw new IllegalArgumentException("t == null");
-
-	firePropertyChange(REFERENCE_TYPE, referenceType, referenceType = t);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+    if (exp == null) throw new IllegalArgumentException("exp == null");
+    if (t == null)   throw new IllegalArgumentException("t == null");
+    
+    expression    = exp;
+    referenceType = t;
+  }
+  
+  /**
+   * Returns the expression to check
+   */
+  public Expression getExpression() {
+    return expression;
+  }
+  
+  /**
+   * Sets the expression to check
+   * @exception IllegalArgumentException if e is null
+   */
+  public void setExpression(Expression e) {
+    if (e == null) throw new IllegalArgumentException("e == null");
+    
+    firePropertyChange(EXPRESSION, expression, expression = e);
+  }
+  
+  /**
+   * Returns the type to check
+   */
+  public Type getReferenceType() {
+    return referenceType;
+  }
+  
+  /**
+   * Sets the type to check
+   * @exception IllegalArgumentException if t is null
+   */
+  public void setReferenceType(Type t) {
+    if (t == null) throw new IllegalArgumentException("t == null");
+    
+    firePropertyChange(REFERENCE_TYPE, referenceType, referenceType = t);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

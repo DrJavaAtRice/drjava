@@ -33,6 +33,7 @@ import koala.dynamicjava.interpreter.throwable.*;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.parser.wrapper.*;
 import koala.dynamicjava.util.*;
+import koala.dynamicjava.SourceInfo;
 
 /**
  * This exception is thrown when an error append while
@@ -43,111 +44,69 @@ import koala.dynamicjava.util.*;
  */
 
 public class InterpreterException extends ThrownException {
-    /**
-     * The source code information
-     */
-    protected SourceInformation sourceInformation;
-
-    /**
-     * The detailed message
-     */
-    protected String message;
-
-    /**
-     * Constructs an <code>InterpreterException</code> from a ParseError
-     */
-    public InterpreterException(ParseError e) {
-        super(e);
-	if (e.getLine() != -1) {
-	    sourceInformation = new SourceInformation(e.getFilename(),
-						      e.getLine(),
-						      e.getColumn());
-	    message = "L"+e.getLine()+", C"+e.getColumn()+" ("+e.getFilename()+"):\n"+
-		e.getMessage();
-	} else {
-	    message = e.getMessage();
-	}
+  /**
+   * The source code information
+   */
+  protected SourceInfo sourceInfo;
+  
+  /**
+   * The detailed message
+   */
+  protected String message;
+  
+  /**
+   * Constructs an <code>InterpreterException</code> from a ParseError
+   */
+  public InterpreterException(ParseError e) {
+    super(e);
+    System.err.println("GotHere!");
+    if (e.getLine() != -1) {
+      //SourceInfo si = e.getSourceInfo();
+      message = "L"+e.getLine()+", C"+e.getColumn()+" ("+e.getFilename()+"):\n"+/**/// use si
+        e.getMessage(); 
+    } else {
+      message = e.getMessage();
     }
-
-    /**
-     * Constructs an <code>InterpreterException</code> from a ExecutionError
-     */
-    public InterpreterException(ExecutionError e) {
-        super(e);
-	Node n = e.getNode();
-	if (n != null && n.getFilename() != null) {
-	    sourceInformation = new SourceInformation(n.getFilename(),
-						      n.getBeginLine(),
-						      n.getBeginColumn());
-	    message = "L"+n.getBeginLine()+", C"+n.getBeginColumn()+
-		" ("+n.getFilename()+"):\n";
-	} else {
-	    message = "";
-	}
-	if (e instanceof CatchedExceptionError) {
-	    message += ((CatchedExceptionError)e).getException();
-	} else if (e instanceof ThrownException) {
-	    message += ((ThrownException)e).getException();
-	} else {
-	    message += e.getMessage();
-	}
+  }
+  
+  /**
+   * Constructs an <code>InterpreterException</code> from a ExecutionError
+   */
+  public InterpreterException(ExecutionError e) {
+    super(e);
+    Node n = e.getNode();
+    if (n != null && n.getFilename() != null) {
+      SourceInfo si = n.getSourceInfo();
+      message = "BL"+si.getStartLine()+", BC"+si.getStartColumn()+"EL"+si.getEndLine()+", EC"+si.getEndColumn()+
+        " ("+si.getFile().getName()+"):\n";
+    } else {
+      message = "";
     }
-
-    public Throwable getError() {
-        return thrown;
+    if (e instanceof CatchedExceptionError) {
+      message += ((CatchedExceptionError)e).getException();
+    } else if (e instanceof ThrownException) {
+      message += ((ThrownException)e).getException();
+    } else {
+      message += e.getMessage();
     }
- 
-    /**
-     * Returns the source code information if available, or null
-     */
-    public SourceInformation getSourceInformation() {
-	return sourceInformation;
-    }
-
-    /**
-     * To represent the source code informations
-     */
-    public static class SourceInformation {
-	// The fields
-	private String filename;
-	private int    line;
-	private int    column;
-
-	/**
-	 * Creates a source information
-	 */
-	public SourceInformation(String filename, int line, int column) {
-	    this.filename = filename;
-	    this.line     = line;
-	    this.column   = column;
-	}
-
-	/**
-	 * Returns the filename
-	 */
-	public String getFilename() {
-	    return filename;
-	}
-
-	/**
-	 * Returns the line where the error occurs
-	 */
-	public int getLine() {
-	    return line;
-	}
-
-	/**
-	 * Returns the column where the error occurs
-	 */
-	public int getColumn() {
-	    return column;
-	}
-    }
-
-    /**
-     * Returns the detailed message
-     */
-    public String getMessage() {
-	return message;
-    }
+  }
+  
+  public Throwable getError() {
+    return thrown;
+  }
+  
+  /**
+   * Returns the source code information if available, or null
+   */
+  public SourceInfo getSourceInfo() {
+    return sourceInfo;
+  }
+  
+  
+  /**
+   * Returns the detailed message
+   */
+  public String getMessage() {
+    return message;
+  }
 }

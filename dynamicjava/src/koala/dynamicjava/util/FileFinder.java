@@ -43,13 +43,13 @@ public class FileFinder {
   /**
    * The paths
    */
-  private List paths;
+  private List<String> paths;
   
   /**
    * Creates a new file finder
    */
   public FileFinder() {
-    paths = new LinkedList();
+    paths = new LinkedList<String>();
   }
   
   /**

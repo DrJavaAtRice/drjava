@@ -40,66 +40,66 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class TryStatement extends Statement {
-    /**
-     * The try block
-     */
-    private Node tryBlock;
-
-    /**
-     * The catch statements
-     */
-    private List catchStatements;
-
-    /**
-     * The finally block
-     */
-    private Node finallyBlock;
-
-    /**
-     * Creates a new while statement
-     * @param tryB   the try block
-     * @param catchL the catch list
-     * @param fin    the finally block
-     * @param fn     the filename
-     * @param bl     the begin line
-     * @param bc     the begin column
-     * @param el     the end line
-     * @param ec     the end column
-     */
-    public TryStatement(Node tryB, List catchL, Node fin,
-			String fn, int bl, int bc, int el, int ec) {
-	super(fn, bl, bc, el, ec);
-	tryBlock        = tryB;
-	catchStatements = catchL;
-	finallyBlock    = fin;
-    }
-    
-    /**
-     * Gets the try block
-     */
-    public Node getTryBlock() {
-	return tryBlock;
-    }
-
-    /**
-     * Gets the catch statements
-     */
-    public List getCatchStatements() {
-	return catchStatements;
-    }
-
-    /**
-     * Gets the finally block
-     */
-    public Node getFinallyBlock() {
-	return finallyBlock;
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  /**
+   * The try block
+   */
+  private Node tryBlock;
+  
+  /**
+   * The catch statements
+   */
+  private List<Node> catchStatements;
+  
+  /**
+   * The finally block
+   */
+  private Node finallyBlock;
+  
+  /**
+   * Creates a new while statement
+   * @param tryB   the try block
+   * @param catchL the catch list
+   * @param fin    the finally block
+   * @param fn     the filename
+   * @param bl     the begin line
+   * @param bc     the begin column
+   * @param el     the end line
+   * @param ec     the end column
+   */
+  public TryStatement(Node tryB, List<Node> catchL, Node fin,
+                      String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
+    tryBlock        = tryB;
+    catchStatements = catchL;
+    finallyBlock    = fin;
+  }
+  
+  /**
+   * Gets the try block
+   */
+  public Node getTryBlock() {
+    return tryBlock;
+  }
+  
+  /**
+   * Gets the catch statements
+   */
+  public List<Node> getCatchStatements() {
+    return catchStatements;
+  }
+  
+  /**
+   * Gets the finally block
+   */
+  public Node getFinallyBlock() {
+    return finallyBlock;
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

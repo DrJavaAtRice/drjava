@@ -38,68 +38,68 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class CastExpression extends UnaryExpression {
-    /**
-     * The targetType property name
-     */
-    public final static String TARGET_TYPE = "targetType";
-
-    /**
-     * The target type
-     */
-    private Type targetType;
-
-    /**
-     * Initializes the expression
-     * @param tt    the target type
-     * @param exp   the casted expression
-     * @exception IllegalArgumentException if tt is null or exp is null
-     */
-    public CastExpression(Type tt, Expression exp) {
-	this(tt, exp, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Initializes the expression
-     * @param tt    the target type
-     * @param exp   the casted expression
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if tt is null or exp is null
-     */
-    public CastExpression(Type tt, Expression exp,
-			  String fn, int bl, int bc, int el, int ec) {
-	super(exp, fn, bl, bc, el, ec);
-
-	if (tt == null) throw new IllegalArgumentException("tt == null");
-
-	targetType = tt;
-    }
-
-    /**
-     * Returns the target type
-     */
-    public Type getTargetType() {
-	return targetType;
-    }
-
-    /**
-     * Sets the target type
-     * @exception IllegalArgumentException if t is null
-     */
-    public void setTargetType(Type t) {
-	if (t == null) throw new IllegalArgumentException("t == null");
-
-	firePropertyChange(TARGET_TYPE, targetType, targetType = t);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  /**
+   * The targetType property name
+   */
+  public final static String TARGET_TYPE = "targetType";
+  
+  /**
+   * The target type
+   */
+  private Type targetType;
+  
+  /**
+   * Initializes the expression
+   * @param tt    the target type
+   * @param exp   the casted expression
+   * @exception IllegalArgumentException if tt is null or exp is null
+   */
+  public CastExpression(Type tt, Expression exp) {
+    this(tt, exp, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Initializes the expression
+   * @param tt    the target type
+   * @param exp   the casted expression
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if tt is null or exp is null
+   */
+  public CastExpression(Type tt, Expression exp,
+                        String fn, int bl, int bc, int el, int ec) {
+    super(exp, fn, bl, bc, el, ec);
+    
+    if (tt == null) throw new IllegalArgumentException("tt == null");
+    
+    targetType = tt;
+  }
+  
+  /**
+   * Returns the target type
+   */
+  public Type getTargetType() {
+    return targetType;
+  }
+  
+  /**
+   * Sets the target type
+   * @exception IllegalArgumentException if t is null
+   */
+  public void setTargetType(Type t) {
+    if (t == null) throw new IllegalArgumentException("t == null");
+    
+    firePropertyChange(TARGET_TYPE, targetType, targetType = t);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

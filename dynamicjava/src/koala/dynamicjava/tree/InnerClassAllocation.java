@@ -41,74 +41,70 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class InnerClassAllocation extends InnerAllocation {
-    /**
-     * The members property name
-     */
-    public final static String MEMBERS = "members";
-
-    /**
-     * The members of the anonymous class
-     */
-    private List members;
-
-    /**
-     * Initializes the expression
-     * @param exp   the outer object
-     * @param tp    the type prefix
-     * @param args  the arguments of the constructor. Can be null.
-     * @param memb  the members of the class
-     * @exception IllegalArgumentException if exp is null or memb is null or
-     *            tp is null
-     */
-    public InnerClassAllocation(Expression exp, Type tp, List args, List memb) {
-	this(exp, tp, args, memb, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Initializes the expression
-     * @param exp   the outer object
-     * @param tp    the type prefix
-     * @param args  the arguments of the constructor. Can be null.
-     * @param memb  the members of the class
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if exp is null or memb is null or
-     *            tp is null
-     */
-    public InnerClassAllocation(Expression exp, Type tp, List args, List memb,
-				String fn, int bl, int bc, int el, int ec) {
-	super(exp, tp, args, fn, bl, bc, el, ec);
-
-	if (memb == null) throw new IllegalArgumentException("memb == null");
-
-	members    = memb;
-    }
-
-    /**
-     * Returns the members of the anonymous class
-     */
-    public List getMembers() {
-	return members;
-    }
-
-    /**
-     * Sets the members of the anonymous class
-     * @exception IllegalArgumentException if l is null
-     */
-    public void setMembers(List l) {
-	if (l == null) throw new IllegalArgumentException("l == null");
-
-	firePropertyChange(MEMBERS, members, members = l);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  /**
+   * The members property name
+   */
+  public final static String MEMBERS = "members";
+  
+  /**
+   * The members of the anonymous class
+   */
+  private List<Node> members;
+  
+  /**
+   * Initializes the expression
+   * @param exp   the outer object
+   * @param tp    the type prefix
+   * @param args  the arguments of the constructor. Can be null.
+   * @param memb  the members of the class
+   * @exception IllegalArgumentException if exp is null or memb is null or
+   *            tp is null
+   */
+  public InnerClassAllocation(Expression exp, Type tp, List<Expression> args, List<Node> memb) {
+    this(exp, tp, args, memb, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Initializes the expression
+   * @param exp   the outer object
+   * @param tp    the type prefix
+   * @param args  the arguments of the constructor. Can be null.
+   * @param memb  the members of the class
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if exp is null or memb is null or
+   *            tp is null
+   */
+  public InnerClassAllocation(Expression exp, Type tp, List<Expression> args, List<Node> memb,
+                              String fn, int bl, int bc, int el, int ec) {
+    super(exp, tp, args, fn, bl, bc, el, ec);
+    
+    if (memb == null) throw new IllegalArgumentException("memb == null");
+    
+    members = memb;
+  }
+  
+  /** Returns the members of the anonymous class */
+  public List<Node> getMembers() { return members; }
+  
+  /**
+   * Sets the members of the anonymous class
+   * @exception IllegalArgumentException if l is null
+   */
+  public void setMembers(List<Node> l) {
+    if (l == null) throw new IllegalArgumentException("l == null");
+    
+    firePropertyChange(MEMBERS, members, members = l);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

@@ -40,62 +40,62 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class SimpleAllocation extends Allocation implements ExpressionStatement {
-    /**
-     * The arguments property name
-     */
-    public final static String ARGUMENTS = "arguments";
-
-    /**
-     * The arguments to pass to the constructor
-     */
-    private List arguments;
-
-    /**
-     * Initializes the expression
-     * @param tp    the type prefix
-     * @param args  the arguments of the constructor
-     * @exception IllegalArgumentException if tp is null
-     */
-    public SimpleAllocation(Type tp, List args) {
-	this(tp, args, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Initializes the expression
-     * @param tp    the type prefix
-     * @param args  the arguments of the constructor
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if tp is null
-     */
-    public SimpleAllocation(Type tp, List args,
-			    String fn, int bl, int bc, int el, int ec) {
-	super(tp, fn, bl, bc, el, ec);
-	arguments = args;
-    }
-
-    /**
-     * Returns the constructor arguments
-     */
-    public List getArguments() {
-	return arguments;
-    }
-
-    /**
-     * Sets the constructor arguments.
-     */
-    public void setArguments(List l) {
-	firePropertyChange(ARGUMENTS, arguments, arguments = l);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
-    }
+  /**
+   * The arguments property name
+   */
+  public final static String ARGUMENTS = "arguments";
+  
+  /**
+   * The arguments to pass to the constructor
+   */
+  private List<Expression> arguments;
+  
+  /**
+   * Initializes the expression
+   * @param tp    the type prefix
+   * @param args  the arguments of the constructor
+   * @exception IllegalArgumentException if tp is null
+   */
+  public SimpleAllocation(Type tp, List<Expression> args) {
+    this(tp, args, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Initializes the expression
+   * @param tp    the type prefix
+   * @param args  the arguments of the constructor
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if tp is null
+   */
+  public SimpleAllocation(Type tp, List<Expression> args,
+                          String fn, int bl, int bc, int el, int ec) {
+    super(tp, fn, bl, bc, el, ec);
+    arguments = args;
+  }
+  
+  /**
+   * Returns the constructor arguments
+   */
+  public List<Expression> getArguments() {
+    return arguments;
+  }
+  
+  /**
+   * Sets the constructor arguments.
+   */
+  public void setArguments(List<Expression> l) {
+    firePropertyChange(ARGUMENTS, arguments, arguments = l);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
 }

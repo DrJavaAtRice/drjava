@@ -44,7 +44,7 @@ public class AddExpression extends BinaryExpression {
      * @param rexp  the RHS expression
      */
     public AddExpression(Expression lexp, Expression rexp) {
-	this(lexp, rexp, null, 0, 0, 0, 0);
+ this(lexp, rexp, null, 0, 0, 0, 0);
     }
 
     /**
@@ -58,15 +58,15 @@ public class AddExpression extends BinaryExpression {
      * @param ec    the end column
      */
     public AddExpression(Expression lexp, Expression rexp,
-			 String fn, int bl, int bc, int el, int ec) {
-	super(lexp, rexp, fn, bl, bc, el, ec);
+    String fn, int bl, int bc, int el, int ec) {
+ super(lexp, rexp, fn, bl, bc, el, ec);
     }
 
     /**
      * Allows a visitor to traverse the tree
      * @param visitor the visitor to accept
      */
-    public Object acceptVisitor(Visitor visitor) {
-	return visitor.visit(this);
+    public <T> T acceptVisitor(Visitor<T> visitor) {
+ return visitor.visit(this);
     }
 }

@@ -94,7 +94,7 @@ public abstract class AttributeOwnerComponent extends BytecodeComponent {
   /**
    * The attributes
    */
-  protected List attributes;
+  protected List<AttributeInfo> attributes;
   
   /**
    * Initializes a new bytecode component
@@ -104,7 +104,7 @@ public abstract class AttributeOwnerComponent extends BytecodeComponent {
    */
   protected AttributeOwnerComponent() {
     super(null, (short)0);
-    attributes = new LinkedList();
+    attributes = new LinkedList<AttributeInfo>();
   }
   
   /**

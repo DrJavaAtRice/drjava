@@ -299,4 +299,5 @@ public class ImportationManagerTest extends TestCase {
     // im.declarePackageImport("...") to let run() fail, and learn how to catch its 'failure'
     //run(); // given that im == im2
   }
+  
 }

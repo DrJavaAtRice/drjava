@@ -43,50 +43,50 @@ import koala.dynamicjava.util.*;
  */
 
 public class VariableModifier extends LeftHandSideModifier {
-    /**
-     * The name of the variable
-     */
-    protected QualifiedName name;
-
-    /**
-     * The type of this variable
-     */
-    protected Class type;
-
-    /**
-     * The representation of the variable
-     */
-    protected String representation;
-
-    /**
-     * Creates a new variable modifier
-     * @param name the node of that represents this variable
-     * @param type the declared type of the variable
-     */
-    public VariableModifier(QualifiedName name, Class type) {
-	this.name = name;
-	this.type = type;
-	representation = name.getRepresentation();
+  /**
+   * The name of the variable
+   */
+  protected QualifiedName name;
+  
+  /**
+   * The type of this variable
+   */
+  protected Class type;
+  
+  /**
+   * The representation of the variable
+   */
+  protected String representation;
+  
+  /**
+   * Creates a new variable modifier
+   * @param name the node of that represents this variable
+   * @param type the declared type of the variable
+   */
+  public VariableModifier(QualifiedName name, Class type) {
+    this.name = name;
+    this.type = type;
+    representation = name.getRepresentation();
+  }
+  
+  /**
+   * Prepares the modifier for modification
+   */
+  public Object prepare(Visitor<Object> v, Context ctx) {
+    return ctx.get(representation);
+  }
+  
+  /**
+   * Sets the value of the underlying left hand side expression
+   */
+  public void modify(Context ctx, Object value) {
+    if (type.isPrimitive()                     ||
+        value == null                          ||
+        type.isAssignableFrom(value.getClass())) {
+      ctx.set(representation, value);
+    } else {
+      Exception e = new ClassCastException(representation);
+      throw new CatchedExceptionError(e, name);
     }
-
-    /**
-     * Prepares the modifier for modification
-     */
-    public Object prepare(Visitor v, Context ctx) {
-	return ctx.get(representation);
-    }
-
-    /**
-     * Sets the value of the underlying left hand side expression
-     */
-    public void modify(Context ctx, Object value) {
-	if (type.isPrimitive()                     ||
-	    value == null                          ||
-	    type.isAssignableFrom(value.getClass())) {
-	    ctx.set(representation, value);
-	} else {
-	    Exception e = new ClassCastException(representation);
-	    throw new CatchedExceptionError(e, name);
-	}
-    }
+  }
 }
