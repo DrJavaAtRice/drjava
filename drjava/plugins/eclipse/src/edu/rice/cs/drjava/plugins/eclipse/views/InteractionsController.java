@@ -40,13 +40,19 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.plugins.eclipse.views;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.preference.*;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.*;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.SWT;
 
+import edu.rice.cs.drjava.plugins.eclipse.EclipsePlugin;
+import edu.rice.cs.drjava.plugins.eclipse.DrJavaConstants;
 import edu.rice.cs.drjava.plugins.eclipse.repl.EclipseInteractionsModel;
 
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
@@ -90,6 +96,15 @@ public class InteractionsController {
   protected Color _colorDarkBlue;
   protected Color _colorYellow;
   
+  /** Whether the Interactions Pane is currently enabled. */
+  protected boolean _enabled;
+  
+  // ---- Preferences ----
+  
+  /** Whether to prompt before resetting Interactions. */
+  protected boolean _promptToReset;
+  
+  
   /**
    * Glue together the given model and view.
    * @param model EclipseInteractionsModel to handle the interpreter
@@ -103,6 +118,14 @@ public class InteractionsController {
     _adapter = adapter;
     _doc = model.getDocument();
     _view = view;
+    _enabled = true;
+    
+    // Initialize preferences
+    IPreferenceStore store = EclipsePlugin.getDefault().getPreferenceStore();
+    IPropertyChangeListener listener = new PrefChangeListener();
+    store.addPropertyChangeListener(listener);
+    JFaceResources.getFontRegistry().addListener(listener);
+    _updatePreferences();
     
     // Put the caret at the end
     _view.getTextPane().setCaretOffset(_doc.getDocLength());
@@ -110,6 +133,18 @@ public class InteractionsController {
     _addDocumentStyles();
     _setupModel();
     _setupView();
+  }
+  
+  /**
+   * Reads user-defined preferences and sets up a PropertyChangeListener
+   * to react to changes.
+   */
+  private void _updatePreferences() {
+    IPreferenceStore store = EclipsePlugin.getDefault().getPreferenceStore();
+    _promptToReset = store.getBoolean(DrJavaConstants.INTERACTIONS_RESET_PROMPT);
+    
+    // Update the font
+    _view.updateFont();
   }
   
   /**
@@ -220,6 +255,19 @@ public class InteractionsController {
     }
   }
   
+  /** Enables the Interactions Pane. */
+  protected void _enableInteractionsPane() {
+    _enabled = true;
+    _view.setBusyCursorShown(false);
+    _view.setEditable(true);
+  }
+  /** Disables the Interactions Pane. */
+  protected void _disableInteractionsPane() {
+    _enabled = false;
+    _view.setBusyCursorShown(true);
+    _view.setEditable(false);
+  }
+  
   /**
    * Listens and reacts to interactions-related events.
    */
@@ -229,8 +277,8 @@ public class InteractionsController {
     }
     
     public void interactionEnded() {
-      moveToPrompt();
       _enableInteractionsPane();
+      moveToPrompt();
     }
     
     public void interactionErrorOccurred(final int offset, final int length) {
@@ -246,8 +294,8 @@ public class InteractionsController {
     }
     
     public void interpreterReady() {
-      moveToPrompt();
       _enableInteractionsPane();
+      moveToPrompt();
     }
     
     public void interpreterExited(int status) {
@@ -275,16 +323,6 @@ public class InteractionsController {
       interpreterReady();
     }
     
-    /** Enables the Interactions Pane. */
-    protected void _enableInteractionsPane() {
-      _view.setBusyCursorShown(false);
-      _view.setEditable(true);
-    }
-    /** Disables the Interactions Pane. */
-    protected void _disableInteractionsPane() {
-      _view.setBusyCursorShown(true);
-      _view.setEditable(false);
-    }
   }
   
   /**
@@ -305,7 +343,7 @@ public class InteractionsController {
       public void run() {
         String title = "Confirm Reset Interactions";
         String message = "Are you sure you want to reset the Interactions Pane?";
-        if (_view.showConfirmDialog(title, message)) {
+        if (!_promptToReset || _view.showConfirmDialog(title, message)) {
           _model.resetInterpreter();
         }
       }
@@ -325,6 +363,9 @@ public class InteractionsController {
       
       // -- Branch to an action on certain keystrokes --
       //  (needs to be refactored for better OO code)
+      
+      // Keys have no action if Interactions pane is not enabled.
+      if (!_enabled) return;
       
       // enter
       if (event.keyCode == 13 && event.stateMask == 0) {
@@ -367,6 +408,7 @@ public class InteractionsController {
    * result to the view.
    */
   boolean evalAction() {
+    _disableInteractionsPane();
     _model.interpretCurrentInteraction();
     return false;
   }
@@ -465,7 +507,6 @@ public class InteractionsController {
         pane.showSelection();
       }
     });
-    
   }
   
   /** Moves the pane's caret to the document's prompt. */
@@ -477,5 +518,15 @@ public class InteractionsController {
         pane.showSelection();
       }
     });
+  }
+  
+  /**
+   * Class to listen to preference changes and update the
+   * controller accordingly.
+   */
+  class PrefChangeListener implements IPropertyChangeListener {
+    public void propertyChange(PropertyChangeEvent event) {
+      _updatePreferences();
+    }
   }
 }

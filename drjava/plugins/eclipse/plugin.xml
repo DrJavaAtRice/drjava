@@ -59,4 +59,23 @@
       </perspectiveExtension>
    </extension>
 
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page id="edu.rice.cs.drjava.Page1"
+            class="edu.rice.cs.drjava.plugins.eclipse.DrJavaPreferencePage"
+            name="DrJava">
+      </page>
+   </extension>
+
+   <extension point="org.eclipse.ui.fontDefinitions">
+      <fontDefinition
+         id="edu.rice.cs.drjava.InteractionsFont"
+         label="DrJava Interactions Font"
+         defaultsTo="org.eclipse.jdt.ui.editors.textfont">
+         <description>
+            The font used in DrJava's Interactions Pane.
+         </description>
+      </fontDefinition>
+   </extension>
+
 </plugin>

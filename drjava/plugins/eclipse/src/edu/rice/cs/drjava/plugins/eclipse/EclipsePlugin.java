@@ -42,6 +42,8 @@ package edu.rice.cs.drjava.plugins.eclipse;
 import org.eclipse.ui.plugin.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.resources.*;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceStore;
 import java.util.*;
 import java.net.URL;
 import java.io.IOException;
@@ -137,5 +139,15 @@ public class EclipsePlugin extends AbstractUIPlugin {
       buf.append(pathSep);
     }
     return buf.toString();
+  }
+  
+  /** 
+   * Sets default preference values. These values will be used
+   * until some preferences are actually set using Preference dialog.
+   */
+  protected void initializeDefaultPreferences(IPreferenceStore store) {
+    // These settings will show up when Preference dialog
+    // opens up for the first time.
+    store.setDefault(DrJavaConstants.INTERACTIONS_RESET_PROMPT, true);
   }
 }

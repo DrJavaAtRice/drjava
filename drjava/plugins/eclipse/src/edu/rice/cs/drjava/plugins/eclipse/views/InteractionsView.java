@@ -44,13 +44,17 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.ui.part.*;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.SWT;
 
+import edu.rice.cs.drjava.plugins.eclipse.DrJavaConstants;
 import edu.rice.cs.drjava.plugins.eclipse.repl.EclipseInteractionsModel;
 import edu.rice.cs.drjava.model.repl.SimpleInteractionsModel;
 import edu.rice.cs.util.text.SWTDocumentAdapter;
@@ -98,7 +102,7 @@ public class InteractionsView extends ViewPart {
    */
   protected MenuManager _contextMenu;
   
-  
+
   /**
    * Constructor.
    */
@@ -137,9 +141,20 @@ public class InteractionsView extends ViewPart {
   
   /**
    * Sets the command that creates a beep when run.
+   * @param beep Command to create a beep
    */
   public void setBeep(Runnable beep) {
     _beep = beep;
+  }
+  
+  /**
+   * Sets the font of the Interactions Pane to be the value
+   * stored in JFace's FontRegistry under the key corresponding
+   * to DrJava's font preference.
+   */
+  public void updateFont() {
+    Font font = JFaceResources.getFont(DrJavaConstants.FONT_MAIN);
+    _styledText.setFont(font);
   }
   
   /**

@@ -1,0 +1,41 @@
+DrJava Plug-in for Eclipse Development Tips -----
+
+
+How to compile and package the plug-in:
+
+ - Adapt "eclipse.sh" to match your system.
+ - Run "source eclipse.sh"
+ - Run "ant clean-eclipse package-eclipse"
+   - This will generate a zip file in plugins/eclipse/packages
+   - Unzip this to your eclipse/plugins directory to run.
+
+
+How to update the version number:
+
+ - Edit plugins/eclipse/plugin.xml:
+   - Change version attribute in the plugin tag.
+ - Edit build.xml in top level:
+   - Change eclipse_plugin_version property to new version.
+
+
+How to add a preference to the plug-in:
+
+ - Add a constant to DrJavaConstants
+ - In DrJavaPreferencePage:
+   - Create a component in createContents()
+   - Add appropriate lines to initializeDefaults, initializeValues,
+     and storeValues
+ - Add a default value to EclipsePlugin
+ - Add an IPropertyChangeListener to the PreferenceStore
+   (EclipsePlugin.getDefault().getPreferenceStore())
+   - Specifically, in InteractionsController:
+     - Add a variable to remember preference
+     - Make action dependent on variable
+     - Add a line to _updatePreferences
+
+
+ Special note for font preferences:
+  - Fonts are added to FontRegistry in plugin.xml (via an extension point)
+  - Use JFaceResources to access the FontRegistry
+    (see InteractionsController, InteractionsView)
+
