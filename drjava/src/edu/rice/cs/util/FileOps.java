@@ -281,6 +281,20 @@ public abstract class FileOps {
   }
 
   /**
+   * Renames the given file to the given destination.  Needed since Windows will
+   * not allow a rename to overwrite an existing file.
+   * @param file the file to rename
+   * @param dest the destination file
+   * @return true iff the rename was successful
+   */
+  public static boolean renameFile(File file, File dest) {
+    if (dest.exists()) {
+      dest.delete();
+    }
+    return file.renameTo(dest);
+  }
+
+  /**
    * This method writes files correctly; it takes care of catching errors and
    * making backups and keeping an unsuccessful file save from destroying the old
    * file (unless a backup is made).  Note: if saving fails and a backup was being
@@ -301,7 +315,7 @@ public abstract class FileOps {
     /* First back up the file, if necessary */
     if (makeBackup){
       backup = fileSaver.getBackupFile();
-      if (!file.renameTo(backup)){
+      if (!renameFile(file, backup)){
         throw new IOException("Save failed: Could not create backup file "
                                 + backup.getAbsolutePath() + 
                               "\nIt may be possible to save by disabling file backups\n");
@@ -338,10 +352,14 @@ public abstract class FileOps {
       BufferedOutputStream bos = new BufferedOutputStream(fos);
       fileSaver.saveTo(bos);
       bos.close();
-      if (tempFileUsed && !tempFile.renameTo(fileSaver.getTargetFile())){
+
+      if (tempFileUsed && !renameFile(tempFile, fileSaver.getTargetFile())) {
         throw new IOException("Save failed: Could not rename temp file " +
                               tempFile + " to " + file);
       }
+      /* Delete the temp file */
+      tempFile.delete();
+
       success = true;
     } finally {
       if (makeBackup) {
@@ -350,11 +368,9 @@ public abstract class FileOps {
         if (success) {
           fileSaver.backupDone();
         } else {
-          backup.renameTo(file);
+          renameFile(backup, file);
         }
       }
-      /* Delete the temp file */
-      tempFile.delete();
     }
   }
 
