@@ -51,26 +51,26 @@ public class OrderedBidirectionalHashMap<Type1, Type2> extends BidirectionalHash
   
   public OrderedBidirectionalHashMap() { super(); }
   
-  public synchronized void put(Type1 key, Type2 value) {
+  public /* synchronized */ void put(Type1 key, Type2 value) {
     super.put(key, value);
     order.add(value);
   }
    
-  public synchronized Type2 removeValue(Type1 key) {
+  public /* synchronized */ Type2 removeValue(Type1 key) {
     Type2 value = super.removeValue(key);
     order.remove(value);
     return value;
   }
   
-  public synchronized Type1 removeKey(Type2 value) {
+  public /* synchronized */ Type1 removeKey(Type2 value) {
     Type1 key = super.removeKey(value);
     order.remove(value);
     return key;
   }
   
-  public synchronized Iterator<Type2> valuesIterator() { return new OBHMIterator(); }
+  public /* synchronized */ Iterator<Type2> valuesIterator() { return new OBHMIterator(); }
   
-  public synchronized void clear() {
+  public /* synchronized */ void clear() {
     super.clear();
     order.clear();
   }
@@ -87,29 +87,27 @@ public class OrderedBidirectionalHashMap<Type1, Type2> extends BidirectionalHash
 
     
     public boolean hasNext() { 
-      synchronized(OBHMthis) {
+//      synchronized(OBHMthis) {
         return it.hasNext(); 
-      }
+//      }
     }
     
     public Type2 next() {
-      synchronized(OBHMthis) {
+//      synchronized(OBHMthis) {
         lastValue = it.next(); 
         return lastValue;
-      }
+//      }
     }
     
     /** Removes last element returned by next(); throws IllegalStateException if no such element */
     public void remove() {
-      synchronized(OBHMthis) {
+//     synchronized(OBHMthis) {
         it.remove();                 /* throws exception if lastValue is null */
         lastKey = OBHMthis.getKey(lastValue);
         forward.remove(lastKey);     /* cannot fail because lastKey is not null */
         backward.remove(lastValue);  /* cannot fail because lastValue is not null */
         lastValue = null;
-      }
+//      }
     }
   }
-      
-      
 }
