@@ -53,6 +53,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.ArrayList;
 
 // TODO: Check synchronization.
 import edu.rice.cs.util.Pair;
@@ -60,6 +61,9 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.OperationCanceledException;
+import edu.rice.cs.drjava.model.Finalizable;
+import edu.rice.cs.drjava.model.FinalizationListener;
+import edu.rice.cs.drjava.model.FinalizationEvent;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
@@ -75,7 +79,7 @@ import edu.rice.cs.drjava.model.debug.Breakpoint;
  * changed.
  * @version $Id$
  */
-public class DefinitionsPane extends JEditorPane implements OptionConstants {
+public class DefinitionsPane extends JEditorPane implements OptionConstants, Finalizable<DefinitionsPane> {
 
   /**
    * This field NEEDS to be set by setEditorKit() BEFORE any DefinitonsPanes
@@ -1515,6 +1519,40 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
         setCaretPosition(_pos);
       }
       _undo.undo();
+    }
+  }
+  
+  
+  
+  /**
+   * This list of listeners to notify when we are finalized
+   */
+  private List<FinalizationListener<DefinitionsPane>> _finalizationListeners = 
+    new LinkedList<FinalizationListener<DefinitionsPane>>();
+  
+  /**
+   * Registers a finalization listener with the specific instance of the ddoc
+   * <p><b>NOTE:</b><i>This should only be used by test cases.  This is to ensure that
+   * we don't spring memory leaks by allowing our unit tests to keep track of 
+   * whether objects are being finalized (garbage collected)</i></p>
+   * @param fl the listener to register
+   */
+  public void addFinalizationListener(FinalizationListener<DefinitionsPane> fl) {
+    _finalizationListeners.add(fl);
+  }
+
+  public List<FinalizationListener<DefinitionsPane>> getFinalizationListeners(){
+    return _finalizationListeners;
+  }
+
+  /**
+   * This is called when this method is GC'd.  Since this class implements
+   * edu.rice.cs.drjava.model.Finalizable, it must notify its listeners
+   */
+  protected void finalize() {
+    FinalizationEvent<DefinitionsPane> fe = new FinalizationEvent<DefinitionsPane>(this);
+    for(FinalizationListener<DefinitionsPane> fl: _finalizationListeners) {
+      fl.finalized(fe);
     }
   }
 }

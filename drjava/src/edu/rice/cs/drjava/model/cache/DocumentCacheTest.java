@@ -244,7 +244,55 @@ public class DocumentCacheTest extends GlobalModelTestCase {
    assertEquals("the number of document listeners is the same after reconstruction", numDocListeners, doc1.getDocumentListeners().length);
    assertEquals("the number of undoableEditListeners is the same after reconstruction", numUndoListeners, doc1.getUndoableEditListeners().length);
 
-
-   
   }
+  
+  /**
+   * There used to be a memory leak where various listeners, 
+   * LeafElements, and other extraneous references from the model, 
+   * definitions pane, and main frame would be preventing the
+   * definitions panes/documents from being GC'd at the correct
+   * times causing the entire program to run out of heap space
+   * when working with large numbers of files.  This problem was
+   * agrivated when we added project facility and implemented
+   * the document cache (which was supposed to solve our memory
+   * problem but actually worsened it).  
+   * <p>Adam and Jonathan went through great pains to remove 
+   * these references, so <b>don't break our work!!!</b></p>
+   */
+  public void testMemoryLeak() throws InterruptedException{
+    _memLeakCounter=0;
+    FinalizationListener<DefinitionsDocument> fl = new FinalizationListener<DefinitionsDocument>() {
+      public void finalized(FinalizationEvent<DefinitionsDocument> fe) {
+        _memLeakCounter++;
+      }
+    };
+    // Adding the listeners will load the document into the cache
+    OpenDefinitionsDocument doc1 = _model.newFile();
+    doc1.addFinalizationListener(fl); 
+    OpenDefinitionsDocument doc2 = _model.newFile();
+    doc2.addFinalizationListener(fl);
+    OpenDefinitionsDocument doc3 = _model.newFile();
+    doc3.addFinalizationListener(fl);
+    OpenDefinitionsDocument doc4 = _model.newFile();
+    doc4.addFinalizationListener(fl);
+    OpenDefinitionsDocument doc5 = _model.newFile();
+    doc5.addFinalizationListener(fl);
+    
+    System.gc();
+    Thread.sleep(100);
+    assertEquals("One doc should have been collected", 1, _memLeakCounter);
+    
+
+    doc1.getLength();
+    doc2.getLength();
+    doc3.getLength();
+    doc4.getLength();
+    
+    doc5.getLength();
+    System.gc();
+    Thread.sleep(100);
+    assertEquals("several docs should have been collected", 6, _memLeakCounter);
+    
+  }
+  private int _memLeakCounter;
 }

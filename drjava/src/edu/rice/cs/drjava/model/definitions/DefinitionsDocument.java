@@ -51,6 +51,7 @@ import javax.swing.undo.*;
 import javax.swing.event.DocumentEvent;
 import java.util.Vector;
 import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Hashtable;
 import java.util.HashSet;
@@ -69,6 +70,9 @@ import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.Finalizable;
+import edu.rice.cs.drjava.model.FinalizationListener;
+import edu.rice.cs.drjava.model.FinalizationEvent;
 import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 import edu.rice.cs.drjava.model.OperationCanceledException;
@@ -99,7 +103,7 @@ import edu.rice.cs.drjava.model.OperationCanceledException;
  *
  * @version $Id$
  */
-public class DefinitionsDocument extends PlainDocument implements OptionConstants {
+public class DefinitionsDocument extends PlainDocument implements OptionConstants, Finalizable<DefinitionsDocument> {
   
   List<DocumentClosedListener> _closedListeners = new LinkedList<DocumentClosedListener>();
   
@@ -978,8 +982,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
 
     int newLoc = _currentLocation + dist;
     if (newLoc < 0) {
-      throw  new RuntimeException("location < 0?! oldLoc=" + _currentLocation + " dist=" +
-                                  dist);
+//      throw new RuntimeException("location < 0?! oldLoc=" + _currentLocation + " dist=" +
+//                                  dist);
+      throw new IllegalStateException("Tried to cursor to a negative location");
     }
     _currentLocation = newLoc;
     _reduced.move(dist);
@@ -3150,6 +3155,38 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
 //    DrJava.getConfig().addOptionListener(op, l);
 //    _optionListeners.add(new Pair<Option, OptionListener>(op, l));
 //  }
+  
+  /**
+   * This list of listeners to notify when we are finalized
+   */
+  private List<FinalizationListener<DefinitionsDocument>> _finalizationListeners = 
+    new LinkedList<FinalizationListener<DefinitionsDocument>>();
+  
+  /**
+   * Registers a finalization listener with the specific instance of the ddoc
+   * <p><b>NOTE:</b><i>This should only be used by test cases.  This is to ensure that
+   * we don't spring memory leaks by allowing our unit tests to keep track of 
+   * whether objects are being finalized (garbage collected)</i></p>
+   * @param fl the listener to register
+   */
+  public void addFinalizationListener(FinalizationListener<DefinitionsDocument> fl) {
+    _finalizationListeners.add(fl);
+  }
+  
+  public List<FinalizationListener<DefinitionsDocument>> getFinalizationListeners(){
+    return _finalizationListeners;
+  }
+
+  /**
+   * This is called when this method is GC'd.  Since this class implements
+   * edu.rice.cs.drjava.model.Finalizable, it must notify its listeners
+   */
+  protected void finalize() {
+    FinalizationEvent<DefinitionsDocument> fe = new FinalizationEvent<DefinitionsDocument>(this);
+    for(FinalizationListener<DefinitionsDocument> fl: _finalizationListeners) {
+      fl.finalized(fe);
+    }
+  }
   
   public String toString() {
     return "ddoc for " + _odd;

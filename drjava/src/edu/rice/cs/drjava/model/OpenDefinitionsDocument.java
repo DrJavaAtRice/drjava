@@ -58,6 +58,7 @@ import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
+import edu.rice.cs.drjava.model.Finalizable;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
@@ -68,7 +69,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  *
  * @version $Id$
  */
-public interface OpenDefinitionsDocument extends Document {
+public interface OpenDefinitionsDocument extends Document, Finalizable<DefinitionsDocument> {
 
   
   public int getIntelligentBeginLinePos(int currPos) throws BadLocationException;
@@ -89,6 +90,7 @@ public interface OpenDefinitionsDocument extends Document {
   public DocumentListener[] getDocumentListeners();
   public UndoableEditListener[] getUndoableEditListeners();
   public int getCurrentLocation();
+  
   /**
    * Gets the definitions document being handled.
    * @return document being handled

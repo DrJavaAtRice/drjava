@@ -55,6 +55,7 @@ import java.util.Date;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
 /**
  * Tests the Definitions Pane
@@ -501,6 +502,50 @@ public final class DefinitionsPaneTest extends TestCase {
     ddoc = currpane.getDocument();
     assertFalse("the old pane should not have an open defintions document", olddoc instanceof OpenDefinitionsDocument);
     assertTrue("the active pane should have an open defintions document", ddoc instanceof OpenDefinitionsDocument);
+  }
+  
+  
+  private int _finalCount;
+  private int _finalDocCount;
+  public void testDocumentPaneMemoryLeak()  throws InterruptedException, java.io.IOException{
+    _finalCount = 0;
+    _finalDocCount = 0;
+    
+    
+    FinalizationListener<DefinitionsPane> fl = new FinalizationListener<DefinitionsPane>(){
+      public void finalized(FinalizationEvent<DefinitionsPane> e){
+        _finalCount++;
+      }
+    };
+    
+    FinalizationListener<DefinitionsDocument> fldoc = new FinalizationListener<DefinitionsDocument>(){
+      public void finalized(FinalizationEvent<DefinitionsDocument> e){
+        _finalDocCount++;
+      }
+    };
+
+    SingleDisplayModel _model = _frame.getModel();
+    _model.newFile().addFinalizationListener(fldoc);
+    _frame.getCurrentDefPane().addFinalizationListener(fl);
+    _model.newFile().addFinalizationListener(fldoc);
+    _frame.getCurrentDefPane().addFinalizationListener(fl);
+    _model.newFile().addFinalizationListener(fldoc);
+    _frame.getCurrentDefPane().addFinalizationListener(fl);
+    _model.newFile().addFinalizationListener(fldoc);
+    _frame.getCurrentDefPane().addFinalizationListener(fl);
+    _model.newFile().addFinalizationListener(fldoc);
+    _frame.getCurrentDefPane().addFinalizationListener(fl);
+    
+    
+    
+    // all the panes have a listener, so lets close all files
+    
+    _frame.closeAll();
+    
+    System.gc();
+    Thread.sleep(100);
+    assertEquals("all the panes have been garbage collected", 5, _finalCount);
+    assertEquals("all the defdocs have been garbage collected", 5, _finalDocCount);
   }
   
 }

@@ -2393,6 +2393,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     try {
       if (_model.getActiveDocument().saveFile(_saveSelector)) {
         _currentDefPane.hasWarnedAboutModified(false); 
+        
+        /**
+         * this highlights the document in the navigator
+         */
         _model.setActiveDocument(_model.getActiveDocument());
         return true;
       }

@@ -1708,6 +1708,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 //        private CompoundUndoManager _undo = null;
 //        
         private UndoableEditListener[] _undoListeners = {};
+
+        private List<FinalizationListener<DefinitionsDocument>> _finalListeners =
+          new LinkedList<FinalizationListener<DefinitionsDocument>>();
         
         public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException{
           DefinitionsDocument tempDoc;
@@ -1721,17 +1724,20 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             reader.close(); // win32 needs readers closed explicitly!
           }
           
-            tempDoc.setCurrentLocation(_loc);
-            for(DocumentListener d : _list) {
-              if (d instanceof DocumentUIListener) {
-                tempDoc.addDocumentListener(d);
-              }
+          tempDoc.setCurrentLocation(_loc);
+          for(DocumentListener d : _list) {
+            if (d instanceof DocumentUIListener) {
+              tempDoc.addDocumentListener(d);
             }
-            for(UndoableEditListener l: _undoListeners){
-              tempDoc.addUndoableEditListener(l);
-            }
-            tempDoc.resetModification();
-//            tempDoc.setUndoManager(_undo);
+          }
+          for(UndoableEditListener l: _undoListeners){
+            tempDoc.addUndoableEditListener(l);
+          }
+          for(FinalizationListener<DefinitionsDocument> l: _finalListeners){
+            tempDoc.addFinalizationListener(l);
+          }
+          tempDoc.resetModification();
+          //            tempDoc.setUndoManager(_undo);
           try {
             _packageName = tempDoc.getPackageName();
           } catch(InvalidPackageException e) {
@@ -1745,6 +1751,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 //          _undoListeners = doc.getUndoableEditListeners();
           _loc = doc.getCurrentLocation();
           _list = doc.getDocumentListeners();
+          _finalListeners = doc.getFinalizationListeners();
         }
       };
     }
@@ -1774,12 +1781,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       
       
       try{
-        System.out.println("DefaultGlobalModel: 1435: creating blank doc.");
+        File tempFile = _file;
+        setFile(null);
         _cache.update(this, makeReconstructor());
+        _cache.get(this).insertString(0, "\"Error loading document from file: " + tempFile + "\"", null);
         return _cache.get(this);
       }catch(FileMovedException e){
         System.out.println("DefaultGlobalModel: 1440: this should NEVER happen");
       }catch(IOException e){
+        System.out.println("DefaultGlobalModel: 1442: this should NEVER happen");
+      }catch(BadLocationException e){
         System.out.println("DefaultGlobalModel: 1442: this should NEVER happen");
       }
       return null;
@@ -1984,9 +1995,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           }
           
           /* update the navigator */
-          _documentNavigator.removeDocument(getIDocGivenODD(this));
-          _documentNavigator.addDocument(getIDocGivenODD(this), file.getCanonicalFile().getParent());
-          
+          _documentNavigator.refreshDocument(getIDocGivenODD(this), file.getCanonicalFile().getParent());
         }
 
         return true;
@@ -2910,6 +2919,17 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     
     public int getCurrentLocation() {
       return getDocument().getCurrentLocation();
+    }
+  
+    /**
+     * This method is put here because the ODD is the only way to get to the defdoc
+     */
+    public void addFinalizationListener(FinalizationListener<DefinitionsDocument> fl) {
+      getDocument().addFinalizationListener(fl);
+    }
+    
+    public List<FinalizationListener<DefinitionsDocument>> getFinalizationListeners(){
+      return getDocument().getFinalizationListeners();
     }
     
 //    protected void finalize() throws Throwable{

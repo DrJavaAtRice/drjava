@@ -61,6 +61,9 @@ import edu.rice.cs.drjava.model.junit.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+import edu.rice.cs.drjava.model.Finalizable;
+import edu.rice.cs.drjava.model.FinalizationListener;
+import edu.rice.cs.drjava.model.FinalizationEvent;
 import edu.rice.cs.util.docnavigation.*;
 
 public class DummyOpenDefDoc implements OpenDefinitionsDocument {  
@@ -640,4 +643,13 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public int getCurrentLocation() {
     throw new UnsupportedOperationException("Dummy method");
   }
+  
+  public void addFinalizationListener(FinalizationListener<DefinitionsDocument> fl) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public List<FinalizationListener<DefinitionsDocument>> getFinalizationListeners(){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+
 }
