@@ -62,6 +62,14 @@
 
     <rmic base="${built}"
           classname="edu.rice.cs.drjava.model.repl.newjvm.MainJVM" />
+
+    <copy todir="${built}">
+      <fileset dir="${srcroot}">
+        <include name="${projpath}/**/LICENSE" />
+        <include name="${projpath}/**/*.gif" />
+      </fileset>
+    </copy>
+
   </target>
 
   <!-- Makes a jar with dependencies. No tests are included. -->

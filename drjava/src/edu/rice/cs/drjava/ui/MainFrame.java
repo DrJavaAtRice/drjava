@@ -48,6 +48,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Hashtable;
+import java.net.URL;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
@@ -68,6 +69,8 @@ public class MainFrame extends JFrame {
   private static final int GUI_WIDTH = 800;
   private static final int GUI_HEIGHT = 700;
   private static final int DOC_LIST_WIDTH = 150;
+  
+  private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
 
   private final SingleDisplayModel _model;
 
@@ -85,6 +88,7 @@ public class MainFrame extends JFrame {
   private JSplitPane _docSplitPane;
   private JList _docList;
   private JMenuBar _menuBar;
+  private JToolBar _toolBar;
   private JMenu _fileMenu;
   private JMenu _editMenu;
   private JMenu _helpMenu;
@@ -179,6 +183,16 @@ public class MainFrame extends JFrame {
       _compile();
     }
   };
+  
+  /** Default cut action. */
+  private Action _cutAction = new DefaultEditorKit.CutAction();
+  
+  /** Default copy action. */
+  private Action _copyAction = new DefaultEditorKit.CopyAction();
+
+  /** Default paste action. */
+  private Action _pasteAction = new DefaultEditorKit.PasteAction();
+
 
   /** Undoes the last change to the active definitions document. */
   private DelegatingAction _undoAction = new DelegatingAction();
@@ -193,7 +207,7 @@ public class MainFrame extends JFrame {
     public void actionPerformed(ActionEvent ae) {
       String title = "Confirm abort interaction";
 
-      String message = "Are you sure you would like to abort the" +
+      String message = "Are you sure you would like to abort the " +
                        "current interaction?";
 
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
@@ -313,8 +327,11 @@ public class MainFrame extends JFrame {
     _errorPanel.getErrorListPane().setLastDefPane(_currentDefPane);
     _errorPanel.reset();
 
-    // Make the menu bar
+    // Set up the menu bar and tool bar
+    _setUpActions();
     _setUpMenuBar();
+    _setUpToolBar();
+    _setUpStatusBar();
     _setUpDocumentSelector();
 
     setBounds(0, 0, GUI_WIDTH, GUI_HEIGHT);
@@ -576,6 +593,60 @@ public class MainFrame extends JFrame {
       pane.removeCaretListener(pane.getErrorCaretListener());
     }
   }
+  
+  /**
+   * Initializes all action objects.
+   * Adds icons and descriptions to several of the actions.
+   * Note: this initialization will later be done in the
+   * constructor of each action, which will subclass AbstractAction.
+   */
+  private void _setUpActions() {
+    _newAction.putValue(Action.SMALL_ICON, _getIcon("New16.gif"));
+    _newAction.putValue(Action.SHORT_DESCRIPTION, "New");
+    _openAction.putValue(Action.SMALL_ICON, _getIcon("Open16.gif"));
+    _openAction.putValue(Action.SHORT_DESCRIPTION, "Open");
+    _saveAction.putValue(Action.SMALL_ICON, _getIcon("Save16.gif"));
+    _saveAction.putValue(Action.SHORT_DESCRIPTION, "Save");
+    _saveAsAction.putValue(Action.SMALL_ICON, _getIcon("SaveAs16.gif"));
+    _saveAsAction.putValue(Action.SHORT_DESCRIPTION, "Save As");
+    _compileAction.putValue(Action.SHORT_DESCRIPTION, "Compile");
+    
+    _cutAction.putValue(Action.NAME, "Cut");
+    _cutAction.putValue(Action.SMALL_ICON, _getIcon("Cut16.gif"));
+    _cutAction.putValue(Action.SHORT_DESCRIPTION, "Cut");
+    _copyAction.putValue(Action.NAME, "Copy");
+    _copyAction.putValue(Action.SMALL_ICON, _getIcon("Copy16.gif"));
+    _copyAction.putValue(Action.SHORT_DESCRIPTION, "Copy");
+    _pasteAction.putValue(Action.NAME, "Paste");
+    _pasteAction.putValue(Action.SMALL_ICON, _getIcon("Paste16.gif"));
+    _pasteAction.putValue(Action.SHORT_DESCRIPTION, "Paste");
+    
+    _switchToPrevAction.putValue(Action.SMALL_ICON, _getIcon("Back16.gif"));
+    _switchToPrevAction.putValue(Action.SHORT_DESCRIPTION, "Previous Document");
+    _switchToNextAction.putValue(Action.SMALL_ICON, _getIcon("Forward16.gif"));
+    _switchToNextAction.putValue(Action.SHORT_DESCRIPTION, "Next Document");
+    
+    _findReplaceAction.putValue(Action.SMALL_ICON, _getIcon("Find16.gif"));
+    _findReplaceAction.putValue(Action.SHORT_DESCRIPTION, "Find/Replace");
+    _aboutAction.putValue(Action.SMALL_ICON, _getIcon("About16.gif"));
+    _aboutAction.putValue(Action.SHORT_DESCRIPTION, "About");
+
+  }
+
+  /**
+   * Returns the icon with the given name.
+   * All icons are assumed to reside in the /edu/rice/cs/drjava/ui/icons
+   * directory.
+   * @param name Name of icon image file
+   * @return ImageIcon object constructed from the file
+   */
+  private ImageIcon _getIcon(String name) {
+    URL url = this.getClass().getResource(ICON_PATH + name);
+    if (url != null) {
+      return new ImageIcon(url);
+    }
+    return null;
+  }
 
   /**
    * Sets up the components of the menu bar and links them to the private
@@ -588,14 +659,9 @@ public class MainFrame extends JFrame {
     _editMenu = _setUpEditMenu();
     _helpMenu = _setUpHelpMenu();
 
-    // Menu bars can actually hold anything!
-    _fileNameField = new JTextField();
-    _fileNameField.setEditable(false);
     _menuBar.add(_fileMenu);
     _menuBar.add(_editMenu);
     _menuBar.add(_helpMenu);
-    _menuBar.add(_fileNameField);
-    _setUpMenuBarButtons();
     setJMenuBar(_menuBar);
   }
 
@@ -663,22 +729,13 @@ public class MainFrame extends JFrame {
                                                   ActionEvent.CTRL_MASK));
     editMenu.addSeparator();
 
-    // set up the actions for cut/copy/paste with regards to menu
-    // items and keystrokers.
-    Action cutAction = new DefaultEditorKit.CutAction();
-    cutAction.putValue(Action.NAME, "Cut");
-    Action copyAction = new DefaultEditorKit.CopyAction();
-    copyAction.putValue(Action.NAME, "Copy");
-    Action pasteAction = new DefaultEditorKit.PasteAction();
-    pasteAction.putValue(Action.NAME, "Paste");
-
-    tmpItem = editMenu.add(cutAction);
+    tmpItem = editMenu.add(_cutAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
                                                   ActionEvent.CTRL_MASK));
-    tmpItem = editMenu.add(copyAction);
+    tmpItem = editMenu.add(_copyAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C,
                                                   ActionEvent.CTRL_MASK));
-    tmpItem = editMenu.add(pasteAction);
+    tmpItem = editMenu.add(_pasteAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,
                                                   ActionEvent.CTRL_MASK));
     editMenu.addSeparator();
@@ -692,15 +749,13 @@ public class MainFrame extends JFrame {
     editMenu.add(_resetInteractionsAction);
 
 
-    /** TEMPORARY */
     editMenu.addSeparator();
-    tmpItem = editMenu.add(_switchToNextAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD,
-                                                  ActionEvent.CTRL_MASK));
     tmpItem = editMenu.add(_switchToPrevAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA,
                                                   ActionEvent.CTRL_MASK));
-    // END TEMPORARY
+    tmpItem = editMenu.add(_switchToNextAction);
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD,
+                                                  ActionEvent.CTRL_MASK));
 
     // Add the menus to the menu bar
     return editMenu;
@@ -716,16 +771,48 @@ public class MainFrame extends JFrame {
   }
 
   /**
-   * Sets up the save and compile buttons on the menu bar.
+   * Sets up the toolbar with several useful buttons.
+   * Most buttons are always enabled, but those that are not are
+   * maintained in fields to allow enabling and disabling.
    */
-  private void _setUpMenuBarButtons() {
-    // Add buttons.
-    _saveButton = new JButton(_saveAction);
+  private void _setUpToolBar() {
+    _toolBar = new JToolBar();
+    
+    // New, open, save (disabled)
+    _toolBar.add(_newAction);
+    _toolBar.add(_openAction);
+    _saveButton = _toolBar.add(_saveAction);
     _saveButton.setEnabled(false);
-    _menuBar.add(_saveButton);
-    _compileButton = new JButton(_compileAction);
-    _menuBar.add(_compileButton);
+    
+    _toolBar.addSeparator();
+    
+    // Cut, copy, paste
+    _toolBar.add(_cutAction);
+    _toolBar.add(_copyAction);
+    _toolBar.add(_pasteAction);
+    
+    _toolBar.addSeparator();
+    
+    // Prev, next
+    _toolBar.add(_switchToPrevAction);
+    _toolBar.add(_switchToNextAction);
+    
+    _toolBar.addSeparator();
+    
+    // Compile (disabled)
+    _compileButton = _toolBar.add(_compileAction);
     _compileButton.setEnabled(false);
+    
+    getContentPane().add(_toolBar, BorderLayout.NORTH);
+  }
+  
+  /**
+   * Sets up the status bar with the filename field.
+   */
+  private void _setUpStatusBar() {
+    _fileNameField = new JTextField();
+    _fileNameField.setEditable(false);
+    getContentPane().add(_fileNameField, BorderLayout.SOUTH);
   }
 
   private void _setUpTabs() {
@@ -808,13 +895,13 @@ public class MainFrame extends JFrame {
 
     // Overall layout
     _docSplitPane = new BorderlessSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-					    true,
-					    listScroll,
-					    defScroll);
+         true,
+         listScroll,
+         defScroll);
     JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-				      true,
-				      _docSplitPane,
-				      _tabbedPane);
+          true,
+          _docSplitPane,
+          _tabbedPane);
     getContentPane().add(split, BorderLayout.CENTER);
     // This is annoyingly order-dependent. Since split2 contains split1,
     // we need to get split2's divider set up first to give split1 an overall
