@@ -372,8 +372,8 @@ public class DefinitionsPane extends JEditorPane {
   /**
    * @return true if the document was modified since the last save
    */
-  public boolean modifiedSinceSave() {
-    return  _doc().modifiedSinceSave();
+  public boolean isModifiedSinceSave() {
+    return  _doc().isModifiedSinceSave();
   }
 
   /** 
@@ -507,7 +507,7 @@ public class DefinitionsPane extends JEditorPane {
    */
   public boolean checkAbandoningChanges() {
     boolean retVal = true;
-     if (_doc().modifiedSinceSave()) {
+     if (_doc().isModifiedSinceSave()) {
        String fname = _currentFileName;
        if (fname == "")
         fname = "untitled file";

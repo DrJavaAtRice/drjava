@@ -81,7 +81,7 @@ public class MainFrame extends JFrame {
      */
     public void actionPerformed(ActionEvent ae) {
       boolean wantToExit = true;
-      if (_definitionsPane.modifiedSinceSave()) {
+      if (_definitionsPane.isModifiedSinceSave()) {
         wantToExit = _definitionsPane.checkAbandoningChanges();
       }
       if (wantToExit) {
@@ -181,7 +181,7 @@ public class MainFrame extends JFrame {
     // This doesn't seem to ever re-enable once disabled!
     /*
      public boolean isEnabled() {
-     return ! _definitionsPane.modifiedSinceSave();
+     return ! _definitionsPane.isModifiedSinceSave();
      }
      */
     public void actionPerformed(ActionEvent ae) {
@@ -232,7 +232,7 @@ public class MainFrame extends JFrame {
      }
      */
     public void actionPerformed(ActionEvent ae) {
-      boolean modified = _definitionsPane.modifiedSinceSave();
+      boolean modified = _definitionsPane.isModifiedSinceSave();
       if (modified) {
         // file was not saved -- tell user they must save before compiling
         String msg = "The definitions must be saved before compiling. " + "Would you like to save and compile now?";
@@ -241,7 +241,7 @@ public class MainFrame extends JFrame {
         if (rc == JOptionPane.YES_OPTION) {
           save();
           // Check if they cancelled the save. If they did, exit!
-          if (_definitionsPane.modifiedSinceSave()) {
+          if (_definitionsPane.isModifiedSinceSave()) {
             return;
           }
         } 
@@ -322,7 +322,7 @@ public class MainFrame extends JFrame {
      */
     public void windowClosing(WindowEvent ev) {
       boolean wantToExit = true;
-      if (_definitionsPane.modifiedSinceSave()) {
+      if (_definitionsPane.isModifiedSinceSave()) {
         wantToExit = _definitionsPane.checkAbandoningChanges();
       }
       if (wantToExit) {

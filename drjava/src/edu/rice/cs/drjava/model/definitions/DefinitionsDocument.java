@@ -223,7 +223,7 @@ public class DefinitionsDocument extends PlainDocument {
    * Determines if the document has been modified since the last save.
    * @return true if the document has been modified
    */
-  public boolean modifiedSinceSave() {
+  public boolean isModifiedSinceSave() {
     return  _modifiedSinceSave;
   }
 

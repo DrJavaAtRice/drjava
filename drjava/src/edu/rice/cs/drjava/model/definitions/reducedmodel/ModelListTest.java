@@ -46,6 +46,18 @@ public class ModelListTest extends TestCase {
     assertTrue("#2.4", !fFull.isEmpty());
   }
   
+  public void testInsertFront() {
+    fFull.insertFront(new Integer(3));
+    fFull.insertFront(new Integer(2));
+    fFull.insertFront(new Integer(1));
+    fFull.insertFront(new Integer(0));
+    ModelList<Integer>.Iterator itFull = fFull.getIterator();
+    for (int i = 0; i < 4; i++) {
+      itFull.next();
+      assertEquals(new Integer(i), itFull.current());
+    }
+  }
+  
   public void testRemove() {
     ModelList<Integer>.Iterator itFull = fFull.getIterator();
     ModelList<Integer>.Iterator itEmpty = fEmpty.getIterator();

@@ -117,7 +117,8 @@ public class ButtonTest extends TestCase {
     assertTrue(_m.saveToFile("C.java"));
     try {
       _m.compile();
-    } catch (NullPointerException ex) {
+    } 
+    catch (NullPointerException ex) {
     // A compilation will cause messages to be written to
     // the compile-errors window, which doesn't exist in a
     // barebones MainFrame.

@@ -47,6 +47,12 @@ class ModelList<T> {
     point.pred = ins;
     _length++;
   }
+   
+  public void insertFront(T item) {
+    Iterator it = new Iterator();
+    it.insert(item);
+    it.dispose();
+  }
   
   /**
    * Remove a node from the list.
