@@ -2288,34 +2288,30 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    * @param o  the object to cast
    */
   protected static Object performCast(Class<?> tc, Object o) {
-    Class<?> ec = (o != null) ? o.getClass() : null;
-
-    if (tc != ec && tc.isPrimitive() && ec != null) {
-      if (tc != char.class && ec == Character.class) {
-        o = new Character(((Character)o).charValue());
-      } 
-      else if (tc == byte.class) {
-        o = new Byte(((Number)o).byteValue());
-      } 
-      else if (tc == short.class) {
-        o = new Short(((Number)o).shortValue());
-      }
-      else if (tc == int.class) {
-        o = new Integer(((Number)o).intValue());
-      }
-      else if (tc == long.class) {
-        o = new Long(((Number)o).longValue());
-      }
-      else if (tc == float.class) {
-        o = new Float(((Number)o).floatValue());
-      }
-      else if (tc == double.class) {
-        o = new Double(((Number)o).doubleValue());
-      }
-      else if (tc == char.class && ec != Character.class) {
-        o = new Character((char)((Number)o).shortValue());
-      }
-    }
-    return o;
+    
+    if (o == null || !tc.isPrimitive()) return o;
+    
+    /* oc is class of o */
+    Class<?> oc = o.getClass();
+      
+    if (oc == Character.class) 
+      return performCast(tc, new Integer(((Character)o).charValue()));
+    
+    else if (tc == byte.class) return new Byte(((Number)o).byteValue());
+    
+    else if (tc == short.class) return new Short(((Number)o).shortValue());
+    
+    else if (tc == int.class) return new Integer(((Number)o).intValue());
+    
+    else if (tc == long.class) return new Long(((Number)o).longValue());
+    
+    else if (tc == float.class) return new Float(((Number)o).floatValue());
+    
+    else if (tc == double.class) return new Double(((Number)o).doubleValue());
+    
+    else if (tc == char.class)
+      return new Character((char)((Number)o).shortValue());
+    
+    else return o;
   }
 }

@@ -894,6 +894,6 @@ public class InterpreterUtilities {
    * This class contains only static methods, so it is not useful
    * to create instances of it.
    */
-  protected InterpreterUtilities() {
+  private InterpreterUtilities() {
   }
 }

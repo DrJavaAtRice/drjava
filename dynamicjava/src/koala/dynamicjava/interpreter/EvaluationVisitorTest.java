@@ -115,6 +115,23 @@ public class EvaluationVisitorTest extends DynamicJavaTestCase {
 //    }
 //  }
 
+  
+   /**
+   * Tests primitive casts
+   */
+  public void testPrimitiveCast() throws InterpreterException {
+    
+    Object res  = interpret("(float) 7");
+    assertEquals("(float) 7", new Float(7.0), res);
+
+    res = interpret("(int) 'a'");
+    assertEquals("(int) 'a'", new Integer(97), res);
+    
+    res = interpret("(short) 'a'");
+    assertEquals("(short) 'a'", new Short((short) 97), res);
+    
+  }
+
   /**
    * Tests the += operator
    */
