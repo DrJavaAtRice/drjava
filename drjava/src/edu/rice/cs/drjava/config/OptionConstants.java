@@ -885,7 +885,7 @@ public interface OptionConstants {
    * This needs to be tokenized before passing it to Javadoc.
    */
   public static final StringOption JAVADOC_CUSTOM_PARAMS =
-    new StringOption("javadoc.custom.params", "");
+    new StringOption("javadoc.custom.params", "-author -version");
   
   /**
    * The default destination directory for Javadoc output.

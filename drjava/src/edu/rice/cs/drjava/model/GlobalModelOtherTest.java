@@ -551,7 +551,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     // Since we had the package statement the source root should be base dir
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, roots.length);
-    assertEquals("source root", baseTempDir, roots[0]);
+    assertEquals("source root", baseTempDir.getCanonicalFile(), 
+                 roots[0].getCanonicalFile());
 
   }
   
@@ -583,7 +584,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     // Since we had the package statement the source root should be base dir
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, roots.length);
-    assertEquals("source root", baseTempDir, roots[0]);
+    assertEquals("source root", baseTempDir.getCanonicalFile(),
+                 roots[0].getCanonicalFile());
 
   }
 
@@ -621,8 +623,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 0, roots.length);
     /*assertEquals("source root (current directory)",
-                 workDir,
-                 roots[0]);*/
+                 workDir.getCanonicalFile(),
+                 roots[0].getCanonicalFile());*/
   }
 
   public void testGetSourceRootPackageOneDeepValid()
@@ -646,7 +648,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     // Since we had the package statement the source root should be base dir
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, roots.length);
-    assertEquals("source root", baseTempDir, roots[0]);
+    assertEquals("source root", baseTempDir.getCanonicalFile(),
+                 roots[0].getCanonicalFile());
 
   }
 

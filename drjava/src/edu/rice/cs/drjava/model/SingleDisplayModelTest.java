@@ -295,8 +295,14 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
           // We know file should exist
           fail("file does not exist");
         }
-        assertEquals("file to open", tempFile, file);
-        openCount++;
+        try {
+          assertEquals("file to open", tempFile.getCanonicalFile(),
+                       file.getCanonicalFile());
+          openCount++;
+        }
+        catch (IOException ioe) {
+          fail("could not get canonical file");
+        }
       }
       public void fileClosed(OpenDefinitionsDocument doc) {
         closeCount++;

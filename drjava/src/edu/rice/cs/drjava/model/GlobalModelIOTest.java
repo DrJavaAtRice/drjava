@@ -222,8 +222,14 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
           // We know file should exist
           fail("file does not exist");
         }
-        assertEquals("file to open", tempFile, file);
-        openCount++;
+        try {
+          assertEquals("file to open", tempFile.getCanonicalFile(), 
+                       file.getCanonicalFile());
+          openCount++;
+        }
+        catch (IOException ioe) {
+          fail("could not get canonical file");
+        }
       }
     };
 
@@ -428,13 +434,20 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
           fail("file does not exist");
         }
 
-        if (tempFile1.equals(file)) {
-          assertEquals("file to open", tempFile1, file);
-        } else {
-          assertEquals("file to open", tempFile2, file);
-        }
+        try {
+          if (tempFile1.equals(file)) {
+            assertEquals("file to open", tempFile1.getCanonicalFile(),
+                         file.getCanonicalFile());
+          } else {
+            assertEquals("file to open", tempFile2.getCanonicalFile(),
+                         file.getCanonicalFile());
+          }
 
-        openCount++;
+          openCount++;
+        }
+        catch (IOException ioe) {
+          fail("could not get canonical file");
+        }
       }
     };
 
@@ -536,9 +549,15 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
           // We know file should exist
           fail("file does not exist");
         }
-        assertEquals("file to open", tempFile1, file);
-
-        openCount++;
+        try {
+          assertEquals("file to open", tempFile1.getCanonicalFile(),
+                       file.getCanonicalFile());
+          
+          openCount++;
+        }
+        catch (IOException ioe) {
+          fail("could not get canonical file");
+        }
       }
     };
     _model.addListener(listener);
@@ -702,8 +721,14 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
           // We know file should exist
           fail("file does not exist");
         }
-        assertEquals("saved file name", file, f);
-        saveCount++;
+        try {
+          assertEquals("saved file name", file.getCanonicalFile(),
+                       f.getCanonicalFile());
+          saveCount++;
+        }
+        catch (IOException ioe) {
+          fail("could not get canonical file");
+        }
       }
     };
 
@@ -754,8 +779,14 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
           // We know file should exist
           fail("file does not exist");
         }
-        assertEquals("saved file name", file, f);
-        saveCount++;
+        try {
+          assertEquals("saved file", file.getCanonicalFile(),
+                       f.getCanonicalFile());
+          saveCount++;
+        }
+        catch (IOException ioe) {
+          fail("could not get canonical file");
+        }
       }
     };
 
@@ -775,7 +806,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
                  BAR_TEXT,
                  FileOps.readFileAsString(file));
 
-    assertEquals("no backup was made", false, backup.exists());
+    assertFalse("no backup was made", backup.exists());
 
 
     //enable file backups
@@ -833,8 +864,14 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
           // We know file should exist
           fail("file does not exist");
         }
-        assertEquals("saved file name", file, f);
-        saveCount++;
+        try {
+          assertEquals("saved file", file.getCanonicalFile(),
+                       f.getCanonicalFile());
+          saveCount++;
+        }
+        catch (IOException ioe) {
+          fail("could not get canonical file");
+        }
       }
     };
 
@@ -919,8 +956,14 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
           // We know file should exist
           fail("file does not exist");
         }
-        assertEquals("saved file name", file2, f);
-        saveCount++;
+        try {
+          assertEquals("saved file", file2.getCanonicalFile(),
+                       f.getCanonicalFile());
+          saveCount++;
+        }
+        catch (IOException ioe) {
+          fail("could not get canonical file");
+        }
       }
     };
 
