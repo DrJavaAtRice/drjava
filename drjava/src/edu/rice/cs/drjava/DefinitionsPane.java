@@ -8,6 +8,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JEditorPane;
+import javax.swing.KeyStroke;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -21,6 +22,7 @@ import javax.swing.event.CaretListener;
 import javax.swing.event.CaretEvent;
 
 import javax.swing.text.Document;
+import javax.swing.text.Keymap;
 import javax.swing.text.StyledEditorKit;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.EditorKit;
@@ -33,6 +35,8 @@ import java.io.IOException;
 import java.io.FileReader;
 import java.io.FileWriter;
 
+import java.beans.PropertyChangeListener;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Toolkit;
@@ -42,7 +46,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
-
+import java.awt.event.ActionListener;
+import java.awt.event.*;
 
 public class DefinitionsView extends JEditorPane
 {
@@ -107,16 +112,75 @@ public class DefinitionsView extends JEditorPane
       _redoAction.updateRedoState();
     }
   };
-
-	// Constructor
 	
-  public DefinitionsView(MainFrame mf)
-  {
+	private class IndentKeyActionTab extends AbstractAction {
+		/** Handle the key typed event from the text field. */
+		public void actionPerformed(ActionEvent e) {
+			int pos = getCaretPosition();
+			_doc().setCurrentLocation(pos);
+			_doc().indentLine();
+
+		}
+	}
+
+	private class IndentKeyActionSquiggly extends AbstractAction {
+		/** Handle the key typed event from the text field. */
+		public void actionPerformed(ActionEvent e) {
+			int pos = getCaretPosition();
+			_doc().setCurrentLocation(pos);
+			try{
+				_doc().insertString(pos, "}", null);
+			}
+			catch(BadLocationException be){throw new IllegalArgumentException
+																			 (be.toString());}
+
+			_doc().indentLine();
+		}
+	}
+
+	private class IndentKeyActionLine extends AbstractAction {
+		/** Handle the key typed event from the text field. */
+		public void actionPerformed(ActionEvent e) {
+			int pos = getCaretPosition();
+			_doc().setCurrentLocation(pos);
+			try{
+				_doc().insertString(pos, "\n", null);
+			}
+			catch(BadLocationException be){throw new IllegalArgumentException
+																			 (be.toString());}
+			
+			_doc().indentLine();
+		}
+	}
+	
+	
+	private Action _indentKeyActionTab = new IndentKeyActionTab();
+	private Action _indentKeyActionLine = new IndentKeyActionLine();
+	private Action _indentKeyActionSquiggly = new IndentKeyActionSquiggly();
+
+	
+// Constructor
+	
+	public DefinitionsView(MainFrame mf)
+		{
     _mainFrame = mf;
     _resetDocument("");
     _resetUndo();
 		_findReplace = new FindReplaceDialog(mf, this);
+
+				
+		Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
+
+		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+																 (Action) _indentKeyActionLine);
+		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0),
+																 (Action) _indentKeyActionTab);
+		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('}'),
+																 (Action) _indentKeyActionSquiggly);
+		setKeymap(ourMap);
+		
 		this.addCaretListener(_matchListener);
+//		this.addKeyListener(_indentKeyListener);
   }
 
   public Action getUndoAction() { return _undoAction; }

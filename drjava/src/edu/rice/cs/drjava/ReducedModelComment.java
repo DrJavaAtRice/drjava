@@ -2034,9 +2034,9 @@ public class ReducedModelComment
 			ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
 			if(copyCursor.atStart())
 				copyCursor.next();
-			if(copyCursor.atEnd() || copyCursor.current().equals("\n"))
+			if(copyCursor.atEnd() || copyCursor.current().getType().equals("\n")){
 				return 0;
-			
+			}
 			int walkcount = copyCursor.current().getSize() - _offset;
 			copyCursor.next();
 			

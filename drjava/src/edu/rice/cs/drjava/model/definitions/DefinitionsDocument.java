@@ -4,7 +4,11 @@ package edu.rice.cs.drjava;
 
 import javax.swing.text.StyleContext.SmallAttributeSet;
 import javax.swing.text.*;
+
 import gj.util.Vector;
+
+import java.util.HashSet;
+
 
 /** 
 	 hasHighlightChanged()
@@ -23,10 +27,22 @@ public class DefinitionsDocument extends DefaultStyledDocument
 	Vector<StateBlock> litBlocks = new Vector<StateBlock>(); 
 	Vector<StateBlock> changes = new Vector<StateBlock>();
 
+	private static HashSet _normEndings = _makeNormEndings();
+	
   int _currentLocation = 0;
 
 	StyleUpdateThread styleUpdater = null;
 
+	private static HashSet _makeNormEndings() {
+		HashSet normEndings = new HashSet();
+		normEndings.add(";");
+		normEndings.add("{");
+		normEndings.add("}");
+		normEndings.add("(");
+		return normEndings;
+	}
+
+	
 	/**
 	 *1)mark the item previous to the current first insert
 	 *2)insert string
@@ -217,7 +233,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
   {
     _reduced.move(loc - _currentLocation);
     _currentLocation = loc;
-  }
+	}
 
 
 	public void move(int dist)
@@ -225,8 +241,12 @@ public class DefinitionsDocument extends DefaultStyledDocument
 			_currentLocation += dist;
 			_reduced.move(dist);
 		}
-public void indentLine() 
+
+	public void indentLine() 
 		{
+			// moves us to the end of the line
+			move(_reduced.getDistToNextNewline());
+			
 			IndentInfo ii = _reduced.getIndentInformation();
 			String braceType = ii.braceType;
 			int distToNewline = ii.distToNewline;
@@ -234,8 +254,6 @@ public void indentLine()
 			int distToPrevNewline = ii.distToPrevNewline;
 			int tab = 0;
 			
-			// moves us to the end of the line
-			move(_reduced.getDistToNextNewline());
 			
 			try{
 				if ((distToNewline == -1) || (distToBrace == -1))
@@ -264,26 +282,29 @@ public void indentLine()
 	private int _indentSpecialCases(int tab, int distToPrevNewline)
 		throws BadLocationException
 		{
-			if (distToPrevNewline == -1) //not a special case.
+			//not a special case.
+			if (distToPrevNewline == -1)
 				return tab;
+
 			//setup
 			int start = _reduced.getDistToPreviousNewline(distToPrevNewline);
 			if (start == -1)
 				start = 0;
 			else
 				start = _currentLocation - start;
-			
 			String text = this.getText(start,_currentLocation - start);
 
 			//case of  }  if no matching { then let offset be 0.
 			int length = text.length();
 			int i = length - distToPrevNewline;
-
 			while (i < length && text.charAt(i) == ' ')
 				i++;
-			if(text.charAt(i) == '}')
+			if(i < length && text.charAt(i) == '}')
 				tab -= 2;
-			
+
+			//normal endings
+
+      //return tab
 			if(tab < 0)
 				tab = 0;
 			return tab;
@@ -298,7 +319,7 @@ public void indentLine()
 
 			String text = this.getText(_currentLocation - relStart,
 																 relStart - relEnd);
-			int i = 0;
+ 			int i = 0;
 			int length = text.length();
 			while ((i < length) && (text.charAt(i) == ' '))
 				i++;
@@ -314,13 +335,14 @@ public void indentLine()
 				distToPrevNewline = _currentLocation;
 			
 			int currentTab = getWhiteSpaceBetween(distToPrevNewline, 0);
-		
+			
 			if (tab == currentTab)
 				return;
 			if (tab > currentTab){
 				String spaces = "";
 				for (int i = 0; i < tab - currentTab; i++)
 					spaces = spaces + " ";
+
 				insertString(_currentLocation - distToPrevNewline, spaces, null);
 			}
 			else

@@ -357,8 +357,77 @@ public class IndentTest extends TestCase
 				{ 
 				 	System.out.println(e.toString());
 				}  
+		}
+
+	public void testWierdFuckup()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "hello\n", null);
+				doc.indentLine();
+				assertEquals("0.1", "hello\n", doc.getText(0, doc.getLength()));			
+			} 
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}  
+		}
+
+	public void testWierdFuckup2()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "hello", null);
+				doc.indentLine();
+				assertEquals("0.1", "hello", doc.getText(0, doc.getLength()));			
+			} 
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}  
 		} 
 
+	public void testMotion()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "hes{\n{abcde", null);
+				doc.insertString(11,"\n{",null);
+				// hes{\n{abcde\n{#
+				doc.move(-8);
+				// hes{\n#{abcde\n{
+				doc.indentLine();
+				// hes{\n  #{abcde\n{
+				assertEquals("0.1", "hes{\n  {abcde\n{", doc.getText(0, doc.getLength()));			
+			} 
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}  
+		} 
+
+		public void testNextCharIsNewline()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "hes{\n{abcde", null);
+				doc.insertString(11,"\n{",null);
+				// hes{\n{abcde\n{#
+				doc.move(-2);
+				// hes{\n{abcde#\n{
+				doc.indentLine();
+				// hes{\n  {abcde#\n{
+				assertEquals("0.1", "hes{\n  {abcde\n{", doc.getText(0, doc.getLength()));
+			} 
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}  
+		}
 }
 
 
