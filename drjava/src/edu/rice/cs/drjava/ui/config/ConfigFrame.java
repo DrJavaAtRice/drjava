@@ -249,13 +249,14 @@ public class ConfigFrame extends JFrame {
     PanelTreeNode keystrokesNode = _createPanel(new KeyStrokeConfigPanel("Key Bindings"),
                                                 _rootNode);
     _setupKeyBindingsPanel(keystrokesNode.getPanel());    
-
+/*
     PanelTreeNode fileNode = _createPanel("File");
     _setupFilePanel(fileNode.getPanel());
-    /*
+    */
+    
     PanelTreeNode pathsNode = _createPanel("Paths");
     _setupPathsPanel(pathsNode.getPanel());
-    */
+    
     PanelTreeNode miscNode = _createPanel("Miscellaneous");
     _setupMiscPanel(miscNode.getPanel());
     
@@ -329,24 +330,27 @@ public class ConfigFrame extends JFrame {
    * Adds all of the components for the File panel of the preferences window.
    */
   private void _setupFilePanel( ConfigPanel panel) {
+    /*
     panel.addComponent( new FileOptionComponent (OptionConstants.FILE_LOCATION, "Normal File", this));     
     panel.addComponent( new FileOptionComponent (OptionConstants.FILE2_LOCATION, "Not-So-Normal File", this)); 
     panel.addComponent( new FileOptionComponent (OptionConstants.FILE3_LOCATION, "Dumb File", this)); 
+    */
     panel.displayComponents();
   }
   
   /**
    * Adds all of the components for the Paths panel of the preferences window.
    */
-  private void _setupPathsPanel( ConfigPanel panel) {/*
+  private void _setupPathsPanel( ConfigPanel panel) {
     panel.addComponent( new VectorOptionComponent (OptionConstants.EXTRA_CLASSPATH, "Classpath", this));     
-    panel.displayComponents();*/
+    panel.displayComponents();
   }
  
   /**
    * Adds all of the components for the Key Bindings panel of the preferences window.
    */
-  private void _setupKeyBindingsPanel( ConfigPanel panel) {     
+  private void _setupKeyBindingsPanel( ConfigPanel panel) {
+    // using a treeset because it automatically sorts element upon insertion
     TreeSet _comps = new TreeSet();
 
     
@@ -364,6 +368,7 @@ public class ConfigFrame extends JFrame {
         }
       }
     }
+    // gives the KeyStrokeConfigPanel a collection of the KeyStrokeOptionComponents
     ((KeyStrokeConfigPanel)panel).setKeyStrokeComponents(_comps);
 
     
@@ -372,47 +377,6 @@ public class ConfigFrame extends JFrame {
       KeyStrokeOptionComponent x = (KeyStrokeOptionComponent) iter.next();
       panel.addComponent(x);
     }
-
-  /*
-  public static final KeyStrokeOption KEY_NEW_FILE =
-  public static final KeyStrokeOption KEY_OPEN_FILE =
-  public static final KeyStrokeOption KEY_SAVE_FILE =
-  public static final KeyStrokeOption KEY_SAVE_FILE_AS =
-  public static final KeyStrokeOption KEY_CLOSE_FILE =
-  public static final KeyStrokeOption KEY_PRINT_PREVIEW =
-  public static final KeyStrokeOption KEY_PRINT =
-  public static final KeyStrokeOption KEY_QUIT =
-  public static final KeyStrokeOption KEY_UNDO =
-  public static final KeyStrokeOption KEY_REDO =
-  public static final KeyStrokeOption KEY_CUT =
-  public static final KeyStrokeOption KEY_COPY =
-  public static final KeyStrokeOption KEY_PASTE =
-  public static final KeyStrokeOption KEY_SELECT_ALL =
-  public static final KeyStrokeOption KEY_FIND_NEXT =
-  public static final KeyStrokeOption KEY_FIND_REPLACE =
-  public static final KeyStrokeOption KEY_GOTO_LINE =
-  public static final KeyStrokeOption KEY_PREVIOUS_DOCUMENT =
-  public static final KeyStrokeOption KEY_NEXT_DOCUMENT =
-  public static final KeyStrokeOption KEY_COMPILE =
-  public static final KeyStrokeOption KEY_ABORT_INTERACTION =
-  public static final KeyStrokeOption KEY_BACKWARD =
-  public static final KeyStrokeOption KEY_BEGIN_DOCUMENT =
-  public static final KeyStrokeOption KEY_BEGIN_LINE =
-  public static final KeyStrokeOption KEY_BEGIN_PARAGRAPH =
-  public static final KeyStrokeOption KEY_PREVIOUS_WORD =
-  public static final KeyStrokeOption KEY_DELETE_NEXT =
-  public static final KeyStrokeOption KEY_DELETE_PREVIOUS =
-  public static final KeyStrokeOption KEY_DOWN =
-  public static final KeyStrokeOption KEY_UP =
-  public static final KeyStrokeOption KEY_END_DOCUMENT =
-  public static final KeyStrokeOption KEY_END_LINE =
-  public static final KeyStrokeOption KEY_END_PARAGRAPH =
-  public static final KeyStrokeOption KEY_NEXT_WORD =
-  public static final KeyStrokeOption KEY_FORWARD =
-  public static final KeyStrokeOption KEY_PAGE_DOWN =
-  public static final KeyStrokeOption KEY_PAGE_UP =
-  public static final KeyStrokeOption KEY_CUT_LINE =
-  */
     panel.displayComponents();
   }
   

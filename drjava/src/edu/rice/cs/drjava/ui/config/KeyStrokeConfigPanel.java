@@ -76,8 +76,16 @@ public class KeyStrokeConfigPanel extends ConfigPanel {
    * @return whether update() of all the components succeeded 
    */ 
   public boolean update() {
+    // shouldn't happen
     if (_comps == null) return false;
     
+    /** 
+     * Overrides update in order to perform some pre-processing. Need to 
+     * set every modified key-binding's KeyStroke to null because in the 
+     * KeyBindingManager, if two binding's KeyStrokes are swapped, the 
+     * later key-binding will erase the earlier key-binding since its old
+     * value's entry is removed from the hashtable.
+     */
     Iterator iter = _comps.iterator();
     while (iter.hasNext()) {
       KeyStrokeOptionComponent x = (KeyStrokeOptionComponent) iter.next();
@@ -86,15 +94,7 @@ public class KeyStrokeConfigPanel extends ConfigPanel {
       }
           
     }
-    /*
-    iter = _comps.iterator();
-    while (iter.hasNext()) {
-      KeyStrokeOptionComponent x = (KeyStrokeOptionComponent) iter.next();
-      x.update();
-    }
-    */
     return super.update();
-    //return true;
   }
   
 }

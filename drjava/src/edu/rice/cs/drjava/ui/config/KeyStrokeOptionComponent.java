@@ -164,11 +164,13 @@ public class KeyStrokeOptionComponent  extends OptionComponent<KeyStrokeOption> 
           _inputField.setText("");
           _actionLabel.setText("<none>");
           _currentKeyStroke = KeyStrokeOption.NULL_KEYSTROKE;
+          _inputField.requestFocus();
         }
       });
       _cancelButton = new JButton("Cancel");
       _cancelButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
+          _inputField.requestFocus();
           GetKeyDialog.this.dispose();
         }
       });
@@ -188,8 +190,8 @@ public class KeyStrokeOptionComponent  extends OptionComponent<KeyStrokeOption> 
             _keyToKSOC.put(_currentKeyStroke, _ksoc);
             _ksoc._setKeyStroke(_currentKeyStroke);
           }
+          _inputField.requestFocus();
           GetKeyDialog.this.dispose();
-          
         }
       });
       _instructionLabel = new JLabel("Type in the keystroke you want to use " +
@@ -225,17 +227,16 @@ public class KeyStrokeOptionComponent  extends OptionComponent<KeyStrokeOption> 
    
     public void promptKey(KeyStrokeOptionComponent k) {
       _ksoc = k;
-      _instructionLabel.setText("Type in the keystroke you want to use for " +
+      _instructionLabel.setText("Type in the keystroke you want to use for \"" +
                                 k.getLabelText() + 
-                                " and click \"OK\"");
+                                "\" and click \"OK\"");
       _currentKeyStroke = k._getKeyStroke();
-      _actionLabel.setText("<none>");
-      _inputField.setText("");
+      _actionLabel.setText(k.getLabelText());
+      _inputField.setText(_option.format(_currentKeyStroke));
       //this.setLocation(frame.getLocation());
       this.setSize((int)_instructionLabel.getPreferredSize().getWidth() + 30, DIALOG_HEIGHT);
       centerOnScreen();
       super.setVisible(true);
-      
     }
     
     private void centerOnScreen() {
