@@ -573,16 +573,23 @@
   <!-- Allow a commit of just the docs, without testing -->
   <target name="commit-docs">
     <echo message="Committing the documentation." />
-    <input message="Please enter the log message for the commit:"
-           addproperty="cvs-commit-message" />
+    
+    <tempfile property="commit-comments-filename" 
+            destdir="${java.io.tmpdir}"
+            prefix="commit-comments" />
+    <antcall target="create-commit-comments">
+      <param name="commit-comments-filename" value="${commit-comments-filename}"/>
+    </antcall>
     <cvs>
       <commandline>
         <argument value="commit" />
-        <argument value="-m" />
-        <argument value="${cvs-commit-message}" />
+        <argument value="-F" />
+        <argument value="${commit-comments-filename}" />
         <argument value="docs" />
       </commandline>
     </cvs>
+    <delete file="${commit-comments-filename}"/>
+    
   </target>
 
 </project>
