@@ -40,7 +40,35 @@ import java.io.IOException;
 import edu.rice.cs.util.FileOps;
 
 /**
- * Sticky class loader.
+ * A {@link ClassLoader} that works as the union of two classloaders, but
+ * always tries to delegate to the first of these.
+ *
+ * The purpose for this class is to ensure that classes loaded transitively
+ * due to some class's loading are also loaded with the right classloader.
+ * Here's the problem: Say that class A contains a reference to class B,
+ * but the specific B is unknown to clients of class A.
+ * Class A is loadable by the standard classloader, but class B needs
+ * to be loaded with a (known) custom classloader.
+ * <P>
+ *
+ * If A were loaded using
+ * the standard classloader, it would fail because this would cause the
+ * transitive loading of B to be done by the system loader as well.
+ * If A were loaded with the custom loader, the same thing would happen --
+ * the custom loader would delegate to the system loader to load A (since
+ * it doesn't load non-custom-loader-requiring classes), but this would
+ * associate class A with the system classloader. (Every class is associated
+ * with the loader that called {@link ClassLoader#defineClass} to define it
+ * in the JVM.) This association would make B be loaded by the standard loader!
+ * <P>
+ *
+ * To get around this problem, we use this class, which acts mostly
+ * as a union of two classloaders. The trick, however, is that the
+ * StickyClassLoader has itself associated with all classes it loads, even
+ * though the actual work is done by the two loaders it delegate to.
+ * (It does this by calling {@link ClassLoader#findResource} on the
+ * subordinate loaders to get the class data, but then by calling
+ * {@link ClassLoader#defineClass} itself to preserve the association.
  *
  * @version $Id$
  */
@@ -48,12 +76,44 @@ public class StickyClassLoader extends ClassLoader {
   private final ClassLoader _newLoader;
   private final String[] _classesToLoadWithOld;
 
+  /**
+   * Creates a sticky class loader with the given primary and secondary
+   * loaders to join together.
+   *
+   * All classes will be attempted to be loaded with the primary loader,
+   * and the secondary will be used as a fallback.
+   *
+   * @param newLoader Primary loader
+   * @param oldLoader Secondary loader
+   */
   public StickyClassLoader(final ClassLoader newLoader,
                            final ClassLoader oldLoader)
   {
     this(newLoader, oldLoader, new String[0]);
   }
 
+  /**
+   * Creates a sticky class loader with the given primary and secondary
+   * loaders to join together.
+   *
+   * All classes will be attempted to be loaded with the primary loader
+   * (except for classes in <code>classesToLoadWithOld</code>),
+   * and the secondary will be used as a fallback.
+   *
+   * @param newLoader Primary loader
+   * @param oldLoader Secondary loader
+   * @param classesToLoadWithOld All class names in this array will be loaded
+   *                             only with the secondary classloader. This is
+   *                             vital to ensure that only one copy of some
+   *                             classes are loaded, since two differently
+   *                             loaded versions of a class act totally
+   *                             independantly! (That is, they have different,
+   *                             incompatible types.) Often it'll be necessary
+   *                             to make key interfaces that are used between
+   *                             components get loaded via one standard 
+   *                             classloader, to ensure that things can be
+   *                             cast to that interface.
+   */
   public StickyClassLoader(final ClassLoader newLoader,
                            final ClassLoader oldLoader,
                            final String[] classesToLoadWithOld)

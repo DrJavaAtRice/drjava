@@ -206,21 +206,27 @@
     <arg value="${javadoc_dir}/src" />
     
     <fileset dir="${srcroot}">
-      <include name="${projpath}/**/*.java" />
+      <!-- get all projects within this sourceroot -->
+      <include name="**/*.java" />
+      <!-- <include name="${projpath}/**/*.java" /> -->
     </fileset>
   </apply>
 
   <!-- Now we need to copy the package.htmls over to the
-       directory with the non-generic sources. -->
+       directory with the non-generic sources.
+       Also copy doc-files subdirectories.
+  -->
   <copy todir="${javadoc_dir}/src">
     <fileset dir="${srcroot}">
-      <include name="${projpath}/**/package.html" />
+      <include name="**/package.html" />
+      <include name="**/doc-files/**" />
+      <!-- <include name="${projpath}/**/package.html" /> -->
     </fileset>
   </copy>
 
   <javadoc sourcepath="${javadoc_dir}/src"
            destdir="${javadoc_dir}"
-           packagenames="edu.rice.cs.${ant.project.name}.*"
+           packagenames="edu.rice.cs.*"
            Private="yes"
            Use="yes"
            Version="yes"

@@ -41,7 +41,9 @@ import  javax.swing.text.StyleConstants.ColorConstants;
 
 
 /**
- * Output stream for documents.  Used for file I/O.
+ * An extension of {@link OutputStream} that writes its output to
+ * an implementation of {@link Document}.
+ *
  * @version $Id$
  */
 public class DocumentOutputStream extends OutputStream {
@@ -49,17 +51,25 @@ public class DocumentOutputStream extends OutputStream {
   private AttributeSet _attributes;
 
   /**
-   * Constructor.
-   * @param     Document doc
+   * Constructs an {@link OutputStream} that writes its output to a
+   * {@link Document}.
+   *
+   * When this constructor is used, all insertions to the Document will
+   * be done with the attributes set to <code>null</code>.
+   *
+   * @param doc Document to write output to.
    */
   public DocumentOutputStream(Document doc) {
     this(doc, null);
   }
 
   /**
-   * Constructor.
-   * @param     Document doc
-   * @param     AttributeSet attributes
+   * Constructs an {@link OutputStream} that writes its output to a
+   * {@link Document}.
+   *
+   * @param doc Document to write output to.
+   * @param attributes Attributes to use for inserting text into the document
+   *                   that is sent to this stream.
    */
   public DocumentOutputStream(Document doc, AttributeSet attributes) {
     _doc = doc;

@@ -8,6 +8,8 @@ import java.text.SimpleDateFormat;
  * This file is copied to Version.java by the build process, which also
  * fills in the right values of the date and time.
  *
+ * This javadoc corresponds to build drjava-@DATE@-@TIME@;
+ *
  * @version $Id$
  */
 public abstract class Version {
@@ -16,6 +18,8 @@ public abstract class Version {
    * Do not edit it by hand!
    */
   public static final String BUILD_TIME_STRING = "@DATE@-@TIME@";
+
+  /** A {@link Date} version of the build time. */
   public static final Date BUILD_TIME = _getBuildDate();
 
   private static Date _getBuildDate() {
