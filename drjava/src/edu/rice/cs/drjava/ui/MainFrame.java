@@ -119,6 +119,8 @@ public class MainFrame extends JFrame {
   private JMenuItem _compileMenuItem;
   private JMenuItem _abortInteractionMenuItem;
   private JCheckBoxMenuItem _debuggerEnabledMenuItem;
+  private JMenuItem _breakpointMenuItem;
+  private JMenuItem _runDebuggerMenuItem;
 
   public SingleDisplayModel getModel() {
     return _model;
@@ -382,21 +384,21 @@ public class MainFrame extends JFrame {
     }
   };
 
-  /** Sets a breakpoint */
-  private Action _setBreakpointAction =
-    new AbstractAction("Set Breakpoint")
+  /** Toggles a breakpoint on the current line */
+  private Action _toggleBreakpointAction =
+    new AbstractAction("Toggle Breakpoint on Current Line")
   {
     public void actionPerformed(ActionEvent ae) {
-      _setBreakpoint();
+      _toggleBreakpoint();
     }
   };
   
-  /** Removes a breakpoint */
-  private Action _removeBreakpointAction =
-    new AbstractAction("Remove Breakpoint")
+  /** Runs the debugger on the current document */
+  private Action _runDebuggerAction =
+    new AbstractAction("Run Current Document")
   {
     public void actionPerformed(ActionEvent ae) {
-      _removeBreakpoint();
+      _runDebugger();
     }
   };
 
@@ -435,8 +437,6 @@ public class MainFrame extends JFrame {
     // Set up listeners
     this.addWindowListener(_windowCloseListener);
     _model.addListener(new ModelListener());
-    // COMMENTED UNTIL COMPLETE
-    //_posListener = new PositionListener();
     _setUpTabs();
     
     // DefinitionsPane
@@ -550,7 +550,7 @@ public class MainFrame extends JFrame {
      _model.getDebugManager().init(_debugPanel.getUIAdapter());
     _tabbedPane.add("Debug", _debugPanel);
     _tabbedPane.setSelectedComponent(_debugPanel);
-    _debuggerEnabledMenuItem.setState(true);
+    _setDebugMenuItemsEnabled(true);
   }
   
   /**
@@ -560,8 +560,9 @@ public class MainFrame extends JFrame {
     _model.getDebugManager().cleanUp();
     _tabbedPane.remove(_debugPanel);
     _debugPanel.reset();
-    _debuggerEnabledMenuItem.setState(false);
+    _setDebugMenuItemsEnabled(false);    
   }
+  
   
 
 
@@ -762,10 +763,10 @@ public class MainFrame extends JFrame {
     }
   }
   
-  private void _setBreakpoint(){
+  private void _toggleBreakpoint() {
   }
   
-  private void _removeBreakpoint(){
+  private void _runDebugger() {
   }
   
   private void _showIOError(IOException ioe) {
@@ -1117,17 +1118,29 @@ public class MainFrame extends JFrame {
     _debuggerEnabledMenuItem.setState(false);
     debugMenu.add(_debuggerEnabledMenuItem);
     
-    tempItem = debugMenu.add(_setBreakpointAction);
-    // add an accelerator to tempItem
+    debugMenu.addSeparator();
     
-    tempItem = debugMenu.add(_removeBreakpointAction);
-    // add an accelerator to tempItem
+    _breakpointMenuItem = debugMenu.add(_toggleBreakpointAction);
+    // TO DO: add an accelerator
     
+    _runDebuggerMenuItem = debugMenu.add(_runDebuggerAction);
+    // TO DO: add an accelerator
+    
+    // Start off disabled
+    _setDebugMenuItemsEnabled(false);
     
     // Add the menu to the menu bar
     return debugMenu;
   }
 
+  /**
+   * Enables and disables the debug menu items.
+   */
+  private void _setDebugMenuItemsEnabled(boolean enabled) {
+    _debuggerEnabledMenuItem.setState(enabled);
+    _breakpointMenuItem.setEnabled(enabled);
+    _runDebuggerMenuItem.setEnabled(enabled);
+  }
 
   /**
    * Creates and returns a help menu.
