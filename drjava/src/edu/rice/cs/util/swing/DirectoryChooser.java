@@ -1383,8 +1383,8 @@ public class DirectoryChooser extends JPanel {
         Icon ico = _fdManager.getIcon(f); //_jfc.getIcon(f);
         setIcon(ico);
       }
-      catch(IllegalArgumentException e) {
-        // ignore non-file nodes
+      catch(Exception e) {
+        // if there's a problem getting the icon, don't set it.
       }
       
       return this;
