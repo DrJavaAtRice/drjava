@@ -36,21 +36,21 @@ public class ButtonTest extends TestCase
 
     public void testSaveEnabledAfterModification() 
 	throws BadLocationException {
-	DefinitionsDocument d = _m.getDefView()._doc();
+	DefinitionsDocument d = _m.getDefPane()._doc();
 	d.insertString(0,"this is a test",null);
 	assertTrue(_m._saveButton.isEnabled());
     }
 
     public void testCompileDisabledAfterModification() 
 	throws BadLocationException {
-	DefinitionsDocument d = _m.getDefView()._doc();
+	DefinitionsDocument d = _m.getDefPane()._doc();
 	d.insertString(0, "this is a test", null);
 	assertTrue(!_m._compileButton.isEnabled());
     }
 
     public void testCompileEnabledAfterSave() 
 	throws BadLocationException {
-	DefinitionsView v = _m.getDefView();
+	DefinitionsPane v = _m.getDefPane();
 	DefinitionsDocument d = v._doc();
 	d.insertString(0,"this is a test",null);
 	assertTrue(_m.saveToFile("button-test-file"));
@@ -60,7 +60,7 @@ public class ButtonTest extends TestCase
 
     public void testSaveDisabledAfterSave() 
 	throws BadLocationException {
-	DefinitionsView v = _m.getDefView();
+	DefinitionsPane v = _m.getDefPane();
 	DefinitionsDocument d = v._doc();
 	d.insertString(0,"this is a test",null);
 	assertTrue(_m.saveToFile("button-test-file"));
@@ -70,7 +70,7 @@ public class ButtonTest extends TestCase
 
 	public void testCompileDisabledAfterCompile() 
 	  throws BadLocationException {
-	DefinitionsView v = _m.getDefView();
+	DefinitionsPane v = _m.getDefPane();
 	DefinitionsDocument d = v._doc();
 	d.insertString(0,"public class C{}",null);
 	assertTrue(_m.saveToFile("C.java"));

@@ -234,7 +234,7 @@ public class JavaInterpreterTest extends TestCase
 	public void testRunAsProgram()
 	 {
 	 MainFrame _m = new MainFrame();
-	 DefinitionsView v = _m.getDefView();
+	 DefinitionsPane v = _m.getDefPane();
 	 DefinitionsDocument d = v._doc();
 	 _m.show();
 	 try {
@@ -243,7 +243,7 @@ public class JavaInterpreterTest extends TestCase
 	 
 				_m.compile();
 				
-				InteractionsDocument id = _m._interactionsView.getInteractionsDocument();
+				InteractionsDocument id = _m._interactionsPane.getInteractionsDocument();
 				id.insertString(id.frozenPos,"java C", null);
 				id.eval();
 			id.insertString(id.frozenPos,"C.t", null);

@@ -94,7 +94,7 @@ public class CompilerErrorPanel extends JPanel {
    */
   private CompilerError[] _errorsWithoutPositions;
 
-  private DefinitionsView _definitionsView;
+  private DefinitionsPane _definitionsPane;
 
   private JButton _showAllButton;
   private JButton _nextButton;
@@ -134,7 +134,7 @@ public class CompilerErrorPanel extends JPanel {
         int errPos = _errorPositions[errorBefore].getOffset();
         try {
           String betweenDotAndErr =
-            _definitionsView.getDocument().getText(errPos, curPos - errPos);
+            _definitionsPane.getDocument().getText(errPos, curPos - errPos);
 
           if (betweenDotAndErr.indexOf('\n') == -1) {
             shouldSelect = errorBefore;
@@ -150,7 +150,7 @@ public class CompilerErrorPanel extends JPanel {
         int errPos = _errorPositions[errorAfter].getOffset();
         try {
           String betweenDotAndErr =
-            _definitionsView.getDocument().getText(curPos, errPos - curPos);
+            _definitionsPane.getDocument().getText(curPos, errPos - curPos);
 
           if (betweenDotAndErr.indexOf('\n') == -1) {
             shouldSelect = errorAfter;
@@ -176,23 +176,23 @@ public class CompilerErrorPanel extends JPanel {
 
   private void _addHighlight(int from, int to) throws BadLocationException {
     _previousHighlightTag =
-      _definitionsView.getHighlighter().addHighlight(from,
+      _definitionsPane.getHighlighter().addHighlight(from,
                                                      to,
                                                      _documentHighlightPainter);
   }
 
   private void _removePreviousHighlight() {
     if (_previousHighlightTag != null) {
-      _definitionsView.getHighlighter().removeHighlight(_previousHighlightTag);
+      _definitionsPane.getHighlighter().removeHighlight(_previousHighlightTag);
       _previousHighlightTag = null;
     }
   }
 
-  public CompilerErrorPanel(DefinitionsView view) {
+  public CompilerErrorPanel(DefinitionsPane defPane) {
     setLayout(new BorderLayout());
         
-    _definitionsView = view;
-    _definitionsView.addCaretListener(_listener);
+    _definitionsPane = defPane;
+    _definitionsPane.addCaretListener(_listener);
 
     _showAllButton = new JButton("Show all");
     _showAllButton.addActionListener(new ActionListener() {
@@ -282,8 +282,8 @@ public class CompilerErrorPanel extends JPanel {
 
     int errPos = _errorPositions[idx].getOffset();
     // move caret to that position
-    _definitionsView.setCaretPosition(errPos);
-    _definitionsView.grabFocus();
+    _definitionsPane.setCaretPosition(errPos);
+    _definitionsPane.grabFocus();
   }
 
   /**
@@ -294,7 +294,7 @@ public class CompilerErrorPanel extends JPanel {
     int errPos = _errorPositions[newIndex].getOffset();
 
     try {
-      Document doc = _definitionsView.getDocument();
+      Document doc = _definitionsPane.getDocument();
       String text = doc.getText(0, doc.getLength());
      
       // Look for the previous newline BEFORE this character. Thus start looking
@@ -385,7 +385,7 @@ public class CompilerErrorPanel extends JPanel {
     if (_errorPositions.length == 0) 
       return;
 
-    Document defsDoc = _definitionsView.getDocument();
+    Document defsDoc = _definitionsPane.getDocument();
     try {
       String defsText = defsDoc.getText(0, defsDoc.getLength());
 

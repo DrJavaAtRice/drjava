@@ -14,7 +14,7 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
 
-public class InteractionsView extends JTextArea
+public class InteractionsPane extends JTextArea
 {
 	private AbstractAction _evalAction = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
@@ -49,7 +49,7 @@ public class InteractionsView extends JTextArea
 		}
   };
 	
-	public InteractionsView() {
+	public InteractionsPane() {
     super(new InteractionsDocument());
     setLineWrap(true);
     setWrapStyleWord(true);

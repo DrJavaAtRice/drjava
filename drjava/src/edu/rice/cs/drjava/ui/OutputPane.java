@@ -16,7 +16,7 @@ import java.awt.Rectangle;
 
 import java.io.PrintStream;
 
-public class OutputView extends JTextPane
+public class OutputPane extends JTextPane
 {
   private PrintStream _out;
   private PrintStream _err;
@@ -44,7 +44,7 @@ public class OutputView extends JTextPane
     }
   }
 
-  public OutputView() {
+  public OutputPane() {
     // user can't edit this thing!
     setEditable(false);
 

@@ -29,7 +29,7 @@ public class FindReplaceDialog extends JDialog {
 	private JOptionPane _optionPane;
 	private String _fWord = null;
 	private String _rWord = null;
-	private DefinitionsView _view;
+	private DefinitionsPane _defPane;
 	private int _currentPosition;
 	private JButton _findNextButton;
 	private JButton _replaceButton;
@@ -46,12 +46,12 @@ public class FindReplaceDialog extends JDialog {
 		return _rWord;
 	}
 
-	public FindReplaceDialog(Frame frame, DefinitionsView view) {
+	public FindReplaceDialog(Frame frame, DefinitionsPane defPane) {
 				
 		super(frame);
 
-		_view = view;
-		_currentPosition = _view.getCaretPosition();
+		_defPane = defPane;
+		_currentPosition = _defPane.getCaretPosition();
 		setTitle("Find/Replace");
 				
 		final String msgString1 = "Find:";
@@ -106,7 +106,7 @@ public class FindReplaceDialog extends JDialog {
 			}
 		});
 
-		_view.getDocument().addDocumentListener(new DocumentListener() {
+		_defPane.getDocument().addDocumentListener(new DocumentListener() {
 			public void changedUpdate(DocumentEvent e) {
 				_replaceButton.setEnabled(false);
 				_replaceFindButton.setEnabled(false);
@@ -123,7 +123,7 @@ public class FindReplaceDialog extends JDialog {
 			}
 		});
 
-		_view.addCaretListener(new CaretListener() {
+		_defPane.addCaretListener(new CaretListener() {
 			public void caretUpdate(CaretEvent e) {
 				_replaceButton.setEnabled(false);
 				_replaceFindButton.setEnabled(false);
@@ -140,7 +140,7 @@ public class FindReplaceDialog extends JDialog {
 
 				//System.err.println(e.getActionCommand());
 
-				boolean found = _view.findNextText(_fWord);
+				boolean found = _defPane.findNextText(_fWord);
 
 				if (found) {
 					_replaceButton.setEnabled(true);
@@ -160,7 +160,7 @@ public class FindReplaceDialog extends JDialog {
 				_message.setText("");
 
 				// replaces the occurance at the current position
-				_view.replaceText(_fWord, _rWord);
+				_defPane.replaceText(_fWord, _rWord);
 								
 				_replaceButton.setEnabled(false);
 				_replaceFindButton.setEnabled(false);
@@ -174,11 +174,11 @@ public class FindReplaceDialog extends JDialog {
 				_message.setText("");
 
 				// replaces the occurance at the current position
-				boolean found = _view.replaceText(_fWord,
+				boolean found = _defPane.replaceText(_fWord,
 																				_rWord);
 				// and finds the next word
 				if (found)
-					found = _view.findNextText(_fWord);
+					found = _defPane.findNextText(_fWord);
 				if (found) {
 					_replaceButton.setEnabled(true);
 					_replaceFindButton.setEnabled(true);										
@@ -197,7 +197,7 @@ public class FindReplaceDialog extends JDialog {
 				_rWord = replaceField.getText();
 				_message.setText("");
 
-				int count = _view.replaceAllText(_fWord, _rWord);
+				int count = _defPane.replaceAllText(_fWord, _rWord);
 
 				_message.setText("Replaced " + count + " occurrence" +
 												 ((count == 1)?"":"s") + ".");

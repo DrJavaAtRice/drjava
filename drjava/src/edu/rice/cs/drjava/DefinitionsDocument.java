@@ -80,7 +80,7 @@ public class DefinitionsDocument extends PlainDocument
     for (int i = 0; i < str.length(); i++)
     {
       char curChar = str.charAt(i);
-      _addCharToReducedView(curChar);
+      _addCharToReducedModel(curChar);
     }
 
     //DrJava.consoleErr().print("Insert: loc before=" + _currentLocation);
@@ -92,7 +92,7 @@ public class DefinitionsDocument extends PlainDocument
     _styleChanged();
   }
   
-  private void _addCharToReducedView(char curChar)
+  private void _addCharToReducedModel(char curChar)
   {
     switch (curChar)
       {

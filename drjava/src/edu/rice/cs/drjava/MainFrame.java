@@ -51,9 +51,9 @@ public class MainFrame extends JFrame
   private static final int OUTPUT_TAB = 2;
 
   private CompilerErrorPanel _errorPanel;
-  private DefinitionsView _definitionsView;
-  private OutputView _outputView;
-  InteractionsView _interactionsView;
+  private DefinitionsPane _definitionsPane;
+  private OutputPane _outputPane;
+  InteractionsPane _interactionsPane;
   private JTextField _fileNameField;
   private JTabbedPane _tabbedPane;
 
@@ -84,8 +84,8 @@ public class MainFrame extends JFrame
     public void actionPerformed(ActionEvent ae)
     {			
 			boolean wantToExit = true;
-			if (_definitionsView.modifiedSinceSave()) {
-				wantToExit = _definitionsView.checkAbandoningChanges();
+			if (_definitionsPane.modifiedSinceSave()) {
+				wantToExit = _definitionsPane.checkAbandoningChanges();
 			}
 			if (wantToExit) {
 				System.exit(0);
@@ -97,7 +97,7 @@ public class MainFrame extends JFrame
   {
     public void actionPerformed(ActionEvent ae)
     {
-      boolean opened = _definitionsView.open();
+      boolean opened = _definitionsPane.open();
       if (opened) {
         _resetInteractions();
         _errorPanel.resetErrors(new CompilerError[0]);
@@ -111,7 +111,7 @@ public class MainFrame extends JFrame
   {
     public void actionPerformed(ActionEvent ae)
     {
-      boolean createdNew = _definitionsView.newFile();
+      boolean createdNew = _definitionsPane.newFile();
       if (createdNew) {
         _resetInteractions();
         _errorPanel.resetErrors(new CompilerError[0]);
@@ -125,13 +125,13 @@ public class MainFrame extends JFrame
   {
     public void actionPerformed(ActionEvent ae)
     {
-      _definitionsView.gotoLine();
+      _definitionsPane.gotoLine();
     }
   };
 
   boolean saveToFile(String fileName) 
   {
-    boolean result = _definitionsView.saveToFile(fileName);
+    boolean result = _definitionsPane.saveToFile(fileName);
     if (result) {
       updateEnablesAfterSave();
     }
@@ -140,7 +140,7 @@ public class MainFrame extends JFrame
 
   boolean save()
   {
-    boolean result = _definitionsView.save();
+    boolean result = _definitionsPane.save();
     if (result) {
       updateEnablesAfterSave();
     }
@@ -149,7 +149,7 @@ public class MainFrame extends JFrame
 
   boolean saveAs() 
   {
-    boolean result = _definitionsView.saveAs();
+    boolean result = _definitionsPane.saveAs();
     if (result) {
       updateEnablesAfterSave();
     }
@@ -167,16 +167,16 @@ public class MainFrame extends JFrame
     // This doesn't seem to ever re-enable once disabled!
     /*
     public boolean isEnabled() {
-      return ! _definitionsView.modifiedSinceSave();
+      return ! _definitionsPane.modifiedSinceSave();
     }
     */
 
     public void actionPerformed(ActionEvent ae)
     {
-			if (_definitionsView.getCurrentFileName() == "")
+			if (_definitionsPane.getCurrentFileName() == "")
 			saveAs();
 			else
-			saveToFile(_definitionsView.getCurrentFileName());
+			saveToFile(_definitionsPane.getCurrentFileName());
     }
   };
 
@@ -192,7 +192,7 @@ public class MainFrame extends JFrame
     {
 			_compileButton.setEnabled(false);
 
-      String filename = _definitionsView.getCurrentFileName();
+      String filename = _definitionsPane.getCurrentFileName();
 			
       if (filename.length() == 0) {
         // the file has never been saved. we can only get here
@@ -201,7 +201,7 @@ public class MainFrame extends JFrame
       }
 
       // Clear the output window before compilation
-      _outputView.clear();
+      _outputPane.clear();
 
       _tabbedPane.setSelectedIndex(COMPILE_TAB);
       
@@ -217,13 +217,13 @@ public class MainFrame extends JFrame
     // This doesn't seem to ever re-enable once disabled!
     /*
     public boolean isEnabled() {
-      return _definitionsView.getDocument().getLength() > 0;
+      return _definitionsPane.getDocument().getLength() > 0;
     }
     */
 
     public void actionPerformed(ActionEvent ae)
     {
-      boolean modified = _definitionsView.modifiedSinceSave();
+      boolean modified = _definitionsPane.modifiedSinceSave();
 
       if (modified) {
         // file was not saved -- tell user they must save before compiling
@@ -236,7 +236,7 @@ public class MainFrame extends JFrame
         if (rc == JOptionPane.YES_OPTION) {
 	    save();
           // Check if they cancelled the save. If they did, exit!
-          if (_definitionsView.modifiedSinceSave()) {
+          if (_definitionsPane.modifiedSinceSave()) {
             return;
           }
         }
@@ -254,7 +254,7 @@ public class MainFrame extends JFrame
 		{
 			public void actionPerformed(ActionEvent ae)
 			{
-				_definitionsView.findReplace();
+				_definitionsPane.findReplace();
 			}
 		};
 	
@@ -262,7 +262,7 @@ public class MainFrame extends JFrame
 		{
 			public void actionPerformed(ActionEvent ae)
 			{
-				_outputView.clear();
+				_outputPane.clear();
 			}
 		};
 
@@ -270,7 +270,7 @@ public class MainFrame extends JFrame
 		{
 			public void actionPerformed(ActionEvent ae)
 			{
-				_interactionsView.reset();
+				_interactionsPane.reset();
 			}
 		};
 
@@ -280,9 +280,9 @@ public class MainFrame extends JFrame
 
     // Reset the interactions window, and add the source directory
     // of the file we just compiled to the class path.
-    _interactionsView.reset();
+    _interactionsPane.reset();
 
-    String filename = _definitionsView.getCurrentFileName();
+    String filename = _definitionsPane.getCurrentFileName();
 
     if (filename == "") {
       return; // no file, so no source path to add to classpath.
@@ -290,7 +290,7 @@ public class MainFrame extends JFrame
 
     File file = new File(filename);
     String sourceDir = file.getAbsoluteFile().getParent();
-    _interactionsView.addClassPath(sourceDir);
+    _interactionsPane.addClassPath(sourceDir);
   }
 
 	private WindowListener _windowCloseListener = new WindowListener() {
@@ -298,8 +298,8 @@ public class MainFrame extends JFrame
 		public void windowClosed(WindowEvent ev) {}
 		public void windowClosing(WindowEvent ev) {
 			boolean wantToExit = true;
-			if (_definitionsView.modifiedSinceSave()) {
-				wantToExit = _definitionsView.checkAbandoningChanges();
+			if (_definitionsPane.modifiedSinceSave()) {
+				wantToExit = _definitionsPane.checkAbandoningChanges();
 			}
 			if (wantToExit) {
 				System.exit(0);
@@ -310,7 +310,7 @@ public class MainFrame extends JFrame
 		public void windowIconified(WindowEvent ev) {}
 
 		public void windowOpened(WindowEvent ev) {
-      _definitionsView.requestFocus();
+      _definitionsPane.requestFocus();
     }
 	};
 
@@ -361,9 +361,9 @@ public class MainFrame extends JFrame
 		_fileNameField = new JTextField();
     _fileNameField.setEditable(false);
 
-    _definitionsView = new DefinitionsView(this);
-    _outputView = new OutputView();
-    _errorPanel = new CompilerErrorPanel(_definitionsView);
+    _definitionsPane = new DefinitionsPane(this);
+    _outputPane = new OutputPane();
+    _errorPanel = new CompilerErrorPanel(_definitionsPane);
 
     this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
     this.addWindowListener(_windowCloseListener);
@@ -405,10 +405,10 @@ public class MainFrame extends JFrame
     pasteAction.putValue(Action.NAME, "Paste");
 
 		/*The undo/redo menus and key action
-    //tmpItem = _editMenu.add(_definitionsView.getUndoAction());
+    //tmpItem = _editMenu.add(_definitionsPane.getUndoAction());
 		//tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
 		//																							ActionEvent.CTRL_MASK));		
-    //tmpItem = _editMenu.add(_definitionsView.getRedoAction());
+    //tmpItem = _editMenu.add(_definitionsPane.getRedoAction());
 		//tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
 		//																							ActionEvent.CTRL_MASK));
 
@@ -455,26 +455,26 @@ public class MainFrame extends JFrame
     setJMenuBar(_menuBar);
    
     // Make the output view the active one
-    _outputView.makeActive();
+    _outputPane.makeActive();
     
-    _interactionsView = new InteractionsView();
+    _interactionsPane = new InteractionsPane();
     
     _tabbedPane = new JTabbedPane();
-    _tabbedPane.add("Interactions", new JScrollPane(_interactionsView));
+    _tabbedPane.add("Interactions", new JScrollPane(_interactionsPane));
     _tabbedPane.add("Compiler output", _errorPanel);
-    _tabbedPane.add("Console", new JScrollPane(_outputView));
+    _tabbedPane.add("Console", new JScrollPane(_outputPane));
 
     // Select interactions pane when interactions tab is selected
     _tabbedPane.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
         if (_tabbedPane.getSelectedIndex() == INTERACTIONS_TAB) {
-          _interactionsView.grabFocus();
+          _interactionsPane.grabFocus();
         }
       }
     });
 
     JScrollPane defScroll =
-      new JScrollPane(_definitionsView,
+      new JScrollPane(_definitionsPane,
                       JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                       JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
                             
@@ -504,9 +504,9 @@ public class MainFrame extends JFrame
   }
 
   private void _setAllFonts(Font f) {
-    _definitionsView.setFont(f);
-    _interactionsView.setFont(f);
-    _outputView.setFont(f);
+    _definitionsPane.setFont(f);
+    _interactionsPane.setFont(f);
+    _outputPane.setFont(f);
     _errorPanel.setListFont(f);
   }
 
@@ -517,14 +517,14 @@ public class MainFrame extends JFrame
     _fileNameField.setText(filename);
   }
 		
-	DefinitionsView getDefView()
+	DefinitionsPane getDefPane()
 		{
-			return _definitionsView;
+			return _definitionsPane;
 		}
 
-	OutputView getOutView()
+	OutputPane getOutPane()
 		{
-			return _outputView;
+			return _outputPane;
 		}
 }
 

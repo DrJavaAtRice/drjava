@@ -51,7 +51,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.*;
 
-public class DefinitionsView extends JEditorPane
+public class DefinitionsPane extends JEditorPane
 {
 	/** Keep track of the name of the file currently associated
    *  with the document we're editing. If we've never saved this file
@@ -192,7 +192,7 @@ public class DefinitionsView extends JEditorPane
 	
 // Constructor
 	
-	public DefinitionsView(MainFrame mf)
+	public DefinitionsPane(MainFrame mf)
   {
     _mainFrame = mf;
     _resetDocument("");
@@ -361,7 +361,7 @@ public class DefinitionsView extends JEditorPane
     // But do it in the Swing thread to be safe.
     SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-          DefinitionsView.this.requestFocus();
+          DefinitionsPane.this.requestFocus();
         }
     });
   }
