@@ -44,7 +44,7 @@ import javax.swing.*;
 
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.util.PreventExitSecurityManager;
-import edu.rice.cs.drjava.model.Configuration;
+import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.compiler.*;
 
 /** 
@@ -55,9 +55,11 @@ public class DrJava {
   private static final PrintStream _consoleOut = System.out;
   private static final PrintStream _consoleErr = System.err;
   private static PreventExitSecurityManager _manager;
-
-  public static void main(String[] args) {
-
+  
+  private static final MainFrame _mf = new MainFrame();
+  
+  public static void main(final String[] args) {
+    
     /*
     Thread dbg = new Thread() {
       public void run() {
@@ -75,7 +77,7 @@ public class DrJava {
             break;
           }
         }
-      }
+an      }
     };
     dbg.setDaemon(true);
     dbg.start();
@@ -83,22 +85,55 @@ public class DrJava {
       
     try {
       System.setProperty("com.apple.macos.useScreenMenuBar","true");
-
+      
       _setupCompilerIfNeeded();
-
-      MainFrame mf = new MainFrame();
-
+      
+      //      MainFrame mf = new MainFrame();
+      
       // This enabling of the security manager must happen *after* the mainframe
       // is constructed. See bug #518509.
       enableSecurityManager();
-
-      mf.show();
+      openCommandLineFiles(_mf, args);
+      _mf.show();
     } catch (Exception ex) {
       _consoleErr.println(ex.getClass().getName() + ": " + ex.getMessage());
       ex.printStackTrace(_consoleErr);
     }
   }
 
+  /**
+   * Handle the list of files specified on the command line.  Feature request #509701.
+   * If file exists, open it in DrJava.  Otherwise, ignore it.
+   * Is there a better way to handle nonexistent files?  Dialog box, maybe?
+   */
+  public static void openCommandLineFiles(MainFrame mf, String[] args) {
+    int i;
+    for(i=0; i<args.length; i++) {
+      final File file = new File(args[i]);
+      FileOpenSelector command = new FileOpenSelector() {
+        public File getFile() {
+          return file;
+        }
+      };
+      try {
+        OpenDefinitionsDocument doc = mf.getModel().openFile(command);
+      } catch (FileNotFoundException ex) {
+        //dialog: file not found
+      } catch (Exception ex) {
+        
+      }
+    }
+  }
+
+  /**
+   * Get the MainFrame we're using.  Lets the DrJava class tester 
+   * know what's going on.
+   *
+  public static MainFrame getMainFrame() {
+    return _mf;
+  }
+  */
+  
   /**
    * Implements feature req #523222: Prompt user for compiler if none found.
    */
