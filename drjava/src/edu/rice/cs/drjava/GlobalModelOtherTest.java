@@ -11,8 +11,15 @@ import java.util.LinkedList;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
 
-
+/**
+ * A test on the GlobalModel that does deals with everything outside of
+ * simple file operations, e.g., compile, quit.
+ * @version $Id$
+ */
 public class GlobalModelOtherTest extends GlobalModelTestCase {
+  private static final String FOO_MISSING_CLOSE_TEXT = 
+    "class Foo {";
+
   /**
    * Constructor.
    * @param  String name
@@ -53,6 +60,29 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     compiled.delete();
   }
 
+  /**
+   * Tests compiling an invalid file and checks to make sure the class
+   * file was not created.
+   */
+  public void testCompileMissingCloseSquiggly()
+    throws BadLocationException, IOException
+  {
+    setupDocument(FOO_MISSING_CLOSE_TEXT);
+    final File file = tempFile();
+    _model.saveFile(new FileSelector(file));
+    TestListener listener = new NormalCompileListener();
+    _model.addListener(listener);
+    _model.startCompile();
+    listener.assertCompileStartCount(1);
+    listener.assertCompileEndCount(1);
+    listener.assertInteractionsResetCount(1);
+    listener.assertConsoleResetCount(1);
+    File compiled = classForJava(file, "Foo");
+    assertTrue("Class file exists after compile?!", !compiled.exists());
+
+    file.delete();
+  }
+  
   /**
    * If we try to compile an unsaved file but we do save it from within
    * saveBeforeProceeding, the compile should occur happily.

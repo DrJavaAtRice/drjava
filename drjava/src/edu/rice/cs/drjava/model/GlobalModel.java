@@ -131,7 +131,10 @@ public class GlobalModel {
   }
   
   /**
-   * Saves a document with a FileWriter.
+   * Saves a document with a FileWriter.  The FileSaveSelector will
+   * either provide a file name or prompt the user for one.  It is
+   * up to the caller to decide what needs to be done to choose
+   * a file to save to.
    * @param com a selector that picks the file name.
    */
   public void saveFileAs(FileSaveSelector com) throws IOException {
@@ -159,6 +162,9 @@ public class GlobalModel {
   /**
    * Open a file and read it into the definitions.
    * Checks first to see if we can abandon the current file.
+   * The file selector either provides a name or prompts the user
+   * for a name - it is up to the caller to provide this
+   * as the argument to this method.
    * @param com a command pattern command that selects what file
    *            to open
    */
@@ -190,7 +196,11 @@ public class GlobalModel {
   
   /**
    * Starts compiling the source.  Demands that the definitions be
-   * saved before proceeding with the compile.
+   * saved before proceeding with the compile.  Depending on whether
+   * the compile can proceed, the interations pane and console may be 
+   * reset. If the compile can proceed, a compileStarted event is fired,
+   * which guarantees that a compileEnded event will be fired when the
+   * compile finishes or fails.
    */
   public void startCompile() {
     saveBeforeProceeding(GlobalModelListener.COMPILE_REASON);
