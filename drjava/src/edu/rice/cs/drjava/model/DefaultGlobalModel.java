@@ -369,9 +369,25 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     _state.setBuildDirectory(f);
   }
   
+  /**
+   * Notifies the project state that the project has been changed
+   */
+  public void setProjectChanged() {
+    _state.setProjectChanged();
+  }
+  
+  /**
+   * Returns true if the project state has been changed
+   */
+  public boolean isProjectChanged() {
+    return _state.isProjectChanged();
+  }
+  
   public FileGroupingState _makeProjectFileGroupingState(final File buildDir, final File projectFile, final File[] projectFiles) { 
     return new FileGroupingState(){
       private File _builtDir = buildDir;
+      
+      private boolean _isProjectChanged = false;
       
       public File getBuildDirectory(){
         return _builtDir;
@@ -385,8 +401,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         try {
           File projectRoot = projectFile.getParentFile();
           if(doc.isUntitled()) return false;
-          String filePath = doc.getFile().getParentFile().getCanonicalPath();
-          String projectPath = projectRoot.getCanonicalPath();
+          String filePath = doc.getFile().getParentFile().getCanonicalPath() + File.separator;
+          String projectPath = projectRoot.getCanonicalPath() + File.separator;
           return (filePath.startsWith(projectPath));
 //          return (doc.getSourceRoot().compareTo(projectRoot) == 0);
         }
@@ -430,6 +446,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       public void setBuildDirectory(File f) {
         _builtDir = f;
       }
+      
+      public boolean isProjectChanged() {
+        return _isProjectChanged;
+      }
+      
+      public void setProjectChanged() {
+        _isProjectChanged = true;
+      }
     };
   }
   
@@ -450,13 +474,21 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return null;
       }
       public void setBuildDirectory(File f) {
-        //Do nothing - there is no project open. Maybe throw an exception here?
+        //Do nothing
       }
       public File[] getProjectFiles() {
         return null;
       }
       public boolean isProjectFile(File f) {
         return false;
+      }
+      
+       public boolean isProjectChanged() {
+        return false;
+      }
+      
+      public void setProjectChanged() {
+        //Do nothing    
       }
     };
   }
@@ -800,7 +832,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   public void saveProject(String filename) throws IOException {
     
-    String base = filename.substring(0, filename.lastIndexOf(File.separator));
+    String base = filename.substring(0, filename.lastIndexOf(File.separator) + 1);
     ProjectFileBuilder builder = new ProjectFileBuilder(base);
     
     // add opendefinitionsdocument
@@ -811,7 +843,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         builder.addSourceFile(doc.getFile());
       }
     }
-    
+          
     // add classpath info
     Vector<File> currentclasspaths = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
     for(int i = 0; i<currentclasspaths.size(); i++){
@@ -823,6 +855,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     //System.out.println(f);
     if(f != null)
       builder.setBuildDir(f);
+    
+    //Tried to use .toArray and a cast but always seemed to throw a class cast exception
+    Vector<File> srcFileVector = builder.getSourceFiles();
+    File [] srcFiles = new File[srcFileVector.size()];
+    for(int i = 0; i<srcFileVector.size(); i++)
+      srcFiles[i] = srcFileVector.elementAt(i);
+    
+    setFileGroupingState(_makeProjectFileGroupingState(f, new File(filename), srcFiles));
     
     // write to disk
     FileWriter fw = new FileWriter(filename);

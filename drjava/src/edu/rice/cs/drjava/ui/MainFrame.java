@@ -2256,6 +2256,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     _model.setPageFormat(job.pageDialog(_model.getPageFormat()));
   }
 
+  //Called by testCases
+  void closeAll() {
+    _closeAll();
+  }
+  
   private void _closeAll() {
     if(_model.isProjectActive())    
       _closeProject();
@@ -4695,8 +4700,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       
       try {
         File f = doc.getFile();
-        if(! _model.isProjectFile(f) && _model.isInProjectPath(doc))
+        if(! _model.isProjectFile(f) && _model.isInProjectPath(doc)) {
           _saveProjectAction.setEnabled(true);
+          _model.setProjectChanged();
+        }
       }
       catch(FileMovedException fme) {
         //do nothing
@@ -4756,8 +4763,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       if(doc != null) {
         try {
           File f = doc.getFile();
-          if(_model.isProjectFile(f))
+          if(_model.isProjectFile(f)) {
             _saveProjectAction.setEnabled(true);
+            _model.setProjectChanged();
+          }
         }
         catch(FileMovedException fme) {
           //do nothing

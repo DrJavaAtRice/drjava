@@ -96,4 +96,14 @@ public interface FileGroupingState {
    * Returns true the given file is in the current project file.
    */
   public boolean isProjectFile(File f);
+  
+  /**
+   * Returns true if in project mode and the current project file has changed
+   */
+  public boolean isProjectChanged();
+  
+  /**
+   * Sets that the project state is no longer a snapshot of the open project.
+   */
+   public void setProjectChanged(); 
 }

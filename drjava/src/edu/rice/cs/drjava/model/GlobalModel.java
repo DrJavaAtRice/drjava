@@ -430,4 +430,14 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    * source root. (we query the model through the model's state)
    */
   public boolean isInProjectPath(OpenDefinitionsDocument doc);
+  
+  /**
+   * Notifies the project state that the project has been changed
+   */
+  public void setProjectChanged();
+  
+  /**
+   * Returns true if the project state has been changed
+   */
+  public boolean isProjectChanged();
 }

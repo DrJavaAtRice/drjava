@@ -5,56 +5,56 @@ import java.util.*;
 public class ProjectFileBuilder
 {
   
-  private Vector<File> _sourcefiles = new Vector<File>();
+  private Vector<File> _sourceFiles = new Vector<File>();
   
-  private Vector<File> _resourcefiles = new Vector<File>();
+  private Vector<File> _resourceFiles = new Vector<File>();
   
-  private Vector<File> _builddirfiles = new Vector<File>();
+  private Vector<File> _buildDirFiles = new Vector<File>();
   
-  private Vector<File> _classpathfiles = new Vector<File>();
+  private Vector<File> _classpathFiles = new Vector<File>();
   
-  private Vector<File> _jarfiles = new Vector<File>();
+  private Vector<File> _jarFiles = new Vector<File>();
  
-  private String _projectpath;
+  private String _projectPath;
   
-  public ProjectFileBuilder(String projectpath)
+  public ProjectFileBuilder(String projectPath)
   {
-    _projectpath = projectpath.replace('\\', '/');
+    _projectPath = projectPath.replace('\\', '/');
   }
   
   public void addSourceFile(File sf)
   {
-    _sourcefiles.add(sf);
+    _sourceFiles.add(sf);
   }
   
   public void addResourceFile(File sf)
   {
-    _resourcefiles.add(sf);
+    _resourceFiles.add(sf);
   }
   public void setBuildDir(File sf)
   {
-    _builddirfiles.clear();
-    _builddirfiles.add(sf);
+    _buildDirFiles.clear();
+    _buildDirFiles.add(sf);
   }
   public void addClasspathFile(File sf)
   {
-    _classpathfiles.add(sf);
+    _classpathFiles.add(sf);
   }
   
   public void addJarFile(File sf)
   {
-    _jarfiles.add(sf);
+    _jarFiles.add(sf);
   }
   
   public String makeProjectFile()
   {
     StringBuffer tbr = new StringBuffer();
-    makeEntries(tbr, _sourcefiles, "Source", true);
-    makeEntries(tbr, _resourcefiles, "Resources", true);
-    makeEntries(tbr, _builddirfiles, "BuildDir", false);
-    //makeEntries(tbr, _classpathfiles, "Classpath", false);
+    makeEntries(tbr, _sourceFiles, "Source", true);
+    makeEntries(tbr, _resourceFiles, "Resources", true);
+    makeEntries(tbr, _buildDirFiles, "BuildDir", false);
+    //makeEntries(tbr, _classpathFiles, "Classpath", false);
     tbr.append("(Classpath\n)");
-    makeEntries(tbr, _jarfiles, "Jar", true);
+    makeEntries(tbr, _jarFiles, "Jar", true);
     return tbr.toString();
   }
   
@@ -69,11 +69,11 @@ public class ProjectFileBuilder
       {
         String path = files.elementAt(i).getCanonicalPath();
         path = path.replace('\\', '/');
-        if(path.startsWith(_projectpath) || !checkrelpath)
+        if(path.startsWith(_projectPath) || !checkrelpath)
         {
           if(checkrelpath)
           {
-            path = path.substring(_projectpath.length());
+            path = path.substring(_projectPath.length());
           }
           buffer.append("  (" + path + ")\n");
         }
@@ -86,4 +86,27 @@ public class ProjectFileBuilder
     buffer.append(")\n");
   }
   
+  public Vector<File> getSourceFiles() {
+    return _sourceFiles;
+  }
+  
+  public Vector<File> getResourceFiles() {
+    return _resourceFiles;
+  }
+  
+  public Vector<File> getBuildDirFiles() {
+    return _buildDirFiles;
+  }
+  
+  public Vector<File> getClasspathFiles() {
+    return _classpathFiles;
+  }
+  
+  public Vector<File> getJarFiles() {
+    return _jarFiles;
+  }
+  
+  public String getProjectPath() {
+    return _projectPath;
+  }
 }
