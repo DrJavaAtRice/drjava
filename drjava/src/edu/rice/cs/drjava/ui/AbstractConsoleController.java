@@ -270,6 +270,20 @@ public abstract class AbstractConsoleController {
     }
   };
 
+  /** Goes to the end of the current input line. */
+  AbstractAction gotoEndAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      moveToEnd();
+    }
+  };
+
+  /** Selects to the end of the current input line. */
+  AbstractAction selectToEndAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      _pane.moveCaretPosition(getConsoleDoc().getDocLength());
+    }
+  };
+
   /** Moves the caret to the prompt. */
   AbstractAction gotoPromptPosAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
@@ -277,6 +291,7 @@ public abstract class AbstractConsoleController {
     }
   };
   
+  /** Selects to the current prompt. */
   AbstractAction selectToPromptPosAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       // Selects the text between the old pos and the prompt

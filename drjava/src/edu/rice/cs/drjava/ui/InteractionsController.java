@@ -196,16 +196,19 @@ public class InteractionsController extends AbstractConsoleController {
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 
                                                        java.awt.Event.SHIFT_MASK), 
                                 newLineAction);
-
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_B, mask), 
                                 clearCurrentAction);
 
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0), 
                                 gotoPromptPosAction);
-    
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_HOME,
-                                                       java.awt.Event.SHIFT_MASK), 
+                                                       java.awt.Event.SHIFT_MASK),
                                 selectToPromptPosAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_END, 0), 
+                                gotoEndAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_END,
+                                                       java.awt.Event.SHIFT_MASK),
+                                selectToEndAction);
 
     // Up and down need to be bound both for keypad and not
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0), 

@@ -99,6 +99,9 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
 public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   JUnitModelCallback {
   
+  static final String DOCUMENT_OUT_OF_SYNC_MSG =
+    "Current document is out of sync with the Interactions Pane and should be recompiled!\n";
+  
   // ----- FIELDS -----
 
   /**
@@ -536,12 +539,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public OpenDefinitionsDocument openFiles(FileOpenSelector com)
     throws IOException, OperationCanceledException, AlreadyOpenException
   {
-
     final File[] files = com.getFiles();
     OpenDefinitionsDocument retDoc = null;
     
-    if (files == null)
+    if (files == null) {
       throw new IOException("No Files returned from FileSelector");
+    }
 
     AlreadyOpenException storedAOE = null;
     
@@ -551,8 +554,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       }
         
       try {
-      //always return last opened Doc
-      retDoc = _openFile(files[i].getAbsoluteFile());
+        //always return last opened Doc
+        retDoc = _openFile(files[i].getAbsoluteFile());
       }
       catch (AlreadyOpenException aoe) {
         retDoc = aoe.getOpenDocument();
@@ -561,20 +564,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           storedAOE = aoe;
         }
       }
-      
-      // Make sure this is on the classpath
-      try {
-        File classpath = retDoc.getSourceRoot();
-        _interactionsModel.addToClassPath(classpath.getAbsolutePath());
-      }
-      catch (InvalidPackageException e) {
-        // Invalid package-- don't add it to classpath
-      }
-      
     }
-    
-    if (storedAOE != null) throw storedAOE;
-    
+
+    if (storedAOE != null) {
+      throw storedAOE;
+    }
+
     if (retDoc != null) {
       return retDoc;
     }
@@ -1733,8 +1728,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       try {
         // First, get the class name to use.  This relies on Java's convention of
         // one top-level class per file.
-        DefinitionsDocument doc = getDocument();
-        String className = doc.getQualifiedClassName();
+        String className = _doc.getQualifiedClassName();
         /*  Do not compile in any case.
         // Prompt to save and compile if any document is modified.
         if (hasModifiedDocuments()) {
@@ -1750,7 +1744,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         if (!checkIfClassFileInSync()) {
           startCompile();
         }
-        */
+
         // Make sure that the compiler is done before continuing.
         synchronized(_compilerLock) {
           // If the compile had errors, abort the run.
@@ -1758,6 +1752,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             return;
           }
         }
+        */
         // Then clear the current interaction and replace it with a "java X" line.
         InteractionsDocument iDoc = _interactionsModel.getDocument();
 //        if (iDoc.inProgress()) {
@@ -1779,7 +1774,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 //        }
         synchronized (_interpreterControl) {
           iDoc.clearCurrentInput();
-        
+          if (!checkIfClassFileInSync()) {
+            iDoc.insertBeforeLastPrompt(DOCUMENT_OUT_OF_SYNC_MSG, InteractionsDocument.ERROR_STYLE);
+          }
           iDoc.insertText(iDoc.getDocLength(), "java " + className, null);
         
           // Notify listeners that the file is about to be run.
@@ -2602,37 +2599,38 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @return openened document
    */
   private OpenDefinitionsDocument _openFile(File file)
-    throws IOException, AlreadyOpenException {
-
-      DefinitionsDocument tempDoc = (DefinitionsDocument)
-        _editorKit.createNewDocument();
-
+    throws IOException, AlreadyOpenException
+  {
     try {
       OpenDefinitionsDocument openDoc = _getOpenDocument(file);
       if (openDoc != null) {
         throw new AlreadyOpenException(openDoc);
       }
+      DefinitionsDocument tempDoc = (DefinitionsDocument) _editorKit.createNewDocument();
       
       FileReader reader = new FileReader(file);
       _editorKit.read(reader, tempDoc, 0);
       reader.close(); // win32 needs readers closed explicitly!
-      
+
       tempDoc.setFile(file);
       tempDoc.resetModification();
-      
       tempDoc.setCurrentLocation(0);
-      
-      final OpenDefinitionsDocument doc =
-        new DefinitionsDocumentHandler(tempDoc);
+
+      final OpenDefinitionsDocument doc = new DefinitionsDocumentHandler(tempDoc);
       _definitionsDocs.addElement(doc);
       //doc.checkIfClassFileInSync();
-      
-      _notifier.notifyListeners(new EventNotifier.Notifier() {
-          public void notifyListener(GlobalModelListener l) {
-            l.fileOpened(doc);
-          }
-        });
-      
+
+      // Make sure this is on the classpath
+      try {
+        File classpath = doc.getSourceRoot();
+        _interactionsModel.addToClassPath(classpath.getAbsolutePath());
+      }
+      catch (InvalidPackageException e) {
+        // Invalid package-- don't add it to classpath
+      }
+
+      _notifier.fileOpened(doc);
+
       return doc;
     }
     catch (BadLocationException docFailed) {

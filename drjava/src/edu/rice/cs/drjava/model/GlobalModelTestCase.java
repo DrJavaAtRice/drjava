@@ -379,7 +379,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   /**
    * Asserts that the given string exists in the Interactions Document.
    */
-  protected void assertInteractionsContains(String text) throws DocumentAdapterException{
+  protected void assertInteractionsContains(String text) throws DocumentAdapterException {
     _assertInteractionContainsHelper(text, true);
   }
   

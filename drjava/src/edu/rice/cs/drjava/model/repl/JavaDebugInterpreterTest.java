@@ -364,7 +364,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
    * Tests that the user can access static fields of outer classes
    * in the debug interpreter.
    */
-  public void testAccessStaticFieldsAndMethodsOfOuterClass()
+  public void testAccessStaticFieldsAndMethodsOfOuterClasses()
     throws DebugException, BadLocationException, DocumentAdapterException, IOException, InterruptedException {
     File dir = new File(_tempDir, "monkey");
     dir.mkdir();

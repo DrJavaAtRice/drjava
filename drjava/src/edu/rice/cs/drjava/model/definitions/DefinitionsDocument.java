@@ -431,8 +431,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   
   //long maxHelpDelay = 0;
   //String maxKey = "none";
-  
-  
+
+
   /**
    * Clears the helper method cache.
    * Should be called every time the document is modified.
@@ -442,7 +442,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     _helperCacheHistory.clear();
     _cacheInUse = false;
   }
-  
+
   /**
    * Gets the package and class name of this OpenDefinitionsDocument
    * @return the qualified class name
@@ -455,9 +455,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * Gets fully qualified class name of the top level class enclosing
    * the given position.
    */
-  public String getQualifiedClassName(int pos)
-    throws ClassNameNotFoundException
-  {
+  public String getQualifiedClassName(int pos) throws ClassNameNotFoundException {
     return _getPackageQualifier() + getEnclosingTopLevelClassName(pos);
   }
   
@@ -2336,7 +2334,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
 
       // OK, we must have found a package statement.
       // Now let's find the semicolon. Again, the semicolon must be free.
-      int afterPackage = firstNormalLocation + "package".length();
+      int afterPackage = firstNormalLocation + strlen;
 
       int semicolonLocation = afterPackage;
       do {

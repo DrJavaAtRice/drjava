@@ -69,6 +69,14 @@ import edu.rice.cs.drjava.CodeStatus;
 public final class GlobalModelOtherTest extends GlobalModelTestCase
   implements OptionConstants
 {
+  private static final String FOO_CLASS =
+    "package bar;\n" +
+    "public class Foo {\n" +
+    "  public static void main(String[] args) {\n" +
+    "    System.out.println(\"Foo\");\n" +
+    "  }\n" +
+    "}\n";
+
   /**
    * Constructor.
    * @param  String name
@@ -77,14 +85,6 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     super(name);
   }
 
-  /**
-   * Creates a test suite for JUnit to run.
-   * @return a test suite based on the methods in this class
-   */
-  public static Test suite() {
-    return new TestSuite(GlobalModelOtherTest.class);
-  }
-  
   /**
    * Tests that the undoableEditHappened event is fired if the undo manager
    * is in use.
@@ -790,5 +790,17 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     _model.changeInputListener(listener1, listener2);
     assertEquals("Second input listener should return correct input", "input2", _model.getConsoleInput());
   }
-   
+
+  public void testRunMainMethod() throws Exception {
+    File dir = new File(_tempDir, "bar");
+    dir.mkdir();
+    File file = new File(dir, "Foo.java");
+    OpenDefinitionsDocument doc = doCompile(FOO_CLASS, file);
+    doc.runMain();
+    assertInteractionsContains("Foo");
+    DefinitionsDocument defDoc = doc.getDocument();
+    defDoc.insertString(defDoc.getLength(), " ", null);
+    doc.runMain();
+    assertInteractionsContains(DefaultGlobalModel.DOCUMENT_OUT_OF_SYNC_MSG);
+  }
 }

@@ -77,7 +77,6 @@ public class SimpleInteractionsWindow extends JFrame {
     
     _pane.setFont(Font.decode("monospaced"));
 
-
     _model.addInteractionsListener(new InteractionsListener() {
       public void interactionStarted() {
         _pane.setEditable(false);

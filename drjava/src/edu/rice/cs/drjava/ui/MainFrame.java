@@ -455,14 +455,17 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** Runs JUnit on the document in the definitions pane. */
-  private Action _junitAction = new AbstractAction("Test Using JUnit") {
+  private Action _junitAction = new AbstractAction("Test Current Document") {
     public void actionPerformed(ActionEvent ae) {
       _junit();
       //_setDividerLocation();  is this necessary?
     }
   };
 
-  private Action _junitAllAction = new AbstractAction("Test All Open JUnit TestCases") {
+  /**
+   * Runs JUnit over all open JUnit tests.
+   */
+  private Action _junitAllAction = new AbstractAction("Test All Documents") {
     public void actionPerformed(ActionEvent e) {
       new Thread("Running JUnit Tests") {
         public void run() {
@@ -529,9 +532,14 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Action that copies whatever is currently in the interactions pane
    * at the prompt to the definitions pane.
    */
-  private Action _copyInteractionToDefinitionsAction = new AbstractAction("Lift Current Interaction to Definitions") {
+  private Action _copyInteractionToDefinitionsAction =
+    new AbstractAction("Lift Current Interaction to Definitions")
+  {
     public void actionPerformed(ActionEvent e) {
-      _putTextIntoDefinitions(_interactionsController.getDocument().getCurrentInput() + "\n");
+      String text = _interactionsController.getDocument().getCurrentInput();
+      if (!text.equals("")) {
+        _putTextIntoDefinitions(text + "\n");
+      }
     }
   };
 
@@ -624,8 +632,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Action for commenting out a block of text using wing comments.
    */
-  private Action _commentLinesAction = new AbstractAction("Comment Line(s)")
-  {
+  private Action _commentLinesAction = new AbstractAction("Comment Line(s)") {
     public void actionPerformed(ActionEvent ae) {
       // Delegate everything to the DefinitionsDocument.
       OpenDefinitionsDocument openDoc = _model.getActiveDocument();
@@ -641,8 +648,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Action for un-commenting a block of commented text.
    */
-  private Action _uncommentLinesAction = new AbstractAction("Uncomment Line(s)")
-  {
+  private Action _uncommentLinesAction = new AbstractAction("Uncomment Line(s)") {
     public void actionPerformed(ActionEvent ae) {
       // Delegate everything to the DefinitionsDocument.
       OpenDefinitionsDocument openDoc = _model.getActiveDocument();
@@ -673,19 +679,15 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** Resets the Interactions pane. */
-  private Action _resetInteractionsAction =
-    new AbstractAction("Reset Interactions")
-  {
+  private Action _resetInteractionsAction = new AbstractAction("Reset Interactions") {
     public void actionPerformed(ActionEvent ae) {
       if (!DrJava.getConfig().getSetting(INTERACTIONS_RESET_PROMPT).booleanValue()) {
         _doResetInteractions();
         return;
       }
+
       String title = "Confirm Reset Interactions";
-      
-      String message = "Are you sure you want to reset the " +
-        "Interactions Pane?";
-      
+      String message = "Are you sure you want to reset the Interactions Pane?";
       ConfirmCheckBoxDialog dialog =
         new ConfirmCheckBoxDialog(MainFrame.this, title, message);
       int rc = dialog.show();
@@ -754,36 +756,28 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** Switches to next document. */
-  private Action _switchToNextAction =
-    new AbstractAction("Next Document")
-  {
+  private Action _switchToNextAction = new AbstractAction("Next Document") {
     public void actionPerformed(ActionEvent ae) {
       _model.setNextActiveDocument();
     }
   };
 
   /** Switches to previous document. */
-  private Action _switchToPrevAction =
-    new AbstractAction("Previous Document")
-  {
+  private Action _switchToPrevAction = new AbstractAction("Previous Document") {
     public void actionPerformed(ActionEvent ae) {
       _model.setPreviousActiveDocument();
     }
   };
   
   /** Switches focus to next pane. */
-  private Action _switchToNextPaneAction = 
-    new AbstractAction("Next Pane")
-  {
+  private Action _switchToNextPaneAction =  new AbstractAction("Next Pane") {
     public void actionPerformed(ActionEvent ae) {
       _switchPaneFocus(true);
     }
   };
   
   /** Switches focus to previous pane. */
-  private Action _switchToPreviousPaneAction = 
-    new AbstractAction("Previous Pane")
-  {
+  private Action _switchToPreviousPaneAction =  new AbstractAction("Previous Pane") {
     public void actionPerformed(ActionEvent ae) {
       _switchPaneFocus(false);
     }
@@ -806,9 +800,9 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _switchPaneFocus(boolean next) {
     if (next) {
-      if (_currentDefPane.hasFocus()) {
+//      if (_currentDefPane.hasFocus()) {
         _switchToPane(_interactionsPane);
-      }     
+//      }     
 //      else if (_interactionsPane.hasFocus()) {
 //        _switchToPane(_consolePane);
 //      }
@@ -817,9 +811,9 @@ public class MainFrame extends JFrame implements OptionConstants {
 //      }
     }
     else {
-      if (_interactionsPane.hasFocus()) {
+//      if (_interactionsPane.hasFocus()) {
         _switchToPane(_currentDefPane);
-      }
+//      }
 //      else if (_currentDefPane.hasFocus()) {
 //        _switchToPane(_consolePane);
 //      }
@@ -830,31 +824,26 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   /** Calls the ConfigFrame to edit preferences */
-  private Action _editPreferencesAction =
-    new AbstractAction("Preferences...")
-  {
+  private Action _editPreferencesAction = new AbstractAction("Preferences...") {
     public void actionPerformed(ActionEvent ae) {
       // Create frame if we haven't yet
       if (_configFrame == null) {
         _configFrame = new ConfigFrame(MainFrame.this);
       }
       _configFrame.show();
+      _configFrame.toFront();
     }
   };
   
   /** Enables the debugger */
-  private Action _toggleDebuggerAction =
-    new AbstractAction("Debug Mode")
-  {
+  private Action _toggleDebuggerAction = new AbstractAction("Debug Mode") {
     public void actionPerformed(ActionEvent ae) {
       debuggerToggle();
     }
   };
 
   /** Resumes debugging */
-  private Action _resumeDebugAction =
-    new AbstractAction("Resume Debugger")
-  {
+  private Action _resumeDebugAction = new AbstractAction("Resume Debugger") {
     public void actionPerformed(ActionEvent ae) {
       try {
         debuggerResume();
@@ -866,27 +855,21 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** Steps into the next method call */
-  private Action _stepIntoDebugAction =
-    new AbstractAction("Step Into")
-  {
+  private Action _stepIntoDebugAction = new AbstractAction("Step Into") {
     public void actionPerformed(ActionEvent ae) {
       debuggerStep(Debugger.STEP_INTO);
     }
   };
 
   /** Runs the next line, without stepping into methods */
-  private Action _stepOverDebugAction =
-    new AbstractAction("Step Over")
-  {
+  private Action _stepOverDebugAction = new AbstractAction("Step Over") {
     public void actionPerformed(ActionEvent ae) {
       debuggerStep(Debugger.STEP_OVER);
     }
   };
 
   /** Steps out of the next method call */
-  private Action _stepOutDebugAction =
-    new AbstractAction("Step Out")
-  {
+  private Action _stepOutDebugAction = new AbstractAction("Step Out") {
     public void actionPerformed(ActionEvent ae) {
       debuggerStep(Debugger.STEP_OUT);
     }
@@ -920,8 +903,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   /** Cuts from the caret to the end of the current line to the clipboard. */
-  protected Action _cutLineAction = new AbstractAction("Cut Line")
-  {
+  protected Action _cutLineAction = new AbstractAction("Cut Line") {
     public void actionPerformed(ActionEvent ae) {
       ActionMap _actionMap = _currentDefPane.getActionMap();
       int oldCol = _model.getActiveDocument().getDocument().getCurrentCol();
@@ -941,8 +923,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   /** Deletes text from the caret to the end of the current line. */
-  protected Action _clearLineAction = new AbstractAction("Clear Line")
-  {
+  protected Action _clearLineAction = new AbstractAction("Clear Line") {
     public void actionPerformed(ActionEvent ae) {
       ActionMap _actionMap = _currentDefPane.getActionMap();
       int oldCol = _model.getActiveDocument().getDocument().getCurrentCol();
@@ -956,7 +937,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * non-whitespace character on the line (if right of it), otherwise
    * moves to the first character on the line.
    *
-  private Action _homeAction = new AbstractAction() {
+  private Action _homeAction = new AbstractAction("Home") {
     public void actionPerformed(ActionEvent ae) {
       try {
         DefinitionsDocument doc = _model.getActiveDocument().getDocument();
@@ -978,9 +959,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };*/
   
-  /** Interprets the commands in a file in the interactions window */
-  private Action _loadHistoryAction = new AbstractAction("Load Interactions History...")
-  {
+  /**
+   * Interprets the commands in a file in the interactions window
+   */
+  private Action _loadHistoryAction = new AbstractAction("Load Interactions History...") {
     public void actionPerformed(ActionEvent ae) {
       // Show interactions tab
       _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
@@ -1005,8 +987,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** Save the commands in the interactions window's history to a file */
-  private Action _saveHistoryAction = new AbstractAction("Save Interactions History...")
-  {
+  private Action _saveHistoryAction = new AbstractAction("Save Interactions History...") {
     public void actionPerformed(ActionEvent ae) {
       String[] options = {"Yes","No","Cancel"};
       int resp = JOptionPane.showOptionDialog(MainFrame.this,
@@ -1056,7 +1037,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       catch (IOException ioe) {
         _showIOError(new IOException("An error occured writing the history to a file"));
       }
-      
+
       _interactionsPane.requestFocus();
     }
   };
@@ -1098,18 +1079,18 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
-  
-  
-  
-  
-  
+
+
+
+
+
   /* ----------------------- Constructor is here! --------------------------- */
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
   /** Creates the main window, and shows it. */
   public MainFrame() {
     // Platform-specific UI setup.
@@ -1579,11 +1560,12 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private void _open() {
-    open (_openSelector);
+    open(_openSelector);
   }
-  
+
   void open(FileOpenSelector openSelector) {
     try {
+      hourglassOn();
       _model.openFiles(openSelector);
     }
     catch (AlreadyOpenException aoe) {
@@ -1636,6 +1618,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     catch (IOException ioe) {
       _showIOError(ioe);
+    }
+    finally {
+      hourglassOff();
     }
   }
 
@@ -1828,31 +1813,25 @@ public class MainFrame extends JFrame implements OptionConstants {
    * the interactions pane.
    */
   private void _runMain() {
-    final SwingWorker worker = new SwingWorker() {
-      public Object construct() {
-        try {
-          _model.getActiveDocument().runMain();
-        }
-        catch (ClassNameNotFoundException e) {
-          // Display a warning message if a class name can't be found.
-          JOptionPane.showMessageDialog
-            (MainFrame.this,
-             "DrJava could not find the top level class name in the\n" +
-             "current document.  Please make sure that a class is\n" +
-             "properly defined before trying to run its main method.",
-             "No Main Method",
-             JOptionPane.ERROR_MESSAGE);
-        }
-        catch (FileMovedException fme) {
-          _showFileMovedError(fme);
-        }
-        catch (IOException ioe) {
-          _showIOError(ioe);
-        }
-        return null;
-      }
-    };
-    worker.start();
+    try {
+      _model.getActiveDocument().runMain();
+    }
+    catch (ClassNameNotFoundException e) {
+      // Display a warning message if a class name can't be found.
+      String msg =
+        "DrJava could not find the top level class name in the\n" +
+        "current document.  Please make sure that a class is\n" +
+        "properly defined before trying to run its main method.";
+
+      JOptionPane.showMessageDialog(MainFrame.this, msg, "No Main Method",
+                                    JOptionPane.ERROR_MESSAGE);
+    }
+    catch (FileMovedException fme) {
+      _showFileMovedError(fme);
+    }
+    catch (IOException ioe) {
+      _showIOError(ioe);
+    }
   }
 
   private void _junit() {
@@ -2523,13 +2502,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Compile, Compile all, Run Main Method
     _addMenuItem(toolsMenu, _compileAllAction, KEY_COMPILE_ALL);
     _addMenuItem(toolsMenu, _compileAction, KEY_COMPILE);
-    if (CodeStatus.DEVELOPMENT) {
-      _addMenuItem(toolsMenu, _runAction, KEY_RUN);
-    }
     _addMenuItem(toolsMenu, _junitAllAction, KEY_TEST_ALL);
     _addMenuItem(toolsMenu, _junitAction, KEY_TEST);
     _addMenuItem(toolsMenu, _javadocAllAction, KEY_JAVADOC_ALL);
     _addMenuItem(toolsMenu, _javadocCurrentAction, KEY_JAVADOC_CURRENT);
+    _addMenuItem(toolsMenu, _runAction, KEY_RUN);
     toolsMenu.addSeparator();
     
     _addMenuItem(toolsMenu, _loadHistoryAction, KEY_LOAD_HISTORY);
@@ -3017,11 +2994,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     _docPanePopupMenu.add(_printPreviewAction);
     _docPanePopupMenu.addSeparator();
     _docPanePopupMenu.add(_compileAction);
-    if (CodeStatus.DEVELOPMENT) {
-      _docPanePopupMenu.add(_runAction);
-    }
     _docPanePopupMenu.add(_junitAction);
     _docPanePopupMenu.add(_javadocCurrentAction);
+    _docPanePopupMenu.add(_runAction);
     _docList.addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
         _docList.setSelectedIndex(_docList.locationToIndex(e.getPoint()));
@@ -4567,10 +4542,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     // For now, _switchToPreviousPaneAction only switches the focus from the interactions pane to the definitions pane.
     // Change this when the behavior is updated. Same for _switchToNextPaneAction.
-    KeyBindingManager.Singleton.put(KEY_PREVIOUS_PANE,
-                                    _switchToPreviousPaneAction, null, "Switch Focus To Definitions Pane");    
-    KeyBindingManager.Singleton.put(KEY_NEXT_PANE,
-                                    _switchToNextPaneAction, null, "Switch Focus To Interactions Pane");
+    KeyBindingManager.Singleton.put(KEY_PREVIOUS_PANE, _switchToPreviousPaneAction,
+                                    null, "Switch Focus To Definitions Pane");
+    KeyBindingManager.Singleton.put(KEY_NEXT_PANE, _switchToNextPaneAction,
+                                    null, "Switch Focus To Interactions Pane");
   }
   
   /**
