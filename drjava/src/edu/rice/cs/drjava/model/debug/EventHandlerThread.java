@@ -236,6 +236,8 @@ public class EventHandlerThread extends Thread {
                                e.location().lineNumber() + "]");
         _debugger.currThreadSuspended();
         _debugger.scrollToSource(e);
+        // this just moves the cursor to the interactions pane in MainFrame
+        _debugger.finishedStep();
       }
       // Delete the step request so it doesn't happen again
       _debugger.getEventRequestManager().deleteEventRequest(e.request());

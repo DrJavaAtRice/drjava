@@ -3317,6 +3317,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void currThreadSet(DebugThreadData dtd) {
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          _interactionsPane.requestFocus();
+        }
+      });
     }
     
     public void threadLocationUpdated(final OpenDefinitionsDocument doc,
@@ -3399,6 +3404,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void breakpointReached(Breakpoint bp) {
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          _interactionsPane.requestFocus();
+        }
+      });
     }
     
     public void breakpointRemoved(final Breakpoint bp) {
@@ -3428,6 +3438,17 @@ public class MainFrame extends JFrame implements OptionConstants {
           _debugStepTimer.start();
         }
       }
+    }
+    
+    /**
+     * Called when a step is finished.
+     */
+    public void stepFinished() {
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          _interactionsPane.requestFocus();
+        }
+      });
     }
     
     public void currThreadSuspended() {

@@ -76,18 +76,19 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     /*6*/ "      int twoDeepFoo = 13;\n" +
     /*7*/ "      class MonkeyThreeDeep {\n" +
     /*8*/ "        public int threeDeepFoo = 18;\n" +
-    /*9*/ "          public void threeDeepMethod() {\n" +
-    /*10*/"            int blah;\n" +
-    /*11*/"            System.out.println(MonkeyStuff.MonkeyInner.MonkeyTwoDeep.MonkeyThreeDeep.this.threeDeepFoo);\n" +
-    /*12*/"          }\n" +
-    /*13*/"        }\n" +
-    /*14*/"      }\n" +
+    /*9*/ "        public void threeDeepMethod() {\n" +
+    /*10*/"          int blah;\n" +
+    /*11*/"          System.out.println(MonkeyStuff.MonkeyInner.MonkeyTwoDeep.MonkeyThreeDeep.this.threeDeepFoo);\n" +
+    /*12*/"        }\n" +
+    /*13*/"      }\n" +
+    /*14*/"      int getNegativeTwo() { return -2; }\n" + 
     /*15*/"    }\n" +
-    /*16*/"\n" + 
-    /*17*/"  public static void main(String[] args) {\n" +
-    /*18*/"    new MonkeyStuff().new MonkeyInner().new MonkeyTwoDeep().new MonkeyThreeDeep().threeDeepMethod();\n" +
-    /*19*/"  }\n" +
-    /*20*/"}";
+    /*16*/"  }\n" +
+    /*17*/"\n" + 
+    /*18*/"  public static void main(String[] args) {\n" +
+    /*19*/"    new MonkeyStuff().new MonkeyInner().new MonkeyTwoDeep().new MonkeyThreeDeep().threeDeepMethod();\n" +
+    /*20*/"  }\n" +
+    /*21*/"}";
 
   protected static final String MONKEY_STATIC_STUFF =
     /*1*/ "class MonkeyStaticStuff {\n" +
@@ -104,9 +105,10 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     /*12*/"          System.out.println(twoDeepFoo);\n" +
     /*13*/"        }\n" +
     /*14*/"      }\n" +
-    /*15*/"    }\n" +
-    /*16*/"  }\n" +
-    /*17*/"}";
+    /*15*/"      static int getNegativeTwo() { return -2; }\n" +    
+    /*16*/"    }\n" +
+    /*17*/"  }\n" +
+    /*18*/"}";
 
 
   /**
@@ -168,7 +170,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     DisplayVisitor dve = new DisplayVisitor(baos);
     expected.acceptVisitor(dve);
-    String s1 = baos.toString();    
+    String s1 = baos.toString(); 
     baos.reset();
     actual.acceptVisitor(dve);
     String s2 = baos.toString();
@@ -216,7 +218,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
    * Tests that the user can access fields of outer classes
    * in the debug interpreter.
    */
-  public void testAccessFieldsOfOuterClasses() 
+  public void testAccessFieldsAndMethodsOfOuterClasses() 
     throws DebugException, BadLocationException, DocumentAdapterException, IOException, InterruptedException {
     File file = new File(_tempDir, "MonkeyStuff.java");
     OpenDefinitionsDocument doc = doCompile(MONKEY_STUFF, file);
@@ -280,6 +282,19 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     assertEquals("declaring foo should not have changed MonkeyStuff.this.foo",
                  "123",
                  interpret("MonkeyStuff.this.foo"));
+    
+    assertEquals("should be able to call method of outer class",
+                 "-2",
+                 interpret("getNegativeTwo()"));
+    assertEquals("should be able to call method of outer class",
+                 "-2",
+                 interpret("MonkeyTwoDeep.this.getNegativeTwo()"));
+    assertEquals("should be able to call method of outer class",
+                 "-2",
+                 interpret("MonkeyInner.MonkeyTwoDeep.this.getNegativeTwo()"));
+    assertEquals("should be able to call method of outer class",
+                 "-2",
+                 interpret("MonkeyStuff.MonkeyInner.MonkeyTwoDeep.this.getNegativeTwo()"));
 
     // Close doc and make sure breakpoints are removed    
     _model.closeFile(doc);
@@ -302,7 +317,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
    * Tests that the user can access static fields of outer classes
    * in the debug interpreter.
    */
-  public void testAccessStaticFieldsOfOuterClass()
+  public void testAccessStaticFieldsAndMethodsOfOuterClass()
     throws DebugException, BadLocationException, DocumentAdapterException, IOException, InterruptedException {
     File file = new File(_tempDir, "MonkeyStaticStuff.java");
     OpenDefinitionsDocument doc = doCompile(MONKEY_STATIC_STUFF, file);
@@ -331,7 +346,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
                  interpret("twoDeepFoo"));
     assertEquals("should find field of static outer class",
                  "13",
-                 interpret("MonkeyTwoDeep.twoDeepFoo"));
+                 interpret("MonkeyInner.MonkeyTwoDeep.twoDeepFoo"));
     
     interpret("twoDeepFoo = 100;");
     assertEquals("should have assigned field of static outer class",
@@ -374,6 +389,19 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     assertEquals("Should have shadowed the value of a static field of a non-static outer class",
                  "987",
                  interpret("MonkeyStaticStuff.foo"));
+    
+    assertEquals("should be able to call method of outer class",
+                 "-2",
+                 interpret("getNegativeTwo()"));
+    assertEquals("should be able to call method of outer class",
+                 "-2",
+                 interpret("MonkeyTwoDeep.getNegativeTwo()"));
+    assertEquals("should be able to call method of outer class",
+                 "-2",
+                 interpret("MonkeyInner.MonkeyTwoDeep.getNegativeTwo()"));
+    assertEquals("should be able to call method of outer class",
+                 "-2",
+                 interpret("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.getNegativeTwo()"));
 
     // Shutdown the debugger
     if (printMessages) {

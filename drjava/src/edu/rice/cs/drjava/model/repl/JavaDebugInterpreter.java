@@ -47,6 +47,7 @@ import koala.dynamicjava.tree.visitor.*;
 
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.StringTokenizer;
 
 import edu.rice.cs.util.UnexpectedException;
@@ -150,6 +151,36 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
   }
   
   /**
+   * Given a method, looks at enclosing classes until it finds
+   * one that contains the field. It returns the ObjectMethodCall
+   * that represents the method.
+   * @param method the method
+   * @param context the context
+   * @return the ObjectMethodCall that represents the method or null
+   * if it cannot find the method in any enclosing class.
+   */
+  protected ObjectMethodCall _getObjectMethodCallForFunction(MethodCall method, Context context) {
+    TypeChecker tc = makeTypeChecker(context);
+    int numDollars = _getNumDollars(_thisClassName);
+    String methodName = method.getMethodName();
+    List args = method.getArguments();
+    Expression expr = null;
+    for (int i = 0; i <= numDollars; i++) {          
+      expr = _buildObjectFieldAccess(i, numDollars);
+      expr = new ObjectMethodCall(expr, methodName, args, null, 0, 0, 0, 0);
+      try {
+        // the type checker will tell us if it's a field
+        tc.visit((ObjectMethodCall)expr);
+        return (ObjectMethodCall)expr;
+      }
+      catch (ExecutionError e2) {
+        // do nothing, try an outer class
+      }
+    }
+    return null;
+  } 
+  
+  /**
    * Given a field in a static context, looks at enclosing classes until it 
    * finds one that contains the field. It returns the StaticFieldAccess
    * that represents the field.
@@ -180,6 +211,41 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       }
     }
     return null;
+  }  
+  
+  /**
+   * Given a method in a static context, looks at enclosing classes until it 
+   * finds one that contains the method. It returns the StaticMethodCall
+   * that represents the method.
+   * @param method the method
+   * @param context the context
+   * @return the StaticMethodCall that represents the method or null
+   * if it cannot find the method in any enclosing class.
+   */  
+  protected StaticMethodCall _getStaticMethodCallForFunction(MethodCall method, Context context) {
+    TypeChecker tc = makeTypeChecker(context);
+    int numDollars = _getNumDollars(_thisClassName);
+    String methodName = method.getMethodName();
+    List args = method.getArguments();
+    StaticMethodCall expr = null;
+    String currClass = _thisClassName;
+    int index = currClass.length();
+    // iterate outward trying to find the method
+    for (int i = 0; i <= numDollars; i++) {
+      currClass = currClass.substring(0, index);
+      ReferenceType rt = new ReferenceType(currClass);
+      expr = new StaticMethodCall(rt, methodName, args);
+      try {
+        // the type checker will tell us if it's a field
+        tc.visit(expr);
+        return expr;
+      }
+      catch (ExecutionError e2) {
+        // try an outer class
+        index = currClass.lastIndexOf("$");       
+      }
+    }
+    return null;
   }
   
   /**
@@ -196,6 +262,12 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     TypeChecker tc = makeTypeChecker(context);
     int index = _indexOfWithinBoundaries(_thisClassName, field);
     if (index != -1) {
+      // field may be of form outerClass$innerClass. 
+      // We want to match the inner most class.
+      int lastDollar = field.lastIndexOf("$");
+      if (lastDollar != -1) {
+        field = field.substring(lastDollar + 1, field.length());
+      }
       LinkedList list = new LinkedList();
       StringTokenizer st = new StringTokenizer(_thisClassName, "$");
       String currString = st.nextToken();
@@ -423,8 +495,12 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
         }
         catch(ExecutionError e) {
           List ids = node.getIdentifiers();
-          IdentifierToken t = (IdentifierToken)ids.get(0);
-          String field = t.image();
+          Iterator iter = ids.iterator();
+          String field = ((IdentifierToken)iter.next()).image();
+          while (iter.hasNext()) {
+            IdentifierToken t = (IdentifierToken)iter.next();
+            field += "$" + t.image();
+          }
           // This error is thrown only if this QualifiedName is not 
           // a local variable or a class
           if (context.isDefined("this")) {
@@ -455,6 +531,45 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
           // Didn't find this field in any outer class. Throw original exception.
           throw e;          
         }
+      }
+      public Object visit(ObjectMethodCall node) {
+//        try {
+          MethodCall method = (MethodCall) super.visit(node);
+          // if (method != null) this object method call is either a method with no
+          // class before it or is a static method call
+          if (method != null) {
+            if (method instanceof StaticMethodCall) {
+              return method;
+            }
+            // now we know that method is a FunctionCall
+            else if (context.isDefined("this")) {
+              ObjectMethodCall omc = _getObjectMethodCallForFunction(method, context);
+              if (omc != null) {
+                return omc;
+              }
+              else {
+                return method;
+              }
+            }
+            // it's a FunctionCall from a static context
+            else {
+              StaticMethodCall smc = _getStaticMethodCallForFunction(method, context);
+              if (smc != null) {
+                return smc;
+              }
+              else {
+                return method;                  
+              }
+            }
+          }
+          else {
+            return null;
+          }
+//        }
+//        catch (ExecutionError e) {
+//          // see if the expression is a static inner class
+//          
+//        }
       }
     };
   }

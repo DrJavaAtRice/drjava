@@ -1061,6 +1061,18 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       _log("Reached a breakpoint without a debugAction property: " + request);
     }
   }
+
+  /**
+   * Called when a step is reached. Just moves the cursor to
+   * the interactions pane in MainFrame.
+   */
+  synchronized void finishedStep() {
+    notifyListeners(new EventNotifier() {
+      public void notifyListener(DebugListener l) {
+        l.stepFinished();
+      }
+    });    
+  }
   
   /**
    * Returns a Vector<Breakpoint> that contains all of the Breakpoint objects that

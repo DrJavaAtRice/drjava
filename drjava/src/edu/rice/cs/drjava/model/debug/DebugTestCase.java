@@ -204,6 +204,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     protected int breakpointReachedCount = 0;
     protected int breakpointRemovedCount = 0;
     protected int stepRequestedCount = 0;
+    protected int stepFinishedCount = 0;
     protected int currThreadSuspendedCount = 0;
     protected int currThreadResumedCount = 0;
     protected int threadStartedCount = 0;
@@ -237,6 +238,11 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     }
     
     public void assertStepRequestedCount(int i) {
+      assertEquals("number of times stepRequested fired", i,
+                   stepRequestedCount);
+    }
+    
+    public void assertStepFinishedCount(int i) {
       assertEquals("number of times stepRequested fired", i,
                    stepRequestedCount);
     }
@@ -297,6 +303,10 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     }
     
     public void stepRequested() {
+      fail("stepRequested fired unexpectedly");
+    }
+    
+    public void stepFinished() {
       fail("stepRequested fired unexpectedly");
     }
     
@@ -423,6 +433,11 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       // Manager's thread: test shouldn't wait
       stepRequestedCount++;
       if (printEvents) System.out.println("stepRequested " + stepRequestedCount);
+    }
+    public void stepFinished() {
+      // Manager's thread: test shouldn't wait
+      stepFinishedCount++;
+      if (printEvents) System.out.println("stepFinished " + stepFinishedCount);
     }
   }
   
