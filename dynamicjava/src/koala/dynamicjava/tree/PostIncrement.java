@@ -68,10 +68,5 @@ public class PostIncrement extends UnaryExpression implements ExpressionStatemen
   public <T> T acceptVisitor(Visitor<T> visitor) {
     return visitor.visit(this);
   }
-    /**
-   * Implementation of toString for use in unit testing
-   */
-  public String toString() {
-    return "("+getClass().getName()+": "+getExpression()+")";
-  }
+ 
 }
