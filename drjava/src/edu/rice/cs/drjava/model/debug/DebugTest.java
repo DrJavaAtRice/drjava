@@ -66,9 +66,7 @@ import edu.rice.cs.drjava.CodeStatus;
  *
  * @version $Id$
  */
-public final class DebugTest extends DebugTestCase
-  implements OptionConstants
-{
+public final class DebugTest extends DebugTestCase implements OptionConstants {
   
   protected static final String DEBUG_CLASS =
     /*  1 */ "class DrJavaDebugClass {\n" +
@@ -329,59 +327,57 @@ public final class DebugTest extends DebugTestCase
   }
 
   /**
+   * Tests that setCurrentThread works for multiple threads
+   * 
    * This test has been commented out because we do not support setting the
    * current thread to be an unsuspended thread right now
-   */
-//  /**
-//   * Tests that setCurrentThread works for multiple threads
-//   */
-//   public synchronized void testMultiThreadedSetCurrentThread() throws Exception {
-//     if (printMessages) System.out.println("----testMultiThreadedSetCurrentThread----");
-//     BreakpointTestListener debugListener = new BreakpointTestListener();
-//     _debugger.addListener(debugListener);
-//
-//     // Start up
-//     OpenDefinitionsDocument doc = _startupDebugger("Suspender.java",
-//                                                    SUSPEND_CLASS);
-//  
-//     int index = SUSPEND_CLASS.indexOf("int a = 1;");
-//     _debugger.toggleBreakpoint(doc,index,5);
-//
-//      // Run the main() method, hitting breakpoints
-//     synchronized(_notifierLock) {
-//       interpretIgnoreResult("java Suspender");
-//       _waitForNotifies(3); // suspended, updated, breakpointReached
-//       _notifierLock.wait();
-//     }
-//     final DebugThreadData thread = new DebugThreadData(_debugger.getCurrentThread());
-//     synchronized(_notifierLock){
-//       /** _debugger.setCurrentThread(...);
-//        * must be executed in another thread because otherwise the notifies
-//        * will be received before the _notifierLock is released
-//        */
-//       new Thread() {
-//         public void run(){
-//           try{
-//             _debugger.resume();
-//             _doSetCurrentThread(thread);
-//           }catch(DebugException excep){
-//             excep.printStackTrace();
-//             fail("_doSetCurrentThread failed in testMultiThreadedSetCurrentThread");
-//           }
-//         }
-//       }.start();
-//       _waitForNotifies(2);  // suspended, updated
-//       _notifierLock.wait();
-//     }
-//     // Ensure thread suspended
-//     debugListener.assertCurrThreadSuspendedCount(2);  //fires
-//
-//     // Shut down
-//     _shutdownWithoutSuspendedInteraction();
-//     _debugger.removeListener(debugListener);
-//   }
-  
-  
+   *
+  public synchronized void testMultiThreadedSetCurrentThread() throws Exception {
+    if (printMessages) System.out.println("----testMultiThreadedSetCurrentThread----");
+    BreakpointTestListener debugListener = new BreakpointTestListener();
+    _debugger.addListener(debugListener);
+    
+    // Start up
+    OpenDefinitionsDocument doc = _startupDebugger("Suspender.java",
+                                                   SUSPEND_CLASS);
+    
+    int index = SUSPEND_CLASS.indexOf("int a = 1;");
+    _debugger.toggleBreakpoint(doc,index,5);
+    
+    // Run the main() method, hitting breakpoints
+    synchronized(_notifierLock) {
+      interpretIgnoreResult("java Suspender");
+      _waitForNotifies(3); // suspended, updated, breakpointReached
+      _notifierLock.wait();
+    }
+    final DebugThreadData thread = new DebugThreadData(_debugger.getCurrentThread());
+    synchronized(_notifierLock) {
+       // _debugger.setCurrentThread(...);
+       // must be executed in another thread because otherwise the notifies
+       // will be received before the _notifierLock is released
+      new Thread() {
+        public void run(){
+          try {
+            _debugger.resume();
+            _doSetCurrentThread(thread);
+          }
+          catch (DebugException excep) {
+            excep.printStackTrace();
+            fail("_doSetCurrentThread failed in testMultiThreadedSetCurrentThread");
+          }
+        }
+      }.start();
+      _waitForNotifies(2);  // suspended, updated
+      _notifierLock.wait();
+    }
+    // Ensure thread suspended
+    debugListener.assertCurrThreadSuspendedCount(2);  //fires
+    
+    // Shut down
+    _shutdownWithoutSuspendedInteraction();
+    _debugger.removeListener(debugListener);
+  }*/
+
   /**
    * Tests that breakpoints behave correctly for multiple threads
    */
@@ -412,7 +408,9 @@ public final class DebugTest extends DebugTestCase
     // Resumes one thread, finishing it and switching to the next break point
     synchronized(_notifierLock) {
       _asyncResume();
-      _waitForNotifies(3);  // currThreadDied, suspended, updated
+      _waitForNotifies(2);  // suspended, updated
+                            // no longer get a currThreadDied since we immediately
+                            // switch to the next thread
       _notifierLock.wait();
     }
     
@@ -425,10 +423,11 @@ public final class DebugTest extends DebugTestCase
     debugListener.assertThreadLocationUpdatedCount(3);  //fires
     debugListener.assertCurrThreadSuspendedCount(3);  //fires
     debugListener.assertCurrThreadResumedCount(1);
-    debugListener.assertCurrThreadDiedCount(1);
     _debugger.removeListener(debugListener);
     
-    if( printMessages ) System.out.println("Testing stepping...");
+    if (printMessages) {
+      System.out.println("Testing stepping...");
+    }
     // Step
     StepTestListener stepTestListener = new StepTestListener();
     _debugger.addListener(stepTestListener);
@@ -450,7 +449,8 @@ public final class DebugTest extends DebugTestCase
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
       _asyncResume();
-      _waitForNotifies(3);  // interactionEnded, currThreadDied, interpreterChanged
+      _waitForNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
+                            // we get a currThreadDied here since it's the last thread
       _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
@@ -527,7 +527,8 @@ public final class DebugTest extends DebugTestCase
     synchronized(_notifierLock) {
       if( printMessages ) System.err.println("-------- Resuming --------");
       _asyncResume();
-      _waitForNotifies(3);  // interactionEnded, currThreadDied, interpreterChanged
+      _waitForNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
+                            // here, we get a currThreadDied since it's the last thread
       _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
@@ -535,7 +536,6 @@ public final class DebugTest extends DebugTestCase
     
     if (printMessages) System.out.println("----After second resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(2);  //fires (no waiting)
-    debugListener.assertCurrThreadDiedCount(1);  //fires
     debugListener.assertBreakpointReachedCount(2);
     debugListener.assertThreadLocationUpdatedCount(2);
     debugListener.assertCurrThreadSuspendedCount(2);
@@ -592,7 +592,8 @@ public final class DebugTest extends DebugTestCase
     synchronized(_notifierLock) {
       if( printMessages ) System.err.println("-------- Resuming --------");
       _asyncResume();
-      _waitForNotifies(3);  // interactionEnded, currThreadDied, interpreterChanged
+      _waitForNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
+                            // here, we get a currThreadDied since it's the last thread
       _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
@@ -600,7 +601,6 @@ public final class DebugTest extends DebugTestCase
     
     if (printMessages) System.out.println("----After second resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(1);  //fires (no waiting)
-    debugListener.assertCurrThreadDiedCount(1);  //fires
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertThreadLocationUpdatedCount(1);
     debugListener.assertCurrThreadSuspendedCount(1);
@@ -635,7 +635,9 @@ public final class DebugTest extends DebugTestCase
       _notifierLock.wait();
     }
     
-    if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
+    if (printMessages) {
+      System.out.println("----After breakpoint:\n" + getInteractionsText());
+    }
       
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(1);  //fires
@@ -717,7 +719,8 @@ public final class DebugTest extends DebugTestCase
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(3);  // interactionEnded, currThreadDied, interpreterChanged
+      _waitForNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
+                            // here, we get a currThreadDied since it's the last thread
       _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
@@ -735,7 +738,9 @@ public final class DebugTest extends DebugTestCase
    * Tests that stepping out of a method behaves correctly.
    */
   public synchronized void testStepOut() throws Exception {
-    if (printMessages)  System.out.println("----testStepOut----");
+    if (printMessages) { 
+      System.out.println("----testStepOut----");
+    }
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
     
@@ -874,7 +879,8 @@ public final class DebugTest extends DebugTestCase
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
       _asyncResume();
-      _waitForNotifies(3);  // interactionEnded, currThreadDied, interpreterChanged
+      _waitForNotifies(3);  // interactionEnded, interpreterChanged
+                            // here, we get a currThreadDied since it's the last thread
       _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
@@ -882,7 +888,6 @@ public final class DebugTest extends DebugTestCase
 
     if (printMessages) System.out.println("----After resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(3);  //fires (no waiting)
-    debugListener.assertCurrThreadDiedCount(1);  //fires
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertThreadLocationUpdatedCount(3);
     debugListener.assertCurrThreadSuspendedCount(3);
@@ -1047,7 +1052,8 @@ public final class DebugTest extends DebugTestCase
     synchronized(_notifierLock) {
       if( printMessages ) System.err.println("-------- resuming --------");
       _asyncResume();
-      _waitForNotifies(3);  // currThreadDied, interactionEnded, interpreterChanged
+      _waitForNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
+                            // here, we get a currThreadDied since it's the last thread
       _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
@@ -1055,7 +1061,6 @@ public final class DebugTest extends DebugTestCase
     
     if (printMessages) System.out.println("----After second resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(3);  //fires (no waiting)
-    debugListener.assertCurrThreadDiedCount(1);  //fires
     debugListener.assertBreakpointReachedCount(2);
     debugListener.assertThreadLocationUpdatedCount(3);
     debugListener.assertCurrThreadSuspendedCount(3);
@@ -1158,7 +1163,8 @@ public final class DebugTest extends DebugTestCase
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
       _asyncResume();
-      _waitForNotifies(3);  // interactionEnded, currThreadDied, interpreterChanged
+      _waitForNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
+                            // here, we get a currThreadDied since it's the last thread
       _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
@@ -1168,7 +1174,6 @@ public final class DebugTest extends DebugTestCase
       System.out.println("----After resume:\n" + getInteractionsText());
     }
     debugListener.assertCurrThreadResumedCount(3);  //fires (no waiting)
-    debugListener.assertCurrThreadDiedCount(1);  //fires
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertThreadLocationUpdatedCount(3);
     debugListener.assertCurrThreadSuspendedCount(3);
@@ -1241,41 +1246,40 @@ public final class DebugTest extends DebugTestCase
     // Step over once
     synchronized(_notifierLock){
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
+      _waitForNotifies(4);  // suspended x 2, updated x 2
       _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
-    debugListener.assertThreadLocationUpdatedCount(3);  // fires
-    debugListener.assertCurrThreadSuspendedCount(3);  // fires
+    debugListener.assertThreadLocationUpdatedCount(4);  // fires
+    debugListener.assertCurrThreadSuspendedCount(4);  // fires
     debugListener.assertBreakpointReachedCount(2);
     debugListener.assertCurrThreadDiedCount(0);
     assertInteractionsContains("x == 5");
     assertEquals("x retains correct value after step", "5", interpret("DrJavaDebugStaticField.x"));
     assertEquals("this has correct value for x after step", "5", interpret("this.x"));
-
+    
     // Step over again
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
+      _waitForNotifies(4);  // (suspended, updated) x2
       _notifierLock.wait();
     }
-    
     if (printMessages) {
       System.out.println("****"+getInteractionsText());
     }
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
-    debugListener.assertThreadLocationUpdatedCount(4);  // fires
+    debugListener.assertThreadLocationUpdatedCount(6);  // fires
     debugListener.assertCurrThreadDiedCount(0);
-    debugListener.assertCurrThreadSuspendedCount(4);  // fires
+    debugListener.assertCurrThreadSuspendedCount(6);  // fires
     debugListener.assertBreakpointReachedCount(2);
     assertEquals("x has correct value after increment", "6", interpret("DrJavaDebugStaticField.x"));
     assertEquals("this has correct value for x after increment", "6", interpret("this.x"));
 
     synchronized(_notifierLock){
       _asyncDoSetCurrentThread(threadB);
-      _waitForNotifies(2);  // updated, suspended
+      _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
     assertEquals("x has correct value in other thread", "6", interpret("DrJavaDebugStaticField.x"));
@@ -1507,7 +1511,7 @@ public final class DebugTest extends DebugTestCase
    */
   public void testStaticWatches() throws Exception {
     if (printMessages) {
-      System.out.println("----teststaticWatches----");
+      System.out.println("----testStaticWatches----");
     }
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);

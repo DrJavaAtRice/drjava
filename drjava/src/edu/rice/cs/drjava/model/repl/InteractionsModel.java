@@ -583,78 +583,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
     mainCall.append("});");
     return mainCall.toString();
-    /*
-    StreamTokenizer st = new StreamTokenizer(new StringReader(s));
-    st.ordinaryChar('\'');  // clear the quote status of '
-    st.ordinaryChar('\\');
-    st.ordinaryChars('0','9');
-    st.ordinaryChars('-', '.'); // clear the "numeric" status from these
-    
-    // make everything a word char except " (34)
-    st.wordChars(33, 33); // '!'
-    st.wordChars(35, '\u00ff');
-
-    try {
-      st.nextToken();             //don't want to get back java
-      st.nextToken();             //move to second token
-      String className = st.sval;
-      StringBuffer mainCall = new StringBuffer(className);
-      mainCall.append(".main(new String[]{");
-      
-      // Add each argument
-      boolean seenArg = false;
-      while (st.nextToken() != StreamTokenizer.TT_EOF) {
-        if ((st.ttype == StreamTokenizer.TT_WORD) ||
-            (st.ttype == '"'))
-        {
-          if (seenArg) {
-            mainCall.append(",");
-          }
-          else {
-            seenArg = true;
-          }
-          mainCall.append("\"");
-          mainCall.append(_escapeQuotesAndBackslashes(st.sval));
-          mainCall.append("\"");
-        }
-        else {
-          throw new IllegalArgumentException("Unknown token type: " + st.ttype);
-        }
-      }
-      mainCall.append("});");
-      return mainCall.toString();
-    }
-    catch (IOException ioe) {
-      // Can't happen with a StringReader.
-      throw new UnexpectedException(ioe);
-    }
-    
-    */
-    
-    
-    /*
-    LinkedList ll = new LinkedList();
-    if (s.endsWith(";"))
-      s = _deleteSemiColon(s);
-    StringTokenizer st = new StringTokenizer(s);
-    st.nextToken();             //don't want to get back java
-    String argument = st.nextToken();           // must have a second Token
-    while (st.hasMoreTokens())
-      ll.add(st.nextToken());
-    argument = argument + ".main(new String[]{";
-    ListIterator li = ll.listIterator(0);
-    while (li.hasNext()) {
-      String currArg = (String)li.next();
-      currArg = _escapeQuotesAndBackslashes(currArg);
-      
-      argument = argument + "\"" + currArg + "\"";
-      if (li.hasNext())
-        argument = argument + ",";
-    }
-    argument = argument + "});";
-    return  argument;
-    */
   }
+
   /**
    * Deletes the last character of a string.  Assumes semicolon at the
    * end, but does not check.  Helper for _testClassCall(String).
@@ -663,48 +593,5 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    */
   protected static String _deleteSemiColon(String s) {
     return  s.substring(0, s.length() - 1);
-  }
-  
-  /**
-   * Inserts backslashes before any occurrences of a backslash or
-   * quote in the given string.  Also converts any special characters
-   * appropriately.
-   */
-  protected static String _escapeQuotesAndBackslashes(String s) {
-    StringBuffer buf = new StringBuffer(s);
-    int lastIndex = 0;
-    
-    // Walk backwards, looking for quotes or backslashes.
-    //  If we see any, insert an extra backslash into the buffer at
-    //  the same index.  (By walking backwards, the index into the buffer
-    //  will remain correct as we change the buffer.)
-    for (int i = s.length()-1; i >= 0; i--) {
-      char c = s.charAt(i);
-      if ((c == '\\') || (c == '"')) {
-        buf.insert(i, '\\');
-      }
-      // Replace any special characters with escaped versions
-      else if (c == '\n') {
-        buf.deleteCharAt(i);
-        buf.insert(i, "\\n");
-      }
-      else if (c == '\t') {
-        buf.deleteCharAt(i);
-        buf.insert(i, "\\t");
-      }
-      else if (c == '\r') {
-        buf.deleteCharAt(i);
-        buf.insert(i, "\\r");
-      }
-      else if (c == '\b') {
-        buf.deleteCharAt(i);
-        buf.insert(i, "\\b");
-      }
-      else if (c == '\f') {
-        buf.deleteCharAt(i);
-        buf.insert(i, "\\f");
-      }
-    }
-    return buf.toString();
   }
 }

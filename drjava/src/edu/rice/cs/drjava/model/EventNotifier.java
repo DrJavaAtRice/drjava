@@ -683,7 +683,9 @@ public class EventNotifier implements GlobalModelListener {
    * Called to demand that all files be saved before running the main method of
    * a document. It is up to the caller of this method to check if the documents
    * have been saved, using IGetDocuments.hasModifiedDocuments().
-   */
+   *
+   * This is never called currently, but it is commented out in case it is
+   * needed later.
   public void saveBeforeRun() {
     _lock.startRead();
     try {
@@ -695,13 +697,15 @@ public class EventNotifier implements GlobalModelListener {
     finally {
       _lock.endRead();
     }
-  }
+  }*/
   
   /**
    * Called to demand that all files be saved before running JUnit tests.
    * It is up to the caller of this method to check if the documents have been
    * saved, using IGetDocuments.hasModifiedDocuments().
-   */
+   *
+   * This is never called currently, but it is commented out in case it is
+   * needed later.
   public void saveBeforeJUnit() {
     _lock.startRead();
     try {
@@ -713,7 +717,7 @@ public class EventNotifier implements GlobalModelListener {
     finally {
       _lock.endRead();
     }
-  }
+  }*/
   
   /**
    * Called before attempting Javadoc, to give users a chance to save.
@@ -736,7 +740,9 @@ public class EventNotifier implements GlobalModelListener {
    * Called to demand that all files be saved before starting the debugger.
    * It is up to the caller of this method to check if the documents have been
    * saved, using IGetDocuments.hasModifiedDocuments().
-   */
+   *
+   * This is never called currently, but it is commented out in case it is
+   * needed later.
   public void saveBeforeDebug() {
     _lock.startRead();
     try {
@@ -748,6 +754,6 @@ public class EventNotifier implements GlobalModelListener {
     finally {
       _lock.endRead();
     }
-  }
+  }*/
 }
 

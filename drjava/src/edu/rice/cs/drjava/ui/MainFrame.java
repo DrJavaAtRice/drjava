@@ -4064,7 +4064,8 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     /**
      * Prompts the user to save and compile before running a modified file.
-     */
+     *
+     * Not currently used.
     public void saveBeforeRun() {
       _saveAllBeforeProceeding
         ("To run this document's main method, you must first\n" +
@@ -4072,15 +4073,17 @@ public class MainFrame extends JFrame implements OptionConstants {
          "Would you like to save and compile now?",
          ALWAYS_SAVE_BEFORE_RUN,
          "Always save and compile before running");
-    }
-    
+    }*/
+
+    /**
+     * Not currently used.
     public void saveBeforeJUnit() {
       _saveAllBeforeProceeding
         ("To run JUnit, you must first save and compile ALL modified\n" +
          "files. Would you like to save and compile now?",
          ALWAYS_SAVE_BEFORE_JUNIT,
          "Always save and compile before testing with JUnit");
-    }
+    }*/
     
     public void saveBeforeJavadoc() {
       _saveAllBeforeProceeding
@@ -4090,13 +4093,15 @@ public class MainFrame extends JFrame implements OptionConstants {
          "Always save before running Javadoc");
     }
     
+    /**
+     * Not currently used.
     public void saveBeforeDebug() {
       _saveAllBeforeProceeding
         ("To use debugging commands, you must first save and compile\n" +
          "ALL modified files. Would you like to save and then compile?",
          ALWAYS_SAVE_BEFORE_DEBUG,
          "Always save and compile before debugging");
-    }
+    }*/
   
     /**
      * Helper method shared by all "saveBeforeX" methods.
@@ -4110,7 +4115,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         if (!DrJava.getConfig().getSetting(option).booleanValue()) {
           ConfirmCheckBoxDialog dialog =
             new ConfirmCheckBoxDialog(MainFrame.this,
-                                      "Must save all files to continue",
+                                      "Must Save All Files to Continue",
                                       message,
                                       checkMsg);
           int rc = dialog.show();

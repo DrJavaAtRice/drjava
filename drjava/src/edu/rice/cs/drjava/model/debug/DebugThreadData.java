@@ -107,6 +107,11 @@ public class DebugThreadData {
    * @return true iff the thread is suspended
    */
   public boolean isSuspended() {
-    return _thread.isSuspended();
+    try {
+      return _thread.isSuspended();
+    }
+    catch (ObjectCollectedException oce) {
+      return false;
+    }
   }
 }

@@ -69,6 +69,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   private static final String SLAVE_CLASS_NAME =
     "edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM";
   
+  private static final String DEFAULT_INTERPRETER_NAME = "DEFAULT";
+  
   private Log _log = new Log("MainJVMLog", false);
   
   /** Listens to interactions-related events. */
@@ -104,6 +106,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * Starting classpath reorganized into a vector.
    */
   private Vector<String> _startupClasspathVector;
+
+  /**
+   * The name of the current interpreter.
+   */
+  private String _currentInterpreterName = DEFAULT_INTERPRETER_NAME;
 
   /**
    * Creates a new MainJVM to interface to another JVM, but does not
@@ -474,6 +481,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     
     try {
       _interpreterJVM().removeInterpreter(name);
+      if (name.equals(_currentInterpreterName)) {
+        _currentInterpreterName = null;
+      }
     }
     catch (RemoteException re) {
       _threwException(re);
@@ -495,7 +505,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     ensureInterpreterConnected();
     
     try {
-      return _interpreterJVM().setActiveInterpreter(name);
+      boolean result = _interpreterJVM().setActiveInterpreter(name);
+      _currentInterpreterName = name;
+      return result;
     }
     catch (RemoteException re) {
       _threwException(re);
@@ -515,7 +527,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     ensureInterpreterConnected();
     
     try {
-      return _interpreterJVM().setToDefaultInterpreter();
+      boolean result = _interpreterJVM().setToDefaultInterpreter();
+      _currentInterpreterName = DEFAULT_INTERPRETER_NAME;
+      return result;
     }
     catch (ConnectIOException ce) {
       _log.logTime("Could not connect to the interpreterJVM after killing it", ce);
@@ -525,6 +539,13 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       _threwException(re);
       return false;
     }
+  }
+
+  /**
+   * Accesses the cached current interpreter name.
+   */
+  public String getCurrentInterpreterName() {
+    return _currentInterpreterName;
   }
 
   /**

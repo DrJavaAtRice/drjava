@@ -127,12 +127,13 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
 
   /**
    * Sets the active interpreter.
-   * @param name the name of the interpreter.
+   * @param name the (unique) name of the interpreter.
    * @param prompt the prompt the interpreter should have.
    */
   public void setActiveInterpreter(String name, String prompt) {
+    String currName = _interpreterControl.getCurrentInterpreterName();
     boolean inProgress = _interpreterControl.setActiveInterpreter(name);
-    _updateDocument(prompt, inProgress);
+    _updateDocument(prompt, inProgress, !currName.equals(name));
     _notifyInterpreterChanged(inProgress);
   }
 
@@ -141,7 +142,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    */
   public void setToDefaultInterpreter() {
     boolean inProgress = _interpreterControl.setToDefaultInterpreter();
-    _updateDocument(_document.DEFAULT_PROMPT, inProgress);
+    _updateDocument(_document.DEFAULT_PROMPT, inProgress, true);
     _notifyInterpreterChanged(inProgress);
   }
   
@@ -149,9 +150,10 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    * Updates the prompt and status of the document after an interpreter change.
    * @param prompt New prompt to display
    * @param inProgress whether the interpreter is currently in progress
+   * @param updatePrompt whether or not the interpreter has changed
    */
-  private void _updateDocument(String prompt, boolean inProgress) {
-    if (!_document.getPrompt().equals(prompt)) {
+  protected void _updateDocument(String prompt, boolean inProgress, boolean updatePrompt) {
+    if (updatePrompt) {
       _document.setPrompt(prompt);
       _document.insertNewLine(_document.getDocLength());
       _document.insertPrompt();

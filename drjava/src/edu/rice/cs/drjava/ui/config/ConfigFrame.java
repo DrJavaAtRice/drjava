@@ -589,9 +589,6 @@ public class ConfigFrame extends JFrame {
     // Source path can only include directories
     sourcePath.setFileFilter(new DirectoryFilter("Source Directories"));
     panel.addComponent(sourcePath);
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.DEBUG_SHOW_THREADS,
-                                                  "Show Current Threads Tab", this,
-                                                  "Whether to show a tab in the Debugger displaying the current threads."));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.DEBUG_STEP_JAVA,
                                                   "Step Into Java Classes", this,
                                                   "<html>Whether the Debugger should step into Java library classes,<br>" +
@@ -648,10 +645,6 @@ public class ConfigFrame extends JFrame {
                                "Default Destination Directory", this,
                                "The default directory for saving Javadoc documentation.",
                                _fileOptionChooser));
-    panel.addComponent
-      (new BooleanOptionComponent(OptionConstants.JAVADOC_PROMPT_FOR_DESTINATION,
-                                  "Always Prompt For Destination", this,
-                                  "Whether Javadoc should always prompt the user for the destination directory."));
     
     panel.displayComponents();
   }
@@ -672,31 +665,32 @@ public class ConfigFrame extends JFrame {
                                                   "recompiling, or instead should ask the user each time.</html>"));
     
     // TODO: this is dev-only until the sync issues with interactions are worked out
-    if (CodeStatus.DEVELOPMENT) {
-      panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_RUN, "Automatically Save and Compile Before Running Main Method", this,
-                                                    "<html>Whether DrJava should automatically save and compile before running<br>" +
-                                                    "a document's main method, or instead should ask the user each time.</html>"));
-    }
+//    if (CodeStatus.DEVELOPMENT) {
+//      panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_RUN, "Automatically Save and Compile Before Running Main Method", this,
+//                                                    "<html>Whether DrJava should automatically save and compile before running<br>" +
+//                                                    "a document's main method, or instead should ask the user each time.</html>"));
+//    }
     
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_JUNIT, "Automatically Save and Compile Before Testing", this,
-                                                  "<html>Whether DrJava should automatically save and compile before<br>" +
-                                                  "testing with JUnit, or instead should ask the user each time</html>"));
+//    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_JUNIT, "Automatically Save and Compile Before Testing", this,
+//                                                  "<html>Whether DrJava should automatically save and compile before<br>" +
+//                                                  "testing with JUnit, or instead should ask the user each time</html>"));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_JAVADOC, "Automatically Save Before Generating Javadoc", this,
                                                   "<html>Whether DrJava should automatically save before generating<br>" +
-                                                  "Javadoc, or instead should ask the user each time</html>"));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_DEBUG, "Automatically Save and Compile Before Debugging", this,
-                                                  "<html>Whether DrJava should automatically save and compile before<br>" +
-                                                  "debugging, or instead should ask the user each time</html>"));
+                                                  "Javadoc, or instead should ask the user each time.</html>"));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.JAVADOC_PROMPT_FOR_DESTINATION,
+                                                  "Always Prompt for Javadoc Destination", this,
+                                                  "Whether Javadoc should always prompt the user for the destination directory."));
+//    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_DEBUG, "Automatically Save and Compile Before Debugging", this,
+//                                                  "<html>Whether DrJava should automatically save and compile before<br>" +
+//                                                  "debugging, or instead should ask the user each time</html>"));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_BREAKPOINT_OUT_OF_SYNC, "Warn on Breakpoint If out of Sync", this,
                                                   "<html>Whether DrJava should prompt the user if the class file<br>" +
-                                                  "is out of sync before setting a breakpoint in that file</html>."));
+                                                  "is out of sync before setting a breakpoint in that file.</html>"));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_DEBUG_MODIFIED_FILE, "Warn if Debugging Modified File", this,
                                                   "Whether DrJava should prompt the user if the file being debugged has been modified."));
-    if (CodeStatus.DEVELOPMENT) {
-      panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_CHANGE_LAF, "Warn to Restart to Change Look and Feel", this,
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_CHANGE_LAF, "Warn to Restart in order to Change Look and Feel", this,
                                                     "<html>Whether DrJava should warn the user that look and feel<br>" +
                                                     "changes will not be applied until DrJava is restarted.</html>."));
-    }
 
     panel.displayComponents();
   }

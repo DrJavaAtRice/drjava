@@ -89,6 +89,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private JPopupMenu _stackPopupMenu;
   private JPopupMenu _breakpointPopupMenu;
   private JPopupMenu _watchPopupMenu;
+  private DebugThreadData _threadInPopup;
   
   private final SingleDisplayModel _model;
   private final MainFrame _frame;
@@ -126,10 +127,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
     _setupTabPanes();
     
-    _tabsPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                               true,
-                               _leftPane,
-                               _rightPane);
+    _tabsPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, _leftPane, _rightPane);
     _tabsPane.setOneTouchExpandable(true);
     _tabsPane.setDividerLocation((int)(_frame.getWidth()/2.5));
     
@@ -180,9 +178,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
     ((AbstractTableModel)_watchTable.getModel()).fireTableDataChanged();
     ((AbstractTableModel)_stackTable.getModel()).fireTableDataChanged();
-    if (_threadTable != null) {
-      ((AbstractTableModel)_threadTable.getModel()).fireTableDataChanged();
-    }
+    ((AbstractTableModel)_threadTable.getModel()).fireTableDataChanged();
   }
   
   
@@ -221,26 +217,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _rightPane.addTab("Stack", new JScrollPane(_stackTable));
     
     // Thread table
-    if (DrJava.getConfig().getSetting(DEBUG_SHOW_THREADS).booleanValue()) {
-       _initThreadTable();
-    }
+    _initThreadTable();
 
-    DrJava.getConfig().addOptionListener(OptionConstants.DEBUG_SHOW_THREADS,
-                                         new OptionListener<Boolean>() {
-      public void optionChanged(OptionEvent<Boolean> oce) {
-        if (oce.value.booleanValue()) {
-          if (_threadTable == null) {
-             _initThreadTable();
-          }
-        }
-        else {
-          if (_threadTable != null) {
-            _threadTable = null;
-            _rightPane.remove(1);
-          }
-        }
-      }
-    });
     // Sets the method column to always be 7 times as wide as the line column
     TableColumn methodColumn = null;
     TableColumn lineColumn = null;
@@ -489,12 +467,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
     Action selectAction = new AbstractAction("Select Thread") {
       public void actionPerformed(ActionEvent e) {
-        try {
-          _debugger.setCurrentThread(getSelectedThread());
-        }
-        catch(DebugException de) {
-          _frame._showDebugError(de);
-        }
+        _selectCurrentThread();
       }
     };
 
@@ -503,7 +476,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _threadSuspendedPopupMenu.add(new AbstractAction("Resume Thread") {
       public void actionPerformed(ActionEvent e) {
         try {
-          _debugger.resume(getSelectedThread());
+          if (_threadInPopup.isSuspended()) {
+            _debugger.resume(_threadInPopup);
+          }
         }
         catch (DebugException dbe) {
           _frame._showDebugError(dbe);
@@ -532,7 +507,10 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _breakpointPopupMenu.add(new AbstractAction("Remove Breakpoint") {
       public void actionPerformed(ActionEvent e) {
         try {
-          _debugger.removeBreakpoint(_getSelectedBreakpoint());
+          Breakpoint bp = _getSelectedBreakpoint();
+          if (bp != null) {
+            _debugger.removeBreakpoint(bp);
+          }
         }
         catch (DebugException de) {
           _frame._showDebugError(de);
@@ -563,6 +541,19 @@ public class DebugPanel extends JPanel implements OptionConstants {
       protected void _action() {
       }
     });
+  }
+
+  /**
+   */
+  private void _selectCurrentThread() {
+    if (_threadInPopup.isSuspended()) {
+      try {
+        _debugger.setCurrentThread(_threadInPopup);
+      }
+      catch(DebugException de) {
+        _frame._showDebugError(de);
+      }
+    }
   }
 
   /**
@@ -604,7 +595,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
    * @param row the current row
    */
   private void _setThreadCellFont(Component renderer, int row) {
-    if (_threads.elementAt(row).getUniqueID() == _currentThreadID) {
+    DebugThreadData currThread = _threads.elementAt(row);
+    if (currThread.getUniqueID() == _currentThreadID &&
+        currThread.isSuspended()) {
       renderer.setFont(getFont().deriveFont(Font.BOLD));
     }
   }
@@ -964,8 +957,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
 
     protected void _showPopup(MouseEvent e) {
-      DebugThreadData thread = _threads.elementAt(_lastRow);
-      if (thread.isSuspended()) {
+      _threadInPopup = _threads.elementAt(_lastRow);
+      if (_threadInPopup.isSuspended()) {
          _threadSuspendedPopupMenu.show(e.getComponent(), e.getX(), e.getY());
       }
 //       else {
@@ -974,16 +967,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
 
     protected void _action() {
-      DebugThreadData thread = _threads.elementAt(_lastRow);
-      if (thread.isSuspended()) {
-        try {
-          _debugger.setCurrentThread(thread);
-        }
-        catch(DebugException exception){
-          JOptionPane.showMessageDialog(_frame, "Cannot select the thread.",
-                                        "Debugger Error", JOptionPane.ERROR_MESSAGE);
-        }
-      }
+      _threadInPopup = _threads.elementAt(_lastRow);
+      _selectCurrentThread();
     }
   }
 
