@@ -557,7 +557,7 @@ public class Student {
 
     <formalpara>
       <title>Configuring Javadoc</title>
-      <para>You can configure many aspects of how Javadoc files are generated.  Most prominent is the ability to hide fields and methods below a particular access level (eg. <literal>public</literal> or <literal>protected</literal>).  By default, all fields and methods are shown.  Other options include specifying a URL to link to the Java library API (which defaults to Sun's own website), specifying a default destination directory for all Javadoc files, and specifying any custom parameters to pass to the Javadoc tool itself.  Finally, for programs with many nested packages (folders), DrJava provides an option to always generate Javadoc for all packages in the program, rather than just the sub-packages of the open documents.</para>
+      <para>You can configure many aspects of how Javadoc files are generated.  Most prominent is the ability to hide fields and methods below a particular access level (eg. <literal>public</literal> or <literal>protected</literal>).  By default, no private fields or methods are shown.  Other options include specifying a URL to link to the Java library API (which defaults to Sun's own website), specifying a default destination directory for all Javadoc files, and specifying any custom parameters to pass to the Javadoc tool itself.  Finally, for programs with many nested packages (folders), DrJava provides an option to always generate Javadoc for all packages in the program, rather than just the sub-packages of the open documents.</para>
     </formalpara>    
 
     </section>
@@ -865,7 +865,7 @@ public class Student {
       <variablelist>
 
 	<varlistentry>
-	  <term>Access Level (<varname>javadoc.access.level = "private"</varname>)</term>
+	  <term>Access Level (<varname>javadoc.access.level = "package"</varname>)</term>
 	  <listitem>
 	    <para>Specifies the lowest access level for fields and methods to include in the generated documentation.  Legal values are "public", "protected", "package", and "private".</para>
 	  </listitem>

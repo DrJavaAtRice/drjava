@@ -756,7 +756,7 @@ public interface OptionConstants {
    * The lowest access level of classes and members to include in the javadoc.
    */
   public static final ForcedChoiceOption JAVADOC_ACCESS_LEVEL =
-    new ForcedChoiceOption("javadoc.access.level", "private", accessLevelChoices);
+    new ForcedChoiceOption("javadoc.access.level", "package", accessLevelChoices);
   
   /**
    * Possible options for Javadoc system class documentation links.
