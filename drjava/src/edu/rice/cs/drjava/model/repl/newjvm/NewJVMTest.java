@@ -49,7 +49,8 @@ import junit.framework.*;
 import junit.extensions.*;
 
 import java.rmi.*;
-
+import java.io.*;
+import edu.rice.cs.util.FileOps;
 /**
  * Tests the functionality of the new JVM manager.
  *
@@ -58,6 +59,8 @@ import java.rmi.*;
 public final class NewJVMTest extends TestCase {
   final boolean printMessages = false;
 
+  
+  
   private static TestJVMExtension _jvm;
 
   public NewJVMTest(String name) {

@@ -102,7 +102,7 @@ public class JUnitTestRunner extends TestRunner {
   public JUnitTestRunner(JUnitModelCallback jmc) {
     super();
     _jmc = jmc;
-    _classLoader = new DrJavaTestClassLoader(jmc);
+    _classLoader = new DrJavaTestSuiteLoader(jmc);
     _writer = new PrintStream(System.out) {
       public void print(String s) {
       }

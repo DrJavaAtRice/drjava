@@ -64,7 +64,7 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.newjvm.*;
-
+import edu.rice.cs.util.FileOps;
 import koala.dynamicjava.parser.wrapper.*;
 
 /**
@@ -742,7 +742,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * @param status Status returned by the dead process.
    */
   protected void handleSlaveQuit(int status) {
-    // Only restart the slave if _enabled is true
+  // Only restart the slave if _enabled is true
     if (_enabled) {
       // We have already fired this event if we are cleanly restarting
       if (!_cleanlyRestarting) {
@@ -899,7 +899,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
         //if (! _enabled) {
           //throw new IllegalStateException("Interpreter is disabled");
         //}
-
         while (_interpreterJVM() == null) {
           //_log.logTime("interpreter is null, waiting for it to register");
           wait();

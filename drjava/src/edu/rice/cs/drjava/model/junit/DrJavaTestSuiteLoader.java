@@ -56,17 +56,17 @@ import junit.runner.*;
  *
  * @version $Id$
  */
-public class DrJavaTestClassLoader implements TestSuiteLoader, OptionConstants {
+public class DrJavaTestSuiteLoader implements TestSuiteLoader, OptionConstants {
   
   private final JUnitModelCallback _jmc;
   private TestCaseClassLoader _loader;
   
-  public DrJavaTestClassLoader(JUnitModelCallback jmc) {
+  public DrJavaTestSuiteLoader(JUnitModelCallback jmc) {
     _jmc = jmc;
     String classpath = _jmc.getClasspathString();
     classpath += System.getProperty("path.separator");
     classpath += System.getProperty("java.class.path");
-    _loader = new TestCaseClassLoader(classpath);
+    _loader = new DrJavaTestCaseClassLoader(classpath);
   }
 
   public Class load(String className) throws ClassNotFoundException {

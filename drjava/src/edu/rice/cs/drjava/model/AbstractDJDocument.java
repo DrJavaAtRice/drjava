@@ -1641,9 +1641,9 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * and store information for how to undo/redo the reduced model changes
    * inside the {@link DefaultDocumentEvent}.
    *
-   * @see InsertCommand
-   * @see DefaultDocumentEvent
-   * @see CommandUndoableEdit
+   * @see edu.rice.cs.drjava.model.AbstractDJDocument$InsertCommand
+   * @see javax.swing.AbstractDocument$DefaultDocumentEvent
+   * @see edu.rice.cs.drjava.model.definitions.DefinitionsDocument$CommandUndoableEdit
    */
   protected void insertUpdate(AbstractDocument.DefaultDocumentEvent chng,
                               AttributeSet attr)

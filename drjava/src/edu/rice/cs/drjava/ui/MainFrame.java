@@ -1729,8 +1729,8 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // DefinitionsPane
     JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
-    _df  = new RecentDocFrame(this);
-    _df.pokeDocument(_model.getActiveDocument());
+    _recentDocFrame  = new RecentDocFrame(this);
+    _recentDocFrame.pokeDocument(_model.getActiveDocument());
     
     _currentDefPane = (DefinitionsPane) defScroll.getViewport().getView();
     _currentDefPane.notifyActive();
@@ -2040,10 +2040,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     return answer;
   }
   
+  
+  
   /**
    * holds/shows the history of documents for ctrl-tab
    */
-  RecentDocFrame _df;
+  RecentDocFrame _recentDocFrame;
   
   /**
    * sets up the ctrl-tab listener
@@ -2470,11 +2472,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   public void openProject(FileOpenSelector projectSelector) {
     try {
-      hourglassOn();
       final File[] file = projectSelector.getFiles();
       if( file.length < 1 ) {
         throw new IllegalStateException("Open project file selection not canceled but no project file was selected.");
       }
+      hourglassOn();
       // make sure there are no open projects
       if(!_model.isProjectActive() || (_model.isProjectActive() && _closeProject())) {
         _openProjectHelper(file[0]);
@@ -3204,7 +3206,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private boolean showCleanWarning(){
-    //adam
     if (!DrJava.getConfig().getSetting(NO_PROMPT_BEFORE_CLEAN).booleanValue()) {
       String buildDirTxt = "";
       try {
@@ -4916,25 +4917,25 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   
   private void nextRecentDoc(){
-    if(_df.isVisible()){
-      _df.next();
+    if(_recentDocFrame.isVisible()){
+      _recentDocFrame.next();
     }else{
-      _df.setVisible(true);
+      _recentDocFrame.setVisible(true);
     }
   }
   
   private void prevRecentDoc(){
-    if(_df.isVisible()){
-      _df.prev();
+    if(_recentDocFrame.isVisible()){
+      _recentDocFrame.prev();
     }else{
-      _df.setVisible(true);
+      _recentDocFrame.setVisible(true);
     }
   }
   
   private void hideRecentDocFrame(){
-    if(_df.isVisible()){
-      _df.setVisible(false);
-      OpenDefinitionsDocument doc = _df.getDocument();
+    if(_recentDocFrame.isVisible()){
+      _recentDocFrame.setVisible(false);
+      OpenDefinitionsDocument doc = _recentDocFrame.getDocument();
       if(doc != null){
         _model.getDocumentNavigator().setActiveDoc(_model.getIDocGivenODD(doc));
       }
@@ -4943,8 +4944,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   KeyListener _historyListener = new KeyListener(){
     public void keyPressed(KeyEvent e){
-      if(e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE && e.isControlDown()){
+      if(e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE && e.isControlDown() && !e.isShiftDown()){
         nextRecentDoc();
+      }
+      if(e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE && e.isControlDown() && e.isShiftDown()){
+        prevRecentDoc();
       }
 //    else if(e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE){
 //        transferFocusUpCycle();
@@ -5798,6 +5802,8 @@ public class MainFrame extends JFrame implements OptionConstants {
         //do nothing
       }
     }
+    
+    
     private void _fileOpened(final OpenDefinitionsDocument doc){
       // Fix OS X scrollbar bug before switching
       _reenableScrollBar();
@@ -5868,7 +5874,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     /** Does the work of closing a file */
     private void _fileClosed(OpenDefinitionsDocument doc){
-      _df.closeDocument(doc);
+      _recentDocFrame.closeDocument(doc);
       _removeErrorListener(doc);
       ((DefinitionsPane)_defScrollPanes.get(doc).getViewport().getView()).close();
       _defScrollPanes.remove(doc);
@@ -5897,7 +5903,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // public void run() {
       Runnable command = new Runnable() {
         public void run(){
-          _df.pokeDocument(active);
+          _recentDocFrame.pokeDocument(active);
           _switchDefScrollPane();
 
           boolean isModified = active.isModifiedSinceSave();

@@ -321,7 +321,7 @@ public class DefaultCompilerModel implements CompilerModel {
   synchronized public void compile(OpenDefinitionsDocument doc)
       throws IOException {
     File buildDir = null;
-    if (doc.isInProjectPath()) {
+    if (doc.isInProjectPath() || doc.isAuxiliaryFile()) {
       buildDir = _getter.getFileGroupingState().getBuildDirectory();
     }
     
