@@ -108,7 +108,7 @@ public class DocFile extends File {
       return this;
     }
     else {
-      return new DocFile(getAbsoluteFile(),_sel,_scroll,_active,_package);
+      return new DocFile(super.getAbsoluteFile(),_sel,_scroll,_active,_package);
     }
   }
   
