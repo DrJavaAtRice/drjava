@@ -139,7 +139,6 @@ public class PopupConsole {
    * @return The text inputted by the user
    */
   public synchronized String getConsoleInput() { 
-    System.out.println("Console Input");
     Frame parentFrame = JOptionPane.getFrameForComponent(_parentComponent);
     if (parentFrame.isVisible()) 
       return showDialog(parentFrame) + "\n";
@@ -152,12 +151,9 @@ public class PopupConsole {
    * has been inputted so far.
    */
   public void interruptConsole() {
-    System.out.println("acquiring commandLock");
     synchronized(commandLock) {
-      System.out.println("lock acquired");
       if (_interruptCommand != null) _interruptCommand.run();
     }
-    System.out.println("command lock released");
   }
   
   /**
@@ -327,27 +323,18 @@ public class PopupConsole {
         
         _interruptCommand = new Runnable() {
           public void run() {
-            System.out.println("in interrupt command");
             _insertTextCommand = null;
             _interruptCommand = null;
             synchronized(monitor) {
-              System.out.println("notifying monitor");
               monitor.notifyAll();
             }
-            System.out.println("released lock on monitor");
           }
         };
         
         commandLock.notifyAll();
       }
       try {
-        long time = System.currentTimeMillis();
-        System.out.println("waiting for monitor");
-        
-        monitor.wait(4000);
-        
-        System.out.println("done waiting - time=" + (System.currentTimeMillis() - time));
-        if (System.currentTimeMillis() - time > 3999) throw new RuntimeException("monitor.wait() timeout");
+        monitor.wait();
       } catch (InterruptedException e) { }
     }
     return input.toString();
