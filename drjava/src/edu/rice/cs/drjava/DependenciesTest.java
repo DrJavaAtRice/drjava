@@ -49,8 +49,8 @@ import java.text.SimpleDateFormat;
  * @version $Id$
  */
 public class DependenciesTest extends TestCase {
-  public static final String REQUIRED_UTIL_VERSION = "20020221-0455";
-  
+  public static final String REQUIRED_UTIL_VERSION = "20020221-1536";
+
   /**
    * Constructor.
    * @param  String name
