@@ -43,48 +43,53 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.project;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.io.File;
+
+import edu.rice.cs.util.Pair;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20040701-1828;
- *
- * @version $Id$
+ * Classes that implement this interface are expected to 
+ * give information specific to a single document that is
+ * to be saved by the project file builder.  These objects
+ * are passed to the builder upon a save.  These objects
+ * should not be cached anywhere.  They are meant for 
+ * temporary transmition of data.
  */
-public abstract class Version {
+public interface DocumentInfoGetter {
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * @return the selection with the start and ending locations paired together.
+   * the cursor location is at the second location in the pair while the selection
+   * is defined between the two.
    */
-  private static final String BUILD_TIME_STRING = "20040701-1828";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+  public Pair<Integer,Integer> getSelection();
+  
+  /**
+   * @return the scroll offset of the scroll pane with the first element being
+   * the vertical scroll and the second being the horizontal scroll
+   */
+  public Pair<Integer,Integer> getScroll();
+  
+  /**
+   * @return the filename of the document being described by this getter
+   */
+  public File getFile();
+  
+  /**
+   * Returns the package declared in the java code within the document being described
+   * @return the package of this document.  
+   */
+  public String getPackage();
+  
+  /**
+   * @return true iff the described document is the current active document
+   */
+  public boolean isActive();
+  
+  /**
+   * @return whether the document has a file currently associated with it
+   */
+  public boolean isUntitled();
+}
