@@ -68,7 +68,7 @@ public class ButtonTest extends TestCase
 	assertTrue(new File("button-test-file").delete());
     }
 
-       public void testCompileDisabledAfterCompile() 
+	public void testCompileDisabledAfterCompile() 
 	  throws BadLocationException {
 	DefinitionsView v = _m.getDefView();
 	DefinitionsDocument d = v._doc();

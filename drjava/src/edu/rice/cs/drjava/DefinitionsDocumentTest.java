@@ -192,4 +192,62 @@ public class DefinitionsDocumentTest extends TestCase {
     assertEquals(0, v.elementAt(0).getLocation());
     assertEquals(2, v.elementAt(0).getLength());
   }
+
+	public void testGotoLine1() throws BadLocationException
+		{
+			final String s = "a\n";
+			
+			defModel.insertString(0, s, null);
+			defModel.gotoLine(2);
+			assertEquals("#0.0", 2,defModel.getCurrentLocation());
+		}
+	
+	public void testGotoLine2() throws BadLocationException
+		{
+			final String s = "abcd\n";
+			
+			defModel.insertString(0, s, null);
+			defModel.gotoLine(2);
+			assertEquals("#0.0", 5,defModel.getCurrentLocation());
+		}
+	public void testGotoLine3() throws BadLocationException
+		{
+			final String s = "a\nb\nc\n";
+			
+			defModel.insertString(0, s, null);
+			defModel.gotoLine(4);
+			assertEquals("#0.0", 6,defModel.getCurrentLocation());
+		}
+	public void testGotoLine4() throws BadLocationException
+		{
+			final String s = "a\nb\nc\n";
+			
+			defModel.insertString(0, s, null);
+			defModel.gotoLine(8);
+			assertEquals("#0.0", 6,defModel.getCurrentLocation());
+		}
+	public void testGotoLine5()
+		{
+			defModel.gotoLine(1);
+			assertEquals("#0.0", 0,defModel.getCurrentLocation());
+		}
+	public void testGotoLine6()
+		{
+			defModel.gotoLine(4);
+			assertEquals("#0.0", 0,defModel.getCurrentLocation());
+		}
+	public void testGotoLine7() throws BadLocationException
+		{
+			final String s = "11111\n2222\n33333\n44444";
+			
+			defModel.insertString(0, s, null);
+			defModel.gotoLine(3);
+			assertEquals("#0.0", 11,defModel.getCurrentLocation());
+		}
 }
+
+
+
+
+
+

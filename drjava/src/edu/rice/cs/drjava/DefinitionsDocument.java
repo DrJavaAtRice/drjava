@@ -542,4 +542,31 @@ public class DefinitionsDocument extends PlainDocument
     // return one before because we need to point to the last one we inserted
     return index - 1;
   }
+
+	public void gotoLine(int line)
+		{
+			int dist;
+			if (line < 0)
+				return;
+			setCurrentLocation(0);
+
+			for (int i = 1; (i < line) && (_currentLocation < getLength()); i++){
+				dist = _reduced.getDistToNextNewline();
+				if (_currentLocation + dist < getLength()){
+					dist++;
+				}
+				move(dist);
+			}
+		}
 }
+
+
+
+
+
+
+
+
+
+
+
