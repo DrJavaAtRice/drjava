@@ -50,26 +50,157 @@ import junit.framework.TestCase;
 import edu.rice.cs.javalanglevels.*;
 import edu.rice.cs.javalanglevels.tree.*;
 
+/**
+ * test the auto complete parser
+ */
 public class ACParserTest extends TestCase {
   
+  /**
+   * parses a string and returns it's sourcefile
+   */
   private SourceFile _parseString(String txt) throws ParseException {
     ACParser p = new ACParser(txt);
     return p.SourceFile();
   }
   
-  public void testX(){
+  
+  
+  /**
+   * test import/package out of order.
+   * also tests package/imports not terminated by ;'s
+   */
+  public void testPackageMissingSemicolon() throws ParseException {
+    SourceFile s = _parseString("package edu.rice.cs.drjava\n"+
+                                "import java.io.*\n"+
+                                "import java.util.List\n"+
+                                "package edu.rice.cs.drjava\n"+
+                                "public class A {\n"+
+                                "}");
+    assertEquals("Number of packages",2,s.getPackageStatements().length);
+    assertEquals("Number of imports",2,s.getImportStatements().length);
   }
   
-//  
-//  public void testMissingSemicolon() throws ParseException {
-//    SourceFile s = _parseString("package edu.rice.cs.drjava\n"+
-//                                "package edu.rice.cs.drjava\n"+
-//                                "import java.io.*\n"+
-//                                "import java.util.List\n"+
-//                                "public class A {\n"+
-//                                "}");
-//    assertEquals("Number of packages",2,s.getPackageStatements().length);
-//    assertEquals("Number of imports",2,s.getImportStatements().length);
-//  }
+  /**
+   * also tests package/imports terminated by trash
+   */
+  public void testPackageEndInTrash() throws ParseException {
+    SourceFile s = _parseString("package edu.rice.cs.drjava;\n"+
+                                "import java.io.*asdf\n"+
+                                "import java.util.List#$\n"+
+                                "package edu.rice.cs.drjava\n"+
+                                "public class A {\n"+
+                                "}");
+    assertEquals("Number of packages",2,s.getPackageStatements().length);
+    assertEquals("Number of imports",2,s.getImportStatements().length);
+  }
+
+  /**
+   * also tests package/imports terminated by trash
+   */
+  public void testTrashInClassDef() throws ParseException {
+    SourceFile s = _parseString("fdsa public sad static class A {\n"+
+                                "}");
+    assertEquals("Number of classes",1,s.getClasses().length);
+    assertEquals("the class name is A", "A", s.getClasses()[0].getName().getText());
+    assertEquals("the class has 2 modifiers", 1, s.getClasses()[0].getMav().getModifiers().length);
+  }
+
+  /**
+   * also tests package/imports terminated by trash
+   */
+  public void testTrashInInterfaceDef() throws ParseException {
+    SourceFile s = _parseString("fdsa public static interface A {\n"+
+                                "}");
+    assertEquals("Number of interfaces",1,s.getInterfaces().length);
+    assertEquals("the class name is A", "A", s.getInterfaces()[0].getName().getText());
+    assertEquals("the class has 2 modifiers", 2, s.getInterfaces()[0].getMav().getModifiers().length);
+  }
   
+  
+  /**
+   * test class declaration with optional {'s and }'s
+   */
+  public void testClassDefWithoutBraces() throws ParseException {
+    /* normal case */
+    SourceFile s = _parseString("public class A {\n" +
+                                "public void foo(){}" +
+                                "}");
+    assertEquals("Number of classes",1,s.getClasses().length);
+    assertEquals("the class name is A", "A", s.getClasses()[0].getName().getText());
+    assertEquals("the class has 1 modifiers", 1, s.getClasses()[0].getMav().getModifiers().length);
+    assertEquals("there is 1 function in the body", 1, s.getClasses()[0].getBody().getItems().length);
+
+    /* missing } */
+    s = _parseString("public class A {\n" +
+                                "public void foo(){}");
+    assertEquals("Number of classes",1,s.getClasses().length);
+    assertEquals("the class name is A", "A", s.getClasses()[0].getName().getText());
+    assertEquals("the class has 1 modifiers", 1, s.getClasses()[0].getMav().getModifiers().length);
+    assertEquals("there is 1 function in the body", 1, s.getClasses()[0].getBody().getItems().length);
+
+
+    /* missing { */
+    s = _parseString("public class A \n" +
+                                "public void foo(){}" +
+                                "}");
+    assertEquals("Number of classes",1,s.getClasses().length);
+    assertEquals("the class name is A", "A", s.getClasses()[0].getName().getText());
+    assertEquals("the class has 1 modifiers", 1, s.getClasses()[0].getMav().getModifiers().length);
+    assertEquals("there is 1 function in the body", 1, s.getClasses()[0].getBody().getItems().length);
+
+    /* missing both { and } */
+    s = _parseString("public class A \n" +
+                     "  public void foo(){}");
+    assertEquals("Number of classes",1,s.getClasses().length);
+    assertEquals("the class name is A", "A", s.getClasses()[0].getName().getText());
+    assertEquals("the class has 1 modifiers", 1, s.getClasses()[0].getMav().getModifiers().length);
+    assertEquals("there is 1 function in the body", 1, s.getClasses()[0].getBody().getItems().length);
+  }
+  
+  
+  /**
+   * test interface definition with optional {'s and }'
+   */
+  public void testInterfaceDefWithoutBraces() throws ParseException{
+    /* normal case */
+    SourceFile s = _parseString("public interface A {\n" +
+                                "public void foo();" +
+                                "}");
+    assertEquals("Number of interfacees",1,s.getInterfaces().length);
+    assertEquals("the interface name is A", "A", s.getInterfaces()[0].getName().getText());
+    assertEquals("the interface has 1 modifiers", 1, s.getInterfaces()[0].getMav().getModifiers().length);
+    assertEquals("there is 1 function in the body", 1, s.getInterfaces()[0].getBody().getItems().length);
+
+    /* missing } */
+    s = _parseString("public interface A {\n" +
+                     "  public void foo();");
+    assertEquals("Number of interfacees",1,s.getInterfaces().length);
+    assertEquals("the interface name is A", "A", s.getInterfaces()[0].getName().getText());
+    assertEquals("the interface has 1 modifiers", 1, s.getInterfaces()[0].getMav().getModifiers().length);
+    assertEquals("there is 1 function in the body", 1, s.getInterfaces()[0].getBody().getItems().length);
+
+
+    /* missing { */
+    s = _parseString("public interface A \n" +
+                     "  public void foo();" +
+                     "}");
+    assertEquals("Number of interfacees",1,s.getInterfaces().length);
+    assertEquals("the interface name is A", "A", s.getInterfaces()[0].getName().getText());
+    assertEquals("the interface has 1 modifiers", 1, s.getInterfaces()[0].getMav().getModifiers().length);
+    assertEquals("there is 1 function in the body", 1, s.getInterfaces()[0].getBody().getItems().length);
+
+    /* missing both { and } */
+    s = _parseString("public interface A \n" +
+                     "  public void foo();");
+    assertEquals("Number of interfacees",1,s.getInterfaces().length);
+    assertEquals("the interface name is A", "A", s.getInterfaces()[0].getName().getText());
+    assertEquals("the interface has 1 modifiers", 1, s.getInterfaces()[0].getMav().getModifiers().length);
+    assertEquals("there is 1 function in the body", 1, s.getInterfaces()[0].getBody().getItems().length);
+  }
+  
+  public void testNoCommaInGenerics() throws ParseException{
+    SourceFile s = _parseString("public class A<T H>\n");
+    assertEquals("Number of classes",1,s.getClasses().length);
+    assertEquals("the class name is A", "A", s.getClasses()[0].getName().getText());
+  }
 }

@@ -482,19 +482,6 @@ TOKEN : /* SEPARATORS */
   
 }
 
-TOKEN : 
-{ <SEPARATOR:
-  <LPAREN>
-| <RPAREN>
-| <LBRACE>
-| <RBRACE>
-| <LBRACKET>
-| <RBRACKET>
-| <SEMICOLON>
-| <COMMA>
-| <DOT> >
-}
-  
 TOKEN : /* OPERATORS */
 {
   < ASSIGN: "=" >
@@ -572,6 +559,11 @@ TOKEN:
   }
   
   JAVACODE
+  boolean _ignoreChar(char c){
+    return true;
+  }
+  
+  JAVACODE
   void _errorString(String s) {
     StringBuffer message = new StringBuffer();
     for (int i = 0; i < s.length(); i++) {
@@ -611,40 +603,44 @@ SourceFile SourceFile() :
 }
 {
   try {
+//    (
+//     try{
+//        temp1 = PackageStatement() {
+//          packageStatements.addLast(temp1);
+//        }
+//      }catch(ParseException e){}
+//    )*
+//    (
+//     try{
+//       temp2 = ImportStatement() {
+//         importStatements.addLast(temp2);
+//       }
+//     }catch(ParseException e){}
+//    )*
+      
     (
-     try{
-        temp1 = PackageStatement() {
-          packageStatements.addLast(temp1);
-        }
-      }catch(ParseException e){}
-    )*
-    (
-     try{
+     LOOKAHEAD(<IMPORT>)
        temp2 = ImportStatement() {
          importStatements.addLast(temp2);
        }
-     }catch(ParseException e){}
-    )*
-      
-    (
-     LOOKAHEAD( ( <ABSTRACT> | <FINAL> | <PUBLIC> | <STRICTFP> )* <CLASS> )
+      |
+     LOOKAHEAD(<PACKAGE>)
+        temp1 = PackageStatement() {
+          packageStatements.addLast(temp1);
+    }
+       |
+     LOOKAHEAD(ModifiersAndVisibility() <CLASS>)
      temp3 = ClassDef() {
       classes.addLast(temp3);
     }
      |
-     LOOKAHEAD( ( <STATIC> | <ABSTRACT> | <FINAL> | <PUBLIC> | <PROTECTED> | <PRIVATE> )* <INTERFACE> )
+     LOOKAHEAD( ModifiersAndVisibility() <INTERFACE> )
      temp4 = InterfaceDef() {
        interfaces.addLast(temp4);
      }
      |
-     LOOKAHEAD( (<SEPARATOR>))
-       <SEPARATOR>{
-         System.out.println("received separator");
-       }
-//     }
-//     |
-//     LOOKAHEAD(<EOF>)
-//     { getToken(1); }
+     LOOKAHEAD(AnyTokenButEOF())
+     AnyTokenButEOF()
      )*
 
        <EOF> {
@@ -668,52 +664,132 @@ SourceFile SourceFile() :
 //    }
   }
 }
-//
-//void AnyTokenButEOF() {
-//  (<ABSTRACT> | < BOOLEAN> | < BREAK: "break" >| < BYTE: "byte" >| < CASE: "case" >| < CATCH: "catch" >
-//| < CHAR: "char" >| < CLASS: "class" >| < CONST: "const" >| < CONTINUE: "continue" >| < _DEFAULT: "default" >
-//| < DO: "do" >
-//| < DOUBLE: "double" >
-//| < ELSE: "else" >
-//| < EXTENDS: "extends" >
-//| < FALSE: "false" >
-//| < FINAL: "final" >
-//| < FINALLY: "finally" >
-//| < FLOAT: "float" >
-//| < FOR: "for" >
-//| < GOTO: "goto" >
-//| < IF: "if" >
-//| < IMPLEMENTS: "implements" >
-//| < IMPORT: "import" >
-//| < INSTANCEOF: "instanceof" >
-//| < INT: "int" >
-//| < INTERFACE: "interface" >
-//| < LONG: "long" >
-//| < NATIVE: "native" >
-//| < NEW: "new" >
-//| < NULL: "null" >
-//| < PACKAGE: "package">
-//| < PRIVATE: "private" >
-//| < PROTECTED: "protected" >
-//| < PUBLIC: "public" >
-//| < RETURN: "return" >
-//| < SHORT: "short" >
-//| < STRICTFP: "strictfp" >
-//| < STATIC: "static" >
-//| < SUPER: "super" >
-//| < SWITCH: "switch" >
-//| < SYNCHRONIZED: "synchronized" >
-//| < THIS: "this" >
-//| < THROW: "throw" >
-//| < THROWS: "throws" >
-//| < TRANSIENT: "transient" >
-//| < TRUE: "true" >
-//| < TRY: "try" >
-//| < VOID: "void" >
-//| < VOLATILE: "volatile" >
-//| < WHILE: "while" >
-//}
-//    
+  void AnyTokenButEOF(): 
+  {
+    LinkedList/*<String>*/ words = new LinkedList/*<String>*/();
+    Token t = getToken(1);
+  }{
+  ((t = <ABSTRACT> |
+    t = < BOOLEAN> |
+    t = <BREAK> |
+    t = <BYTE> |
+    t = <CASE> |
+    t = <CATCH> |
+    t = <CHAR> |
+    t = <CLASS> |
+    t = <CONST> |
+    t = <CONTINUE> |
+    t = <_DEFAULT> |
+    t = <DO> |
+    t = <DOUBLE> |
+    t = <ELSE> |
+    t = <EXTENDS> |
+    t = <FALSE> |
+    t = <FINAL> |
+    t = <FINALLY> |
+    t = <FLOAT> |
+    t = <FOR> |
+    t = <GOTO> |
+    t = <IF> |
+    t = <IMPLEMENTS> |
+    t = <IMPORT> |
+    t = <INSTANCEOF> |
+    t = <INT> |
+    t = <INTERFACE> |
+    t = <LONG> |
+    t = <NATIVE> |
+    t = <NEW> |
+    t = <NULL> |
+    t = <PACKAGE> |
+    t = <PRIVATE> |
+    t = <PROTECTED> |
+    t = <PUBLIC> |
+    t = <RETURN> |
+    t = <SHORT> |
+    t = <STRICTFP> |
+    t = <STATIC> |
+    t = <SUPER> |
+    t = <SWITCH> |
+    t = <SYNCHRONIZED> |
+    t = <THIS> |
+    t = <THROW> |
+    t = <THROWS> |
+    t = <TRANSIENT> |
+    t = <TRUE> |
+    t = <TRY> |
+    t = <VOID> |
+    t = <VOLATILE> |
+    t = <WHILE> |
+    t = <DECIMAL_LITERAL> |
+    t = <HEX_LITERAL> |
+    t = <OCTAL_LITERAL> |
+    t = <LONG_DECIMAL_LITERAL> |
+    t = <LONG_HEX_LITERAL> |
+    t = <LONG_OCTAL_LITERAL> |
+    t = <DOUBLE_FLOATING_POINT_LITERAL> |
+    t = <FLOATING_POINT_LITERAL> |
+    t = <CHARACTER_LITERAL> |
+    t = <STRING_LITERAL> |
+    t = <IDENTIFIER> |
+    t = <LPAREN> |
+    t = <RPAREN> |
+    t = <LBRACE> |
+    t = <RBRACE> |
+    t = <LBRACKET> |
+    t = <RBRACKET> |
+    t = <SEMICOLON> |
+    t = <COMMA> |
+    t = <DOT> |
+    t = <ASSIGN> |
+    t = <GT> |
+    t = <LT> |
+    t = <BANG> |
+    t = <TILDE> |
+    t = <HOOK> |
+    t = <COLON> |
+    t = <EQ> |
+    t = <LE> |
+    t = <GE> |
+    t = < NE> |
+    t = <SC_OR> |
+    t = <SC_AND> |
+    t = <INCR> |
+    t = <DECR> |
+    t = <PLUS> |
+    t = <MINUS>|
+    t = <STAR> |
+    t = <SLASH> |
+    t = <BIT_AND> |
+    t = <BIT_OR> |
+    t = <XOR> |
+    t = <REM> |
+    t = <LSHIFT> |
+    t = <RSIGNEDSHIFT> |
+    t = <RSSHIFT1> |
+    t = <RSSHIFT2> |
+    t = <RUSHIFT1> |
+    t = <RUSHIFT2> |
+    t = <RUSHIFT3> |
+    t = <PLUSASSIGN> |
+    t = <MINUSASSIGN> |
+    t = <STARASSIGN> |
+    t = <SLASHASSIGN> |
+    t = <ANDASSIGN> |
+    t = <ORASSIGN> |
+    t = <XORASSIGN> |
+    t = <REMASSIGN> |
+    t = <LSHIFTASSIGN> | 
+    t = <RSIGNEDSHIFTASSIGN> |
+    t = <RUNSIGNEDSHIFTASSIGN> |
+    t = <OTHER>
+  )
+     { 
+//    System.out.println("chewing: " + t.image);
+      words.addLast(t.image);
+      getToken(1);
+     }
+  )
+}
     
     
     
@@ -817,7 +893,7 @@ PackageStatement PackageStatement() :
   <PACKAGE> 
     try {
     cw = CompoundWord() 
-      ([<SEMICOLON>]) {//{ System.out.println("cw = " + cw); 
+    {//{ System.out.println("cw = " + cw); 
       return new PackageStatement(_loc(first), cw);
     }
   }
@@ -833,20 +909,21 @@ ImportStatement ImportStatement() :
 }
 {
   <IMPORT>
+  cw = CompoundWord() 
   try {
-    cw = CompoundWord()
-    (<DOT> <STAR> [<SEMICOLON>] {
+    (<DOT> <STAR> {
       return new PackageImportStatement(_loc(first), cw);
-    }   
-    | ([<SEMICOLON>]) {
-      return new ClassImportStatement(_loc(first), cw);
     })
+      |
+    {
+      return new ClassImportStatement(_loc(first), cw);
+    }
   }
   catch (ParseException pe) {
     _throwParseException(pe, "Illegal import name!");
   }
-
 }
+
 
 ModifiersAndVisibility ModifiersAndVisibility() :
 {
@@ -869,7 +946,10 @@ ModifiersAndVisibility ModifiersAndVisibility() :
    | t = <SYNCHRONIZED> 
    | t = <STRICTFP>
   )
-    {words.addLast(t.image);}
+    {
+//   System.out.println("adding " + t.image);
+     words.addLast(t.image);
+    }
  )*
  { 
    // If there are no modifiers, then we make our own SourceInfo that
@@ -895,6 +975,7 @@ ClassDef ClassDef() :
   ModifiersAndVisibility modifiers;
   UnmodifiedClassDef decl;
   Token first = getToken(1);
+//  System.out.println("looking at: " + first.image);
   _inInterface = false;
 }
 {
@@ -930,14 +1011,16 @@ UnmodifiedClassDef UnmodifiedClassDef() :
   [ decl.typeParameters = TypeParameters() ]
   [ <EXTENDS> decl.superclass = ClassOrInterfaceType() ]
   [ <IMPLEMENTS> decl.interfaces = NameList() ]
-    (<LBRACE> | _errorChar('{'))
+    (<LBRACE> | _ignoreChar('{'))
    decl.body = BracedBody() 
-    (<RBRACE> | _errorChar('}'))
+    (<RBRACE> | _ignoreChar('}'))
 
   {
     return decl;
   }
 }
+
+
 
 InnerClassDef InnerClassDef() :
 {
@@ -1021,7 +1104,9 @@ UnmodifiedInterfaceDef UnmodifiedInterfaceDef() :
   name = Word() { decl.name = name; }
   [ decl.typeParameters = TypeParameters() ]
   [ <EXTENDS> decl.superinterfaces = NameList() ]
-  <LBRACE> body = BracedBody() <RBRACE>
+    (<LBRACE> | _ignoreChar('{'))
+    body = BracedBody()
+    (<RBRACE> | _ignoreChar('}'))
   {
 //    decl.methods = (AbstractMethodDef[]) methodList.toArray(new AbstractMethodDef[0]);
 //    decl.fields = (FinalStaticFieldDef[]) fieldList.toArray(new FinalStaticFieldDef[0]);
@@ -1063,9 +1148,13 @@ BracedBody BracedBody() :
 {
 //  <LBRACE>  // Merging the definitions of BracedBody and BlockStatements so must remove braces
     (
-     temp = BodyItem()
-       { items.addLast(temp); }
-  )*
+     try{
+       temp = BodyItem()
+         { items.addLast(temp); }
+    }catch(ParseException e){
+       break;
+    }
+    )*
 //    <RBRACE>
   {
     SourceInfo si;
@@ -1558,7 +1647,7 @@ Type[] TypeArguments() :
   }
 
  (
-    <COMMA>
+    [<COMMA>]
     ( LOOKAHEAD(ArrayType()) temp = ArrayType() | temp = ReferenceType() )
     {
       list.add(temp);
@@ -1581,7 +1670,7 @@ TypeParameter[] TypeParameters() :
  <LT>
  temp = TypeFormalParameter() { list.add(temp); }
   (
-    <COMMA>
+    [<COMMA>]
     temp = TypeFormalParameter() { list.add(temp); }
   )*
   RightAngledBracket()
