@@ -93,6 +93,8 @@ public class JavacGJCompiler implements CompilerInterface {
   public static final String COMPILER_CLASS_NAME =
     "com.sun.tools.javac.v8.JavaCompiler";
 
+  private String _builtPath = "";
+
   /** A writer that discards its input. */
   private static final Writer NULL_WRITER = new Writer() {
     public void write(char cbuf[], int off, int len) throws IOException {}
@@ -126,6 +128,14 @@ public class JavacGJCompiler implements CompilerInterface {
       throw new RuntimeException("Invalid version of Java compiler.");
     } 
   }
+  
+  public void setBuildDirectory(File dir){
+    if(dir == null)
+      _builtPath = "";
+    else
+      _builtPath=dir.getAbsolutePath(); 
+  }
+
   
   /**
    * Uses reflection on the Log object to deduce which JDK is being used.
@@ -232,9 +242,22 @@ public class JavacGJCompiler implements CompilerInterface {
       // GJ defines the compile method to throw Throwable?!
       //System.err.println("Compile error: " + t);
       //t.printStackTrace();
-      return new CompilerError[] {
-        new CompilerError("Compile exception: " + t, false)
-      };
+      
+      
+      //Added to account for error in javac whereby a variable that was not declared will
+      //cause an out of memory error. This change allows us to output both errors and not
+      //just the out of memory error
+      
+      CompilerError[] errorArray = new CompilerError[compilerLog.getErrors().length + 1];
+      for(int i = 0; i < compilerLog.getErrors().length; i++) {
+        errorArray[i+1] = compilerLog.getErrors()[i];
+      }
+      errorArray[0] = new CompilerError("Compile exception: " + t, false);
+      return errorArray; 
+
+      //      return new CompilerError[] {
+      //        new CompilerError("Compile exception: " + t, false)
+      //      };
     }
 
     CompilerError[] errors = compilerLog.getErrors();
