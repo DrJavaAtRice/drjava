@@ -2,7 +2,7 @@
 <plugin
    id="edu.rice.cs.drjava"
    name="DrJava"
-   version="0.0.3"
+   version="1.0.0"
    provider-name="Rice University"
    class="edu.rice.cs.drjava.plugins.eclipse.EclipsePlugin">
 
@@ -14,6 +14,7 @@
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.debug.ui"/>
       <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.eclipse.jdt.core"/>
    </requires>
 
 
