@@ -669,4 +669,48 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
   }
+
+  /**
+   * After creating a new file and saving it, this test checks that the new document is
+   * not in sync before compiling and is in sync afterwards.
+   */
+  public void testInSyncAfterCompile()
+    throws BadLocationException, IOException
+  {
+    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final File file = tempFile();
+    
+    doc.saveFile(new FileSelector(file));
+    assertTrue(!doc.checkIfClassFileInSync());
+    doc.startCompile();
+    assertTrue(doc.checkIfClassFileInSync());
+    
+    // Make sure .class exists
+    File compiled = classForJava(file, "DrJavaTestFoo");
+    assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
+  }
+
+  /**
+   * After creating a new file, saving, and compiling it, this test checks that the new document is
+   * in sync after compiling and is out of sync after modifying and even saving it.
+   */
+  public void testOutOfSyncAfterModification()
+    throws BadLocationException, IOException
+  {
+    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final File file = tempFile();
+    
+    doc.saveFile(new FileSelector(file));
+    assertTrue(!doc.checkIfClassFileInSync());
+    doc.startCompile();
+    assertTrue(doc.checkIfClassFileInSync());
+    doc.getDocument().insertString(0, "hi", null);
+    assertTrue(!doc.checkIfClassFileInSync());
+    doc.saveFile(new FileSelector(file));
+    assertTrue(!doc.checkIfClassFileInSync());
+    
+    // Make sure .class exists
+    File compiled = classForJava(file, "DrJavaTestFoo");
+    assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
+  }
 }

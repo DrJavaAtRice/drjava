@@ -72,7 +72,7 @@ public abstract class DocumentDebugAction<T extends EventRequest>
   public DocumentDebugAction (DebugManager manager, OpenDefinitionsDocument doc) 
     throws DebugException, IllegalStateException {
     super(manager);
-    _className = _getQualifiedClassName(doc);
+    _className = doc.getDocument().getQualifiedClassName();
     _file = doc.getFile();
     _doc = doc;
   }  
@@ -151,27 +151,5 @@ public abstract class DocumentDebugAction<T extends EventRequest>
   protected void _prepareRequest(EventRequest request) {
     super._prepareRequest(request);
     request.putProperty("document", _doc);
-  }
-
-  
-  /**
-   * Gets the package and class name of the given OpenDefinitionsDocument
-   * @param doc OpenDefinitionsDocument whose qualified class name is desired
-   * @return the qualified class name
-   */
-  protected String _getQualifiedClassName(OpenDefinitionsDocument doc) {
-    String packageName = "";
-    String className = "";
-    try {
-      packageName = doc.getDocument().getPackageName();
-    }
-    catch (InvalidPackageException e) {
-      // Couldn't find package, pretend there's none
-    }
-    if ((packageName != null) && (!packageName.equals(""))) {
-      className = packageName + ".";
-    }
-    className += doc.getClassName();
-    return className;
   }
 }

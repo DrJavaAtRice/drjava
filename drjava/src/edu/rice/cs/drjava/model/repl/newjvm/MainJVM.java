@@ -46,6 +46,7 @@ import java.io.*;
 
 import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.drjava.CodeStatus;
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.repl.*;
 
@@ -304,9 +305,10 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
       
       //System.out.println("starting interpreter... " + jvmargs[1]);
       try {
-        //System.err.println("started interpreter jvm");
+        //DrJava.consoleOut().println("In MainJVM: starting interpreter jvm");
         _interpreterProcess = ExecJVM.
             runJVMPropogateClassPath(className, args, jvmargs);
+        //DrJava.consoleOut().println("In MainJVM: started interpreter jvm");
         
         // Start a thread to wait for the interpreter to die and to fire
         // off a new one (and notify model) when it happens
@@ -314,8 +316,11 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
           public void run() {
             try {
               int status = _interpreterProcess.waitFor();
+              //DrJava.consoleOut().println("In Thread: interpreterProcess ended. status=" +
+              //                            status);
               restartInterpreterJVM();
               if (!_isResetting()) {
+               
                 replCalledSystemExit(status);
               }
             }
@@ -325,6 +330,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
           }
         };
 
+        //DrJava.consoleOut().println("In MainJVM: starting thread");
         thread.start();
       }
       catch (IOException ioe) {
@@ -368,10 +374,9 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
    * (Timing issues, maybe?)
    * @param b whether we are in the process of resetting
    */
-  public void setIsResetting(boolean b) { 
-    synchronized(this) {
-      _resetInProgress = b;
-    }
+  public synchronized void setIsResetting(boolean b) { 
+    //DrJava.consoleOut().println("setIsResestting: resetInProgress: " + b);
+    _resetInProgress = b;
   }
   
   /**
@@ -379,7 +384,8 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
    * interactions JVM.
    * @see #setIsResetting
    */
-  private boolean _isResetting() {
+  private synchronized boolean _isResetting() {
+    //DrJava.consoleOut().println("isResetting: resetInProgress: " + _resetInProgress);
     return _resetInProgress;
   }
   

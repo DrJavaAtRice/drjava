@@ -99,6 +99,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   private int _cachedPrevLineLoc;
   /** Cached location of next line. */
   private int _cachedNextLineLoc;
+  private boolean _classFileInSync;
+  private File _classFile;
+  
   /**
    * The reduced model of the document that handles most of the
    * document logic and keeps track of state.  Should ONLY be referenced from
@@ -138,6 +141,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     _cachedLineNum = 1;
     _cachedPrevLineLoc = -1;
     _cachedNextLineLoc = -1;
+    _classFileInSync = false;
+    _classFile = null;
   }
 
   /**
@@ -235,6 +240,44 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   public long getTimestamp() {
     return _timestamp;
   }
+    
+  /**
+   * Gets the package and class name of this OpenDefinitionsDocument
+   * @return the qualified class name
+   */
+  public String getQualifiedClassName() {
+    String packageName = "";
+    String className = "";
+    try {
+      packageName = this.getPackageName();
+    }
+    catch (InvalidPackageException e) {
+      // Couldn't find package, pretend there's none
+    }
+    if ((packageName != null) && (!packageName.equals(""))) {
+      className = packageName + ".";
+    }
+    className += this.getClassName();
+    return className;
+  }
+  
+  public void setClassFileInSync(boolean inSync) {
+    _classFileInSync = inSync;
+  }
+  
+  public boolean getClassFileInSync() {
+    return _classFileInSync;
+  }
+  
+  public void setCachedClassFile(File classFile) {
+    _classFile = classFile;
+    //DrJava.consoleOut().println("cached classFile = " + _classFile);
+  }
+  
+  public File getCachedClassFile() {
+    return _classFile;
+  }
+  
   /**
    * Inserts a string of text into the document.
    * It turns out that this is not where we should do custom processing
@@ -251,8 +294,11 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       str = _removeTabs(str);
     }
 
-    _modifiedSinceSave = true;
-
+    if (!_modifiedSinceSave) {
+      _modifiedSinceSave = true;
+      _classFileInSync = false;
+    }
+    
     super.insertString(offset, str, a);
   }
 
@@ -296,7 +342,10 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * in {@link #removeUpdate}.
    */
   public void remove(int offset, int len) throws BadLocationException {
-    _modifiedSinceSave = true;
+    if (!_modifiedSinceSave) {
+      _modifiedSinceSave = true;
+      _classFileInSync = false;
+    }
     super.remove(offset, len);
   }
 
@@ -408,7 +457,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   public void resetModification() {
     try {
       writeLock();
-      _modifiedSinceSave = false;
+      _modifiedSinceSave = false;      
    if (_file != null)
      _timestamp = _file.lastModified();
     }

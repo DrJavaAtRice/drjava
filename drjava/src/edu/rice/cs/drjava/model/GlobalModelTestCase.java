@@ -352,7 +352,7 @@ public abstract class GlobalModelTestCase extends TestCase {
                  b,
                  numErrors > 0);
   }
-
+  
     // These exceptions are specially used only in this test case.
     // They are used to verify that the code blocks 
   public class OverwriteException extends RuntimeException{}

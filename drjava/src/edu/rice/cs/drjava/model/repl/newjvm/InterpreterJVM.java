@@ -46,6 +46,7 @@ import java.rmi.*;
 import java.net.MalformedURLException;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.util.OutputStreamRedirector;
+import javax.swing.JOptionPane;
 
 /**
  * This is the main class for the interpreter JVM.
@@ -73,6 +74,7 @@ public class InterpreterJVM extends UnicastRemoteObject
   {
     super();
 
+    //JOptionPane.showMessageDialog(null, "Starting InterpreterJVM initialization");
     reset();
 
     _mainJVM = (MainJVMRemoteI) Naming.lookup(url);
@@ -136,6 +138,7 @@ public class InterpreterJVM extends UnicastRemoteObject
     };
 
     thread.start();
+    //JOptionPane.showMessageDialog(null, "InterpreterJVM initialized");
 
   }
 

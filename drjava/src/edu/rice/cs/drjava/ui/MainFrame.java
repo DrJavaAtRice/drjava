@@ -98,6 +98,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   //private static final int SPLIT_DIVIDER_SIZE = 10;
 
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
+  private static final String OUT_OF_SYNC = " Current document is out of sync with the debugger and should be recompiled!";
 
   /**
    * The model which controls all logic in DrJava.
@@ -942,12 +943,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     try {
       if (inDebugMode()) {
         // Turn off debugger
-        debugger.shutdown();
+        debugger.shutdown();        
       }
       else {
         // Turn on debugger
         try {
           debugger.startup();
+          _updateDebugStatus();
         }
         catch (DebugException de) {
           _showError(de, "Debugger Error",
@@ -1063,23 +1065,29 @@ public class MainFrame extends JFrame implements OptionConstants {
    * are enabled and disabled appropriately after document
    * modifications.
    */
-  private void _installNewDocumentListener(Document d) {
+  private void _installNewDocumentListener(final Document d) {
     d.addDocumentListener(new DocumentListener() {
       public void changedUpdate(DocumentEvent e) {
-      _saveAction.setEnabled(true);
-      //_compileAction.setEnabled(false);
-      updateFileTitle();
-    }
-    public void insertUpdate(DocumentEvent e) {
-      _saveAction.setEnabled(true);
-      //_compileAction.setEnabled(false);
-      updateFileTitle();
-    }
-    public void removeUpdate(DocumentEvent e) {
-      _saveAction.setEnabled(true);
-      //_compileAction.setEnabled(false);
-      updateFileTitle();
-    }
+        _saveAction.setEnabled(true);
+        if (inDebugMode() && _debugPanel.getStatusText().equals(""))
+          _debugPanel.setStatusText(OUT_OF_SYNC);
+        //_compileAction.setEnabled(false);
+        updateFileTitle();
+      }
+      public void insertUpdate(DocumentEvent e) {
+        _saveAction.setEnabled(true);
+        if (inDebugMode() && _debugPanel.getStatusText().equals(""))
+          _debugPanel.setStatusText(OUT_OF_SYNC);
+        //_compileAction.setEnabled(false);
+        updateFileTitle();
+      }
+      public void removeUpdate(DocumentEvent e) {
+        _saveAction.setEnabled(true);
+        if (inDebugMode() && _debugPanel.getStatusText().equals(""))
+          _debugPanel.setStatusText(OUT_OF_SYNC);
+        //_compileAction.setEnabled(false);
+        updateFileTitle();
+      }
     });
   }
 
@@ -2357,6 +2365,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     // reset the undo/redo menu items
     _undoAction.setDelegatee(_currentDefPane.getUndoAction());
     _redoAction.setDelegatee(_currentDefPane.getRedoAction());    
+    
+    if(inDebugMode()) {
+      _updateDebugStatus();
+    }
   }
   
   /**
@@ -2511,6 +2523,23 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   /**
+   * Checks if debugPanel's status bar displays the OUT_OF_SYNC message but the current document
+   * is in sync. Clears the debugPanel's status bar in this case
+   */
+  private void _updateDebugStatus() {
+    // if the document is untitled, don't show that it is out of sync since it can't be debugged anyway
+    if (_model.getActiveDocument().isUntitled() || _model.getActiveDocument().getDocument().getClassFileInSync()) {
+      if (_debugPanel.getStatusText().equals(OUT_OF_SYNC)) {  
+        _debugPanel.setStatusText("");
+      }
+    }
+    else {
+      if(_debugPanel.getStatusText().equals(""))
+        _debugPanel.setStatusText(OUT_OF_SYNC);
+    }
+  }
+  
+  /**
    * Blocks access to DrJava while the hourglass cursor is on
    */
   private class GlassPane extends JComponent {
@@ -2594,6 +2623,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             //no need to update flag, because previous method call will do it
             //_hasWarnedAboutModified = true;
           }
+          _updateDebugStatus();
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -2603,11 +2633,17 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          _model.setActiveDocument(bp.getDocument());
+          JScrollPane scroll = 
+            (JScrollPane) _defScrollPanes.get(bp.getDocument());
+          if (scroll == null) {
+            throw new UnexpectedException(new Exception("Breakpoint set in a closed document."));
+          }
+          DefinitionsPane bpPane = (DefinitionsPane) scroll.getViewport().getView();
           _breakpointHighlights.put(bp, 
-                                    _currentDefPane.getHighlightManager().addHighlight(bp.getStartOffset(),
-                                                                                       bp.getEndOffset(),
-                                                                                       DefinitionsPane.BREAKPOINT_PAINTER));
+                                    bpPane.getHighlightManager().addHighlight(bp.getStartOffset(),
+                                                                              bp.getEndOffset(),
+                                                                              DefinitionsPane.BREAKPOINT_PAINTER));
+          _updateDebugStatus();
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -2714,7 +2750,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Fix OS X scrollbar bug before switching
       _reenableScrollBar();
       _createDefScrollPane(doc);
-      
+      //_updateDebugStatus();
       _recentFileManager.updateOpenFiles(doc.getFile());
     }
 
@@ -2820,6 +2856,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       hourglassOff();
       _updateErrorListeners();
       _errorPanel.reset();
+      _updateDebugStatus();
     }
     
     public void compileErrorDuringJUnit() {

@@ -67,6 +67,7 @@ public interface OpenDefinitionsDocument {
   public DefinitionsDocument getDocument();
 
   public String getClassName();
+    
   /**
    * Returns whether this document is currently untitled
    * (indicating whether it has a file yet or not).
@@ -248,6 +249,14 @@ public interface OpenDefinitionsDocument {
   public Pageable getPageable() throws IllegalStateException;
 
   public void cleanUpPrintJob();
+  
+  /**
+   * Checks if the document is modified. If not, searches for the class file
+   * corresponding to this document and compares the timestamps of the 
+   * class file to that of the source file.
+   * @return is the class file and this OpenDefinitionsDocument are in sync
+   */
+  public boolean checkIfClassFileInSync();
 
   /**
    * Returns the Breakpoint in this OpenDefinitionsDocument at the given 

@@ -44,6 +44,8 @@ import javax.swing.ListModel;
 import java.io.*;
 import java.util.*;
 
+import gj.util.Vector;
+
 import edu.rice.cs.util.swing.FindReplaceMachine;
 
 import edu.rice.cs.drjava.DrJava;
@@ -354,4 +356,12 @@ public interface GlobalModel {
    * @return whether any documents have been modified
    */
   public boolean areAnyModifiedSinceSave();
+  
+  /**
+   * Searches for a file with the given name on the provided paths.
+   * Returns null if the file is not found.
+   * @param filename Name of the source file to look for
+   * @param paths An array of directories to search
+   */
+  public File getSourceFileFromPaths(String filename, gj.util.Vector<File> paths);
 }

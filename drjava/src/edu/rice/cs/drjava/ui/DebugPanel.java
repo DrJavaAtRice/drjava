@@ -46,6 +46,7 @@ import java.util.Hashtable;
 import java.util.Enumeration;
 
 import javax.swing.*;
+import javax.swing.border.*;
 import javax.swing.text.*;
 import javax.swing.tree.*;
 import javax.swing.event.*;
@@ -90,6 +91,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private JButton _stepIntoButton;
   private JButton _stepOverButton;
   private JButton _stepOutButton;
+  private JLabel _statusBar;
   
   private Vector<DebugManager.WatchData> _watches;
   private Vector<DebugManager.ThreadData> _threads;
@@ -127,6 +129,15 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _buttonPanel = new JPanel(new BorderLayout());
     _setupButtonPanel();
     this.add(_buttonPanel, BorderLayout.EAST);
+    
+    _statusBar = new JLabel("");
+    /*_statusBar.setBorder(
+      new CompoundBorder(new EmptyBorder(2,2,2,2),
+                         new CompoundBorder(new BevelBorder(BevelBorder.LOWERED),
+                                            new EmptyBorder(2,2,2,2))));
+                                            */
+    _statusBar.setForeground(Color.blue.darker());
+    this.add(_statusBar, BorderLayout.SOUTH);
     
     _debugger.addListener(new DebugPanelListener());
   }
@@ -258,7 +269,13 @@ public class DebugPanel extends JPanel implements OptionConstants {
         DebugManager.WatchData watch = _watches.elementAt(row);
         switch(col) {
           case 0: return watch.getName();
-          case 1: return watch.getValue();
+          case 1: Object value = watch.getValue();
+          if (value == null)
+            return "null";
+          else if (value == DebugManager.WatchUndefinedValue.Singleton)
+            return "<not in scope>";
+          else
+            return value.toString();        
           case 2: return watch.getType();
         }
         return null;
@@ -638,6 +655,14 @@ public class DebugPanel extends JPanel implements OptionConstants {
   }
   public void disableButtons() {
     setThreadDependentButtons(false);
+  }
+  
+  public void setStatusText(String text) {
+    _statusBar.setText(text);
+  }
+  
+  public String getStatusText() {
+    return _statusBar.getText();
   }
 }
 

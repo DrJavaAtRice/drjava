@@ -1052,11 +1052,18 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         // Get sourceroots and all files
         File[] sourceRoots = getSourceRootSet();
         File[] files = new File[_definitionsDocs.getSize()];
+        int index = 0;
         for (int i = 0; i < _definitionsDocs.getSize(); i++) {
           OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
             _definitionsDocs.getElementAt(i);
-          files[i] = doc.getFile();
+          if (!doc.checkIfClassFileInSync()) {
+            files[index] = doc.getFile();
+            index++;
+          }
         }
+        
+        File[] outOfSyncFiles = new File[index];
+        System.arraycopy(files,0,outOfSyncFiles,0,index);
       
         notifyListeners(new EventNotifier() {
           public void notifyListener(GlobalModelListener l) {
@@ -1065,7 +1072,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         });
         
         // Compile everything
-        _compileFiles(sourceRoots, files);
+        _compileFiles(sourceRoots, outOfSyncFiles);
         
         // Fire a compileEnded event
         notifyListeners(new EventNotifier() {
@@ -1079,7 +1086,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
           resetConsole();
           resetInteractions();
         }
-        
       }
       catch (IllegalStateException ise) {
         // One of the docs didn't have a file.  Don't compile.
@@ -1101,8 +1107,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     CompilerInterface compiler
       = CompilerRegistry.ONLY.getActiveCompiler();
       
-    errors = compiler.compile(sourceRoots, files);
+    if (files.length > 0)
+      errors = compiler.compile(sourceRoots, files);
     _distributeErrors(errors);
+    // check if all open documents are in sync
+    /*ListModel list = _definitionsDocs;
+    for (int i = 0; i < list.getSize(); i++) {
+      OpenDefinitionsDocument currDoc = (OpenDefinitionsDocument)list.getElementAt(i);
+      currDoc.checkIfClassFileInSync();
+    }*/
   }
 
   /**
@@ -1160,6 +1173,24 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       }
       return modified;
     }
+  
+    /**
+     * Searches for a file with the given name on the provided paths.
+     * Returns null if the file is not found.
+     * @param filename Name of the source file to look for
+     * @param paths An array of directories to search
+     */
+    public File getSourceFileFromPaths(String filename, Vector<File> paths) {
+      File f = null;
+      for (int i = 0; i < paths.size(); i++) {
+        String currRoot = paths.elementAt(i).getAbsolutePath();
+        f = new File(currRoot + System.getProperty("file.separator") + filename);
+        if (f.exists()) {
+          return f;
+        }
+      }
+      return null;
+    }
     
     
     // ---------- DefinitionsDocumentHandler inner class ----------
@@ -1201,6 +1232,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     public String getClassName() { 
       return _doc.getClassName();
     }
+    
     /**
      * Returns whether this document is currently untitled
      * (indicating whether it has a file yet or not).
@@ -1627,7 +1659,82 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     public boolean isModifiedOnDisk() {
       return _doc.isModifiedOnDisk();
     }
-    
+  
+  /**
+   * Checks if the document is modified. If not, searches for the class file
+   * corresponding to this document and compares the timestamps of the 
+   * class file to that of the source file.
+   */
+    public boolean checkIfClassFileInSync() {
+      if(isModifiedSinceSave()) {
+        _doc.setClassFileInSync(false);
+        return false;
+      }
+      File classFile = _doc.getCachedClassFile();
+      if (classFile == null) {
+        String className = _doc.getQualifiedClassName();
+        String ps = System.getProperty("file.separator");
+        // replace periods with the System's file separator
+        className = StringOps.replace(className, ".", ps);
+        
+        // crop off the $ if there is one and anything after it
+        int indexOfDollar = className.indexOf('$');
+        if (indexOfDollar > -1) {
+          className = className.substring(0, indexOfDollar);
+        }
+        
+        String filename = className + ".class";
+        // Check source root set (open files)
+        File[] sourceRoots = getSourceRootSet();
+        Vector<File> roots = new Vector<File>();
+        for (int i=0; i < sourceRoots.length; i++) {
+          roots.addElement(sourceRoots[i]);
+        }
+        classFile = getSourceFileFromPaths(filename, roots);
+        if (classFile == null) {
+          // not on source root set, check system classpath
+          String cp = System.getProperty("java.class.path");
+          String pathSeparator = System.getProperty("path.separator");
+          Vector<File> cpVector = new Vector<File>();
+          for (int i = 0; i < cp.length();) {
+            int nextSeparator = cp.indexOf(pathSeparator, i);
+            if (nextSeparator == -1) {
+              cpVector.addElement(new File(cp.substring(i, cp.length())));
+              break;
+            }
+            cpVector.addElement(new File(cp.substring(i, nextSeparator)));
+            i = nextSeparator + 1;
+          }
+          classFile = getSourceFileFromPaths(filename, cpVector);
+        }
+        if (classFile == null) {
+          // not on system classpath, check interactions classpath
+          classFile = getSourceFileFromPaths(filename, DrJava.CONFIG.getSetting(EXTRA_CLASSPATH));
+        }
+        _doc.setCachedClassFile(classFile);
+        if (classFile == null) {
+          // couldn't find the class file
+          return false;
+        }
+      }
+      // compare timestamps
+      File sourceFile = null;
+      try {
+        sourceFile = getFile();
+      }
+      catch (IllegalStateException ise) {
+        throw new UnexpectedException(ise);
+      }
+      if (sourceFile.lastModified() > classFile.lastModified()) {
+        _doc.setClassFileInSync(false);
+        return false;
+      }
+      else {
+        _doc.setClassFileInSync(true);
+        return true;
+      }
+    }
+      
     /** 
      * Determines if the defintions document has been changed
      * by an outside program. If the document has changed,
@@ -2091,7 +2198,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       final OpenDefinitionsDocument doc =
         new DefinitionsDocumentHandler(tempDoc);
       _definitionsDocs.addElement(doc);
-      
+      //doc.checkIfClassFileInSync();
       
       notifyListeners(new EventNotifier() {
           public void notifyListener(GlobalModelListener l) {

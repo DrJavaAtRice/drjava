@@ -75,7 +75,7 @@ import com.sun.jdi.event.*;
 public class DebugManager {
   public static final int STEP_INTO = StepRequest.STEP_INTO;
   public static final int STEP_OVER = StepRequest.STEP_OVER;
-  public static final int STEP_OUT = StepRequest.STEP_OUT;
+  public static final int STEP_OUT = StepRequest.STEP_OUT; 
   
   /**
    * Reference to DrJava's model.
@@ -140,6 +140,12 @@ public class DebugManager {
    */
   public synchronized void startup() throws DebugException {
     if (!isReady()) {
+      // check if all open documents are in sync
+      ListModel list = _model.getDefinitionsDocuments();
+      for (int i = 0; i < list.getSize(); i++) {
+        OpenDefinitionsDocument currDoc = (OpenDefinitionsDocument)list.getElementAt(i);
+        currDoc.checkIfClassFileInSync();
+      }
       _attachToVM();
       ThreadDeathRequest tdr = _eventManager.createThreadDeathRequest();
       tdr.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
@@ -191,7 +197,7 @@ public class DebugManager {
    * any state.
    */
   public synchronized void shutdown() {
-    if (isReady()) {
+    if (isReady()) {      
       removeAllBreakpoints();
       removeAllWatches();
       try {
@@ -437,7 +443,6 @@ public class DebugManager {
     throws DebugException
   {
     if (!isReady()) return;
-    
     Breakpoint breakpoint = doc.getBreakpointAt(offset);
     if (breakpoint == null) {
       setBreakpoint(new Breakpoint (doc, offset, lineNum, this));
@@ -455,6 +460,9 @@ public class DebugManager {
   public synchronized void setBreakpoint(final Breakpoint breakpoint)
   {
     if (!isReady()) return;
+    
+    breakpoint.getDocument().checkIfClassFileInSync();
+    // update UI back in MainFrame
     
     _breakpoints.addElement(breakpoint);
     breakpoint.getDocument().addBreakpoint(breakpoint);
@@ -638,7 +646,7 @@ public class DebugManager {
       String filename = className + ".java";
       Vector<File> sourcepath = 
         DrJava.CONFIG.getSetting(OptionConstants.DEBUG_SOURCEPATH);
-      File f = _getSourceFileFromPaths(filename, sourcepath);
+      File f = _model.getSourceFileFromPaths(filename, sourcepath);
       //File f = null;
       if (f == null) {
         // If not on sourcepath, check source root set (open files)
@@ -647,7 +655,7 @@ public class DebugManager {
         for (int i=0; i < sourceRoots.length; i++) {
           roots.addElement(sourceRoots[i]);
         }
-        f = _getSourceFileFromPaths(filename, roots);
+        f = _model.getSourceFileFromPaths(filename, roots);
       }
       
       if (f != null) {
@@ -666,6 +674,9 @@ public class DebugManager {
     
     // Open and scroll if doc was found
     if (doc != null) {
+      doc.checkIfClassFileInSync();
+      // change UI if in sync in MainFrame listener
+      
       final OpenDefinitionsDocument docF = doc;
       final Location locationF = location;
       
@@ -679,26 +690,7 @@ public class DebugManager {
       String className = location.declaringType().name();
       printMessage("  (Source for " + className + " not found.)");
     }
-  }
-  
-  /**
-   * Searches for a source file with the given name on the provided paths.
-   * Returns null if the file is not found.
-   * @param filename Name of the source file to look for
-   * @param paths An array of directories to search
-   */
-  private File _getSourceFileFromPaths(String filename, Vector<File> paths) {
-    File f = null;
-    for (int i = 0; i < paths.size(); i++) {
-      String currRoot = paths.elementAt(i).getAbsolutePath();
-      f = new File(currRoot + System.getProperty("file.separator") + filename);
-      if (f.exists()) {
-        return f;
-      }
-    }
-    return null;
-  }
-  
+  }  
   
   /**
    * Prints a message in the Interactions Pane.
@@ -737,7 +729,7 @@ public class DebugManager {
           currWatch.setType(obj.type());
         }
         else {
-          currWatch.setValue(null);
+          currWatch.setValue(WatchUndefinedValue.Singleton);
           currWatch.setType(null);
         }
         continue;
@@ -761,21 +753,22 @@ public class DebugManager {
         while (field == null) {
           
           // crop off the $ if there is one and anything after it
-          int indexOfDollar = className.indexOf('$');    
+          int indexOfDollar = className.lastIndexOf('$');    
           if (indexOfDollar > -1) {
             className = className.substring(0, indexOfDollar);
           }
           else {
             // There is no $ in the className, we're at the outermost class and the
             // field still was not found
-            currWatch.setValue(null);
-            currWatch.setType(null);
+            
+            //currWatch.setValue(WatchUndefinedValue.Singleton);
+            //currWatch.setType(null);
             break;
           }
           rt = (ReferenceType)_vm.classesByName(className).get(0);
           if (rt == null) {
-            currWatch.setValue(null);
-            currWatch.setType(null);
+            //currWatch.setValue(WatchUndefinedValue.Singleton);
+            //currWatch.setType(null);
             break;
           }
           field = rt.fieldByName(currName);
@@ -819,7 +812,7 @@ public class DebugManager {
               }
             }
             else {
-              currWatch.setValue(null);
+              currWatch.setValue(WatchUndefinedValue.Singleton);
               currWatch.setType(null);
             }
           }
@@ -953,7 +946,7 @@ public class DebugManager {
     
     public WatchData(String name) {
       _name = name;
-      _value = null;
+      _value = WatchUndefinedValue.Singleton;
       _type = null;
       _changed = false;
     }
@@ -1059,6 +1052,13 @@ public class DebugManager {
     
     public int getLine() {
       return _line;
+    }
+  }
+  
+  public static class WatchUndefinedValue {
+    public static final WatchUndefinedValue Singleton = new WatchUndefinedValue();
+    
+    private WatchUndefinedValue() {
     }
   }
 }

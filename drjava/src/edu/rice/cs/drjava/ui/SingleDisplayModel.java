@@ -517,6 +517,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
   private void _setActiveDoc(int index) {
     ListModel docs = getDefinitionsDocuments();
     _activeDocument = (OpenDefinitionsDocument) docs.getElementAt(index);
+    _activeDocument.checkIfClassFileInSync();
 
     // notify listeners
     notifyListeners(new EventNotifier() {
