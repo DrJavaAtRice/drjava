@@ -362,6 +362,7 @@ public abstract class GlobalModelTestCase extends TestCase {
     // They are used to verify that the code blocks 
   public class OverwriteException extends RuntimeException{}
   public class OpenWarningException extends RuntimeException{}
+  public class FileMovedWarningException extends RuntimeException{}
   
   public class WarningFileSelector implements FileOpenSelector, FileSaveSelector {
     private File _file;
@@ -380,6 +381,10 @@ public abstract class GlobalModelTestCase extends TestCase {
     }
     public boolean verifyOverwrite(){
       throw new OverwriteException();
+    }
+    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, 
+                                            File oldFile) {
+      throw new FileMovedWarningException();
     }
   }
 
@@ -419,6 +424,10 @@ public abstract class GlobalModelTestCase extends TestCase {
     public boolean verifyOverwrite(){
       return true;
     }
+    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc,
+                                            File oldFile) {
+      return true;
+    }
   }
   
   public class CancelingSelector implements FileOpenSelector, FileSaveSelector
@@ -432,6 +441,10 @@ public abstract class GlobalModelTestCase extends TestCase {
     public void warnFileOpen(){
     }
     public boolean verifyOverwrite(){
+      return true;
+    }
+    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc,
+                                            File oldFile) {
       return true;
     }
   }

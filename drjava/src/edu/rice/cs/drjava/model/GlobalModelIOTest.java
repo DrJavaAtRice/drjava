@@ -1215,11 +1215,12 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     file.delete();
     changeDocumentText(BAR_TEXT, doc);
     try {
-      doc.saveFile(new FileSelector(file));
+      doc.saveFile(new WarningFileSelector(file));
       fail("Save file should have thrown an exception");
     }
-    catch (FileMovedException fme) {
-      //this is expected to occur
+    catch (GlobalModelTestCase.FileMovedWarningException fme) {
+      // this is expected to occur:
+      //  WarningFileSelector throws it in shouldSaveAfterFileMoved()
     }
    
     assertModified(true, doc);

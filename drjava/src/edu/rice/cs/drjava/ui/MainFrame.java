@@ -254,6 +254,18 @@ public class MainFrame extends JFrame implements OptionConstants {
     public boolean verifyOverwrite() {
       return _verifyOverwrite();
     }
+    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc,
+                                            File oldFile) {
+      _model.setActiveDocument(doc);
+      String text = "File " + oldFile.getAbsolutePath() +
+        "\ncould not be found on disk!  It was probably moved\n" +
+        "or deleted.  Would you like to save it in a new file?";
+      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
+                                             text,
+                                             "File Moved or Deleted",
+                                             JOptionPane.YES_NO_OPTION);
+      return (rc == JOptionPane.YES_OPTION);
+    }
   };
 
   /** Resets the document in the definitions pane to a blank one. */
@@ -745,16 +757,20 @@ public class MainFrame extends JFrame implements OptionConstants {
                                               JOptionPane.QUESTION_MESSAGE,
                                               null,options,
                                               options[1]);
-      if(resp == 2 || resp == JOptionPane.CLOSED_OPTION) {
+      // Cancel
+      if (resp == 2 || resp == JOptionPane.CLOSED_OPTION) {
         return;
       }
       String history = _model.getHistoryAsString();
-      if(resp == 0) {
+      
+      // Edit the history
+      if (resp == 0) {
         history = (new HistorySaveDialog(MainFrame.this)).editHistory(history);
       }
-      if(history==null) {
+      if (history == null) {
         return; // save cancelled
       }
+      
       // Working directory is default place to start
       File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
       if (workDir == FileOption.NULL_FILE) {
@@ -777,19 +793,25 @@ public class MainFrame extends JFrame implements OptionConstants {
         public boolean verifyOverwrite() {
           return _verifyOverwrite();
         }
+        public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc,
+                                                File oldFile) {
+          return true;
+        }
       };
       
       File c = null;
       try {
         c = selector.getFile();
-      } catch (OperationCanceledException oce) {
+      }
+      catch (OperationCanceledException oce) {
         return;
         // don't need to do anything
       }
       
       if (c != null) {
         if (c.getName().indexOf('.') == -1)
-          c = new File(c.getAbsolutePath() + "." + InteractionsHistoryFilter.HIST_EXTENSION);
+          c = new File(c.getAbsolutePath() + "." + 
+                       InteractionsHistoryFilter.HIST_EXTENSION);
         try {
           FileOutputStream fos = new FileOutputStream(c);
           OutputStreamWriter osw = new OutputStreamWriter(fos);
@@ -801,7 +823,6 @@ public class MainFrame extends JFrame implements OptionConstants {
           _showIOError(new IOException("An error occured writing the history to a file"));
         }
       }
-      
       
       _interactionsPane.requestFocus();
     }
@@ -1310,9 +1331,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       _model.getActiveDocument().saveFile(_saveSelector);
       _currentDefPane.hasWarnedAboutModified(false);
     }
-    catch (FileMovedException fme) {
-      _showFileMovedError(fme);
-    }
     catch (IOException ioe) {
       _showIOError(ioe);
     }
@@ -1331,9 +1349,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _saveAll() {
     try {
       _model.saveAllFiles(_saveSelector);
-    }
-    catch (FileMovedException fme) {
-      _showFileMovedError(fme);
     }
     catch (IOException ioe) {
       _showIOError(ioe);
@@ -1605,23 +1620,17 @@ public class MainFrame extends JFrame implements OptionConstants {
 
 
   void _showFileMovedError(FileMovedException fme) {
-    String text = "File " + fme.getFile().getAbsolutePath() +
-      "\ncould not be found on disk!  It was probably moved\n" +
-      "or deleted.  Would you like to save it in a new file?";
-    int rc = JOptionPane.showConfirmDialog(MainFrame.this,
-                                           text,
-                                           "File Moved or Deleted",
-                                           JOptionPane.YES_NO_OPTION);
-    
-    switch (rc) {
-      case JOptionPane.YES_OPTION:
-        _saveAs();
-      case JOptionPane.NO_OPTION:
-      case JOptionPane.CLOSED_OPTION:
-      case JOptionPane.CANCEL_OPTION:
-        return;
-      default:
-        throw new RuntimeException("Invalid rc: " + rc);
+    try {
+      File f = fme.getFile();
+      OpenDefinitionsDocument doc = _model.getDocumentForFile(f);
+      if (doc != null) {
+        if (_saveSelector.shouldSaveAfterFileMoved(doc, f)) {
+          _saveAs();
+        }
+      }
+    }
+    catch (IOException ioe) {
+      // Couldn't find the document, so ignore the FME
     }
   }
   

@@ -34,21 +34,27 @@
         <ul>
             <li>3. Yes: <b>QuestionCurrLineEmpty</b><br>
             <ul>
-                <li>4. Yes: ActionStartPrevLinePlus(" * ")
-                <li>5. No: ActionStartPrevLinePlus(" ")
+                <li>4. Yes: ActionStartPrevLinePlus(" * ")<br>
+                    <i>Starting first line of a mutli-line comment</i>
+                <li>5. No: ActionStartPrevLinePlus(" ")<br>
+                    <i>Revisiting first line of a mutli-line comment</i>
             </ul>
             <li>6. No: <b>QuestionPrevLineStartsWith("*")</b><br>
             <ul>
                 <li>7. Yes: <b>QuestionCurrLineStartsWith("*")</b><br>
                 <ul>
-                    <li>8. Yes: ActionStartPrevLinePlus("") (Goto 12)
+                    <li>8. Yes: ActionStartPrevLinePlus("") (Goto 12)<br>
+                        <i>Revisiting middle line of a mutli-line comment (with star)</i>
                     <li>9. No: <b>QuestionCurrLineEmpty</b><br>
                     <ul>
-                        <li>10. Yes: ActionStartPrevLinePlus("* ")
-                        <li>11. No: ActionStartPrevLinePlus("") (Goto 12)
+                        <li>10. Yes: ActionStartPrevLinePlus("* ")<br>
+                            <i>Starting middle line of a mutli-line comment</i>
+                        <li>11. No: ActionStartPrevLinePlus("") (Goto 12)<br>
+                            <i>Revisiting middle line of a mutli-line comment (without star)</i>
                     </ul>
                 </ul>
-                <li>12. No: ActionStartPrevLinePlus("")
+                <li>12. No: ActionStartPrevLinePlus("")<br>
+                    <i>Following a line with no start in a mutli-line comment</i>
             </ul>
         </ul>
 

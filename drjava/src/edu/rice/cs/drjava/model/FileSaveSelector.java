@@ -48,8 +48,29 @@ import java.io.File;
  */
 public interface FileSaveSelector {
 
+  /**
+   * Returns the file to save.
+   * @throws OperationCanceledException if the save request is canceled
+   */
   public File getFile() throws OperationCanceledException;
+  
+  /**
+   * Informs the user that the chosen file is already open and cannot be saved.
+   * The save is not performed.
+   */
   public void warnFileOpen();
+  
+  /**
+   * Confirms whether the existing chosen file should be overwritten.
+   */
   public boolean verifyOverwrite();
+  
+  /**
+   * Confirms whether a new file should be selected after the existing chosen
+   * file is detected to have been deleted or moved.
+   * @param oldFile The file that was moved or deleted.
+   */
+  public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, 
+                                          File oldFile);
 
 }

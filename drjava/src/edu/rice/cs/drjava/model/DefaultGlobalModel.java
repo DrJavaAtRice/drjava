@@ -1520,7 +1520,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * Saves the document with a FileWriter.  If the file name is already
      * set, the method will use that name instead of whatever selector
      * is passed in.
-     * @param com a selector that picks the file name
+     * @param com a selector that picks the file name if the doc is untitled
      * @exception IOException
      */
     public void saveFile(FileSaveSelector com) throws IOException {
@@ -1530,23 +1530,40 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       try {
         if (_doc.isUntitled()) {
           realCommand = com;
-        } else {
-          file = _doc.getFile();
-          realCommand = new FileSaveSelector() {
-            public File getFile() throws OperationCanceledException {
-              return file;
+        }
+        else {
+          try {
+            file = _doc.getFile();
+            realCommand = new FileSaveSelector() {
+              public File getFile() throws OperationCanceledException {
+                return file;
+              }
+              public void warnFileOpen() {}
+              public boolean verifyOverwrite() {
+                return true;
+              }
+              public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc,
+                                                      File oldFile) {
+                return true;
+              }
+            };
+          }
+          catch (FileMovedException fme) {
+            // getFile() failed, prompt the user if a new one should be selected
+            if (com.shouldSaveAfterFileMoved(this, fme.getFile())) {
+              realCommand = com;
             }
-            public void warnFileOpen() {}
-            public boolean verifyOverwrite() {
-              return true;
+            else {
+              // User declines to save as a new file, so don't save
+              return;
             }
-          };
+          }
         }
 
         saveFileAs(realCommand);
       }
       catch (IllegalStateException ise) {
-        // No file; this should be caught by isUntitled()
+        // No file--  this should have been caught by isUntitled()
         throw new UnexpectedException(ise);
       }
     }
@@ -1559,53 +1576,59 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * this method fires fileSave(File).  If the save fails for any
      * reason, the event is not fired.
      * @param com a selector that picks the file name.
-     * @exception IOException
+     * @throws IOException if the save fails due to an IO error
      */
     public void saveFileAs(FileSaveSelector com) throws IOException {
       try {
         final OpenDefinitionsDocument openDoc = this;
         final File file = com.getFile();
         final OpenDefinitionsDocument otherDoc = _getOpenDocument(file);
+        
+        // Check if file is already open in another document
         if ( otherDoc != null && openDoc != otherDoc ) {
+          // Can't save over an open document
           com.warnFileOpen();
-          throw new OperationCanceledException();
         }
-        else if (file.exists()) {
-          if (com.verifyOverwrite()) {
-            if (! file.getCanonicalFile().getName().equals(file.getName())) {
-              //need filename case switching (on windows)
-              file.renameTo(file);
+        
+        // If the file exists, make sure it's ok to overwrite it
+        else if (!file.exists() || com.verifyOverwrite()) {
+            
+          // Correct the case of the filename (in Windows)
+          if (! file.getCanonicalFile().getName().equals(file.getName())) {
+            file.renameTo(file);
+          }
+          
+          // Save the file
+          FileWriter writer = new FileWriter(file);
+          _editorKit.write(writer, _doc, 0, _doc.getLength());
+          writer.close();
+          _doc.resetModification();
+          _doc.setFile(file);
+          _doc.setCachedClassFile(null);
+          checkIfClassFileInSync();
+          notifyListeners(new EventNotifier() {
+            public void notifyListener(GlobalModelListener l) {
+              l.fileSaved(openDoc);
             }
-          } else {
-            throw new OperationCanceledException();
+          });
+          
+          // Make sure this file is on the classpath
+          try {
+            File classpath = getSourceRoot();
+            _interpreterControl.addClassPath(classpath.getAbsolutePath());
+          }
+          catch (InvalidPackageException e) {
+            // Invalid package-- don't add to classpath
           }
         }
-        FileWriter writer = new FileWriter(file);
-        _editorKit.write(writer, _doc, 0, _doc.getLength());
-        writer.close();
-        _doc.resetModification();
-        _doc.setFile(file);
-        _doc.setCachedClassFile(null);
-        checkIfClassFileInSync();
-        notifyListeners(new EventNotifier() {
-          public void notifyListener(GlobalModelListener l) {
-          l.fileSaved(openDoc);
-        }
-        });
         
-        // Make sure this is on the classpath
-        try {
-          File classpath = getSourceRoot();
-          _interpreterControl.addClassPath(classpath.getAbsolutePath());
-        }
-        catch (InvalidPackageException e) {
-          // Invalid package-- don't add to classpath
-        }
       }
       catch (OperationCanceledException oce) {
-        // OK, do nothing as the user wishes.
+        // Thrown by com.getFile() if the user cancels.
+        //   We don't save if this happens.
       }
       catch (BadLocationException docFailed) {
+        // We don't expect this to happen
         throw new UnexpectedException(docFailed);
       }
     }
@@ -1620,7 +1643,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       String filename = "(untitled)";
       try {
         filename = _doc.getFile().getAbsolutePath();
-      } catch (IllegalStateException e) {
+      }
+      catch (IllegalStateException e) {
       }
 
       _book = new DrJavaBook(_doc.getText(0, _doc.getLength()), filename, _pageFormat);
@@ -2042,6 +2066,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         return false;
       }
     }
+    
     public void revertFile() throws IOException {
 
       //need to remove old, possibly invalid breakpoints
@@ -2051,8 +2076,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       
       try {
         File file = doc.getFile();
-        //this line precedes the .remove() so that a document with an invalid file is not cleared before
-        // this fact is discovered.
+        //this line precedes the .remove() so that a document with an invalid
+        // file is not cleared before this fact is discovered.
+
         FileReader reader = new FileReader(file);
         DefinitionsDocument tempDoc = doc.getDocument();
         
@@ -2072,10 +2098,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
               l.fileReverted(doc);
             }
         });
-      } catch (IllegalStateException docFailed) {
+      }
+      catch (IllegalStateException docFailed) {
         //cant revert file if doc has no file
         throw new UnexpectedException(docFailed);
-      } catch (BadLocationException docFailed) {
+      }
+      catch (BadLocationException docFailed) {
         throw new UnexpectedException(docFailed);
       }
     }

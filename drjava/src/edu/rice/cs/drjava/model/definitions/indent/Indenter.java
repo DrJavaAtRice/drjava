@@ -77,6 +77,7 @@ public class Indenter {
     String oneLevel = new String(indent);
     
     IndentRule 
+      // Main tree
       rule37 = new ActionStartCurrStmtPlus(oneLevel),
       rule36 = new ActionStartStmtOfBracePlus(oneLevel),
       rule35 = rule37,
@@ -100,9 +101,12 @@ public class Indenter {
       rule17 = new QuestionBraceIsCurly(rule18, rule25),
       rule16 = new ActionBracePlus(" " + oneLevel),
       rule15 = new ActionBracePlus(" "),
-      rule38 = new QuestionCurrLineStartsWith(")",rule30,rule15),
+      rule38 = new QuestionCurrLineStartsWith(")",rule30,rule15),  //BROKEN
+        // Why is rule 38 here?
       rule14 = new QuestionNewParenPhrase(rule38, rule16), //rule15->rule38
       rule13 = new QuestionBraceIsParenOrBracket(rule14, rule17),
+        
+      // Comment tree
       rule12 = new ActionStartPrevLinePlus(""),
       rule11 = rule12,
       rule10 = new ActionStartPrevLinePlus("* "),
@@ -114,6 +118,7 @@ public class Indenter {
       rule04 = new ActionStartPrevLinePlus(" * "), 
       rule03 = new QuestionCurrLineEmpty(rule04, rule05),
       rule02 = new QuestionPrevLineStartsComment(rule03, rule06),
+
       rule01 = new QuestionInsideComment(rule02, rule13);
     
     _topRule = rule01;
