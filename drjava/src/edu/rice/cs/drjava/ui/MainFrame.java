@@ -1579,10 +1579,13 @@ public class MainFrame extends JFrame implements OptionConstants {
         if (name.endsWith(".dj1")) ret = _dj1;
         if (name.endsWith(".dj2")) ret = _dj2;
       }
-      if (ret == null)
-        return super.getIcon(f);
-      else
-        return ret;
+      if (ret == null) {
+        ret = super.getIcon(f);
+        if (ret.getIconHeight() < _java.getIconHeight()) {
+          ret = new CenteredIcon(ret, _java.getIconWidth(), _java.getIconHeight());
+        }
+      }
+      return ret;
     }
   }
   

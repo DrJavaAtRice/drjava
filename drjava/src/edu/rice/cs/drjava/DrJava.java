@@ -689,15 +689,29 @@ public class DrJava implements OptionConstants {
   public static boolean promptForToolsJar(boolean needCompiler,
                                           boolean needDebugger) {
     boolean restartRequired = false;
-    final String[] text = {
-      "DrJava cannot find the Java SDK's 'tools.jar' file. ",
-      "This file is necessary to compile files and use the ",
-      "debugger.  It is generally located in the 'lib' ",
-      "subdirectory of your Java installation directory. ",
-      "Would you like to specify its location? ",
-      "(If you say 'No', DrJava might be unable to compile ",
-      "or debug programs.)"
-    };
+    final String[] text;
+    if (needDebugger && !needCompiler) {
+      text = new String[]{
+        "DrJava cannot get the necessary information from the",
+        "current Java SDK's 'tools.jar' file to start the",
+        "debugger. Would you like to specify the 'tools.jar'",
+        "file for the version of java you are using to run",
+        "DrJava at this time?",
+        "(If you say 'No', DrJava might be unable to debug",
+        "programs and the debug menu will not appear.)"
+      };
+    }
+    else {
+      text = new String[]{
+        "DrJava cannot find the Java SDK's 'tools.jar' file. ",
+        "This file is necessary to compile files and use the ",
+        "debugger.  It is generally located in the 'lib' ",
+        "subdirectory of your Java installation directory. ",
+        "Would you like to specify its location? ",
+        "(If you say 'No', DrJava might be unable to compile ",
+        "or debug programs.)"
+      };
+    }
 
     int result = JOptionPane.showConfirmDialog(null, text, "Locate 'tools.jar'?",
                                                JOptionPane.YES_NO_OPTION);
@@ -750,7 +764,8 @@ public class DrJava implements OptionConstants {
           }
         }
       }
-      while ((needCompiler || needDebugger) && _userWantsToPickAgain());
+      while ((needCompiler || needDebugger) && 
+             _userWantsToPickAgain(needDebugger && !needCompiler));
     }
 
     return restartRequired;
@@ -761,16 +776,30 @@ public class DrJava implements OptionConstants {
    * found in the specified location, and asks if he would like to specify
    * a new location.
    */
-  private static boolean _userWantsToPickAgain() {
-    final String[] text = {
-      "The file you chose did not appear to be a valid 'tools.jar'. ",
-      "(Your choice might be an incompatible version of the file.) ",
-      "Would you like to pick again?  The 'tools.jar' file is ",
-      "generally located in the 'lib' subdirectory under your ",
-      "JDK installation directory.",
-      "(If you say 'No', DrJava might be unable to compile or ",
-      "debug programs.)"
-    };
+  private static boolean _userWantsToPickAgain(boolean justDebugger) {
+    final String[] text;
+    
+    if (justDebugger) {
+      text = new String[]{
+        "DrJava was still unable to load the debugger from the",
+        "'tools.jar' file you located. Would you like to pick again?",
+        "The 'tools.jar' file is generally located in the 'lib'",
+        "subdirectory under your JDK installation directory.",
+        "(If you say 'No', DrJava might be unable to debug programs,",
+        "in which case the 'Debugger' menu will not be displayed.)"
+      };
+    }
+    else {
+      text = new String[] {
+        "The file you chose did not appear to be the correct 'tools.jar'. ",
+        "(Your choice might be an incompatible version of the file.) ",
+        "Would you like to pick again?  The 'tools.jar' file is ",
+        "generally located in the 'lib' subdirectory under your ",
+        "JDK installation directory.",
+        "(If you say 'No', DrJava might be unable to compile or ",
+        "debug programs.)"
+      };
+    }
 
     int result = JOptionPane.showConfirmDialog(null,
                                                text,
