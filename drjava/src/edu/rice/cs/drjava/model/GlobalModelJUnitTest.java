@@ -362,7 +362,13 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
                  0,
                  doc.getJUnitErrorModel().getNumErrors());
     doc.saveFile(new FileSelector(file));
-    doc.startJUnit();
+    
+    listener = new TestShouldSucceedListener();
+    _model.addListener(listener);
+    synchronized(listener) {
+      doc.startJUnit();
+      listener.wait();
+    }
     
     assertEquals("test case should have no errors reported after saving",
                  0,

@@ -37,48 +37,56 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.compiler;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.io.File;
+import java.net.URLClassLoader;
+import java.net.URL;
+import java.net.MalformedURLException;
+
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.FileOption;
+import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020913-2254;
+ * A compiler interface to find Javac (1.4.1+) from the location
+ * specified in Configuration.
  *
  * @version $Id$
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20020913-2254";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+public class Javac141FromSetLocation extends CompilerProxy
+  implements OptionConstants {
+  // To implement #523222, we had to make this not a singleton,
+  // to allow it to re-determine the location of the compiler multiple times.
+  //public static final CompilerInterface ONLY = new JavacFromSetLocation();
+  
+  /** Private constructor due to singleton. */
+  public Javac141FromSetLocation() {
+    super("edu.rice.cs.drjava.model.compiler.Javac141Compiler",
+          _getClassLoader());
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
+  
+  private static ClassLoader _getClassLoader() {
+    File loc = DrJava.getConfig().getSetting(JAVAC_LOCATION);
+    if (loc == FileOption.NULL_FILE) {
+      throw new RuntimeException("javac location not set");
+    }
+    
     try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+      //URL url = new File(loc).toURL();
+      URL url = loc.toURL();
+      return new URLClassLoader(new URL[] { url });
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
+    catch (MalformedURLException e) {
+      throw new RuntimeException("malformed url exception");
     }
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
+  
+  /**
+   * Returns the name of this compiler, appropriate to show to the user.
+   */
+  public String getName() {
+    return super.getName() + " (user)";
   }
-} 
+}

@@ -37,48 +37,32 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.compiler;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.io.File;
+import java.net.URLClassLoader;
+import java.net.URL;
+import java.net.MalformedURLException;
+
+import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020913-2254;
- *
+ * A compiler interface to find Javac (1.4.1+) in the tools.jar file.
  * @version $Id$
  */
-public abstract class Version {
+public class Javac141FromToolsJar extends CompilerProxy {
+  public static final CompilerInterface ONLY = new Javac141FromToolsJar();
+
+  /** Private constructor due to singleton. */
+  private Javac141FromToolsJar() {
+    super("edu.rice.cs.drjava.model.compiler.Javac141Compiler",
+          new ToolsJarClassLoader());
+  }
+
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Returns the name of this compiler, appropriate to show to the user.
    */
-  private static final String BUILD_TIME_STRING = "20020913-2254";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public String getName() {
+    return super.getName() + " (tools.jar)";
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

@@ -663,6 +663,7 @@ public class DebugManager {
       String filename = "";
       try {
         filename = rt.sourceName();
+        filename = getPackageDir(rt.name()) + filename;
       }
       catch (AbsentInformationException aie) {
         // Don't know real source name:
@@ -727,6 +728,28 @@ public class DebugManager {
       printMessage("  (Source for " + className + " not found.)");
     }
   }  
+  
+  /**
+   * Returns the relative directory (from the source root) that the source
+   * file with this qualifed name will be in, given its package.
+   * Returns the empty string for classes without packages.
+   * @param className The fully qualified class name
+   */
+  String getPackageDir(String className) {
+    // Only keep up to the last dot
+    int lastDotIndex = className.lastIndexOf(".");
+    if (lastDotIndex == -1) {
+      // No dots, so no package
+      return "";
+    }
+    else {
+      String packageName = className.substring(0, lastDotIndex);
+      // replace periods with the System's file separator
+      String ps = System.getProperty("file.separator");
+      packageName = StringOps.replace(packageName, ".", ps);
+      return packageName + ps;
+    }
+  }
   
   /**
    * Prints a message in the Interactions Pane.

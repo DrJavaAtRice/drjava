@@ -94,6 +94,15 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     /* 16 */ "  }\n" +
     /* 17 */ "}";
   
+  protected static final String DEBUG_CLASS_WITH_PACKAGE =
+    /*  1 */ "package a;\n" +
+    /*  2 */ "public class DrJavaDebugClassWithPackage {\n" +
+    /*  3 */ "  public void foo() {\n" +
+    /*  4 */ "    System.out.println(\"foo line 1\");\n" +
+    /*  5 */ "    System.out.println(\"foo line 2\");\n" +
+    /*  6 */ "  }\n" +
+    /*  7 */ "}";
+  
   protected DebugManager _debugManager;
   
   /**
@@ -235,13 +244,17 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     // Compile the class
     OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS, tempFile());
     _debugManager.addListener(debugListener);
-    // Start debugger and add breakpoint (before class is loaded)
+    // Start debugger
     synchronized(_notifierLock) {
       _debugManager.startup();
       _waitForNotifies(1);
       _notifierLock.wait();
     }
-   
+    debugListener.assertDebuggerStartedCount(1);
+    debugListener.assertDebuggerShutdownCount(0);
+    assertTrue("Debug Manager should be ready", _debugManager.isReady());
+    
+   // Add breakpoint before class is loaded
     _debugManager.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
     debugListener.assertBreakpointSetCount(1);
     
@@ -368,8 +381,6 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     }
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
-    //NOTE: LocationUpdatedCount is still 1 because the manager could not find the
-    //file on the sourcepath so the count was not updated.
     debugListener.assertThreadLocationUpdatedCount(2);  // fires
     debugListener.assertCurrThreadSuspendedCount(2);  // fires
     debugListener.assertBreakpointReachedCount(1);
@@ -534,6 +545,111 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     debugListener.assertCurrThreadDiedCount(1);  // fires
     debugListener.assertBreakpointRemovedCount(1);  // fires (don't wait)
     debugListener.assertDebuggerShutdownCount(1);  // fires
+    if (printMessages) System.out.println("Shut down.");
+    _debugManager.removeListener(debugListener);
+  }
+  
+  /**
+   * Tests that stepping works in a public class with a package
+   */
+  public void testStepOverWithPackage() 
+    throws DebugException, BadLocationException, IOException, InterruptedException
+  {
+    if (printMessages) System.out.println("----testStepOverWithPackage----");
+    StepTestListener debugListener = new StepTestListener();
+    
+    // Compile the class
+    File aDir = new File(_tempDir, "a");
+    aDir.mkdir();
+    File file = new File(aDir, "DrJavaDebugClassWithPackage.java");
+    OpenDefinitionsDocument doc = _doCompile(DEBUG_CLASS_WITH_PACKAGE, file);
+   
+    _debugManager.addListener(debugListener); 
+    // Start debugger
+    synchronized(_notifierLock) {
+      _debugManager.startup();
+      _waitForNotifies(1);  // startup
+      _notifierLock.wait();
+    }
+    debugListener.assertDebuggerStartedCount(1);
+    
+    // Add a breakpoint
+    _debugManager.toggleBreakpoint(doc,DEBUG_CLASS_WITH_PACKAGE.indexOf("foo line 1"), 4);
+    debugListener.assertBreakpointSetCount(1);
+    
+    // Run the foo() method, hitting breakpoint
+    synchronized(_notifierLock) {
+      interpretIgnoreResult("new a.DrJavaDebugClassWithPackage().foo()");
+      _waitForNotifies(3);  // suspended, updated, breakpointReached
+      _notifierLock.wait();
+    }
+    
+    if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
+      
+    // Ensure breakpoint is hit
+    debugListener.assertBreakpointReachedCount(1);  //fires
+    debugListener.assertThreadLocationUpdatedCount(1);  //fires
+    debugListener.assertCurrThreadSuspendedCount(1);  //fires
+    debugListener.assertCurrThreadResumedCount(0);
+    debugListener.assertCurrThreadDiedCount(0);
+    assertInteractionsDoesNotContain("foo line 1");
+
+    // Step over once
+    synchronized(_notifierLock){
+      _debugManager.step(DebugManager.STEP_OVER);
+      _waitForNotifies(2);  // suspended, updated
+      _notifierLock.wait();
+    }
+    debugListener.assertStepRequestedCount(1);  // fires (don't wait)
+    debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
+    debugListener.assertThreadLocationUpdatedCount(2);  // fires
+    debugListener.assertCurrThreadSuspendedCount(2);  // fires
+    debugListener.assertBreakpointReachedCount(1);
+    debugListener.assertCurrThreadDiedCount(0);
+    assertInteractionsContains("foo line 1");
+    assertInteractionsDoesNotContain("foo line 2");
+    
+    // Step over again
+    synchronized(_notifierLock){
+      _debugManager.step(DebugManager.STEP_OVER);
+      _waitForNotifies(2);  // suspended, updated
+      _notifierLock.wait();
+    }
+    
+    if (printMessages) System.out.println("****"+getInteractionsText());
+    debugListener.assertStepRequestedCount(2);  // fires (don't wait)
+    debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
+    debugListener.assertThreadLocationUpdatedCount(3);  // fires
+    debugListener.assertCurrThreadDiedCount(0);
+    debugListener.assertCurrThreadSuspendedCount(3);  // fires
+    debugListener.assertBreakpointReachedCount(1);
+    assertInteractionsContains("foo line 2");
+    
+    // Resume until finished
+    synchronized(_notifierLock) {
+      _debugManager.resume();
+      _waitForNotifies(1);  // threadDied
+      _notifierLock.wait();
+    }
+    if (printMessages) System.out.println("----After resume:\n" + getInteractionsText());
+    debugListener.assertCurrThreadResumedCount(3);  //fires (no waiting)
+    debugListener.assertCurrThreadDiedCount(1);  //fires
+    debugListener.assertBreakpointReachedCount(1);
+    debugListener.assertThreadLocationUpdatedCount(3);
+    debugListener.assertCurrThreadSuspendedCount(3);
+    
+    // Close doc and make sure breakpoints are removed
+    _model.closeFile(doc);
+    debugListener.assertBreakpointRemovedCount(1);  //fires (no waiting)
+      
+    // Remove listener at end
+    if (printMessages) System.out.println("Shutting down...");
+    synchronized(_notifierLock) {
+      _debugManager.shutdown();
+      _waitForNotifies(1);  // shutdown
+      _notifierLock.wait();
+    }
+    debugListener.assertDebuggerShutdownCount(1);  //fires
     if (printMessages) System.out.println("Shut down.");
     _debugManager.removeListener(debugListener);
   }
@@ -738,37 +854,19 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   
   
   /**
-   * Tests that starting up and shutting down the debugger triggers the
-   * correct states and events.
+   * Tests the utility function to get a relative directory for a package.
    */
-  public synchronized void testStartupAndShutdown() throws DebugException, 
-    InterruptedException {
-    if (printMessages) System.out.println("----testStartupAndShutdown----");
-    DebugStartAndStopListener listener = new DebugStartAndStopListener();
-
-    _debugManager.addListener(listener);
-     synchronized(_notifierLock) {
-       _debugManager.startup();
-       _waitForNotifies(1);
-      _notifierLock.wait();
-    }
+  public void testGetPackageDir() {
+    String class1 = "edu.rice.cs.drjava.model.MyTest";
+    String class2 = "MyTest";
     
-    listener.assertDebuggerStartedCount(1);
-    listener.assertDebuggerShutdownCount(0);
-    assertTrue("Debug Manager should be ready", _debugManager.isReady());
-    
-    synchronized(_notifierLock) {
-      _debugManager.shutdown();
-      _waitForNotifies(1);
-      _notifierLock.wait();
-    }
-    listener.assertDebuggerStartedCount(1);
-    listener.assertDebuggerShutdownCount(1);
-    assertTrue("Debug Manager should not be ready", !_debugManager.isReady());
-
-    _debugManager.removeListener(listener);
-  }  
-  
+    assertEquals("package dir with package",
+                 "edu/rice/cs/drjava/model/",
+                 _debugManager.getPackageDir(class1));
+    assertEquals("package dir without package",
+                 "",
+                 _debugManager.getPackageDir(class2));
+  }
   
   
   /**

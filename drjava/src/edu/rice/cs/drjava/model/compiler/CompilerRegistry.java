@@ -62,7 +62,11 @@ public class CompilerRegistry {
    * The list of compiler interfaces that are distributed with DrJava.
    */
   public static final String[] DEFAULT_COMPILERS = {
+    "edu.rice.cs.drjava.model.compiler.JSR14v12FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.JSR14FromSetLocation",
+    "edu.rice.cs.drjava.model.compiler.Javac141FromSetLocation",
+    "edu.rice.cs.drjava.model.compiler.Javac141FromClasspath",
+    "edu.rice.cs.drjava.model.compiler.Javac141FromToolsJar",
     "edu.rice.cs.drjava.model.compiler.JavacFromSetLocation",
     "edu.rice.cs.drjava.model.compiler.JavacFromClasspath",
     "edu.rice.cs.drjava.model.compiler.JavacFromToolsJar",
@@ -264,6 +268,7 @@ public class CompilerRegistry {
       return (CompilerInterface) val;
     }
     catch (Throwable t) {
+      //t.printStackTrace(DrJava.consoleErr());
       return (CompilerInterface) clazz.newInstance();
     }
   }

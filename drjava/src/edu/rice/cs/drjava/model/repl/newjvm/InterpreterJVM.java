@@ -79,7 +79,7 @@ public class InterpreterJVM extends UnicastRemoteObject
     super();
     _classpath = "";
 
-    //JOptionPane.showMessageDialog(null, "Starting InterpreterJVM initialization");
+    //_dialog("Starting InterpreterJVM initialization");
     reset();
     
     _junitTestManager = new JUnitTestManager(this);

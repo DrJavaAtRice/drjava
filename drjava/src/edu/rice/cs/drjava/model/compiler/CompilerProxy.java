@@ -118,7 +118,9 @@ public class CompilerProxy implements CompilerInterface {
         DrJava.getConfig().getSetting(OptionConstants.JAVAC_ALLOW_ASSERT).booleanValue();
       _realCompiler.setAllowAssertions(allowAssertions);
       
-      if (_realCompiler.getClass().getName().equals("edu.rice.cs.drjava.model.compiler.JSR14v10Compiler") &&
+      String compilerClass = _realCompiler.getClass().getName();
+      if ((compilerClass.equals("edu.rice.cs.drjava.model.compiler.JSR14v10Compiler") ||
+           compilerClass.equals("edu.rice.cs.drjava.model.compiler.JSR14v12Compiler")) &&
           collectionsPath != FileOption.NULL_FILE) {
         _realCompiler.addToBootClassPath( collectionsPath );
       }

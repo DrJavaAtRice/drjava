@@ -340,7 +340,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     if (_startupInProgress) {
       return;
     }
-    _startupInProgress = true;   
+    _startupInProgress = true;
     
     // _model may be null if we're running a test on this
     if (_model != null)
