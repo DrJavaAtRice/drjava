@@ -105,7 +105,7 @@ public class SExpParserTest extends TestCase {
    */
   public void testParseMultiple() throws SExpParseException{
     String text = "(abcdefg)(hijklmnop)";
-    List<SExp> exps = SExpParser.parse(text);
+    List<? extends SExp> exps = SExpParser.parse(text);
     SExp exp1 = exps.get(0);
     SExp exp2 = exps.get(1);
     
@@ -216,5 +216,40 @@ public class SExpParserTest extends TestCase {
                    e.getMessage());
     }
     
+    
+    text = "(;)";  // <-- last ) is commented out
+    try {
+      SExp exp = SExpParser.parse(text).get(0);
+      fail("Didn't throw a parse exception");
+    }catch(SExpParseException e) {
+      assertEquals("Incorrect exception message", 
+                   "Unexpected <EOF> at line 1",
+                   e.getMessage());
+    }
+  }
+  
+  public void testCorrectParse() throws SExpParseException {
+    String n = "\n";
+    String text = 
+      "; this is a comment line                      " + n +
+      "; this is another comment line                " + n +
+      "(Source                                       " + n +
+      "  (/sexp/Atom.java)                           " + n +
+      "  (/sexp/Cons.java)                           " + n +
+      "  (/sexp/Empty.java)                          " + n +
+      "  (/sexp/Lexer.java)                          " + n +
+      "  (/sexp/SExp.java)                           " + n +
+      "  (/sexp/SExpParser.java)                     " + n +
+      "  (/sexp/SExpVisitor.java)                    " + n +
+      "  (/sexp/Tokens.java)                         " + n +
+      ")                                             " + n +
+      "; This is the build directory.  Absolute path " + n +
+      "(BuildDir \"/home/javaplt/drjava/built\")     " + n +
+      "(MainFile \"/sexp/SExpParser.java\")          " + n +
+      "(Included                                     " + n +
+      ")";
+    
+    List<SEList> res = SExpParser.parse(text);
+    assertEquals("Should have four trees in forest", 4, res.size());
   }
 }

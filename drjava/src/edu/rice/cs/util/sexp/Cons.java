@@ -62,6 +62,9 @@ public class Cons extends SEList {
   public <Ret> Ret accept(SExpVisitor<Ret> v) {
     return v.forCons(this);
   }
+  public <Ret> Ret accept(SEListVisitor<Ret> v) {
+    return v.forCons(this);
+  }
   
   protected String toStringHelp() {
     return " " + _first + _rest.toStringHelp();

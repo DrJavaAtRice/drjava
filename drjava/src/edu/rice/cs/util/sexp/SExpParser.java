@@ -63,15 +63,15 @@ import java.util.LinkedList;
  */
 public class SExpParser {
   
-  public static List<SExp> parse(File f) throws SExpParseException, IOException{
+  public static List<SEList> parse(File f) throws SExpParseException, IOException{
     return parse(new FileReader(f));
   }
   
-  public static List<SExp> parse(String s) throws SExpParseException {
+  public static List<SEList> parse(String s) throws SExpParseException {
     return parse(new StringReader(s));
   }
   
-  public static List<SExp> parse(Reader r) throws SExpParseException {
+  public static List<SEList> parse(Reader r) throws SExpParseException {
     try {
       return new ParseHelper(r).parseMultiple();
     }
@@ -101,9 +101,9 @@ public class SExpParser {
      * Parse a forest of top-level s-expressions
      * @param a list of top-level s-expressions
      */
-    public List<SExp> parseMultiple() {
-      ArrayList<SExp> l = new ArrayList<SExp>();
-      SExp exp;
+    public List<SEList> parseMultiple() {
+      ArrayList<SEList> l = new ArrayList<SEList>();
+      SEList exp;
       while ( (exp = parseTopLevelExp()) != null) {
         l.add(exp);
       }
@@ -111,12 +111,12 @@ public class SExpParser {
     }
     
     /**
-     * A top-level s-expression is simply a list.  Our s-expression files
+     * A top-level s-expression is simply a non-empty list.  Our s-expression files
      * can be a forest of several trees, but the Atomic values are not allowed
      * at the top level, only lists.
      * @return the top-level list s-expression
      */
-    public SExp parseTopLevelExp() {
+    public SEList parseTopLevelExp() {
       SExpToken t = _lex.readToken();
       if (t == LeftParenToken.ONLY) {
         return parseList();
@@ -190,6 +190,9 @@ public class SExpParser {
       }
       else if (t instanceof NumberToken) {
         return new NumberAtom(((NumberToken)t).getValue());
+      }
+      else if (t instanceof QuotedTextToken) {
+        return new QuotedTextAtom(t.getText());
       }
       else {
         return new TextAtom(t.getText());

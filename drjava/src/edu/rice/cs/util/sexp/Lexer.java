@@ -74,7 +74,8 @@ class Lexer extends StreamTokenizer {
     quoteChar('"');
     ordinaryChars('(',')');
     whitespaceChars(0,' ');
-        
+    commentChar(';');
+    
     initWordTable();
     buffer = null;  // buffer initially empty
   }
@@ -163,22 +164,5 @@ class Lexer extends StreamTokenizer {
     // initialize wordTable
     wordTable.put("true", BooleanToken.TRUE);
     wordTable.put("false", BooleanToken.FALSE);
-  }
-  
-  public static void main(String[] args) {
-    String text = "";
-    
-    if (args.length > 0) {
-      text = args[0];
-    }
-      
-    Lexer lex = new Lexer(new StringReader(text));
-    SExpToken token;
-    System.out.println("Lexing: " + text);
-    do {
-      token = lex.readToken();
-      System.out.println(token);
-    }while(token != null);
-    
   }
 }

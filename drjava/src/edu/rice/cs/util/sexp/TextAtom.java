@@ -46,7 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util.sexp;
 
 public class TextAtom implements Atom {
-  private String _text;
+  protected String _text;
   
   public TextAtom(String text) { _text = text; }
   
@@ -66,5 +66,44 @@ public class TextAtom implements Atom {
    * excludes the quotes around the string.
    * @return the text that went into making this atom.
    */
-  public String toString() { return _text; }
+  public String toString() { return _text; }  
+}
+
+/**
+ * this type of text atom is mostly like its super class
+ * except its string representation includes the sourrounding 
+ * quotes and the instances of the characters: \ " etc are turned
+ * into their corresponding escape character sequences.
+ */
+class QuotedTextAtom extends TextAtom {
+  
+  public QuotedTextAtom(String text) { super(text); }
+  
+  public String toString() { 
+    String output = _text;
+    output = replaceAll(output, "\\", "\\\\"); // convert \ to \\
+    output = replaceAll(output, "\"", "\\\""); // convert " to \"
+    output = replaceAll(output, "\t", "\\t");  // convert [tab] to \t
+    output = replaceAll(output, "\n", "\\n");  // convert [newline] to \n
+    return "\"" + output + "\"";
+  }
+  
+  /**
+   * replaces all occurrences of the given a string with a new string.
+   * This method was reproduced here to remove any dependencies on the
+   * java v1.4 api.
+   * @param str the string in which the replacements should occur
+   * @param toReplace the substring to replace
+   * @param replacement the substring to put in its place
+   * @return the new changed string
+   */
+  private static String replaceAll(String str, String toReplace, String replacement) {
+    String result = str;
+    int i = result.indexOf(toReplace); 
+    while (i >= 0) {
+      result = result.substring(0,i) + replacement + result.substring(i+1);
+      i = result.indexOf(toReplace, i + replacement.length());
+    }
+    return result;
+  }
 }

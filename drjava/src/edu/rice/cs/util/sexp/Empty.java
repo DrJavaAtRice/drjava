@@ -54,6 +54,9 @@ public class Empty extends SEList {
   public <Ret> Ret accept(SExpVisitor<Ret> v) {
     return v.forEmpty(this);
   }
+  public <Ret> Ret accept(SEListVisitor<Ret> v) {
+    return v.forEmpty(this);
+  }
   
   protected String toStringHelp() {
     return ")";
