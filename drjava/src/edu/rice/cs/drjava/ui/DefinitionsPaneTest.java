@@ -122,7 +122,7 @@ public class DefinitionsPaneTest extends TestCase {
   
   /**
    * Tests that shift backspace works the same as backspace.
-   * (Ease of use issue 693253
+   * (Ease of use issue 693253)
    * 
    * Ideally, this test would be a bit lighter weight, and not require
    * the creation of an entire MainFrame+GlobalModel.  Some refactoring
@@ -131,7 +131,7 @@ public class DefinitionsPaneTest extends TestCase {
    * NOTE: This test doesn't work yet, since we can't currently bind
    * two keys to the same action.  This should be implemented as part of
    * feature request 683300.
-   * 
+   */
   public void testShiftBackspace() throws BadLocationException {
     DefinitionsPane definitions = _frame.getCurrentDefPane();
     DefinitionsDocument doc = definitions.getOpenDocument().getDocument();
@@ -170,7 +170,7 @@ public class DefinitionsPaneTest extends TestCase {
                                              InputEvent.SHIFT_MASK,
                                              shiftDeleteCode));
     _assertDocumentContents(doc, "ts", "Did not delete on shift+delete");
-  }*/
+  }
   
   /**
    * Tests that a simulated key press with the meta modifier is correct

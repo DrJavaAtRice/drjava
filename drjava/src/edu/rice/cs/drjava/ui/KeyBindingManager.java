@@ -101,8 +101,10 @@ public class KeyBindingManager {
     _keyToDataMap.put(ks, ksd);
     _actionToDataMap.put(a, ksd);
     
-    if (kso != null) // check for shift-actions
+    // check for shift-actions
+    if (kso != null) {
       DrJava.getConfig().addOptionListener(kso, new KeyStrokeOptionListener(jmi, a, ks));
+    }
   }
   
   /**
@@ -112,9 +114,10 @@ public class KeyBindingManager {
    * with the KeyStroke
    */
   public Action get(KeyStroke ks) {
-    KeyStrokeData ksd = (KeyStrokeData)_keyToDataMap.get(ks);
-    if (ksd == null)
-      return null;    
+    KeyStrokeData ksd = (KeyStrokeData) _keyToDataMap.get(ks);
+    if (ksd == null) {
+      return null;
+    }
     return ksd.getAction();
   }
   
@@ -150,7 +153,7 @@ public class KeyBindingManager {
   public void addShiftAction(Option<KeyStroke> opt, String shiftS) {
     KeyStroke ks = DrJava.getConfig().getSetting(opt);
 
-    KeyStrokeData normal = (KeyStrokeData)_keyToDataMap.get(ks);
+    KeyStrokeData normal = (KeyStrokeData) _keyToDataMap.get(ks);
     Action shiftA = _actionMap.get(shiftS);
     normal.setShiftAction(shiftA);
 

@@ -110,14 +110,16 @@ public class CompoundUndoManager extends UndoManager {
       _compoundEdits.removeElementAt(0);
       compoundEdit.end();
 
-      if (_compoundEdits.isEmpty()) {
+      if (!_compoundEditInProgress()) {
         super.addEdit(compoundEdit);
       }
       else {
         _compoundEdits.firstElement().addEdit(compoundEdit);
       }
       _keys.removeElementAt(0);
-    } 
+
+      // signal view to update undo state
+    }
     else {
       throw new IllegalStateException("Improperly nested compound edits.");
     }
@@ -145,11 +147,68 @@ public class CompoundUndoManager extends UndoManager {
    * @return true if the add is successful, false otherwise
    */
   public boolean addEdit(UndoableEdit e) {
-    if (!_compoundEdits.isEmpty()) {
+    if (_compoundEditInProgress()) {
       return _compoundEdits.firstElement().addEdit(e);
     }
     else {
       return super.addEdit(e);
+    }
+  }
+  
+  /**
+   * Returns whether or not a compound edit is in progress.
+   * @return true iff in progress
+   */
+  private boolean _compoundEditInProgress() {
+    return !_compoundEdits.isEmpty();
+  }
+  
+  /**
+   * returns true when a compound edit is in progress,
+   * or when there are valid stored undoable edits
+   * @return true iff undoing is possible
+   */
+  public boolean canUndo() {
+    return _compoundEditInProgress() || super.canUndo();
+  }
+  
+  /**
+   * returns the presentation name for this undo,
+   * or delegates to super if none is available
+   * @return the undo's presentation name
+   */
+  public String getUndoPresentationName() {
+    if (_compoundEditInProgress()) {
+      return "Undo Previous Command";
+    }
+    else {
+      return super.getUndoPresentationName();
+    }
+  }
+  
+  /**
+   * overrides the inherited undo method so that an exception will
+   * be thrown if undo is attempted while in the compound undo state
+   */
+  public void undo() {
+    if(_compoundEditInProgress()) {
+      throw new CannotUndoException();
+    }
+    else {
+      super.undo();
+    }
+  }
+   
+  /**
+   * overrides the inherited redo method so that an exception will
+   * be thrown if redo is attempted while in the compound undo state
+   */
+  public void redo() {
+    if(_compoundEditInProgress()) {
+      throw new CannotRedoException();
+    }
+    else {
+      super.redo();
     }
   }
 }
