@@ -50,6 +50,10 @@ import javax.swing.filechooser.FileFilter;
 
 /**
  * Graphical form of a FileOption.
+ * 
+ * TO DO: Replace the internal components here with an
+ * edu.rice.cs.util.swing.FileSelectorComponent.
+ * 
  * @version $Id$
  */
 public class FileOptionComponent extends OptionComponent<File> 

@@ -2391,6 +2391,18 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
   
   /**
+   * Suggests a default location for generating Javadoc, based on the given
+   * document's source root.  (Appends JavadocModel.SUGGESTED_DIR_NAME to
+   * the sourceroot.)
+   * @param doc Document with the source root to use as the default.
+   * @return Suggested destination directory, or null if none could be
+   * determined.
+   */
+  public File suggestJavadocDestination(OpenDefinitionsDocument doc) {
+    return _javadocModel.suggestJavadocDestination(doc);
+  }
+  
+  /**
    * Javadocs all open documents, after ensuring that all are saved.
    */
   public void javadocAll(DirectorySelector select, FileSaveSelector saver,

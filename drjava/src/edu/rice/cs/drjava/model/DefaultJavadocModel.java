@@ -100,6 +100,24 @@ public class DefaultJavadocModel implements JavadocModel {
     _javadocErrorModel = new CompilerErrorModel<CompilerError>();
   }
   
+  /**
+   * Suggests a default location for generating Javadoc, based on the given
+   * document's source root.  (Appends JavadocModel.SUGGESTED_DIR_NAME to
+   * the sourceroot.)
+   * @param doc Document with the source root to use as the default.
+   * @return Suggested destination directory, or null if none could be
+   * determined.
+   */
+  public File suggestJavadocDestination(OpenDefinitionsDocument doc) {
+    try {
+      File sourceRoot = doc.getSourceRoot();
+      return new File(sourceRoot, SUGGESTED_DIR_NAME);
+    }
+    catch (InvalidPackageException ipe) {
+      return null;
+    }
+  }
+  
   
   // -------------------- Javadoc All Documents --------------------
   
@@ -149,33 +167,56 @@ public class DefaultJavadocModel implements JavadocModel {
     
     Configuration config = DrJava.getConfig();
     File destDir = config.getSetting(OptionConstants.JAVADOC_DESTINATION);
-    boolean ask = config.getSetting(OptionConstants.JAVADOC_PROMPT_FOR_DESTINATION).booleanValue();
     
     // Get the destination directory via the DirectorySelector, if appropriate.
     try {
-      // If we no destination is set, or the user has asked for prompts,
-      // ask the user for a destination directory.
-      if (destDir.equals(FileOption.NULL_FILE) || ask) {
-        if (!destDir.equals(FileOption.NULL_FILE)) {
-          destDir = select.getDirectory(destDir);
+      if (destDir.equals(FileOption.NULL_FILE)) {
+        // This is the default, stock behavior of a new install.
+        // If no destination is set, don't pass anything to the ui command.
+        // Let the command object decide what to do.
+        destDir = select.getDirectory(null);
+      }
+      else {
+        // Otherwise, tell the command object to prefer the config's default.
+        destDir = select.getDirectory(destDir);
+      }
+        
+      // Make sure the destination is usable.
+      while (!destDir.exists() || !destDir.isDirectory() || !destDir.canWrite()) {
+        if (!destDir.exists()) {
+          // If the choice doesn't exist, ask to create it.
+          boolean create = select.askUser
+            ("The destination directory you have chosen\n" +
+             "does not exist.  Would you like to create it?",
+             "Create Directory?");
+          if (create) {
+            boolean dirMade = destDir.mkdir();
+            if (!dirMade) {
+              throw new IOException("Could not create directory: " + destDir);
+            }
+          }
+          else {
+            return;
+          }
+        }
+        else if (!destDir.isDirectory()) {
+          // We can't use it if it isn't a directory
+          select.warnUser("The file you have chosen is not a directory.\n" +
+                          "Please choose another.",
+                          "Not a Directory!");
+          destDir = select.getDirectory(null);
         }
         else {
+          //If the directory isn't writable, tell the user and ask again.
+          select.warnUser("The destination directory you have chosen is\n" +
+                          "not writeable. Please choose another directory.",
+                          "Cannot Write to Destination!");
           destDir = select.getDirectory(null);
         }
       }
-        
-      // Make sure the destination is writable.
-      while (!destDir.exists() || !destDir.canWrite()) {
-        // If the choice was rejected, tell the user and ask again.
-        select.warnUser("The destination directory you have chosen\n"
-                          + "does not exist or is not readable. Please\n"
-                          + "choose another directory.",
-                        "Bad Destination");
-        destDir = select.getDirectory(null);
-      }
     }
     catch (OperationCanceledException oce) {
-      // If the user cancels the dialog, silently return.
+      // If the user cancels anywhere, silently return.
       return;
     }
     

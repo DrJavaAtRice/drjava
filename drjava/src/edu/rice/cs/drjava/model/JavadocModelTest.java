@@ -40,8 +40,10 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.util.UnexpectedException;
+
+import java.io.*;
 
 import junit.framework.TestCase;
 
@@ -49,8 +51,43 @@ import junit.framework.TestCase;
  * Tests the functionality provided by an implementation of JavadocModel.
  * For now, this class is hard-coded to test DefaultJavadocModel, but it can be
  * extended to test any implementation of the interface.
+ * @version $Id$
  */
 public class JavadocModelTest extends TestCase {
+  
+  /**
+   * Tests that a simple suggestion can be made for the destination directory.
+   */
+  public void testSimpleSuggestedDirectory() {
+    JavadocModel jModel = new DefaultJavadocModel(new DummyGetDocuments());
+    final File file = new File(System.getProperty("user.dir"));
+    OpenDefinitionsDocument doc = new DummyOpenDefDoc() {
+      public File getSourceRoot() throws InvalidPackageException {
+        return file;
+      }
+    };
+    
+    File suggestion = jModel.suggestJavadocDestination(doc);
+    File expected = new File(file, JavadocModel.SUGGESTED_DIR_NAME);
+    assertEquals("simple suggested destination", expected, suggestion);
+  }
+  
+  /**
+   * Tests that a no suggestion can be made for the destination directory
+   * if there is no valid source root.
+   */
+  public void testNoSuggestedDirectory() {
+    JavadocModel jModel = new DefaultJavadocModel(new DummyGetDocuments());
+    final File file = new File(System.getProperty("user.dir"));
+    OpenDefinitionsDocument doc = new DummyOpenDefDoc() {
+      public File getSourceRoot() throws InvalidPackageException {
+        throw new InvalidPackageException(-1, "invalid package");
+      }
+    };
+    
+    File suggestion = jModel.suggestJavadocDestination(doc);
+    assertNull("suggestion should be null", suggestion);
+  }
   
   public void testFileDefaultPackage() {
     

@@ -39,8 +39,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
-import  java.io.File;
-import  javax.swing.filechooser.FileFilter;
+import java.io.File;
+import javax.swing.filechooser.FileFilter;
 
 
 /**

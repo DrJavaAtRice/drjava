@@ -39,6 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
+import java.io.File;
 import java.io.IOException;
 
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
@@ -48,8 +49,15 @@ import java.util.List;
 /**
  * Model interface for Javadoc integration features.
  * Note: Implementors should have a constructor taking an IGetDocuments.
+ * @version $Id$
  */
 public interface JavadocModel {
+  /**
+   * Name for the suggested destination directory to be placed in the
+   * source root of one of the open documents.  (Value is "docs".)
+   */
+  public static final String SUGGESTED_DIR_NAME = "docs";
+  
   /**
    * Accessor for the Javadoc error model.
    */
@@ -59,6 +67,16 @@ public interface JavadocModel {
    * Clears all current Javadoc errors.
    */
   public void resetJavadocErrors();
+  
+  /**
+   * Suggests a default location for generating Javadoc, based on the given
+   * document's source root.  (Appends JavadocModel.SUGGESTED_DIR_NAME to
+   * the sourceroot.)
+   * @param doc Document with the source root to use as the default.
+   * @return Suggested destination directory, or null if none could be
+   * determined.
+   */
+  public File suggestJavadocDestination(OpenDefinitionsDocument doc);
   
   /**
    * Javadocs all open documents, after ensuring that all are saved.

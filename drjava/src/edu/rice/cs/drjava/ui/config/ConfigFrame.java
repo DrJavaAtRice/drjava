@@ -91,19 +91,13 @@ public class ConfigFrame extends JFrame {
     
     _mainFrame = frame;
 
-    File workDir = DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY);
-    if (workDir == FileOption.NULL_FILE) {
-      workDir = new File(System.getProperty("user.dir"));
-    }
-    if (workDir.isFile() && workDir.getParent() != null) {
-      workDir = workDir.getParentFile();
-    }
+    File workDir = _getWorkDir();
     _fileOptionChooser = new JFileChooser(workDir);
     _fileOptionChooser.setDialogTitle("Select");
     _fileOptionChooser.setApproveButtonText("Select");
     _fileOptionChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     _fileOptionChooser.setFileFilter(ClasspathFilter.ONLY);
-
+    
     _createTree();
     _createPanels();
     
@@ -227,6 +221,21 @@ public class ConfigFrame extends JFrame {
     _tree.expandRow(0);
     _tree.expandRow(1);
     _tree.expandRow(2);
+  }
+  
+  /**
+   * Returns the current working directory, or the user's current directory
+   * if none is set.
+   */
+  private File _getWorkDir() {
+    File workDir = DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY);
+    if (workDir == FileOption.NULL_FILE) {
+      workDir = new File(System.getProperty("user.dir"));
+    }
+    if (workDir.isFile() && workDir.getParent() != null) {
+      workDir = workDir.getParentFile();
+    }
+    return workDir;
   }
 
   /**
@@ -553,21 +562,7 @@ public class ConfigFrame extends JFrame {
                                 "<html>Any directories in which to search for source<br>" +
                                 "files when stepping in the Debugger.</html>");
     // Source path can only include directories
-    sourcePath.setFileFilter(new FileFilter() {
-      public boolean accept(File f) {
-        if(f.isDirectory()) {
-          return true;
-        }
-        return false;
-      }
-
-      /**
-       * @return A description of this filter to display
-       */
-      public String getDescription() {
-        return "Source Directories";
-      }
-    });
+    sourcePath.setFileFilter(new DirectoryFilter("Source Directories"));
     panel.addComponent(sourcePath);
     panel.addComponent(new BooleanOptionComponent(OptionConstants.DEBUG_SHOW_THREADS,
                                                   "Show Current Threads Tab", this,
@@ -688,27 +683,20 @@ public class ConfigFrame extends JFrame {
     panel.addComponent(new IntegerOptionComponent(OptionConstants.INDENT_LEVEL,
                                                   "Indent Level", this,
                                                   "The number of spaces to use for each level of indentation."));
+    // Working directory chooser and component
+    JFileChooser dirChooser = new JFileChooser(_getWorkDir());
+    dirChooser.setDialogTitle("Select");
+    dirChooser.setApproveButtonText("Select");
+    dirChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+    dirChooser.setMultiSelectionEnabled(false);
     FileOptionComponent workDir =
       new FileOptionComponent(OptionConstants.WORKING_DIRECTORY,
                               "Working Directory", this,
                               "The directory that DrJava should consider the current working directory.",
-                              _fileOptionChooser);
-    workDir.setFileFilter(new FileFilter() {
-      public boolean accept(File f) {
-        if (f.isDirectory()) {
-          return true;
-        }
-        return false;
-      }
-
-      /**
-       * @return A description of this filter to display
-       */
-      public String getDescription() {
-        return "Directories";
-      }
-    });
+                              dirChooser);
+    workDir.setFileFilter(new DirectoryFilter());
     panel.addComponent(workDir);
+    
     panel.addComponent(new IntegerOptionComponent(OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this,
                                                   "The number of interactions to remember in the history."));
     panel.addComponent(new IntegerOptionComponent(OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this,

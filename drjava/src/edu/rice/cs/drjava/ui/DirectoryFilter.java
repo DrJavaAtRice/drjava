@@ -37,34 +37,46 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model;
+package edu.rice.cs.drjava.ui;
 
 import java.io.File;
+import javax.swing.filechooser.FileFilter;
+
+
 /**
- * An interface to give GlobalModel a directory for various operations.
- *
+ * A file filter for selecting directories.
  * @version $Id$
  */
-public interface DirectorySelector {
+public class DirectoryFilter extends FileFilter {
+  /** Name of the filter. */
+  private String _description;
 
   /**
-   * Gets a directory.
-   * @param start a file to start the search from, or null to allow 
-   * implementation to determine
-   * @return any valid directory on the file system
-   * @throws OperationCanceledException if the selection request is canceled
+   * Creates a new directory filter named "Directories".
    */
-  public File getDirectory(File start) throws OperationCanceledException;
+  public DirectoryFilter() {
+    this("Directories");
+  }
   
   /**
-   * Asks the user a yes/no question.
-   * @return true if the user responded affirmatively, false if negatively
+   * Creates a new directory filter with the given description.
+   * @param description Name of the filter
    */
-  public boolean askUser(String message, String title);
-  
-  /**
-   * Warns the user about an error condition.
-   */
-  public void warnUser(String message, String title);
+  public DirectoryFilter(String description) {
+    _description = description;
+  }
 
+  /**
+   * Returns true if the file is a directory.
+   */
+  public boolean accept(File f) {
+    return f.isDirectory();
+  }
+
+  /**
+   * @return A description of this filter to display
+   */
+  public String getDescription() {
+    return _description;
+  }
 }

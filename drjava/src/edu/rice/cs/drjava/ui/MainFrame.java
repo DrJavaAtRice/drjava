@@ -251,13 +251,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JFileChooser _saveChooser;
 
   /**
-   * For placing javadoc output.
-   * We have a persistent dialog to keep track of the last place we
-   * placed javadoc
-   */
-  private JFileChooser _javadocChooser;
-
-  /**
    * Returns the files to open to the model (command pattern).
    */
   private FileOpenSelector _openSelector = new FileOpenSelector() {
@@ -292,24 +285,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       return (rc == JOptionPane.YES_OPTION);
     }
   };
-    
+  
+  
   /**
    * Provides the view's contribution to the Javadoc interaction.
    */
-  private DirectorySelector _javadocSelector =
-    new DirectorySelector() {
-    public File getDirectory(File start) throws OperationCanceledException {
-      _javadocChooser.setSelectedFile(start);
-      
-      int returnVal = _javadocChooser.showDialog(MainFrame.this, "Select");
-      return getChosenFile(_javadocChooser, returnVal);
-    }
-    
-    public void warnUser(String message, String title) {
-      JOptionPane.showMessageDialog(MainFrame.this, message, title,
-                                    JOptionPane.ERROR_MESSAGE);
-    }
-  };
+  private JavadocDialog _javadocSelector = new JavadocDialog(this);
 
   /** Resets the document in the definitions pane to a blank one. */
   private Action _newAction = new AbstractAction("New") {
@@ -483,10 +464,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _javadocAllAction = new AbstractAction("Javadoc All Documents") {
       public void actionPerformed(ActionEvent ae) {
         try {
-//          Vector<String> gjClasspath = _model.getClasspath();
-//          String[] cp = new String[gjClasspath.size()];
-//          gjClasspath.copyInto(cp);
-//          List<String> javaClasspath = Arrays.asList(cp);
+          File suggestedDir = _model.suggestJavadocDestination(_model.getActiveDocument());
+          _javadocSelector.setSuggestedDir(suggestedDir);
           _model.javadocAll(_javadocSelector, _saveSelector, _model.getClasspath(), _model.getNotifier());
         }
         catch (IOException ioe) {
@@ -1155,17 +1134,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _interactionsHistoryChooser = new JFileChooser();
     _interactionsHistoryChooser.setCurrentDirectory(workDir);
     _interactionsHistoryChooser.setFileFilter(new InteractionsHistoryFilter());
-
-    _javadocChooser = new JFileChooser();
-    _javadocChooser.setCurrentDirectory(workDir);
-    _javadocChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    _javadocChooser.setDialogTitle("Javadoc Destination Directory");
     
-//     JPanel _jdAccPanel = new JPanel();
-//     JCheckBox _jdCheckBox = new JCheckBox("Start From Source Roots");
-//     _jdAccPanel.add(_jdCheckBox);
-//
-//     _javadocChooser.setAccessory(_jdAccPanel);
     
     //set up the hourglass cursor
     setGlassPane(new GlassPane());
@@ -1298,7 +1267,6 @@ public class MainFrame extends JFrame implements OptionConstants {
           SwingUtilities.updateComponentTreeUI(_consolePanePopupMenu);
           SwingUtilities.updateComponentTreeUI(_openChooser);
           SwingUtilities.updateComponentTreeUI(_saveChooser);
-          SwingUtilities.updateComponentTreeUI(_javadocChooser);
           Iterator<TabbedPanel> it = _tabs.iterator();
           while (it.hasNext()) {
             SwingUtilities.updateComponentTreeUI(it.next());
@@ -3240,7 +3208,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       _openChooser.setCurrentDirectory(f);
       _saveChooser.setCurrentDirectory(f);
-      _javadocChooser.setCurrentDirectory(f);
     }
     catch (IOException ioe) {
       // If getCanonicalFile throws an IOException, we can't
