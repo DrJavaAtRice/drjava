@@ -95,6 +95,19 @@ public final class InteractionsModelTest extends TestCase {
                  expected, _model.toEval);
   }
   
+  /**
+   * Asserts that the given string typed by the user of the form "java classname"
+   * is transformed to the given expected main method invocation.
+   * @param typed the "java classname args ..." typed by the user
+   * @param expected the expected main class call
+   */
+  protected void _assertMainTransformation(String typed, String expected)
+    throws DocumentAdapterException
+  {
+    assertEquals("main transformation should match expected",
+                 expected, _model._testClassCall(typed));
+  }
+  
   
   /**
    * Tests that the correct text is returned when interpreting.
@@ -123,27 +136,27 @@ public final class InteractionsModelTest extends TestCase {
   public void testInterpretJavaArguments() throws DocumentAdapterException {
     // java Foo a b c
     // Foo.main(new String[]{"a", "b", "c"});
-    _assertProcessedContents("java Foo a b c",
+    _assertMainTransformation("java Foo a b c",
                              "Foo.main(new String[]{\"a\",\"b\",\"c\"});");
     // java Foo "a b c"
     // Foo.main(new String[]{"a b c"});
-    _assertProcessedContents("java Foo \"a b c\"",
+    _assertMainTransformation("java Foo \"a b c\"",
                              "Foo.main(new String[]{\"a b c\"});");
     // java Foo "a b"c d
     // Foo.main(new String[]{"a bc", "d"});
     //  This is different behavior than Unix or DOS, but it's more
     //  intuitive to the user (and easier to implement).
-    _assertProcessedContents("java Foo \"a b\"c d",
+    _assertMainTransformation("java Foo \"a b\"c d",
                              "Foo.main(new String[]{\"a bc\",\"d\"});");
 
     // java Foo c:\\file.txt
     // Foo.main("c:\\file.txt");
-    _assertProcessedContents("java Foo c:\\\\file.txt",
+    _assertMainTransformation("java Foo c:\\\\file.txt",
                              "Foo.main(new String[]{\"c:\\\\file.txt\"});");
 
     // java Foo /home/user/file
     // Foo.main("/home/user/file");
-    _assertProcessedContents("java Foo /home/user/file",
+    _assertMainTransformation("java Foo /home/user/file",
                              "Foo.main(new String[]{\"/home/user/file\"});");
   }
 
@@ -158,19 +171,19 @@ public final class InteractionsModelTest extends TestCase {
   public void testInterpretJavaEscapedArgs() throws DocumentAdapterException {
     // java Foo \j
     // Foo.main(new String[]{"j"});
-    _assertProcessedContents("java Foo \\j",
+    _assertMainTransformation("java Foo \\j",
                              "Foo.main(new String[]{\"j\"});");
     // java Foo \"
     // Foo.main(new String[]{"\""});
-    _assertProcessedContents("java Foo \\\"",
+    _assertMainTransformation("java Foo \\\"",
                              "Foo.main(new String[]{\"\\\"\"});");
     // java Foo \\
     // Foo.main(new String[]{"\\"});
-    _assertProcessedContents("java Foo \\\\",
+    _assertMainTransformation("java Foo \\\\",
                              "Foo.main(new String[]{\"\\\\\"});");
     // java Foo a\ b
     // Foo.main(new String[]{"a b"});
-    _assertProcessedContents("java Foo a\\ b",
+    _assertMainTransformation("java Foo a\\ b",
                              "Foo.main(new String[]{\"a b\"});");
   }
   
@@ -181,39 +194,39 @@ public final class InteractionsModelTest extends TestCase {
   public void testInterpretJavaQuotedEscapedArgs() throws DocumentAdapterException {
     // java Foo "a \" b"
     // Foo.main(new String[]{"a \" b"});
-    _assertProcessedContents("java Foo \"a \\\" b\"",
+    _assertMainTransformation("java Foo \"a \\\" b\"",
                              "Foo.main(new String[]{\"a \\\" b\"});");
     // java Foo "\'"
     // Foo.main(new String[]{"\\'"});
-    _assertProcessedContents("java Foo \"\\'\"",
+    _assertMainTransformation("java Foo \"\\'\"",
                              "Foo.main(new String[]{\"\\\\'\"});");
     // java Foo "\\"
     // Foo.main(new String[]{"\\"});
-    _assertProcessedContents("java Foo \"\\\\\"",
+    _assertMainTransformation("java Foo \"\\\\\"",
                              "Foo.main(new String[]{\"\\\\\"});");
     // java Foo "\" \d"
     // Foo.main(new String[]{"\" \\d"});
-    _assertProcessedContents("java Foo \"\\\" \\d\"",
+    _assertMainTransformation("java Foo \"\\\" \\d\"",
                              "Foo.main(new String[]{\"\\\" \\\\d\"});");
     // java Foo "\n"
     // Foo.main(new String[]{"\n"});
-/*    _assertProcessedContents("java Foo \"\\n\"",
+/*    _assertMainTransformation("java Foo \"\\n\"",
                              "Foo.main(new String[]{\"\\n\"});");
     // java Foo "\t"
     // Foo.main(new String[]{"\t"});
-    _assertProcessedContents("java Foo \"\\t\"",
+    _assertMainTransformation("java Foo \"\\t\"",
                              "Foo.main(new String[]{\"\\t\"});");
     // java Foo "\r"
     // Foo.main(new String[]{"\r"});
-    _assertProcessedContents("java Foo \"\\r\"",
+    _assertMainTransformation("java Foo \"\\r\"",
                              "Foo.main(new String[]{\"\\r\"});");
     // java Foo "\f"
     // Foo.main(new String[]{"\f"});
-    _assertProcessedContents("java Foo \"\\f\"",
+    _assertMainTransformation("java Foo \"\\f\"",
                              "Foo.main(new String[]{\"\\f\"});");
     // java Foo "\b"
     // Foo.main(new String[]{"\b"});
-    _assertProcessedContents("java Foo \"\\b\"",
+    _assertMainTransformation("java Foo \"\\b\"",
                              "Foo.main(new String[]{\"\\b\"});"); */
   }
 
@@ -222,14 +235,14 @@ public final class InteractionsModelTest extends TestCase {
    */
   public void testInterpretJavaSingleQuotedArgs() throws DocumentAdapterException {
     // java Foo 'asdf'
-    _assertProcessedContents("java Foo 'asdf'",
+    _assertMainTransformation("java Foo 'asdf'",
                              "Foo.main(new String[]{\"asdf\"});");
     // java Foo 'a b c'
-    _assertProcessedContents("java Foo 'a b c'",
+    _assertMainTransformation("java Foo 'a b c'",
                              "Foo.main(new String[]{\"a b c\"});");
     
     // java Foo 'a b'c
-    _assertProcessedContents("java Foo 'a b'c",
+    _assertMainTransformation("java Foo 'a b'c",
                              "Foo.main(new String[]{\"a bc\"});");
   }
   

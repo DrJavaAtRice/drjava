@@ -205,23 +205,48 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         toEval = _testClassCall(toEval);
       }
 
-      if (!_checkInteraction(text)) {
-        return;
+      try {
+//        _checkInteraction(text);
+        toEval = _interactionsProcessor.preProcess(toEval);
+
+        _prepareToInterpret(text);
+        interpret(toEval);
       }
-
-      // there is no return at the end of the last line
-      // better to put it on now and not later.
-      _docAppend(_newLine, InteractionsDocument.DEFAULT_STYLE);
-
-      _notifyInteractionStarted();
-
-      _document.setInProgress(true);
-      _document.addToHistory(text);
-
-      interpret(toEval);
+      catch (ParseException pe) {
+        // A ParseException indicates a syntax error in the input window
+        String errMsg = pe.getInteractionsMessage();
+//        javax.swing.JOptionPane.showMessageDialog(null, "ParseException:\n" + errMsg);
+        if (errMsg.endsWith("<EOF>\"")) {
+          _notifier.interactionIncomplete();
+        }
+        else {
+          _prepareToInterpret(text);
+          replReturnedSyntaxError(errMsg, text, pe.getBeginLine(),
+                                  pe.getBeginColumn(), pe.getEndLine(), pe.getEndColumn());
+        }
+      }
+      catch (TokenMgrError tme) {
+        // A TokenMgrError indicates some lexical difficulty with input.
+//        javax.swing.JOptionPane.showMessageDialog(null, "TokenMgrError:\n" + tme.getMessage());
+        _prepareToInterpret(text);
+        int row = tme.getErrorRow();
+        int col = tme.getErrorColumn() - 1;
+        replReturnedSyntaxError(tme.getMessage(), text, row, col, row, col);
+      }
     }
   }
-  
+
+  /**
+   * Performs pre-interpretation preparation of the interactions document and
+   * notifies the view.
+   */
+  private void _prepareToInterpret(String text) {
+    _docAppend(_newLine, InteractionsDocument.DEFAULT_STYLE);
+    _notifyInteractionStarted();
+    _document.setInProgress(true);
+    _document.addToHistory(text);
+  }
+
   /**
    * Interprets the given command.
    * @param toEval command to be evaluated
@@ -644,7 +669,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
                                       int endRow,
                                       int endCol ) {
     edu.rice.cs.util.Pair<Integer,Integer> oAndL = 
-      StringOps.getOffsetAndLength( interaction, startRow, startCol, endRow, endCol );
+      StringOps.getOffsetAndLength(interaction, startRow, startCol, endRow, endCol);
     
     _notifySyntaxErrorOccurred(_document.getPromptPos() + oAndL.getFirst().intValue(),
                                 oAndL.getSecond().intValue());
