@@ -1276,20 +1276,6 @@ public final class DefinitionsDocumentTest extends TestCase
     assertEquals("Should have inserted the text properly.", text, 
                  _defModel.getText(0, _defModel.getLength()));
     
-    // Indent the lines, so as to trigger a nested compond edit
-    _defModel.indentLines(0, _defModel.getLength());
-    assertEquals("Should have indented correctly.", indented, 
-                 _defModel.getText(0, _defModel.getLength()));
-    
-    // Try to undo the nested edit
-    try {
-      _defModel.getUndoManager().undo();
-      fail("Should not have allowed undoing a nested edit.");
-    }
-    catch (CannotUndoException e) {
-      // Correct: cannot undo a nested edit
-    }
-    
     // Try end the compound edit with a wrong key
     try {
       _defModel.getUndoManager().endCompoundEdit(key + 1);
@@ -1300,8 +1286,27 @@ public final class DefinitionsDocumentTest extends TestCase
                    "Improperly nested compound edits.", e.getMessage());
     }
     
+    // Indent the lines, so as to trigger a nested compound edit
+    _defModel.indentLines(0, _defModel.getLength());
+    assertEquals("Should have indented correctly.", indented, 
+                 _defModel.getText(0, _defModel.getLength()));
+    
+    // We've taken out this part of the test because of our change to
+    // undo where we close the nearest open compound edit upon undo-ing,
+    // pasting, commenting, un-commenting, indenting, and backspacing.
+    // We should never have a nested edit anymore.
+    
+    // Try to undo the nested edit
+//    try {
+//      _defModel.getUndoManager().undo();
+//      fail("Should not have allowed undoing a nested edit.");
+//    }
+//    catch (CannotUndoException e) {
+//      // Correct: cannot undo a nested edit
+//    }
+    
     // End the compound edit and undo
-    _defModel.getUndoManager().endCompoundEdit(key);
+//    _defModel.getUndoManager().endCompoundEdit(key);
     _defModel.getUndoManager().undo();
     assertEquals("Should have undone the indenting and inserting.", "",
                  _defModel.getText(0, _defModel.getLength()));

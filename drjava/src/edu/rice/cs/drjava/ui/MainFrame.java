@@ -541,6 +541,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent e) {
       Component c = SwingUtilities.findFocusOwner(MainFrame.this);
       if (_currentDefPane.hasFocus()) {
+        _currentDefPane.endCompoundEdit();
         CompoundUndoManager undoMan = _model.getActiveDocument().getDocument().getUndoManager();
         int key = undoMan.startCompoundEdit();
         super.actionPerformed(e);
@@ -596,6 +597,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Undoes the last change to the active definitions document. */
   private DelegatingAction _undoAction = new DelegatingAction() {
     public void actionPerformed(ActionEvent e) {
+      _currentDefPane.endCompoundEdit();
       super.actionPerformed(e);
       _currentDefPane.requestFocus();
       OpenDefinitionsDocument doc = _model.getActiveDocument();
@@ -664,12 +666,14 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _gotoLineAction = new AbstractAction("Go to Line...") {
     public void actionPerformed(ActionEvent ae) {
       _gotoLine();
+      _currentDefPane.requestFocus();
     }
   };
 
   /** Indents the current selection. */
   private Action _indentLinesAction = new AbstractAction("Indent Line(s)") {
     public void actionPerformed(ActionEvent ae) {
+      _currentDefPane.endCompoundEdit();
       _currentDefPane.indent();
     }
   };
@@ -686,6 +690,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       openDoc.syncCurrentLocationWithDefinitions(caretPos);
       int start = _currentDefPane.getSelectionStart();
       int end = _currentDefPane.getSelectionEnd();
+      _currentDefPane.endCompoundEdit();
       doc.commentLines(start, end);
     }
   };
@@ -702,6 +707,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       openDoc.syncCurrentLocationWithDefinitions(caretPos);
       int start = _currentDefPane.getSelectionStart();
       int end = _currentDefPane.getSelectionEnd();
+      _currentDefPane.endCompoundEdit();
       doc.uncommentLines(start, end);
     }
   };
@@ -1502,12 +1508,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     });
     
-    config.addOptionListener(OptionConstants.ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {
+    config.addOptionListener(ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {
         _model.getInteractionsModel().setPrivateAccessible(oce.value.booleanValue());
       }
     });
-    
+
     // Initialize breakpoint highlights hashtable, for easy removal of highlights
     _breakpointHighlights = new gj.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
 
@@ -2826,7 +2832,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     toolsMenu.addSeparator();
 
     _addMenuItem(toolsMenu, _clearConsoleAction, KEY_CLEAR_CONSOLE);
-    if (DrJava.getConfig().getSetting(OptionConstants.SHOW_DEBUG_CONSOLE).booleanValue()) {
+    if (DrJava.getConfig().getSetting(SHOW_DEBUG_CONSOLE).booleanValue()) {
       toolsMenu.add(_showDebugConsoleAction);
     }
 

@@ -326,6 +326,174 @@ public final class DefinitionsPaneTest extends TestCase {
     assertEquals(message, contents, doc.getText(0, doc.getLength()));
   }
   
+  public void testGranularUndo() throws BadLocationException {   
+    DefinitionsPane definitions = _frame.getCurrentDefPane();
+    DefinitionsDocument doc = definitions.getOpenDocument().getDocument(); 
+//    doc.addUndoableEditListener(doc.getUndoManager());
+
+    // 1
+    assertEquals("Should start out empty.", "", 
+                 doc.getText(0, doc.getLength()));
+    
+    // Type in consecutive characters and see if they are all undone at once.
+    // Type 'a'
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_PRESSED, 
+                                             (new Date()).getTime(),
+                                             0,
+                                             KeyEvent.VK_A, KeyEvent.CHAR_UNDEFINED));
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_TYPED, 
+                                             (new Date()).getTime(),
+                                             0,
+                                             KeyEvent.VK_UNDEFINED, 'a'));
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_RELEASED, 
+                                             (new Date()).getTime(),
+                                             0,
+                                             KeyEvent.VK_A, KeyEvent.CHAR_UNDEFINED));
+    definitions.setCaretPosition(doc.getLength());
+    
+    // Type '!'
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_PRESSED, 
+                                             (new Date()).getTime(),
+                                             0,
+                                             KeyEvent.VK_EXCLAMATION_MARK, KeyEvent.CHAR_UNDEFINED));
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_TYPED, 
+                                             (new Date()).getTime(),
+                                             0,
+                                             KeyEvent.VK_UNDEFINED, '!'));
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_RELEASED, 
+                                             (new Date()).getTime(),
+                                             0,
+                                             KeyEvent.VK_EXCLAMATION_MARK, KeyEvent.CHAR_UNDEFINED));
+    definitions.setCaretPosition(doc.getLength());
+    
+    // Type 'B'
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_PRESSED, 
+                                             (new Date()).getTime(),
+                                             InputEvent.SHIFT_MASK,
+                                             KeyEvent.VK_B, KeyEvent.CHAR_UNDEFINED));
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_TYPED, 
+                                             (new Date()).getTime(),
+                                             0,
+                                             KeyEvent.VK_UNDEFINED, 'B'));
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_RELEASED, 
+                                             (new Date()).getTime(),
+                                             InputEvent.SHIFT_MASK,
+                                             KeyEvent.VK_B, KeyEvent.CHAR_UNDEFINED));
+    definitions.setCaretPosition(doc.getLength());
+    
+    // Type '9'
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_PRESSED, 
+                                             (new Date()).getTime(),
+                                             0,
+                                             KeyEvent.VK_9, KeyEvent.CHAR_UNDEFINED));
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_TYPED, 
+                                             (new Date()).getTime(),
+                                             0,
+                                             KeyEvent.VK_UNDEFINED, '9'));
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_RELEASED, 
+                                             (new Date()).getTime(),
+                                             0,
+                                             KeyEvent.VK_9, KeyEvent.CHAR_UNDEFINED));
+    definitions.setCaretPosition(doc.getLength());
+    assertEquals("The text should have been inserted", "a!B9", 
+                 doc.getText(0, doc.getLength()));
+    
+    // Call the undoAction in MainFrame through the KeyBindingManager.
+    KeyStroke ks = DrJava.getConfig().getSetting(OptionConstants.KEY_UNDO);
+    Action a = KeyBindingManager.Singleton.get(ks);
+    definitions.processKeyEvent(new KeyEvent(definitions,
+                                             KeyEvent.KEY_PRESSED,
+                                             (new Date()).getTime(),
+                                             ks.getModifiers(),
+                                             ks.getKeyCode(), KeyEvent.CHAR_UNDEFINED));
+//                              ks.getKeyChar());
+    // Performs the action a
+//    SwingUtilities.notifyAction(a, ks, e, e.getSource(), e.getModifiers());
+//    doc.getUndoManager().undo();
+    assertEquals("Should have undone correctly.", "", 
+                 doc.getText(0, doc.getLength()));
+    
+    // 2
+    /* This part doesn't work right now because by just calling processKeyEvent we
+     * have to manually move the caret, and the UndoWithPosition is off by one.  This
+     * bites us since when the backspace is done, the backspace undo position is 
+     * still at position 1 which doesn't exist in the document anymore.
+     *
+    
+    // Test undoing backspace.
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_PRESSED, 
+                                             (new Date()).getTime(),
+                                             0,
+                                             KeyEvent.VK_UNDEFINED, KeyEvent.CHAR_UNDEFINED));
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_TYPED, 
+                                             (new Date()).getTime(),
+                                             0,
+                                             KeyEvent.VK_UNDEFINED, 'a'));
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_RELEASED, 
+                                             (new Date()).getTime(),
+                                             0,
+                                             KeyEvent.VK_UNDEFINED, KeyEvent.CHAR_UNDEFINED));
+    definitions.setCaretPosition(doc.getLength());
+    
+    assertEquals("The text should have been inserted", "a", 
+                 doc.getText(0, doc.getLength()));
+    
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_PRESSED, 
+                                             (new Date()).getTime(),
+                                             0,
+                                             KeyEvent.VK_BACK_SPACE, KeyEvent.CHAR_UNDEFINED));
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_TYPED, 
+                                             (new Date()).getTime(),
+                                             0,
+                                             KeyEvent.VK_UNDEFINED, '\010'));
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_RELEASED, 
+                                             (new Date()).getTime(),
+                                             0,
+                                             KeyEvent.VK_BACK_SPACE, KeyEvent.CHAR_UNDEFINED));
+    System.out.println(definitions.getCaretPosition());
+    definitions.setCaretPosition(doc.getLength());
+    
+    assertEquals("The text should have been deleted", "", 
+                 doc.getText(0, doc.getLength()));
+    
+    // Call the undoAction in MainFrame through the KeyBindingManager.
+//    KeyStroke ks = DrJava.getConfig().getSetting(OptionConstants.KEY_UNDO);
+//    Action a = KeyBindingManager.Singleton.get(ks);
+//    KeyEvent e = new KeyEvent(definitions,
+//                              KeyEvent.KEY_PRESSED,
+//                              0,
+//                              ks.getModifiers(),
+//                              ks.getKeyCode(),
+//                              ks.getKeyChar());
+    // Performs the action a
+    definitions.processKeyEvent(new KeyEvent(definitions,
+                                             KeyEvent.KEY_PRESSED,
+                                             (new Date()).getTime(),
+                                             ks.getModifiers(),
+                                             ks.getKeyCode(), KeyEvent.CHAR_UNDEFINED));
+//    doc.getUndoManager().undo();
+    assertEquals("Should have undone correctly.", "a", 
+                 doc.getText(0, doc.getLength()));*/
+  }
+  
 }
 
 

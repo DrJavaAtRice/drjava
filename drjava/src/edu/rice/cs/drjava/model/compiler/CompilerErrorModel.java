@@ -434,6 +434,9 @@ public class CompilerErrorModel<T extends CompilerError> {
                      && (nextNewline != -1)
                      && (file.equals(_errors[curError].file()))) {
               nextNewline = defsText.indexOf(newLine, offset);
+              if (nextNewline == -1) {
+                nextNewline = defsText.indexOf("\n", offset);
+              }
               if (nextNewline != -1) {
                 curLine++;
                 offset = nextNewline + 1;

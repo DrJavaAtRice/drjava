@@ -47,6 +47,7 @@ package edu.rice.cs.drjava.model.definitions;
 
 import javax.swing.undo.*;
 import java.util.LinkedList;
+import java.util.Iterator;
 
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
@@ -138,6 +139,14 @@ public class CompoundUndoManager extends UndoManager {
       throw new IllegalStateException("Improperly nested compound edits.");
     }
   }
+  
+  /**
+   * We are getting the last Compound Edit entered into the list.
+   * This is for making a Compound edit for granular undo.
+   */
+  public CompoundEdit getLastCompoundEdit(){
+    return _compoundEdits.get(0);
+  }
 
   /**
    * Gets the next undo.
@@ -162,6 +171,7 @@ public class CompoundUndoManager extends UndoManager {
    */
   public boolean addEdit(UndoableEdit e) {
     if (_compoundEditInProgress()) {
+//      _notifyUndoHappened(); // added this for granular undo
       return _compoundEdits.get(0).addEdit(e);
     }
     else {
@@ -175,7 +185,7 @@ public class CompoundUndoManager extends UndoManager {
    * Returns whether or not a compound edit is in progress.
    * @return true iff in progress
    */
-  private boolean _compoundEditInProgress() {
+  public boolean _compoundEditInProgress() {
     return !_compoundEdits.isEmpty();
   }
 
@@ -208,7 +218,11 @@ public class CompoundUndoManager extends UndoManager {
    */
   public void undo() {
     if(_compoundEditInProgress()) {
-      throw new CannotUndoException();
+      while (_keys.size() > 0) {
+        endCompoundEdit(_keys.get(0).intValue());
+      }
+      super.undo();
+//      throw new CannotUndoException();
     }
     else {
       super.undo();
@@ -238,7 +252,11 @@ public class CompoundUndoManager extends UndoManager {
    */
   public void redo() {
     if(_compoundEditInProgress()) {
-      throw new CannotRedoException();
+      while (_keys.size() > 0) {
+        endCompoundEdit(_keys.get(0).intValue());
+      }
+      super.redo();
+//      throw new CannotRedoException();
     }
     else {
       super.redo();

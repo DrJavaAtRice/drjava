@@ -70,6 +70,7 @@ public class CompilerRegistry {
    * The list of compiler interfaces that are distributed with DrJava.
    */
   public static final String[] DEFAULT_COMPILERS = {
+    "edu.rice.cs.drjava.model.compiler.Javac150FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.JSR14v20FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.JSR14v12FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.JSR14FromSetLocation",
