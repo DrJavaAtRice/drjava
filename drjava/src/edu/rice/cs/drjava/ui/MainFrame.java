@@ -3753,7 +3753,10 @@ public class MainFrame extends JFrame implements OptionConstants {
         public void run() {
           _compilerErrorPanel.reset();
           _junitErrorPanel.reset();
-          if (inDebugMode()) _updateDebugStatus();
+          if (inDebugMode()) {
+            _model.getActiveDocument().checkIfClassFileInSync();
+            _updateDebugStatus();
+          }
           hourglassOff();
         }
         

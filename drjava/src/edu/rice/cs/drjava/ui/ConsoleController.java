@@ -103,7 +103,7 @@ public class ConsoleController extends AbstractConsoleController {
 //     return JOptionPane.showInputDialog(MainFrame.this, "Please enter System.in:",
 //                                        "System.in", JOptionPane.QUESTION_MESSAGE);
       _pane.setEditable(true);
-      _pane.getCaret().setVisible(true);
+      //_pane.getCaret().setVisible(true);
       _waitForInput();
       String s = _doc.getCurrentInput();
       _doc.disablePrompt();

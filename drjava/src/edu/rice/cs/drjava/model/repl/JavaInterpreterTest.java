@@ -280,6 +280,13 @@ public final class JavaInterpreterTest extends TestCase {
     catch (ExceptionReturnedException e) {
       // Correct; it should fail
     }
+    try {
+      out = _interpreter.interpret("Integer i2 = (Integer)new Object();");
+      fail("incompatible assignment should have failed");
+    }
+    catch (ExceptionReturnedException e) {
+      // Correct; it should fail
+    }
     
     // Check that a correct assignment doesn't fail
     _interpreter.interpret("Object o = new Integer(3)");

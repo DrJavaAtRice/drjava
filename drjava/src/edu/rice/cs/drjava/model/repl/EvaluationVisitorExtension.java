@@ -63,8 +63,10 @@ import koala.dynamicjava.util.*;
  */
 
 public class EvaluationVisitorExtension extends EvaluationVisitor {
-  public EvaluationVisitorExtension(Context ctx) {
+  private Context _context;
+  public EvaluationVisitorExtension(Context ctx) {    
     super(ctx);
+    _context = ctx;
   }
 
   private void _checkInterrupted(Node node) {
@@ -142,18 +144,50 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     super.visit(node);
     return Interpreter.NO_RESULT;
   }
-
+  
   public Object visit(Literal node) {
     _checkInterrupted(node);
     return super.visit(node);
   }
-
+  
+  /**
+   * Overrides EvaluationVisitor to enforce a proper type check at
+   * runtime. It combines code from the actual visit code in
+   * EvaluationVisitor as well as code from the modify method
+   * in VariableModifier.
+   */
   public Object visit(VariableDeclaration node) {
     _checkInterrupted(node);
-    super.visit(node);
+    Class c = NodeProperties.getType(node.getType());
+    
+    if (node.getInitializer() != null) {
+      Object o = performCast(c, node.getInitializer().acceptVisitor(this));
+      
+      // Forces a runtime type-check on the cast.
+      String name = node.getName();
+      
+      if (!(c.isPrimitive()                     ||
+            o == null                          ||
+            c.isAssignableFrom(o.getClass()))) {
+        Exception e = new ClassCastException(name);
+        throw new CatchedExceptionError(e, node);
+      }
+      
+      if (node.isFinal()) {
+        _context.setConstant(node.getName(), o);
+      } else {
+        _context.set(node.getName(), o);
+      }
+    } else {
+      if (node.isFinal()) {
+        _context.setConstant(node.getName(), UninitializedObject.INSTANCE);
+      } else {
+        _context.set(node.getName(), UninitializedObject.INSTANCE);
+      }
+    }
     return Interpreter.NO_RESULT;
   }
-
+  
   public Object visit(ObjectFieldAccess node) {
     _checkInterrupted(node);
     return super.visit(node);
