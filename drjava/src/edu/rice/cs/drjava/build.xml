@@ -33,6 +33,30 @@
   <property name="jarfile" value="${srcroot}/../drjava.jar" />
   <property name="manifest" value="manifest" />
 
+
+  <!-- Sets a flag indicating that code dealing with new features since the 
+    last stable release should be enabled and testable.
+    Takes effect only after a clean compile -->
+  <target name="development">
+    <filter token="DEVELOPMENT" value = "true" />
+    <copy file="CodeStatus.orig"
+          tofile="CodeStatus.java"
+          overwrite="yes"
+          filtering="yes" />
+  </target>
+
+  <!-- Sets a flag indicating that code dealing with new features since the 
+    last stable release should not be enabled or testable.
+    Takes effect only after a clean compile -->
+  <target name="stable">
+    <filter token="DEVELOPMENT" value = "false" />
+    <copy file="CodeStatus.orig"
+          tofile="CodeStatus.java"
+          overwrite="yes"
+          filtering="yes" />
+  </target>
+
+
   <!-- include standard build file parts -->
   &build-common;
 

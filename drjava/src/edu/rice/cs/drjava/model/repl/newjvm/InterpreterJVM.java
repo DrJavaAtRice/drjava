@@ -45,6 +45,7 @@ import java.rmi.server.*;
 import java.rmi.*;
 import java.net.MalformedURLException;
 import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.util.OutputStreamRedirector;
 
 /**
  * This is the main class for the interpreter JVM.
@@ -332,20 +333,4 @@ public class InterpreterJVM extends UnicastRemoteObject
       System.exit(-1);
     }
   }
-}
-
-abstract class OutputStreamRedirector extends OutputStream {
-  public final void write(int b) throws IOException {
-    write(new byte[] { (byte) b }, 0, 1);
-  }
-
-  public final void write(byte[] b) throws IOException {
-    print(new String(b));
-  }
-
-  public final void write(byte[] b, int off, int len) throws IOException {
-    print(new String(b, off, len));
-  }
-
-  public abstract void print(String s);
 }

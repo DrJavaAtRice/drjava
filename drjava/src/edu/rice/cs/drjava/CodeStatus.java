@@ -39,14 +39,14 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava;
 
-
 /**
- * Contains the constant that specifies whether any new features should be used in any
- * compilation or test. This flag will be set to false for preparing stable releases and
- * will be set to true during development of new features. To set the flag to false, include
- * the "stable" target when using ant and "development" to set the flag to true. All new features
- * during the beta test stage should be surrounded by a conditional based on this flag.
- * @version $Idx$
+ * Contains the constant that specifies whether any new features should be used
+ * in any compilation or test.  This flag will be set to false when preparing 
+ * stable releases and will be set to true during development of new features.
+ * To set the flag to false, use the "stable" target in ant and the 
+ * "development" target to set the flag to true.  All new features during a beta
+ * test period should be surrounded by a conditional based on this flag.
+ * @version $Id$
  */
 public class CodeStatus {
   public static final boolean DEVELOPMENT = true;

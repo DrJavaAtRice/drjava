@@ -420,7 +420,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       //Vector<String> v = new Vector<String>();
       //v.addElement("/home/mcgraw/javafiles/");
       //CONFIG.setSetting(EXTRA_CLASSPATH, v);
-      CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(10));
     }
   };
 

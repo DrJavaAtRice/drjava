@@ -45,6 +45,7 @@ import javax.swing.*;
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.util.PreventExitSecurityManager;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.config.*;
@@ -95,7 +96,7 @@ public class DrJava implements ConfigurationTool, OptionConstants {
       // At some point this should be fixed, which would involve making the
       // CompilerRegistry notify listeners when there is a change in the list of
       // available compilers.
-      MainFrame mf = new MainFrame();
+      final MainFrame mf = new MainFrame();
       System.setProperty("sun.awt.exception.handler", 
                          "edu.rice.cs.drjava.AWTExceptionHandler");
       
@@ -104,6 +105,23 @@ public class DrJava implements ConfigurationTool, OptionConstants {
       enableSecurityManager();
       openCommandLineFiles(mf, args);
       mf.show();
+      
+      
+      // redirect stdout
+      System.setOut(new PrintStream(new OutputStreamRedirector() {
+        public void print(String s) {
+          mf.getModel().systemOutPrint(s);
+        }
+      }));
+      
+      // redirect stderr
+      System.setErr(new PrintStream(new OutputStreamRedirector() {
+        public void print(String s) {
+          mf.getModel().systemErrPrint(s);
+        }
+      }));
+      
+      
     } catch (Exception ex) {
       _consoleErr.println(ex.getClass().getName() + ": " + ex.getMessage());
       ex.printStackTrace(_consoleErr);
@@ -254,3 +272,4 @@ public class DrJava implements ConfigurationTool, OptionConstants {
     return  _consoleOut;
   }
 }
+

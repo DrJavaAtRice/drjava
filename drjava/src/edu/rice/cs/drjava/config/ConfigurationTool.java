@@ -61,29 +61,33 @@ public interface ConfigurationTool {
   /**
    * The global Configuration object to use for all configurable options.
    */
-  public static final FileConfiguration CONFIG = 
-    (new Begin<FileConfiguration>() {
-      public FileConfiguration evaluate() {
-        try { 
-          PROPERTIES_FILE.createNewFile(); 
-          // be nice and ensure a config file 
-        } catch(IOException e) { // IOException occurred 
-        } 
-        FileConfiguration config = 
-          new FileConfiguration(PROPERTIES_FILE); 
-        try { 
-          config.loadConfiguration(); 
-        }
-        catch (Exception e) {
-          // problem parsing the config file.
-          // Use defaults and remember what happened (for the UI)
-          config.resetToDefaults();
-          config.storeStartupException(e);
-        }
-        return config;
-      }
-    }).evaluate();
+  public static final FileConfiguration CONFIG = new DefaultFileConfig().evaluate();
 }
 
+/**
+ * Generate the CONFIG object separately to appease the almighty Javadoc.
+ * (It didn't like anonymous inner classes with generics in interfaces in Java 1.3.)
+ */
+class DefaultFileConfig {
+  public FileConfiguration evaluate() {
+    try { 
+      ConfigurationTool.PROPERTIES_FILE.createNewFile(); 
+      // be nice and ensure a config file 
+    } catch(IOException e) { // IOException occurred 
+    } 
+    FileConfiguration config = 
+      new FileConfiguration(ConfigurationTool.PROPERTIES_FILE); 
+    try { 
+      config.loadConfiguration(); 
+    }
+    catch (Exception e) {
+      // problem parsing the config file.
+      // Use defaults and remember what happened (for the UI)
+      config.resetToDefaults();
+      config.storeStartupException(e);
+    }
+    return config;
+  }
+}
 
 

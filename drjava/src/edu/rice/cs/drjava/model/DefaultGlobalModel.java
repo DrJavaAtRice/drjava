@@ -637,28 +637,38 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       throw new UnexpectedException(e);
     }
   }
+  
+  /** Prints System.out to the DrJava console. */
+  public void systemOutPrint(String s) {
+    _docAppend(_consoleDoc, s, SYSTEM_OUT_STYLE);
+  }
+
+  /** Prints System.err to the DrJava console. */
+  public void systemErrPrint(String s) {
+    _docAppend(_consoleDoc, s, SYSTEM_ERR_STYLE);
+  }
 
   /** Called when the repl prints to System.out. */
   public void replSystemOutPrint(String s) {
-    _docAppend(_consoleDoc, s, SYSTEM_OUT_STYLE);
+    systemOutPrint(s);
     _interactionsDoc.insertBeforeLastPrompt(s, SYSTEM_OUT_INTERACTIONS_STYLE);
   }
 
   /** Called when the repl prints to System.err. */
   public void replSystemErrPrint(String s) {
-    _docAppend(_consoleDoc, s, SYSTEM_ERR_STYLE);
+    systemErrPrint(s);
     _interactionsDoc.insertBeforeLastPrompt(s, SYSTEM_ERR_INTERACTIONS_STYLE);
   }
 
   /** Called when the repl prints to System.out. */
   public void debugSystemOutPrint(String s) {
-    _docAppend(_consoleDoc, s, SYSTEM_OUT_STYLE);
+    systemOutPrint(s);
     _docAppend(_debugDoc, s, SYSTEM_OUT_DEBUG_STYLE);
   }
 
   /** Called when the repl prints to System.err. */
   public void debugSystemErrPrint(String s) {
-    _docAppend(_consoleDoc, s, SYSTEM_ERR_STYLE);
+    systemErrPrint(s);
     _docAppend(_debugDoc, s, SYSTEM_ERR_STYLE);
   }
 

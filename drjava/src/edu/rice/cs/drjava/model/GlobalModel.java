@@ -228,6 +228,12 @@ public interface GlobalModel {
    * Aborts the currently running interaction.
    */
   public void abortCurrentInteraction();
+  
+  /** Prints System.out to the DrJava console. */
+  public void systemOutPrint(String s);
+
+  /** Prints System.err to the DrJava console. */
+  public void systemErrPrint(String s);
 
   /** Called when the repl prints to System.out. */
   public void replSystemOutPrint(String s);

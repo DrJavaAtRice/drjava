@@ -65,25 +65,7 @@ public interface OptionConstants extends ConfigurationTool {
     new StringOption("jsr14.collectionspath","");
   
   public static final VectorOption<String> EXTRA_CLASSPATH = 
-    (new Begin<VectorOption<String>>() {
-      private String warning =
-        "WARNING: Configurability interface only supports path separators"+
-        " of maximum length 1 character as of this moment.";
-      public VectorOption<String> evaluate() {
-        // system path separator
-        String ps = System.getProperty("path.separator");
-        if(ps.length() > 1) { 
-          // spit out warning if it's more than one character.
-          System.err.println(warning);
-          System.err.println("using '"+ps.charAt(0)+
-                             "' for delimiter.");
-        }
-        StringOption sop = new StringOption("","");
-        String name = "extra.classpath";
-        char delim = ps.charAt(0);
-        return new VectorOption<String>(name,sop,"",delim,"",new Vector<String>());
-      }
-    }).evaluate();
+    new ExtraClasspathOption().evaluate();
   
   
   /* ---------- Color Options ---------- */
@@ -524,5 +506,30 @@ public interface OptionConstants extends ConfigurationTool {
 
 }
 
+
+/**
+ * Generate vector options separately to appease javadoc.
+ * (It didn't like anonymous inner classes with generics in interfaces in Java 1.3.)
+ */
+class ExtraClasspathOption {
+  private String warning =
+    "WARNING: Configurability interface only supports path separators"+
+    " of maximum length 1 character as of this moment.";
+  
+  public VectorOption<String> evaluate() {
+    // system path separator
+    String ps = System.getProperty("path.separator");
+    if(ps.length() > 1) { 
+      // spit out warning if it's more than one character.
+      System.err.println(warning);
+      System.err.println("using '"+ps.charAt(0)+
+                         "' for delimiter.");
+    }
+    StringOption sop = new StringOption("","");
+    String name = "extra.classpath";
+    char delim = ps.charAt(0);
+    return new VectorOption<String>(name,sop,"",delim,"",new Vector<String>());
+  }
+}
 
 
