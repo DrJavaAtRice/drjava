@@ -52,6 +52,9 @@ public class AWTExceptionHandler {
   }
   
   public void handle(Throwable thrown) {
+    if (frame == null) {
+      frame = new JFrame();
+    }
     UncaughtExceptionWindow uew = new UncaughtExceptionWindow(frame,thrown);
   }
 }

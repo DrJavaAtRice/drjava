@@ -47,6 +47,7 @@ import java.lang.reflect.InvocationTargetException;
 import javax.swing.*;
 
 import edu.rice.cs.drjava.ui.MainFrame;
+import edu.rice.cs.drjava.ui.AWTExceptionHandler;
 import edu.rice.cs.util.PreventExitSecurityManager;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.OutputStreamRedirector;
@@ -219,9 +220,10 @@ public class DrJava implements OptionConstants {
         
       }
         
-    } catch (Exception ex) {
-      _consoleErr.println(ex.getClass().getName() + ": " + ex.getMessage());
-      ex.printStackTrace(_consoleErr);
+    } catch (Throwable t) {
+      _consoleErr.println(t.getClass().getName() + ": " + t.getMessage());
+      t.printStackTrace(_consoleErr);
+      new AWTExceptionHandler().handle(t);
     }
   }
 

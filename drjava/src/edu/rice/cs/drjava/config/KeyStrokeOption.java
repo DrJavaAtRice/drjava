@@ -44,6 +44,7 @@ import edu.rice.cs.util.UnexpectedException;
 import java.lang.reflect.Field;
 import javax.swing.KeyStroke;
 import java.awt.event.KeyEvent;
+import java.awt.Event;
 import java.util.Hashtable;
 
 /**
@@ -111,6 +112,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
     
     KeyStroke ks = KeyStroke.getKeyStroke(s);
     if (ks == null) {
+//      return NULL_KEYSTROKE;
       throw new OptionParseException(name, s,
                                      "Must be a valid string representation of a Keystroke.");
     }
@@ -122,31 +124,72 @@ public class KeyStrokeOption extends Option<KeyStroke> {
    * @return A String representing the KeyStroke "k".
    */
   public String format(KeyStroke k) {
-    if (k == NULL_KEYSTROKE)
+    if (k == NULL_KEYSTROKE) {
       return "<none>";
-    String s = KeyEvent.getKeyModifiersText(k.getModifiers()).toLowerCase();
-    s = s.replace('+', ' ');
-    if (!s.equals(""))
-      s += " ";
+    }
+
+    //String s = KeyEvent.getKeyModifiersText(k.getModifiers()).toLowerCase();
+    //s = s.replace('+', ' ');
+    //if (!s.equals(""))
+    //  s += " ";
+
+    // Generate modifiers text on our own, since getKeyStroke can't parse
+    //  locale-specific modifiers.
+    int modifiers = k.getModifiers();
+    boolean isMac = _isMacPlatform();
+    StringBuffer buf = new StringBuffer();
+    if ((modifiers & Event.META_MASK) > 0) {
+      String meta = (!isMac) ? "meta " : "command ";
+      buf.append(meta);
+    }
+    if ((modifiers & Event.CTRL_MASK) > 0) {
+      buf.append("ctrl ");
+    }
+    if ((modifiers & Event.ALT_MASK) > 0) {
+      String alt = (!isMac) ? "alt " : "option ";
+      buf.append(alt);
+    }
+    if ((modifiers & Event.SHIFT_MASK) > 0) {
+      buf.append("shift ");
+    }
+
     // If the key code is undefined, this is a "typed" unicode character
     if (k.getKeyCode() == KeyEvent.VK_UNDEFINED) {
-      s += "typed ";
-      s += k.getKeyChar();
+      buf.append("typed ");
+      buf.append(k.getKeyChar());
     }
     // else this corresponds to a static KeyEvent constant
     else {
       // defaults to pressed
-      if (k.isOnKeyRelease())
-        s += "released ";
+      if (k.isOnKeyRelease()) {
+        buf.append("released ");
+      }
       String key = (String) keys.get(new Integer(k.getKeyCode()));
-      if (key == null)
+      if (key == null) {
         throw new IllegalArgumentException("Invalid keystroke");
+      }
       if (key.equals("CONTROL") || key.equals("ALT") || key.equals("META") ||
-          key.equals("SHIFT") || key.equals("ALT_GRAPH"))
-        return s;
-      s += key;
-      return s;
+          key.equals("SHIFT") || key.equals("ALT_GRAPH")) {
+        return buf.toString();
+      }
+      else {
+        buf.append(key);
+        return buf.toString();
+      }
     }
-    return s; 
+    return buf.toString();
+  }
+
+  /**
+   * Returns if the current platform is a Macintosh.
+   */
+  private boolean _isMacPlatform() {
+    String os = System.getProperty("os.name");
+    if (os != null) {
+      return os.toLowerCase().indexOf("mac") > -1;
+    }
+    else {
+      return false;
+    }
   }
 }
