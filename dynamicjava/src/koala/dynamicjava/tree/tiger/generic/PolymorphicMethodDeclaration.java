@@ -54,8 +54,8 @@ import java.util.List;
  */
 
 public class PolymorphicMethodDeclaration extends MethodDeclaration {
-
-
+  
+  
   private TypeParameter[] _typeParameters;
   /**
    * Creates a new method declaration
@@ -70,10 +70,10 @@ public class PolymorphicMethodDeclaration extends MethodDeclaration {
    *            params is null or excepts is null
    */
   public PolymorphicMethodDeclaration(int flags, Type type, String name,
-                                      List<FormalParameter> params, List<List<IdentifierToken>> excepts, BlockStatement body, TypeParameter[] typeParams) {
+                                      List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body, TypeParameter[] typeParams) {
     this(flags, type, name, params, excepts, body, null, 0, 0, 0, 0, typeParams);
   }
-
+  
   /**
    * Creates a new method declaration
    * @param flags   the access flags
@@ -92,31 +92,27 @@ public class PolymorphicMethodDeclaration extends MethodDeclaration {
    *            params is null or excepts is null
    */
   public PolymorphicMethodDeclaration(int flags, Type type, String name,
-                                      List<FormalParameter> params, List<List<IdentifierToken>> excepts, BlockStatement body,
+                                      List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body,
                                       String fn, int bl, int bc, int el, int ec, TypeParameter[] typeParams) {
     super(flags, type, name, params, excepts, body, fn, bl, bc, el, ec);
-
+    
     _typeParameters = typeParams;
   }
-
+  
   public TypeParameter[] getTypeParameters(){ return _typeParameters; }
-
+  
   public String toString() {
     return "("+getClass().getName()+": "+toStringHelper()+")";
   }
-
+  
   public String toStringHelper() {
-	  TypeParameter[] tp = getTypeParameters();
-	  String typeParamsS = "";
-	  if(tp.length>0)
-		typeParamsS = ""+tp[0];
-	  for(int i = 1; i < tp.length; i++)
-	    typeParamsS = typeParamsS + " " + tp[i];
-
-	  return typeParamsS+" "+super.toStringHelper();
+    TypeParameter[] tp = getTypeParameters();
+    String typeParamsS = "";
+    if(tp.length>0)
+      typeParamsS = ""+tp[0];
+    for(int i = 1; i < tp.length; i++)
+      typeParamsS = typeParamsS + " " + tp[i];
+    
+    return typeParamsS+" "+super.toStringHelper();
   }
-
-//  public <T> T acceptVisitor(GenericVisitor<T> visitor) {
-//    return visitor.visit(this);
-//  } /**/
 }

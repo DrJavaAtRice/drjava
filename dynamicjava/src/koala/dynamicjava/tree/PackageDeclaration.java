@@ -75,6 +75,20 @@ public class PackageDeclaration extends Node {
   }
   
   /**
+   * Creates a new package declaration node
+   * @param nm    a string that represents a package name.
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   */
+  public PackageDeclaration(String nm, String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
+    name = nm;
+  }
+  
+  /**
    * Returns the name of the imported class or package
    */
   public String getName() {

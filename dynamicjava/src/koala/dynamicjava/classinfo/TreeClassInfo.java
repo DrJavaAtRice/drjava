@@ -528,7 +528,7 @@ public class TreeClassInfo implements ClassInfo {
             cd = new ConstructorDeclaration(Modifier.PUBLIC,
                                             classTree.getName(),
                                             new LinkedList<FormalParameter>(),
-                                            new LinkedList<List<IdentifierToken>>(),
+                                            new LinkedList<ReferenceType>(),
                                             ci,
                                             new LinkedList<Node>());
             cd.acceptVisitor(this);

@@ -3,6 +3,7 @@ sed "s/\/\*</</g" $1 |
 sed "s/>\*\//>/g" | 
 sed "s/List name[(]/List<IdentifierToken> name(/" |
 sed "s/List TypeArguments[(]/List<Type> TypeArguments(/" |
+sed "s/List ReferenceTypeNameList[(]/List<? extends ReferenceType> ReferenceTypeNameList(/" |
 sed "s/List localVariableDeclaration[(]/List<Node> localVariableDeclaration(/" |
 sed "s/List nameList[(]/List<List<IdentifierToken>> nameList(/" |
 sed "s/List classBodyDeclaration[(]/List<Node> classBodyDeclaration(/" |

@@ -47,7 +47,7 @@ public class InterfaceDeclaration extends TypeDeclaration {
    * @param impl  the list of implemented interfaces. Can be null.
    * @param body  the list of fields declarations
    */
-  public InterfaceDeclaration(int flags, String name, List<List<IdentifierToken>> impl, List<Node> body) {
+  public InterfaceDeclaration(int flags, String name, List<? extends ReferenceType> impl, List<Node> body) {
     this(flags, name, impl, body, null, 0, 0, 0, 0);
   }
 
@@ -63,7 +63,7 @@ public class InterfaceDeclaration extends TypeDeclaration {
    * @param el    the end line
    * @param ec    the end column
    */
-  public InterfaceDeclaration(int flags, String name, List<List<IdentifierToken>> impl, List<Node> body,
+  public InterfaceDeclaration(int flags, String name, List<? extends ReferenceType> impl, List<Node> body,
                               String fn, int bl, int bc, int el, int ec) {
     super(flags, name, impl, body, fn, bl, bc, el, ec);
   }

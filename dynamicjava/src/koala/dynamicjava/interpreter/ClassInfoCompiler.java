@@ -192,7 +192,7 @@ public class ClassInfoCompiler {
                                new VoidType(),
                                "<clinit>",
                                new LinkedList<FormalParameter>(),
-                               new LinkedList<List<IdentifierToken>>(),
+                               new LinkedList<ReferenceType>(),
                                new BlockStatement(classInitializer)),
          importationManager);
     }
@@ -264,7 +264,7 @@ public class ClassInfoCompiler {
                             new VoidType(),
                             "<init>",
                             cd.getParameters(),
-                            new LinkedList<List<IdentifierToken>>(),
+                            new LinkedList<ReferenceType>(),
                             new BlockStatement(cd.getStatements()));
     interpreter.registerMethod(sig, md, importationManager);
     

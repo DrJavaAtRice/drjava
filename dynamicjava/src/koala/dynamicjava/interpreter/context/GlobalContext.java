@@ -485,22 +485,23 @@ public class GlobalContext extends VariableContext implements Context {
     csd = new ConstructorDeclaration(Modifier.PUBLIC,
                                      cname,
                                      params,
-                                     new LinkedList<List<IdentifierToken>>(),
+                                     new LinkedList<ReferenceType>(),
                                      ci,
                                      stmts);
     memb.add(csd);
 
     // Set the inheritance
-    List<IdentifierToken> ext = null;
-    List<List<IdentifierToken>> impl = null;
+    ReferenceType ext = null;
+    List<ReferenceType> impl = null;
     if (c.isInterface()) {
-      impl = new LinkedList<List<IdentifierToken>>();
+      impl = new LinkedList<ReferenceType>();
       List<IdentifierToken> intf = new LinkedList<IdentifierToken>();
       intf.add(new Identifier(c.getName()));
-      impl.add(intf);
+      impl.add(new ReferenceType(intf));
     } else {
-      ext = new LinkedList<IdentifierToken>();
-      ext.add(new Identifier(c.getName()));
+      List<IdentifierToken> l = new LinkedList<IdentifierToken>();
+      l.add(new Identifier(c.getName()));
+      ext = new ReferenceType(l);
     }
 
     // Create the class

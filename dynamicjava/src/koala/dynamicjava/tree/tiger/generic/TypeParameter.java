@@ -41,7 +41,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 
 package koala.dynamicjava.tree.tiger.generic;
@@ -49,8 +49,8 @@ package koala.dynamicjava.tree.tiger.generic;
 import koala.dynamicjava.tree.Node;
 import koala.dynamicjava.tree.ReferenceType;
 import koala.dynamicjava.tree.IdentifierToken;
+import koala.dynamicjava.tree.TreeUtilities;
 import koala.dynamicjava.SourceInfo;
-import koala.dynamicjava.tree.visitor.Visitor;
 import java.util.List;
 
 /**
@@ -59,21 +59,15 @@ import java.util.List;
  */
 public class TypeParameter extends ReferenceType {
   private final ReferenceType _bound;
-
+  
   /**
    * Constructs a TypeParameter.
    * @throw IllegalArgumentException if any parameter to the constructor is null.
    */
   public TypeParameter(SourceInfo in_sourceInfo, List<IdentifierToken> ids, ReferenceType in_bound) {
-    super(ids, in_sourceInfo.getFilename(), in_sourceInfo.getStartLine(),
-          in_sourceInfo.getStartColumn(), in_sourceInfo.getEndLine(), in_sourceInfo.getEndColumn());
-
-    if (in_bound == null) { /**/ // probably not.   A null indicates a normal type used as a parameter
-      /**///throw new IllegalArgumentException("Parameter 'bound' to the TypeParameter constructor was null. This class may not have null field values.");
-    }
-    _bound = in_bound;
+    this(in_sourceInfo, TreeUtilities.listToName(ids), in_bound);
   }
-
+  
   /**
    * Constructs a TypeParameter.
    * @throw IllegalArgumentException if any parameter to the constructor is null.
@@ -81,43 +75,28 @@ public class TypeParameter extends ReferenceType {
   public TypeParameter(SourceInfo in_sourceInfo, String rep, ReferenceType in_bound) {
     super(rep, in_sourceInfo.getFilename(), in_sourceInfo.getStartLine(),
           in_sourceInfo.getStartColumn(), in_sourceInfo.getEndLine(), in_sourceInfo.getEndColumn());
-
+    
     if (in_bound == null) {
-      throw new IllegalArgumentException("Parameter 'bound' to the TypeParameter constructor was null. This class may not have null field values.");
+      throw new IllegalArgumentException("Parameter 'bound' to the TypeParameter constructor was null.");
     }
     _bound = in_bound;
   }
-
+  
   public ReferenceType getBound() { return _bound; }
-
+  
   public String getRepresentation(){
     return _bound.getRepresentation(); // coerce to bound's type
-
-//    if(bound == null) { // should not happen in fact, it indicates this is not a generic type parameter but a normal type
-//      return super.getRepresentation(); // Depend on one inherited from ReferenceType
-//    }
-//    else {
-//      return _bound.getRepresentation(); // coerce to bound's type
-//    }
   }
-
+  
   public String getName(){
-	return super.getRepresentation();
+    return super.getRepresentation();
   }
-
+  
   public String toString() {
-	return "("+getClass().getName()+": "+toStringHelper()+")";
+    return "("+getClass().getName()+": "+toStringHelper()+")";
   }
-
+  
   protected String toStringHelper() {
     return getName()+" "+getBound();
   }
-
-//  public <T> T acceptVisitor(GenericVisitor<T> visitor) {
-//    return visitor.visit(this);
-//  } /**/
-
-//  public <T> T acceptVisitor(Visitor<T> visitor) {
-//    throw new IllegalArgumentException("*Generic* AST nodes should be visited only by *generic* visitors");
-//  }
 }

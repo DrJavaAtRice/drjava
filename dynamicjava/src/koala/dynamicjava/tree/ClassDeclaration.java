@@ -61,7 +61,7 @@ public class ClassDeclaration extends TypeDeclaration {
    *              Token). Can be null.
    * @param body  the list of members declarations
    */
-  public ClassDeclaration(int flags, String name, List<IdentifierToken> ext, List<List<IdentifierToken>> impl, List<Node> body) {
+  public ClassDeclaration(int flags, String name, ReferenceType ext, List<? extends ReferenceType> impl, List<Node> body) {
     this(flags, name, ext, impl, body, null, 0, 0, 0, 0);
   }
 
@@ -81,13 +81,13 @@ public class ClassDeclaration extends TypeDeclaration {
    * @param el    the end line
    * @param ec    the end column
    */
-  public ClassDeclaration(int flags, String name, List<IdentifierToken> ext, List<List<IdentifierToken>> impl, List<Node> body,
+  public ClassDeclaration(int flags, String name, ReferenceType ext, List<? extends ReferenceType> impl, List<Node> body,
                           String fn, int bl, int bc, int el, int ec) {
     super(flags, name, impl, body, fn, bl, bc, el, ec);
     if (ext == null) {
       superclass = "java.lang.Object";
     } else {
-      superclass = TreeUtilities.listToName(ext);
+      superclass = ext.getRepresentation();
     }
   }
 

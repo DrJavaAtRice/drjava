@@ -44,22 +44,22 @@ public class ImportDeclaration extends Node {
    * The name property name
    */
   public final static String NAME = "name";
-  
+
   /**
    * The package property name
    */
   public final static String PACKAGE = "package";
-  
+
   /**
    * The name of the imported class or package
    */
   private String name;
-  
+
   /**
    * Is this declaration import a class or a package
    */
   private boolean pckage;
-  
+
   /**
    * Creates a new import declaration node
    * @param ident a list of tokens that represents a package or a class name
@@ -69,7 +69,7 @@ public class ImportDeclaration extends Node {
   public ImportDeclaration(List<IdentifierToken> ident, boolean pkg) {
     this(ident, pkg, null, 0, 0, 0, 0);
   }
-  
+
   /**
    * Creates a new import declaration node
    * @param ident a list of tokens that represents a package or a class name
@@ -84,45 +84,66 @@ public class ImportDeclaration extends Node {
   public ImportDeclaration(List<IdentifierToken> ident, boolean pkg,
                            String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
-    
+
     if (ident == null) throw new IllegalArgumentException("ident == null");
-    
+
     pckage     = pkg;
     name       = TreeUtilities.listToName(ident);
   }
-  
+
+  /**
+   * Creates a new import declaration node
+   * @param nm    a string that represents a package or a class name
+   * @param pkg   true if this declaration imports a package
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if ident is null
+   */
+  public ImportDeclaration(String nm, boolean pkg,
+                           String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
+
+    if (nm == null) throw new IllegalArgumentException("name == null");
+
+    pckage     = pkg;
+    name       = nm;
+  }
+
   /**
    * Returns the name of the imported class or package
    */
   public String getName() {
     return name;
   }
-  
+
   /**
    * Sets the package name
    * @exception IllegalArgumentException if s is null
    */
   public void setName(String s) {
     if (s == null) throw new IllegalArgumentException("s == null");
-    
+
     firePropertyChange(NAME, name, name = s);
   }
-  
+
   /**
    * Returns true if the identifier represents a package, false
-   * if it represents a 
+   * if it represents a
    */
   public boolean isPackage() {
     return pckage;
   }
-  
+
   /**
    * Sets the package property
    */
   public void setPackage(boolean b) {
     firePropertyChange(PACKAGE, pckage, pckage = b);
   }
-  
+
   /**
    * Allows a visitor to traverse the tree
    * @param visitor the visitor to accept

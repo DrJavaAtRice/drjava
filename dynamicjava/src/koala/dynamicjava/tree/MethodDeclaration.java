@@ -112,7 +112,7 @@ public class MethodDeclaration extends Node {
    *            params is null or excepts is null
    */
   public MethodDeclaration(int flags, Type type, String name,
-                           List<FormalParameter> params, List<List<IdentifierToken>> excepts, BlockStatement body) {
+                           List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body) {
     this(flags, type, name, params, excepts, body, null, 0, 0, 0, 0);
   }
 
@@ -133,7 +133,7 @@ public class MethodDeclaration extends Node {
    *            params is null or excepts is null
    */
   public MethodDeclaration(int flags, Type type, String name,
-                           List<FormalParameter> params, List<List<IdentifierToken>> excepts, BlockStatement body,
+                           List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body,
                            String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
 
@@ -150,9 +150,9 @@ public class MethodDeclaration extends Node {
 
     exceptions            = new LinkedList<String>();
 
-    ListIterator<List<IdentifierToken>> it = excepts.listIterator();
+    ListIterator<? extends ReferenceType> it = excepts.listIterator();
     while (it.hasNext()) {
-      exceptions.add(TreeUtilities.listToName(it.next()));
+      exceptions.add(it.next().getRepresentation());
     }
   }
 
