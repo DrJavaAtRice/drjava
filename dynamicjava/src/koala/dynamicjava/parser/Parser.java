@@ -15,7 +15,7 @@ import koala.dynamicjava.tree.tiger.generic.*;
 
 /**
  * This class represents a (interpreted) Java 1.1 language parser
- * adapted for 1.5 language extensions.
+ * adapted for 1.5 language extensions.  Lines 801, 2588, 2622, 2668 have been generified!  We must retrofit the input to javacc!!
  */
 
 public class Parser implements ParserConstants {
@@ -798,7 +798,7 @@ public class Parser implements ParserConstants {
    * @return a list of nodes (possibly empty)
    * @see koala.dynamicjava.tree.Node
    */
-  final public List StreamItem() throws ParseException {
+  final public List<Node> StreamItem() throws ParseException {
     Node root = null;
     List<Node> l = new LinkedList<Node>();
     try {
@@ -2557,7 +2557,7 @@ public class Parser implements ParserConstants {
     Token            t, e;
     Token            id;
     List<? extends ReferenceType> impl = null;
-    List<Node>   body;
+    List<Node> body;
     int   m = 0;
     t = jj_consume_token(ENUM);
     id = jj_consume_token(IDENTIFIER);
@@ -2585,7 +2585,7 @@ public class Parser implements ParserConstants {
    * Parses the body of an enum
    * @see koala.dynamicjava.tree.Node
    */
-  final public List enumBody(String enumTypeName) throws ParseException {
+  final public List<Node> enumBody(String enumTypeName) throws ParseException {
     List<Node>         body = new LinkedList<Node>();
     List<EnumConstant> consts = null;
     List<Node>         decl = null;
@@ -2619,7 +2619,7 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public List enumConstants() throws ParseException {
+  final public List<EnumConstant> enumConstants() throws ParseException {
     List<EnumConstant> list = new LinkedList<EnumConstant>();
     EnumConstant individual = null;
     individual = enumConstant();
@@ -2665,7 +2665,7 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public List enumBodyDeclarations() throws ParseException {
+  final public List<Node> enumBodyDeclarations() throws ParseException {
     List<Node> body = new LinkedList<Node>();
     List<Node> decl = null;
     jj_consume_token(SEMICOLON);

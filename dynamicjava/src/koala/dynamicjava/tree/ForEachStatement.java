@@ -79,10 +79,8 @@ import java.util.*;
 import koala.dynamicjava.tree.visitor.*;
 
 /**
- * This class represents the for statement nodes of the syntax tree
+ * This class represents the foreach statement nodes of the syntax tree
  *
- * @author  Stephane Hillion
- * @version 1.0 - 1999/05/23
  */
 
 public class ForEachStatement extends ForSlashEachStatement implements ContinueTarget {
@@ -161,8 +159,8 @@ public class ForEachStatement extends ForSlashEachStatement implements ContinueT
     parameter = para;
     collection     = coll;
     this.body      = body;
-    labels         = new LinkedList();
-    vars = new LinkedList();
+    labels         = new LinkedList<String>();
+    vars = new LinkedList<String>();
   }
   
   

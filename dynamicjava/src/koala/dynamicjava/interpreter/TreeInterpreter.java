@@ -849,11 +849,11 @@ public class TreeInterpreter implements Interpreter {
    * created methods
    */
   protected class MethodDescriptor {
-    Set                variables;
-    MethodDeclaration  method;
-    ImportationManager importationManager;
-    TreeInterpreter    interpreter;
-    Field              contextField;
+    Set<AbstractVariable> variables;
+    MethodDeclaration     method;
+    ImportationManager    importationManager;
+    TreeInterpreter       interpreter;
+    Field                 contextField;
 
     /**
      * Creates a new descriptor
@@ -870,7 +870,7 @@ public class TreeInterpreter implements Interpreter {
    * invocation
    */
   protected class ConstructorParametersDescriptor {
-    Set                   variables;
+    Set<AbstractVariable> variables;
     List<FormalParameter> parameters;
     List<Expression>      arguments;
     ImportationManager    importationManager;
@@ -894,7 +894,7 @@ public class TreeInterpreter implements Interpreter {
    * @return the result of the evaluation of the last statement
    */
   public Object interpret(Node AST) throws InterpreterException {
-    NameVisitor nv = new NameVisitor(nameVisitorContext,checkVisitorContext);
+    NameVisitor nv = new NameVisitor(nameVisitorContext, checkVisitorContext);
     Node o = AST.acceptVisitor(nv);
     if (o != null) AST = o;
 

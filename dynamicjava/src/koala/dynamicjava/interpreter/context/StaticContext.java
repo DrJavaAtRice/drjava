@@ -76,7 +76,7 @@ public class StaticContext extends GlobalContext {
    * @param c  the declaring class of the method
    * @param fp the formal parameters
    */
-  public StaticContext(Interpreter i, Class c, Set fp) {
+  public StaticContext(Interpreter i, Class c, Set<AbstractVariable> fp) {
     super(i, fp);
     declaringClass   = c;
     defaultQualifier = new ReferenceType(c.getName());

@@ -2,8 +2,15 @@ package koala.dynamicjava.interpreter.context;
 
 //import koala.dynamicjava.interpreter.context.VariableContext;
 
+/** TODO:  (Corky: 7 Jun 04)
+ *  Improve the choice of names!
+ *  AbstractVariable should be called Identifier or LocalIdentifier
+ *  AbstractVariable is very misleading!
+ * */
+
 /**
- * To store the variables
+ * Root of a composite hiearchy for variables and constants in the environment (VariableContext)
+ * AbstractVariable := Variable | Constant
  */
 public abstract class AbstractVariable {
   /**

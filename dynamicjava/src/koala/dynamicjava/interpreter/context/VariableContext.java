@@ -70,15 +70,15 @@ public class VariableContext implements SimpleContext {
   
   
   /**
-   * Creates a new context initialized with the given entries defined
-   * in the initial scope.
-   * @param entries a set of string
+   * Creates a new context initialized with variables and constants defined
+   * in the initial scope passed in the parameter entries
+   * @param entries a set of abstract variables (constants or variables)
    */
-  public VariableContext(Set entries) {
+  public VariableContext(Set<AbstractVariable> entries) {
     this();    
-    Iterator it = entries.iterator();
+    Iterator<AbstractVariable> it = entries.iterator();
     while (it.hasNext()) {
-      ((AbstractVariable)it.next()).set(this, null);
+      it.next().set(this, null);
     }
   }
   

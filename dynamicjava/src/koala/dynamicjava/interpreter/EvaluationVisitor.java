@@ -91,7 +91,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    * @param node the node to visit
    */
   public Object visit(ForEachStatement node){
-    Set vars = (Set)node.getProperty(NodeProperties.VARIABLES);
+    Set<AbstractVariable> vars = (Set<AbstractVariable>)node.getProperty(NodeProperties.VARIABLES);  /* Type erasure bites! */
       context.enterScope(vars);
         
     FormalParameter formalparam = node.getParameter();
@@ -388,7 +388,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    */
   public Object visit(ForStatement node) {
     try {
-      Set vars = (Set)node.getProperty(NodeProperties.VARIABLES);
+      Set<AbstractVariable> vars = (Set<AbstractVariable>)node.getProperty(NodeProperties.VARIABLES); /* Type erasure bites! */
       context.enterScope(vars);
 
       // Interpret the initialization expressions
@@ -690,7 +690,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(BlockStatement node) {
     try {
       // Enter a new scope and define the local variables
-      Set vars = (Set)node.getProperty(NodeProperties.VARIABLES);
+      Set<AbstractVariable> vars = (Set<AbstractVariable>)node.getProperty(NodeProperties.VARIABLES); /* Type erasure bites! */
       context.enterScope(vars);
 
       // Interpret the statements
@@ -2065,7 +2065,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
 
       ctx = new GlobalContext(context.getInterpreter());
       ctx.setImportationManager(im);
-      ctx.setFunctions((List<MethodDeclaration>)md.getProperty(NodeProperties.FUNCTIONS)); /**/  //Why does this work???
+      ctx.setFunctions((List<MethodDeclaration>)md.getProperty(NodeProperties.FUNCTIONS)); /* Type erasure bites */
 
       AbstractTypeChecker tc = AbstractTypeChecker.makeTypeChecker(ctx);
       it = md.getParameters().iterator();

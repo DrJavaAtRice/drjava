@@ -121,9 +121,9 @@ public class GlobalContext extends VariableContext implements Context {
    * Creates a new context initialized with the given entries defined
    * in the initial scope.
    * @param i the interpreter
-   * @param entries a set of string
+   * @param entries a set of string (NO! AbstractVariable)
    */
-  public GlobalContext(Interpreter i, Set entries) {
+  public GlobalContext(Interpreter i, Set<AbstractVariable> entries) {
     super(entries);
     interpreter = i;
   }

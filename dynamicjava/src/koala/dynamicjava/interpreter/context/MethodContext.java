@@ -75,7 +75,7 @@ public class MethodContext extends StaticContext {
    * @param obj the current object
    * @param fp  the formal parameters
    */
-  public MethodContext(Interpreter i, Class c, Object obj, Set fp) {
+  public MethodContext(Interpreter i, Class c, Object obj, Set<AbstractVariable> fp) {
     super(i, c, fp);
 
     List<IdentifierToken> l = new LinkedList<IdentifierToken>();

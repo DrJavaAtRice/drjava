@@ -57,14 +57,14 @@ public interface SimpleContext {
     void defineVariables(Set<AbstractVariable> vars);
 
     /**
-     * Returns the current scope variables (strings) in a set
+     * Returns the current scope variables (AbstractVariables) in a set
      */
-    Set getCurrentScopeVariables();
+    Set<AbstractVariable> getCurrentScopeVariables();
 
     /**
-     * Returns the current scope variables (strings) in a set
+     * Returns the current scope variable names in a set
      */
-    Set getCurrentScopeVariableNames();
+    Set<String> getCurrentScopeVariableNames();
 
     /**
      * Leaves the current scope

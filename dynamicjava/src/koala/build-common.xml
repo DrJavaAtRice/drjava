@@ -307,7 +307,8 @@ target="jsr14"
      just this project in order for it to realize what files have already
      been compiled (preventing needless recompilation).
 
-     This version works with JDK 1.4.2 and JSR-14 v2.3 and JSR-14 v2.4.
+     This version works with JDK 1.4.2 and JSR-14 v2.3, v2.4, and v2.5; it
+     also works with JDK 1.5.0.
      (Be sure to have the right version of tools.jar on your classpath.)
 -->
 <target name="do-compile" depends="init">
