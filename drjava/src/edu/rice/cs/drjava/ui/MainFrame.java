@@ -442,8 +442,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       //CONFIG.setSetting(LINEENUM_ENABLED, new Boolean(!DrJava.CONFIG.getSetting(LINEENUM_ENABLED).booleanValue()));
       //CONFIG.setSetting(DEFINITIONS_COMMENT_COLOR, Color.red.darker());
       //CONFIG.setSetting(DEFINITIONS_MATCH_COLOR, Color.gray.brighter());
-      //CONFIG.setSetting(JSR14_LOCATION, "/home/javaplt/packages/jsr14_adding_generics-1_2-ea/javac.jar");
-      //CONFIG.setSetting(JAVAC_LOCATION, "/usr/local/bin/javac");
+      CONFIG.setSetting(JSR14_LOCATION, new File("/home/javaplt/packages/jsr14_adding_generics-1_0-ea/javac.jar"));
+      CONFIG.setSetting(JAVAC_LOCATION, new File("/usr/local/bin/javac"));
       //Vector<String> v = new Vector<String>();
       //v.addElement("/home/mcgraw/javafiles/");
       //CONFIG.setSetting(EXTRA_CLASSPATH, v);
@@ -636,9 +636,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     _model = new SingleDisplayModel();
     
     // Working directory is default place to start
-    String workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString();
-    if ((workDir == null) || (workDir.equals(""))) {
-      workDir = System.getProperty("user.dir");
+    File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+        
+    if (workDir == FileOption.NULL_FILE) {
+      workDir = new File( System.getProperty("user.dir"));
+    }
+    if (workDir.isFile() && workDir.getParent() != null) {
+      workDir = workDir.getParentFile();
     }
     _openChooser = new JFileChooser(workDir);
     _openChooser.setFileFilter(new JavaSourceFilter());

@@ -187,7 +187,7 @@ public class DrJava implements ConfigurationTool, OptionConstants {
             
             // set the javac property
             CONFIG.setSetting(JAVAC_LOCATION,
-                              jar.getAbsolutePath());
+                              jar);//.getAbsolutePath());
             
             // need to re-call getAvailable for it to re-check availability
             CompilerInterface[] compilers

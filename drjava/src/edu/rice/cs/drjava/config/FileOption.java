@@ -47,6 +47,25 @@ import java.io.*;
  */
 public class FileOption extends Option<File> {
   
+  public static final File NULL_FILE = new File("") {
+    
+    public String getAbsolutePath() {
+      return "";
+    }
+  
+    public String getName() {
+      return "";
+    }
+    
+    public String toString() {
+      return "";
+    }
+    
+    public boolean exists() {
+      return true;
+    }
+  };
+  
   /**
    * @param key The name of this option.
    */
@@ -58,6 +77,8 @@ public class FileOption extends Option<File> {
    * @return The File object corresponding to path "p".
    */
   public File parse(String s) { 
+    if (s.trim().equals("")) return NULL_FILE;
+    
     try {
       return new File(s).getAbsoluteFile();
     }

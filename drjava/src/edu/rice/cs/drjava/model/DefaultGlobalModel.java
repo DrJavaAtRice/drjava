@@ -67,6 +67,7 @@ import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
+import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.config.BooleanOption;
 import edu.rice.cs.drjava.model.print.*;
 import edu.rice.cs.drjava.model.definitions.*;
@@ -854,12 +855,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    */
   public File[] getSourceRootSet() {
     LinkedList roots = new LinkedList();
-    String workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
-    if ((workDir == null) || (workDir.equals(""))) {
-      workDir = System.getProperty("user.dir");
+    File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+        
+    if (workDir == FileOption.NULL_FILE) {
+      workDir = new File( System.getProperty("user.dir"));
     }
-    File currDir = new File(workDir);
-    roots.add(currDir);
+    if (workDir.isFile() && workDir.getParent() != null) {
+      workDir = workDir.getParentFile();
+    }
+    roots.add(workDir);
 
     for (int i = 0; i < _definitionsDocs.size(); i++) {
       OpenDefinitionsDocument doc

@@ -278,9 +278,6 @@ public class ConfigFrame extends JFrame {
                                                 _rootNode);
     _setupKeyBindingsPanel(keystrokesNode.getPanel());    
 
-    PanelTreeNode pathsNode = _createPanel("Paths");
-    _setupPathsPanel(pathsNode.getPanel());
-    
     PanelTreeNode miscNode = _createPanel("Miscellaneous");
     _setupMiscPanel(miscNode.getPanel());
     
@@ -330,6 +327,10 @@ public class ConfigFrame extends JFrame {
    */ 
   private void _setupResourceLocPanel ( ConfigPanel panel) {
    
+    panel.addComponent( new FileOptionComponent( OptionConstants.JAVAC_LOCATION, "Javac Location", this));
+    panel.addComponent( new FileOptionComponent( OptionConstants.JSR14_LOCATION, "JSR14 Location", this));
+    panel.addComponent( new FileOptionComponent( OptionConstants.JSR14_COLLECTIONSPATH, "JSR14 CollectionsPath", this));
+    panel.addComponent( new VectorOptionComponent (OptionConstants.EXTRA_CLASSPATH, "Interactions Classpath", this));     
     panel.displayComponents();
   }
   
@@ -339,8 +340,8 @@ public class ConfigFrame extends JFrame {
   private void _setupDisplayPanel ( ConfigPanel panel) {
 
     //ToolbarOptionComponent is a degenerate option component
-    panel.addComponent( new ToolbarOptionComponent ( "Toolbar button options", this));
-    panel.addComponent( new BooleanOptionComponent ( OptionConstants.LINEENUM_ENABLED, "Line number enumeration", this));
+    panel.addComponent( new BooleanOptionComponent ( OptionConstants.LINEENUM_ENABLED, "Line Number Enumeration", this));
+    panel.addComponent( new ToolbarOptionComponent ( "Toolbar Buttons", this));
     panel.displayComponents();
   }
    
@@ -369,15 +370,6 @@ public class ConfigFrame extends JFrame {
     panel.displayComponents();
   }
   
-  
-  /**
-   * Adds all of the components for the Paths panel of the preferences window.
-   */
-  private void _setupPathsPanel( ConfigPanel panel) {
-    panel.addComponent( new VectorOptionComponent (OptionConstants.EXTRA_CLASSPATH, "Classpath", this));     
-    panel.displayComponents();
-  }
- 
   /**
    * Adds all of the components for the Key Bindings panel of the preferences window.
    */
@@ -416,9 +408,9 @@ public class ConfigFrame extends JFrame {
    *  Adds all of the components for the Miscellaneous panel of the preferences window.
    */
   private void _setupMiscPanel( ConfigPanel panel) {
-    panel.addComponent( new StringOptionComponent ( OptionConstants.WORKING_DIRECTORY, "Working directory", this));
     panel.addComponent( new IntegerOptionComponent ( OptionConstants.INDENT_LEVEL, "Indent level", this));
-    panel.addComponent( new IntegerOptionComponent ( OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions command history", this));
+    panel.addComponent( new FileOptionComponent ( OptionConstants.WORKING_DIRECTORY, "Working directory", this));
+    panel.addComponent( new IntegerOptionComponent ( OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions Command History", this));
 
     panel.displayComponents();
   }

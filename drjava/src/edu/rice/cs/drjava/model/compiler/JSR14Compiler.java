@@ -69,7 +69,7 @@ import edu.rice.cs.util.FileOps;
  */
 public class JSR14Compiler extends JavacGJCompiler {
   
-  private String _collectionsPath;
+  private File _collectionsPath;
   
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new JSR14Compiler();
@@ -86,7 +86,7 @@ public class JSR14Compiler extends JavacGJCompiler {
     // And this way, we don't need to specify the entire bootclasspath,
     // just what we want to add on to it.
     
-    String ccp = _collectionsPath;
+    String ccp = _collectionsPath.getAbsolutePath();
     
     if (ccp != null && ccp.length() > 0) {
       compiler.syms.reader.bootClassPath = ccp +
@@ -105,7 +105,7 @@ public class JSR14Compiler extends JavacGJCompiler {
    * This method allows us to set the JSR14 collections path across a class loader.
    * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
    */ 
-  public void addToBootClassPath( String cp) {
+  public void addToBootClassPath( File cp) {
     _collectionsPath = cp;
   }
   

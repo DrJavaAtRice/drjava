@@ -45,6 +45,7 @@ import java.net.URL;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.classloader.StickyClassLoader;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.util.UnexpectedException;
 import gj.util.Vector;
 import gj.util.Enumeration;
@@ -92,7 +93,7 @@ public class CompilerProxy implements CompilerInterface {
   }
 
   private void _recreateCompiler() {
-    String collectionsPath = DrJava.CONFIG.getSetting(OptionConstants.JSR14_COLLECTIONSPATH);
+    File collectionsPath = DrJava.CONFIG.getSetting(OptionConstants.JSR14_COLLECTIONSPATH);
             
     StickyClassLoader loader =
       new StickyClassLoader(_newLoader,
@@ -105,15 +106,16 @@ public class CompilerProxy implements CompilerInterface {
      
       StringBuffer newclasspath = new StringBuffer();
       Vector<String> cp = DrJava.CONFIG.getSetting(OptionConstants.EXTRA_CLASSPATH);
-      if(cp!=null) {
+      //if(cp!=null) {
         Enumeration<String> enum = cp.elements();
         while(enum.hasMoreElements()) {
           newclasspath.append(System.getProperty("path.separator")).append(enum.nextElement());
         }
-      }
+      //}
       _realCompiler.setExtraClassPath(newclasspath.toString());
       
-      if (_realCompiler.getClass().getName().equals("edu.rice.cs.drjava.model.compiler.JSR14Compiler")) {
+      if (_realCompiler.getClass().getName().equals("edu.rice.cs.drjava.model.compiler.JSR14Compiler") &&
+          collectionsPath != FileOption.NULL_FILE) {
         _realCompiler.addToBootClassPath( collectionsPath );
       }
       
@@ -190,7 +192,7 @@ public class CompilerProxy implements CompilerInterface {
    * This method allows us to set the JSR14 collections path across a class loader.
    * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
    */
-  public void addToBootClassPath( String cp) {
+  public void addToBootClassPath( File cp) {
     _realCompiler.addToBootClassPath(cp);
   }
   

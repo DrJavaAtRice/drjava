@@ -194,9 +194,9 @@ public class CompilerErrorPanel extends TabbedPanel {
   /**
    * The OptionListener for compiler LOCATIONs 
    */
-  private class CompilerLocationOptionListener implements OptionListener<String> {
+  private class CompilerLocationOptionListener implements OptionListener<File> {
     
-    public void optionChanged(OptionEvent<String> oce) {
+    public void optionChanged(OptionEvent<File> oce) {
       _compilerChoiceBox.removeAllItems();
       CompilerInterface[] availCompilers = _model.getAvailableCompilers();
       for (int i=0; i<availCompilers.length; i++) {

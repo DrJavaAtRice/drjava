@@ -178,9 +178,13 @@ public class VectorOptionComponent extends OptionComponent<VectorOption<String>>
   public JComponent getComponent() { return _panel; }
   
   public void chooseFile() {
-    String workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString();
-    if ((workDir == null) || (workDir.equals(""))) {
-      workDir = System.getProperty("user.dir");
+    File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+        
+    if (workDir == FileOption.NULL_FILE) {
+      workDir = new File( System.getProperty("user.dir"));
+    }
+    if (workDir.isFile() && workDir.getParent() != null) {
+      workDir = workDir.getParentFile();
     }
     JFileChooser jfc = new JFileChooser(workDir);
     jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);

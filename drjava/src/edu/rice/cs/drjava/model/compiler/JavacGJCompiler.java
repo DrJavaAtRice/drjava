@@ -251,7 +251,7 @@ public class JavacGJCompiler implements CompilerInterface {
    * This method allows us to set the JSR14 collections path across a class loader.
    * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
    */
-  public void addToBootClassPath( String cp) {
+  public void addToBootClassPath( File cp) {
     throw new UnexpectedException( new Exception("Method only implemented in JSR14Compiler"));
   }
   

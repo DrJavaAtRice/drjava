@@ -46,6 +46,7 @@ import java.net.MalformedURLException;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 
 /**
@@ -67,13 +68,14 @@ public class JavacFromSetLocation extends CompilerProxy
     }
     
     private static ClassLoader _getClassLoader() {
-        String loc = DrJava.CONFIG.getSetting(JAVAC_LOCATION);
-        if (loc == null || loc.length() == 0) {
+        File loc = DrJava.CONFIG.getSetting(JAVAC_LOCATION);
+        if (loc == FileOption.NULL_FILE) {
             throw new RuntimeException("javac location not set");
         }
         
         try {
-            URL url = new File(loc).toURL();
+            //URL url = new File(loc).toURL();
+            URL url = loc.toURL();
             return new URLClassLoader(new URL[] { url });
         }
         catch (MalformedURLException e) {

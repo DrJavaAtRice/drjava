@@ -41,49 +41,49 @@ package edu.rice.cs.drjava.config;
 import junit.framework.TestCase;
 import java.io.*;
 public class OptionMapLoaderTest extends TestCase implements OptionConstants {
-
-    public OptionMapLoaderTest(String s) {
-	super(s);
+  
+  public OptionMapLoaderTest(String s) {
+    super(s);
+  }
+  
+  public static class StringInputStream extends ByteArrayInputStream {
+    public StringInputStream(String s) {
+      super(s.getBytes());
     }
-
-    public static class StringInputStream extends ByteArrayInputStream {
-	public StringInputStream(String s) {
-	    super(s.getBytes());
-	}
-    }
+  }
+  
+  /** an artificially created properties "file" **/
+  public static final String OPTION_DOC = 
+    "# this is a fake header\n"+
+    "this.is.a.real.key = value\n"+
+    "indent.level = -1\n"+
+    "javac.location = foo\n"+
+    "jsr14.location = bar\n"+
+    "jsr14.collectionspath = baz\n"+
+    "extra.classpath = bam\n\n";
+  
+  public void testProperConfigSet() throws IOException {
+    checkSet(OPTION_DOC,new Integer(-1),new File("foo"),new File("bar"),new File("baz"),1);
+  }
+  
+  private void checkSet(String set, Integer indent, File javac, File jsr, File col, int size) throws IOException {
+    StringInputStream is = new StringInputStream(set);
+    OptionMapLoader loader = new OptionMapLoader(is);
+    DefaultOptionMap map = new DefaultOptionMap();
+    loader.loadInto(map);
+    assertEquals("indent (integer) option",
+                 map.getOption(INDENT_LEVEL),indent);
+    assertEquals("JAVAC", map.getOption(JAVAC_LOCATION),javac.getAbsoluteFile());
+    assertEquals("JSR14", map.getOption(JSR14_LOCATION),jsr.getAbsoluteFile());
+    assertEquals("COLLECTIONS", map.getOption(JSR14_COLLECTIONSPATH),col.getAbsoluteFile());
+    assertEquals("size of extra-classpath vector",
+                 new Integer(size),new Integer(map.getOption(EXTRA_CLASSPATH).size()));
+  }
+  
+  public void testEmptyConfigSet() throws IOException {
+    checkSet("",INDENT_LEVEL.getDefault(),JAVAC_LOCATION.getDefault(),
+             JSR14_LOCATION.getDefault(),JSR14_COLLECTIONSPATH.getDefault(),
+             EXTRA_CLASSPATH.getDefault().size());
     
-    /** an artificially created properties "file" **/
-    public static final String OPTION_DOC = 
-	"# this is a fake header\n"+
-	"this.is.a.real.key = value\n"+
-	"indent.level = -1\n"+
-	"javac.location = foo\n"+
-	"jsr14.location = bar\n"+
-	"jsr14.collectionspath = baz\n"+
-	"extra.classpath = bam\n\n";
-    
-    public void testProperConfigSet() throws IOException {
-	checkSet(OPTION_DOC,new Integer(-1),"foo","bar","baz",1);
-    }
-
-    private void checkSet(String set, Integer indent, String javac, String jsr, String col, int size) throws IOException {
-        StringInputStream is = new StringInputStream(set);
-	OptionMapLoader loader = new OptionMapLoader(is);
-	DefaultOptionMap map = new DefaultOptionMap();
-	loader.loadInto(map);
-	assertEquals("indent (integer) option",
-		     map.getOption(INDENT_LEVEL),indent);
-	assertEquals(map.getOption(JAVAC_LOCATION),javac);
-	assertEquals(map.getOption(JSR14_LOCATION),jsr);
-	assertEquals(map.getOption(JSR14_COLLECTIONSPATH),col);
-	assertEquals("size of extra-classpath vector",
-                     new Integer(size),new Integer(map.getOption(EXTRA_CLASSPATH).size()));
-    }
-
-    public void testEmptyConfigSet() throws IOException {
-        checkSet("",INDENT_LEVEL.getDefault(),JAVAC_LOCATION.getDefault(),
-                 JSR14_LOCATION.getDefault(),JSR14_COLLECTIONSPATH.getDefault(),
-                 EXTRA_CLASSPATH.getDefault().size());
-        
-    }
+  }
 }

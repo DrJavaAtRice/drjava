@@ -46,6 +46,7 @@ import java.net.MalformedURLException;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 
 /**
@@ -66,13 +67,14 @@ public class JSR14FromSetLocation extends CompilerProxy implements OptionConstan
   }
 
   private static ClassLoader _getClassLoader() {
-    String loc = DrJava.CONFIG.getSetting(JSR14_LOCATION);
-    if (loc == null || loc.length() == 0) {
+    File loc = DrJava.CONFIG.getSetting(JSR14_LOCATION);
+    if (loc == FileOption.NULL_FILE) {
       throw new RuntimeException("jsr14 location not set");
     }
 
     try {
-      URL url = new File(loc).toURL();
+      //URL url = new File(loc).toURL();
+      URL url = loc.toURL();
       return new URLClassLoader(new URL[] { url });
     }
     catch (MalformedURLException e) {

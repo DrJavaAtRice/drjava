@@ -345,16 +345,20 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     throws BadLocationException, IOException, InvalidPackageException
   {
     // Get current working directory
-    String workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
-    if ((workDir == null) || (workDir.equals(""))) {
-      workDir = System.getProperty("user.dir");
+    File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+        
+    if (workDir == FileOption.NULL_FILE) {
+      workDir = new File( System.getProperty("user.dir"));
+    }
+    if (workDir.isFile() && workDir.getParent() != null) {
+      workDir = workDir.getParentFile();
     }
     
     // Get source root (current directory only)
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, roots.length);
     assertEquals("source root (current directory)", 
-                 new File(workDir),
+                 workDir,
                  roots[0]);
 
     // Create temp directory
@@ -416,11 +420,14 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     File baseTempDir = tempDirectory();
     
     // Get current working directory
-    String workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
-    if ((workDir == null) || (workDir.equals(""))) {
-      workDir = System.getProperty("user.dir");
+    File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+        
+    if (workDir == FileOption.NULL_FILE) {
+      workDir = new File( System.getProperty("user.dir"));
     }
-
+    if (workDir.isFile() && workDir.getParent() != null) {
+      workDir = workDir.getParentFile();
+    }
     // Now make subdirectory a/b/d
     File subdir = new File(baseTempDir, "a");
     subdir = new File(subdir, "b");
@@ -440,7 +447,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, roots.length);
     assertEquals("source root (current directory)", 
-                 new File(workDir),
+                 workDir,
                  roots[0]);
   }
 

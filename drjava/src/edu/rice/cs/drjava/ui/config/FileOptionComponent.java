@@ -45,6 +45,7 @@ import edu.rice.cs.drjava.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Graphical form of a FileOption
@@ -52,9 +53,13 @@ import java.io.File;
  */
 public class FileOptionComponent extends OptionComponent<FileOption> 
   implements OptionConstants {
+  
   private JButton _button;
+  private JTextField _jtf;
   private File _currentFile;
   private File _newFile;
+  private JFileChooser _jfc;
+  private JPanel _panel;
   
   public FileOptionComponent (FileOption opt, String text, Frame parent) {
     super(opt, text, parent);
@@ -64,68 +69,115 @@ public class FileOptionComponent extends OptionComponent<FileOption>
         chooseFile();
       }
     });
-    _button.setBackground(Color.white);
+    //_button.setBackground(Color.white);
+    _button.setText("...");
+    _button.setMaximumSize(new Dimension(10,10));
+    _button.setMinimumSize(new Dimension(10, 10));
+    
+    _jtf = new JTextField();
+    _jtf.setColumns(30);
+    
+    _jtf.setFont(_jtf.getFont().deriveFont(10f));
+    _jtf.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        boolean tf = chooseFileFromField();
+      }
+    });
+    
     _currentFile = DrJava.CONFIG.getSetting(_option);
     _newFile = _currentFile;
-    _updateButton(_currentFile);
+    //_updateButton(_currentFile);
+    _updateTextField(_currentFile);
+    
+    File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+       
+    if (workDir == FileOption.NULL_FILE) {
+      workDir = new File( System.getProperty("user.dir"));
+    }
+    if (workDir.isFile() && workDir.getParent() != null) {
+      workDir = workDir.getParentFile();
+    }
+    _jfc = new JFileChooser(workDir);
+    
+    _panel = new JPanel();
+    _panel.setLayout(new BorderLayout());
+     
+    _panel.add(_jtf, BorderLayout.CENTER);
+    _panel.add(_button, BorderLayout.EAST);
   }
   
   public boolean update() {
-    if (_newFile != _currentFile) {
+        
+    boolean validChoice = chooseFileFromField();
+    if (!validChoice) return false;
+    
+    if (!_newFile.equals(_currentFile)) {
       DrJava.CONFIG.setSetting(_option, _newFile);
+      _currentFile = _newFile;
     }
+    
     return true;
   } 
   
   public void reset() {
     _currentFile = DrJava.CONFIG.getSetting(_option);
     _newFile = _currentFile;
-    _updateButton(_currentFile);
+    _updateTextField(_currentFile);
   }
   
-  public JComponent getComponent() { return _button; }
-  
-  private void _updateButton(File c) {    
-    _button.setText(c.toString());
+  public JComponent getComponent() { 
+    return _panel;
   }
+  
+  private void _updateTextField(File c) {    
+    _jtf.setText(c.getAbsolutePath());
+  }
+
   
   public void chooseFile() {
-    String workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString();
-    if ((workDir == null) || (workDir.equals(""))) {
-      workDir = System.getProperty("user.dir");
+
+    if (_newFile != FileOption.NULL_FILE && _newFile.getParent() != null) {
+      _jfc.setCurrentDirectory( new File(_newFile.getParent()));
     }
-    JFileChooser jfc = new JFileChooser(workDir);
-    jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+    
+    _jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     File c = null;
-    int returnValue = jfc.showDialog(_parent,
+    int returnValue = _jfc.showDialog(_parent,
                                      null);
     if (returnValue == JFileChooser.APPROVE_OPTION) 
-      c = jfc.getSelectedFile();
+      c = _jfc.getSelectedFile();
     if (c != null) {
       _newFile = c;
-      _updateButton(_newFile);
+      _updateTextField(_newFile);
     }
     
   }
     
   /**
-  private class FileDialog extend JDialog {
-    
-    private JLabel _title;
-    private JFileChooser _chooser;
-    
-    public FileDialog() {
-      super(_parent, "Choose File", true);
-      this.setLayout(new BorderLayout());
-      
-      _title = new JLabel("Choose File");
-      this.add(_title, BorderLayout.NORTH);
-      
-      _chooser = new JFileChooser();
-      this.add(_chooser, BorderLayout.CENTER);
-    }
-    
+   *  The chooser method for the validation of filenames that are manually entered
+   *  into the text field.
+   *  @return False, if file does not exist. True, otherwise.
+   */
+  public boolean chooseFileFromField() {
+   String newValue = _jtf.getText().trim();
+   String currentValue = _currentFile.getAbsolutePath();
+     
+   if (newValue.equals(currentValue)) return true;
+
+   File newFile = _option.parse(newValue);
+   
+   if (newFile != null && !newFile.exists()) {
+     JOptionPane.showMessageDialog(_parent, 
+                                   "The file '"+ newValue+"' is an invalid selection for\n" +
+                                   getLabelText() + " because it does not exist.", 
+                                   "Invalid File Chosen for "+ getLabelText() +"!", 
+                                   JOptionPane.ERROR_MESSAGE);
+     return false;
+   }
+  
+   _newFile = newFile;
+     
+   return true;
   }
-  */
   
 }

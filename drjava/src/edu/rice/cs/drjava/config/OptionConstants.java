@@ -55,14 +55,14 @@ public interface OptionConstants extends ConfigurationTool {
   
   /* ---------- Resource Location and Classpath Options ---------- */
   
-  public static final StringOption JAVAC_LOCATION = 
-    new StringOption("javac.location","");
+  public static final FileOption JAVAC_LOCATION = 
+    new FileOption("javac.location",new File(""));
   
-  public static final StringOption JSR14_LOCATION =
-    new StringOption("jsr14.location","");
+  public static final FileOption JSR14_LOCATION =
+    new FileOption("jsr14.location",new File(""));
   
-  public static final StringOption JSR14_COLLECTIONSPATH = 
-    new StringOption("jsr14.collectionspath","");
+  public static final FileOption JSR14_COLLECTIONSPATH = 
+    new FileOption("jsr14.collectionspath",new File(""));
   
   public static final VectorOption<String> EXTRA_CLASSPATH = 
     new ExtraClasspathOption().evaluate();
@@ -479,8 +479,8 @@ public interface OptionConstants extends ConfigurationTool {
   /**
    * Directory to start looking for files in when DrJava starts up.
    */
-  public static final StringOption WORKING_DIRECTORY = 
-    new StringOption("working.directory", "");
+  public static final FileOption WORKING_DIRECTORY = 
+    new FileOption("working.directory", new File(""));
   
   /**
    * How many spaces to use for indenting.
