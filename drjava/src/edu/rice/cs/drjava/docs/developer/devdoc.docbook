@@ -327,12 +327,72 @@ ant clean compile
   </chapter>
 
 
-  <!-- Chapter: Using Ant
+  <!-- Chapter: Using Ant -->
   <chapter id="ant">
-    <title>Using Ant</title>
+    <title>Using Ant with DrJava</title>
+    <para>We use an Ant build script to handle all compilation and code repository tasks for DrJava.  It is important that you use Ant rather than Javac and CVS directly, both because we use a specialized compiler (JSR-14) and because we <emphasis>require</emphasis> that all the tests pass before any commit.  Our Ant build script allows us to enforce this, while also simplifying the process of compiling and committing.</para>
 
-    <para>text...</para>
+    <section id="ant-common">
+      <title>Commonly Used Ant Tasks</title>
+      <para>This section lists several of the Ant tasks you will frequently use while developing DrJava.  You can run these tasks in either the <filename>src/edu/rice/cs/util</filename> or <filename>src/edu/rice/cs/drjava</filename> directories by typing <literal>ant</literal> and then the task name.  For example, to run the <literal>clean compile</literal> task for the <literal>util</literal> package, type the following:</para>
+
+      <programlisting>
+cd ~/drjava/src/edu/rice/cs/util
+ant clean compile
+      </programlisting>
+
+      <para>Note that you can list as many task names at once as you like.</para>
+
+      <itemizedlist>
+        <listitem>
+          <formalpara>
+            <title>Updating from CVS: "<literal>update</literal>"</title>
+            <para>This will update the current package with all of the changes that have been made in the CVS repository.  It is important to run this frequently to be sure your code is not out of date.  Note that this will be run automatically when you commit code to ensure your copy is not outdated.</para>
+          </formalpara>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Compiling: "<literal>clean compile</literal>"</title>
+            <para>This will compile all the classes in the current package.  The <literal>clean</literal> task first deletes all existing class files from the <filename>built</filename> directory, and can be run on its own.  Unfortunately, it is required to use <literal>clean</literal> every time you compile DrJava, because the use of generics prevents the compiler from knowing which specific class files need to be recompiled.  Thus, if you run the <literal>compile</literal> target on its own, you will probably get compile errors.</para>
+          </formalpara>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Testing the code: "<literal>test</literal>"</title>
+            <para>This will run all of the unit tests in the current package.  Specifically, this looks for all JUnit tests in classes with names that end in <literal>Test</literal>, compiling classes if necessary.  This can be a very time consuming task (ie. over 15 minutes on slower computers).  Note that this task is run automatically when you commit code to ensure that nothing breaks.  As a side note, <literal>test</literal> is the default Ant task for DrJava, so running Ant with no arguments will invoke this task.</para>
+          </formalpara>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Running DrJava: "<literal>run</literal>"</title>
+            <para>This task can only be run in the <filename>src/edu/rice/cs/drjava</filename> directory, and will start DrJava from within Ant.  You can also start DrJava manually using the command below, which does not require the overhead of Ant.  (You might want to set up an alias for this command, such as <filename>drj</filename>.)</para>
+          </formalpara>
+          <programlisting>java edu.rice.cs.drjava.DrJava</programlisting>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Creating a Jar file: "<literal>jar</literal>"</title>
+            <para>This task can only be run in the <filename>src/edu/rice/cs/drjava</filename> directory, and it will create a <filename>~/drjava/drjava.jar</filename> file.  On most operating systems, you can double click on this Jar file to start DrJava.  Note that this file will be deleted as part of the <literal>clean</literal> task.</para>
+          </formalpara>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Committing changes: "<literal>commit</literal>"</title>
+            <para>This will commit the code on your computer to the CVS repository.  This task incorporates most of the other tasks:  it updates your code to ensure it is not out of date, it compiles your code, and it runs all the unit tests.  If these tasks pass, it will ask for a commit message and commit the code.  If you have not set up an SSH key pair (see <link linkend="env-sf-keypair">Sourceforge SSH Key Pairs</link>), you will have to enter your Sourceforge password several times.  (Once to update, once to commit, and once to tag the code for a potential release.)</para>
+          </formalpara>
+<!--
+          <para><emphasis>Important Note:</emphasis> This task requires that you can open Emacs in a separate window.  Ant will not allow you to enter the commit comments in the console.  On most Unix systems, this is not a problem.  (If you are developing on Unix through a Windows SSH session, you will need to have X-Win32 running.)  On Windows, you will need to have Emacs set up correctly.  On Mac OS X, you will need an X server (either Apple's or OrobosOSX/XDarwin) and a copy of Emacs that opens in a new window (eg. from Fink).</para>
+-->
+        </listitem>
+
+      </itemizedlist>
+    </section>
+
   </chapter>
-  -->
 
 </book>
