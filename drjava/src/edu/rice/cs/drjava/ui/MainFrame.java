@@ -58,15 +58,10 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.DebugManager;
+import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.DelegatingAction;
-
-/*
-import com.bluemarsh.jswat.*;
-import com.bluemarsh.jswat.ui.*;
-import com.bluemarsh.jswat.view.*;
-*/
 
 /**
  * DrJava's main window.
@@ -764,6 +759,20 @@ public class MainFrame extends JFrame {
   }
   
   private void _toggleBreakpoint() {
+    OpenDefinitionsDocument doc = _model.getActiveDocument();
+    try {
+      _model.getDebugManager().
+        setBreakpoint(doc, doc.getDocument().getCurrentLine());
+    }
+    catch (IOException ioe) {
+      _showIOError(ioe);
+    }
+    catch (ClassNotFoundException cnfe) {
+      _showClassNotFoundError(cnfe);
+    }
+    catch (DebugException de) {
+      _showDebugError(de);
+    }
   }
   
   private void _runDebugger() {
@@ -786,6 +795,12 @@ public class MainFrame extends JFrame {
                "A NoClassDefFoundError occurred during the last operation.\n" +
                "Please check that your classpath includes all relevant paths.\n\n");
   }
+  
+  private void _showDebugError(DebugException de) {
+    _showError(de, "Debug Error",
+               "A JSwat error occurred in the last operation.\n\n");
+  }
+  
   private void _showError(Throwable e, String title, String message) {
     JOptionPane.showMessageDialog(this,
                                   message + "\n" + e,
@@ -1593,6 +1608,11 @@ public class MainFrame extends JFrame {
         message = 
           "To run JUnit, you must first save and compile the current\n" + 
           "file. Would like to save and then compile?";
+      }
+      else if (reason == DEBUG_REASON) {
+        message = 
+          "To use debugging commands, you must first save and compile\n" +
+          "the current file. Would like to save and then compile?";
       }
       else {
         throw new RuntimeException("Invalid reason for forcing a save.");

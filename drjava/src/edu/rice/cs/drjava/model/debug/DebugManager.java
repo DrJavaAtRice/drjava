@@ -43,10 +43,14 @@ import java.io.*;
 
 // DrJava stuff
 import edu.rice.cs.drjava.model.GlobalModel;
+import edu.rice.cs.drjava.model.GlobalModelListener;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
 // JSwat stuff
 import com.bluemarsh.jswat.*;
 import com.bluemarsh.jswat.ui.*;
+import com.bluemarsh.jswat.breakpoint.*;
 import com.sun.jdi.Bootstrap;
 
 /**
@@ -155,16 +159,99 @@ public class DebugManager {
   
   public void getBreakpoints();
  */ 
-  public void setBreakpoint() {
+  public void setBreakpoint(OpenDefinitionsDocument doc, int lineNumber) 
+    throws IOException, ClassNotFoundException, DebugException {
+    BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
     
+    if (doc.isModifiedSinceSave()) {
+      doc.saveBeforeProceeding(GlobalModelListener.DEBUG_REASON);
+    }
+
+    String className = mapClassName(doc);
+    if (className == null) {
+      throw new ClassNotFoundException();
+    }
+    
+    try {
+      bpManager.createBreakpoint(className, lineNumber);
+    }    
+    catch(ClassNotFoundException cnfEx) {
+      //try {
+      doc.startCompile();
+      if(_model.getNumErrors() != 0) {
+        return;
+      }
+      //}
+    }
+    catch (ResolveException re) {
+      throw new DebugException();
+    }
   }
-   /* 
+
+  /* 
   public void removeBreakpoint();
   
   public void addWatch();
   
   public void removeWatch();
   */
+
+  /**
+   * Return the fully-qualified classname corresponding to the
+   * given source file. Returns null if file has an error.
+   *
+   * Note: assumes each file contains source for exactly one
+   * class whose name is the same as the filename.
+   * 
+   * Based on code from JSwat.
+   * 
+   * @param doc   document containing class.
+   * @return  Classname, or null if error.
+   */
+  private final static String mapClassName(final OpenDefinitionsDocument doc) {
+    File source;
+    String fpath, rpath;
+    try {
+      source = doc.getDocument().getFile();
+      fpath = source.getCanonicalPath();
+      rpath = doc.getSourceRoot().getCanonicalPath();
+    }
+    catch (IOException ioe) {
+      return null;
+    } catch (InvalidPackageException ipe) {
+      return null;
+    }
+    // Don't need the filename extension.
+    int idx = fpath.lastIndexOf(".java");
+    if (idx > 0) {
+      fpath = fpath.substring(0, idx);
+    }
+
+    int longest = -1;
+    if (fpath.startsWith(rpath)) {
+      int len = rpath.length();
+      if (rpath.charAt(len - 1) != File.separatorChar) {
+        // Path list entry does not end with a separator so
+        // we must add one to remove it from fpath.
+        len++;
+      }
+      if (len > longest) {
+        // Save the length for the possible best match.
+        // This may change as we go through the list.
+        longest = len;
+      }
+    }
+  
+    if (longest > -1) {
+      // Convert the file separators to dots.
+      fpath = fpath.replace(File.separatorChar, '.');
+      fpath = fpath.substring(longest);
+      return fpath;
+    } else {
+      return null;
+    }    
+  } // mapClassName
+  
   
   /*
    * Class DebugOutputAdapter is responsible for displaying the output
