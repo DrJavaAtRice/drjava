@@ -36,18 +36,18 @@
       
       <formalpara>
 	<title>Stable and Development Releases</title>
-	<para>A distinction is made between Stable and Development releases of DrJava.  All releases must pass our rigorous unit-tests and should be safe to use, but we have found that a period of beta-testing can be helpful for finding additional bugs.  Our Stable releases have gone through a period of beta-testing and should be safe for all users.  Our Development releases contain newer features that are under development.  We believe these releases are ready to use, but they have not been widely beta-tested.</para>
+	<para>A distinction is made between Stable and Development releases of DrJava.  All releases must pass our rigorous unit-tests and should be safe to use, but we have found that a period of beta-testing can be helpful for finding additional bugs.  Our Stable releases have gone through a period of beta-testing and should be safe for all users.  Our Development releases contain newer features that are under development.  We believe these releases are also ready to use, but they have not been widely beta-tested, so some users may prefer to use only Stable releases.</para>
       </formalpara>
     </section>
 
     <section id="gs-running">
       <title>Running DrJava</title>
-      <para>DrJava can be started from a command prompt using the Jar file you downloaded.  You can optionally give it a list of source files to open at startup.</para>
+      <para>DrJava can be started from a command prompt using the <filename>.jar</filename> file you downloaded.  You can optionally give it a list of source files to open at startup.</para>
       <cmdsynopsis>
 	<command>java -jar drjava-DATE-TIME.jar</command>
 	<arg choice='opt' rep='repeat'>filename.java</arg>
       </cmdsynopsis>
-      <para>(Replace DATE-TIME with the appropriate value for your file.)  On many platforms, you can also simply double-click on the Jar file and DrJava will start automatically.</para>
+      <para>(Replace DATE-TIME with the appropriate value for your file.)  On many platforms, you can also simply double-click on the <filename>.jar</filename> file and DrJava will start automatically.</para>
     </section>
 
     <section id="gs-requirements">
@@ -71,10 +71,87 @@
     </section>
 
   </chapter>
-  
 
-  <!-- ---- Chapter: Configuring DrJava ---- -->
-  <chapter id="configuration">
+  <!-- Chapter: Editing Programs -->
+  <chapter id="editing">
+    <title>Editing Programs</title>
+    <para>While DrJava contains many useful tools for Java development, its primary role is as a simple editor for Java source code.  Like most text editors, it supports a full range of editing features such as "Find/Replace" and "Goto Line", while also providing more advanced features like syntax coloring, automatic indentation, and brace matching.</para>
+
+    <section id="edit-defpane">
+      <title>Definitions Pane</title>
+      <para>The Definitions Pane is the main window of DrJava, displaying the currently active source file.  As files are edited in this window, DrJava helps out with several useful features.</para>
+
+      <formalpara>
+	<title>Syntax Coloring</title>
+	<para>Certain types of words are colored differently to help make the structure of the program more apparent.  Any comments appear in green, while Java keywords appear in blue and primitive types and class names appear in dark blue.  Strings are colored red and characters are colored magenta, while the remaining types of text appear in black.  These colors can all be configured by the user (see <link linkend="configuration">Configuring DrJava</link>).</para>
+      </formalpara>
+
+      <formalpara>
+	<title>Automatic Indentation</title>
+	<para>As the user types multiple lines of code, DrJava automatically indents each line using common coding conventions.  By default, two spaces are used for each indentation level, although this can be configured.  When the user hits Enter, DrJava indents the new line to the appropriate level.  To re-align an existing line, press the Tab key while the cursor is on the line.  (In DrJava, the Tab key always indents the line, and never inserts a Tab character.)  A block of code can be re-aligned by selecting several lines and then pressing Tab.</para>
+      </formalpara>
+
+      <formalpara>
+	<title>Brace Matching</title>
+	<para>To help the user visualize the structure of the code, DrJava uses highlighting to match braces.  If the cursor is placed immediately after a close brace, parenthesis, or bracket, all text between that character and the corresponding open brace is highlighted in another color.</para>
+      </formalpara>
+    </section>
+
+    <section id="edit-multiple">
+      <title>Multiple Documents</title>
+      <para>DrJava supports having multiple documents open at the same time, since most users tend to edit several class files at a time.  The window on the left side of DrJava displays a list of all the names of the open documents, in the order that the files were opened.  The user can edit a particular document by selecting it in the list, or by using the Previous and Next Document actions in the Edit Menu.  Only the class name of a source file is shown in the list and in the title bar, but the full filename is always displayed in the status bar at the bottom of the window.</para>
+    </section>
+
+    <section id="edit-navigation">
+      <title>Source Navigation</title>
+      <para>DrJava also has many simple features to help users edit and navigate source files.</para>
+
+      <formalpara>
+	<title>Find/Replace</title>
+	<para>DrJava has a powerful Find and Replace utility, which is displayed as one of the tabs at the bottom of the window.  The tab is first displayed by selecting Find/Replace from the Edit Menu (or using the keyboard shortcut, CTRL+F), and can be closed by clicking on the "X" button in the upper right corner or by hitting the Escape key.  To search for a term, simply enter it in the Find text field and click "Find Next" (or press Enter).  To replace the term with another, type the new term in the Replace text field, find an occurance using "Find Next", and then click "Replace".  The "Replace/Find Next" and "Replace All" buttons can help to speed up this process.</para>
+      </formalpara>
+
+      <formalpara>
+	<title>Goto Line</title>
+	<para>Selecting "Goto Line" from the Edit Menu (or hitting CTRL+G) will display a dialog allowing the user to jump to a particular line number.  This can be useful when viewing stack trace information, which often gives line numbers.</para>
+      </formalpara>
+
+      <formalpara>
+	<title>Line Numbering</title>
+	<para>DrJava displays the cursor's current line number and column number on the right side of the status bar at the bottom of the window.  The line number is shown first and starts at 1, and the column number is shown second and starts at 0.</para>
+      </formalpara>
+
+      <formalpara>
+	<title>Opening Files at Startup</title>
+	<para>For convenience, any number of files can be specified on the command line when starting DrJava, to be opened when the program first starts up.  If no files are specified on the command line, DrJava starts with a new file.</para>
+      </formalpara>
+    </section>
+
+  </chapter>
+  
+  <!-- Chapter: Interactions Pane
+    - How to use
+    - Keyboard shortcuts
+    - Setting classpath
+  -->
+
+  <!-- Chapter: Integrated Compiler
+    - Compiling an open file
+    - Viewing compiler errors
+    - Selecting a compiler
+  -->
+
+  <!-- Chapter: JUnit Integration
+    - Overview of unit-testing
+    - How to write a JUnit test (from Chris Haynes' page)
+    - Viewing test failures
+  -->
+
+
+
+
+  <!-- ---- Appendix: Configuring DrJava ---- -->
+  <appendix id="configuration">
     <title>Configuring DrJava</title>
     <para>DrJava currently has several configurable options which can be defined in a <filename>.drjava</filename> file in your home directory.  This file is a standard Java properties file, with one option on each line and with names and values separated by an equals sign.  Any options which are not defined in your <filename>.drjava</filename> file will have their default value, which is shown below after each option.  The options which are currently available are described below.</para>
     
@@ -82,7 +159,7 @@
     <!-- Resource Location -->
     <formalpara>
       <title>Resource Location Options</title>
-      <para>Description of resource location options...
+      <para>Description of resource location options... (see documentation on SourceForge page)
         <variablelist>
 	  
 	  <varlistentry>
@@ -275,14 +352,6 @@
       
     </variablelist>
     
-  </chapter>
+  </appendix>
  
-  <!-- Chapter: JUnit Integration -->
-  <chapter id="junit">
-    <title>Testing Classes using JUnit</title>
-    <para>
-      Copy from Chris Haynes' page.
-    </para>
-  </chapter>
-
 </book>
