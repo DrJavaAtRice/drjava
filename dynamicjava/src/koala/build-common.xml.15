@@ -116,6 +116,12 @@ target="jsr14"
   <echo message="All tests passed. Rebuilding to put version tag (${version-tag}) into the code." />
   <antcall target="compile" />
 
+  <!-- Copy the dynamicjava.jar to the lib directory and commit it. -->
+  <copy file="${jarfile}"
+          tofile="${lib_dir}/dynamicjava.jar"
+          overwrite="yes"/>
+  <echo message="Copied current dynamicjava.jar to the lib directory. Please commit it to keep DrJava in sync with the koala code base." />
+  
   <tempfile property="commit-comments-filename" 
             destdir="${java.io.tmpdir}"
             prefix="commit-comments" />

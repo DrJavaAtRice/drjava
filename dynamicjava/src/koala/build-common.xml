@@ -111,15 +111,16 @@ target="jsr14"
 <target name="do-commit" depends="clean, update, test, jar, make-version-stamp">
   <property name="version-tag"
             value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />   
+
+  <!-- recompile to make new version number get into code. -->
+  <echo message="All tests passed. Rebuilding to put version tag (${version-tag}) into the code." />
+  <antcall target="compile" />
   
   <!-- Copy the dynamicjava.jar to the lib directory and commit it. -->
   <copy file="${jarfile}"
           tofile="${lib_dir}/dynamicjava.jar"
           overwrite="yes"/>
-
-  <!-- recompile to make new version number get into code. -->
-  <echo message="All tests passed. Rebuilding to put version tag (${version-tag}) into the code." />
-  <antcall target="compile" />
+  <echo message="Copied current dynamicjava.jar to the lib directory. Please commit it to keep DrJava in sync with the koala code base." />
 
   <tempfile property="commit-comments-filename" 
             destdir="${java.io.tmpdir}"
@@ -128,14 +129,6 @@ target="jsr14"
     <param name="commit-comments-filename" value="${commit-comments-filename}"/>
   </antcall>
   
-  <cvs>
-    <commandline>
-      <argument value="commit" />
-      <argument value="-F" />
-      <argument value="${commit-comments-filename}" />
-      <argument value="${lib_dir}/dynamicjava.jar" />
-    </commandline>
-  </cvs>
   <cvs>
     <commandline>
       <argument value="commit" />
