@@ -41,50 +41,37 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
  * OTHER DEALINGS WITH THE SOFTWARE.
  * 
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
+package edu.rice.cs.drjava.model;
+import junit.framework.TestCase;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
+ * DummyOpenDefDocTest for unit testing DummyOpenDefDoc.  Uses
+ * JUnit for testing.
  *
- * This javadoc corresponds to build drjava-20050223-0309;
- *
+ * @author <a href="mailto:jasonbs@rice.edu">Jason Schiller</a>
  * @version $Id$
  */
-public abstract class Version {
+
+public class DummyOpenDefDocTest extends TestCase {
+  
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Creates a DummyOpenDefDoc and ensures that it properly
+   * throws UnsupportedOperationException by calling isModifiedOnDisk().
    */
-  private static final String BUILD_TIME_STRING = "20050223-0309";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
+  public void testProperExceptionThrowing() {
     try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.isModifiedOnDisk();
+      fail("DummyOpenDefDoc did not throw UnsupportedOperationException");
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e){
+      fail("DummyOpenDefDoc did not throw UnsupportedOperationException, but "+e);
     }
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

@@ -185,7 +185,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /**
    * Tests that a JUnit file with no errors is reported to have no errors.
    */
-  public void testNoJUnitErrors() throws Exception {
+  public void xtestNoJUnitErrors() throws Exception {
     if (printMessages) System.out.println("----testNoJUnitErrors-----");
     
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
@@ -216,7 +216,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /**
    * Tests that a JUnit file with an error is reported to have an error.
    */
-  public void testOneJUnitError() throws Exception {
+  public void xtestOneJUnitError() throws Exception {
     if (printMessages) System.out.println("----testOneJUnitError-----");
 
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
@@ -243,7 +243,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /**
    * Tests that a JUnit file with an error is reported to have an error.
    */
-  public void testElspethOneJUnitError() throws Exception {
+  public void xtestElspethOneJUnitError() throws Exception {
     if (printMessages) System.out.println("----testElspethOneJUnitError-----");
 
     OpenDefinitionsDocument doc = setupDocument(ELSPETH_ERROR_TEXT);
@@ -272,7 +272,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
    * Tests that a test class which throws a *real* Error (not an Exception)
    * is handled correctly.
    */
-  public void testRealError() throws Exception {
+  public void xtestRealError() throws Exception {
     if (printMessages) System.out.println("----testRealError-----");
 
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_ERROR_TEXT);
@@ -335,7 +335,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
    * Tests that the ui is notified to put up an error dialog if JUnit
    * is run on a non-public TestCase.
    */
-  public void testResultOfNonPublicTestCase() throws Exception {
+  public void xtestResultOfNonPublicTestCase() throws Exception {
     if (printMessages) System.out.println("----testResultOfNonPublicTestCase-----");
 
     final OpenDefinitionsDocument doc = setupDocument(NONPUBLIC_TEXT);
@@ -570,7 +570,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /**
    * Tests that junit all works with one or two test cases that should pass.
    */
-  public void testJUnitAllWithNoErrors() throws Exception {
+  public void xtestJUnitAllWithNoErrors() throws Exception {
     OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
     JUnitNonTestListener listener = new JUnitNonTestListener(true);
     File file = new File(_tempDir, "NonTestCase.java");
@@ -611,7 +611,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /**
    * Tests that junit all works with test cases that do not pass.
    */
-  public void testJUnitAllWithErrors() throws Exception {
+  public void xtestJUnitAllWithErrors() throws Exception {
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_ERROR_TEXT);
     JUnitNonTestListener listener = new JUnitNonTestListener(true);
     File file = new File(_tempDir, "MonkeyTestError.java");
@@ -643,7 +643,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
    * Tests that an infinite loop in a test case can be aborted by clicking
    * the Reset button.
    */
-  public void testInfiniteLoop() throws Exception {
+  public void xtestInfiniteLoop() throws Exception {
     if (printMessages) System.out.println("----testInfiniteLoop-----");
 
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_INFINITE_TEXT);
@@ -711,7 +711,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /**
    * Tests that junit all works with one or two test cases that should pass.
    */
-  public void testJUnitStaticInnerClass() throws Exception {
+  public void xtestJUnitStaticInnerClass() throws Exception {
     if (printMessages) System.err.println("----testJUnitAllWithNoErrors-----");
     OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
     JUnitNonTestListener listener = new JUnitNonTestListener(true);
