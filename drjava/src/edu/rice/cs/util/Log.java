@@ -153,6 +153,7 @@ public class Log {
     if (isEnabled()) {
       StringWriter sw = new StringWriter();
       PrintWriter pw = new PrintWriter(sw);
+      t.printStackTrace(pw);
       logTime(s + "\n" + sw.toString());
     }
   }
