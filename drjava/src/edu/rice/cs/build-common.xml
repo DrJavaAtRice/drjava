@@ -33,7 +33,11 @@
 <!-- classpath to use everywhere. -->
 <path id="classpath">
   <pathelement location="${jsr14_classpath}" />
-  <pathelement path="${java.class.path}" />
+<!--  <pathelement path="${java.class.path}" /> -->
+  <fileset dir="${lib_dir}">
+    <include name="*.jar" />
+  </fileset>
+  <pathelement path="${built}" />
 </path>
 
 <target name="compile-tstamp-gmt">
@@ -138,14 +142,15 @@ optimize="off"/>
          includes="${projpath}/**/*java"
          destdir="${built}" 
          bootclasspath="${jsr14_classpath}:${sun.boot.class.path}"
+	 classpath="${classpath_text}"
          target="1.1"
          debug="on"
          optimize="off">
     <compilerarg value="-gj" />
   </javac>
-
-    <!--
-    <echo message="Recompiling all classes ..." />
+ 
+  <!--
+    <echo message="Recompiling all classes..." />
     <apply executable="java" failonerror="yes" parallel="yes" type="file">
 
       <arg value="-classpath" />
@@ -169,8 +174,7 @@ optimize="off"/>
         <include name="${projpath}/**/*.java" />
       </fileset>
     </apply>
-    -->
-
+   -->
 </target>
 
 
@@ -244,6 +248,7 @@ optimize="off"/>
     
     <fileset dir="${srcroot}">
       <!-- get all projects within this sourceroot -->
+      <exclude name="src-jsr14v1_*/**/*.java" />
       <include name="**/*.java" />
       <!-- <include name="${projpath}/**/*.java" /> -->
     </fileset>
