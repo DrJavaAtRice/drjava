@@ -680,6 +680,9 @@
         <include name="userdoc.docbook" />
       </fileset>
     </apply>
+
+    <!-- Include Language Level chart -->
+    <copy todir="${doc_dir}/user" file="${srcroot}/${projpath}/docs/user/LanguageLevelFeatures.jpg" />
   </target>
 
   <!-- Create the user documentation as a PDF -->
