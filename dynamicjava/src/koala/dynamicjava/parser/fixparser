@@ -1,0 +1,23 @@
+#!/bin/sh
+sed "s/\/\*</</g" $1 | 
+sed "s/>\*\//>/g" | 
+sed "s/List name[(]/List<IdentifierToken> name(/" |
+sed "s/List localVariableDeclaration[(]/List<Node> localVariableDeclaration(/" |
+sed "s/List nameList[(]/List<List<IdentifierToken>> nameList(/" |
+sed "s/List classBodyDeclaration[(]/List<Node> classBodyDeclaration(/" |
+sed "s/List fieldDeclaration[(]/List<Node> fieldDeclaration(/" |
+sed "s/List formalParameters[(]/List<FormalParameter> formalParameters(/" |
+sed "s/List argumentList[(]/List<Expression> argumentList(/" |
+sed "s/List parseStream[(]/List<Node> parseStream(/" |
+sed "s/List parseCompilationUnit[(]/List<Node> parseCompilationUnit(/" |
+sed "s/List interfaceMemberDeclaration[(]/List<Node> interfaceMemberDeclaration(/" |
+sed "s/List blockStatement[(]/List<Node> blockStatement(/" |
+sed "s/List forInit[(]/List<Node> forInit(/" |
+sed "s/List statementExpressionList[(]/List<Node> statementExpressionList(/" |
+sed "s/Vector/Vector<Object>/g"
+
+
+
+
+
+
