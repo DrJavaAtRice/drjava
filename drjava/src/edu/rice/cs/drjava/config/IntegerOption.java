@@ -35,18 +35,20 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 import java.awt.*;
 
 /**
  * Class defining all configuration options with values of type Integer.
+ * @version $Id$
  */
 public class IntegerOption extends Option<Integer>
 {  
   /**
    * @param key The name of this Option.
+   * @param def The default value for this option
    */
   public IntegerOption(String key, Integer def) { super(key,def); }
   
@@ -64,8 +66,8 @@ public class IntegerOption extends Option<Integer>
     
     catch (NumberFormatException e)
     {
-      throw new IllegalArgumentException("Input must be a String " +
-                                           "representing an integer value.");
+      throw new OptionParseException(name, s,
+                                     "Must be a valid integer value.");
     }
   }
 }

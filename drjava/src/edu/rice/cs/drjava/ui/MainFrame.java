@@ -638,8 +638,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setAllFonts(mainFont);
     _docList.setFont(doclistFont);
 
-    //     frameSize = this.getSize();
-    //     System.out.println("Actual Frame Height: " + frameSize.height);
+    // If any errors parsing config file, show them
+    _showConfigException();
   }
 
   /**
@@ -1049,6 +1049,20 @@ public class MainFrame extends JFrame implements OptionConstants {
                                   message + "\n" + e,
                                   title,
                                   JOptionPane.ERROR_MESSAGE);
+  }
+  
+  /**
+   * Check if any errors occurred while parsing the config file,
+   * and display a message if necessary.
+   */
+  private void _showConfigException() {
+    if (DrJava.CONFIG.hadStartupException()) {
+      Exception e = DrJava.CONFIG.getStartupException();
+      _showError(e, "Error in Config File",
+                 "Could not read the '.drjava' configuration file\n" +
+                 "in your home directory.  Starting with default\n" +
+                 "values instead.\n");
+    }
   }
 
 

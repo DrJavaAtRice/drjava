@@ -43,6 +43,7 @@ import java.io.*;
 
 /**
  * Class representing all configuration options with values of type File.
+ * @version $Id$
  */
 public class FileOption extends Option<File> {
   
@@ -56,7 +57,15 @@ public class FileOption extends Option<File> {
    * the absolute path of the File to be created.
    * @return The File object corresponding to path "p".
    */
-  public File parse(String s) { return new File(s).getAbsoluteFile(); }
+  public File parse(String s) { 
+    try {
+      return new File(s).getAbsoluteFile();
+    }
+    catch (NullPointerException e) {
+      throw new OptionParseException(name, s,
+                                     "Must have a legal filename.");
+    }
+  }
 
   /**
    * @param f The instance of class File to be formatted.

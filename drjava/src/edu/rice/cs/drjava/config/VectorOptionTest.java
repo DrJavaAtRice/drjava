@@ -35,7 +35,7 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 
@@ -49,94 +49,94 @@ import junit.framework.*;
  * VectorOption.
  */
 public class VectorOptionTest extends TestCase {
-    private VectorOption<Integer> _ivo;
-    private VectorOption<Boolean> _bvo;
+  private VectorOption<Integer> _ivo;
+  private VectorOption<Boolean> _bvo;
   
-    /**
-     * @param name The name of this test case.
-     */
-    public VectorOptionTest(String name) { super(name); }
-    
-    public void setUp() {
-	// name fields are irrelevant at this point.
-	_ivo = new VectorOption<Integer>("whatever",new IntegerOption("",null),(Vector) null);
-	_bvo = new VectorOption<Boolean>("everwhat",new BooleanOption("",null),(Vector) null);
-    }
-    
-    public void testGetName() {
-	assertEquals("whatever", _ivo.getName());
-	assertEquals("everwhat", _bvo.getName());
-    }
+  /**
+   * @param name The name of this test case.
+   */
+  public VectorOptionTest(String name) { super(name); }
   
-    public void testParse() {
-	Vector<Integer> iv = new Vector<Integer>();
-	
-	assertTrue(_ivo.parse("[]").isEmpty());
-	assertTrue(_bvo.parse("[]").isEmpty());
-	
-	try {
-	    _ivo.parse("[,]"); fail("Comma at beginning.");
-	} catch (IllegalArgumentException e) {
-	}
-	try {
-	    _ivo.parse("[11"); fail("Missing footer.");
-	} catch (IllegalArgumentException e) {
-	}
-	try {
-	    _ivo.parse("[11,]"); fail("Comma w/o following list element.");
-	} catch (IllegalArgumentException e) {
-	}
-	try {
-	    _ivo.parse("11]"); fail("Missing header.");
-	} catch (IllegalArgumentException e) {
-	}
-	try {
-	    _ivo.parse("[11,,22]"); fail("Missing list element.");
-	} catch (IllegalArgumentException e) {
-	}
-	try {
-	    _ivo.parse("{11,22}"); fail("Illegal header and footer.");
-	} catch (IllegalArgumentException e) {
-	}
-	try {
-	    _ivo.parse("[11;22]"); fail("Illegal delimiter.");
-	} catch (IllegalArgumentException e) {
-	}
-	
- 	Vector<Boolean> bv = _bvo.parse("[true]");
-	
-	assertEquals(1, bv.size()); 
-	assertEquals(Boolean.TRUE, bv.elementAt(0));
-	
-	bv = _bvo.parse("[true,false,true,true]");
-	
-	assertEquals(4, bv.size()); 
-	assertEquals(Boolean.TRUE,  bv.elementAt(0)); 
-	assertEquals(Boolean.FALSE, bv.elementAt(1));
-	assertEquals(Boolean.TRUE,  bv.elementAt(2));
-	assertEquals(Boolean.TRUE,  bv.elementAt(3));
-	
-	try {
-	    _bvo.parse("[11]"); fail("Number instead of boolean.");
-	} catch (IllegalArgumentException e) {
-	}
-	try {
-	    _bvo.parse("[True]"); fail("Boolean String needs to be lowercase.");
-	} catch (IllegalArgumentException e) {
-	}
+  public void setUp() {
+    // name fields are irrelevant at this point.
+    _ivo = new VectorOption<Integer>("whatever",new IntegerOption("",null),(Vector) null);
+    _bvo = new VectorOption<Boolean>("everwhat",new BooleanOption("",null),(Vector) null);
+  }
+  
+  public void testGetName() {
+    assertEquals("whatever", _ivo.getName());
+    assertEquals("everwhat", _bvo.getName());
+  }
+  
+  public void testParse() {
+    Vector<Integer> iv = new Vector<Integer>();
+    
+    assertTrue(_ivo.parse("[]").isEmpty());
+    assertTrue(_bvo.parse("[]").isEmpty());
+    
+    try {
+      _ivo.parse("[,]"); fail("Comma at beginning.");
+    } catch (OptionParseException e) {
+    }
+    try {
+      _ivo.parse("[11"); fail("Missing footer.");
+    } catch (OptionParseException e) {
+    }
+    try {
+      _ivo.parse("[11,]"); fail("Comma w/o following list element.");
+    } catch (OptionParseException e) {
+    }
+    try {
+      _ivo.parse("11]"); fail("Missing header.");
+    } catch (OptionParseException e) {
+    }
+    try {
+      _ivo.parse("[11,,22]"); fail("Missing list element.");
+    } catch (OptionParseException e) {
+    }
+    try {
+      _ivo.parse("{11,22}"); fail("Illegal header and footer.");
+    } catch (OptionParseException e) {
+    }
+    try {
+      _ivo.parse("[11;22]"); fail("Illegal delimiter.");
+    } catch (OptionParseException e) {
     }
     
-    public void testFormat() {
-	Vector<Integer> iv = new Vector<Integer>();
-	assertEquals("[]", _ivo.format(iv));
-	
-	iv.addElement(new Integer(-33));
-	assertEquals("[-33]", _ivo.format(iv));
-	
-	iv.addElement(new Integer(2));
-	assertEquals("[-33,2]", _ivo.format(iv));
-	
-	iv.addElement(new Integer(0));
-	assertEquals("[-33,2,0]", _ivo.format(iv));
+    Vector<Boolean> bv = _bvo.parse("[true]");
+    
+    assertEquals(1, bv.size()); 
+    assertEquals(Boolean.TRUE, bv.elementAt(0));
+    
+    bv = _bvo.parse("[true,false,true,true]");
+    
+    assertEquals(4, bv.size()); 
+    assertEquals(Boolean.TRUE,  bv.elementAt(0)); 
+    assertEquals(Boolean.FALSE, bv.elementAt(1));
+    assertEquals(Boolean.TRUE,  bv.elementAt(2));
+    assertEquals(Boolean.TRUE,  bv.elementAt(3));
+    
+    try {
+      _bvo.parse("[11]"); fail("Number instead of boolean.");
+    } catch (OptionParseException e) {
     }
+    try {
+      _bvo.parse("[True]"); fail("Boolean String needs to be lowercase.");
+    } catch (OptionParseException e) {
+    }
+  }
+  
+  public void testFormat() {
+    Vector<Integer> iv = new Vector<Integer>();
+    assertEquals("[]", _ivo.format(iv));
+    
+    iv.addElement(new Integer(-33));
+    assertEquals("[-33]", _ivo.format(iv));
+    
+    iv.addElement(new Integer(2));
+    assertEquals("[-33,2]", _ivo.format(iv));
+    
+    iv.addElement(new Integer(0));
+    assertEquals("[-33,2,0]", _ivo.format(iv));
+  }
 }

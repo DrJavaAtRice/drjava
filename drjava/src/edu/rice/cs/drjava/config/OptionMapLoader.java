@@ -75,7 +75,7 @@ public class OptionMapLoader implements OptionConstants {
         }
     }
 
-    public static OptionMapLoader DEFAULT = new OptionMapLoader(DEFAULT_STRINGS);
+    public static final OptionMapLoader DEFAULT = new OptionMapLoader(DEFAULT_STRINGS);
     
     /**
      * creates an OptionMapLoader from a given input stream.

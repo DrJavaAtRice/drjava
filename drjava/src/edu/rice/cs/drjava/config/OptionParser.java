@@ -57,7 +57,7 @@ public abstract class OptionParser<T> implements ParseStrategy<T> {
      * part of the magic inner workings of this package.
      */
     final Hashtable<DefaultOptionMap,T> map =
-	new Hashtable<DefaultOptionMap,T>();
+ new Hashtable<DefaultOptionMap,T>();
 
     /** 
      * constructor that takes in a name
@@ -100,7 +100,9 @@ public abstract class OptionParser<T> implements ParseStrategy<T> {
      * uses parse() and setOption() so that any changes in parsing will automatically
      * be applied to setString().
      */
-    T setString(DefaultOptionMap om, String val) { return setOption(om,parse(val)); }
+    T setString(DefaultOptionMap om, String val) { 
+      return setOption(om,parse(val));
+    }
     
     /** the accessor for the magic-typed hashtable stunt. */
     T getOption(DefaultOptionMap om) { return map.get(om); }

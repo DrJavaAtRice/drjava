@@ -35,13 +35,14 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 import java.awt.*;
 
 /**
  * Class defining all configuration options with values of type Boolean.
+ * @version $Id$
  */
 public class BooleanOption extends Option<Boolean>
 {  
@@ -58,14 +59,16 @@ public class BooleanOption extends Option<Boolean>
    */
   public Boolean parse(String s) 
   { 
-    if (s.equals("true"))
+    if (s.equals("true")) {
       return Boolean.TRUE;
-    
-    if (s.equals("false"))
+    }
+    if (s.equals("false")) {
       return Boolean.FALSE;
-    
-    else
-      throw new IllegalArgumentException("Input must be a lowercase String " +
-                                           "representing a boolean value");
+    }
+    else {
+      throw new OptionParseException(name, s,
+                                     "Must be a lowercase String " +
+                                     "representing a boolean value.");
+    }
   }
 }

@@ -36,34 +36,50 @@
  * remove the dependency first!)
  *
  END_COPYRIGHT_BLOCK*/
+
 package edu.rice.cs.drjava.config;
 import java.io.*;
 
 /**
- * a Configuration object that is backed by a file.
- * @version $ID$
+ * A Configuration object that is backed by a file.
+ * @version $Id$
  */
 public class FileConfiguration extends SavableConfiguration {  
-    
-    public final File file;
-
-    public FileConfiguration(File f) {
-        super(new DefaultOptionMap());
-        file = f.getAbsoluteFile();
-    }
- 
-    public void loadConfiguration() throws IOException {
-        loadConfiguration(new BufferedInputStream(new FileInputStream(file)));
-    }
-
-    public void saveConfiguration() throws IOException {
-        saveConfiguration("DrJava configuration file");
-    }
-
-    public void saveConfiguration(String header) throws IOException {
-        OutputStream os = new BufferedOutputStream(new
-            FileOutputStream(file));
-        super.saveConfiguration(os,header);
-        os.close(); // in this implementation, close the file after saving.
-    }
+  
+  public final File file;
+  
+  /**
+   * Creates a new Configuration object using the values stored in file f.
+   * Any values not specified by f will be set to defaults from OptionConstants.
+   * @param f Properties file containing customized values
+   */
+  public FileConfiguration(File f) {
+    super(new DefaultOptionMap());
+    file = f.getAbsoluteFile();
+  }
+  
+  /**
+   * Calls SavableConfiguration.loadConfiguration, which loads all values
+   * from the file, based on the defaults in OptionConstants.
+   */
+  public void loadConfiguration() throws IOException {
+    loadConfiguration(new BufferedInputStream(new FileInputStream(file)));
+  }
+  
+  /**
+   * Saves the current settings to the stored properties file.
+   */
+  public void saveConfiguration() throws IOException {
+    saveConfiguration("DrJava configuration file");
+  }
+  
+  /**
+   * Saves the current settings to the stored properties file.
+   * @param header Description of the properties list
+   */
+  public void saveConfiguration(String header) throws IOException {
+    OutputStream os = new BufferedOutputStream(new FileOutputStream(file));
+    super.saveConfiguration(os,header);
+    os.close(); // in this implementation, close the file after saving.
+  }
 }

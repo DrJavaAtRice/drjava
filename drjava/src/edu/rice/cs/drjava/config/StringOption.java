@@ -42,6 +42,7 @@ import java.awt.*;
 
 /**
  * Class representing all configuration options with values of type String.
+ * @version $Id$
  */
 public class StringOption extends Option<String>
 {  

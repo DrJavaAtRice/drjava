@@ -40,30 +40,45 @@ package edu.rice.cs.drjava.config;
 import java.io.*;
 import gj.util.Enumeration;
 import java.util.Properties;
+
 /**
- * a Configuration object that is backed by a file.
- * @version $ID$
+ * A Configuration object that can be read and saved from a Stream.
+ * @version $Id$
  */
 public class SavableConfiguration extends Configuration {  
+  
+  private File file;
+  
+  /**
+   * Creates a new Configuration based on the given OptionMap.
+   * @param map an empty OptionMap
+   */
+  public SavableConfiguration(OptionMap map) {
+    super(map);
+  }
+  
+  /**
+   * Creates an OptionMapLoader with the values loaded from the InputStream
+   * (and defaults where values weren't specified) and loads them into
+   * this Configuration's OptionMap.
+   * @param is InputStream containing properties-style keys and values
+   */
+  public void loadConfiguration(InputStream is) throws IOException {
     
-    private File file;
-
-    public SavableConfiguration(OptionMap map) {
-        super(map);
+    new OptionMapLoader(is).loadInto(map);
+  }
+  
+  /**
+   * Saves the values from this Configuration into the given OutputStream
+   * as a Properties file.
+   */
+  public void saveConfiguration(OutputStream os, String header) throws IOException {
+    Enumeration<OptionParser> keys = map.keys();
+    Properties p = new Properties();
+    while(keys.hasMoreElements()) {
+      OptionParser key = keys.nextElement();
+      p.setProperty(key.getName(),map.getString(key));
     }
-
-    public void loadConfiguration(InputStream is) throws IOException {
-        
-      new OptionMapLoader(is).loadInto(map);
-    }
- 
-    public void saveConfiguration(OutputStream os, String header) throws IOException {
-        Enumeration<OptionParser> keys = map.keys();
-        Properties p = new Properties();
-        while(keys.hasMoreElements()) {
-            OptionParser key = keys.nextElement();
-            p.setProperty(key.getName(),map.getString(key));
-        }
-        p.store(os,header);
-    }
+    p.store(os,header);
+  }
 }

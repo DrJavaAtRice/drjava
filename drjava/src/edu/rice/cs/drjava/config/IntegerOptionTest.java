@@ -35,7 +35,7 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 
@@ -44,6 +44,7 @@ import junit.framework.*;
 /**
  * Class according to the JUnit protocol. Tests
  * the proper functionality of the class IntegerOption.
+ * @version $Id$
  */
 public class IntegerOptionTest extends TestCase
 {
@@ -58,7 +59,7 @@ public class IntegerOptionTest extends TestCase
   {
     IntegerOption io1 = new IntegerOption("indent_size",null);
     IntegerOption io2 = new IntegerOption("max_files",null);
-
+    
     assertEquals("indent_size", io1.getName());
     assertEquals("max_files",   io2.getName());
   }
@@ -71,10 +72,10 @@ public class IntegerOptionTest extends TestCase
     assertEquals(new Integer(-3), io.parse("-3"));
     
     try { io.parse("true"); fail(); }
-    catch (IllegalArgumentException e) {}
+    catch (OptionParseException e) {}
     
     try { io.parse(".33"); fail(); }
-    catch (IllegalArgumentException e) {}
+    catch (OptionParseException e) {}
   }
   
   public void testFormat()

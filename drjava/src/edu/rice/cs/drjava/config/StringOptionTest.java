@@ -35,7 +35,7 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 
@@ -44,6 +44,7 @@ import junit.framework.*;
 /**
  * Class according to the JUnit protocol. Tests
  * the proper functionality of the class StringOption.
+ * @version $Id$
  */
 public class StringOptionTest extends TestCase
 {
@@ -57,7 +58,7 @@ public class StringOptionTest extends TestCase
   public void testGetName()
   {
     StringOption so = new StringOption("classpath",null);
-
+    
     assertEquals("classpath", so.getName());
   }
   

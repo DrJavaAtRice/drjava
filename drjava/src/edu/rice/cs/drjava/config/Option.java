@@ -35,7 +35,7 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 import gj.util.Hashtable;
@@ -57,74 +57,77 @@ import gj.util.Vector;
  * </pre>
  * the above example is simple because Integers (like most Java(tm) standard-lib data-type
  * classes) have handy toString() / parsing methods/constructors.
+ * 
+ * @version $Id$
  */
 public abstract class Option<T> extends OptionParser<T> implements FormatStrategy<T> {
   
-    
-    /**
-     * a hashtablethat maps Configuration Objects to a list of listeners for this
-     * particular option.  Part of the magic inner workings of this package.
-     */
-    final Hashtable<Configuration,Vector<OptionListener<T>>> listeners=
- new Hashtable<Configuration,Vector<OptionListener<T>>>();
-    
-    /** 
-     * constructor that takes in a name
-     * @param name the name of this option (i.e. "indent.level");
-     */
-    public Option(String name, T def) { super(name,def); }
-    
-    /**
-     * the ability to format a statically typed T value to a String.  Since T is an Object,
-     * the default implementation uses the .toString() method.
-     * @param value the statically-typed value to format into a String
-     * @throws NullPointerException if value is null
-     */
-    public String format(T value) { return value.toString(); }
-    
-    public String getDefaultString() { return format(getDefault()); }
-
-    // PACKAGE PRIVATE MAGIC STUFF
-    // this package-private magic stuff makes all of the config "magic" types work.
-    // basically, it's achieved via a double-dispatch stunt, so that the type information
-    // is saved.
-    
-    /** 
-     * uses format() and getOption() so that any changes in format will automatically
-     * be applied to getString().
-     */
-    String getString(DefaultOptionMap om) { return format(getOption(om)); }
-
-    
-
-    void notifyListeners(Configuration config, T val) {
- Vector<OptionListener<T>> v = listeners.get(config);
- if(v==null) return; // no listeners
- OptionEvent<T> e = new OptionEvent<T>(this,val);
- int size = v.size();
- for(int i = 0; i < size; i++) {
-     v.elementAt(i).optionChanged(e);
- }
-    }
   
-    /** magic listener-bag adder */
-    void addListener(Configuration c, OptionListener<T> l) {
- Vector<OptionListener<T>> v = listeners.get(c);
- if(v==null) {
-     v = new Vector<OptionListener<T>>();
-     listeners.put(c,v);
- }
- v.addElement(l);
+  /**
+   * a hashtablethat maps Configuration Objects to a list of listeners for this
+   * particular option.  Part of the magic inner workings of this package.
+   */
+  final Hashtable<Configuration,Vector<OptionListener<T>>> listeners=
+    new Hashtable<Configuration,Vector<OptionListener<T>>>();
+  
+  /** 
+   * constructor that takes in a name and default value
+   * @param name the name of this option (eg. "indent.level");
+   * @param def the default value for this option (eg. "2")
+   */
+  public Option(String name, T def) { super(name,def); }
+  
+  /**
+   * the ability to format a statically typed T value to a String.  Since T is an Object,
+   * the default implementation uses the .toString() method.
+   * @param value the statically-typed value to format into a String
+   * @throws NullPointerException if value is null
+   */
+  public String format(T value) { return value.toString(); }
+  
+  public String getDefaultString() { return format(getDefault()); }
+  
+  // PACKAGE PRIVATE MAGIC STUFF
+  // this package-private magic stuff makes all of the config "magic" types work.
+  // basically, it's achieved via a double-dispatch stunt, so that the type information
+  // is saved.
+  
+  /** 
+   * uses format() and getOption() so that any changes in format will automatically
+   * be applied to getString().
+   */
+  String getString(DefaultOptionMap om) { return format(getOption(om)); }
+  
+  
+  
+  void notifyListeners(Configuration config, T val) {
+    Vector<OptionListener<T>> v = listeners.get(config);
+    if(v==null) return; // no listeners
+    OptionEvent<T> e = new OptionEvent<T>(this,val);
+    int size = v.size();
+    for(int i = 0; i < size; i++) {
+      v.elementAt(i).optionChanged(e);
     }
-
-    /** magic listener-bag remover */
-    void removeListener(Configuration c, OptionListener<T> l) {
- Vector<OptionListener<T>> v = listeners.get(c);
- if(v==null) return;
- if(v.removeElement(l) && v.size() == 0) {
-     listeners.remove(c);
- }
+  }
+  
+  /** magic listener-bag adder */
+  void addListener(Configuration c, OptionListener<T> l) {
+    Vector<OptionListener<T>> v = listeners.get(c);
+    if(v==null) {
+      v = new Vector<OptionListener<T>>();
+      listeners.put(c,v);
     }
+    v.addElement(l);
+  }
+  
+  /** magic listener-bag remover */
+  void removeListener(Configuration c, OptionListener<T> l) {
+    Vector<OptionListener<T>> v = listeners.get(c);
+    if(v==null) return;
+    if(v.removeElement(l) && v.size() == 0) {
+      listeners.remove(c);
+    }
+  }
 }
 
 

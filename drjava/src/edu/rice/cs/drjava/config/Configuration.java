@@ -39,33 +39,102 @@
 
 package edu.rice.cs.drjava.config;
 
+/**
+ * Class to store and retrieve all configurable options.
+ * @version $Id$
+ */
 public class Configuration {  
-    
-    protected OptionMap map;
   
-    public Configuration(OptionMap om) {
-	map = om;
-    }
+  /**
+   * OptionMap used to store all option settings.
+   */
+  protected OptionMap map;
   
-    public <T> T setSetting(Option<T> op, T value) {
-	T ret = map.setOption(op,value);
-	op.notifyListeners(this,value);
-	return ret;
-    }
+  /**
+   * Any exception that is caught when initializing this Configuration object.
+   * Used later by the UI to display a useful message to the user.
+   */
+  protected Exception _startupException;
   
-    public <T> T getSetting(Option<T> op) {
-	return map.getOption(op);
-    }
+  /**
+   * Initializes this Configuration object with the given OptionMap.
+   * @param om An empty OptionMap.
+   */
+  public Configuration(OptionMap om) {
+    map = om;
+    _startupException = null;
+  }
   
-    public <T> void addOptionListener(Option<T> op, OptionListener<T> l) {
-	op.addListener(this,l);
-    }
+  /**
+   * Sets the given option to the given value and notifies all
+   * listeners of that option of the change.
+   * @param op Option to set
+   * @param value New value for the option
+   */
+  public <T> T setSetting(Option<T> op, T value) {
+    T ret = map.setOption(op,value);
+    op.notifyListeners(this,value);
+    return ret;
+  }
   
-    public <T> void removeOptionListener(Option<T> op, OptionListener<T> l) {
-	op.removeListener(this,l);
-    }
-
-    public String toString() {
-	return map.toString();
-    }
+  /**
+   * Gets the current value of the given Option.
+   */
+  public <T> T getSetting(Option<T> op) {
+    return map.getOption(op);
+  }
+  
+  /**
+   * Adds an OptionListener to the given Option, to be notified each
+   * time the option changes.
+   * @param op Option to listen for changes on
+   * @param l OptionListener wishing to listen
+   */
+  public <T> void addOptionListener(Option<T> op, OptionListener<T> l) {
+    op.addListener(this,l);
+  }
+  
+  /**
+   * Removes an OptionListener from an Option to which it was listening.
+   */
+  public <T> void removeOptionListener(Option<T> op, OptionListener<T> l) {
+    op.removeListener(this,l);
+  }
+  
+  /**
+   * Resets to the default values, overwriting any existing values.
+   */
+  public void resetToDefaults() {
+    OptionMapLoader.DEFAULT.loadInto(map);
+  }
+  
+  /**
+   * Returns whether there were any exceptions when starting.
+   */
+  public boolean hadStartupException() {
+    return _startupException != null;
+  }
+  
+  /**
+   * Returns the exception caught during startup, or null if none were caught.
+   */
+  public Exception getStartupException() {
+    return _startupException;
+  }
+  
+  /**
+   * Stores any exception caught during the creation of this Configuration
+   * object, so it can be displayed later by the UI.
+   * @param e Exception caught during startup
+   */
+  public void storeStartupException(Exception e) {
+    _startupException = e;
+  }
+  
+  /**
+   * Returns a string representation of the contents of the OptionMap.
+   */
+  public String toString() {
+    return map.toString();
+  }
 }

@@ -35,55 +35,45 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
- END_COPYRIGHT_BLOCK*/package edu.rice.cs.drjava.config;
- 
- import junit.framework.*;
- 
- /**
-  * Class according to the JUnit protocol. Tests
-  * the proper functionality of the class BooleanOption.
-  * @version $Id$
-  */
- public class BooleanOptionTest extends TestCase
- {
-   /**
-    * @param name The name of this test case.
-    */
-   public BooleanOptionTest(String name) { super(name); }
-   
-   public void setUp() {}
-   
-   public void testGetName()
-   {
-     BooleanOption bo1 = new BooleanOption("enable JUnit",null);
-     BooleanOption bo2 = new BooleanOption("use menu icons",null);
-     
-     assertEquals("enable JUnit", bo1.getName());
-     assertEquals("use menu icons",   bo2.getName());
-   }
-   
-   public void testParse()
-   {
-     BooleanOption bo = new BooleanOption("enable JUnit",null);
-     
-     assertEquals(Boolean.TRUE, bo.parse("true"));
-     assertEquals(Boolean.FALSE, bo.parse("false"));
-     
-     try { bo.parse("3"); fail(); }
-     catch (OptionParseException e) {}
-     
-     try { bo.parse("True"); fail(); }
-     catch (OptionParseException e) {}
-   }
-   
-   public void testFormat()
-   {
-     BooleanOption bo1 = new BooleanOption("max_files",null);
-     BooleanOption bo2 = new BooleanOption("indent_size",null);
-     
-     assertEquals("true",  bo1.format(Boolean.TRUE));
-     assertEquals("true",  bo2.format(Boolean.TRUE));
-     assertEquals("false", bo1.format(Boolean.FALSE));
-     assertEquals("false", bo2.format(Boolean.FALSE));
-   }
- }
+END_COPYRIGHT_BLOCK*/
+
+package edu.rice.cs.drjava.config;
+
+/**
+ * Exception indicating that an OptionParser could not parse the specified
+ * value for a given configurable option.
+ * @version $Id$
+ */
+public class OptionParseException extends IllegalArgumentException {
+  
+  private String _key;
+  private String _value;
+  private String _message;
+  
+  /**
+   * Exception indicating that an OptionParser could not parse the specified
+   * value for a given configurable option.
+   * @param key The name of the configuration option
+   * @param value The invalid value which caused the parse error
+   * @param message Some helpful message explaining the parse error
+   */
+  public OptionParseException(String key, String value, String message) {
+    _key = key;
+    _value = value;
+    _message = message;
+  }
+  
+  /**
+   * Format a nice message for the user.
+   */
+  public String toString() {
+    StringBuffer sb = new StringBuffer();
+    sb.append("Could not parse configuration option.\nOption: ");
+    sb.append(_key);
+    sb.append("\nGiven value: \"");
+    sb.append(_value);
+    sb.append("\"\n");
+    sb.append(_message);
+    return sb.toString();
+  }
+}
