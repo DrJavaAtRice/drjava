@@ -67,26 +67,31 @@ public class DebugThreadData {
     try {
       name = _thread.name();
     }
-    catch (VMDisconnectedException vmde) {
+    catch(VMDisconnectedException e) {
       name = "";
     }
     _name = name;
     String status = "(unknown)";
-    switch (_thread.status()) {
-      case ThreadReference.THREAD_STATUS_MONITOR: 
-        status = "MONITOR"; break;
-      case ThreadReference.THREAD_STATUS_NOT_STARTED:
-        status = "NOT STARTED"; break;
-      case ThreadReference.THREAD_STATUS_RUNNING:
-        status = "RUNNING"; break;
-      case ThreadReference.THREAD_STATUS_SLEEPING:
-        status = "SLEEPING"; break;
-      case ThreadReference.THREAD_STATUS_UNKNOWN:
-        status = "UNKNOWN"; break;
-      case ThreadReference.THREAD_STATUS_WAIT:
-        status = "WAIT"; break;
-      case ThreadReference.THREAD_STATUS_ZOMBIE:
-        status = "ZOMBIE"; break;
+    try{
+      switch (_thread.status()) {
+        case ThreadReference.THREAD_STATUS_MONITOR: 
+          status = "MONITOR"; break;
+        case ThreadReference.THREAD_STATUS_NOT_STARTED:
+          status = "NOT STARTED"; break;
+        case ThreadReference.THREAD_STATUS_RUNNING:
+          status = "RUNNING"; break;
+        case ThreadReference.THREAD_STATUS_SLEEPING:
+          status = "SLEEPING"; break;
+        case ThreadReference.THREAD_STATUS_UNKNOWN:
+          status = "UNKNOWN"; break;
+        case ThreadReference.THREAD_STATUS_WAIT:
+          status = "WAIT"; break;
+        case ThreadReference.THREAD_STATUS_ZOMBIE:
+          status = "ZOMBIE"; break;
+      }
+    }
+    catch (VMDisconnectedException e) {
+      // status will be set to unknown
     }
     if( isSuspended() && status.equals("RUNNING") ){
       _status = "SUSPENDED";
@@ -94,7 +99,6 @@ public class DebugThreadData {
     else{
       _status = status;
     }
-    
     _uniqueID = _thread.uniqueID();
   }
   

@@ -94,6 +94,7 @@ import com.sun.jdi.event.*;
  */
 public class JPDADebugger implements Debugger, DebugModelCallback {
   private static final boolean printMessages = false;
+  private static final int OBJECT_COLLECTED_TRIES = 5;
 
   /**
    * Reference to DrJava's model.
@@ -1182,6 +1183,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     catch (IncompatibleThreadStateException itse) {
       throw new DebugException("Unable to obtain stack frame: " + itse);
     }
+    catch (VMDisconnectedException vmde) {
+      _log("VMDisconnected when getting the current stack frame data.", vmde);
+      return new Vector<DebugStackData>();
+    }
   }
 
   /**
@@ -1842,30 +1847,34 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     // invokeMethod could execute. We now just disable collection until after the
     // method is invoked.
 
-
-    LinkedList args = new LinkedList();
-    StringReference sr = _vm.mirrorOf(interpreterName);
-    sr.disableCollection();
-    args.add(sr); // make the String a JDI Value
-    if( printMessages ) {
-      System.out.println("Invoking " + m.toString() + " on " + args.toString());
-      System.out.println("Thread is " + threadRef.toString() + " <suspended = " + threadRef.isSuspended() + ">");
+    int tries = 0;
+    StringReference sr = null;
+    while (tries < OBJECT_COLLECTED_TRIES) {
+      try{       
+        LinkedList args = new LinkedList();
+        sr = _vm.mirrorOf(interpreterName);
+        sr.disableCollection();
+        args.add(sr); // make the String a JDI Value
+        if( printMessages ) {
+          System.out.println("Invoking " + m.toString() + " on " + args.toString());
+          System.out.println("Thread is " + threadRef.toString() + " <suspended = " + threadRef.isSuspended() + ">");
+        }
+        
+        ObjectReference tmpInterpreter = (ObjectReference) _interpreterJVM.invokeMethod(threadRef, m, args,
+                                                                                        ObjectReference.INVOKE_SINGLE_THREADED);
+        
+        
+        if( printMessages ) System.out.println("Returning...");
+        return tmpInterpreter;
+      }
+      catch (ObjectCollectedException e) {
+        tries++;
+      }
+      finally {
+        sr.enableCollection();
+      }
     }
-
-    try {
-      ObjectReference tmpInterpreter = (ObjectReference) _interpreterJVM.invokeMethod(threadRef, m, args,
-                                                                                      ObjectReference.INVOKE_SINGLE_THREADED);
-
-
-      if( printMessages ) System.out.println("Returning...");
-      return tmpInterpreter;
-    }
-    catch (ObjectCollectedException e) {
-      throw new DebugException("The debugInterpreter: " + interpreterName + " could not be obtained from interpreterJVM");
-    }
-    finally {
-      sr.enableCollection();
-    }
+    throw new DebugException("The debugInterpreter: " + interpreterName + " could not be obtained from interpreterJVM");
   }
 
   /**
@@ -2012,35 +2021,40 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     // invokeMethod could execute. We now just disable collection until after the
     // method is invoked.
 
-    List args = new LinkedList();
-    StringReference sr = _vm.mirrorOf(name);
-    sr.disableCollection();
-    args.add(sr);
-    args.add(val);
-    if (type == null) {
-      args.add(null);
+    int tries = 0;
+    StringReference sr = null;
+    while (tries < OBJECT_COLLECTED_TRIES) {
+      try {
+        List args = new LinkedList();
+        sr = _vm.mirrorOf(name);
+        sr.disableCollection();
+        args.add(sr);
+        args.add(val);
+        if (type == null) {
+          args.add(null);
+        }
+        else if (type instanceof ReferenceType) {
+          args.add(((ReferenceType)type).classObject());
+        }
+        
+        /* System.out.println("Calling " + method2Call.toString() + "with " + args.get(0).toString()); */
+        debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args,
+                                      ObjectReference.INVOKE_SINGLE_THREADED);
+        return;
+      }
+      catch (ObjectCollectedException oce) {
+        tries++;
+      }
+      finally {
+        sr.enableCollection();
+      }
     }
-    else if (type instanceof ReferenceType) {
-      args.add(((ReferenceType)type).classObject());
-    }
-
-    /* System.out.println("Calling " + method2Call.toString() + "with " + args.get(0).toString()); */
-    try {
-      debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args,
-                                    ObjectReference.INVOKE_SINGLE_THREADED);
-      return;
-    }
-    catch (ObjectCollectedException oce) {
-      throw new DebugException("The variable: " + name +
-                               " could not be defined in the debug interpreter");
-    }
-    finally {
-      sr.enableCollection();
-    }
+    throw new DebugException("The variable: " + name +
+                             " could not be defined in the debug interpreter");
   }
-
-
-  /**
+    
+    
+    /**
    * Notifies all listeners that the current thread has been suspended.
    */
   synchronized void currThreadSuspended() {
@@ -2246,27 +2260,34 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     // declared by _vm.mirrorOf(name) had been garbage collected before
     // invokeMethod could execute. We now just disable collection until after the
     // method is invoked.
-    List args = new LinkedList();
+    
+    int tries = 0;
+    StringReference sr = null;
     String varName = var.name();
-    StringReference sr = _vm.mirrorOf(varName);
-    sr.disableCollection();
-    args.add(sr);
-    try {
-      v = interpreter.invokeMethod(thread, method2Call, args,
-                                   ObjectReference.INVOKE_SINGLE_THREADED);
-      if (v != null) {
-        v = _convertToActualType(thread, var, v);
+    while (tries < OBJECT_COLLECTED_TRIES) {
+      try {
+        List args = new LinkedList();
+        sr = _vm.mirrorOf(varName);
+        sr.disableCollection();
+        args.add(sr);
+        v = interpreter.invokeMethod(thread, method2Call, args,
+                                     ObjectReference.INVOKE_SINGLE_THREADED);
+        if (v != null) {
+          v = _convertToActualType(thread, var, v);
+        }
+        
+        return v;
       }
-
-      return v;
+      catch (ObjectCollectedException oce) {
+        tries++;
+      }
+      finally {
+        sr.enableCollection();
+      }
     }
-    catch (ObjectCollectedException oce) {
-      throw new DebugException("The value of variable: " + varName +
-                               " could not be obtained from the debug interpreter");
-    }
-    finally {
-      sr.enableCollection();
-    }
+    throw new DebugException("The value of variable: " + varName +
+                             " could not be obtained from the debug interpreter");
+    
   }
 
   /**
