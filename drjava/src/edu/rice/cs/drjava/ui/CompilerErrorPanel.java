@@ -346,18 +346,20 @@ public class CompilerErrorPanel extends JPanel {
      * to the given CompilerError.
      */
     private int _getIndexForError(CompilerError error) {
-      if (error == null) return -1;
+      if (error == null) {
+        throw new IllegalArgumentException("Couldn't find index for null error");
+      }
 
-      int index = -1;
       for (int i = 0; i < _errorListPositions.length; i++) {
         CompilerError e = (CompilerError)
           _errorTable.get(_errorListPositions[i]);
+
         if (error.equals(e)) {
-          index = i;
-          break;
+          return i;
         }
       }
-      return index;
+
+      throw new IllegalArgumentException("Couldn't find index for error " + error);
     }
 
     /**

@@ -63,12 +63,17 @@ public class MainFrame extends JFrame {
   private static final int GUI_HEIGHT = 700;
   private static final int DOC_LIST_WIDTH = 150;
 
-  private SingleDisplayModel _model;
+  private final SingleDisplayModel _model;
+
   private Hashtable _defScrollPanes;
   private DefinitionsPane _currentDefPane;
+
+  // These should be final but can't be, as the code is currently organized,
+  // because they are not set in the constructor
   private CompilerErrorPanel _errorPanel;
   private OutputPane _outputPane;
   private InteractionsPane _interactionsPane;
+  
   private JTextField _fileNameField;
   private JTabbedPane _tabbedPane;
   private JSplitPane _docSplitPane;
@@ -304,10 +309,11 @@ public class MainFrame extends JFrame {
 
     // Make the menu bar
     _setUpMenuBar();
-    _setUpTabs();
     _setUpDocumentSelector();
+
     setBounds(0, 0, GUI_WIDTH, GUI_HEIGHT);
     setSize(GUI_WIDTH, GUI_HEIGHT);
+
     _setUpPanes();
     updateFileTitle();
     _setAllFonts(new Font("Monospaced", 0, 12));
@@ -575,6 +581,7 @@ public class MainFrame extends JFrame {
     _fileMenu = _setUpFileMenu();
     _editMenu = _setUpEditMenu();
     _helpMenu = _setUpHelpMenu();
+
     // Menu bars can actually hold anything!
     _fileNameField = new JTextField();
     _fileNameField.setEditable(false);
