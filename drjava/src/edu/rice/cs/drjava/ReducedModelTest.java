@@ -7,6 +7,7 @@ import java.util.Vector;
 import junit.extensions.*;
 
 public class ReducedModelTest extends TestCase {
+	protected ReducedModel model0;
 	protected ReducedModel model1;
 	protected ReducedModel model2;
 	
@@ -17,10 +18,11 @@ public class ReducedModelTest extends TestCase {
 	
 	protected void setUp()
 		{
+			model0 = new ReducedModel();
 			model1 = new ReducedModel();
 			model2 = new ReducedModel();
 		}
-
+	
 	public static Test suite()
 		{
 			return new TestSuite(ReducedModelTest.class);
@@ -28,6 +30,7 @@ public class ReducedModelTest extends TestCase {
 
 	public void testInsertGap()
 		{
+			
 			model1.insertGap(4);
 			assertTrue("#0.0", model1._cursor.prevItem().isGap());
 			assertTrue("#0.1", model1._cursor.atEnd());
@@ -39,7 +42,8 @@ public class ReducedModelTest extends TestCase {
 			assertEquals("#1.2", 5, model2._cursor.prevItem().getSize());
 		}
 
-	public void testInsertGapBeforeGap()
+	
+public void testInsertGapBeforeGap()
 		{
 			model1.insertGap(3);
 			assertTrue("#0.0.0", model1._cursor.atEnd());
@@ -1182,7 +1186,8 @@ public void testDeleteThroughToStar()
 									 model1._cursor.nextItem().getState());
 			assertEquals("#0.6",0,model1._offset);
 		}
-public void testDeleteToLine()
+
+	public void testDeleteToLine()
 		{
 			model1.insertSlash();
 			model1.insertStar();
@@ -1631,14 +1636,455 @@ public void testDeleteToLine2()
 			assertEquals("#0.1", 1, model1._offset);
 		}
 
+  public void testMove0StaysPut()
+  {
+    model0.insertSlash();
+    assertEquals("#1", 1, model0.absOffset());
+    model0.move(0);
+    assertEquals("#2", 1, model0.absOffset());
+    model0.insertSlash();
+    assertEquals("#3", 2, model0.absOffset());
+    model0.move(0);
+    assertEquals("#4", 2, model0.absOffset());
+    model0.move(-1);
+    assertEquals("#5", 1, model0.absOffset());
+    model0.move(0);
+    assertEquals("#6", 1, model0.absOffset());
+  }
+    
 	
+	/** tests the function to test if something is inside comments */
+	public void testInsideComment()
+		{
+			assertEquals("#0.0", ReducedToken.FREE, model0.getStateAtCurrent());
+
+			model0.insertSlash();
+			model0.insertStar();
+			assertEquals("#0.1", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model0.getStateAtCurrent());
+
+			model1.insertSlash();
+			model1.insertSlash();
+			assertEquals("#0.2", ReducedToken.INSIDE_LINE_COMMENT,
+									 model1.getStateAtCurrent());
+
+			model1.insertOpenParen();
+			assertEquals("#0.3", ReducedToken.INSIDE_LINE_COMMENT,
+									 model1.getStateAtCurrent());
+
+			model1.insertNewline();
+			assertEquals("#0.4", ReducedToken.FREE,
+									 model1.getStateAtCurrent());
+
+			model0.insertStar();
+			model0.insertSlash();
+			assertEquals("#0.4", ReducedToken.FREE,
+									 model0.getStateAtCurrent());
+
+		}
+
+	/** tests the function to test if something is inside quotes */
+	
+	public void testInsideString()
+		{
+			assertEquals("#0.0", ReducedToken.FREE,
+									 model0.getStateAtCurrent());
+			model0.insertQuote();
+			assertEquals("#0.1", ReducedToken.INSIDE_QUOTE,
+									 model0.getStateAtCurrent());
+			model1.insertQuote();
+
+			assertEquals("#0.2", ReducedToken.INSIDE_QUOTE,
+									 model1.getStateAtCurrent());
+
+			model1.insertOpenParen();
+			assertEquals("#0.3", ReducedToken.INSIDE_QUOTE,
+									 model1.getStateAtCurrent());
+
+			model1.insertQuote();
+			assertEquals("#0.4", ReducedToken.FREE,
+									 model1.getStateAtCurrent());
+		}
+
+	/** tests inserting braces */
+	public void testInsertBraces()
+		{
+			assertEquals("#0.0", 0, model0.absOffset());
+			model0.insertSlash();
+      // /#
+      assertEquals("#1.0", ReducedToken.FREE,
+									 model0.getStateAtCurrent());
+      
+			model0.insertStar();
+      // /*#
+      assertEquals("#2.0", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model0.getStateAtCurrent());
+
+			assertEquals("#2.1", 2, model0.absOffset());
+			model0.move(-1);
+      // /#*
+			assertEquals("#3.0", 1, model0.absOffset());
+
+      model0.insertOpenParen();
+      // /(#*
+      assertEquals("#4.0", ReducedToken.FREE,
+									 model0.getStateAtCurrent());      
+
+      model0.move(-1);
+      // /#(*
+      model0.delete(1);
+      // /#*
+			model0.move(1);
+      // /*#
+			assertEquals("#5.0", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model0.getStateAtCurrent());
+			assertEquals("#5.1" + model0.simpleString(), 2, model0.absOffset());
+
+			model0.insertStar();
+      // /**#
+			assertEquals("#6.0",ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model0.getStateAtCurrent());
+			
+			model0.insertSlash();
+      // /**/#
+			assertEquals("#7.0", 4, model0.absOffset());
+			assertEquals("#7.1", ReducedToken.FREE,
+									 model0.getStateAtCurrent());
+
+			model0.move(-2);
+      // /*#*/
+			assertEquals("#8.0", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model0.getStateAtCurrent());
+			assertEquals("#8.1", 2, model0.absOffset());
+
+			model0.insertOpenParen();
+			assertEquals("#9.0", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model0.getStateAtCurrent());
+      // /*(#*/
+      model0.move(1);
+      // /*(*#/
+			assertEquals("#10.0", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model0.getStateAtCurrent());
+									 
+      model0.move(-2);
+      // /*#(*/
+			assertEquals("#11.0", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model0.getStateAtCurrent());
+
+			model0.move(1);
+      // /*(#*/
+
+      // /*(#*/
+			assertEquals("#12.0", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model0.getStateAtCurrent());      
+			assertEquals("#12.1", 3, model0.absOffset());
+
+			model0.insertGap(4);
+      // /*(____#*/
+			model0.move(-2);
+      // /*(__#__*/
+			assertEquals("#13.0", 5, model0.absOffset());
+
+			model0.insertClosedParen();
+      // /*(__)#__*/
+			assertEquals("#14.0", 6, model0.absOffset());
+
+      // move to the closed paren
+      model0.move(-1);
+      // /*(__#)__*/
+			assertEquals("#12.0", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model0.getStateAtCurrent());      
+		}
+
+
+  /** tests inserting gaps */
+	
+	public void testInsertGap2()
+		{
+			model0.insertSlash();
+			model0.insertStar();
+			model0.insertGap(5);
+			assertEquals("#0.0",7, model0.absOffset());
+			model0.insertOpenParen();
+			model0.move(-1);
+			model0.insertGap(3);
+			assertEquals("#1.0", 10, model0.absOffset());
+		}
+
+	/** tests the cursor movement function */
+	
+	public void testMove()
+		{
+			model0.insertOpenParen();
+			model0.insertGap(5);
+			model0.insertClosedParen();
+			model0.insertNewline();
+			model0.insertGap(2);
+			model0.insertOpenSquiggly();
+			model0.insertClosedSquiggly();
+			try {
+				model0.move(-30);
+				assertTrue("#0.0", false);
+			}
+			catch (Exception e) {
+			}
+			try {
+				model0.move(1);
+				assertTrue("#0.1", false);
+			}
+			catch (Exception e) {
+			}
+
+			assertEquals("#0.2", 12, model0.absOffset());	
+			model0.move(-2);
+			assertEquals("#0.3", 10, model0.absOffset());
+			model0.move(-8);
+			assertEquals("#0.4", 2, model0.absOffset());
+			model0.move(3);
+			assertEquals("#0.5", 5, model0.absOffset());
+			model0.move(4);
+			assertEquals("#0.6", 9, model0.absOffset());
+		}
+
+	/** tests delete function in places where it formerly wasn't allowed. */
+	
+	public void testDeleteInsideBrace()
+		{
+			model0.insertSlash();
+			model0.insertStar();
+			assertEquals("#0.0", ReducedToken.INSIDE_BLOCK_COMMENT,
+									 model0.getStateAtCurrent());
+			model0.move(-1);
+      model0.delete(1);
+			assertEquals("#0.1", ReducedToken.FREE,
+									 model0.getStateAtCurrent());
+
+			model1.insertGap(5);
+			model1.insertSlash();
+			model1.insertStar();
+			model1.move(-7);
+      model1.delete(6);
+		}
+
+
+	/** sets up a reduction for the delete tests */
+	
+	protected ReducedModel setUpForDelete()
+		{
+			ReducedModel model = new ReducedModel();
+			model.insertGap(5);
+			model.insertNewline();
+			model.insertOpenSquiggly();
+			model.insertGap(4);
+			model.insertNewline();
+			model.insertGap(4);
+			model.insertNewline();
+			model.insertClosedSquiggly();
+			// _____
+			// {____
+			// ____
+			// }
+			return model;
+		}
+
+	/** tests simple single-brace (or simple gap) deletes */
+	
+	public void testDeleteSimple10()
+		{
+			model0 = setUpForDelete();
+			// _____
+			// {____
+			// ____
+			// }#
+			assertEquals("#0.0", 18, model0.absOffset());
+
+			model0.move(-6);
+			model0.delete(5);
+      // _____
+			// {____#
+			assertEquals("#1.0", 12,model0.absOffset());			
+
+			model0.move(-8);
+      // ____#_
+			// {____
+			assertEquals("#2.0", 4, model0.absOffset());
+
+			model0.delete(-4);	
+      // #_
+			// {____
+			assertEquals("#3.0", 0, model0.absOffset());
+		}
+
+	/** tests multiple-brace deletes */
+
+	public void testDeleteComplex()
+		{
+			model0 = setUpForDelete();
+			// _____
+			// {____
+			// ____
+			// }#
+			assertEquals("#0.0", 18,model0.absOffset());
+			model0.move(-14);
+      // ____#_
+			// {____
+			// ____
+			// }
+			assertEquals("#1.0", 4, model0.absOffset());
+
+			model0.delete(13);
+      // ____#}
+			assertEquals("#2.0", 4, model0.absOffset());
+
+			model1 = setUpForDelete();
+			// _____
+			// {____
+			// ____
+			// }#
+			assertEquals("#3.0", 18,model1.absOffset());
+
+			// _____#
+			model1.delete(-13);
+			assertEquals("#4.0", 5, model1.absOffset());
+		}
+
+
+	/** sets up example reduction for the following tests */
+	
+	protected ReducedModel setUpExample()
+		{
+			ReducedModel model = new ReducedModel();
+			model.insertOpenSquiggly();
+			model.insertNewline();
+			model.insertGap(3);
+			model.insertNewline();
+			model.insertOpenParen();
+			model.insertGap(2);
+			model.insertClosedParen();
+			model.insertNewline();
+			model.insertGap(3);
+			model.insertSlash();
+			model.insertSlash();
+			model.insertGap(3);
+			model.insertNewline();
+			model.insertQuote();
+			model.insertGap(1);
+			model.insertOpenSquiggly();
+			model.insertGap(1);
+			model.insertQuote();
+			model.insertSlash();
+			model.insertStar();
+			model.insertGap(1);
+			model.insertOpenParen();
+			model.insertGap(1);
+			model.insertClosedParen();
+			model.insertGap(1);
+			model.insertStar();
+			model.insertSlash();
+			model.insertNewline();
+			model.insertClosedSquiggly();
+			// {
+			// ___
+			// (__)
+			// ___//___
+			// "_{_"/*_(_)_*/
+			// }#
+			return model;
+		}
+
+	/** tests previousBrace() */
+	
+	public void testPreviousBrace()
+		{
+			// #
+			assertEquals("#1.0", -1, model0.previousBrace());
+			model0 = setUpExample();
+			// {
+			// ___
+			// (__)
+			// ___//___
+			// "_{_"/*_(_)_*/
+			// }#
+			assertEquals("#2.0", 1, model0.previousBrace());
+			model0.move(-5);
+			assertEquals("#3.0", 6, model0.previousBrace());
+			model0.move(-7);
+			assertEquals("#4.0", 4, model0.previousBrace());
+			model0.move(-14);
+			assertEquals("#5.0", 1, model0.previousBrace());
+			model0.move(-1);
+			assertEquals("#6.0", 3, model0.previousBrace());
+			model0.move(6);
+			assertEquals("#7.0", 6, model0.previousBrace());
+		}
+
+	/** tests nextBrace() */
+	
+	public void testNextBrace()
+		{
+			assertEquals("#0.0", -1, model0.nextBrace());
+			model0 = setUpExample();
+			assertEquals("#1.0", -1, model0.nextBrace());
+			model0.move(-9);
+			assertEquals("#2.0",5, model0.nextBrace());
+			model0.move(-6);
+			assertEquals("#3.0", 3, model0.nextBrace());
+			model0.move(-6);
+			assertEquals("#4.0", 5, model0.nextBrace());
+			model0.move(-1);
+			assertEquals("#5.0", 6, model0.nextBrace());			
+		}
+
+	/** tests forward balancer, e.g., '(' balances with ')' */
+	
+	public void testBalanceForward()
+		{
+			assertEquals("#0.0", -1, model0.balanceForward());
+			model0 = setUpExample();
+			assertEquals("#1.0",-1, model0.balanceForward());
+			model0.move(-1);
+			assertEquals("#2.0",-1,model0.balanceForward());
+			model0.move(-35);
+			assertEquals("#3.0",36, model0.balanceForward());
+			model0.move(1);
+			assertEquals("#4.0",-1, model0.balanceForward());
+			model0.move(5);
+			assertEquals("#5.0",4, model0.balanceForward());
+			model0.move(27);
+			assertEquals("#6.0",-1, model0.balanceForward());
+			model0.move(-20);
+			assertEquals(-1, model0.balanceForward());
+
+			model1.insertOpenParen();
+			model1.move(-1);
+			assertEquals("#7.0", -1, model1.balanceForward());
+			model1.move(1);
+			model1.insertClosedSquiggly();
+			model1.move(-1);
+			assertEquals("#8.0", -1, model1.balanceForward());			
+		}
+
+	/** tests backwards balancer, e.g., ')' balances with '(' */
+	
+	public void testBalanceBackward()
+		{
+			assertEquals("#0.0", -1, model0.balanceBackward());
+			model0 = setUpExample();
+			assertEquals("#1.0", 36, model0.balanceBackward());
+			model0.move(-2);
+			assertEquals("#2.0", 9, model0.balanceBackward());
+			model0.move(-14);
+			assertEquals("#3.0", -1, model0.balanceBackward());
+			model0.move(-10);
+			assertEquals("#4.0", 4, model0.balanceBackward());
+			model0.move(-10);
+			assertEquals("#5.0", -1, model0.balanceBackward());			
+
+			model1.insertClosedParen();
+			assertEquals("#6.0", -1, model1.balanceBackward());
+			model1.move(-1);
+			model1.insertOpenSquiggly();
+			model1.move(1);
+			assertEquals("#7.0", -1, model1.balanceBackward());
+		}
 }
-
-
-
-
-
-
-
-
-

@@ -11,6 +11,7 @@ package edu.rice.cs.drjava;
 
 public interface BraceReduction
 {
+	
   /**
    * Inserts an open brace ({) into the reduced model.
    */
@@ -68,10 +69,6 @@ public interface BraceReduction
    */
   public void insertGap( int length );
 
-  public boolean insideComment();
-
-  public boolean insideString();
-  
   /**
    * <P>Updates the BraceReduction to reflect cursor movement.
    * Negative values move left from the cursor, positive values move
@@ -87,18 +84,6 @@ public interface BraceReduction
    * values delete text to the right.
    */
   public void delete( int count );
-  
-  /**
-   * <P>Is there a brace to the left of the cursor?</P>
-   * @return true if there is a brace to the left of the cursor.
-   */
-  public boolean braceLeft();
-  
-  /**
-   * <P>Is there a brace to the right of the cursor?</P>
-   * @return true if there is a brace to the left of the cursor.
-   */
-  public boolean braceRight();
   
   /**
    * <P>Finds the next significant brace.</P>

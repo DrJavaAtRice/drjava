@@ -175,7 +175,7 @@ class Brace extends ReducedToken {
    * @param other the brace to compare
    * @return true if this is a match for other.
    */
-  public boolean isMatch( Brace other )
+  public boolean isMatch( ReducedToken other )
     {
       if ( this.getType().equals("") )
 				return false;

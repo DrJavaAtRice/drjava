@@ -14,7 +14,7 @@ abstract class ReducedToken
 	public abstract String getType();
 	public abstract void setType(String type);
 	public abstract void flip();
-
+	public abstract boolean isMatch(ReducedToken other);
 	public int getState()
 		{
 			return _state;

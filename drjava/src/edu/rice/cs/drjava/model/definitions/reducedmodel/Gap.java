@@ -121,4 +121,9 @@ class Gap extends ReducedToken
 		{
 			return false;
 		}
+
+	public boolean isMatch(ReducedToken other)
+		{
+			return false;
+		}
 }
