@@ -182,11 +182,9 @@ public class DrJava implements OptionConstants {
         // This enabling of the security manager must happen *after* the mainframe
         // is constructed. See bug #518509.
         enableSecurityManager();
-
         openCommandLineFiles(mf, _filesToOpen);
         splash.dispose();
         mf.setVisible(true);
-
 
         // redirect stdout to DrJava's console
         System.setOut(new PrintStream(new OutputStreamRedirector() {
@@ -340,7 +338,7 @@ public class DrJava implements OptionConstants {
     for(int i = 0; i < filesToOpen.length; i++) {
       String currFileName = filesToOpen[i];
       boolean isProjectFile = currFileName.endsWith(".pjt");
-      final File file = new File(currFileName);
+      final File file = new File(currFileName).getAbsoluteFile();
       FileOpenSelector command = new FileOpenSelector() {
         public File getFile() {
           return file;
@@ -361,11 +359,17 @@ public class DrJava implements OptionConstants {
       catch (FileNotFoundException ex) {
         // TODO: show a dialog? (file not found)
       }
+      catch (SecurityException se) {
+        // TODO: show a dialog? (file not found)
+      }
       catch (AlreadyOpenException aoe) {
         // This explicitly does nothing to ignore duplicate files.
       }
       catch (FileMovedException aoe) {
         // This explicitly does nothing to ignore duplicate files.
+      }
+      catch (IOException ex) {
+        // TODO: show a dialog? (file not found)
       }
       catch (Exception ex) {
         throw new UnexpectedException(ex);
@@ -833,5 +837,6 @@ public class DrJava implements OptionConstants {
   public static PrintStream consoleOut() {
     return  _consoleOut;
   }
+  
 }
 

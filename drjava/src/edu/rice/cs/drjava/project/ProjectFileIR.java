@@ -78,7 +78,12 @@ public interface ProjectFileIR {
   public File[] getClasspaths();
   
   /**
-   * @return an the name of the file that holds the Jar main class associated with this project
+   * @return the name of the file that holds the Jar main class associated with this project
    */
   public File getMainClass();
+  
+  /**
+   * @return the file pointing to the directory that all source files are relative to
+   */
+  public File getProjectRoot();
 }

@@ -166,6 +166,18 @@ public class ProjectFileParser {
         pfir.setMainClass(fList.get(0));
       }
     }
+    else if (name.compareToIgnoreCase("proj-root") == 0) {
+      List<DocFile> fList = exp.getRest().accept(flv);
+      if (fList.size() > 1) {
+        throw new PrivateProjectException("Cannot have multiple project roots");
+      }
+      else if (fList.size() == 0) {
+        pfir.setProjectRoot(null);
+      }
+      else {
+        pfir.setProjectRoot(fList.get(0));
+      }
+    }
   }
   
   
@@ -401,6 +413,7 @@ public class ProjectFileParser {
     File _buildDir;
     List<? extends File> _classpaths;
     File _mainClass;
+    File _projRoot;
     
     /**
      * Starts the project file IR off with all its
@@ -413,6 +426,7 @@ public class ProjectFileParser {
       _classpaths = new ArrayList<DocFile>();
       _buildDir = null;
       _mainClass = null;
+      _projRoot = null;
     }
     
     /**
@@ -458,6 +472,13 @@ public class ProjectFileParser {
       return _mainClass;
     }
     
+    /**
+     * @return the file pointing to the directory that all source files are relative to
+     */
+    public File getProjectRoot() {
+      return _projRoot;
+    }
+    
     //////////// Package Protected Setter Methods //////////
     
     void setSourceFiles(List<DocFile> src) {
@@ -477,6 +498,9 @@ public class ProjectFileParser {
     }
     void setMainClass(File main) {
       _mainClass = main;
+    }
+    void setProjectRoot(File root) {
+      _projRoot = root;
     }
   } // end ProjectFileIRImpl class
 

@@ -381,7 +381,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Provides a chooser to open a directory
    */  
-  private JFileChooser _folderChooser;
+//  private JFileChooser _folderChooser;
+  DirectoryChooser _folderChooser;
   private JCheckBox _openRecursiveCheckBox;
 
   private Action _moveToAuxiliaryAction = new AbstractAction("Move To Auxiliary"){
@@ -1566,11 +1567,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     
     
-    _openRecursiveCheckBox = new JCheckBox("Recursive open");
+    _openRecursiveCheckBox = new JCheckBox("Open folders recursively");
     _openRecursiveCheckBox.setSelected(DrJava.getConfig().getSetting(OptionConstants.OPEN_FOLDER_RECURSIVE).booleanValue());
     
     _folderChooser = makeFolderChooser(workDir);
-    
     
     //Get most recently opened project for filechooser
     Vector<File> recentProjects = config.getSetting(RECENT_PROJECTS);
@@ -1863,36 +1863,44 @@ public class MainFrame extends JFrame implements OptionConstants {
     setUpKeys();
   }
 
-  
-  private JFileChooser makeFolderChooser(File workDir){
-    _folderChooser = new JFileChooser();
-    _folderChooser.setMultiSelectionEnabled(false);
-    _folderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    _folderChooser.setCurrentDirectory(workDir);
-    _folderChooser.setApproveButtonText("Select");
-    _folderChooser.setFileFilter(new DirectoryFilter());
-    _folderChooser.setDialogTitle("Open Folder");
-    
-    
-    Container button_row = (Container)findButtonContainer(_folderChooser, _folderChooser.getApproveButtonText());
-    Container buttons = (Container) button_row.getParent();
-    
-//    Component c2 = ((BorderLayout)_folderChooser.getLayout()).getLayoutComponent(BorderLayout.SOUTH);
-    
-//    System.out.println("c1: " + c1);
-//    System.out.println("c2: " + c2);
-    
-    
-//    JPanel buttons = (JPanel)c2;
-//    JPanel button_row = (JPanel)buttons.getComponent(3);
-    JPanel bottom_row = new JPanel();
-    bottom_row.setLayout(new BorderLayout());
-    bottom_row.add(new JCheckBox("Recursive Open"), BorderLayout.CENTER);
-    bottom_row.add(button_row, BorderLayout.EAST);
-    buttons.add(bottom_row);
-    
-    return _folderChooser;
+  private DirectoryChooser makeFolderChooser(File workDir) {
+    DirectoryChooser dc = new DirectoryChooser(this, null, false, false);
+    dc.setSelectedDirectory(workDir);
+    dc.setApproveButtonText("Select");
+    dc.setTitle("Open Folder");
+    dc.setAccessory(_openRecursiveCheckBox);
+    return dc;
   }
+//  
+//  private JFileChooser makeFolderChooser(File workDir){
+//    _folderChooser = new JFileChooser();
+//    _folderChooser.setMultiSelectionEnabled(false);
+//    _folderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//    _folderChooser.setCurrentDirectory(workDir);
+//    _folderChooser.setApproveButtonText("Select");
+//    _folderChooser.setFileFilter(new DirectoryFilter());
+//    _folderChooser.setDialogTitle("Open Folder");
+//    
+//    
+//    Container button_row = (Container)findButtonContainer(_folderChooser, _folderChooser.getApproveButtonText());
+//    Container buttons = (Container) button_row.getParent();
+//    
+////    Component c2 = ((BorderLayout)_folderChooser.getLayout()).getLayoutComponent(BorderLayout.SOUTH);
+//    
+////    System.out.println("c1: " + c1);
+////    System.out.println("c2: " + c2);
+//    
+//    
+////    JPanel buttons = (JPanel)c2;
+////    JPanel button_row = (JPanel)buttons.getComponent(3);
+//    JPanel bottom_row = new JPanel();
+//    bottom_row.setLayout(new BorderLayout());
+//    bottom_row.add(new JCheckBox("Recursive Open"), BorderLayout.CENTER);
+//    bottom_row.add(button_row, BorderLayout.EAST);
+//    buttons.add(bottom_row);
+//    
+//    return _folderChooser;
+//  }
   
   private Container findButtonContainer(Container container, String buttonText){
     Container answer = null;
@@ -2339,7 +2347,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       if( file.length < 1 ) {
         throw new IllegalStateException("Open project file selection not canceled but no project file was selected.");
       }
-      if(!_model.isProjectActive() || _model.isProjectActive() && _closeProject()) {
+      // make sure there are no open projects
+      if(!_model.isProjectActive() || (_model.isProjectActive() && _closeProject())) {
         _openProjectHelper(file[0]);
       }
     }
@@ -2545,72 +2554,61 @@ public class MainFrame extends JFrame implements OptionConstants {
    * files are missing, or the action was canceled by the user
    * @param openSelector the selector that returns the files to open
    */
-  public void openFolder(JFileChooser chooser) {
+  public void openFolder(DirectoryChooser chooser) {
+    File openDir = null;
     try{
-      File openDir = null;
-      try{
-        openDir = _model.getActiveDocument().getFile().getParentFile();
-      }catch(FileMovedException e){
-      }catch(IllegalStateException e){
-      }
-      
-      if (openDir != null && openDir.exists()) {
-        // We were given a default - use it.
-        chooser.setCurrentDirectory(openDir);
-        chooser.setSelectedFile(openDir);
-      }
-      
-      File [] filesArray = getOpenFiles(chooser);
-      DrJava.getConfig().setSetting(OptionConstants.OPEN_FOLDER_RECURSIVE, _openRecursiveCheckBox.isSelected());
-      
-      if(filesArray == null || filesArray.length == 0)
-        return;
-      
-            
-      File dir = filesArray[0];
-      
-      ArrayList<File> files;
-      if(dir != null && dir.isDirectory()){
-        files = FileOps.getFilesInDir(dir, _openRecursiveCheckBox.isSelected(), new FileFilter(){
-          public boolean accept(File f){ 
-            return f.isDirectory() ||
-              f.isFile() && 
-              f.getName().endsWith(DrJava.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
-          }
-        });
-        
-        
-        
-        if(_model.isProjectActive()){
-          Collections.sort(files, new Comparator<File>(){
-            public int compare(File o1,File o2){
-              return - o1.getAbsolutePath().compareTo(o2.getAbsolutePath());
-            }
-            public boolean equals(Object o){
-              return false;
-            }
-          });
-        }else{
-          Collections.sort(files, new Comparator<File>(){
-            public int compare(File o1,File o2){
-              return - o1.getName().compareTo(o2.getName());
-            }
-            public boolean equals(Object o){
-              return false;
-            }
-          });
+      openDir = _model.getActiveDocument().getFile().getParentFile();
+    }catch(FileMovedException e){
+    }catch(IllegalStateException e){
+    }
+    
+    int result = chooser.showDialog(openDir);
+    if (result != DirectoryChooser.APPROVE_OPTION) {
+      return; // canceled or error
+    }
+    
+    File dir = chooser.getSelectedDirectory();
+    DrJava.getConfig().setSetting(OptionConstants.OPEN_FOLDER_RECURSIVE, _openRecursiveCheckBox.isSelected());
+    
+    if(dir == null) return; // just in case
+    
+    ArrayList<File> files;
+    if(dir != null && dir.isDirectory()){
+      files = FileOps.getFilesInDir(dir, _openRecursiveCheckBox.isSelected(), new FileFilter(){
+        public boolean accept(File f){ 
+          return f.isDirectory() ||
+            f.isFile() && 
+            f.getName().endsWith(DrJava.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
         }
-        
-        final File[] sfiles = files.toArray(new File[0]);
-        
-        open(new FileOpenSelector(){
-          public File[] getFiles() {
-            return sfiles;
+      });
+      
+      if(_model.isProjectActive()){
+        Collections.sort(files, new Comparator<File>(){
+          public int compare(File o1,File o2){
+            return - o1.getAbsolutePath().compareTo(o2.getAbsolutePath());
+          }
+          public boolean equals(Object o){
+            return false;
+          }
+        });
+      }else{
+        Collections.sort(files, new Comparator<File>(){
+          public int compare(File o1,File o2){
+            return - o1.getName().compareTo(o2.getName());
+          }
+          public boolean equals(Object o){
+            return false;
           }
         });
       }
-    }catch(OperationCanceledException e){
-      // noop
+      
+      final File[] sfiles = files.toArray(new File[0]);
+      
+      open(new FileOpenSelector(){
+        public File[] getFiles() {
+          return sfiles;
+        }
+      });
     }
   }
 

@@ -55,6 +55,9 @@ import edu.rice.cs.drjava.Version;
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.UnexpectedException;
 
+import static edu.rice.cs.util.StringOps.*;
+import static edu.rice.cs.util.FileOps.*;
+
 /**
  * The project file builder is responsible for
  * encoding the project file based on the information
@@ -75,6 +78,8 @@ public class ProjectFileBuilder {
   private List<File> _classpathFiles = new Vector<File>();
   
   private File _mainClass = null;
+  
+  private File _projRoot = null;
  
   private File _projectFile;
   
@@ -125,7 +130,9 @@ public class ProjectFileBuilder {
   public void setMainClass(File main) {
     _mainClass = main;
   }
-  
+  public void setProjectRoot(File root) {
+    _projRoot = root;
+  }
   /**
    * This method writes what information has been passed
    * to this builder so far to disk in s-expression format
@@ -135,7 +142,15 @@ public class ProjectFileBuilder {
     
     // write opening comment line
     fw.write(";; DrJava project file, written by build " + Version.getBuildTimeString());
+    fw.write(";; relative files are made relative to: " + _projectFile.getParentFile().getCanonicalFile());
     
+    // write the project root
+    if (_projRoot != null) {
+      fw.write("\n(proj-root");
+      fw.write("\n" + encodeFile(_projRoot, "  ", true));
+      fw.write(")");
+    }
+        
     // write source files
     if (!_sourceFiles.isEmpty()) {
       fw.write("\n(source");
@@ -176,7 +191,7 @@ public class ProjectFileBuilder {
     if (!_classpathFiles.isEmpty()) {
       fw.write("\n(classpaths");
       for(File f: _classpathFiles) {
-        fw.write("\n" + encodeFile(f, "  "));
+        fw.write("\n" + encodeFile(f, "  ", false));
       }
       fw.write(")"); // close the classpaths expression
     }
@@ -187,7 +202,7 @@ public class ProjectFileBuilder {
     // write the build directory
     if (_buildDir != null) {
       fw.write("\n(build-dir");
-      fw.write("\n" + encodeFile(_buildDir, "  "));
+      fw.write("\n" + encodeFile(_buildDir, "  ", true));
       fw.write(")");
     }
     else {
@@ -197,7 +212,7 @@ public class ProjectFileBuilder {
     // write the main class
     if (_mainClass != null) {
       fw.write("\n(main-class");
-      fw.write("\n" + encodeFile(_mainClass, "  "));
+      fw.write("\n" + encodeFile(_mainClass, "  ", true));
       fw.write(")");
     }
     else {
@@ -319,47 +334,43 @@ public class ProjectFileBuilder {
    * @return the string name of the file's path relative to the project path
    */
   private String makeRelative(File f) throws IOException {
-    String proj = _projectFile.getParentFile().getCanonicalPath() + File.separator;
-    String path = f.getCanonicalPath();
-    if (path.startsWith(proj)) {
-      return path.substring(proj.length());
-    }
-    return path;
+    return makeRelativeTo(f, _projectFile).getPath();
   }
   
-  /**
-   * Converts the given string to a valid Java string literal.
-   * All back slashes, quotes, new-lines, and tabs are converted
-   * to their escap character form, and the sourounding quotes 
-   * are added.
-   * @param s the normal string to turn into a string literal
-   * @return the valid Java string literal
-   */
-  public static String convertToLiteral(String s) {
-    String output = s;
-    output = replaceAll(output, "\\", "\\\\"); // convert \ to \\
-    output = replaceAll(output, "\"", "\\\""); // convert " to \"
-    output = replaceAll(output, "\t", "\\t");  // convert [tab] to \t
-    output = replaceAll(output, "\n", "\\n");  // convert [newline] to \n
-    return "\"" + output + "\"";
-  }
-  
-  /**
-   * replaces all occurrences of the given a string with a new string.
-   * This method was reproduced here to remove any dependencies on the
-   * java v1.4 api.
-   * @param str the string in which the replacements should occur
-   * @param toReplace the substring to replace
-   * @param replacement the substring to put in its place
-   * @return the new changed string
-   */
-  private static String replaceAll(String str, String toReplace, String replacement) {
-    String result = str;
-    int i = result.indexOf(toReplace); 
-    while (i >= 0) {
-      result = result.substring(0,i) + replacement + result.substring(i+1);
-      i = result.indexOf(toReplace, i + replacement.length());
-    }
-    return result;
-  }
+//  
+//  /**
+//   * Converts the given string to a valid Java string literal.
+//   * All back slashes, quotes, new-lines, and tabs are converted
+//   * to their escap character form, and the sourounding quotes 
+//   * are added.
+//   * @param s the normal string to turn into a string literal
+//   * @return the valid Java string literal
+//   */
+//  public static String convertToLiteral(String s) {
+//    String output = s;
+//    output = replaceAll(output, "\\", "\\\\"); // convert \ to \\
+//    output = replaceAll(output, "\"", "\\\""); // convert " to \"
+//    output = replaceAll(output, "\t", "\\t");  // convert [tab] to \t
+//    output = replaceAll(output, "\n", "\\n");  // convert [newline] to \n
+//    return "\"" + output + "\"";
+//  }
+//  
+//  /**
+//   * replaces all occurrences of the given a string with a new string.
+//   * This method was reproduced here to remove any dependencies on the
+//   * java v1.4 api.
+//   * @param str the string in which the replacements should occur
+//   * @param toReplace the substring to replace
+//   * @param replacement the substring to put in its place
+//   * @return the new changed string
+//   */
+//  private static String replaceAll(String str, String toReplace, String replacement) {
+//    String result = str;
+//    int i = result.indexOf(toReplace); 
+//    while (i >= 0) {
+//      result = result.substring(0,i) + replacement + result.substring(i+1);
+//      i = result.indexOf(toReplace, i + replacement.length());
+//    }
+//    return result;
+//  }
 }

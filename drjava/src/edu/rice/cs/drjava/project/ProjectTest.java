@@ -53,6 +53,8 @@ import java.text.SimpleDateFormat;
 import edu.rice.cs.util.sexp.*;
 import edu.rice.cs.util.*;
 
+import static edu.rice.cs.util.StringOps.convertToLiteral;
+
 /**
  * A JUnit test case class.
  * Every method starting with the word "test" will be called when running
@@ -106,15 +108,15 @@ public class ProjectTest extends TestCase {
       "   (file (name \"sexp/NumberAtom.java\")(select 12 12)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"sexp/SEList.java\")(select 0 0)))\n" + // doesn't have mod date
       "(auxiliary ;; absolute file names\n" +
-      "   (file (name "+ProjectFileBuilder.convertToLiteral(new File(absp,"junk/sexp/Tokens.java").getCanonicalPath()) +")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name "+ProjectFileBuilder.convertToLiteral(new File(absp,"jdk1.5.0/JScrollPane.java").getCanonicalPath()) +")(select 9086 8516)(mod-date \"16-Jul-2004 03:45:23\")))\n" +
+      "   (file (name "+convertToLiteral(new File(absp,"junk/sexp/Tokens.java").getCanonicalPath()) +")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name "+convertToLiteral(new File(absp,"jdk1.5.0/JScrollPane.java").getCanonicalPath()) +")(select 9086 8516)(mod-date \"16-Jul-2004 03:45:23\")))\n" +
       "(collapsed ;; relative paths\n" +
       "   (path \"./[ Source Files ]/sexp/\")\n" +
       "   (path \"./[ External ]/\"))\n" +
       "(build-dir ;; absolute path\n" +
-      "   (file (name "+ProjectFileBuilder.convertToLiteral(new File(absp,"drjava/built").getCanonicalPath()) + ")))\n" +
+      "   (file (name "+convertToLiteral(new File(absp,"drjava/built").getCanonicalPath()) + ")))\n" +
       "(classpaths\n" +
-      "   (file (name "+ProjectFileBuilder.convertToLiteral(new File(absp,"drjava/src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
+      "   (file (name "+convertToLiteral(new File(absp,"drjava/src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
       "(main-class\n" +
       "   (file (name \"sexp/SEList.java\")))";
 
