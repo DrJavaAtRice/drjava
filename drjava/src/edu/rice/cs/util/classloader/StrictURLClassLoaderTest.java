@@ -76,7 +76,7 @@ public class StrictURLClassLoaderTest extends TestCase {
    */
   public void testWontLoadResourceFromBootClassPath() throws Throwable {
     StrictURLClassLoader loader = new StrictURLClassLoader(new URL[0]);
-    String compiler = "com/sun/tools/javac/main/JavaCompiler.class";
+    String compiler = "com/sun/tools/javac/util/Log.class";
 
     URL resource = loader.getResource(compiler);
     assertTrue("should not have found resource", resource == null);
@@ -87,7 +87,7 @@ public class StrictURLClassLoaderTest extends TestCase {
    */
   public void testWillLoadClassFromGivenURLs() throws Throwable {
     String logResource = "com/sun/tools/javac/util/Log.class";
-    String compilerClass = "com.sun.tools.javac.main.JavaCompiler";
+    String compilerClass = "com.sun.tools.javac.util.Context";
     URL[] urls = ToolsJarClassLoader.getToolsJarURLs();
 
     if (urls.length > 0) {
