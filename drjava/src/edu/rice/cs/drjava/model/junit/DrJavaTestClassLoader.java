@@ -63,12 +63,14 @@ public class DrJavaTestClassLoader implements TestSuiteLoader, OptionConstants {
   
   public Class load(String suiteClassName) throws ClassNotFoundException {
     String classpath = _jvm.getClasspath();
+    classpath += System.getProperty("java.class.path");
     TestCaseClassLoader loader= new TestCaseClassLoader(classpath);
     return loader.loadClass(suiteClassName, true);
   }
   
   public Class reload(Class aClass) throws ClassNotFoundException {
     String classpath = _jvm.getClasspath();
+    classpath += System.getProperty("java.class.path");
     TestCaseClassLoader loader= new TestCaseClassLoader(classpath);
     return loader.loadClass(aClass.getName(), true);
   }

@@ -142,6 +142,32 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
   }
   
   /**
+   * Tests calling compileAll with no source files works.
+   */
+  public void testCompileAllWithNoFiles()
+    throws BadLocationException, IOException, InterruptedException
+  {
+    _model.setResetAfterCompile(false);
+    
+    // Open one empty doc
+    _model.newFile();
+    
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
+    _model.addListener(listener);
+    //synchronized(listener) {
+      _model.compileAll();
+      if (_model.getNumErrors() > 0) {
+        fail("compile failed: " + getCompilerErrorString());
+      }
+      //listener.wait();
+    //}
+    assertCompileErrorsPresent(_name(), false);
+    listener.checkCompileOccurred();
+
+    _model.setResetAfterCompile(true);
+  }
+  
+  /**
    * Tests calling compileAll with different source roots works.
    */
   public void testCompileAllDifferentSourceRoots()
@@ -167,8 +193,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
       _model.compileAll();
       numErrors = _model.getNumErrors();
       if (_model.getNumErrors() > 0) {
-        fail("compile failed: " + doc.getCompilerErrorModel() + 
-             doc2.getCompilerErrorModel());
+        fail("compile failed: " + getCompilerErrorString());
       }
       //listener.wait();
     //}
@@ -243,7 +268,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     //synchronized(listener) {   
       doc1.startCompile();
       if (_model.getNumErrors() > 0) {
-        fail("compile failed: " + doc1.getCompilerErrorModel());
+        fail("compile failed: " + getCompilerErrorString());
       }
       //listener.wait();
     //}
@@ -257,7 +282,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     //synchronized(listener2) {
       doc2.startCompile();
       if (_model.getNumErrors() > 0) {
-        fail("compile failed: " + doc2.getCompilerErrorModel());
+        fail("compile failed: " + getCompilerErrorString());
       }
       //listener2.wait();
     //}
@@ -298,7 +323,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     //synchronized(listener) {
       doc1.startCompile();
       if (_model.getNumErrors() > 0) {
-        fail("compile failed: " + doc1.getCompilerErrorModel());
+        fail("compile failed: " + getCompilerErrorString());
       }
       //listener.wait();
     //}
@@ -314,7 +339,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     //synchronized(listener2) {
       doc2.startCompile();
       if (_model.getNumErrors() > 0) {
-        fail("compile failed: " + doc2.getCompilerErrorModel());
+        fail("compile failed: " + getCompilerErrorString());
       }
       //listener2.wait();
     //}
@@ -555,7 +580,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     //synchronized(listener) {
       doc.startCompile();
       if (_model.getNumErrors() > 0) {
-        fail("compile failed: " + doc.getCompilerErrorModel());
+        fail("compile failed: " + getCompilerErrorString());
       }
       //listener.wait();
     //}
@@ -645,7 +670,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     //synchronized(listener) {
       doc.startCompile();
       if (_model.getNumErrors() > 0) {
-        fail("compile failed: " + doc.getCompilerErrorModel());
+        fail("compile failed: " + getCompilerErrorString());
       }
       //listener.wait();
     //}
@@ -686,7 +711,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     //synchronized(listener) {
       doc.startCompile();
       if (_model.getNumErrors() > 0) {
-        fail("compile failed: " + doc.getCompilerErrorModel());
+        fail("compile failed: " + getCompilerErrorString());
       }
       //listener.wait();
     //}
@@ -734,7 +759,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     //synchronized(listener) {
       doc.startCompile();
       if (_model.getNumErrors() > 0) {
-        fail("compile failed: " + doc.getCompilerErrorModel());
+        fail("compile failed: " + getCompilerErrorString());
       }
       //listener.wait();
     //}
@@ -798,7 +823,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     //synchronized(listener) {
       doc.startCompile();
       if (_model.getNumErrors() > 0) {
-        fail("compile failed: " + doc.getCompilerErrorModel());
+        fail("compile failed: " + getCompilerErrorString());
       }
       //listener.wait();
     //}
@@ -808,7 +833,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     //synchronized(listener2) {
       doc2.startCompile();
       if (_model.getNumErrors() > 0) {
-        fail("compile failed: " + doc.getCompilerErrorModel());
+        fail("compile failed: " + getCompilerErrorString());
       }
       //listener2.wait();
     //}
@@ -863,7 +888,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
       //synchronized(listener2) {   
         doc.startCompile();
         if (_model.getNumErrors() > 0) {
-          fail("compile failed: " + doc.getCompilerErrorModel());
+          fail("compile failed: " + getCompilerErrorString());
         }
         //listener2.wait();
       //}
@@ -903,6 +928,8 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     Position[] positions = doc.getCompilerErrorModel().getPositions();
     Position[] positions2 = doc2.getCompilerErrorModel().getPositions();
 
+    assertTrue("first doc should have errors", positions.length > 0);
+    assertTrue("second doc should have errors", positions2.length > 0);
     assertTrue("location of first error should be between 20 and 29 inclusive (line 2)",
         positions[0].getOffset() <= 20 && positions[0].getOffset() <= 29);
     assertTrue("location of error should be after 34 (line 3 or 4)", positions2[0].getOffset() >= 34);
@@ -933,7 +960,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
       _model.compileAll();
       numErrors = _model.getNumErrors();
       if (_model.getNumErrors() > 0) {
-        fail("compile failed: " + doc.getCompilerErrorModel());
+        fail("compile failed: " + getCompilerErrorString());
       }
       assertCompileErrorsPresent(_name(), false);
       listener.checkCompileOccurred();

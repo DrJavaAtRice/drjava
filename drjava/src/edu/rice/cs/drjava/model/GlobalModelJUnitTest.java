@@ -384,7 +384,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     //synchronized(listener) {
       doc.startCompile();
       if (_model.getNumErrors() > 0) {
-        fail("compile failed: " + doc.getCompilerErrorModel());
+        fail("compile failed: " + getCompilerErrorString());
       }
       //listener.wait();
     //}

@@ -278,13 +278,37 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     synchronized(listener) {
       doc.startCompile();
       if (_model.getNumErrors() > 0) {
-        fail("compile failed: " + doc.getCompilerErrorModel());
+        fail("compile failed: " + getCompilerErrorString());
       }
       listener.wait();
     }
     listener.checkCompileOccurred();
     assertCompileErrorsPresent(false);
     _model.removeListener(listener);
+  }
+  
+  /**
+   * Returns a string with all compiler errors.
+   */
+  protected String getCompilerErrorString() {
+    StringBuffer buf = new StringBuffer();
+    buf.append(_model.getNumErrors());
+    buf.append(" compiler error(s):\n");
+    CompilerError[] modelErrors = _model.getCompilerErrorsWithoutFiles();
+    if (modelErrors.length > 0) {
+      buf.append("Without files:\n");
+      for (int i=0; i < modelErrors.length; i++) {
+        buf.append(modelErrors[i]);
+        buf.append("\n  ");
+      }
+    }
+    buf.append("With files:\n");
+    ListModel docs = _model.getDefinitionsDocuments();
+    for (int i=0; i < docs.getSize(); i++) {
+      OpenDefinitionsDocument doc = (OpenDefinitionsDocument) docs.getElementAt(i);
+      buf.append(doc.getCompilerErrorModel().toString());
+    }
+    return buf.toString();
   }
 
   /**

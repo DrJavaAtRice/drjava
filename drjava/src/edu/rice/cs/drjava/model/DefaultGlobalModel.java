@@ -1202,18 +1202,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       else {
         // Get sourceroots and all files
         File[] sourceRoots = getSourceRootSet();
-        File[] files = new File[_definitionsDocs.getSize()];
+        ArrayList filesToCompile = new ArrayList();
         int index = 0;
         for (int i = 0; i < _definitionsDocs.getSize(); i++) {
           OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
             _definitionsDocs.getElementAt(i);
-            try {
-              files[i] = doc.getFile();
-            }
-            catch (IllegalStateException ise) {
-              // No file for this document; skip it
-            }
+          try {
+            filesToCompile.add(doc.getFile());
+          }
+          catch (IllegalStateException ise) {
+            // No file for this document; skip it
+          }
         }
+        File[] files = (File[]) filesToCompile.toArray(new File[0]);
         
         _notifier.notifyListeners(new EventNotifier.Notifier() {
           public void notifyListener(GlobalModelListener l) {
