@@ -81,12 +81,7 @@ public class Distinction1415Test extends TestCase {
     astInterpreter = new TreeInterpreter(null); // No ParserFactory needed to interpret an AST
     strInterpreter = new TreeInterpreter(parserFactory); // ParserFactory is needed to interpret a string
   }
-  
-  public List<Node> parse(String testString){
-    List<Node> retval = parserFactory.createParser(new StringReader(testString),"UnitTest").parseStream();
-    return retval;
-  }
-  
+    
   public Object interpret(String testString) throws InterpreterException {
     return strInterpreter.interpret(new StringReader(testString), "Unit Test");
   }

@@ -59,8 +59,6 @@ import koala.dynamicjava.parser.wrapper.*;
 
 import junit.framework.TestCase;
 
-import edu.rice.cs.drjava.model.repl.*;
-
 /**
  * This test class tests only those methods that were modified in order to ensure 
  * that the wrapper classes involved in autoboxing/unboxing are allowed.&nbsp; The 
@@ -130,33 +128,49 @@ public class TypeCheckerTest extends TestCase {
   /**
    * The interpreter we are using to test our modifications of the ASTs.
    */
-  private JavaInterpreter _interpreter;
+  private TreeInterpreter _interpreter;
+  
+  private JavaCCParserFactory parserFactory;
+  
+  private static final String VERSION_KEY = "java.specification.version";
   
   /**
    * Sets up the tests for execution.
    */
   public void setUp() {
-    _globalContext = new GlobalContext(new TreeInterpreter(new JavaCCParserFactory()));
+    // This test is dependent on 1.5 since the ObjectMethodCall uses 1.5 reflection methods.
+    // If this were run in 1.4 and we faked the version property to 1.5, some methods would
+    // not be found during the test and would cause the test case to fail.
+    String version = System.getProperty(VERSION_KEY);
+    if (Float.valueOf(version) < 1.5) {
+      throw new WrongVersionException("This test case requires Java 2 SDK v1.5.0 or better");
+    }
+    
+    parserFactory = new JavaCCParserFactory();
+    _globalContext = new GlobalContext(new TreeInterpreter(parserFactory));
     _globalContext.define("x", int.class);
     _globalContext.define("X", Integer.class);
     _globalContext.define("b", boolean.class);
     _globalContext.define("B", Boolean.class);
     _globalContext.define("I", int[].class);
+
     //makeTypeChecker will return the correct type checker depending on the current runtime version of Java
     _typeChecker = AbstractTypeChecker.makeTypeChecker(_globalContext);
-    _interpreter = new DynamicJavaAdapter();
+
+    _interpreter = new TreeInterpreter(parserFactory);
     
     try {
-      _interpreter.interpret("int x = 0;");
-      _interpreter.interpret("Integer X = new Integer(0);");
-      _interpreter.interpret("Boolean B = Boolean.FALSE;");
-      _interpreter.interpret("boolean b = false;");
-      _interpreter.interpret("int[] I = {1, 2, 3};");
+      _interpretText("int x = 0;");
+      _interpretText("Integer X = new Integer(0);");
+      _interpretText("Boolean B = Boolean.FALSE;");
+      _interpretText("boolean b = false;");
+      _interpretText("int[] I = {1, 2, 3};");
     }
-    catch (ExceptionReturnedException ere) {
+    catch (InterpreterException ere) {
       fail("Should have been able to declare variables for interpreter.");
     }
   }
+  
   
   /**
    * Parses the given string and returns the list of Nodes.
@@ -164,9 +178,13 @@ public class TypeCheckerTest extends TestCase {
    * @return the list of Nodes
    */
   private List<Node> _parseCode(String code) {
-    JavaCCParserFactory parserFactory = new JavaCCParserFactory();
     SourceCodeParser parser = parserFactory.createParser(new java.io.StringReader(code), "");
     return parser.parseStream();
+  }
+  
+  private Object _interpretText(String text) throws InterpreterException {
+    List<Node> exps = _interpreter.buildStatementList(new java.io.StringReader(text), "Unit Test");
+    return _interpreter.interpret(exps);
   }
   
   /**
@@ -175,7 +193,7 @@ public class TypeCheckerTest extends TestCase {
   private Class _checkBinaryExpression(String text, 
                                        String leftExpected, 
                                        String rightExpected) 
-    throws ExceptionReturnedException {
+    throws InterpreterException {
     
     BinaryExpression exp = (BinaryExpression)_parseCode(text).get(0);
     Class type = exp.acceptVisitor(_typeChecker);
@@ -186,12 +204,12 @@ public class TypeCheckerTest extends TestCase {
     actual = exp.getRightExpression().toString();
     assertEquals("Right should have typed correctly.", rightExpected, actual);
     
-    _interpreter.interpret(text);
+    _interpretText(text);
     return type;
   }
   
   private Class _checkUnaryExpression(String text, String expected) 
-    throws ExceptionReturnedException {
+    throws InterpreterException {
     
     UnaryExpression exp = (UnaryExpression)_parseCode(text).get(0);
     
@@ -200,7 +218,7 @@ public class TypeCheckerTest extends TestCase {
     String actual = exp.getExpression().toString();
     assertEquals("Expression should have typed correctly.", expected, actual);
 
-    _interpreter.interpret(text);
+    _interpretText(text);
     
     return type;
   }
@@ -210,7 +228,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests the While statement's condition statement
    */
-  public void testVisitWhileStatement() throws ExceptionReturnedException {
+  public void testVisitWhileStatement() throws InterpreterException {
     String text = "while (B) { }";
     Node stmt = _parseCode(text).get(0);
     
@@ -220,13 +238,13 @@ public class TypeCheckerTest extends TestCase {
     String actual = ((WhileStatement)stmt).getCondition().toString();
     assertEquals("Should have autounboxed", expected, actual);
     
-    _interpreter.interpret(text);
+    _interpretText(text);
   }
   
   /**
    * Tests the do-while loop's condition statement
    */
-  public void testVisitDoStatement() throws ExceptionReturnedException {
+  public void testVisitDoStatement() throws InterpreterException {
     String text = "do { } while(B);";
     Node stmt = _parseCode(text).get(0);
     
@@ -236,13 +254,13 @@ public class TypeCheckerTest extends TestCase {
     String actual = ((DoStatement)stmt).getCondition().toString();
     assertEquals("Should have autounboxed", expected, actual);
     
-    _interpreter.interpret(text);
+    _interpretText(text);
   }  
   
   /**
    * Tests the for loop's condition statement
    */
-  public void testVisitForStatement() throws ExceptionReturnedException {
+  public void testVisitForStatement() throws InterpreterException {
     String text = "for(int i=0; new Boolean(i<1); i++);";
     Node stmt = _parseCode(text).get(0);
     
@@ -252,10 +270,10 @@ public class TypeCheckerTest extends TestCase {
     String actual = ((ForStatement)stmt).getCondition().toString();
     assertEquals("Should have autounboxed", expected, actual);
 
-    _interpreter.interpret(text);
+    _interpretText(text);
   }
   
-  public void testSwitchStatement() throws ExceptionReturnedException {
+  public void testSwitchStatement() throws InterpreterException {
     String text = "switch (new Integer(1)) { }";
     SwitchStatement stmt = (SwitchStatement)_parseCode(text).get(0);
     
@@ -265,11 +283,11 @@ public class TypeCheckerTest extends TestCase {
     String actual = stmt.getSelector().toString();
     assertEquals("Should have autounboxed", expected, actual);
     
-    _interpreter.interpret(text);
+    _interpretText(text);
   }
   
 
-  public void testIfThenStatement() throws ExceptionReturnedException {
+  public void testIfThenStatement() throws InterpreterException {
     String text = "if (B) { }";
     IfThenStatement stmt = (IfThenStatement) _parseCode(text).get(0);
     
@@ -279,13 +297,13 @@ public class TypeCheckerTest extends TestCase {
     String actual = stmt.getCondition().toString();
     assertEquals("Should have autounboxed", expected, actual);
     
-    _interpreter.interpret(text);
+    _interpretText(text);
   }
   
   /**
    * Tests the if-then-else statement for auto-unboxing.
    */
-  public void testIfThenElseStatement() throws ExceptionReturnedException {
+  public void testIfThenElseStatement() throws InterpreterException {
     String text = "if (B) { } else if (B) { }";
     IfThenStatement stmt = (IfThenStatement) _parseCode(text).get(0);
     
@@ -295,14 +313,14 @@ public class TypeCheckerTest extends TestCase {
     String actual = stmt.getCondition().toString();
     assertEquals("Should have autounboxed", expected, actual);
     
-    _interpreter.interpret(text);
+    _interpretText(text);
   }
   
   //////////// Addititve Bin Ops ////////////////////////
   /**
    * Tests adding two Integers.
    */
-  public void testAddTwoIntegers() throws ExceptionReturnedException {
+  public void testAddTwoIntegers() throws InterpreterException {
     
     String text = "new Integer(1) + new Integer(2);";
     
@@ -315,7 +333,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests substracting two Integers.
    */
-  public void testSubtractingTwoIntegers() throws ExceptionReturnedException {
+  public void testSubtractingTwoIntegers() throws InterpreterException {
     String text = "new Integer(1) - new Integer(2);";
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 1 1 int)]))";
     String expectedRight = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 2 2 int)]))";
@@ -328,7 +346,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests the += operation.
    */
-  public void testPlusEquals() throws ExceptionReturnedException {
+  public void testPlusEquals() throws InterpreterException {
     // Tests plus-equals with a primitive left-hand side
     String text = "x += new Integer(2);";
     String expectedLeft = "(koala.dynamicjava.tree.QualifiedName: x)";
@@ -347,7 +365,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests the ++ operation.
    */
-  public void testPlusPlus() throws ExceptionReturnedException {
+  public void testPlusPlus() throws InterpreterException {
     // Tests ++ with a reference-type left-hand side, post-increment
     String text = "X++;";
     String expected = "(koala.dynamicjava.tree.QualifiedName: X)";
@@ -364,7 +382,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests the -= operation.
    */
-  public void testMinusEquals() throws ExceptionReturnedException {
+  public void testMinusEquals() throws InterpreterException {
     // Tests minus-equals with a primitive left-hand side
     String text = "x -= new Integer(2);";
     String expectedLeft = "(koala.dynamicjava.tree.QualifiedName: x)";
@@ -383,7 +401,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests the -- operation.
    */
-  public void testMinusMinus() throws ExceptionReturnedException {
+  public void testMinusMinus() throws InterpreterException {
     // Tests "--" with a reference-type left-hand side, post-decrement
     String text = "X--;";
     String expected = "(koala.dynamicjava.tree.QualifiedName: X)";
@@ -403,7 +421,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests multiplying two Integers.
    */
-  public void testMultiplyingTwoIntegers() throws ExceptionReturnedException {
+  public void testMultiplyingTwoIntegers() throws InterpreterException {
     String text = "new Integer(1) * new Integer(2);";
     
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 1 1 int)]))";
@@ -415,7 +433,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests dividing two Integers.
    */
-  public void testDividingTwoIntegers() throws ExceptionReturnedException {
+  public void testDividingTwoIntegers() throws InterpreterException {
     String text = "new Integer(1) / new Integer(2);";
     
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 1 1 int)]))";
@@ -427,7 +445,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests dividing two Integers.
    */
-  public void testModingTwoIntegers() throws ExceptionReturnedException {
+  public void testModingTwoIntegers() throws InterpreterException {
     String text = "new Integer(1) % new Integer(2);";
     
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 1 1 int)]))";
@@ -440,7 +458,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests the *= operation.
    */
-  public void testMultEquals() throws ExceptionReturnedException {
+  public void testMultEquals() throws InterpreterException {
     // Tests times-equals with a primitive left-hand side
     String text = "x *= new Integer(2);";
     String expectedLeft = "(koala.dynamicjava.tree.QualifiedName: x)";
@@ -459,7 +477,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests the /= operation.
    */
-  public void testDivideEquals() throws ExceptionReturnedException {
+  public void testDivideEquals() throws InterpreterException {
     // Tests divide-equals with a primitive left-hand side
     String text = "x /= new Integer(2);";
     String expectedLeft = "(koala.dynamicjava.tree.QualifiedName: x)";
@@ -478,7 +496,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests the %= operation.
    */
-  public void testModEquals() throws ExceptionReturnedException {
+  public void testModEquals() throws InterpreterException {
     // Tests mod-equals with a primitive left-hand side
     String text = "x %= new Integer(2);";
     String expectedLeft = "(koala.dynamicjava.tree.QualifiedName: x)";
@@ -498,7 +516,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests Shift Right on two Shorts
    */
-  public void testShiftRight() throws ExceptionReturnedException {
+  public void testShiftRight() throws InterpreterException {
     String text = "(new Short(\"1\") >> new Short(\"2\"));";
     
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: shortValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Short) [(koala.dynamicjava.tree.StringLiteral: \"1\" 1 class java.lang.String)]))";
@@ -510,7 +528,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests Shift Left on two Shorts
    */
-  public void testShiftLeft() throws ExceptionReturnedException {
+  public void testShiftLeft() throws InterpreterException {
     String text = "new Short(\"-10\") << new Short(\"2\");";
     
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: shortValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Short) [(koala.dynamicjava.tree.StringLiteral: \"-10\" -10 class java.lang.String)]))";
@@ -522,7 +540,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests Unsigned Shift on two longs
    */
-  public void testUShiftRight() throws ExceptionReturnedException {
+  public void testUShiftRight() throws InterpreterException {
     String text = "new Long(-1) >>> new Long(1);";
       
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: longValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Long) [(koala.dynamicjava.tree.MinusExpression: (koala.dynamicjava.tree.IntegerLiteral: 1 1 int))]))";
@@ -537,7 +555,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests the <<= operation.
    */
-  public void testLeftShiftEquals() throws ExceptionReturnedException {
+  public void testLeftShiftEquals() throws InterpreterException {
     // Tests left-shift-equals with a primitive left-hand side
     String text = "x <<= new Integer(2);";
     String expectedLeft = "(koala.dynamicjava.tree.QualifiedName: x)";
@@ -556,7 +574,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests the >>= operation.
    */
-  public void testRightShiftEquals() throws ExceptionReturnedException {
+  public void testRightShiftEquals() throws InterpreterException {
     // Tests right-shift-equals with a primitive left-hand side
     String text = "x >>= new Integer(2);";
     String expectedLeft = "(koala.dynamicjava.tree.QualifiedName: x)";
@@ -575,7 +593,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests the >>>= operation.
    */
-  public void testUnsignedRightShiftEquals() throws ExceptionReturnedException {
+  public void testUnsignedRightShiftEquals() throws InterpreterException {
     // Tests u-right-shift-equals with a primitive left-hand side
     String text = "x >>>= new Integer(2);";
     String expectedLeft = "(koala.dynamicjava.tree.QualifiedName: x)";
@@ -598,7 +616,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests XORing two Booleans.
    */
-  public void testBooleanBitwiseXOr() throws ExceptionReturnedException {
+  public void testBooleanBitwiseXOr() throws InterpreterException {
     String text = "new Boolean(true) ^ new Boolean(false);";
       
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: true true boolean)]))";
@@ -610,7 +628,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests Bitwise AND on Booleans.
    */
-  public void testBooleanBitwiseAnd() throws ExceptionReturnedException {
+  public void testBooleanBitwiseAnd() throws InterpreterException {
     String text = "new Boolean(true) & new Boolean(false);";
       
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: true true boolean)]))";
@@ -622,7 +640,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests Bitwise OR on Booleans.
    */
-  public void testBooleanBitwiseOr() throws ExceptionReturnedException {
+  public void testBooleanBitwiseOr() throws InterpreterException {
     String text = "new Boolean(true) | new Boolean(false);";
       
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: true true boolean)]))";
@@ -634,7 +652,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests XORing two Booleans.
    */
-  public void testNumericBitwiseXOr() throws ExceptionReturnedException {
+  public void testNumericBitwiseXOr() throws InterpreterException {
     String text = "new Long(0) ^ new Integer(1);";
       
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: longValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Long) [(koala.dynamicjava.tree.IntegerLiteral: 0 0 int)]))";
@@ -646,7 +664,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests Bitwise AND on Integers.
    */
-  public void testNumericBitwiseAnd() throws ExceptionReturnedException {
+  public void testNumericBitwiseAnd() throws InterpreterException {
     String text = "new Character('a') & new Integer(2);";
       
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: charValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Character) [(koala.dynamicjava.tree.CharacterLiteral: 'a' a char)]))";
@@ -659,7 +677,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests Bitwise OR on Integers.
    */
-  public void testNumericBitwiseOr() throws ExceptionReturnedException {
+  public void testNumericBitwiseOr() throws InterpreterException {
     String text = "new Short(\"2\") | new Byte(\"2\");";
       
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: shortValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Short) [(koala.dynamicjava.tree.StringLiteral: \"2\" 2 class java.lang.String)]))";
@@ -673,7 +691,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests the &= operation.
    */
-  public void testAndEquals() throws ExceptionReturnedException {
+  public void testAndEquals() throws InterpreterException {
     // Tests and-equals with a primitive left-hand side
     String text = "x &= new Integer(2);";
     String expectedLeft = "(koala.dynamicjava.tree.QualifiedName: x)";
@@ -692,7 +710,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests the ^= operation.
    */
-  public void testXorEquals() throws ExceptionReturnedException {
+  public void testXorEquals() throws InterpreterException {
     // Tests xor-equals with a primitive left-hand side
     String text = "x ^= new Integer(2);";
     String expectedLeft = "(koala.dynamicjava.tree.QualifiedName: x)";
@@ -711,7 +729,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests the |= operation.
    */
-  public void testOrEquals() throws ExceptionReturnedException {
+  public void testOrEquals() throws InterpreterException {
     // Tests or-equals with a primitive left-hand side
     String text = "x |= new Integer(2);";
     String expectedLeft = "(koala.dynamicjava.tree.QualifiedName: x)";
@@ -733,7 +751,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests ANDing two Booleans.
    */
-  public void testAndingTwoBooleans() throws ExceptionReturnedException {
+  public void testAndingTwoBooleans() throws InterpreterException {
     String text = "new Boolean(true) && new Boolean(false);";
       
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: true true boolean)]))";
@@ -745,7 +763,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests ORing two Booleans.
    */
-  public void testOringTwoBooleans() throws ExceptionReturnedException {
+  public void testOringTwoBooleans() throws InterpreterException {
     String text = "new Boolean(true) || new Boolean(false);";
       
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: true true boolean)]))";
@@ -757,7 +775,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests GreaterThan with two Doubles
    */
-  public void testGreaterThan() throws ExceptionReturnedException {
+  public void testGreaterThan() throws InterpreterException {
     String text = "new Double(1) > new Double(2);";
       
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: doubleValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Double) [(koala.dynamicjava.tree.IntegerLiteral: 1 1 int)]))";
@@ -769,7 +787,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests GreaterThan or Equal to with two Floats
    */
-  public void testGreaterThanEqual() throws ExceptionReturnedException {
+  public void testGreaterThanEqual() throws InterpreterException {
     String text = "new Float(1) >= new Float(2);";
       
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: floatValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Float) [(koala.dynamicjava.tree.IntegerLiteral: 1 1 int)]))";
@@ -781,7 +799,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests LessThan to with two Longs
    */
-  public void testLessThan() throws ExceptionReturnedException {
+  public void testLessThan() throws InterpreterException {
     String text = "new Long(12) < new Long(32);";
       
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: longValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Long) [(koala.dynamicjava.tree.IntegerLiteral: 12 12 int)]))";
@@ -793,7 +811,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests LessThan Or Equal to with two Integers
    */
-  public void testLessThanEqual() throws ExceptionReturnedException {
+  public void testLessThanEqual() throws InterpreterException {
     String text = "new Integer(12) <= new Integer(32);";
       
     String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 12 12 int)]))";
@@ -805,7 +823,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests the equality operator (==) with an integer and a short.
    */
-  public void testEqualsEquals() throws ExceptionReturnedException {
+  public void testEqualsEquals() throws InterpreterException {
     String text = "new Integer(1) == new Short(\"1\");";
     
     try {
@@ -824,7 +842,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests the inequality operator (!=) with an integer and a short.
    */
-  public void testNotEquals() throws ExceptionReturnedException {
+  public void testNotEquals() throws InterpreterException {
     String text = "new Integer(1) != new Short(\"1\");";
     
     try {
@@ -845,7 +863,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests Complimenting an Integer.
    */
-  public void testComplimentingOneBoolean() throws ExceptionReturnedException {
+  public void testComplimentingOneBoolean() throws InterpreterException {
     String text = "~new Integer(24);";
     String expected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 24 24 int)]))";
 
@@ -855,7 +873,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests Plus Operator.
    */
-  public void testPlusOperator() throws ExceptionReturnedException {
+  public void testPlusOperator() throws InterpreterException {
     String text = "+new Double(10);";
     String expected = "(koala.dynamicjava.tree.ObjectMethodCall: doubleValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Double) [(koala.dynamicjava.tree.IntegerLiteral: 10 10 int)]))";
 
@@ -865,7 +883,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests Minus Operator.
    */
-  public void testMinusOperator() throws ExceptionReturnedException {
+  public void testMinusOperator() throws InterpreterException {
     String text = "-new Integer(10);";
     String expected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 10 10 int)]))";
 
@@ -875,7 +893,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests Negating a Boolean.
    */
-  public void testNegatingOneBoolean() throws ExceptionReturnedException {
+  public void testNegatingOneBoolean() throws InterpreterException {
     String text = "!new Boolean(false);";
     String expected = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: false false boolean)]))";
 
@@ -885,39 +903,39 @@ public class TypeCheckerTest extends TestCase {
   
   //////////// Other Operations //////////////////////
   
-  public void testSimpleAssignBox() throws ExceptionReturnedException {
+  public void testSimpleAssignBox() throws InterpreterException {
     String text = "B = true;";
     String leftExpected = "(koala.dynamicjava.tree.QualifiedName: B)";
     String rightExpected = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: java.lang.Boolean) [(koala.dynamicjava.tree.CastExpression: (koala.dynamicjava.tree.BooleanLiteral: true true boolean) (koala.dynamicjava.tree.BooleanType: boolean))])";
     _checkBinaryExpression(text, leftExpected, rightExpected);
   }
-  public void testSimpleAssignUnbox() throws ExceptionReturnedException {  
+  public void testSimpleAssignUnbox() throws InterpreterException {  
     String text = "b = new Boolean(false);";
     String leftExpected = "(koala.dynamicjava.tree.QualifiedName: b)";
     String rightExpected = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.BooleanLiteral: false false boolean)]))";
     _checkBinaryExpression(text, leftExpected, rightExpected);
   }
-  public void testSimpleAssignBoxInt() throws ExceptionReturnedException {
+  public void testSimpleAssignBoxInt() throws InterpreterException {
     String text = "X = 3 + 5;";
     String leftExpected = "(koala.dynamicjava.tree.QualifiedName: X)";
     String rightExpected = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: java.lang.Integer) [(koala.dynamicjava.tree.CastExpression: (koala.dynamicjava.tree.AddExpression: (koala.dynamicjava.tree.IntegerLiteral: 3 3 int) (koala.dynamicjava.tree.IntegerLiteral: 5 5 int)) (koala.dynamicjava.tree.IntType: int))])";
     _checkBinaryExpression(text, leftExpected, rightExpected);
   }
-  public void testSimpleAssignBoxAddExp() throws ExceptionReturnedException {
+  public void testSimpleAssignBoxAddExp() throws InterpreterException {
     String text = "X = new Integer(1) + new Integer(3);";
     String leftExpected = "(koala.dynamicjava.tree.QualifiedName: X)";
     String rightExpected = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: java.lang.Integer) [(koala.dynamicjava.tree.CastExpression: (koala.dynamicjava.tree.AddExpression: (koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 1 1 int)])) (koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 3 3 int)]))) (koala.dynamicjava.tree.IntType: int))])";
     _checkBinaryExpression(text, leftExpected, rightExpected);
   }
-   
-  public void testVariableDeclaration()  throws ExceptionReturnedException {
+  
+  public void testVariableDeclaration()  throws InterpreterException {
     String text = "Integer i = 1;";
     String initExpected = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: java.lang.Integer) [(koala.dynamicjava.tree.CastExpression: (koala.dynamicjava.tree.IntegerLiteral: 1 1 int) (koala.dynamicjava.tree.IntType: int))])";
     VariableDeclaration exp = (VariableDeclaration)_parseCode(text).get(0);
     Class type = exp.acceptVisitor(_typeChecker);
     String actual = exp.getInitializer().toString();
     assertEquals("The initializer should have been boxed.", initExpected, actual);
-    _interpreter.interpret(text);
+    _interpretText(text);
     
     text = "Long L = 1;";
     initExpected = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: java.lang.Long) [(koala.dynamicjava.tree.CastExpression: (koala.dynamicjava.tree.IntegerLiteral: 1 1 int) (koala.dynamicjava.tree.LongType: long))])";
@@ -925,7 +943,7 @@ public class TypeCheckerTest extends TestCase {
     type = exp.acceptVisitor(_typeChecker);
     actual = exp.getInitializer().toString();
     assertEquals("The initializer should have been boxed.", initExpected, actual);
-    _interpreter.interpret(text);
+    _interpretText(text);
     
     text = "Double D = 1;";
     initExpected = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: java.lang.Double) [(koala.dynamicjava.tree.CastExpression: (koala.dynamicjava.tree.IntegerLiteral: 1 1 int) (koala.dynamicjava.tree.DoubleType: double))])";
@@ -933,38 +951,38 @@ public class TypeCheckerTest extends TestCase {
     type = exp.acceptVisitor(_typeChecker);
     actual = exp.getInitializer().toString();
     assertEquals("The initializer should have been boxed.", initExpected, actual);
-    _interpreter.interpret(text);
+    _interpretText(text);
   }
   
-  public void testUnboxingCastExpression() throws ExceptionReturnedException{
+  public void testUnboxingCastExpression() throws InterpreterException{
     String text = "(int)new Integer(1);";
   
     Node exp = _parseCode(text).get(0);
     Class type = exp.acceptVisitor(_typeChecker);
     assertEquals("Should be the primitive type.", int.class, type);
 
-    _interpreter.interpret(text);
+    _interpretText(text);
   }
   
-  public void testBoxingCastExpression() throws ExceptionReturnedException{
+  public void testBoxingCastExpression() throws InterpreterException{
     String text = "(Integer)1;";
     Node exp = _parseCode(text).get(0);
     Class type = exp.acceptVisitor(_typeChecker);
     assertEquals("Should be the refrence type.", Integer.class, type);
 
-    _interpreter.interpret(text);
+    _interpretText(text);
   }
   
-  public void testDoubleCastExpression() throws ExceptionReturnedException{
+  public void testDoubleCastExpression() throws InterpreterException{
     String text = "(Byte)(byte)1;";
     Node exp = _parseCode(text).get(0);
     Class type = exp.acceptVisitor(_typeChecker);
     assertEquals("Should be the primitive type.", Byte.class, type);
 
-    _interpreter.interpret(text);
+    _interpretText(text);
   }
   
-  public void testErroneousUnboxingCastExpression() throws ExceptionReturnedException{
+  public void testErroneousUnboxingCastExpression() throws InterpreterException{
     try {
       String text = "(boolean)new Long(3);";
       _parseCode(text).get(0).acceptVisitor(_typeChecker);
@@ -976,7 +994,7 @@ public class TypeCheckerTest extends TestCase {
   /**
    * Tests the coniditional expression (... ? ... : ...).
    */
-  public void testConditionalExpressions() throws ExceptionReturnedException{
+  public void testConditionalExpressions() throws InterpreterException{
     
     // This test makes sure that the special case where one of the operands is
     // a Boolean reference type and the other is a primitive type works
@@ -998,7 +1016,7 @@ public class TypeCheckerTest extends TestCase {
     assertEquals("Test 1: Should have boxed the int", expected, actual);
     
     String definition = "Boolean B = Boolean.TRUE; ";
-    _interpreter.interpret(text);
+    _interpretText(text);
     
     // This test is to make sure that a boxing type will get unboxed
     // if the other operand is a numerical primitive type
@@ -1019,7 +1037,7 @@ public class TypeCheckerTest extends TestCase {
     actual = stmt.getIfFalseExpression().toString();
     assertEquals("Test 2: Should have left the int alone", expected, actual);
     
-    _interpreter.interpret(text);
+    _interpretText(text);
     
     // This test makes sure that both primitives are boxed in the case
     // that one is a boolean and the other is not.
@@ -1040,17 +1058,17 @@ public class TypeCheckerTest extends TestCase {
     actual = stmt.getIfFalseExpression().toString();
     assertEquals("Test 3: Should have boxed the int", expected, actual);
     
-    _interpreter.interpret(text);
+    _interpretText(text);
   }
   
-  public void testArrayAllocation() throws ExceptionReturnedException {
+  public void testArrayAllocation() throws InterpreterException {
     String text = "new int[new Integer(5)];";
     String sizeExpected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 5 5 int)]))";
     ArrayAllocation exp = (ArrayAllocation) _parseCode(text).get(0);
     Class type = exp.acceptVisitor(_typeChecker);
     String actual = exp.getSizes().get(0).toString();
     assertEquals("The size should have been unboxed.", sizeExpected, actual);
-    _interpreter.interpret(text);
+    _interpretText(text);
  
     text = "new int[new Long(0)];";
     exp = (ArrayAllocation) _parseCode(text).get(0);
@@ -1062,14 +1080,14 @@ public class TypeCheckerTest extends TestCase {
     }
   }
   
-  public void testArrayAccess() throws ExceptionReturnedException {
+  public void testArrayAccess() throws InterpreterException {
     String text = "I[new Integer(0)];";
     String idxExpected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 0 0 int)]))";
     ArrayAccess exp = (ArrayAccess)_parseCode(text).get(0);
     Class type = exp.acceptVisitor(_typeChecker);
     String actual = exp.getCellNumber().toString();
     assertEquals("The index should have been unboxed.", idxExpected, actual);
-    _interpreter.interpret(text);
+    _interpretText(text);
  
     text = "I[new Long(0)];";
     exp = (ArrayAccess)_parseCode(text).get(0);
@@ -1082,8 +1100,41 @@ public class TypeCheckerTest extends TestCase {
   }
 
   /**
+   * Tests a call on a method on an instance of an Integer
+   */
+  public void testObjectMethodCall() throws InterpreterException {
+    String text = "X.equals(0);";
+    List<Node> list = _parseCode(text);
+    System.out.println(list);
+    MethodCall exp = (MethodCall)list.get(0);
+    Class type = exp.acceptVisitor(_typeChecker);
+    Method m = (Method)exp.getProperty(NodeProperties.METHOD);
+    assertEquals("the method's parameter type should have been int", Object.class, m.getParameterTypes()[0]);
+    Object res = _interpretText(text);
+    System.out.println(res instanceof Boolean);
+  }
+  
+  /**
    * Method calls may or may not be a simple project.  We need to look into what
    * needs to be tested, the different types of method calls that must change,
    * what specifications have been added in the jsr language specs...
    */
+  public void testStaticMethodCall() throws InterpreterException {
+    String text = "Integer.toString(new Integer(1));";
+    /**
+     * This code was commented out because the static method call relies on the
+     * name visitor to recognize that the preceding expression is a class name
+     * and convert it from an object method call to a static method call.  This 
+     * would require some extra initialization that I have not done yet.
+     * - Jonathan Lugo 5/19/2004
+     */
+//    List<Node> list = _parseCode(text);
+//    System.out.println(list);
+//    MethodCall exp = (MethodCall)list.get(0);
+//    Class type = exp.acceptVisitor(_typeChecker);
+//    Method m = (Method)exp.getProperty(NodeProperties.METHOD);
+//    assertEquals("the method's parameter type should have been int", int.class, m.getParameterTypes()[0]);
+    Object res = _interpretText(text);
+    System.out.println(res instanceof String);
+  }
 }

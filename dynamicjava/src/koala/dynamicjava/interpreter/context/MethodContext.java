@@ -422,7 +422,8 @@ public class MethodContext extends StaticContext {
         m.setAccessible(true);
       }
       return m;
-    } catch (NoSuchMethodException e) {
+    } 
+    catch (NoSuchMethodException e) {
       if ((prefix instanceof QualifiedName) &&
           ((QualifiedName)prefix).getRepresentation().equals("this")) {
         m = InterpreterUtilities.lookupOuterMethod(c, mname, params);

@@ -28,6 +28,8 @@
 
 package koala.dynamicjava.util;
 
+import koala.dynamicjava.interpreter.throwable.WrongVersionException;
+  
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -60,8 +62,9 @@ public class ReflectionUtilities {
     }
     
     if (mm.isEmpty()) {
-      // It is here that we have to take care of boxing/unboxing and varargs
+      boolean compatibleVersion = Float.valueOf(System.getProperty("java.specification.version")) >= 1.5;
       
+      // Autoboxing handled in the isCompatible method called by the hasVarArgsCompatibleSignatures method
       
       // Do second pass for finding a varargs method that matches given method call
       
@@ -73,6 +76,9 @@ public class ReflectionUtilities {
       while (it.hasNext()) {
         Constructor m = it.next();
         if (hasVarArgsCompatibleSignatures(m.getParameterTypes(), ac)) {
+          if (!compatibleVersion) {
+            throw new WrongVersionException("Variable arguments are only supported in Java 1.5 or better");
+          }
           mm.add(m);
         }
       }
@@ -166,8 +172,9 @@ public class ReflectionUtilities {
     }
     
     if (mm.isEmpty()) {
-      // It is here that we have to take care of boxing/unboxing and varargs
+      boolean compatibleVersion = Float.valueOf(System.getProperty("java.specification.version")) >= 1.5;
       
+      // Autoboxing handled in the isCompatible method called by the hasVarArgsCompatibleSignatures method
       
       // Do second pass for finding a varargs method that matches given method call
       
@@ -178,7 +185,11 @@ public class ReflectionUtilities {
       it = ms.iterator();
       while (it.hasNext()) {
         Method m = it.next();
+        
         if (hasVarArgsCompatibleSignatures(m.getParameterTypes(), ac)) {
+          if (!compatibleVersion) {
+            throw new WrongVersionException("Variable arguments are only supported in Java 1.5 or better");
+          }
           mm.add(m);
         }
       }
@@ -457,36 +468,144 @@ public class ReflectionUtilities {
    * Whether 'c1' is assignable from 'c2'
    */
   public static boolean isCompatible(Class c1, Class c2) {
+    return isBoxCompatible(c1, c2, Float.valueOf(System.getProperty("java.specification.version")) >= 1.5);
+    
+    /** Commented by Jonathan Lugo 2004-05-18.  Code moved to isBoxCompatible**/
+//    if (c1.isPrimitive()) {
+//      if (c1 != c2) {
+//        if (c1 == int.class) {
+//          return (c2 == byte.class  ||
+//                  c2 == short.class ||
+//                  c2 == char.class);
+//        } 
+//        else if (c1 == long.class) {
+//          return (c2 == byte.class  ||
+//                  c2 == short.class ||
+//                  c2 == int.class);
+//        } 
+//        else if (c1 == short.class) {
+//          return c2 == byte.class;
+//        } 
+//        else if (c1 == float.class) {
+//          return (c2 == byte.class  ||
+//                  c2 == short.class ||
+//                  c2 == int.class   ||
+//                  c2 == long.class);
+//        } 
+//        else if (c1 == double.class) {
+//          return (c2 == byte.class  ||
+//                  c2 == short.class ||
+//                  c2 == int.class   ||
+//                  c2 == long.class  ||
+//                  c2 == float.class);
+//        } 
+//        else { // it's a boolean && c1 != c2
+//          return false;
+//        }
+//      }
+//      else { // c1 == c2
+//        return true;
+//      }
+//    } 
+//    else { // It's a reference type
+//      return (c2 == null) ? true : c1.isAssignableFrom(c2);
+//    }
+  }
+  
+  private static boolean _isBoxingType(Class c) {
+    return (c == Integer.class   || c == Long.class   ||
+            c == Boolean.class   || c == Double.class ||
+            c == Character.class || c == Short.class  ||
+            c == Byte.class      || c == Float.class );
+  }
+  
+  /**
+   * Returns the reference type that corresponds to the given primitive type.
+   * @param primType the primitive type
+   * @return the corresponding reference type
+   */
+  protected static Class _correspondingBoxingType(Class primType) {
+    if (primType == boolean.class) { return Boolean.class; }
+    else if (primType == byte.class) { return Byte.class; }
+    else if (primType == char.class) { return Character.class; }
+    else if (primType == short.class) { return Short.class; }
+    else if (primType == int.class) { return Integer.class; }
+    else if (primType == long.class) { return Long.class; }
+    else if (primType == float.class) { return Float.class; }
+    else if (primType == double.class) { return Double.class; }
+    else {
+      return primType; // It's already a reference type
+    }
+  }
+  protected static Class _correspondingPrimType(Class refType) {
+    if (refType == Boolean.class) { return boolean.class; }
+    else if (refType == Byte.class) { return byte.class; }
+    else if (refType == Character.class) { return char.class; }
+    else if (refType == Short.class) { return short.class; }
+    else if (refType == Integer.class) { return int.class; }
+    else if (refType == Long.class) { return long.class; }
+    else if (refType == Float.class) { return float.class; }
+    else if (refType == Double.class) { return double.class; }
+    else {
+      return refType; // It's already a primitive type
+    }
+  }
+  public static boolean isBoxCompatible(Class c1, Class c2, boolean autoBoxEnabled) {
     if (c1.isPrimitive()) {
+      
+        
+      if (!c2.isPrimitive() && !autoBoxEnabled) {
+        // We know autoboxing/unboxing is required but
+        // the version of java doesn't support it
+        throw new WrongVersionException("Auto-unboxing only supported in Java 1.5 or better");
+      }
+      else {
+        // unbox the second type (may not change)
+        c2 = _correspondingPrimType(c2);
+      }
+      
       if (c1 != c2) {
         if (c1 == int.class) {
-          return c2 == byte.class  ||
-            c2 == short.class ||
-            c2 == char.class;
-        } else if (c1 == long.class) {
-          return c2 == byte.class  ||
-            c2 == short.class ||
-            c2 == int.class;
-        } else if (c1 == short.class) {
+          return (c2 == byte.class  ||
+                  c2 == short.class ||
+                  c2 == char.class);
+        } 
+        else if (c1 == long.class) {
+          return (c2 == byte.class  ||
+                  c2 == short.class ||
+                  c2 == int.class);
+        } 
+        else if (c1 == short.class) {
           return c2 == byte.class;
-        } else if (c1 == float.class) {
-          return c2 == byte.class  ||
-            c2 == short.class ||
-            c2 == int.class   ||
-            c2 == long.class;
-        } else if (c1 == double.class) {
-          return c2 == byte.class  ||
-            c2 == short.class ||
-            c2 == int.class   ||
-            c2 == long.class  ||
-            c2 == float.class;
-        } else {
+        } 
+        else if (c1 == float.class) {
+          return (c2 == byte.class  ||
+                  c2 == short.class ||
+                  c2 == int.class   ||
+                  c2 == long.class);
+        } 
+        else if (c1 == double.class) {
+          return (c2 == byte.class  ||
+                  c2 == short.class ||
+                  c2 == int.class   ||
+                  c2 == long.class  ||
+                  c2 == float.class);
+        } 
+        else { // it's a boolean && c1 != c2
           return false;
         }
-      } else {
+      }
+      else { // c1 == c2
         return true;
       }
-    } else {
+    }
+    else { // It's a reference type
+      if (c2 != null && c2.isPrimitive()) {
+        if (!autoBoxEnabled) {
+           throw new WrongVersionException("Auto-boxing/unboxing is only supported in Java 1.5 or better");
+        }
+        c2 = _correspondingBoxingType(c2);
+      }
       return (c2 == null) ? true : c1.isAssignableFrom(c2);
     }
   }

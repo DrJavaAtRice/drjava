@@ -412,7 +412,11 @@ public class GlobalContext extends VariableContext implements Context {
     Constructor cons = null;
     try {
       cons = lookupConstructor(c, cargs);
-    } catch (Exception e) {
+    }
+    catch (WrongVersionException e) {
+      throw e;
+    }
+    catch (Exception e) {
       throw new CatchedExceptionError(e, node);
     }
 

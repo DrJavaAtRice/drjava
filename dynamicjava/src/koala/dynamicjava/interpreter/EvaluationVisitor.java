@@ -543,7 +543,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       }
       // Invoke the method
       try {
-        return m.invoke(obj, args);
+        Object res = m.invoke(obj, args);
+        return res;
       }
       catch (InvocationTargetException e) {
         if (e.getTargetException() instanceof Error) {

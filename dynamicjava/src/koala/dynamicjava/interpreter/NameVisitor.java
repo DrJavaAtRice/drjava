@@ -432,7 +432,7 @@ public class NameVisitor extends VisitorObject<Node> {
         rejectReferenceType(o,n);
         node.setInitializer((Expression)o);
       }
-    } 
+    }
     return null;
   }
   
@@ -500,9 +500,9 @@ public class NameVisitor extends VisitorObject<Node> {
                                      node.getBeginLine(),
                                      node.getBeginColumn(),
                                      node.getEndLine(),
-                                     node.getEndColumn()
-      );
-      } else {
+                                     node.getEndColumn());
+      } 
+      else {
         node.setExpression((Expression)o);
       }
     }

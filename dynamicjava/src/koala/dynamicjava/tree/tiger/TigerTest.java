@@ -37,6 +37,8 @@ public class TigerTest extends TestCase {
   
   public Object interpret(String testString) throws InterpreterException {
     return strInterpreter.interpret(new StringReader(testString), "Unit Test");
+//    List<Node> exps = strInterpreter.buildStatementList(new java.io.StringReader(testString), "Unit Test");
+//    return astInterpreter.interpret(exps);
   }
   
   // Interpreting STATIC IMPORT, NOT YET SUPPORTED
@@ -165,24 +167,24 @@ public class TigerTest extends TestCase {
     
     // Testing static method with varargs
     public void testInterpretStaticMethodVarArgs(){
-    testString =
-      "public class C {\n"+
-      "  public static String someMethod(String ... s){\n"+
-      "    String returnStr=\"\";\n"+
-      "    for(int i=0;i<s.length;i++) {\n"+
-      "      returnStr = returnStr+s[i];\n"+
-      "    }\n"+
-      "    return returnStr;\n"+
-      "  }\n"+
-      "}\n"+
-      "C.someMethod(\"Str1\", \"Str2\", \"Str3\");\n";
-    
-    assertEquals("Str1Str2Str3", interpret(testString));
-  }
+      testString =
+        "public class C {\n"+
+        "  public static String someMethod(String ... s){\n"+
+        "    String returnStr=\"\";\n"+
+        "    for(int i=0;i<s.length;i++) {\n"+
+        "      returnStr = returnStr+s[i];\n"+
+        "    }\n"+
+        "    return returnStr;\n"+
+        "  }\n"+
+        "}\n"+
+        "C.someMethod(\"Str1\", \"Str2\", \"Str3\");\n";
+      
+      assertEquals("Str1Str2Str3", interpret(testString));
+    }
         
     //This fails until autoboxing works.
     //Using ByteArrayOutputStream to avoid printing to console (and ByteArrayOutputStream is a non abstract subclass of OutputStream(
-    public void xtestInterpretPrimitivePrintf(){
+    public void testInterpretPrimitivePrintf(){
       testString =
         "import java.io.PrintStream;\n"+
         "import java.io.ByteArrayOutputStream;\n"+
