@@ -65,6 +65,7 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
           System.exit(0);
         }
         catch (Exception e) {
+          quitFailed(e);
         }
       }
     };
@@ -77,6 +78,13 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
    * It can be overridden to provide cleanup code, etc.
    */
   protected void beforeQuit() {}
+  
+  /**
+   * This method is called if the interpreterJVM cannot
+   * be exited (likely because of its having a
+   * security manager)
+   */
+  protected void quitFailed(Exception e) {}
   
   /**
    * Starts background thread to periodically poll the master JVM and
