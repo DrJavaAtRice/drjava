@@ -204,7 +204,11 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     OpenDefinitionsDocument openDoc = _defPane.getOpenDocument();
     Document doc = fr.getDocument();
     int pos = fr.getFoundOffset();
-    if (!openDoc.belongsHuh(doc)) {
+    
+    // if the result is in another document and
+    // there actually *is* a match, then switch 
+    // active documents. otherwise don't
+    if (!openDoc.belongsHuh(doc) && pos != -1) {
       Caret c = _defPane.getCaret();
       c.setDot(c.getDot());
       // XXX: this is fundamentally ugly - we should support direct, ordered

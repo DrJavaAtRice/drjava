@@ -374,9 +374,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       
       public boolean isProjectFile(OpenDefinitionsDocument doc){
         try {
-          return (doc.getSourceRoot().compareTo(projectRoot) == 0);
+          if(doc.isUntitled()) return false;
+          String filePath = doc.getFile().getParentFile().getCanonicalPath();
+          String projectPath = projectRoot.getCanonicalPath();
+          System.err.println("filePath and projectPath");
+          System.err.println("  " + filePath);
+          System.err.println("  " + projectPath);
+          return (filePath.startsWith(projectPath));
+//          return (doc.getSourceRoot().compareTo(projectRoot) == 0);
         }
-        catch(InvalidPackageException e) {
+        catch(IOException e) {
           return false;
         }
       }
@@ -1018,26 +1025,26 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
     return docs;
   }
-
-    /**
-     * @return the size of the collection of OpenDefinitionsDocument's
-     */
-    public int getDefinitionsDocumentsSize() {
-      return _documentsRepos.size();
-    }
-
-    public OpenDefinitionsDocument getODDGivenIDoc(INavigatorItem idoc)
-    {
-      return _documentsRepos.getValue(idoc);
-    }
-    
-    public INavigatorItem getIDocGivenODD(OpenDefinitionsDocument odd)
-    {
-      return _documentsRepos.getKey(odd);
-    }
-
+  
+  /**
+   * @return the size of the collection of OpenDefinitionsDocument's
+   */
+  public int getDefinitionsDocumentsSize() {
+    return _documentsRepos.size();
+  }
+  
+  public OpenDefinitionsDocument getODDGivenIDoc(INavigatorItem idoc)
+  {
+    return _documentsRepos.getValue(idoc);
+  }
+  
+  public INavigatorItem getIDocGivenODD(OpenDefinitionsDocument odd)
+  {
+    return _documentsRepos.getKey(odd);
+  }
+  
   //----------------------- End IGetDocuments Methods -----------------------//
-
+  
   /**
    * Set the indent tab size for all definitions documents.
    * @param indent the number of spaces to make per level of indent
@@ -1659,8 +1666,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      */
     public File getFile() throws IllegalStateException , FileMovedException {
         if (_file == null) {
-          throw new IllegalStateException(
-                                          "This document does not yet have a file.");
+          throw new IllegalStateException("This document does not yet have a file.");
         }
         //does the file actually exist?
         if (_file.exists()) {
@@ -2666,6 +2672,32 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       return true;
   }*/
 
+  
+  public List<OpenDefinitionsDocument> getNonProjectDocuments(){
+    List<OpenDefinitionsDocument> allDocs = getDefinitionsDocuments();
+    List<OpenDefinitionsDocument> projectDocs = new LinkedList<OpenDefinitionsDocument>();
+    for(OpenDefinitionsDocument tempDoc : allDocs){
+      if(!tempDoc.isProjectFile()){
+        projectDocs.add(tempDoc);
+      }
+    }
+    return projectDocs;
+  }
+  
+  
+  
+  
+  public List<OpenDefinitionsDocument> getProjectDocuments(){
+    List<OpenDefinitionsDocument> allDocs = getDefinitionsDocuments();
+    List<OpenDefinitionsDocument> projectDocs = new LinkedList<OpenDefinitionsDocument>();
+    for(OpenDefinitionsDocument tempDoc : allDocs){
+      if(tempDoc.isProjectFile()){
+        projectDocs.add(tempDoc);
+      }
+    }
+    return projectDocs;
+  }
+  
   
   
   

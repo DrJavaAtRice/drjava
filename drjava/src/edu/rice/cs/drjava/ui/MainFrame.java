@@ -1961,6 +1961,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }    
   }
   
+  
   /**
    * Oversees the opening of the project by delegating to the model
    * to parse and initialize the project while resetting the 
@@ -1968,6 +1969,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * @param projectFile the file of the project to open
    */
   private void _openProjectHelper(File projectFile) {
+    System.err.println("opening");
     _currentProjFile = projectFile;
     File[] srcFiles = null;
     try{
@@ -1986,9 +1988,48 @@ public class MainFrame extends JFrame implements OptionConstants {
       _showIOError(e);
       return;
     }
+
     
-    _closeAll();
-    _resetNavigatorPane();
+    /**
+     * now the model
+     */
+    List<OpenDefinitionsDocument> nonProjDocs = _model.getNonProjectDocuments();
+    List<OpenDefinitionsDocument> projDocs = _model.getProjectDocuments();
+    
+    
+    /**
+     * close all project files
+     */
+    for(OpenDefinitionsDocument d: projDocs){
+      System.err.println("closing " + d);
+      _model.closeFile(d);
+      System.err.println("closed");
+    }
+      
+    /**
+     * keep all nonproject files open
+     */
+    IDocumentNavigator nav = _model.getDocumentNavigator();
+//    nav.clear();
+
+//    for(OpenDefinitionsDocument d: nonProjDocs){
+//      System.err.println("adding" + d);
+//      try{
+//        /* transfer docs with files to new navigator */
+//        nav.addDocument(_model.getIDocGivenODD(d), d.getFile().getParentFile().getAbsolutePath());
+//      }catch(IllegalStateException e){
+//        /* transfer untitled docs to new navigator */
+//        nav.addDocument(_model.getIDocGivenODD(d));
+//      }catch(FileMovedException e){
+//        /* if the file has moved or been deleted,
+//         * then add it to external files, since it's
+//         * "no longer in the project directory"
+//         */
+//        nav.addDocument(_model.getIDocGivenODD(d));
+//      }
+//    }
+    
+    System.err.println("done adding");
     
     final File[] files = srcFiles;
     // project could be empty
@@ -1999,7 +2040,14 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       });
     }
+    
+    System.err.println("about to set close project action");
+    
     _closeProjectAction.setEnabled(true);
+
+    System.err.println("done opening");
+    
+    _resetNavigatorPane();
   }
   
   /**
@@ -2008,11 +2056,14 @@ public class MainFrame extends JFrame implements OptionConstants {
    * list view navigator
    */
   private void _closeProject(){
+    List<OpenDefinitionsDocument> projDocs = _model.getProjectDocuments();
+    for(OpenDefinitionsDocument d: projDocs){
+      _model.closeFile(d);
+    }
     _model.closeProject();
     Component renderer = _model.getDocumentNavigator().getRenderer();
     new ForegroundColorListener(renderer);
     new BackgroundColorListener(renderer);
-    _closeAll();
     _resetNavigatorPane();
     _closeProjectAction.setEnabled(false);
     _setUpContextMenus();
