@@ -62,10 +62,17 @@ import koala.dynamicjava.util.*;
 import edu.rice.cs.util.classloader.StickyClassLoader;
 import edu.rice.cs.util.*;
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.*;
+
+// NOTE: Do NOT import/use the config framework in this class!
+//  (This class runs in a different JVM, and will not share the config object)
+
 
 /**
  * An implementation of the interpreter for the repl pane.
+ * 
+ * This class is loaded in the Interpreter JVM, not the Main JVM.
+ * (Do not use DrJava's config framework here.)
+ * 
  * @version $Id$
  */
 public class DynamicJavaAdapter implements JavaInterpreter {
@@ -76,10 +83,6 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    */
   public DynamicJavaAdapter() {
     _djInterpreter = new InterpreterExtension();
-    // Allow access to private fields/methods from interpreter!
-    if (DrJava.getConfig().getSetting(OptionConstants.ALLOW_PRIVATE_ACCESS).booleanValue()) {
-      _djInterpreter.setAccessible(true);
-    }
   }
 
   /**

@@ -1415,6 +1415,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       (DEFINITIONS_BACKGROUND_COLOR, new BackgroundColorOptionListener());
 
     // Add option listeners for changes to config options
+    //  NOTE: We should only add listeners to view-related (or view-dependent)
+    //        config options here.  Model options should go in
+    //        DefaultGlobalModel._registerOptionListeners().
     config.addOptionListener
       (FONT_MAIN, new MainFontOptionListener());
     config.addOptionListener
@@ -1505,12 +1508,6 @@ public class MainFrame extends JFrame implements OptionConstants {
             config.setSetting(WARN_CHANGE_LAF, Boolean.FALSE);
           }
         }
-      }
-    });
-    
-    config.addOptionListener(ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {
-      public void optionChanged(OptionEvent<Boolean> oce) {
-        _model.getInteractionsModel().setPrivateAccessible(oce.value.booleanValue());
       }
     });
 

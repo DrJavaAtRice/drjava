@@ -52,6 +52,9 @@ import java.io.*;
 
 /**
  * Processes any commands sent to or from the interpreter.
+ * 
+ * This class is loaded in the Interpreter JVM, not the Main JVM.
+ * (Do not use DrJava's config framework here.)
  *
  * @version $Id$
  */

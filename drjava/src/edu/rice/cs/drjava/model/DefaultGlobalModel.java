@@ -952,10 +952,18 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     // Listen to any relevant config options
     DrJava.getConfig().addOptionListener(EXTRA_CLASSPATH,
                                          new ExtraClasspathOptionListener());
+    
     DrJava.getConfig().addOptionListener(BACKUP_FILES,
                                          new BackUpFileOptionListener());
     Boolean makeBackups = DrJava.getConfig().getSetting(BACKUP_FILES);
     FileOps.DefaultFileSaver.setBackupsEnabled(makeBackups.booleanValue());
+    
+    DrJava.getConfig().addOptionListener(ALLOW_PRIVATE_ACCESS,
+                                         new OptionListener<Boolean>() {
+      public void optionChanged(OptionEvent<Boolean> oce) {
+        getInteractionsModel().setPrivateAccessible(oce.value.booleanValue());
+      }
+    });
   }
 
   /**

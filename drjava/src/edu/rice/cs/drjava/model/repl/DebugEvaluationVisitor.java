@@ -54,6 +54,10 @@ import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 /**
  * Extension of EvaluationVisitorExtension that notifies InterpreterJVM
  * every time a variable assignment is made.
+ * 
+ * This class is loaded in the Interpreter JVM, not the Main JVM.
+ * (Do not use DrJava's config framework here.)
+ * 
  * @version $Id$
  */
 public class DebugEvaluationVisitor extends EvaluationVisitorExtension {

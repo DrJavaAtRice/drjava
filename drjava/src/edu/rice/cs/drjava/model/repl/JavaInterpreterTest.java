@@ -521,7 +521,7 @@ public final class JavaInterpreterTest extends TestCase {
    * given the value of the ALLOW_PRIVATE_ACCESS configuration option.
    */
   public void testAllowPrivateAccess() throws ExceptionReturnedException {
-    // The real option listener is on MainFrame, add one here.
+    // The real option listener is in DefaultGlobalModel, so add one here.
     DrJava.getConfig().addOptionListener(OptionConstants.ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {
         _interpreter.setPrivateAccessible(oce.value.booleanValue());

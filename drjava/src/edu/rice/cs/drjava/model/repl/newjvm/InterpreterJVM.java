@@ -82,6 +82,9 @@ import javax.swing.JDialog;
  * to be subclassed to use with another interpreter. (Really, there would
  * need to be an abstract base class, but since we don't need it yet I'm
  * not making one.)
+ * 
+ * This class is loaded in the Interpreter JVM, not the Main JVM.
+ * (Do not use DrJava's config framework here.)
  *
  * @version $Id$
  */

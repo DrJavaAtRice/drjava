@@ -64,6 +64,9 @@ import koala.dynamicjava.util.*;
  *       had no result. (This is instead of returning null, which
  *       DynamicJava does.</LI>
  * </OL>
+ * 
+ * This class is loaded in the Interpreter JVM, not the Main JVM.
+ * (Do not use DrJava's config framework here.)
  *
  * @version $Id$
  */

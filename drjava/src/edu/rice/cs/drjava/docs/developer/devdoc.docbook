@@ -324,6 +324,10 @@ ant clean compile
     </section>
 
   </chapter>
+  
+  
+  <!-- Chapter: General Overview -->
+
 
 
   <!-- Chapter: Using Ant -->
@@ -399,4 +403,59 @@ ant clean compile
 
   </chapter>
 
+  <!-- Chapter: Updating the docs -->
+  <chapter id="documentation">
+    <title>Updating the Documentation</title>
+    <para>The DrJava User and Developer Documentation files are written in DocBook, a form of XML.  It is important to keep these files up to date for both the user help documentation and instructions to help developers get started.</para>
+      
+    <section id="doc-files">
+      <title>Documentation Files</title>
+      <para>The user and developer DocBook files are named <filename>userdoc.docbook</filename> and <filename>devdoc.docbook</filename>, respectively, and they are located in the <filename>src/edu/rice/cs/drjava/docs/</filename> directory.  Emacs and modern versions of KDE's KWrite are both good editors for DocBook files.  Please try to maintain a consistent style within the documentation, both in tone (eg. somewhat informal-- "you" instead of "the user") and formatting (eg. literal tags for small bits of code, paragraphs on one line, etc).</para>
+    </section>
+    
+    <section id="doc-builds">
+      <title>Building the Documentation</title>
+      <para>There are Ant build targets for creating HTML and PDF versions of the user and developer documentation.  To use these targets, you must have <filename>docbook2html</filename> (and optionally <filename>docbook2pdf</filename>) installed and on your path.  Beware that some versions of these tools may not work with our build script or may generate HTML files without an <filename>index.html</filename> file.  (If this is the case, as it is currently on the greenland server, you'll probably want to copy <filename>book1.html</filename> to <filename>index.html</filename>.  Don't just rename it, because other files will link to the old one.)</para>
+      
+      <formalpara>
+        <title>Ant Targets</title>
+        <para>You can build HTML files for both user and developer documentation at once with <literal>ant docs</literal>, which places the HTML in <filename>built/edu/rice/cs/drjava/docs/</filename>.  The two sets can be built independently with <literal>ant userdocs</literal> and <literal>ant devdocs</literal>.  You can calso build a PDF file for the user documentation with <literal>ant userdocs-pdf</literal>.  (There is currently no target for a developer documentation PDF, though it would not be difficult to add.)</para>
+      </formalpara>
+      
+      <formalpara>
+        <title>Updating the Website</title>
+        <para>It is important to update the DrJava website after all changes to the documentation.  This involves copying the HTML files for the user and developer documentation (and the PDF file for the user documentation) to <filename>drjava.sf.net:/home/groups/d/dr/drjava/htdocs/</filename>.  The HTML files should go in the <filename>userdocs/</filename> and <filename>devdocs/</filename> directories, respectively, while the PDF should be saved as <filename>drjava-userdoc.pdf</filename> directly in <filename>htdocs/</filename>.</para>
+      </formalpara>
+      
+      <formalpara>
+        <title>Committing Documentation</title>
+        <para>The documentation is committed automatically with any <literal>ant commit</literal>, but it is hardly necessary to run the full suite of unit tests for a change that does not affect the codebase.  Instead, the documentation can be committed in isolation with <literal>ant commit-docs</literal>.</para>
+      </formalpara>
+    </section>
+
+  </chapter>
+
+    <!-- Chapter: Miscellaneous Tips -->
+  <chapter id="misc">
+    <title>Miscellaneous Tips</title>
+    <para>This chapter includes miscellaneous development tips that haven't found a home in another chapter yet.  Feel free to move them to a more appropriate place as the documentation grows.</para>
+    
+    <section id="misc-architecture">
+      <title>Architectural Notes</title>
+      <para>This section includes general notes on DrJava's architecture.  (We don't want to get too specific, since many aspects change over time.)</para>
+      
+      <itemizedlist>
+        <listitem>
+          <formalpara>
+            <title>Use of the Configuration Framework</title>
+            <para>DrJava's configurable options are managed through a framework in the <literal>edu.rice.cs.drjava.config</literal> package.  This framework takes care of loading and saving options from the <filename>.drjava</filename> file, as well as managing listeners to changed configuration options.  The main class of interest is <literal>OptionConstants</literal>, which defines all options and their default values.  You can get and change settings using the static <literal>DrJava.getConfig()</literal> method.</para>
+          </formalpara>
+          <para>It is very important never to use the configuration framework in the Interpreter JVM, since this will instantiate a new copy of the framework inconsistent with the one in the Main JVM.  (It also causes the "SlaveJVMRunner" icon to appear in Mac OS X.)  It is also very important never to use the configuration framework in the Eclipse plug-in, because it causes Eclipse to crash.  (We're not sure why, but it's better for us to use Eclipse's preferences in that world anyway.)</para>
+        </listitem>
+      </itemizedlist>
+      
+    </section>
+    
+  </chapter>
+  
 </book>

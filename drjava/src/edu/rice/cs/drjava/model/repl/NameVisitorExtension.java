@@ -59,6 +59,9 @@ import koala.dynamicjava.util.*;
  * A subclass of NameVisitor that preempts the context defining
  * variables when it visits VariableDeclarations by making sure 
  * the NameVisitor and TypeChecker will accept it first.
+ * 
+ * This class is loaded in the Interpreter JVM, not the Main JVM.
+ * (Do not use DrJava's config framework here.)
  *
  * @version $Id$
  */

@@ -788,6 +788,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     // killInterpreter(false), we want to automatically respawn
     _enabled = true;
     _cleanlyRestarting = false;
+    
+    Boolean allowAccess = DrJava.getConfig().getSetting(OptionConstants.ALLOW_PRIVATE_ACCESS);
+    setPrivateAccessible(allowAccess.booleanValue());
 
     _interactionsModel.interpreterReady();
     _junitModel.junitJVMReady();

@@ -68,6 +68,9 @@ import edu.rice.cs.util.UnexpectedException;
  * references to outer instance classes to field accesses in the form
  * "this.this$N.this$N-1...".
  *
+ * This class is loaded in the Interpreter JVM, not the Main JVM.
+ * (Do not use DrJava's config framework here.)
+ * 
  * @version $Id$
  */
 public class JavaDebugInterpreter extends DynamicJavaAdapter {

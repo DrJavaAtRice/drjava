@@ -59,6 +59,9 @@ import java.util.Iterator;
  * short circuiting should occur (e.g. (false) ? 2/0 else 1 will cause an
  * exception).
  * 
+ * This class is loaded in the Interpreter JVM, not the Main JVM.
+ * (Do not use DrJava's config framework here.)
+ * 
  * NOTE: These problems have been corrected in newer versions of
  * DynamicJava, so this class is no longer used.
  * 
