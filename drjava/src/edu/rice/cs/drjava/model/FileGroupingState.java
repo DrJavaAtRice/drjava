@@ -70,10 +70,10 @@ public interface FileGroupingState {
   public boolean isProjectActive();
   
   /**
-   * @return true if the document is part of the active project, or false
+   * @return true if the document is part of the active project (in the project path), or false
    * if it is not (or the model is not in project mode)
    */
-  public boolean isProjectFile(OpenDefinitionsDocument doc);
+  public boolean isInProjectPath(OpenDefinitionsDocument doc);
   
   /**
    * Returns the current project file
@@ -85,4 +85,15 @@ public interface FileGroupingState {
    * Sets the current built directory
    */
   public void setBuildDirectory(File f);
+  
+  /**
+   * Return all files currently saved as source files in the project file
+   * If not in project mode, returns null
+   */
+  public File[] getProjectFiles();
+  
+  /**
+   * Returns true the given file is in the current project file.
+   */
+  public boolean isProjectFile(File f);
 }

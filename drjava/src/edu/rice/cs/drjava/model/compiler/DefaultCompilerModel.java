@@ -158,7 +158,7 @@ public class DefaultCompilerModel implements CompilerModel {
         new LinkedList<OpenDefinitionsDocument>();
     
       for(OpenDefinitionsDocument odd : defDocs){
-        if(odd.isProjectFile()){
+        if(odd.isInProjectPath()){
             projectDocs.add(odd);
         }
       }
@@ -233,7 +233,7 @@ public class DefaultCompilerModel implements CompilerModel {
   synchronized public void compile(OpenDefinitionsDocument doc)
       throws IOException {
     File buildDir = null;
-    if (doc.isProjectFile()) {
+    if (doc.isInProjectPath()) {
       buildDir = _getter.getFileGroupingState().getBuildDirectory();
     }
     
@@ -367,7 +367,7 @@ public class DefaultCompilerModel implements CompilerModel {
   protected boolean _hasModifiedFiles(List<OpenDefinitionsDocument> defDocs) {
     boolean hasModifiedFiles = false;
     for(OpenDefinitionsDocument odd : defDocs){
-      if(odd.isProjectFile()){
+      if(odd.isInProjectPath()){
         hasModifiedFiles |= odd.isModifiedSinceSave();
       }
     }

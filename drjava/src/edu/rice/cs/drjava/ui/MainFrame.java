@@ -314,10 +314,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       _openChooser.resetChoosableFileFilters();
       _openChooser.setFileFilter(_projectFilter);
       File[] retFiles = getOpenFiles(_openChooser);
-      _openChooser.removeChoosableFileFilter(_projectFilter);      // why both???
-                                                                   //         ???
-      _openChooser.addChoosableFileFilter(_projectFilter);         //         ???
-      _openChooser.setFileFilter(_javaSourceFilter);
       return retFiles;
     }
   };
@@ -1956,10 +1952,23 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private void _open() {
-    if(_openChooser.getFileFilter().equals(_projectFilter))
-      openProject(_openSelector);
-    else
-      open(_openSelector);
+    try {
+      final File[] fileList = _openSelector.getFiles();
+      
+      FileOpenSelector fos = new FileOpenSelector() {
+        public File[] getFiles(){
+          return fileList;         
+        }
+      };
+    
+      if(_openChooser.getFileFilter().equals(_projectFilter)) 
+        openProject(fos);
+      else
+        open(fos);
+    }
+    catch(OperationCanceledException oce) {
+      
+    }
   }
   
   /**
@@ -1984,7 +1993,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     openProject(_openProjectSelector);
   }
   
-  private void openProject(FileOpenSelector projectSelector) {
+  void openProject(FileOpenSelector projectSelector) {
     try {
       hourglassOn();
       final File[] file = projectSelector.getFiles();
@@ -2014,6 +2023,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     try{
       srcFiles = _model.openProject(projectFile);
       _setUpContextMenus();
+      _recentFileManager.updateOpenFiles(projectFile);
     }
     catch(MalformedProjectFileException e){
       _showProjectFileParseError(e);
@@ -2084,7 +2094,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _openProjectUpdate() {
     if(_model.isProjectActive()) {
       _closeProjectAction.setEnabled(true);
-      _saveProjectAction.setEnabled(true);
+      _saveProjectAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(true);
       
       _resetNavigatorPane(); 
@@ -2167,15 +2177,19 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
       try {
-          _recentFileManager.updateOpenFiles(openDoc.getFile());
+        File f = openDoc.getFile();
+        if(! _model.isProjectFile(f))
+          _recentFileManager.updateOpenFiles(f);
       }
       catch (IllegalStateException ise) {
         // Impossible: saved => has a file
         throw new UnexpectedException(ise);
       }
       catch (FileMovedException fme) {
+        File f = fme.getFile();
         // Recover, show it in the list anyway
-        _recentFileManager.updateOpenFiles(fme.getFile());
+        if(! _model.isProjectFile(f))
+          _recentFileManager.updateOpenFiles(f);
       }
     }
     catch (OperationCanceledException oce) {
@@ -2189,7 +2203,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     finally {
       hourglassOff();
-      _openProjectUpdate();
+      //_openProjectUpdate();
     }
   }
 
@@ -2269,6 +2283,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   private boolean _saveAs() {
     try {
+      //If file becomes project file it should enable the save project option in the menu
       return _model.getActiveDocument().saveFileAs(_saveSelector);
     }
     catch (IOException ioe) {
@@ -2279,6 +2294,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   private void _saveAll() {
     try {
+      _saveProject();
       _model.saveAllFiles(_saveSelector);
     }
     catch (IOException ioe) {
@@ -2336,7 +2352,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     catch(IOException ioe) {
       _showIOError(ioe);
     }
-    //_saveProjectAction.setEnabled(false);
+    _recentFileManager.updateOpenFiles(file);
+    _saveProjectAction.setEnabled(false);
   }
   
   
@@ -4410,7 +4427,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          showDebugger();
+          showDebugger(); 
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -4631,15 +4648,19 @@ public class MainFrame extends JFrame implements OptionConstants {
       updateFileTitle();
       _currentDefPane.requestFocus();
       try {
-        _recentFileManager.updateOpenFiles(doc.getFile());
+        File f = doc.getFile();
+        if(! _model.isProjectFile(f))
+          _recentFileManager.updateOpenFiles(f);
       }
       catch (IllegalStateException ise) {
         // Impossible: saved => has a file
         throw new UnexpectedException(ise);
       }
       catch (FileMovedException fme) {
+        File f = fme.getFile();
         // Recover, show it in the list anyway
-        _recentFileManager.updateOpenFiles(fme.getFile());
+        if(! _model.isProjectFile(f))
+          _recentFileManager.updateOpenFiles(f);
       }
       // Check class file sync status, in case file was renamed
       if (inDebugMode()) _updateDebugStatus();
@@ -4671,21 +4692,34 @@ public class MainFrame extends JFrame implements OptionConstants {
       else {
         _fileOpened(doc);
       }
+      
+      try {
+        File f = doc.getFile();
+        if(! _model.isProjectFile(f) && _model.isInProjectPath(doc))
+          _saveProjectAction.setEnabled(true);
+      }
+      catch(FileMovedException fme) {
+        //do nothing
+      }
     }
     private void _fileOpened(final OpenDefinitionsDocument doc){
       // Fix OS X scrollbar bug before switching
       _reenableScrollBar();
       _createDefScrollPane(doc);
       try {
-        _recentFileManager.updateOpenFiles(doc.getFile());
+        File f = doc.getFile();
+        if(! _model.isProjectFile(f))
+          _recentFileManager.updateOpenFiles(f);
       }
       catch (IllegalStateException ise) {
         // Impossible: opened => has a file
         throw new UnexpectedException(ise);
       }
       catch (FileMovedException fme) {
+        File f = fme.getFile();
         // Recover, show it in the list anyway
-        _recentFileManager.updateOpenFiles(fme.getFile());
+        if(! _model.isProjectFile(f))
+          _recentFileManager.updateOpenFiles(f);
       }
     }
 
@@ -4719,7 +4753,21 @@ public class MainFrame extends JFrame implements OptionConstants {
         _fileClosed(doc);
 //        System.out.println("gui closed file 2");
       }
+      if(doc != null) {
+        try {
+          File f = doc.getFile();
+          if(_model.isProjectFile(f))
+            _saveProjectAction.setEnabled(true);
+        }
+        catch(FileMovedException fme) {
+          //do nothing
+        }
+        catch(IllegalStateException ise) {
+          //thrown if the document does not yet have a file
+        }
+      }
     }
+  
 
     /** Does the work of closing a file */
     private void _fileClosed(OpenDefinitionsDocument doc){

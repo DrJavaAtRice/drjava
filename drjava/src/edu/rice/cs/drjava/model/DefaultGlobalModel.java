@@ -369,7 +369,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     _state.setBuildDirectory(f);
   }
   
-  public FileGroupingState _makeProjectFileGroupingState(final File buildDir, final File projectFile) { 
+  public FileGroupingState _makeProjectFileGroupingState(final File buildDir, final File projectFile, final File[] projectFiles) { 
     return new FileGroupingState(){
       private File _builtDir = buildDir;
       
@@ -381,7 +381,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return true;
       }
       
-      public boolean isProjectFile(OpenDefinitionsDocument doc){
+      public boolean isInProjectPath(OpenDefinitionsDocument doc){
         try {
           File projectRoot = projectFile.getParentFile();
           if(doc.isUntitled()) return false;
@@ -397,6 +397,34 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       
       public File getProjectFile() {
         return projectFile;
+      }
+      
+      public boolean isProjectFile(File f) {
+        String path;
+        
+        if (f == null) return false;
+        
+        try{
+          path = f.getCanonicalPath();
+        }
+        catch(IOException ioe) {
+          return false;
+        }
+        
+        for(File file : projectFiles) {
+          try {
+            if(file.getCanonicalPath().equals(path))
+              return true;
+          }
+          catch(IOException ioe) {
+            //continue
+          }
+        }
+        return false;
+      }
+      
+      public File[] getProjectFiles() {
+        return projectFiles;
       }
       
       public void setBuildDirectory(File f) {
@@ -415,7 +443,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return false;
       }
       
-      public boolean isProjectFile(OpenDefinitionsDocument doc){
+      public boolean isInProjectPath(OpenDefinitionsDocument doc){
         return false;
       }
       public File getProjectFile() {
@@ -423,6 +451,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       }
       public void setBuildDirectory(File f) {
         //Do nothing - there is no project open. Maybe throw an exception here?
+      }
+      public File[] getProjectFiles() {
+        return null;
+      }
+      public boolean isProjectFile(File f) {
+        return false;
       }
     };
   }
@@ -447,7 +481,32 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public File getProjectFile() {
     return _state.getProjectFile();
   }
+  
+  /**
+   * Return all files currently saved as source files in the project file
+   * If not in project mode, returns null
+   */
+  public File[] getProjectFiles() {
+    return _state.getProjectFiles();
+  }
+  
+  /**
+   * Returns true the given file is in the current project file.
+   */
+  public boolean isProjectFile(File f) {
+    return _state.isProjectFile(f);
+  }
    
+  /**
+   * a file is in the project if the source root is the same as the
+   * project root. this means that project files must be saved at the
+   * source root. (we query the model through the model's state)
+   */
+  public boolean isInProjectPath(OpenDefinitionsDocument doc) {
+    return _state.isInProjectPath(doc);
+  }
+  
+  
   // ----- METHODS -----
   /**
    * Add a listener to this global model.
@@ -790,7 +849,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     setDocumentNavigator(newNav);
     
     File buildDir = (ir.getBuildDirectory().length > 0) ? ir.getBuildDirectory()[0] : null;
-    setFileGroupingState(_makeProjectFileGroupingState(buildDir, projectFile));
+    setFileGroupingState(_makeProjectFileGroupingState(buildDir, projectFile, srcFiles));
     
     
     String projfilepath = projectFile.getCanonicalPath();
@@ -1591,8 +1650,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * project root. this means that project files must be saved at the
      * source root. (we query the model through the model's state)
      */
-    public boolean isProjectFile(){
-      return _state.isProjectFile(this);
+    public boolean isInProjectPath(){
+      return _state.isInProjectPath(this);
     }
     
     /**
@@ -2815,7 +2874,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     List<OpenDefinitionsDocument> allDocs = getDefinitionsDocuments();
     List<OpenDefinitionsDocument> projectDocs = new LinkedList<OpenDefinitionsDocument>();
     for(OpenDefinitionsDocument tempDoc : allDocs){
-      if(!tempDoc.isProjectFile()){
+      if(!tempDoc.isInProjectPath()){
         projectDocs.add(tempDoc);
       }
     }
@@ -2829,7 +2888,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     List<OpenDefinitionsDocument> allDocs = getDefinitionsDocuments();
     List<OpenDefinitionsDocument> projectDocs = new LinkedList<OpenDefinitionsDocument>();
     for(OpenDefinitionsDocument tempDoc : allDocs){
-      if(tempDoc.isProjectFile()){
+      if(tempDoc.isInProjectPath()){
         projectDocs.add(tempDoc);
       }
     }

@@ -88,7 +88,7 @@ public interface OpenDefinitionsDocument extends Document {
    * project root. this means that project files must be saved at the
    * source root.
    */
-  public boolean isProjectFile();
+  public boolean isInProjectPath();
   
   /**
    * Returns whether this document is currently untitled

@@ -412,4 +412,22 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    * Sets the current built directory
    */
   public void setBuildDirectory(File f);
+  
+  /**
+   * Return all files currently saved as source files in the project file
+   * If not in project mode, returns null
+   */
+  public File[] getProjectFiles();
+  
+  /**
+   * Returns true the given file is in the current project file.
+   */
+  public boolean isProjectFile(File f);
+  
+  /**
+   * a file is in the project if the source root is the same as the
+   * project root. this means that project files must be saved at the
+   * source root. (we query the model through the model's state)
+   */
+  public boolean isInProjectPath(OpenDefinitionsDocument doc);
 }
