@@ -521,7 +521,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpStatusBar();
 
     _model = new SingleDisplayModel();
-    String userdir = System.getProperty("user.dir");
+    String userdir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString();
     _openChooser = new JFileChooser(userdir);
     _openChooser.setFileFilter(new JavaSourceFilter());
     _openChooser.setMultiSelectionEnabled(true);

@@ -65,6 +65,9 @@ public interface OptionConstants extends ConfigurationTool {
   
   public static final IntegerOption FONT_DOCLIST_SIZE = 
     new IntegerOption("font.doclist.size", new Integer(10));
+
+  public static final StringOption WORKING_DIRECTORY = 
+    new StringOption("working.directory", System.getProperty("user.dir"));
   
   public static final IntegerOption INDENT_LEVEL =
     new IntegerOption("indent.level",new Integer(2));

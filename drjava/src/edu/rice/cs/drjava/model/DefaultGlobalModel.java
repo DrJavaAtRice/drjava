@@ -775,7 +775,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    */
   public File[] getSourceRootSet() {
     LinkedList roots = new LinkedList();
-    File currDir = new File(System.getProperty("user.dir"));
+    File currDir = new File(DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString());
     roots.add(currDir);
 
     for (int i = 0; i < _definitionsDocs.size(); i++) {

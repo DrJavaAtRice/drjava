@@ -51,6 +51,7 @@ import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
@@ -62,7 +63,7 @@ import edu.rice.cs.util.*;
  *
  * @version $Id$
  */
-public class GlobalModelOtherTest extends GlobalModelTestCase {
+public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
   /**
    * Constructor.
    * @param  String name
@@ -346,9 +347,9 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, roots.length);
     assertEquals("source root (current directory)", 
-                 new File(System.getProperty("user.dir")),
+                 new File(DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString()),
                  roots[0]);
-    
+
     // Create temp directory
     File baseTempDir = tempDirectory();
 
@@ -426,7 +427,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, roots.length);
     assertEquals("source root (current directory)", 
-                 new File(System.getProperty("user.dir")),
+                 new File(DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString()),
                  roots[0]);
   }
 
