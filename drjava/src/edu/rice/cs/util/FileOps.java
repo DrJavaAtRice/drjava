@@ -130,6 +130,16 @@ public abstract class FileOps {
     reader.close();
     return buf.toString();
   }
+  
+  /**
+   * Copies the text of one file into another.
+   * @param source the file to be copied
+   * @param dest the file to be copied to
+   */
+  public static void copyFile(File source, File dest) throws IOException {
+    String text = readFileAsString(source);
+    writeStringToFile(dest, text);
+  }
 
   /**
    * Creates a new temporary file and writes the given text to it.
