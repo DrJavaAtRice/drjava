@@ -84,8 +84,15 @@ public abstract class DocumentDebugAction<T extends EventRequest>
       }
     }
     catch (ClassNameNotFoundException cnnfe) {
-      // Couldn't find class name, leave as empty string
-      _className = "";
+      // Couldn't find class name at offset, use the first class name
+      // found.
+      try {
+        _className = doc.getDocument().getQualifiedClassName();
+      }
+      catch (ClassNameNotFoundException cnnfe2) {
+        // Still couldn't find a class name, use ""
+        _className = "";
+      }
     }
     try {
       _file = doc.getFile();

@@ -611,7 +611,10 @@ public class DebugPanel extends JPanel implements OptionConstants {
    */
   private Breakpoint _getSelectedBreakpoint() throws DebugException {
     TreePath path = _bpTree.getSelectionPath();
-    if (path.getPathCount() == 3) {
+    if (path == null || path.getPathCount() != 3) {
+      return null;
+    }
+    else {
       DefaultMutableTreeNode lineNode =
         (DefaultMutableTreeNode)path.getLastPathComponent();
       int line = ((Integer) lineNode.getUserObject()).intValue();
@@ -619,9 +622,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
         (DefaultMutableTreeNode) path.getPathComponent(1);
       String className = (String) classNameNode.getUserObject();
       return _debugger.getBreakpoint(line, className);
-    }
-    else {
-      return null;
     }
   }
 
