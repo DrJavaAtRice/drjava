@@ -47,95 +47,127 @@ package edu.rice.cs.drjava.model;
 
 import java.io.*;
 
-public class ClassAndInterfaceFinder{
-  private File _file;
+/** Class with getClassName method for finding the name of the first class or 
+ *  interface defined in a file */
+
+public class ClassAndInterfaceFinder {
   
-  public ClassAndInterfaceFinder(File f){
-    _file = f;
+  private StreamTokenizer tokenizer;
+  
+  /* constructor to support unit testing */
+  public ClassAndInterfaceFinder(Reader r) {
+    initialize(r);
   }
   
-  public String getClassName(){
-    try{
+  /* normal constructor */
+  public ClassAndInterfaceFinder(File f) {
+    Reader r;
+    try {
+      r = new FileReader(f);
+    }
+    catch(FileNotFoundException e) { /* create a Reader for an "empty" file */
+      r = new StringReader("");
+    }
+    initialize(r);
+  }
+  
+  
+  
+  private void initialize(Reader r) {
+    
+    tokenizer = new StreamTokenizer(r);
+    tokenizer.slashSlashComments(true);
+    tokenizer.slashStarComments(true);
+    tokenizer.lowerCaseMode(false);
+    tokenizer.wordChars('_','_');
+    tokenizer.wordChars('.','.');
+  }
+  
+  /** Finds the the name of the first class or interface defined in this file.
+   *  @return the String containing this name or "" if no such class or interface
+   *          is found.
+   */
+  public String getClassOrInterfaceName() { return getName(true); }
+  
+  /** Finds the the name of the first class (excluding interfaces) defined in this file.
+   *  @return the String containing this name or "" if no such class or interface
+   *          is found.
+   */
+  public String getClassName() { return getName(false); }
+  
+  /** Finds the the name of the first class or interface in this file, respecting the
+   *  value of the interfaceOK flag.
+   *  I hate flags but did not see a simpler way to avoid duplicated code.
+   *  This method has package (rather than private) visibility for testing purposes.
+   */
+  String getName(boolean interfaceOK) {
+    try {
       String package_name = "";
-      
-      FileReader fr = new FileReader(_file);
-      StreamTokenizer tokenizer = new StreamTokenizer(fr);
-      tokenizer.slashSlashComments(true);
-      tokenizer.slashStarComments(true);
-      tokenizer.lowerCaseMode(false);
-      tokenizer.wordChars('_','_');
-      tokenizer.wordChars('.','.');
-      
       int tokenType;
       
-      // find the "class" or "package" keyword
-      do{
+      // find the "class"/"interface" or "package" keyword (may encounter EOF)
+      do {
         tokenType = tokenizer.nextToken();
-      }while(!foundClassOrInterfaceKeyword(tokenType, tokenizer) && 
-             !foundPackageKeyword(tokenType, tokenizer));
+      } while(! isClassOrInterfaceWord(tokenType,interfaceOK) && ! isPackageWord(tokenType));
+
+      if (isEOF(tokenType)) return "";
       
+      /* Save opening keyword */
       String keyword = tokenizer.sval;
       
-      // find the name of the class or package
-      do{
+      // find the name of the class or package (may encounter EOF)
+      do {
         tokenType = tokenizer.nextToken();
-      }while(!(tokenType == StreamTokenizer.TT_WORD || tokenType == StreamTokenizer.TT_EOF));
+      } while (! isWord(tokenType));
+
+      if (isEOF(tokenType)) return "";
       
-      
-      if(keyword.equals("class")){
-        // we have just a class defined without a package, so return;
-        return tokenizer.sval;
-      }else
-      if(keyword.equals("interface")){
-        // we have just an interface without a package, so return;
-        return tokenizer.sval;
-      }else
-      if(keyword.equals("package")){
-        package_name = tokenizer.sval;
-      }
+      if(keyword.equals("class")) return tokenizer.sval;  // a class defined without a package
+        
+      if (interfaceOK && keyword.equals("interface")) return tokenizer.sval; // an interface without a package
+  
+      if (keyword.equals("package")) package_name = tokenizer.sval;
       
       // find the "class" keyword
-      do{
-        tokenType = tokenizer.nextToken();
-      }while(!foundClassOrInterfaceKeyword(tokenType, tokenizer));
+      do { tokenType = tokenizer.nextToken(); } while (! isClassOrInterfaceWord(tokenType, interfaceOK));
       
       // find the name of the class or interface
-      do{
-        tokenType = tokenizer.nextToken();
-      }while(!(tokenType == StreamTokenizer.TT_WORD || tokenType == StreamTokenizer.TT_EOF));
+      do { tokenType = tokenizer.nextToken(); } while (! isWord(tokenType));
       
+      if (tokenType == StreamTokenizer.TT_EOF) return "";
       
-      if(tokenType != StreamTokenizer.TT_EOF){
-        if(package_name.length() > 0){
-          return package_name + "." + tokenizer.sval;
-        }else{
-          return tokenizer.sval;
-        }
-      }else{
-        return "";      
-      }
-    }catch(FileNotFoundException e){
-      return "";
-    }catch(IOException e){
+      if (package_name.length() > 0) return package_name + "." + tokenizer.sval;
+      
+      return tokenizer.sval;
+      
+    } catch(IOException e) {
       return "";
     }
   }
   
   /**
-   * returns true if the token is "class" or we're at the end of the file
+   * returns true iff the token is a word (as defined by StreamTokenizer)
    */
-  private boolean foundClassOrInterfaceKeyword(int type, StreamTokenizer tokenizer){
-    return (type == StreamTokenizer.TT_WORD && tokenizer.sval.equals("class") ||
-            type == StreamTokenizer.TT_WORD && tokenizer.sval.equals("interface") ||
-            type == StreamTokenizer.TT_EOF);
+  private static boolean isWord(int tt) { return tt == StreamTokenizer.TT_WORD || isEOF(tt); }
+  
+  private static boolean isEOF(int tt)  { return tt == StreamTokenizer.TT_EOF; }
+  
+  
+  /**
+   * returns true iff the token is "class" or we're at the end of the file
+   */
+  private boolean isClassOrInterfaceWord(int tt, boolean interfaceOK) {
+    return  isEOF(tt) || 
+      (tt == StreamTokenizer.TT_WORD && tokenizer.sval.equals("class")) ||
+      (tt == StreamTokenizer.TT_WORD && interfaceOK && tokenizer.sval.equals("interface"));
   }
 
   /**
-   * returns true if the token is "package" or we're at the end of the file
+   * returns true iff the token is "package" or we're at the end of the file
    */
-  private boolean foundPackageKeyword(int type, StreamTokenizer tokenizer){
-    return (type == StreamTokenizer.TT_WORD && tokenizer.sval.equals("package") ||
-            type == StreamTokenizer.TT_EOF);
+  private boolean isPackageWord(int tt) {
+    return (tt == StreamTokenizer.TT_WORD && tokenizer.sval.equals("package") ||
+            tt == StreamTokenizer.TT_EOF);
   }
 }
 

@@ -812,7 +812,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         List<File>los = new LinkedList<File>();
         for(File f: files){
           finder = new ClassAndInterfaceFinder(f);
-          String classname = finder.getClassName();
+          String classname = finder.getClassOrInterfaceName();
           String packagename = getPackageName(classname);
           try{
             File sourceroot = getSourceRoot(packagename, f);
@@ -869,11 +869,11 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
               pathname.getPath().toLowerCase().endsWith(".dj2");
           }
         });
-        ClassFinder finder;
+        ClassAndInterfaceFinder finder;
         List<String> los = new LinkedList<String>();
         List<File> lof = new LinkedList<File>();
         for(File f: files){
-          finder = new ClassFinder(f);
+          finder = new ClassAndInterfaceFinder(f);
           String classname = finder.getClassName();
           if(classname.length() > 0){
             los.add(classname);
