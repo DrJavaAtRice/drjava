@@ -1,6 +1,7 @@
 package edu.rice.cs.drjava;
 
 /**
+ * A list of reduced model tokens.  Uses ModelList as its base.
  * @version$Id$
  */
 public class TokenList extends ModelList<ReducedToken> 

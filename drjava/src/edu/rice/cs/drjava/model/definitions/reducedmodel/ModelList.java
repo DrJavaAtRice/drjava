@@ -5,8 +5,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @version $Id$
  * A list class with some extra features.
+ * Allows multiple iterators to make modifications to the same list
+ * without failing like the iterators for java.util.*List.
+ * @version $Id$
  */
 class ModelList<T> {
   private Node<T> _head;
@@ -128,7 +130,8 @@ class ModelList<T> {
    * Iterators for model list.
    * The iterators are intimately coupled with the ModelList to which they
    * belong.  They are the only public interface for manipulating
-   * ModelList.
+   * ModelList.  The iterators are also fail-safe with regards to 
+   * manipulation of the same list, although probably not thread-safe.
    */
   class Iterator {
     private Node<T> _point;
@@ -174,6 +177,16 @@ class ModelList<T> {
       this._pos = it._pos;
     }
     
+    /**
+     * Disposes of an iterator by removing it from the list's set of
+     * listeners.  When an iterator is no longer necessary, it
+     * should be disposed of.  Otherwise, there will be memory leaks
+     * because the listener set of the list provides a root reference
+     * for the duration of the list's existence.  What this means is that
+     * unless an iterator is disposed of, it will continue to exist even
+     * after garbage collection as long as the list itself is not
+     * garbage collected.
+     */
     public void dispose() {
       ModelList.this.removeListener(this);
     }
@@ -408,7 +421,3 @@ class ModelList<T> {
     }
   }
 }
-
-
-
-

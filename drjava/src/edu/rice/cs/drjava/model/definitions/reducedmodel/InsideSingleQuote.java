@@ -1,6 +1,7 @@
 package edu.rice.cs.drjava;
 
 /**
+ * Shadowing state that corresponds to being between single quotes.
  * @version$Id$
  */
 public class InsideSingleQuote extends ReducedModelState {

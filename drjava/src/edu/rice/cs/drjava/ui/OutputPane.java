@@ -13,6 +13,8 @@ import  java.io.PrintStream;
 
 
 /**
+ * The view component to which System.out and System.err is redirected
+ * when DrJava is run.
  * @version $Id$
  */
 public class OutputPane extends JTextPane {

@@ -4,7 +4,6 @@ import gj.util.Stack;
 import gj.util.Vector;
 
 /**
- * @version $Id$
  * This class provides an implementation of the BraceReduction
  * interface for brace matching.  In order to correctly match, this class
  * keeps track of what is commented (line and block) and what is inside
@@ -24,7 +23,8 @@ import gj.util.Vector;
  *      in the middle of a comment, it is treated as two separate slashes.
  *      Similar for /*.
  * </ol>
- * @author Mike Yantosca, Jonathan Bannet
+ * @version $Id$
+ * @author JavaPLT
  */
 public class ReducedModelBrace implements ReducedModelStates {
   

@@ -1,6 +1,7 @@
 package edu.rice.cs.drjava;
 
 /**
+ * Shadowing state that corresponds to being inside a double-quoted string.
  * @version$Id$
  */
 public class InsideDoubleQuote extends ReducedModelState {

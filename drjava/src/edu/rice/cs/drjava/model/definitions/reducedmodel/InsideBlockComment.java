@@ -1,6 +1,7 @@
 package edu.rice.cs.drjava;
 
 /**
+ * Shadowing state that corresponds to being inside a block comment.
  * @version$Id$
  */
 public class InsideBlockComment extends ReducedModelState {

@@ -5,6 +5,8 @@ import  javax.swing.filechooser.FileFilter;
 
 
 /**
+ * A file filter for files with extensions ".java" and ".gj".
+ * Used in the file choosers for open and save.
  * @version $Id$
  */
 public class JavaSourceFilter extends FileFilter {

@@ -6,6 +6,7 @@ import  javax.swing.text.BadLocationException;
 
 
 /**
+ * Test the tab/enter/squiggly indenting functionality.
  * @version $Id$
  */
 public class IndentTest extends TestCase {

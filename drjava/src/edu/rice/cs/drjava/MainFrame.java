@@ -35,6 +35,7 @@ import  java.io.File;
 
 
 /** 
+ * DrJava's main window.
  * @version $Id$
  * Main DrJava window.
  * It has a menu and then a scroll pane with three components:

@@ -6,6 +6,8 @@ import  junit.extensions.*;
 
 
 /**
+ * Tests insertion and move and other non-delete functionality
+ * of the reduced model.
  * @version $Id$
  */
 public class ReducedModelTest extends BraceReductionTestCase 

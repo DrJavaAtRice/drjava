@@ -6,6 +6,7 @@ import  junit.extensions.*;
 
 
 /**
+ * Test the delete functionality of the reduced model.
  * @version $Id$
  */
 public class ReducedModelDeleteTest extends TestCase implements ReducedModelStates {

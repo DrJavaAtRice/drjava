@@ -9,6 +9,7 @@ import  java.io.File;
 
 
 /**
+ * Tests the functionality of the repl interpreter.
  * @version $Id$
  */
 public class JavaInterpreterTest extends TestCase {

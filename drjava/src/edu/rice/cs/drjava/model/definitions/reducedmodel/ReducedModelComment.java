@@ -19,6 +19,8 @@ import gj.util.Vector;
  * of the document becomes uncommented, the reduced model must update the
  * quoting information linearly in the newly revealed code.
  * <li> Quote shadowing and comment shadowing are mutually exclusive.
+ * <li> Single quotes and double quotes are mutually exclusive with regards to
+ *  shadowing.
  * <li> There is no nesting of comment open characters. If // is encountered
  *      in the middle of a comment, it is treated as two separate slashes.
  *      Similar for /*.

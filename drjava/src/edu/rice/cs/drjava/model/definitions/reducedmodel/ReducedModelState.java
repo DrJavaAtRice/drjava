@@ -1,6 +1,12 @@
 package edu.rice.cs.drjava;
 
 /**
+ * The abstract notion of a shadowing state.  We use shadowing to mean
+ * the state of text as it is interpreted during compile.  Commented text
+ * is ignored, and quoted text does not factor into the ASTs generated
+ * by the compiler except as a text constant. This buys us a lot in
+ * terms of correctness when highlighting, indenting, and performing
+ * other editor functions.
  * @version$Id$
  */
 public abstract class ReducedModelState 

@@ -9,6 +9,8 @@ import  java.util.ListIterator;
 import  java.util.StringTokenizer;
 
 /**
+ * The document that handles input to the repl and the interpretation
+ * of said input.
  * @version $Id$
  */
 class InteractionsDocument extends PlainDocument {

@@ -11,6 +11,7 @@ import  java.awt.event.ActionEvent;
 
 
 /**
+ * The view component for repl interaction.
  * @version $Id$
  */
 public class InteractionsPane extends JTextArea {

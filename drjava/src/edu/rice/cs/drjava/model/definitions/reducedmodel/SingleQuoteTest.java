@@ -6,6 +6,7 @@ import  junit.extensions.*;
 
 
 /**
+ * Tests the interaction between quotes and backslashes.
  * @version $Id$
  */
 public class SingleQuoteTest extends BraceReductionTestCase 

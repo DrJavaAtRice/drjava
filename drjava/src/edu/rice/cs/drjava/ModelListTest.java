@@ -5,6 +5,7 @@ import java.util.Vector;
 import junit.extensions.*;
 
 /**
+ * Tests the functionality of the ModelList list class.
  * @version $Id$
  */
 public class ModelListTest extends TestCase {
