@@ -147,6 +147,7 @@ public class DebugManager {
     Connector.Argument port = (Connector.Argument) args.get("port");
     try {
       int debugPort = _model.getDebugPort();
+      System.out.println("using port: " + debugPort);
       port.setValue("" + debugPort);
       _vm = connector.attach(args);
       _eventManager = _vm.eventRequestManager();
@@ -159,7 +160,7 @@ public class DebugManager {
     }
   }
   
-  public void startup() throws DebugException {
+  public synchronized void startup() throws DebugException {
     if (!isReady()) {
       _attachToVM();
       EventHandler eventHandler = new EventHandler(this, _vm);
@@ -174,7 +175,7 @@ public class DebugManager {
     }
   }
   
-  public void shutdown() {
+  public synchronized void shutdown() {
     if (isReady()) {
       try {
       _vm.dispose();

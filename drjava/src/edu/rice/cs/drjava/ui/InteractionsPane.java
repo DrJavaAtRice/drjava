@@ -43,6 +43,8 @@ import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.Toolkit;
 import java.awt.event.*;
+import  javax.swing.event.DocumentListener;
+import  javax.swing.event.DocumentEvent;
 
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.repl.*;
@@ -57,8 +59,16 @@ public class InteractionsPane extends JTextPane {
 
   private final GlobalModel _model;
 
+  private class ScrollToEndDocumentListener implements DocumentListener {
+    public void insertUpdate(DocumentEvent e) {
+      setCaretPosition(getText().length());
+    }
+
+    public void removeUpdate(DocumentEvent e) {}
+    public void changedUpdate(DocumentEvent e) {}
+  }
+
   // The fields below were made package private for testing purposes.
-  
   AbstractAction _evalAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       _model.interpretCurrentInteraction();
@@ -144,6 +154,7 @@ public class InteractionsPane extends JTextPane {
   public InteractionsPane(GlobalModel model) {
     super(model.getInteractionsDocument());
     _model = model;
+    getDocument().addDocumentListener(new ScrollToEndDocumentListener());
     
     // Get proper cross-platform mask.
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();

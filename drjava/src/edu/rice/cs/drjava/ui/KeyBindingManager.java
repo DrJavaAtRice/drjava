@@ -269,12 +269,9 @@ public class KeyBindingManager {
     
     public void optionChanged(OptionEvent<KeyStroke> oce) {
       if (CodeStatus.DEVELOPMENT) {
-        System.out.println("optionChanged: ks:" +oce.value + 
-                           " shouldUpdate:" + shouldUpdate(oce.value,_a));
         if(shouldUpdate(oce.value, _a)) 
         {
           KeyStrokeData data = (KeyStrokeData)_actionToDataMap.get(_a); 
-          System.out.println("  -- name: " + data.getName());
           _keyToDataMap.remove(_ks);
           
           //check for conflicting key binding

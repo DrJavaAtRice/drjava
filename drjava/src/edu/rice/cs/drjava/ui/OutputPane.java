@@ -46,11 +46,13 @@ import  javax.swing.text.StyleContext;
 import  javax.swing.text.StyleConstants;
 import  javax.swing.event.DocumentListener;
 import  javax.swing.event.DocumentEvent;
+import  java.awt.Point;
 import  java.awt.Color;
 import  java.awt.Rectangle;
 import  java.io.PrintStream;
 
 import edu.rice.cs.drjava.model.GlobalModel;
+import edu.rice.cs.drjava.DrJava;
 
 /**
  * The view component to which System.out and System.err is redirected
@@ -61,16 +63,7 @@ import edu.rice.cs.drjava.model.GlobalModel;
 public class OutputPane extends JTextPane {
   private class ScrollToEndDocumentListener implements DocumentListener {
     public void insertUpdate(DocumentEvent e) {
-      try {
-        Rectangle endPos = modelToView(getDocument().getLength());
-        // If the window is not on the screen, this will be null
-        // In that case, don't try to scroll!
-        if (endPos != null) {
-          scrollRectToVisible(endPos);
-        }
-        revalidate();
-        repaint();
-      } catch (BadLocationException willNeverHappenISwear) {}
+      setCaretPosition(getText().length());
     }
 
     public void removeUpdate(DocumentEvent e) {}

@@ -878,7 +878,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     try {
       if (_inDebugMode()) {//debugger.isReady()) {
-        // Turn off debugger
+        // Turn off debugger        
         debugger.shutdown();
         hideDebugger();
       }

@@ -286,8 +286,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
       }*/
       
       public void processKeyEvent(KeyEvent e) {    
-        KeyStroke ks = KeyStroke.getKeyStrokeForEvent(e);
-        System.out.println(ks);     
+        KeyStroke ks = KeyStroke.getKeyStrokeForEvent(e);    
         if (e.getID() == KeyEvent.KEY_PRESSED) {         
           this.setText(_option.format(ks));
           KeyStrokeOptionComponent configKs = (KeyStrokeOptionComponent)_keyToKSOC.get(ks);

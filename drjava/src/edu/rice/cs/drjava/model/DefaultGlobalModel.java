@@ -2042,6 +2042,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       //  _debugManager = null;
       //}
     }
+    /* else {
+     _debugManager = null;
+     }
+    }*/
+    
   }
 
 
