@@ -35,50 +35,50 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.config;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
-
+import java.awt.Font;
+import edu.rice.cs.drjava.CodeStatus;
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020621-2158;
- *
+ * Class defining all configuration entries of type Font
  * @version $Id$
- */
-public abstract class Version {
+ */ 
+public class FontOption extends Option<Font> { 
+  
+  public FontOption(String key, Font def) { super(key,def); }
+  
+  public Font parse(String s) {
+    if (CodeStatus.DEVELOPMENT) {
+      return Font.decode(s);
+    }
+    else return null;
+  }
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20020621-2158";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+   * Create a String representation of the Font object, in the format:
+   *   fontname-fontstyle-fontsize
+   */ 
+  public String format(Font f) {  
+    if (CodeStatus.DEVELOPMENT) {
+      StringBuffer str = new StringBuffer(f.getFamily());
+      str.append("-");
+      if (f.isBold()) {
+        str.append("BOLD");
+      }
+      if (f.isItalic()) {
+        str.append("ITALIC");
+      }
+      if (f.isPlain()) {
+        str.append("PLAIN");
+      }
+      str.append("-");
+      str.append(f.getSize());
+      
+      return str.toString();
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+    else return null;
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+  
+}

@@ -174,7 +174,9 @@ public interface OptionConstants extends ConfigurationTool {
    * Whether the line-numbers should be displayed in a row header.
    */
   public static final BooleanOption LINEENUM_ENABLED = 
-    new BooleanOption("lineenum.enabled", new Boolean(false));
+    (CodeStatus.DEVELOPMENT) ?
+    new BooleanOption("lineenum.enabled", new Boolean(false)):
+    null;
   
   
   /* ---------- Misc Options ---------- */

@@ -400,6 +400,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
+  
+  // SET CONFIGS
   /** Clears DrJava's output console. */
   private Action _clearOutputAction = new AbstractAction("Clear Console") {
     public void actionPerformed(ActionEvent ae) {
@@ -409,6 +411,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       //CONFIG.setSetting(FONT_DOCLIST, DrJava.CONFIG.getSetting(FONT_DOCLIST).deriveFont(25f));
       //CONFIG.setSetting(FONT_TOOLBAR, DrJava.CONFIG.getSetting(FONT_TOOLBAR).deriveFont(18f));
       //CONFIG.setSetting(TOOLBAR_ICONS_ENABLED, new Boolean(!DrJava.CONFIG.getSetting(TOOLBAR_ICONS_ENABLED).booleanValue()));
+      //CONFIG.setSetting(LINEENUM_ENABLED, new Boolean(!DrJava.CONFIG.getSetting(LINEENUM_ENABLED).booleanValue()));
+      //CONFIG.setSetting(DEFINITIONS_COMMENT_COLOR, Color.red.darker());
+      //drjava&CONFIG.setSetting(DEFINITIONS_NORMAL_COLOR, Color.gray.brighter());
     }
   };
 
@@ -655,6 +660,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       DrJava.CONFIG.addOptionListener( OptionConstants.FONT_TOOLBAR, new ToolbarFontOptionListener());
       DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_ICONS_ENABLED, new ToolbarIconsOptionListener());
       DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_TEXT_ENABLED, new ToolbarTextOptionListener());
+      DrJava.CONFIG.addOptionListener( OptionConstants.LINEENUM_ENABLED, new LineEnumOptionListener());
     }
     
 
@@ -1673,8 +1679,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           Action a = b.getAction();
 
           // Work-around for strange configuration of undo/redo buttons
-          if (a == null) {
-            ActionListener[] al = b.getActionListeners();
+          /**if (a == null) {
+            ActionListener[] al = b.getActionListeners(); // 1.4 only
             
             for (int j=0; j<al.length; j++) {
               if (al[j] instanceof Action) {
@@ -1683,8 +1689,9 @@ public class MainFrame extends JFrame implements OptionConstants {
               }
             }
             
+            */
             if (a==null) continue;
-          }
+          //}
           
           boolean iconsEnabled = DrJava.CONFIG.getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
           
@@ -2021,7 +2028,11 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (scroll != null) {
         DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
         pane.setFont(f);
-        scroll.setRowHeaderView( new Rule( pane) );
+        if (CodeStatus.DEVELOPMENT) {
+          if (DrJava.CONFIG.getSetting(LINEENUM_ENABLED).booleanValue()) {
+            scroll.setRowHeaderView( new Rule( pane) );
+          }
+        }
       }
     }
     _interactionsPane.setFont(f);
@@ -2030,6 +2041,36 @@ public class MainFrame extends JFrame implements OptionConstants {
     _errorPanel.setListFont(f);
     _junitPanel.setListFont(f);
   }
+  
+  
+  /**
+   *  Update the row header (line number enumeration) for the definitions scroll pane
+   */
+  private void _updateDefScrollRowHeader() {
+    
+    boolean ruleEnabled = DrJava.CONFIG.getSetting(LINEENUM_ENABLED).booleanValue();
+    
+    Iterator scrollPanes = _defScrollPanes.values().iterator();
+    while (scrollPanes.hasNext()) {  
+      JScrollPane scroll = (JScrollPane) scrollPanes.next();
+      if (scroll != null) {
+        DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
+        if (scroll.getRowHeader().getView() == null) {
+          if (ruleEnabled) {
+            scroll.setRowHeaderView(new Rule(pane));
+          }
+        }
+        else {
+          if (!ruleEnabled) {
+            scroll.setRowHeaderView(null);
+          }
+        }
+      }
+    }
+    
+  }
+  
+  
   /**
    * put your documentation comment here
    */
@@ -2438,5 +2479,13 @@ public class MainFrame extends JFrame implements OptionConstants {
       _updateToolbarButtons();
     }
   }
-   
+  
+  /**
+   *  The OptionListener for LINEENUM_ENABLED
+   */
+  private class LineEnumOptionListener implements OptionListener<Boolean> {
+    public void optionChanged(OptionEvent<Boolean> oce) {
+      _updateDefScrollRowHeader();
+    }
+  }
 }

@@ -45,7 +45,10 @@ import javax.swing.event.DocumentEvent;
 import gj.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.OptionEvent;
+import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
@@ -61,13 +64,13 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 public class ColoringView extends PlainView implements OptionConstants {
   private DefinitionsDocument _doc;
 
-  private static final Color COMMENTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_COMMENT_COLOR);
-  private static final Color DOUBLE_QUOTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_DOUBLE_QUOTED_COLOR);
-  private static final Color SINGLE_QUOTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_SINGLE_QUOTED_COLOR);
-  private static final Color NORMAL_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_NORMAL_COLOR);
-  private static final Color KEYWORD_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_KEYWORD_COLOR);
-  private static final Color NUMBER_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_NUMBER_COLOR);
-  private static final Color TYPE_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_TYPE_COLOR);
+  private static Color COMMENTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_COMMENT_COLOR);
+  private static Color DOUBLE_QUOTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_DOUBLE_QUOTED_COLOR);
+  private static Color SINGLE_QUOTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_SINGLE_QUOTED_COLOR);
+  private static Color NORMAL_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_NORMAL_COLOR);
+  private static Color KEYWORD_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_KEYWORD_COLOR);
+  private static Color NUMBER_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_NUMBER_COLOR);
+  private static Color TYPE_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_TYPE_COLOR);
 
   /**
    * Constructor.
@@ -76,7 +79,21 @@ public class ColoringView extends PlainView implements OptionConstants {
   ColoringView(Element elem) {
     super(elem);
     _doc = (DefinitionsDocument)getDocument();
-  }
+       
+    if (CodeStatus.DEVELOPMENT) {
+      
+      ColorOptionListener col = new ColorOptionListener();
+      
+      DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
+      DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
+      DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
+      DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
+      DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
+      DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
+      DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col); 
+    }
+    
+ }
 
   /**
    * Renders the given range in the model as normal unselected
@@ -197,6 +214,33 @@ public class ColoringView extends PlainView implements OptionConstants {
     // Make sure we redraw since something changed in the formatting
     getContainer().repaint();
   }
+  
+  /**
+   * Called when an OptionListener perceives a change in any of the colors
+   */ 
+  private void _updateColors() {
+    
+    if (CodeStatus.DEVELOPMENT) {
+      
+      COMMENTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_COMMENT_COLOR);
+      DOUBLE_QUOTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_DOUBLE_QUOTED_COLOR);
+      SINGLE_QUOTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_SINGLE_QUOTED_COLOR);
+      NORMAL_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_NORMAL_COLOR);
+      KEYWORD_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_KEYWORD_COLOR);
+      NUMBER_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_NUMBER_COLOR);
+      TYPE_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_TYPE_COLOR);
+        
+      //getContainer().repaint();
+    }
+  }
+  
+  /**
+   * The OptionListeners for DEFINITIONS COLORs 
+   */
+  private class ColorOptionListener implements OptionListener<Color> {
+    public void optionChanged(OptionEvent<Color> oce) {
+      //_updateColors();
+    }
+  }
+  
 }
-
-

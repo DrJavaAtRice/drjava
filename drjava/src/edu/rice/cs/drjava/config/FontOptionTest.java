@@ -37,48 +37,49 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.config;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import junit.framework.*;
+import java.awt.Font;
+import edu.rice.cs.drjava.CodeStatus;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020621-2158;
- *
+ * Class according to the JUnit protocol. Tests
+ * the proper functionality of the class FontOption.
  * @version $Id$
  */
-public abstract class Version {
+public class FontOptionTest extends TestCase
+{
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * @param name The name of this test case.
    */
-  private static final String BUILD_TIME_STRING = "20020621-2158";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+  public FontOptionTest(String name) { super(name); }
+  
+  public void setUp() {}
+  
+  public void testParse()
+  {
+    if (CodeStatus.DEVELOPMENT) {
+      FontOption fo = new FontOption("font.test1", Font.decode(null));
+      
+      assertEquals(new Font("monospaced", 0, 12), fo.parse("monospaced-PLAIN-12"));
+      assertEquals(new Font("sansserif", 1, 10), fo.parse("sansserif-BOLD-10"));
+      assertEquals(new Font("sansserif", 3, 10), fo.parse("sansserif-BOLDITALIC-10"));
+      
+      // Any failed parse attempts return the default "dialog" font
+      assertEquals("dialog", fo.parse("true").getFamily());
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
+
+  }
+  
+  public void testFormat()
+  {
+    if (CodeStatus.DEVELOPMENT) {
+      FontOption fO1 = new FontOption("font.test2", Font.decode(null));
+      
+      assertEquals("monospaced-PLAIN-12",  fO1.format(new Font("monospaced", 0, 12)));
+      assertEquals("sansserif-BOLD-10", fO1.format(new Font("sansserif", 1, 10)));
+      assertEquals("sansserif-BOLDITALIC-10", fO1.format(new Font("sansserif", 3, 10)));
     }
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}
