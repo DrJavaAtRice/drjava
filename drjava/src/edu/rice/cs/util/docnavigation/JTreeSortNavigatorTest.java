@@ -1,4 +1,4 @@
-/*BEGIN_COPYRIGHT_BLOCK
+ /*BEGIN_COPYRIGHT_BLOCK
  *
  * This file is part of DrJava.  Download the current version of this project:
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
@@ -74,19 +74,19 @@ public class JTreeSortNavigatorTest extends TestCase {
     tree.addDocument(new INavigatorItem() {
       public String getName() { return "item1"; }
       public boolean equals(Object o) { return o == this; }
-    }, "folder1/");
+    }, "folder1");
     tree.addDocument(new INavigatorItem() {
       public String getName() { return "item2"; }
       public boolean equals(Object o) { return o == this; }
-    }, "folder1/");
+    }, "folder1");
     tree.addDocument(new INavigatorItem() {
       public String getName() { return "item1"; }
       public boolean equals(Object o) { return o == this; }
-    }, "folder2/");
+    }, "folder2");
     tree.addDocument(new INavigatorItem() {
       public String getName() { return "item2"; }
       public boolean equals(Object o) { return o == this; }
-    }, "folder2/");
+    }, "folder2");
     
     root = (DefaultMutableTreeNode)tree.getModel().getRoot();
     source = (DefaultMutableTreeNode)root.getChildAt(0);
@@ -152,13 +152,13 @@ public class JTreeSortNavigatorTest extends TestCase {
     };
     Object _lock = new Object();
     synchronized(_lock) {
-      tree.addDocument(item, "folder3/");
+      tree.addDocument(item, "folder3");
     }
     InnerNode folder3 = (InnerNode)source.getChildAt(2);
     assertEquals("folder3 should have 1 children", 1, folder3.getChildCount());
     synchronized(_lock) {
       _name = "MyTest.expected";
-      tree.refreshDocument(item, "folder3/");
+      tree.refreshDocument(item, "folder3");
     }
     synchronized(_lock) {
       assertEquals("folder3 should have 1 children", 1, folder3.getChildCount());

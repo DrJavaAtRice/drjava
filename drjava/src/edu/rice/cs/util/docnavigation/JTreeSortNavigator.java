@@ -154,6 +154,7 @@ public class JTreeSortNavigator extends JTree
 
     this.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     
+    this.setRowHeight(18);
     //this.setShowsRootHandles(true);
   }
   
@@ -469,6 +470,11 @@ public class JTreeSortNavigator extends JTree
     }
     InnerNode newParent = _path2node.getValue(newPath); // node that should be parent
     
+//    System.out.println("path="+path);
+//    System.out.println("newPath="+newPath);
+//    System.out.println("oldParent="+oldParent);
+//    System.out.println("newParent="+newParent);
+//    System.out.println(_path2node);
     
     if (newParent == oldParent) { 
       if (!node.toString().equals(doc.getName())) {
@@ -476,8 +482,10 @@ public class JTreeSortNavigator extends JTree
         _doc2node.put(doc,newLeaf);
         insertNodeSortedInto(newLeaf, newParent);
         _model.removeNodeFromParent(node);
+//        System.out.print("sort of ");
       }
       // don't do anything if its name or parents haven't changed
+//      System.out.println("fast");
     }
     else {
       Object lock = new Object();
@@ -487,6 +495,7 @@ public class JTreeSortNavigator extends JTree
       synchronized(lock) {
         addDocument(doc, path);
       }
+//      System.out.println("slow");
     }
   }
   

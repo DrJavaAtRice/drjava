@@ -485,7 +485,7 @@ public class DirectoryChooser extends JPanel {
     cce.addCellEditorListener(_cellEditorListener);
     _tree.setCellEditor(_cellEditor);
     _tree.setEditable(_isEditable);
-    
+    _tree.setRowHeight(18);
     if (_allowMultiple) {
       _tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
     }
