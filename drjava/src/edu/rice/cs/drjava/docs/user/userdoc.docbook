@@ -68,8 +68,8 @@
 
     <section id="gs-requirements">
       <title>System Requirements</title>
-      <para>DrJava requires Java 2, version 1.3 or later.  Note that you will need to have the JDK (not the JRE) installed if you wish to use the compiler or debugger within DrJava.</para>
-      <para>We recommend using Sun's JDK 1.4.2 or later (from <ulink url="http://java.sun.com">http://java.sun.com</ulink>) for Solaris, Linux, and Windows.  Other users should use the Java virtual machine that comes with their operating system (including Mac OS X).</para>
+      <para>As of the June 18th release, DrJava requires Java 2, version 1.4 or later. Note that you will need to have the JDK (not the JRE) installed if you wish to use the compiler or debugger within DrJava.</para>
+      <para>We recommend downloading and using Sun's JDK 1.5.0, currently in beta releases, (from <ulink url="http://java.sun.com">http://java.sun.com</ulink>) for Solaris, Linux, and Windows.  Other users should use the Java virtual machine that comes with their operating system (including Mac OS X).</para>
       <para>DrJava uses two Java Virtual Machines (one for the main program, and one for the Interactions Pane) that use Java's Remote Method Invocation (RMI) to communicate with each other. RMI uses TCP/IP as the default transport mechanism, so you must have those drivers installed. Without TCP/IP, DrJava will not start properly.</para>
     </section>
 
@@ -223,6 +223,20 @@ OTHER DEALINGS WITH THE SOFTWARE.
 
   </chapter>
   
+  <!-- Chapter: Project Facility -->
+  <chapter id="projects">
+  <title>Project Facility</title>
+  <para>As of the June 18th release, DrJava now includes a project facility for managing many files. The project facility allows the user to save their open java files in a project file, and reopen the project file at a later time to work on some or all of the project java files.</para>
+  <para>When using the project facility, the navigator pane on the left hand side of the DrJava window displays the files in a tree view, giving the user a graphical representation of where the project files are layed out in the project directories.</para>
+  <para>Note that when using the project facility, all project files must be in the directory where the project file is saved or in subdirectories of this directory.</para>
+  <para>To create a new project, either select new project in the Project menu, or select Save As in the project menu when you have one or more files already open.</para>
+  <para>Only one project may be open at a time.</para>
+  <formalpara>
+  <title>Setting the built directory</title>
+  <para>The project facility allows the user to set a built directory where class files will be compiled. This give the user the freedom to have separate source file and built file directories. To set the project built directory, open the project, the select Project > Project Properties.</para>
+  </formalpara>
+  </chapter>
+  
   <!-- Chapter: Interactions Pane -->
   <chapter id="interactions">
     <title>Interactions Pane</title>
@@ -293,6 +307,11 @@ Welcome to DrJava.
  <title>Context Menu</title>
  <para>The Interactions Pane has a context menu, which can be used by right-clicking in the pane.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to useful commands for the Interactions Pane, including cut, copy, and paste, as well as resetting the Interactions Pane, executing, loading, and saving history files, viewing the current classpath, and copying the current interaction to the Definitions Pane.</para>
       </formalpara>
+     
+      <formalpara>
+  <title>Tiger Features</title>
+  <para>New to the development release on June 18th is support for Tiger (JDK 1.5) features in the interactions pane. These include enum types, static import, for each statements, methods with variable arguments, generics, and autoboxing. Note that you must be running Java 2, version 1.5.0 or later to use 1.5 features in the Interactions Pane. Also, as of the June 18th release, we do not type check generics, so while they may be used in the interactions pane without a syntax error, we do not yet provide full support for type checking of generics.</para>
+      </formalpara>
   </chapter>
 
 
@@ -314,7 +333,7 @@ Welcome to DrJava.
 
     <section id="compiling-selecting">
       <title>Selecting a Compiler</title>
-      <para>DrJava supports the use of different Java compilers, such as the traditional "Javac" compiler supplied with the JDK or Sun's JSR-14 experimental compiler (which supports generic types).  DrJava will attempt to locate the your Java compiler on startup by searching for standard installation directories, but sometimes it is unable to find a compiler.  In this case, it will prompt you to specify the location of a compiler, or allow you to continue using DrJava without any compiler.  Note that the location of the compiler can be specified in the Preferences (see <link linkend="configuration">Configuring DrJava</link>).  If more than one compiler is specified, the active compiler can be selected from a menu on the Compiler Output tab itself.  You may notice that the same compiler may appear multiple times in the menu.  This happens because DrJava looks for compilers in three different places: on the user classpath, the user specified location in Preferences, and in the usual locations that the compiler can be found (the default installation directory, where java is located, etc.).</para>
+      <para>DrJava supports the use of different Java compilers, such as the traditional "Javac" compiler supplied with the JDK or Sun's JSR-14 experimental compiler (which supports generic types when only running under the 1.4 JDK).  DrJava will attempt to locate the your Java compiler on startup by searching for standard installation directories, but sometimes it is unable to find a compiler.  In this case, it will prompt you to specify the location of a compiler, or allow you to continue using DrJava without any compiler.  Note that the location of the compiler can be specified in the Preferences (see <link linkend="configuration">Configuring DrJava</link>).  If more than one compiler is specified, the active compiler can be selected from a menu on the Compiler Output tab itself.  You may notice that the same compiler may appear multiple times in the menu.  This happens because DrJava looks for compilers in three different places: on the user classpath, the user specified location in Preferences, and in the usual locations that the compiler can be found (the default installation directory, where java is located, etc.).</para>
     </section>
   </chapter>
 
@@ -481,6 +500,58 @@ public class CalculatorTest extends TestCase {
 
   </chapter>
 
+  <!-- Chapter: Language Level Facility -->
+  <chapter id="language-levels">
+    <title>Language Level Facility</title>
+    <para>The Java Language Level Facility provides a student-friendly introduction to Java.
+There are three levels: <emphasis> Elementary</emphasis>, <emphasis>Intermediate</emphasis>, and <emphasis>Advanced</emphasis>, and
+each level progressively introduces students to more Java features.
+When used with a complementary curriculum, they form a powerful
+learning tool.</para>
+
+    <section id="usingLL">
+      <title>Using the Java Language Level Facility</title>
+      <para>The Java Language Level Facility is fully integrated into DrJava.  To select the level at which you wish to work, click on the "Language Levels" menu in the menu bar and select a level.  If you do not want to use any Language Level, select "Full Java".</para>
+      <para> Selecting your level affects how new files are saved and which files can be opened by default.  Each file's extension specifies its level. Elementary, Intermediate, and Advanced Level files are given the .dj0, .dj1, and .dj2 extensions respectively.  You can reference classes defined at any language level regardless of the level you are currently using. </para>
+
+    </section>
+    
+    <section id="LLBreakdown">
+       <title>What Does Each Level Provide?</title>
+    <para>Here is a summary of what is allowed at each level: </para>
+    <mediaobject>
+     <imageobject>
+     <imagedata fileref="LanguageLevelFeatures.jpg" format="jpg">
+    </imageobject>
+    </mediaobject>
+    <para>Read on for a more detailed explaination of each level.</para>
+    
+    <formalpara> 
+      <title>The Elementary Level:</title>
+      <para>The Elementary Level provides support for programming in functionalJava, which can be taught with only algebraic data types--types that are inductively defined, such as <emphasis>integers</emphasis>, <emphasis>booleans</emphasis>, <emphasis>lists</emphasis>, and <emphasis>trees</emphasis>. Because of this, only a small subset of the Java language is necessary.  Most importantly, all fields and variables are immutable, in other words, their values cannot be changed once they are set, so they are automatically made final. </para>
+      <para> Because of this immutability of data, <emphasis>for</emphasis>, <emphasis>while</emphasis>, and <emphasis>do</emphasis> loops cannot be used at the Elementary level.  We also do not allow arrays because they are commonly used with a procedural style approach to programming (loops) rather than an object-oriented one.  We also simplify the language for the student by not allowing <emphasis>null</emphasis> as a keyword.  This protects beginning students from getting null-pointer exceptions but also means that instructors should not allow the students to use library functions that return null.  In addition, interfaces are not allowed at the Elementary Level; only classes and abstract classes are allowed.  By waiting to introduce interfaces until after the students are familiar with abstract classes, we hope students will have an easier time differentiating between interfaces and abstract classes. We also disallow the use of explicit access modifiers (<emphasis>final,</emphasis> <emphasis>private,</emphasis> <emphasis>static,</emphasis> etc.), and instead automatically make all fields and local variables private and all methods public.  The one exception to this is that classes and methods can be denoted as <emphasis>abstract</emphasis>.  We also do not allow the use of <emphasis>package</emphasis> or <emphasis>import</emphasis> statements in order to simplify the concepts that beginning students must learn.  Of course, students' classes can still reference other files in the same directory, and they also have access to all classes in the <emphasis>java.lang</emphasis> package. Finally, at the Elementary Level, all of a class's fields cannot be set outside of the automatically generated constructor.  </para>
+      <para> We automatically generate a <emphasis>constructor</emphasis> for each class that students write at the Elementary Level.  Each class's constructor takes a value for each of its fields and sets the fields to those values.  In addition, we automatically generate <emphasis>accessors</emphasis> for each field (for example, field my_field would have an accessor my_field()).  We also generate a <emphasis>toString()</emphasis> method that returns a description of the object--its class name and field values, an <emphasis>equals()</emphasis> method that determines if two objects are equal by comparing their class types and the values for each of their fields, and a <emphasis>hashCode()</emphasis> method that follows the Java Language Specification that if two objects are equal, their hash codes are the same. </para> 
+      <para> Although at first glance this level seems limited, even the basic functionality provided is powerful and flexible.  The <emphasis>Composite,</emphasis> <emphasis>Union,</emphasis> <emphasis>Interpreter,</emphasis> and <emphasis>Factory</emphasis> patterns can all be taught at the Elementary level. </para>
+    </formalpara>
+        
+    <formalpara>
+  <title>The Intermediate Level:</title>
+        <para> At the Intermediate level, the focus is still on functional programming with immutable data.  However, there is an added twist: functions can now be used at data.  This introduces anonymous inner classes as a new construct.  These anonymous inner classes can be stored in variables and passed as arguments to methods. </para>
+        <para> Although we now allow anonymous inner classes, students still cannot use nested classes or nested interfaces at this level.  They introduce a level of complexity in naming and referencing that is best deferred to the Advanced Level. </para>
+        <para> In addition to anonymous inner classes, several new concepts are introduced at this level.  We now allow interfaces, which should be intuitive to students since they have been working with abstract classes at the Elementary Level.  In addition, we allow <emphasis>package</emphasis> and <emphasis>import</emphasis> statements to broaden the scope of classes the student has access to (including the Java libraries), and to help them learn how to modularize their own projects.  Since students now have access to methods that can return null, we allow the <emphasis>null</emphasis> keyword to be used.  We also allow explicit visibility specifiers such as <emphasis>public</emphasis>, <emphasis>private</emphasis>, and <emphasis>protected</emphasis>, and allow the keyword <emphasis>static</emphasis>.  However, only fields can be static at this level; static methods are still prohibited.  We also introduce casts because they are useful with the <emphasis>Visitor</emphasis> design pattern--frequently the arguments to and return type of visitors is Object, and if a more specific contract for the specific function is known, the data can be cast.  Students can also define their own constructors at this level, though they must make sure that all of a class's fields are given a value in the constructor.  Fields still cannot be assigned outside of a constructor since they are still implicitly made final.  Finally, we no longer require that students explicitly extend Java's Object class.</para>
+        <para> The code augmentation is the same as that done at the Elementary Level, except that if a student defines a constructor that takes in all the fields of the class, we do not generate a duplicate constructor. </para>
+        <para> Both the <emphasis>Command</emphasis> and <emphasis>Visitor</emphasis> design patterns deal with passing functions as data and should be taught at this level.  The <emphasis>Singleton</emphasis> design pattern can also be taught here. </para>
+          </formalpara>
+          
+     <formalpara>
+  <title>The Advanced Level:</title>
+          <para> Information on and support for the Advanced Level will be available soon.  Currently, it is not fully implemented. </para>
+          </formalpara>
+          
+          
+          </section>
+          </chapter>                                                                                                                                                                                                                                                   
+                                                                                                                                                                                                                                                   
   <!-- ---- Chapter: Debugger ---- -->
   <chapter id="debug">
     <title>Debugger</title>
