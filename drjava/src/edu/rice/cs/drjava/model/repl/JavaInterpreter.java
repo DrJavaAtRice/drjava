@@ -57,6 +57,14 @@ public interface JavaInterpreter extends Interpreter {
    */
   public void setPackageScope(String packageName);
   
+  /**
+   * Returns the value of the variable with the given name in
+   * the interpreter.
+   * @param name Name of the variable
+   * @return Value of the variable
+   */
+  public Object getVariable(String name);
+  
     /**
    * Assigns the given value to the given name in the interpreter.
    * @param name Name of the variable

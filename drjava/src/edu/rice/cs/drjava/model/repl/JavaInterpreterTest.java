@@ -344,12 +344,31 @@ public class JavaInterpreterTest extends TestCase {
   }
   
   /**
+   * Tests that the value of a variable can be queried externally.
+   */
+  public void testQueryVariableExternally() throws ExceptionReturnedException {
+    _interpreter.defineVariable("x", 7);
+    // Get value of variable externally
+    assertEquals("external query for x",
+                 new Integer(7), _interpreter.getVariable("x"));
+    
+    // Undefined variable
+    try {
+      Object o = _interpreter.getVariable("undefined");
+      fail("Should have thrown IllegalStateException");
+    }
+    catch (IllegalStateException e) {
+      // good, that's what we want
+    }
+  }
+  
+  /**
    * Tests that a constant can be defined in the interpreter by an external source.
    */
   public void testDefineConstantExternally() throws ExceptionReturnedException {
-    _interpreter.defineConstant("x", 3);
+    _interpreter.defineConstant("y", 3);
     try {
-      _interpreter.interpret("x = 4");
+      _interpreter.interpret("y = 4");
       fail("should not be able to assign to a constant");
     }
     catch (ExceptionReturnedException e) {

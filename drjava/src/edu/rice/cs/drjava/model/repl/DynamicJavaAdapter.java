@@ -149,6 +149,16 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   }
   
   /**
+   * Returns the value of the variable with the given name in
+   * the interpreter.
+   * @param name Name of the variable
+   * @return Value of the variable
+   */
+  public Object getVariable(String name) {
+    return _djInterpreter.getVariable(name);
+  }
+  
+  /**
    * Assigns the given value to the given name in the interpreter.
    * @param name Name of the variable
    * @param value Value to assign
