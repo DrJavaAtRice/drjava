@@ -104,11 +104,37 @@ public class ArgumentTokenizerTest extends TestCase {
                      new String[]{"a b c"});
     
     // "a b"c d
-    // [a b, c, d]
-    //  This is different behavior than Unix or DOS, but it's more
-    //  intuitive to the user (and easier to implement).
+    // [a bc, d]
+    // This behavior seems unintuitive, but it's the way both DOS and Unix
+    //  handle command-line arguments.
     _assertTokenized("\"a b\"c d",
-                     new String[]{"a b","c","d"});
+                     new String[]{"a bc","d"});
+
+    // 'a b'c d
+    // [a bc, d]
+    // This behavior seems unintuitive, but it's the way both DOS and Unix
+    //  handle command-line arguments.
+    _assertTokenized("'a b'c d",
+                     new String[]{"a bc","d"});
+
+    // a b"c d"
+    // [a, bc d]
+    // This behavior seems unintuitive, but it's the way both DOS and Unix
+    //  handle command-line arguments.
+    _assertTokenized("a b\"c d\"",
+                     new String[]{"a","bc d"});
+
+    // a b'c d'
+    // [a, bc d]
+    // This behavior seems unintuitive, but it's the way both DOS and Unix
+    //  handle command-line arguments.
+    _assertTokenized("a b'c d'",
+                     new String[]{"a","bc d"});
+
+    // a b'c d'"e f" g "hi "
+    // [a, bc de f, g, hi ]
+    _assertTokenized("a b'c d'\"e f\" g \"hi \"",
+                     new String[]{"a","bc de f","g","hi "});
 
     // c:\\file.txt
     // [c:\file.txt]

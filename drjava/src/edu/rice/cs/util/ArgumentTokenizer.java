@@ -99,10 +99,8 @@ public class ArgumentTokenizer {
         switch(state) {
           case SINGLE_QUOTE_STATE:
             if (c == '\'') {
-              // Seen the close quote; finish this arg and start a new one
-              argList.add(currArg.toString());
-              currArg = new StringBuffer();
-              state = NO_TOKEN_STATE;
+              // Seen the close quote; continue this arg until whitespace is seen
+              state = NORMAL_TOKEN_STATE;
             }
             else {
               currArg.append(c);
@@ -110,10 +108,8 @@ public class ArgumentTokenizer {
             break;
           case DOUBLE_QUOTE_STATE:
             if (c == '"') {
-              // Seen the close quote; finish this arg and start a new one
-              argList.add(currArg.toString());
-              currArg = new StringBuffer();
-              state = NO_TOKEN_STATE;
+              // Seen the close quote; continue this arg until whitespace is seen
+              state = NORMAL_TOKEN_STATE;
             }
             else if (c == '\\') {
               // Look ahead, and only escape quotes or backslashes
@@ -131,22 +127,29 @@ public class ArgumentTokenizer {
               currArg.append(c);
             }
             break;
-          case NORMAL_TOKEN_STATE:
-            if (Character.isWhitespace(c)) {
-              // Whitespace ends the token; start a new one
-              argList.add(currArg.toString());
-              currArg = new StringBuffer();
-              state = NO_TOKEN_STATE;
-            }
-            else if (c == '\\') {
-              // Backslash in a normal token: escape the next character
-              escaped = true;
-            }
-            else {
-              currArg.append(c);
-            }
-            break;
+//          case NORMAL_TOKEN_STATE:
+//            if (Character.isWhitespace(c)) {
+//              // Whitespace ends the token; start a new one
+//              argList.add(currArg.toString());
+//              currArg = new StringBuffer();
+//              state = NO_TOKEN_STATE;
+//            }
+//            else if (c == '\\') {
+//              // Backslash in a normal token: escape the next character
+//              escaped = true;
+//            }
+//            else if (c == '\'') {
+//              state = SINGLE_QUOTE_STATE;
+//            }
+//            else if (c == '"') {
+//              state = DOUBLE_QUOTE_STATE;
+//            }
+//            else {
+//              currArg.append(c);
+//            }
+//            break;
           case NO_TOKEN_STATE:
+          case NORMAL_TOKEN_STATE:
             switch(c) {
               case '\\':
                 escaped = true;
@@ -162,6 +165,12 @@ public class ArgumentTokenizer {
                 if (!Character.isWhitespace(c)) {
                   currArg.append(c);
                   state = NORMAL_TOKEN_STATE;
+                }
+                else if (state == NORMAL_TOKEN_STATE) {
+                  // Whitespace ends the token; start a new one
+                  argList.add(currArg.toString());
+                  currArg = new StringBuffer();
+                  state = NO_TOKEN_STATE;
                 }
               }
             break;
