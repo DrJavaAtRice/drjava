@@ -44,9 +44,13 @@ import javax.swing.text.*;
 import javax.swing.event.*;
 import java.awt.event.*;
 import java.awt.*;
+import java.util.Enumeration;
 
 import javax.swing.tree.*;
 import gj.util.Hashtable;
+
+import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.ui.*;
 
 /**
  * The frame for setting Configuration options on the fly
@@ -54,11 +58,14 @@ import gj.util.Hashtable;
  */ 
 public class ConfigFrame extends JFrame {
   
+  private JSplitPane _splitPane;
   private JTree _tree;
   private DefaultTreeModel _treeModel;
-  private DefaultMutableTreeNode _rootNode;
+  private PanelTreeNode _rootNode;
   
   private JButton _okButton;
+  private JButton _applyButton;
+  private JButton _cancelButton;
   private JPanel _mainPanel;
   /**
    * Sets up the frame and displays it.
@@ -66,15 +73,19 @@ public class ConfigFrame extends JFrame {
   public ConfigFrame () {
     super("Preferences");
     
+    
     _createTree();
     
     _createPanels();
     
-    _mainPanel= new JPanel();
-    _tree.addTreeSelectionListener( new PanelTreeSelectionListener());
     
+    _mainPanel= new JPanel();
+    _mainPanel.setLayout(new BorderLayout());
+    _tree.addTreeSelectionListener( new PanelTreeSelectionListener());
+        
     Container cp = getContentPane();
-    cp.add(_mainPanel, BorderLayout.CENTER);
+    cp.setLayout(new BorderLayout());
+    //cp.add(_mainPanel, BorderLayout.CENTER);
     
     if (_rootNode.getChildCount() != 0) {
       PanelTreeNode firstChild = (PanelTreeNode)_rootNode.getChildAt(0);
@@ -85,13 +96,34 @@ public class ConfigFrame extends JFrame {
     }
     
        
-    JScrollPane scroll = new JScrollPane(_tree);
-    //scroll.setMinimumSize( new Dimension( 100 , scroll.getHeight()));
-    cp.add(scroll, BorderLayout.WEST);
+    JScrollPane treeScroll = new JScrollPane(_tree);
+    //cp.add(treeScroll, BorderLayout.WEST);
+    
+    _splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+                                treeScroll,
+                                _mainPanel);
+    cp.add(_splitPane, BorderLayout.CENTER);
+    
     
     _okButton = new JButton("OK");
     _okButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        apply();
+        ConfigFrame.this.hide();
+      }
+    });
+    
+    _applyButton = new JButton("Apply");
+    _applyButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        apply();
+      }
+    });
+    
+    _cancelButton = new JButton("Cancel");
+    _cancelButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        reset();
         ConfigFrame.this.hide();
       }
     });
@@ -99,24 +131,43 @@ public class ConfigFrame extends JFrame {
     JPanel bottom = new JPanel();
     bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
     bottom.add(Box.createHorizontalGlue());
+    bottom.add(_applyButton);
     bottom.add(_okButton);
+    bottom.add(_cancelButton);
     bottom.add(Box.createHorizontalGlue());
 
     cp.add(bottom, BorderLayout.SOUTH);
 
-    //pack();
-    /**setSize((int) (owner.getWidth() * (4f/5f)),
-            (int) (owner.getHeight() * (4f/5f)));*/
     
+    
+    // Set all dimensions ----
     setSize( 600, 500);
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = this.getSize();
     this.setLocation((screenSize.width - frameSize.width) / 2,
                      (screenSize.height - frameSize.height) / 2);
+    int width = getWidth() / 4;
+    System.out.println("width: " + getWidth());
+    System.out.println("width for divider: " + width);
+    _splitPane.setDividerLocation(width);
+    _mainPanel.setPreferredSize(new Dimension(getWidth() - width, _splitPane.getHeight()));
   }
 
-     
+  /**
+   * Call the update method to propagate down the tree, parsing input values into their config options
+   */
+  public void apply() {   
+    _rootNode.update();
+  }
+  
+  /**
+   * Resets the field of each option in the Preferences window to its actual stored value.
+   */
+  public void reset() {
+    _rootNode.reset();
+  }
+  
   private void _displayPanel(ConfigPanel cf) {
 
     _mainPanel.removeAll();
@@ -128,7 +179,7 @@ public class ConfigFrame extends JFrame {
     
   private void _createTree() {
    
-    _rootNode = new DefaultMutableTreeNode("Preferences");
+    _rootNode = new PanelTreeNode("Preferences");
     _treeModel = new DefaultTreeModel(_rootNode);
     _tree = new JTree(_treeModel);
     _tree.setEditable(false);
@@ -143,9 +194,13 @@ public class ConfigFrame extends JFrame {
    */
   private void _createPanels() {
     PanelTreeNode fontNode = _createPanel("Fonts");
+    fontNode.getPanel().displayComponents(); 
     PanelTreeNode colorNode = _createPanel("Colors");
+    colorNode.getPanel().displayComponents();
     PanelTreeNode keystrokesNode = _createPanel("Key Bindings");
+    keystrokesNode.getPanel().displayComponents();
     PanelTreeNode miscNode = _createPanel("Miscellaneous");
+    _setupMiscPanel(miscNode.getPanel());
 
   }
   
@@ -156,7 +211,7 @@ public class ConfigFrame extends JFrame {
    * @param parent the parent tree node
    * @return this tree node
    */
-  private PanelTreeNode _createPanel(String t, DefaultMutableTreeNode parent) {
+  private PanelTreeNode _createPanel(String t, PanelTreeNode parent) {
     
     //ConfigPanel newPanel = new ConfigPanel(t);
     //_panels.addElement( newPanel );
@@ -176,6 +231,13 @@ public class ConfigFrame extends JFrame {
     return _createPanel(t, _rootNode);
   }
   
+  private void _setupMiscPanel( ConfigPanel panel) {
+    panel.addComponent( new StringOptionComponent ( OptionConstants.WORKING_DIRECTORY, "Working directory"));
+    panel.addComponent( new IntegerOptionComponent ( OptionConstants.INDENT_LEVEL, "Indent level"));
+    panel.addComponent( new IntegerOptionComponent ( OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions command history"));
+    panel.displayComponents();
+  }
+  
   private class PanelTreeNode extends DefaultMutableTreeNode {
     
     private ConfigPanel _panel;
@@ -189,6 +251,29 @@ public class ConfigFrame extends JFrame {
       return _panel;
     }
     
+    /**
+     * Tells its panel to update, and tells all of its child nodes to update their panels.
+     */ 
+    public void update() {
+      _panel.update();
+      
+      Enumeration childNodes = this.children();
+      while (childNodes.hasMoreElements()) {
+        ((PanelTreeNode)childNodes.nextElement()).update();
+      }
+    }
+    
+    /**
+     * Tells its panel to reset, and tells all of its children to reset their panels.
+     */
+    public void reset() {
+      _panel.reset();
+      
+      Enumeration childNodes = this.children();
+      while (childNodes.hasMoreElements()) {
+        ((PanelTreeNode)childNodes.nextElement()).reset();
+      } 
+    }
   }
   
   private class PanelTreeSelectionListener implements TreeSelectionListener {

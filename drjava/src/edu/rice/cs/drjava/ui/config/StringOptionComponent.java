@@ -65,4 +65,8 @@ public class StringOptionComponent extends OptionComponent<StringOption> {
     DrJava.CONFIG.setSetting(_option, _option.parse(_jtf.getText()));
     _jtf.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
   } 
+ 
+  public void reset() {
+    _jtf.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
+  }
 }

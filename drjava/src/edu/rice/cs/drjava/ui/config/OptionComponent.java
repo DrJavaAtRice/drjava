@@ -73,6 +73,11 @@ public abstract class OptionComponent<T extends Option> extends JPanel {
    * should reflect the changes.
    */
   public abstract void update();
+
+  /**
+   * Resets the entry field to reflect the actual stored value for the option.
+   */
+  public abstract void reset();
   
 }
                                       

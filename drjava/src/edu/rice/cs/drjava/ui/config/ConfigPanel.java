@@ -56,14 +56,68 @@ import gj.util.Hashtable;
 public class ConfigPanel extends JPanel {
   
   private JLabel _title;
+  protected Vector<OptionComponent> _components;
   
-  public ConfigPanel(String t) {
-    _title = new JLabel(t);
+  /**
+   * Constructor for this ConfigPanel
+   * @param title the title for this panel
+   */
+  public ConfigPanel(String title) {
+    _title = new JLabel(title);
+    _components = new Vector<OptionComponent>();
     
-    this.add(_title);
   }
   
   public String getTitle() {
     return _title.getText();
+  }
+  
+  /**
+   * The method for adding new OptionComponents to this ConfigPanel
+   * @param oc the OptionComponent to be added
+   */ 
+  public void addComponent( OptionComponent oc) {
+    _components.addElement(oc);
+  }
+  
+  public void displayComponents() {
+    this.setLayout(new BorderLayout());
+    this.add(_title, BorderLayout.NORTH);
+
+    JPanel panel = new JPanel();
+    //panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+    panel.setLayout(new BorderLayout());
+    JPanel panel2 = new JPanel();
+    panel2.setLayout(new GridLayout(0, 1));
+    panel.add(panel2, BorderLayout.NORTH);
+    JScrollPane scroll = new JScrollPane(panel,
+                                         JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                                         JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    
+    
+    for (int i=0; i<_components.size(); i++) {
+      panel2.add(_components.elementAt(i));
+    }
+    
+    this.add(scroll, BorderLayout.CENTER);
+  }
+  
+  /**
+   * Tells each component in the vector to update() itself
+   */ 
+  public void update() {
+    
+    for (int i= 0; i<_components.size();i++) {
+      _components.elementAt(i).update();
+    }  
+  }
+  
+  /**
+   * Tells each component to reset its field to the stored value.
+   */
+  public void reset() {
+    for (int i= 0; i<_components.size();i++) {
+      _components.elementAt(i).reset();
+    }
   }
 }

@@ -64,4 +64,8 @@ public class ColorOptionComponent extends OptionComponent<ColorOption> {
     DrJava.CONFIG.setSetting(_option,_jtf.getBackground());
     _jtf.setBackground(DrJava.CONFIG.getSetting(_option));
   } 
+  
+  public void reset() {
+    _jtf.setBackground(DrJava.CONFIG.getSetting(_option));
+  }
 }
