@@ -1414,7 +1414,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       FileSaveSelector realCommand;
       final File file;
       
-      if (!isModifiedSinceSave()) {
+      if (!isModifiedSinceSave() && !isUntitled()) {
         // Don't need to save.
         //  Return true, since the save wasn't "canceled"
         return true;

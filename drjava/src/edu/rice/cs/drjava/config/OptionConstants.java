@@ -315,7 +315,8 @@ public interface OptionConstants {
    */
   public static final KeyStrokeOption KEY_REDO =
     new KeyStrokeOption("key.redo",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_R, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_Z, mask |
+                                               InputEvent.SHIFT_MASK));
   /**
    * The key binding for cutting
    */

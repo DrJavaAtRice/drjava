@@ -176,8 +176,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JButton _saveButton;
   private JButton _compileButton;
   private JButton _closeButton;
-  private JButton _javadocButton;
-  private JButton _junitButton;
+  private JButton _undoButton;
+  private JButton _redoButton;
   private JToolBar _toolBar;
   private JFileChooser _interactionsHistoryChooser;
   
@@ -2417,7 +2417,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     fileMenu.addSeparator();
 
     _addMenuItem(fileMenu, _saveAction, KEY_SAVE_FILE);
-    _saveAction.setEnabled(false);
+    _saveAction.setEnabled(true);
     _addMenuItem(fileMenu, _saveAsAction, KEY_SAVE_FILE_AS);
     _addMenuItem(fileMenu, _saveAllAction, KEY_SAVE_ALL_FILES);
 
@@ -2706,8 +2706,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     // We just manually create the JButtons, and we *don't* set up
     // PropertyChangeListeners on the action's name.
     //_toolBar.addSeparator();
-    _toolBar.add(_createManualToolbarButton(_undoAction));
-    _toolBar.add(_createManualToolbarButton(_redoAction));
+    _undoButton = _createManualToolbarButton(_undoAction);
+    _toolBar.add(_undoButton);
+    _redoButton = _createManualToolbarButton(_redoAction);
+    _toolBar.add(_redoButton);
     
     // Find
     _toolBar.addSeparator();
@@ -2724,11 +2726,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Junit
     _toolBar.addSeparator();
     
-    _junitButton = _createToolbarButton(_junitAction);
-    _toolBar.add(_junitButton);
-    _javadocButton = _createToolbarButton(_javadocAllAction);
-    _toolBar.add(_javadocButton);
+    _toolBar.add(_createToolbarButton(_junitAction));
+    _toolBar.add(_createToolbarButton(_javadocAllAction));
 
+    // Correct the vertical height of the buttons.
+    _fixToolbarHeights();
 
     getContentPane().add(_toolBar, BorderLayout.NORTH);
   }
@@ -2758,14 +2760,23 @@ public class MainFrame extends JFrame implements OptionConstants {
               break;
             }
           }
-            
+        }
           */
           
         Font toolbarFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
         b.setFont(toolbarFont);
                    
-        if (a==null) continue;
-        //}
+        if (a==null) {
+          if (b == _undoButton) {
+            a = _undoAction;
+          }
+          else if (b == _redoButton) {
+            a = _redoAction;
+          }
+          else {
+            continue;
+          }
+        }
           
         boolean iconsEnabled = DrJava.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
           
@@ -2795,8 +2806,52 @@ public class MainFrame extends JFrame implements OptionConstants {
           
       }
     }
+        
+    // Correct the vertical height of the buttons.
+    _fixToolbarHeights();
   }
   
+  /**
+   * Ensures that all toolbar buttons have the same height.
+   */
+  private void _fixToolbarHeights() {
+    Component[] buttons = _toolBar.getComponents();
+    
+    // First, find the maximum height of all the buttons.
+    int max = 0;
+    for (int i = 0; i< buttons.length; i++) {
+      // We only care about the JButtons.
+      if (buttons[i] instanceof JButton) {
+        JButton b = (JButton) buttons[i];
+        
+        // reset any preferred size we have set
+        b.setPreferredSize(null);
+        
+        // get the preferred height, since that's what we want to use
+        Dimension d = b.getPreferredSize();
+        int cur = (int) d.getHeight();
+        if (cur > max) {
+          max = cur;
+        }
+      }
+    }
+    
+    // Now set all button heights to the max.
+    for (int i = 0; i< buttons.length; i++) {
+      // We only care about the JButtons.
+      if (buttons[i] instanceof JButton) {
+        JButton b = (JButton) buttons[i];
+        Dimension d = new Dimension((int) b.getPreferredSize().getWidth(), max);
+        
+        // JToolBar inexplicably uses the max size
+        // also set preferred size for consistency
+        b.setPreferredSize(d);
+        b.setMaximumSize(d);
+      }
+    }
+    
+    // _toolbar.revalidate();
+  }
   
   /**
    * Sets up the status bar with the filename field.
@@ -3615,6 +3670,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private class ModelListener implements SingleDisplayModelListener {
     public void newFileCreated(OpenDefinitionsDocument doc) {
       _createDefScrollPane(doc);
+      
     }
 
     public void fileSaved(OpenDefinitionsDocument doc) {
@@ -3743,7 +3799,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           
           boolean isModified = active.isModifiedSinceSave();
           boolean canCompile = (!isModified && !active.isUntitled());
-          _saveAction.setEnabled(isModified);
+          _saveAction.setEnabled(isModified || active.isUntitled());
           _revertAction.setEnabled(!active.isUntitled());
           
           // Update error highlights
