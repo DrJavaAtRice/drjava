@@ -79,6 +79,8 @@ public class JTreeNavigator extends JTree implements IAWTContainerNavigatorActor
   /** the collection of INavigationListeners listening to this JListNavigator */
   private Vector<INavigationListener> navListeners = new Vector<INavigationListener>();
   
+  protected DefaultTreeCellRenderer _renderer;
+
   public JTreeNavigator(String name) {
     super(new DefaultTreeModel(new DefaultMutableTreeNode(name)));
     
@@ -87,6 +89,9 @@ public class JTreeNavigator extends JTree implements IAWTContainerNavigatorActor
     _model = (DefaultTreeModel) this.getModel();
     _root = (DefaultMutableTreeNode) _model.getRoot();
       
+    _renderer = new DefaultTreeCellRenderer();
+    _renderer.setOpaque(true);
+    this.setCellRenderer(_renderer);
     
     //this.setShowsRootHandles(true);
   }
@@ -419,5 +424,12 @@ public class JTreeNavigator extends JTree implements IAWTContainerNavigatorActor
       }
       _currSelected = newselection;
     }
+  }
+
+  /**
+   * returns a renderer for this object
+   */
+  public Component getRenderer(){
+    return _renderer;
   }
 }

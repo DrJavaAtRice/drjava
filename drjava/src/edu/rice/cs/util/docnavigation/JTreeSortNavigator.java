@@ -79,6 +79,21 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
   /** the collection of INavigationListeners listening to this JListNavigator */
   private Vector<INavigationListener> navListeners = new Vector<INavigationListener>();
   
+  protected DefaultTreeCellRenderer _renderer;
+
+  public void setForeground(Color c){
+    super.setForeground(c);
+    _renderer.setTextNonSelectionColor(c);
+//    _renderer.setTextSelectionColor(c);
+    System.out.println("setting foreground to " + c);
+  }
+  
+  public void setBackground(Color c){
+    super.setBackground(c);
+    if(_renderer != null)
+      _renderer.setBackgroundNonSelectionColor(c);
+  }
+  
   public JTreeSortNavigator(String name) {
     super(new DefaultTreeModel(new DefaultMutableTreeNode(name)));
     
@@ -86,7 +101,12 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
     
     _model = (DefaultTreeModel) this.getModel();
     _root = (DefaultMutableTreeNode) _model.getRoot();
-      
+    _renderer = new DefaultTreeCellRenderer();
+    _renderer.setOpaque(false);
+    
+    this.setCellRenderer(_renderer);
+
+    
     
     //this.setShowsRootHandles(true);
   }
@@ -489,5 +509,13 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
       }
       _currSelected = newselection;
     }
+  }
+  
+  
+  /**
+   * returns a renderer for this object
+   */
+  public Component getRenderer(){
+    return _renderer;
   }
 }

@@ -50,4 +50,6 @@ import java.awt.*;
 public interface IAWTContainerNavigatorActor extends IDocumentNavigator
 {
   public Container asContainer();
+  
+  public Component getRenderer();
 }

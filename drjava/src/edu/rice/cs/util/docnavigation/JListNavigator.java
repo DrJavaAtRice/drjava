@@ -63,12 +63,20 @@ class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListS
   /** the collection of INavigationListeners listening to this JListNavigator */
   protected Vector<INavigationListener> navListeners = new Vector<INavigationListener>();
   
+  protected DefaultListCellRenderer _renderer;
+  
   public JListNavigator() 
   {
     super();
     this.setListData(_docs);
     setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     this.addListSelectionListener(this);
+    
+    
+    _renderer = new DefaultListCellRenderer();
+    _renderer.setOpaque(true);
+    this.setCellRenderer(_renderer);
+    
     /*
     listmodel.addListDataListener(new ListDataListener(){
       public void contentsChanged(ListDataEvent e)
@@ -312,5 +320,13 @@ class JListNavigator extends JList implements IAWTContainerNavigatorActor, ListS
         currentselected = (INavigatorItem)this.getSelectedValue();
       } 
     }
+  }
+
+
+  /**
+   * returns a renderer for this object
+   */
+  public Component getRenderer(){
+    return _renderer;
   }
 }

@@ -63,9 +63,15 @@ class JListSortNavigator extends JListNavigator{
   /** the collection of INavigationListeners listening to this JListNavigator */
   private Vector<INavigationListener> navListeners = new Vector<INavigationListener>();
   
+  protected DefaultListCellRenderer _renderer;
+
+  
   public JListSortNavigator() 
   {
     super();
+    _renderer = new DefaultListCellRenderer();
+    _renderer.setOpaque(true);
+    this.setCellRenderer(_renderer);
   }
   
   public void addDocument(INavigatorItem doc) {
@@ -263,5 +269,13 @@ class JListSortNavigator extends JListNavigator{
         currentselected = (INavigatorItem)this.getSelectedValue();
       } 
     }
+  }
+
+
+  /**
+   * returns a renderer for this object
+   */
+  public Component getRenderer(){
+    return _renderer;
   }
 }
