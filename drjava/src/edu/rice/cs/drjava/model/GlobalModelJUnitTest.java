@@ -380,19 +380,19 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
       
       public void junitEnded() {
         synchronized(this) {
-          assertInteractionsResetCount(1);
+          assertInterpreterReadyCount(1);
           junitEndCount++;
           notify();
         }
       }
       
       public void interpreterResetting() {
-        assertInteractionsResetCount(0);
+        assertInterpreterReadyCount(0);
         interpreterResettingCount++;
       }
       
       public void interpreterReady() {
-        assertInteractionsResettingCount(1);
+        assertInterpreterResettingCount(1);
         assertJUnitEndCount(0);
         interpreterReadyCount++;
       }

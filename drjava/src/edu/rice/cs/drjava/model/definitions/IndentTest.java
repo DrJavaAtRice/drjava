@@ -1341,6 +1341,8 @@ public final class IndentTest extends TestCase {
     FileOps.writeStringToFile(toFile, text);
     String newText = FileOps.readFileAsString(toFile);
     assertEquals("File copy verify", text, newText);
+    fromFile.deleteOnExit();
+    toFile.deleteOnExit();
   }
   
   /**
@@ -1353,6 +1355,7 @@ public final class IndentTest extends TestCase {
     File test = null;
     try {
       test = File.createTempFile("test", ".java");
+      test.deleteOnExit();
       _copyFile(unindented, test);
       IndentFiles.main(new String[] {"-silent", test.toString()});
       _fileCompare(test, correct);

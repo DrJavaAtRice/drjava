@@ -349,8 +349,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
      */
      String user = System.getProperty("user.name");
      _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
-     File ForceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.java");
-     String ForceOpenClass1_string =
+     File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.java");
+     String forceOpenClass1_string =
        "public class ForceOpenClass1 {\n" +
        "  ForceOpenClass2 class2;\n" +
        "  ForceOpenClass3 class3;\n\n" +   
@@ -360,21 +360,24 @@ public final class MainFrameTest extends MultiThreadedTestCase {
        "  }\n" + 
        "}";
      
-     File ForceOpenClass2_file = new File(_tempDir, "ForceOpenClass2.java");
-     String ForceOpenClass2_string =
+     File forceOpenClass2_file = new File(_tempDir, "ForceOpenClass2.java");
+     String forceOpenClass2_string =
        "public class ForceOpenClass2 {\n" +
        "  inx x = 4;\n" +
        "}";
      
-     File ForceOpenClass3_file = new File(_tempDir, "ForceOpenClass3.java");
-     String ForceOpenClass3_string = 
+     File forceOpenClass3_file = new File(_tempDir, "ForceOpenClass3.java");
+     String forceOpenClass3_string = 
        "public class ForceOpenClass3 {\n" +
        "  String s = \"asf\";\n" +
        "}";
      
-     FileOps.writeStringToFile(ForceOpenClass1_file, ForceOpenClass1_string);
-     FileOps.writeStringToFile(ForceOpenClass2_file, ForceOpenClass2_string);
-     FileOps.writeStringToFile(ForceOpenClass2_file, ForceOpenClass2_string);
+     FileOps.writeStringToFile(forceOpenClass1_file, forceOpenClass1_string);
+     FileOps.writeStringToFile(forceOpenClass2_file, forceOpenClass2_string);
+     FileOps.writeStringToFile(forceOpenClass3_file, forceOpenClass3_string);
+     forceOpenClass1_file.deleteOnExit();
+     forceOpenClass2_file.deleteOnExit();
+     forceOpenClass3_file.deleteOnExit();
      
      //_frame.setVisible(true);
      _frame.pack();
@@ -432,8 +435,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
      */
      String user = System.getProperty("user.name");
      _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
-     File ForceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.java");
-     String ForceOpenClass1_string =
+     File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.java");
+     String forceOpenClass1_string =
        "public class ForceOpenClass1 {\n" +
        "  ForceOpenClass2 class2;\n" +
        "  ForceOpenClass3 class3;\n\n" +   
@@ -443,7 +446,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
        "  }\n" + 
        "}";
      
-     FileOps.writeStringToFile(ForceOpenClass1_file, ForceOpenClass1_string);
+     FileOps.writeStringToFile(forceOpenClass1_file, forceOpenClass1_string);
+     forceOpenClass1_file.deleteOnExit();
      
      //_frame.setVisible(true);
      _frame.pack();
@@ -542,6 +546,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
   /** Create a new temporary file in _tempDir. */
   protected File tempFile(String fileName) throws IOException {
-    return File.createTempFile(fileName, ".java", _tempDir);
+    File f =  File.createTempFile(fileName, ".java", _tempDir);
+    f.deleteOnExit();
+    return f;
   }
 }

@@ -120,6 +120,8 @@ public class InterpreterJVM extends AbstractSlaveJVM
    * Private constructor; use the singleton ONLY instance.
    */
   private InterpreterJVM() {
+    _quitSlaveThreadName = "Reset Interactions Thread";
+    _pollMasterThreadName = "Poll DrJava Thread";
     reset();
     _interactionsProcessor = new InteractionsProcessor();
     _messageOnResetFailure = true;

@@ -141,8 +141,13 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    * Sets the default interpreter to be the current one.
    */
   public void setToDefaultInterpreter() {
+    // Only print prompt if we're not already the default
+    String currName = _interpreterControl.getCurrentInterpreterName();
+    boolean printPrompt = !MainJVM.DEFAULT_INTERPRETER_NAME.equals(currName);
+    
     boolean inProgress = _interpreterControl.setToDefaultInterpreter();
-    _updateDocument(_document.DEFAULT_PROMPT, inProgress, true);
+
+    _updateDocument(_document.DEFAULT_PROMPT, inProgress, printPrompt);
     _notifyInterpreterChanged(inProgress);
   }
   

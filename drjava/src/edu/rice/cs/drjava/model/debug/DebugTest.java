@@ -246,7 +246,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
   
   /**
    * Tests startup and shutdown, ensuring that all appropriate fields are
-   * initialized.
+   * initialized.  Ensures multiple startups and shutdowns work, even
+   * after a reset, which changes the debug port.
    */
   public void testStartupAndShutdown()
     throws DebugException, InterruptedException
@@ -261,7 +262,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
       _waitForNotifies(1);  // startup
       _notifierLock.wait();
     }
-    debugListener.assertDebuggerStartedCount(1);
+    debugListener.assertDebuggerStartedCount(1);  //fires
     debugListener.assertDebuggerShutdownCount(0);
 
     // Check fields and status
@@ -277,9 +278,71 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
       _waitForNotifies(1);  // shutdown
       _notifierLock.wait();
     }
+    debugListener.assertDebuggerStartedCount(1);
+    debugListener.assertDebuggerShutdownCount(1);  //fires
+    
+    
+    // Start debugger again without resetting
+    synchronized(_notifierLock) {
+      _debugger.startup();
+      _waitForNotifies(1);  // startup
+      _notifierLock.wait();
+    }
+    debugListener.assertDebuggerStartedCount(2);  //fires
     debugListener.assertDebuggerShutdownCount(1);
+    
+    // Reset interactions (which shuts down debugger)
+    InterpretListener resetListener = new InterpretListener() {
+      public void interpreterChanged(boolean inProgress) {
+        // Don't notify: happens in the same thread
+        interpreterChangedCount++;
+      }
+      public void interpreterResetting() {
+        // Don't notify: happens in the same thread
+        interpreterResettingCount++;
+      }
+      public void interpreterReady() {
+        synchronized(_notifierLock) {
+          interpreterReadyCount++;
+          if (printEvents) System.out.println("interpreterReady " + interpreterReadyCount);
+          _notifyLock();
+        }
+      }
+    };
+    _model.addListener(resetListener);
+    synchronized(_notifierLock) {
+      _model.resetInteractions();
+      _waitForNotifies(2);  // shutdown, interpreterReady
+      _notifierLock.wait();
+    }
+    _model.removeListener(resetListener);
+    resetListener.assertInterpreterResettingCount(1);  //fires (no waiting)
+    resetListener.assertInterpreterReadyCount(1);  //fires
+    debugListener.assertDebuggerStartedCount(2);
+    debugListener.assertDebuggerShutdownCount(2);  //fires
+    
+    
+    // Start debugger again after reset
+    synchronized(_notifierLock) {
+      _debugger.startup();
+      _waitForNotifies(1);  // startup
+      _notifierLock.wait();
+    }
+    debugListener.assertDebuggerStartedCount(3);  //fires
+    debugListener.assertDebuggerShutdownCount(2);
+    
+    // Shutdown the debugger
+    synchronized(_notifierLock) {
+      _debugger.shutdown();
+      _waitForNotifies(1);  // shutdown
+      _notifierLock.wait();
+    }
+    debugListener.assertDebuggerStartedCount(3);
+    debugListener.assertDebuggerShutdownCount(3);  //fires
+    
     _debugger.removeListener(debugListener);
   }
+  
   
   /**
    * Test that when two threads are suspended setCurrentThread can be used

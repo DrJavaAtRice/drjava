@@ -236,7 +236,14 @@ public final class InteractionsModelTest extends TestCase {
    * Tests that a debug port can be generated.
    */
   public void testDebugPort() throws IOException {
-    assertTrue("generated debug port", _model.getDebugPort() != -1);
+    int port = _model.getDebugPort();
+    assertTrue("generated debug port", port != -1);
+    
+    // Resetting after startup should change the port
+    _model.setWaitingForFirstInterpreter(false);
+    _model.interpreterResetting();
+    int newPort = _model.getDebugPort();
+    assertTrue("debug port should change", newPort != port);
     
     // Set port
     _model.setDebugPort(5);

@@ -96,7 +96,7 @@ public final class EventNotifierTest extends TestCase {
         l.interpreterExited(1);
       }
     });
-    listener1.assertInteractionsExitedCount(1);
+    listener1.assertInterpreterExitedCount(1);
   }
   
   /**

@@ -74,6 +74,7 @@ public final class ConfigFileTest extends TestCase {
   public void testCustomConfigFile() throws IOException {
     File propsFile = 
       FileOps.writeStringToNewTempFile("DrJavaProps", ".txt", CUSTOM_PROPS);
+    propsFile.deleteOnExit();
     DrJava.setPropertiesFile(propsFile.getAbsolutePath());
     DrJava.initConfig();
     FileConfiguration config = DrJava.getConfig();

@@ -200,7 +200,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         assertSaveCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
-        assertInteractionsResetCount(0);
+        assertInterpreterReadyCount(0);
         assertConsoleResetCount(0);
         
         try {
@@ -219,7 +219,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         assertSaveBeforeCompileCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
-        assertInteractionsResetCount(0);
+        assertInterpreterReadyCount(0);
         assertConsoleResetCount(0);
         
         //File f = null;
@@ -279,7 +279,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         assertSaveCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
-        assertInteractionsResetCount(0);
+        assertInterpreterReadyCount(0);
         assertConsoleResetCount(0);
         
         try {
@@ -300,7 +300,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         assertSaveBeforeCompileCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
-        assertInteractionsResetCount(0);
+        assertInterpreterReadyCount(0);
         assertConsoleResetCount(0);
         
         File f = null;

@@ -296,10 +296,12 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     int i = this.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT;
     //i = this.WHEN_FOCUSED;
     //i = this.WHEN_IN_FOCUSED_WINDOW;
-    InputMap im = _mainPanel.getInputMap(i);
+    //InputMap im = _mainPanel.getInputMap(i);
+    InputMap im = _findField.getInputMap(i);
     im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0), "Close");
     im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), "Find Next");
-    ActionMap am = _mainPanel.getActionMap();
+    //ActionMap am = _mainPanel.getActionMap();
+    ActionMap am = _findField.getActionMap();
     am.put("Find Next", _findNextAction);
     am.put("Close", new AbstractAction("Close") {
       public void actionPerformed(ActionEvent ae) {

@@ -69,7 +69,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   private static final String SLAVE_CLASS_NAME =
     "edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM";
   
-  private static final String DEFAULT_INTERPRETER_NAME = "DEFAULT";
+  public static final String DEFAULT_INTERPRETER_NAME = "DEFAULT";
   
   private Log _log = new Log("MainJVMLog", false);
   
@@ -119,6 +119,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public MainJVM() {
     super(SLAVE_CLASS_NAME);
+    _waitForQuitThreadName = "Wait for Interactions to Exit Thread";
+    _exportMasterThreadName = "Export DrJava to RMI Thread";
 
     _interactionsModel = new DummyInteractionsModel();
     _junitModel = new DummyJUnitModel();
@@ -648,6 +650,19 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       _interactionsModel.replCalledSystemExit(status);
     }
     _cleanlyRestarting = false;
+  }
+  
+  /**
+   * Action to take if the slave JVM quits before registering.
+   * @param status Status code of the JVM
+   */
+  protected void slaveQuitDuringStartup(int status) {
+    String msg = "Interpreter JVM exited before registering, status: "
+      + status;
+    IllegalStateException e = new IllegalStateException(msg);
+    _interactionsModel.interpreterResetFailed(e);
+    _cleanlyRestarting = false;
+    throw e;
   }
   
   /**

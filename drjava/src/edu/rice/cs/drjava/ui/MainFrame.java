@@ -666,10 +666,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       int rc = dialog.show();
       if (rc == JOptionPane.YES_OPTION) {
         _doResetInteractions();
-      }
-      if ((rc == JOptionPane.YES_OPTION || rc == JOptionPane.NO_OPTION)
-            && dialog.getCheckBoxValue()) {
-        DrJava.getConfig().setSetting(INTERACTIONS_RESET_PROMPT, Boolean.FALSE);
+      
+        if (dialog.getCheckBoxValue()) {
+          DrJava.getConfig().setSetting(INTERACTIONS_RESET_PROMPT, Boolean.FALSE);
+        }
       }
     }
   };
@@ -1733,10 +1733,13 @@ public class MainFrame extends JFrame implements OptionConstants {
         new ConfirmCheckBoxDialog(MainFrame.this, title, message);
       int rc = dialog.show();
       if (rc != JOptionPane.YES_OPTION) {
-        if (rc == JOptionPane.NO_OPTION && dialog.getCheckBoxValue() == true) {
+        return;
+      }
+      else {
+        // Only remember the checkbox if they say yes
+        if (dialog.getCheckBoxValue() == true) {
           DrJava.getConfig().setSetting(OptionConstants.QUIT_PROMPT, Boolean.FALSE);
         }
-        return;
       }
     }
       
@@ -3932,7 +3935,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     public void javadocEnded(final boolean success, final File destDir,
-                             final boolean showFrames) {
+                             final boolean allDocs) {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
@@ -3958,13 +3961,13 @@ public class MainFrame extends JFrame implements OptionConstants {
               className = "";
             }
             try {
-              String filename = (showFrames || className.equals("")) ?
+              String filename = (allDocs || className.equals("")) ?
                 "index.html" : (className + ".html");
               File index = new File(destDir, filename);
               URL address = index.getAbsoluteFile().toURL();
               if (!PlatformFactory.ONLY.openURL(address)) {
                 JavadocFrame _javadocFrame = 
-                  new JavadocFrame(destDir, className, showFrames);
+                  new JavadocFrame(destDir, className, allDocs);
                 _javadocFrame.show();
               }
             }
@@ -4126,12 +4129,12 @@ public class MainFrame extends JFrame implements OptionConstants {
           switch (rc) {
             case JOptionPane.YES_OPTION:
               _saveAll();
-              // don't break, since no option and yes option both check the checkbox
-            case JOptionPane.NO_OPTION:
+              // Only remember checkbox if they say yes
               if (dialog.getCheckBoxValue()) {
                 DrJava.getConfig().setSetting(option, Boolean.TRUE);
               }
               break;
+            case JOptionPane.NO_OPTION:
             case JOptionPane.CANCEL_OPTION:
             case JOptionPane.CLOSED_OPTION:
               // do nothing

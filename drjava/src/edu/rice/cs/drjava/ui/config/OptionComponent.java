@@ -88,6 +88,9 @@ public abstract class OptionComponent<T> {
   
   public JLabel getLabel() { return _label; } 
   
+  /**
+   * Returns the JComponent to display for this OptionComponent.
+   */
   public abstract JComponent getComponent();
 
   /**

@@ -143,9 +143,9 @@ public class JavadocFrame extends HTMLFrame {
    * Constructor.
    * @param destDir Directory holding the Javadoc
    * @param curClass Name of the class to try to show by default
-   * @param showFrames Whether to show the left frame with the links
+   * @param allDocs Whether Javadoc was run for all open documents
    */
-  public JavadocFrame(File destDir, String curClass, boolean showFrames)
+  public JavadocFrame(File destDir, String curClass, boolean allDocs)
     throws MalformedURLException
   {
     // This call has to happen first!
@@ -163,7 +163,7 @@ public class JavadocFrame extends HTMLFrame {
       }
     });
     
-    if (!showFrames) {
+    if (!allDocs) {
       _hideNavigationPane();
     }
   }

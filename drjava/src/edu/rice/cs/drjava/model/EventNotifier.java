@@ -461,15 +461,14 @@ public class EventNotifier implements GlobalModelListener {
    * @param success whether the Javadoc operation generated proper output
    * @param destDir if (success == true) the location where the output was
    *                generated, otherwise undefined (possibly null)
-   * @param showFrames Whether to show the frames version of the Javadoc
-   * (for Javadoc All, vs. Javadoc Current)
+   * @param allDocs Whether Javadoc was run for all open documents
    */
-  public void javadocEnded(boolean success, File destDir, boolean showFrames) {
+  public void javadocEnded(boolean success, File destDir, boolean allDocs) {
     _lock.startRead();
     try {
       int size = _listeners.size();
       for(int i = 0; i < size; i++) {
-        _listeners.get(i).javadocEnded(success, destDir, showFrames);
+        _listeners.get(i).javadocEnded(success, destDir, allDocs);
       }
     }
     finally {

@@ -188,8 +188,9 @@ public class DefaultJavadocModel implements JavadocModel {
         if (!destDir.exists()) {
           // If the choice doesn't exist, ask to create it.
           boolean create = select.askUser
-            ("The destination directory you have chosen\n" +
-             "does not exist.  Would you like to create it?",
+            ("The directory you chose does not exist:\n" +
+             "'" + destDir + "'\n" +
+             "Would you like to create it?",
              "Create Directory?");
           if (create) {
             boolean dirMade = destDir.mkdirs();
@@ -203,15 +204,17 @@ public class DefaultJavadocModel implements JavadocModel {
         }
         else if (!destDir.isDirectory()) {
           // We can't use it if it isn't a directory
-          select.warnUser("The file you have chosen is not a directory.\n" +
+          select.warnUser("The file you chose is not a directory:\n" +
+                          "'" + destDir + "'\n" +
                           "Please choose another.",
                           "Not a Directory!");
           destDir = select.getDirectory(null);
         }
         else {
           //If the directory isn't writable, tell the user and ask again.
-          select.warnUser("The destination directory you have chosen is\n" +
-                          "not writeable. Please choose another directory.",
+          select.warnUser("The directory you chose is not writable:\n" +
+                          "'" + destDir + "'\n" +
+                          "Please choose another directory.",
                           "Cannot Write to Destination!");
           destDir = select.getDirectory(null);
         }
@@ -225,7 +228,7 @@ public class DefaultJavadocModel implements JavadocModel {
     // Start a new thread to do the work.
     final File destDirF = destDir;
     final String[] classpathArray = classpath.toArray(new String[0]);
-    new Thread() {
+    new Thread("DrJava Javadoc Thread") {
       public void run() {
         _javadocAllWorker(destDirF, saver, classpathArray, listener);
       }
@@ -408,11 +411,10 @@ public class DefaultJavadocModel implements JavadocModel {
     
     // Generate to a temporary directory
     final File destDir = FileOps.createTempDirectory("DrJava-javadoc");
-    destDir.deleteOnExit();
     
     // Start a new thread to do the work.
     final String[] classpathArray = classpath.toArray(new String[0]);
-    new Thread() {
+    new Thread("DrJava Javadoc Thread") {
       public void run() {
         _javadocDocumentWorker(destDir, file, doc, saver, classpathArray, listener);
       }
@@ -486,11 +488,11 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param classpath Classpath to pass to Javadoc
    * @param destDirFile Directory where the results are being saved
    * @param listener JavadocListener to notify
-   * @param showFrames Whether to show the frames version (ie. Javadoc All)
+   * @param allDocs Whether we are running over all open documents
    */
   private void _runJavadoc(ArrayList<String> args, String[] classpath,
                            File destDirFile, JavadocListener listener,
-                           boolean showFrames)
+                           boolean allDocs)
   {
     // Start a new process to execute Javadoc and tell listeners it has started
     // And finally, when we're done notify the listeners with a success flag
@@ -501,8 +503,14 @@ public class DefaultJavadocModel implements JavadocModel {
       
       result = _javadoc_1_3((String[]) args.toArray(new String[0]), classpath);
       
+      // If success and we're generating current, make sure the temp
+      //  directory gets deleted on exit.
+      if (result && !allDocs) {
+        FileOps.deleteDirectoryOnExit(destDirFile);
+      }
+      
       // Notify all listeners that we're done.
-      listener.javadocEnded(result, destDirFile, showFrames);
+      listener.javadocEnded(result, destDirFile, allDocs);
     }
     catch (Throwable e) {
       // This fires javadocEnded, showing the error

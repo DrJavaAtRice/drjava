@@ -722,25 +722,25 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("number of times runStarted fired", i, runStartCount);
     }
 
-    public void assertInteractionsResettingCount(int i) {
+    public void assertInterpreterResettingCount(int i) {
       assertEquals("number of times interactionsResetting fired",
                    i,
                    interpreterResettingCount);
     }
     
-    public void assertInteractionsResetCount(int i) {
+    public void assertInterpreterReadyCount(int i) {
       assertEquals("number of times interactionsReset fired",
                    i,
                    interpreterReadyCount);
     }
     
-    public void assertInteractionsResetFailedCount(int i) {
+    public void assertInterpreterResetFailedCount(int i) {
       assertEquals("number of times interactionsResetFailed fired",
                    i,
                    interpreterResetFailedCount);
     }
 
-    public void assertInteractionsExitedCount(int i) {
+    public void assertInterpreterExitedCount(int i) {
       assertEquals("number of times interpreterExited fired",
                    i,
                    interpreterExitedCount);
@@ -867,7 +867,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("javadocStarted fired unexpectedly");
     }
   
-    public void javadocEnded(boolean success, File destDir, boolean showFrames) {
+    public void javadocEnded(boolean success, File destDir, boolean allDocs) {
       listenerFail("javadocEnded fired unexpectedly");
     }
 
@@ -988,8 +988,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void compileStarted() {
       assertCompileStartCount(0);
       assertCompileEndCount(0);
-      assertInteractionsResettingCount(0);
-      assertInteractionsResetCount(0);
+      assertInterpreterResettingCount(0);
+      assertInterpreterReadyCount(0);
       assertConsoleResetCount(0);
       compileStartCount++;
     }
@@ -997,15 +997,15 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void compileEnded() {
       assertCompileEndCount(0);
       assertCompileStartCount(1);
-      assertInteractionsResettingCount(0);
-      assertInteractionsResetCount(0);
+      assertInterpreterResettingCount(0);
+      assertInterpreterReadyCount(0);
       assertConsoleResetCount(0);
       compileEndCount++;
     }
 
     public void interpreterResetting() {
-      assertInteractionsResettingCount(0);
-      assertInteractionsResetCount(0);
+      assertInterpreterResettingCount(0);
+      assertInterpreterReadyCount(0);
       assertCompileStartCount(1);
       assertCompileEndCount(1);
       // don't care whether interactions or console are reset first
@@ -1014,8 +1014,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     public void interpreterReady() {
       synchronized(this) {
-        assertInteractionsResettingCount(1);
-        assertInteractionsResetCount(0);
+        assertInterpreterResettingCount(1);
+        assertInterpreterReadyCount(0);
         assertCompileStartCount(1);
         assertCompileEndCount(1);
         // don't care whether interactions or console are reset first
@@ -1037,12 +1037,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertCompileEndCount(1);
       assertCompileStartCount(1);
       if (_expectReset) {
-        assertInteractionsResettingCount(1);
-        assertInteractionsResetCount(1);
+        assertInterpreterResettingCount(1);
+        assertInterpreterReadyCount(1);
       }
       else {
-        assertInteractionsResettingCount(0);
-        assertInteractionsResetCount(0);
+        assertInterpreterResettingCount(0);
+        assertInterpreterReadyCount(0);
       }
 
       // Note: console is no longer reset after a compile

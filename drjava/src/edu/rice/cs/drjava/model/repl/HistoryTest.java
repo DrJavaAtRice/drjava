@@ -104,6 +104,7 @@ public final class HistoryTest extends TestCase implements OptionConstants{
     
     _history.add("some text");
     final File file1 = File.createTempFile("DrJava-test", ".hist", _tempDir);
+    file1.deleteOnExit();
     try {
       _history.writeToFile(new WarningFileSelector(file1));
       fail("Did not ask to verify overwrite as expected");

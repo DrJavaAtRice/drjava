@@ -256,10 +256,9 @@ public class DummySingleDisplayModelListener implements SingleDisplayModelListen
    * @param success whether the Javadoc operation generated proper output
    * @param destDir if (success == true) the location where the output was
    *                generated, otherwise undefined (possibly null)
-   * @param showFrames Whether to show the frames version of the Javadoc
-   * (for Javadoc All, vs. Javadoc Current)
+   * @param allDocs Whether we are running over all open documents
    */
-  public void javadocEnded(boolean success, File destDir, boolean showFrames) { }
+  public void javadocEnded(boolean success, File destDir, boolean allDocs) { }
   
   public void activeDocumentChanged(OpenDefinitionsDocument active) { }
 }

@@ -325,21 +325,29 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    */
   public int getDebugPort() throws IOException {
     if (!_debugPortSet) {
-      try {
-        ServerSocket socket = new ServerSocket(0);
-        _debugPort = socket.getLocalPort();
-        socket.close();
-      }
-      catch (java.net.SocketException se) {
-        // something wrong with sockets, can't use for debugger
-        _debugPort = -1;
-      }
-      _debugPortSet = true;
-      if (CodeStatus.DEVELOPMENT) {
-        System.setProperty("drjava.debug.port", String.valueOf(_debugPort));
-      }
+      _createNewDebugPort();
     }
     return _debugPort;
+  }
+  
+  /**
+   * Generates an available port for use with the debugger.
+   * @throws IOException if unable to get a valid port number.
+   */
+  protected void _createNewDebugPort() throws IOException {
+    try {
+      ServerSocket socket = new ServerSocket(0);
+      _debugPort = socket.getLocalPort();
+      socket.close();
+    }
+    catch (java.net.SocketException se) {
+      // something wrong with sockets, can't use for debugger
+      _debugPort = -1;
+    }
+    _debugPortSet = true;
+    if (CodeStatus.DEVELOPMENT) {
+      System.setProperty("drjava.debug.port", String.valueOf(_debugPort));
+    }
   }
   
   /**
@@ -523,6 +531,15 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       _document.insertBeforeLastPrompt("Resetting Interactions..." + _newLine,
                                        InteractionsDocument.ERROR_STYLE);
       _document.setInProgress(true);
+      
+      // Change to a new debug port to avoid conflicts
+      try {
+        _createNewDebugPort();
+      }
+      catch (IOException ioe) {
+        // Oh well, leave it at the previous port
+      }
+      
       _notifyInterpreterResetting();
     }
   }

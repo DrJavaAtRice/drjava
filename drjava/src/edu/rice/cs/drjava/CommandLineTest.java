@@ -96,18 +96,21 @@ public final class CommandLineTest extends TestCase {
     super(name);
     try {
       f1 = File.createTempFile("DrJava-test", ".java");
+      f1.deleteOnExit();
       f1_name = f1.getAbsolutePath();
       f1_contents = "abcde";
       FileWriter fw1 = new FileWriter(f1);
       fw1.write(f1_contents,0,f1_contents.length());
       fw1.close();
       f2 = File.createTempFile("DrJava-test", ".java");
+      f2.deleteOnExit();
       f2_name = f2.getAbsolutePath();
       f2_contents = "fghijklm";
       FileWriter fw2 = new FileWriter(f2);
       fw2.write(f2_contents,0,f2_contents.length());
       fw2.close();
       f3 = File.createTempFile("DrJava-test", ".java");
+      f3.deleteOnExit();
       f3_name = f3.getAbsolutePath();
       f3_contents = "nopqrstuvwxyz";
       FileWriter fw3 = new FileWriter(f3);
@@ -123,7 +126,8 @@ public final class CommandLineTest extends TestCase {
       nof3 = File.createTempFile("DrJava-test", ".java");
       nof3_name = nof3.getAbsolutePath();
       nof3.delete();
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       System.err.print("createTempFile failed.  This should not happen.");
       throw new RuntimeException(e.toString());
     }
@@ -314,8 +318,9 @@ public final class CommandLineTest extends TestCase {
    * when opening files.)
    */
   public void testRelativePath() throws IOException, InvalidPackageException {
-    // OK, we have to create a directory with a hard-coded name, so we'll
-    // make it strange. If this directory happens to exist, it'll be deleted.
+    // OK, we have to create a directory with a hard-coded name in the
+    // current working directory, so we'll make it strange. If this 
+    // directory happens to exist, it'll be deleted.
     String funnyName = "DrJava_automatically_deletes_this";
     File newDirectory = new File(funnyName);
     if (newDirectory.exists()) {

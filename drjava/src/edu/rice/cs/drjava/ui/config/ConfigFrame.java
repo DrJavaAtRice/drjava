@@ -423,28 +423,28 @@ public class ConfigFrame extends JFrame {
       new StringOptionComponent(OptionConstants.BROWSER_STRING,
                               "Web Browser Command", this,
                               "<html>Command to send to the web browser to view a web location.<br>" +
-                              "The string &lt;URL&gt; will be replaced with the URL address.<br>" +
+                              "The string <code>&lt;URL&gt;</code> will be replaced with the URL address.<br>" +
                               "This is not necessary if a default browser is available on your system.");
     panel.addComponent(browserCommand);
     
     FileOptionComponent javacLoc =
       new FileOptionComponent(OptionConstants.JAVAC_LOCATION,
                               "Tools.jar Location", this,
-                              "Location of the JDK's tools.jar, which contains the compiler and debugger.",
+                              "Optional location of the JDK's tools.jar, which contains the compiler and debugger.",
                               _fileOptionChooser);
     javacLoc.setFileFilter(ClasspathFilter.ONLY);
     panel.addComponent(javacLoc);
     FileOptionComponent jsr14Loc =
       new FileOptionComponent(OptionConstants.JSR14_LOCATION,
                               "JSR-14 Location", this,
-                              "Location of the JSR-14 compiler, for compiling with generics.",
+                              "Optional location of the JSR-14 compiler, for compiling with generics.",
                               _fileOptionChooser);
     jsr14Loc.setFileFilter(ClasspathFilter.ONLY);
     panel.addComponent(jsr14Loc);
     FileOptionComponent jsr14Col =
       new FileOptionComponent(OptionConstants.JSR14_COLLECTIONSPATH,
                               "JSR-14 Collections Path", this,
-                               "Location of the JSR-14 collect.jar file, which contains the collection classes.",
+                               "Optional location of the JSR-14 collect.jar file, which contains the collection classes.",
                              _fileOptionChooser);
     jsr14Col.setFileFilter(ClasspathFilter.ONLY);
     panel.addComponent(jsr14Col);
@@ -462,17 +462,16 @@ public class ConfigFrame extends JFrame {
    */
   private void _setupDisplayPanel(ConfigPanel panel) {
 
+    panel.addComponent(new ForcedChoiceOptionComponent(OptionConstants.LOOK_AND_FEEL,
+                                                       "Look and Feel", this,
+                                                       "Changes the general appearance of DrJava."));
+    
     //ToolbarOptionComponent is a degenerate option component
     panel.addComponent(new ToolbarOptionComponent("Toolbar Buttons", this,
                                                   "How to display the toolbar buttons."));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.LINEENUM_ENABLED,
-                                                  "Line Number Enumeration", this,
+                                                  "Show All Line Numbers", this,
                                                   "Whether to show line numbers on the left side of the Definitions Pane."));
-    if (CodeStatus.DEVELOPMENT) {
-      panel.addComponent(new ForcedChoiceOptionComponent(OptionConstants.LOOK_AND_FEEL,
-                                                         "Look and Feel", this,
-                                                         "Sets the look and feel DrJava should use"));
-    }
     panel.displayComponents();
   }
    
@@ -541,7 +540,8 @@ public class ConfigFrame extends JFrame {
       if (tmpKsd.getOption() != null) {
         // Get the tooltip, or default to its name, if none
         KeyStroke ks = tmpKsd.getKeyStroke();
-        Action a = KeyBindingManager.Singleton.get(ks);
+        //Action a = KeyBindingManager.Singleton.get(ks);
+        Action a = tmpKsd.getAction();
         String desc = (String) a.getValue(Action.SHORT_DESCRIPTION);
         if ((desc == null) || (desc.equals(""))) {
           desc = tmpKsd.getName();
@@ -604,7 +604,7 @@ public class ConfigFrame extends JFrame {
                                                  "Classes/Packages To Exclude", this,
                                                  "<html>Any classes that the debuggger should not step into.<br>" +
                                                  "Should be a comma-separated list of fully-qualified class names.<br>" +
-                                                 "To exclude a package, specify packagename.* in the list.</html>"));
+                                                 "To exclude a package, specify <code>packagename.*</code> in the list.</html>"));
     
     panel.displayComponents();
   }
@@ -616,7 +616,8 @@ public class ConfigFrame extends JFrame {
     panel.addComponent
       (new ForcedChoiceOptionComponent(OptionConstants.JAVADOC_ACCESS_LEVEL,
                                        "Access Level", this,
-                                       "The lowest access level to include for fields and methods."));
+                                       "<html>Fields and methods with access modifiers at this level<br>" +
+                                       "or higher will be included in the generated Javadoc.</html>"));
     panel.addComponent
       (new ForcedChoiceOptionComponent(OptionConstants.JAVADOC_LINK_VERSION,
                                        "Java Version for Javadoc Links", this,
@@ -631,20 +632,22 @@ public class ConfigFrame extends JFrame {
                                  "The URL to the Java 1.4 API, for generating links to library classes."));
     
     panel.addComponent
-      (new BooleanOptionComponent(OptionConstants.JAVADOC_FROM_ROOTS,
-                                  "Generate Javadoc From Source Roots", this,
-                                  "<html>Whether Javadoc should be generated for all packages in<br>" +
-                                  "an open document's source tree, rather than just the document's<br>" +
-                                  "own package and sub-packages.</html>"));
+      (new FileOptionComponent(OptionConstants.JAVADOC_DESTINATION,
+                               "Default Destination Directory", this,
+                               "Optional default directory for saving Javadoc documentation.",
+                               _fileOptionChooser));
+    
     panel.addComponent
       (new StringOptionComponent(OptionConstants.JAVADOC_CUSTOM_PARAMS,
                                  "Custom Javadoc Parameters", this,
-                                 "Any extra parameters to pass to Javadoc."));
+                                 "Any extra flags or parameters to pass to Javadoc."));
+    
     panel.addComponent
-      (new FileOptionComponent(OptionConstants.JAVADOC_DESTINATION,
-                               "Default Destination Directory", this,
-                               "The default directory for saving Javadoc documentation.",
-                               _fileOptionChooser));
+      (new BooleanOptionComponent(OptionConstants.JAVADOC_FROM_ROOTS,
+                                  "Generate Javadoc From Source Roots", this,
+                                  "<html>Whether 'Javadoc All' should generate Javadoc for all packages<br>" +
+                                  "in an open document's source tree, rather than just the document's<br>" +
+                                  "own package and sub-packages.</html>"));
     
     panel.displayComponents();
   }
@@ -653,16 +656,32 @@ public class ConfigFrame extends JFrame {
    *  Adds all of the components for the Prompts panel of the preferences window.
    */
   private void _setupNotificationsPanel(ConfigPanel panel) {
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.INTERACTIONS_EXIT_PROMPT, "Prompt If Interactions Pane Exits Unexpectedly", this,
-                                                  "<html>Whether DrJava should show a dialog box if a program<br>" +
-                                                  "in the Interactions Pane exits without the user clicking Reset.</html>"));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.INTERACTIONS_RESET_PROMPT, "Prompt Before Resetting Interactions Pane", this,
-                                                  "Whether DrJava should prompt the user before resetting the interactinos pane."));
+    // Quit
     panel.addComponent(new BooleanOptionComponent(OptionConstants.QUIT_PROMPT, "Prompt Before Quit", this,
                                                   "Whether DrJava should prompt the user before quitting."));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_COMPILE, "Automatically Save Before Compiling", this,
+
+    // Interactions
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.INTERACTIONS_RESET_PROMPT,
+                                                  "Prompt Before Resetting Interactions Pane", this,
+                                                  "<html>Whether DrJava should prompt the user before<br>" +
+                                                  "manually resetting the interactions pane.</html>"));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.INTERACTIONS_EXIT_PROMPT,
+                                                  "Prompt if Interactions Pane Exits Unexpectedly", this,
+                                                  "<html>Whether DrJava should show a dialog box if a program<br>" +
+                                                  "in the Interactions Pane exits without the user clicking Reset.</html>"));
+    
+    // Javadoc
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.JAVADOC_PROMPT_FOR_DESTINATION,
+                                                  "Prompt for Javadoc Destination", this,
+                                                  "<html>Whether Javadoc should always prompt the user<br>" +
+                                                  "to select a destination directory.</html>"));
+    
+
+    // Save before X
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_COMPILE,
+                                                  "Automatically Save Before Compiling", this,
                                                   "<html>Whether DrJava should automatically save before<br>" +
-                                                  "recompiling, or instead should ask the user each time.</html>"));
+                                                  "recompiling or ask the user each time.</html>"));
     
     // TODO: this is dev-only until the sync issues with interactions are worked out
 //    if (CodeStatus.DEVELOPMENT) {
@@ -670,27 +689,31 @@ public class ConfigFrame extends JFrame {
 //                                                    "<html>Whether DrJava should automatically save and compile before running<br>" +
 //                                                    "a document's main method, or instead should ask the user each time.</html>"));
 //    }
-    
+//    // These are not currently used.
 //    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_JUNIT, "Automatically Save and Compile Before Testing", this,
 //                                                  "<html>Whether DrJava should automatically save and compile before<br>" +
-//                                                  "testing with JUnit, or instead should ask the user each time</html>"));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_JAVADOC, "Automatically Save Before Generating Javadoc", this,
-                                                  "<html>Whether DrJava should automatically save before generating<br>" +
-                                                  "Javadoc, or instead should ask the user each time.</html>"));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.JAVADOC_PROMPT_FOR_DESTINATION,
-                                                  "Always Prompt for Javadoc Destination", this,
-                                                  "Whether Javadoc should always prompt the user for the destination directory."));
+//                                                  "testing with JUnit or ask the user each time.</html>"));
 //    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_DEBUG, "Automatically Save and Compile Before Debugging", this,
 //                                                  "<html>Whether DrJava should automatically save and compile before<br>" +
-//                                                  "debugging, or instead should ask the user each time</html>"));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_BREAKPOINT_OUT_OF_SYNC, "Warn on Breakpoint If out of Sync", this,
-                                                  "<html>Whether DrJava should prompt the user if the class file<br>" +
+//                                                  "debugging or ask the user each time.</html>"));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_JAVADOC,
+                                                  "Automatically Save Before Generating Javadoc", this,
+                                                  "<html>Whether DrJava should automatically save before<br>" +
+                                                  "generating Javadoc or ask the user each time.</html>"));
+    
+    // Warnings
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_BREAKPOINT_OUT_OF_SYNC,
+                                                  "Warn on Breakpoint if Out of Sync", this,
+                                                  "<html>Whether DrJava should warn the user if the class file<br>" +
                                                   "is out of sync before setting a breakpoint in that file.</html>"));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_DEBUG_MODIFIED_FILE, "Warn if Debugging Modified File", this,
-                                                  "Whether DrJava should prompt the user if the file being debugged has been modified."));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_CHANGE_LAF, "Warn to Restart in order to Change Look and Feel", this,
-                                                    "<html>Whether DrJava should warn the user that look and feel<br>" +
-                                                    "changes will not be applied until DrJava is restarted.</html>."));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_DEBUG_MODIFIED_FILE,
+                                                  "Warn if Debugging Modified File", this,
+                                                  "<html>Whether DrJava should warn the user if the file being<br>" +
+                                                  "debugged has been modified since its last save.</html>"));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_CHANGE_LAF,
+                                                  "Warn to Restart to Change Look and Feel", this,
+                                                  "<html>Whether DrJava should warn the user that look and feel<br>" +
+                                                  "changes will not be applied until DrJava is restarted.</html>."));
 
     panel.displayComponents();
   }
@@ -711,7 +734,7 @@ public class ConfigFrame extends JFrame {
     FileOptionComponent workDir =
       new FileOptionComponent(OptionConstants.WORKING_DIRECTORY,
                               "Working Directory", this,
-                              "The directory that DrJava should consider the current working directory.",
+                              "The directory that DrJava should consider the default working directory.",
                               dirChooser);
     workDir.setFileFilter(new DirectoryFilter());
     panel.addComponent(workDir);
@@ -723,7 +746,7 @@ public class ConfigFrame extends JFrame {
                                                   "the recently used files list in the File menu.</html>"));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.JAVAC_ALLOW_ASSERT, "Allow Assert Keyword in Java 1.4", this,
                                                   "<html>Whether to allow the <code>assert</code> keyword when compiling in Java 1.4.</html>"));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.BACKUP_FILES, "Keep emacs style backup files", this,
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.BACKUP_FILES, "Keep Emacs-style Backup Files", this,
                                                   "<html>Whether DrJava should keep a backup copy of each file that<br>" +
                                                   "the user modifies, saved with a '~' at the end of the filename.</html>"));
     

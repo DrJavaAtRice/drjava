@@ -112,9 +112,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
   
   /**
    * Checks that System.exit is handled appropriately from
-   * interactions frame.
+   * interactions pane.
    */
-  public void testInteractionPreventedFromExit()
+  public void testExitInteractions()
     throws DocumentAdapterException, InterruptedException
   {
     TestListener listener = new TestListener() {
@@ -124,23 +124,23 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
 
       public void interpreterExited(int status) {
         assertInteractionStartCount(1);
-        assertInteractionsResettingCount(1);
+        assertInterpreterResettingCount(1);
         interpreterExitedCount++;
         lastExitStatus = status;
       }
       
       public void interpreterResetting() {
         assertInteractionStartCount(1);
-        assertInteractionsExitedCount(0);
-        assertInteractionsResetCount(0);
+        assertInterpreterExitedCount(0);
+        assertInterpreterReadyCount(0);
         interpreterResettingCount++;
       }
 
       public void interpreterReady() {
-        synchronized(this) {
+        synchronized (this) {
           assertInteractionStartCount(1);
-          assertInteractionsExitedCount(1);
-          assertInteractionsResettingCount(1);
+          assertInterpreterExitedCount(1);
+          assertInterpreterResettingCount(1);
           interpreterReadyCount++;
           this.notify();
         }
@@ -155,9 +155,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     _model.removeListener(listener);
 
     listener.assertInteractionStartCount(1);
-    listener.assertInteractionsResettingCount(1);
-    listener.assertInteractionsResetCount(1);
-    listener.assertInteractionsExitedCount(1);
+    listener.assertInterpreterResettingCount(1);
+    listener.assertInterpreterReadyCount(1);
+    listener.assertInterpreterExitedCount(1);
     assertEquals("exit status", 23, listener.lastExitStatus);
   }
   
@@ -172,13 +172,13 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     TestListener listener = new TestListener() {
       
       public void interpreterResetting() {
-        assertInteractionsResetFailedCount(0);
+        assertInterpreterResetFailedCount(0);
         interpreterResettingCount++;
       }
       
       public void interpreterResetFailed() {
         synchronized(this) {
-          assertInteractionsResettingCount(1);
+          assertInterpreterResettingCount(1);
           interpreterResetFailedCount++;
           this.notify();
         }
@@ -199,10 +199,10 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     _model.removeListener(listener);
     interpret("edu.rice.cs.drjava.DrJava.disableSecurityManager();");
 
-    listener.assertInteractionsResettingCount(1);
-    listener.assertInteractionsResetFailedCount(1);
-    listener.assertInteractionsResetCount(0);
-    listener.assertInteractionsExitedCount(0);
+    listener.assertInterpreterResettingCount(1);
+    listener.assertInterpreterResetFailedCount(1);
+    listener.assertInterpreterReadyCount(0);
+    listener.assertInterpreterExitedCount(0);
   }
 
   /**
@@ -248,16 +248,16 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
 
       public void interpreterResetting() {
         assertInteractionStartCount(1);
-        assertInteractionsExitedCount(0);
-        assertInteractionsResetCount(0);
+        assertInterpreterExitedCount(0);
+        assertInterpreterReadyCount(0);
         interpreterResettingCount++;
       }
       
       public void interpreterReady() {
         synchronized(this) {
           assertInteractionStartCount(1);
-          assertInteractionsExitedCount(0);
-          assertInteractionsResettingCount(1);
+          assertInterpreterExitedCount(0);
+          assertInterpreterResettingCount(1);
           interpreterReadyCount++;
           this.notify();
         }
@@ -271,9 +271,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
       _model.resetInteractions();
       listener.wait();
     }
-    listener.assertInteractionsResettingCount(1);
-    listener.assertInteractionsResetCount(1);
-    listener.assertInteractionsExitedCount(0);
+    listener.assertInterpreterResettingCount(1);
+    listener.assertInterpreterReadyCount(1);
+    listener.assertInterpreterExitedCount(0);
 
     // now make sure it still works!
     assertEquals("5", interpret("5"));
@@ -386,10 +386,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
                  interpret("new DrJavaTestBaz().getClass().getName()"));
     
     // Ensure that static fields can be seen
-    // IN PROGRESS: BUG #702733
-//    assertEquals("result of static field",
-//                 "3",
-//                 interpret("DrJavaTestBaz.x"));
+    assertEquals("result of static field",
+                 "3",
+                 interpret("DrJavaTestBaz.x"));
     
     // Also ensure that Foo can be used directly
     assertEquals("interactions result",

@@ -401,6 +401,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     
     // Ends in ".java"
     File file = File.createTempFile("DrJava-filename-test", ".java", _tempDir);
+    file.deleteOnExit();
     String name = file.getName();
     doc = sdm.openFile(new FileSelector(file));
     assertEquals(".java display filename",
@@ -409,6 +410,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     
     // Doesn't contain ".java"
     file = File.createTempFile("DrJava-filename-test", ".txt", _tempDir);
+    file.deleteOnExit();
     name = file.getName();
     doc = sdm.openFile(new FileSelector(file));
     assertEquals(".txt display filename",
@@ -417,6 +419,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     
     // Doesn't end in ".java"
     file = File.createTempFile("DrJava-filename-test", ".java.txt", _tempDir);
+    file.deleteOnExit();
     name = file.getName();
     doc = sdm.openFile(new FileSelector(file));
     assertEquals(".java.txt display filename",
