@@ -149,7 +149,9 @@ public interface BraceReduction
 	/**
 	 *Gets distance to enclosing new line
 	 */
-	public int getDistToPrevLine();
+	public int getDistToPreviousNewline(int relativeLoc);
+
+	public int getDistToNextNewline();
 
 	public String simpleString();
 

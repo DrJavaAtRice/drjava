@@ -417,11 +417,16 @@ public class ReducedModelControl implements BraceReduction
 	/**
 	 *Gets distance to enclosing new line
 	 */
-	public int getDistToPrevLine()
+	public int getDistToPreviousNewline(int relLoc)
 		{
-			return -1;
+			return rmc.getDistToPreviousNewline(relLoc);
 		}
 
+	public int getDistToNextNewline()
+		{
+			return rmc.getDistToNextNewline();
+		}
+	
 	public boolean hasHighlightChanged()
 		{
 			return rmc.hasHighlightChanged();

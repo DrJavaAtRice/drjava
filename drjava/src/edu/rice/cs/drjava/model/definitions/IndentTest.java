@@ -235,6 +235,129 @@ public class IndentTest extends TestCase
 			 	System.out.println(e.toString());
 			} 
 	}
+	
+	public void testStartSimple () {
+		try {
+			// just paren
+			BraceReduction rm = doc._reduced;
+			doc.insertString(0, "abcde", null);
+			doc.indentLine();
+			assertEquals("0.1", "abcde", doc.getText(0, doc.getLength()));
+		}
+		catch( javax.swing.text.BadLocationException e)
+			{ 
+			 	System.out.println(e.toString());
+			} 
+	}
+	
+	
+	public void testStartSpaceIndent () {
+		try {
+			// just paren
+			BraceReduction rm = doc._reduced;
+			doc.insertString(0, "  abcde", null);
+			doc.indentLine(); 
+			assertEquals("0.1", "abcde", doc.getText(0, doc.getLength()));
+		} 
+		catch( javax.swing.text.BadLocationException e)
+			{ 
+			 	System.out.println(e.toString());
+			} 
+	} 
+	
+
+	public void testStartBrace() 
+		{
+		try {
+			// just paren
+			BraceReduction rm = doc._reduced;
+			doc.insertString(0, "public class temp \n {", null);
+			doc.indentLine();
+			assertEquals("0.1", "public class temp \n{",
+									 doc.getText(0, doc.getLength()));
+		}
+		catch( javax.swing.text.BadLocationException e)
+			{ 
+			 	System.out.println(e.toString());
+			} 
+		}
+
+		public void testEndBrace () {
+		try {
+			// just paren
+			BraceReduction rm = doc._reduced;
+			doc.insertString(0, "public class temp \n{ \n  }", null);
+			doc.indentLine();
+			assertEquals("0.1", "public class temp \n{ \n}",
+									 doc.getText(0, doc.getLength()));
+		}
+		catch( javax.swing.text.BadLocationException e)
+			{ 
+			 	System.out.println(e.toString());
+			} 
+	}
+
+	public void testInsideClass () {
+		try {
+			// just paren
+			BraceReduction rm = doc._reduced;
+			doc.insertString(0, "public class temp \n{ \ntext here", null);
+			doc.indentLine();
+			assertEquals("0.1", "public class temp \n{ \n  text here",
+									 doc.getText(0, doc.getLength()));
+		}
+		catch( javax.swing.text.BadLocationException e)
+			{ 
+			 	System.out.println(e.toString());
+			} 
+	}
+
+	public void testInsideClassWithBraceSets () {
+		try {
+			// just paren
+			BraceReduction rm = doc._reduced;
+			doc.insertString(0, "public class temp \n{  ()\ntext here", null);
+			doc.indentLine();
+			assertEquals("0.1", "public class temp \n{  ()\n  text here",
+									 doc.getText(0, doc.getLength()));
+		}
+		catch( javax.swing.text.BadLocationException e)
+			{ 
+			 	System.out.println(e.toString());
+			} 
+	}
+
+	public void testIgnoreBraceOnSameLine ()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "public class temp \n{  ()\n{text here", null);
+				doc.indentLine();
+				assertEquals("0.1", "public class temp \n{  ()\n  {text here",
+										 doc.getText(0, doc.getLength()));			
+			}
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+					System.out.println(e.toString());
+				} 
+		}
+
+	public void testLargerIndent()
+		{
+			try {
+				// just paren
+				BraceReduction rm = doc._reduced;
+				doc.insertString(0, "public class temp \n  {  ()\n { text here", null);
+				doc.indentLine();
+				assertEquals("0.1", "public class temp \n  {  ()\n    { text here",
+								 		 doc.getText(0, doc.getLength()));			
+			} 
+			catch( javax.swing.text.BadLocationException e)
+				{ 
+				 	System.out.println(e.toString());
+				}  
+		} 
 
 }
 

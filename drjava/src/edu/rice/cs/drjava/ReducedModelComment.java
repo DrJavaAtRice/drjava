@@ -1961,8 +1961,9 @@ public class ReducedModelComment
 
 	void getDistToPreviousNewline(IndentInfo braceInfo)
 		{
-			braceInfo.distToNewline = _getDistToPreviousNewline(_cursor.copy(),
-																													_offset);
+			braceInfo.distToPrevNewline = _getDistToPreviousNewline(_cursor.copy(),
+																															 _offset);
+			braceInfo.distToNewline = braceInfo.distToPrevNewline;
 			return;
 		}
 	
@@ -1977,7 +1978,8 @@ public class ReducedModelComment
 				copyCursor.prev();
 			
 			while ((!copyCursor.atStart()) &&
-						 (!copyCursor.current().getType().equals("\n"))){
+						 (!(copyCursor.current().getType().equals("\n") &&
+								copyCursor.current().getState() == ReducedToken.FREE))){
 				walkcount += copyCursor.current().getSize();
 				copyCursor.prev();
 			}
@@ -1993,10 +1995,10 @@ public class ReducedModelComment
 			
 			if (braceInfo.distToBrace == -1 || copyCursor.atStart()) //if no brace
 				return;
-
+			
 			int walkcount = _move(-braceInfo.distToBrace, copyCursor,_offset);
-
-//walk count now holds the offset within the current block.
+			
+      //walk count now holds the offset within the current block.
 			//but negative.
 			// find newline
 			
@@ -2010,9 +2012,57 @@ public class ReducedModelComment
 
 			return;
 		}
+	
+  /**
+	 * Gets distance to previous newline, relLoc is the distance
+	 * back from the cursor that we want to start searching.
+	 */
+	public int getDistToPreviousNewline(int relLoc)
+		{
+			ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
+			int copyOffset = _move(-relLoc,copyCursor, _offset);
+			copyCursor.dispose();
 
+			int dist = _getDistToPreviousNewline(copyCursor, copyOffset);
+			if(dist == -1)
+				return -1;
+			return dist + relLoc;
+		}
+
+	public int getDistToNextNewline()
+		{
+			ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
+			if(copyCursor.atStart())
+				copyCursor.next();
+			if(copyCursor.atEnd() || copyCursor.current().equals("\n"))
+				return 0;
+			
+			int walkcount = copyCursor.current().getSize() - _offset;
+			copyCursor.next();
+			
+			while ((!copyCursor.atEnd()) &&
+						 (!(copyCursor.current().getType().equals("\n") &&
+								copyCursor.current().getState() == ReducedToken.FREE))){
+				walkcount += copyCursor.current().getSize();
+				copyCursor.next();
+			}
+
+			return walkcount;
+		}
+	
+	
+	
 	public boolean hasHighlightChanged()
 		{
 			return _highlightChanged;
 		}
 }
+
+
+
+
+
+
+
+
+

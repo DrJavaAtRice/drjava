@@ -225,6 +225,109 @@ public class DefinitionsDocument extends DefaultStyledDocument
 			_currentLocation += dist;
 			_reduced.move(dist);
 		}
+public void indentLine() 
+		{
+			IndentInfo ii = _reduced.getIndentInformation();
+			String braceType = ii.braceType;
+			int distToNewline = ii.distToNewline;
+			int distToBrace = ii.distToBrace;
+			int distToPrevNewline = ii.distToPrevNewline;
+			int tab = 0;
+			
+			// moves us to the end of the line
+			move(_reduced.getDistToNextNewline());
+			
+			try{
+				if ((distToNewline == -1) || (distToBrace == -1))
+					tab = 0;
+				else if (braceType.equals("("))
+					tab = distToNewline - distToBrace + 1;
+				else if (braceType.equals("{"))
+					tab = getWhiteSpaceBetween(distToNewline, distToBrace) + 2;
+				else if (braceType.equals("["))
+					tab = distToNewline - distToBrace + 1;
+
+				tab = _indentSpecialCases(tab,distToPrevNewline);
+			 
+				tab(tab, distToPrevNewline);
+			}
+			catch (BadLocationException e){
+				//e.printStackTrace();
+				throw new IllegalArgumentException(e.getMessage());
+			}
+		}
+
+	/**
+	 *Deals with the special cases.
+	 * If the first character after the previous \n is a } then -2
+	 */
+	private int _indentSpecialCases(int tab, int distToPrevNewline)
+		throws BadLocationException
+		{
+			if (distToPrevNewline == -1) //not a special case.
+				return tab;
+			//setup
+			int start = _reduced.getDistToPreviousNewline(distToPrevNewline);
+			if (start == -1)
+				start = 0;
+			else
+				start = _currentLocation - start;
+			
+			String text = this.getText(start,_currentLocation - start);
+
+			//case of  }  if no matching { then let offset be 0.
+			int length = text.length();
+			int i = length - distToPrevNewline;
+
+			while (i < length && text.charAt(i) == ' ')
+				i++;
+			if(text.charAt(i) == '}')
+				tab -= 2;
+			
+			if(tab < 0)
+				tab = 0;
+			return tab;
+		}
+	/**
+	 *Starts at start and gets whitespace starting at relStart and either
+	 *stopping at relEnd or at the first non-white space char.
+	 */
+	private int getWhiteSpaceBetween(int relStart, int relEnd)
+		throws BadLocationException
+		{
+
+			String text = this.getText(_currentLocation - relStart,
+																 relStart - relEnd);
+			int i = 0;
+			int length = text.length();
+			while ((i < length) && (text.charAt(i) == ' '))
+				i++;
+
+			return i;
+		}
+
+	
+	void tab(int tab, int distToPrevNewline)
+		throws BadLocationException
+		{
+			if (distToPrevNewline == -1)
+				distToPrevNewline = _currentLocation;
+			
+			int currentTab = getWhiteSpaceBetween(distToPrevNewline, 0);
+		
+			if (tab == currentTab)
+				return;
+			if (tab > currentTab){
+				String spaces = "";
+				for (int i = 0; i < tab - currentTab; i++)
+					spaces = spaces + " ";
+				insertString(_currentLocation - distToPrevNewline, spaces, null);
+			}
+			else
+				remove(_currentLocation - distToPrevNewline, currentTab - tab);
+		}
+	
+
 }
 
 
