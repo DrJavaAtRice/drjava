@@ -286,6 +286,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Close file so it won't be in source root set
     _model.closeFile(doc);
+    debugListener.assertBreakpointRemovedCount(1);
     
     // Step to next line
     synchronized(_notifierLock){
@@ -322,7 +323,6 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _notifierLock.wait();
     }
     debugListener.assertCurrThreadDiedCount(1);  // fires
-    debugListener.assertBreakpointRemovedCount(1);  // fires (don't wait)
     debugListener.assertDebuggerShutdownCount(1);  // fires
     if (printMessages) System.out.println("Shut down.");
     _debugManager.removeListener(debugListener);
@@ -830,7 +830,10 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     debugListener.assertThreadLocationUpdatedCount(2);
     debugListener.assertCurrThreadSuspendedCount(2);
     assertInteractionsContains("Foo Line 3");
-
+    
+    // Close doc and make sure breakpoints are removed
+    _model.closeFile(doc);
+    debugListener.assertBreakpointRemovedCount(2);  //fires twice (no waiting)
       
     // Remove listener at end
     if (printMessages) System.out.println("Shutting down...");
@@ -839,7 +842,6 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _waitForNotifies(1);  // shutdown
       _notifierLock.wait();
     }
-    debugListener.assertBreakpointRemovedCount(2);  //fires twice (no waiting)
     debugListener.assertDebuggerShutdownCount(1);  //fires
     if (printMessages) System.out.println("Shut down.");
     _debugManager.removeListener(debugListener);

@@ -94,6 +94,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private static final int GUI_WIDTH = 800;
   private static final int GUI_HEIGHT = 700;
   private static final int DOC_LIST_WIDTH = 150;
+  private static final int SPLIT_DIVIDER_SIZE = 15;
 
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
 
@@ -118,6 +119,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private OutputPane _outputPane;
   private InteractionsPane _interactionsPane;
   //private DebugPanel _debugPanel;
+  private JPanel _debugPanel;
   private JUnitPanel _junitPanel;
   private FindReplaceDialog _findReplace;
   private LinkedList _tabs;
@@ -127,6 +129,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JLabel _currLocationField;
   private PositionListener _posListener;
   private JSplitPane _docSplitPane;
+  private JSplitPane _debugSplitPane;
   private JSplitPane _mainSplit;
   private JList _docList;
   private JButton _saveButton;
@@ -935,7 +938,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _tabbedPane.setSelectedComponent(_debugPanel);
     */
     _setDebugMenuItemsEnabled(true);
-    
+    //_showDebuggerPanel();  uncomment when the debug panel exists
   }
 
   /**
@@ -949,7 +952,22 @@ public class MainFrame extends JFrame implements OptionConstants {
     _debugPanel.reset();
     */
     _setDebugMenuItemsEnabled(false);
-    
+    _hideDebuggerPanel();
+  }
+  
+  private void _showDebuggerPanel() {
+    _debugSplitPane.setDividerSize(SPLIT_DIVIDER_SIZE);
+    int height = _debugSplitPane.getTopComponent().getHeight();
+    // int debugHeight = _debugPanel.getPreferredSize().getHeight();
+    _debugSplitPane.setDividerLocation(height - 150);  // height-debugHeight
+  }
+  
+  private void _hideDebuggerPanel() {
+    _debugSplitPane.setDividerSize(0);
+    int height = _mainSplit.getDividerLocation();
+    //System.out.println("height of mainSplit.top: " + height);
+    //System.out.println("mainSplit.dividerLoc: " + _mainSplit.getDividerLocation());
+    _debugSplitPane.setDividerLocation(height);
   }
 
 
@@ -2326,16 +2344,23 @@ public class MainFrame extends JFrame implements OptionConstants {
     JScrollPane defScroll = (JScrollPane)
       _defScrollPanes.get(_model.getActiveDocument());
 
+    _debugPanel = new JPanel();
+    
     // Overall layout
     _docSplitPane = new BorderlessSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                             true,
                                             listScroll,
                                             defScroll);
+    _debugSplitPane = new BorderlessSplitPane(JSplitPane.VERTICAL_SPLIT,
+                                              true,
+                                              _docSplitPane,
+                                              _debugPanel);
     _mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                                       true,
-                                      _docSplitPane,
+                                      _debugSplitPane,
                                       _tabbedPane);
     _mainSplit.setResizeWeight(1.0);
+    _debugSplitPane.setResizeWeight(1.0);
     getContentPane().add(_mainSplit, BorderLayout.CENTER);
     // This is annoyingly order-dependent. Since split contains _docSplitPane,
     // we need to get split's divider set up first to give _docSplitPane an
@@ -2345,8 +2370,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     _mainSplit.setDividerLocation(2*getHeight()/3);
     _mainSplit.setDividerSize(getHeight()/60);
     _mainSplit.setOneTouchExpandable(true);
+    _hideDebuggerPanel();
+    
+    _debugSplitPane.setOneTouchExpandable(true);
     _docSplitPane.setDividerLocation(DOC_LIST_WIDTH);
-    _docSplitPane.setOneTouchExpandable(true);
+    _docSplitPane.setOneTouchExpandable(true);   
   }
 
   /**

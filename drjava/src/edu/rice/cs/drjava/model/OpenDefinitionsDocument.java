@@ -279,4 +279,10 @@ public interface OpenDefinitionsDocument {
    * Tells the document to remove all breakpoints
    */
   public void clearBreakpoints();
+  
+  /**
+   * Called to indicate the document is being closed, so to remove
+   * all related state from the debug manager.
+   */
+  public void removeFromDebugger();
 }

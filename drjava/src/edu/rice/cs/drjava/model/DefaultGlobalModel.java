@@ -465,6 +465,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     boolean canClose = doc.canAbandonFile();
     final OpenDefinitionsDocument closedDoc = doc;
     if (canClose) {
+      doc.removeFromDebugger();
       // Only fire event if doc exists and was removed from list
       if (_definitionsDocs.removeElement(doc)) {
         notifyListeners(new EventNotifier() {
@@ -1779,8 +1780,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
     
     /**
-     * Add the supplied Breakpoint to the hashtable, keyed by its BreakpointRequest
-     * @param breakpoint the Breakpoint to be inserted into the hashtable
+     * Inserts the given Breakpoint into the list, sorted by region
+     * @param breakpoint the Breakpoint to be inserted
      */
     public void addBreakpoint( Breakpoint breakpoint) {
       //_breakpoints.put( new Integer(breakpoint.getLineNumber()), breakpoint); 
@@ -1791,14 +1792,17 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         int newStart = breakpoint.getStartOffset();
         
         if ( newStart < oldStart) {
+          // Starts before, add here
           _breakpoints.insertElementAt(breakpoint, i);
           return;
         }
         if ( newStart == oldStart) {
+          // Starts at the same place
           int oldEnd = bp.getEndOffset();
           int newEnd = breakpoint.getEndOffset();
           
           if ( newEnd < oldEnd) {
+            // Ends before, add here
             _breakpoints.insertElementAt(breakpoint, i);
             return;
           }
@@ -1808,7 +1812,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
     
     /**
-     * Remove the given Breakpoint from the hashtable.
+     * Remove the given Breakpoint from our list (but not the debug manager)
      * @param breakpoint the Breakpoint to be removed.
      */
     public void removeBreakpoint( Breakpoint breakpoint) {
@@ -1816,18 +1820,29 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
     
     /**
-     * Returns a Vector<Breakpoint> that contains all of the Breakpoint objects that
-     * this document contains
+     * Returns a Vector<Breakpoint> that contains all of the Breakpoint objects
+     * in this document.
      */
     public Vector<Breakpoint> getBreakpoints() {
       return _breakpoints;
     }
     
     /**
-     * Tells the document to remove all breakpoints
+     * Tells the document to remove all breakpoints (without removing them
+     * from the debug manager).
      */
     public void clearBreakpoints() {
       _breakpoints.removeAllElements();
+    }
+    
+    /**
+     * Called to indicate the document is being closed, so to remove
+     * all related state from the debug manager.
+     */
+    public void removeFromDebugger() {
+      while (_breakpoints.size() > 0) {
+        _debugManager.removeBreakpoint(_breakpoints.elementAt(0));
+      }
     }
   
     /**
