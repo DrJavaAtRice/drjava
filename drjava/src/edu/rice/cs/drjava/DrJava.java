@@ -52,26 +52,14 @@ import edu.rice.cs.drjava.config.*;
  * Main class for DrJava. 
  * @version $Id$
  */
-public class DrJava implements OptionConstants {
+public class DrJava implements ConfigurationTool, OptionConstants {
   private static final PrintStream _consoleOut = System.out;
   private static final PrintStream _consoleErr = System.err;
   private static PreventExitSecurityManager _manager;
-  public static final File PROPERTIES_FILE =
-    new File(System.getProperty("user.home"), ".drjava");
-  public static final FileConfiguration CONFIG;
-  static {
-    try {
-      PROPERTIES_FILE.createNewFile();
-      // be nice and ensure a config file
-    } catch(IOException e) { // IOException occurred
-    }
-    CONFIG = new FileConfiguration(PROPERTIES_FILE);
-    try {
-      CONFIG.loadConfiguration();
-    } catch(IOException e) {
-    }
-  }
-        
+  public static final File PROPERTIES_FILE = ConfigurationTool.PROPERTIES_FILE;
+  public static final FileConfiguration CONFIG = ConfigurationTool.CONFIG;
+
+    
   public static void main(final String[] args) {
     
     /*

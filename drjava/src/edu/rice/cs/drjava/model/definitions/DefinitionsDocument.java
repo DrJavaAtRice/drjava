@@ -50,7 +50,8 @@ import java.io.File;
 
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
-
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 
 /**
@@ -69,7 +70,7 @@ import edu.rice.cs.drjava.model.definitions.indent.Indenter;
  *
  * @version $Id$
  */
-public class DefinitionsDocument extends PlainDocument {
+public class DefinitionsDocument extends PlainDocument implements OptionConstants {
   /** A set of normal endings for lines. */
   private static HashSet _normEndings = _makeNormEndings();
   /** A set of Java keywords. */
@@ -543,6 +544,7 @@ public class DefinitionsDocument extends PlainDocument {
    * @param indent the size of indent that you want for the document
    */
   public void setIndent(final int indent) {
+    DrJava.CONFIG.setSetting(INDENT_LEVEL,new Integer(indent));
     this._indent = indent;
   }
 

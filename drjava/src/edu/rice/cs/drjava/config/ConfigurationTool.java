@@ -39,59 +39,36 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 import java.io.File;
+import java.io.IOException;
 import gj.util.Vector;
 import java.awt.Color;
 import edu.rice.cs.drjava.DrJava;
-public interface OptionConstants extends ConfigurationTool {
+/**
+ * $ID$
+ */
+public interface ConfigurationTool {
   
-  // STATIC VARIABLES    
-  public static final IntegerOption INDENT_LEVEL =
-    new IntegerOption("indent.level",new Integer(2));
+    // STATIC VARIABLES    
 
-  public static final ColorOption DEFINITIONS_MATCH_COLOR = 
-    new ColorOption("definitions.match.color", new Color(190, 255, 230));
-  
-  public static final StringOption JAVAC_LOCATION = 
-    new StringOption("javac.location","");
-  
-  public static final StringOption JSR14_LOCATION =
-    new StringOption("jsr14.location","");
-  
-  public static final StringOption JSR14_COLLECTIONSPATH = 
-    new StringOption("jsr14.collectionspath","");
-  
-  public static final VectorOption<String> EXTRA_CLASSPATH = 
-    (new Begin<VectorOption<String>>() {
-      private String warning =
-        "WARNING: Configurability interface only supports path separators"+
-        " of maximum length 1 character as of this moment.";
-      public VectorOption<String> evaluate() {
-        // system path separator
-        String ps = System.getProperty("path.separator");
-        if(ps.length() > 1) { 
-          // spit out warning if it's more than one character.
-          System.err.println(warning);
-          System.err.println("using '"+ps.charAt(0)+
-                             "' for delimiter.");
-        }
-        StringOption sop = new StringOption("","");
-        String name = "extra.classpath";
-        char delim = ps.charAt(0);
-        return new VectorOption<String>(name,sop,"",delim,"",new Vector<String>());
-      }
-    }).evaluate();
-  
-  /**
-   * Whether the integrated debugger should be displayed as available.
-   */
-  public static final BooleanOption DEBUGGER_ENABLED =
-    new BooleanOption("debugger.enabled", new Boolean(false));
-
-  /**
-   * Whether the integrated debugger should display the advanced mode JSwat console
-   */    
-  public static final BooleanOption DEBUGGER_ADVANCED =
-    new BooleanOption("debugger.advanced", new Boolean(false));
+    public static final File PROPERTIES_FILE =  
+        new File(System.getProperty("user.home"), ".drjava");  
+    public static final FileConfiguration CONFIG = 
+        (new Begin<FileConfiguration>() {
+            public FileConfiguration evaluate() {
+                try { 
+                    PROPERTIES_FILE.createNewFile(); 
+                    // be nice and ensure a config file 
+                } catch(IOException e) { // IOException occurred 
+                } 
+                FileConfiguration config = 
+                new FileConfiguration(PROPERTIES_FILE); 
+                try { 
+                    config.loadConfiguration(); 
+                } catch(IOException e) { 
+                } 
+                return config;
+            }
+        }).evaluate();
 }
 
 

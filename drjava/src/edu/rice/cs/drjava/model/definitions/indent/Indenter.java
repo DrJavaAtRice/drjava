@@ -41,14 +41,15 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
-
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.FileConfiguration;
 /**
  * Singleton class to construct and use the indentation decision tree.
  *
  * @version $Id$
  */
-public class Indenter
-{
+public class Indenter implements OptionConstants {
   /**
    * Singleton instance.
    */
@@ -58,15 +59,9 @@ public class Indenter
    * Private constructor for singleton instance.
    */
   private Indenter() { 
-    // Listen to configuration.
-    buildTree(); 
+      buildTree();
   }
   
-  /**
-   * Hardcoded indent size, for now.
-   */
-  private String _indentLevel = "  ";  // 2 spaces
-
   /**
    * Root of decision tree.
    */
@@ -80,7 +75,9 @@ public class Indenter
    */
   public void buildTree()
   {
-    String oneLevel = _indentLevel;
+    char[] indent = new char[CONFIG.getSetting(INDENT_LEVEL).intValue()];
+    java.util.Arrays.fill(indent,' ');
+    String oneLevel = new String(indent);
     
     IndentRule 
       rule35 = new ActionStartCurrStmtPlus(oneLevel),

@@ -56,7 +56,7 @@ public class IndentTest extends TestCase {
   static String openSquiggly = IndentInfo.openSquiggly;
   static String openParen = IndentInfo.openParen;
   static String openBracket = IndentInfo.openBracket;
-
+  private int indentLevel = 0;
   /**
    * put your documentation comment here
    * @param     String name
