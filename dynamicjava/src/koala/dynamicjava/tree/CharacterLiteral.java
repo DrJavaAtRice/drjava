@@ -94,10 +94,5 @@ public class CharacterLiteral extends Literal {
       }
     }
   }
-  /**
-   * Implementation of toString for use in unit testing
-   */
-  public String toString() {
-    return "("+getClass().getName()+": "+getRepresentation()+" "+getValue()+" "+getType()+")";
-  }
+ 
 }

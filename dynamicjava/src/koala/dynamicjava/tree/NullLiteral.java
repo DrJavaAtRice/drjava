@@ -54,10 +54,5 @@ public class NullLiteral extends Literal {
     public NullLiteral(String fn, int bl, int bc, int el, int ec) {
  super("null", null, null, fn, bl, bc, el, ec);
     }
-      /**
-   * Implementation of toString for use in unit testing
-   */
-  public String toString() {
-    return "("+getClass().getName()+": "+getRepresentation()+" "+getValue()+" "+getType()+")";
-  }
+ 
 }

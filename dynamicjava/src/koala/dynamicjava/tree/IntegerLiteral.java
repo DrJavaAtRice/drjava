@@ -102,10 +102,5 @@ public class IntegerLiteral extends Literal {
  }
  return new Integer(value);
     }
-       /**
-   * Implementation of toString for use in unit testing
-   */
-  public String toString() {
-    return "("+getClass().getName()+": "+getRepresentation()+" "+getValue()+" "+getType()+")";
-  }
+ 
 }

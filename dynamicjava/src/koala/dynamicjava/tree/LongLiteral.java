@@ -102,10 +102,5 @@ public class LongLiteral extends Literal {
  }
  return new Long(value);
     }
-      /**
-   * Implementation of toString for use in unit testing
-   */
-  public String toString() {
-    return "("+getClass().getName()+": "+getRepresentation()+" "+getValue()+" "+getType()+")";
-  }
+ 
 }
