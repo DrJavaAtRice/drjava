@@ -135,7 +135,7 @@ public interface OptionConstants extends ConfigurationTool {
   /* ---------- Other Display Options ---------- */
   
   /**
-   * Whether icons should be displayed on the toolbar buttons
+   * Whether icons should be displayed on the toolbar buttons.
    */    
   public static final BooleanOption TOOLBAR_ICONS_ENABLED =
     new BooleanOption("toolbar.icons.enabled", new Boolean(true));
@@ -146,6 +146,12 @@ public interface OptionConstants extends ConfigurationTool {
    */    
   public static final BooleanOption TOOLBAR_TEXT_ENABLED =
     new BooleanOption("toolbar.text.enabled", new Boolean(true));
+  
+  /**
+   * Whether the line-numbers should be displayed in a row header.
+   */
+  public static final BooleanOption LINEENUM_ENABLED = 
+    new BooleanOption("lineenum.enabled", new Boolean(false));
   
   
   /* ---------- Misc Options ---------- */

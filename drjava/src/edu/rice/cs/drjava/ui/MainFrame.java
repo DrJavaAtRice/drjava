@@ -1759,6 +1759,14 @@ public class MainFrame extends JFrame implements OptionConstants {
         pane.setSize(scroll.getViewport().getWidth(), pane.getHeight());
       }
     });*/
+    
+    if (CodeStatus.DEVELOPMENT) {
+      
+      if (DrJava.CONFIG.getSetting(LINEENUM_ENABLED).booleanValue()) {
+        scroll.setRowHeaderView( new Rule(pane));
+      }
+    }
+    
     _defScrollPanes.put(doc, scroll);
     
     return scroll;
