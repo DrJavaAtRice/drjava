@@ -146,7 +146,7 @@ class ColoringView extends WrappedPlainView {
 
 
   private void setFormattingForState(Graphics g, int state) {
-    final Color COMMENTED_COLOR = Color.green.darker().darker().darker();
+    final Color COMMENTED_COLOR = Color.green.darker().darker();
     final Color QUOTED_COLOR = Color.red.darker();
     final Color NORMAL_COLOR = Color.black;
     final Color KEYWORD_COLOR = Color.blue;

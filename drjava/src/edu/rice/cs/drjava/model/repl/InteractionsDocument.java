@@ -94,13 +94,16 @@ class InteractionsDocument extends PlainDocument {
     catch (Exception e) {
 			//System.out.println("\n\nhey!!!!!!\n\n");
       try {
-				if(e.toString().startsWith("java.lang.RuntimeException: Encountered"))
-					{
-						int end = e.toString().indexOf('\n');
-						super.insertString(getLength(), "\nError in evaluation: " +
-															 "Invalid Expression (Bad Syntax)\n", null);
-					} else
-						super.insertString(getLength(), "\nError in evaluation: " + e + "\n", null);
+				if (e.getMessage().startsWith("koala.dynamicjava.interpreter.InterpreterException: Encountered"))
+        {
+          int end = e.toString().indexOf('\n');
+          super.insertString(getLength(), "\nError in evaluation: " +
+              "Invalid syntax\n", null);
+        }
+        else {
+          super.insertString(getLength(), "\nError in evaluation: " + e.getMessage() + "\n", null);
+        }
+          
         prompt();
       }
       catch (BadLocationException willNeverHappen) {}

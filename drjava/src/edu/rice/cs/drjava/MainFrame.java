@@ -100,38 +100,46 @@ public class MainFrame extends JFrame
     }
   };
 
-    boolean saveToFile(String fileName) 
+  private Action _gotoLineAction = new AbstractAction("Goto line")
+  {
+    public void actionPerformed(ActionEvent ae)
     {
-	boolean result = _definitionsView.saveToFile(fileName);
-	if (result) {
-	    updateEnablesAfterSave();
-	}
-	return result;
+      _definitionsView.gotoLine();
     }
+  };
 
-    boolean save()
-    {
-	boolean result = _definitionsView.save();
-	if (result) {
-	    updateEnablesAfterSave();
-	}
-	return result;
+  boolean saveToFile(String fileName) 
+  {
+    boolean result = _definitionsView.saveToFile(fileName);
+    if (result) {
+      updateEnablesAfterSave();
     }
+    return result;
+  }
 
-    boolean saveAs() 
-    {
-       boolean result = _definitionsView.saveAs();
-       if (result) {
-	   updateEnablesAfterSave();
-       }
-       return result;
+  boolean save()
+  {
+    boolean result = _definitionsView.save();
+    if (result) {
+      updateEnablesAfterSave();
     }
+    return result;
+  }
 
-    void updateEnablesAfterSave() 
-    {
-      _saveButton.setEnabled(false);
-      _compileButton.setEnabled(true);
+  boolean saveAs() 
+  {
+    boolean result = _definitionsView.saveAs();
+    if (result) {
+      updateEnablesAfterSave();
     }
+    return result;
+  }
+
+  void updateEnablesAfterSave() 
+  {
+    _saveButton.setEnabled(false);
+    _compileButton.setEnabled(true);
+  }
 
   private Action _saveAction = new AbstractAction("Save")
   {
@@ -347,12 +355,11 @@ public class MainFrame extends JFrame
 		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
 																									ActionEvent.CTRL_MASK));
     tmpItem = _fileMenu.add(_saveAsAction);
-		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,
-																									ActionEvent.CTRL_MASK));
+
     _fileMenu.addSeparator();
     tmpItem = _fileMenu.add(_compileAction);
-		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B,
-																									ActionEvent.CTRL_MASK));
+		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5,
+																									0));
     _fileMenu.addSeparator();
     tmpItem = _fileMenu.add(_quitAction);
 		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,
@@ -373,14 +380,25 @@ public class MainFrame extends JFrame
 		//tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
 		//																							ActionEvent.CTRL_MASK));
 
-		*/
 		_editMenu.addSeparator();
-		_editMenu.add(cutAction);
-		_editMenu.add(copyAction);
-		_editMenu.add(pasteAction);
+		*/
+
+		tmpItem = _editMenu.add(cutAction);
+		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
+																									ActionEvent.CTRL_MASK));
+		tmpItem = _editMenu.add(copyAction);
+		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C,
+																									ActionEvent.CTRL_MASK));
+		tmpItem = _editMenu.add(pasteAction);
+		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,
+																									ActionEvent.CTRL_MASK));
 		_editMenu.addSeparator();
 		tmpItem = _editMenu.add(_findReplaceAction);
 		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,
+																									ActionEvent.CTRL_MASK));
+
+		tmpItem = _editMenu.add(_gotoLineAction);
+		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G,
 																									ActionEvent.CTRL_MASK));
 		_editMenu.add(_clearOutputAction);
 
@@ -407,13 +425,14 @@ public class MainFrame extends JFrame
     setJMenuBar(_menuBar);
    
     // Make the output view the active one
-    //_outputView.makeActive();
+    _outputView.makeActive();
     
     _interactionsView = new InteractionsView();
     
     _tabbedPane = new JTabbedPane();
     _tabbedPane.add("Interactions", new JScrollPane(_interactionsView));
     _tabbedPane.add("Compiler output", _errorPanel);
+    _tabbedPane.add("Console", new JScrollPane(_outputView));
 
     JScrollPane defScroll =
       new JScrollPane(_definitionsView,
@@ -426,18 +445,18 @@ public class MainFrame extends JFrame
 																			 _tabbedPane);
 		
 
-    setBounds(25, 25, 300, 500);
+    setBounds(0, 0, 700, 700);
 
 
     getContentPane().add(split1, BorderLayout.CENTER);
-    setSize(640, 480);
+    setSize(700, 700);
 
     // This is annoyingly order-dependent. Since split2 contains split1,
     // we need to get split2's divider set up first to give split1 an overall
     // size. Then we can set split1's divider. Ahh, Swing.
     // Also, according to the Swing docs, we need to set these dividers AFTER
     // we have shown the window. How annoying.
-    split1.setDividerLocation(200);
+    split1.setDividerLocation(2 * getHeight() / 3);
     //split2.setDividerLocation(50);
 
     updateFileTitle("Untitled");
@@ -449,6 +468,10 @@ public class MainFrame extends JFrame
 
   private void _selectInteractionsTab() {
     _tabbedPane.setSelectedIndex(0);
+  }
+
+  private void _selectOutputTab() {
+    _tabbedPane.setSelectedIndex(2);
   }
 
   public void updateFileTitle(String filename)

@@ -38,6 +38,7 @@ import java.io.FileWriter;
 
 import java.beans.PropertyChangeListener;
 
+import java.awt.Rectangle;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Toolkit;
@@ -262,6 +263,41 @@ public class DefinitionsView extends JEditorPane
     return new DefinitionsEditorKit();
   }
 
+  /**
+   * Ask the user what line they'd like to jump to, then go there.
+   */
+  public void gotoLine() {
+    final String msg = "What line would you like to go to?";
+    final String title = "Jump to line";
+
+    String lineStr = JOptionPane.showInputDialog(this,
+                                                 msg,
+                                                 title, 
+                                                 JOptionPane.QUESTION_MESSAGE);
+
+    try {
+      int lineNum = Integer.parseInt(lineStr);
+
+      // Move the defs document to the right spot
+      _doc().gotoLine(lineNum);
+
+      // Now move the caret to the same place
+      int pos = _doc().getCurrentLocation();
+      setCaretPosition(pos);
+
+      // Finally, scroll the window to make this line visible.
+      Rectangle rect = modelToView(pos);
+      scrollRectToVisible(rect);
+    }
+    catch (BadLocationException impossible) {
+      // we got the location from defs doc. it is valid, i swear.
+    }
+    catch (NumberFormatException nfe) { // invalid input for line number
+      Toolkit.getDefaultToolkit().beep();
+      // Do nothing.
+    }
+  }
+
   /** Save the current document over the old version of the document.
    *  If the current document is unsaved, call save as. */
   public boolean save()
@@ -388,15 +424,17 @@ public class DefinitionsView extends JEditorPane
       case JFileChooser.APPROVE_OPTION:
 				_mainFrame.hourglassOn();
         File chosen = fc.getSelectedFile();
-				if (chosen == null)
-					return false;
+
         try
         {
+          if (chosen == null) {
+            return false;
+          }
+
           FileReader reader = new FileReader(chosen);
           read(reader, null);
           // Update file name if the read succeeds.
           _resetDocument(chosen.getAbsolutePath());
-					_mainFrame.hourglassOff();
           return true;
         }
         catch (IOException ioe)
@@ -409,8 +447,11 @@ public class DefinitionsView extends JEditorPane
                                         "Error opening file",
                                         msg,
                                         JOptionPane.ERROR_MESSAGE);
-					_mainFrame.hourglassOff();
           return false;
+        }
+        finally {
+          // Make sure we always turn off the hourglass!
+					_mainFrame.hourglassOff();
         }
       default: // impossible since rc must be one of these
         throw new RuntimeException("filechooser returned bad rc " + rc);

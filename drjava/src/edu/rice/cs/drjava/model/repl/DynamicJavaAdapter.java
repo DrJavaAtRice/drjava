@@ -3,6 +3,7 @@
 package edu.rice.cs.drjava;
 
 import java.util.HashMap;
+import java.util.Date;
 
 import java.io.StringReader;
 import java.io.IOException;
@@ -54,8 +55,11 @@ public class DynamicJavaAdapter implements JavaInterpreter {
 				return JavaInterpreter.NO_RESULT;
     }
     catch (Throwable ie) {
-			//System.out.println("\n\ngotinterpreter exception\n\n");
-      throw new RuntimeException(ie.getMessage());
+      System.err.print(new Date() + ": ");
+      System.err.println(ie);
+      ie.printStackTrace();
+      System.err.println("\n");
+      throw new RuntimeException(ie.toString());
     }
   }
 
@@ -226,38 +230,4 @@ class ClassLoadChecker {
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -25,7 +25,10 @@ import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Position;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.StyleConstants;
 
 import javax.swing.event.CaretListener;
 import javax.swing.event.CaretEvent;
@@ -53,6 +56,15 @@ public class CompilerErrorPanel extends JPanel {
   private static final DefaultHighlighter.DefaultHighlightPainter
     _listHighlightPainter
       = new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
+
+  private static final AttributeSet BOLD_ATTRIBUTES = _getBoldAttributes();
+
+  private static final AttributeSet _getBoldAttributes() {
+    SimpleAttributeSet s = new SimpleAttributeSet();
+    StyleConstants.setBold(s, true);
+    return s;
+  }
+
 
   // when we create a highlight we get back a tag we can use to remove it
   private Object _previousHighlightTag = null;
@@ -420,7 +432,7 @@ public class CompilerErrorPanel extends JPanel {
 
       for (int i = 0; i < _errors.length; i++) {
         int startPos = doc.getLength();
-        doc.insertString(startPos, _errorText(i), null);
+        _insertErrorText(i, doc);
         _errorListPositions[i] = doc.createPosition(startPos);
       }
 
@@ -430,22 +442,20 @@ public class CompilerErrorPanel extends JPanel {
       _switchToError(0);
     }
 
-    private String _errorText(int i) {
+    private void _insertErrorText(int i, Document doc)
+      throws BadLocationException
+    {
       CompilerError error = _errors[i];
 
-      StringBuffer buf = new StringBuffer();
-
       if (error.isWarning()) {
-        buf.append("Warning: ");
+        doc.insertString(doc.getLength(), "Warning: ", BOLD_ATTRIBUTES);
       }
       else {
-        buf.append("Error: ");
+        doc.insertString(doc.getLength(), "Error: ", BOLD_ATTRIBUTES);
       }
 
-      buf.append(error.message());
-      buf.append("\n");
-
-      return buf.toString();
+      doc.insertString(doc.getLength(), error.message(), null);
+      doc.insertString(doc.getLength(), "\n", null);
     }
 
     private void _removeListHighlight() {
