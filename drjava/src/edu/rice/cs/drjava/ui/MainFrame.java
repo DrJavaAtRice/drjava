@@ -67,6 +67,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
+import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.ui.config.*;
 import edu.rice.cs.drjava.ui.CompilerErrorPanel.CompilerErrorListPane;
@@ -1615,13 +1616,13 @@ public class MainFrame extends JFrame implements OptionConstants {
                                         "Bad Destination", JOptionPane.ERROR_MESSAGE);
         }
         
-        returnVal = _javadocChooser.showOpenDialog(MainFrame.this);
+        returnVal = _javadocChooser.showDialog(this, "Select");
         destDir = getChosenFile(_javadocChooser, returnVal);
       } while (!destDir.exists() || !destDir.canWrite());
       
       // Generate the output with the GlobalModel.
       _model.javadocAll(destDir.getAbsolutePath());
-      
+
       // Display the results.
       _javadocFrame = new JavadocFrame(destDir);
       _javadocFrame.show();
@@ -1632,6 +1633,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     catch (OperationCanceledException oce) {
       // If the user cancels the prompt, silently return.
       return;
+    }
+    catch (InvalidPackageException ipe) {
+      _showError(ipe, "JavaDoc Error",
+                 "JavaDoc encountered an invalid package name.");
+    }
+    catch (JavadocException jde) {
+      _showError(jde, "JavaDoc Error",
+                 "There was an error generating the javadoc.");
     }
   }
 

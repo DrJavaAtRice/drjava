@@ -1060,7 +1060,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @param destDir the absolute path to the destination directory
    * @pre The destination directory must be writable and exist.
    */
-  public void javadocAll(String destDir) throws IOException {
+  public void javadocAll(String destDir)
+    throws IOException, JavadocException, InvalidPackageException {
     
     // Accumulate a set of arguments to JavaDoc - package or file names.
     HashSet docUnits = new HashSet();
@@ -1092,32 +1093,27 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           }
         }
         else {
-          String topLevelPack;
-          File searchRoot;
-          if (docAll) {
+          String topLevelPack = pack;
+          File searchRoot = new File(sourceRoot,
+                                     topLevelPack.replace('.', File.separatorChar));
+
+          int index = pack.indexOf('.');
+          if (docAll && index != -1) {
             // We need to doc all packages from the root level down.
-            topLevelPack = pack.substring(0, pack.indexOf('.'));
+            
+            // TO DO: write a unit test for a package name w/ no dot!
+            topLevelPack = pack.substring(0, index);
             searchRoot = new File(sourceRoot, topLevelPack);
           }
-          else {
-            // We just want packages below the current one.
-            topLevelPack = pack;
-            searchRoot = new File(sourceRoot,
-                                  topLevelPack.replace('.', File.separatorChar));
-          }
-          
+
           // But we don't want to traverse the heirarchy more than once.
           if (!topLevelPacks.contains(topLevelPack) 
                 || !sourceRootSet.contains(sourceRoot)) {
             topLevelPacks.add(topLevelPack);
             sourceRootSet.add(sourceRoot);
-            docUnits.addAll
-              (FileOps.packageExplore(topLevelPack, searchRoot));
+            docUnits.addAll(FileOps.packageExplore(topLevelPack, searchRoot));
           }
         }
-      }
-      catch (InvalidPackageException ipe) {
-        throw new UnexpectedException(ipe);
       }
       catch (IllegalStateException ise) {
         // No file for this document; skip it
@@ -1161,7 +1157,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * specific area of the code base when we develop the 1.4 javadoc process.
    * Of course, it can be a fallback for if tools.jar isn't found in the 1.4 jdk
    */
-  private void  javadoc_1_3(String[] args) throws IOException {
+  private void  javadoc_1_3(String[] args) throws IOException, JavadocException {
     final String JAVADOC_CLASS = "com.sun.tools.javadoc.Main" ;
     Process javadocProcess = null;
     boolean failed = true;
@@ -1205,22 +1201,23 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         output = jdOut.readLine();
       }
       
-      output = jdErr.readLine();
-      while(output!= null){
+      do {
         System.err.println("[javadoc] " + output);
         output = jdErr.readLine();
-      }
+      } while(output!= null);
+
       try {
         int value = javadocProcess.exitValue();
         done = true;
         System.out.println("Javadoc finished with exit code " + value);
+        if (value != 0) {
+          throw new JavadocException("Javadoc error:  finished with exit code " + value);
+        }
       }
       catch (IllegalThreadStateException itse) {
         done = false;
       }
-      
     }
-    
   }
 
 
