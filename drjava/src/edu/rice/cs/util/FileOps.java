@@ -56,7 +56,87 @@ import java.util.*;
  * @version $Id$
  */
 public abstract class FileOps {
+   
+  /**
+   * Makes a file from the abs file that is relative such that making a new file:
+   * <code>new File(base,makeRelativeTo(base,abs)).getCanonicalPath()</code> would
+   * create the same file as <code>abs.getCanonicalPath()</code>
+   * <p> The abs file in linux is: <code>/home/username/folder/file.java</code>
+   * and the base file is <code>/home/username/folder/sublevel/file2.java</code>, 
+   * the resulting path of this method would be: <code>../file.java</code> while
+   * its canoncial path would be <code>/home/username/folder/file.java</code>. </p>
+   * @param abs The absolute path that is to be made relative to the base file
+   * @param base The file to make the next file relative to
+   * @return A new file whose path is relative to the base file while the value
+   * of <code>getCanonicalPath()</code> for the returned file is the same as
+   * the result of <code>getCanonicalPath()</code> in the given absolute file
+   */
+  public static File makeRelativeTo(File abs, File base) throws IOException, SecurityException{
+    base = base.getCanonicalFile();
+    abs  = abs.getCanonicalFile();
+    if (!base.isDirectory()) {
+      base = base.getParentFile();
+    }
     
+    String last = "";
+    if (!abs.isDirectory()) {
+      String tmp = abs.getPath();
+      last = tmp.substring(tmp.lastIndexOf(File.separator)+1);
+      abs = abs.getParentFile();
+    }
+    
+    String[] basParts = splitFile(base);
+    String[] absParts = splitFile(abs);
+    
+    String result = "";
+    // loop until elements differ, record what part of absParts to append
+    // next find out how many .. to put in.
+    int diffIndex = -1;
+    boolean different = false;
+    for (int i = 0; i < basParts.length; i++) {
+      if (!different && ((i >= absParts.length) || !basParts[i].equals(absParts[i]))) {
+        different = true;
+        diffIndex = i;
+      }
+      if (different) {
+        result += ".." + File.separator;
+      }
+    }
+    if (diffIndex < 0) {
+      diffIndex = basParts.length;
+    }
+    for (int i = diffIndex; i < absParts.length; i++) {
+      result += absParts[i] + File.separator;
+    }
+    result += last;
+    return new File(result);
+  }
+  
+  /**
+   * Splits a file into an array of strings representing each parent folder of
+   * the given file.  The file whose path is <code>/home/username/txt.txt</code> 
+   * in linux would be split into the string array: {&quot;&quot;,&quot;home&quot;,
+   * &quot;username&quot;,&quot;txt.txt&quot;}.
+   * Delimeters are excluded.
+   * @param fileToSplit the file to split into its directories.
+   */
+  public static String[] splitFile(File fileToSplit) {
+    String path = fileToSplit.getPath();
+    ArrayList<String> list = new ArrayList<String>();
+    while (!path.equals("")) {
+      int idx = path.indexOf(File.separator);
+      if (idx < 0) {
+        list.add(path);
+        path = "";
+      }
+      else {
+        list.add(path.substring(0,idx));
+        path = path.substring(idx+1);
+      }
+    }
+    return list.toArray(new String[0]);
+  }
+  
   /**
    * @return an array of Files in the directory specified (not including directories)
    */
@@ -65,6 +145,7 @@ public abstract class FileOps {
     getFilesInDir(d, l, recur, f);
     return l;
   }
+  
   /**
    * helper fuction for getFilesInDir(Filed , boolean recur)
    * @return an array of Files in the directory specified (not including directories)
