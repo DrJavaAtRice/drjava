@@ -44,6 +44,7 @@ import javax.swing.text.*;
 import javax.swing.event.*;
 import java.awt.event.*;
 import java.awt.*;
+import java.beans.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -407,17 +408,17 @@ public class MainFrame extends JFrame {
     d.addDocumentListener(new DocumentListener() {
       public void changedUpdate(DocumentEvent e) {
         _saveAction.setEnabled(true);
-        _compileAction.setEnabled(false);
+        //_compileAction.setEnabled(false);
         updateFileTitle();
       }
       public void insertUpdate(DocumentEvent e) {
         _saveAction.setEnabled(true);
-        _compileAction.setEnabled(false);
+        //_compileAction.setEnabled(false);
         updateFileTitle();
       }
       public void removeUpdate(DocumentEvent e) {
         _saveAction.setEnabled(true);
-        _compileAction.setEnabled(false);
+        //_compileAction.setEnabled(false);
         updateFileTitle();
       }
     });
@@ -695,7 +696,7 @@ public class MainFrame extends JFrame {
 
     // keep track of the compile menu item
     _compileMenuItem = tmpItem;
-    _compileAction.setEnabled(false);
+    //_compileAction.setEnabled(false);
 
     _abortInteractionAction.setEnabled(false);
     _abortInteractionMenuItem = fileMenu.add(_abortInteractionAction);
@@ -764,6 +765,30 @@ public class MainFrame extends JFrame {
     return helpMenu;
   }
 
+  private JButton _createManualToolbarButton(Action a) {
+    final JButton ret;
+    final Icon icon = (Icon) a.getValue(Action.SMALL_ICON);
+    if (icon == null) {
+      ret = new JButton( (String) a.getValue(Action.NAME));
+    }
+    else {
+      ret = new JButton(icon);
+    }
+
+    ret.setEnabled(false);
+    ret.addActionListener(a);
+    a.addPropertyChangeListener(new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent evt) {
+        if ("enabled".equals(evt.getPropertyName())) {
+          Boolean val = (Boolean) evt.getNewValue();
+          ret.setEnabled(val.booleanValue());
+        }
+      }
+    });
+
+    return ret;
+  }
+
   /**
    * Sets up the toolbar with several useful buttons.
    * Most buttons are always enabled, but those that are not are
@@ -783,8 +808,15 @@ public class MainFrame extends JFrame {
     _toolBar.addSeparator();
     
     // Undo, redo
-    _toolBar.add(_undoAction);
-    _toolBar.add(_redoAction);
+    // Simple workaround, for now, for bug # 520742:
+    // Undo/Redo button text in JDK 1.3
+    // We just manually create the JButtons, and we *don't* set up
+    // PropertyChangeListeners on the action's name
+    //_toolBar.add(_undoAction);
+    //_toolBar.add(_redoAction);
+
+    _toolBar.add(_createManualToolbarButton(_undoAction));
+    _toolBar.add(_createManualToolbarButton(_redoAction));
     
     _toolBar.addSeparator();
     
@@ -993,7 +1025,7 @@ public class MainFrame extends JFrame {
 
     public void fileSaved(OpenDefinitionsDocument doc) {
       _saveAction.setEnabled(false);
-      _compileAction.setEnabled(true);
+      //_compileAction.setEnabled(true);
       updateFileTitle();
       _currentDefPane.grabFocus();
     }
@@ -1013,7 +1045,7 @@ public class MainFrame extends JFrame {
       boolean isModified = active.isModifiedSinceSave();
       boolean canCompile = (!isModified && !active.isUntitled());
       _saveAction.setEnabled(isModified);
-      _compileAction.setEnabled(canCompile);
+      //_compileAction.setEnabled(canCompile);
 
       // Update error highlights
       _errorPanel.getErrorListPane().selectNothing();
@@ -1043,7 +1075,7 @@ public class MainFrame extends JFrame {
     public void compileStarted() {
       _tabbedPane.setSelectedIndex(COMPILE_TAB);
       _saveAction.setEnabled(false);
-      _compileAction.setEnabled(false);
+      //_compileAction.setEnabled(false);
       hourglassOn();
     }
 
@@ -1051,7 +1083,7 @@ public class MainFrame extends JFrame {
       hourglassOff();
       _updateErrorListeners();
       _errorPanel.reset();
-      _compileAction.setEnabled(true);
+      //_compileAction.setEnabled(true);
     }
 
     public void interactionsExited(int status) {
@@ -1080,7 +1112,7 @@ public class MainFrame extends JFrame {
     public void saveBeforeProceeding(GlobalModelListener.SaveReason reason) {
       String message;
       if (reason == COMPILE_REASON) {
-        message = "To compile, you must first save the current file." +
+        message = "To compile, you must first save the current file. " +
           "Would you like to save and then compile?";
       }
       else {
