@@ -352,7 +352,7 @@ public final class InteractionsPaneTest extends TestCase {
                  1, _pane.getPromptList().size());    
     assertEquals("First prompt should be saved as being at position",
                  InteractionsDocument.DEFAULT_BANNER.length() + InteractionsDocument.DEFAULT_PROMPT.length(),
-                 _pane.getPromptList().get(0));
+                 (int)_pane.getPromptList().get(0)); //needs cast to prevent ambiguity
     
     _doc.insertPrompt();
     _pane.setCaretPosition(_doc.getDocLength());
@@ -360,10 +360,10 @@ public final class InteractionsPaneTest extends TestCase {
                  2, _pane.getPromptList().size());
     assertEquals("First prompt should be saved as being at position",
                  InteractionsDocument.DEFAULT_BANNER.length() + InteractionsDocument.DEFAULT_PROMPT.length(),
-                 _pane.getPromptList().get(0));
+		 (int) _pane.getPromptList().get(0)); //needs cast to prevent ambiguity
     assertEquals("Second prompt should be saved as being at position",
                  InteractionsDocument.DEFAULT_BANNER.length() + InteractionsDocument.DEFAULT_PROMPT.length() * 2 + 1,
-                 _pane.getPromptList().get(1));
+                 (int)_pane.getPromptList().get(1)); //needs cast to prevent ambiguity
     
     
     synchronized(_model){

@@ -144,8 +144,8 @@ public class ProjectTest extends TestCase {
     SEList c = SExpParser.parse("(file (name \"file-name\") (select 1 2))").get(0);
     DocFile df = ProjectFileParser.ONLY.parseFile(c,null);
     Pair<Integer,Integer> p = df.getSelection();
-    assertEquals("First int should be a 1", 1, p.getFirst());
-    assertEquals("Second int should be a 2", 2, p.getSecond());
+    assertEquals("First int should be a 1", 1, (int)p.getFirst()); //need cast to prevent ambiguity
+    assertEquals("Second int should be a 2", 2, (int)p.getSecond());//need cast to prevent ambiguity
     assertEquals("Name should have been file-name", "file-name", df.getPath());
   }
 
