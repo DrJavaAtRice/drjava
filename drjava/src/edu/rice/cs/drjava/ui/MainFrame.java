@@ -4527,6 +4527,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           _closeInteractionsScript();
           _interactionsPane.setEditable(false);
           _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+          _interactionsController.notifyInputEnteredAction();
           if (_model.getDebugger().isAvailable()) {
             _toggleDebuggerAction.setEnabled(false);
           }
@@ -4885,7 +4886,10 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Builds the Hashtables in KeyBindingManager that are used to keep track
    * of key-bindings and allows for live updating, conflict resolution, and
-   * intelligent error messages (the ActionToNameMap)
+   * intelligent error messages (the ActionToNameMap).
+   * IMPORTANT: Don't use this way to put actions into the KeyBindingManager if
+   * the action is a menu item. It will already have been put in. Putting in
+   * in again will cause bug #803304 "Uncomment lines wont rebind".
    */
   private void _setUpKeyBindingMaps() {
     ActionMap _actionMap = _currentDefPane.getActionMap();
@@ -4951,23 +4955,10 @@ public class MainFrame extends JFrame implements OptionConstants {
                                     _cutLineAction, null, "Cut Line");
     KeyBindingManager.Singleton.put(KEY_CLEAR_LINE,
                                     _clearLineAction, null, "Clear Line");
-    KeyBindingManager.Singleton.put(KEY_COMMENT_LINES,
-                                    _commentLinesAction, null, "Comment Out Line(s)");
-    KeyBindingManager.Singleton.put(KEY_UNCOMMENT_LINES,
-                                    _uncommentLinesAction, null, "Uncomment Line(s)");
     KeyBindingManager.Singleton.put(KEY_DELETE_PREVIOUS,
                                     _actionMap.get(DefaultEditorKit.deletePrevCharAction), null, "Delete Previous");
     KeyBindingManager.Singleton.put(KEY_DELETE_NEXT,
-                                    _actionMap.get(DefaultEditorKit.deleteNextCharAction), null, "Delete Next");
-    KeyBindingManager.Singleton.put(KEY_FIND_NEXT,
-                                    _findNextAction, null, "Find Next");
-
-    // For now, _switchToPreviousPaneAction only switches the focus from the interactions pane to the definitions pane.
-    // Change this when the behavior is updated. Same for _switchToNextPaneAction.
-    KeyBindingManager.Singleton.put(KEY_PREVIOUS_PANE, _switchToPreviousPaneAction,
-                                    null, "Switch Focus To Previous Pane");
-    KeyBindingManager.Singleton.put(KEY_NEXT_PANE, _switchToNextPaneAction,
-                                    null, "Switch Focus To Next Pane");
+                                    _actionMap.get(DefaultEditorKit.deleteNextCharAction), null, "Delete Next");    
   }
 
   /**

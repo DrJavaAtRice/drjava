@@ -280,9 +280,8 @@ public class ConfigFrame extends JFrame {
       }
       catch (IOException ioe) {
         JOptionPane.showMessageDialog(this,
-                                      "Could not save changes to your '.drjava' file \n" +
-                                      "in your home directory. Another process may be \n" +
-                                      "using the file.\n\n" + ioe,
+                                      "Could not save changes to your '.drjava' file " +
+                                      "in your home directory. \n\n" + ioe,
                                       "Could Not Save Changes",
                                       JOptionPane.ERROR_MESSAGE);
         //return false;

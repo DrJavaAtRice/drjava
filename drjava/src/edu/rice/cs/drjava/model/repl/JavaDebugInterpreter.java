@@ -432,7 +432,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     int numDollars = _getNumDollars(_thisClassName);
     // if numToWalk == 0, just return "this"
     if (numToWalk == -1) {
-      throw new ExecutionError("malformed.expression");
+      throw new ExecutionError("malformed.expression", node);
     }
     else {
       return _buildObjectFieldAccess(numToWalk, numDollars);

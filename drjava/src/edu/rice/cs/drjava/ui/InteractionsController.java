@@ -226,6 +226,12 @@ public class InteractionsController extends AbstractConsoleController {
     return _inputListener;
   }
 
+  public void notifyInputEnteredAction() {
+    synchronized(_inputEnteredAction) {
+      _inputEnteredAction.notify();
+    }
+  }
+  
   /**
    * Accessor method for the InteractionsModel.
    */
@@ -247,6 +253,14 @@ public class InteractionsController extends AbstractConsoleController {
   public InteractionsDocument getDocument() {
     return _doc;
   }
+  
+  /**
+   * Notifies the inputEnteredAction. Called by DefaultGlobalModel when reset is called so
+   * that this lock is released.
+   */
+//  public void notifyInputEnteredAction() {
+// _inputEnteredAction.notify();
+//}
   
   /**
    * Adds AttributeSets as named styles to the document adapter.

@@ -154,15 +154,46 @@ public interface OptionConstants {
   
   /** Main (definitions document, tab contents) */
   public static final FontOption FONT_MAIN =
-    new FontOption("font.main", Font.decode("Monospaced-PLAIN-12"));
+    new FontOption("font.main", DefaultFont.getDefaultMainFont());
+  
+  /**
+   * Class that allows the main font to be initialized properly.
+   * On Mac14, Monospaced-PLAIN-12 is too faint, so use Monaco instead.
+   */
+  static class DefaultFont {
+    public static Font getDefaultMainFont() {
+      if (PlatformFactory.ONLY.isMac14Platform()) {
+        return Font.decode("Monaco-PLAIN-12");
+      }
+      else {
+        return Font.decode("Monospaced-PLAIN-12");
+      }
+    }
+    public static Font getDefaultLineNumberFont() {
+      if (PlatformFactory.ONLY.isMac14Platform()) {
+        return Font.decode("Monaco-PLAIN-12");
+      }
+      else {
+        return Font.decode("Monospaced-PLAIN-12");
+      }
+    }
+    public static Font getDefaultDocListFont() {
+      if (PlatformFactory.ONLY.isMac14Platform()) {
+        return Font.decode("Monaco-PLAIN-10");
+      }
+      else {
+        return Font.decode("Monospaced-PLAIN-10");
+      }
+    }
+  }
   
   /** Line numbers */
   public static final FontOption FONT_LINE_NUMBERS =
-    new FontOption("font.line.numbers", Font.decode("Monospaced-PLAIN-12"));
+    new FontOption("font.line.numbers", DefaultFont.getDefaultLineNumberFont());
         
   /** List of open documents */
   public static final FontOption FONT_DOCLIST =
-    new FontOption("font.doclist", Font.decode("Monospaced-PLAIN-10"));
+    new FontOption("font.doclist", DefaultFont.getDefaultDocListFont());
         
  /** Toolbar buttons */
   public static final FontOption FONT_TOOLBAR =

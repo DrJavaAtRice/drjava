@@ -393,6 +393,62 @@ public class DynamicJavaAdapter implements JavaInterpreter {
         node.setProperty(NodeProperties.TYPE, boolean.class);
         return boolean.class;
       }
+      
+      public Object visit(MethodDeclaration node) {
+        super.visit(node);
+        Class c = (Class)node.getProperty(NodeProperties.TYPE);
+        BlockStatement bs = node.getBody();
+        List l = bs.getStatements();
+        Iterator iter = l.iterator();
+        boolean foundCorrectType = false;
+        while(iter.hasNext()) {
+          Statement s = (Statement)iter.next();
+          if (s instanceof ReturnStatement) {
+            Class returnExpClass;
+            Expression expression = ((ReturnStatement)s).getExpression();
+            if (expression == null) {
+              returnExpClass = null;
+            }
+            else {
+              returnExpClass = (Class)expression.acceptVisitor(this);
+            }
+            // will void return type mean c is null?
+            if (c == null) {
+              if (returnExpClass != null) {
+                // returning a value in a void method
+                throw new ExecutionError("assignment.types", node);
+              }
+            }
+            else if (returnExpClass == null) {
+              // returning nothing in a non-void method
+                throw new ExecutionError("assignment.types", node);    
+            }
+            else if (!c.isAssignableFrom(returnExpClass)) {
+              // returning an unassignable type
+              throw new ExecutionError("assignment.types", node);
+            }
+            else {
+              // returning an assignable type
+              foundCorrectType = true;
+            }
+          }
+        }
+        if (c != null) {
+          if (!foundCorrectType) {
+            // we were supposed to return a type, but did not
+            throw new ExecutionError("assignment.types", node);
+          }
+        }
+        return null;
+      }
+      
+      public Object visit(ReturnStatement node) {
+        Expression e = node.getExpression();
+        if (e != null) {
+          return e.acceptVisitor(this);
+        }
+        return null;
+      }     
     };
   }
   
