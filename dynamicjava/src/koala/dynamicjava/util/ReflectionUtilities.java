@@ -168,7 +168,8 @@ public class ReflectionUtilities {
       if (cs.length == 0) {
         result.addAll(getMethods(Object.class, name, params));
       }
-    } else {
+    } 
+    else {
       Class c = cl;
       while (c != null) {
         Method[] ms = c.getDeclaredMethods();

@@ -782,6 +782,9 @@ public class TypeCheckerTest extends TestCase {
     Node exp = _parseCode("X = new Integer(1) + new Integer(3);").get(0);
   }
   
+  // may need more simple assignment tests
+  // need some variable assignment tests.
+  
   public void testCastExpression() {
   }
   
@@ -799,7 +802,7 @@ public class TypeCheckerTest extends TestCase {
   
   public void testArrayAccess() {
   }
-  
+
   /**
    * Method calls may or may not be a simple project.  We need to look into what
    * needs to be tested, the different types of method calls that must change,

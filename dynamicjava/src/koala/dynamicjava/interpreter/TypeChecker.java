@@ -181,7 +181,7 @@ return null;
     // Enter a new scope
     context.enterScope();
 
-    List l;
+    List<Node> l;
     // Check the statements
     if ((l = node.getInitialization()) != null) {
       checkList(l);
@@ -320,7 +320,7 @@ return null;
     if (exp != null) {
       exp.acceptVisitor(this);
     }
-    List l;
+    List<Node> l;
     if ((l = node.getStatements()) != null) {
       checkList(l);
     }
@@ -608,20 +608,21 @@ return null;
 
     if (!c.isArray() || (c.isArray() && !mn.equals("clone"))) {
       // Do the type checking of the arguments
-      List args = node.getArguments();
+      List<Expression> args = node.getArguments();
       Class[] cargs = Constants.EMPTY_CLASS_ARRAY;
       if (args != null) {
         cargs = new Class[args.size()];
-        Iterator it = args.iterator();
+        Iterator<Expression> it = args.iterator();
         int i  = 0;
         while (it.hasNext()) {
-          cargs[i++] = ((Node)it.next()).acceptVisitor(this);
+          cargs[i++] = it.next().acceptVisitor(this);
         }
       }
       Method m = null;
       try {
         m = context.lookupMethod(exp, mn, cargs);
-      } catch (NoSuchMethodException e) {
+      } 
+      catch (NoSuchMethodException e) {
         String s = c.getName();
         String sargs = "";
         for (int i = 0; i < cargs.length-1; i++) {
@@ -632,7 +633,8 @@ return null;
         }
         node.setProperty(NodeProperties.ERROR_STRINGS, new String[] { mn, s, sargs });
         throw new ExecutionError("no.such.method.with.args", node);
-      } catch (MethodModificationError e) {
+      } 
+      catch (MethodModificationError e) {
         Expression expr = e.getExpression();
         expr.acceptVisitor(this);
         node.setExpression(expr);
@@ -2042,6 +2044,7 @@ return null;
 
   /**
    * Visits an unary operation
+   * !! This method has not been modified for boxing/unboxing !!
    */
   private Class visitUnaryOperation(UnaryExpression node, String s) {
     Class c = node.getExpression().acceptVisitor(this);
@@ -2057,7 +2060,14 @@ return null;
   }
 
   /**
-   * Visits a numeric expression
+   * Visits a numeric expression.
+   * This method checks the types on any numeric binary operator
+   * performing any needed unboxing or numeric promotion on either
+   * of the operands.
+   * @param node the Binary expression to type check
+   * @param s The key to use when throwing an ExecutionError
+   * @return the type of the expression after any numeric promotion or 
+   * unboxing has been performed
    */
   protected static Class visitNumericExpression(BinaryExpression node, String s) {
     Expression leftExp = node.getLeftExpression();
@@ -2113,6 +2123,7 @@ return null;
   
   /**
    * Checks the typing rules for an assignment
+   * !! This method has not yet been modified for boxing/unboxing !!
    * @param lc   the class of the left part of an assignment
    * @param rc   the class of the right part of an assignment
    * @param node the current node
@@ -2185,6 +2196,7 @@ return null;
 
   /**
    * Checks the typing rules in an equality operation
+   * !! This method has not yet been modified for boxing/unboxing !!
    * @param lc the class of the left operand
    * @param rc the class of the right operand
    * @param s  the error message
@@ -2212,6 +2224,7 @@ return null;
 
   /**
    * Visits a relational expression
+   * !! This method has not yet been modified for boxing/unboxing !!
    */
   private Class visitRelationalExpression(BinaryExpression node) {
     // Check the types
@@ -2231,7 +2244,14 @@ return null;
   }
 
   /**
-   * Visits a bitwise expression
+   * Visits a bitwise expression.
+   * If either the left or right expression is an integral
+   * boxing type, this method performs the unboxing procedure
+   * and uses the primitive type of the ObjectMethodCall to 
+   * perform the any numeric promotion necessary.
+   * @param node the bitwise expression to be type checked.
+   * @return the type of the expression after unboxing and 
+   *         promotion has been executed
    */
   private Class visitBitwiseExpression(BinaryExpression node) {
     // Check the types
@@ -2283,6 +2303,7 @@ return null;
 
   /**
    * Checks a bitwise expression
+   * !!! This method has not been modified for boxing/unboxing !!!
    */
   private Class visitBitwiseAssign(BinaryExpression node) {
     // Check the types
@@ -2310,7 +2331,14 @@ return null;
   }
 
   /**
-   * Visits a shift expression
+   * Visits a shift expression.
+   * This method is responsible for unboxing the two operands
+   * as necessary, performing any numeric promotions needed,
+   * and checking that the types of the two operands are compatible
+   * with the shift operations.
+   * @param node the shifting expression to be type checked
+   * @return the type of the expression after any unboxing or numeric
+   * promotion has been successfully executed.
    */
   private Class visitShiftExpression(BinaryExpression node) {
     // Check the types
@@ -2352,6 +2380,7 @@ return null;
 
   /**
    * Checks the typing rules in a cast expression
+   * !! This method has not yet been modified for boxing/unboxing !!
    * @param tc the target class
    * @param ec the expression class
    */
@@ -2405,12 +2434,14 @@ return null;
   }
 
   /**
-   * Check a list of node
+   * Check a list of node by running this type checker
+   * on each node in the list.
+   * @param the list of nodes to type check
    */
-  private void checkList(List l) {
-    ListIterator it = l.listIterator();
+  private void checkList(List<? extends Node> l) {
+    ListIterator<? extends Node> it = l.listIterator();
     while (it.hasNext()) {
-      ((Node)it.next()).acceptVisitor(this);
+      it.next().acceptVisitor(this);
     }
   }
 
