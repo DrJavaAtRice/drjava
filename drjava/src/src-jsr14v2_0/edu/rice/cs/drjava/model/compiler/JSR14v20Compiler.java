@@ -90,6 +90,7 @@ public class JSR14v20Compiler implements CompilerInterface {
   protected boolean _allowAssertions = false;  
   
   private boolean _isJSR14v2_4;
+  private boolean _isJSR14v2_5 = false;
     
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new JSR14v20Compiler();
@@ -217,7 +218,16 @@ public class JSR14v20Compiler implements CompilerInterface {
   public boolean isAvailable() {
     try {
       Class.forName(COMPILER_CLASS_NAME);
-      Class.forName("java.lang.Enum");
+      try {
+        Class.forName("java.lang.Enum");
+      }
+      catch (Exception e) {
+        // If java.lang.Enum is not found, there's a chance the user specified JSR14v2.5 
+        // For some reason, java.lang.Enum got moved to collect.jar which we can't put on the
+        // bootclasspath.  Look for something 2.5 specific.
+        Class.forName("com.sun.tools.javac.main.Main$14");
+        _isJSR14v2_5 = true;
+      }
       return _isValidVersion();
     }
     catch (Exception e) {
@@ -226,7 +236,10 @@ public class JSR14v20Compiler implements CompilerInterface {
   }
 
   public String getName() {
-    if (_isJSR14v2_4) {
+    if (_isJSR14v2_5) {
+      return "JSR-14 v2.5";
+    }
+    else if (_isJSR14v2_4) {
       return "JSR-14 v2.4";
     }
     else {
@@ -359,7 +372,7 @@ public class JSR14v20Compiler implements CompilerInterface {
   }
   
   /**
-   * Check if we're using JSR14v2.4.  We're skipping version 2.3
+   * Check if we're using JSR14v2.4 or 2.5.  We're skipping version 2.3
    * because it will never be officially released.
    */
   private boolean _isJSR14v2_4() {
