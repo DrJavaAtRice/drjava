@@ -62,6 +62,7 @@ public class JUnitErrorCaretListener implements CaretListener {
   private final OpenDefinitionsDocument _openDoc;
   private final JUnitErrorListPane _errorListPane;
   private final DefinitionsPane _definitionsPane;
+  private final MainFrame _frame;
   private final Document _document;
 
   private JUnitErrorModel _model;
@@ -72,11 +73,13 @@ public class JUnitErrorCaretListener implements CaretListener {
    * Constructs a new caret listener to highlight JUnit errors.
    */
   public JUnitErrorCaretListener(OpenDefinitionsDocument doc,
-                                    JUnitErrorListPane errorListPane,
-                                    DefinitionsPane defPane) {
+                                 JUnitErrorListPane errorListPane,
+                                 DefinitionsPane defPane,
+                                 MainFrame frame) {
     _openDoc = doc;
     _errorListPane = errorListPane;
     _definitionsPane = defPane;
+    _frame = frame;
     _document = doc.getDocument();
 
     resetErrorModel();
@@ -99,7 +102,8 @@ public class JUnitErrorCaretListener implements CaretListener {
 
   /**
    * After each update to the caret, determine if changes in
-   * highlighting need to be made.
+   * highlighting need to be made.  Highlights the error if
+   * the test tab is showing.
    */
   public void caretUpdate(CaretEvent evt) {
     if (_positions.length == 0) {

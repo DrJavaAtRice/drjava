@@ -445,32 +445,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Quits DrJava.  Optionally displays a prompt before quitting. */
   private Action _quitAction = new AbstractAction("Quit") {
     public void actionPerformed(ActionEvent ae) {
-      if (_promptBeforeQuit) {
-        String title = "Quit DrJava?";
-        String message = "Are you sure you want to quit DrJava?";
-        
-        int rc = JOptionPane.showConfirmDialog(MainFrame.this,
-                                               message,
-                                               title,
-                                               JOptionPane.YES_NO_OPTION);
-        if (rc != JOptionPane.YES_OPTION) {
-          return;
-        }
-      }
-      
-      _recentFileManager.saveRecentFiles();
-        
-      // Save recent files, but only if there wasn't a problem at startup
-      // (Don't want to overwrite a custom config file with a simple typo.)
-      if (!DrJava.getConfig().hadStartupException()) {
-        try {
-          DrJava.getConfig().saveConfiguration();
-        }
-        catch (IOException ioe) {
-          _showIOError(ioe);
-        }
-      }
-      _model.quit();
+      _quit();
     }
   };
 
@@ -841,7 +816,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void windowActivated(WindowEvent ev) {}
     public void windowClosed(WindowEvent ev) {}
     public void windowClosing(WindowEvent ev) {
-      _model.quit();
+      _quit();
     }
     public void windowDeactivated(WindowEvent ev) {}
     public void windowDeiconified(WindowEvent ev) {
@@ -864,7 +839,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** Creates the main window, and shows it. */
   public MainFrame() {
-    this(-1);
+    this(-1);  // use a unique RMI port
   }
   /**
    * Creates the main window and shows it.  The underlying model will
@@ -1161,7 +1136,20 @@ public class MainFrame extends JFrame implements OptionConstants {
     return _currentDefPane;
   }
 
-
+  /**
+   * Returns whether the compiler output tab is currently showing.
+   */
+  public boolean isCompilerTabSelected() {
+    return _tabbedPane.getSelectedComponent() == _errorPanel;
+  }
+  
+  /**
+   * Returns whether the test output tab is currently showing.
+   */
+  public boolean isTestTabSelected() {
+    return _tabbedPane.getSelectedComponent() == _junitPanel;
+  }
+  
   /**
    * Makes sure save and compile buttons and menu items
    * are enabled and disabled appropriately after document
@@ -1369,6 +1357,36 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   */
+  
+  private void _quit() {
+    if (_promptBeforeQuit) {
+      String title = "Quit DrJava?";
+      String message = "Are you sure you want to quit DrJava?";
+      
+      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
+                                             message,
+                                             title,
+                                             JOptionPane.YES_NO_OPTION);
+      if (rc != JOptionPane.YES_OPTION) {
+        return;
+      }
+    }
+      
+    _recentFileManager.saveRecentFiles();
+        
+    // Save recent files, but only if there wasn't a problem at startup
+    // (Don't want to overwrite a custom config file with a simple typo.)
+    if (!DrJava.getConfig().hadStartupException()) {
+      try {
+        DrJava.getConfig().saveConfiguration();
+      }
+      catch (IOException ioe) {
+        _showIOError(ioe);
+      }
+    }
+    _model.quit();
+  }
+  
 
   private void _compile() {
     final SwingWorker worker = new SwingWorker() {
@@ -2390,6 +2408,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           outputScroll.revalidate();
           outputScroll.repaint();
         }
+        // Update error highlights?
       }
     });
     
@@ -2446,11 +2465,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Add listeners
     _installNewDocumentListener(doc.getDocument());
     CompilerErrorCaretListener caretListener =
-      new CompilerErrorCaretListener(doc, _errorPanel.getErrorListPane(), pane);
+      new CompilerErrorCaretListener(doc, _errorPanel.getErrorListPane(), pane, this);
     pane.addErrorCaretListener(caretListener);
 
     JUnitErrorCaretListener junitCaretListener =
-      new JUnitErrorCaretListener(doc, _junitPanel.getJUnitErrorListPane(), pane);
+      new JUnitErrorCaretListener(doc, _junitPanel.getJUnitErrorListPane(), pane, this);
     pane.addJUnitErrorCaretListener(junitCaretListener);
 
     // add a listener to update line and column.

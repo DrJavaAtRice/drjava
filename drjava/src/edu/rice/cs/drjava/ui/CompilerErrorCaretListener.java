@@ -62,6 +62,7 @@ public class CompilerErrorCaretListener implements CaretListener {
   private final OpenDefinitionsDocument _openDoc;
   private final ErrorListPane _errorListPane;
   private final DefinitionsPane _definitionsPane;
+  private final MainFrame _frame;
   private final Document _document;
 
   private CompilerErrorModel _model;
@@ -73,10 +74,12 @@ public class CompilerErrorCaretListener implements CaretListener {
    */
   public CompilerErrorCaretListener(OpenDefinitionsDocument doc,
                                     ErrorListPane errorListPane,
-                                    DefinitionsPane defPane) {
+                                    DefinitionsPane defPane,
+                                    MainFrame frame) {
     _openDoc = doc;
     _errorListPane = errorListPane;
     _definitionsPane = defPane;
+    _frame = frame;
     _document = doc.getDocument();
 
     resetErrorModel();
@@ -99,7 +102,8 @@ public class CompilerErrorCaretListener implements CaretListener {
 
   /**
    * After each update to the caret, determine if changes in
-   * highlighting need to be made.
+   * highlighting need to be made.  Highlights the line if the
+   * compiler output tab is showing.
    */
   public void caretUpdate(CaretEvent evt) {
     if (_positions.length == 0) {
@@ -114,12 +118,21 @@ public class CompilerErrorCaretListener implements CaretListener {
    * Update the highlight appropriately.
    */
   public void updateHighlight(int curPos) {
-
+    //DrJava.consoleOut().println("updateHighlight: " + curPos);
     // check if the dot is on a line with an error.
     // Find the first error that is on or after the dot. If this comes
     // before the newline after the dot, it's on the same line.
     int errorAfter; // index of the first error after the dot
+    //if (_positions == null) {
+    //  DrJava.consoleOut().println("positions array is null!");
+    //}
     for (errorAfter = 0; errorAfter < _positions.length; errorAfter++) {
+      if (_positions[errorAfter] == null) {
+        // Something is wrong here, but this is happening on warnings!
+        //  Need to figure out why...
+        //DrJava.consoleOut().println("Found a null position (1)!  index: " + errorAfter);
+        return;
+      }
       if (_positions[errorAfter].getOffset() >= curPos) {
         break;
       }
@@ -132,6 +145,10 @@ public class CompilerErrorCaretListener implements CaretListener {
     int shouldSelect = -1;
 
     if (errorBefore >= 0) { // there's an error before the dot
+      Position p = _positions[errorBefore];
+      //if (p == null) {
+      //  DrJava.consoleOut().println("Found a null position (2)!  index: " + errorBefore);
+      //}
       int errPos = _positions[errorBefore].getOffset();
       try {
         String betweenDotAndErr = _document.getText(errPos, curPos - errPos);

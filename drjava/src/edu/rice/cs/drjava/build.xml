@@ -71,7 +71,7 @@
 
        ant -Dversion-tag=drjava-20020101-0000 release
   -->
-  <target name="release" if="version-tag" depends="update,compile">
+  <target name="release" if="version-tag" depends="clean,update,compile">
     <delete dir="${dist}/${version-tag}" />
     <mkdir dir="${dist}/${version-tag}" />
 
@@ -92,9 +92,9 @@
     <cvs dest="${dist}/${version-tag}"
          tag="HEAD"
          quiet="yes"
-         package="src/edu/rice/cs/drjava"
+         package="src/edu/rice/cs/drjava src/edu/rice/cs/util src/edu/rice/cs/lib src/edu/rice/cs/README src/edu/rice/cs/build-common.xml src/src-jsr14v1_0/edu/rice/cs/drjava src/src-jsr14v1_2"
          command="export -N" />
-
+<!--
     <cvs dest="${dist}/${version-tag}"
          tag="HEAD"
          quiet="yes"
@@ -107,6 +107,18 @@
          package="src/edu/rice/cs/lib"
          command="export -N" />
 
+    <cvs dest="${dist}/${version-tag}"
+         tag="HEAD"
+         quiet="yes"
+         package="src/src-jsr14v1_0/edu/rice/cs/drjava"
+         command="export -N" />
+
+    <cvs dest="${dist}/${version-tag}"
+         tag="HEAD"
+         quiet="yes"
+         package="src/src-jsr14v1_2/edu/rice/cs/drjava"
+         command="export -N" />
+-->
     <zip zipfile="${dist}/${version-tag}-src.zip">
       <fileset dir="${dist}">
         <include name="${version-tag}/src/**" />
@@ -240,7 +252,11 @@
   <!-- Makes a jar with dependencies. No tests are included. -->
   <target name="jar">
     <delete file="${jarfile}" />
-
+<!--
+    <zip zipfile="${jarfile}">
+      <zipfileset src="${srcroot}/edu/rice/cs/LICENSE" />
+    </zip>
+-->
     <jar jarfile="${jarfile}" manifest="${manifest}" update="true" >
       <!-- Include dependencies -->
       <zipfileset src="${lib_dir}/gj-util.jar"

@@ -49,6 +49,7 @@ import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import javax.swing.JOptionPane;
+import javax.swing.JDialog;
 
 /**
  * This is the main class for the interpreter JVM.
@@ -145,9 +146,36 @@ public class InterpreterJVM extends UnicastRemoteObject
     };
 
     thread.start();
+
+    // On Windows, any frame or dialog opened from Interactions pane will
+    // appear *behind* DrJava's frame, unless a previous frame or dialog 
+    // is shown here.  Not sure what the difference is, but this hack 
+    // seems to work.  (I'd be happy to find a better solution, though.)
+    // Only necessary on Windows, since frames and dialogs on other 
+    // platforms appear correctly in front of DrJava.
+    if (_isWindowsPlatform()) {
+      JDialog d = new JDialog();
+      d.show();
+      d.hide();
+    }
+
     //JOptionPane.showMessageDialog(null, "InterpreterJVM initialized");
 
   }
+
+  /**
+   * Returns if the current platform is Windows.
+   */
+  private boolean _isWindowsPlatform() {
+    String os = System.getProperty("os.name");
+    if (os != null) {
+      return os.toLowerCase().indexOf("windows") == 0;
+    }
+    else {
+      return false;
+    }  
+  }
+
 
   public void interpret(final String s) throws RemoteException {
     // fire off thread to interpret to keep from blocking the caller

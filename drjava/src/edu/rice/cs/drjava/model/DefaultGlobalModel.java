@@ -2453,6 +2453,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       // JPDA not available, so we won't use it.
       _debugManager = null;
     }
+    catch( UnsupportedClassVersionError ucve ) {
+      // Wrong version of JPDA, so we won't use it.
+      _debugManager = null;
+    }
   }
 
 
