@@ -1082,6 +1082,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   public void hourglassOn() {
     getGlassPane().setVisible(true);
+    _currentDefPane.setEditable(false);
   }
 
   /**
@@ -1089,6 +1090,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   public void hourglassOff() {
     getGlassPane().setVisible(false);
+    _currentDefPane.setEditable(true);
   }
 
   /**
@@ -1174,6 +1176,8 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Prompt the user to select a place to open a file from, then load it.
    * Ask the user if they'd like to save previous changes (if the current
    * document has been modified) before opening.
+   * @param jfc the open dialog from which to extract information
+   * @return an array of the files that were chosen
    */
   public File[] getOpenFiles(JFileChooser jfc) throws OperationCanceledException {
     // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
@@ -1799,10 +1803,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   /**
-   * Returns the File selected by the JFileChooser.
+   * Returns the Files selected by the JFileChooser.
    * @param fc File chooser presented to the user
    * @param choice return value from fc
-   * @return Selected File
+   * @return Selected Files - this array will be size 1 for single-selection dialogs.
    * @throws OperationCanceledException if file choice canceled
    * @throws RuntimeException if fc returns a bad file or choice
    */
@@ -1815,25 +1819,29 @@ public class MainFrame extends JFrame implements OptionConstants {
       case JFileChooser.APPROVE_OPTION:
         File[] chosen = fc.getSelectedFiles();
         if (chosen == null)
-            throw new RuntimeException("filechooser returned null file");
+            throw new UnexpectedException(new OperationCanceledException(), "filechooser returned null file");
         
         // Following code reviewed for bug 70902-- JVF
-        
-        // this new File[] { null } is totally unaccounted for in originating
-        // method calls
-        //if (chosen.length == 0) chosen = new File[] { null };
-        if (chosen.length == 0) { throw new OperationCanceledException(); }
-        
-        if (chosen[0] == null) { 
-          // why was this here? we shouldn't expect to get
-          // something totally new from fc.
-          //chosen[0] = fc.getSelectedFile();
-          throw new OperationCanceledException();
+        // If this is a single-selection dialog, getSelectedFiles() will always
+        // return a zero-size array -- handle it differently.
+        if (chosen.length == 0) {
+          if (!fc.isMultiSelectionEnabled()) {
+            return new File[] { fc.getSelectedFile() };
+          }
+          else {
+            /* This is the workaround for bug 70902: sometimes Mac OS X will return
+             * APPROVE_OPTION when the user clicks the close (x) control button
+             * on the dialog window, even though nothing is selected.
+             */
+            throw new OperationCanceledException();
+          }
         }
-        return chosen;
+        else {
+          return chosen;
+        }
         
       default:                  // impossible since rc must be one of these
-        throw  new RuntimeException("filechooser returned bad rc " + choice);
+        throw new UnexpectedException(new OperationCanceledException(), "filechooser returned bad rc " + choice);
     }
   }
 
@@ -3229,10 +3237,10 @@ public class MainFrame extends JFrame implements OptionConstants {
           //elp.setSize(_tabbedPane.getMinimumSize());
           //_setDividerLocation();
 
+          hourglassOn();
           showTab(_errorPanel);
           _errorPanel.setCompilationInProgress();
           _saveAction.setEnabled(false);
-          hourglassOn();
         }
       };
       SwingUtilities.invokeLater(doCommand);
