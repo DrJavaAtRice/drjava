@@ -1,0 +1,375 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V3.1//EN">
+
+<!--
+  Developer Documentation for DrJava
+  Charles Reis
+  @version $Id$
+-->
+<book id="index">
+  <!-- Meta info -->
+  <bookinfo>
+    <date>2003-1-9</date>
+    <title>DrJava Developer Documentation</title>
+  </bookinfo>
+  <toc></toc>
+
+
+  <!-- Chapter: Intro -->
+  <chapter id="intro">
+    <title>Introduction</title>
+
+    <para>By releasing DrJava as an open source project, our team welcomes anyone to download, modify, and
+use the source code for their own benefit.  We hope that this outreach to the development community can
+continue to help DrJava achieve its educational goals and improve its quality as a stable and
+full-featured development environment.  This documentation will help you get started with downloading and
+compiling the DrJava code base.</para>
+
+    <para>To ensure that DrJava's reliability and robustness is maintained, the DrJava development team
+adheres to several guidelines and philosophies when making changes.  We will soon add chapters to this
+documentation describing these design philosophies and coding conventions, in an effort to help DrJava
+developers keep the quality of the project high.</para>
+  </chapter>
+
+
+  <!-- Chapter: Project Goals
+  <chapter id="goals">
+    <title>Project Goals</title>
+
+    <para>text...</para>
+  </chapter>
+  -->
+
+
+  <!-- Chapter: Design Philosophies
+  <chapter id="philosophies">
+    <title>Design Philosophies</title>
+
+    <para>text...</para>
+  </chapter>
+  -->
+
+
+  <!-- Chapter: Code Layout
+  <chapter id="layout">
+    <title>Code Layout</title>
+
+    <para>text...</para>
+  </chapter>
+  -->
+
+
+  <!-- Chapter: Coding Conventions
+  <chapter id="conventions">
+    <title>Coding Conventions</title>
+
+    <para>text...</para>
+  </chapter>
+  -->
+
+
+  <!-- Chapter: Build Environment -->
+  <chapter id="environment">
+    <title>Setting Up A Build Environment</title>
+    <para>This chapter walks you through setting up your build environment to develop DrJava.  It is
+addressed to both independent developers and members of the DrJava development team who will be committing
+code to the CVS repository.  We attempt to support development on Linux, Mac OS X, and Windows.</para>
+
+    <section id="env-sf-account">
+      <title>SourceForge Account</title>
+      <para>Regardless of whether you will be committing code or not, we recommend registering for a
+SourceForge user account to check out code and submit or respond to bugs and feature requests.  If you
+will be a member of the DrJava development team, the DrJava project administrators will add your account
+to the project to allow you to commit code and perform related tasks.  If you already have a SourceForge
+account, you can skip the first two steps.</para>
+      <itemizedlist>
+        <listitem>
+          <para>Go to <ulink url="http://sourceforge.net">http://sourceforge.net</ulink> and click on "New
+User via SSL"</para>
+        </listitem>
+        <listitem>
+          <para>Fill in the form to create a user account.</para>
+        </listitem>
+        <listitem>
+          <para>If you will be a member of the DrJava development team, email one of the DrJava project
+administrators with your SourceForge username so that you can be added to the DrJava project.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+
+    <section id="env-install">
+      <title>Install Necessary Programs</title>
+      <para>You will need to have several programs installed to be able to develop and run DrJava.  This
+section will help you install each of them, if you do not already have them installed.</para>
+
+      <itemizedlist>
+        <listitem>
+          <formalpara>
+            <title>Java Software Development Kit</title>
+            <para>If you don't have it already, you will need to install Sun's Java SDK (not just the
+JRE).  If you are using Linux or Windows, install version 1.4.1 or later.  If you are using Mac OS X, you
+should already have version 1.3.1 installed.  (Version 1.4.1 for Mac OS X is not yet available.)  You can
+download the SDK for your platform from <ulink
+url="http://java.sun.com">http://java.sun.com</ulink>.</para>
+          </formalpara>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Cygwin (Windows only)</title>
+            <para>If you will be developing on a Windows platform, you will need to install Cygwin (a
+Unix-like shell for Windows) to run the DrJava build script.</para>
+          </formalpara>
+          <itemizedlist>
+            <listitem>
+              <para>Download and run the latest Cygwin installer from <ulink
+url="http://www.cygwin.com">http://www.cygwin.com</ulink>.</para>
+            </listitem>
+            <listitem>
+              <para>On the "Select Packages" screen of the installer, make sure that "cvs" (in the Dev
+category) and "openssh" (in the Net category) are selected to be installed.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Ant</title>
+            <para>Ant is a build tool similar to "make", but which uses XML build scripts.  We use Ant to
+compile, test, and commit DrJava code.  You will need to download version 1.5.1 or later from <ulink
+url="http://www.apache.org/dist/ant/binaries/">http://www.apache.org/dist/ant/binaries/</ulink>. 
+Decompress the package and copy the <filename>jakarta-ant-1.5.1</filename> folder to a convenient location
+(eg. <filename>/usr/local/ant</filename>, <filename>~/ant/</filename>, or
+<filename>c:\jakarta-ant-1.5.1</filename>).</para>
+          </formalpara>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Emacs</title>
+            <para>If you will be committing code, you will need to have a text editor that can open in a
+new window; we recommend Emacs.  Most Unix and Linux systems already have Emacs installed.  For Windows,
+download the latest version from <ulink
+url="http://ftp.gnu.org/gnu/windows/emacs/latest/">http://ftp.gnu.org/gnu/windows/emacs/latest/</ulink>,
+then decompress the package (using WinZip) to a convenient folder (eg.
+<filename>c:\emacs-21.1</filename>).  You can also run the included <filename>addpm.exe</filename> to put
+Emacs in the Start menu.  For Mac OS X 10.2, you can download Emacs as an application from <ulink
+url="http://mindlube.com/developer/">http://mindlube.com/developer</ulink>.  Users with earlier versions
+of Mac OS X will need to install Emacs with an X server, such as OrobosX.  (Contact a DrJava project
+administrator for help, if you need it.)</para>
+          </formalpara>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+
+    <section id="env-sf-keypair">
+      <title>SourceForge SSH Key Pairs</title>
+      <para>If you will developing frequently from the same computer or on a Windows platform, we
+recommend setting up a SSH key pair to allow you to check out and commit code without having to enter your
+SourceForge password every time.  (This is required to commit code in a Windows environment due to a
+complication with Cygwin.)  However, you should not set up a key pair on a public Windows computer-- only
+on your personal computer, or on a personal account on a Unix server.  Follow the directions below to set
+up a key pair.</para>
+      <itemizedlist>
+        <listitem>
+          <para>Read through the <ulink
+url="http://sourceforge.net/docman/display_doc.php?docid=761&amp;group_id=1">SourceForge
+documentation</ulink> to understand the security implications of using SSH key pairs.</para>
+        </listitem>
+        <listitem>
+          <para>Generate a key pair on your local computer by running the following command at a Terminal
+(Linux / Mac OS X) or a Cygwin prompt (Windows).  Be sure to use a blank passphrase, and save to the
+default location.</para>
+          <cmdsynopsis>
+            <command>ssh-keygen -t dsa</command>
+          </cmdsynopsis>
+        </listitem>
+        <listitem>
+          <para>Log into SourceForge using your user account, click on "Account Options", and then "Edit
+Keys" under the "Shell Account Information" section.</para>
+        </listitem>
+        <listitem>
+          <para>Copy the contents of your <filename>id_dsa.pub</filename> file into the form and click
+update.  <emphasis>Note: This will take up to 6 hours to go into effect!</emphasis></para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+
+    <section id="env-variables">
+      <title>Set Up Environment Variables</title>
+      <para>There are several environment variables you will need to set to run the build scripts.  The
+method to set these variables depends heavily on your platform.</para>
+      <itemizedlist>
+        <listitem>
+          <formalpara>
+            <title>Linux / Mac OS X (Bash)</title>
+            <para>If you are using a Bash shell, you can simply add the lines below to your
+<filename>~/.bashrc</filename> file, substituting the correct paths for each program.  If you are using a
+different shell (eg. csh, tcsh), you will have to adapt the lines accordingly.  Be sure to use the correct
+paths for Ant and Java.</para>
+          </formalpara>
+          <programlisting>
+export ANT_HOME=/usr/local/ant
+export JAVA_HOME=/usr/java/j2sdk1.4.1_01
+export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:$PATH
+export CVS_RSH=ssh
+export EDITOR=emacs
+          </programlisting>
+          <para>You will need to start a new Terminal for the changes to take effect.</para>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Windows</title>
+            <para>Each version of Windows has a slightly different method for setting environment
+variables.  In most cases, you can double click on the "System" icon in the Control Panel (or choose
+"Properties" after right-clicking on "My Computer"), and then find a button for "Environment Variables"
+(usually on the "Advanced" tab.  Then add the following system-level variables, adjusting the paths for
+Java, Cygwin, Ant, and Emacs accordingly.</para>
+          </formalpara>
+          <itemizedlist>
+            <listitem>
+              <para>Include the following <emphasis>at the beginning</emphasis> of the
+<literal>Path</literal> variable:
+<literal>c:\j2sdk1.4.1\bin;c:\jakarta-ant-1.5.1\bin;c:\emacs-21.2\bin</literal></para>
+            </listitem>
+            <listitem>
+              <para>Set <literal>ANT_HOME</literal> to <literal>c:\jakarta-ant-1.5.1</literal></para>
+            </listitem>
+            <listitem>
+              <para>Set <literal>JAVA_HOME</literal> to <literal>c:\j2sdk1.4.1</literal></para>
+            </listitem>
+            <listitem>
+              <para>Set <literal>CVS_RSH</literal> to <literal>ssh</literal></para>
+            </listitem>
+            <listitem>
+              <para>Set <literal>EDITOR</literal> to <literal>c:\emacs-21.2\bin\emacs.exe</literal></para>
+            </listitem>
+
+          </itemizedlist>
+          <para>After setting these environment variables in Windows, you will need to either log out and
+log back in or restart your computer.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+
+    <section id="env-drjava-source">
+      <title>Download DrJava Source</title>
+      <para>After setting the environment variables, you should be ready to check out the DrJava source
+code from the CVS repository.</para>
+      <itemizedlist>
+        <listitem>
+          <para>If this is the first time you have used your SourceForge account, you might need to SSH
+into the CVS server to initialize it.  You will be logged out immediately, but your account will be ready
+to use.  Do this with the following command, replacing [USERNAME] with your SourceForge username.</para>
+          <programlisting>ssh cvs.drjava.sf.net -l [USERNAME]</programlisting>
+        </listitem>
+
+        <listitem>
+          <para>Create a <filename>drjava</filename> folder in your home directory, and then a
+<filename>built</filename> folder within it:</para>
+          <programlisting>
+mkdir ~/drjava
+mkdir ~/drjava/built
+          </programlisting>
+        </listitem>
+
+        <listitem>
+          <para>Change to the <filename>drjava</filename> directory and check out the code.</para>
+          <programlisting>
+cd ~/drjava
+cvs -d [USERNAME]@cvs.drjava.sf.net:/cvsroot/drjava co src
+          </programlisting>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+
+    <section id="env-jsr14">
+      <title>Download the JSR-14 Compiler</title>
+      <para>The DrJava code uses generics (parametric types), which will not officially be supported in
+Java until version 1.5.  Until then, we use Sun's JSR-14 prototype compiler to compile the code.  You can
+download this compiler from Sun, though it requires registering for a free user account.</para>
+      <itemizedlist>
+        <listitem>
+          <para>Download the most recent JSR-14 compiler from <ulink
+url="http://developer.java.sun.com/developer/earlyAccess/adding_generics/">http://developer.java.sun.com/developer/earlyAccess/adding_generics/</ulink>.</para>
+        </listitem>
+        <listitem>
+          <para>Unzip the package you downloaded and copy the included <filename>javac.jar</filename> to
+<filename>~/drjava/src/edu/rice/cs/lib/jsr14.jar</filename>.</para>
+        </listitem>
+        <listitem>
+          <para>Note: The current version of the JSR-14 compiler <emphasis>will not work</emphasis> with
+any version of Java prior to 1.4.1, so it <emphasis>will not work</emphasis> on Mac OS X.  Please contact
+a DrJava project administrator for help if you are running Mac OS X.  (This problem will go away when Java
+1.4.1 is released for Mac OS X.)</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+
+    <section id="env-classpath">
+      <title>Set Your Classpath</title>
+      <para>Now that you have the JSR-14 compiler, you need to put it on your classpath, along with the
+JDK's <filename>tools.jar</filename> and the <filename>junit.jar</filename>.  It is essential that the
+JSR-14 jar file occurs <emphasis>before</emphasis> <filename>tools.jar</filename> on the classpath.  (Note
+that you cannot have <filename>tools.jar</filename> copied into
+<filename>c:\j2sdk1.4.1\jre\lib\ext\</filename>, which would automatically put it at the front of the
+classpath.)  Add CLASSPATH as an environment variable, just as you did in <link
+linkend="env-variables">Set Up Environment Variables</link>.</para>
+      <itemizedlist>
+        <listitem>
+          <formalpara>
+            <title>Linux / Mac OS X (Bash)</title>
+            <para>Add the following line (all one line) to your <filename>~/.bashrc</filename> file and
+start a new Terminal.</para>
+          </formalpara>
+          <programlisting>
+export
+CLASSPATH=~/drjava/src/edu/rice/cs/lib/jsr14.jar:~/drjava/src/edu/rice/cs/lib/junit.jar:${JAVA_HOME}/lib/tools.jar:$CLASSPATH
+          </programlisting>
+        </listitem>
+        <listitem>
+          <formalpara>
+            <title>Windows</title>
+            <para>Add
+<literal>c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\jsr14.jar;c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\junit.jar;c:\j2sdk1.4.1\lib\tools.jar</literal>
+to the front of the <literal>CLASSPATH</literal> variable (replacing USERNAME with your Cygwin username).   
+Log out and log back in or restart.</para>
+          </formalpara>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+
+    <section id="env-compile">
+      <title>Compile the DrJava Source</title>
+      <para>You should finally be ready to compile the DrJava source code.  First compile the source for
+the <literal>util</literal> package, and then the <literal>drjava</literal> package, as shown
+below.</para>
+      <programlisting>
+cd ~/drjava/src/edu/rice/cs/util
+ant clean compile
+cd ~/drjava/src/edu/rice/cs/drjava
+ant clean compile
+      </programlisting>
+      <para>You can now start DrJava with the following command:</para>
+      <programlisting>ant run</programlisting>
+    </section>
+
+  </chapter>
+
+
+  <!-- Chapter: Using Ant
+  <chapter id="ant">
+    <title>Using Ant</title>
+
+    <para>text...</para>
+  </chapter>
+  -->
+
+</book>
