@@ -503,13 +503,29 @@ public class EvaluationVisitor extends VisitorObject<Object> {
 
       // Fill the arguments
       if (larg != null) {
-        args = new Object[larg.size()];
+        args = new Object[typs.length];
         Iterator<Expression> it = larg.iterator();
         int      i  = 0;
-        while (it.hasNext()) {
+        while (i < typs.length-1) {
           Object p  = it.next().acceptVisitor(this);
           args[i] = performCast(typs[i], p);
           i++;
+        }
+        if(typs.length > 0){
+          if(!m.isVarArgs()){
+            Object p  = it.next().acceptVisitor(this);
+            args[i] = performCast(typs[i], p);
+            i++;
+          } else { // Pass an array with all the remaining arguments
+            assert(typs[typs.length-1].isArray());
+            Class componentType = typs[typs.length-1].getComponentType();
+            Object argArray = Array.newInstance(componentType,new int[]{(larg.size()-typs.length+1)});
+            for(int j = 0; j < larg.size()-typs.length+1; j++){
+              Object p  = it.next().acceptVisitor(this);
+              Array.set(argArray, j, performCast(componentType, p));
+            }
+            args[typs.length-1] = argArray;
+          }
         }
       }
       // Invoke the method
