@@ -28,4 +28,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       throw new RuntimeException(ie.getMessage());
     }
   }
+
+  public void addClassPath(String path) {
+    _djInterpreter.addClassPath(path);
+  }
 }

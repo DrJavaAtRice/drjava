@@ -55,6 +55,10 @@ class InteractionsDocument extends PlainDocument {
     }
   }
 
+  public void addClassPath(String path) {
+    _interpreter.addClassPath(path);
+  }
+
   public void prompt() {
     try {
       super.insertString(getLength(), "\n> ", null);

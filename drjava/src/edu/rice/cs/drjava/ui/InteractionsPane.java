@@ -27,6 +27,11 @@ public class InteractionsView extends JTextArea
     return (InteractionsDocument) getDocument();
   }
 
+  // The class path will be reset on reset().
+  public void addClassPath(String path) {
+    getInteractionsDocument().addClassPath(path);
+  }
+
   public void reset() {
     getInteractionsDocument().reset();
     setCaretPosition(getInteractionsDocument().getLength());

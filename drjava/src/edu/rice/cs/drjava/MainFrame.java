@@ -8,12 +8,15 @@ import javax.swing.JMenu;
 import javax.swing.Action;
 import javax.swing.AbstractAction;
 import javax.swing.JEditorPane;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.BoxLayout;
 import javax.swing.JTextField;
 
 import java.awt.event.ActionEvent;
+
+import java.io.File;
 
 /** Main DrJava window.
  *  It has a menu and then a scroll pane with three components:
@@ -29,7 +32,6 @@ public class MainFrame extends JFrame
   private JMenu _fileMenu;
   private JMenu _editMenu;
   
-  
   // Make some actions for menus
   private Action _quitAction = new AbstractAction("Quit")
   {
@@ -43,7 +45,10 @@ public class MainFrame extends JFrame
   {
     public void actionPerformed(ActionEvent ae)
     {
-      _definitionsView.open();
+      boolean opened = _definitionsView.open();
+      if (opened) {
+        _resetInteractions();
+      }
     }
   };
 
@@ -51,12 +56,22 @@ public class MainFrame extends JFrame
   {
     public void actionPerformed(ActionEvent ae)
     {
-      _definitionsView.newFile();
+      boolean createdNew = _definitionsView.newFile();
+      if (createdNew) {
+        _resetInteractions();
+      }
     }
   };
 
   private Action _saveAction = new AbstractAction("Save")
   {
+    // This doesn't seem to ever re-enable once disabled!
+    /*
+    public boolean isEnabled() {
+      return ! _definitionsView.modifiedSinceSave();
+    }
+    */
+
     public void actionPerformed(ActionEvent ae)
     {
       _definitionsView.save();
@@ -71,12 +86,86 @@ public class MainFrame extends JFrame
     }
   };
 
+  private Action _compileAction = new AbstractAction("Compile")
+  {
+    // This doesn't seem to ever re-enable once disabled!
+    /*
+    public boolean isEnabled() {
+      return _definitionsView.getDocument().getLength() > 0;
+    }
+    */
+
+    public void actionPerformed(ActionEvent ae)
+    {
+      boolean modified = _definitionsView.modifiedSinceSave();
+
+      if (modified) {
+        // file was not saved -- tell user they must save before compiling
+        String msg = "The definitions must be saved before compiling. " + 
+                     "Would you like to save and compile now?";
+        int rc = JOptionPane.showConfirmDialog(MainFrame.this,
+                                               msg,
+                                               "File not saved",
+                                               JOptionPane.YES_NO_OPTION);
+        if (rc == JOptionPane.YES_OPTION) {
+          _definitionsView.save();
+          // Check if they cancelled the save. If they did, exit!
+          if (_definitionsView.modifiedSinceSave()) {
+            return;
+          }
+        }
+        else {
+          return; // user wants to do nothing
+        }
+      }
+
+      String filename = _definitionsView.getCurrentFileName();
+
+      if (filename.length() == 0) {
+        // the file has never been saved. we can only get here
+        // if the file was never changed and never saved.
+        return;
+      }
+
+      // Clear the output window before compilation
+      _outputView.clear();
+      
+      File file = new File(filename);
+      boolean success = DrJava.compiler.compile(new File[] { file });
+
+      if (success) {
+        // Success doesn't print anything, so we should print something
+        // to let them know it worked.
+        System.out.println(file.getName() + " compiled successfully.");
+        _resetInteractions();
+      }
+    }
+  };
+
+  private void _resetInteractions() {
+    // Reset the interactions window, and add the source directory
+    // of the file we just compiled to the class path.
+    _interactionsView.reset();
+
+    String filename = _definitionsView.getCurrentFileName();
+
+    if (filename == "") {
+      return; // no file, so no source path to add to classpath.
+    }
+
+    File file = new File(filename);
+    String sourceDir = file.getAbsoluteFile().getParent();
+    _interactionsView.addClassPath(sourceDir);
+  }
 
   /** Creates the main window, and shows it. */
   public MainFrame()
   {
     _fileNameField = new JTextField();
     _fileNameField.setEditable(false);
+
+    _definitionsView = new DefinitionsView(this);
+    _outputView = new OutputView();
 
     // Make the menu bar, and stub file and edit menus
     _menuBar = new JMenuBar();
@@ -88,19 +177,18 @@ public class MainFrame extends JFrame
     _fileMenu.add(_openAction);
     _fileMenu.add(_saveAction);
     _fileMenu.add(_saveAsAction);
+    _fileMenu.add(_compileAction);
     _fileMenu.add(_quitAction);
 
     // Add the menus to the menu bar
     _menuBar.add(_fileMenu);
     _menuBar.add(_editMenu);
+    
+    // Menu bars can actually hold anything!
     _menuBar.add(_fileNameField);
 
     setJMenuBar(_menuBar);
-
-
-    _definitionsView = new DefinitionsView(this);
-    _outputView = new OutputView();
-    
+   
     // Make the output view the active one
     _outputView.makeActive();
     

@@ -1,3 +1,5 @@
+/* $Id$ */
+
 package edu.rice.cs.drjava;
 
 import java.io.OutputStream;

@@ -20,13 +20,13 @@ public class DefinitionsDocument extends DefaultStyledDocument
 
     int locationChange = offset - _currentLocation;
 
-    System.err.println("rv at start=" + _reduced.simpleString());
+    //System.err.println("rv at start=" + _reduced.simpleString());
 
     _reduced.move(locationChange);
 
-    System.err.println("location changed: " + locationChange);
-    System.err.println("old location: " + _currentLocation + 
-                       " rv=" + _reduced.simpleString());
+    //System.err.println("location changed: " + locationChange);
+    //System.err.println("old location: " + _currentLocation + 
+                       //" rv=" + _reduced.simpleString());
 
     for (int i = 0; i < str.length(); i++)
     {
@@ -35,8 +35,8 @@ public class DefinitionsDocument extends DefaultStyledDocument
     }
 
     _currentLocation = offset + str.length();
-    System.err.println("new location: " + _currentLocation + 
-                       " rv=" + _reduced.simpleString());
+    //System.err.println("new location: " + _currentLocation + 
+                       //" rv=" + _reduced.simpleString());
     _modifiedSinceSave = true;
   }
 
@@ -57,11 +57,11 @@ public class DefinitionsDocument extends DefaultStyledDocument
         _reduced.insertClosedBracket();
         break;
       case '{':
-        System.err.println("calling insert {");
+        //System.err.println("calling insert {");
         _reduced.insertOpenSquiggly();
         break;
       case '}':
-        System.err.println("calling insert }");
+        //System.err.println("calling insert }");
         _reduced.insertClosedSquiggly();
         break;
       case '/':
@@ -88,7 +88,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
     super.remove(offset, len);
 
     int locationChange = offset - _currentLocation;
-    System.err.println("doc.remove: locChange=" + locationChange);
+    //System.err.println("doc.remove: locChange=" + locationChange);
     _reduced.move(locationChange);
     _reduced.delete(len);
 

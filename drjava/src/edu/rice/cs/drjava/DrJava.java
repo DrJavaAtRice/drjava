@@ -12,6 +12,9 @@ public class DrJava {
   private static OutputStream _consoleOut;
   private static OutputStream _consoleErr;
 
+  /** Compiler to use everywhere. */
+  public static final CompilerInterface compiler = new GJv6Compiler();
+
   public static void main(String[] args) {
     // Save pointers to stdout and stderr
     _consoleOut = System.out;
@@ -19,4 +22,7 @@ public class DrJava {
 
     MainFrame mf = new MainFrame();
   }
+
+  public static OutputStream consoleErr() { return _consoleErr; }
+  public static OutputStream consoleOut() { return _consoleOut; }
 }

@@ -34,6 +34,11 @@ public class DefinitionsView extends JEditorPane
     _resetDocument("");
   }
 
+  /** Gets current file name, or "" if it was never saved. */
+  public String getCurrentFileName() {
+    return _currentFileName;
+  }
+
   /** Overriding this method ensures that all new documents created in this
    *  editor pane use our editor kit (and thus our model). */
   protected EditorKit createDefaultEditorKit()
@@ -43,16 +48,21 @@ public class DefinitionsView extends JEditorPane
 
   /** Save the current document over the old version of the document.
    *  If the current document is unsaved, call save as. */
-  public void save()
+  public boolean save()
   {
     if (_currentFileName == "")
-      saveAs();
+      return saveAs();
     else
-      _saveToFile(_currentFileName);
+      return _saveToFile(_currentFileName);
+  }
+
+  public boolean modifiedSinceSave()
+  {
+    return _doc().modifiedSinceSave();
   }
 
   /** Prompt the user to select a place to save the file, then save it. */
-  public void saveAs()
+  public boolean saveAs()
   {
     JFileChooser fc = new JFileChooser();
     int rc = fc.showSaveDialog(this);
@@ -61,11 +71,12 @@ public class DefinitionsView extends JEditorPane
     {
       case JFileChooser.CANCEL_OPTION:
       case JFileChooser.ERROR_OPTION:
-        break;
+        return false;
       case JFileChooser.APPROVE_OPTION:
         File chosen = fc.getSelectedFile();
-        _saveToFile(chosen.getAbsolutePath());
-        break;
+        return _saveToFile(chosen.getAbsolutePath());
+      default: // impossible since rc must be one of these
+        throw new RuntimeException("filechooser returned bad rc " + rc);
     }
   }
 
@@ -91,7 +102,7 @@ public class DefinitionsView extends JEditorPane
   /** Save the current document to the given path.
    *  Inform the user if there was a problem.
    */
-  private void _saveToFile(String path)
+  private boolean _saveToFile(String path)
   {
     try
     {
@@ -100,6 +111,7 @@ public class DefinitionsView extends JEditorPane
       writer.close(); // This flushes the buffer!
       // Update file name if the read succeeds.
       _resetDocument(path);
+      return true;
     }
     catch (IOException ioe)
     {
@@ -111,27 +123,30 @@ public class DefinitionsView extends JEditorPane
                                     "Error saving file",
                                     msg,
                                     JOptionPane.ERROR_MESSAGE);
+      return false;
     }
   }
 
   /** Create a new, empty file in this view. */
-  public void newFile()
+  public boolean newFile()
   {
     boolean isOK = checkAbandoningChanges();
-    if (!isOK) return;
+    if (!isOK)
+      return false;
 
     setDocument(getEditorKit().createDefaultDocument());
     _resetDocument("");
+    return true;
   }
 
   /** Prompt the user to select a place to open a file from, then load it.
    *  Ask the user if they'd like to save previous changes (if the current
    *  document has been modified) before opening.
    */
-  public void open()
+  public boolean open()
   {
     boolean isOK = checkAbandoningChanges();
-    if (!isOK) return;
+    if (!isOK) return false;
 
     JFileChooser fc = new JFileChooser();
     int rc = fc.showOpenDialog(this);
@@ -140,7 +155,7 @@ public class DefinitionsView extends JEditorPane
     {
       case JFileChooser.CANCEL_OPTION:
       case JFileChooser.ERROR_OPTION:
-        break;
+        return false;
       case JFileChooser.APPROVE_OPTION:
         File chosen = fc.getSelectedFile();
 
@@ -150,6 +165,7 @@ public class DefinitionsView extends JEditorPane
           read(reader, null);
           // Update file name if the read succeeds.
           _resetDocument(chosen.getAbsolutePath());
+          return true;
         }
         catch (IOException ioe)
         {
@@ -161,9 +177,10 @@ public class DefinitionsView extends JEditorPane
                                         "Error opening file",
                                         msg,
                                         JOptionPane.ERROR_MESSAGE);
+          return false;
         }
-
-        break;
+      default: // impossible since rc must be one of these
+        throw new RuntimeException("filechooser returned bad rc " + rc);
     }
   }
 
