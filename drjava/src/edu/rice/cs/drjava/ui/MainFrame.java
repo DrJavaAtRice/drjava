@@ -193,7 +193,7 @@ public class MainFrame extends JFrame {
    * Asks user for file name and and reads that file into
    * the definitions pane.
    */
-  private Action _openAction = new AbstractAction("Open") {
+  private Action _openAction = new AbstractAction("Open...") {
     public void actionPerformed(ActionEvent ae) {
       _open();
     }
@@ -225,6 +225,16 @@ public class MainFrame extends JFrame {
     }
   };
 
+  /**
+   * Asks the user for a file name and saves the document
+   * currently in the definitions pane to that file.
+   */
+  private Action _saveAsAction = new AbstractAction("Save As...") {
+    public void actionPerformed(ActionEvent ae) {
+      _saveAs();
+    }
+  };
+
   /** Reverts the current document. */
   private Action _revertAction = new AbstractAction("Revert") {
     public void actionPerformed(ActionEvent ae) {
@@ -244,43 +254,33 @@ public class MainFrame extends JFrame {
     }
   };
 
-  /** Prints the current document. */
-  private Action _printAction = new AbstractAction("Print") {
-    public void actionPerformed(ActionEvent ae) {
-      _print();
-    }
-  };
-
-  /** Opens the print preview window */
-  private Action _printPreviewAction = new AbstractAction("Print Preview") {
-    public void actionPerformed(ActionEvent ae) {
-      _printPreview();
-    }
-  };
-
-  /** Opens the page setup window. */
-  private Action _pageSetupAction = new AbstractAction("Page Setup") {
-    public void actionPerformed(ActionEvent ae) {
-      _pageSetup();
-    }
-  };
-
-  /**
-   * Asks the user for a file name and saves the document
-   * currently in the definitions pane to that file.
-   */
-  private Action _saveAsAction = new AbstractAction("Save As") {
-    public void actionPerformed(ActionEvent ae) {
-      _saveAs();
-    }
-  };
-
   /**
    * Saves all documents, prompting for file names as necessary
    */
   private Action _saveAllAction = new AbstractAction("Save All") {
     public void actionPerformed(ActionEvent ae) {
       _saveAll();
+    }
+  };
+
+  /** Prints the current document. */
+  private Action _printAction = new AbstractAction("Print...") {
+    public void actionPerformed(ActionEvent ae) {
+      _print();
+    }
+  };
+
+  /** Opens the print preview window */
+  private Action _printPreviewAction = new AbstractAction("Print Preview...") {
+    public void actionPerformed(ActionEvent ae) {
+      _printPreview();
+    }
+  };
+
+  /** Opens the page setup window. */
+  private Action _pageSetupAction = new AbstractAction("Page Setup...") {
+    public void actionPerformed(ActionEvent ae) {
+      _pageSetup();
     }
   };
 
@@ -349,7 +349,7 @@ public class MainFrame extends JFrame {
   };
 
   /** Opens the find/replace dialog. */
-  private Action _findReplaceAction = new AbstractAction("Find/Replace") {
+  private Action _findReplaceAction = new AbstractAction("Find/Replace...") {
     public void actionPerformed(ActionEvent ae) {
       if(!_findReplace.isVisible()) {
         _findReplace.show();
@@ -359,7 +359,7 @@ public class MainFrame extends JFrame {
   };
 
   /** Asks the user for a line number and goes there. */
-  private Action _gotoLineAction = new AbstractAction("Goto Line") {
+  private Action _gotoLineAction = new AbstractAction("Goto Line...") {
     public void actionPerformed(ActionEvent ae) {
       _gotoLine();
     }
@@ -1189,12 +1189,15 @@ public class MainFrame extends JFrame {
     boolean showDebugger = (_debugPanel != null);
     //boolean showDebugger = false;
 
+    // Get proper cross-platform mask.
+    int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+
     _menuBar = new JMenuBar();
-    _fileMenu = _setUpFileMenu();
-    _editMenu = _setUpEditMenu();
-    _toolsMenu = _setUpToolsMenu();
-    if (showDebugger) _debugMenu = _setUpDebugMenu();
-    _helpMenu = _setUpHelpMenu();
+    _fileMenu = _setUpFileMenu(mask);
+    _editMenu = _setUpEditMenu(mask);
+    _toolsMenu = _setUpToolsMenu(mask);
+    if (showDebugger) _debugMenu = _setUpDebugMenu(mask);
+    _helpMenu = _setUpHelpMenu(mask);
 
     _menuBar.add(_fileMenu);
     _menuBar.add(_editMenu);
@@ -1209,28 +1212,27 @@ public class MainFrame extends JFrame {
    * Creates and returns a file menu.  Side effects: sets values for
    * _saveMenuItem and _compileMenuItem.
    */
-  private JMenu _setUpFileMenu() {
+  private JMenu _setUpFileMenu(int mask) {
     JMenuItem tmpItem;
     JMenu fileMenu = new JMenu("File");
 
     // New, open
     tmpItem = fileMenu.add(_newAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
-                                                  ActionEvent.CTRL_MASK));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, mask));
     tmpItem = fileMenu.add(_openAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
-                                                  ActionEvent.CTRL_MASK));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, mask));
     // Save, Save as, Save all
     fileMenu.addSeparator();
 
     tmpItem = fileMenu.add(_saveAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
-                                                  ActionEvent.CTRL_MASK));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, mask));
     // keep track of the save menu item
     _saveMenuItem = tmpItem;
     _saveAction.setEnabled(false);
 
     tmpItem = fileMenu.add(_saveAsAction);
+    tmpItem.setAccelerator
+	(KeyStroke.getKeyStroke(KeyEvent.VK_S, mask | ActionEvent.SHIFT_MASK));
 
     tmpItem = fileMenu.add(_saveAllAction);
 
@@ -1242,79 +1244,68 @@ public class MainFrame extends JFrame {
     fileMenu.addSeparator();
 
     tmpItem = fileMenu.add(_closeAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
-                                                  ActionEvent.CTRL_MASK));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, mask));
 
     tmpItem = fileMenu.add(_closeAllAction);
 
     // Page setup, print preview, print
     fileMenu.addSeparator();
 
-    fileMenu.add(_pageSetupAction);
-    fileMenu.add(_printPreviewAction);
+    tmpItem = fileMenu.add(_pageSetupAction);
+    tmpItem = fileMenu.add(_printPreviewAction);
+    tmpItem.setAccelerator
+	(KeyStroke.getKeyStroke(KeyEvent.VK_P, mask | ActionEvent.SHIFT_MASK));
     tmpItem = fileMenu.add(_printAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
-                                                  ActionEvent.CTRL_MASK));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, mask));
 
     // Quit
     fileMenu.addSeparator();
 
     tmpItem = fileMenu.add(_quitAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,
-                                                  ActionEvent.CTRL_MASK));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, mask));
     return fileMenu;
   }
 
   /**
    * Creates and returns a edit menu.
    */
-  private JMenu _setUpEditMenu() {
+  private JMenu _setUpEditMenu(int mask) {
     JMenuItem tmpItem;
     JMenu editMenu = new JMenu("Edit");
 
     // Undo, redo
     tmpItem = editMenu.add(_undoAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
-                                                  ActionEvent.CTRL_MASK));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, mask));
     tmpItem = editMenu.add(_redoAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
-                                                  ActionEvent.CTRL_MASK));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, mask));
 
     // Cut, copy, paste
     editMenu.addSeparator();
 
     tmpItem = editMenu.add(_cutAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
-                                                  ActionEvent.CTRL_MASK));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, mask));
     tmpItem = editMenu.add(_copyAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C,
-                                                  ActionEvent.CTRL_MASK));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, mask));
     tmpItem = editMenu.add(_pasteAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,
-                                                  ActionEvent.CTRL_MASK));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, mask));
 
     // Select All
     tmpItem = editMenu.add(_selectAllAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,
-                                                  ActionEvent.CTRL_MASK));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, mask));
 
     // Find/replace, goto
     editMenu.addSeparator();
     tmpItem = editMenu.add(_findReplaceAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,
-                                                  ActionEvent.CTRL_MASK));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, mask));
     tmpItem = editMenu.add(_gotoLineAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G,
-                                                  ActionEvent.CTRL_MASK));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, mask));
 
     // Next, prev doc
     editMenu.addSeparator();
     tmpItem = editMenu.add(_switchToPrevAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA,
-                                                  ActionEvent.CTRL_MASK));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, mask));
     tmpItem = editMenu.add(_switchToNextAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD,
-                                                  ActionEvent.CTRL_MASK));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, mask));
 
     // Add the menus to the menu bar
     return editMenu;
@@ -1323,13 +1314,13 @@ public class MainFrame extends JFrame {
   /**
    * Creates and returns a tools menu.
    */
-  private JMenu _setUpToolsMenu() {
+  private JMenu _setUpToolsMenu(int mask) {
     JMenuItem tmpItem;
     JMenu toolsMenu = new JMenu("Tools");
 
     // Compile
     tmpItem = toolsMenu.add(_compileAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, mask));
 
     // keep track of the compile menu item
     _compileMenuItem = tmpItem;
@@ -1342,7 +1333,7 @@ public class MainFrame extends JFrame {
     _abortInteractionAction.setEnabled(false);
     _abortInteractionMenuItem = toolsMenu.add(_abortInteractionAction);
     _abortInteractionMenuItem
-      .setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
+      .setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
     toolsMenu.add(_resetInteractionsAction);
     toolsMenu.add(_clearOutputAction);
 
@@ -1353,7 +1344,7 @@ public class MainFrame extends JFrame {
   /**
    * Creates and returns a debug menu.
    */
-  private JMenu _setUpDebugMenu() {
+  private JMenu _setUpDebugMenu(int mask) {
     JMenuItem tempItem;
     JMenu debugMenu = new JMenu("Debug");
 
@@ -1402,7 +1393,7 @@ public class MainFrame extends JFrame {
   /**
    * Creates and returns a help menu.
    */
-  private JMenu _setUpHelpMenu() {
+  private JMenu _setUpHelpMenu(int mask) {
     JMenu helpMenu = new JMenu("Help");
     helpMenu.add(_aboutAction);
     return helpMenu;
