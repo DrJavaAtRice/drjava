@@ -44,13 +44,13 @@
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
-
+import java.io.Serializable;
 /**
  * A pair.
  *
  * @version $Id$
  */
-public class Pair<T,U> {
+public class Pair<T,U> implements Serializable{
   T _first;
   U _second;
 
