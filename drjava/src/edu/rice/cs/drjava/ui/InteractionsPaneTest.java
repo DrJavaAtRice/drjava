@@ -51,6 +51,8 @@ import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 import edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractionsModel;
 import edu.rice.cs.util.text.DocumentAdapterException;
 
+import java.util.List;
+
 import javax.swing.text.*;
 
 import junit.framework.*;
@@ -76,7 +78,11 @@ public final class InteractionsPaneTest extends TestCase {
     _adapter = new InteractionsDocumentAdapter();
     _model = new TestInteractionsModel(_adapter);
     _doc = _model.getDocument();
-    _pane = new InteractionsPane(_adapter);
+    _pane = new InteractionsPane(_adapter) {
+      public int getPromptPos() {
+       return _model.getDocument().getPromptPos();
+      }
+    };
     // Make tests silent
     _pane.setBeep(new TestBeep());
 
@@ -300,11 +306,5 @@ public final class InteractionsPaneTest extends TestCase {
       assertEquals("Should have returned the correct text.", "\n\n", buf.toString());
     }
   }
-  
-//  public void testInteractionsPaneHasColoringView() {
-//    EditorKit ek = _pane.createDefaultEditorKit();
-//    assertEquals("Should be an InteractionsEditorKit", InteractionsEditorKit.class, ek.getClass());
-//    assertEquals("View Factory should return a Coloring View", ColoringView.class, ek.getViewFactory().create(null).getClass());
-//    
-//  }
+    
 }

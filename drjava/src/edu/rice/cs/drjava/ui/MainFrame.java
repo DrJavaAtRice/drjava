@@ -430,8 +430,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private Action _openAction = new AbstractAction("Open...") {
     public void actionPerformed(ActionEvent ae) {
-      throw new RuntimeException();
-      //_open();
+      _open();
     }
   };
   

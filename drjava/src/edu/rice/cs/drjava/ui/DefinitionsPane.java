@@ -132,26 +132,53 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    * The name of the keymap added to the super class (saved so it can be removed)
    */
   public static String INDENT_KEYMAP_NAME = "INDENT_KEYMAP";
+//  
+//  /**
+//   * Looks for changes in the caret position to see if a paren/brace/bracket
+//   * highlight is needed.
+//   */
+//  private CaretListener _matchListener = new CaretListener() {
+//    /**
+//     * Checks caret position to see if it needs to set or remove a highlight
+//     * from the document.
+//     * When the cursor is immediately right of ')', '}', or ']', it highlights
+//     * up to the matching open paren/brace/bracket.
+//     * @param e the event fired by the caret position change
+//     */
+//    public void caretUpdate(CaretEvent e) {
+//      //_doc().setCurrentLocation(getCaretPosition());
+//      getDJDocument().setCurrentLocation(getCaretPosition());
+//      _removePreviousHighlight();
+//      _updateMatchHighlight();
+//    }
+//  };
+//  
   
   /**
-   * Looks for changes in the caret position to see if a paren/brace/bracket
-   * highlight is needed.
+   * Updates the highlight if there is any.
    */
-  private CaretListener _matchListener = new CaretListener() {
-    /**
-     * Checks caret position to see if it needs to set or remove a highlight
-     * from the document.
-     * When the cursor is immediately right of ')', '}', or ']', it highlights
-     * up to the matching open paren/brace/bracket.
-     * @param e the event fired by the caret position change
-     */
-    public void caretUpdate(CaretEvent e) {
-      //_doc().setCurrentLocation(getCaretPosition());
-      getDJDocument().setCurrentLocation(getCaretPosition());
-      _removePreviousHighlight();
-      _updateMatchHighlight();
+  protected void _updateMatchHighlight() {
+    int to = getCaretPosition();
+    int from = getDJDocument().balanceBackward(); //_doc()._reduced.balanceBackward();
+    if (from > -1) {
+      // Found a matching open brace to this close brace
+      from = to - from;
+      _addHighlight(from, to);
+      //      Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
     }
-  };
+    // if this wasn't a close brace, check for an open brace
+    else {
+      // (getCaretPosition will be the start of the highlight)
+      from = to;
+
+      to = getDJDocument().balanceForward();
+      if (to > -1) {
+        to = to + from;
+        _addHighlight(from - 1, to);
+//        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
+      }
+    }
+  }
   
   /**
    * The OptionListener for DEFINITIONS_MATCH_COLOR

@@ -47,13 +47,18 @@ package edu.rice.cs.drjava.ui;
 
 import javax.swing.*;
 import javax.swing.text.*;
+import javax.swing.event.*;
 import java.awt.Toolkit;
 import java.awt.event.ContainerEvent;
 import java.awt.event.KeyEvent;
 
+import java.util.List;
+import java.util.LinkedList;
+
 import edu.rice.cs.util.swing.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
+import edu.rice.cs.drjava.model.DJDocument;
 import edu.rice.cs.drjava.model.repl.*;
 
 /**
@@ -61,27 +66,17 @@ import edu.rice.cs.drjava.model.repl.*;
  *
  * @version $Id$
  */
-public class InteractionsPane extends JTextPane implements OptionConstants {
+public abstract class InteractionsPane extends AbstractDJPane implements OptionConstants {
 
   /** The custom keymap for the interactions pane. */
   protected Keymap _keymap;
-  // InteractionsPane must be constructed completely, so
-  // this can't be placed in the constructor.
-  protected HighlightManager _highlightManager = null;
-
+  
   private static StyledEditorKit EDITOR_KIT;
   
   static {
     EDITOR_KIT = new InteractionsEditorKit();    
   }
   
-  /**
-   *  Highlight painter for syntax errors, currently borrowing breakpoint color.
-   */
-  public static DefaultHighlighter.DefaultHighlightPainter ERROR_PAINTER =
-    new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
-
-
   /** A runnable object that causes the editor to beep. */
   protected Runnable _beep = new Runnable() {
     public void run() {
@@ -96,6 +91,10 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
     return _beep;
   }
 
+  private InteractionsDocumentAdapter _doc;
+  
+  private List<Integer> _listOfPrompt = new LinkedList<Integer> ();
+    
   /**
    * Creates an InteractionsPane with the given document.
    * Uses default keymap name ("INTERACTIONS_KEYMAP")
@@ -112,12 +111,13 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
    */
   public InteractionsPane(String keymapName, InteractionsDocumentAdapter doc) {
     super(doc);
-
+    _doc = doc;
     //add actions for enter key, etc.
     _keymap = addKeymap(keymapName, getKeymap());
 
     setCaretPosition(doc.getLength());
-
+    this.addCaretListener(_matchListener);
+    _highlightManager = new HighlightManager(this);
     // Setup color listeners.
     new ForegroundColorListener(this);
     new BackgroundColorListener(this);
@@ -154,21 +154,11 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
   }
 
   /**
-   * Initializes the highlight manager.
-   */
-  private void _initializeHighlightManager() {
-    _highlightManager = new HighlightManager(this);
-  }
-
-  /**
    * Highlights the given text with error highlight.
    * @param offset the offset in the text
    * @param length the length of the error to highlight
    */
   public void highlightError(int offset, int length) {
-    if(_highlightManager == null) {
-      _initializeHighlightManager();
-    }
     _highlightManager.addHighlight(offset, offset+length, ERROR_PAINTER);
   }
   
@@ -182,6 +172,85 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
     return EDITOR_KIT;
   }
 
+  /**
+   * Returns the DJDocument held by the pane
+   */
+  public DJDocument getDJDocument() {
+    return _doc;
+  }
+  
+  /**
+   * Updates the highlight if there is any.
+   */
+  protected void _updateMatchHighlight() {
+    addToPromptList(getPromptPos());
+    int to = getCaretPosition();
+    int from = getDJDocument().balanceBackward(); //_doc()._reduced.balanceBackward();
+    if (from > -1) {
+      // Found a matching open brace to this close brace
+      from = to - from;
+      if(_notCrossesPrompt(to,from))
+        _addHighlight(from, to);
+      //      Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
+    }
+    // if this wasn't a close brace, check for an open brace
+    else {
+      // (getCaretPosition will be the start of the highlight)
+      from = to;
+
+      to = getDJDocument().balanceForward();
+      if (to > -1) {
+        to = to + from;
+        if(_notCrossesPrompt(to,from))
+          _addHighlight(from - 1, to);
+//        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
+      }
+    }
+  }
+  
+  /**
+   * Returns the list of prompts. Used for tests
+   */
+  List<Integer> getPromptList() {
+    return _listOfPrompt;
+  }
+  
+  /**
+   * Resets the list of prompts. Called when the interactions pane is reset
+   */
+  public void resetPrompts() {
+    _listOfPrompt.clear();
+  }
+  
+  
+  /**
+   * Adds the position to the list of prompt positions. package private for tests
+   */
+  void addToPromptList(int pos) {
+    if (!_listOfPrompt.contains(pos)) _listOfPrompt.add(pos);
+  }
+  
+  /**
+   * returns true if the two locations do not have a prompt between them
+   */
+  private boolean _notCrossesPrompt(int to, int from) {
+//    DrJava.consoleErr().println("To: " + to + " , From: " + from);
+    boolean toReturn = true;
+    for(Integer prompt : _listOfPrompt) {
+      toReturn &= ((to >= prompt && from >= prompt) || (to <= prompt && from <= prompt));
+      if(!((to >= prompt && from >= prompt) || (to <= prompt && from <= prompt)))
+        System.out.println("Prompt pos =" + prompt + "; To =" + to + "; From =" + from);
+      
+    }
+    return toReturn;
+    
+  }
+  
+  
+  /**
+   * Gets the current prompt position
+   */
+  public abstract int getPromptPos();
   
 //  public void requestFocus() {
 //    super.requestFocus();

@@ -84,6 +84,28 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   protected HighlightManager _highlightManager;
   
   /**
+   * Looks for changes in the caret position to see if a paren/brace/bracket
+   * highlight is needed.
+   */
+  protected CaretListener _matchListener = new CaretListener() {
+    /**
+     * Checks caret position to see if it needs to set or remove a highlight
+     * from the document.
+     * When the cursor is immediately right of ')', '}', or ']', it highlights
+     * up to the matching open paren/brace/bracket.
+     * @param e the event fired by the caret position change
+     */
+    public void caretUpdate(CaretEvent e) {
+      //_doc().setCurrentLocation(getCaretPosition());
+      getDJDocument().setCurrentLocation(getCaretPosition());
+      _removePreviousHighlight();
+      _updateMatchHighlight();
+//      DrJava.consoleErr().println(getPromptPos());
+    }
+  };
+  
+  
+  /**
    * Our current paren/brace/bracket matching highlight.
    */
   protected HighlightManager.HighlightInfo _matchHighlight = null;
@@ -97,33 +119,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   }
   
   //--------- METHODS -----------
-  
-  /**
-   * Updates the highlight if there is any.
-   */
-  protected void _updateMatchHighlight() {
-    int to = getCaretPosition();
-    int from = getDJDocument().balanceBackward(); //_doc()._reduced.balanceBackward();
-    if (from > -1) {
-      // Found a matching open brace to this close brace
-      from = to - from;
-      _addHighlight(from, to);
-      //      Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
-    }
-    // if this wasn't a close brace, check for an open brace
-    else {
-      // (getCaretPosition will be the start of the highlight)
-      from = to;
-
-      to = getDJDocument().balanceForward();
-      if (to > -1) {
-        to = to + from;
-        _addHighlight(from - 1, to);
-//        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
-      }
-    }
-  }
-  
+    
   /**
    * Adds a highlight to the document.  Called by _updateMatchHighlight().
    * @param from start of highlight
@@ -132,6 +128,8 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   protected void _addHighlight(int from, int to) {
     _matchHighlight = _highlightManager.addHighlight(from, to, MATCH_PAINTER);
   }
+  
+  protected abstract void _updateMatchHighlight();
 
   /**
    * Removes the previous highlight so document is cleared when caret position changes.

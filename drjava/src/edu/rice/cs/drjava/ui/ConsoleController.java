@@ -70,8 +70,12 @@ public class ConsoleController extends AbstractConsoleController {
    */
   private boolean _waiting;
 
-  public ConsoleController(ConsoleDocument doc, InteractionsDocumentAdapter adapter) {
-    super(adapter, new InteractionsPane("CONSOLE_KEYMAP", adapter));
+  public ConsoleController(final ConsoleDocument doc, InteractionsDocumentAdapter adapter) {
+    super(adapter, new InteractionsPane("CONSOLE_KEYMAP", adapter) {
+      public int getPromptPos() {
+        return doc.getPromptPos();
+      }
+    });
     _doc = doc;
     _waiting = false;
     _pane.setEditable(false);

@@ -187,14 +187,36 @@ public class InteractionsController extends AbstractConsoleController {
       return _inputText + "\n";
     }
   };
+  
+  private InteractionsListener _viewListener = new InteractionsListener() {
+    public void interactionStarted() {}
+    public void interactionEnded() {}    
+    public void interactionErrorOccurred(int offset, int length) {}    
+    
+    public void interpreterResetting() {
+      _adapter.clearColoring();
+      _pane.resetPrompts();
+    }
+    
+    public void interpreterReady() {}  
+    public void interpreterResetFailed(Throwable t) {}  
+    public void interpreterExited(int status) {}  
+    public void interpreterChanged(boolean inProgress) {}
+    public void interactionIncomplete() {}
+  };
 
   /**
    * Glue together the given model and a new view.
    * @param model An InteractionsModel
    * @param adapter InteractionsDocumentAdapter being used by the model's doc
    */
-  public InteractionsController(InteractionsModel model, InteractionsDocumentAdapter adapter) {
-    this(model, adapter, new InteractionsPane(adapter));
+  public InteractionsController(final InteractionsModel model, InteractionsDocumentAdapter adapter) {
+    this(model, adapter, 
+         new InteractionsPane(adapter) {
+      public int getPromptPos() {
+        return model.getDocument().getPromptPos();
+      }
+    });
   }
 
   /**
@@ -213,9 +235,13 @@ public class InteractionsController extends AbstractConsoleController {
     _debugStyle = new SimpleAttributeSet();
 
     _model.setInputListener(_inputListener);
+    
+    _model.addListener(_viewListener);
 
     _init();
   }
+  
+  
 
   /**
    * Gets the input listener for console input requests.

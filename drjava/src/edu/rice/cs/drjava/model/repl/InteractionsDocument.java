@@ -161,7 +161,7 @@ public class InteractionsDocument extends ConsoleDocument {
   public void reset() {
     try {
       forceRemoveText(0, _document.getDocLength());
-      forceInsertText(0, _banner, DEFAULT_STYLE);
+      forceInsertText(0, _banner, OBJECT_RETURN_STYLE);
       insertPrompt();
       _history.moveEnd();
       setInProgress(false);

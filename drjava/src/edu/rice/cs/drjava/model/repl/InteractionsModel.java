@@ -748,9 +748,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       catch (IOException ioe) {
         // Oh well, leave it at the previous port
       }
-
-      if (_adapter instanceof InteractionsDocumentAdapter)
-        ((InteractionsDocumentAdapter)_adapter).clearColoring();
       _notifyInterpreterResetting();
     }
   }

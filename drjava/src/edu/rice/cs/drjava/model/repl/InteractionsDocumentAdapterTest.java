@@ -47,23 +47,33 @@ package edu.rice.cs.drjava.model.repl;
 
 import junit.framework.*;
 
+import edu.rice.cs.drjava.ui.*;
+import edu.rice.cs.drjava.model.GlobalModel;
+import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
+
 import edu.rice.cs.util.text.DocumentAdapterException;
 
 /**
  * Tests the functionality of the InteractionsDocumentAdapter.
  */
 public final class InteractionsDocumentAdapterTest extends TestCase {
-  protected InteractionsDocument _doc;
+  
+  
   protected InteractionsDocumentAdapter _adapter;
   protected InteractionsModel _model;
+  protected InteractionsDocument _doc;
+  protected InteractionsPane _pane;
+  protected MainFrame mf;
   /**
    * Initialize fields for each test.
    */
-  protected void setUp() {
-    
-    _adapter = new InteractionsDocumentAdapter();
-    _model = new TestInteractionsModel(_adapter);
-    _doc = _model.getDocument();
+  protected void setUp() {    
+    mf = new MainFrame();
+    GlobalModel gm = mf.getModel();
+    _model = gm.getInteractionsModel();
+    _adapter = gm.getSwingInteractionsDocument();
+    _doc = gm.getInteractionsDocument();
+
   }
   
   /**
@@ -81,7 +91,7 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
                  3, _adapter.getStylesList().size());
     
     assertEquals("The first element of StylesList before reset should be", 
-                 "((0, 19), default)", _adapter.getStylesList().get(0).toString());
+                 "((0, 19), object.return.style)", _adapter.getStylesList().get(0).toString());
     assertEquals("The second element of StylesList before reset should be", 
                  "((19, 21), default)", _adapter.getStylesList().get(1).toString());
     assertEquals("The third element of StylesList before reset should be", 
@@ -90,66 +100,12 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
     // Reset should clear
     _model.setWaitingForFirstInterpreter(false);
     //this adds the "Resetting Interactions" 
+    _model.resetInterpreter();
     _model.interpreterResetting();
     
-    assertEquals("StylesList before reset should contain 4 pairs",
-                 4, _adapter.getStylesList().size());
-    
-    assertEquals("The fourth element of the StylesLIst before reset should be",
-                 "((19, 45), error)", _adapter.getStylesList().get(3).toString());
-    
-    _doc.reset();
-    //_doc.insertText(_doc.getDocLength(), "\"yes\"", InteractionsDocument.STRING_RETURN_STYLE);
-    assertEquals("StylesList after rest should only contain 2 pairs",
-                 2, _adapter.getStylesList().size());
-    assertEquals("The first element of StylesList after reset should be", 
-                 "((0, 19), default)", _adapter.getStylesList().get(0).toString());
-    assertEquals("The second element of StylesList after reset should be", 
-                 "((19, 21), default)", _adapter.getStylesList().get(1).toString());
-  }
-  
-  
-  
-  /**
-   * A generic InteractionsModel for testing purposes.
-   */
-  public static class TestInteractionsModel extends InteractionsModel {
-    String toEval = null;
-    String addedClass = null;
-
-    /**
-     * Constructs a new InteractionsModel.
-     */
-    public TestInteractionsModel(InteractionsDocumentAdapter adapter) {
-      // Adapter, history size, write delay
-      super(adapter, 1000, 25);
-    }
-
-    protected void _interpret(String toEval) {
-      this.toEval = toEval;
-    }
-    public String getVariableToString(String var) {
-      fail("cannot getVariableToString in a test");
-      return null;
-    }
-    public String getVariableClassName(String var) {
-      fail("cannot getVariableClassName in a test");
-      return null;
-    }
-    public void addToClassPath(String path) {
-      fail("cannot add to classpath in a test");
-    }
-    protected void _resetInterpreter() {
-      fail("cannot reset interpreter in a test");
-    }
-    protected void _notifyInteractionStarted() {}
-    protected void _notifyInteractionEnded() {}
-    protected void _notifySyntaxErrorOccurred(int offset, int length) {}
-    protected void _notifyInterpreterExited(int status) {}
-    protected void _notifyInterpreterResetting() {}
-    protected void _notifyInterpreterResetFailed(Throwable t) {}
-    protected void _notifyInterpreterReady() {}
-    protected void _interpreterResetFailed(Throwable t) {}
-    protected void _notifyInteractionIncomplete() {}
+    assertEquals("StylesList after reset should contain 1 pair",1, _adapter.getStylesList().size());
+    //Resetting Interactions piece
+    assertEquals("The only element of the StylesList after reset should be",
+                 "((48, 74), error)", _adapter.getStylesList().get(0).toString());
   }
 }
