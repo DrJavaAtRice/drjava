@@ -155,7 +155,12 @@ public class JavacGJCompiler implements CompilerInterface {
       };
     }
 
-    return compilerLog.getErrors();
+    CompilerError[] errors = compilerLog.getErrors();
+
+    // null out things to not keep pointers to dead data
+    compiler = null;
+    compilerLog = null;
+    return errors;
   }
 
   public boolean isAvailable() {
