@@ -604,9 +604,11 @@ public class MainFrame extends JFrame {
       _model.getActiveDocument().preparePrintJob();
       new PreviewFrame(_model, this);
     } catch (BadLocationException e) {
-      _showError(e, "Print Error", "An error occured while preparing the print preview.");
+      _showError(e, "Print Error", 
+                 "An error occured while preparing the print preview.");
     } catch (IllegalStateException e) {
-      _showError(e, "Print Error", "An error occured while preparing the print preview.");
+      _showError(e, "Print Error", 
+                 "An error occured while preparing the print preview.");
     }
   }
   
@@ -680,7 +682,8 @@ public class MainFrame extends JFrame {
   private void _showClassNotFoundError(ClassNotFoundException cnfe) {
     _showError(cnfe, "Class Not Found",
                "A ClassNotFound exception occurred during the last operation.\n" +
-               "Please check that your classpath includes all relevant paths.\n\n");
+               "Please check that your classpath includes all relevant " +
+               "directories.\n\n");
   }
   
   private void _showNoClassDefError(NoClassDefFoundError ncde) {
@@ -1467,7 +1470,7 @@ public class MainFrame extends JFrame {
         
         "For information on how to write JUnit TestCases, visit:\n\n" +
         
-        "                                http://www.junit.org/\n\n";
+        "  http://www.junit.org/\n\n";
       
       JOptionPane.showMessageDialog(MainFrame.this, message, 
                                     "Test Works Only On JUnit TestCases", 
