@@ -39,6 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
+import koala.dynamicjava.interpreter.error.*;
 import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.interpreter.context.*;
 import koala.dynamicjava.tree.*;
@@ -51,11 +52,59 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
   protected final String _name;
   
   /**
+   * The "this" object for the current suspended thread.
+   * Null if the thread is in a static method.
+   */
+  protected Object _this;
+  
+  /**
+   * Contains an ordered list of unqualified classnames which
+   * enclose _this along with the instances of each enclosing class. 
+   * The first element of this list contains the outermost
+   * enclosing class.
+   */
+  //protected Vector<Pair<String, Object>> _enclosingClasses;
+  
+  /**
+   * The name of the package containing _this, if any.
+   */
+  protected String _packageName;
+  
+  /**
    * Creates a new debug interpreter.
    * @param name the name of the interpreter
    */
   public JavaDebugInterpreter(String name) {
     _name = name;
+    _this = null;
+    //_enclosingClasses = new Vector<Pair<String, Object>>();
+    _packageName = "";
+  }
+  
+  /**
+   * Sets the "this" object for the current suspended thread, if there is one.
+   * @param t The "this" object
+   */
+  public void setThis(Object t) {
+    _this = t;
+  }
+  
+  /**
+   * This method adds an enclosing class to the list.
+   * It should be called with the outermost class first.
+   * @param className the unqualified class name
+   * @param o the instance of className enclosing _this
+   */
+  public void addEnclosingClass(String className, Object o) {
+    //_enclosingClasses.addElement(new Pair<String,Object>(className, o));
+  }
+  
+  /**
+   * Sets the package name.
+   * @param packageName the package containing _this
+   */
+  public void setThisPackage(String packageName) {
+    _packageName = packageName;
   }
   
   /**

@@ -338,20 +338,15 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     };
 
     _model.addListener(listener);
-    _model.interpretCurrentInteraction();
-
-    // wait for interpret over
-    while (listener.interactionEndCount == 0) {
+    try {
       synchronized(listener) {
-        try {
-          listener.wait();
-        }
-        catch (InterruptedException ie) {
-          throw new UnexpectedException(ie);
-        }
+        _model.interpretCurrentInteraction();
+        listener.wait();
       }
     }
-
+    catch (InterruptedException ie) {
+      throw new UnexpectedException(ie);
+    }
     _model.removeListener(listener);
     listener.assertInteractionStartCount(1);
     listener.assertInteractionEndCount(1);

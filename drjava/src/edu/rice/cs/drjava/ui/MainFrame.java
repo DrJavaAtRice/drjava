@@ -1129,7 +1129,7 @@ public class MainFrame extends JFrame implements OptionConstants {
                                           "You must restart DrJava in order to use the JSR14 v2.0 compiler.",
                                           "JSR14 Warning", JOptionPane.WARNING_MESSAGE);
           }
-          else if (bootClasspathHasv2) {
+          else if (!DrJava.checkForJSR14v20() && bootClasspathHasv2) {
             JOptionPane.showMessageDialog(MainFrame.this,
                                           "You must restart DrJava in order to switch to earlier versions of the JSR14 compiler.",
                                           "JSR14 Warning", JOptionPane.WARNING_MESSAGE);

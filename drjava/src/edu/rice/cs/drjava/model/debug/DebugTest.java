@@ -145,6 +145,26 @@ public final class DebugTest extends GlobalModelTestCase
 /* 22 */    "  }\n" +
 /* 23 */    "}\n";
   
+  protected static final String MONKEY_WITH_INNER_CLASS = 
+/* 1 */    "class Monkey {\n" +  
+/* 2 */    "  int foo = 6; \n" +
+/* 3 */    "  class MonkeyInner { \n" +
+/* 4 */    "    int innerFoo = 8;\n" +
+/* 5 */    "    public void innerMethod() { \n" +
+/* 6 */    "      int innerMethodFoo;\n" +
+/* 7 */    "      innerMethodFoo = 10;\n" +
+/* 8 */    "      foo++;\n" +
+/* 9 */    "      innerFoo++;\n" +
+/* 10 */   "      innerMethodFoo++;\n" +
+/* 11 */   "      System.out.println(\"innerMethodFoo: \" + innerMethodFoo);\n" +
+/* 11 */   "    }\n" +
+/* 12 */   "  }\n" +  
+/* 13 */   "  public void bar() {\n" +
+/* 14 */   "    MonkeyInner mi = new MonkeyInner();\n" +
+/* 15 */   "    mi.innerMethod();\n" +
+/* 16 */   "  }\n" +
+/* 13 */   "}\n";
+  
   protected static final String CLASS_WITH_STATIC_FIELD =
 /*  1 */    "public class DrJavaDebugStaticField {\n" +
 /*  2 */    "  public static int x = 0;\n" +
@@ -1493,11 +1513,20 @@ public final class DebugTest extends GlobalModelTestCase
     if (printMessages) {
       System.out.println("Shutting down...");
     }
+    InterpretListener interpretListener = new InterpretListener() {
+       public void interpreterChanged(boolean inProgress) {
+         // Don't notify: happens in the same thread
+        interpreterChangedCount++;
+       }
+     };
+    _model.addListener(interpretListener);
     synchronized(_notifierLock) {
       _debugger.shutdown();
-      _waitForNotifies(1);  // shutdown
+      _waitForNotifies(2);  // interactionEnded, shutdown
       _notifierLock.wait();
     }
+    interpretListener.assertInteractionEndCount(1);
+    _model.removeListener(interpretListener);
     
     debugListener.assertDebuggerShutdownCount(1);  //fires
     if (printMessages) {
@@ -1506,7 +1535,162 @@ public final class DebugTest extends GlobalModelTestCase
     _debugger.removeListener(debugListener);
   }
 
-  
+  /**
+   * Tests that watches can correctly see the values of local
+   * variables, fields and fields of outer classes.
+   */
+  public void testWatches()
+    throws DebugException, BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException
+  {
+    if (printMessages) {
+      System.out.println("----testWatches----");
+    }
+    StepTestListener debugListener = new StepTestListener();
+    
+    // Compile the class
+    File file = new File(_tempDir, "Monkey.java");
+    OpenDefinitionsDocument doc = doCompile(MONKEY_WITH_INNER_CLASS, file);
+    
+    _debugger.addListener(debugListener);
+
+    // Start debugger
+    synchronized(_notifierLock) {
+      _debugger.startup();
+      _waitForNotifies(1);  // startup
+      _notifierLock.wait();
+    }
+    debugListener.assertDebuggerStartedCount(1);
+    
+    _debugger.toggleBreakpoint(doc,MONKEY_WITH_INNER_CLASS.indexOf("innerMethodFoo = 10;"), 7);
+    debugListener.assertBreakpointSetCount(1);
+
+    // Run the foo() method, hitting breakpoint
+    synchronized(_notifierLock) {
+      interpretIgnoreResult("new Monkey().new MonkeyInner().innerMethod()");
+      _waitForNotifies(3);  // suspended, updated, breakpointReached
+      _notifierLock.wait();
+    }
+    _debugger.addWatch("foo");
+    _debugger.addWatch("innerFoo");
+    _debugger.addWatch("innerMethodFoo");
+    _debugger.addWatch("asdf");
+    
+    if (printMessages) {
+      System.out.println("first step");
+    }
+    // Step over once
+    synchronized(_notifierLock){
+      _asyncStep(Debugger.STEP_OVER);
+      _waitForNotifies(2);  // suspended, updated
+      _notifierLock.wait();
+    }
+    debugListener.assertStepRequestedCount(1);  // fires (don't wait)
+    debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
+    debugListener.assertThreadLocationUpdatedCount(2);  // fires
+    debugListener.assertCurrThreadSuspendedCount(2);  // fires
+    debugListener.assertBreakpointReachedCount(1);
+    debugListener.assertCurrThreadDiedCount(0);
+    
+    Vector<DebugWatchData> watches = _debugger.getWatches();
+    assertEquals("watch name incorrect", "foo", watches.elementAt(0).getName());
+    assertEquals("watch name incorrect", "innerFoo", watches.elementAt(1).getName());
+    assertEquals("watch name incorrect", "innerMethodFoo", watches.elementAt(2).getName());
+    assertEquals("watch name incorrect", "asdf", watches.elementAt(3).getName());
+    assertEquals("watch value incorrect", "6", watches.elementAt(0).getValue());
+    assertEquals("watch value incorrect", "8", watches.elementAt(1).getValue());
+    assertEquals("watch value incorrect", "10", watches.elementAt(2).getValue());
+    assertEquals("watch value incorrect", DebugWatchUndefinedValue.ONLY.toString(), watches.elementAt(3).getValue());
+    
+    if (printMessages) {
+      System.out.println("second step");
+    }
+    // Step over twice
+    synchronized(_notifierLock){
+      _asyncStep(Debugger.STEP_OVER);
+      _waitForNotifies(2);  // suspended, updated
+      _notifierLock.wait();
+    }
+    debugListener.assertStepRequestedCount(2);  // fires (don't wait)
+    debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
+    debugListener.assertThreadLocationUpdatedCount(3);  // fires
+    debugListener.assertCurrThreadSuspendedCount(3);  // fires
+    debugListener.assertBreakpointReachedCount(1);
+    debugListener.assertCurrThreadDiedCount(0);
+   
+    if (printMessages) {
+      System.out.println("third step");
+    }
+    // Step over thrice
+    synchronized(_notifierLock){
+      _asyncStep(Debugger.STEP_OVER);
+      _waitForNotifies(2);  // suspended, updated
+      _notifierLock.wait();
+    }
+    debugListener.assertStepRequestedCount(3);  // fires (don't wait)
+    debugListener.assertCurrThreadResumedCount(3); // fires (don't wait)
+    debugListener.assertThreadLocationUpdatedCount(4);  // fires
+    debugListener.assertCurrThreadSuspendedCount(4);  // fires
+    debugListener.assertBreakpointReachedCount(1);
+    debugListener.assertCurrThreadDiedCount(0);
+    
+    if (printMessages) {
+      System.out.println("fourth step");
+    }
+    // Step over frice(?)
+    synchronized(_notifierLock){
+      _asyncStep(Debugger.STEP_OVER);
+      _waitForNotifies(2);  // suspended, updated
+      _notifierLock.wait();
+    }
+    debugListener.assertStepRequestedCount(4);  // fires (don't wait)
+    debugListener.assertCurrThreadResumedCount(4); // fires (don't wait)
+    debugListener.assertThreadLocationUpdatedCount(5);  // fires
+    debugListener.assertCurrThreadSuspendedCount(5);  // fires
+    debugListener.assertBreakpointReachedCount(1);
+    debugListener.assertCurrThreadDiedCount(0);    
+    
+    watches = _debugger.getWatches();
+    assertEquals("watch name incorrect", "foo", watches.elementAt(0).getName());
+    assertEquals("watch name incorrect", "innerFoo", watches.elementAt(1).getName());
+    assertEquals("watch name incorrect", "innerMethodFoo", watches.elementAt(2).getName());
+    assertEquals("watch name incorrect", "asdf", watches.elementAt(3).getName());
+    assertEquals("watch value incorrect", "7", watches.elementAt(0).getValue());
+    assertEquals("watch value incorrect", "9", watches.elementAt(1).getValue());
+    assertEquals("watch value incorrect", "11", watches.elementAt(2).getValue());
+    assertEquals("watch value incorrect", DebugWatchUndefinedValue.ONLY.toString(), watches.elementAt(3).getValue());
+    
+    // Close doc and make sure breakpoints are removed
+    _model.closeFile(doc);
+    debugListener.assertBreakpointRemovedCount(1);  //fires (no waiting)
+    
+    // Shutdown the debugger
+    if (printMessages) {
+      System.out.println("Shutting down...");
+    }
+    InterpretListener interpretListener = new InterpretListener() {
+       public void interpreterChanged(boolean inProgress) {
+         // Don't notify: happens in the same thread
+        interpreterChangedCount++;
+       }
+     };
+    _model.addListener(interpretListener);
+    synchronized(_notifierLock) {
+      _debugger.shutdown();
+      _waitForNotifies(2);  // interactionEnded, shutdown
+      _notifierLock.wait();
+    }
+    interpretListener.assertInteractionEndCount(1);
+    _model.removeListener(interpretListener);
+    
+    debugListener.assertDebuggerShutdownCount(1);  //fires
+    if (printMessages) {
+      System.out.println("Shut down.");
+    }
+    _debugger.removeListener(debugListener);
+  }
+    
+    
   /**
    * Listens to events from the debugger to ensure that they happen at the
    * correct times.

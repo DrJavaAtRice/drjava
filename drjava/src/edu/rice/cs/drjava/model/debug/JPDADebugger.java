@@ -1343,13 +1343,15 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       stackIndex++;
       Location location = currFrame.location();
       ReferenceType rt = location.declaringType();
+      ObjectReference obj = currFrame.thisObject();
+      
       for (int i = 0; i < _watches.size(); i++) {
         DebugWatchData currWatch = _watches.elementAt(i);
         String currName = currWatch.getName();
         String currValue = currWatch.getValue();
+        
         // check for "this"
         if (currName.equals("this")) {
-          ObjectReference obj = currFrame.thisObject();
           if (obj != null) {
             currWatch.setValue(_getValue(obj));
             currWatch.setType(obj.type());
@@ -1366,17 +1368,41 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
           localVar = currFrame.visibleVariableByName(currName);
         }
         catch (AbsentInformationException aie) {
+          // Not compiled with debug flag.... ignore
         }
         
         ReferenceType outerRt = rt;
+        ObjectReference outer = obj;
         // if the variable being watched is not a local variable, check if it's a field
         if (localVar == null) {
           Field field = outerRt.fieldByName(currName);
           
           // if the variable is not a field either, it's not defined in this 
           // ReferenceType's scope, keep going further out in scope.
-          String className = outerRt.name();
-          while (field == null) {
+          Field outerThis = outerRt.fieldByName("this$0");
+          
+          while ((field == null) && (outerThis != null)) {
+            outer = (ObjectReference) outer.getValue(outerThis);
+            //outer = (ObjectReference)outer.getValue(outerThis);//currFrame.getValue(var);
+            outerRt = outer.referenceType();
+            field = outerRt.fieldByName(currName);
+            
+            if (field == null) {
+              // Enter the loop again with the next outer enclosing class
+              outerThis = outerRt.fieldByName("this$0");                
+            }    
+          }
+          
+          if (field != null) {
+            currWatch.setValue(_getValue(outer.getValue(field)));
+            try {
+              currWatch.setType(field.type());
+            }
+            catch (ClassNotLoadedException cnle) {
+              currWatch.setType(null);
+            }
+          }
+          /*
             
             // crop off the $ if there is one and anything after it
             int indexOfDollar = className.lastIndexOf('$');    
@@ -1406,6 +1432,18 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
               }
             }
             else {
+              LocalVariable var;
+              ObjectReference outer;
+              do {
+                // get the object reference for outer classes
+                var = currFrame.visibleVariableByName("this$0");
+                outer = (ObjectReference)currFrame.getValue(var);
+              }
+              while (!outer.referenceType().equals(outerRt));
+                 
+              */
+          
+              /*
               StackFrame outerFrame = currFrame;
               // the field is not static
               // Check if the frame represents a native or static method and
@@ -1434,8 +1472,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
                 currWatch.setValue(DebugWatchUndefinedValue.ONLY);
                 currWatch.setType(null);
               }
-            }
-          }
+              
+            }*/
           else {
             currWatch.setValue(DebugWatchUndefinedValue.ONLY);
             currWatch.setType(null);
@@ -1695,6 +1733,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       if (thisVal != null) {
         _defineVariable(suspendedThreadRef, debugInterpreter,
                         "this", thisVal);
+        //_setThisInInterpreter(suspendedThreadRef, debugInterpreter, thisVal);
       }
       
       // Set the new interpreter and prompt
@@ -1763,8 +1802,62 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         tries++;
       }
     }
-    throw new DebugException("The variable: " + name + " could not be defined in the debug interpreter");
+    throw new DebugException("The variable: " + name + 
+                             " could not be defined in the debug interpreter");
   }
+  
+  /**
+   * Sets the value of "this" as well as its enclosing classes in
+   * the debug interpreter.
+   */
+  protected void _setThisInInterpreter(ThreadReference suspendedThreadRef, 
+                                       ObjectReference debugInterpreter,
+                                       Value val)
+    throws InvalidTypeException, AbsentInformationException, 
+    IncompatibleThreadStateException, ClassNotLoadedException, 
+    InvocationException, DebugException
+  {
+    // First set "this"
+    ReferenceType rtDebugInterpreter = debugInterpreter.referenceType();
+//    Method method2Call = _getMethod(rtDebugInterpreter, "setThis");
+//    LinkedList args = new LinkedList();
+//    args.add(val);
+//    debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args,
+//                                  ObjectReference.INVOKE_SINGLE_THREADED);
+    
+    // Then set its package
+//    ReferenceType thisRt = ((ObjectReference)val).referenceType();
+//    String className = thisRt.name();
+//    int lastDot = className.lastIndexOf(".");
+//    if (lastDot != -1) {
+//      String packageName = className.substring(0,lastDot);
+//      className = className.substring(lastDot+1,className.length()));
+//      method2Call = _getMethod(rtDebugInterpreter, "setThisPackage");
+//      args.clear();
+//      args.add(packageName);
+//      debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args,
+//                                    ObjectReference.INVOKE_SINGLE_THREADED);
+//    }
+//    
+//    // Then set its enclosing classes
+//    method2Call = _getMethod(rtDebugInterpreter, "addEnclosingClass");
+//    int numEnclosing = 1; // includes "this" class
+//    int index = className.indexOf("$");
+//    while (index != -1) {
+//      numEnclosing++;
+//      index = className.indexOf("$",index);
+//    }
+//    
+//    Object instance = val;
+//    while (numEnclosing > 0) {
+//      index = className.lastIndexOf("$");
+//      immediateClassName = className.substring(index+1, className.length);
+//      className = className.substring(0,index));
+//      args.clear();     
+//      debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args,
+//                                    ObjectReference.INVOKE_SINGLE_THREADED);
+  }
+  
   
   /**
    * Notifies all listeners that the current thread has been suspended.
@@ -1842,7 +1935,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       }
     }
     
-    throw new NoSuchElementException("No non-abstract method called getVariable found in " + rt.name());
+    throw new NoSuchElementException("No non-abstract method called " + name + " found in " + rt.name());
   }
   
   /**
