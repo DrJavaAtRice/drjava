@@ -59,7 +59,10 @@ import edu.rice.cs.util.UnexpectedException;
 public class GlobalModelCompileTest extends GlobalModelTestCase {
   private static final String FOO_MISSING_CLOSE_TEXT =
     "class DrJavaTestFoo {";
-
+  
+  private static final String BAR_MISSING_SEMI_TEXT =
+    "class DrJavaTestBar { int x }";
+  
   private static final String FOO_PACKAGE_AFTER_IMPORT =
     "import java.util.*;\npackage a;\n" + FOO_TEXT;
 
@@ -135,6 +138,72 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     // Make sure .class exists
     File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
+  }
+  
+  /**
+   * Tests calling compileAll with different source roots works.
+   */
+  public void testCompileAllDifferentSourceRoots()
+    throws BadLocationException, IOException
+  {
+    File aDir = new File(_tempDir, "a");
+    File bDir = new File(_tempDir, "b");
+    aDir.mkdir();
+    bDir.mkdir();
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final File file = new File(aDir, "DrJavaTestFoo.java");
+    doc.saveFile(new FileSelector(file));
+    OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    final File file2 = new File(bDir, "DrJavaTestBar.java");
+    doc2.saveFile(new FileSelector(file2));
+    
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
+    _model.addListener(listener);
+    _model.compileAll();
+    assertCompileErrorsPresent(_name(), false);
+    listener.checkCompileOccurred();
+
+    // Make sure .class exists for both files
+    File compiled = classForJava(file, "DrJavaTestFoo");
+    assertTrue(_name() + "Foo Class file doesn't exist after compile", compiled.exists());
+    File compiled2 = classForJava(file2, "DrJavaTestBar");
+    assertTrue(_name() + "Bar Class file doesn't exist after compile", compiled2.exists());
+  }
+  
+  /**
+   * Tests calling compileAll with different source roots works
+   * if the files have errors in them.  (Each file has 1 error.)
+   */
+  public void testCompileAllFailsDifferentSourceRoots()
+    throws BadLocationException, IOException
+  {
+    File aDir = new File(_tempDir, "a");
+    File bDir = new File(_tempDir, "b");
+    aDir.mkdir();
+    bDir.mkdir();
+    OpenDefinitionsDocument doc = setupDocument(FOO_MISSING_CLOSE_TEXT);
+    final File file = new File(aDir, "DrJavaTestFoo.java");
+    doc.saveFile(new FileSelector(file));
+    OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT);
+    final File file2 = new File(bDir, "DrJavaTestBar.java");
+    doc2.saveFile(new FileSelector(file2));
+    
+    CompileShouldFailListener listener = new CompileShouldFailListener();
+    _model.addListener(listener);
+    _model.compileAll();
+    assertCompileErrorsPresent(_name(), true);
+    assertEquals("Should have 2 compiler errors", 2, _model.getNumErrors());
+    listener.checkCompileOccurred();
+
+    // Make sure .class does not exist for both files
+    File compiled = classForJava(file, "DrJavaTestFoo");
+    assertEquals(_name() + "Class file exists after failing compile (1)",
+                 false,
+                 compiled.exists());
+    File compiled2 = classForJava(file2, "DrJavaTestBar");
+    assertEquals(_name() + "Class file exists after failing compile (2)",
+                 false,
+                 compiled2.exists());
   }
 
   /**

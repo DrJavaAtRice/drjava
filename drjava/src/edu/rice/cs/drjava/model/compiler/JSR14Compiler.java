@@ -96,8 +96,8 @@ public class JSR14Compiler extends JavacGJCompiler {
     }
   }
     
-  protected void initCompiler(File sourceRoot) {
-    super.initCompiler(sourceRoot);
+  protected void initCompiler(File[] sourceRoots) {
+    super.initCompiler(sourceRoots);
     updateBootClassPath();
   }
 

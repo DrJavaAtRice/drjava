@@ -53,16 +53,40 @@ public class ColorOptionComponent extends OptionComponent<Color> {
   private JButton _button;
   private Color _currentColor;
   private Color _newColor;
+  private boolean _isBackgroundColor;
   
+  /**
+   * Main constructor for ColorOptionComponent.
+   * @param opt The ColorOption to display
+   * @param text The text to display in the label of the component
+   * @param parent The Frame displaying this component
+   */
   public ColorOptionComponent (ColorOption opt, String text, Frame parent) {
+    this(opt, text, parent, false);
+  }
+  
+  /**
+   * An alternate constructor, allowing the caller to specify whether
+   * this color is a background color.  If so, the button will display
+   * the color as its background.
+   */
+  public ColorOptionComponent(ColorOption opt, String text, Frame parent,
+                              boolean isBackgroundColor)
+  {
     super(opt, text, parent);
+    _isBackgroundColor = isBackgroundColor;
     _button = new JButton();
     _button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         chooseColor();
       }
     });
-    _button.setBackground(Color.white);
+    if (_isBackgroundColor) {
+      _button.setForeground(Color.black);
+    }
+    else {
+      _button.setBackground(Color.white);
+    }
     _currentColor = DrJava.CONFIG.getSetting(_option);
     _newColor = _currentColor;
     _updateButton(_currentColor);
@@ -94,7 +118,12 @@ public class ColorOptionComponent extends OptionComponent<Color> {
    * Updates the component's button to display the given color.
    */
   private void _updateButton(Color c) {
-    _button.setForeground(c);
+    if (_isBackgroundColor) {
+      _button.setBackground(c);
+    }
+    else {
+      _button.setForeground(c);
+    }
     _button.setText(getLabelText() + " ("+_option.format(c)+")");
   }
   

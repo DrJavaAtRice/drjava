@@ -1009,6 +1009,76 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
     return (File[]) roots.toArray(new File[0]);
   }
+  
+  /**
+   * Compiles all open documents, after ensuring that all are saved.
+   */
+  public void compileAll() throws IOException {
+    // Only compile if all are saved
+    saveAllBeforeProceeding(GlobalModelListener.COMPILE_REASON);
+    
+    if (areAnyModifiedSinceSave()) {
+      // if any files haven't been saved after we told our
+      // listeners to do so, don't proceed with the rest
+      // of the compile.
+    }
+    else {
+      try {
+        // Get sourceroots and all files
+        File[] sourceRoots = getSourceRootSet();
+        File[] files = new File[_definitionsDocs.getSize()];
+        for (int i = 0; i < _definitionsDocs.getSize(); i++) {
+          OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
+            _definitionsDocs.getElementAt(i);
+          files[i] = doc.getFile();
+        }
+      
+        notifyListeners(new EventNotifier() {
+          public void notifyListener(GlobalModelListener l) {
+            l.compileStarted();
+          }
+        });
+        
+        // Compile everything
+        _compileFiles(sourceRoots, files);
+        
+        // Fire a compileEnded event
+        notifyListeners(new EventNotifier() {
+          public void notifyListener(GlobalModelListener l) {
+            l.compileEnded();
+          }
+        });
+        
+        // Only clear console/interactions if there were no errors
+        if (_numErrors == 0) {
+          resetConsole();
+          resetInteractions();
+        }
+        
+      }
+      catch (IllegalStateException ise) {
+        // One of the docs didn't have a file.  Don't compile.
+      }
+    }
+  }
+  
+  /**
+   * Compile the given files (with the given sourceroots), and update
+   * the model with any errors that result.  Does not notify listeners;
+   * use compileAll or doc.startCompile instead.
+   * @param sourceRoots An array of all sourceroots for the files to be compiled
+   * @param files An array of all files to be compiled
+   */
+  private void _compileFiles(File[] sourceRoots, File[] files) throws IOException {
+    
+    CompilerError[] errors = new CompilerError[0];
+    
+    CompilerInterface compiler
+      = CompilerRegistry.ONLY.getActiveCompiler();
+      
+    errors = compiler.compile(sourceRoots, files);
+    _distributeErrors(errors);
+  }
 
   /**
    * Gets the DebugManager, which interfaces with the integrated debugger.
@@ -1256,9 +1326,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * an error will be put in compileErrors.
      */
     public void startCompile() throws IOException {
+      // Only compile if all are saved
       saveAllBeforeProceeding(GlobalModelListener.COMPILE_REASON);
-      CompilerError[] errors = new CompilerError[0];
-
+    
       if (areAnyModifiedSinceSave()) {
         // if any files haven't been saved after we told our
         // listeners to do so, don't proceed with the rest
@@ -1267,23 +1337,18 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       else {
         try {
           File file = _doc.getFile();
-
+          File[] files = new File[] { file };
+          
           try {
             notifyListeners(new EventNotifier() {
               public void notifyListener(GlobalModelListener l) {
-              l.compileStarted();
-            }
+                l.compileStarted();
+              }
             });
-
-            File[] files = new File[] { file };
-
-            String packageName = _doc.getPackageName();
-            File sourceRoot = _getSourceRoot(packageName);
-
-            CompilerInterface compiler
-              = CompilerRegistry.ONLY.getActiveCompiler();
-
-            errors = compiler.compile(sourceRoot, files);
+          
+            File[] sourceRoots = new File[] { getSourceRoot() };
+        
+            _compileFiles(sourceRoots, files);
           }
           catch (InvalidPackageException e) {
             CompilerError err = new CompilerError(file,
@@ -1291,18 +1356,17 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
                                                   -1,
                                                   e.getMessage(),
                                                   false);
-            errors = new CompilerError[] { err };
+            CompilerError[] errors = new CompilerError[] { err };
+            _distributeErrors(errors);
           }
           finally {
-            _distributeErrors(errors);
-
             // Fire a compileEnded event
             notifyListeners(new EventNotifier() {
               public void notifyListener(GlobalModelListener l) {
-              l.compileEnded();
-            }
+                l.compileEnded();
+              }
             });
-
+            
             // Only clear console/interactions if there were no errors
             if (_numErrors == 0) {
               resetConsole();
@@ -1747,69 +1811,69 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
       return parentDir;
     }
+  }
 
-    /**
-     * Sorts the given array of CompilerErrors and divides it into groups
-     * based on the file, giving each group to the appropriate
-     * OpenDefinitionsDocument, opening files if necessary.
-     */
-    private void _distributeErrors(CompilerError[] errors)
-      throws IOException
-    {
-      // Reset CompilerErrorModels
-      for (int i = 0; i < _definitionsDocs.getSize(); i++) {
-        OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
-          _definitionsDocs.getElementAt(i);
-        doc.setCompilerErrorModel(new CompilerErrorModel());
+  /**
+   * Sorts the given array of CompilerErrors and divides it into groups
+   * based on the file, giving each group to the appropriate
+   * OpenDefinitionsDocument, opening files if necessary.
+   */
+  private void _distributeErrors(CompilerError[] errors)
+    throws IOException
+  {
+    // Reset CompilerErrorModels
+    for (int i = 0; i < _definitionsDocs.getSize(); i++) {
+      OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
+        _definitionsDocs.getElementAt(i);
+      doc.setCompilerErrorModel(new CompilerErrorModel());
+    }
+    
+    // Store number of errors
+    _numErrors = errors.length;
+    
+    // Sort the errors by file and position
+    Arrays.sort(errors);
+    
+    // Filter out ones without files
+    int numWithoutFiles = 0;
+    for (int i = 0; i < errors.length; i++) {
+      if (errors[i].file() == null) {
+        numWithoutFiles++;
       }
-
-      // Store number of errors
-      _numErrors = errors.length;
-
-      // Sort the errors by file and position
-      Arrays.sort(errors);
-
-      // Filter out ones without files
-      int numWithoutFiles = 0;
-      for (int i = 0; i < errors.length; i++) {
-        if (errors[i].file() == null) {
-          numWithoutFiles++;
-        }
-        else {
-          // Since sorted, finding one with a file means we're done
-          break;
-        }
+      else {
+        // Since sorted, finding one with a file means we're done
+        break;
       }
-
-      // Copy errors without files into GlobalModel's array
-      _compilerErrorsWithoutFiles = new CompilerError[numWithoutFiles];
-      System.arraycopy(errors, 0, _compilerErrorsWithoutFiles, 0,
-                       numWithoutFiles);
-
-      // Create error models and give to their respective documents
-      for (int i = numWithoutFiles; i < errors.length; i++) {
-        File file = errors[i].file();
-        OpenDefinitionsDocument doc = getDocumentForFile(file);
-
-        // Find all other errors with this file
-        int numErrors = 1;
-        int j = i + 1;
-        while ((j < errors.length) &&
-               (file.equals(errors[j].file()))) {
-          j++;
-          numErrors++;
-        }
-
-        // Create a model with all errors with this file
-        CompilerError[] fileErrors = new CompilerError[numErrors];
-        System.arraycopy(errors, i, fileErrors, 0, numErrors);
-        CompilerErrorModel model =
-          new CompilerErrorModel(fileErrors, doc.getDocument(), file);
-        doc.setCompilerErrorModel(model);
-
-        // Continue with errors for the next file
-        i = j - 1;
+    }
+    
+    // Copy errors without files into GlobalModel's array
+    _compilerErrorsWithoutFiles = new CompilerError[numWithoutFiles];
+    System.arraycopy(errors, 0, _compilerErrorsWithoutFiles, 0,
+                     numWithoutFiles);
+    
+    // Create error models and give to their respective documents
+    for (int i = numWithoutFiles; i < errors.length; i++) {
+      File file = errors[i].file();
+      OpenDefinitionsDocument doc = getDocumentForFile(file);
+      
+      // Find all other errors with this file
+      int numErrors = 1;
+      int j = i + 1;
+      while ((j < errors.length) &&
+             (file.equals(errors[j].file()))) {
+        j++;
+        numErrors++;
       }
+      
+      // Create a model with all errors with this file
+      CompilerError[] fileErrors = new CompilerError[numErrors];
+      System.arraycopy(errors, i, fileErrors, 0, numErrors);
+      CompilerErrorModel model =
+        new CompilerErrorModel(fileErrors, doc.getDocument(), file);
+      doc.setCompilerErrorModel(model);
+      
+      // Continue with errors for the next file
+      i = j - 1;
     }
   }
 

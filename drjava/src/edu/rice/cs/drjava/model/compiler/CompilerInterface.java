@@ -57,6 +57,17 @@ public interface CompilerInterface {
    * length array (not null).
    */
   CompilerError[] compile(File sourceRoot, File[] files);
+  
+  /**
+   * Compile the given files.
+   * @param files Source files to compile.
+   * @param sourceRoots Array of source root directories, the base of
+   *  the package structure for all files to compile.
+   *
+   * @return Array of errors that occurred. If no errors, should be zero
+   * length array (not null).
+   */
+  CompilerError[] compile(File[] sourceRoots, File[] files);
 
   /**
    * Indicates whether this compiler is actually available.

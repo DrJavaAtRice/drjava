@@ -55,6 +55,11 @@ public class NoCompilerAvailable implements CompilerInterface {
   private NoCompilerAvailable() {}
 
   public CompilerError[] compile(File sourceRoot, File[] files) {
+    File[] sourceRoots = new File[] { sourceRoot };
+    return compile(sourceRoots, files);
+  }
+  
+  public CompilerError[] compile(File[] sourceRoots, File[] files) {
     CompilerError error = new CompilerError(files[0],
                                             -1,
                                             -1,

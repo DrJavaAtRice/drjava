@@ -184,9 +184,23 @@ public class JavacGJCompiler implements CompilerInterface {
    * length array (not null).
    */
   public CompilerError[] compile(File sourceRoot, File[] files) {
+    File[] sourceRoots = new File[] { sourceRoot };
+    return compile(sourceRoots, files);
+  }
+  
+  /**
+   * Compile the given files.
+   * @param files Source files to compile.
+   * @param sourceRoots Array of source root directories, the base of
+   *  the package structure for all files to compile.
+   *
+   * @return Array of errors that occurred. If no errors, should be zero
+   * length array (not null).
+   */
+  public CompilerError[] compile(File[] sourceRoots, File[] files) {
     // We must re-initialize the compiler on each compile. Otherwise
     // it gets very confused.
-    initCompiler(sourceRoot);
+    initCompiler(sourceRoots);
     List<String> filesToCompile = new List<String>();
 
     for (int i = 0; i < files.length; i++) {
@@ -255,7 +269,7 @@ public class JavacGJCompiler implements CompilerInterface {
     throw new UnexpectedException( new Exception("Method only implemented in JSR14Compiler"));
   }
   
-  protected Hashtable<String, String> createOptionsHashtable(File sourceRoot) {
+  protected Hashtable<String, String> createOptionsHashtable(File[] sourceRoots) {
     Hashtable<String, String> options = Hashtable.make();
 
     options.put("-warnunchecked", "");
@@ -269,7 +283,8 @@ public class JavacGJCompiler implements CompilerInterface {
     // Set output classfile version to 1.1
     options.put("-target", "1.1");
 
-    options.put("-sourcepath", sourceRoot.getAbsolutePath());
+    String sourceRootString = getSourceRootString(sourceRoots);
+    options.put("-sourcepath", sourceRootString /*sourceRoot.getAbsolutePath()*/);
 
     String cp = System.getProperty("java.class.path");
     // Adds extra.classpath to the classpath.
@@ -279,9 +294,25 @@ public class JavacGJCompiler implements CompilerInterface {
 
     return options;
   }
+  
+  /**
+   * Package protected utility method for getting a properly formatted
+   * string with several source paths from an array of files.
+   * Static so it can be used by GJv6Compiler...  (Ugly, I know.)
+   */
+  static String getSourceRootString(File[] sourceRoots) {
+    StringBuffer roots = new StringBuffer();
+    for (int i = 0; i < sourceRoots.length; i++) {
+      roots.append(sourceRoots[i].getAbsolutePath());
+      if (i < sourceRoots.length - 1) {
+        roots.append(File.pathSeparator);
+      }
+    }
+    return roots.toString();
+  }
 
-  protected void initCompiler(File sourceRoot) {
-    Hashtable<String, String> options = createOptionsHashtable(sourceRoot);
+  protected void initCompiler(File[] sourceRoots) {
+    Hashtable<String, String> options = createOptionsHashtable(sourceRoots);
 
     // sigh, the 1.4 log won't work on 1.3 so we need to try the 1.4 first
     // and fall back to the 1.3

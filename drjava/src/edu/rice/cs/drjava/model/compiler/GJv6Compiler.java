@@ -89,7 +89,7 @@ public class GJv6Compiler implements CompilerInterface{
   /**
    * Set up new instance of the GJ compiler.
    */
-  private void _initCompiler (File sourceRoot) {
+  private void _initCompiler (File[] sourceRoots) {
     _compilerLog = new OurLog();
     // To use the GJ compiler, we build up the GJ options hashtable.
     Hashtable<String, String> options = Hashtable.make();
@@ -100,7 +100,8 @@ public class GJv6Compiler implements CompilerInterface{
     // Since GJ doesn't have a sourcepath attribute, we just
     // put the sourcepath into the classpath instead
     String oldclasspath = System.getProperty("java.class.path");
-    StringBuffer newclasspath = new StringBuffer(sourceRoot.getAbsolutePath());
+    String sourceRootString = JavacGJCompiler.getSourceRootString(sourceRoots);
+    StringBuffer newclasspath = new StringBuffer(sourceRootString /*sourceRoot.getAbsolutePath()*/);
     if (oldclasspath.length() > 0) {
       newclasspath.append(File.pathSeparator);
       newclasspath.append(oldclasspath);
@@ -122,9 +123,23 @@ public class GJv6Compiler implements CompilerInterface{
    * length array (not null).
    */
   public CompilerError[] compile(File sourceRoot, File[] files) {
+    File[] sourceRoots = new File[] { sourceRoot };
+    return compile(sourceRoots, files);
+  }
+  
+  /**
+   * Compile the given files.
+   * @param files Source files to compile.
+   * @param sourceRoots Array of source root directories, the base of
+   *  the package structure for all files to compile.
+   *
+   * @return Array of errors that occurred. If no errors, should be zero
+   * length array (not null).
+   */
+  public CompilerError[] compile(File[] sourceRoots, File[] files) {
     // We must re-initialize the compiler on each compile. Otherwise
     // it gets very confused.
-    _initCompiler(sourceRoot);
+    _initCompiler(sourceRoots);
     List<String> filesToCompile = new List<String>();
     for (int i = 0; i < files.length; i++) {
       filesToCompile = filesToCompile.prepend(files[i].getAbsolutePath());

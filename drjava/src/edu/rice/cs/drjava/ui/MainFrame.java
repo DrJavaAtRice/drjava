@@ -304,6 +304,20 @@ public class MainFrame extends JFrame implements OptionConstants {
       _setDividerLocation();
     }
   };
+  
+  /** Compiles all open documents. */
+  private Action _compileAllAction = new AbstractAction("Compile All Documents") {
+    public void actionPerformed(ActionEvent ae) {
+      if (!_errorPanel.isDisplayed()) {
+        ErrorListPane elp = _errorPanel.getErrorListPane();
+        elp.setSize(_tabbedPane.getMinimumSize());
+        showTab(_errorPanel);
+      }
+      _compileAll();
+      _tabbedPane.setSelectedComponent(_errorPanel);
+      _setDividerLocation();
+    }
+  };
 
   /** Runs JUnit on the document in the definitions pane. */
   private Action _junitAction = new AbstractAction("Test Using JUnit") {
@@ -1135,6 +1149,15 @@ public class MainFrame extends JFrame implements OptionConstants {
       _showIOError(ioe);
     }
   }
+  
+  private void _compileAll() {
+    try {
+      _model.compileAll();
+    }
+    catch (IOException ioe) {
+      _showIOError(ioe);
+    }
+  }
 
   private void _junit() {
     try {
@@ -1448,6 +1471,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_saveAllAction, "SaveAll", "Save all open documents");
 
     _setUpAction(_compileAction, "Compile", "Compile the current document");
+    _setUpAction(_compileAllAction, "CompileAll", "Compile all open documents");
     _setUpAction(_printAction, "Print", "Print the current document");
     _setUpAction(_pageSetupAction, "PageSetup", "Page Setup");
     _setUpAction(_printPreviewAction, "PrintPreview", "Print Preview");
@@ -1552,7 +1576,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   /**
    * Creates and returns a file menu.  Side effects: sets values for
-   * _saveMenuItem and _compileMenuItem.
+   * _saveMenuItem.
    */
   private JMenu _setUpFileMenu(int mask) {
     JMenuItem tmpItem;
@@ -1714,7 +1738,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     JMenuItem tmpItem;
     JMenu toolsMenu = new JMenu("Tools");
 
-    // Compile
+    // Compile, Compile all
     if (!CodeStatus.DEVELOPMENT) {
       tmpItem = toolsMenu.add(_compileAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
@@ -1722,6 +1746,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     else {
       _addMenuItem(toolsMenu, _compileAction, KEY_COMPILE);
     }
+    toolsMenu.add(_compileAllAction);
     toolsMenu.add(_junitAction);
 
     // Abort/reset interactions, clear console

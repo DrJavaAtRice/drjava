@@ -139,10 +139,26 @@ public class CompilerProxy implements CompilerInterface {
    * length array (not null).
    */
   public CompilerError[] compile(File sourceRoot, File[] files) {
+    _recreateCompiler();
+    CompilerError[] ret =  _realCompiler.compile(sourceRoot, files);
+    
+    return ret;
+  }
+  
+  /**
+   * Compile the given files.
+   * @param files Source files to compile.
+   * @param sourceRoots Array of source root directories, the base of
+   *  the package structure for all files to compile.
+   *
+   * @return Array of errors that occurred. If no errors, should be zero
+   * length array (not null).
+   */
+  public CompilerError[] compile(File[] sourceRoots, File[] files) {
     //DrJava.consoleErr().println("proxy to compile: " + files[0]);
      
     _recreateCompiler();
-    CompilerError[] ret =  _realCompiler.compile(sourceRoot, files);
+    CompilerError[] ret =  _realCompiler.compile(sourceRoots, files);
     
     return ret;
   }
