@@ -291,7 +291,7 @@
        them to compilers.jar in the lib directory.
        Deletes the compiled classes when finished.
     -->
-  <target name="compile-jsr14v2_0">
+  <target name="compile-jsr14v2_0" depends="init">
     <property name="srcroot_jsr14v2_0" 
               value="${srcroot}/src-jsr14v2_0" />
     <property name="built_jsr14v2_0"
@@ -303,13 +303,13 @@
            includes="${projpath}/**/*java"
            destdir="${built_jsr14v2_0}" 
            bootclasspath="${jsr14_classpath}:${sun.boot.class.path}"
-           classpath="${classpath_text}"
+           classpath="{jsr14_collect_classpath}:{jsr14_classpath}:${classpath_text}"
            debug="on"
            source="1.5"
            target="jsr14"
            fork="on"
            optimize="off">
-       <!--<compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>-->
+       <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
     </javac>
 <!--  commented out because the jsr14 v2.0 compiler adapter must be compiled using
       variance, whereas the rest of DrJava should be compiled with -novariance.
