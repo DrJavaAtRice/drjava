@@ -1086,7 +1086,57 @@ public class Student {
  <para>Most menu items in DrJava have configurable keyboard shortcuts, along with several other navigational commands (such as moving to the beginning or end of a line).  All such options are displayed on the Key Bindings panel in the Preferences window, along with their current value.  Clicking on the value displays a window which allows the user to type a new key, showing any conflict with an existing key if there is one.  (We recommend editing these options in the Preferences window.)</para>
       </formalpara>
       
-      
+     <!-- Compiler Options -->
+     <formalpara>
+<title>Compiler Options</title>
+<para>Configurable options relating to compiling source code in DrJava. Note that Compiler Warnings are not shown when compiling any Java Language Level files. Also note that the Compiler Warnings options are all passed using the "-Xlint:" flag, which is a non-standard option and may not work with all implementations of the JDK.</para>
+     </formalpara>
+     <variablelist>
+
+<varlistentry>
+  <term>Unchecked Warnings (<varname>show.unchecked.warnings = true</varname>)</term>
+  <listitem>
+   <para>Passes the "-Xlint:unchecked" warning to javac. This will give more detail for unchecked conversion warnings that are mandated by the Java Language Specification.</para>
+  </listitem>
+</varlistentry>
+
+<varlistentry>
+  <term>Deprecation Warnings (<varname>show.deprecation.warnings = true</varname>)</term>
+  <listitem>
+   <para>Passes the "-Xlint:deprecation" warning to javac. According to the JLS, this will show a description of each use or override of a deprecated member or class.</para>
+  </listitem>
+</varlistentry>
+
+<varlistentry>
+  <term>Path Warnings (<varname>show.path.warnings = false</varname>)</term>
+  <listitem>
+   <para>Passes the "-Xlint:path" warning to javac. According to the JLS, this will warn about non-existent path (classpath, sourcepath, etc.) directories.</para>
+  </listitem>
+</varlistentry>
+
+<varlistentry>
+  <term>Serial Warnings (<varname>show.serial.warnings = false</varname>)</term>
+  <listitem>
+   <para>Passes the "-Xlint:serial" warning to javac. According to the JLS, this will warn about missing serialVersionUID definitions on serializable classes.</para>
+  </listitem>
+</varlistentry>
+
+<varlistentry>
+  <term>Finally Warnings (<varname>show.finally.warnings = false</varname>)</term>
+  <listitem>
+   <para>Passes the "-Xlint:finally" warning to javac. According to the JLS, this will warn about finally clauses that cannot complete normally.</para>
+  </listitem>
+</varlistentry>
+
+<varlistentry>
+  <term>Fall-through Warnings (<varname>show.fallthrough.warnings = false</varname>)</term>
+  <listitem>
+   <para>Passes the "-Xlint:fallthrough" warning to javac. According to the JLS, this will check switch blocks for fall-through cases and provide a warning message for any that are found. Fall-through cases are cases in a switch block, other than the last case in the block, whose code does not include a break statement, allowing code execution to "fall through" from that case to the next case.</para>
+  </listitem>
+</varlistentry>
+
+     </variablelist>
+
 
       <!-- Debugger -->
       <formalpara>
@@ -1167,6 +1217,13 @@ public class Student {
      <para>The URL to use when generating links to JDK 1.4 library classes.</para>
    </listitem>
  </varlistentry>
+
+ <varlistentry>
+   <term>Javadoc 1.5 URL (<varname>javadoc.1.5.link = "http:/java.sun.com/j2se/1.5/docs/api"</varname>)</term>
+   <listitem>
+     <para>The URL to use when generating links to JDK 1.5 library classes.</para>
+   </listitem>
+</varlistentry>
 
  <varlistentry>
    <term>Default Destination Directory (<varname>javadoc.destination = ""</varname>)</term>
