@@ -149,9 +149,11 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    * @param inProgress whether the interpreter is currently in progress
    */
   private void _updateDocument(String prompt, boolean inProgress) {
-    _document.setPrompt(prompt);
-    _document.insertNewLine(_document.getDocLength());
-    _document.insertPrompt();
+    if (!_document.getPrompt().equals(prompt)) {
+      _document.setPrompt(prompt);
+      _document.insertNewLine(_document.getDocLength());
+      _document.insertPrompt();
+    }
     _document.setInProgress(inProgress);
   }
   

@@ -130,6 +130,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       lastIndex = index + separator.length();
       index = _startupClasspath.indexOf(separator, lastIndex);
     }
+    // Get the last entry
+    index = _startupClasspath.length();
+    _startupClasspathVector.addElement(_startupClasspath.substring(lastIndex, index));
   }
 
   public boolean isInterpreterRunning() {

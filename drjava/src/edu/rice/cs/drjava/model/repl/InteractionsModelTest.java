@@ -52,7 +52,7 @@ import edu.rice.cs.util.text.*;
  */
 public final class InteractionsModelTest extends TestCase {
   protected DocumentAdapter _adapter;
-  protected InteractionsModel _model;
+  protected TestInteractionsModel _model;
   
   public void setUp() {
     _adapter = new SwingDocumentAdapter();
@@ -74,49 +74,147 @@ public final class InteractionsModelTest extends TestCase {
   }
   
   /**
+   * Asserts that the given string typed by the user is processed
+   * to become the given expected string for an interpretation.
+   * @param typed A string typed by the user
+   * @param expected What the processor should return
+   */
+  protected void _assertProcessedContents(String typed, String expected)
+    throws DocumentAdapterException
+  {
+    InteractionsDocument doc = _model.getDocument();
+    doc.reset();
+    doc.insertText(doc.getDocLength(), typed,
+                   InteractionsDocument.DEFAULT_STYLE);
+    _model.interpretCurrentInteraction();
+    assertEquals("processed output should match expected",
+                 expected, _model.toEval);
+  }
+  
+  
+  /**
    * Tests that the correct text is returned when interpreting.
    */
   public void testInterpretCurrentInteraction() throws DocumentAdapterException {
-    TestInteractionsModel model = new TestInteractionsModel(_adapter) {
-      protected void _interpret(String toEval) {
-        this.toEval = toEval;
-      }
-    };
     String code = "int x = 3;";
-    InteractionsDocument doc = model.getDocument();
-    model.interpretCurrentInteraction();
+    InteractionsDocument doc = _model.getDocument();
+    _model.interpretCurrentInteraction();
     // pretend the call completed
-    model.replReturnedVoid();
-    assertEquals("string being interpreted", "", model.toEval);
+    _model.replReturnedVoid();
+    assertEquals("string being interpreted", "", _model.toEval);
     
     // Insert text and evaluate
     doc.insertText(doc.getDocLength(), code,
                    InteractionsDocument.DEFAULT_STYLE);
-    model.interpretCurrentInteraction();
+    _model.interpretCurrentInteraction();
     // pretend the call completed
-    model.replReturnedVoid();
-    assertEquals("string being interpreted", code, model.toEval);
+    _model.replReturnedVoid();
+    assertEquals("string being interpreted", code, _model.toEval);
   }
   
   /**
-   * Tests that "java Classname" runs the class's main method.
+   * Tests that "java Classname [args]" runs the class's main method, with
+   * simple delimited arguments.
    */
-  public void testInterpretJavaClassname() throws DocumentAdapterException {
-    TestInteractionsModel model = new TestInteractionsModel(_adapter) {
-      protected void _interpret(String toEval) {
-        this.toEval = toEval;
-      }
-    };
-    String code = "java Foo arg1 arg2";
-    InteractionsDocument doc = model.getDocument();
-    doc.insertText(doc.getDocLength(), code,
-                   InteractionsDocument.DEFAULT_STYLE);
-    model.interpretCurrentInteraction();
-    // Arguments must be quoted as strings
-    assertEquals("string being interpreted",
-                 "Foo.main(new String[]{\"arg1\",\"arg2\"});",
-                 model.toEval);
+  public void testInterpretJavaArguments() throws DocumentAdapterException {
+    // java Foo a b c
+    _assertProcessedContents("java Foo a b c",
+                             "Foo.main(new String[]{\"a\",\"b\",\"c\"});");
+    // java Foo "a b c"
+    _assertProcessedContents("java Foo \"a b c\"",
+                             "Foo.main(new String[]{\"a b c\"});");
+    // java Foo "a b"c d
+    //  This is different behavior than Unix or DOS, but it's more
+    //  intuitive to the user (and easier to implement).
+    _assertProcessedContents("java Foo \"a b\"c d",
+                             "Foo.main(new String[]{\"a b\",\"c\",\"d\"});");
+
   }
+
+  /**
+   * Tests that escaped characters just return the character itself.
+   * Escaped whitespace is considered a character, not a delimiter.
+   * (This is how Unix behaves.)
+   *
+   * not currently enforcing any behavior for a simple implementation
+   * using a StreamTokenizer
+   *
+  public void testInterpretJavaEscapedArgs() throws DocumentAdapterException {
+    // java Foo \j
+    // Foo.main(new String[]{"j"});
+    _assertProcessedContents("java Foo \\j",
+                             "Foo.main(new String[]{\"j\"});");
+    // java Foo \"
+    // Foo.main(new String[]{"\""});
+    _assertProcessedContents("java Foo \\\"",
+                             "Foo.main(new String[]{\"\\\"\"});");
+    // java Foo \\
+    // Foo.main(new String[]{"\\"});
+    _assertProcessedContents("java Foo \\\\",
+                             "Foo.main(new String[]{\"\\\\\"});");
+    // java Foo a\ b
+    // Foo.main(new String[]{"a b"});
+    _assertProcessedContents("java Foo a\\ b",
+                             "Foo.main(new String[]{\"a b\"});");
+  }*/
+  
+  /**
+   * Tests that within a quote, everything is correctly escaped.
+   * (Special characters are passed to the program correctly.)
+   */
+  public void testInterpretJavaQuotedEscapedArgs() throws DocumentAdapterException {
+    // java Foo "a \" b"
+    // Foo.main(new String[]{"a \" b"});
+    _assertProcessedContents("java Foo \"a \\\" b\"",
+                             "Foo.main(new String[]{\"a \\\" b\"});");
+    // java Foo "\'"
+    // Foo.main(new String[]{"'"});
+    _assertProcessedContents("java Foo \"\\'\"",
+                             "Foo.main(new String[]{\"'\"});");
+    // java Foo "\\"
+    // Foo.main(new String[]{"\\"});
+    _assertProcessedContents("java Foo \"\\\\\"",
+                             "Foo.main(new String[]{\"\\\\\"});");
+    // java Foo "\" \d"
+    // Foo.main(new String[]{"\" d"});
+    _assertProcessedContents("java Foo \"\\\" \\d\"",
+                             "Foo.main(new String[]{\"\\\" d\"});");
+    // java Foo "\n"
+    // Foo.main(new String[]{"\n"});
+    _assertProcessedContents("java Foo \"\\n\"",
+                             "Foo.main(new String[]{\"\\n\"});");
+    // java Foo "\t"
+    // Foo.main(new String[]{"\t"});
+    _assertProcessedContents("java Foo \"\\t\"",
+                             "Foo.main(new String[]{\"\\t\"});");
+    // java Foo "\r"
+    // Foo.main(new String[]{"\r"});
+    _assertProcessedContents("java Foo \"\\r\"",
+                             "Foo.main(new String[]{\"\\r\"});");
+    // java Foo "\f"
+    // Foo.main(new String[]{"\f"});
+    _assertProcessedContents("java Foo \"\\f\"",
+                             "Foo.main(new String[]{\"\\f\"});");
+    // java Foo "\b"
+    // Foo.main(new String[]{"\b"});
+    _assertProcessedContents("java Foo \"\\b\"",
+                             "Foo.main(new String[]{\"\\b\"});");
+  }
+
+  /**
+   * Tests that single quotes cannot be used as argument delimiters.
+   * This is consistent with DOS, not with Unix.
+   */
+  public void testInterpretJavaSingleQuotedArgs() throws DocumentAdapterException {
+    // java Foo 'asdf'
+    _assertProcessedContents("java Foo 'asdf'",
+                             "Foo.main(new String[]{\"'asdf'\"});");
+    // java Foo 'a b c'
+    _assertProcessedContents("java Foo 'a b c'",
+                             "Foo.main(new String[]{\"'a\",\"b\",\"c'\"});");
+  }
+  
+  
   
   //public void testLoadHistory();
   // TO DO: test that the correct history is returned (careful of last newline)
@@ -153,7 +251,7 @@ public final class InteractionsModelTest extends TestCase {
     }
     
     protected void _interpret(String toEval) {
-      fail("cannot interpret in a test");
+      this.toEval = toEval;
     }
     public void addToClassPath(String path) {
       fail("cannot add to classpath in a test");

@@ -346,26 +346,27 @@ public class DrJava implements OptionConstants {
         String fs = "/"; // In jar files, the file separator is always '/'
         String checkClass = "com" + fs + "sun" + fs + "tools" + fs + "javac" + fs + "comp" + fs + "Check.class";
         if (jsr14jar.getJarEntry(checkClass) != null) {
+          
+          // If we're using Java 1.3, don't allow JSR14v20
+          if (System.getProperty("java.specification.version").equals("1.3")) {
+            // Show a warning message, but only if we haven't restarted
+            if (!_attemptingAugmentedClasspath) {
+              String msg = "The JSR-14 v2.0 compiler is not compatible with JDK 1.3.\n" +
+                "It will not be available in your list of compilers.";
+              String title = "Cannot Load JSR-14 v2.0";
+              JOptionPane.showMessageDialog(null, msg, title,
+                                            JOptionPane.WARNING_MESSAGE);
+            }
+            return false;
+          }
+          
           return true;
         }
       }
       catch (IOException ex) {
         // if there was an error loading the jar file, just return false
       }
-/* 
-      try {
-        URL[] urls = new URL[] { jsr14.toURL() };
-        URLClassLoader cl = new URLClassLoader(urls);
-        cl.loadClass("com.sun.tools.javac.comp.Check");
-        //System.out.println("Using JSR14v20 is true!");
-        return true;
-      }
-      catch (Throwable t) {
-        // failed to load class, so we're not using jsr14 v2.0
-      }
-*/
-      // this method fails if JSR14 v2.0 is on the classpath but a different
-      // version is specified in the preferences.
+
     }
     // either caught an exception thrown by the classloader or had no jsr14 specified.
     // Therefore, not using jsr14 v2.0.

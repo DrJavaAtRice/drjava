@@ -147,15 +147,15 @@
        Deletes the compiled classes when finished.
     -->
   <target name="compile-jsr14v1_0">
-    <property name="projpath_jsr14v1_0" 
-              value="src-jsr14v1_0/edu/rice/cs/${ant.project.name}" />
+    <property name="srcroot_jsr14v1_0" 
+              value="${srcroot}/src-jsr14v1_0" />
     <property name="built_jsr14v1_0"
               value="${srcroot}/../built-jsr14v1_0/" />
 
     <!-- Build the classes -->
     <mkdir dir="${built_jsr14v1_0}" />
     <antcall target="do-compile">
-      <param name="projpath" value="${projpath_jsr14v1_0}" />
+      <param name="srcroot" value="${srcroot_jsr14v1_0}" />
       <param name="built" value="${built_jsr14v1_0}" />
     </antcall>
 
@@ -180,15 +180,15 @@
        Deletes the compiled classes when finished.
     -->
   <target name="compile-jsr14v1_2">
-    <property name="projpath_jsr14v1_2" 
-              value="src-jsr14v1_2/edu/rice/cs/${ant.project.name}" />
+    <property name="srcroot_jsr14v1_2" 
+              value="${srcroot}/src-jsr14v1_2" />
     <property name="built_jsr14v1_2"
               value="${srcroot}/../built-jsr14v1_2/" />
 
     <!-- Build the classes -->
     <mkdir dir="${built_jsr14v1_2}" />
     <antcall target="do-compile">
-      <param name="projpath" value="${projpath_jsr14v1_2}" />
+      <param name="srcroot" value="${srcroot_jsr14v1_2}" />
       <param name="built" value="${built_jsr14v1_2}" />
     </antcall>
 
@@ -213,15 +213,15 @@
        Deletes the compiled classes when finished.
     -->
   <target name="compile-jsr14v2_0">
-    <property name="projpath_jsr14v2_0" 
-              value="src-jsr14v2_0/edu/rice/cs/${ant.project.name}" />
+    <property name="srcroot_jsr14v2_0" 
+              value="${srcroot}/src-jsr14v2_0" />
     <property name="built_jsr14v2_0"
               value="${srcroot}/../built-jsr14v2_0/" />
 
     <!-- Build the classes -->
     <mkdir dir="${built_jsr14v2_0}" />
-    <javac srcdir="${srcroot}"
-           includes="${projpath_jsr14v2_0}/**/*java"
+    <javac srcdir="${srcroot_jsr14v2_0}"
+           includes="${projpath}/**/*java"
            destdir="${built_jsr14v2_0}" 
            bootclasspath="${jsr14_classpath}:${sun.boot.class.path}"
            classpath="${classpath_text}"
@@ -260,15 +260,15 @@
        Deletes the compiled classes when finished.
     -->
   <target name="compile-mac13">
-    <property name="projpath_mac13" 
-              value="src-mac13/edu/rice/cs/${ant.project.name}" />
+    <property name="srcroot_mac13" 
+              value="${srcroot}/src-mac13" />
     <property name="built_mac13"
               value="${srcroot}/../built-mac13/" />
 
     <!-- Build the classes -->
     <mkdir dir="${built_mac13}" />
     <antcall target="do-compile">
-      <param name="projpath" value="${projpath_mac13}" />
+      <param name="srcroot" value="${srcroot_mac13}" />
       <param name="built" value="${built_mac13}" />
     </antcall>
 
@@ -293,15 +293,15 @@
        Deletes the compiled classes when finished.
     -->
   <target name="test-mac13">
-    <property name="projpath_mac13" 
-              value="src-mac13/edu/rice/cs/${ant.project.name}" />
+    <property name="srcroot_mac13" 
+              value="${srcroot}/src-mac13" />
     <property name="built_mac13"
               value="${srcroot}/../built-mac13/" />
 
     <!-- Build the classes -->
     <mkdir dir="${built_mac13}" />
     <antcall target="do-compile">
-      <param name="projpath" value="${projpath_mac13}" />
+      <param name="srcroot" value="${srcroot_mac13}" />
       <param name="built" value="${built_mac13}" />
     </antcall>
 
@@ -339,15 +339,15 @@
        Deletes the compiled classes when finished.
     -->
   <target name="compile-mac14">
-    <property name="projpath_mac14" 
-              value="src-mac14/edu/rice/cs/${ant.project.name}" />
+    <property name="srcroot_mac14" 
+              value="${srcroot}/src-mac14" />
     <property name="built_mac14"
               value="${srcroot}/../built-mac14/" />
 
     <!-- Build the classes -->
     <mkdir dir="${built_mac14}" />
     <antcall target="do-compile">
-      <param name="projpath" value="${projpath_mac14}" />
+      <param name="srcroot" value="${srcroot_mac14}" />
       <param name="built" value="${built_mac14}" />
     </antcall>
 
@@ -372,15 +372,15 @@
        Deletes the compiled classes when finished.
     -->
   <target name="test-mac14">
-    <property name="projpath_mac14" 
-              value="src-mac14/edu/rice/cs/${ant.project.name}" />
+    <property name="srcroot_mac14" 
+              value="${srcroot}/src-mac14" />
     <property name="built_mac14"
               value="${srcroot}/../built-mac14/" />
 
     <!-- Build the classes -->
     <mkdir dir="${built_mac14}" />
     <antcall target="do-compile">
-      <param name="projpath" value="${projpath_mac14}" />
+      <param name="srcroot" value="${srcroot_mac14}" />
       <param name="built" value="${built_mac14}" />
     </antcall>
 
@@ -418,15 +418,15 @@
        Deletes the compiled classes when finished.
     -->
   <target name="compile-windows">
-    <property name="projpath_windows" 
-              value="src-windows/edu/rice/cs/${ant.project.name}" />
+    <property name="srcroot_windows" 
+              value="${srcroot}/src-windows" />
     <property name="built_windows"
               value="${srcroot}/../built-windows/" />
 
     <!-- Build the classes -->
     <mkdir dir="${built_windows}" />
     <antcall target="do-compile">
-      <param name="projpath" value="${projpath_windows}" />
+      <param name="srcroot" value="${srcroot_windows}" />
       <param name="built" value="${built_windows}" />
     </antcall>
 
@@ -451,15 +451,15 @@
        Deletes the compiled classes when finished.
     -->
   <target name="test-windows">
-    <property name="projpath_windows" 
-              value="src-mac14/edu/rice/cs/${ant.project.name}" />
+    <property name="srcroot_windows" 
+              value="${srcroot}/src-windows" />
     <property name="built_windows"
               value="${srcroot}/../built-windows/" />
 
     <!-- Build the classes -->
     <mkdir dir="${built_windows}" />
     <antcall target="do-compile">
-      <param name="projpath" value="${projpath_windows}" />
+      <param name="srcroot" value="${srcroot_windows}" />
       <param name="built" value="${built_windows}" />
     </antcall>
 

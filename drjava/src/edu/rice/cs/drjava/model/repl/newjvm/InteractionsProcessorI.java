@@ -46,5 +46,4 @@ import edu.rice.cs.javaast.parser.ParseException;
  */
 public interface InteractionsProcessorI {
   public String preProcess(String s) throws ParseException;
-  public String postProcess(String s, Object result);
 }

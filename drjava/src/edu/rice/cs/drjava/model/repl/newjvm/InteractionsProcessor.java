@@ -50,10 +50,10 @@ import java.io.*;
  * @version $Id$
  */
 public class InteractionsProcessor implements InteractionsProcessorI {
-
   
   /**
    * Processes each command sent to the interpreter.
+   * Currently type-erases any GJ-style generic code.
    * @param s String typed by the user
    * @return Processed String to send to the interpreter
    */
@@ -62,18 +62,13 @@ public class InteractionsProcessor implements InteractionsProcessorI {
     InteractionsInput tree = new GJParser( new StringReader( s ) ).InteractionsInput();
     JavaASTVisitor typeEraser = (JavaASTVisitor) new TypeEraser();
     JavaAST typeErasedTree = (JavaAST) tree.accept( typeEraser );
-    //precalled = true;
     String source =  InteractionsPrinter.generateSource( typeErasedTree );
-    //System.out.println("Interpreting: " + source);
+    // System.out.println("Interpreting: " + source);
     return source;
   }
 
-  /**
-   * 
-   */
-  public String postProcess(String s, Object result)
-  {
-    //postcalled = true;
-    return s;
-  }
+  // postProcess method removed for now:
+  //  Contract was unclear, since it didn't do anything.  If we find a good
+  //  use for post-processing, we'll add it again here.
+  
 } 

@@ -50,25 +50,33 @@ import edu.rice.cs.javaast.*;
  */
 public final class InteractionsProcessorTest extends TestCase {
 
-  TestInteractionsProcessor _ip;
+  /**
+   * InteractionsProcessor to be used in the test methods.
+   */
+  InteractionsProcessor _ip;
 
-  public InteractionsProcessorTest(String s)
-  {
-    super(s);
+  protected void setUp() {
+    _ip = new InteractionsProcessor();
   }
 
-  protected void setUp()
+  /**
+   * Tests a simple assignment to be sure it works.  More comprehensive
+   * parser tests are in edu.rice.cs.javaast.InteractionsParserTest.
+   */
+  public void testPreProcessAssignment() throws ParseException
   {
-    _ip = new TestInteractionsProcessor();
+    String s = _ip.preProcess("int x = 3;");
+    assertEquals("assignment", "int x = 3;", s);
   }
-
-  public void testPreProcess() throws ParseException
+  
+  /**
+   * Tests that generic statements are type erased.  More comprehensive
+   * generic tests are in edu.rice.cs.javaast.TypeEraserTest.
+   */
+  public void testPreProcessGenerics() throws ParseException
   {
-    String s = _ip.preProcess("0");
-    assertTrue("InteractionProcessor.testPreProcess:", _ip.precalled);
-    
-    // this test is presumptive for the real preprocessor, correct? -jvf
-    //assertEquals("InteractionProcessor.testPreProcess:", "0", s);
+    String s = _ip.preProcess("Vector<String> v = new Vector<String>();");
+    assertEquals("type-erased assignment", "Vector v = new Vector();", s);
   }
   
   /**
@@ -99,29 +107,6 @@ public final class InteractionsProcessorTest extends TestCase {
     }
     catch( TokenMgrError tme ){
      // this was what we wanted.
-    }
-  }
-
-  /**
-   * Tests that post-process currently does nothing.
-   */
-  public void testPostProcess()
-  {
-    String s = _ip.postProcess("0", null);
-    assertTrue("InteractionProcessor.testPostProcess:", _ip.postcalled);
-    assertEquals("InteractionProcessor.testPostProcess:", "0", s);
-  }
-  
-  static class TestInteractionsProcessor extends InteractionsProcessor {
-    boolean precalled = false;
-    boolean postcalled = false;
-    public String preProcess(String s) throws ParseException {
-      precalled = true;
-      return super.preProcess(s);
-    }
-    public String postProcess(String s, Object result) {
-      postcalled = true;
-      return super.postProcess(s, result);
     }
   }
 }
