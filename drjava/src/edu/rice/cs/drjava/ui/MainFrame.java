@@ -436,7 +436,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Asks user for directory name and and reads it's files (and subdirectories files, on request) to
    * the definitions pane.
    */
-  private Action _openFolderAction = new AbstractAction("Open Folder...") {
+  private Action _openFolderAction  = new AbstractAction("Open Folder...") {
     public void actionPerformed(ActionEvent ae) {
       openFolder(_folderSelector);
     }
@@ -2360,6 +2360,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       try{
         opendir = _model.getActiveDocument().getFile().getParentFile();
       }catch(FileMovedException e){
+      }catch(IllegalStateException e){
       }
       
       

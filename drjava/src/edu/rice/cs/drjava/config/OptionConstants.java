@@ -797,6 +797,21 @@ public interface OptionConstants {
     new KeyStrokeOption("key.about",
                         KeyStrokeOption.NULL_KEYSTROKE);
 
+  
+  /* ---------- Find Replace Options ---------- */
+  
+  public static final BooleanOption FIND_MATCH_CASE = 
+    new BooleanOption("find.replace.match.case", Boolean.TRUE);
+  
+  public static final BooleanOption FIND_SEARCH_BACKWARDS = 
+    new BooleanOption("find.replace.search.backwards", Boolean.FALSE);
+  
+  public static final BooleanOption FIND_WHOLE_WORD = 
+    new BooleanOption("find.replace.search.backwards", Boolean.FALSE);
+  
+  public static final BooleanOption FIND_ALL_DOCUMENTS = 
+    new BooleanOption("find.replace.all.documents", Boolean.FALSE);
+  
 
   /* ---------- Debugger Options ---------- */
 
