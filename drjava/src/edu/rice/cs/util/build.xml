@@ -65,9 +65,11 @@
 
   <target name="compile" depends="do-compile">
     <rmic base="${built}"
+      classpath="${classpath_text}"
       classname="edu.rice.cs.util.newjvm.IntegratedMasterSlaveTest.MasterImpl" />
 
     <rmic base="${built}"
+      classpath="${classpath_text}"
       classname="edu.rice.cs.util.newjvm.IntegratedMasterSlaveTest.CounterSlave" />
 
   </target>
