@@ -61,7 +61,7 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
   
   // Class patterns for which we don't want events
   private String[] excludes = {"java.*", "javax.*", "sun.*", 
-    "com.sun.*", "koala.*"};
+    "com.sun.*"};
    
   /**
    * @throws IllegalStateException if the document does not have a file
@@ -91,12 +91,19 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
    */
   protected void _createRequest() throws DebugException {
     //DrJava.consoleOut().println("Step._createRequest starting...");
+    boolean stepJava = DrJava.CONFIG.getSetting(DEBUG_STEP_JAVA).booleanValue();  
+    boolean stepInterpreter = DrJava.CONFIG.getSetting(DEBUG_STEP_INTERPRETER).booleanValue();  
     boolean stepDrJava = DrJava.CONFIG.getSetting(DEBUG_STEP_DRJAVA).booleanValue();  
     
     _request = _manager.getEventRequestManager().
       createStepRequest(_manager.getCurrentThread(), _size, _depth);
-    for (int i=0; i<excludes.length; ++i) {
-      _request.addClassExclusionFilter(excludes[i]);
+    if (!stepJava) {
+      for (int i=0; i<excludes.length; ++i) {
+        _request.addClassExclusionFilter(excludes[i]);
+      }
+    }
+    if (!stepInterpreter) {
+      _request.addClassExclusionFilter("koala.*");
     }
     if (!stepDrJava) {
       _request.addClassExclusionFilter("edu.rice.cs.drjava.*");

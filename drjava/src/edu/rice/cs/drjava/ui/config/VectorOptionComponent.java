@@ -40,11 +40,13 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.ui.config;
 
 import javax.swing.*;
+import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import javax.swing.filechooser.FileFilter;
 
 import gj.util.Vector;
 
@@ -65,6 +67,7 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
   private JButton _moveUpButton;
   private JButton _moveDownButton;
   private DefaultListModel _listModel;
+  private FileFilter _fileFilter;
   
   public VectorOptionComponent (VectorOption opt, String text, Frame parent) {
     super(opt, text, parent);
@@ -73,6 +76,7 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
     _listModel = new DefaultListModel();
     _list = new JList(_listModel);
     resetToCurrent();
+    _fileFilter = new ClasspathFilter();
     /*
     Vector v = DrJava.CONFIG.getSetting(_option);
     String[] array = new String[v.size()];
@@ -189,6 +193,13 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
   public JComponent getComponent() { return _panel; }
   
   /**
+   * Set the file filter for this vector option component
+   */
+  public void setFileFilter(FileFilter fileFilter) {
+    _fileFilter = fileFilter;
+  }
+  
+  /**
    * Shows a file chooser for adding a file to the element.
    */
   public void chooseFile() {
@@ -201,7 +212,9 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
       workDir = workDir.getParentFile();
     }
     JFileChooser jfc = new JFileChooser(workDir);
+    jfc.setApproveButtonText("Select");
     jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+    jfc.setFileFilter(_fileFilter);
     File c = null;
     int returnValue = jfc.showDialog(_parent,
                                      null);

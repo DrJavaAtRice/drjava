@@ -500,6 +500,18 @@ public interface OptionConstants extends ConfigurationTool {
     new ClasspathOption().evaluate("debug.sourcepath");
   
   /**
+   * Whether stepping should step through Java's source files
+   */    
+  public static final BooleanOption DEBUG_STEP_JAVA =
+    new BooleanOption("debug.step.java", new Boolean(false));
+  
+  /**
+   * Whether stepping should step through Dynamic Java's source files
+   */    
+  public static final BooleanOption DEBUG_STEP_INTERPRETER =
+    new BooleanOption("debug.step.interpreter", new Boolean(false));
+  
+  /**
    * Whether stepping should step through DrJava's source files
    */    
   public static final BooleanOption DEBUG_STEP_DRJAVA =

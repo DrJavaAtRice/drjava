@@ -42,6 +42,7 @@ package edu.rice.cs.drjava.ui.config;
 import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.event.*;
+import javax.swing.filechooser.FileFilter;
 import java.awt.event.*;
 import java.awt.*;
 import java.util.Enumeration;
@@ -419,8 +420,34 @@ public class ConfigFrame extends JFrame {
    * Add all of the components for the Debugger panel of the preferences window.
    */ 
   private void _setupDebugPanel ( ConfigPanel panel) {
-    panel.addComponent( new VectorOptionComponent (OptionConstants.DEBUG_SOURCEPATH, "Sourcepath", this));
-    panel.addComponent( new BooleanOptionComponent ( OptionConstants.DEBUG_STEP_DRJAVA, "Step through DrJava Source", this));
+    VectorOptionComponent sourcePath = new VectorOptionComponent (OptionConstants.DEBUG_SOURCEPATH, 
+                                                                  "Sourcepath", 
+                                                                  this);
+    sourcePath.setFileFilter(new FileFilter() {
+      public boolean accept (File f) {
+        if (f.isDirectory()) {
+          return true;
+        }
+        return false;
+      }
+
+      /**
+       * @return A description of this filter to display
+       */
+      public String getDescription() {
+        return "Source Directories";
+      }
+    });
+    panel.addComponent( sourcePath );
+    panel.addComponent( new BooleanOptionComponent ( OptionConstants.DEBUG_STEP_JAVA, 
+                                                    "Step Into Java Classes", 
+                                                    this));
+    panel.addComponent( new BooleanOptionComponent ( OptionConstants.DEBUG_STEP_INTERPRETER, 
+                                                    "Step Into Interpreter Classes", 
+                                                    this));
+    panel.addComponent( new BooleanOptionComponent ( OptionConstants.DEBUG_STEP_DRJAVA, 
+                                                    "Step Into DrJava Classes", 
+                                                    this));
     panel.displayComponents();
   }
   

@@ -37,48 +37,53 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import  java.io.File;
+import  javax.swing.filechooser.FileFilter;
+
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020723-2244;
- *
+ * A file filter for files with extensions ".jar" and ".zip".
+ * Used in the file choosers for extra classpath option.
  * @version $Id$
  */
-public abstract class Version {
+public class ClasspathFilter extends FileFilter {
+
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Returns true if the file's extension matches JAR or ZIP.
    */
-  private static final String BUILD_TIME_STRING = "20020723-2244";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+  public boolean accept(File f) {
+    if (f.isDirectory()) {
+      return true;
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
+    String extension = getExtension(f);
+    if (extension != null) {
+      return (extension.equals("jar") || extension.equals("zip"));
     }
+    return false;
   }
 
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
+  /**
+   * @return A description of this filter to display
+   */
+  public String getDescription() {
+    return "Classpath elements";
   }
-} 
+
+  /*
+   * Get the extension of a file.
+   */
+  public static String getExtension(File f) {
+    String ext = null;
+    String s = f.getName();
+    int i = s.lastIndexOf('.');
+    if (i > 0 && i < s.length() - 1) {
+      ext = s.substring(i + 1).toLowerCase();
+    }
+    return ext;
+  }
+}
+
+
+
