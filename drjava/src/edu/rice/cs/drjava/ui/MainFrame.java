@@ -2157,16 +2157,21 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       
       //close the last file
-      _model.closeFile(last);
-      
-      if(_model.getDocumentCount() == 1){
-        _model.setActiveFirstDocument();
+      if (_model.closeFile(last))
+      {        
+        if(_model.getDocumentCount() == 1){
+          _model.setActiveFirstDocument();
+        }
+        else {
+          /* this will select the active document in the navigator, which
+           * will signal a listener to call _setActiveDoc(...)
+           */
+          nav.setActiveDoc(switchTo);
+        }
       }
-      else {
-        /* this will select the active document in the navigator, which
-         * will signal a listener to call _setActiveDoc(...)
-         */
-        nav.setActiveDoc(switchTo);
+      else
+      {
+       nav.setActiveDoc(_model.getIDocGivenODD(last)); 
       }
     }
   }
