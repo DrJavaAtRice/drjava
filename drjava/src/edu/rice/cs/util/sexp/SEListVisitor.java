@@ -43,48 +43,16 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
+package edu.rice.cs.util.sexp;
 
 /**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20040701-1815;
- *
- * @version $Id$
+ * Just your every-day visitor.  It works on the lists only.<br>
+ * The return types are parameterized.
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20040701-1815";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+public interface SEListVisitor<Ret> {
+  
+  public Ret forEmpty(Empty e);
+  
+  public Ret forCons(Cons c);
+    
+}
