@@ -161,7 +161,7 @@
 
     <formalpara>
       <title>How to Use</title>
-      <para>The Interactions Pane supports the execution of any valid Java statements as well as the evaluation of Java expressions.  Simply define variables and call methods as you would in an ordinary method, or even define new classes and methods and call them interactively.  In general, any statement or expression ending without a semicolon will display its result in the Interactions Pane, while those ending with a semicolon will complete without displaying a result.  Result objects are displayed using the object's toString() method.  Any system output will be displayed in the Interactions Pane in green (as well as in the Console tab), while system errors will be displayed in red by default.  Any system input will cause a rectangle to be inserted in the Interactions Pane where you can type what you want System.in to read. This text will be colored purple. These colors can be modified in the "Colors" section in the Preferences window.</para>
+      <para>The Interactions Pane supports the execution of any valid Java statements as well as the evaluation of Java expressions.  Simply define variables and call methods as you would in an ordinary method, or even define new classes and methods and call them interactively.  In general, any statement or expression ending without a semicolon will display its result in the Interactions Pane, while those ending with a semicolon will complete without displaying a result.  Result objects are displayed using the object's toString() method.  Any system output will be displayed in the Interactions Pane in green (as well as in the Console tab), while system errors will be displayed in red by default.  Any system input will cause a box to be inserted in the Interactions Pane where you can type what you want System.in to read. This text will be colored purple. These colors can be modified in the "Colors" section in the Preferences window.</para>
     </formalpara>
     
     <para>Here is a simple interactions session, to demonstrate how the Interactions Pane can be used to experiment with objects or show GUI components.</para>
@@ -204,7 +204,12 @@ Welcome to DrJava.
 
     <formalpara>
       <title>Saving the Interactions History</title>
-      <para>You can save all of your past interactions to a file at any time, using the "Save Interactions History" command in the Tools menu.  This command gives you the option to edit any part of the history before saving it, through  a separate window that supports editing.  By default, up to 500 of the most recent Interaction commands are kept in this history, though this number is configurable.  Histories are saved in files with a <filename>.hist</filename> extension, and they can be loaded back into the Interactions Pane with the "Load Interactions History" command in the Tools menu.  Saving and loading histories can be particularly useful for initial setup of an often repeated task, such as importing several packages and initializing frequently used variables.  To help manage the history, a "Clear Interactions History" command is also provided in the Tools menu.</para>
+      <para>You can save all of your past interactions to a file at any time, using the "Save Interactions History" command in the Tools and popup menus.  This command gives you the option to edit any part of the history before saving it, through  a separate window that supports editing.  By default, up to 500 of the most recent Interaction commands are kept in this history, though this number is configurable.  Histories are saved in files with a <filename>.hist</filename> extension, and they can be later executed in the Interactions Pane with the "Execute Interactions History" command in the Tools menu.  Saving and executing histories can be particularly useful for initial setup of an often repeated task, such as importing several packages and initializing frequently used variables.  To help manage the history, a "Clear Interactions History" command is also provided in the Tools menu.</para>
+    </formalpara>
+
+    <formalpara>
+      <title>Loading a History File as a Script</title>
+      <para>You can load a history file as a script that can be executed one line at a time, using the "Load Interactions History as Script" command in the Tools and popup menus.  A panel will appear on the right side of the Interactions Pane with buttons that allow you to display the previous interaction, execute the current interaction, display the next interaction, and close the panel.  This feature is useful during presentations because you can step through a series of interactions that has been prepared in advance, allowing the audience to see the result of each interaction.</para>
     </formalpara>
 
     <formalpara>
@@ -800,7 +805,7 @@ public class Student {
  <varlistentry>
    <term>Background Color (<varname>definitions.background.color = #FFFFFF</varname>)</term>
    <listitem>
-     <para>Used as the background color for the Definitions Pane.</para>
+     <para>Used as the background color for all panes.</para>
    </listitem>
  </varlistentry>
 
