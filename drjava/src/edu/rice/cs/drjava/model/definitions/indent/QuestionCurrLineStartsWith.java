@@ -67,7 +67,7 @@ public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
    
   /**
    * Determines if the current line in the document starts with the
-   * specified character.
+   * specified prefix, ignoring whitespace.
    * @param doc DefinitionsDocument containing the line to be indented.
    * @return true if this node's rule holds.
    */
@@ -76,12 +76,16 @@ public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
       try {
       // Find start of line
       int here = doc.getCurrentLocation();
-      int startLine = doc.getLineStartPos(here);
-      
-      int firstChar = doc.getLineFirstCharPos(startLine);
+      int firstCharPos = doc.getLineFirstCharPos(here);
+      int lineEndPos = doc.getLineEndPos(here);
+
+      // If prefix would run off the end of the line, the answer is obvious.
+      if (firstCharPos + _prefix.length() > lineEndPos) {
+        return false;
+      }
       
       // Compare prefix
-      String actualPrefix = doc.getText(firstChar, _prefix.length());
+      String actualPrefix = doc.getText(firstCharPos, _prefix.length());
       return _prefix.equals(actualPrefix);
     }
     catch (BadLocationException e) {

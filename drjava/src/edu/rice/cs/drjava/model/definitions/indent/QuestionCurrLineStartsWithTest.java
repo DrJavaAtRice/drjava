@@ -134,21 +134,7 @@ public class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("dot star dot", rule.applyRule(_doc, 7));
     assertTrue("dot star dot text", rule.applyRule(_doc, 9));
   }
-  
-  /**
-   * Tests having a comment before the prefix.
-   *
-  public void testStartsWithPrefixWithComment() throws BadLocationException {
-    IndentRuleQuestion rule = new QuestionCurrLineStartsWith("}", null, null);
     
-    // Prefix in text, with comment before
-    _setDocText("foo();\n/** comment * /}\nbar();\n");
-    assertTrue("line before brace", !rule.applyRule(_doc, 0));
-    assertTrue("just before brace", rule.applyRule(_doc, 7));
-    assertTrue("just after brace", rule.applyRule(_doc, 22));
-    assertTrue("line after brace", !rule.applyRule(_doc, 23));
-  }*/
-  
   /**
    * Tests having a commented prefix without searching in comments.
    */
@@ -160,16 +146,6 @@ public class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("just before brace", !rule.applyRule(_doc, 7));
     assertTrue("just after brace", !rule.applyRule(_doc, 11));
     assertTrue("line after brace", !rule.applyRule(_doc, 12));
-    
-    /*
-    // Close brace in comment
-    rule = new QuestionCurrLineStartsWith("}", false, null, null);
-    _setDocText("/**\n}\n* /\n");
-    assertTrue("line before brace", !rule.applyRule(_doc, 0));
-    assertTrue("just before brace", !rule.applyRule(_doc, 4));
-    assertTrue("just after brace", !rule.applyRule(_doc, 5));
-    assertTrue("line after brace", !rule.applyRule(_doc, 7));
-    */
   }
 
   /**
@@ -200,5 +176,31 @@ public class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("line after brace", !rule.applyRule(_doc, 10));
   }
 
-
+  /**
+   * Prefix appears at the end of a document.
+   */
+  public void testPrefixAtEnd() throws BadLocationException {
+    IndentRuleQuestion rule = new QuestionCurrLineStartsWith("}", null, null);
+    
+    _setDocText("void foo() {\n}");
+    assertTrue("first line", !rule.applyRule(_doc, 3));
+    assertTrue("end of first line", !rule.applyRule(_doc, 12));
+    assertTrue("beginning of second line", rule.applyRule(_doc, 13));
+    assertTrue("end of second line", rule.applyRule(_doc, 14));
+  }
+  
+  /**
+   * Tests multiple-character prefix.
+   */
+  public void testMultCharPrefix() throws BadLocationException {
+    IndentRuleQuestion rule = new QuestionCurrLineStartsWith("abcdefg", null, null);
+    
+    _setDocText("   abcdefghij\n  abcde");
+    assertTrue("first line, beginning", rule.applyRule(_doc, 0));
+    assertTrue("first line, mid", rule.applyRule(_doc, 6));
+    assertTrue("first line, end", rule.applyRule(_doc, 13));
+    assertTrue("second line, beginning", !rule.applyRule(_doc, 14));
+    assertTrue("second line, mid", !rule.applyRule(_doc, 18));
+    assertTrue("second line, end", !rule.applyRule(_doc, 21));    
+  }
 }
