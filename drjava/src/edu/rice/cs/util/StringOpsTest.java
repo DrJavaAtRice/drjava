@@ -39,43 +39,28 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
 
-import  junit.framework.*;
-import  junit.extensions.*;
+import junit.framework.*;
+import junit.extensions.*;
+import java.io.PrintWriter;
 
 /**
  * Test functions of StringOps.
- *
  */
 public class StringOpsTest extends TestCase {
   /**
-   * Constructor.
-   * @param  String name
-   */
-  public StringOpsTest(String name) {
-    super(name);
-  }
-  
-  /**
-   * Creates a test suite for JUnit to run.
-   * @return a test suite based on the methods in this class
-   */
-  public static Test suite() {
-    return  new TestSuite(StringOpsTest.class);
-  }
-  
-  /**
    *  Test the replace() method of StringOps class
    */
-  public void testReplace()
-  {
+  public void testReplace() {
     String test = "aabbccdd";
     assertEquals("testReplace:", "aab12cdd", StringOps.replace(test, "bc", "12"));
     test = "cabcabc";
     assertEquals("testReplace:", "cabc", StringOps.replace(test, "cabc", "c"));
   }
   
-  public void testGetOffsetAndLength()
-  {
+  /**
+   *  Test the getOffsetAndLength() method of StringOps class
+   */
+  public void testGetOffsetAndLength() {
     String test = "123456789\n123456789\n123456789\n";
     Pair<Integer,Integer> oAndL = StringOps.getOffsetAndLength( test, 1, 1, 1, 9 );
     assertEquals("testGetOffsetAndLength- offSet:", new Integer(0), oAndL.getFirst() );
@@ -92,6 +77,18 @@ public class StringOpsTest extends TestCase {
     oAndL = StringOps.getOffsetAndLength( test, 1, 1, 1, 1 );
     assertEquals("testGetOffsetAndLength- offSet:", new Integer(0), oAndL.getFirst() );
     assertEquals("testGetOffsetAndLength- length:", new Integer(1), oAndL.getSecond() );
+  }
 
+  /**
+   * Tests that getting the stack trace of a throwable works correctly.
+   */
+  public void testGetStackTrace() {
+    final String trace = "hello";
+    Throwable t = new Throwable() {
+      public void printStackTrace(PrintWriter w) {
+        w.print(trace);
+      }
+    };
+    assertEquals("Should have returned the correct stack trace!", trace, StringOps.getStackTrace(t));
   }
 }

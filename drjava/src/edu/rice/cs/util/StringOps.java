@@ -39,6 +39,9 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
 
+import java.io.StringWriter;
+import java.io.PrintWriter;
+
 /**
  * A class to provide some convenient String operations as static methods.
  * It's abstract to prevent (useless) instantiation, though it can be subclassed
@@ -72,12 +75,8 @@ public abstract class StringOps {
     return fullString;
   }
   
-  public static Pair<Integer,Integer> getOffsetAndLength( String fullString, 
-                                                          int startRow,
-                                                          int startCol,
-                                                          int endRow,
-                                                          int endCol )
-  {
+  public static Pair<Integer,Integer> getOffsetAndLength(String fullString, int startRow,
+                                                         int startCol, int endRow, int endCol) {
     int currentChar = 0;
     int linesSeen = 1;
     while( startRow > linesSeen ){
@@ -92,5 +91,16 @@ public abstract class StringOps {
     int length = currentChar + endCol - offset;
     return new Pair<Integer,Integer>( new Integer(offset), new Integer(length) );
   }
-  
+
+  /**
+   * Gets the stack trace of the given Throwable as a String.
+   * @param t the throwable object for which to get the stack trace
+   * @return the stack trace of the given Throwable
+   */
+  public static String getStackTrace(Throwable t) {
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    t.printStackTrace(pw);
+    return sw.toString();
+  }
 }
