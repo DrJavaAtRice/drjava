@@ -48,13 +48,14 @@ import java.awt.*;
 import java.awt.event.*;
 
 /**
- * The Graphical form of a FontOption
+ * The Graphical form of a FontOption.
+ * @version $Id$
  */ 
-public class FontOptionComponent extends OptionComponent<FontOption> {
+public class FontOptionComponent extends OptionComponent<Font> {
   
-  JButton _button;
-  Font _currentFont;
-  Font _newFont;
+  private JButton _button;
+  private Font _currentFont;
+  private Font _newFont;
   
   public FontOptionComponent(FontOption opt, String text, Frame parent) {
     super(opt, text, parent);
@@ -72,15 +73,24 @@ public class FontOptionComponent extends OptionComponent<FontOption> {
     
   }
   
+  /**
+   * Updates the button to display the given font.
+   */
   private void _updateButton (Font f) {
     _button.setFont(f);
     _button.setText(_option.format(f));
   }
     
+  /**
+   * Return's this OptionComponent's configurable component.
+   */
   public JComponent getComponent() {
     return _button;
   }
   
+  /**
+   * Shows a custom font chooser dialog to pick a new font.
+   */
   public void chooseFont() {
     Font f = FontChooser.showDialog(_parent, _newFont);
     
@@ -90,7 +100,11 @@ public class FontOptionComponent extends OptionComponent<FontOption> {
     }
   }
   
-  public boolean update() {
+  /**
+   * Updates the config object with the new setting.
+   * @return true if the new value is set successfully
+   */
+  public boolean updateConfig() {
     if (!_newFont.equals(_currentFont)) {
       DrJava.CONFIG.setSetting(_option, _newFont);
       _currentFont = _newFont;
@@ -98,9 +112,26 @@ public class FontOptionComponent extends OptionComponent<FontOption> {
     return true;
   }
   
-  public void reset() {
-    _currentFont = DrJava.CONFIG.getSetting(_option);
+  /**
+   * Resets this component to the current config value.
+   */
+  public void resetToCurrent() {
     _newFont = _currentFont;
-    _updateButton(_currentFont);
+    _updateButton(_newFont);
+  }
+  
+  /**
+   * Resets this component to the option's default value.
+   */
+  public void resetToDefault() {
+    _newFont = _option.getDefault();
+    _updateButton(_newFont);
+  }
+  
+  /**
+   * Displays the given value.
+   */
+  public void setDisplay(Font value) {
+    _updateButton(value);
   }
 }

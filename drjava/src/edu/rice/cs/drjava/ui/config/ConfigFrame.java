@@ -64,7 +64,7 @@ import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
  */ 
 public class ConfigFrame extends JFrame {
   
-  private static final int FRAME_WIDTH = 700;
+  private static final int FRAME_WIDTH = 750;
   private static final int FRAME_HEIGHT = 500;
   
   private JSplitPane _splitPane;
@@ -77,17 +77,15 @@ public class ConfigFrame extends JFrame {
   private JButton _cancelButton;
   private JButton _saveSettingsButton;
   private JPanel _mainPanel;
+  
   /**
    * Sets up the frame and displays it.
    */
   public ConfigFrame () {
     super("Preferences");
     
-    
     _createTree();
-    
     _createPanels();
-    
     
     _mainPanel= new JPanel();
     _mainPanel.setLayout(new BorderLayout());
@@ -95,30 +93,26 @@ public class ConfigFrame extends JFrame {
         
     Container cp = getContentPane();
     cp.setLayout(new BorderLayout());
-    //cp.add(_mainPanel, BorderLayout.CENTER);
     
+    // Select the first panel by default
     if (_rootNode.getChildCount() != 0) {
       PanelTreeNode firstChild = (PanelTreeNode)_rootNode.getChildAt(0);
       TreePath path = new TreePath(firstChild.getPath());
       _tree.expandPath(path);
       _tree.setSelectionPath(path);
-      //_mainPanel.add( firstChild.getPanel(), BorderLayout.CENTER);
     }
     
-       
-    JScrollPane treeScroll = new JScrollPane(_tree);
-    //cp.add(treeScroll, BorderLayout.WEST);
-    
+    JScrollPane treeScroll = new JScrollPane(_tree);    
     _splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                 treeScroll,
                                 _mainPanel);
     cp.add(_splitPane, BorderLayout.CENTER);
     
-    
     _okButton = new JButton("OK");
     _okButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        boolean successful = apply();
+        // Always apply and save settings
+        boolean successful = saveSettings();
         if (successful) ConfigFrame.this.hide();
       }
     });
@@ -126,7 +120,8 @@ public class ConfigFrame extends JFrame {
     _applyButton = new JButton("Apply");
     _applyButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        apply();
+        // Always save settings
+        saveSettings();
       }
     });
     
@@ -137,6 +132,7 @@ public class ConfigFrame extends JFrame {
       }
     });
     
+    /* Now always saves settings...
     _saveSettingsButton = new JButton("Save Settings");
     _saveSettingsButton.setToolTipText("Save all settings to disk for future sessions.");
     _saveSettingsButton.addActionListener(new ActionListener() {
@@ -144,12 +140,14 @@ public class ConfigFrame extends JFrame {
         saveSettings();
       }
     });
+    */
 
+    // Add buttons
     JPanel bottom = new JPanel();
     bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
     bottom.add(Box.createHorizontalGlue());
-    bottom.add(_saveSettingsButton);
-    bottom.add(Box.createHorizontalGlue());
+    //bottom.add(_saveSettingsButton);
+    //bottom.add(Box.createHorizontalGlue());
     bottom.add(_applyButton);
     bottom.add(_okButton);
     bottom.add(_cancelButton);
@@ -176,19 +174,22 @@ public class ConfigFrame extends JFrame {
     this.setLocation((screenSize.width - frameSize.width) / 2,
                      (screenSize.height - frameSize.height) / 2);
     int width = getWidth() / 4;
-    System.out.println("width: " + getWidth());
-    System.out.println("width for divider: " + width);
+    //System.out.println("width: " + getWidth());
+    //System.out.println("width for divider: " + width);
     _splitPane.setDividerLocation(width);
-    _mainPanel.setPreferredSize(new Dimension(getWidth() - width, _splitPane.getHeight()));
+    _mainPanel.setPreferredSize(new Dimension(getWidth() - width,
+                                              _splitPane.getHeight()));
     addWindowListener(new WindowAdapter() { 
       public void windowClosing(java.awt.event.WindowEvent e) { 
-        cancel();}
+        cancel();
+      }
     });
     
   }
 
   /**
-   * Call the update method to propagate down the tree, parsing input values into their config options
+   * Call the update method to propagate down the tree, parsing input values 
+   * into their config options.
    */
   public boolean apply() {   
     // returns false if the update did not succeed
@@ -196,24 +197,25 @@ public class ConfigFrame extends JFrame {
   }
   
   /**
-   * Resets the field of each option in the Preferences window to its actual stored value.
+   * Resets the field of each option in the Preferences window to its actual 
+   * stored value.
    */
-  public void reset() {
-    _rootNode.reset();
+  public void resetToCurrent() {
+    _rootNode.resetToCurrent();
   }
   
   /** 
    * Resets the frame and hides it.
    */
   public void cancel() {
-    reset();
+    resetToCurrent();
     ConfigFrame.this.hide();
   }
   
   /**
    * Write the configured option values to disk.
    */
-  public void saveSettings() {
+  public boolean saveSettings() {
     boolean successful = apply();
     if (successful) {
       try {
@@ -225,11 +227,15 @@ public class ConfigFrame extends JFrame {
                                       "in your home directory.\n\n" + ioe,
                                       "Could Not Save Changes",
                                       JOptionPane.ERROR_MESSAGE);
-        return;
+        return false;
       }
     }
+    return successful;
   }
-   
+ 
+  /**
+   * Sets the given ConfigPanel as the visible panel.
+   */
   private void _displayPanel(ConfigPanel cf) {
 
     _mainPanel.removeAll();
@@ -238,7 +244,10 @@ public class ConfigFrame extends JFrame {
     _mainPanel.repaint();
     
   }
-    
+  
+  /**
+   * Creates the JTree to display preferences categories.
+   */
   private void _createTree() {
    
     _rootNode = new PanelTreeNode("Preferences");
@@ -258,32 +267,6 @@ public class ConfigFrame extends JFrame {
   }
   
   /**
-   * Creates all of the panels contained within the frame.
-   */
-  private void _createPanels() {
-    
-    PanelTreeNode resourceLocNode = _createPanel("Resource Locations");
-    _setupResourceLocPanel(resourceLocNode.getPanel());
-    
-    PanelTreeNode displayNode = _createPanel("Display Options");
-    _setupDisplayPanel(displayNode.getPanel());
-    
-    PanelTreeNode fontNode = _createPanel("Fonts", displayNode);
-    _setupFontPanel(fontNode.getPanel());
-
-    PanelTreeNode colorNode = _createPanel("Colors", displayNode);
-    _setupColorPanel(colorNode.getPanel());
-
-    PanelTreeNode keystrokesNode = _createPanel(new KeyStrokeConfigPanel("Key Bindings"),
-                                                _rootNode);
-    _setupKeyBindingsPanel(keystrokesNode.getPanel());    
-
-    PanelTreeNode miscNode = _createPanel("Miscellaneous");
-    _setupMiscPanel(miscNode.getPanel());
-    
-  }
-  
-  /**
    * Creates an individual panel, adds it to the JTree and the list of panels, and
    *  returns the tree node.
    * @param t the title of this panel
@@ -292,8 +275,6 @@ public class ConfigFrame extends JFrame {
    */
   private PanelTreeNode _createPanel(String t, PanelTreeNode parent) {
     
-    //ConfigPanel newPanel = new ConfigPanel(t);
-    //_panels.addElement( newPanel );
     PanelTreeNode ptNode = new PanelTreeNode(t);
     parent.add(ptNode);
     
@@ -322,6 +303,33 @@ public class ConfigFrame extends JFrame {
     return _createPanel(t, _rootNode);
   }
   
+  
+  /**
+   * Creates all of the panels contained within the frame.
+   */
+  private void _createPanels() {
+    
+    PanelTreeNode resourceLocNode = _createPanel("Resource Locations");
+    _setupResourceLocPanel(resourceLocNode.getPanel());
+    
+    PanelTreeNode displayNode = _createPanel("Display Options");
+    _setupDisplayPanel(displayNode.getPanel());
+    
+    PanelTreeNode fontNode = _createPanel("Fonts", displayNode);
+    _setupFontPanel(fontNode.getPanel());
+
+    PanelTreeNode colorNode = _createPanel("Colors", displayNode);
+    _setupColorPanel(colorNode.getPanel());
+
+    PanelTreeNode keystrokesNode = _createPanel(new KeyStrokeConfigPanel("Key Bindings"),
+                                                _rootNode);
+    _setupKeyBindingsPanel(keystrokesNode.getPanel());    
+
+    PanelTreeNode miscNode = _createPanel("Miscellaneous");
+    _setupMiscPanel(miscNode.getPanel());
+    
+  }
+  
   /**
    * Add all of the components for the Resource Locations panel of the preferences window.
    */ 
@@ -329,7 +337,7 @@ public class ConfigFrame extends JFrame {
    
     panel.addComponent( new FileOptionComponent( OptionConstants.JAVAC_LOCATION, "Javac Location", this));
     panel.addComponent( new FileOptionComponent( OptionConstants.JSR14_LOCATION, "JSR14 Location", this));
-    panel.addComponent( new FileOptionComponent( OptionConstants.JSR14_COLLECTIONSPATH, "JSR14 CollectionsPath", this));
+    panel.addComponent( new FileOptionComponent( OptionConstants.JSR14_COLLECTIONSPATH, "JSR14 Collections Path", this));
     panel.addComponent( new VectorOptionComponent (OptionConstants.EXTRA_CLASSPATH, "Interactions Classpath", this));     
     panel.displayComponents();
   }
@@ -408,13 +416,17 @@ public class ConfigFrame extends JFrame {
    *  Adds all of the components for the Miscellaneous panel of the preferences window.
    */
   private void _setupMiscPanel( ConfigPanel panel) {
-    panel.addComponent( new IntegerOptionComponent ( OptionConstants.INDENT_LEVEL, "Indent level", this));
-    panel.addComponent( new FileOptionComponent ( OptionConstants.WORKING_DIRECTORY, "Working directory", this));
-    panel.addComponent( new IntegerOptionComponent ( OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions Command History", this));
+    panel.addComponent( new IntegerOptionComponent ( OptionConstants.INDENT_LEVEL, "Indent Level", this));
+    panel.addComponent( new FileOptionComponent ( OptionConstants.WORKING_DIRECTORY, "Working Directory", this));
+    panel.addComponent( new IntegerOptionComponent ( OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this));
 
     panel.displayComponents();
   }
   
+  /**
+   * Private class to handle rendering of tree nodes, each of which
+   * corresponds to a ConfigPanel.
+   */
   private class PanelTreeNode extends DefaultMutableTreeNode {
     
     private ConfigPanel _panel;
@@ -440,7 +452,7 @@ public class ConfigFrame extends JFrame {
       boolean isValidUpdate = _panel.update();
       //if this panel encountered an error while attempting to update, return false
       if (!isValidUpdate) {
-        System.out.println("Panel.update() returned false");
+        //System.out.println("Panel.update() returned false");
         TreePath path = new TreePath(this.getPath());
         _tree.expandPath(path);
         _tree.setSelectionPath(path);
@@ -458,14 +470,15 @@ public class ConfigFrame extends JFrame {
     }
     
     /**
-     * Tells its panel to reset, and tells all of its children to reset their panels.
+     * Tells its panel to reset its displayed value to the currently set value
+     * for this component, and tells all of its children to reset their panels.
      */
-    public void reset() {
-      _panel.reset();
+    public void resetToCurrent() {
+      _panel.resetToCurrent();
       
       Enumeration childNodes = this.children();
       while (childNodes.hasMoreElements()) {
-        ((PanelTreeNode)childNodes.nextElement()).reset();
+        ((PanelTreeNode)childNodes.nextElement()).resetToCurrent();
       } 
     }
   }

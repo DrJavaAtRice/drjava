@@ -50,11 +50,13 @@ import gj.util.Vector;
 
 
 /**
- * Graphical form of a VectorOption
+ * Graphical form of a VectorOption for the Extra Classpath option.
+ * Uses a file chooser for each String element.
  * @version $Id$
  */
-public class VectorOptionComponent extends OptionComponent<VectorOption<String>> 
-  implements OptionConstants{  
+public class VectorOptionComponent extends OptionComponent<Vector<String>> 
+  implements OptionConstants
+{  
   private JScrollPane _listScrollPane;
   private JPanel _panel;
   private JList _list;
@@ -70,7 +72,7 @@ public class VectorOptionComponent extends OptionComponent<VectorOption<String>>
     //set up list
     _listModel = new DefaultListModel();
     _list = new JList(_listModel);
-    reset();
+    resetToCurrent();
     /*
     Vector v = DrJava.CONFIG.getSetting(_option);
     String[] array = new String[v.size()];
@@ -154,29 +156,41 @@ public class VectorOptionComponent extends OptionComponent<VectorOption<String>>
     _panel.add(buttons, BorderLayout.SOUTH);
   }
   
-  public boolean update() {
+  /**
+   * Updates the config object with the new setting.
+   * @return true if the new value is set successfully
+   */
+  public boolean updateConfig() {
     Vector current = new Vector();
     for (int i = 0; i < _listModel.getSize(); i++) {
       current.addElement(_listModel.getElementAt(i));
     }
     DrJava.CONFIG.setSetting(_option, current);
-    reset();
+    resetToCurrent();
     
     return true;
   } 
  
-  public void reset() {
-    Vector v = DrJava.CONFIG.getSetting(_option);
-    String[] array = new String[v.size()];
-    v.copyInto(array);
+  /**
+   * Displays the given value.
+   */
+  public void setDisplay(Vector<String> value) {
+    String[] array = new String[value.size()];
+    value.copyInto(array);
     _listModel.clear();
     for (int i = 0; i < array.length; i++) {
       _listModel.addElement(array[i]);
     }
   }
   
+  /**
+   * Return's this OptionComponent's configurable component.
+   */
   public JComponent getComponent() { return _panel; }
   
+  /**
+   * Shows a file chooser for adding a file to the element.
+   */
   public void chooseFile() {
     File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
         

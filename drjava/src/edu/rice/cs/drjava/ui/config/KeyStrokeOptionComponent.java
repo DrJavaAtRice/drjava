@@ -48,28 +48,32 @@ import java.awt.event.*;
 import java.util.Hashtable;
 
 /**
- * Graphical form of a KeyStrokeOption
+ * Graphical form of a KeyStrokeOption.
  * @version $Id$
  */
-public class KeyStrokeOptionComponent  extends OptionComponent<KeyStrokeOption> implements Comparable{
+public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
+  implements Comparable
+{
   private static final int DIALOG_HEIGHT = 185;
   public static Hashtable _keyToKSOC = new Hashtable();
-  private JButton _jb;
+  private JButton _button;
   private static GetKeyDialog _getKeyDialog =  null;    
   
-  private KeyStroke _ks;
-  private KeyStroke _configKs;
+  private KeyStroke _currentKey;
+  private KeyStroke _newKey;
 
-  public KeyStrokeOptionComponent (KeyStrokeOption opt, String text, final Frame parent) {
+  public KeyStrokeOptionComponent(KeyStrokeOption opt,
+                                  String text,
+                                  final Frame parent) {
     super(opt, text, parent);
   
-    _ks = DrJava.CONFIG.getSetting(opt);
-    _configKs = _ks;
+    _currentKey = DrJava.CONFIG.getSetting(opt);
+    _newKey = _currentKey;
     
-    _jb = new JButton();
-    _jb.setBackground(Color.white);
-    _jb.setText(_option.format(_ks));
-    _jb.addActionListener(new ActionListener() {
+    _button = new JButton();
+    _button.setBackground(Color.white);
+    _button.setText(_option.format(_currentKey));
+    _button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
 
         if (_getKeyDialog == null) {
@@ -85,53 +89,91 @@ public class KeyStrokeOptionComponent  extends OptionComponent<KeyStrokeOption> 
    
     GridLayout gl = new GridLayout(1,0);
     gl.setHgap(15);
-    _keyToKSOC.put(_ks, this);
+    _keyToKSOC.put(_currentKey, this);
   }
   
+  /**
+   * Returns a custom string representation of this option component.
+   */
   public String toString() { 
     return "<KSOC>label:" + getLabelText() + "ks: " +
-      
-      _getKeyStroke() + "jb: " + _jb.getText() + "</KSOC>\n";
+      getKeyStroke() + "jb: " + _button.getText() + "</KSOC>\n";
   }
   
-  public boolean update() {
-    if (!_ks.equals(DrJava.CONFIG.getSetting(_option))) {
-      DrJava.CONFIG.setSetting(_option, _ks);
+  /**
+   * Updates the config object with the new setting.
+   * @return true if the new value is set successfully
+   */
+  public boolean updateConfig() {
+    if (!_newKey.equals(_currentKey)) {
+      DrJava.CONFIG.setSetting(_option, _newKey);
       _setKeyStroke(DrJava.CONFIG.getSetting(_option));
+      _currentKey = _newKey;
     }
     return true;
   }
   
+  /**
+   * Resets this component to the current config value.
+   */
+  public void resetToCurrent() {
+    _newKey = _currentKey;
+    setDisplay(_newKey);
+  }
+  
+  /**
+   * Resets this component to the option's default value.
+   */
+  public void resetToDefault() {
+    _newKey = _option.getDefault();
+    setDisplay(_newKey);
+  }
+  
+  /**
+   * Displays the given value.
+   */
+  public void setDisplay(KeyStroke value) {
+    _button.setText(_option.format(value));
+  }
+  
+  /**
+   * Compares two KeyStrokeOptionComponents based on the text of their labels.
+   * @return Comparison based on labels, or 1 if o is not a KeyStrokeOptionComponent
+   */
   public int compareTo(Object o) {
-    KeyStrokeOptionComponent other = (KeyStrokeOptionComponent)o;
-    return this.getLabelText().compareTo(other.getLabelText());
+    if (o instanceof KeyStrokeOptionComponent) {
+      KeyStrokeOptionComponent other = (KeyStrokeOptionComponent)o;
+      return this.getLabelText().compareTo(other.getLabelText());
+    }
+    else return 1;
   }
   
-  public KeyStroke _getKeyStroke() {
-    return _ks;
+  /**
+   * Returns the currently selected KeyStroke.
+   */
+  public KeyStroke getKeyStroke() {
+    return _newKey;
   }
   
-  public KeyStroke _getConfigKeyStroke() {
-    return _configKs;
+  /**
+   * Returns the KeyStroke current set in the Config settings.
+   */
+  public KeyStroke getConfigKeyStroke() {
+    return _currentKey;
   }
   
-  public JComponent getComponent() { return _jb; }
+  /**
+   * Return's this OptionComponent's configurable component.
+   */
+  public JComponent getComponent() { return _button; }
   
+  /**
+   * Sets the currently selected KeyStroke.
+   */
   private void _setKeyStroke(KeyStroke ks) {
-    System.out.println("setKS:" + getLabelText() + ks);
-    _ks = ks;
-    _jb.setText(_option.format(ks));
-    System.out.println("<--setKS:" + getLabelText() + _jb.getText());   
+    _newKey = ks;
+    _button.setText(_option.format(_newKey));
   }
-  /*
-  private JButton _getButton() {
-    return _jb;
-  }*/
-  /*
-  public boolean equals (Object o) {
-    if (! (o instanceof KeyStrokeOptionComponent)) return false;
-    return (_option  == ((KeyStrokeOptionComponent)o)._option);
-  }*/
   
   /**
    * A dialog that allows the user to type in a keystroke to be bound
@@ -177,8 +219,8 @@ public class KeyStrokeOptionComponent  extends OptionComponent<KeyStrokeOption> 
       _okButton = new JButton("OK");
       _okButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
-          if (!_ksoc._getKeyStroke().equals(_currentKeyStroke)) {
-            _keyToKSOC.remove(_ksoc._getKeyStroke());            
+          if (!_ksoc.getKeyStroke().equals(_currentKeyStroke)) {
+            _keyToKSOC.remove(_ksoc.getKeyStroke());            
             
             KeyStrokeOptionComponent conflict = 
               (KeyStrokeOptionComponent)_keyToKSOC.get(_currentKeyStroke);
@@ -230,7 +272,7 @@ public class KeyStrokeOptionComponent  extends OptionComponent<KeyStrokeOption> 
       _instructionLabel.setText("Type in the keystroke you want to use for \"" +
                                 k.getLabelText() + 
                                 "\" and click \"OK\"");
-      _currentKeyStroke = k._getKeyStroke();
+      _currentKeyStroke = k.getKeyStroke();
       _actionLabel.setText(k.getLabelText());
       _inputField.setText(_option.format(_currentKeyStroke));
       //this.setLocation(frame.getLocation());
@@ -267,7 +309,7 @@ public class KeyStrokeOptionComponent  extends OptionComponent<KeyStrokeOption> 
           if (configKs == null)
             _actionLabel.setText("<none>");
           else {
-            String name = KeyBindingManager.Singleton.getName(configKs._getConfigKeyStroke());
+            String name = KeyBindingManager.Singleton.getName(configKs.getConfigKeyStroke());
             _actionLabel.setText(name);
           }
           _currentKeyStroke = ks;
@@ -275,9 +317,5 @@ public class KeyStrokeOptionComponent  extends OptionComponent<KeyStrokeOption> 
       }
     }
   }
-  
-  public void reset() {
-    _jb.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
-  }  
 
 }

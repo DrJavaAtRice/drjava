@@ -75,6 +75,7 @@ public class SavableConfiguration extends Configuration {
    * Used to save the values from this Configuration into the given OutputStream
    * as a Properties file. The elements weren't ordered, so now the properties
    * are written in the same way as the about dialog.
+   * Values equals to their defaults are not written to disk.
    */
   public void saveConfiguration(OutputStream os, String header) throws IOException {
     OutputStreamWriter osw = new OutputStreamWriter(os);
@@ -83,6 +84,8 @@ public class SavableConfiguration extends Configuration {
     String tmpString;
     StringBuffer buff;
     OptionParser key;
+    
+    // Write the header
     Date date = new Date();
     osw.write((int)'#');
     osw.write(header, 0, header.length());
@@ -90,29 +93,40 @@ public class SavableConfiguration extends Configuration {
     osw.write((int)'#');
     osw.write(date.toString(), 0, date.toString().length());
     osw.write((int)'\n');
-    while(keys.hasMoreElements()) {
+    
+    // Write each option
+    while (keys.hasMoreElements()) {
       key = keys.nextElement();
-      tmpString = key.getName();
-      osw.write(tmpString, 0, tmpString.length());
-      tmpString = " = ";
-      osw.write(tmpString, 0, 3);
-      tmpString = map.getString(key);
-      // This replaces all backslashes with two backslashes for windows
-      int index = 0;
-      int pos;
-      while (index < tmpString.length() && 
-             ((pos = tmpString.indexOf('\\', index)) >= 0)) {
-        buff = new StringBuffer(tmpString);
-        buff.insert(pos, '\\');
-        index = pos + 2;
-        tmpString = buff.toString();
+      
+      if (!key.getDefault().equals(map.getOption(key))) {
+      
+        // Write name
+        tmpString = key.getName();
+        osw.write(tmpString, 0, tmpString.length());
+        
+        // Write equals sign
+        tmpString = " = ";
+        osw.write(tmpString, 0, 3);
+        
+        // Write value
+        tmpString = map.getString(key);
+        // This replaces all backslashes with two backslashes for windows
+        int index = 0;
+        int pos;
+        while (index < tmpString.length() && 
+               ((pos = tmpString.indexOf('\\', index)) >= 0)) {
+          buff = new StringBuffer(tmpString);
+          buff.insert(pos, '\\');
+          index = pos + 2;
+          tmpString = buff.toString();
+        }
+        osw.write(tmpString, 0, tmpString.length());
+        osw.write((int)'\n');
+        
+        // p.setProperty(key.getName(),map.getString(key));
       }
-      osw.write(tmpString, 0, tmpString.length());
-      osw.write((int)'\n');
-     // p.setProperty(key.getName(),map.getString(key));
     }
     osw.close();
     //p.store(os,header)
-    
   }
 }

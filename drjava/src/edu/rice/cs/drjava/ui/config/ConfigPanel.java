@@ -49,8 +49,8 @@ import gj.util.Vector;
 import gj.util.Hashtable;
 
 /**
- * The panel on which each set of configuration options (e.g. Fonts, Colors) displays
- *  its configurable items as read from the OptionConstants.
+ * The panel on which each set of configuration options (e.g. Fonts, Colors) 
+ * displays its configurable items as read from the OptionConstants.
  * @version $Id$
  */
 public class ConfigPanel extends JPanel {
@@ -84,11 +84,9 @@ public class ConfigPanel extends JPanel {
     this.setLayout(new BorderLayout());
     this.add(_title, BorderLayout.NORTH);
 
-    JPanel panel = new JPanel();
-    //panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+    JPanel panel = new JPanel();  // sits in scrollpane and compresses layout
     panel.setLayout(new BorderLayout());
-    JPanel panel2 = new JPanel();
-    //panel2.setLayout(new GridLayout(0, 1));
+    JPanel panel2 = new JPanel();  // contains OptionComponents
     panel.add(panel2, BorderLayout.NORTH);
     JScrollPane scroll = new JScrollPane(panel,
                                          JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -123,17 +121,26 @@ public class ConfigPanel extends JPanel {
      panel2.add(_components.elementAt(i));
      }*/
     
+    // Reset Button
+    JButton _resetToDefaultButton = new JButton("Reset to Defaults");
+    _resetToDefaultButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        resetToDefault();
+      }
+    });
+    panel.add(_resetToDefaultButton, BorderLayout.SOUTH);
+    
     this.add(scroll, BorderLayout.CENTER);
   }
   
   /**
-   * Tells each component in the vector to update() itself
+   * Tells each component in the vector to update Config with its value
    * @return whether update() of all the components succeeded 
    */ 
   public boolean update() {
     
     for (int i= 0; i<_components.size();i++) {
-      boolean isValidUpdate = _components.elementAt(i).update();
+      boolean isValidUpdate = _components.elementAt(i).updateConfig();
       if (!isValidUpdate) return false;
     }  
     
@@ -141,11 +148,20 @@ public class ConfigPanel extends JPanel {
   }
   
   /**
-   * Tells each component to reset its field to the stored value.
+   * Tells each component to reset its display field to the current value.
    */
-  public void reset() {
-    for (int i= 0; i<_components.size();i++) {
-      _components.elementAt(i).reset();
+  public void resetToCurrent() {
+    for (int i=0; i < _components.size(); i++) {
+      _components.elementAt(i).resetToCurrent();
+    }
+  }
+  
+  /**
+   * Tells each component to reset its value to the component's default.
+   */
+  public void resetToDefault() {
+    for (int i=0; i < _components.size(); i++) {
+      _components.elementAt(i).resetToDefault();
     }
   }
 }

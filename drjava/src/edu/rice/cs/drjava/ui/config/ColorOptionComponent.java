@@ -46,10 +46,10 @@ import java.awt.*;
 import java.awt.event.*;
 
 /**
- * Graphical form of a ColorOption
+ * Graphical form of a ColorOption.
  * @version $Id$
  */
-public class ColorOptionComponent extends OptionComponent<ColorOption> {
+public class ColorOptionComponent extends OptionComponent<Color> {
   private JButton _button;
   private Color _currentColor;
   private Color _newColor;
@@ -68,38 +68,66 @@ public class ColorOptionComponent extends OptionComponent<ColorOption> {
     _updateButton(_currentColor);
   }
   
-  public boolean update() {
+  /**
+   * Updates the config object with the new setting.
+   * @return true if the new value is set successfully
+   */
+  public boolean updateConfig() {
     if (!_newColor.equals(_currentColor)) {
       DrJava.CONFIG.setSetting(_option, _newColor);
       _currentColor = _newColor;
     }
 
     return true;
-  } 
-  
-  public void reset() {
-    _currentColor = DrJava.CONFIG.getSetting(_option);
-    _newColor = _currentColor;
-    _updateButton(_currentColor);
   }
   
+  /**
+   * Resets this component to the current config value.
+   */
+  public void resetToCurrent() {
+    _newColor = _currentColor;
+    _updateButton(_newColor);
+  }
+  
+  /**
+   * Resets this component to the option's default value.
+   */
+  public void resetToDefault() {
+    _newColor = _option.getDefault();
+    _updateButton(_newColor);
+  }
+  
+  /**
+   * Displays the given value.
+   */
+  public void setDisplay(Color value) {
+    _updateButton(value);
+  }
+  
+  /**
+   * Updates the component's button to display the given color.
+   */
   private void _updateButton(Color c) {
     _button.setForeground(c);
     _button.setText(getLabelText() + " ("+_option.format(c)+")");
   }
   
+  /**
+   * Return's this OptionComponent's configurable component.
+   */
   public JComponent getComponent() { return _button; }
   
+  /**
+   * Shows a color chooser dialog for picking a new color.
+   */
   public void chooseColor() {
-
     Color c = JColorChooser.showDialog(_parent,
                                        "Choose '" + getLabelText() + "'",
                                        _newColor);
     if (c != null) {
       _newColor = c;
       _updateButton(_newColor);
-    }
-    
+    }    
   }
   
 }

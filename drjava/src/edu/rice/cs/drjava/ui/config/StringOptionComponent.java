@@ -46,10 +46,10 @@ import java.awt.*;
 
 
 /**
- * Graphical form of a StringOption
+ * Graphical form of a StringOption.
  * @version $Id$
  */
-public class StringOptionComponent extends OptionComponent<StringOption> {
+public class StringOptionComponent extends OptionComponent<String> {
   private JTextField _jtf;
   
   public StringOptionComponent (StringOption opt, String text, Frame parent) {
@@ -58,7 +58,11 @@ public class StringOptionComponent extends OptionComponent<StringOption> {
     _jtf.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
   }
   
-  public boolean update() {
+  /**
+   * Updates the config object with the new setting.
+   * @return true if the new value is set successfully
+   */
+  public boolean updateConfig() {
     String oldValue = DrJava.CONFIG.getSetting(_option);
     String newValue = _option.parse(_jtf.getText().trim());
     
@@ -66,9 +70,15 @@ public class StringOptionComponent extends OptionComponent<StringOption> {
     return true;
   } 
  
-  public void reset() {
-    _jtf.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
+  /**
+   * Displays the given value.
+   */
+  public void setDisplay(String value) {
+    _jtf.setText(value);
   }
   
+  /**
+   * Return's this OptionComponent's configurable component.
+   */
   public JComponent getComponent() { return _jtf; }
 }

@@ -46,10 +46,10 @@ import java.awt.*;
 
 
 /**
- * Graphical form of a BooleanOption
+ * Graphical form of a BooleanOption.
  * @version $Id$
  */
-public class BooleanOptionComponent extends OptionComponent<BooleanOption> {
+public class BooleanOptionComponent extends OptionComponent<Boolean> {
   private JCheckBox _jcb;
   
   public BooleanOptionComponent (BooleanOption opt, String text, Frame parent) {
@@ -58,7 +58,11 @@ public class BooleanOptionComponent extends OptionComponent<BooleanOption> {
     _jcb.setSelected(DrJava.CONFIG.getSetting(_option).booleanValue());
   }
   
-  public boolean update() {
+  /**
+   * Updates the config object with the new setting.
+   * @return true if the new value is set successfully
+   */
+  public boolean updateConfig() {
     Boolean oldValue = DrJava.CONFIG.getSetting(_option);
     Boolean newValue = new Boolean(_jcb.isSelected());
     
@@ -66,9 +70,15 @@ public class BooleanOptionComponent extends OptionComponent<BooleanOption> {
     return true;
   } 
   
-  public void reset() {
-    _jcb.setSelected(DrJava.CONFIG.getSetting(_option).booleanValue());
+  /**
+   * Displays the given value.
+   */
+  public void setDisplay(Boolean value) {
+    _jcb.setSelected(value.booleanValue());
   }
   
+  /**
+   * Return's this OptionComponent's configurable component.
+   */
   public JComponent getComponent() { return _jcb; }
 }

@@ -47,20 +47,19 @@ import java.io.*;
  */
 public class FileOption extends Option<File> {
   
+  /**
+   * Special sentinal file indicating that this option is not set.
+   */
   public static final File NULL_FILE = new File("") {
-    
     public String getAbsolutePath() {
       return "";
     }
-  
     public String getName() {
       return "";
     }
-    
     public String toString() {
       return "";
     }
-    
     public boolean exists() {
       return true;
     }

@@ -52,8 +52,9 @@ import java.awt.event.*;
  * and TOOLBAR_ICONS_ENABLED) bypassing the the normal graphical representation
  * with JRadioButtons, in order to comply with the special circumstances regarding 
  * their setting.
+ * @version $Id$
  */
-public class ToolbarOptionComponent extends OptionComponent<BooleanOption> {
+public class ToolbarOptionComponent extends OptionComponent<Boolean> {
   
   private JRadioButton _textButton;
   private JRadioButton _iconsButton;
@@ -85,7 +86,7 @@ public class ToolbarOptionComponent extends OptionComponent<BooleanOption> {
     _textAndIconsButton = new JRadioButton(TEXT_AND_ICONS);
     _textAndIconsButton.setActionCommand(TEXT_AND_ICONS);
 
-    _setSelected();
+    resetToCurrent();
     
     _group = new ButtonGroup();
     _group.add(_textButton);
@@ -100,26 +101,48 @@ public class ToolbarOptionComponent extends OptionComponent<BooleanOption> {
   }
   
   /**
-   * Selects the radio button that corresponds to the previously chosen Toolbar text/icon preference
+   * Selects the radio button corresponding to the current config options.
    */ 
-  private void _setSelected() {
-    boolean textWasEnabled = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
-    boolean iconsWereEnabled = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
-    
-    if (textWasEnabled && iconsWereEnabled) {
+  public void resetToCurrent() {
+    _setSelected(DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue(),
+                 DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue());
+  }
+  
+  /**
+   * Selects the radio button corresponding to the default values.
+   */ 
+  public void resetToDefault() {
+    _setSelected(OptionConstants.TOOLBAR_TEXT_ENABLED.getDefault().booleanValue(),
+                 OptionConstants.TOOLBAR_ICONS_ENABLED.getDefault().booleanValue());
+  }
+  
+  /**
+   * Selects the radio button corresponding to the specified configuration.
+   * @param textEnabled Whether toolbar text is enabled
+   * @param iconsEnabled Whether toolbar icons are enabled
+   */
+  private void _setSelected(boolean textEnabled, boolean iconsEnabled) {
+    if (textEnabled && iconsEnabled) {
       _textAndIconsButton.setSelected(true);
     }
     else {
-      if (textWasEnabled) _textButton.setSelected(true);
-      else if (iconsWereEnabled) _iconsButton.setSelected(true);
+      if (textEnabled) _textButton.setSelected(true);
+      else if (iconsEnabled) _iconsButton.setSelected(true);
     }
   }
   
+  /**
+   * Return's this OptionComponent's configurable component.
+   */
   public JComponent getComponent() {
     return _buttonPanel;
   }
   
-  public boolean update() {
+  /**
+   * Updates the config object with the new setting.
+   * @return true if the new value is set successfully
+   */
+  public boolean updateConfig() {
     String btnIdent = _group.getSelection().getActionCommand();
     boolean textWasEnabled = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
     boolean iconsWereEnabled = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
@@ -143,8 +166,11 @@ public class ToolbarOptionComponent extends OptionComponent<BooleanOption> {
   }
   
   
-  public void reset() {
-    _setSelected();
+  /**
+   * Displays the given value.
+   */
+  public void setDisplay(Boolean value) {
+    resetToCurrent();
   }
   
 }

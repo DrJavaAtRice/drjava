@@ -48,10 +48,10 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Graphical form of a FileOption
+ * Graphical form of a FileOption.
  * @version $Id$
  */
-public class FileOptionComponent extends OptionComponent<FileOption> 
+public class FileOptionComponent extends OptionComponent<File> 
   implements OptionConstants {
   
   private JButton _button;
@@ -69,7 +69,6 @@ public class FileOptionComponent extends OptionComponent<FileOption>
         chooseFile();
       }
     });
-    //_button.setBackground(Color.white);
     _button.setText("...");
     _button.setMaximumSize(new Dimension(10,10));
     _button.setMinimumSize(new Dimension(10, 10));
@@ -86,7 +85,6 @@ public class FileOptionComponent extends OptionComponent<FileOption>
     
     _currentFile = DrJava.CONFIG.getSetting(_option);
     _newFile = _currentFile;
-    //_updateButton(_currentFile);
     _updateTextField(_currentFile);
     
     File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
@@ -106,7 +104,11 @@ public class FileOptionComponent extends OptionComponent<FileOption>
     _panel.add(_button, BorderLayout.EAST);
   }
   
-  public boolean update() {
+  /**
+   * Updates the config object with the new setting.
+   * @return true if the new value is set successfully
+   */
+  public boolean updateConfig() {
         
     boolean validChoice = chooseFileFromField();
     if (!validChoice) return false;
@@ -119,21 +121,46 @@ public class FileOptionComponent extends OptionComponent<FileOption>
     return true;
   } 
   
-  public void reset() {
-    _currentFile = DrJava.CONFIG.getSetting(_option);
+  /**
+   * Resets this component to the current config value.
+   */
+  public void resetToCurrent() {
     _newFile = _currentFile;
-    _updateTextField(_currentFile);
+    _updateTextField(_newFile);
   }
   
+  /**
+   * Resets this component to the option's default value.
+   */
+  public void resetToDefault() {
+    _newFile = _option.getDefault();
+    _updateTextField(_newFile);
+  }
+  
+  /**
+   * Displays the given value.
+   */
+  public void setDisplay(File value) {
+    _updateTextField(value);
+  }
+  
+  /**
+   * Return's this OptionComponent's configurable component.
+   */
   public JComponent getComponent() { 
     return _panel;
   }
   
+  /**
+   * Updates the text field to display the given file.
+   */
   private void _updateTextField(File c) {    
     _jtf.setText(c.getAbsolutePath());
   }
 
-  
+  /**
+   * Shows a file chooser to pick a new file.  Allows picking directories.
+   */
   public void chooseFile() {
 
     if (_newFile != FileOption.NULL_FILE && _newFile.getParent() != null) {

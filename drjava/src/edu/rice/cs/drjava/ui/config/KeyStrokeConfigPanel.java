@@ -54,10 +54,11 @@ import gj.util.Hashtable;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.KeyStrokeOption;
 import edu.rice.cs.drjava.config.Option;
+
 /**
+ * Panel to display all KeyStrokeOptionComponents.
  * @version $Id$
  */
-
 public class KeyStrokeConfigPanel extends ConfigPanel { 
   TreeSet _comps = null;
 
@@ -89,7 +90,7 @@ public class KeyStrokeConfigPanel extends ConfigPanel {
     Iterator iter = _comps.iterator();
     while (iter.hasNext()) {
       KeyStrokeOptionComponent x = (KeyStrokeOptionComponent) iter.next();
-      if (!DrJava.CONFIG.getSetting(x.getOption()).equals(x._getKeyStroke())) {
+      if (!DrJava.CONFIG.getSetting(x.getOption()).equals(x.getKeyStroke())) {
         DrJava.CONFIG.setSetting((Option)x.getOption(), KeyStrokeOption.NULL_KEYSTROKE);
       }
           

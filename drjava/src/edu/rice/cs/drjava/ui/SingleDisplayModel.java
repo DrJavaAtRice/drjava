@@ -459,6 +459,15 @@ public class SingleDisplayModel extends DefaultGlobalModel {
     setActiveDocument(0);
     return success;
   }
+  
+  /**
+   * Returns whether we are in the process of closing all documents.
+   * (Don't want to prompt the user to revert files that have become
+   * modified on disk if we're just closing everything.)
+   */
+  public boolean isClosingAllFiles() {
+    return _isClosingAllDocs;
+  }
 
 
   /**

@@ -42,18 +42,22 @@ package edu.rice.cs.drjava.ui.config;
 import javax.swing.*;
 import java.awt.*;
 import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.DrJava;
 
 /**
  * The graphical form of an Option. Provides a way to see the values of Option
  * while running DrJava and perform live updating of Options.
  * @version $Id$
  */
-public abstract class OptionComponent<T extends Option> {
-  protected T _option;
+//public abstract class OptionComponent<T extends Option<U>> {
+public abstract class OptionComponent<T> {
+//  protected T _option;
+  protected Option<T> _option;
   protected JLabel _label;
   protected Frame _parent;
     
-  public OptionComponent (T option, String labelText, Frame parent) {
+//  public OptionComponent (T option, String labelText, Frame parent) {
+  public OptionComponent (Option<T> option, String labelText, Frame parent) {
     _option = option;
     _label = new JLabel(labelText);
     _label.setHorizontalAlignment(JLabel.RIGHT);
@@ -70,7 +74,8 @@ public abstract class OptionComponent<T extends Option> {
     this(null, labelText, parent);
   }
   
-  public T getOption() {
+//  public T getOption() {
+  public Option<T> getOption() {
     return _option;
   }
   
@@ -89,12 +94,26 @@ public abstract class OptionComponent<T extends Option> {
    * should reflect the changes.
    * @return false, if value is invalid; otherwise true.
    */ 
-  public abstract boolean update();
+  public abstract boolean updateConfig();
 
   /**
    * Resets the entry field to reflect the actual stored value for the option.
    */
-  public abstract void reset();
+  public void resetToCurrent() {
+    setDisplay(DrJava.CONFIG.getSetting(_option));
+  }
+  
+  /**
+   * Resets the actual value of the component to the original default.
+   */
+  public void resetToDefault() {
+    setDisplay(_option.getDefault());
+  }
+  
+  /**
+   * Sets the value that is currently displayed by this component.
+   */
+  public abstract void setDisplay(T value);
   
   public void showErrorMessage(String title, OptionParseException e) {
     showErrorMessage(title, e.value, e.message);

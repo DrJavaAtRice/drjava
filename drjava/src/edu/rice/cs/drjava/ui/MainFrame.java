@@ -349,21 +349,46 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
-  /** Default cut action. */
-  private Action _cutAction = new DefaultEditorKit.CutAction();
+  /** Default cut action.  Returns focus to def pane. */
+  private Action _cutAction = new DefaultEditorKit.CutAction() {
+    public void actionPerformed(ActionEvent e) {
+      super.actionPerformed(e);
+      _currentDefPane.requestFocus();
+    }
+  };
 
-  /** Default copy action. */
-  private Action _copyAction = new DefaultEditorKit.CopyAction();
+  /** Default copy action.  Returns focus to def pane. */
+  private Action _copyAction = new DefaultEditorKit.CopyAction() {
+    public void actionPerformed(ActionEvent e) {
+      super.actionPerformed(e);
+      _currentDefPane.requestFocus();
+    }
+  };
 
-  /** Default paste action. */
-  private Action _pasteAction = new DefaultEditorKit.PasteAction();
+  /** Default paste action.  Returns focus to def pane. */
+  private Action _pasteAction = new DefaultEditorKit.PasteAction() {
+    public void actionPerformed(ActionEvent e) {
+      super.actionPerformed(e);
+      _currentDefPane.requestFocus();
+    }
+  };
 
 
   /** Undoes the last change to the active definitions document. */
-  private DelegatingAction _undoAction = new DelegatingAction();
+  private DelegatingAction _undoAction = new DelegatingAction() {
+    public void actionPerformed(ActionEvent e) {
+      super.actionPerformed(e);
+      _currentDefPane.requestFocus();
+    }
+  };
 
   /** Redoes the last undo to the active definitions document. */
-  private DelegatingAction _redoAction = new DelegatingAction();
+  private DelegatingAction _redoAction = new DelegatingAction() {
+    public void actionPerformed(ActionEvent e) {
+      super.actionPerformed(e);
+      _currentDefPane.requestFocus();
+    }
+  };
 
   /** Aborts current interaction.  (Replaced by Reset.)
   private Action _abortInteractionAction = new AbstractAction("Abort Current Interaction") {  
@@ -2312,18 +2337,25 @@ public class MainFrame extends JFrame implements OptionConstants {
       _currentDefPane.getErrorCaretListener().updateHighlight(pos);
       _currentDefPane.getJUnitErrorCaretListener().updateHighlight(pos);
      
+      // Update FileChoosers' directory
       _setCurrentDirectory(active);
 
+      // Update title and position
       updateFileTitle();
       _currentDefPane.requestFocus();
       _posListener.updateLocation();
       
-      try {
-        active.revertIfModifiedOnDisk();
-      } catch (IOException e) {
-        _showIOError(e);
+      // Check if modified (but only if we're not closing all files)
+      if (!_model.isClosingAllFiles()) {
+        try {
+          active.revertIfModifiedOnDisk();
+        } catch (IOException e) {
+          _showIOError(e);
+        }
       }
-      if(_findReplace.isDisplayed()) {
+      
+      // Change Find/Replace to the new defpane
+      if (_findReplace.isDisplayed()) {
         _findReplace.stopListening();
         _findReplace.beginListeningTo(_currentDefPane);
         //uninstallFindReplaceDialog(_findReplace);

@@ -45,10 +45,10 @@ import edu.rice.cs.drjava.*;
 import java.awt.*;
 
 /**
- * Graphical form of an IntegerOption
+ * Graphical form of an IntegerOption.
  * @version $Id$
  */
-public class IntegerOptionComponent extends OptionComponent<IntegerOption> {
+public class IntegerOptionComponent extends OptionComponent<Integer> {
   private JTextField _jtf;
   
   public IntegerOptionComponent (IntegerOption opt, String text, Frame parent) {
@@ -58,10 +58,10 @@ public class IntegerOptionComponent extends OptionComponent<IntegerOption> {
   }
   
   /**
-   * Checks to see if value has changed, is valid and, if so, applies the new setting.
-   * @return false, if value is invalid; otherwise true.
-   */ 
-  public boolean update() {
+   * Updates the config object with the new setting.
+   * @return true if the new value is set successfully
+   */
+  public boolean updateConfig() {
   
     Integer currentValue = DrJava.CONFIG.getSetting(_option);
     String enteredString = _jtf.getText().trim();
@@ -83,10 +83,16 @@ public class IntegerOptionComponent extends OptionComponent<IntegerOption> {
     return true;
   } 
   
-  public void reset() {
-    _jtf.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
+  /**
+   * Displays the given value.
+   */
+  public void setDisplay(Integer value) {
+    _jtf.setText(_option.format(value));
   }
   
+  /**
+   * Return's this OptionComponent's configurable component.
+   */
   public JComponent getComponent() { return _jtf; }
     
 }
