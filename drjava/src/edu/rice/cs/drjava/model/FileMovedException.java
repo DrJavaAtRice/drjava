@@ -37,48 +37,31 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.io.*;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020806-1700;
- *
+ * Special FileMovedException to signify when a document's file no longer
+ *  exists on disk where it once was.
  * @version $Id$
  */
-public abstract class Version {
+public class FileMovedException extends IOException {
+  private File _file;
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Creates a FileMovedException for the given file, with 
+   * the given message.
    */
-  private static final String BUILD_TIME_STRING = "20020806-1700";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public FileMovedException(File f, String s) {
+    super(s);
+    _file = f;
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  /**
+   * Get the file which caused this exception.
+   */
+  public File getFile() {
+    return _file;
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

@@ -66,8 +66,8 @@ import edu.rice.cs.drjava.CodeStatus;
  */
 public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   
-  final boolean printEvents = true;
-  final boolean printMessages = true;
+  final boolean printEvents = false;
+  final boolean printMessages = false;
   
   private int _pendingNotifies = 0;
   private Object _notifierLock = new Object();
