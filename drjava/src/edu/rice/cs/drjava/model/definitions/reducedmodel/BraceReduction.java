@@ -2,6 +2,7 @@
 
 package edu.rice.cs.drjava;
 
+import gj.util.Vector;
 /**
  * The interface BraceReduction serves as the template for our reduced
  * view of a java document, which stores only the information necessary
@@ -15,59 +16,59 @@ public interface BraceReduction
   /**
    * Inserts an open brace ({) into the reduced model.
    */
-  public void insertOpenSquiggly();
+  public Vector<StateBlock> insertOpenSquiggly();
 
   /**
    * Inserts a closed brace (}) into the reduced model.
    */
-  public void insertClosedSquiggly();
+  public Vector<StateBlock> insertClosedSquiggly();
 
   /**
    * Inserts an open parenthesis (() into the reduced model.
    */
-  public void insertOpenParen();
+  public Vector<StateBlock> insertOpenParen();
 
   /**
    * Inserts a closed parenthesis ()) into the reduced model.
    */
-  public void insertClosedParen();
+  public Vector<StateBlock> insertClosedParen();
 
   /**
    * Inserts an open bracket ([) into the reduced model.
    */
-  public void insertOpenBracket();
+  public Vector<StateBlock> insertOpenBracket();
 
   /**
    * Inserts a closed bracket (]) into the reduced model.
    */
-  public void insertClosedBracket();
+  public Vector<StateBlock> insertClosedBracket();
 
   /**
    * Inserts a star.
    */
-  public void insertStar();
+  public Vector<StateBlock> insertStar();
 
   /**
    * Inserts a slash.
    */
-  public void insertSlash();
+  public Vector<StateBlock> insertSlash();
 
   /**
    * Inserts a new line character (\n) into the reduced model.
    */
-  public void insertNewline();
+  public Vector<StateBlock> insertNewline();
 
   /**
    * Inserts a double quote (") into the reduced model.
    */
-  public void insertQuote();
+  public Vector<StateBlock> insertQuote();
   
   /**
    * <P>Updates the BraceReduction to reflect the insertion of a
    * regular text string into the document.</P>
    * @param length the length of the inserted string
    */
-  public void insertGap( int length );
+  public Vector<StateBlock> insertGap( int length );
 
   /**
    * <P>Updates the BraceReduction to reflect cursor movement.
@@ -83,7 +84,7 @@ public interface BraceReduction
    * Negative values delete text to the left of the cursor, positive
    * values delete text to the right.
    */
-  public void delete( int count );
+  public Vector<StateBlock> delete( int count );
   
   /**
    * <P>Finds the next significant brace.</P>

@@ -3,6 +3,7 @@
 package edu.rice.cs.drjava;
 
 import gj.util.Stack;
+import gj.util.Vector;
 
 /**
  * This class provides an implementation of the BraceReduction
@@ -133,60 +134,66 @@ public class ReducedModel implements BraceReduction
   /**
    * Inserts an open brace ({) into the reduced model.	 
    */
-	public void insertOpenSquiggly()
+	public Vector<StateBlock> insertOpenSquiggly()
 		{
-			_insertBrace("{");			
+			_insertBrace("{");
+			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
 
   /**
    * Inserts a closed brace (}) into the reduced model.
    */
-  public void insertClosedSquiggly()
+  public Vector<StateBlock> insertClosedSquiggly()
 		{
 			_insertBrace("}");
+			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
   /**
    * Inserts an open parenthesis (() into the reduced model.
    */
-  public void insertOpenParen()
+  public Vector<StateBlock> insertOpenParen()
 		{
 			_insertBrace("(");
+			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
 
   /**
    * Inserts a closed parenthesis ()) into the reduced model.
    */
-  public void insertClosedParen()
+  public Vector<StateBlock> insertClosedParen()
 		{
 			_insertBrace(")");
+			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
-
+	
   /**
    * Inserts an open bracket ([) into the reduced model.
    */
-  public void insertOpenBracket()
+  public Vector<StateBlock> insertOpenBracket()
 		{
 			_insertBrace("[");
+			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
 
   /**
    * Inserts a closed bracket (]) into the reduced model.
    */
-  public void insertClosedBracket()
+  public Vector<StateBlock> insertClosedBracket()
 		{
 			_insertBrace("]");
+			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
 	
   /**
    * Inserts a star.
    */
-  public void insertStar()
+  public Vector<StateBlock> insertStar()
 		{
 			//check if empty
 			if (_braces.isEmpty())
 				{
 					_insertNewBrace("*",_cursor);//now pointing to tail.
-					return;
+					return SBVectorFactory.generate(_cursor.copy(),_offset);
 				}
 			//check if at start
 			if (_cursor.atStart())
@@ -195,7 +202,7 @@ public class ReducedModel implements BraceReduction
 			if (_cursor.atEnd())
 				{
 					_checkPreviousInsertStar(_cursor);
-					return;
+					return SBVectorFactory.generate(_cursor.copy(),_offset);
 				}
 		 
 			//if inside a double character brace, break it.
@@ -229,6 +236,7 @@ public class ReducedModel implements BraceReduction
 				{
 					_checkPreviousInsertStar(_cursor);
 				}
+			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
 	
 			 
@@ -253,7 +261,7 @@ public class ReducedModel implements BraceReduction
 			if (copyCursor.current().getSize() == 2)
 				_offset = 1;
 			else
-				copyCursor.next();
+				copyCursor.next();			
 		}
 
 		
@@ -273,13 +281,13 @@ public class ReducedModel implements BraceReduction
 	 *                                b)insert
 	 *                                c)walk from first of three
 	 */
-  public void insertSlash()
+  public Vector<StateBlock> insertSlash()
 		{
 			//check if empty
 			if (_braces.isEmpty())
 				{
 					_insertNewBrace("/",_cursor);//now pointing to tail.
-					return;
+					return SBVectorFactory.generate(_cursor.copy(),_offset);
 				}
 			//check if at start
 			if (_cursor.atStart())
@@ -288,7 +296,7 @@ public class ReducedModel implements BraceReduction
 			if (_cursor.atEnd())
 				{
 					_checkPreviousInsertSlash(_cursor);
-					return;
+					return SBVectorFactory.generate(_cursor.copy(),_offset);
 				}
 			
 			//if inside a double character brace, break it.
@@ -324,6 +332,7 @@ public class ReducedModel implements BraceReduction
 				{
 					_checkPreviousInsertSlash(_cursor);
 				}
+			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
 
 	
@@ -377,7 +386,7 @@ public class ReducedModel implements BraceReduction
 	 *                    5) move two forward, _offset = 0
 	 * 5) otherwise, just insert newline, walk, move next, _offset = 0
    */
-  public void insertNewline()
+  public Vector<StateBlock> insertNewline()
 		{
 			if (_cursor.atStart())
 				{
@@ -406,6 +415,7 @@ public class ReducedModel implements BraceReduction
 				{
 					_insertNewEndOfLine();
 				}
+			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
 
 	private void _insertNewEndOfLine()
@@ -433,7 +443,7 @@ public class ReducedModel implements BraceReduction
 	 *                    5) move two forward, _offset = 0
 	 * 5) otherwise, just insert, walk, move next, _offset = 0
    */
-  public void insertQuote()
+  public Vector<StateBlock> insertQuote()
 		{
 			if (_cursor.atStart())
 				{
@@ -462,7 +472,7 @@ public class ReducedModel implements BraceReduction
 				{
 					_insertNewQuote();
 				}
-				
+			return SBVectorFactory.generate(_cursor.copy(),_offset);	
 		}
 
 	private void _insertNewQuote()
@@ -508,7 +518,7 @@ public class ReducedModel implements BraceReduction
    * regular text string into the document.</P>
    * @param length the length of the inserted string
    */
-  public void insertGap( int length )
+  public Vector<StateBlock> insertGap( int length )
 		{
 			//0 - a
 			if (_cursor.atStart())
@@ -569,6 +579,7 @@ public class ReducedModel implements BraceReduction
 				{
 					_insertNewGap(length); //inserts a gap and goes to the next item
 				}
+			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
 
 	/**
@@ -1204,14 +1215,15 @@ public class ReducedModel implements BraceReduction
    * values delete text to the right.
 	 * Always move count spaces to make sure we can delete.
    */
-  public void delete( int count )
+  public Vector<StateBlock> delete( int count )
 		{
 			if (count == 0)
-				return;
+				return SBVectorFactory.generate(_cursor.copy(),_offset);;
 			ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
 			// from = the _cursor
 			// to = _cursor.copy()
 			_offset = _delete(count, _offset, _cursor, copyCursor);
+			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
 
 	private int _delete(int count, int offset,
@@ -1701,5 +1713,5 @@ public class ReducedModel implements BraceReduction
 			// not the right initial conditions 
 			else
 				return -1;				
-    }
+    }	
 }
