@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -85,7 +85,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   private static final String FOO2_EXTENDS_FOO_TEXT =
     "class DrJavaTestFoo2 extends DrJavaTestFoo {}";
   
-  private static final String FOO_NON_PUBLIC_CLASS_TEXT = 
+  private static final String FOO_NON_PUBLIC_CLASS_TEXT =
     "class DrJavaTestFoo {} class Foo{}";
   
   private static final String FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT =
@@ -225,10 +225,10 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
 
     // Make sure .class exists for both files
     File compiled = classForJava(file, "DrJavaTestFoo");
-    assertTrue(_name() + "Foo Class file doesn't exist after compile", 
+    assertTrue(_name() + "Foo Class file doesn't exist after compile",
                compiled.exists());
     File compiled2 = classForJava(file2, "DrJavaTestBar");
-    assertTrue(_name() + "Bar Class file doesn't exist after compile", 
+    assertTrue(_name() + "Bar Class file doesn't exist after compile",
                compiled2.exists());
     _model.removeListener(listener);
   }
@@ -273,8 +273,8 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   /**
    * Test that one compiled file can depend on the other and that when a keyword
    * is part of a field name, the file will compile.
-   * We compile DrJavaTestFoo and then DrJavaTestFoo2 (which extends 
-   * DrJavaTestFoo). This shows that the compiler successfully found 
+   * We compile DrJavaTestFoo and then DrJavaTestFoo2 (which extends
+   * DrJavaTestFoo). This shows that the compiler successfully found
    * DrJavaTestFoo2 when compiling DrJavaTestFoo.
    * Doesn't reset interactions because no interpretations are performed.
    */
@@ -287,7 +287,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     
     doc1.saveFile(new FileSelector(fooFile));
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
-    _model.addListener(listener); 
+    _model.addListener(listener);
     doc1.startCompile();
     if (_model.getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
@@ -316,8 +316,8 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
 
   /**
    * Test that one compiled file can depend on the other.
-   * We compile a.DrJavaTestFoo and then b.DrJavaTestFoo2 (which extends 
-   * DrJavaTestFoo). This shows that the compiler successfully found 
+   * We compile a.DrJavaTestFoo and then b.DrJavaTestFoo2 (which extends
+   * DrJavaTestFoo). This shows that the compiler successfully found
    * DrJavaTestFoo2 when compiling DrJavaTestFoo.
    * Doesn't reset interactions because no interpretations are performed.
    */
@@ -473,7 +473,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     // check that model.resetCompilerErrors works
     _model.resetCompilerErrors();
     CompilerErrorModel cem = _model.getCompilerErrorModel();
-    assertEquals("CompilerErrorModel has errors after reset", 
+    assertEquals("CompilerErrorModel has errors after reset",
                  0,
                  cem.getNumErrors());
     _model.removeListener(listener);
@@ -490,24 +490,23 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
 
     TestListener listener = new TestListener() {
-      public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
+      public void saveBeforeCompile() {
         assertModified(true, doc);
-        assertEquals(_name() + "save reason", COMPILE_REASON, reason);
-        saveAllBeforeProceedingCount++;
+        saveBeforeCompileCount++;
         // since we don't actually save the compile should abort
       }
     };
 
     _model.addListener(listener);
     doc.startCompile();
-    listener.assertSaveAllBeforeProceedingCount(1);
+    listener.assertSaveBeforeCompileCount(1);
     assertModified(true, doc);
     assertContents(FOO_TEXT, doc);
     _model.removeListener(listener);
   }
 
   /**
-   * If we try to compile while any files are unsaved, and if we don't 
+   * If we try to compile while any files are unsaved, and if we don't
    * save when asked to saveAllBeforeProceeding, it should not do the compile
    * or any other actions.
    */
@@ -518,18 +517,17 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     
     TestListener listener = new TestListener() {
-      public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
+      public void saveBeforeCompile() {
         assertModified(true, doc);
         assertModified(true, doc2);
-        assertEquals(_name() + "save reason", COMPILE_REASON, reason);
-        saveAllBeforeProceedingCount++;
+        saveBeforeCompileCount++;
         // since we don't actually save the compile should abort
       }
     };
     
     _model.addListener(listener);
     doc.startCompile();
-    listener.assertSaveAllBeforeProceedingCount(1);
+    listener.assertSaveBeforeCompileCount(1);
     assertModified(true, doc);
     assertModified(true, doc2);
     assertContents(FOO_TEXT, doc);
@@ -538,8 +536,8 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   }
 
   /**
-   * If we try to compile while any files (including the active file) are 
-   * unsaved but we do save it from within saveAllBeforeProceeding, the 
+   * If we try to compile while any files (including the active file) are
+   * unsaved but we do save it from within saveAllBeforeProceeding, the
    * compile should occur happily.
    * Doesn't reset interactions because no interpretations are performed.
    */
@@ -552,8 +550,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     final File file2 = tempFile(2);
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false) {
-      public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
-        assertEquals(_name() + "save reason", COMPILE_REASON, reason);
+      public void saveBeforeCompile() {
         assertModified(true, doc);
         assertModified(true, doc2);
         assertSaveCount(0);
@@ -570,12 +567,12 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
           fail("Save produced exception: " + ioe);
         }
         
-        saveAllBeforeProceedingCount++;
+        saveBeforeCompileCount++;
       }
       
       public void fileSaved(OpenDefinitionsDocument doc) {
         assertModified(false, doc);
-        assertSaveAllBeforeProceedingCount(0);
+        assertSaveBeforeCompileCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
         assertInteractionsResetCount(0);
@@ -605,7 +602,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     }
 
     // Check events fired
-    listener.assertSaveAllBeforeProceedingCount(1);
+    listener.assertSaveBeforeCompileCount(1);
     listener.assertSaveCount(2);
     assertCompileErrorsPresent(_name(), false);
     listener.checkCompileOccurred();
@@ -631,8 +628,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     final File file2 = tempFile(1);
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false) {
-      public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
-        assertEquals(_name() + "save reason", COMPILE_REASON, reason);
+      public void saveBeforeCompile() {
         assertModified(false, doc);
         assertModified(true, doc2);
         assertSaveCount(0);
@@ -648,15 +644,15 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
           fail("Save produced exception: " + ioe);
         }
         
-        saveAllBeforeProceedingCount++;
+        saveBeforeCompileCount++;
         assertModified(false, doc);
         assertModified(false, doc2);
-        assertTrue(!_model.areAnyModifiedSinceSave());
+        assertTrue(!_model.hasModifiedDocuments());
       }
       
       public void fileSaved(OpenDefinitionsDocument doc) {
         assertModified(false, doc);
-        assertSaveAllBeforeProceedingCount(0);
+        assertSaveBeforeCompileCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
         assertInteractionsResetCount(0);
@@ -688,11 +684,11 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     if (_model.getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
-    assertTrue(!_model.areAnyModifiedSinceSave());
+    assertTrue(!_model.hasModifiedDocuments());
     
     // Check events fired
     listener.assertCompileStartCount(1);
-    listener.assertSaveAllBeforeProceedingCount(1);
+    listener.assertSaveBeforeCompileCount(1);
     listener.assertSaveCount(1);
     assertCompileErrorsPresent(_name(), false);
     listener.checkCompileOccurred();
@@ -705,7 +701,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
 
   /**
    * After creating a new file, saving, and compiling it, this test checks
-   * that the new document is in sync after compiling and is out of sync 
+   * that the new document is in sync after compiling and is out of sync
    * after modifying and even saving it.
    * Doesn't reset interactions because no interpretations are performed.
    */
@@ -719,9 +715,9 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
-    assertTrue(_name() + "Class file should not exist before compile", 
+    assertTrue(_name() + "Class file should not exist before compile",
                doc.getDocument().getCachedClassFile() == null);
-    assertTrue("should not be in sync before compile", 
+    assertTrue("should not be in sync before compile",
                !doc.checkIfClassFileInSync());
     doc.startCompile();
     if (_model.getNumErrors() > 0) {
@@ -739,7 +735,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     Thread.sleep(2000);
 
     doc.saveFile(new FileSelector(file));
-    assertTrue("should not be in sync after save", 
+    assertTrue("should not be in sync after save",
                !doc.checkIfClassFileInSync());
     
     // Make sure .class exists
@@ -763,9 +759,9 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
-    assertTrue(_name() + "Class file should not exist before compile", 
+    assertTrue(_name() + "Class file should not exist before compile",
                doc.getDocument().getCachedClassFile() == null);
-    assertTrue("should not be in sync before compile", 
+    assertTrue("should not be in sync before compile",
                !doc.checkIfClassFileInSync());
     doc.startCompile();
     if (_model.getNumErrors() > 0) {
@@ -773,7 +769,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     }
     _model.removeListener(listener);
     listener.checkCompileOccurred();
-    assertTrue("should be in sync after compile", 
+    assertTrue("should be in sync after compile",
                doc.checkIfClassFileInSync());
     
     // Have to wait 1 second so file will have a different timestamp
@@ -791,7 +787,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   public void testCompileAfterFileMoved() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
-    doc.saveFile(new FileSelector(file));    
+    doc.saveFile(new FileSelector(file));
     TestListener listener = new TestListener();
     _model.addListener(listener);
     file.delete();
@@ -813,7 +809,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   }
   
   /**
-   * Tests a compile on a file that references a non-public class defined in 
+   * Tests a compile on a file that references a non-public class defined in
    * another class with a name different than the non-public class.
    * Doesn't reset interactions because no interpretations are performed.
    */
@@ -882,7 +878,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
                                     Boolean.TRUE);
       
       CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
-      _model.addListener(listener2); 
+      _model.addListener(listener2);
       doc.startCompile();
       if (_model.getNumErrors() > 0) {
         fail("compile failed: " + getCompilerErrorString());
@@ -950,9 +946,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
       
       CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
       _model.addListener(listener);
-      int numErrors = _model.getNumErrors();
       _model.compileAll();
-      numErrors = _model.getNumErrors();
       if (_model.getNumErrors() > 0) {
         fail("compile failed: " + getCompilerErrorString());
       }

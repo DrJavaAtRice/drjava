@@ -54,6 +54,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.io.*;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.LinkedList;
 import java.util.Arrays;
 import java.net.URL;
@@ -114,7 +115,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private final SingleDisplayModel _model;
 
-  /** 
+  /**
    * Maps an OpenDefDoc to its JScrollPane.
    */
   private Hashtable _defScrollPanes;
@@ -372,7 +373,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
-  /** Reverts all open documents. 
+  /** Reverts all open documents.
    * (not working yet)
   private Action _revertAllAction = new AbstractAction("Revert All to Saved") {
     public void actionPerformed(ActionEvent ae) {
@@ -448,7 +449,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _javadocAction = new AbstractAction("Create Javadoc") {
       public void actionPerformed(ActionEvent ae) {
         try {
-          _model.javadocAll(_javadocSelector, _saveSelector);
+          Vector<String> gjClasspath = _model.getClasspath();
+          String[] cp = new String[gjClasspath.size()];
+          gjClasspath.copyInto(cp);
+          List<String> javaClasspath = Arrays.asList(cp);
+          _model.javadocAll(_javadocSelector, _saveSelector, javaClasspath, _model.getNotifier());
         }
         catch (IOException ioe) {
           _showIOError(ioe);
@@ -499,7 +504,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /**
    * Action that copies the previous interaction to the definitions pane.
-   * 
+   *
    * is there a good way to get the last history element without perturbing the current document?
   Action copyPreviousInteractionToDefinitionsAction = new AbstractAction("Copy previous interaction to definitions") {
     public void actionPerformed(ActionEvent e) {
@@ -558,7 +563,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         showTab(_findReplace);
         _findReplace.beginListeningTo(_currentDefPane);
       }
-      _tabbedPane.setSelectedComponent(_findReplace);  
+      _tabbedPane.setSelectedComponent(_findReplace);
       _findReplace.requestFocus();
       _setDividerLocation();
     }
@@ -709,8 +714,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** Calls the ConfigFrame to edit preferences */
-  private Action _editPreferencesAction = 
-    new AbstractAction("Preferences...") 
+  private Action _editPreferencesAction =
+    new AbstractAction("Preferences...")
   {
     public void actionPerformed(ActionEvent ae) {
       // Create frame if we haven't yet
@@ -877,7 +882,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       jfc.setDialogTitle("Load Interactions History");
       jfc.setFileFilter(new InteractionsHistoryFilter());
       FileOpenSelector selector = new FileOpenSelector() {
-        public File[] getFiles() throws OperationCanceledException {            
+        public File[] getFiles() throws OperationCanceledException {
           return getOpenFiles(jfc);
         }
       };
@@ -963,7 +968,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   /**
-   * Clears the commands in the interaction history 
+   * Clears the commands in the interaction history
    */
   private Action _clearHistoryAction = new AbstractAction("Clear Interactions History")
   {
@@ -1054,7 +1059,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 //     JPanel _jdAccPanel = new JPanel();
 //     JCheckBox _jdCheckBox = new JCheckBox("Start From Source Roots");
 //     _jdAccPanel.add(_jdCheckBox);
-//     
+//
 //     _javadocChooser.setAccessory(_jdAccPanel);
     
     //set up the hourglass cursor
@@ -1100,7 +1105,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpDocumentSelector();
     _setUpContextMenus();
     
-    _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2, 
+    _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2,
                                                _fileMenu,
                                                this);
 
@@ -1133,7 +1138,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _promptBeforeQuit = DrJava.getConfig().getSetting(QUIT_PROMPT).booleanValue();
 
     // Set the fonts
-    _setMainFont();    
+    _setMainFont();
     Font doclistFont = DrJava.getConfig().getSetting(FONT_DOCLIST);
     _docList.setFont(doclistFont);
     
@@ -1248,7 +1253,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     try {
       if (inDebugMode()) {
         // Turn off debugger
-        debugger.shutdown();        
+        debugger.shutdown();
       }
       else {
         // Turn on debugger
@@ -1426,7 +1431,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _model.newFile();
   }
 
-  private void _open() { 
+  private void _open() {
     open (_openSelector);
   }
   
@@ -1516,11 +1521,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     catch (FileMovedException fme) {
       _showFileMovedError(fme);
-    } 
+    }
     catch (BadLocationException e) {
       _showError(e, "Print Error",
                  "An error occured while preparing the print preview.");
-    } 
+    }
     catch (IllegalStateException e) {
       _showError(e, "Print Error",
                  "An error occured while preparing the print preview.");
@@ -1729,7 +1734,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       catch (IllegalStateException ise) {
         // This may happen if the user if stepping very frequently,
         // and is even more likely if they are using both hotkeys
-        // and UI buttons. Ignore it in this case. 
+        // and UI buttons. Ignore it in this case.
         // Hopefully, there are no other situations where
         // the user can be trying to step while there are no
         // suspended threads.
@@ -1763,7 +1768,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (isModified  && !_currentDefPane.hasWarnedAboutModified()) {
         
         int rc = JOptionPane.showConfirmDialog(this,
-                                               "This document has been modified and may be out of sync\n" + 
+                                               "This document has been modified and may be out of sync\n" +
                                                "with the debugger.  It is recommended that you first\n" +
                                                "save and recompile before continuing to use the debugger,\n" +
                                                "to avoid any unexpected errors.  Would you still like to\n" +
@@ -1788,7 +1793,7 @@ public class MainFrame extends JFrame implements OptionConstants {
            
       try {
         Debugger debugger = _model.getDebugger();
-        debugger.toggleBreakpoint(doc, 
+        debugger.toggleBreakpoint(doc,
                                   _currentDefPane.getCaretPosition(),
                                   _currentDefPane.getCurrentLine());
       }
@@ -1920,12 +1925,12 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   /**
    * Shows a brief warning to the user, to inform him/her that the file he/she is
-   * debugging has been modified since its last save and should probably be saved 
+   * debugging has been modified since its last save and should probably be saved
    * and recompiled. Does not actually save or recompile for the user.
    */
   private void _showDebuggingModifiedFileWarning() {
     JOptionPane.showMessageDialog(this,
-                                  "This document has been modified since its last save and\n" + 
+                                  "This document has been modified since its last save and\n" +
                                   "may be out of sync with the debugger. It is suggested that\n" +
                                   "you save and recompile before continuing to debug in order\n" +
                                   "to avoid any unexpected errors.",
@@ -1933,7 +1938,7 @@ public class MainFrame extends JFrame implements OptionConstants {
                                   JOptionPane.WARNING_MESSAGE);
 
     _currentDefPane.hasWarnedAboutModified(true);
-  } 
+  }
 
    /**
    * Returns the File selected by the JFileChooser.
@@ -1957,7 +1962,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             if (chosen.getName().indexOf(".") == -1)
               return new File (chosen.getAbsolutePath() + ".java");
           }
-          return chosen; 
+          return chosen;
         }
         else
           throw new RuntimeException("filechooser returned null file");
@@ -2031,7 +2036,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         /*
         // Center the destination line on the screen
         // (this code taken from FindReplaceDialog's _selectFoundItem method)
-        JScrollPane defScroll = (JScrollPane) 
+        JScrollPane defScroll = (JScrollPane)
           _defScrollPanes.get(_model.getActiveDocument());
         int viewHeight = (int)defScroll.getViewport().getSize().getHeight();
         // Scroll to make sure this item is visible
@@ -2041,7 +2046,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         startRect.setLocation(0, startRectY-viewHeight/2);
         //Rectangle endRect = _defPane.modelToView(to - 1);
         Point endPoint = new Point(0, startRectY+viewHeight/2-1);
-        startRect.add(endPoint);      
+        startRect.add(endPoint);
       
         _currentDefPane.scrollRectToVisible(startRect);
 
@@ -2053,7 +2058,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         _currentDefPane.requestFocus();
         */
       }
-    } 
+    }
     catch (NumberFormatException nfe) {
       // invalid input for line number
       Toolkit.getDefaultToolkit().beep();
@@ -2214,7 +2219,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Need to check in case two actions were assigned to the same
     // key in the config file
     KeyBindingManager.Singleton.put(opt, a, item, item.getText());
-    if (KeyBindingManager.Singleton.get(ks) == a) { 
+    if (KeyBindingManager.Singleton.get(ks) == a) {
       item.setAccelerator(ks);
       //KeyBindingManager.Singleton.addListener(opt, item);
     }
@@ -2228,7 +2233,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     JMenuItem tmpItem;
     JMenu fileMenu = new JMenu("File");
     fileMenu.setMnemonic(KeyEvent.VK_F);
-    // New, open 
+    // New, open
     _addMenuItem(fileMenu, _newAction, KEY_NEW_FILE);
     _addMenuItem(fileMenu, _openAction, KEY_OPEN_FILE);
     fileMenu.addSeparator();
@@ -2392,7 +2397,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * @param isSuspended is true when the current thread has just been suspended
    * false if the current thread has just been resumed
    */
-  private void _setThreadDependentDebugMenuItems(boolean isSuspended) {    
+  private void _setThreadDependentDebugMenuItems(boolean isSuspended) {
     //_suspendDebugAction.setEnabled(!isSuspended);
     _resumeDebugAction.setEnabled(isSuspended);
     _stepIntoDebugAction.setEnabled(isSuspended);
@@ -2544,7 +2549,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Update the toolbar's buttons, following any change to TOOLBAR_ICONS_ENABLED,
    * TOOLBAR_TEXT_ENABLED, or FONT_TOOLBAR (name, style, text)
-   */ 
+   */
   private void _updateToolbarButtons() {
     
     Component[] buttons = _toolBar.getComponents();
@@ -2656,7 +2661,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _model.setInputListener(_consoleController.getInputListener());
 
     // Interactions
-    _interactionsController = 
+    _interactionsController =
       new InteractionsController(_model.getInteractionsModel(),
                                  _model.getSwingInteractionsDocument());
     _interactionsPane = _interactionsController.getPane();
@@ -2716,7 +2721,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Configures the component used for selecting active documents.
    */
   private void _setUpDocumentSelector() {
-    _docList = new JList(_model.getDefinitionsDocuments());
+    _docList = new JList(_model.getDefinitionsDocs());
     _docList.setSelectionModel(_model.getDocumentSelectionModel());
     _docList.setCellRenderer(new DocCellRenderer());
 
@@ -2779,11 +2784,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Create a new DefinitionsPane and JScrollPane for an open
    * definitions document.
-   * 
+   *
    * @param doc The open definitions document to wrap
    * @return JScrollPane containing a DefinitionsPane for the
    *         given document.
-   */ 
+   */
   JScrollPane _createDefScrollPane(OpenDefinitionsDocument doc) {
     // made this package private to allow testing of disabling editing
     // during compile and successful switching on and off of ability to
@@ -2805,7 +2810,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     pane.addJavadocErrorCaretListener(javadocCaretListener);
 
     // add a listener to update line and column.
-    pane.addCaretListener( _posListener );    
+    pane.addCaretListener( _posListener );
     
     // Add to a scroll pane
     JScrollPane scroll = new BorderlessScrollPane(pane,
@@ -2883,7 +2888,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _mainSplit.setOneTouchExpandable(true);
     _debugSplitPane.setOneTouchExpandable(true);
     _docSplitPane.setDividerLocation(DOC_LIST_WIDTH);
-    _docSplitPane.setOneTouchExpandable(true);   
+    _docSplitPane.setOneTouchExpandable(true);
   }
 
   /**
@@ -2899,7 +2904,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _currentDefPane.getOpenDocument().
       syncCurrentLocationWithDefinitions( _currentDefPane.getCaretPosition() );
 
-    JScrollPane scroll = 
+    JScrollPane scroll =
       (JScrollPane) _defScrollPanes.get(_model.getActiveDocument());
     if (scroll == null) {
       throw new UnexpectedException(new Exception(
@@ -2909,14 +2914,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     int oldLocation = _docSplitPane.getDividerLocation();
     
     // Following line should fix "Dancing UI" bug
-    // scroll.setPreferredSize(_docSplitPane.getRightComponent().getPreferredSize()); 
+    // scroll.setPreferredSize(_docSplitPane.getRightComponent().getPreferredSize());
     
     _docSplitPane.setRightComponent(scroll);
     _docSplitPane.setDividerLocation(oldLocation);
     
     // if the current def pane is uneditable, that means
     // we arrived here from a compile with errors.  We're
-    // guaranteed to make it editable again when we 
+    // guaranteed to make it editable again when we
     // return from the compilation, so we take the state
     // with us.  We guarantee only one definitions pane
     // is un-editable at any time.
@@ -2930,7 +2935,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     // reset the undo/redo menu items
     _undoAction.setDelegatee(_currentDefPane.getUndoAction());
-    _redoAction.setDelegatee(_currentDefPane.getRedoAction());    
+    _redoAction.setDelegatee(_currentDefPane.getRedoAction());
     
     if(inDebugMode()) {
       _updateDebugStatus();
@@ -2968,7 +2973,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     newbar.setEnabled(true);
     newbar.revalidate();
     scroll.setHorizontalScrollBar(newbar);
-    scroll.revalidate();    
+    scroll.revalidate();
   }
   
   /**
@@ -3031,7 +3036,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     Font f = DrJava.getConfig().getSetting(FONT_MAIN);
     
     Iterator scrollPanes = _defScrollPanes.values().iterator();
-    while (scrollPanes.hasNext()) {  
+    while (scrollPanes.hasNext()) {
       JScrollPane scroll = (JScrollPane) scrollPanes.next();
       if (scroll != null) {
         DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
@@ -3058,7 +3063,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     boolean ruleEnabled = DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue();
     
     Iterator scrollPanes = _defScrollPanes.values().iterator();
-    while (scrollPanes.hasNext()) {  
+    while (scrollPanes.hasNext()) {
       JScrollPane scroll = (JScrollPane) scrollPanes.next();
       if (scroll != null) {
         DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
@@ -3107,11 +3112,11 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // if the document is untitled, don't show that it is out of sync since it
     // can't be debugged anyway
-    if (_model.getActiveDocument().isUntitled() || 
+    if (_model.getActiveDocument().isUntitled() ||
         _model.getActiveDocument().getDocument().getClassFileInSync())
     {
       // Hide message
-      if (_debugPanel.getStatusText().equals(DEBUGGER_OUT_OF_SYNC)) {  
+      if (_debugPanel.getStatusText().equals(DEBUGGER_OUT_OF_SYNC)) {
         _debugPanel.setStatusText("");
       }
     }
@@ -3203,9 +3208,9 @@ public class MainFrame extends JFrame implements OptionConstants {
           _removeThreadLocationHighlight();
 
           // Ensure all doc breakpoints are gone
-          ListModel docs = _model.getDefinitionsDocuments();
-          for (int i=0; i < docs.getSize(); i++) {
-            ((OpenDefinitionsDocument)docs.getElementAt(i)).removeFromDebugger();
+          List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
+          for (int i=0; i < docs.size(); i++) {
+            docs.get(i).removeFromDebugger();
           }
         }
       };
@@ -3213,8 +3218,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void currThreadSet(DebugThreadData dtd) {
-    }    
-       
+    }
+    
     public void threadLocationUpdated(final OpenDefinitionsDocument doc, 
                                       final int lineNumber,
                                       final boolean shouldHighlight) {
@@ -3228,7 +3233,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           // for a call to setSize.
           ActionListener setSizeListener = new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-              _currentDefPane.centerViewOnLine(lineNumber);  
+              _currentDefPane.centerViewOnLine(lineNumber);
             }
           };
           _currentDefPane.addSetSizeListener(setSizeListener);
@@ -3278,13 +3283,13 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          JScrollPane scroll = 
+          JScrollPane scroll =
             (JScrollPane) _defScrollPanes.get(bp.getDocument());
           if (scroll == null) {
             throw new UnexpectedException(new Exception("Breakpoint set in a closed document."));
           }
           DefinitionsPane bpPane = (DefinitionsPane) scroll.getViewport().getView();
-          _breakpointHighlights.put(bp, 
+          _breakpointHighlights.put(bp,
                                     bpPane.getHighlightManager().addHighlight(bp.getStartOffset(),
                                                                               bp.getEndOffset(),
                                                                               DefinitionsPane.BREAKPOINT_PAINTER));
@@ -3454,7 +3459,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         // Recover, show it in the list anyway
         _recentFileManager.updateOpenFiles(fme.getFile());
       }
-    } 
+    }
 
     /**
      * NOTE: Makes certain that this action occurs in the event dispatching
@@ -3546,7 +3551,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             }
             catch (FileMovedException fme) {
               _showFileMovedError(fme);
-            } 
+            }
             catch (IOException e) {
               _showIOError(e);
             }
@@ -3572,7 +3577,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _enableInteractionsPane();
     }
     
-    public void interactionErrorOccurred(int offset, int length){      
+    public void interactionErrorOccurred(int offset, int length){
       _interactionsPane.highlightError(offset, length);
     }
     
@@ -3778,46 +3783,48 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     public void consoleReset() {
     }
+    
+    public void saveBeforeCompile() {
+      _saveAllBeforeProceeding
+        ("To compile, you must first save ALL modified files.\n" +
+         "Would you like to save and then compile?");
+    }
+    
+    public void saveBeforeJUnit() {
+      _saveAllBeforeProceeding
+        ("To run JUnit, you must first save and compile ALL modified\n" +
+         "files. Would you like to save and then compile?");
+    }
+    
+    public void saveBeforeJavadoc() {
+      _saveAllBeforeProceeding
+        ("To run Javadoc, you must first save ALL modified files.\n" +
+         "Would you like to save and then run Javadoc?");
+    }
+    
+    public void saveBeforeDebug() {
+      _saveAllBeforeProceeding
+        ("To use debugging commands, you must first save and compile\n" +
+         "ALL modified files. Would you like to save and then compile?");
+    }
 
-    public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
-      String message;
-      if (reason == COMPILE_REASON) {
-        message =
-          "To compile, you must first save ALL modified files.\n" +
-          "Would you like to save and then compile?";
-      }
-      else if (reason == JUNIT_REASON) {
-        message =
-          "To run JUnit, you must first save and compile ALL modified\n" +
-          "files. Would you like to save and then compile?";
-      }
-      else if (reason == JAVADOC_REASON) {
-        message =
-          "To run JavaDoc, you must first save ALL modified files.\n" +
-          "Would you like to save and then run JavaDoc?"; 
-      }
-      else if (reason == DEBUG_REASON) {
-        message =
-          "To use debugging commands, you must first save and compile\n" +
-          "ALL modified files. Would you like to save and then compile?";
-      }
-      else {
-        throw new RuntimeException("Invalid reason for forcing a save.");
-      }
-      int rc = JOptionPane.showConfirmDialog(MainFrame.this, message,
-                                             "Must save all files to continue",
-                                             JOptionPane.YES_NO_OPTION);
-      switch (rc) {
-        case JOptionPane.YES_OPTION:
-          _saveAll();
-          break;
-        case JOptionPane.NO_OPTION:
-        case JOptionPane.CANCEL_OPTION:
-        case JOptionPane.CLOSED_OPTION:
-          // do nothing
-          break;
-        default:
-          throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
+    private void _saveAllBeforeProceeding(String message) {
+      if (_model.hasModifiedDocuments()) {
+        int rc = JOptionPane.showConfirmDialog(MainFrame.this, message,
+                                               "Must save all files to continue",
+                                               JOptionPane.YES_NO_OPTION);
+        switch (rc) {
+          case JOptionPane.YES_OPTION:
+            _saveAll();
+            break;
+          case JOptionPane.NO_OPTION:
+          case JOptionPane.CANCEL_OPTION:
+          case JOptionPane.CLOSED_OPTION:
+            // do nothing
+            break;
+          default:
+            throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
+        }
       }
     }
 
@@ -3829,7 +3836,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         "that  to  work,  the  current  document  must  be a valid JUnit\n" +
         "TestCase, i.e., a subclass of junit.framework.TestCase.\n\n" +
         
-        "Make  sure  the current  document  has been saved and  compiled\n" + 
+        "Make  sure  the current  document  has been saved and  compiled\n" +
         "before using the Test button.\n\n" +
 
         "For information on how to write JUnit TestCases, view the JUnit\n" +
@@ -3977,7 +3984,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   /**
    * Shows the components passed in in the appropriate place in the tabbedPane depending on the position of
-   * the component in the _tabs list. 
+   * the component in the _tabs list.
    * @param c the component to show in the tabbedPane
    */
   public void showTab(Component c) {
@@ -3988,7 +3995,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       tp = (TabbedPanel)_tabs.get(i);
       if (tp == c) {
         // 2 right now is a magic number for the number of tabs always visible
-        // interactions & console        
+        // interactions & console
         if (!tp.isDisplayed()) {
           _tabbedPane.insertTab(tp.getName(), null, tp, null, numVisible + 2);
           tp.setDisplayed(true);
@@ -4001,9 +4008,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   
-  private void _setDividerLocation() {    
-    int divLocation = _mainSplit.getHeight() - 
-      _mainSplit.getDividerSize() - 
+  private void _setDividerLocation() {
+    int divLocation = _mainSplit.getHeight() -
+      _mainSplit.getDividerSize() -
       (int)_tabbedPane.getMinimumSize().getHeight();
     if (_mainSplit.getDividerLocation() > divLocation)
       _mainSplit.setDividerLocation(divLocation);
@@ -4059,67 +4066,67 @@ public class MainFrame extends JFrame implements OptionConstants {
                                                DefaultEditorKit.selectionBackwardAction);
     
     KeyBindingManager.Singleton.put(KEY_BEGIN_DOCUMENT, _actionMap.get(DefaultEditorKit.beginAction), null, "Begin Document");
-    KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_DOCUMENT, 
+    KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_DOCUMENT,
                                                DefaultEditorKit.selectionBeginAction);
     
     KeyBindingManager.Singleton.put(KEY_BEGIN_LINE, _actionMap.get(DefaultEditorKit.beginLineAction), null, "Begin Line");
-    //KeyBindingManager.Singleton.put(KEY_BEGIN_LINE, _homeAction, 
+    //KeyBindingManager.Singleton.put(KEY_BEGIN_LINE, _homeAction,
     //                                null, "Begin Line");
-    KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_LINE, 
-                                               DefaultEditorKit.selectionBeginLineAction); 
+    KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_LINE,
+                                               DefaultEditorKit.selectionBeginLineAction);
     
-    KeyBindingManager.Singleton.put(KEY_PREVIOUS_WORD, 
+    KeyBindingManager.Singleton.put(KEY_PREVIOUS_WORD,
                                     _actionMap.get(DefaultEditorKit.previousWordAction), null, "Previous Word");
-    KeyBindingManager.Singleton.addShiftAction(KEY_PREVIOUS_WORD, 
+    KeyBindingManager.Singleton.addShiftAction(KEY_PREVIOUS_WORD,
                                                DefaultEditorKit.selectionPreviousWordAction);
     
     
-    KeyBindingManager.Singleton.put(KEY_DOWN, 
+    KeyBindingManager.Singleton.put(KEY_DOWN,
                                     _actionMap.get(DefaultEditorKit.downAction), null, "Down");
-    KeyBindingManager.Singleton.addShiftAction(KEY_DOWN, 
+    KeyBindingManager.Singleton.addShiftAction(KEY_DOWN,
                                                DefaultEditorKit.selectionDownAction);
     
-    KeyBindingManager.Singleton.put(KEY_END_DOCUMENT, 
+    KeyBindingManager.Singleton.put(KEY_END_DOCUMENT,
                                     _actionMap.get(DefaultEditorKit.endAction), null, "End Document");
-    KeyBindingManager.Singleton.addShiftAction(KEY_END_DOCUMENT, 
+    KeyBindingManager.Singleton.addShiftAction(KEY_END_DOCUMENT,
                                                DefaultEditorKit.selectionEndAction);
     
-    KeyBindingManager.Singleton.put(KEY_END_LINE, 
+    KeyBindingManager.Singleton.put(KEY_END_LINE,
                                     _actionMap.get(DefaultEditorKit.endLineAction), null, "End Line");
-    KeyBindingManager.Singleton.addShiftAction(KEY_END_LINE, 
+    KeyBindingManager.Singleton.addShiftAction(KEY_END_LINE,
                                                DefaultEditorKit.selectionEndLineAction);
     
-    KeyBindingManager.Singleton.put(KEY_NEXT_WORD, 
+    KeyBindingManager.Singleton.put(KEY_NEXT_WORD,
                                     _actionMap.get(DefaultEditorKit.nextWordAction), null, "Next Word");
-    KeyBindingManager.Singleton.addShiftAction(KEY_NEXT_WORD, 
+    KeyBindingManager.Singleton.addShiftAction(KEY_NEXT_WORD,
                                                DefaultEditorKit.selectionNextWordAction);
     
-    KeyBindingManager.Singleton.put(KEY_FORWARD, 
+    KeyBindingManager.Singleton.put(KEY_FORWARD,
                                     _actionMap.get(DefaultEditorKit.forwardAction), null, "Forward");
     KeyBindingManager.Singleton.addShiftAction(KEY_FORWARD,
                                                DefaultEditorKit.selectionForwardAction);
     
-    KeyBindingManager.Singleton.put(KEY_UP, 
+    KeyBindingManager.Singleton.put(KEY_UP,
                                     _actionMap.get(DefaultEditorKit.upAction), null, "Up");
-    KeyBindingManager.Singleton.addShiftAction(KEY_UP, 
-                                               DefaultEditorKit.selectionUpAction); 
+    KeyBindingManager.Singleton.addShiftAction(KEY_UP,
+                                               DefaultEditorKit.selectionUpAction);
     
     // These last methods have no default selection methods
-    KeyBindingManager.Singleton.put(KEY_PAGE_DOWN, 
+    KeyBindingManager.Singleton.put(KEY_PAGE_DOWN,
                                     _actionMap.get(DefaultEditorKit.pageDownAction), null, "Page Down");
-    KeyBindingManager.Singleton.put(KEY_PAGE_UP, 
+    KeyBindingManager.Singleton.put(KEY_PAGE_UP,
                                     _actionMap.get(DefaultEditorKit.pageUpAction), null, "Page Up");
-    KeyBindingManager.Singleton.put(KEY_CUT_LINE, 
+    KeyBindingManager.Singleton.put(KEY_CUT_LINE,
                                     _cutLineAction, null, "Cut Line");
-    KeyBindingManager.Singleton.put(KEY_CLEAR_LINE, 
+    KeyBindingManager.Singleton.put(KEY_CLEAR_LINE,
                                     _clearLineAction, null, "Clear Line");
-    KeyBindingManager.Singleton.put(KEY_COMMENT_LINES, 
+    KeyBindingManager.Singleton.put(KEY_COMMENT_LINES,
                                     _commentLinesAction, null, "Comment Out Line(s)");
-    KeyBindingManager.Singleton.put(KEY_UNCOMMENT_LINES, 
+    KeyBindingManager.Singleton.put(KEY_UNCOMMENT_LINES,
                                     _uncommentLinesAction, null, "Uncomment Line(s)");
-    KeyBindingManager.Singleton.put(KEY_DELETE_PREVIOUS, 
+    KeyBindingManager.Singleton.put(KEY_DELETE_PREVIOUS,
                                     _actionMap.get(DefaultEditorKit.deletePrevCharAction), null, "Delete Previous");
-    KeyBindingManager.Singleton.put(KEY_DELETE_NEXT, 
+    KeyBindingManager.Singleton.put(KEY_DELETE_NEXT,
                                     _actionMap.get(DefaultEditorKit.deleteNextCharAction), null, "Delete Next");
     KeyBindingManager.Singleton.put(KEY_FIND_NEXT,
                                     new AbstractAction("FindNext") {
@@ -4143,7 +4150,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   /**
-   * The OptionListener for FONT_MAIN 
+   * The OptionListener for FONT_MAIN
    */
   private class MainFontOptionListener implements OptionListener<Font> {
     public void optionChanged(OptionEvent<Font> oce) {
@@ -4208,9 +4215,10 @@ public class MainFrame extends JFrame implements OptionConstants {
    * The OptionListener for RECENT_FILES_MAX_SIZE
    */
   private class RecentFilesOptionListener implements OptionListener<Integer> {
-    public void optionChanged(OptionEvent<Integer> oce) {  
-      _recentFileManager.updateMax(oce.value.intValue()); 
+    public void optionChanged(OptionEvent<Integer> oce) {
+      _recentFileManager.updateMax(oce.value.intValue());
       _recentFileManager.numberItems();
     }
   }
 }
+

@@ -39,69 +39,62 @@
 
 package edu.rice.cs.drjava.model;
 
-import gj.util.Vector;
-import gj.util.Enumeration;
+import java.util.ArrayList;
+import java.io.File;
 
 /**
  * Keeps track of all listeners to the model, and has the ability
- * to notify them of some event.
+ * to notify them of some event.  All methods on this class should be
+ * synchronized to prevent events from occuring while updating listeners.
  * @version $Id$
  */
-public class EventNotifier {
+public class EventNotifier implements GlobalModelListener {
   /**
    * All GlobalModelListeners that are listening to the model.
-   * All accesses should be synchronized on this field.
+   * An unsynchronized collection is okay as long as all methods on this class
+   * are synchronized (against this class itself).  Syncing on this is safer
+   * because it prevents unsynchronized iteration over listeners.
    */
-  private final Vector<GlobalModelListener> _listeners;
+  private final ArrayList<GlobalModelListener> _listeners;
   
   /**
    * Creates a new EventNotifier with an empty list of listeners.
    */
   public EventNotifier() {
-    _listeners = new Vector<GlobalModelListener>();
+    _listeners = new ArrayList<GlobalModelListener>();
   }
   
   /**
    * Add a listener to the model.
    * @param listener a listener that reacts on events
    */
-  public void addListener(GlobalModelListener listener) {
-    synchronized(_listeners) {
-      _listeners.addElement(listener);
-    }
+  synchronized public void addListener(GlobalModelListener listener) {
+    _listeners.add(listener);
   }
 
   /**
    * Remove a listener from the model.
    * @param listener a listener that reacts on events
    */
-  public void removeListener(GlobalModelListener listener) {
-    synchronized(_listeners) {
-      _listeners.removeElement(listener);
-    }
+  synchronized public void removeListener(GlobalModelListener listener) {
+    _listeners.remove(listener);
   }
 
   /**
    * Removes all listeners from this notifier.
    */
-  public void removeAllListeners() {
-    synchronized(_listeners) {
-      _listeners.removeAllElements();
-    }
+  synchronized public void removeAllListeners() {
+    _listeners.clear();
   }
   
   /**
    * Lets the listeners know some event has taken place.
    * @param EventNotifier n tells the listener what happened
    */
-  public void notifyListeners(Notifier n) {
-    int listeners = 0;
-    synchronized(_listeners) {
-      Enumeration<GlobalModelListener> i = _listeners.elements();
-      while(i.hasMoreElements()) {
-        GlobalModelListener cur = i.nextElement();
-        n.notifyListener(cur);
-      }
+  synchronized public void notifyListeners(Notifier n) {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      n.notifyListener(_listeners.get(i));
     }
   }
   
@@ -112,17 +105,14 @@ public class EventNotifier {
    * @return the listeners' responses ANDed together, true if they all
    * agree, false if some disagree
    */
-  public boolean pollListeners(Poller p) {
-    synchronized(_listeners) {
-      Enumeration<GlobalModelListener> i = _listeners.elements();
-      boolean poll = true;
-      
-      while(i.hasMoreElements()) {
-        GlobalModelListener cur = i.nextElement();
-        poll = poll && p.poll(cur);
-      }
-      return poll;
+  synchronized public boolean pollListeners(Poller p) {
+    boolean poll = true;
+    
+    int size = _listeners.size();
+    for(int i = 0; (poll && (i < size)); i++) {
+      poll = poll && p.poll(_listeners.get(i));
     }
+    return poll;
   }
 
   /**
@@ -138,4 +128,346 @@ public class EventNotifier {
   public abstract static class Poller {
     public abstract boolean poll(GlobalModelListener l);
   }
+  
+  /**
+   * Called after JUnit is started by the GlobalModel.
+   */
+  synchronized public void junitStarted(OpenDefinitionsDocument doc) {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).junitStarted(doc);
+    }
+  }
+  
+  /**
+   * Called when the active interpreter is changed.
+   * @param inProgress Whether the new interpreter is currently in progress
+   * with an interaction (ie. whether an interactionEnded event will be fired)
+   */
+  synchronized public void interpreterChanged(boolean inProgress) {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).interpreterChanged(inProgress);
+    }
+  }
+  
+  /**
+   * Called to indicate that a suite of tests has started running.
+   * @param numTests The number of tests in the suite to be run.
+   */
+  synchronized public void junitSuiteStarted(int numTests) {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).junitSuiteStarted(numTests);
+    }
+  }
+  
+  /**
+   * Called when the interactions window generates a syntax error.
+   *
+   * @param offset the error's offset into the InteractionsDocument
+   * @param length the length of the error
+   */
+  synchronized public void interactionErrorOccurred(int offset, int length) {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).interactionErrorOccurred(offset, length);
+    }
+  }
+  
+  /**
+   * Called after a new document is created.
+   */
+  synchronized public void newFileCreated(OpenDefinitionsDocument doc) {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).newFileCreated(doc);
+    }
+  }
+  
+  /**
+   * Called when an interaction has finished running.
+   */
+  synchronized public void interactionEnded() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).interactionEnded();
+    }
+  }
+  
+  /**
+   * Called when the console window is reset.
+   */
+  synchronized public void consoleReset() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).consoleReset();
+    }
+  }
+  
+  /**
+   * Called after the current document is saved.
+   */
+  synchronized public void fileSaved(OpenDefinitionsDocument doc) {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).fileSaved(doc);
+    }
+  }
+  
+  /**
+   * Called when a particular test is started.
+   * @param testName The name of the test being started.
+   */
+  synchronized public void junitTestStarted(String name) {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).junitTestStarted(name);
+    }
+  }
+  
+  /**
+   * Called after a file is opened and read into the current document.
+   */
+  synchronized public void fileOpened(OpenDefinitionsDocument doc) {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).fileOpened(doc);
+    }
+  }
+  
+  /**
+   * Called when the interactionsJVM has begun resetting.
+   */
+  synchronized public void interpreterResetting() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).interpreterResetting();
+    }
+  }
+  
+  /**
+   * Called after Javadoc is started by the GlobalModel.
+   */
+  synchronized public void javadocStarted() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).javadocStarted();
+    }
+  }
+  
+  /**
+   * Called after a document is closed.
+   */
+  synchronized public void fileClosed(OpenDefinitionsDocument doc) {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).fileClosed(doc);
+    }
+  }
+  
+  /**
+   * Called when a particular test has ended.
+   * @param testName The name of the test that has ended.
+   * @param wasSuccessful Whether the test passed or not.
+   * @param causedError If not successful, whether the test caused an error
+   *  or simply failed.
+   */
+  synchronized public void junitTestEnded(OpenDefinitionsDocument doc, String name, boolean wasSuccesful, boolean causedError) {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).junitTestEnded(doc, name, wasSuccesful, causedError);
+    }
+  }
+  
+  /**
+   * Called after a document is reverted.
+   */
+  synchronized public void fileReverted(OpenDefinitionsDocument doc) {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).fileReverted(doc);
+    }
+  }
+  
+  /**
+   * Called after Javadoc is finished.
+   * @param success whether the Javadoc operation generated proper output
+   * @param destDir if (success == true) the location where the output was
+   *                generated, otherwise undefined (possibly null)
+   */
+  synchronized public void javadocEnded(boolean success, File destDir) {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).javadocEnded(success, destDir);
+    }
+  }
+  
+  /**
+   * Called when the interactions window is reset.
+   */
+  synchronized public void interpreterReady() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).interpreterReady();
+    }
+  }
+  
+  /**
+   * Called if the interpreter reset failed.
+   * (Subclasses must maintain listeners.)
+   */
+  synchronized public void interpreterResetFailed() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).interpreterResetFailed();
+    }
+  }
+  
+  /**
+   * Called when trying to test a non-TestCase class.
+   */
+  synchronized public void nonTestCase() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).nonTestCase();
+    }
+  }
+  
+  /**
+   * Called when an undoable edit occurs.
+   */
+  synchronized public void undoableEditHappened() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).undoableEditHappened();
+    }
+  }
+  
+  /**
+   * Called when the interactions JVM was closed by System.exit
+   * or by being aborted. Immediately after this the interactions
+   * will be reset.
+   * @param status the exit code
+   */
+  synchronized public void interpreterExited(int status) {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).interpreterExited(status);
+    }
+  }
+  
+  /**
+   * Called to ask the listener if it is OK to abandon the current
+   * document.
+   */
+  synchronized public boolean canAbandonFile(OpenDefinitionsDocument doc) {
+    boolean poll = true;
+    int size = _listeners.size();
+    for(int i = 0; (poll && (i < size)); i++) {
+      poll = poll && _listeners.get(i).canAbandonFile(doc);
+    }
+    return poll;
+  }
+  
+  /**
+   * Called after JUnit is finished running tests.
+   */
+  synchronized public void junitEnded() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).junitEnded();
+    }
+  }
+  
+  /**
+   * Called after a compile is started by the GlobalModel.
+   */
+  synchronized public void compileStarted() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).compileStarted();
+    }
+  }
+  
+  /**
+   * Called to ask the listener if it is OK to revert the current
+   * document to a newer version saved on file.
+   */
+  synchronized public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
+    boolean poll = true;
+    int size = _listeners.size();
+    for(int i = 0; (poll && (i < size)); i++) {
+      poll = poll && _listeners.get(i).shouldRevertFile(doc);
+    }
+    return poll;
+  }
+  
+  /**
+   * Called after an interaction is started by the GlobalModel.
+   */
+  synchronized public void interactionStarted() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).interactionStarted();
+    }
+  }
+  
+  /**
+   * Called when a compile has finished running.
+   */
+  synchronized public void compileEnded() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).compileEnded();
+    }
+  }
+  
+  /**
+   * Called before attempting Javadoc, to give users a chance to save.
+   * Do not continue with Javadoc if the user doesn't save!
+   */
+  synchronized public void saveBeforeJavadoc() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).saveBeforeJavadoc();
+    }
+  }
+ 
+  /**
+   * Called to demand that all files be saved before starting the debugger.
+   * It is up to the caller of this method to check if the documents have been
+   * saved, using IGetDocuments.hasModifiedDocuments().
+   */
+  synchronized public void saveBeforeDebug() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).saveBeforeDebug();
+    }
+  }
+  
+  /**
+   * Called to demand that all files be saved before compiling.
+   * It is up to the caller of this method to check if the documents have been
+   * saved, using IGetDocuments.hasModifiedDocuments().
+   */
+  synchronized public void saveBeforeCompile() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).saveBeforeCompile();
+    }
+  }
+  
+  /**
+   * Called to demand that all files be saved before running JUnit tests.
+   * It is up to the caller of this method to check if the documents have been
+   * saved, using IGetDocuments.hasModifiedDocuments().
+   */
+  synchronized public void saveBeforeJUnit() {
+    int size = _listeners.size();
+    for(int i = 0; i < size; i++) {
+      _listeners.get(i).saveBeforeJUnit();
+    }
+  }
 }
+

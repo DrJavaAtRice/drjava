@@ -42,6 +42,7 @@ package edu.rice.cs.drjava.model;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.ListModel;
+import java.util.List;
 
 /**
  * This interface encapsulates the behavior of a document store.
@@ -75,8 +76,14 @@ public interface IGetDocuments {
    * Returns a collection of all documents currently open for editing.
    * This is equivalent to the results of getDocumentForFile for the set
    * of all files for which isAlreadyOpen returns true.
-   * TODO: Remove dependence on Swing implementation.
-   * @return a Swing ListModel of the open definitions documents.
+   * @return a random-access List of the open definitions documents.
    */
-  public ListModel getDefinitionsDocuments();
+  public List<OpenDefinitionsDocument> getDefinitionsDocuments();
+  
+  /**
+   * Checks if any open definitions documents have been modified
+   * since last being saved.
+   * @return whether any documents have been modified
+   */
+  public boolean hasModifiedDocuments();
 }

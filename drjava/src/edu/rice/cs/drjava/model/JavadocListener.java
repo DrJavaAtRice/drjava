@@ -40,37 +40,26 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
-/**
- * Concrete implementation of IGetDocuments that always throws exceptions.
- * @version $Id$
- */
-public class DummyGetDocuments implements IGetDocuments {
+public interface JavadocListener {
   /**
-   * Since this is not supposed to be used, we need to throw an exception OTHER
-   * than the ones it officially supports.
-   * @throws UnexpectedException
+   * Called to demand that all files be saved before generating Javadoc.
+   * It is up to the caller of this method to check if the documents have been
+   * saved, using IGetDocuments.hasModifiedDocuments().
+   * Do not continue with Javadoc if the user doesn't save!
    */
-  public OpenDefinitionsDocument getDocumentForFile(File file)
-    throws IOException, OperationCanceledException {
-    throw new UnsupportedOperationException
-      ("Tried to getDocumentForFile on a Dummy with file: " + file);
-  }
+  public void saveBeforeJavadoc();
   
-  public boolean isAlreadyOpen(File file) {
-    throw new UnsupportedOperationException
-      ("Tried to call isAlreadyOpen on a Dummy with file: " + file);
-  }
+  /**
+   * Called after Javadoc is started by the GlobalModel.
+   */
+  public void javadocStarted();
   
-  public List<OpenDefinitionsDocument> getDefinitionsDocuments() {
-    throw new UnsupportedOperationException
-      ("Tried to getDefinitionsDocuments on a Dummy!");
-  }
-  
-  public boolean hasModifiedDocuments() {
-    throw new UnsupportedOperationException
-      ("Tried to call hasModifiedDocuments on a Dummy!");
-  }
+  /**
+   * Called after Javadoc is finished.
+   * @param success whether the Javadoc operation generated proper output
+   * @param destDir if (success == true) the location where the output was
+   *                generated, otherwise undefined (possibly null)
+   */
+  public void javadocEnded(boolean success, File destDir);
 }

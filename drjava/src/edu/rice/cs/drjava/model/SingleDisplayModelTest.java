@@ -99,7 +99,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     throws BadLocationException
   {
     assertTrue("number of documents",
-               getSDModel().getDefinitionsDocuments().getSize() > 0);
+               getSDModel().getDefinitionsDocs().getSize() > 0);
   }
 
   protected void assertActiveDocument(OpenDefinitionsDocument doc) 
@@ -131,7 +131,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     getSDModel().addListener(listener);
 
     // Open a new document
-    int numOpen = getSDModel().getDefinitionsDocuments().getSize();
+    int numOpen = getSDModel().getDefinitionsDocs().getSize();
     OpenDefinitionsDocument doc = getSDModel().newFile();
     assertNumOpenDocs(numOpen + 1);
 

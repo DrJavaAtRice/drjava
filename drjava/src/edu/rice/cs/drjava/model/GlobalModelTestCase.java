@@ -225,7 +225,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _model.addListener(listener);
 
     // Open a new document
-    int numOpen = _model.getDefinitionsDocuments().getSize();
+    int numOpen = _model.getDefinitionsDocuments().size();
     OpenDefinitionsDocument doc = _model.newFile();
     assertNumOpenDocs(numOpen + 1);
 
@@ -412,7 +412,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   protected void assertNumOpenDocs(int num) {
     assertEquals("number of open documents",
                  num,
-                 _model.getDefinitionsDocuments().getSize());
+                 _model.getDefinitionsDocuments().size());
   }
 
   protected void assertModified(boolean b, OpenDefinitionsDocument doc) {
@@ -583,7 +583,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected int interpreterChangedCount;
     //protected int interactionCaretPositionChangedCount;
     protected int consoleResetCount;
-    protected int saveAllBeforeProceedingCount;
+    protected int saveBeforeCompileCount;
+    protected int saveBeforeJUnitCount;
+    protected int saveBeforeJavadocCount;
+    protected int saveBeforeDebugCount;
     protected int nonTestCaseCount;
     protected int lastExitStatus;
     protected int fileRevertedCount;
@@ -618,7 +621,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       interpreterReadyCount = 0;
       interpreterExitedCount = 0;
       interpreterResetFailedCount = 0;
-      saveAllBeforeProceedingCount = 0;
+      saveBeforeCompileCount = 0;
+      saveBeforeJUnitCount = 0;
+      saveBeforeJavadocCount = 0;
+      saveBeforeDebugCount = 0;
       nonTestCaseCount = 0;
       lastExitStatus = 0;
       fileRevertedCount = 0;
@@ -743,10 +749,28 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
                    consoleResetCount);
     }
 
-    public void assertSaveAllBeforeProceedingCount(int i) {
-      assertEquals("number of times saveAllBeforeProceeding fired",
+    public void assertSaveBeforeCompileCount(int i) {
+      assertEquals("number of times saveBeforeCompile fired",
                    i,
-                   saveAllBeforeProceedingCount);
+                   saveBeforeCompileCount);
+    }
+
+    public void assertSaveBeforeJUnitCount(int i) {
+      assertEquals("number of times saveBeforeJUnit fired",
+                   i,
+                   saveBeforeJUnitCount);
+    }
+
+    public void assertSaveBeforeJavadocCount(int i) {
+      assertEquals("number of times saveBeforeJavadoc fired",
+                   i,
+                   saveBeforeJavadocCount);
+    }
+
+    public void assertSaveBeforeDebugCount(int i) {
+      assertEquals("number of times saveBeforeDebug fired",
+                   i,
+                   saveBeforeDebugCount);
     }
     
     public void assertNonTestCaseCount(int i) {
@@ -875,8 +899,20 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("consoleReset fired unexpectedly");
     }
 
-    public void saveAllBeforeProceeding(GlobalModelListener.SaveReason reason) {
-      listenerFail("saveAllBeforeProceeding fired unexpectedly");
+    public void saveBeforeCompile() {
+      listenerFail("saveBeforeCompile fired unexpectedly");
+    }
+
+    public void saveBeforeJUnit() {
+      listenerFail("saveBeforeJUnit fired unexpectedly");
+    }
+
+    public void saveBeforeJavadoc() {
+      listenerFail("saveBeforeJavadoc fired unexpectedly");
+    }
+
+    public void saveBeforeDebug() {
+      listenerFail("saveBeforeDebug fired unexpectedly");
     }
 
     public void nonTestCase() {

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -162,12 +162,12 @@ public class SingleDisplayModel extends DefaultGlobalModel {
   /**
    * Sets the currently active document by updating the selection model.
    * The selection model will trigger our SelectionModelListener
-   * to fire an activeDocumentChanged event.  
+   * to fire an activeDocumentChanged event.
    * @param index Index of active document in the list of documents.
    */
   public void setActiveDocument(int index) {
     int oldIndex = _selectionModel.getMinSelectionIndex();
-    if ((index < 0) || (index >= getDefinitionsDocuments().getSize())) {
+    if ((index < 0) || (index >= getDefinitionsDocs().getSize())) {
       throw new IllegalArgumentException(
         "No such document in model to be set to active.");
     }
@@ -194,7 +194,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
   public void setNextActiveDocument() {
     int index = _getDocumentIndex(_activeDocument);
 
-    if (index < getDefinitionsDocuments().getSize() - 1) {
+    if (index < getDefinitionsDocs().getSize() - 1) {
       index++;
       setActiveDocument(index);
     }
@@ -270,7 +270,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    */
   public String getDisplayFullPath(int index) {
     OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
-      getDefinitionsDocuments().getElementAt(index);
+      getDefinitionsDocs().getElementAt(index);
     if (doc == null) {
       throw new RuntimeException(
         "Document not found with index " + index);
@@ -367,12 +367,12 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    * Saves all open files, prompting for names if necessary.
    * When prompting (ie, untitled document), set that document as active.
    * @param com a FileSaveSelector
-   * @exception IOException 
+   * @exception IOException
    */
-   public void saveAllFiles(FileSaveSelector com) throws IOException {    
+   public void saveAllFiles(FileSaveSelector com) throws IOException {
      OpenDefinitionsDocument curdoc = getActiveDocument();
      super.saveAllFiles(com);
-     setActiveDocument(curdoc); // Return focus to previously active doc     
+     setActiveDocument(curdoc); // Return focus to previously active doc
    }
 
   /**
@@ -401,7 +401,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
         _ensureNotEmpty();
 
         // Select next document
-        int size = getDefinitionsDocuments().getSize();
+        int size = getDefinitionsDocs().getSize();
         if (index < 0) {
           index = 0;
         }
@@ -448,7 +448,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    * in the list of open documents, or -1 if it is not found.
    */
   private int _getDocumentIndex(OpenDefinitionsDocument doc) {
-    ListModel docs = getDefinitionsDocuments();
+    ListModel docs = getDefinitionsDocs();
     int index = -1;
     for (int i=0; (i < docs.getSize()) && (index < 0); i++) {
       if (docs.getElementAt(i).equals(doc)) {
@@ -464,7 +464,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    * which is untitled and unchanged.
    */
   private boolean _hasOneEmptyDocument() {
-    return ((getDefinitionsDocuments().getSize() == 1) &&
+    return ((getDefinitionsDocs().getSize() == 1) &&
             (_activeDocument.isUntitled()) &&
             (!_activeDocument.isModifiedSinceSave()));
   }
@@ -474,7 +474,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    */
   private void _ensureNotEmpty() {
     if ((!_isClosingAllDocs) &&
-        (getDefinitionsDocuments().getSize() == 0)) {
+        (getDefinitionsDocs().getSize() == 0)) {
       super.newFile();
     }
   }
@@ -488,14 +488,14 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    * SelectionModel does not fire a valueChanged event.
    */
   private void _setActiveDoc(int index) {
-    ListModel docs = getDefinitionsDocuments();
+    ListModel docs = getDefinitionsDocs();
     _activeDocument = (OpenDefinitionsDocument) docs.getElementAt(index);
     _activeDocument.checkIfClassFileInSync();
 
     // notify single display model listeners
     getNotifier().notifyListeners(new EventNotifier.Notifier() {
       public void notifyListener(GlobalModelListener l) {
-        // If it is a SingleDisplayModelListener, let it know that the 
+        // If it is a SingleDisplayModelListener, let it know that the
         //  active doc changed
         if (l instanceof SingleDisplayModelListener) {
           SingleDisplayModelListener sl = (SingleDisplayModelListener) l;
@@ -513,7 +513,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
     public void valueChanged(ListSelectionEvent e) {
       if (! e.getValueIsAdjusting()) {
         int index = _selectionModel.getMinSelectionIndex();
-        ListModel docs = getDefinitionsDocuments();
+        ListModel docs = getDefinitionsDocs();
         //if ((index < 0) || (index > docs.getSize())) {
           //throw new RuntimeException("Document index out of bounds: " + index);
         //}

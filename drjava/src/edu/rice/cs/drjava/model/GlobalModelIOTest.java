@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -112,7 +112,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     doc3 = setupDocument(FOO_TEXT);
     assertNumOpenDocs(3);
     
-    ListModel docs = _model.getDefinitionsDocuments();
+    ListModel docs = _model.getDefinitionsDocs();
     assertEquals("size of document array", 3, docs.getSize());
     
     assertEquals("document 1", doc1, docs.getElementAt(0));
@@ -134,13 +134,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     _model.closeFile(doc1);
     assertNumOpenDocs(1);
     
-    ListModel docs = _model.getDefinitionsDocuments();
+    ListModel docs = _model.getDefinitionsDocs();
     assertEquals("size of document array", 1, docs.getSize());
     assertContents(BAR_TEXT, (OpenDefinitionsDocument) docs.getElementAt(0));
     
     _model.closeFile(doc2);
     assertNumOpenDocs(0);
-    docs = _model.getDefinitionsDocuments();
+    docs = _model.getDefinitionsDocs();
     assertEquals("size of document array", 0, docs.getSize());
   }
   
@@ -275,7 +275,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       assertNumOpenDocs(1);
       listener.assertOpenCount(0);
       
-      ListModel docs = _model.getDefinitionsDocuments();
+      ListModel docs = _model.getDefinitionsDocs();
       doc = (OpenDefinitionsDocument) docs.getElementAt(0);
       assertModified(true, doc);
       assertContents(FOO_TEXT, doc);
@@ -421,7 +421,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       fail("Open was unexpectedly canceled!");
     }
     listener.assertOpenCount(2);
-    ListModel docs = _model.getDefinitionsDocuments();
+    ListModel docs = _model.getDefinitionsDocs();
     assertEquals("size of document array", 2, docs.getSize());
     assertContents(FOO_TEXT, (OpenDefinitionsDocument) docs.getElementAt(0));
     assertContents(BAR_TEXT, (OpenDefinitionsDocument) docs.getElementAt(1));
@@ -466,7 +466,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       assertNumOpenDocs(2);
       listener.assertOpenCount(0);
       
-      ListModel docs = _model.getDefinitionsDocuments();
+      ListModel docs = _model.getDefinitionsDocs();
       doc1 = (OpenDefinitionsDocument) docs.getElementAt(0);
       assertModified(true, doc1);
       assertContents(FOO_TEXT, doc1);
@@ -921,7 +921,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
   }
   
   public void testSaveAsExistsAndOpen()
-    throws BadLocationException, IOException, 
+    throws BadLocationException, IOException,
     OperationCanceledException, AlreadyOpenException{
     OpenDefinitionsDocument doc1,doc2;
     final File file1,file2;
@@ -949,20 +949,21 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
    * Make sure that all open files are saved in appropriate order,
    * ie, even with BAR file as active document, save all should
    * first prompt to save FOO, then BAR.
-   */    
-  public void testSaveAllSaveInOrder()
+   */
+  public void testSaveAllSaveCorrectFiles()
     throws BadLocationException, IOException {
     OpenDefinitionsDocument fooDoc = setupDocument(FOO_TEXT);
     OpenDefinitionsDocument barDoc = setupDocument(BAR_TEXT);
-    OpenDefinitionsDocument trdDco = setupDocument("third document contents");
+    OpenDefinitionsDocument trdDoc = setupDocument("third document contents");
     final File file1 = tempFile();
     final File file2 = tempFile();
     final File file3 = tempFile();
+    fooDoc.getDocument().setFile(file1);
+    barDoc.getDocument().setFile(file2);
+    trdDoc.getDocument().setFile(file3);
+    
     // check.
-    FileSelector fs[] = new FileSelector[3];
-    fs[0] = new FileSelector(file1);
-    fs[1] = new FileSelector(file2);
-    fs[2] = new FileSelector(file3);      
+    FileSelector fs = new FileSelector(file1);
     
     _model.saveAllFiles(fs); // this should save the files as file1,file2,file3 respectively
     
@@ -974,7 +975,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
                  FileOps.readFileAsString(file2));
     assertEquals("contents of saved file1",
                  "third document contents",
-                 FileOps.readFileAsString(file3));      
+                 FileOps.readFileAsString(file3));
   }
   /**
    * Force a file to be opened with getDocumentforFile
@@ -1056,12 +1057,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     listener.assertFileRevertedCount(0);
     assertModified(false, doc);
     
-    doc.revertIfModifiedOnDisk();  
+    doc.revertIfModifiedOnDisk();
     
     
     listener.assertShouldRevertFileCount(0);
     listener.assertFileRevertedCount(0);
-    synchronized(tempFile1) { 
+    synchronized(tempFile1) {
       tempFile1.wait(2000);
     }
     
@@ -1090,7 +1091,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     // don't catch and fail!
     
-    TestListener listener = new TestListener() { 
+    TestListener listener = new TestListener() {
       public void fileOpened(OpenDefinitionsDocument doc) { }
       
       public void fileReverted(OpenDefinitionsDocument doc) {
@@ -1113,7 +1114,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     listener.assertShouldRevertFileCount(0);
     listener.assertFileRevertedCount(0);
     
-    synchronized(tempFile1) { 
+    synchronized(tempFile1) {
       tempFile1.wait(2000);
     }
     
@@ -1135,7 +1136,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
    * Interprets some statements, saves the history, clears the history, then loads
    * the history.
    */
-  public void testSaveClearAndLoadHistory() throws DocumentAdapterException, 
+  public void testSaveClearAndLoadHistory() throws DocumentAdapterException,
     BadLocationException, InterruptedException, IOException
   {
     TestListener listener = new TestListener() {
@@ -1232,7 +1233,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
    * Loads two history files, one whose statements end in semicolons, and one whose statements do not.
    * Makes sure that it doesn't matter.
    */
-  public void testLoadHistoryWithAndWithoutSemicolons() throws BadLocationException, 
+  public void testLoadHistoryWithAndWithoutSemicolons() throws BadLocationException,
     InterruptedException, IOException, DocumentAdapterException
   {
     TestListener listener = new TestListener() {
@@ -1262,7 +1263,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     FileOps.writeStringToFile(f1,s1+'\n'+s2+'\n');
     FileOps.writeStringToFile(f2,s3+'\n'+s4+'\n');
     
-    listener.assertInteractionStartCount(0);    
+    listener.assertInteractionStartCount(0);
     _model.loadHistory(fs1);
     while (listener.interactionEndCount == 0) {
       synchronized(listener) {

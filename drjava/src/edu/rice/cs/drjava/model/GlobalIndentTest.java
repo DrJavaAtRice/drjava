@@ -319,7 +319,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     _assertNumOpenDocs(0);
     OpenDefinitionsDocument doc = _model.newFile();
     doc.setDefinitionsIndent(2);
-    ListModel docs = _model.getDefinitionsDocuments();
+    ListModel docs = _model.getDefinitionsDocs();
     _assertNumOpenDocs(1);
     return (OpenDefinitionsDocument) docs.getElementAt(0);
   }
@@ -327,7 +327,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
   private void _assertNumOpenDocs(int num) {
     assertEquals("number of open documents",
                  num,
-                 _model.getDefinitionsDocuments().getSize());
+                 _model.getDefinitionsDocs().getSize());
   }
 
   private void _assertContents(String expected, Document document)

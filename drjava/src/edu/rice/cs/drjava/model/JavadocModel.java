@@ -39,38 +39,36 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import java.io.File;
 import java.io.IOException;
+
+import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
+import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import java.util.List;
 
-/**
- * Concrete implementation of IGetDocuments that always throws exceptions.
- * @version $Id$
- */
-public class DummyGetDocuments implements IGetDocuments {
+public interface JavadocModel {
   /**
-   * Since this is not supposed to be used, we need to throw an exception OTHER
-   * than the ones it officially supports.
-   * @throws UnexpectedException
+   * Accessor for the Javadoc error model.
    */
-  public OpenDefinitionsDocument getDocumentForFile(File file)
-    throws IOException, OperationCanceledException {
-    throw new UnsupportedOperationException
-      ("Tried to getDocumentForFile on a Dummy with file: " + file);
-  }
+  public CompilerErrorModel getJavadocErrorModel();
   
-  public boolean isAlreadyOpen(File file) {
-    throw new UnsupportedOperationException
-      ("Tried to call isAlreadyOpen on a Dummy with file: " + file);
-  }
+  /**
+   * Clears all current Javadoc errors.
+   */
+  public void resetJavadocErrors();
   
-  public List<OpenDefinitionsDocument> getDefinitionsDocuments() {
-    throw new UnsupportedOperationException
-      ("Tried to getDefinitionsDocuments on a Dummy!");
-  }
-  
-  public boolean hasModifiedDocuments() {
-    throw new UnsupportedOperationException
-      ("Tried to call hasModifiedDocuments on a Dummy!");
-  }
+  /**
+   * Javadocs all open documents, after ensuring that all are saved.
+   * The user provides a destination, and the gm provides the package info.
+   * @param select a command object for selecting a directory and warning a user
+   *        about bad input
+   * @param saver a command object for saving a document (if it moved/changed)
+   * @param classpath a collection of classpath elements to be used by Javadoc
+   * @param listener an object to be notified of start and end events, etc.
+   * @throws IOException if there is a problem manipulating files
+   * @throws InvalidPackageException if a document has a bad package statement
+   */
+  public void javadocAll(DirectorySelector select, FileSaveSelector saver,
+                         List<String> classpath,
+                         JavadocListener listener)
+    throws IOException, InvalidPackageException;
 }

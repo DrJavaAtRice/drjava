@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -47,34 +47,7 @@ import edu.rice.cs.drjava.model.repl.InteractionsListener;
  *
  * @version $Id$
  */
-public interface GlobalModelListener extends InteractionsListener {
-
-  /**
-   * Reasons provided for demanding a save before proceeding.
-   */
-  public class SaveReason {
-    private SaveReason() {}
-  }
-
-  /**
-   * This enumeration of save reason means that we want to compile.
-   */
-  public static final SaveReason COMPILE_REASON = new SaveReason();
-
-  /**
-   * This enumeration of save reason means that we want to run JUnit.
-   */
-  public static final SaveReason JUNIT_REASON = new SaveReason();
-
-  /**
-   * This enumeration of save reason means that we want to run JavaDoc.
-   */
-  public static final SaveReason JAVADOC_REASON = new SaveReason();
-
-  /**
-   * This enumeration of save reason means that we want to debug with JSwat.
-   */
-  public static final SaveReason DEBUG_REASON = new SaveReason();
+public interface GlobalModelListener extends InteractionsListener, JavadocListener {
   
   /**
    * Called after a new document is created.
@@ -147,16 +120,6 @@ public interface GlobalModelListener extends InteractionsListener {
    * Called after JUnit is finished running tests.
    */
   public void junitEnded();
-  
-  /**
-   * Called after Javadoc is started by the GlobalModel.
-   */
-  public void javadocStarted();
-  
-  /**
-   * Called after Javadoc is finished.
-   */
-  public void javadocEnded(boolean success, File destDir);
 
   //---------------------- InteractionsListener Methods ----------------------//
   
@@ -172,7 +135,7 @@ public interface GlobalModelListener extends InteractionsListener {
   
   /**
    * Called when the interactions window generates a syntax error.
-   * 
+   *
    * @param offset the error's offset into the InteractionsDocument
    * @param length the length of the error
    */
@@ -220,12 +183,34 @@ public interface GlobalModelListener extends InteractionsListener {
    * Called when the console window is reset.
    */
   public void consoleReset();
-
+  
   /**
-   * Called to demand that the listeners save all open documents
-   * before the GlobalModel can proceed with another action.  
+   * Called to demand that all files be saved before generating Javadoc.
+   * It is up to the caller of this method to check if the documents have been
+   * saved, using IGetDocuments.hasModifiedDocuments().
    */
-  public void saveAllBeforeProceeding(SaveReason reason);
+  public void saveBeforeJavadoc();
+  
+  /**
+   * Called to demand that all files be saved before compiling.
+   * It is up to the caller of this method to check if the documents have been
+   * saved, using IGetDocuments.hasModifiedDocuments().
+   */
+  public void saveBeforeCompile();
+  
+  /**
+   * Called to demand that all files be saved before running JUnit tests.
+   * It is up to the caller of this method to check if the documents have been
+   * saved, using IGetDocuments.hasModifiedDocuments().
+   */
+  public void saveBeforeJUnit();
+  
+  /**
+   * Called to demand that all files be saved before starting the debugger.
+   * It is up to the caller of this method to check if the documents have been
+   * saved, using IGetDocuments.hasModifiedDocuments().
+   */
+  public void saveBeforeDebug();
   
   /**
    * Called when trying to test a non-TestCase class.
