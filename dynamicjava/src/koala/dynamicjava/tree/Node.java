@@ -438,4 +438,8 @@ public abstract class Node {
   public int getEndColumn() {
     return sourceInfo.getEndColumn();
   }
+  
+  public boolean equals(Object n){
+    return this.toString().equals(n.toString());
+  }
 }

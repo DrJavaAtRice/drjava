@@ -68,15 +68,18 @@ public class FormalParameter extends Node {
    */
   private String name;
   
+  private boolean varargs;
+  
   /**
    * Initializes the node
    * @param f     is the parameter final?
    * @param t     the type of the parameter
    * @param n     the name of the parameter
+   * @param va    whether paramater is a varargs
    * @exception IllegalArgumentException if t is null or n is null
    */
-  public FormalParameter(boolean f, Type t, String n) {
-    this(f, t, n, null, 0, 0, 0, 0);
+  public FormalParameter(boolean f, Type t, String n, boolean va) {
+    this(f, t, n, va, null, 0, 0, 0, 0);
   }
   
   /**
@@ -84,6 +87,7 @@ public class FormalParameter extends Node {
    * @param f     is the parameter final?
    * @param t     the type of the parameter
    * @param n     the name of the parameter
+   * @param va    whether paramater is a varargs
    * @param fn    the filename
    * @param bl    the begin line
    * @param bc    the begin column
@@ -91,7 +95,7 @@ public class FormalParameter extends Node {
    * @param ec    the end column
    * @exception IllegalArgumentException if t is null or n is null
    */
-  public FormalParameter(boolean f, Type t, String n,
+  public FormalParameter(boolean f, Type t, String n, boolean va,
                          String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
     
@@ -101,6 +105,7 @@ public class FormalParameter extends Node {
     finalParameter = f;
     type           = t;
     name           = n;
+    varargs        = va;
   }
   
   /**
@@ -132,6 +137,10 @@ public class FormalParameter extends Node {
    */
   public String getName() {
     return name;
+  }
+  
+  public boolean isVarArgs(){
+    return varargs;
   }
   
   /**

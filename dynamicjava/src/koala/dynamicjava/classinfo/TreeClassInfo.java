@@ -586,7 +586,7 @@ public class TreeClassInfo implements ClassInfo {
         if (dc != null && !Modifier.isStatic(getModifiers())) {
           ReferenceType t = new ReferenceType(dc.getName());
           node.getParameters().add(0,
-                                   new FormalParameter(false, t, "param$0"));
+                                   new FormalParameter(false, t, "param$0", false));
         }
       }
 

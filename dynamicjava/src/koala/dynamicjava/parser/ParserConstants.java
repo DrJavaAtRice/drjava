@@ -114,13 +114,14 @@ public interface ParserConstants {
   int LEFT_SHIFT_ASSIGN = 118;
   int RIGHT_SIGNED_SHIFT_ASSIGN = 119;
   int RIGHT_UNSIGNED_SHIFTASSIGN = 120;
-  int RSIGNEDSHIFT = 121;
-  int RUNSIGNEDSHIFT = 122;
-  int RSSHIFT1 = 123;
-  int RSSHIFT2 = 124;
-  int RUSHIFT1 = 125;
-  int RUSHIFT2 = 126;
-  int RUSHIFT3 = 127;
+  int VAR_ARGS = 121;
+  int RSIGNEDSHIFT = 122;
+  int RUNSIGNEDSHIFT = 123;
+  int RSSHIFT1 = 124;
+  int RSSHIFT2 = 125;
+  int RUSHIFT1 = 126;
+  int RUSHIFT2 = 127;
+  int RUSHIFT3 = 128;
 
   int DEFAULT = 0;
   int IN_SINGLE_LINE_COMMENT = 1;
@@ -249,6 +250,7 @@ public interface ParserConstants {
     "\"<<=\"",
     "\">>=\"",
     "\">>>=\"",
+    "\"...\"",
     "\">>\"",
     "\">>>\"",
     "\">@1\"",

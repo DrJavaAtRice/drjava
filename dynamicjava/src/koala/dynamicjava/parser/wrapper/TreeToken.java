@@ -97,4 +97,8 @@ public class TreeToken implements IdentifierToken {
   public int endColumn() {
     return token.endLine;
   }
+  
+  public String toString() {
+    return image();
+  }
 }

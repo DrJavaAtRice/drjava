@@ -276,14 +276,14 @@ public class StaticContext extends GlobalContext {
     List<Node> stmts = new LinkedList<Node>();
 
     // Add the final local variables map parameter
-    params.add(new FormalParameter(false, MAP_TYPE, "param$0"));
+    params.add(new FormalParameter(false, MAP_TYPE, "param$0", false));
 
     // Add the other parameters
     List<Expression> superArgs = new LinkedList<Expression>();
     for (int i = 0; i < args.length; i++) {
       params.add(new FormalParameter(false,
                                      TreeUtilities.classToType(args[i]),
-                                     "param$" + (i + 1)));
+                                     "param$" + (i + 1), false));
       List<IdentifierToken> l = new LinkedList<IdentifierToken>();
       l.add(new Identifier("param$" + (i + 1)));
       superArgs.add(new QualifiedName(l));

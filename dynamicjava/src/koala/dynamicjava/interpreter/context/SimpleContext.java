@@ -29,6 +29,7 @@
 package koala.dynamicjava.interpreter.context;
 
 import java.util.*;
+//import koala.dynamicjava.interpreter.AbstractVariable;
 
 /**
  * The classes that implements this interface represent
@@ -48,12 +49,12 @@ public interface SimpleContext {
      * Enters a scope and defines the given entries to null.
      * @param entries a set of string
      */
-    void enterScope(Set entries);
+    void enterScope(Set<AbstractVariable> entries);
 
     /**
      * Defines the given variables
      */
-    void defineVariables(Set vars);
+    void defineVariables(Set<AbstractVariable> vars);
 
     /**
      * Returns the current scope variables (strings) in a set

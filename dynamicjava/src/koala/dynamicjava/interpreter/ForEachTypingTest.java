@@ -28,7 +28,7 @@ import edu.rice.cs.drjava.model.repl.*;
  * the test with JUnit.
  */
 public class ForEachTypingTest extends TestCase {
-  
+ 
   /*
    * test that a foreach statement creates necessary variables
    */

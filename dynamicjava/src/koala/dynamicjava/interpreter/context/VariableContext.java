@@ -87,21 +87,21 @@ public class VariableContext implements SimpleContext {
    * Enters a scope and defines the given entries to null.
    * @param entries a set of string
    */
-  public void enterScope(Set entries) {
+  public void enterScope(Set<AbstractVariable> entries) {
     enterScope();
-    Iterator it = entries.iterator();
+    Iterator<AbstractVariable> it = entries.iterator();
     while (it.hasNext()) {
-      ((AbstractVariable)it.next()).set(this, null);
+      it.next().set(this, null);
     }
   }
   
   /**
    * Defines the given variables
    */
-  public void defineVariables(Set vars) {
-    Iterator it = vars.iterator();
+  public void defineVariables(Set<AbstractVariable> vars) {
+    Iterator<AbstractVariable> it = vars.iterator();
     while (it.hasNext()) {
-      AbstractVariable v = (AbstractVariable)it.next();
+      AbstractVariable v = it.next();
       
       if (v.get(this) == Scope.NO_SUCH_KEY) {
         v.set(this, null);
@@ -272,85 +272,6 @@ public class VariableContext implements SimpleContext {
       }
     }
     return result;
-  }
-  
-  /**
-   * To store the variables
-   */
-  protected static abstract class AbstractVariable {
-    /**
-     * The constant name
-     */
-    public String name;
-    
-    /**
-     * Sets the variable in the current scope
-     */
-    public abstract void set(VariableContext ctx, Object value);
-    
-    /**
-     * Sets the variable in the current scope
-     */
-    public abstract Object get(VariableContext ctx);
-    
-    /**
-     * Returns the hashCode
-     */
-    public int hashCode() {
-      return name.hashCode();
-    }
-  }
-  
-  /**
-   * To store the variables
-   */
-  protected static class Variable extends AbstractVariable {
-    /**
-     * Creates a new variable
-     */
-    public Variable(String s) {
-      name = s;
-    }
-    
-    /**
-     * Sets the variable in the current scope
-     */
-    public void set(VariableContext ctx, Object value) {
-      ctx.scope.put(name, value);
-    }
-    
-    /**
-     * Sets the variable in the current scope
-     */
-    public Object get(VariableContext ctx) {
-      return ctx.scope.get(name);
-    }
-  }
-  
-  /**
-   * To store the constants
-   */
-  protected class Constant extends AbstractVariable {
-    /**
-     * Creates a new variable
-     */
-    public Constant(String s) {
-      name = s;
-    }
-    
-    /**
-     * Sets the variable in the current scope
-     */
-    public void set(VariableContext ctx, Object value) {
-      ctx.cscope.put(name, value);
-    }
-    
-    /**
-     * Sets the variable in the current scope
-     */
-    public Object get(VariableContext ctx) {
-      return ctx.cscope.get(name);
-    }
   }
   
   /**

@@ -74,8 +74,12 @@ public class GenericTreeTest extends TestCase {
     
     List<ReferenceType> targs = new LinkedList<ReferenceType>();
     targs.add(new ReferenceType(iIds));
+    List<List<? extends Type>> alltargs = new LinkedList<List<? extends Type>>();
+    alltargs.add(new LinkedList<ReferenceType>());
+    alltargs.add(new LinkedList<ReferenceType>());
+    alltargs.add(targs);
     
-    Type genericListType = new GenericReferenceType(ids, targs);
+    Type genericListType = new GenericReferenceType(ids, alltargs);
     SimpleAllocation sa = new SimpleAllocation(genericListType, null); // Call parameters-less constructor of LinkedList
     
     Object result = astInterpreter.interpret(sa);
@@ -107,7 +111,7 @@ public class GenericTreeTest extends TestCase {
     List<Node> body = new LinkedList<Node>();
     FieldDeclaration n = new FieldDeclaration(accessFlags, t, "n", null);
     body.add(n);
-    FormalParameter param = new FormalParameter(false, t, "_n");
+    FormalParameter param = new FormalParameter(false, t, "_n", false);
     List<FormalParameter> cparams = new LinkedList<FormalParameter>();
     cparams.add(param);
     
@@ -144,8 +148,12 @@ public class GenericTreeTest extends TestCase {
     
     List<ReferenceType> targs = new LinkedList<ReferenceType>();
     targs.add(new ReferenceType(iIds));
+    List<List<? extends Type>> alltargs = new LinkedList<List<? extends Type>>();
+    alltargs.add(new LinkedList<ReferenceType>());
+    alltargs.add(new LinkedList<ReferenceType>());
+    alltargs.add(targs);
     
-    Type genericCType = new GenericReferenceType(ids, targs);
+    Type genericCType = new GenericReferenceType(ids, alltargs);
     List<Expression> mccargs = new LinkedList<Expression>(); // method call constructor args
     List<Expression> fiveExps = new LinkedList<Expression>();
     fiveExps.add(new IntegerLiteral("5"));
@@ -650,19 +658,6 @@ public class GenericTreeTest extends TestCase {
     assertEquals("fooo", interpret(testString));
   }
   
-  
-  // STATIC IMPORT, NOT YET SUPPORTED
-  public void xtestStaticImport(){
-    testString =
-      "import static java.lang.Integer.MAX_VALUE;\n"+
-      "class A{\n"+
-      "  int m(){return MAX_VALUE;}\n"+
-      "}\n"+
-      "A a = new A(); a.m();\n";
-    
-    assertEquals(new Integer(java.lang.Integer.MAX_VALUE), interpret(testString));
-    
-  }
   
   // wildcards
   public void testWildcards(){

@@ -56,7 +56,7 @@ import java.util.List;
 
 public class GenericReferenceType extends ReferenceType {
   
-  private List<? extends Type> _typeArguments;
+  private List<List<? extends Type>> _typeArguments;
   
   /**
    * Initializes the type
@@ -64,7 +64,7 @@ public class GenericReferenceType extends ReferenceType {
    * @param typeArgs the type arguments
    * @exception IllegalArgumentException if ids is null
    */
-  public GenericReferenceType(List<IdentifierToken> ids, List<? extends Type> typeArgs) {
+  public GenericReferenceType(List<IdentifierToken> ids, List<List<? extends Type>> typeArgs) {
     this(ids, null, 0, 0, 0, 0, typeArgs);
   }
   
@@ -74,7 +74,7 @@ public class GenericReferenceType extends ReferenceType {
    * @param typeArgs the type arguments
    * @exception IllegalArgumentException if rep is null
    */
-  public GenericReferenceType(String rep, List<? extends Type> typeArgs) {
+  public GenericReferenceType(String rep, List<List<? extends Type>> typeArgs) {
     this(rep, null, 0, 0, 0, 0, typeArgs);
   }
   
@@ -89,7 +89,7 @@ public class GenericReferenceType extends ReferenceType {
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if ids is null
    */
-  public GenericReferenceType(List<IdentifierToken> ids, String fn, int bl, int bc, int el, int ec, List<? extends Type> typeArgs) {
+  public GenericReferenceType(List<IdentifierToken> ids, String fn, int bl, int bc, int el, int ec, List<List<? extends Type>> typeArgs) {
     super(ids, fn, bl, bc, el, ec);
     
     _typeArguments = typeArgs;
@@ -106,26 +106,28 @@ public class GenericReferenceType extends ReferenceType {
    * @param typeArgs the type arguments
    * @exception IllegalArgumentException if rep is null
    */
-  public GenericReferenceType(String rep, String fn, int bl, int bc, int el, int ec, List<? extends Type> typeArgs) {
+  public GenericReferenceType(String rep, String fn, int bl, int bc, int el, int ec, List<List<? extends Type>> typeArgs) {
     super(rep, fn, bl, bc, el, ec);
     
     _typeArguments = typeArgs;
   }
   
-  public List<? extends Type> getTypeArguments(){ return _typeArguments; }
+  public List<List<? extends Type>> getTypeArguments(){ return _typeArguments; }
   
   public String toString() {
     return "("+getClass().getName()+": "+toStringHelper()+")";
   }
   
   public String toStringHelper() {
-    List<? extends Type> ta = getTypeArguments();
     String typeArgS = "";
-    if(ta.size()>0)
-      typeArgS = ""+ta.get(0);
-    for(int i = 1; i < ta.size(); i++)
-      typeArgS = typeArgS + " " + ta.get(i);
-    
-    return typeArgS+" "+super.toStringHelper();
+    List<List<? extends Type>> alltas = getTypeArguments();
+    for( List<? extends Type> ta : alltas ){
+      if(ta.size()>0)
+        typeArgS = ""+ta.get(0);
+      for(int i = 1; i < ta.size(); i++)
+        typeArgS += " " + ta.get(i);
+      typeArgS += ":";
+    }    
+    return super.toStringHelper()+" "+typeArgS;
   }
 }

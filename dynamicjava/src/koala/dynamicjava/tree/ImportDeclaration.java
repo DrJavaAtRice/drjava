@@ -60,20 +60,24 @@ public class ImportDeclaration extends Node {
    */
   private boolean pckage;
 
+  private boolean sttic;
+  
   /**
    * Creates a new import declaration node
    * @param ident a list of tokens that represents a package or a class name
    * @param pkg   true if this declaration imports a package
+   * @param sttc  true if this declaration is a static import
    * @exception IllegalArgumentException if ident is null
    */
-  public ImportDeclaration(List<IdentifierToken> ident, boolean pkg) {
-    this(ident, pkg, null, 0, 0, 0, 0);
+  public ImportDeclaration(List<IdentifierToken> ident, boolean pkg, boolean sttc) {
+    this(ident, pkg, sttc, null, 0, 0, 0, 0);
   }
 
   /**
    * Creates a new import declaration node
    * @param ident a list of tokens that represents a package or a class name
    * @param pkg   true if this declaration imports a package
+   * @param sttc  true if this declaration is a static import
    * @param fn    the filename
    * @param bl    the begin line
    * @param bc    the begin column
@@ -81,13 +85,14 @@ public class ImportDeclaration extends Node {
    * @param ec    the end column
    * @exception IllegalArgumentException if ident is null
    */
-  public ImportDeclaration(List<IdentifierToken> ident, boolean pkg,
+  public ImportDeclaration(List<IdentifierToken> ident, boolean pkg, boolean sttc,
                            String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
 
     if (ident == null) throw new IllegalArgumentException("ident == null");
 
     pckage     = pkg;
+    sttic      = sttc;
     name       = TreeUtilities.listToName(ident);
   }
 
@@ -95,6 +100,7 @@ public class ImportDeclaration extends Node {
    * Creates a new import declaration node
    * @param nm    a string that represents a package or a class name
    * @param pkg   true if this declaration imports a package
+   * @param sttc  true if this declaration is a static import
    * @param fn    the filename
    * @param bl    the begin line
    * @param bc    the begin column
@@ -102,13 +108,14 @@ public class ImportDeclaration extends Node {
    * @param ec    the end column
    * @exception IllegalArgumentException if ident is null
    */
-  public ImportDeclaration(String nm, boolean pkg,
+  public ImportDeclaration(String nm, boolean pkg, boolean sttc,
                            String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
 
     if (nm == null) throw new IllegalArgumentException("name == null");
 
     pckage     = pkg;
+    sttic      = sttc;
     name       = nm;
   }
 
@@ -131,7 +138,7 @@ public class ImportDeclaration extends Node {
 
   /**
    * Returns true if the identifier represents a package, false
-   * if it represents a
+   * if it represents a class
    */
   public boolean isPackage() {
     return pckage;
@@ -145,6 +152,13 @@ public class ImportDeclaration extends Node {
   }
 
   /**
+   * Returns true if the identifier represents a static import, false otherwise
+   */
+  public boolean isStatic() {
+    return sttic;
+  }
+
+  /**
    * Allows a visitor to traverse the tree
    * @param visitor the visitor to accept
    */
@@ -155,6 +169,10 @@ public class ImportDeclaration extends Node {
    * Implementation of toString for use in unit testing
    */
   public String toString() {
-    return "("+getClass().getName()+": "+getName()+" "+isPackage()+")";
+    return "("+getClass().getName()+": "+toStringHelper()+")";
+  }
+  
+  public String toStringHelper(){
+    return getName()+" "+isPackage()+" "+isStatic();
   }
 }

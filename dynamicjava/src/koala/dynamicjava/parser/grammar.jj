@@ -891,6 +891,7 @@ PARSER_END(Parser)
     | < LEFT_SHIFT_ASSIGN: "<<=" >
     | < RIGHT_SIGNED_SHIFT_ASSIGN: ">>=" >
     | < RIGHT_UNSIGNED_SHIFTASSIGN: ">>>=" >
+    | < VAR_ARGS:  "...">
   }
   
   TOKEN : /* OPERATORS, from Generics Preprocessor  */
@@ -1102,14 +1103,15 @@ PARSER_END(Parser)
     ReferenceType name = null;
     Token star = null;
     Token t1, t2;
+    Token sttic = null;
   }
   {
-    t1="import" name=ReferenceTypeName() [ "." star="*" ] t2=";"
+    t1="import" [sttic=<STATIC>] name=ReferenceTypeName() [ "." star="*" ] t2=";"
     {
       if(name instanceof GenericReferenceType){
         throw new ParseException("Import names cannot be parameterized.");
       }
-      return new ImportDeclaration(name.getRepresentation(), star != null,
+      return new ImportDeclaration(name.getRepresentation(), star != null, sttic != null,
                                    filename,
                                    t1.beginLine, t1.beginColumn,
                                    t2.endLine,   t2.endColumn);
@@ -1216,23 +1218,36 @@ PARSER_END(Parser)
   {
     Token id;
     List/*<IdentifierToken>*/ list = new LinkedList/*<IdentifierToken>*/();
-    List/*<Type>*/ typeArgs = null;
+    List/*<Type>*/ typeArgs = new LinkedList/*<Type>*/();
+    List/*<List<? extends Type>>*/ allTypeArgs = new LinkedList/*<List<? extends Type>>*/();
   }
   {
     id=<IDENTIFIER> [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments() ]
     {
       list.add(new TreeToken(id));
+      allTypeArgs.add( typeArgs );
+      typeArgs = new LinkedList/*<Type>*/();
     }
-    ( LOOKAHEAD("." <IDENTIFIER>) "." id=<IDENTIFIER> [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments() ]
+    ( LOOKAHEAD("." <IDENTIFIER>) "." id=<IDENTIFIER>  [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments() ]
      {
       list.add(new TreeToken(id));
+      allTypeArgs.add( typeArgs );
+      typeArgs = new LinkedList/*<Type>*/();
      }
     )*
       
     {
       IdentifierToken f  = list.get(0);
       IdentifierToken l  = list.get(list.size()-1);
-      if(typeArgs == null){
+      boolean Parameterized = false;
+      for( int i = 0; i < allTypeArgs.size(); i++ ){
+        List/*<? extends Type>*/ targs = allTypeArgs.get(i);
+        if(targs.size() > 0) { 
+          Parameterized = true;
+          break;
+        }
+      }
+      if(!Parameterized){
         if(TypeParamsMap.containsKey(TreeUtilities.listToName(list))){
           return TypeParamsMap.get(TreeUtilities.listToName(list));
         } else if(GenericTypesEnv.contains(TreeUtilities.listToName(list))){
@@ -1248,7 +1263,7 @@ PARSER_END(Parser)
                                         filename,
                                         f.beginLine(), f.beginColumn(),
                                         l.endLine(), l.endColumn(),
-                                        typeArgs);
+                                        allTypeArgs);
       }
     }
   }
@@ -1714,9 +1729,16 @@ PARSER_END(Parser)
     Token id;
     Token f   = null;
     int   dim = 0;
+    Token varargs = null;
   }
   {
-    [ f="final" ] typ=type() id=<IDENTIFIER> ( "[" "]" { dim++; } )*
+    [ f="final" ] typ=type() 
+      (
+       (varargs=<VAR_ARGS> id=<IDENTIFIER>)
+       |
+       (id=<IDENTIFIER> ( "[" "]" { dim++; } )*)
+      )
+       
     {
       if (dim > 0) {
         typ = new ArrayType(typ, dim,
@@ -1724,7 +1746,7 @@ PARSER_END(Parser)
                             typ.getBeginLine(), typ.getBeginColumn(),
                             typ.getEndLine(),   typ.getEndColumn());
       }
-      return new FormalParameter(f != null, typ, id.image,
+      return new FormalParameter(f != null, typ, id.image, varargs != null,
                                  filename,
                                  (f != null) ? f.beginLine   : typ.getBeginLine(),
                                  (f != null) ? f.beginColumn : typ.getBeginColumn(),

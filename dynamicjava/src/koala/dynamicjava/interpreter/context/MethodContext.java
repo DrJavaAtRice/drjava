@@ -285,17 +285,17 @@ public class MethodContext extends StaticContext {
     List<Node> stmts = new LinkedList<Node>();
 
     // Add the outer instance parameter
-    params.add(new FormalParameter(false, otype, "param$0"));
+    params.add(new FormalParameter(false, otype, "param$0", false));
 
     // Add the final local variables map parameter
-    params.add(new FormalParameter(false, MAP_TYPE, "param$1"));
+    params.add(new FormalParameter(false, MAP_TYPE, "param$1", false));
 
     // Add the other parameters
     List<Expression> superArgs = new LinkedList<Expression>();
     for (int i = 0; i < args.length; i++) {
       params.add(new FormalParameter(false,
                                      TreeUtilities.classToType(args[i]),
-                                     "param$" + (i + 2)));
+                                     "param$" + (i + 2), false));
       List<IdentifierToken> l = new LinkedList<IdentifierToken>();
       l.add(new Identifier("param$" + (i + 2)));
       superArgs.add(new QualifiedName(l));
