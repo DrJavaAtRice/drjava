@@ -44,6 +44,8 @@ import java.awt.*;
 import javax.swing.event.DocumentEvent;
 import gj.util.Vector;
 
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
@@ -54,14 +56,16 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  *
  * @version $Id$
  */
-public class ColoringView extends WrappedPlainView {
+public class ColoringView extends WrappedPlainView implements OptionConstants {
   private DefinitionsDocument _doc;
 
-  private static final Color COMMENTED_COLOR = Color.green.darker().darker();
-  private static final Color DOUBLE_QUOTED_COLOR = Color.red.darker();
-  private static final Color SINGLE_QUOTED_COLOR = Color.magenta;
-  private static final Color NORMAL_COLOR = Color.black;
-  private static final Color KEYWORD_COLOR = Color.blue;
+  private static final Color COMMENTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_COMMENT_COLOR);
+  private static final Color DOUBLE_QUOTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_DOUBLE_QUOTED_COLOR);
+  private static final Color SINGLE_QUOTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_SINGLE_QUOTED_COLOR);
+  private static final Color NORMAL_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_NORMAL_COLOR);
+  private static final Color KEYWORD_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_KEYWORD_COLOR);
+  private static final Color NUMBER_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_NUMBER_COLOR);
+  private static final Color TYPE_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_TYPE_COLOR);
 
   /**
    * Constructor.
@@ -168,6 +172,12 @@ public class ColoringView extends WrappedPlainView {
         break;
       case HighlightStatus.KEYWORD:
         g.setColor(KEYWORD_COLOR);
+        break;
+      case HighlightStatus.NUMBER:
+        g.setColor(NUMBER_COLOR);
+        break;
+      case HighlightStatus.TYPE:
+        g.setColor(TYPE_COLOR);
         break;
       default:
         throw  new RuntimeException("Can't get color for invalid state: " + state);

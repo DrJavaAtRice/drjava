@@ -251,15 +251,20 @@ public class DefinitionsDocumentTest extends TestCase
     v = defModel.getHighlightStatus(0, defModel.getLength());
     _checkHighlightStatusConsistent(v, 0, defModel.getLength());
     // Make sure the keywords are highlighted
-    assertEquals("vector length", 8, v.size());
+    assertEquals("vector length", 12, v.size());
     assertEquals(HighlightStatus.KEYWORD, v.elementAt(0).getState());
     assertEquals(HighlightStatus.NORMAL, v.elementAt(1).getState());
     assertEquals(HighlightStatus.KEYWORD, v.elementAt(2).getState());
     assertEquals(HighlightStatus.NORMAL, v.elementAt(3).getState());
-    assertEquals(HighlightStatus.KEYWORD, v.elementAt(4).getState());
+    assertEquals(HighlightStatus.TYPE, v.elementAt(4).getState());
     assertEquals(HighlightStatus.NORMAL, v.elementAt(5).getState());
+
     assertEquals(HighlightStatus.KEYWORD, v.elementAt(6).getState());
     assertEquals(HighlightStatus.NORMAL, v.elementAt(7).getState());
+    assertEquals(HighlightStatus.TYPE, v.elementAt(8).getState());
+    assertEquals(HighlightStatus.NORMAL, v.elementAt(9).getState());
+    assertEquals(HighlightStatus.NUMBER, v.elementAt(10).getState());
+    assertEquals(HighlightStatus.NORMAL, v.elementAt(11).getState());
   }
   
   /**
@@ -274,14 +279,15 @@ public class DefinitionsDocumentTest extends TestCase
    */
   public void testHighlightKeywords2() throws BadLocationException {
     Vector<HighlightStatus> v;
-    final String s = "int Y";
+    final String s = "int y";
     defModel.insertString(defModel.getLength(), s, null);
     // First sanity check the whole string's status
     v = defModel.getHighlightStatus(0, defModel.getLength());
     _checkHighlightStatusConsistent(v, 0, defModel.getLength());
     // Make sure the keyword is highlighted
+
     assertEquals("vector length", 2, v.size());
-    assertEquals(HighlightStatus.KEYWORD, v.elementAt(0).getState());
+    assertEquals(HighlightStatus.TYPE, v.elementAt(0).getState());
     assertEquals(HighlightStatus.NORMAL, v.elementAt(1).getState());
     // Now only ask for highlights for "in"
     v = defModel.getHighlightStatus(0, 2);

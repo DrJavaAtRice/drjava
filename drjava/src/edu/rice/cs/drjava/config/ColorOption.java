@@ -47,9 +47,7 @@ public class ColorOption extends Option<Color>{
   public Color parse(String s) { return Color.decode(s); }
   
   public String format(Color c) {
-    return new StringBuffer("#").
-      append(Integer.toString(c.getRed(),16)).
-      append(Integer.toString(c.getGreen(),16)).
-      append(Integer.toString(c.getBlue(),16)).toString();
+    return new StringBuffer("#").append(
+      Integer.toHexString(c.getRGB() & 0xFFFFFF)).toString();
   }
 }

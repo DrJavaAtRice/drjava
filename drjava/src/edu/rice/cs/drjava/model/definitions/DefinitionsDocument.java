@@ -75,6 +75,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   private static HashSet _normEndings = _makeNormEndings();
   /** A set of Java keywords. */
   private static HashSet _keywords = _makeKeywords();
+  /** A set of Java keywords. */
+  private static HashSet _primTypes = _makePrimTypes();
   /** The default indent setting. */
   private int _indent = 2;
   /** Determines if tabs are removed on open and converted to spaces. */
@@ -151,8 +153,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     final String[] words =  {
       "import", "native", "package", "goto", "const", "if", "else",
       "switch", "while", "for", "do", "true", "false", "null", "this",
-      "super", "new", "instanceof", "boolean", "char", "byte",
-      "short", "int", "long", "float", "double", "void", "return",
+      "super", "new", "instanceof",    "return",
       "static", "synchronized", "transient", "volatile", "final",
       "strictfp", "throw", "try", "catch", "finally",
       "throws", "extends", "implements", "interface", "class",
@@ -164,6 +165,21 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       keywords.add(words[i]);
     }
     return  keywords;
+  }
+  /**
+   * Create a set of Java/GJ primitive types for special coloring.
+   * @return the set of primitive types
+   */
+  private static HashSet _makePrimTypes() {
+    final String[] words =  {
+      "boolean", "char", "byte", "short", "int", 
+      "long", "float", "double", "void", 
+    };
+    HashSet prims = new HashSet();
+    for (int i = 0; i < words.length; i++) {
+      prims.add(words[i]);
+    }
+    return  prims;
   }
 
   /**
@@ -1335,9 +1351,26 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     // new things into.
     int index = i;
 
+    boolean process = false;
+    int state = 0;
     while (tokenizer.hasMoreTokens()) {
       String token = tokenizer.nextToken();
-      if (_keywords.contains(token)) {
+
+      //first check to see if we need highlighting
+      process = false;
+      if (_isType(token)) {
+        //right now keywords incl prim types, so must put this first
+        state = HighlightStatus.TYPE;
+        process = true;
+      } else if (_keywords.contains(token)) {
+        state = HighlightStatus.KEYWORD;
+        process = true;
+      } else if (_isNum(token)) {
+        state = HighlightStatus.NUMBER;
+        process = true;
+      }
+
+      if (process) {
         // first check if we had any text before the token
         if (length != 0) {
           HighlightStatus newStat =
@@ -1354,7 +1387,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
         int keywordLength = token.length();
         v.insertElementAt(new HighlightStatus(start,
                                               keywordLength,
-                                              HighlightStatus.KEYWORD),
+                                              state),
                           index);
         index++;
         // Move start to the end of the keyword
@@ -1377,6 +1410,35 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     }
     // return one before because we need to point to the last one we inserted
     return index - 1;
+    }
+
+  /**
+   * Checks to see if the current string is a number
+   * @return true if x is a parseable number
+   */
+  private boolean _isNum(String x) {
+    try {
+      Double.parseDouble(x);
+      return true;
+      
+    } catch (NumberFormatException e) {
+      return false;
+    }
+  }
+  
+  /**
+   * Checks to see if the current string is a type
+   * A type is assumed to be a primitive type OR
+   * anything else that begins with a capitalized character
+   */
+  private boolean _isType(String x) {
+    if (_primTypes.contains(x)) return true;
+    
+    try {
+      return Character.isUpperCase(x.charAt(0));
+    } catch (IndexOutOfBoundsException e) {
+      return false;
+    }
   }
 
   /**
