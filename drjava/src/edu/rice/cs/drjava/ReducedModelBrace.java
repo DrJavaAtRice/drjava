@@ -280,219 +280,44 @@ public class ReducedModelBrace implements ReducedModelStates {
    */
   private void _insertBrace(String text) {
     if (_cursor.atStart() || _cursor.atEnd()) {
-      _insertNewBrace(text,_cursor); // inserts brace and goes to next
+      _cursor.insertNewBrace(text); // inserts brace and goes to next
     }
     else if (_cursor.current().isGap()) {
-      _insertBraceToGap(text,_cursor);
+      _cursor.insertBraceToGap(text);
     }
     
     else {
-      _insertNewBrace(text,_cursor);
+      _cursor.insertNewBrace(text);
     }
   }
   
-  /**
-   * Helper function to _insertBrace.
-   * Handles the details of the case where a brace is inserted into a gap.
-   */
-  private void _insertBraceToGap(String text,
-                                 TokenList.Iterator copyCursor)
-  {
-    copyCursor.current().shrink(_cursor.getBlockOffset());
-    copyCursor.insert(Brace.MakeBrace(text, FREE));
-    copyCursor.insert(new Gap(_cursor.getBlockOffset(), FREE));
-    copyCursor.next(); // now pointing at new brace
-    copyCursor.next(); // now pointing at second half of gap
-    _cursor.setBlockOffset(0);
-  }
-  
-  /**
-   * Helper function to _insertBrace.
-   * Handles the details of the case where brace is inserted between two
-   * reduced tokens.  No destructive action is taken.
-   */
-  private void _insertNewBrace(String text,
-                               TokenList.Iterator copyCursor)
-  {
-    copyCursor.insert(Brace.MakeBrace(text, FREE));
-    copyCursor.next();
-    _cursor.setBlockOffset(0);
-  }
   
   
   
   /**
-   * Updates the BraceReduction to reflect cursor movement.
+   * Updates ReducedModelBrace to reflect cursor movement.
    * Negative values move left from the cursor, positive values move
-   * right.
+   * right.  All functionality has been refactored into TokenList.
    * @param count indicates the direction and magnitude of cursor movement
    */
   public void move(int count) {
     _cursor.move(count);
   }
   
-  
-  
   /**
-   * <P>Update the BraceReduction to reflect text deletion.</P>
-   * @param count indicates the size and direction of text deletion.
-   * Negative values delete text to the left of the cursor, positive
-   * values delete text to the right.
-   * Always move count spaces to make sure we can delete.
+   * Updates ReducedModelBrace to reflect text deletion.
+   * Negative values mean text left of the cursor, positive values mean
+   * text to the right.  All functionality has been refactored into TokenList.
    */
   public void delete( int count ) {
     if (count == 0) {
       return;
     }
-    TokenList.Iterator copyCursor = _cursor.copy();
-    // from = the _cursor
-    // to = _cursor.copy()
-    _cursor.setBlockOffset(_delete(count, _cursor, copyCursor));
-    copyCursor.dispose();
+    _cursor.delete(count);
     return;
   }
   
-  /**
-  * Helper function for delete.
-  * If deleting forward, move delTo the distance forward and call
-  * deleteRight.<BR>
-  * If deleting backward, move delFrom the distance back and call
-  * deleteRight.
-  * @param count size of deletion
-  * @param offset current offset for cursor
-  * @param delFrom where to delete from
-  * @param delTo where to delete to
-  * @return new offset after deletion
-  */
-  private int _delete(int count, TokenList.Iterator delFrom,
-                      TokenList.Iterator delTo)
- {                     
-   
-   // Guarrantees that it's possible to delete count characters
-   if (count >0) {
-     try {
-       delTo.move(count);
-     }
-     catch (Exception e) {
-       throw new IllegalArgumentException("Trying to delete" +
-                                          " past end of file.");
-     }
-     return _deleteRight(delFrom.getBlockOffset(), delTo.getBlockOffset(),delFrom, delTo);
-   }
-   else { // count < 0
-     try {
-       delFrom.move(count);
-     }
-     catch (Exception e) {
-       throw new IllegalArgumentException("Trying to delete" +
-                                          " past end of file.");
-     }
-     return _deleteRight(delFrom.getBlockOffset(), delTo.getBlockOffset(), delFrom, delTo);
-   }
- }
-  
-  /**
-   * Deletes from offset in delFrom to endOffset in delTo.
-   * Uses ModelList's collapse function to facilitate quick deletion.
-   */
-  private int _deleteRight(int offset,int endOffset,
-                           TokenList.Iterator delFrom,
-                           TokenList.Iterator delTo)
-  {
-    delFrom.collapse(delTo);
-    
-    // if both pointing to same item, and it's a gap
-    if (delFrom.eq(delTo) && delFrom.current().isGap()) {
-      // inside gap
-      delFrom.current().shrink(endOffset-offset);
-      return offset;
-    }
-    
-    // If brace is multiple char it must be a comment because the above if
-    // test gaurentees it can't be a gap.
-    if (!delFrom.eq(delTo))
-      _clipLeft(offset, delFrom);
-    
-    _clipRight(endOffset, delTo);
-    
-    delFrom.setTo(delTo);
-    if (!delFrom.atStart()) {
-      delFrom.prev();
-    }
-    if (delFrom.atStart()) {
-      delFrom.setTo(delTo);
-      return 0;
-    }
-  
-    if (delTo.atEnd()) {
-      delFrom.setTo(delTo);
-      return 0;
-    }
-  
-    if (delFrom.current().isGap() && delTo.current().isGap()) {
-      int gapSize = delFrom.current().getSize();
-      delFrom.remove();
-      delFrom.current().grow(gapSize);
-      return gapSize;
-    }
-    
-    delFrom.setTo(delTo);
-    return 0;
-  }
-  
-  /**
-   * Gets rid of extra text.
-   * Because collapse cannot get rid of all deletion text as some may be
-   * only partially spanning a token, we need to make sure that
-   * this partial span into the non-collapsed token on the left is removed.
-   */
-  private void _clipLeft(int offset, 
-                         TokenList.Iterator copyCursor)
-  {
-    if (copyCursor.atStart()) {
-      return;
-    }
-    else if (offset == 0) {
-      copyCursor.remove();
-    }
-    else if (copyCursor.current().isGap()) {
-      int size = copyCursor.current().getSize();
-      copyCursor.current().shrink(size-offset);
-    }
-    else {
-      throw new IllegalArgumentException("Cannot clip left.");
-    }
-  }
-  
-  
-  /**
-   * Gets rid of extra text.
-   * Because collapse cannot get rid of all deletion text as some may be
-   * only partially spanning a token, we need to make sure that
-   * this partial span into the non-collapsed token on the right is removed.
-   */
-  private void _clipRight(int offset, 
-                          TokenList.Iterator copyCursor)
-  {
-    if (copyCursor.atEnd()) {
-      return;
-    }
-    else if (offset == 0) {
-      return;
-    }
-    else if (offset == copyCursor.current().getSize()) {
-      copyCursor.remove();
-    }
-    else if (copyCursor.current().isGap()) {
-      copyCursor.current().shrink(offset);
-    }
-    
-    else {
-      throw new IllegalArgumentException("Cannot clip left.");
-    }
-  }
-  
-  
+
   /** If the current brace is a /, a *, a // or a \n, it's not matchable.
   *  This means it is ignored on balancing and on next/prev brace finding.
   *  All other braces are matchable.
@@ -885,34 +710,3 @@ public class ReducedModelBrace implements ReducedModelStates {
     return;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

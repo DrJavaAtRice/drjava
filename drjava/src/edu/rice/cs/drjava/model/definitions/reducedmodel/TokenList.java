@@ -89,6 +89,31 @@ public class TokenList extends ModelList<ReducedToken>
       return state;
     }
     
+    
+    /**
+    * Handles the details of the case where a brace is inserted into a gap.
+    * Do not call this unless the current token is a gap!
+    */
+    void insertBraceToGap(String text) {
+      this.current().shrink(this.getBlockOffset());
+      this.insert(Brace.MakeBrace(text, getStateAtCurrent()));
+      this.insert(new Gap(this.getBlockOffset(), getStateAtCurrent()));
+      this.next(); // now pointing at new brace
+      this.next(); // now pointing at second half of gap
+      this.setBlockOffset(0);
+    }
+  
+    /**
+    * Helper function to _insertBrace.
+    * Handles the details of the case where brace is inserted between two
+    * reduced tokens.  No destructive action is taken.
+    */
+    void insertNewBrace(String text) {
+      this.insert(Brace.MakeBrace(text, getStateAtCurrent()));
+      this.next();
+      this.setBlockOffset(0);
+    }
+    
     /**
     * Splits the current brace if it is a multiple character brace and
     * fulfills certain conditions.
@@ -127,6 +152,31 @@ public class TokenList extends ModelList<ReducedToken>
           }
     }
     
+    
+    /**
+    * The walk function.
+    * Walks along the list on which ReducedModel is based from the current
+    * cursor position.  Which path it takes depends on the
+    * return value of getStateAtCurrent() at the start of the walk.
+    */
+    void updateBasedOnCurrentState() {
+      if (this.atStart()) {
+        this.next();
+      }
+      
+      // If there's no text after here, nothing to update!
+      if (this.atEnd()) {
+        return;
+      }
+      
+      ReducedModelState curState = this.getStateAtCurrent();
+      // Free if at the beginning     
+      while (!this.atEnd()) {
+        curState = curState.update(this);
+      }
+    }
+    
+    
     /**
     * Updates the BraceReduction to reflect cursor movement.
     * Negative values move left from the cursor, positive values move
@@ -141,7 +191,6 @@ public class TokenList extends ModelList<ReducedToken>
     * Helper function for move(int).
     * @param count the number of chars to move.  Negative values move back,
     * positive values move forward.
-    * @param copyCursor the cursor being moved
     * @param currentOffset the current offset for copyCursor
     * @return the updated offset
     */
@@ -243,6 +292,314 @@ public class TokenList extends ModelList<ReducedToken>
       }
       return currentOffset - count;
     }     
+
+
+    /**
+    * <P>Update the BraceReduction to reflect text deletion.</P>
+    * @param count indicates the size and direction of text deletion.
+    * Negative values delete text to the left of the cursor, positive
+    * values delete text to the right.
+    * Always move count spaces to make sure we can delete.
+    */
+    public void delete( int count ) {
+      if (count == 0) {
+        return;
+      }
+      TokenList.Iterator copyCursor = this.copy();
+      // from = this iterator
+      // to = this iterator's copy
+      _offset = _delete(count, copyCursor);
+      copyCursor.dispose();
+      return;
+    }
+    
+    /**
+    * Helper function for delete.
+    * If deleting forward, move delTo the distance forward and call
+    * deleteRight.<BR>
+    * If deleting backward, move delFrom the distance back and call
+    * deleteRight.
+    * @param count size of deletion
+    * @param offset current offset for cursor
+    * @param delFrom where to delete from
+    * @param delTo where to delete to
+    * @return new offset after deletion
+    */
+    private int _delete(int count, TokenList.Iterator copyCursor)
+    {                     
+      
+      // Guarrantees that it's possible to delete count characters
+      if (count >0) {
+        try {
+          copyCursor.move(count);
+        }
+        catch (Exception e) {
+          throw new IllegalArgumentException("Trying to delete" +
+                                             " past end of file.");
+        }
+      }
+      else { // count < 0
+        try {
+          this.move(count);
+        }
+        catch (Exception e) {
+          throw new IllegalArgumentException("Trying to delete" +
+                                             " past end of file.");
+        }
+      }
+      return this.deleteRight(copyCursor);
+    }
+    
+    /**
+    * Gets rid of extra text.
+    * Because collapse cannot get rid of all deletion text as some may be
+    * only partially spanning a token, we need to make sure that
+    * this partial span into the non-collapsed token on the left is removed.
+    */
+    void clipLeft() {
+      if (this.atStart()) {
+        return;
+      }
+      else if (this.getBlockOffset() == 0) {
+        this.remove();
+      }
+      else if (this.current().isGap()) {
+        int size = this.current().getSize();
+        this.current().shrink(size-this.getBlockOffset());
+      }
+      else if (this.current().isMultipleCharBrace()) {
+        if (this.getBlockOffset() != 1) {
+          throw new IllegalArgumentException("Offset incorrect");
+        }
+        else {
+          String type = this.current().getType();
+          String first = type.substring(0,1);
+          this.current().setType(first);
+        }
+      }
+      else {
+        throw new IllegalArgumentException("Cannot clip left.");
+      }
+    }
+    
+    
+    /**
+    * Gets rid of extra text.
+    * Because collapse cannot get rid of all deletion text as some may be
+    * only partially spanning a token, we need to make sure that
+    * this partial span into the non-collapsed token on the right is removed.
+    */
+    void clipRight() {
+      if (this.atEnd()) {
+        return;
+      }
+      else if (this.getBlockOffset() == 0) {
+        return;
+      }
+      else if (this.getBlockOffset() == this.current().getSize()) {
+        this.remove();
+      }
+      else if (this.current().isGap()) {
+        this.current().shrink(this.getBlockOffset());
+      }
+      else if (this.current().isMultipleCharBrace()) {
+        if (this.getBlockOffset() != 1) {
+          throw new IllegalArgumentException("Offset incorrect");
+        }
+        else {
+          String type = this.current().getType();
+          String second = type.substring(1,2);
+          this.current().setType(second);
+        }
+      }
+      else {
+        throw new IllegalArgumentException("Cannot clip left.");
+      }
+    }
+    
+    /**
+    * Deletes from offset in delFrom to endOffset in delTo.
+    * Uses ModelList's collapse function to facilitate quick deletion.
+    */
+    int deleteRight(TokenList.Iterator delTo)
+    {
+      this.collapse(delTo);
+      
+      // if both pointing to same item, and it's a gap
+      if (this.eq(delTo) && this.current().isGap()) {
+        // inside gap
+        this.current().shrink(delTo.getBlockOffset()-this.getBlockOffset());
+        return this.getBlockOffset();
+      }
+      
+      
+      //if brace is multiple char it must be a comment because the above if
+      //test guarrantees it can't be a gap.
+      if (!this.eq(delTo)) {
+        this.clipLeft();
+      }
+      delTo.clipRight();      
+      
+      if (!this.atStart()) {
+        this.prev();
+      }
+      int delToSizeCurr;
+      String delToTypeCurr;
+      if (delTo.atEnd()) {
+        this.setTo(delTo);
+        return 0;
+      }
+      else {
+        delToSizeCurr = delTo.current().getSize();
+        delToTypeCurr = delTo.current().getType();
+      }
+      
+      //get info on previous item.
+      delTo.prev(); //get stats on previous item
+      
+      int delToSizePrev;
+      String delToTypePrev;
+      if (delTo.atStart()) { //no previous item, can't be at end
+        delTo.next();
+        this.setTo(delTo);
+        return 0;
+      }
+      else {
+        delToSizePrev = delTo.current().getSize();
+        delToTypePrev = delTo.current().getType();
+      }
+      delTo.next(); //put delTo back on original node
+            
+      int temp = _calculateOffset(delToSizePrev,delToTypePrev,
+                                  delToSizeCurr, delToTypeCurr,
+                                  delTo);
+      this.setTo(delTo);
+      return temp;
+    }
+    
+    
+    /**
+    *By contrasting the delTo token after the walk to what it was before the
+    *walk we can see how it has changed and where the offset should go.
+    *
+    *Prev is the item previous to the current cursor
+    *Current is what the current cursor
+    *delTo is where current is pointing at this moment in time.
+    */
+    private int _calculateOffset(int delToSizePrev, String delToTypePrev,
+                                 int delToSizeCurr, String delToTypeCurr,
+                                 TokenList.Iterator delTo)
+    {      
+      int offset;
+      int delToSizeChange = delTo.current().getSize();
+      String delToTypeChange = delTo.current().getType();
+      
+      //1)if there was a gap previous to the gap at delTo delTo should be
+      //augmented by its size, and that size is the offset.
+      //2)if the gap was not preceeded by a gap then it would not need to
+      //be shrunk
+      if (delTo.atEnd()) {
+        throw new IllegalArgumentException("Shouldn't happen");
+      }
+      if (delTo.current().isGap()) {
+        return delToSizeChange - delToSizeCurr;
+      }
+      //this means that the item at the end formed a double brace with the
+      //item that the delete left preceeding it. /dddddd*
+      
+      //the final item shrunk. This can only happen if the starting item
+      //stole one of its braces: /ddddd*/
+      //or if it was a double brace that had to get broken because it was
+      //now commented or no longer has an open block
+      
+      //EXAMPLES: /*___*/  becoming */
+      //          /*___*/  delete the first star, through the spaces to get
+      //                   /*/
+      //         //*__\n// becoming //*__//, the // is broken
+      //         //*__\n// becoming ////   , the // is broken
+      //THIS MUST HAVE THE previous items size and type passed in from
+      //before the update. This way we know how it's changing too.
+      
+      // In this if clause, special characters are initially separated by some text
+      // (represented here as ellipses), and when the text is deleted, the special
+      // characters come together.  Sometimes, this breaks up the second token if
+      // it is a multiple character brace.  Each in-line comment demonstrates
+      // the individual case that occurs and for which we check with this if.
+      // In this branch, both the cursor is off and the offset is also not correct.
+      if (((delToTypePrev.equals("/")) &&
+           // /.../* => //-*
+           ((delToTypeCurr.equals("/*") && 
+             _checkPrevEquals(delTo,"//")) ||
+            // /...// => //-/
+            (delToTypeCurr.equals("//") &&
+             _checkPrevEquals(delTo,"//")))) ||
+          
+          ((delToTypePrev.equals("*")) &&
+           // *.../* => */-*
+           ((delToTypeCurr.equals("/*") && 
+             _checkPrevEquals(delTo,"*/")) ||
+            // *...// => */-/
+            (delToTypeCurr.equals("//") &&
+             _checkPrevEquals(delTo,"*/")))) ||
+          
+          ((delToTypePrev.equals("\\")) &&
+           // \...\\ => \\-\
+           ((delToTypeCurr.equals("\\\\") && 
+             _checkPrevEquals(delTo,"\\")) ||
+            // \...\' => \\-'
+            (delToTypeCurr.equals("\\'") &&
+             _checkPrevEquals(delTo,"'")) ||
+            // \...\" => \\-"
+            (delToTypeCurr.equals("\\\"") &&
+             _checkPrevEquals(delTo,"\""))))) {
+               delTo.prev();
+               offset = 1;
+             }
+      // In this branch, the cursor is on the right token, but the offset is not correct. 
+      else if (((delToTypePrev.equals("/")) &&
+                // /-*/
+                ((delToTypeCurr.equals("*/") && 
+                  delTo.current().getType().equals("/*")) ||
+                 (delToTypeCurr.equals("*") &&
+                  delTo.current().getType().equals("/*")) ||
+                 (delToTypeCurr.equals("/") &&
+                  delTo.current().getType().equals("//")))) ||
+               
+               ((delToTypePrev.equals("*")) &&
+                ((delToTypeCurr.equals("/") &&
+                  delTo.current().getType().equals("*/")))) ||
+               
+               ((delToTypePrev.equals("\\")) &&
+                ((delToTypeCurr.equals("\\") &&
+                  delTo.current().getType().equals("\\\\")) ||
+                 (delToTypeCurr.equals("'") &&
+                  delTo.current().getType().equals("\\'")) ||
+                 (delToTypeCurr.equals("\"") &&
+                  delTo.current().getType().equals("\\\""))))) {
+                    offset = 1;
+                  }
+      // otherwise, we're on the right token and our offset is correct 
+      // because no recombinations occurred
+      else {
+        offset = 0;
+      }
+      return offset;
+    }
+    
+    /**
+    * Checks if the previous token is of a certain type.
+    * @param delTo the cursor for calling prevItem on
+    * @param match the type we want to check
+    * @return true if the previous token is of type match
+    */
+    private boolean _checkPrevEquals(TokenList.Iterator delTo,
+                                     String match)
+    {
+      if (delTo.atFirstItem() || delTo.atStart()) {
+        return false;
+      }
+      return delTo.prevItem().getType().equals(match);
+    }
+   
   }
-  
 }

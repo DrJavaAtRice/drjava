@@ -174,7 +174,7 @@ public class ReducedModelComment implements ReducedModelStates {
   private void insertSpecial(String special) {
     // Check if empty.
     if (_braces.isEmpty()) {
-      _insertNewBrace(special, _cursor); //now pointing to tail.
+      _cursor.insertNewBrace(special); //now pointing to tail.
       return;
     }
     // Check if at start.
@@ -190,14 +190,21 @@ public class ReducedModelComment implements ReducedModelStates {
       _cursor._splitCurrentIfCommentBlock(true,true);
       //leaving us at the start
       _cursor.next(); //leaving us after first char
-      _insertNewBrace(special, _cursor); //leaves us after the insert
+      _cursor.insertNewBrace(special); //leaves us after the insert
       move(-2);
       _updateBasedOnCurrentState();
       move(2);
     }
     // inside a gap
     else if ((_cursor.getBlockOffset() > 0) && (_cursor.current().isGap())) {
-      _insertBraceToGap(special, _cursor);
+      _cursor.insertBraceToGap(special);
+      _cursor.prev();
+      _cursor.prev();
+      _updateBasedOnCurrentState();   
+      // restore cursor state
+      _cursor.next();
+      _cursor.next();
+      // update based on current state
     }   
     //if at start of double character brace, break it.
     else if ((_cursor.getBlockOffset() == 0) && _cursor.current().isMultipleCharBrace()) {
@@ -243,7 +250,7 @@ public class ReducedModelComment implements ReducedModelStates {
       }
     }
     // Here we know the / unites with nothing behind it.
-    _insertNewBrace("\\", _cursor); //leaving us after the brace.
+    _cursor.insertNewBrace("\\"); //leaving us after the brace.
     _cursor.prev();
     _updateBasedOnCurrentState();
     if (_cursor.current().getSize() == 2) {
@@ -280,7 +287,7 @@ public class ReducedModelComment implements ReducedModelStates {
         }
     }
     //Here we know the / unites with nothing behind it.
-    _insertNewBrace(special, _cursor); //leaving us after the brace.
+    _cursor.insertNewBrace(special); //leaving us after the brace.
     _cursor.prev();
     _updateBasedOnCurrentState();
     if (_cursor.current().getSize() == 2)
@@ -326,7 +333,13 @@ public class ReducedModelComment implements ReducedModelStates {
       _cursor.setBlockOffset(0);
     }
     else if ((_cursor.getBlockOffset() > 0) && _cursor.current().isGap()) {
-      _insertBraceToGap("\n", _cursor);
+      _cursor.insertBraceToGap("\n");
+      _cursor.prev();
+      _cursor.prev();
+      _updateBasedOnCurrentState();   
+      // restore cursor state
+      _cursor.next();
+      _cursor.next();
     }
     else {
       _insertNewEndOfLine();
@@ -335,7 +348,7 @@ public class ReducedModelComment implements ReducedModelStates {
   }
   
   private void _insertNewEndOfLine() {
-    _insertNewBrace("\n", _cursor);
+    _cursor.insertNewBrace("\n");
     _cursor.prev();
     _updateBasedOnCurrentState();
     _cursor.next();
@@ -391,7 +404,14 @@ public class ReducedModelComment implements ReducedModelStates {
     }
     // in the middle of a gap
     else if ((_cursor.getBlockOffset() > 0) && _cursor.current().isGap()) {
-      _insertBraceToGap(quote, _cursor);
+      _cursor.insertBraceToGap(quote);
+      _cursor.prev();
+      _cursor.prev();
+      _updateBasedOnCurrentState();   
+      // restore cursor state
+      _cursor.next();
+      _cursor.next();
+
     }
     else {
       _insertNewQuote(quote);
@@ -406,7 +426,7 @@ public class ReducedModelComment implements ReducedModelStates {
    */
   private void _insertNewQuote(String quote) {
     String insert = _getQuoteType(quote);    
-    _insertNewBrace(insert, _cursor);
+    _cursor.insertNewBrace(insert);
     _cursor.prev();
     _updateBasedOnCurrentState();
     _cursor.next();
@@ -570,33 +590,7 @@ public class ReducedModelComment implements ReducedModelStates {
     _cursor.next();
     _cursor.setBlockOffset(0);
   }
-  
-  /**
-  * Helper function to _insertBrace.
-  * Handles the details of the case where a brace is inserted into a gap.
-  */
-  private void _insertBraceToGap(String text, TokenList.Iterator copyCursor) {
-    copyCursor.current().shrink(_cursor.getBlockOffset());
-    copyCursor.insert(Brace.MakeBrace(text, getStateAtCurrent()));
-    copyCursor.insert(new Gap(_cursor.getBlockOffset(), getStateAtCurrent()));
-    TokenList.Iterator copy2 = copyCursor.copy();
-    _updateBasedOnCurrentStateHelper(copy2);
-    copy2.dispose();
-    copyCursor.next(); // now pointing at new brace
-    copyCursor.next(); // now pointing at second half of gap
-    _cursor.setBlockOffset(0);
-  }
-  
-  /**
-  * Helper function to _insertBrace.
-  * Handles the details of the case where brace is inserted between two
-  * reduced tokens.  No destructive action is taken.
-  */
-  private void _insertNewBrace(String text, TokenList.Iterator copyCursor) {
-    copyCursor.insert(Brace.MakeBrace(text, getStateAtCurrent()));
-    copyCursor.next();
-    _cursor.setBlockOffset(0);
-  }
+    
   
   /**
   * USE RULES:
@@ -610,32 +604,11 @@ public class ReducedModelComment implements ReducedModelStates {
   
   private void _updateBasedOnCurrentState() {
     TokenList.Iterator copyCursor = _cursor.copy();
-    _updateBasedOnCurrentStateHelper(copyCursor);
+    copyCursor.updateBasedOnCurrentState();
     copyCursor.dispose();
   }
   
-  /**
-  * The walk function.
-  * Walks along the list on which ReducedModel is based from the current
-  * cursor position.  Which path it takes depends on the
-  * return value of getStateAtCurrent() at the start of the walk.
-  */
-  private void _updateBasedOnCurrentStateHelper(TokenList.Iterator copyCursor) {
-    if (copyCursor.atStart()) {
-      copyCursor.next();
-    }
-    
-    // If there's no text after here, nothing to update!
-    if (copyCursor.atEnd()) {
-      return;
-    }
-    
-    ReducedModelState curState = copyCursor.getStateAtCurrent();
-    // Free if at the beginning     
-    while (!copyCursor.atEnd()) {
-      curState = curState.update(copyCursor);
-    }
-  }
+
   
  /**
   * Updates the BraceReduction to reflect cursor movement.
@@ -658,11 +631,15 @@ public class ReducedModelComment implements ReducedModelStates {
     if (count == 0) {
       return;
     }
-    TokenList.Iterator copyCursor = _cursor.copy();
-    // from = the _cursor
-    // to = _cursor.copy()
-    _cursor.setBlockOffset(_delete(count, _cursor, copyCursor));
-    copyCursor.dispose();
+    _cursor.delete(count);
+
+    // Changes in ReducedModelComment can entail state changes in the 
+    // document.  For this reason, we have to call 
+    // _updateBasedOnCurrentState because there is no need to call it
+    // in ReducedModelBrace, and factoring it out would be stupid and
+    // wasteful.
+    
+    // Move back 2 or as far back as the document will allow
     int absOff = this.absOffset();
     int movement;
     if (absOff < 2)
@@ -670,307 +647,13 @@ public class ReducedModelComment implements ReducedModelStates {
     else
       movement = 2;
     _cursor.move(-movement);
+    // update state information
     _updateBasedOnCurrentState();
+    // restore the cursor
     _cursor.move(movement);
     return;
   }
   
-  /**
-  * Helper function for delete.
-  * If deleting forward, move delTo the distance forward and call
-  * deleteRight.<BR>
-  * If deleting backward, move delFrom the distance back and call
-  * deleteRight.
-  * @param count size of deletion
-  * @param offset current offset for cursor
-  * @param delFrom where to delete from
-  * @param delTo where to delete to
-  * @return new offset after deletion
-  */
-  private int _delete(int count, TokenList.Iterator delFrom,
-                      TokenList.Iterator delTo)
-  {                      
-    // Guarrantees that its possible to delete count characters.
-    if (count > 0) {
-      try {
-        delTo.move(count);
-      }
-      catch (Exception e) {
-        throw new IllegalArgumentException("Trying to delete" +
-                                           " past end of file.");        
-      }
-    }
-    else { // count <= 0
-      try {
-        delFrom.move(count);
-      }
-      catch (Exception e) {
-        throw new IllegalArgumentException("Trying to delete" +
-                                           " past end of file.");        
-      }
-    }
-    return _deleteRight(delFrom, delTo);
-  }
-  
-  
-  /**
-   * Deletes from offset in delFrom to endOffset in delTo.
-   * Uses ModelList's collapse function to facilitate quick deletion.
-   */
-  private int _deleteRight(TokenList.Iterator delFrom, TokenList.Iterator delTo)
-  {
-    delFrom.collapse(delTo);
-    
-    // if both pointing to same item, and it's a gap
-    if (delFrom.eq(delTo) && delFrom.current().isGap()) {
-      // inside gap
-      delFrom.current().shrink(delTo.getBlockOffset()-delFrom.getBlockOffset());
-      return delFrom.getBlockOffset();
-    }
-    
-    
-    //if brace is multiple char it must be a comment because the above if
-    //test guarrantees it can't be a gap.
-    if (!delFrom.eq(delTo)) {
-      _clipLeft(delFrom.getBlockOffset(), delFrom);
-    }
-    _clipRight(delTo.getBlockOffset(), delTo);      
-    
-    if (!delFrom.atStart()) {
-      delFrom.prev();
-    }
-    int delToSizeCurr;
-    String delToTypeCurr;
-    if (delTo.atEnd()) {
-//      _updateBasedOnCurrentState();
-      delFrom.setTo(delTo);
-      return 0;
-    }
-    else {
-      delToSizeCurr = delTo.current().getSize();
-      delToTypeCurr = delTo.current().getType();
-    }
-    
-    //get info on previous item.
-    delTo.prev(); //get stats on previous item
-    
-    int delToSizePrev;
-    String delToTypePrev;
-    if (delTo.atStart()) { //no previous item, can't be at end
-      delTo.next();
-//      _updateBasedOnCurrentStateHelper(delFrom);
-      delFrom.setTo(delTo);
-      return 0;
-    }
-    else {
-      delToSizePrev = delTo.current().getSize();
-      delToTypePrev = delTo.current().getType();
-    }
-    delTo.next(); //put delTo back on original node
-    
-//    _updateBasedOnCurrentState();
-    
-    int temp = _calculateOffset(delToSizePrev,delToTypePrev,
-                                delToSizeCurr, delToTypeCurr,
-                                delTo);
-    delFrom.setTo(delTo);
-    return temp;
-  }
-  
-  /**
-  * Gets rid of extra text.
-  * Because collapse cannot get rid of all deletion text as some may be
-  * only partially spanning a token, we need to make sure that
-  * this partial span into the non-collapsed token on the left is removed.
-  */
-  private void _clipLeft(int offset, 
-                         TokenList.Iterator
-                         copyCursor)
-  {
-    if (copyCursor.atStart()) {
-      return;
-    }
-    else if (offset == 0) {
-      copyCursor.remove();
-    }
-    else if (copyCursor.current().isGap()) {
-      int size = copyCursor.current().getSize();
-      copyCursor.current().shrink(size-offset);
-    }
-    else if (copyCursor.current().isMultipleCharBrace()) {
-      if (offset != 1) {
-        throw new IllegalArgumentException("Offset incorrect");
-      }
-      else {
-        String type = copyCursor.current().getType();
-        String first = type.substring(0,1);
-        copyCursor.current().setType(first);
-      }
-    }
-    else {
-      throw new IllegalArgumentException("Cannot clip left.");
-    }
-  }
-  
-  
-  /**
-  * Gets rid of extra text.
-  * Because collapse cannot get rid of all deletion text as some may be
-  * only partially spanning a token, we need to make sure that
-  * this partial span into the non-collapsed token on the right is removed.
-  */
-  private void _clipRight(int offset, TokenList.Iterator
-                          copyCursor)
-  {
-    if (copyCursor.atEnd()) {
-      return;
-    }
-    else if (offset == 0) {
-      return;
-    }
-    else if (offset == copyCursor.current().getSize()) {
-      copyCursor.remove();
-    }
-    else if (copyCursor.current().isGap()) {
-      copyCursor.current().shrink(offset);
-    }
-    else if (copyCursor.current().isMultipleCharBrace()) {
-      if (offset != 1) {
-        throw new IllegalArgumentException("Offset incorrect");
-      }
-      else {
-        String type = copyCursor.current().getType();
-        String second = type.substring(1,2);
-        copyCursor.current().setType(second);
-      }
-    }
-    else {
-      throw new IllegalArgumentException("Cannot clip left.");
-    }
-  }
-  
-  /**
-  *By contrasting the delTo token after the walk to what it was before the
-  *walk we can see how it has changed and where the offset should go.
-  *
-  *Prev is the item previous to the current cursor
-  *Current is what the current cursor
-  *delTo is where current is pointing at this moment in time.
-  */
-  private int _calculateOffset(int delToSizePrev, String delToTypePrev,
-                               int delToSizeCurr, String delToTypeCurr,
-                               TokenList.Iterator delTo)
-  {      
-    int offset;
-    int delToSizeChange = delTo.current().getSize();
-    String delToTypeChange = delTo.current().getType();
-    
-    //1)if there was a gap previous to the gap at delTo delTo should be
-    //augmented by its size, and that size is the offset.
-    //2)if the gap was not preceeded by a gap then it would not need to
-    //be shrunk
-    if (delTo.atEnd()) {
-      throw new IllegalArgumentException("Shouldn't happen");
-    }
-    if (delTo.current().isGap()) {
-      return delToSizeChange - delToSizeCurr;
-    }
-    //this means that the item at the end formed a double brace with the
-    //item that the delete left preceeding it. /dddddd*
-    
-    //the final item shrunk. This can only happen if the starting item
-    //stole one of its braces: /ddddd*/
-    //or if it was a double brace that had to get broken because it was
-    //now commented or no longer has an open block
-    
-    //EXAMPLES: /*___*/  becoming */
-    //          /*___*/  delete the first star, through the spaces to get
-    //                   /*/
-    //         //*__\n// becoming //*__//, the // is broken
-    //         //*__\n// becoming ////   , the // is broken
-    //THIS MUST HAVE THE previous items size and type passed in from
-    //before the update. This way we know how it's changing too.
-         
-    // In this if clause, special characters are initially separated by some text
-    // (represented here as ellipses), and when the text is deleted, the special
-    // characters come together.  Sometimes, this breaks up the second token if
-    // it is a multiple character brace.  Each in-line comment demonstrates
-    // the individual case that occurs and for which we check with this if.
-    // In this branch, both the cursor is off and the offset is also not correct.
-    if (((delToTypePrev.equals("/")) &&
-         // /.../* => //-*
-         ((delToTypeCurr.equals("/*") && 
-           _checkPrevEquals(delTo,"//")) ||
-          // /...// => //-/
-          (delToTypeCurr.equals("//") &&
-           _checkPrevEquals(delTo,"//")))) ||
-        
-        ((delToTypePrev.equals("*")) &&
-         // *.../* => */-*
-         ((delToTypeCurr.equals("/*") && 
-           _checkPrevEquals(delTo,"*/")) ||
-          // *...// => */-/
-          (delToTypeCurr.equals("//") &&
-           _checkPrevEquals(delTo,"*/")))) ||
-        
-        ((delToTypePrev.equals("\\")) &&
-         // \...\\ => \\-\
-         ((delToTypeCurr.equals("\\\\") && 
-           _checkPrevEquals(delTo,"\\")) ||
-          // \...\' => \\-'
-          (delToTypeCurr.equals("\\'") &&
-           _checkPrevEquals(delTo,"'")) ||
-          // \...\" => \\-"
-          (delToTypeCurr.equals("\\\"") &&
-           _checkPrevEquals(delTo,"\""))))) {
-             delTo.prev();
-             offset = 1;
-           }
-    // In this branch, the cursor is on the right token, but the offset is not correct. 
-    else if (((delToTypePrev.equals("/")) &&
-              // /-*/
-              ((delToTypeCurr.equals("*/") && 
-                delTo.current().getType().equals("/*")) ||
-               (delToTypeCurr.equals("*") &&
-                delTo.current().getType().equals("/*")) ||
-               (delToTypeCurr.equals("/") &&
-                delTo.current().getType().equals("//")))) ||
-             
-             ((delToTypePrev.equals("*")) &&
-              ((delToTypeCurr.equals("/") &&
-                delTo.current().getType().equals("*/")))) ||
-             
-             ((delToTypePrev.equals("\\")) &&
-              ((delToTypeCurr.equals("\\") &&
-                delTo.current().getType().equals("\\\\")) ||
-               (delToTypeCurr.equals("'") &&
-                delTo.current().getType().equals("\\'")) ||
-               (delToTypeCurr.equals("\"") &&
-                delTo.current().getType().equals("\\\""))))) {
-                  offset = 1;
-                }
-    // otherwise, we're on the right token and our offset is correct 
-    // because no recombinations occurred
-    else {
-      offset = 0;
-    }
-    return offset;
-  }
-  
-  /**
-  * Checks if the previous token is of a certain type.
-  * @param delTo the cursor for calling prevItem on
-  * @param match the type we want to check
-  * @return true if the previous token is of type match
-  */
-  private boolean _checkPrevEquals(TokenList.Iterator delTo,
-                                   String match)
-  {
-    if (delTo.atFirstItem() || delTo.atStart()) {
-      return false;
-    }
-    return delTo.prevItem().getType().equals(match);
-  }
   
   /**In order to interface with the ReducedModelComment two functions are
   provided. One resets the walker and the other will both move the cursor
