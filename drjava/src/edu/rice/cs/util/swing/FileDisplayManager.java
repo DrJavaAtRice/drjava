@@ -41,50 +41,46 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
  * OTHER DEALINGS WITH THE SOFTWARE.
  * 
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
+package edu.rice.cs.util.swing;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import javax.swing.Icon;
+import java.io.File;
 
 /**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20040804-2055;
- *
- * @version $Id$
+ * FileIconManagers choose the icons to use when displaying files
+ * using their icons in lists or trees.
  */
-public abstract class Version {
+public interface FileDisplayManager {
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Given a file, decide which icon to use
+   * @param f The file to base the icon decision on
+   * @return The icon to display for the given file
    */
-  private static final String BUILD_TIME_STRING = "20040804-2055";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+  public Icon getIcon(File f);
+  
+  /**
+   * Given a file, decide on which name to display for it
+   * @param f The file to base the naming decison on
+   * @return The name to display for the file
+   */
+  public String getName(File f);
+  
+  /**
+   * Creates a file display that displays a file as this manager specifies
+   * @param f the file to display using the display manager
+   * @return the file display object used to display a file's name
+   */
+  public FileDisplay makeFileDisplay(File f);
+  
+  /**
+   * Creates a FileDisplay representing a new untitled folder that is 
+   * yet to be created.
+   * @param parent the parent location to place this new folder
+   * @return the new file display
+   */
+  public FileDisplay makeNewFolderDisplay(File parent);
+  
+}

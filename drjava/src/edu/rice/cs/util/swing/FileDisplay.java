@@ -41,50 +41,48 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
  * OTHER DEALINGS WITH THE SOFTWARE.
  * 
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
+package edu.rice.cs.util.swing;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.io.File;
 
 /**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20040804-2055;
- *
- * @version $Id$
+ * This class is a wrapper for a file whose <code>toString</code> method
+ * outputs only the last element in the file path.  If it's a file, then
+ * it outputs the file name without its parent directories.  If it's a 
+ * directory, then it outputs the name of that directory only
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20040804-2055";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+public class FileDisplay {
+  private File _file;
+  private String _rep;
+  private boolean _isNew;
+  
+  protected FileDisplayManager _fdm;
+  
+  public FileDisplay(File f, FileDisplayManager fdm) { 
+    _fdm = fdm;
+    setFile(f); 
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  public static FileDisplay newFile(File parent, FileDisplayManager fdm) {
+    FileDisplay fd = new FileDisplay(parent, fdm);
+    fd._rep = "New Folder";
+    fd._isNew = true;
+    return fd;
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+  
+  public void setFile(File f) {
+    _isNew = false;
+    _file = f;
+    _rep = _fdm.getName(f); 
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+  
+  public File getFile() { return _file; }
+  
+  public boolean isEditable() { return _file.canWrite() || _isNew; }
+  
+  public boolean isNew() { return _isNew; }
+  
+  public String toString() { return _rep; }
+}
