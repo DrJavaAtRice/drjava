@@ -350,10 +350,17 @@ public class DefinitionsView extends JEditorPane
 				FindReplaceDialog box = new FindReplaceDialog(_mainFrame, this);
 		}
 
+		public boolean findText (String fWord) {
+				System.out.println("find " + fWord);
+				return findNextText(fWord);
+		}
+
+
 	public boolean findNextText(String fWord)
 		{
 			return findNextTextHelper(fWord, true, false);
 		}
+
 	
 	boolean findNextTextHelper(String fWord, boolean interactive,
 														 boolean confirm) {
@@ -369,6 +376,7 @@ public class DefinitionsView extends JEditorPane
 			if(confirm)
 				found = _findNextText(fWord, 0, currentPosition);
 		}
+
 		return found;
 	}
 	
@@ -470,3 +478,5 @@ public class DefinitionsView extends JEditorPane
 	}
 	
 }
+
+

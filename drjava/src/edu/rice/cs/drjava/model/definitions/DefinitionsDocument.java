@@ -2,10 +2,8 @@
 
 package edu.rice.cs.drjava;
 
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.StyleContext.SmallAttributeSet;
+import javax.swing.text.*;
 import gj.util.Vector;
 
 /**
@@ -24,8 +22,9 @@ public class DefinitionsDocument extends DefaultStyledDocument
 	//keeps track of all lit blocks
 	Vector<StateBlock> litBlocks = new Vector<StateBlock>(); 
 	Vector<StateBlock> changes = new Vector<StateBlock>();
-  int _currentLocation = 0;
-
+  int _currentLocation = 0;	
+	
+	
 	/**
 	 *1)mark the item previous to the current first insert
 	 *2)insert string
@@ -39,6 +38,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
     throws BadLocationException
   {
     super.insertString(offset, str, a);
+
 		//variables
     int locationChange = offset - _currentLocation;
 		int strLength = str.length();
@@ -78,9 +78,29 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		
 		_currentLocation = offset + strLength;
 		_modifiedSinceSave = true;
+
+		updateStyles();
+
   }
 
-	
+	private void updateStyles() {
+		if (hasHighlightChanged()) {
+			SimpleAttributeSet attributes = new SimpleAttributeSet();
+			Vector<StateBlock> changedStates = getHighLightInformation();
+
+			for (int i = 0; i < changedStates.size(); i++){
+				StateBlock currentSB = changedStates.elementAt(i);
+				StyleConstants.setForeground(attributes, currentSB.state);
+				setCharacterAttributes(currentSB.location,
+															 currentSB.location+currentSB.size,
+															 attributes, false);
+			}
+
+		}
+		else {
+			return;
+		}
+	}
 	private void _addCharToReducedView(char curChar)
   {
     switch (curChar)
@@ -160,6 +180,8 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		//else the absolute location stays the same.
 		//adjust the current location if delete works
     _modifiedSinceSave = true;
+
+		updateStyles();
   }
 
 

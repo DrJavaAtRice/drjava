@@ -94,13 +94,21 @@ public class DefinitionsDocumentTest extends TestCase {
 				defModel.insertString(0,"a/*bc */\"\\{}()",null);
 
 				assertEquals("#0.0",true, defModel.hasHighlightChanged());
+
 				actual = defModel.getHighLightInformation();
+				expected.addElement(new StateBlock(0, 1,
+																					 StateBlock.DEFAULT_COLOR));
 				expected.addElement(new StateBlock(1, 7,
-																					 ReducedToken.INSIDE_BLOCK_COMMENT));
-				assertTrue("#0.1",actual.elementAt(0).equals(expected.elementAt(0)));
-				assertEquals("#0.2",2,actual.size());
-				defModel.insertString(0,"Start:",null);
-//				assertEquals("#0.0",false, defModel.hasHighlightChanged());
+																					 StateBlock.BLOCK_COMMENT_COLOR));
+				expected.addElement(new StateBlock(8, 6,
+																					 StateBlock.QUOTE_COLOR));
+				
+				assertEquals("#0.1",expected.elementAt(0),actual.elementAt(0));
+				assertEquals("#0.12",expected.elementAt(1),actual.elementAt(1));
+				assertEquals("#0.13",expected.elementAt(2),actual.elementAt(2));
+
+				assertEquals("#0.2",3,actual.size());
+
 			}
 			catch (BadLocationException e) {
 				throw new RuntimeException(e.toString());
@@ -119,13 +127,16 @@ public class DefinitionsDocumentTest extends TestCase {
 
 				actual = defModel.getHighLightInformation();
 				expected.addElement(new StateBlock(0, 7,
-																					 ReducedToken.INSIDE_BLOCK_COMMENT));
+																					 StateBlock.BLOCK_COMMENT_COLOR));
+				expected.addElement(new StateBlock(7, 1,
+																					 StateBlock.DEFAULT_COLOR));
 				expected.addElement(new StateBlock(8, 7,
-																					 ReducedToken.INSIDE_LINE_COMMENT));
+																					 StateBlock.LINE_COMMENT_COLOR));
 			
 				assertTrue("#0.1",actual.elementAt(0).equals(expected.elementAt(0)));
 				assertTrue("#0.2",actual.elementAt(1).equals(expected.elementAt(1)));
-				assertEquals("#0.3",actual.size(),2);
+				assertTrue("#0.2.2",actual.elementAt(2).equals(expected.elementAt(2)));
+				assertEquals("#0.3",3,actual.size());
 			
 				expected = new Vector<StateBlock>();
 			
@@ -133,14 +144,20 @@ public class DefinitionsDocumentTest extends TestCase {
 				// /"hehe"*bc */ //ad}()
 							
 				actual = defModel.getHighLightInformation();
+				expected.addElement(new StateBlock(0, 1,
+																					 StateBlock.DEFAULT_COLOR));
 				expected.addElement(new StateBlock(1, 6,
-																					 ReducedToken.INSIDE_QUOTE));
+																					 StateBlock.QUOTE_COLOR));
+				expected.addElement(new StateBlock(7, 7,
+																					 StateBlock.DEFAULT_COLOR));
 				expected.addElement(new StateBlock(14, 7,
-																					 ReducedToken.INSIDE_LINE_COMMENT));
+																					 StateBlock.LINE_COMMENT_COLOR));
 				assertEquals("#0.4",true, defModel.hasHighlightChanged());
 				assertEquals("#0.5",expected.elementAt(0),actual.elementAt(0));
 				assertEquals("#0.6",expected.elementAt(1),actual.elementAt(1));
-				assertEquals("#0.7",actual.size(),2);
+				assertEquals("#0.7",expected.elementAt(2),actual.elementAt(2));
+				assertEquals("#0.8",expected.elementAt(3),actual.elementAt(3));
+				assertEquals("#0.9",4,actual.size());
 			}
 			catch (BadLocationException e) {
 				throw new RuntimeException(e.toString());
@@ -161,13 +178,16 @@ public class DefinitionsDocumentTest extends TestCase {
 				// /*bc*/ //ad}
 				actual = defModel.getHighLightInformation();
 				expected.addElement(new StateBlock(0, 6,
-																					 ReducedToken.INSIDE_BLOCK_COMMENT));
+																					 StateBlock.BLOCK_COMMENT_COLOR));
+				expected.addElement(new StateBlock(6, 1,
+																					 StateBlock.DEFAULT_COLOR));
 				expected.addElement(new StateBlock(7, 5,
-																					 ReducedToken.INSIDE_LINE_COMMENT));
+																					 StateBlock.LINE_COMMENT_COLOR));
 				
-				assertEquals("#0.2",2,actual.size());
+				assertEquals("#0.2",3,actual.size());
 				assertEquals("#0.3",expected.elementAt(0),actual.elementAt(0));
 				assertEquals("#0.4",expected.elementAt(1),actual.elementAt(1));
+				assertEquals("#0.5",expected.elementAt(2),actual.elementAt(2));
 				
 			}
 			catch (BadLocationException e) {
@@ -183,18 +203,37 @@ public class DefinitionsDocumentTest extends TestCase {
 				Vector<StateBlock> expected = new Vector<StateBlock>();
 
 				defModel.insertString(0,"{}\"\"/*bcnrqu */jl/}()",null);
-
+				// {}""/*bcnrqu */jl/}()
 				assertEquals("#0.0",true, defModel.hasHighlightChanged());
 				actual = defModel.getHighLightInformation();
+				expected.addElement(new StateBlock(0, 2,
+																					 StateBlock.DEFAULT_COLOR));
+				expected.addElement(new StateBlock(2, 2,
+																					 StateBlock.QUOTE_COLOR));
 				expected.addElement(new StateBlock(4, 11,
-																					 ReducedToken.INSIDE_BLOCK_COMMENT));
+																					 StateBlock.BLOCK_COMMENT_COLOR));
+				expected.addElement(new StateBlock(15, 6,
+																					 StateBlock.DEFAULT_COLOR));
+
+				assertEquals("#0.01",expected.elementAt(0),actual.elementAt(0));
+				assertEquals("#0.02",expected.elementAt(1),actual.elementAt(1));
+				assertEquals("#0.03",expected.elementAt(2),actual.elementAt(2));
+				assertEquals("#0.04",expected.elementAt(3),actual.elementAt(3));
+
+				// {}""/*1bcnrqu */jl/}()
 				defModel.insertString(6,"1",null);
 				assertEquals("0.1",true,defModel.hasHighlightChanged());
 
 				actual = defModel.getHighLightInformation();
 				expected = new Vector<StateBlock>();
+				expected.addElement(new StateBlock(0, 2,
+																					 StateBlock.DEFAULT_COLOR));
+				expected.addElement(new StateBlock(2, 2,
+																					 StateBlock.QUOTE_COLOR));
 				expected.addElement(new StateBlock(4, 12,
-																					 ReducedToken.INSIDE_BLOCK_COMMENT));
+																					 StateBlock.BLOCK_COMMENT_COLOR));
+				expected.addElement(new StateBlock(16, 6,
+																					 StateBlock.DEFAULT_COLOR));
 
 				defModel.insertString(9,"2",null);
 				assertEquals("0.1",true,defModel.hasHighlightChanged());
@@ -202,7 +241,7 @@ public class DefinitionsDocumentTest extends TestCase {
 				actual = defModel.getHighLightInformation();
 				expected = new Vector<StateBlock>();
 				expected.addElement(new StateBlock(4, 13,
-																					 ReducedToken.INSIDE_BLOCK_COMMENT));
+																					 StateBlock.BLOCK_COMMENT_COLOR));
 			}
 			catch (BadLocationException e) {
 				throw new RuntimeException(e.toString());
@@ -227,7 +266,7 @@ public class DefinitionsDocumentTest extends TestCase {
 				actual = defModel.getHighLightInformation();
 				expected = new Vector<StateBlock>();
 				expected.addElement(new StateBlock(4, 5,
-																					 ReducedToken.INSIDE_LINE_COMMENT));
+																					 StateBlock.LINE_COMMENT_COLOR));
 			}
 			catch (BadLocationException e) {
 				throw new RuntimeException(e.toString());
@@ -248,7 +287,7 @@ public class DefinitionsDocumentTest extends TestCase {
 				actual = defModel.getHighLightInformation();
 				expected = new Vector<StateBlock>();
 				expected.addElement(new StateBlock(0, 1,
-																					 ReducedToken.INSIDE_QUOTE));
+																					 StateBlock.QUOTE_COLOR));
 			}
 			catch (BadLocationException e) {
 				throw new RuntimeException(e.toString());

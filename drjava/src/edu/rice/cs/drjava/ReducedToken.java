@@ -2,6 +2,8 @@
 
 package edu.rice.cs.drjava;
 
+import java.awt.Color;
+
 abstract class ReducedToken
 {
 	protected int _state;
@@ -23,19 +25,18 @@ abstract class ReducedToken
 	 *returns whether the current char is highlighted. / / beginning a comment
 	 * would be highlighted but free, so its not the same as getState
 	 */
-	public int getHighlight()
+	public Color getHighlight()
 		{
 			String type = getType();
-			if (type.equals("//"))
-				return INSIDE_LINE_COMMENT;
-			if (type.equals("/*"))
-				return INSIDE_BLOCK_COMMENT;
-			if (type.equals("*/"))
-				return INSIDE_BLOCK_COMMENT;
-			if (type.equals("\"") && (_state == FREE))
-				return INSIDE_QUOTE;
-			
-			return _state;
+			if (type.equals("//") || (_state == INSIDE_LINE_COMMENT))
+				return StateBlock.LINE_COMMENT_COLOR;
+			if (type.equals("/*") || type.equals("*/") ||
+					(_state == INSIDE_BLOCK_COMMENT))
+				return StateBlock.BLOCK_COMMENT_COLOR;
+			if ((type.equals("\"") && (_state == FREE)) ||
+					(_state == INSIDE_QUOTE))
+				return StateBlock.QUOTE_COLOR;			
+			return StateBlock.DEFAULT_COLOR;
 		}
 	
 	public void setState(int state)
