@@ -2,7 +2,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /**
  * Shadowing state that corresponds to being inside a line comment.
- * @version$Id$
+ * @version $Id$
  */
 public class InsideLineComment extends ReducedModelState {
   public static final InsideLineComment ONLY = new InsideLineComment();

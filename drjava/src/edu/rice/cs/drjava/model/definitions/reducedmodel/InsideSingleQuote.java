@@ -2,7 +2,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /**
  * Shadowing state that corresponds to being between single quotes.
- * @version$Id$
+ * @version $Id$
  */
 public class InsideSingleQuote extends ReducedModelState {
   public static final InsideSingleQuote ONLY = new InsideSingleQuote();

@@ -7,7 +7,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
  * by the compiler except as a text constant. This buys us a lot in
  * terms of correctness when highlighting, indenting, and performing
  * other editor functions.
- * @version$Id$
+ * @version $Id$
  */
 public abstract class ReducedModelState 
   implements /*imports*/ ReducedModelStates 

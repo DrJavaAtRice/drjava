@@ -2,7 +2,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /**
  * A list of reduced model tokens.  Uses ModelList as its base.
- * @version$Id$
+ * @version $Id$
  */
 public class TokenList extends ModelList<ReducedToken> 
                        implements /*imports*/ ReducedModelStates

@@ -6,6 +6,8 @@ import java.util.*;
  * A class loader that does nothing but allow, at runtime,
  * classes to be put on a list of "do not load" classes,
  * which will be rejected from loading, even if they are available.
+ *
+ * @version $Id$
  */
 public class LimitingClassLoader extends ClassLoader {
   private List _restrictedList = new LinkedList();

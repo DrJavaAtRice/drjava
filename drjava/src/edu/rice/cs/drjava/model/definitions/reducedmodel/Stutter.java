@@ -7,7 +7,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
  * and, hopefully, it would go away if the underlying logic of the reduced 
  * model were refactored.
  *
- * @version$Id$
+ * @version $Id$
  */
 public class Stutter extends ReducedModelState {
   public static final Stutter ONLY = new Stutter();

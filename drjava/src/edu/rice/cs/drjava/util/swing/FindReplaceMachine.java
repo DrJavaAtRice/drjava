@@ -6,6 +6,11 @@ import javax.swing.text.Position;
 
 import edu.rice.cs.drjava.util.UnexpectedException;
 
+/**
+ * Implementation of logic of find/replace over a document.
+ *
+ * @version $Id$
+ */
 public class FindReplaceMachine {
   /** The document on which FindReplaceMachine is operating. */
   private Document _doc;
