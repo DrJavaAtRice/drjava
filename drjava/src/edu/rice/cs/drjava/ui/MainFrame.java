@@ -1329,6 +1329,8 @@ public class MainFrame extends JFrame {
       int pos = _currentDefPane.getCaretPosition();
       _currentDefPane.getErrorCaretListener().updateHighlight(pos);
 
+      active.getDocument().setCurrentLocation( pos );
+      
       _setCurrentDirectory(active);
 
       updateFileTitle();
@@ -1406,8 +1408,8 @@ public class MainFrame extends JFrame {
           "Would you like to save and then compile?";
       }
       else if(reason == JUNIT_REASON) {
-	message = "To run JUnit, you must first save and compile the current " + 
-	  "file. Would like to save and then compile?";
+ message = "To run JUnit, you must first save and compile the current " + 
+   "file. Would like to save and then compile?";
       }
       else {
         throw new RuntimeException("Invalid reason for forcing a save.");
