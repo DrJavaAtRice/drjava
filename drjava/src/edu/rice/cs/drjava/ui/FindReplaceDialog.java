@@ -47,6 +47,8 @@ import javax.swing.text.*;
 import java.beans.*;
 
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.FindReplaceMachine;
 import edu.rice.cs.util.swing.FindResult;
 import edu.rice.cs.util.swing.ContinueCommand;
@@ -56,7 +58,7 @@ import edu.rice.cs.util.UnexpectedException;
  * The dialog box that handles requests for finding and replacing text.
  * @version $Id$
  */
- class FindReplaceDialog extends JDialog {
+ class FindReplaceDialog extends JPanel implements OptionConstants{
   private JOptionPane _optionPane;
   private JButton _findNextButton;
   private JButton _replaceButton;
@@ -66,11 +68,23 @@ import edu.rice.cs.util.UnexpectedException;
   private JTextField _findField = new JTextField(20);
   private JTextField _replaceField = new JTextField(20);
   private JLabel _message;
+   private JPanel _labelPanel;
+   private JCheckBox _matchCase;
+   private JPanel _matchCaseAndClosePanel;
+   private JPanel _rightPanel;
+   private JPanel _closePanel; // holds the close button such that it can't 
+   // be resized
   private FindReplaceMachine _machine;
   private SingleDisplayModel _model;
   private MainFrame _frame;
   private DefinitionsPane _defPane = null;
   private boolean _caretChanged;
+   private boolean _open = false;
+
+   public boolean isOpen() {
+     return _open;
+   }
+
 
    /** 
     * Listens for changes to the cursor position in order
@@ -90,11 +104,15 @@ import edu.rice.cs.util.UnexpectedException;
     */
   public void beginListeningTo(DefinitionsPane defPane) {
     if(_defPane==null) {
+      _open = true;
       _defPane = defPane;
       _defPane.addCaretListener(_caretListener);
       _caretChanged = true;
       _updateMachine();
-      if (!_machine.isOnMatch()) {
+      _machine.setFindWord(_findField.getText());
+      _machine.setReplaceWord(_replaceField.getText());
+      _message.setText("");      
+      if (!_machine.isOnMatch() || _findField.getText().equals("")) {
         _replaceAction.setEnabled(false);
         _replaceFindAction.setEnabled(false);
       }
@@ -102,6 +120,10 @@ import edu.rice.cs.util.UnexpectedException;
         _replaceAction.setEnabled(true);
         _replaceFindAction.setEnabled(true);
       }
+      if (_findField.getText().equals(""))
+        _replaceAllAction.setEnabled(false);
+      else
+        _replaceAllAction.setEnabled(true);
       _message.setText("");
     } else {
       throw new UnexpectedException(new RuntimeException("FindReplaceDialog should not be listening to anything"));
@@ -117,19 +139,13 @@ import edu.rice.cs.util.UnexpectedException;
     if(_defPane!=null) {
       _defPane.removeCaretListener(_caretListener);
       _defPane = null;
+      _open = false;
     } else {
       // Probably a double-click on close...
       //throw new UnexpectedException(new RuntimeException("FindReplaceDialog should be listening to something"));
     }
 
   }
-
-  /** How the dialog responds to window events. */
-  private WindowListener _dialogListener = new WindowAdapter() {
-    public void windowClosing(WindowEvent ev) {
-      hide();
-    }
-  };
 
   private Action _findNextAction = new AbstractAction("Find Next") {
       public void actionPerformed(ActionEvent e) {
@@ -153,7 +169,7 @@ import edu.rice.cs.util.UnexpectedException;
     FindResult fr = _machine.findNext();
     if (fr.getWrapped()) {
       Toolkit.getDefaultToolkit().beep();
-      _message.setText("Reached the end of the document, continuing from the beginning.");
+      _message.setText("Search wrapped to beginning.");
     }
     int pos = fr.getFoundOffset();
     if (pos >= 0) {
@@ -193,7 +209,7 @@ import edu.rice.cs.util.UnexpectedException;
 
   private Action _replaceFindAction = new AbstractAction("Replace/Find Next") {
     public void actionPerformed(ActionEvent e) {
-      _updateMachine();
+      //_updateMachine();
       _machine.setFindWord(_findField.getText());
       String replaceWord = _replaceField.getText();
       _machine.setReplaceWord(replaceWord);
@@ -236,11 +252,20 @@ import edu.rice.cs.util.UnexpectedException;
   };
 
 
-  private Action _closeAction = new AbstractAction("Close") {
-    public void actionPerformed(ActionEvent e) {
-      hide();
+  private Action _closeAction = new AbstractAction("X") {
+    public void actionPerformed(ActionEvent e) {      
+      // removeTab automatically calls show()
+      _close();
     }
   };
+
+   private void _close() {
+     _frame.removeTab(this);
+     if (_open)
+       stopListening();
+       //_frame.uninstallFindReplaceDialog(this);
+     _open = false;
+   }
   
   /**
    * Constructor.
@@ -249,75 +274,92 @@ import edu.rice.cs.util.UnexpectedException;
    * document text being searched over
    */
   public FindReplaceDialog(MainFrame frame, SingleDisplayModel model) {
-    super(frame,"Find / Replace", false) ; // not modal.
+    super();
     _frame = frame;
     _model = model;
     
     addKeyListener(new KeyListener() {
       public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-          hide();
+          _close();
         }
       }
       public void keyReleased(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-          hide();
+          _close();
         }
       }
       public void keyTyped(KeyEvent e) {
       }      
     });
-    
-    addWindowListener(_dialogListener);
-    
-    setTitle("Find/Replace");
 
     _findNextButton = new JButton(_findNextAction);
     _replaceButton = new JButton(_replaceAction);
     _replaceFindButton = new JButton(_replaceFindAction);
     _replaceAllButton = new JButton(_replaceAllAction);
     _closeButton = new JButton(_closeAction);
-    _message = new JLabel();
+    _message = new JLabel("");
 
     _replaceAction.setEnabled(false);
     _replaceFindAction.setEnabled(false);
 
-    Font font = _findField.getFont().deriveFont(16f);
+    Font font = new Font(DrJava.CONFIG.getSetting(FONT_MAIN_NAME).toString(),
+                         DrJava.CONFIG.getSetting(FONT_MAIN_STYLE).intValue(),
+                         DrJava.CONFIG.getSetting(FONT_MAIN_SIZE).intValue());
     _findField.setFont(font);
     _replaceField.setFont(font);
 
+    _findField.setNextFocusableComponent(_replaceField);
+    _replaceField.setNextFocusableComponent(_matchCase);
+
     // set up the layout
     JPanel buttons = new JPanel();
-    buttons.setLayout(new BoxLayout(buttons, BoxLayout.X_AXIS));
-
-    buttons.add(Box.createGlue());
+    buttons.setLayout(new GridLayout(1,0));
     buttons.add(_findNextButton);
     buttons.add(_replaceButton);
     buttons.add(_replaceFindButton);
     buttons.add(_replaceAllButton);
-    buttons.add(_closeButton);
-    buttons.add(Box.createGlue());
+    //buttons.add(_closeButton);
 
+    
     JLabel findLabel = new JLabel("Find:", SwingConstants.LEFT);
-    findLabel.setLabelFor(_findField);
+    //findLabel.setLabelFor(_findField);
     findLabel.setHorizontalAlignment(SwingConstants.LEFT);
 
     JLabel replaceLabel = new JLabel("Replace:", SwingConstants.LEFT);
-    replaceLabel.setLabelFor(_replaceField);
+    // replaceLabel.setLabelFor(_replaceField);
     replaceLabel.setHorizontalAlignment(SwingConstants.LEFT);
 
-    Container main = getContentPane();
-    // arrange everything in 1 column, with all rows being equally high.
-    main.setLayout(new GridLayout(0,1)); // .setLayout(new BoxLayout(main, BoxLayout.Y_AXIS));
+    // need separate label and field panels so that the find and
+    // replace textfields line up
 
-    main.add(findLabel);
-    main.add(_findField);
-    main.add(replaceLabel);
-    main.add(_replaceField);
-    main.add(buttons);
-    main.add(_message);
+    _labelPanel = new JPanel(new GridLayout(0,1));
+    // _labelPanel.setLayout(new BoxLayout(_labelPanel, BoxLayout.Y_AXIS));
+
+    //_labelPanel.add(Box.createGlue());
+    _labelPanel.add(findLabel);
+    _labelPanel.add(replaceLabel);
     
-    setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+    MatchCaseListener mcl = new MatchCaseListener();
+
+    _matchCase = new JCheckBox("Match Case", true);
+    _matchCase.addItemListener(mcl);
+
+    _closePanel = new JPanel(new BorderLayout());
+    _closePanel.add(_closeButton, BorderLayout.NORTH);
+
+    _matchCaseAndClosePanel = new JPanel(new BorderLayout());
+    _matchCaseAndClosePanel.add(_matchCase, BorderLayout.WEST);
+    _matchCaseAndClosePanel.add(_closePanel, BorderLayout.EAST);
+
+    _rightPanel = new JPanel(new GridLayout(2,2));
+    _rightPanel.add(wrap(_findField));
+    _rightPanel.add(_matchCaseAndClosePanel);
+    _rightPanel.add(wrap(_replaceField));
+    _rightPanel.add(_message);
+
+    hookComponents(this,_rightPanel,_labelPanel,buttons);
+
     _machine = new FindReplaceMachine();
     
     _findField.addActionListener(_findNextAction);
@@ -334,6 +376,10 @@ import edu.rice.cs.util.UnexpectedException;
         _machine.makeCurrentOffsetStart();
         _replaceAction.setEnabled(false);
         _replaceFindAction.setEnabled(false);
+        if (_findField.getText().equals(""))
+          _replaceAllAction.setEnabled(false);
+        else
+          _replaceAllAction.setEnabled(true);
       }
 
       /**
@@ -345,6 +391,10 @@ import edu.rice.cs.util.UnexpectedException;
         _machine.makeCurrentOffsetStart();
         _replaceAction.setEnabled(false);
         _replaceFindAction.setEnabled(false);
+        if (_findField.getText().equals(""))
+          _replaceAllAction.setEnabled(false);
+        else
+          _replaceAllAction.setEnabled(true);
       }
 
       /**
@@ -356,14 +406,56 @@ import edu.rice.cs.util.UnexpectedException;
         _machine.makeCurrentOffsetStart();
         _replaceAction.setEnabled(false);
         _replaceFindAction.setEnabled(false);
+        if (_findField.getText().equals(""))
+          _replaceAllAction.setEnabled(false);
+        else
+          _replaceAllAction.setEnabled(true);
       }
     });
         
     // let the dialog size itself correctly.
-    pack();
+    //pack();
     // centers the dialog in the middle of MainFrame
-    setLocationRelativeTo(_frame);
+    //setLocationRelativeTo(_frame);
   }
+
+   private static Container wrap(JComponent comp) {
+     Container stretcher = Box.createHorizontalBox();
+     stretcher.add(comp);
+     stretcher.add(Box.createHorizontalGlue());
+     return stretcher;
+   }
+
+   /** 
+    * consider a parent container.  Change its layout to GridBagLayout
+    * with 2 columns, 2 rows.  Consider them quadrants in a coordinate plain.
+    * put the arguments in their corresponding quadrants, ignoring q3.
+    */
+   private static void hookComponents(Container parent, JComponent q1, 
+                                      JComponent q2, JComponent q4) {
+     GridBagLayout gbl = new GridBagLayout();
+     GridBagConstraints c = new GridBagConstraints();
+     parent.setLayout(gbl);
+     c.fill = c.BOTH;
+     addComp(parent, q2, c, gbl, 0, 0, 0f, 0f, 1, 0);
+     addComp(parent, q1, c, gbl, 0, 1, 1f, 0f, 1, 0);
+     addComp(parent, new JPanel(), c, gbl, 1, 0, 1f, 1f, 2, 0);
+     addComp(parent, new JPanel(), c, gbl, 2, 0, 0f, 0f, 1, 0);
+     addComp(parent, q4, c, gbl, 2, 1, 1f, 0f, 1, 0);
+   }
+   
+   private static void addComp(Container p, JComponent child,
+                               GridBagConstraints c, GridBagLayout gbl,
+                               int row, int col, 
+                               float weightx, float weighty, int gridw,
+                               int ipady) {
+     c.gridx = col; c.gridy = row;
+     c.weightx = weightx; c.weighty = weighty;
+     c.gridwidth = gridw;
+     c.ipady = ipady;
+     gbl.setConstraints(child,c);
+     p.add(child);
+   }
 
    // sets appropriate variables in the FindReplaceMachine if the 
    // caret has been changed
@@ -371,8 +463,8 @@ import edu.rice.cs.util.UnexpectedException;
     if (_caretChanged) {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
       _machine.setDocument(doc.getDocument());
-      _machine.setStart(doc.getDocument().getCurrentLocation());
-      _machine.setPosition(doc.getDocument().getCurrentLocation());
+      _machine.setStart(_defPane.getCaretPosition());
+      _machine.setPosition(_defPane.getCaretPosition());
       _caretChanged = false;
     }
   }
@@ -380,13 +472,15 @@ import edu.rice.cs.util.UnexpectedException;
   /**
    * Shows the dialog and sets the focus appropriately.
    */
-  public void show() {
-    super.show();
-    _frame.installFindReplaceDialog(this);
+   /*public void show() {
+    //super.show();
+    System.err.println("*** Called show ***");
+    if (!_open)
+      _frame.installFindReplaceDialog(this);
     _updateMachine();
     _findField.requestFocus();
     _findField.selectAll();
-  }
+    }*/
       
    /**
     * Will select the searched-for text.
@@ -414,11 +508,10 @@ import edu.rice.cs.util.UnexpectedException;
       
       // Add the end rect onto the start rect to make a rectangle
       // that encompasses the entire selection
-      startRect.add(endPoint);      
+      startRect.add(endPoint);     
       
       _defPane.scrollRectToVisible(startRect);
       _defPane.requestFocus();
-      
     } 
     catch (BadLocationException badBadLocation) {}
   }
@@ -427,21 +520,12 @@ import edu.rice.cs.util.UnexpectedException;
     hide();
     }*/
 
-  public void hide() {
-    
-    /*if (_machine.isOnMatch()) {
-      _defPane.select(_machine.getCurrentOffset() - 
-      _machine.getFindWord().length(),
-      _machine.getCurrentOffset());
-      }
-      else {
-      _defPane.setCaretPosition(_machine.getCurrentOffset());
+   /*public void hide() {
+    System.err.println("*** Called hide ***");
+    if (_open)
+      _frame.uninstallFindReplaceDialog(this);
+      //super.hide();
       }*/
-    
-    //_defPane.requestFocus();
-    super.hide();
-    _frame.uninstallFindReplaceDialog(this);
-  }  
   
    /*private ContinueCommand CONFIRM_CONTINUE = new ContinueCommand() {
     public boolean shouldContinue() {
@@ -463,6 +547,15 @@ import edu.rice.cs.util.UnexpectedException;
 
     }
     };*/
-  
-}
-
+   class MatchCaseListener implements ItemListener {
+     public void itemStateChanged(ItemEvent e) {
+       if (e.getStateChange() == ItemEvent.DESELECTED) {
+         _machine.setMatchCase(false);
+       }
+       if (e.getStateChange() == ItemEvent.SELECTED) {
+         _machine.setMatchCase(true);
+       }
+       
+     }
+   }
+ }

@@ -103,6 +103,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private PositionListener _posListener;
   private JTabbedPane _tabbedPane;
   private JSplitPane _docSplitPane;
+  private JSplitPane _mainSplit;
   private JList _docList;
   private JMenuBar _menuBar;
   private JToolBar _toolBar;
@@ -353,10 +354,16 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Opens the find/replace dialog. */
   private Action _findReplaceAction = new AbstractAction("Find/Replace...") {
     public void actionPerformed(ActionEvent ae) {
-      if(!_findReplace.isVisible()) {
-        _findReplace.show();
+      if(!_findReplace.isOpen()) {
+        _tabbedPane.add("Find/Replace", _findReplace);
+        _findReplace.beginListeningTo(_currentDefPane);
       }
-      
+      _tabbedPane.setSelectedComponent(_findReplace);  
+      int divLocation = _mainSplit.getHeight() - 
+        _mainSplit.getDividerSize() - 
+        (int)_tabbedPane.getMinimumSize().getHeight();
+      if (_mainSplit.getDividerLocation() > divLocation)
+        _mainSplit.setDividerLocation(divLocation);
     }
   };
 
@@ -533,14 +540,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Set up listeners
     this.addWindowListener(_windowCloseListener);
     _model.addListener(new ModelListener());
+
+    //install
     _setUpTabs();
 
     // DefinitionsPane
     _defScrollPanes = new Hashtable();
     JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
     _currentDefPane = (DefinitionsPane) defScroll.getViewport().getView();
-
-
 
     // Need to set undo/redo actions to point to the initial def pane
     // on switching documents later these pointers will also switch
@@ -1588,6 +1595,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _outputPane = new OutputPane(_model);
     _errorPanel = new CompilerErrorPanel(_model, this);
     _interactionsPane = new InteractionsPane(_model);
+    //_findReplace = new FindReplacePanel(this, _model);
 
     // Try to create debug panel (see if JSwat is around)
     if (_model.getDebugManager() != null) {
@@ -1691,19 +1699,19 @@ public class MainFrame extends JFrame implements OptionConstants {
                                             true,
                                             listScroll,
                                             defScroll);
-    JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+    _mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                                       true,
                                       _docSplitPane,
                                       _tabbedPane);
-    split.setResizeWeight(1.0);
-    getContentPane().add(split, BorderLayout.CENTER);
+    _mainSplit.setResizeWeight(1.0);
+    getContentPane().add(_mainSplit, BorderLayout.CENTER);
     // This is annoyingly order-dependent. Since split contains _docSplitPane,
     // we need to get split's divider set up first to give _docSplitPane an
     // overall size. Then we can set _docSplitPane's divider. Ahh, Swing.
     // Also, according to the Swing docs, we need to set these dividers AFTER
     // we have shown the window. How annoying.
-    split.setDividerLocation(2*getHeight()/3);
-    split.setOneTouchExpandable(true);
+    _mainSplit.setDividerLocation(0.6);//2*getHeight()/3);
+    _mainSplit.setOneTouchExpandable(true);
     _docSplitPane.setDividerLocation(DOC_LIST_WIDTH);
     _docSplitPane.setOneTouchExpandable(true);
   }
@@ -1838,9 +1846,11 @@ public class MainFrame extends JFrame implements OptionConstants {
       } catch (IOException e) {
         _showIOError(e);
       }
-      if(_findReplace.isVisible()) {
-        uninstallFindReplaceDialog(_findReplace);
-        installFindReplaceDialog(_findReplace);
+      if(_findReplace.isOpen()) {
+        _findReplace.stopListening();
+        _findReplace.beginListeningTo(_currentDefPane);
+        //uninstallFindReplaceDialog(_findReplace);
+        //installFindReplaceDialog(_findReplace);
       }
       
     }
@@ -2089,4 +2099,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     return defScroll.getViewport();
   }
 
+  public void removeTab(Component c) {
+    //int index = _tabbedPane.indexOfComponent(c);
+    //System.err.println("Called show yet?");
+    //_tabbedPane.removeTabAt(index);
+    _tabbedPane.remove(c);
+  }
 }
